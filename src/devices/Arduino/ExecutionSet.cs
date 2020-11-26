@@ -56,19 +56,7 @@ namespace Iot.Device.Arduino
             EntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
             // Execute all static ctors
-            foreach (var cls in Classes)
-            {
-                if (cls.Cls.TypeInitializer != null)
-                {
-                    var task = _compiler.GetTask(this, cls.Cls.TypeInitializer);
-                    task.Invoke(CancellationToken.None);
-                    task.WaitForResult();
-                    if (task.GetMethodResults(out _, out var state) == false || state != MethodState.Stopped)
-                    {
-                        throw new InvalidProgramException($"Error executing static ctor of class {cls.Cls}");
-                    }
-                }
-            }
+            _compiler.ExecuteStaticCtors(this);
         }
 
         public long EstimateRequiredMemory()
@@ -177,6 +165,8 @@ namespace Iot.Device.Arduino
 
         public class Class
         {
+            private bool _suppressInit;
+
             public Class(Type cls, int dynamicSize, int staticSize, List<VariableOrMethod> members)
             {
                 Cls = cls;
@@ -197,6 +187,12 @@ namespace Iot.Device.Arduino
             {
                 get;
                 internal set;
+            }
+
+            public bool SuppressInit
+            {
+                get { return _suppressInit; }
+                set { _suppressInit = value; }
             }
         }
 

@@ -94,6 +94,13 @@ namespace Iot.Device.Arduino
                     int targetModule = (targetToken >> 28) & 0xF;
                     targetToken = targetToken & 0x0FFF_FFFF;
                     exceptionCode = exceptionCode & 0x0FFF_FFFF;
+                    SystemException ex = (SystemException)exceptionCode;
+
+                    if (ex == SystemException.InvalidOpCode)
+                    {
+                        throw new InvalidOperationException("Invalid Opcode: " + targetToken);
+                    }
+
                     Module module = targetModule < Compiler.Modules.Count ? Compiler.Modules[targetModule] : GetType().Module;
                     var resolved = module.ResolveMethod(targetToken);
                     if (resolved == null)
@@ -103,7 +110,6 @@ namespace Iot.Device.Arduino
 
                     if (exceptionCode < 0xFF)
                     {
-                        SystemException ex = (SystemException)exceptionCode;
                         switch (ex)
                         {
                             case SystemException.MissingMethod:
@@ -112,6 +118,7 @@ namespace Iot.Device.Arduino
                                 throw new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved}");
                             case SystemException.StackOverflow:
                                 throw new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved}");
+
                             default:
                                 throw new InvalidOperationException("Unknown exception");
                         }

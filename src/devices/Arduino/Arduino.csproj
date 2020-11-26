@@ -4,6 +4,7 @@
     <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <RootNamespace>Iot.Device.Arduino</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
  <ItemGroup>

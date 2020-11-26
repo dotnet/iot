@@ -551,7 +551,17 @@ namespace Arduino.Samples
             // and derive everything required from there)
             compiler.ClearAllData(true);
             var exec = compiler.PrepareProgram<Action<int, int>>(typeof(ArduinoCompilerSampleMethods.SimpleLedBinding), ArduinoCompilerSampleMethods.SimpleLedBinding.RunBlink);
-            exec.Load();
+            try
+            {
+                exec.Load();
+            }
+            catch (Exception x)
+            {
+                Console.WriteLine($"Running required class initializers caused an exception: {x}");
+                compiler.ClearAllData(true);
+                return;
+            }
+
             var task = exec.EntryPoint;
             task.InvokeAsync(6, 1000);
 

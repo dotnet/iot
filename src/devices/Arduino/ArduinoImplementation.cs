@@ -25,5 +25,8 @@ namespace Iot.Device.Arduino
         StringIndexer,
         StringFormat2,
         StringFormat2b,
+        BaseTypeEquals,
+        EmptyStaticCtor,
+        DefaultEqualityComparer
     }
 }

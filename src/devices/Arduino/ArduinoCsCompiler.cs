@@ -71,7 +71,8 @@ namespace Iot.Device.Arduino
         None = 0,
         StackOverflow = 1,
         NullReference = 2,
-        MissingMethod = 3
+        MissingMethod = 3,
+        InvalidOpCode = 4,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -79,13 +80,14 @@ namespace Iot.Device.Arduino
         private readonly List<Type> _rootClasses = new List<Type>()
         {
             typeof(System.Object), typeof(System.Type), typeof(System.String),
-            typeof(Array), typeof(Monitor), typeof(Exception)
+            typeof(Array), typeof(Monitor), typeof(Exception),
         };
 
-        private readonly List<Type> _replacementRootClasses = new List<Type>()
+        // These classes substitute (part of) a framework class
+        private readonly List<Type> _replacementClasses = new List<Type>()
         {
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
-            typeof(MiniException)
+            typeof(MiniException), typeof(MiniHashSet<int>),
         };
 
         /// <summary>
@@ -93,7 +95,16 @@ namespace Iot.Device.Arduino
         /// </summary>
         private readonly List<Type> _classesToIgnore = new List<Type>()
         {
-            typeof(Exception), typeof(System.Globalization.CultureInfo), typeof(HashSet<int>)
+            typeof(Exception), typeof(System.Globalization.CultureInfo)
+        };
+
+        /// <summary>
+        /// A list of known classes whose static ctor should not be run (because it is currently unsupported and
+        /// its implementation not needed/patched)
+        /// </summary>
+        private readonly List<Type> _staticInitializersToSuppress = new List<Type>()
+        {
+            typeof(EqualityComparer<>), typeof(EqualityComparer<int>), typeof(Type),
         };
 
         private readonly ArduinoBoard _board;
@@ -408,6 +419,12 @@ namespace Iot.Device.Arduino
                     continue;
                 }
 
+                if (_staticInitializersToSuppress.Contains(cls.Cls))
+                {
+                    cls.SuppressInit = true;
+                    continue;
+                }
+
                 PrepareCodeInternal(set, cctor);
             }
         }
@@ -431,7 +448,7 @@ namespace Iot.Device.Arduino
                 string className = cls.Name;
 
                 _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}");
-                _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), c.Members);
+                _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
             }
         }
 
@@ -733,6 +750,7 @@ namespace Iot.Device.Arduino
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
             List<int> fieldsRequired = new List<int>();
+            List<int> typesRequired = new List<int>();
             if (methodInfo.IsAbstract)
             {
                 // This is a method that will never be called directly, so we can safely skip it.
@@ -740,7 +758,7 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
+            GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired, typesRequired);
             List<int> combined = foreignMethodsRequired;
             combined.AddRange(ownMethodsRequired);
             combined = combined.Distinct().ToList();
@@ -899,6 +917,7 @@ namespace Iot.Device.Arduino
             List<int> foreignMethodsRequired = new List<int>();
             List<int> ownMethodsRequired = new List<int>();
             List<int> fieldsRequired = new List<int>();
+            List<int> typesRequired = new List<int>();
             // Maps methodDef to memberRef tokens (for methods declared outside the assembly of the executing code)
             List<(int, int)> tokenMap = new List<(int, int)>();
             if (ilBytes != null && ilBytes.Length > Math.Pow(2, 14) - 1)
@@ -908,7 +927,7 @@ namespace Iot.Device.Arduino
 
             if (hasBody)
             {
-                GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired);
+                GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired, typesRequired);
 
                 foreach (int token in foreignMethodsRequired.Distinct())
                 {
@@ -933,6 +952,20 @@ namespace Iot.Device.Arduino
 
                     // TODO: Use CombinedMethodToken here, as well, but this requires some indirections in other places
                     tokenMap.Add((resolved.MetadataToken, token));
+                }
+
+                foreach (int token in typesRequired.Distinct())
+                {
+                    var resolved = methodInfo.Module.ResolveType(token);
+                    if (resolved == null)
+                    {
+                        continue;
+                    }
+
+                    if (!set.HasDefinition(resolved))
+                    {
+                        PrepareClass(set, resolved);
+                    }
                 }
 
             }
@@ -1028,10 +1061,10 @@ namespace Iot.Device.Arduino
                 return true;
             }
 
-            if (classType != null && _rootClasses.Contains(classType))
+            if (classType != null)
             {
                 // This is a special class. Maybe we need to replace some methods
-                foreach (var replacement in _replacementRootClasses)
+                foreach (var replacement in _replacementClasses)
                 {
                     var attribs = replacement.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
                     ArduinoReplacementAttribute ia = (ArduinoReplacementAttribute)attribs.Single();
@@ -1099,6 +1132,23 @@ namespace Iot.Device.Arduino
             _board.Firmata.SendTokenMap(codeReference, data);
         }
 
+        internal void ExecuteStaticCtors(ExecutionSet set)
+        {
+            foreach (var cls in set.Classes)
+            {
+                if (!cls.SuppressInit && cls.Cls.TypeInitializer != null)
+                {
+                    var task = GetTask(set, cls.Cls.TypeInitializer);
+                    task.Invoke(CancellationToken.None);
+                    task.WaitForResult();
+                    if (task.GetMethodResults(out _, out var state) == false || state != MethodState.Stopped)
+                    {
+                        throw new InvalidProgramException($"Error executing static ctor of class {cls.Cls}");
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Executes the given method with the provided arguments asynchronously
         /// </summary>
@@ -1126,7 +1176,7 @@ namespace Iot.Device.Arduino
             _board.Firmata.SendKillTask(decl.Index);
         }
 
-        private void GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens, List<int> fields)
+        private void GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens, List<int> fields, List<int> types)
         {
             if (methodInstance.ContainsGenericParameters)
             {
@@ -1189,6 +1239,18 @@ namespace Iot.Device.Arduino
                 }
 
                 if ((byteCode[idx] == 0x7D || byteCode[idx] == 0x7B) && token >> 24 == 0x0A)
+                {
+                    fields.Add(token);
+                }
+
+                // NEWARR instruction with a type token
+                if (byteCode[idx] == 0x8D && (token >> 24 == 0x02))
+                {
+                    types.Add(token);
+                }
+
+                // A LDTOKEN instruction with a field token. Not really sure what this means
+                if (byteCode[idx] == 0xD0 && (token >> 24 == 0x04))
                 {
                     fields.Add(token);
                 }
