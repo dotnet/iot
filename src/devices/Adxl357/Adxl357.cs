@@ -33,7 +33,7 @@ namespace Iot.Device.Adxl357
         /// Constructs a ADXL357 I2C device.
         /// </summary>
         /// <param name="i2CDevice">The I2C device used for communication.</param>
-        /// <param name="accelerometerRange">The sensitivity of the accelerometer.</param>
+        /// <param name="accelerometerRange">The sensitivity of the accelerometer .</param>
         public Adxl357(I2cDevice i2CDevice, AccelerometerRange accelerometerRange = AccelerometerRange.Range10G)
         {
             _i2CDevice = i2CDevice ?? throw new ArgumentNullException(nameof(i2CDevice));
@@ -44,12 +44,14 @@ namespace Iot.Device.Adxl357
         }
 
         /// <summary>
-        /// Gets the current acceleration.
+        /// Gets the current acceleration in g.
+        /// Range depends on the <see cref="AccelerometerRange"/> passed to the constructor.
         /// </summary>
         public Vector3 Acceleration => GetRawAccelerometer();
 
         /// <summary>
-        /// Gets the current temperature
+        /// Gets the current temperature in °C.
+        /// Range is from −40°C to +125°C.
         /// </summary>
         public Temperature Temperature => Temperature.FromDegreesCelsius(GetTemperature());
 

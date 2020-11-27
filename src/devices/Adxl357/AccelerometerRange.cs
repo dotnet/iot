@@ -6,20 +6,20 @@ namespace Iot.Device.Adxl357
     /// <summary>
     /// The sensitivity of the accelerometer sensor.
     /// </summary>
-public enum AccelerometerRange
+    public enum AccelerometerRange
     {
         /// <summary>
-        /// Range 10G
+        /// Range ±10g
         /// </summary>
         Range10G = 1,
 
         /// <summary>
-        /// Range 20G
+        /// Range ±20g
         /// </summary>
         Range20G = 2,
 
         /// <summary>
-        /// Range 40G
+        /// Range ±40g
         /// </summary>
         Range40G = 3
     }
