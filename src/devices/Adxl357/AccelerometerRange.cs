@@ -1,9 +1,12 @@
-﻿namespace Iot.Device.Adxl357
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Iot.Device.Adxl357
 {
     /// <summary>
     /// The sensitivity of the accelerometer sensor.
     /// </summary>
-    public enum AccelerometerRange
+public enum AccelerometerRange
     {
         /// <summary>
         /// Range 10G
