@@ -17,8 +17,8 @@ namespace Iot.Device.Ft4222
 
         protected override bool ReleaseHandle()
         {
-            var ftStatus = FtFunction.FT4222_UnInitialize(this);
-            ftStatus = FtFunction.FT_Close(this);
+            var ftStatus = FtFunction.FT4222_UnInitialize(handle);
+            ftStatus = FtFunction.FT_Close(handle);
             return ftStatus == FtStatus.Ok;
         }
     }
