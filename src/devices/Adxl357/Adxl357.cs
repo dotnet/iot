@@ -7,6 +7,7 @@ using System.Device.I2c;
 using System.Linq;
 using System.Numerics;
 using System.Threading;
+using System.Threading.Tasks;
 using UnitsNet;
 
 namespace Iot.Device.Adxl357
@@ -57,24 +58,27 @@ namespace Iot.Device.Adxl357
 
         /// <summary>
         /// Calibrates the accelerometer.
+        /// You can override default <paramref name="calibrationBufferLength"/> and <paramref name="calibrationInterval"/> if required.
         /// </summary>
+        /// <param name="calibrationBufferLength">The number of times every axis is measured. The average of these measurements is used to calibrate each axis.</param>
+        /// <param name="calibrationInterval">The time in milliseconds to wait between each measurement.</param>
         /// <remarks>
         /// Make sure that the sensor is placed horizontally when executing this method.
         /// </remarks>
-        public void CalibrateAccelerationSensor()
+        public async Task CalibrateAccelerationSensor(int calibrationBufferLength = CalibrationBufferLength, int calibrationInterval = CalibrationInterval)
         {
-            _caliBuffer["x"] = new float[CalibrationBufferLength];
-            _caliBuffer["y"] = new float[CalibrationBufferLength];
-            _caliBuffer["z"] = new float[CalibrationBufferLength];
+            _caliBuffer["x"] = new float[calibrationBufferLength];
+            _caliBuffer["y"] = new float[calibrationBufferLength];
+            _caliBuffer["z"] = new float[calibrationBufferLength];
 
-            for (int i = 0; i < CalibrationBufferLength; i++)
+            for (int i = 0; i < calibrationBufferLength; i++)
             {
                 var acc = GetRawAccelerometer();
                 _caliBuffer["x"][i] = acc.X;
                 _caliBuffer["y"][i] = acc.Y;
                 _caliBuffer["z"][i] = acc.Z;
 
-                Thread.Sleep(CalibrationInterval);
+                await Task.Delay(calibrationInterval);
             }
 
             foreach (var buffer in _caliBuffer)
