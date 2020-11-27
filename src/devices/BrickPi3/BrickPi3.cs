@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -23,7 +22,7 @@ namespace Iot.Device.BrickPi3
         private byte[] _i2cInBytes = { 0, 0, 0, 0 };
 
         // Internals to initalize the SPI
-        private static SpiDevice _brickPiSPI = null;
+        private SpiDevice _brickPiSPI;
         private BrickPiVoltage _brickPiVoltage = new BrickPiVoltage();
 
         #region Properties
@@ -68,33 +67,21 @@ namespace Iot.Device.BrickPi3
         /// <param name="ChipSelectLine">The chip select line that the device is connected to</param>
         public Brick(byte spiAddress = 1, int busId = 0, int ChipSelectLine = 1)
         {
-            try
-            {
-                SpiAddress = spiAddress;
-                // SPI 0 is used on Raspberry with ChipSelectLine 1
-                var settings = new SpiConnectionSettings(busId, ChipSelectLine);
-                // 500K is the SPI communication with the brick
-                settings.ClockFrequency = 500000;
-                // see http://tightdev.net/SpiDev_Doc.pdf
-                settings.Mode = SpiMode.Mode0;
-                settings.DataBitLength = 8;
-                // as the SPI is a static, checking if it has already be initialised
-                if (_brickPiSPI == null)
-                {
-                    _brickPiSPI = SpiDevice.Create(settings);
-                }
-
-                BrickPi3Info = new BrickPiInfo();
-                BrickPi3Info.Manufacturer = GetManufacturer();
-                BrickPi3Info.Board = GetBoard();
-                BrickPi3Info.HardwareVersion = GetHardwareVersion();
-                BrickPi3Info.SoftwareVersion = GetFirmwareVersion();
-                BrickPi3Info.Id = GetId();
-            }
-            catch (Exception ex) when (ex is IOException)
-            {
-                Debug.Write($"Exception: {ex.Message}");
-            }
+            SpiAddress = spiAddress;
+            // SPI 0 is used on Raspberry with ChipSelectLine 1
+            var settings = new SpiConnectionSettings(busId, ChipSelectLine);
+            // 500K is the SPI communication with the brick
+            settings.ClockFrequency = 500000;
+            // see http://tightdev.net/SpiDev_Doc.pdf
+            settings.Mode = SpiMode.Mode0;
+            settings.DataBitLength = 8;
+            _brickPiSPI = SpiDevice.Create(settings);
+            BrickPi3Info = new BrickPiInfo(
+                GetManufacturer(),
+                GetBoard(),
+                GetHardwareVersion(),
+                GetFirmwareVersion(),
+                GetId());
         }
 
         /// <summary>
@@ -870,18 +857,18 @@ namespace Iot.Device.BrickPi3
         /// <param name="port">The sensor port(s). Port 1, 2, 3, and/or 4</param>
         /// <param name="type">The sensor type</param>
         /// <param name="param">param is used only for some sensors and can be ignore for the others
-        /// params is used for the following sensor types:
+        /// param is used for the following sensor types:
         ///   CUSTOM-- a 16 - bit integer used to configure the hardware.
         ///   I2C-- a list of settings:
-        ///     params[0]-- Settings / flags
-        ///     params[1] -- target Speed in microseconds(0-255). Realistically the speed will vary.
+        ///     param[0]-- Settings / flags
+        ///     param[1] -- target Speed in microseconds(0-255). Realistically the speed will vary.
         ///     if SENSOR_I2C_SETTINGS_SAME flag set in I2C Settings:
-        ///        params[2] -- Delay in microseconds between transactions.
-        ///        params[3] -- Address
-        ///        params[4] -- List of bytes to write
-        ///        params[5] -- Number of bytes to read
+        ///        param[2] -- Delay in microseconds between transactions.
+        ///        param[3] -- Address
+        ///        param[4] -- List of bytes to write
+        ///        param[5] -- Number of bytes to read
         /// </param>
-        public void SetSensorType(byte port, SensorType type, int[] param = null)
+        public void SetSensorType(byte port, SensorType type, int[]? param = null)
         {
             for (int p = 0; p < 4; p++)
             {
@@ -892,7 +879,7 @@ namespace Iot.Device.BrickPi3
             }
 
             List<byte> outArray = new List<byte>();
-            if (type == Models.SensorType.Custom)
+            if (param is object && type == Models.SensorType.Custom)
             {
                 outArray.AddRange(new byte[]
                 {
@@ -900,7 +887,7 @@ namespace Iot.Device.BrickPi3
                     (byte)((param[0] >> 8) & 0xFF), (byte)(param[0] & 0xFF)
                 });
             }
-            else if (type == Models.SensorType.I2C)
+            else if (param is object && type == Models.SensorType.I2C)
             {
                 if (param.Length >= 2)
                 {

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -29,19 +28,13 @@ namespace Iot.Device.Ssd13xx
         /// Sends command to the device
         /// </summary>
         /// <param name="command">Command being send</param>
-        public void SendCommand(ISsd1306Command command)
-        {
-            SendCommand((ICommand)command);
-        }
+        public void SendCommand(ISsd1306Command command) => SendCommand((ICommand)command);
 
         /// <summary>
         /// Sends command to the device
         /// </summary>
         /// <param name="command">Command being send</param>
-        public override void SendCommand(ISharedCommand command)
-        {
-            SendCommand(command);
-        }
+        public override void SendCommand(ISharedCommand command) => SendCommand(command);
 
         /// <summary>
         /// Send a command to the display controller.
@@ -49,16 +42,11 @@ namespace Iot.Device.Ssd13xx
         /// <param name="command">The command to send to the display controller.</param>
         private void SendCommand(ICommand command)
         {
-            byte[] commandBytes = command.GetBytes();
+            byte[]? commandBytes = command?.GetBytes();
 
-            if (commandBytes == null)
+            if (commandBytes is not { Length: >0 })
             {
-                throw new ArgumentNullException(nameof(commandBytes));
-            }
-
-            if (commandBytes.Length == 0)
-            {
-                throw new ArgumentException("The command did not contain any bytes to send.");
+                throw new ArgumentNullException(nameof(command), "Argument is either null or there were no bytes to send.");
             }
 
             Span<byte> writeBuffer = SliceGenericBuffer(commandBytes.Length + 1);

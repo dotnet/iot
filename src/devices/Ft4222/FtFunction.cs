@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Runtime.InteropServices;
@@ -73,7 +72,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The device handle</param>
         /// <returns>The status</returns>
-        public static FtStatus FT_Close(SafeFtHandle ftHandle)
+        public static FtStatus FT_Close(IntPtr ftHandle)
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
@@ -126,7 +125,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The device handle</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", EntryPoint = "FT_Close")]
-        private static extern FtStatus FT_CloseLinux(SafeFtHandle ftHandle);
+        private static extern FtStatus FT_CloseLinux(IntPtr ftHandle);
 
         #endregion
 
@@ -171,7 +170,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The device handle</param>
         /// <returns>The status</returns>
         [DllImport("ftd2xx", EntryPoint = "FT_Close")]
-        private static extern FtStatus FT_CloseWin(SafeFtHandle ftHandle);
+        private static extern FtStatus FT_CloseWin(IntPtr ftHandle);
 
         #endregion
 
@@ -183,7 +182,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_UnInitialize(SafeFtHandle ftHandle);
+        public static extern FtStatus FT4222_UnInitialize(IntPtr ftHandle);
 
         /// <summary>
         /// Set the device system clock
@@ -432,7 +431,7 @@ namespace Iot.Device.Ft4222
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="clkStrength">The intensity of the clock pin</param>
-        /// <param name="ioStrength">The intensity of the MOSI and MISO pins</param>
+        /// <param name="ioStrength">The intensity of the SDO and SDI pins</param>
         /// <param name="ssoStrength">The intensity of the chip select pin</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]

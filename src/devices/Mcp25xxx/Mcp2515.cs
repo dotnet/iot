@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
 using System.Device.Spi;
@@ -38,7 +37,7 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            GpioController gpioController = null,
+            GpioController? gpioController = null,
             bool shouldDispose = true)
             : base(
                   spiDevice,

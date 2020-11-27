@@ -20,7 +20,7 @@ namespace TestTest
             var pwm = PwmChannel.Create(0, 0, 400, 0.5);
             pwm.Start();
             Console.ReadKey();
-        }        
+        }
     }
 }
 ```
@@ -57,6 +57,7 @@ Main Raspberry Pi kernel documentation gives 2 possibilities. Either a [single c
 Here are the possible options for each PWM channel:
 
 | PWM | GPIO | Function | Alt | Exposed |
+| --- | --- | --- | --- | --- |
 | PWM0 | 12 | 4 | Alt0 | Yes |
 | PWM0 | 18 | 2 | Alt5 | Yes |
 | PWM0 | 40 | 4 | Alt0 | No |
@@ -74,6 +75,7 @@ Only accessible pin from this list on the Raspberry Pi pin out are GPIO 12, 18, 
 We have then 4 options for the exposed GPIO pins:
 
 | PWM | GPIO | Function | Alt | dtoverlay |
+| --- | --- | --- | --- | --- |
 | PWM0 | 12 | 4 | Alt0 | dtoverlay=pwm,pin=12,func=4 |
 | PWM0 | 18 | 2 | Alt5 | dtoverlay=pwm,pin=18,func=2 |
 | PWM1 | 13 | 4 | Alt0 | dtoverlay=pwm,pin=13,func=4 |
@@ -98,6 +100,7 @@ You are all setup, the basic example should now work with the PWM and channel yo
 ### Activating 2 channels
 
 | PWM0 | PWM0 GPIO | PWM0 Function | PWM0 Alt |  PWM1 | PWM1 GPIO | PWM1 Function | PWM1 Alt | dtoverlay |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PWM0 | 12 | 4 | Alt0 | PWM1 | 13 | 4 | Alt0 | dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4 |
 | PWM0 | 18 | 2 | Alt5 | PWM1 | 13 | 4 | Alt0 | dtoverlay=pwm-2chan,pin=18,func=2,pin2=13,func2=4 |
 | PWM0 | 12 | 4 | Alt0 | PWM1 | 19 | 2 | Alt5 | dtoverlay=pwm-2chan,pin=12,func=4,pin2=19,func2=2 |
@@ -153,7 +156,7 @@ sudo ./yourapplication
 
 ### Adding your user to the right permission group
 
-If you're running, or just upgrated to a version published after Auguste 2020, this should be already done. 
+If you're running, or just upgraded to a version published after August 2020, this should be already done. 
 You will have to create a [specific group in udev](https://raspberrypi.stackexchange.com/questions/66890/accessing-pwm-module-without-root-permissions).
 
 ```bash

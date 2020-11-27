@@ -2,7 +2,7 @@
 
 # Summary
 
-TM1637 is a 6 segments Led controler. It used a 2 wire implementation, one for the clock (CLK), one for the data (DIO). This chip can act as well as a key reader. This part has not been implemented. Only the Led display has been implemented. Most of its modern usages are for 4 to 6 segment displays. 
+TM1637 is a segments display with 6 characters Led controler. It used a 2 wire implementation, one for the clock (CLK), one for the data (DIO). This chip can act as well as a key reader. This part has not been implemented. Only the Led display has been implemented. Most of its modern usages are for 4 to 6 segment displays. 
 
 ## Device family
 
@@ -92,10 +92,10 @@ The maximum size of the buffer is 6.
 
 ## Segment order
 
-You can change the order of the segments. In some cases, especially when you have displays with 6 segments split with 2 displays of 3, the order may not be the one you expect.
+You can change the order of the characters. In some cases, especially when you have displays with 6 segments split with 2 displays of 3, the order may not be the one you expect.
 
 ```csharp
-tm1637.SegmentOrder = new byte[] { 2, 1, 0, 5, 4, 3 };
+tm1637.CharacterOrder = new byte[] { 2, 1, 0, 5, 4, 3 };
 ```
 
 Make sure you have a length of 6 and all numbers from 0 to 5.

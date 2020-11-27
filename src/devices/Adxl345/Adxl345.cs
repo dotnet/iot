@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -18,7 +17,7 @@ namespace Iot.Device.Adxl345
         private readonly byte _gravityRangeByte;
         private readonly int _range;
 
-        private SpiDevice _sensor = null;
+        private SpiDevice _sensor;
 
         #region SpiSetting
 
@@ -46,27 +45,16 @@ namespace Iot.Device.Adxl345
         /// <param name="gravityRange">Gravity Measurement Range</param>
         public Adxl345(SpiDevice sensor, GravityRange gravityRange)
         {
-            if (gravityRange == GravityRange.Range02)
+            _sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
+            _range = gravityRange switch
             {
-                _range = 4;
-            }
-            else if (gravityRange == GravityRange.Range04)
-            {
-                _range = 8;
-            }
-            else if (gravityRange == GravityRange.Range08)
-            {
-                _range = 16;
-            }
-            else if (gravityRange == GravityRange.Range16)
-            {
-                _range = 32;
-            }
-
+                GravityRange.Range02 => 4,
+                GravityRange.Range04 => 8,
+                GravityRange.Range08 => 16,
+                GravityRange.Range16 => 32,
+                _ => 0
+            };
             _gravityRangeByte = (byte)gravityRange;
-
-            _sensor = sensor;
-
             Initialize();
         }
 
@@ -120,10 +108,10 @@ namespace Iot.Device.Adxl345
         /// </summary>
         public void Dispose()
         {
-            if (_sensor != null)
+            if (_sensor is object)
             {
                 _sensor.Dispose();
-                _sensor = null;
+                _sensor = null!;
             }
         }
     }

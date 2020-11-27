@@ -30,6 +30,13 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
+* [CCS811 Gas sensor](Ccs811/README.md)
+* [MH-Z19B CO2-Sensor](Mhz19b/README.md)
+
+### Liquid sensors
+
+* [Digital liquid level switch](LiquidLevel/README.md)
+* [μFire ISE Probe - pH, ORP and temperature sensor](UFireIse/README.md)
 
 ### Light sensor
 
@@ -52,6 +59,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### Thermometers
 
+* [AHT10/15/20 - Temperature and humidity sensor modules](Ahtxx/README.md)
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [Cpu Temperature](CpuTemperature/README.md)
@@ -59,11 +67,15 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
 * [LM75 - Digital Temperature Sensor](Lm75/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
+* [MCP9808 - Digital Temperature Sensor](Mcp9808/README.md)
 * [MLX90614 - Infra Red Thermometer](Mlx90614/README.md)
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [OpenHardwareMonitor client library](HardwareMonitor/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
+* [μFire ISE Probe - pH, ORP and temperature sensor](UFireIse/README.md)
 
 ### Gyroscopes
 
@@ -85,6 +97,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [28BYJ-48 Stepper Motor 5V 4-Phase 5-Wire & ULN2003 Driver Board](Uln2003/README.md)
 * [DC Motor Controller](DCMotor/README.md)
+* [Explorer HAT Pro (Pimoroni)](ExplorerHat/README.md)
 * [MotorHat](MotorHat/README.md)
 * [Servo Motor](ServoMotor/README.md)
 
@@ -104,17 +117,15 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [Sense HAT](SenseHat/README.md)
 
-### Liquid Crystal Displays
-
-* [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
-
 ### Hygrometers
 
+* [AHT10/15/20 - Temperature and humidity sensor modules](Ahtxx/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
 
 ### Clocks
@@ -141,6 +152,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Displays
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [APA102 - Double line transmission integrated control LED](Apa102/README.md)
+* [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
 * [Segment display driver (HT16K33)](Display/README.md)
@@ -188,22 +201,41 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### LED drivers
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [APA102 - Double line transmission integrated control LED](Apa102/README.md)
+* [Explorer HAT Pro (Pimoroni)](ExplorerHat/README.md)
 * [On-board LED driver](BoardLed/README.md)
 * [Segment display driver (HT16K33)](Display/README.md)
 * [Ws28xx LED drivers](Ws28xx/README.md)
 
 ### RFID/NFC modules
 
+* [PN5180 - RFID and NFC reader](Pn5180/README.md)
 * [PN532 - RFID and NFC reader](Pn532/README.md)
 * [RFID shared elements](Card/README.md)
 
 ### Media libraries
 
+* [Buzzer - Piezo Buzzer Controller](Buzzer/README.md)
 * [Still image recording library](Media/README.md)
 
 ### USB devices
 
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
+
+### GPIO or bit operating devices
+
+* [Charlieplex Segment binding](Charlieplex/README.md)
+* [Digital liquid level switch](LiquidLevel/README.md)
+* [Generic shift register](ShiftRegister/README.md)
+* [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
+* [Quadrature Rotary Encoder](RotaryEncoder/README.md)
+* [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
+
+### Multi-device or robot kit
+
+* [GoPiGo3](GoPiGo3/README.md)
+* [GrovePi](GrovePi/README.md)
+* [Sense HAT](SenseHat/README.md)
 
 ### Protocols providers/libraries
 
@@ -364,7 +396,7 @@ private int _pinToUse;
 
 public MyBinding(int pinToUse, GpioController controller = null, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
 {
-  _shouldDispose = gpioController == null || shouldDispose;
+  _shouldDispose = gpioController is null || shouldDispose;
   _controller = gpioController ?? new GpioController(pinNumberingScheme);  
   _pinToUse = pinToUse;
   _controller.OpenPin(_pinToUse);
