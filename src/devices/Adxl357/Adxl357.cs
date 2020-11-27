@@ -36,7 +36,7 @@ namespace Iot.Device.Adxl357
         /// <param name="accelerometerRange">The sensitivity of the accelerometer.</param>
         public Adxl357(I2cDevice i2CDevice, AccelerometerRange accelerometerRange = AccelerometerRange.Range10G)
         {
-            _i2CDevice = i2CDevice;
+            _i2CDevice = i2CDevice ?? throw new ArgumentNullException(nameof(i2CDevice));
             Reset();
 
             SetAccelerometerRange(accelerometerRange);
