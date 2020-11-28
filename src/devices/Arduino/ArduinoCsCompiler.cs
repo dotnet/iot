@@ -52,7 +52,6 @@ namespace Iot.Device.Arduino
         OutOfMemory = 3
     }
 
-    [Flags]
     public enum VariableKind : byte
     {
         Void = 0,
@@ -61,9 +60,9 @@ namespace Iot.Device.Arduino
         Boolean = 3,
         Object = 4,
         Method = 5,
-        // Static member (only used in class member lists)
-        Static = 0x80,
-        TypeMask = 0x7F,
+        ValueArray = 6,
+        ReferenceArray = 7,
+        StaticMember = 8 // type is defined by the first value it gets
     }
 
     public enum SystemException
@@ -110,7 +109,6 @@ namespace Iot.Device.Arduino
         private readonly ArduinoBoard _board;
         private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
         private readonly List<IArduinoTask> _activeTasks;
-        private readonly List<Module> _activeModules;
 
         public ArduinoCsCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
@@ -119,21 +117,10 @@ namespace Iot.Device.Arduino
             _board.SetCompilerCallback(BoardOnCompilerCallback);
 
             _activeTasks = new List<IArduinoTask>();
-            _activeModules = new List<Module>();
-            // The first entry is always "self"
-            _activeModules.Add(null!);
 
             if (resetExistingCode)
             {
                 ClearAllData(true);
-            }
-        }
-
-        internal IList<Module> Modules
-        {
-            get
-            {
-                return _activeModules;
             }
         }
 
@@ -253,7 +240,7 @@ namespace Iot.Device.Arduino
                 {
                     var attr = (ArduinoImplementationAttribute)method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).First();
 
-                    int token = CombinedMethodToken(method);
+                    int token = set.GetOrAddMethodToken(method);
                     ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, MethodFlags.SpecialMethod, attr.MethodNumber);
                     // Todo: Move this member to the ExecutionSet
                     _methodInfos.Add(method, decl);
@@ -267,44 +254,6 @@ namespace Iot.Device.Arduino
             {
                 PrepareCodeInternal(set, method);
             }
-        }
-
-        private int CombinedMethodToken(MemberInfo method)
-        {
-            var module = method.Module;
-            int idx = _activeModules.IndexOf(module);
-            if (idx >= 0)
-            {
-                // Use top 4 bit for the module (at most 15 modules at a time)
-                return method.MetadataToken | idx << 28;
-            }
-
-            if (_activeModules.Count == 15)
-            {
-                throw new NotSupportedException("At most 15 modules may be involved at once");
-            }
-
-            _activeModules.Add(module);
-            return method.MetadataToken | (_activeModules.Count - 1) << 28;
-        }
-
-        private int CombinedClassToken(Type cls)
-        {
-            var module = cls.Module;
-            int idx = _activeModules.IndexOf(module);
-            if (idx >= 0)
-            {
-                // Use top 4 bit for the module (at most 8 modules at a time)
-                return cls.MetadataToken | idx << 28;
-            }
-
-            if (_activeModules.Count == 8)
-            {
-                throw new NotSupportedException("At most 8 assemblies may be involved at once");
-            }
-
-            _activeModules.Add(module);
-            return cls.MetadataToken | (_activeModules.Count - 1) << 28;
         }
 
         public void PrepareClass(ExecutionSet set, Type classType)
@@ -356,10 +305,16 @@ namespace Iot.Device.Arduino
                 var fieldType = GetVariableType(fields[index].FieldType);
                 if (fields[index].IsStatic)
                 {
-                    fieldType |= VariableKind.Static;
+                    fieldType = VariableKind.StaticMember;
                 }
 
-                memberTypes.Add(new ExecutionSet.VariableOrMethod(fieldType, fields[index].MetadataToken, new List<int>()));
+                var newvar = new ExecutionSet.VariableOrMethod(fieldType, set.GetOrAddFieldToken(fields[index]), new List<int>());
+                if (fields[index].IsStatic)
+                {
+                    newvar.InitialValue = fields[index].GetValue(null);
+                }
+
+                memberTypes.Add(newvar);
             }
 
             for (var index = 0; index < methods.Count; index++)
@@ -367,7 +322,7 @@ namespace Iot.Device.Arduino
                 var m = methods[index] as ConstructorInfo;
                 if (m != null)
                 {
-                    memberTypes.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, CombinedMethodToken(m), new List<int>()));
+                    memberTypes.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, set.GetOrAddMethodToken(m), new List<int>()));
                 }
             }
 
@@ -401,8 +356,8 @@ namespace Iot.Device.Arduino
                         // Unfortunately, this can recursively require further classes and methods
                         PrepareCodeInternal(set, (MethodBase)m); // This cast must work
 
-                        List<int> baseTokens = baseMethodInfos.Select(x => CombinedMethodToken(x)).ToList();
-                        cls.Members.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, CombinedMethodToken(m), baseTokens));
+                        List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x)).ToList();
+                        cls.Members.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, set.GetOrAddMethodToken((MethodBase)m), baseTokens));
                     }
                 }
             }
@@ -438,11 +393,11 @@ namespace Iot.Device.Arduino
                 Type parent = cls.BaseType!;
                 if (parent != null)
                 {
-                    parentToken = CombinedClassToken(parent);
+                    parentToken = set.GetOrAddClassToken(parent.GetTypeInfo());
                 }
 
                 // Extend token with assembly identifier, to make sure it is unique
-                int token = CombinedClassToken(cls);
+                int token = set.GetOrAddClassToken(cls.GetTypeInfo());
 
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
                 string className = cls.Name;
@@ -747,10 +702,9 @@ namespace Iot.Device.Arduino
 
         public void CollectDependencies(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> methods)
         {
-            List<int> foreignMethodsRequired = new List<int>();
-            List<int> ownMethodsRequired = new List<int>();
-            List<int> fieldsRequired = new List<int>();
-            List<int> typesRequired = new List<int>();
+            List<MethodBase> methodsRequired = new List<MethodBase>();
+            List<FieldInfo> fieldsRequired = new List<FieldInfo>();
+            List<TypeInfo> typesRequired = new List<TypeInfo>();
             if (methodInfo.IsAbstract)
             {
                 // This is a method that will never be called directly, so we can safely skip it.
@@ -758,41 +712,31 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired, typesRequired);
-            List<int> combined = foreignMethodsRequired;
-            combined.AddRange(ownMethodsRequired);
-            combined = combined.Distinct().ToList();
-            foreach (var method in combined)
-            {
-                var resolved = ResolveMember(methodInfo, method);
-                if (resolved == null)
-                {
-                    // Warning only, since might be an incorrect match
-                    _board.Log($"Unable to resolve token {method}.");
-                    continue;
-                }
+            GetMethodDependencies(set, methodInfo, methodsRequired, typesRequired, fieldsRequired);
 
-                if (resolved is MethodInfo me)
+            foreach (var method in methodsRequired)
+            {
+                if (method is MethodInfo me)
                 {
                     // Ensure we're not scanning the same implementation twice, as this would result
                     // in a stack overflow when a method is recursive (even indirect)
                     if (methods.Add(me))
                     {
-                        _board.Log($"Method {resolved.DeclaringType} - {resolved} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
+                        _board.Log($"Method {me.DeclaringType} - {me} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
                         CollectDependencies(set, me, methods);
                     }
                 }
-                else if (resolved is ConstructorInfo co)
+                else if (method is ConstructorInfo co)
                 {
                     if (methods.Add(co))
                     {
-                        _board.Log($"Constructor {resolved.DeclaringType} - {resolved} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
+                        _board.Log($"Constructor {co.DeclaringType} - {co} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
                         CollectDependencies(set, co, methods);
                     }
                 }
                 else
                 {
-                    _board.Log($"Token {method} is not a MethodInfo token, but a {resolved.GetType()}.");
+                    throw new InvalidOperationException($"Token {method} is not a valid method.");
                 }
             }
 
@@ -914,12 +858,10 @@ namespace Iot.Device.Arduino
                 throw new MissingMethodException($"{methodInfo.DeclaringType} has no visible implementation");
             }
 
-            List<int> foreignMethodsRequired = new List<int>();
-            List<int> ownMethodsRequired = new List<int>();
-            List<int> fieldsRequired = new List<int>();
-            List<int> typesRequired = new List<int>();
-            // Maps methodDef to memberRef tokens (for methods declared outside the assembly of the executing code)
-            List<(int, int)> tokenMap = new List<(int, int)>();
+            List<MethodBase> foreignMethodsRequired = new List<MethodBase>();
+            List<FieldInfo> fieldsRequired = new List<FieldInfo>();
+            List<TypeInfo> typesRequired = new List<TypeInfo>();
+
             if (ilBytes != null && ilBytes.Length > Math.Pow(2, 14) - 1)
             {
                 throw new InvalidProgramException($"Max IL size of real time method is 2^14 Bytes. Actual size is {ilBytes.Length}.");
@@ -927,51 +869,20 @@ namespace Iot.Device.Arduino
 
             if (hasBody)
             {
-                GetMethodDependencies(set, methodInfo, foreignMethodsRequired, ownMethodsRequired, fieldsRequired, typesRequired);
+                ilBytes = GetMethodDependencies(set, methodInfo, foreignMethodsRequired, typesRequired, fieldsRequired);
 
-                foreach (int token in foreignMethodsRequired.Distinct())
+                foreach (var type in typesRequired.Distinct())
                 {
-                    var resolved = ResolveMember(methodInfo, token);
-                    if (resolved == null)
+                    if (!set.HasDefinition(type))
                     {
-                        continue;
-                    }
-
-                    // Multiple local (0x0a) tokens can be implemented by the same remote (0x06) instance, so
-                    // the left entry of this tuple might not need to be unique
-                    tokenMap.Add((CombinedMethodToken(resolved), token));
-                }
-
-                foreach (int token in fieldsRequired.Distinct())
-                {
-                    var resolved = ResolveMember(methodInfo, token);
-                    if (resolved == null)
-                    {
-                        continue;
-                    }
-
-                    // TODO: Use CombinedMethodToken here, as well, but this requires some indirections in other places
-                    tokenMap.Add((resolved.MetadataToken, token));
-                }
-
-                foreach (int token in typesRequired.Distinct())
-                {
-                    var resolved = methodInfo.Module.ResolveType(token);
-                    if (resolved == null)
-                    {
-                        continue;
-                    }
-
-                    if (!set.HasDefinition(resolved))
-                    {
-                        PrepareClass(set, resolved);
+                        PrepareClass(set, type);
                     }
                 }
 
             }
 
-            int tk = CombinedMethodToken(methodInfo);
-            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, tokenMap, ilBytes);
+            int tk = set.GetOrAddMethodToken(methodInfo);
+            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, new List<(int First, int Second)>(), ilBytes);
 
             if (set.AddMethod(newInfo))
             {
@@ -1141,7 +1052,7 @@ namespace Iot.Device.Arduino
                     var task = GetTask(set, cls.Cls.TypeInitializer);
                     task.Invoke(CancellationToken.None);
                     task.WaitForResult();
-                    if (task.GetMethodResults(out _, out var state) == false || state != MethodState.Stopped)
+                    if (task.GetMethodResults(set, out _, out var state) == false || state != MethodState.Stopped)
                     {
                         throw new InvalidProgramException($"Error executing static ctor of class {cls.Cls}");
                     }
@@ -1176,7 +1087,7 @@ namespace Iot.Device.Arduino
             _board.Firmata.SendKillTask(decl.Index);
         }
 
-        private void GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<int> foreignMethodTokens, List<int> ownMethodTokens, List<int> fields, List<int> types)
+        private byte[]? GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
             if (methodInstance.ContainsGenericParameters)
             {
@@ -1186,14 +1097,14 @@ namespace Iot.Device.Arduino
             // Don't analyze the body of a method if we're going to replace it with something else
             if (LoadInternalCode(set, methodInstance, true))
             {
-                return;
+                return null;
             }
 
             MethodBody? body = methodInstance.GetMethodBody();
             if (body == null)
             {
                 // Method has no (visible) implementation, so it certainly has no code dependencies as well
-                return;
+                return null;
             }
 
             /* if (body.ExceptionHandlingClauses.Count > 0)
@@ -1201,62 +1112,8 @@ namespace Iot.Device.Arduino
                 throw new InvalidProgramException("Methods with exception handling are not supported");
             } */
 
-            // TODO: Check argument count, Check parameter types, etc., etc.
-            var byteCode = body.GetILAsByteArray();
-            if (byteCode == null)
-            {
-                throw new InvalidProgramException("Method has no implementation");
-            }
-
-            if (byteCode.Length >= ushort.MaxValue - 1)
-            {
-                // If you hit this limit, some refactoring should be considered...
-                throw new InvalidProgramException("Maximum method size is 32kb");
-            }
-
-            // TODO: This is very simplistic so we do not need another parser. But this might have false positives
-            int idx = 0;
-            while (idx < byteCode.Length - 5)
-            {
-                // Decode token first (number is little endian!)
-                int token = byteCode[idx + 1] | byteCode[idx + 2] << 8 | byteCode[idx + 3] << 16 | byteCode[idx + 4] << 24;
-                if ((byteCode[idx] == 0x6F || byteCode[idx] == 0x28 || (byteCode[idx] == 0x73)) && (token >> 24 == 0x0A))
-                {
-                    // The tokens we're interested in have the form 0x0A XX XX XX preceded by a call, callvirt or newinst instruction
-                    foreignMethodTokens.Add(token);
-                }
-
-                if ((byteCode[idx] == 0x6F || byteCode[idx] == 0x28 || (byteCode[idx] == 0x73)) && (token >> 24 == 0x06))
-                {
-                    // Call to another method of the same assembly
-                    ownMethodTokens.Add(token);
-                }
-
-                // an STSFLD or LDSFLD instruction. Don't know what's wrong with their token
-                if ((byteCode[idx] == 0x7E || byteCode[idx] == 0x80) && token >> 24 == 0x0A)
-                {
-                    fields.Add(token);
-                }
-
-                if ((byteCode[idx] == 0x7D || byteCode[idx] == 0x7B) && token >> 24 == 0x0A)
-                {
-                    fields.Add(token);
-                }
-
-                // NEWARR instruction with a type token
-                if (byteCode[idx] == 0x8D && (token >> 24 == 0x02))
-                {
-                    types.Add(token);
-                }
-
-                // A LDTOKEN instruction with a field token. Not really sure what this means
-                if (byteCode[idx] == 0xD0 && (token >> 24 == 0x04))
-                {
-                    fields.Add(token);
-                }
-
-                idx++;
-            }
+            IlCodeParser parser = new IlCodeParser();
+            return parser.FindAndPatchTokens(set, methodInstance, body, methodsUsed, typesUsed, fieldsUsed);
         }
 
         /// <summary>
@@ -1268,8 +1125,6 @@ namespace Iot.Device.Arduino
             _board.Firmata.SendIlResetCommand(force);
             _activeTasks.Clear();
             _methodInfos.Clear();
-            _activeModules.Clear();
-            _activeModules.Add(null!);
         }
 
         public void Dispose()

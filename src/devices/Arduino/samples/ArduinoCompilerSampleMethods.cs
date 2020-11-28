@@ -46,6 +46,14 @@ namespace Arduino.Samples
             }
         }
 
+        public static int ArrayTest(int size, int index)
+        {
+            int[] array = new int[size];
+            array[index] = 3;
+            array[array.Length - 1] = 2;
+            return array[index];
+        }
+
         public static int AddInts(int a, int b)
         {
             return a + b;

@@ -532,13 +532,14 @@ namespace Arduino.Samples
         public static void TestIlInterpreter(ArduinoBoard board)
         {
             ArduinoCsCompiler compiler = new ArduinoCsCompiler(board);
-            //// BasicCalculationTest(compiler);
+            BasicCalculationTest(compiler);
 
-            //// OperatorTest(compiler);
+            OperatorTest(compiler);
 
-            //// AsyncExecutionTest(board, compiler);
+            AsyncExecutionTest(board, compiler);
 
             //// ReadDht11Test(compiler);
+            ArrayTest(compiler);
 
             LoadClassAndBlinkLed(compiler);
 
@@ -569,7 +570,7 @@ namespace Arduino.Samples
 
             try
             {
-                if (task.GetMethodResults(out _, out var state))
+                if (task.GetMethodResults(exec, out _, out var state))
                 {
                     Console.WriteLine($"Method return code was {state}");
                 }
@@ -603,7 +604,7 @@ namespace Arduino.Samples
             {
                 Console.WriteLine("Method execution timed out.");
             }
-            else if (dht.GetMethodResults(out data, out state) && state == MethodState.Stopped)
+            else if (dht.GetMethodResults(set, out data, out state) && state == MethodState.Stopped)
             {
                 UInt32 raw = (UInt32)data[0] >> 16;
                 double temperature = raw * 0.1;
@@ -710,7 +711,7 @@ namespace Arduino.Samples
             method1.InvokeAsync(2, 3);
             int result;
             method1.WaitForResult();
-            method1.GetMethodResults(out object[] data, out MethodState state);
+            method1.GetMethodResults(set, out object[] data, out MethodState state);
             if (state != MethodState.Stopped)
             {
                 Console.WriteLine("Method returned result but did not end?!?");
@@ -720,7 +721,7 @@ namespace Arduino.Samples
             Console.WriteLine($"2 + 3 = {result}");
             method1.InvokeAsync(255, 5);
             method1.WaitForResult();
-            method1.GetMethodResults(out data, out state);
+            method1.GetMethodResults(set, out data, out state);
             result = (int)data[0];
             Console.WriteLine($"255 + 5 = {result}");
 
@@ -729,14 +730,34 @@ namespace Arduino.Samples
             var method2 = compiler.AddSimpleMethod(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Equal));
             method2.InvokeAsync(2, 3);
             method2.WaitForResult();
-            method2.GetMethodResults(out data, out state);
+            method2.GetMethodResults(set, out data, out state);
             bool trueOrFalse = (bool)data[0];
             Console.WriteLine($"Is 2 == 3? {trueOrFalse}");
             method2.InvokeAsync(257, 257);
             method2.WaitForResult();
-            method2.GetMethodResults(out data, out state);
+            method2.GetMethodResults(set, out data, out state);
             trueOrFalse = (bool)data[0];
             Console.WriteLine($"Is 257 == 257? {trueOrFalse}");
+        }
+
+        private static void ArrayTest(ArduinoCsCompiler compiler)
+        {
+            compiler.ClearAllData(true);
+            var set = compiler.CreateExecutionSet();
+            compiler.PrepareClass(set, typeof(System.Int32));
+            var method1 = compiler.AddSimpleMethod<Func<int, int, int>>(set, ArduinoCompilerSampleMethods.ArrayTest);
+            method1.InvokeAsync(10, 3);
+            int result;
+            method1.WaitForResult();
+            method1.GetMethodResults(set, out object[] data, out MethodState state);
+            if (state != MethodState.Stopped)
+            {
+                Console.WriteLine("Method returned result but did not end?!?");
+            }
+
+            result = (int)data[0];
+            Console.WriteLine($"Should be 3: {result}");
+            compiler.ClearAllData(true);
         }
     }
 }

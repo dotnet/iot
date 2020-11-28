@@ -78,10 +78,11 @@ namespace Iot.Device.Arduino
         /// If this returns true, the next data set is returned, together with the state of the task at that point.
         /// If the returned state is <see cref="MethodState.Stopped"/>, the data returned is the return value of the method.
         /// </summary>
+        /// <param name="set">The execution set the result belongs to (required to look up correct return types)</param>
         /// <param name="data">A set of values sent or returned by the task method</param>
         /// <param name="state">The state of the method matching the task at that time</param>
         /// <returns>True if data was available, false otherwise</returns>
-        public bool GetMethodResults(out object[] data, out MethodState state)
+        public bool GetMethodResults(ExecutionSet set, out object[] data, out MethodState state)
         {
             if (_collectedValues.TryDequeue(out var d))
             {
@@ -91,18 +92,15 @@ namespace Iot.Device.Arduino
                 {
                     int exceptionCode = (int)d.Item2[0];
                     int targetToken = (int)d.Item2[1];
-                    int targetModule = (targetToken >> 28) & 0xF;
-                    targetToken = targetToken & 0x0FFF_FFFF;
-                    exceptionCode = exceptionCode & 0x0FFF_FFFF;
                     SystemException ex = (SystemException)exceptionCode;
 
                     if (ex == SystemException.InvalidOpCode)
                     {
-                        throw new InvalidOperationException("Invalid Opcode: " + targetToken);
+                        string instrName = OpCodeDefinitions.OpcodeDef[targetToken].Name;
+                        throw new InvalidOperationException($"Invalid Opcode: 0x{targetToken:X4}: {instrName}");
                     }
 
-                    Module module = targetModule < Compiler.Modules.Count ? Compiler.Modules[targetModule] : GetType().Module;
-                    var resolved = module.ResolveMethod(targetToken);
+                    var resolved = set.InverseResolveToken(targetToken);
                     if (resolved == null)
                     {
                         throw new InvalidOperationException("Internal error: Unknown exception arguments");
@@ -124,8 +122,8 @@ namespace Iot.Device.Arduino
                         }
                     }
 
-                    module = Compiler.Modules.Count < exceptionCode ? Compiler.Modules[exceptionCode] : GetType().Module;
-                    var resolvedException = module.ResolveType(exceptionCode);
+                    // TypeInfo inherits from Type, so a TypeInfo is always also a Type
+                    var resolvedException = set.InverseResolveToken(exceptionCode) as Type;
 
                     if (resolvedException == null)
                     {

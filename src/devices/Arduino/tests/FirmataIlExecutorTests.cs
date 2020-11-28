@@ -301,7 +301,7 @@ namespace Iot.Device.Arduino.Tests
             // The task has terminated
             Assert.Equal(MethodState.Stopped, method.State);
 
-            Assert.True(method.GetMethodResults(out object[] data, out MethodState state));
+            Assert.True(method.GetMethodResults(set, out object[] data, out MethodState state));
             // The only result is from the end of the method
             Assert.Equal(MethodState.Stopped, state);
             Assert.Single(data);

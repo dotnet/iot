@@ -14,14 +14,24 @@ namespace Iot.Device.Arduino
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<Class> _classes;
+        private readonly Dictionary<TypeInfo, int> _patchedTypeTokens;
+        private readonly Dictionary<MethodBase, int> _patchedMethodTokens;
+        private readonly Dictionary<FieldInfo, int> _patchedFieldTokens;
+
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
+        private int _nextToken;
 
         public ExecutionSet(ArduinoCsCompiler compiler)
         {
             _compiler = compiler;
             _methods = new List<ArduinoMethodDeclaration>();
             _classes = new List<Class>();
+            _patchedTypeTokens = new Dictionary<TypeInfo, int>();
+            _patchedMethodTokens = new Dictionary<MethodBase, int>();
+            _patchedFieldTokens = new Dictionary<FieldInfo, int>();
+            _nextToken = 1;
+
             _numDeclaredMethods = 0;
             _entryPoint = null!;
             MainEntryPointInternal = null;
@@ -87,6 +97,45 @@ namespace Iot.Device.Arduino
             return bytesUsed;
         }
 
+        public int GetOrAddMethodToken(MethodBase methodBase)
+        {
+            int token;
+            if (_patchedMethodTokens.TryGetValue(methodBase, out token))
+            {
+                return token;
+            }
+
+            token = _nextToken++;
+            _patchedMethodTokens.Add(methodBase, token);
+            return token;
+        }
+
+        public int GetOrAddFieldToken(FieldInfo field)
+        {
+            int token;
+            if (_patchedFieldTokens.TryGetValue(field, out token))
+            {
+                return token;
+            }
+
+            token = _nextToken++;
+            _patchedFieldTokens.Add(field, token);
+            return token;
+        }
+
+        public int GetOrAddClassToken(TypeInfo typeInfo)
+        {
+            int token;
+            if (_patchedTypeTokens.TryGetValue(typeInfo, out token))
+            {
+                return token;
+            }
+
+            token = _nextToken++;
+            _patchedTypeTokens.Add(typeInfo, token);
+            return token;
+        }
+
         public bool AddClass(Class type)
         {
             if (_classes.Any(x => x.Cls == type.Cls))
@@ -138,6 +187,30 @@ namespace Iot.Device.Arduino
             return _methods;
         }
 
+        public MemberInfo? InverseResolveToken(int token)
+        {
+            // Todo: This is very slow - consider inversing the dictionaries during data prep
+            var method = _patchedMethodTokens.FirstOrDefault(x => x.Value == token);
+            if (method.Key != null)
+            {
+                return method.Key;
+            }
+
+            var field = _patchedFieldTokens.FirstOrDefault(x => x.Value == token);
+            if (field.Key != null)
+            {
+                return field.Key;
+            }
+
+            var t = _patchedTypeTokens.FirstOrDefault(x => x.Value == token);
+            if (t.Key != null)
+            {
+                return t.Key;
+            }
+
+            return null;
+        }
+
         public class VariableOrMethod
         {
             public VariableOrMethod(VariableKind variableType, int token, List<int> baseTokens)
@@ -145,6 +218,7 @@ namespace Iot.Device.Arduino
                 VariableType = variableType;
                 Token = token;
                 BaseTokens = baseTokens;
+                InitialValue = null;
             }
 
             public VariableKind VariableType
@@ -160,6 +234,12 @@ namespace Iot.Device.Arduino
             public List<int> BaseTokens
             {
                 get;
+            }
+
+            public object? InitialValue
+            {
+                get;
+                set;
             }
         }
 
@@ -195,6 +275,5 @@ namespace Iot.Device.Arduino
                 set { _suppressInit = value; }
             }
         }
-
     }
 }
