@@ -536,7 +536,7 @@ namespace Arduino.Samples
 
             OperatorTest(compiler);
 
-            AsyncExecutionTest(board, compiler);
+            //// AsyncExecutionTest(board, compiler);
 
             //// ReadDht11Test(compiler);
             ArrayTest(compiler);

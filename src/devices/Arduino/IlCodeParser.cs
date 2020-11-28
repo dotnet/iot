@@ -53,7 +53,8 @@ namespace Iot.Device.Arduino
         /// </summary>
         public byte[] FindAndPatchTokens(ExecutionSet set, MethodBase method, MethodBody body, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
-            var byteCode = body.GetILAsByteArray();
+            // We need to copy the code, because we're going to patch it
+            var byteCode = body.GetILAsByteArray()?.ToArray();
             if (byteCode == null)
             {
                 throw new InvalidProgramException("Method has no implementation");
@@ -95,12 +96,26 @@ namespace Iot.Device.Arduino
 
                         idx += 1;
                         continue;
+                    case OpCodeType.ShortInlineR:
                     case OpCodeType.InlineI:
                     case OpCodeType.InlineBrTarget:
                         idx += 4;
                         continue;
+                    case OpCodeType.InlineString:
+                        // String handling not supported yet
+                        idx += 4;
+                        continue;
+                    case OpCodeType.InlineR:
+                    case OpCodeType.InlineI8:
+                        idx += 8;
+                        continue;
+                    case OpCodeType.InlineSwitch:
+                        // The first integer denotes the number of targets. We can then skip to the index beyond that
+                        int numberOfTargets = byteCode[tokenOffset + 0] | byteCode[tokenOffset + 1] << 8 | byteCode[tokenOffset + 2] << 16 | byteCode[tokenOffset + 3] << 24;
+                        idx = tokenOffset + ((numberOfTargets + 1) * 4);
+                        continue;
                     default:
-                        throw new InvalidOperationException($"Not supported opcode type: {type}");
+                        throw new InvalidOperationException($"Not supported opcode type: {type} (from opcode {opCode})");
                 }
 
                 // Decode whatever could be a token first (number is little endian!)
@@ -118,7 +133,7 @@ namespace Iot.Device.Arduino
                 }
 
                 // an STSFLD or LDSFLD instruction.
-                if (opCode == OpCode.CEE_STSFLD || opCode == OpCode.CEE_LDSFLD || opCode == OpCode.CEE_LDFLD || opCode == OpCode.CEE_STFLD)
+                else if (opCode == OpCode.CEE_STSFLD || opCode == OpCode.CEE_LDSFLD || opCode == OpCode.CEE_LDFLD || opCode == OpCode.CEE_STFLD)
                 {
                     var fieldTarget = ResolveMember(method, token)!;
                     FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
@@ -127,7 +142,7 @@ namespace Iot.Device.Arduino
                 }
 
                 // NEWARR instruction with a type token
-                if (opCode == OpCode.CEE_NEWARR)
+                else if (opCode == OpCode.CEE_NEWARR)
                 {
                     var typeTarget = ResolveMember(method, token)!;
                     TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
@@ -135,7 +150,24 @@ namespace Iot.Device.Arduino
                     typesUsed.Add(mb);
                 }
 
-                // TODO LDTOKEN instruction can take about anything
+                // LDTOKEN takes typically types, but can also take virtual stuff (whatever that means)
+                else if (opCode == OpCode.CEE_LDTOKEN)
+                {
+                    var resolved = ResolveMember(method, token);
+                    if (resolved is TypeInfo ti)
+                    {
+                        patchValue = set.GetOrAddClassToken(ti);
+                        typesUsed.Add(ti);
+                    }
+                    else if (resolved is FieldInfo mi)
+                    {
+                        // Skip for now - possibly static initializer, which we don't load for now
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Unknown token type {resolved}");
+                    }
+                }
 
                 // Now use the new token instead of the old (possibly ambiguous one)
                 // Note: We don't care about the sign here, patchValue is never negative

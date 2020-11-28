@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -72,6 +73,8 @@ namespace Iot.Device.Arduino
         NullReference = 2,
         MissingMethod = 3,
         InvalidOpCode = 4,
+        DivideByZero = 5,
+        IndexOutOfRange = 6,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -86,7 +89,7 @@ namespace Iot.Device.Arduino
         private readonly List<Type> _replacementClasses = new List<Type>()
         {
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
-            typeof(MiniException), typeof(MiniHashSet<int>),
+            typeof(MiniException), typeof(MiniHashSet<int>), typeof(MiniEqualityComparer<int>)
         };
 
         /// <summary>
@@ -204,33 +207,6 @@ namespace Iot.Device.Arduino
             return new ExecutionSet(this);
         }
 
-        private MemberInfo? ResolveMember(MethodBase method, int metadataToken)
-        {
-            Type type = method.DeclaringType!;
-            Type[] typeArgs = new Type[0];
-            Type[] methodArgs = new Type[0];
-
-            if (type.IsGenericType || type.IsGenericTypeDefinition)
-            {
-                typeArgs = type.GetGenericArguments();
-            }
-
-            if (method.IsGenericMethod || method.IsGenericMethodDefinition)
-            {
-                methodArgs = method.GetGenericArguments();
-            }
-
-            try
-            {
-                return type.Module.ResolveMember(metadataToken, typeArgs, methodArgs);
-            }
-            catch (ArgumentException)
-            {
-                // Due to our simplistic parsing below, we might find matching metadata tokens that aren't really tokens
-                return null;
-            }
-        }
-
         public void PrepareLowLevelInterface(ExecutionSet set)
         {
             Type lowLevelInterface = typeof(IArduinoHardwareLevelAccess);
@@ -253,6 +229,36 @@ namespace Iot.Device.Arduino
             foreach (var method in t.GetMethods(BindingFlags.Public))
             {
                 PrepareCodeInternal(set, method);
+            }
+
+            // And the internal classes
+            foreach (var replacement in _replacementClasses)
+            {
+                var attribs = replacement.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
+                ArduinoReplacementAttribute ia = (ArduinoReplacementAttribute)attribs.Single();
+                if (ia.ReplaceEntireType)
+                {
+                    PrepareClass(set, replacement);
+                    set.AddReplacementType(ia.TypeToReplace, replacement);
+                }
+                else
+                {
+                    foreach (var m in replacement.GetMethods(BindingFlags.Public))
+                    {
+                        attribs = m.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
+                        ArduinoReplacementAttribute? iaMethod = (ArduinoReplacementAttribute?)attribs.FirstOrDefault();
+                        if (iaMethod != null)
+                        {
+                            var methodToReplace = ia.TypeToReplace!.GetMethods(BindingFlags.Public).Single(x => MethodsHaveSameSignature(x, m));
+                            set.AddReplacementMethod(methodToReplace, m);
+                        }
+                        else
+                        {
+                            attribs = m.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
+                            ArduinoReplacementAttribute? iaMethod = (ArduinoReplacementAttribute?)attribs.FirstOrDefault();
+                        }
+                    }
+                }
             }
         }
 
@@ -294,6 +300,24 @@ namespace Iot.Device.Arduino
                 return;
             }
 
+            if (classType.ContainsGenericParameters)
+            {
+                // Don't inspect unresolved generic types
+                // TODO: Need to add some magic if these are really instantiated dynamically somewhere
+                return;
+            }
+
+            var replacement = set.GetReplacement(classType);
+
+            if (replacement != null)
+            {
+                classType = replacement;
+                if (set.HasDefinition(classType))
+                {
+                    return;
+                }
+            }
+
             List<FieldInfo> fields = new List<FieldInfo>();
             List<MemberInfo> methods = new List<MemberInfo>();
 
@@ -311,7 +335,32 @@ namespace Iot.Device.Arduino
                 var newvar = new ExecutionSet.VariableOrMethod(fieldType, set.GetOrAddFieldToken(fields[index]), new List<int>());
                 if (fields[index].IsStatic)
                 {
-                    newvar.InitialValue = fields[index].GetValue(null);
+                    var t = fields[index].DeclaringType;
+                    if (t == null)
+                    {
+                        throw new InvalidOperationException("field without a class???");
+                    }
+                    else if (t.GenericTypeArguments.Length == 0)
+                    {
+                        newvar.InitialValue = fields[index].GetValue(null);
+                    }
+                    else
+                    {
+                        // If this is a static field of a generic class, we have to go trough the class to obtain its value, since each concrete type has a different
+                        // instance of the field
+                        string fName = fields[index].Name;
+                        if (fName.Contains("<")) // A backing field - use its get accessor instead
+                        {
+                            fName = fName.Substring(1, fName.IndexOf(">", StringComparison.Ordinal) - 1);
+                            var prop = t.GetProperty(fName);
+                            newvar.InitialValue = prop?.GetValue(null, BindingFlags.Public | BindingFlags.NonPublic, null, null, CultureInfo.InvariantCulture);
+                        }
+                        else
+                        {
+                            var fld = t.GetField(fName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                            newvar.InitialValue = fld?.GetValue(null);
+                        }
+                    }
                 }
 
                 memberTypes.Add(newvar);
@@ -700,7 +749,7 @@ namespace Iot.Device.Arduino
             return VariableKind.Object;
         }
 
-        public void CollectDependencies(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> methods)
+        public void CollectDependencies(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> newMethods)
         {
             List<MethodBase> methodsRequired = new List<MethodBase>();
             List<FieldInfo> fieldsRequired = new List<FieldInfo>();
@@ -716,22 +765,29 @@ namespace Iot.Device.Arduino
 
             foreach (var method in methodsRequired)
             {
-                if (method is MethodInfo me)
+                // Do we need to replace this method?
+                var finalMethod = set.GetReplacement(method);
+                if (finalMethod == null)
+                {
+                    finalMethod = method;
+                }
+
+                if (finalMethod is MethodInfo me)
                 {
                     // Ensure we're not scanning the same implementation twice, as this would result
                     // in a stack overflow when a method is recursive (even indirect)
-                    if (methods.Add(me))
+                    if (!set.HasMethod(me) && newMethods.Add(me))
                     {
                         _board.Log($"Method {me.DeclaringType} - {me} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
-                        CollectDependencies(set, me, methods);
+                        CollectDependencies(set, me, newMethods);
                     }
                 }
-                else if (method is ConstructorInfo co)
+                else if (finalMethod is ConstructorInfo co)
                 {
-                    if (methods.Add(co))
+                    if (!set.HasMethod(co) && newMethods.Add(co))
                     {
                         _board.Log($"Constructor {co.DeclaringType} - {co} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
-                        CollectDependencies(set, co, methods);
+                        CollectDependencies(set, co, newMethods);
                     }
                 }
                 else
@@ -840,6 +896,21 @@ namespace Iot.Device.Arduino
             {
                 // This method is uncallable.
                 return;
+            }
+
+            /* if (set.GetReplacement(methodInfo.DeclaringType!) != null)
+            {
+                throw new InvalidOperationException($"{methodInfo.DeclaringType} - {methodInfo} should have been replaced.");
+            }*/
+
+            MethodBase? replacement = set.GetReplacement(methodInfo);
+            if (replacement != null)
+            {
+                methodInfo = replacement;
+                if (set.HasMethod(methodInfo))
+                {
+                    return;
+                }
             }
 
             var body = methodInfo.GetMethodBody();
@@ -974,7 +1045,7 @@ namespace Iot.Device.Arduino
 
             if (classType != null)
             {
-                // This is a special class. Maybe we need to replace some methods
+                // This is a special class. Maybe we need to replace some methods (or all of it)
                 foreach (var replacement in _replacementClasses)
                 {
                     var attribs = replacement.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
@@ -983,8 +1054,7 @@ namespace Iot.Device.Arduino
                     {
                         foreach (var method in replacement.GetMethods())
                         {
-                            // Todo: This should compare the full signature
-                            if (method.Name != methodInfo.Name)
+                            if (!MethodsHaveSameSignature(method, methodInfo))
                             {
                                 continue;
                             }
@@ -1058,6 +1128,46 @@ namespace Iot.Device.Arduino
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// The two methods have the same name and signature (that means one can be replaced with another or one can override another)
+        /// </summary>
+        public bool MethodsHaveSameSignature(MethodBase a, MethodBase b)
+        {
+            // A ctor can never match an ordinary method or the other way round
+            if (a.GetType() != b.GetType())
+            {
+                return false;
+            }
+
+            if (a.Name != b.Name)
+            {
+                return false;
+            }
+
+            if (a.IsStatic != b.IsStatic)
+            {
+                return false;
+            }
+
+            var argsa = a.GetParameters();
+            var argsb = b.GetParameters();
+
+            if (argsa.Length != argsb.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < argsa.Length; i++)
+            {
+                if (argsa[i].GetType() != argsb[i].GetType())
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>

@@ -116,7 +116,10 @@ namespace Iot.Device.Arduino
                                 throw new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved}");
                             case SystemException.StackOverflow:
                                 throw new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved}");
-
+                            case SystemException.DivideByZero:
+                                throw new DivideByZeroException($"Integer Division by zero in {resolved.DeclaringType} - {resolved}");
+                            case SystemException.IndexOutOfRange:
+                                throw new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved}");
                             default:
                                 throw new InvalidOperationException("Unknown exception");
                         }

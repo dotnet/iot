@@ -17,6 +17,8 @@ namespace Iot.Device.Arduino
         private readonly Dictionary<TypeInfo, int> _patchedTypeTokens;
         private readonly Dictionary<MethodBase, int> _patchedMethodTokens;
         private readonly Dictionary<FieldInfo, int> _patchedFieldTokens;
+        private readonly List<(Type, Type)> _classesReplaced;
+        private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -30,6 +32,9 @@ namespace Iot.Device.Arduino
             _patchedTypeTokens = new Dictionary<TypeInfo, int>();
             _patchedMethodTokens = new Dictionary<MethodBase, int>();
             _patchedFieldTokens = new Dictionary<FieldInfo, int>();
+            _classesReplaced = new List<(Type, Type)>();
+            _methodsReplaced = new List<(MethodBase, MethodBase?)>();
+
             _nextToken = 1;
 
             _numDeclaredMethods = 0;
@@ -143,6 +148,11 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
+            if (_classesReplaced.Any(x => x.Item1 == type.Cls))
+            {
+                throw new InvalidOperationException($"Class {type} should have been replaced by its replacement");
+            }
+
             _classes.Add(type);
             return true;
         }
@@ -173,6 +183,16 @@ namespace Iot.Device.Arduino
             if (_methods.Any(x => x.MethodBase == method.MethodBase))
             {
                 return false;
+            }
+
+            if (_methodsReplaced.Any(x => x.Item1 == method.MethodBase))
+            {
+                throw new InvalidOperationException($"Method {method} should have been replaced by its replacement");
+            }
+
+            if (_methodsReplaced.Any(x => x.Item1 == method.MethodBase && x.Item2 == null))
+            {
+                throw new InvalidOperationException($"The method {method} should be replaced, but has no new implementation. This program will not execute");
             }
 
             _methods.Add(method);
@@ -274,6 +294,99 @@ namespace Iot.Device.Arduino
                 get { return _suppressInit; }
                 set { _suppressInit = value; }
             }
+
+            public override string ToString()
+            {
+                return Cls.ToString();
+            }
+        }
+
+        public void AddReplacementType(Type? typeToReplace, Type replacement)
+        {
+            if (typeToReplace == null)
+            {
+                throw new ArgumentNullException(nameof(typeToReplace));
+            }
+
+            _classesReplaced.Add((typeToReplace, replacement));
+
+            List<MethodInfo> methodsNeedingReplacement = typeToReplace.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance).ToList();
+
+            foreach (var methoda in replacement.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+            {
+                // Above, we only check the public methods, here we also look at the private ones
+                foreach (var methodb in typeToReplace.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
+                {
+                    if (_compiler.MethodsHaveSameSignature(methoda, methodb))
+                    {
+                        // Method A shall replace Method B
+                        AddReplacementMethod(methodb, methoda);
+                        // Remove from the list - so we see in the end what is missing
+                        methodsNeedingReplacement.Remove(methodb);
+                        break;
+                    }
+                }
+            }
+
+            // Add these as "not implemented" to the list, so we can figure out what we actually need
+            foreach (var m in methodsNeedingReplacement)
+            {
+                AddReplacementMethod(m, null);
+            }
+
+            // And do the same as above for all (public) ctors
+            var ctorsNeedingReplacement = typeToReplace.GetConstructors(BindingFlags.Public | BindingFlags.Instance).ToList();
+
+            foreach (var methoda in replacement.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance))
+            {
+                // Above, we only check the public methods, here we also look at the private ones
+                foreach (var methodb in typeToReplace.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
+                {
+                    if (_compiler.MethodsHaveSameSignature(methoda, methodb))
+                    {
+                        // Method A shall replace Method B
+                        AddReplacementMethod(methodb, methoda);
+                        // Remove from the list - so we see in the end what is missing
+                        ctorsNeedingReplacement.Remove(methodb);
+                        break;
+                    }
+                }
+            }
+
+            foreach (var m in ctorsNeedingReplacement)
+            {
+                AddReplacementMethod(m, null);
+            }
+        }
+
+        public Type? GetReplacement(Type original)
+        {
+            return _classesReplaced.FirstOrDefault(x => x.Item1 == original).Item2;
+        }
+
+        public MethodBase? GetReplacement(MethodBase original)
+        {
+            var elem = _methodsReplaced.FirstOrDefault(x => x.Item1 == original);
+            if (elem.Item1 == default)
+            {
+                return null;
+            }
+            else if (elem.Item2 == null)
+            {
+                throw new InvalidOperationException($"Should have a replacement for {original}, but it is missing.");
+            }
+
+            return elem.Item2;
+        }
+
+        public void AddReplacementMethod(MethodBase? toReplace, MethodBase? replacement)
+        {
+            if (toReplace == null)
+            {
+                throw new ArgumentNullException(nameof(toReplace));
+            }
+
+            _methodsReplaced.Add((toReplace, replacement));
         }
     }
 }

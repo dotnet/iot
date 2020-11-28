@@ -12,9 +12,10 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// The attribute ctor
         /// </summary>
-        public ArduinoReplacementAttribute(Type typeToReplace)
+        public ArduinoReplacementAttribute(Type typeToReplace, bool replaceEntireType = false)
         {
             TypeToReplace = typeToReplace;
+            ReplaceEntireType = replaceEntireType;
         }
 
         public ArduinoReplacementAttribute(string methodName)
@@ -26,6 +27,8 @@ namespace Iot.Device.Arduino
         {
             get;
         }
+
+        public bool ReplaceEntireType { get; }
 
         public string? MethodNameToReplace
         {

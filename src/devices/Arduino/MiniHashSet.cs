@@ -6,38 +6,50 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(HashSet<int>))]
+    [ArduinoReplacement(typeof(HashSet<int>), true)]
     internal class MiniHashSet<T>
     {
-        public static int _dummy;
+        private T[]? _elements;
+        private int _numberOfElements;
+        private IEqualityComparer<T> _comparer;
 
-        [ArduinoImplementation(ArduinoImplementation.EmptyStaticCtor)]
-        static MiniHashSet()
+        public MiniHashSet()
         {
-            _dummy = 1;
+            _numberOfElements = 0;
+            _elements = null;
+            _comparer = Default;
+        }
+
+        public MiniHashSet(IEqualityComparer<T> comparer)
+        {
+            _numberOfElements = 0;
+            _elements = null;
+            _comparer = comparer;
+        }
+
+        public bool Contains(T elem)
+        {
+            if (_elements == null)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < _numberOfElements; i++)
+            {
+                if (_comparer.Equals(_elements[i],  elem))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static IEqualityComparer<T> Default
         {
-            [ArduinoImplementation(ArduinoImplementation.DefaultEqualityComparer)]
             get
             {
-                return new MiniEqualityComparer();
-            }
-        }
-
-        internal class MiniEqualityComparer : IEqualityComparer<T>
-        {
-            [ArduinoImplementation(ArduinoImplementation.BaseTypeEquals)]
-            public bool Equals(T? x, T? y)
-            {
-                throw new NotImplementedException();
-            }
-
-            [ArduinoImplementation(ArduinoImplementation.GetHashCode)]
-            public int GetHashCode(T obj)
-            {
-                return _dummy;
+                return new MiniEqualityComparer<T>();
             }
         }
     }
