@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using Iot.Device.BrickPi3.Models;
 
@@ -24,7 +23,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// To update sensors
         /// </summary>
-        void UpdateSensor(object state);
+        void UpdateSensor(object? state);
 
         /// <summary>
         /// Reads the sensor value as a string.

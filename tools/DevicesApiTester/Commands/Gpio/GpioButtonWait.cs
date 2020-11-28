@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -44,65 +43,61 @@ namespace DeviceApiTester.Commands.Gpio
                 Console.WriteLine($"Driver={Driver}, Scheme={Scheme}, ButtonPin={ButtonPin}, PressedValue={PressedValue}, OnValue={OnValue}");
             }
 
-            using (GpioController controller = CreateGpioController())
+            using GpioController controller = CreateGpioController();
+            using CancellationTokenSource cancellationTokenSource = new();
+            Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
+
+            // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler.
+            Console.CancelKeyPress += Console_CancelKeyPress;
+            controller.OpenPin(ButtonPin);
+
+            // Set the mode based on if input pull-up resistors are supported.
+            PinMode inputMode = controller.IsPinModeSupported(ButtonPin, PinMode.InputPullUp) ? PinMode.InputPullUp : PinMode.Input;
+            controller.SetPinMode(ButtonPin, inputMode);
+
+            // Open the GPIO pin connected to the LED if one was specified.
+            if (LedPin != null)
             {
-                using (var cancellationTokenSource = new CancellationTokenSource())
+                controller.OpenPin(LedPin.Value, PinMode.Output);
+                controller.Write(LedPin.Value, OffValue);
+            }
+
+            PinEventTypes bothPinEventTypes = PinEventTypes.Falling | PinEventTypes.Rising;
+            WaitForEventResult waitResult;
+            int count = 0;
+            do
+            {
+                waitResult = await controller.WaitForEventAsync(ButtonPin, bothPinEventTypes, cancellationTokenSource.Token);
+                if (!waitResult.TimedOut)
                 {
-                    Console.WriteLine($"Listening for button presses on GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin {ButtonPin} . . .");
+                    var pressedOrReleased = waitResult.EventTypes == PressedValue ? "pressed" : "released";
+                    Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventTypes}");
 
-                    // This example runs until Ctrl+C (or Ctrl+Break) is pressed, so register a local function handler.
-                    Console.CancelKeyPress += Console_CancelKeyPress;
-                    controller.OpenPin(ButtonPin);
-
-                    // Set the mode based on if input pull-up resistors are supported.
-                    PinMode inputMode = controller.IsPinModeSupported(ButtonPin, PinMode.InputPullUp) ? PinMode.InputPullUp : PinMode.Input;
-                    controller.SetPinMode(ButtonPin, inputMode);
-
-                    // Open the GPIO pin connected to the LED if one was specified.
                     if (LedPin != null)
                     {
-                        controller.OpenPin(LedPin.Value, PinMode.Output);
-                        controller.Write(LedPin.Value, OffValue);
-                    }
-
-                    PinEventTypes bothPinEventTypes = PinEventTypes.Falling | PinEventTypes.Rising;
-                    WaitForEventResult waitResult;
-                    int count = 0;
-                    do
-                    {
-                        waitResult = await controller.WaitForEventAsync(ButtonPin, bothPinEventTypes, cancellationTokenSource.Token);
-                        if (!waitResult.TimedOut)
-                        {
-                            var pressedOrReleased = waitResult.EventTypes == PressedValue ? "pressed" : "released";
-                            Console.WriteLine($"[{count++}] Button {pressedOrReleased}: GPIO {Enum.GetName(typeof(PinNumberingScheme), Scheme)} pin number {ButtonPin}, ChangeType={waitResult.EventTypes}");
-
-                            if (LedPin != null)
-                            {
-                                PinValue ledValue = waitResult.EventTypes == PressedValue ? OnValue : OffValue;
-                                controller.Write(LedPin.Value, ledValue);
-                            }
-                        }
-                    } while (!waitResult.TimedOut);
-
-                    controller.ClosePin(ButtonPin);
-                    if (LedPin != null)
-                    {
-                        controller.ClosePin(LedPin.Value);
-                    }
-
-                    Console.WriteLine("Operation cancelled. Exiting.");
-                    Console.OpenStandardOutput().Flush();
-
-                    return 0;
-
-                    // Local function
-                    void Console_CancelKeyPress(object sender, ConsoleCancelEventArgs e)
-                    {
-                        e.Cancel = true;
-                        cancellationTokenSource.Cancel();
-                        Console.CancelKeyPress -= Console_CancelKeyPress;
+                        PinValue ledValue = waitResult.EventTypes == PressedValue ? OnValue : OffValue;
+                        controller.Write(LedPin.Value, ledValue);
                     }
                 }
+            } while (!waitResult.TimedOut);
+
+            controller.ClosePin(ButtonPin);
+            if (LedPin != null)
+            {
+                controller.ClosePin(LedPin.Value);
+            }
+
+            Console.WriteLine("Operation cancelled. Exiting.");
+            Console.OpenStandardOutput().Flush();
+
+            return 0;
+
+            // Local function
+            void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e)
+            {
+                e.Cancel = true;
+                cancellationTokenSource.Cancel();
+                Console.CancelKeyPress -= Console_CancelKeyPress;
             }
         }
 

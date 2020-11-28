@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device;
@@ -30,19 +29,19 @@ namespace Iot.Device.DHTxx
         protected readonly int _pin;
 
         /// <summary>
+        /// True to dispose the Gpio Controller
+        /// </summary>
+        protected readonly bool _shouldDispose;
+
+        /// <summary>
         /// I2C device used to communicate with the device
         /// </summary>
-        protected readonly I2cDevice _i2cDevice;
+        protected I2cDevice? _i2cDevice;
 
         /// <summary>
         /// <see cref="GpioController"/> related with the <see cref="_pin"/>.
         /// </summary>
-        protected readonly GpioController _controller;
-
-        /// <summary>
-        /// True to dispose the Gpio Controller
-        /// </summary>
-        protected readonly bool _shouldDispose;
+        protected GpioController? _controller;
 
         // wait about 1 ms
         private readonly uint _loopCount = 10000;
@@ -58,7 +57,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read temperature
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns <code>default(Temperature)</code>
+        /// If last read was not successful, it returns <code>default(Temperature)</code>
         /// </remarks>
         public virtual Temperature Temperature
         {
@@ -73,7 +72,7 @@ namespace Iot.Device.DHTxx
         /// Get the last read of relative humidity in percentage
         /// </summary>
         /// <remarks>
-        /// If last read was not successfull, it returns <code>default(Ratio)</code>
+        /// If last read was not successful, it returns <code>default(Ratio)</code>
         /// </remarks>
         public virtual Ratio Humidity
         {
@@ -91,10 +90,10 @@ namespace Iot.Device.DHTxx
         /// <param name="pinNumberingScheme">The GPIO pin numbering scheme</param>
         /// <param name="gpioController"><see cref="GpioController"/> related with operations on pins</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController gpioController = null, bool shouldDispose = true)
+        public DhtBase(int pin, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _protocol = CommunicationProtocol.OneWire;
-            _shouldDispose = gpioController == null ? true : shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _pin = pin;
 
@@ -139,8 +138,14 @@ namespace Iot.Device.DHTxx
         /// </summary>
         internal virtual void ReadThroughOneWire()
         {
+            if (_controller is null)
+            {
+                throw new Exception("GPIO controller is not configured.");
+            }
+
             byte readVal = 0;
             uint count;
+            var pinMode = _controller.IsPinModeSupported(_pin, PinMode.InputPullUp) ? PinMode.InputPullUp : PinMode.Input;
 
             // keep data line HIGH
             _controller.SetPinMode(_pin, PinMode.Output);
@@ -158,7 +163,7 @@ namespace Iot.Device.DHTxx
             // wait 20 - 40 microseconds
             DelayHelper.DelayMicroseconds(30, true);
 
-            _controller.SetPinMode(_pin, PinMode.InputPullUp);
+            _controller.SetPinMode(_pin, pinMode);
 
             // DHT corresponding signal - LOW - about 80 microseconds
             count = _loopCount;
@@ -243,6 +248,11 @@ namespace Iot.Device.DHTxx
         /// </summary>
         internal virtual void ReadThroughI2c()
         {
+            if (_i2cDevice is null)
+            {
+                throw new Exception("I2C device is not configured");
+            }
+
             // DHT12 Humidity Register
             _i2cDevice.WriteByte(0x00);
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum
@@ -280,9 +290,15 @@ namespace Iot.Device.DHTxx
             if (_shouldDispose)
             {
                 _controller?.Dispose();
+                _controller = null;
+            }
+            else if (_controller?.IsPinOpen(_pin) ?? false)
+            {
+                _controller.ClosePin(_pin);
             }
 
             _i2cDevice?.Dispose();
+            _i2cDevice = null;
         }
     }
 }

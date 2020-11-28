@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using Windows.Devices.Enumeration;
 using Windows.Security.ExchangeActiveSyncProvisioning;
@@ -42,21 +41,28 @@ namespace System.Device.Pwm.Channels
             // Open the Windows PWM controller for the specified PWM chip.
             string deviceSelector = useDefaultChip ? WinPwm.PwmController.GetDeviceSelector() : WinPwm.PwmController.GetDeviceSelector($"PWM{chip}");
 
-            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
-            if (deviceInformationCollection.Count == 0)
+            DeviceInformationCollection? deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+            if (deviceInformationCollection is null || deviceInformationCollection.Count == 0)
             {
                 throw new ArgumentException($"No PWM device exists for PWM chip at index {chip}.", nameof(chip));
             }
 
             string deviceId = deviceInformationCollection[0].Id;
-            _winController = WinPwm.PwmController.FromIdAsync(deviceId).WaitForCompletion();
+            WinPwm.PwmController? winController = WinPwm.PwmController.FromIdAsync(deviceId).WaitForCompletion();
 
-            _winPin = _winController.OpenPin(channel);
-            if (_winPin == null)
+            if (winController is null)
+            {
+                throw new Exception("A PWM device could not be found.");
+            }
+
+            WinPwm.PwmPin? winPin = winController.OpenPin(channel);
+            if (winPin is null)
             {
                 throw new ArgumentOutOfRangeException($"The PWM chip is unable to open a channel at index {channel}.", nameof(channel));
             }
 
+            _winController = winController;
+            _winPin = winPin;
             Frequency = frequency;
             DutyCycle = dutyCycle;
         }
@@ -111,8 +117,8 @@ namespace System.Device.Pwm.Channels
         {
             Stop();
             _winPin?.Dispose();
-            _winPin = null;
-            _winController = null;
+            _winPin = null!;
+            _winController = null!;
             base.Dispose(disposing);
         }
     }

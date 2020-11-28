@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -22,7 +21,7 @@ namespace Iot.Device.Max44009
         /// <summary>
         /// MAX44009 Illuminance (Lux)
         /// </summary>
-        public double Illuminance { get => GetIlluminance(); }
+        public double Illuminance => GetIlluminance();
 
         /// <summary>
         /// Creates a new instance of the MAX44009, MAX44009 working mode is default. (Consume lowest power)
@@ -30,7 +29,7 @@ namespace Iot.Device.Max44009
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Max44009(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             // Details in the Datasheet P8
             Span<byte> writeBuff = stackalloc byte[2]
@@ -48,7 +47,7 @@ namespace Iot.Device.Max44009
         /// <param name="integrationTime">Measurement Cycle</param>
         public Max44009(I2cDevice i2cDevice, IntegrationTime integrationTime)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             // Details in the Datasheet P8
             Span<byte> writeBuff = stackalloc byte[2]
@@ -65,7 +64,7 @@ namespace Iot.Device.Max44009
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         /// <summary>

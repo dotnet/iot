@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -28,9 +27,9 @@ namespace Iot.Device.SenseHat
         /// </summary>
         public SenseHatLedMatrixSysFs()
         {
-            string device = GetSenseHatDevice();
+            string? device = GetSenseHatDevice();
 
-            if (device == null)
+            if (device is null)
             {
                 throw new InvalidOperationException("Sense HAT not found. Ensure device is enabled in config.txt.");
             }
@@ -44,7 +43,7 @@ namespace Iot.Device.SenseHat
         {
             if (colors.Length != NumberOfPixels)
             {
-                throw new ArgumentException($"`{nameof(colors)}` must have exactly {NumberOfPixels} elements.");
+                throw new ArgumentException(nameof(colors), $"Value must be {NumberOfPixels} elements. Length: {colors.Length}");
             }
 
             StartWritingColors();
@@ -89,22 +88,16 @@ namespace Iot.Device.SenseHat
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void StartWritingColors()
-        {
+        private void StartWritingColors() =>
             _deviceFile.Seek(0, SeekOrigin.Begin);
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void StartWritingColor(int x, int y)
-        {
+        private void StartWritingColor(int x, int y) =>
             _deviceFile.Seek(PositionToIndex(x, y) * PixelLength, SeekOrigin.Begin);
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void EndWriting()
-        {
+        private void EndWriting() =>
             _deviceFile.Flush();
-        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void WriteColor(Color color)
@@ -123,7 +116,7 @@ namespace Iot.Device.SenseHat
             _deviceFile.Write(encoded);
         }
 
-        private static string GetSenseHatDevice()
+        private static string? GetSenseHatDevice()
         {
             foreach (string dev in Directory.EnumerateFileSystemEntries("/sys/class/graphics/", "fb*"))
             {
@@ -141,7 +134,7 @@ namespace Iot.Device.SenseHat
         public override void Dispose()
         {
             _deviceFile?.Dispose();
-            _deviceFile = null;
+            _deviceFile = null!;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using Windows.Devices.Enumeration;
 using WinI2c = Windows.Devices.I2c;
@@ -27,17 +26,19 @@ namespace System.Device.I2c
             string busFriendlyName = $"I2C{settings.BusId}";
             string deviceSelector = WinI2c.I2cDevice.GetDeviceSelector(busFriendlyName);
 
-            DeviceInformationCollection deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
-            if (deviceInformationCollection.Count == 0)
+            DeviceInformationCollection? deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
+            if (deviceInformationCollection is null || deviceInformationCollection.Count == 0)
             {
                 throw new ArgumentException($"No I2C device exists for bus ID {settings.BusId}.", $"{nameof(settings)}.{nameof(settings.BusId)}");
             }
 
-            _winI2cDevice = WinI2c.I2cDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
-            if (_winI2cDevice == null)
+            WinI2c.I2cDevice? winI2cDevice = WinI2c.I2cDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
+            if (winI2cDevice == null)
             {
-                throw new PlatformNotSupportedException($"I2C devices are not supported.");
+                throw new PlatformNotSupportedException("An I2C device could not be found.");
             }
+
+            _winI2cDevice = winI2cDevice;
         }
 
         /// <summary>
@@ -123,7 +124,7 @@ namespace System.Device.I2c
         protected override void Dispose(bool disposing)
         {
             _winI2cDevice?.Dispose();
-            _winI2cDevice = null;
+            _winI2cDevice = null!;
 
             base.Dispose(disposing);
         }

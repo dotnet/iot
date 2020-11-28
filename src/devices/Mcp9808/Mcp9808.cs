@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -35,10 +34,7 @@ namespace Iot.Device.Mcp9808
         /// </summary>
         public bool Disabled
         {
-            get
-            {
-                return _disable;
-            }
+            get => _disable;
             set
             {
                 SetShutdown(value);
@@ -53,7 +49,7 @@ namespace Iot.Device.Mcp9808
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Mcp9808(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             Disabled = false;
 
@@ -86,10 +82,7 @@ namespace Iot.Device.Mcp9808
         /// Return the internal resolution register
         /// </summary>
         /// <returns>Resolution setting</returns>
-        public byte GetResolution()
-        {
-            return Read8(Register8.MCP_RESOLUTION);
-        }
+        public byte GetResolution() => Read8(Register8.MCP_RESOLUTION);
 
         /// <summary>
         /// Wakes-up the device
@@ -105,10 +98,7 @@ namespace Iot.Device.Mcp9808
         /// <summary>
         /// Shuts down the device
         /// </summary>
-        public void Shutdown()
-        {
-            SetShutdown(true);
-        }
+        public void Shutdown() => SetShutdown(true);
 
         /// <summary>
         /// Read MCP9808 Temperature (℃)
@@ -162,13 +152,10 @@ namespace Iot.Device.Mcp9808
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
-        internal Register16 ReadRegister16(Register8 reg)
-        {
-            return (Register16)Read16(reg);
-        }
+        internal Register16 ReadRegister16(Register8 reg) => (Register16)Read16(reg);
 
         internal ushort Read16(Register8 reg)
         {
@@ -192,7 +179,6 @@ namespace Iot.Device.Mcp9808
         internal byte Read8(Register8 reg)
         {
             _i2cDevice.WriteByte((byte)reg);
-
             return _i2cDevice.ReadByte();
         }
 

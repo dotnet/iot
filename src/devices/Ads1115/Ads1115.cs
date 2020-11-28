@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -20,9 +19,9 @@ namespace Iot.Device.Ads1115
     {
         private readonly bool _shouldDispose;
 
-        private I2cDevice _i2cDevice = null;
+        private I2cDevice _i2cDevice;
 
-        private GpioController _gpioController;
+        private GpioController? _gpioController;
 
         private InputMultiplexer _inputMultiplexer;
 
@@ -48,8 +47,8 @@ namespace Iot.Device.Ads1115
         /// <param name="measuringRange">Programmable Gain Amplifier</param>
         /// <param name="dataRate">Data Rate</param>
         /// <param name="deviceMode">Initial device mode</param>
-        public Ads1115(I2cDevice i2cDevice, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096, DataRate dataRate = DataRate.SPS128,
-            DeviceMode deviceMode = DeviceMode.Continuous)
+        public Ads1115(I2cDevice i2cDevice, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096,
+            DataRate dataRate = DataRate.SPS128, DeviceMode deviceMode = DeviceMode.Continuous)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _inputMultiplexer = inputMultiplexer;
@@ -62,7 +61,6 @@ namespace Iot.Device.Ads1115
             _comparatorPolarity = ComparatorPolarity.Low;
             _comparatorLatching = ComparatorLatching.NonLatching;
             _comparatorQueue = ComparatorQueue.Disable;
-            _shouldDispose = false;
 
             SetConfig();
             DisableAlertReadyPin();
@@ -80,18 +78,18 @@ namespace Iot.Device.Ads1115
         /// <param name="dataRate">Data Rate</param>
         /// <param name="deviceMode">Initial device mode</param>
         public Ads1115(I2cDevice i2cDevice,
-            GpioController gpioController, int gpioInterruptPin, bool shouldDispose = true, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096, DataRate dataRate = DataRate.SPS128,
-            DeviceMode deviceMode = DeviceMode.Continuous)
+            GpioController? gpioController, int gpioInterruptPin, bool shouldDispose = true, InputMultiplexer inputMultiplexer = InputMultiplexer.AIN0, MeasuringRange measuringRange = MeasuringRange.FS4096,
+            DataRate dataRate = DataRate.SPS128, DeviceMode deviceMode = DeviceMode.Continuous)
             : this(i2cDevice, inputMultiplexer, measuringRange, dataRate, deviceMode)
         {
-            _gpioController = gpioController ?? throw new ArgumentNullException(nameof(gpioController));
-            if (gpioInterruptPin < 0 || gpioInterruptPin >= gpioController.PinCount)
+            _gpioController = gpioController ?? new GpioController();
+            if (gpioInterruptPin < 0 || gpioInterruptPin >= _gpioController.PinCount)
             {
                 throw new ArgumentOutOfRangeException(nameof(gpioInterruptPin), $"The given GPIO Controller has no pin number {gpioInterruptPin}");
             }
 
             _gpioInterruptPin = gpioInterruptPin;
-            _shouldDispose = shouldDispose;
+            _shouldDispose = shouldDispose || gpioController is null;
         }
 
         /// <summary>
@@ -165,11 +163,7 @@ namespace Iot.Device.Ads1115
         /// Comparator mode.
         /// Only relevant if the comparator trigger event is set up and is changed by <see cref="EnableComparator(short, short, ComparatorMode, ComparatorQueue)"/>.
         /// </summary>
-        public ComparatorMode ComparatorMode
-        {
-            get;
-            private set;
-        }
+        public ComparatorMode ComparatorMode { get; private set; }
 
         /// <summary>
         /// Comparator polarity. Indicates whether the rising or the falling edge of the ALRT/RDY Pin is relevant.
@@ -209,19 +203,13 @@ namespace Iot.Device.Ads1115
         /// Minimum number of samples exceeding the lower/upper threshold before the ALRT pin is asserted.
         /// This can only be set with <see cref="EnableComparator(short, short, ComparatorMode, ComparatorQueue)"/>.
         /// </summary>
-        public ComparatorQueue ComparatorQueue
-        {
-            get
-            {
-                return _comparatorQueue;
-            }
-        }
+        public ComparatorQueue ComparatorQueue => _comparatorQueue;
 
         /// <summary>
         /// This event fires when a new value is available (in conversion ready mode) or the comparator threshold is exceeded.
         /// Requires setup through <see cref="EnableConversionReady"/> or <see cref="EnableComparator(ElectricPotential, ElectricPotential, ComparatorMode, ComparatorQueue)"/>.
         /// </summary>
-        public event Action AlertReadyAsserted;
+        public event Action? AlertReadyAsserted;
 
         /// <summary>
         /// Set ADS1115 Config Register.
@@ -286,7 +274,7 @@ namespace Iot.Device.Ads1115
                 (byte)Register.ADC_CONFIG_REG_HI_THRESH, 0x7F, 0xFF
             };
             _i2cDevice.Write(writeBuff);
-            if (_gpioController != null)
+            if (_gpioController is object)
             {
                 _gpioController.UnregisterCallbackForPinValueChangedEvent(_gpioInterruptPin, ConversionReadyCallback);
                 _gpioController.ClosePin(_gpioInterruptPin);
@@ -320,7 +308,7 @@ namespace Iot.Device.Ads1115
         /// for interrupt handling.</exception>
         public void EnableConversionReady()
         {
-            if (_gpioController == null)
+            if (_gpioController is null)
             {
                 throw new InvalidOperationException("Must have provided a GPIO Controller for interrupt handling.");
             }
@@ -350,7 +338,7 @@ namespace Iot.Device.Ads1115
 
         private void ConversionReadyCallback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
-            if (AlertReadyAsserted != null)
+            if (AlertReadyAsserted is object)
             {
                 AlertReadyAsserted();
             }
@@ -369,10 +357,7 @@ namespace Iot.Device.Ads1115
         /// <param name="queueLength">Minimum number of samples that must exceed the threshold to trigger the event</param>
         /// <exception cref="InvalidOperationException">The GPIO Controller for the interrupt handler has not been set up</exception>
         public void EnableComparator(ElectricPotential lowerValue, ElectricPotential upperValue, ComparatorMode mode,
-            ComparatorQueue queueLength)
-        {
-            EnableComparator(VoltageToRaw(lowerValue), VoltageToRaw(upperValue), mode, queueLength);
-        }
+            ComparatorQueue queueLength) => EnableComparator(VoltageToRaw(lowerValue), VoltageToRaw(upperValue), mode, queueLength);
 
         /// <summary>
         /// Enable comparator callback mode.
@@ -389,7 +374,7 @@ namespace Iot.Device.Ads1115
         public void EnableComparator(short lowerValue, short upperValue, ComparatorMode mode,
             ComparatorQueue queueLength)
         {
-            if (_gpioController == null)
+            if (_gpioController is null)
             {
                 throw new InvalidOperationException("GPIO Controller must have been provided in constructor for this operation to work");
             }
@@ -445,7 +430,7 @@ namespace Iot.Device.Ads1115
         /// This method must only be called in powerdown mode, otherwise it would timeout, since the busy bit never changes.
         /// Due to that, we always write the configuration first in power down mode and then enable the continuous bit.
         /// </summary>
-        /// <exception cref="TimeoutException">A timeout occured waiting for the ADC to finish the conversion</exception>
+        /// <exception cref="TimeoutException">A timeout occurred waiting for the ADC to finish the conversion</exception>
         private void WaitWhileBusy()
         {
             // In powerdown-mode, wait until the busy bit goes high
@@ -503,10 +488,7 @@ namespace Iot.Device.Ads1115
         /// For performance reasons, it is advised to use this method if quick readings with different input channels are required,
         /// instead of setting all the properties first and then calling <see cref="ReadRaw()"/>.
         /// </remarks>
-        public short ReadRaw(InputMultiplexer inputMultiplexer)
-        {
-            return ReadRaw(inputMultiplexer, MeasuringRange, DataRate);
-        }
+        public short ReadRaw(InputMultiplexer inputMultiplexer) => ReadRaw(inputMultiplexer, MeasuringRange, DataRate);
 
         /// <summary>
         /// Reads the next raw value, first switching to the given input and ranges.
@@ -591,30 +573,16 @@ namespace Iot.Device.Ads1115
         /// <returns>An electric potential (voltage).</returns>
         public ElectricPotential MaxVoltageFromMeasuringRange(MeasuringRange measuringRange)
         {
-            double voltage;
-            switch (measuringRange)
+            double voltage = measuringRange switch
             {
-                case MeasuringRange.FS6144:
-                    voltage = 6.144;
-                    break;
-                case MeasuringRange.FS4096:
-                    voltage = 4.096;
-                    break;
-                case MeasuringRange.FS2048:
-                    voltage = 2.048;
-                    break;
-                case MeasuringRange.FS1024:
-                    voltage = 1.024;
-                    break;
-                case MeasuringRange.FS0512:
-                    voltage = 0.512;
-                    break;
-                case MeasuringRange.FS0256:
-                    voltage = 0.256;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(measuringRange), "Unknown measuring range used");
-            }
+                MeasuringRange.FS6144 => 6.144,
+                MeasuringRange.FS4096 => 4.096,
+                MeasuringRange.FS2048 => 2.048,
+                MeasuringRange.FS1024 => 1.024,
+                MeasuringRange.FS0512 => 0.512,
+                MeasuringRange.FS0256 => 0.256,
+                _ => throw new ArgumentOutOfRangeException(nameof(measuringRange), "Unknown measuring range used")
+            };
 
             return ElectricPotential.FromVolts(voltage);
         }
@@ -624,30 +592,18 @@ namespace Iot.Device.Ads1115
         /// </summary>
         /// <param name="dataRate">One of the <see cref="DataRate"/> enumeration members.</param>
         /// <returns>A frequency, in Hertz</returns>
-        public double FrequencyFromDataRate(DataRate dataRate)
+        public double FrequencyFromDataRate(DataRate dataRate) => dataRate switch
         {
-            switch (dataRate)
-            {
-                case DataRate.SPS008:
-                    return 8.0;
-                case DataRate.SPS016:
-                    return 16.0;
-                case DataRate.SPS032:
-                    return 32.0;
-                case DataRate.SPS064:
-                    return 64.0;
-                case DataRate.SPS128:
-                    return 128.0;
-                case DataRate.SPS250:
-                    return 250.0;
-                case DataRate.SPS475:
-                    return 475.0;
-                case DataRate.SPS860:
-                    return 860.0;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(dataRate), "Unknown data rate used");
-            }
-        }
+                DataRate.SPS008 => 8.0,
+                DataRate.SPS016 => 16.0,
+                DataRate.SPS032 => 32.0,
+                DataRate.SPS064 => 64.0,
+                DataRate.SPS128 => 128.0,
+                DataRate.SPS250 => 250.0,
+                DataRate.SPS475 => 475.0,
+                DataRate.SPS860 => 860.0,
+                _ => throw new ArgumentOutOfRangeException(nameof(dataRate), "Unknown data rate used")
+        };
 
         /// <summary>
         /// Cleanup.
@@ -655,19 +611,18 @@ namespace Iot.Device.Ads1115
         /// </summary>
         public void Dispose()
         {
-            if (_i2cDevice != null)
+            if (_i2cDevice is object)
             {
                 DisableAlertReadyPin();
-                _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice.Dispose();
+                _i2cDevice = null!;
             }
 
-            if (_shouldDispose && _gpioController != null)
+            if (_shouldDispose)
             {
-                _gpioController.Dispose();
+                _gpioController?.Dispose();
+                _gpioController = null;
             }
-
-            _gpioController = null;
         }
     }
 }

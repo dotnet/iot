@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -12,6 +11,25 @@ namespace Iot.Device.Ft4222
     public class DeviceInformation
     {
         /// <summary>
+        /// Instantiates a DeviceInformation object.
+        /// </summary>
+        /// <param name="flags">Indicates device state.</param>
+        /// <param name="type">Indicates the device type.</param>
+        /// <param name="id">The Vendor ID and Product ID of the device.</param>
+        /// <param name="locId">The physical location identifier of the device.</param>
+        /// <param name="serialNumber">The device serial number.</param>
+        /// <param name="description">The device description.</param>
+        public DeviceInformation(FtFlag flags, FtDevice type, uint id, uint locId, string serialNumber, string description)
+        {
+            Flags = flags;
+            Type = type;
+            Id = id;
+            LocId = locId;
+            SerialNumber = serialNumber;
+            Description = description;
+        }
+
+        /// <summary>
         /// Indicates device state.  Can be any combination of the following: FT_FLAGS_OPENED, FT_FLAGS_HISPEED
         /// </summary>
         public FtFlag Flags { get; set; }
@@ -22,22 +40,22 @@ namespace Iot.Device.Ft4222
         public FtDevice Type { get; set; }
 
         /// <summary>
-        /// The Vendor ID and Product ID of the device
+        /// The Vendor ID and Product ID of the device.
         /// </summary>
         public uint Id { get; set; }
 
         /// <summary>
-        /// The physical location identifier of the device
+        /// The physical location identifier of the device.
         /// </summary>
         public uint LocId { get; set; }
 
         /// <summary>
-        /// The device serial number
+        /// The device serial number.
         /// </summary>
         public string SerialNumber { get; set; }
 
         /// <summary>
-        /// The device description
+        /// The device description.
         /// </summary>
         public string Description { get; set; }
     }

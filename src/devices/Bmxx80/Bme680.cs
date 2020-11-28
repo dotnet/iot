@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -40,7 +39,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Calibration data for the <see cref="Bme680"/>.
         /// </summary>
-        private Bme680CalibrationData _bme680Calibration;
+        private Bme680CalibrationData? _bme680Calibration;
 
         /// <inheritdoc/>
         protected override int TempCalibrationFactor => 16;
@@ -484,6 +483,11 @@ namespace Iot.Device.Bmxx80
         /// <returns>The percentage relative humidity.</returns>
         private Ratio CompensateHumidity(int adcHumidity)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // Calculate the humidity.
             var temperature = TemperatureFine / 5120.0;
             var var1 = adcHumidity - ((_bme680Calibration.DigH1 * 16.0) + ((_bme680Calibration.DigH3 / 2.0) * temperature));
@@ -512,6 +516,11 @@ namespace Iot.Device.Bmxx80
         /// <returns>The measured pressure.</returns>
         private Pressure CompensatePressure(long adcPressure)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // Calculate the pressure.
             var var1 = (TemperatureFine / 2.0) - 64000.0;
             var var2 = var1 * var1 * (_bme680Calibration.DigP6 / 131072.0);
@@ -549,6 +558,11 @@ namespace Iot.Device.Bmxx80
 
         private ElectricResistance CalculateGasResistance(ushort adcGasRes, byte gasRange)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             var var1 = 1340.0 + 5.0 * _bme680Calibration.RangeSwErr;
             var var2 = var1 * (1.0 + s_k1Lookup[gasRange] / 100.0);
             var var3 = 1.0 + s_k2Lookup[gasRange] / 100.0;
@@ -559,6 +573,11 @@ namespace Iot.Device.Bmxx80
 
         private byte CalculateHeaterResistance(Temperature setTemp, Temperature ambientTemp)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // limit maximum temperature to 400°C
             double temp = setTemp.DegreesCelsius;
             if (temp > 400)

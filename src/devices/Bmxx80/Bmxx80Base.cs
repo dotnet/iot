@@ -1,11 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.Register;
 using UnitsNet;
@@ -52,11 +52,7 @@ namespace Iot.Device.Bmxx80
         /// The variable TemperatureFine carries a fine resolution temperature value over to the
         /// pressure compensation formula and could be implemented as a global variable.
         /// </summary>
-        protected double TemperatureFine
-        {
-            get;
-            set;
-        }
+        protected double TemperatureFine { get; set; }
 
         /// <summary>
         /// The temperature calibration factor.
@@ -87,6 +83,12 @@ namespace Iot.Device.Bmxx80
 
             ReadCalibrationData();
             Reset();
+#if NETCOREAPP2_1
+            if (_calibrationData is null)
+            {
+                throw new Exception("BMxx80 device is not correctly configured.");
+            }
+#endif
         }
 
         /// <summary>
@@ -302,6 +304,9 @@ namespace Iot.Device.Bmxx80
             BigEndian
         }
 
+#if !NETCOREAPP2_1
+        [MemberNotNull(nameof(_calibrationData))]
+#endif
         private void ReadCalibrationData()
         {
             switch (this)
@@ -318,6 +323,8 @@ namespace Iot.Device.Bmxx80
                     _calibrationData = new Bme680CalibrationData();
                     _controlRegister = (byte)Bme680Register.CTRL_MEAS;
                     break;
+                default:
+                    throw new Exception("Bmxx80 device not correctly configured. Could not find calibraton data.");
             }
 
             _calibrationData.ReadFromDevice(this);
@@ -339,7 +346,7 @@ namespace Iot.Device.Bmxx80
         protected virtual void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -63,10 +62,11 @@ namespace Iot.Device.Imu
         }
 
         /// <summary>
-        /// Used to create the class for the MPU9250. Initialization is a bit different than for the MPU65000
+        /// Used to create the class for the MPU9250. Initialization is a bit different than for the MPU6500
         /// </summary>
-        internal Mpu6500()
+        internal Mpu6500(I2cDevice i2cDevice, bool isInternal)
         {
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
         }
 
         #region Accelerometer
@@ -82,7 +82,6 @@ namespace Iot.Device.Imu
         public AccelerometerRange AccelerometerRange
         {
             get => _accelerometerRange;
-
             set
             {
                 WriteRegister(Register.ACCEL_CONFIG, (byte)((byte)value << 3));
@@ -102,7 +101,6 @@ namespace Iot.Device.Imu
         public AccelerometerBandwidth AccelerometerBandwidth
         {
             get => _accelerometerBandwidth;
-
             set
             {
                 WriteRegister(Register.ACCEL_CONFIG_2, (byte)value);
@@ -122,24 +120,14 @@ namespace Iot.Device.Imu
         {
             get
             {
-                float val = 0;
-                switch (AccelerometerRange)
+                float val = AccelerometerRange switch
                 {
-                    case AccelerometerRange.Range02G:
-                        val = 2.0f;
-                        break;
-                    case AccelerometerRange.Range04G:
-                        val = 4.0f;
-                        break;
-                    case AccelerometerRange.Range08G:
-                        val = 8.0f;
-                        break;
-                    case AccelerometerRange.Range16G:
-                        val = 16.0f;
-                        break;
-                    default:
-                        break;
-                }
+                    AccelerometerRange.Range02G => 2.0f,
+                    AccelerometerRange.Range04G => 4.0f,
+                    AccelerometerRange.Range08G => 8.0f,
+                    AccelerometerRange.Range16G => 16.0f,
+                    _ => 0,
+                };
 
                 val = (val * Gravity) / Adc;
                 return val / (1 + SampleRateDivider);
@@ -181,8 +169,8 @@ namespace Iot.Device.Imu
         /// </summary>
         public AccelerometerLowPowerFrequency AccelerometerLowPowerFrequency
         {
-            get { return (AccelerometerLowPowerFrequency)ReadByte(Register.LP_ACCEL_ODR); }
-            set { WriteRegister(Register.LP_ACCEL_ODR, (byte)value); }
+            get => (AccelerometerLowPowerFrequency)ReadByte(Register.LP_ACCEL_ODR);
+            set => WriteRegister(Register.LP_ACCEL_ODR, (byte)value);
         }
 
         #endregion
@@ -200,7 +188,6 @@ namespace Iot.Device.Imu
         public GyroscopeRange GyroscopeRange
         {
             get => _gyroscopeRange;
-
             set
             {
                 WriteRegister(Register.GYRO_CONFIG, (byte)((byte)value << 3));
@@ -218,7 +205,6 @@ namespace Iot.Device.Imu
         public GyroscopeBandwidth GyroscopeBandwidth
         {
             get => _gyroscopeBandwidth;
-
             set
             {
                 if (value == GyroscopeBandwidth.Bandwidth8800HzFS32)
@@ -361,7 +347,7 @@ namespace Iot.Device.Imu
             _wakeOnMotion = true;
             if (accelerometerThreshold > 1020)
             {
-                throw new ArgumentException($"{nameof(accelerometerThreshold)} has to be between 0mg and 1020mg");
+                throw new ArgumentException(nameof(accelerometerThreshold), $"Value has to be between 0mg and 1020mg");
             }
 
             // LSB = 4mg
@@ -417,19 +403,16 @@ namespace Iot.Device.Imu
         /// Return true if the version of MPU6500 is the correct one
         /// </summary>
         /// <returns>True if success</returns>
-        internal bool CheckVersion()
-        {
-            // Check if the version is thee correct one
-            return ReadByte(Register.WHO_AM_I) == 0x70;
-        }
+        // Check if the version is thee correct one
+        internal bool CheckVersion() => ReadByte(Register.WHO_AM_I) == 0x70;
 
         /// <summary>
         /// Get or set the sample diver mode
         /// </summary>
         public byte SampleRateDivider
         {
-            get { return ReadByte(Register.SMPLRT_DIV); }
-            set { WriteRegister(Register.SMPLRT_DIV, value); }
+            get => ReadByte(Register.SMPLRT_DIV);
+            set => WriteRegister(Register.SMPLRT_DIV, value);
         }
 
         /// <summary>
@@ -438,8 +421,8 @@ namespace Iot.Device.Imu
         /// </summary>
         public DisableModes DisableModes
         {
-            get { return (DisableModes)ReadByte(Register.PWR_MGMT_2); }
-            set { WriteRegister(Register.PWR_MGMT_2, (byte)value); }
+            get => (DisableModes)ReadByte(Register.PWR_MGMT_2);
+            set => WriteRegister(Register.PWR_MGMT_2, (byte)value);
         }
 
         #endregion
@@ -467,10 +450,7 @@ namespace Iot.Device.Imu
         /// </summary>
         public FifoModes FifoModes
         {
-            get
-            {
-                return (FifoModes)(ReadByte(Register.FIFO_EN));
-            }
+            get => (FifoModes)(ReadByte(Register.FIFO_EN));
             set
             {
                 if (value != FifoModes.None)
@@ -508,10 +488,7 @@ namespace Iot.Device.Imu
         /// EXT_SENS_DATA_00 to EXT_SENS_DATA_24
         /// </summary>
         /// <param name="readData">Data which will be read</param>
-        public void ReadFifo(Span<byte> readData)
-        {
-            ReadBytes(Register.FIFO_R_W, readData);
-        }
+        public void ReadFifo(Span<byte> readData) => ReadBytes(Register.FIFO_R_W, readData);
 
         #endregion
 
@@ -523,7 +500,7 @@ namespace Iot.Device.Imu
         /// The result bias will be stored in the AcceloremeterBias and GyroscopeBias
         /// </summary>
         /// <returns>Gyroscope and accelerometer bias</returns>
-        public (Vector3 gyroscopeBias, Vector3 accelerometerBias) CalibrateGyroscopeAccelerometer()
+        public (Vector3 GyroscopeBias, Vector3 AccelerometerBias) CalibrateGyroscopeAccelerometer()
         {
             // = 131 LSB/degrees/sec
             const int GyroSensitivity = 131;
@@ -715,7 +692,7 @@ namespace Iot.Device.Imu
         /// ]]>
         /// </summary>
         /// <returns>the gyroscope and accelerometer vectors</returns>
-        public (Vector3 gyroscopeAverage, Vector3 accelerometerAverage) RunGyroscopeAccelerometerSelfTest()
+        public (Vector3 GyroscopeAverage, Vector3 AccelerometerAverage) RunGyroscopeAccelerometerSelfTest()
         {
             // Used for the number of cycles to run the test
             // Value is 200 according to documentation AN-MPU-9250A-03
@@ -902,7 +879,7 @@ namespace Iot.Device.Imu
         {
             if (readBytes.Length > 24)
             {
-                throw new ArgumentException($"Can't read more than 24 bytes at once");
+                throw new ArgumentException(nameof(readBytes), "Value must be 24 bytes or less.");
             }
 
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);
@@ -951,7 +928,7 @@ namespace Iot.Device.Imu
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         #endregion
