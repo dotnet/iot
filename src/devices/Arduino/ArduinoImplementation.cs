@@ -29,6 +29,7 @@ namespace Iot.Device.Arduino
         EmptyStaticCtor,
         DefaultEqualityComparer,
         ArrayCopy3,
-        StringFormat3
+        StringFormat3,
+        ArrayClone
     }
 }

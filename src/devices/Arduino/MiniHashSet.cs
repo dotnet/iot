@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,7 +14,7 @@ namespace Iot.Device.Arduino
     /// </summary>
     /// <typeparam name="T">Type of container. Test with different values pending</typeparam>
     [ArduinoReplacement(typeof(HashSet<int>), true)]
-    internal class MiniHashSet<T>
+    internal class MiniHashSet<T> : IEnumerable<T>
     {
         private const int IncreaseStep = 10;
         private T[]? _elements;
@@ -88,6 +89,61 @@ namespace Iot.Device.Arduino
             }
 
             return false;
+        }
+
+        public void Clear()
+        {
+            _numberOfElements = 0;
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return new HashSetIterator(_elements, _numberOfElements);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            // Todo: Validate method matching on this private implementation
+            return GetEnumerator();
+        }
+
+        private class HashSetIterator : IEnumerator<T>
+        {
+            private T[]? _elements;
+            private int _current;
+            private int _count;
+
+            public HashSetIterator(T[]? elements, int count)
+            {
+                _elements = elements;
+                _current = -1; // before the first element
+                _count = count;
+            }
+
+            public bool MoveNext()
+            {
+                _current++;
+                return _current < _count;
+            }
+
+            public void Reset()
+            {
+                _current = -1;
+            }
+
+            public T Current
+            {
+                get
+                {
+                    return _elements![_current];
+                }
+            }
+
+            object IEnumerator.Current => Current!;
+
+            public void Dispose()
+            {
+            }
         }
     }
 }

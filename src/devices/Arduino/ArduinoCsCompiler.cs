@@ -95,14 +95,6 @@ namespace Iot.Device.Arduino
         };
 
         /// <summary>
-        /// Temporary: These classes (and all of its subclasses and methods) will be ignored during load
-        /// </summary>
-        private readonly List<Type> _classesToIgnore = new List<Type>()
-        {
-            typeof(Exception), typeof(System.Globalization.CultureInfo)
-        };
-
-        /// <summary>
         /// A list of known classes whose static ctor should not be run (because it is currently unsupported and
         /// its implementation not needed/patched)
         /// </summary>
@@ -251,7 +243,7 @@ namespace Iot.Device.Arduino
                 if (ia.ReplaceEntireType)
                 {
                     PrepareClass(set, replacement);
-                    set.AddReplacementType(ia.TypeToReplace, replacement);
+                    set.AddReplacementType(ia.TypeToReplace, replacement, ia.IncludingSubclasses);
                 }
                 else
                 {
@@ -281,12 +273,6 @@ namespace Iot.Device.Arduino
             if (!ValueTypeSupported(classType))
             {
                 throw new NotSupportedException("Value types with sizeof(Type) > sizeof(int32) not supported");
-            }
-
-            if (_classesToIgnore.Any(x => classType.IsSubclassOf(x) || x == classType))
-            {
-                // Ignore
-                return;
             }
 
             HashSet<Type> baseTypes = new HashSet<Type>();
@@ -465,7 +451,7 @@ namespace Iot.Device.Arduino
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
                 string className = cls.Name;
 
-                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}");
+                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes.");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
             }
         }
@@ -759,6 +745,21 @@ namespace Iot.Device.Arduino
             return VariableKind.Object;
         }
 
+        /// <summary>
+        /// Returns true if the given method shall be internalized (has a native implementation on the arduino)
+        /// </summary>
+        private bool HasArduinoImplementationAttribute(MethodBase method)
+        {
+            var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
+            ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
+            if (iaMethod != null && iaMethod.MethodNumber != ArduinoImplementation.None)
+            {
+                return true;
+            }
+
+            return false;
+        }
+
         public void CollectDependencies(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> newMethods)
         {
             List<MethodBase> methodsRequired = new List<MethodBase>();
@@ -771,11 +772,18 @@ namespace Iot.Device.Arduino
                 return;
             }
 
+            // If this is true, we don't have to parse the implementation
+            if (HasArduinoImplementationAttribute(methodInfo))
+            {
+                return;
+            }
+
             GetMethodDependencies(set, methodInfo, methodsRequired, typesRequired, fieldsRequired);
 
             foreach (var method in methodsRequired)
             {
                 // Do we need to replace this method?
+                set.GetReplacement(method.DeclaringType);
                 var finalMethod = set.GetReplacement(method);
                 if (finalMethod == null)
                 {
@@ -788,7 +796,6 @@ namespace Iot.Device.Arduino
                     // in a stack overflow when a method is recursive (even indirect)
                     if (!set.HasMethod(me) && newMethods.Add(me))
                     {
-                        _board.Log($"Method {me.DeclaringType} - {me} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
                         CollectDependencies(set, me, newMethods);
                     }
                 }
@@ -796,7 +803,6 @@ namespace Iot.Device.Arduino
                 {
                     if (!set.HasMethod(co) && newMethods.Add(co))
                     {
-                        _board.Log($"Constructor {co.DeclaringType} - {co} is first required by the implementation of {methodInfo.DeclaringType} - {methodInfo}");
                         CollectDependencies(set, co, newMethods);
                     }
                 }
@@ -902,17 +908,13 @@ namespace Iot.Device.Arduino
 
         public void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo)
         {
-            if (LoadInternalCode(set, methodInfo, false))
-            {
-                // This method is uncallable.
-                return;
-            }
-
             /* if (set.GetReplacement(methodInfo.DeclaringType!) != null)
             {
                 throw new InvalidOperationException($"{methodInfo.DeclaringType} - {methodInfo} should have been replaced.");
             }*/
 
+            // Ensure the class is known, if it needs replacement
+            set.GetReplacement(methodInfo.DeclaringType);
             MethodBase? replacement = set.GetReplacement(methodInfo);
             if (replacement != null)
             {
@@ -959,7 +961,6 @@ namespace Iot.Device.Arduino
                         PrepareClass(set, type);
                     }
                 }
-
             }
 
             int tk = set.GetOrAddMethodToken(methodInfo);
@@ -967,6 +968,7 @@ namespace Iot.Device.Arduino
 
             if (set.AddMethod(newInfo))
             {
+                _board.Log($"Method {methodInfo.DeclaringType} - {methodInfo} added to the execution set");
                 // If the class containing this method contains statics, we need to send its declaration
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
@@ -1030,78 +1032,10 @@ namespace Iot.Device.Arduino
                 SendTokenMap(decl.Index, decl.TokenMap);
             }
 
-            if (decl.HasBody)
+            if (decl.HasBody && decl.NativeMethod == ArduinoImplementation.None)
             {
                 _board.Firmata.SendMethodIlCode(decl.Index, decl.IlBytes!);
             }
-        }
-
-        /// <summary>
-        /// Checks whether the implementation of the given method should be replaced with an internal call.
-        /// This will for instance apply to the implementation of Object.GetType(), which has no implementation in C#
-        /// </summary>
-        /// <param name="set">The current execution set</param>
-        /// <param name="methodInfo">A method info pointer</param>
-        /// <param name="checkOnly">Only check whether there's an internal implementation for this method</param>
-        /// <returns>True if a replacement was found and loaded, false otherwise</returns>
-        private bool LoadInternalCode(ExecutionSet set, MethodBase methodInfo, bool checkOnly)
-        {
-            Type? classType = methodInfo.DeclaringType;
-            if (classType != null && _classesToIgnore.Any(x => classType.IsSubclassOf(x) || x == classType))
-            {
-                // Ignore
-                return true;
-            }
-
-            if (classType != null)
-            {
-                // This is a special class. Maybe we need to replace some methods (or all of it)
-                foreach (var replacement in _replacementClasses)
-                {
-                    var attribs = replacement.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
-                    ArduinoReplacementAttribute ia = (ArduinoReplacementAttribute)attribs.Single();
-                    if (ia.TypeToReplace == classType)
-                    {
-                        foreach (var method in replacement.GetMethods())
-                        {
-                            if (!MethodsHaveSameSignature(method, methodInfo))
-                            {
-                                continue;
-                            }
-
-                            // We have found a method that should replace the one in the original class
-                            var attr1 = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
-                            if (!attr1.Any())
-                            {
-                                // No replacement attribute -> use the original method
-                                return false;
-                            }
-
-                            if (checkOnly)
-                            {
-                                return true;
-                            }
-
-                            // Is it already loaded?
-                            if (!_methodInfos.ContainsKey(method))
-                            {
-                                var attr = (ArduinoImplementationAttribute)attr1.First();
-                                // Send the new implementation (actually a spezial method number),
-                                // but with the token that matches the original method
-                                ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(
-                                    methodInfo.MetadataToken, method,
-                                    MethodFlags.SpecialMethod, attr.MethodNumber);
-                                _methodInfos.Add(method, decl);
-                                set.AddMethod(decl);
-                            }
-
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
         }
 
         private void SendTokenMap(int codeReference, List<(int Foreign, int Own)> tokenMap)
@@ -1212,12 +1146,6 @@ namespace Iot.Device.Arduino
             if (methodInstance.ContainsGenericParameters)
             {
                 throw new InvalidProgramException("No generics supported");
-            }
-
-            // Don't analyze the body of a method if we're going to replace it with something else
-            if (LoadInternalCode(set, methodInstance, true))
-            {
-                return null;
             }
 
             MethodBody? body = methodInstance.GetMethodBody();

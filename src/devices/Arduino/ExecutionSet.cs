@@ -17,7 +17,7 @@ namespace Iot.Device.Arduino
         private readonly Dictionary<TypeInfo, int> _patchedTypeTokens;
         private readonly Dictionary<MethodBase, int> _patchedMethodTokens;
         private readonly Dictionary<FieldInfo, int> _patchedFieldTokens;
-        private readonly List<(Type, Type)> _classesReplaced;
+        private readonly HashSet<(Type Original, Type Replacement, bool Subclasses)> _classesReplaced;
         private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
 
         private int _numDeclaredMethods;
@@ -32,7 +32,7 @@ namespace Iot.Device.Arduino
             _patchedTypeTokens = new Dictionary<TypeInfo, int>();
             _patchedMethodTokens = new Dictionary<MethodBase, int>();
             _patchedFieldTokens = new Dictionary<FieldInfo, int>();
-            _classesReplaced = new List<(Type, Type)>();
+            _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
 
             _nextToken = 1;
@@ -160,7 +160,7 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
-            if (_classesReplaced.Any(x => x.Item1 == type.Cls))
+            if (_classesReplaced.Any(x => x.Original == type.Cls))
             {
                 throw new InvalidOperationException($"Class {type} should have been replaced by its replacement");
             }
@@ -319,14 +319,17 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void AddReplacementType(Type? typeToReplace, Type replacement)
+        public void AddReplacementType(Type? typeToReplace, Type replacement, bool includingSubclasses)
         {
             if (typeToReplace == null)
             {
                 throw new ArgumentNullException(nameof(typeToReplace));
             }
 
-            _classesReplaced.Add((typeToReplace, replacement));
+            if (!_classesReplaced.Add((typeToReplace, replacement, includingSubclasses)))
+            {
+                return;
+            }
 
             List<MethodInfo> methodsNeedingReplacement = typeToReplace.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance).ToList();
 
@@ -377,9 +380,29 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public Type? GetReplacement(Type original)
+        public Type? GetReplacement(Type? original)
         {
-            return _classesReplaced.FirstOrDefault(x => x.Item1 == original).Item2;
+            if (original == null)
+            {
+                return null;
+            }
+
+            foreach (var x in _classesReplaced)
+            {
+                if (x.Original == original)
+                {
+                    return x.Replacement;
+                }
+                else if (x.Subclasses && original.IsSubclassOf(x.Original))
+                {
+                    // If we need to replace all subclasses of x as well, we need to add them here to the replacement list, because
+                    // we initially didn't know which classes will be in this set.
+                    AddReplacementType(original, x.Replacement, true);
+                    return x.Replacement;
+                }
+            }
+
+            return null;
         }
 
         public MethodBase? GetReplacement(MethodBase original)

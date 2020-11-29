@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography.X509Certificates;
 
 #pragma warning disable CS1591
 namespace Iot.Device.Arduino
@@ -16,11 +18,22 @@ namespace Iot.Device.Arduino
             Flags = MethodFlags.None;
             Token = token;
 
+            var attribs = methodBase.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).Cast<ArduinoImplementationAttribute>().ToList();
+
             if (methodBase.IsAbstract)
             {
                 MaxLocals = 0;
                 MaxStack = 0;
                 HasBody = false;
+                NativeMethod = ArduinoImplementation.None;
+            }
+            else if (attribs.Any(x => x.MethodNumber != ArduinoImplementation.None))
+            {
+                MaxLocals = 0;
+                MaxStack = 0;
+                HasBody = false;
+                NativeMethod = attribs.First().MethodNumber;
+                Flags |= MethodFlags.SpecialMethod;
             }
             else
             {
@@ -33,9 +46,9 @@ namespace Iot.Device.Arduino
                 MaxLocals = body.LocalVariables.Count;
                 MaxStack = body.MaxStackSize;
                 HasBody = true;
+                NativeMethod = ArduinoImplementation.None;
             }
 
-            NativeMethod = ArduinoImplementation.None;
             ArgumentCount = methodBase.GetParameters().Length;
             if (methodBase.CallingConvention.HasFlag(CallingConventions.HasThis))
             {
