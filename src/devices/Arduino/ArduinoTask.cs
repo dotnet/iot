@@ -122,6 +122,8 @@ namespace Iot.Device.Arduino
                                 throw new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved}");
                             case SystemException.OutOfMemory:
                                 throw new OutOfMemoryException($"Out of memory allocating an instance of {resolved.DeclaringType} - {resolved}.");
+                            case SystemException.ArrayTypeMismatch:
+                                throw new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.DeclaringType} - {resolved}.");
                             default:
                                 throw new InvalidOperationException("Unknown exception");
                         }

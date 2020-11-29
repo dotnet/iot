@@ -170,6 +170,13 @@ namespace Iot.Device.Arduino
                         throw new InvalidOperationException($"Unknown token type {resolved}");
                     }
                 }
+                else if (opCode == OpCode.CEE_STELEM || opCode == OpCode.CEE_LDELEM)
+                {
+                    var typeTarget = ResolveMember(method, token)!;
+                    TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
+                    patchValue = set.GetOrAddClassToken(mb);
+                    typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                }
 
                 // Now use the new token instead of the old (possibly ambiguous one)
                 // Note: We don't care about the sign here, patchValue is never negative

@@ -335,7 +335,7 @@ namespace Iot.Device.Arduino
                 // Above, we only check the public methods, here we also look at the private ones
                 foreach (var methodb in typeToReplace.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (_compiler.MethodsHaveSameSignature(methoda, methodb))
+                    if (ArduinoCsCompiler.MethodsHaveSameSignature(methoda, methodb))
                     {
                         // Method A shall replace Method B
                         AddReplacementMethod(methodb, methoda);
@@ -360,7 +360,7 @@ namespace Iot.Device.Arduino
                 // Above, we only check the public methods, here we also look at the private ones
                 foreach (var methodb in typeToReplace.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (_compiler.MethodsHaveSameSignature(methoda, methodb))
+                    if (ArduinoCsCompiler.MethodsHaveSameSignature(methoda, methodb))
                     {
                         // Method A shall replace Method B
                         AddReplacementMethod(methodb, methoda);

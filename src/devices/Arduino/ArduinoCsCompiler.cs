@@ -76,6 +76,7 @@ namespace Iot.Device.Arduino
         DivideByZero = 5,
         IndexOutOfRange = 6,
         OutOfMemory = 7,
+        ArrayTypeMismatch = 8,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -515,15 +516,15 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        private static bool IsOverriddenImplementation(MethodInfo candidate, MethodInfo self)
+        private static bool IsOverriddenImplementation(MethodInfo candidate, MethodInfo self, bool candidateIsFromInterface)
         {
             if (candidate.Name != self.Name)
             {
                 return false;
             }
 
-            // If we're declared new, we're not overriding anything
-            if (self.Attributes.HasFlag(MethodAttributes.NewSlot))
+            // If we're declared new, we're not overriding anything (that does not apply for interfaces, though)
+            if (self.Attributes.HasFlag(MethodAttributes.NewSlot) && !candidateIsFromInterface)
             {
                 return false;
             }
@@ -541,24 +542,7 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
-            var candidateArgList = candidate.GetParameters();
-            var selfArgList = self.GetParameters();
-            if (candidateArgList.Length != selfArgList.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < selfArgList.Length; i++)
-            {
-                var a = selfArgList[i].ParameterType;
-                var b = candidateArgList[i].ParameterType;
-                if (a != b)
-                {
-                    return false;
-                }
-            }
-
-            return true;
+            return MethodsHaveSameSignature(self, candidate);
         }
 
         private static void CollectBaseImplementations(MethodInfo method, List<MethodInfo> methodsBeingImplemented)
@@ -568,7 +552,7 @@ namespace Iot.Device.Arduino
             {
                 foreach (var candidate in cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (IsOverriddenImplementation(candidate, method))
+                    if (IsOverriddenImplementation(candidate, method, false))
                     {
                         methodsBeingImplemented.Add(candidate);
                     }
@@ -587,7 +571,7 @@ namespace Iot.Device.Arduino
             {
                 foreach (var candidate in interf.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (IsOverriddenImplementation(candidate, method))
+                    if (IsOverriddenImplementation(candidate, method, true))
                     {
                         methodsBeingImplemented.Add(candidate);
                     }
@@ -632,7 +616,8 @@ namespace Iot.Device.Arduino
             {
                 var varType = GetVariableType(f.FieldType);
                 // Currently, this is always true
-                if (varType == VariableKind.Boolean || varType == VariableKind.Int32 || varType == VariableKind.Uint32 || varType == VariableKind.Object)
+                if (varType == VariableKind.Boolean || varType == VariableKind.Int32 || varType == VariableKind.Uint32 || varType == VariableKind.Object ||
+                    varType == VariableKind.ValueArray || varType == VariableKind.ReferenceArray)
                 {
                     // TODO: Need to query some properties from the board (i.e. sizeof(void*))
                     if (f.IsStatic)
@@ -757,6 +742,18 @@ namespace Iot.Device.Arduino
             if (t == typeof(bool))
             {
                 return VariableKind.Boolean;
+            }
+
+            if (t.IsArray)
+            {
+                if (t.GetElementType()!.IsValueType)
+                {
+                    return VariableKind.ValueArray;
+                }
+                else
+                {
+                    return VariableKind.ReferenceArray;
+                }
             }
 
             return VariableKind.Object;
@@ -1026,7 +1023,7 @@ namespace Iot.Device.Arduino
         {
             MethodBase methodInfo = decl.MethodBase;
             _methodInfos.Add(methodInfo, decl);
-            _board.Log($"Method Index {decl.Index} is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
+            _board.Log($"Method Index {decl.Index} (NewToken 0x{decl.Token:X}) is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
             SendMethodDeclaration(decl);
             if (decl.TokenMap != null)
             {
@@ -1146,7 +1143,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// The two methods have the same name and signature (that means one can be replaced with another or one can override another)
         /// </summary>
-        public bool MethodsHaveSameSignature(MethodBase a, MethodBase b)
+        public static bool MethodsHaveSameSignature(MethodBase a, MethodBase b)
         {
             // A ctor can never match an ordinary method or the other way round
             if (a.GetType() != b.GetType())
