@@ -16,7 +16,7 @@ namespace Iot.Device.Arduino
         ReferenceEquals = 9,
         GetType = 10,
         GetHashCode = 11,
-        ArrayCopy = 12,
+        ArrayCopy5 = 12,
         StringCtor0,
         StringLength,
         MonitorEnter1,
@@ -27,6 +27,8 @@ namespace Iot.Device.Arduino
         StringFormat2b,
         BaseTypeEquals,
         EmptyStaticCtor,
-        DefaultEqualityComparer
+        DefaultEqualityComparer,
+        ArrayCopy3,
+        StringFormat3
     }
 }

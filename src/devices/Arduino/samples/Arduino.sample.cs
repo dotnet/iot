@@ -532,14 +532,14 @@ namespace Arduino.Samples
         public static void TestIlInterpreter(ArduinoBoard board)
         {
             ArduinoCsCompiler compiler = new ArduinoCsCompiler(board);
-            BasicCalculationTest(compiler);
+            //// BasicCalculationTest(compiler);
 
-            OperatorTest(compiler);
+            //// OperatorTest(compiler);
 
             //// AsyncExecutionTest(board, compiler);
 
             //// ReadDht11Test(compiler);
-            ArrayTest(compiler);
+            //// ArrayTest(compiler);
 
             LoadClassAndBlinkLed(compiler);
 

@@ -129,7 +129,8 @@ namespace Iot.Device.Arduino
                     var methodTarget = ResolveMember(method, token)!;
                     MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
                     patchValue = set.GetOrAddMethodToken(mb);
-                    methodsUsed.Add(mb);
+                    // Do an inverse lookup again - might have changed due to replacement
+                    methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
                 }
 
                 // an STSFLD or LDSFLD instruction.
@@ -137,6 +138,7 @@ namespace Iot.Device.Arduino
                 {
                     var fieldTarget = ResolveMember(method, token)!;
                     FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
+                    // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
                     patchValue = set.GetOrAddFieldToken(mb);
                     fieldsUsed.Add(mb);
                 }
@@ -147,7 +149,7 @@ namespace Iot.Device.Arduino
                     var typeTarget = ResolveMember(method, token)!;
                     TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
                     patchValue = set.GetOrAddClassToken(mb);
-                    typesUsed.Add(mb);
+                    typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
                 }
 
                 // LDTOKEN takes typically types, but can also take virtual stuff (whatever that means)

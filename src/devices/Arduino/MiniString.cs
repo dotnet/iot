@@ -28,13 +28,19 @@ namespace Iot.Device.Arduino
         }
 
         [ArduinoImplementation(ArduinoImplementation.StringFormat2)]
-        public string Format(string format, object arg0)
+        public static string Format(string format, object arg0)
+        {
+            return string.Empty;
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.StringFormat3)]
+        public static string Format(string format, object arg0, object arg1)
         {
             return string.Empty;
         }
 
         [ArduinoImplementation(ArduinoImplementation.StringFormat2b)]
-        public string Format(string format, object[] args)
+        public static string Format(string format, object[] args)
         {
             return string.Empty;
         }

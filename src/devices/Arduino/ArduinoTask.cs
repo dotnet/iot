@@ -120,6 +120,8 @@ namespace Iot.Device.Arduino
                                 throw new DivideByZeroException($"Integer Division by zero in {resolved.DeclaringType} - {resolved}");
                             case SystemException.IndexOutOfRange:
                                 throw new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved}");
+                            case SystemException.OutOfMemory:
+                                throw new OutOfMemoryException($"Out of memory allocating an instance of {resolved.DeclaringType} - {resolved}.");
                             default:
                                 throw new InvalidOperationException("Unknown exception");
                         }

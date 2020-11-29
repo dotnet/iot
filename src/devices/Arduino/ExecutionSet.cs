@@ -110,6 +110,12 @@ namespace Iot.Device.Arduino
                 return token;
             }
 
+            var replacement = GetReplacement(methodBase);
+            if (replacement != null)
+            {
+                return GetOrAddMethodToken(replacement);
+            }
+
             token = _nextToken++;
             _patchedMethodTokens.Add(methodBase, token);
             return token;
@@ -134,6 +140,12 @@ namespace Iot.Device.Arduino
             if (_patchedTypeTokens.TryGetValue(typeInfo, out token))
             {
                 return token;
+            }
+
+            var replacement = GetReplacement(typeInfo);
+            if (replacement != null)
+            {
+                return GetOrAddClassToken(replacement.GetTypeInfo());
             }
 
             token = _nextToken++;
@@ -267,15 +279,21 @@ namespace Iot.Device.Arduino
         {
             private bool _suppressInit;
 
-            public Class(Type cls, int dynamicSize, int staticSize, List<VariableOrMethod> members)
+            public Class(Type cls, int dynamicSize, int staticSize, int newToken, List<VariableOrMethod> members)
             {
                 Cls = cls;
                 DynamicSize = dynamicSize;
                 StaticSize = staticSize;
                 Members = members;
+                NewToken = newToken;
             }
 
             public Type Cls
+            {
+                get;
+            }
+
+            public int NewToken
             {
                 get;
             }

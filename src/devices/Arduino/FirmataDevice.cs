@@ -1451,7 +1451,6 @@ namespace Iot.Device.Arduino
 
             lock (_synchronisationLock)
             {
-                short len = (short)members.Count;
                 for (short member = 0; member < members.Count; member++)
                 {
                     _dataReceived.Reset();
@@ -1462,10 +1461,11 @@ namespace Iot.Device.Arduino
                     SendInt32(classToken);
                     SendInt32(parentToken);
                     // We don't need the last two bits, since the size is certainly a multiple of 4
+                    // TODO: Should handle value type sizes differently, because there size matters
                     SendInt14((short)(sizeOfClass.Dynamic >> 2));
                     SendInt14((short)(sizeOfClass.Statics >> 2));
-                    SendInt14(len);
                     SendInt14((short)(isValueType ? 1 : 0));
+                    SendInt14(member);
 
                     _firmataStream.WriteByte((byte)members[member].VariableType);
                     SendInt32(members[member].Token);

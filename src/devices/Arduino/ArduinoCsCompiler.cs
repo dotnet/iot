@@ -75,6 +75,7 @@ namespace Iot.Device.Arduino
         InvalidOpCode = 4,
         DivideByZero = 5,
         IndexOutOfRange = 6,
+        OutOfMemory = 7,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -176,7 +177,17 @@ namespace Iot.Device.Arduino
                 object retVal;
                 int inVal = (int)args[0]; // initially, the list contains only ints
                 // The method ended, therefore we know that the only element of args is the return value and can derive its correct type
-                Type returnType = codeRef.MethodInfo!.ReturnType;
+                Type returnType;
+                // We sometimes also execute ctors directly, but they return void
+                if (codeRef.MethodBase.MemberType == MemberTypes.Constructor)
+                {
+                    returnType = typeof(void);
+                }
+                else
+                {
+                    returnType = codeRef.MethodInfo!.ReturnType;
+                }
+
                 if (returnType == typeof(void))
                 {
                     // Empty return set
@@ -243,19 +254,21 @@ namespace Iot.Device.Arduino
                 }
                 else
                 {
-                    foreach (var m in replacement.GetMethods(BindingFlags.Public))
+                    foreach (var m in replacement.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static))
                     {
-                        attribs = m.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
-                        ArduinoReplacementAttribute? iaMethod = (ArduinoReplacementAttribute?)attribs.FirstOrDefault();
+                        // Methods that have this attribute shall be replaced - if the value is ArduinoImplementation.None, the C# implementation is used,
+                        // otherwise a native implementation is provided
+                        attribs = m.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
+                        ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
                         if (iaMethod != null)
                         {
-                            var methodToReplace = ia.TypeToReplace!.GetMethods(BindingFlags.Public).Single(x => MethodsHaveSameSignature(x, m));
+                            var methodToReplace = ia.TypeToReplace!.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).SingleOrDefault(x => MethodsHaveSameSignature(x, m));
+                            if (methodToReplace == null)
+                            {
+                                throw new InvalidOperationException("A replacement method has nothing to replace");
+                            }
+
                             set.AddReplacementMethod(methodToReplace, m);
-                        }
-                        else
-                        {
-                            attribs = m.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
-                            ArduinoReplacementAttribute? iaMethod = (ArduinoReplacementAttribute?)attribs.FirstOrDefault();
                         }
                     }
                 }
@@ -378,7 +391,7 @@ namespace Iot.Device.Arduino
             var sizeOfClass = GetClassSize(classType);
 
             // Add this first, so we break the recursion to this class further down
-            var newClass = new ExecutionSet.Class(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, memberTypes);
+            var newClass = new ExecutionSet.Class(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes);
             set.AddClass(newClass);
         }
 
@@ -1161,7 +1174,7 @@ namespace Iot.Device.Arduino
 
             for (int i = 0; i < argsa.Length; i++)
             {
-                if (argsa[i].GetType() != argsb[i].GetType())
+                if (argsa[i].ParameterType != argsb[i].ParameterType)
                 {
                     return false;
                 }
