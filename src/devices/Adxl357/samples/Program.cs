@@ -10,6 +10,9 @@ using Iot.Device.Adxl357;
 I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, Adxl357.DefaultI2CAddress);
 I2cDevice device = I2cDevice.Create(i2CConnectionSettings);
 using Adxl357 sensor = new Adxl357(device, AccelerometerRange.Range40G);
+int calibrationBufferLength = 10;
+int calibrationInterval = 100;
+await sensor.CalibrateAccelerationSensor(calibrationBufferLength, calibrationInterval).ConfigureAwait(false);
 while (true)
 {
     // read data
