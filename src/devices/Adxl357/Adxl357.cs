@@ -31,19 +31,19 @@ namespace Iot.Device.Adxl357
         /// Constructs a ADXL357 I2C device.
         /// </summary>
         /// <param name="i2CDevice">The I2C device used for communication.</param>
-        /// <param name="accelerometerRange">The sensitivity of the accelerometer .</param>
+        /// <param name="accelerometerRange">The sensitivity of the accelerometer.</param>
         public Adxl357(I2cDevice i2CDevice, AccelerometerRange accelerometerRange = AccelerometerRange.Range10G)
         {
             _i2CDevice = i2CDevice ?? throw new ArgumentNullException(nameof(i2CDevice));
             Reset();
 
-            SetAccelerometerRange(accelerometerRange);
+            AccelerometerRange = accelerometerRange;
             PowerOn();
         }
 
         /// <summary>
         /// Gets the current acceleration in g.
-        /// Range depends on the <see cref="AccelerometerRange"/> passed to the constructor.
+        /// Range depends on the <see cref="Device.Adxl357.AccelerometerRange"/> passed to the constructor.
         /// </summary>
         public Vector3 Acceleration => GetRawAccelerometer();
 
@@ -85,11 +85,21 @@ namespace Iot.Device.Adxl357
             _factory = 1.0F / x;
         }
 
-        private void SetAccelerometerRange(AccelerometerRange accelerometerRange)
+        /// <summary>
+        /// Gets or sets the sensitivity of the accelerometer.
+        /// </summary>
+        public AccelerometerRange AccelerometerRange
         {
-            var currentValue = ReadByte(Register.SET_RANGE_REG_ADDR);
-            var newValue = currentValue | (byte)accelerometerRange;
-            WriteRegister(Register.SET_RANGE_REG_ADDR, (byte)newValue);
+            get
+            {
+                return (AccelerometerRange)ReadByte(Register.SET_RANGE_REG_ADDR);
+            }
+            set
+            {
+                var currentValue = ReadByte(Register.SET_RANGE_REG_ADDR);
+                var newValue = currentValue | (byte)value;
+                WriteRegister(Register.SET_RANGE_REG_ADDR, (byte)newValue);
+            }
         }
 
         private double GetTemperature()
