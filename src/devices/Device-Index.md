@@ -7,7 +7,6 @@
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
 * [ADXL345 - Accelerometer](Adxl345/README.md)
-* [ADXL357 - Accelerometer](Adxl357/README.md)
 * [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
 * [AHT10/15/20 - Temperature and humidity sensor modules](Ahtxx/README.md)
 * [AK8963 - Magnetometer](Ak8963/README.md)
