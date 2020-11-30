@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Device.I2c;
 using System.Linq;
 using System.Numerics;
@@ -25,8 +24,6 @@ namespace Iot.Device.Adxl357
         private const int CalibrationBufferLength = 15;
         private const int CalibrationInterval = 250;
 
-        private readonly Dictionary<string, float> _caliData = new Dictionary<string, float> { { "x", 0 }, { "y", 0 }, { "z", 0 } };
-        private readonly Dictionary<string, float[]> _caliBuffer = new Dictionary<string, float[]>();
         private float _factory = 1;
         private I2cDevice _i2CDevice;
 
@@ -67,31 +64,23 @@ namespace Iot.Device.Adxl357
         /// </remarks>
         public async Task CalibrateAccelerationSensor(int calibrationBufferLength = CalibrationBufferLength, int calibrationInterval = CalibrationInterval)
         {
-            _caliBuffer["x"] = new float[calibrationBufferLength];
-            _caliBuffer["y"] = new float[calibrationBufferLength];
-            _caliBuffer["z"] = new float[calibrationBufferLength];
+            var caliBuffer = new Vector3[calibrationBufferLength];
 
             for (int i = 0; i < calibrationBufferLength; i++)
             {
                 var acc = GetRawAccelerometer();
-                _caliBuffer["x"][i] = acc.X;
-                _caliBuffer["y"][i] = acc.Y;
-                _caliBuffer["z"][i] = acc.Z;
+                caliBuffer[i].X = acc.X;
+                caliBuffer[i].Y = acc.Y;
+                caliBuffer[i].Z = acc.Z;
 
                 await Task.Delay(calibrationInterval);
             }
 
-            foreach (var buffer in _caliBuffer)
-            {
-                _caliData[buffer.Key] = buffer.Value.Average();
+            var avgX = caliBuffer.Select(v => v.X).Average();
+            var avgY = caliBuffer.Select(v => v.Y).Average();
+            var avgZ = caliBuffer.Select(v => v.Z - 10).Average();
 
-                if (buffer.Key == "z")
-                {
-                    _caliData[buffer.Key] -= 10;
-                }
-            }
-
-            var x = (((_caliData["z"] - _caliData["x"]) + (_caliData["z"] - _caliData["y"])) / 2);
+            var x = (((avgZ - avgX) + (avgZ - avgY)) / 2);
             _factory = 1.0F / x;
         }
 
