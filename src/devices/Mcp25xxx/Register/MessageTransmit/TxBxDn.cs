@@ -62,8 +62,8 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         /// <returns>The Tx Buffer Number based on the register address.</returns>
         public static byte GetTxBufferNumber(Address address) => address switch
         {
-            Address.TxB0D0 or Address.TxB0D1 or Address.TxB0D2 or Address.TxB0D3 or Address.TxB0D4 or Address.TxB0D5 or Address.TxB0D6 or Address.TxB0D7 => 0,
-            Address.TxB1D0 or Address.TxB1D1 or Address.TxB1D2 or Address.TxB1D3 or Address.TxB1D4 or Address.TxB1D5 or Address.TxB1D6 or Address.TxB1D7 => 1,
+            >= Address.TxB0D0 and <= Address.TxB0D7 => 0,
+            >= Address.TxB1D0 and <= Address.TxB1D7 => 1,
             _ => throw new ArgumentException($"Invalid address value {address}.", nameof(address)),
         };
 
