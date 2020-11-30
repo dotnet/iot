@@ -159,7 +159,7 @@ namespace Iot.Device.Adxl357
         private bool CheckDataReady()
         {
             var status = GetAdxl357Status();
-            return (status & 0x01) > 0;
+            return (status & 0x01) == 0x01;
         }
 
         private byte GetAdxl357Status()
