@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Linq;
 using System.Numerics;
@@ -108,7 +109,7 @@ namespace Iot.Device.Adxl357
 
             ReadBytes(Register.TEMPERATURE_REG_ADDR, data);
 
-            double value = ((uint)data[0] << 8) | data[1];
+            double value = BinaryPrimitives.ReadUInt16BigEndian(data);
 
             return 25 + (value - 1852) / -9.05;
         }
