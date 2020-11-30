@@ -162,25 +162,13 @@ namespace Iot.Device.Adxl357
             return (status & 0x01) == 0x01;
         }
 
-        private byte GetAdxl357Status()
-        {
-            return ReadByte(Register.STATUS_REG_ADDR);
-        }
+        private byte GetAdxl357Status() => ReadByte(Register.STATUS_REG_ADDR);
 
-        private void WriteRegister(Register register, byte value)
-        {
-            WriteRegister((byte)register, value);
-        }
+        private void WriteRegister(Register register, byte value) => WriteRegister((byte)register, value);
 
-        private byte ReadByte(Register register)
-        {
-            return ReadByte((byte)register);
-        }
+        private byte ReadByte(Register register) => ReadByte((byte)register);
 
-        private void ReadBytes(Register register, in Span<byte> readBytes)
-        {
-            ReadBytes((byte)register, readBytes);
-        }
+        private void ReadBytes(Register register, in Span<byte> readBytes) => ReadBytes((byte)register, readBytes);
 
         internal void WriteRegister(byte reg, byte data)
         {
