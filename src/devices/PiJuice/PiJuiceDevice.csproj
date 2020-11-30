@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+	<EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <Compile Include="*.cs" />
+    <Compile Remove="samples\**" />
+    <Compile Include="Models\*.cs" />
+    <None Include="README.md" />
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" />
+  </ItemGroup>
+  
+</Project>
