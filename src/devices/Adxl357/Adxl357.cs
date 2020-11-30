@@ -164,31 +164,25 @@ namespace Iot.Device.Adxl357
 
         private byte GetAdxl357Status() => ReadByte(Register.STATUS_REG_ADDR);
 
-        private void WriteRegister(Register register, byte value) => WriteRegister((byte)register, value);
-
-        private byte ReadByte(Register register) => ReadByte((byte)register);
-
-        private void ReadBytes(Register register, in Span<byte> readBytes) => ReadBytes((byte)register, readBytes);
-
-        internal void WriteRegister(byte reg, byte data)
+        private void WriteRegister(Register register, byte data)
         {
             Span<byte> dataout = stackalloc byte[]
             {
-                reg, data
+                (byte)register, data
             };
 
             _i2CDevice.Write(dataout);
         }
 
-        internal byte ReadByte(byte register)
+        private byte ReadByte(Register register)
         {
-            _i2CDevice.WriteByte(register);
+            _i2CDevice.WriteByte((byte)register);
             return _i2CDevice.ReadByte();
         }
 
-        internal void ReadBytes(byte register, Span<byte> readBytes)
+        private void ReadBytes(Register register, Span<byte> readBytes)
         {
-            _i2CDevice.WriteByte(register);
+            _i2CDevice.WriteByte((byte)register);
             _i2CDevice.Read(readBytes);
         }
 
