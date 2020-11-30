@@ -74,7 +74,7 @@ namespace Iot.Device.Adxl357
                 caliBuffer[i].Y = acc.Y;
                 caliBuffer[i].Z = acc.Z;
 
-                await Task.Delay(calibrationInterval);
+                await Task.Delay(calibrationInterval).ConfigureAwait(false);
             }
 
             var avgX = caliBuffer.Select(v => v.X).Average();
