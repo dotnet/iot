@@ -109,6 +109,38 @@ namespace Iot.Device.Amg88xx.Tests
             }
         }
 
+        [Fact]
+        public void TemperatureMatrixTest()
+        {
+            I2cTestDevice i2cDevice = new I2cTestDevice();
+            Amg88xx sensor = new Amg88xx(i2cDevice);
+
+            Temperature[,] referenceImage = new Temperature[Amg88xx.Width, Amg88xx.Height];
+            Random rnd = new Random();
+            for (int y = 0; y < Amg88xx.Height; y++)
+            {
+                for (int x = 0; x < Amg88xx.Width; x++)
+                {
+                    referenceImage[x, y] = Temperature.FromDegreesCelsius(rnd.Next(-80, 321) * PixelTemperatureResolution);
+                    (byte tl, byte th) = Amg88xxUtils.ConvertFromTemperature(referenceImage[x, y]);
+                    i2cDevice.DataToRead.Enqueue(tl);
+                    i2cDevice.DataToRead.Enqueue(th);
+                }
+            }
+
+            // read image from sensor
+            sensor.ReadImage();
+
+            // expectation: one write access to register T01L (lower byte of first pixel) to trigger readout
+            Assert.Single(i2cDevice.DataWritten);
+            Assert.Equal((byte)Register.T01L, i2cDevice.DataWritten.Dequeue());
+
+            // expectation: all pixels have been read, so nothing is remaining
+            Assert.Empty(i2cDevice.DataToRead);
+
+            Assert.Equal(referenceImage, sensor.TemperatureMatrix);
+        }
+
         #endregion
 
         #region Status
