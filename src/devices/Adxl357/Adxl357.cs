@@ -91,10 +91,7 @@ namespace Iot.Device.Adxl357
         /// </summary>
         public AccelerometerRange AccelerometerRange
         {
-            get
-            {
-                return (AccelerometerRange)ReadByte(Register.SET_RANGE_REG_ADDR);
-            }
+            get => (AccelerometerRange)ReadByte(Register.SET_RANGE_REG_ADDR);
             set
             {
                 var currentValue = ReadByte(Register.SET_RANGE_REG_ADDR);
