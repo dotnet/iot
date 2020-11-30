@@ -136,31 +136,24 @@ namespace Iot.Device.Adxl357
             {
                 ReadBytes(Register.FIFO_DATA_REG_ADDR, data);
 
-                double x = ((uint)data[0] << 12) | ((uint)data[1] << 4) | ((uint)data[2] >> 4);
-                double y = ((uint)data[3] << 12) | ((uint)data[4] << 4) | ((uint)data[5] >> 4);
-                double z = ((uint)data[6] << 12) | ((uint)data[7] << 4) | ((uint)data[8] >> 4);
-
-                if (((uint)x & 0x80000) == 0x80000)
-                {
-                    x = (double)((uint)x & 0x7ffff) - 0x80000;
-                }
-
-                if (((uint)y & 0x80000) == 0x80000)
-                {
-                    y = (double)((uint)y & 0x7ffff) - 0x80000;
-                }
-
-                if (((uint)z & 0x80000) == 0x80000)
-                {
-                    z = (double)((uint)z & 0x7ffff) - 0x80000;
-                }
-
-                ace.X = (float)x * _factory;
-                ace.Y = (float)y * _factory;
-                ace.Z = (float)z * _factory;
+                ace.X = GetValueForOneAxis(data[0], data[1], data[2]);
+                ace.Y = GetValueForOneAxis(data[3], data[4], data[5]);
+                ace.Z = GetValueForOneAxis(data[6], data[7], data[8]);
             }
 
             return ace;
+        }
+
+        private float GetValueForOneAxis(byte firstByte, byte secondByte, byte thirdByte)
+        {
+            uint value = ((uint)firstByte << 12) | ((uint)secondByte << 4) | ((uint)thirdByte >> 4);
+
+            if ((value & 0x80000) == 0x80000)
+            {
+                value = (value & 0x7ffff) - 0x80000;
+            }
+
+            return value * _factory;
         }
 
         private bool CheckDataReady()
