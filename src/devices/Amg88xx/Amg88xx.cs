@@ -18,7 +18,7 @@ namespace Iot.Device.Amg88xx
         /// Standard device address
         /// (AD_SELECT pin is low, c.f. reference specification, pg. 11)
         /// </summary>
-        public const int DeafultI2cAddress = 0x68;
+        public const int DefaultI2cAddress = 0x68;
 
         /// <summary>
         /// Alternative device address
