@@ -94,10 +94,7 @@ namespace Iot.Device.Uln2003
         /// </summary>
         public StepperMode Mode
         {
-            get
-            {
-                return _mode;
-            }
+            get => _mode;
             set
             {
                 _mode = value;

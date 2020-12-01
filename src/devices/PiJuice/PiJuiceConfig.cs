@@ -44,23 +44,19 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>Battery profile</returns>
         public BatteryProfile GetBatteryProfile()
         {
-            var batteryProfile = new BatteryProfile();
-
-            var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfile, 14);
-
-            batteryProfile.Capacity = new ElectricCharge(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricChargeUnit.MilliampereHour);
-            batteryProfile.ChargeCurrent = new ElectricCurrent(response[2] * 75 + 550, ElectricCurrentUnit.Milliampere);
-            batteryProfile.TerminationCurrent = new ElectricCurrent(response[3] * 50 + 50, ElectricCurrentUnit.Milliampere);
-            batteryProfile.RegulationVoltage = new ElectricPotential(response[4] * 20 + 3500, ElectricPotentialUnit.Millivolt);
-            batteryProfile.CutOffVoltage = new ElectricPotential(response[5] * 20, ElectricPotentialUnit.Millivolt);
-            batteryProfile.TemperatureCold = new Temperature(response[6], TemperatureUnit.DegreeCelsius);
-            batteryProfile.TemperatureCool = new Temperature(response[7], TemperatureUnit.DegreeCelsius);
-            batteryProfile.TemperatureWarm = new Temperature(response[8], TemperatureUnit.DegreeCelsius);
-            batteryProfile.TemperatureHot = new Temperature(response[9], TemperatureUnit.DegreeCelsius);
-            batteryProfile.NegativeTemperatureCoefficientB = (response[11] << 8) | response[10];
-            batteryProfile.NegativeTemperatureCoefficientResistance = new ElectricResistance(((response[13] << 8) | response[12]) * 10, ElectricResistanceUnit.Ohm);
-
-            return batteryProfile;
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfile, 14);
+            return new BatteryProfile(
+                new ElectricCharge(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricChargeUnit.MilliampereHour),
+                new ElectricCurrent(response[2] * 75 + 550, ElectricCurrentUnit.Milliampere),
+                new ElectricCurrent(response[3] * 50 + 50, ElectricCurrentUnit.Milliampere),
+                new ElectricPotential(response[4] * 20 + 3500, ElectricPotentialUnit.Millivolt),
+                new ElectricPotential(response[5] * 20, ElectricPotentialUnit.Millivolt),
+                new Temperature(response[6], TemperatureUnit.DegreeCelsius),
+                new Temperature(response[7], TemperatureUnit.DegreeCelsius),
+                new Temperature(response[8], TemperatureUnit.DegreeCelsius),
+                new Temperature(response[9], TemperatureUnit.DegreeCelsius),
+                (response[11] << 8) | response[10],
+                new ElectricResistance(((response[13] << 8) | response[12]) * 10, ElectricResistanceUnit.Ohm));
         }
 
         /// <summary>
@@ -96,27 +92,25 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>Battery extended profile</returns>
         public BatteryExtendedProfile GetBatteryExtProfile()
         {
-            var batteryProfile = new BatteryExtendedProfile();
-
-            var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryExtendedProfile, 17);
-
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.BatteryExtendedProfile, 17);
+            BatteryChemistry chemistry;
             if (response[0] < 2)
             {
-                batteryProfile.BatteryChemistry = (BatteryChemistry)response[0];
+                chemistry = (BatteryChemistry)response[0];
             }
             else
             {
-                batteryProfile.BatteryChemistry = BatteryChemistry.Unknown;
+                chemistry = BatteryChemistry.Unknown;
             }
 
-            batteryProfile.OpenCircuitVoltage10Percent = new ElectricPotential((response[2] << 8) | response[1], ElectricPotentialUnit.Millivolt);
-            batteryProfile.OpenCircuitVoltage50Percent = new ElectricPotential((response[4] << 8) | response[3], ElectricPotentialUnit.Millivolt);
-            batteryProfile.OpenCircuitVoltage90Percent = new ElectricPotential((response[6] << 8) | response[5], ElectricPotentialUnit.Millivolt);
-            batteryProfile.InternalResistance10Percent = new ElectricResistance(((response[8] << 8) | response[7]) / 100.0, ElectricResistanceUnit.Milliohm);
-            batteryProfile.InternalResistance50Percent = new ElectricResistance(((response[10] << 8) | response[9]) / 100.0, ElectricResistanceUnit.Milliohm);
-            batteryProfile.InternalResistance90Percent = new ElectricResistance(((response[12] << 8) | response[11]) / 100.0, ElectricResistanceUnit.Milliohm);
-
-            return batteryProfile;
+            return new BatteryExtendedProfile(
+                chemistry,
+                new ElectricPotential((response[2] << 8) | response[1], ElectricPotentialUnit.Millivolt),
+                new ElectricPotential((response[4] << 8) | response[3], ElectricPotentialUnit.Millivolt),
+                new ElectricPotential((response[6] << 8) | response[5], ElectricPotentialUnit.Millivolt),
+                new ElectricResistance(((response[8] << 8) | response[7]) / 100.0, ElectricResistanceUnit.Milliohm),
+                new ElectricResistance(((response[10] << 8) | response[9]) / 100.0, ElectricResistanceUnit.Milliohm),
+                new ElectricResistance(((response[12] << 8) | response[11]) / 100.0, ElectricResistanceUnit.Milliohm));
         }
 
         /// <summary>
@@ -154,26 +148,24 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>Battery profile status</returns>
         public BatteryProfileStatus GetBatteryProfileStatus()
         {
-            var batteryProfileStatus = new BatteryProfileStatus();
-
-            var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfileStatus, 1);
-
-            batteryProfileStatus.BatteryOrigin = (response[0] & 0x0F) == 0x0F ? BatteryOrigin.Custom : BatteryOrigin.Predefined;
-            batteryProfileStatus.BatteryProfileSource = (BatteryProfileSource)((response[0] >> 4) & 0x03);
-            batteryProfileStatus.BatteryProfileValid = ((response[0] >> 6) & 0x01) == 0;
-
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfileStatus, 1);
             SelectBatteryProfiles();
             int profileIndex = response[0] & 0x0F;
+            string batteryProfile;
             if (profileIndex < _batteryProfiles.Count)
             {
-                batteryProfileStatus.BatteryProfile = _batteryProfiles[profileIndex];
+                batteryProfile = _batteryProfiles[profileIndex];
             }
             else
             {
-                batteryProfileStatus.BatteryProfile = "Unknown";
+                batteryProfile = "Unknown";
             }
 
-            return batteryProfileStatus;
+            return new BatteryProfileStatus(
+                batteryProfile,
+                (BatteryProfileSource)((response[0] >> 4) & 0x03),
+                ((response[0] >> 6) & 0x01) == 0,
+                (response[0] & 0x0F) == 0x0F ? BatteryOrigin.Custom : BatteryOrigin.Predefined);
         }
 
         /// <summary>
@@ -231,14 +223,11 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>Battery charging configuration</returns>
         public ChargingConfig GetChargingConfig()
         {
-            var chargingConfig = new ChargingConfig();
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.ChargingConfig, 1);
 
-            var response = _piJuice.ReadCommand(PiJuiceCommand.ChargingConfig, 1);
-
-            chargingConfig.Enabled = (response[0] & 0x01) == 0x01;
-            chargingConfig.NonVolatile = (response[0] & 0x80) == 0x80;
-
-            return chargingConfig;
+            return new ChargingConfig(
+                (response[0] & 0x01) == 0x01,
+                (response[0] & 0x80) == 0x80);
         }
 
         /// <summary>
@@ -268,18 +257,14 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>Power inputs</returns>
         public PowerInput GetPowerInputs()
         {
-            var powerInput = new PowerInput();
-
-            var response = _piJuice.ReadCommand(PiJuiceCommand.PowerInputsConfig, 1);
-
-            powerInput.Precedence = (PowerInputType)(response[0] & 0x01);
-            powerInput.GpioIn = (response[0] & 0x02) == 0x02;
-            powerInput.NoBatteryTurnOn = (response[0] & 0x04) == 0x04;
-            powerInput.UsbMicroCurrentLimit = _usbMicroCurrentLimits[(response[0] >> 3) & 0x01];
-            powerInput.UsbMicroDynamicPowerManagement = _usbMicroDpm[(response[0] >> 4) & 0x07];
-            powerInput.NonVolatile = (response[0] & 0x80) == 0x80;
-
-            return powerInput;
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.PowerInputsConfig, 1);
+            return new PowerInput(
+                (PowerInputType)(response[0] & 0x01),
+                (response[0] & 0x02) == 0x02,
+                (response[0] & 0x04) == 0x04,
+                _usbMicroCurrentLimits[(response[0] >> 3) & 0x01],
+                _usbMicroDpm[(response[0] >> 4) & 0x07],
+                (response[0] & 0x80) == 0x80);
         }
 
         /// <summary>
@@ -328,12 +313,10 @@ namespace Iot.Device.PiJuiceDevice
                 throw new ArgumentOutOfRangeException("Led function type out of range");
             }
 
-            return new LedConfig
-            {
-                Led = led,
-                LedFunction = (LedFunction)response[0],
-                Color = Color.FromArgb(0, response[1], response[2], response[3])
-            };
+            return new LedConfig(
+                led,
+                (LedFunction)response[0],
+                Color.FromArgb(0, response[1], response[2], response[3]));
         }
 
         /// <summary>
