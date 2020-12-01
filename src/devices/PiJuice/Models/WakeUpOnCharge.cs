@@ -4,21 +4,14 @@
 
 using UnitsNet;
 
+#pragma warning disable CS1591, CS1572, CS1573
+
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
     /// Wake up on charge configuration
     /// </summary>
-    public class WakeUpOnCharge
-    {
-        /// <summary>
-        /// Is the wake up on charge disabled
-        /// </summary>
-        public bool Disabled { get; set; }
-
-        /// <summary>
-        /// Battery charge level percentage between [0 - 100] used to wake up the Raspberry Pi
-        /// </summary>
-        public Ratio WakeUpPercentage { get; set; }
-    }
+    /// <param name="Disabled">Is the wake up on charge disabled.</param>
+    /// <param name="WakeUpPercentage">Battery charge level percentage between [0 - 100] used to wake up the Raspberry Pi.</param>
+    public record WakeUpOnCharge(bool Disabled, Ratio WakeUpPercentage);
 }

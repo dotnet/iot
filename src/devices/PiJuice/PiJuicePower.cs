@@ -58,11 +58,9 @@ namespace Iot.Device.PiJuiceDevice
             {
                 var response = _piJuice.ReadCommand(PiJuiceCommand.WakeUpOnCharge, 1);
 
-                return new WakeUpOnCharge
-                {
-                    Disabled = response[0] == 0x7F,
-                    WakeUpPercentage = new Ratio((response[0] == 0x7F ? 0 : response[0]), UnitsNet.Units.RatioUnit.Percent)
-                };
+                return new WakeUpOnCharge(
+                    response[0] == 0x7F,
+                    new Ratio((response[0] == 0x7F ? 0 : response[0]), UnitsNet.Units.RatioUnit.Percent));
             }
             set
             {

@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-	<EnableDefaultItems>false</EnableDefaultItems>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+	  <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <Compile Include="$(MSBuildThisFileDirectory)/../Common/System/Runtime/CompilerServices/IsExternalInit.cs" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
     <Compile Include="*.cs" />
     <Compile Remove="samples\**" />
     <Compile Include="Models\*.cs" />

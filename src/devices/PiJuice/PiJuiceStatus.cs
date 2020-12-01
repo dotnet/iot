@@ -34,17 +34,13 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>PiJuice status</returns>
         public Status GetStatus()
         {
-            Status status = new Status();
-
-            var response = _piJuice.ReadCommand(PiJuiceCommand.Status, 1);
-
-            status.IsFault = (response[0] & 0x01) == 0x01;
-            status.IsButton = (response[0] & 0x02) == 0x02;
-            status.Battery = (BatteryState)(response[0] >> 2 & 0x03);
-            status.PowerInput = (PowerInState)(response[0] >> 4 & 0x03);
-            status.PowerInput5VoltInput = (PowerInState)(response[0] >> 6 & 0x03);
-
-            return status;
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.Status, 1);
+            return new Status(
+                (response[0] & 0x01) == 0x01,
+                (response[0] & 0x02) == 0x02,
+                (BatteryState)(response[0] >> 2 & 0x03),
+                (PowerInState)(response[0] >> 4 & 0x03),
+                (PowerInState)(response[0] >> 6 & 0x03));
         }
 
         /// <summary>
@@ -53,18 +49,14 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>PiJuice fault status</returns>
         public FaultStatus GetFaultStatus()
         {
-            FaultStatus faultStatus = new FaultStatus();
-
-            var response = _piJuice.ReadCommand(PiJuiceCommand.FaultEvent, 1);
-
-            faultStatus.ButtonPowerOff = (response[0] & 0x01) == 0x01;
-            faultStatus.ForcedPowerOff = (response[0] & 0x02) == 0x02;
-            faultStatus.ForcedSystemPowerOff = (response[0] & 0x04) == 0x04;
-            faultStatus.WatchdogReset = (response[0] & 0x08) == 0x08;
-            faultStatus.BatteryProfileInvalid = (response[0] & 0x20) == 0x20;
-            faultStatus.BatteryChargingTemperatureFault = (BatteryChargingTemperatureFault)(response[0] >> 6 & 0x03);
-
-            return faultStatus;
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.FaultEvent, 1);
+            return new FaultStatus(
+                (response[0] & 0x01) == 0x01,
+                (response[0] & 0x02) == 0x02,
+                (response[0] & 0x04) == 0x04,
+                (response[0] & 0x08) == 0x08,
+                (response[0] & 0x20) == 0x20,
+                (BatteryChargingTemperatureFault)(response[0] >> 6 & 0x03));
         }
 
         /// <summary>
@@ -73,16 +65,13 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>List of button event types</returns>
         public List<ButtonEventType> GetButtonEvents()
         {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.ButtonEvent, 2);
-
-            var buttonEvents = new List<ButtonEventType>(3)
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.ButtonEvent, 2);
+            return new List<ButtonEventType>(3)
             {
                 Enum.IsDefined(typeof(ButtonEventType), response[0] & 0x0F) ? (ButtonEventType)(response[0] & 0x0F) : ButtonEventType.Unknown,
                 Enum.IsDefined(typeof(ButtonEventType), (response[0] >> 4) & 0x0F) ? (ButtonEventType)((response[0] >> 4) & 0x0F) : ButtonEventType.Unknown,
                 Enum.IsDefined(typeof(ButtonEventType), response[1] & 0x0F) ? (ButtonEventType)(response[1] & 0x0F) : ButtonEventType.Unknown,
             };
-
-            return buttonEvents;
         }
 
         /// <summary>
@@ -91,7 +80,7 @@ namespace Iot.Device.PiJuiceDevice
         /// <param name="button">Button to clear button event for</param>
         public void ClearButtonEvent(Button button)
         {
-            var array = button switch
+            byte[] array = button switch
             {
                 Button.Switch1 => new byte[] { 0xF0, 0xFF },
                 Button.Switch2 => new byte[] { 0x0F, 0xFF },
@@ -209,18 +198,16 @@ namespace Iot.Device.PiJuiceDevice
         /// <returns>Led blinking pattern</returns>
         public LedBlink GetLedBlink(Led led)
         {
-            var response = _piJuice.ReadCommand(PiJuiceCommand.LedBlink + (byte)led, 9);
+            byte[] response = _piJuice.ReadCommand(PiJuiceCommand.LedBlink + (byte)led, 9);
 
-            return new LedBlink
-            {
-                Led = led,
-                BlinkIndefinite = response[0] == 255,
-                Count = response[0],
-                ColorFirstPeriod = Color.FromArgb(0, response[1], response[2], response[3]),
-                FirstPeriod = new TimeSpan(0, 0, 0, 0, response[4] * 10),
-                ColorSecondPeriod = Color.FromArgb(0, response[5], response[6], response[7]),
-                SecondPeriod = new TimeSpan(0, 0, 0, 0, response[8] * 10)
-            };
+            return new LedBlink(
+                led,
+                response[0] == 255,
+                response[0],
+                Color.FromArgb(0, response[1], response[2], response[3]),
+                new TimeSpan(0, 0, 0, 0, response[4] * 10),
+                Color.FromArgb(0, response[5], response[6], response[7]),
+                new TimeSpan(0, 0, 0, 0, response[8] * 10));
         }
 
         /// <summary>
@@ -234,12 +221,12 @@ namespace Iot.Device.PiJuiceDevice
                 throw new ArgumentOutOfRangeException(nameof(ledBlink.Count));
             }
 
-            if (ledBlink.FirstPeriod.TotalMilliseconds < 10 || ledBlink.FirstPeriod.TotalMilliseconds > 2550)
+            if (ledBlink.FirstPeriod.TotalMilliseconds is < 10 or > 2550)
             {
                 throw new ArgumentOutOfRangeException(nameof(ledBlink.FirstPeriod));
             }
 
-            if (ledBlink.SecondPeriod.TotalMilliseconds < 10 || ledBlink.SecondPeriod.TotalMilliseconds > 2550)
+            if (ledBlink.SecondPeriod.TotalMilliseconds is < 10 or > 2550)
             {
                 throw new ArgumentOutOfRangeException(nameof(ledBlink.SecondPeriod));
             }

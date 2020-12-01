@@ -141,11 +141,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int PeriodRefresh
         {
-            get
-            {
-                return _periodRefresh;
-            }
-
+            get => _periodRefresh;
             set
             {
                 _periodRefresh = value;
@@ -161,11 +157,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get
-            {
-                return ReadRaw();
-            }
-
+            get => ReadRaw();
             internal set
             {
                 if (value != _value)
@@ -202,11 +194,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <value>The mode.</value>
         public IRMode Mode
         {
-            get
-            {
-                return _mode;
-            }
-
+            get => _mode;
             set
             {
                 if (_mode != value)
@@ -221,47 +209,25 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Reads the sensor value as a string.
         /// </summary>
         /// <returns>The value as a string</returns>
-        public string ReadAsString()
+        public string ReadAsString() => _mode switch
         {
-            string s = string.Empty;
-            switch (_mode)
-            {
-                case IRMode.Proximity:
-                    s = ReadDistance() + " cm";
-                    break;
-                case IRMode.Remote:
-                    s = ReadRemoteCommand() + " on channel " + Channel;
-                    break;
-                case IRMode.Seek:
-                    s = "Location: " + ReadBeaconLocation() + " Distance: TBD cm";
-                    break;
-            }
-
-            return s;
-        }
+            IRMode.Proximity => $"{ReadDistance()} cm",
+            IRMode.Remote => $"{ReadRemoteCommand()} on channel {Channel}",
+            IRMode.Seek => $"Location: {ReadBeaconLocation()} Distance: TBD cm",
+            _ => string.Empty,
+        };
 
         /// <summary>
         /// Read the sensor value. The returned value depends on the mode. Distance in proximity mode.
         /// Remote command number in remote mode. Beacon location in seek mode.
         /// </summary>
-        public int Read()
+        public int Read() => Mode switch
         {
-            int value = 0;
-            switch (Mode)
-            {
-                case IRMode.Proximity:
-                    value = ReadDistance();
-                    break;
-                case IRMode.Remote:
-                    value = ReadRemoteCommand();
-                    break;
-                case IRMode.Seek:
-                    value = ReadBeaconLocation();
-                    break;
-            }
-
-            return value;
-        }
+            IRMode.Proximity => ReadDistance(),
+            IRMode.Remote => ReadRemoteCommand(),
+            IRMode.Seek => ReadBeaconLocation(),
+            _ => 0,
+        };
 
         /// <summary>
         /// Read the sensor value
@@ -276,21 +242,13 @@ namespace Iot.Device.BrickPi3.Sensors
                 // SEEK = 8x8 bites, 4 x for each of the four channels, heading and distance
                 // PROXIMITY = 1x8 bites
                 // REMOTE = 4x8, button pressed per channel
-                int value = int.MaxValue;
-                switch (_mode)
+                int value = _mode switch
                 {
-                    case IRMode.Proximity:
-                        value = ret[0];
-                        break;
-                    case IRMode.Seek:
-                        value = ret[0] + (ret[2] << 8) + (ret[4] << 16) + (ret[6] << 24);
-                        break;
-                    case IRMode.Remote:
-                        value = ret[0] + (ret[1] << 8) + (ret[2] << 16) + (ret[3] << 24);
-                        break;
-                    default:
-                        break;
-                }
+                    IRMode.Proximity => ret[0],
+                    IRMode.Seek => ret[0] + (ret[2] << 8) + (ret[4] << 16) + (ret[6] << 24),
+                    IRMode.Remote => ret[0] + (ret[1] << 8) + (ret[2] << 16) + (ret[3] << 24),
+                    _ => int.MaxValue,
+                };
 
                 return value;
             }
@@ -383,43 +341,28 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Gets sensor name
         /// </summary>
         /// <returns>Sensor name</returns>
-        public string GetSensorName()
-        {
-            return "EV3 IR";
-        }
+        public string GetSensorName() => "EV3 IR";
 
         /// <summary>
         /// Moves to next mode
         /// </summary>
-        public void SelectNextMode()
-        {
-            Mode = Mode.Next();
-        }
+        public void SelectNextMode() => Mode = Mode.Next();
 
         /// <summary>
         /// Moves to previous mode
         /// </summary>
-        public void SelectPreviousMode()
-        {
-            Mode = Mode.Previous();
-        }
+        public void SelectPreviousMode() => Mode = Mode.Previous();
 
         /// <summary>
         /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
-        public int NumberOfModes()
-        {
-            return Enum.GetNames(typeof(IRMode)).Length;
-        }
+        public int NumberOfModes() => Enum.GetNames(typeof(IRMode)).Length;
 
         /// <summary>
         /// Selected mode
         /// </summary>
         /// <returns>String representing selected mode</returns>
-        public string SelectedMode()
-        {
-            return Mode.ToString();
-        }
+        public string SelectedMode() => Mode.ToString();
     }
 }

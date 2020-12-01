@@ -250,24 +250,14 @@ namespace Iot.Device.Imu
         {
             get
             {
-                float val = 0;
-                switch (GyroscopeRange)
+                float val = GyroscopeRange switch
                 {
-                    case GyroscopeRange.Range0250Dps:
-                        val = 250.0f;
-                        break;
-                    case GyroscopeRange.Range0500Dps:
-                        val = 500.0f;
-                        break;
-                    case GyroscopeRange.Range1000Dps:
-                        val = 1000.0f;
-                        break;
-                    case GyroscopeRange.Range2000Dps:
-                        val = 2000.0f;
-                        break;
-                    default:
-                        break;
-                }
+                    GyroscopeRange.Range0250Dps => 250.0f,
+                    GyroscopeRange.Range0500Dps => 500.0f,
+                    GyroscopeRange.Range1000Dps => 1000.0f,
+                    GyroscopeRange.Range2000Dps => 2000.0f,
+                    _ => 0,
+                };
 
                 val /= Adc;
                 // the sample rate diver only apply for the non FS modes

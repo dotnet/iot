@@ -72,17 +72,12 @@ namespace LedMatrixWeather
             {
                 if (!Console.IsOutputRedirected)
                 {
-                    while (s_scenario is object)
+                    while (s_scenario is object && Console.ReadKey(intercept: true).Key != ConsoleKey.Q)
                     {
-                        switch (Console.ReadKey(intercept: true).Key)
-                        {
-                            case ConsoleKey.Q:
-                            {
-                                s_scenario = null;
-                                break;
-                            }
-                        }
+                        Thread.Sleep(10);
                     }
+
+                    s_scenario = null;
                 }
 
                 drawing.Wait();

@@ -94,10 +94,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get
-            {
-                return ReadRaw();
-            }
+            get => ReadRaw();
             internal set
             {
                 if (value != _value)
@@ -124,10 +121,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int PeriodRefresh
         {
-            get
-            {
-                return _periodRefresh;
-            }
+            get => _periodRefresh;
             set
             {
                 _periodRefresh = value;
@@ -156,11 +150,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <value>The mode.</value>
         public GyroMode Mode
         {
-            get
-            {
-                return _gmode;
-            }
-
+            get => _gmode;
             set
             {
                 if (_gmode != value)
@@ -180,21 +170,12 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Reads the sensor value as a string.
         /// </summary>
         /// <returns>The value as a string</returns>
-        public string ReadAsString()
+        public string ReadAsString() => _gmode switch
         {
-            string s = string.Empty;
-            switch (_gmode)
-            {
-                case GyroMode.Angle:
-                    s = Read().ToString() + " degree";
-                    break;
-                case GyroMode.AngularVelocity:
-                    s = Read().ToString() + " deg/sec";
-                    break;
-            }
-
-            return s;
-        }
+            GyroMode.Angle => $"{Read().ToString()} degree",
+            GyroMode.AngularVelocity => $"{Read().ToString()} deg/sec",
+            _ => string.Empty,
+        };
 
         /// <summary>
         /// Reset the sensor
@@ -265,43 +246,28 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Gets sensor name
         /// </summary>
         /// <returns>Sensor name</returns>
-        public string GetSensorName()
-        {
-            return "EV3 Gyro";
-        }
+        public string GetSensorName() => "EV3 Gyro";
 
         /// <summary>
         /// Moves to next mode
         /// </summary>
-        public void SelectNextMode()
-        {
-            Mode = Mode.Next();
-        }
+        public void SelectNextMode() => Mode = Mode.Next();
 
         /// <summary>
         /// Moves to previous mode
         /// </summary>
-        public void SelectPreviousMode()
-        {
-            Mode = Mode.Previous();
-        }
+        public void SelectPreviousMode() => Mode = Mode.Previous();
 
         /// <summary>
         /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
-        public int NumberOfModes()
-        {
-            return Enum.GetNames(typeof(GyroMode)).Length;
-        }
+        public int NumberOfModes() => Enum.GetNames(typeof(GyroMode)).Length;
 
         /// <summary>
         /// Selected mode
         /// </summary>
         /// <returns>String representing selected mode</returns>
-        public string SelectedMode()
-        {
-            return Mode.ToString();
-        }
+        public string SelectedMode() => Mode.ToString();
     }
 }

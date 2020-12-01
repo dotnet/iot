@@ -174,24 +174,13 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Reads the sensor value as a string.
         /// </summary>
         /// <returns>The value as a string</returns>
-        public string ReadAsString()
+        public string ReadAsString() => _mode switch
         {
-            string s = string.Empty;
-            switch (_mode)
-            {
-                case UltraSonicMode.Centimeter:
-                    s = Read().ToString() + " cm";
-                    break;
-                case UltraSonicMode.Inch:
-                    s = Read().ToString() + " inch";
-                    break;
-                case UltraSonicMode.Listen:
-                    s = Read().ToString();
-                    break;
-            }
-
-            return s;
-        }
+            UltraSonicMode.Centimeter => $"{Read().ToString()} cm",
+            UltraSonicMode.Inch => $"{Read().ToString()} inch",
+            UltraSonicMode.Listen => Read().ToString(),
+            _ => string.Empty,
+        };
 
         /// <summary>
         /// Read the sensor value. Result depends on the mode
@@ -216,64 +205,46 @@ namespace Iot.Device.BrickPi3.Sensors
         {
             try
             {
-                var ret = _brick.GetSensor((byte)Port);
-                switch (_mode)
+                byte[] ret = _brick.GetSensor((byte)Port);
+                return _mode switch
                 {
-                    case UltraSonicMode.Centimeter:
-                    case UltraSonicMode.Inch:
-                        return (ret[0] + (ret[1] >> 8));
-                    case UltraSonicMode.Listen:
-                        return ret[0];
-                }
+                    UltraSonicMode.Centimeter or UltraSonicMode.Inch => (ret[0] + (ret[1] >> 8)),
+                    UltraSonicMode.Listen => ret[0],
+                    _ => int.MaxValue,
+                };
             }
             catch (Exception ex) when (ex is IOException)
             {
+                return int.MaxValue;
             }
-
-            return int.MaxValue;
         }
 
         /// <summary>
         /// Gets sensor name
         /// </summary>
         /// <returns>Sensor name</returns>
-        public string GetSensorName()
-        {
-            return "EV3 Ultrasonic";
-        }
+        public string GetSensorName() => "EV3 Ultrasonic";
 
         /// <summary>
         /// Moves to next mode
         /// </summary>
-        public void SelectNextMode()
-        {
-            Mode = Mode.Next();
-        }
+        public void SelectNextMode() => Mode = Mode.Next();
 
         /// <summary>
         /// Moves to previous mode
         /// </summary>
-        public void SelectPreviousMode()
-        {
-            Mode = Mode.Previous();
-        }
+        public void SelectPreviousMode() => Mode = Mode.Previous();
 
         /// <summary>
         /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
-        public int NumberOfModes()
-        {
-            return Enum.GetNames(typeof(UltraSonicMode)).Length;
-        }
+        public int NumberOfModes() => Enum.GetNames(typeof(UltraSonicMode)).Length;
 
         /// <summary>
         /// Selected mode
         /// </summary>
         /// <returns>String representing selected mode</returns>
-        public string SelectedMode()
-        {
-            return Mode.ToString();
-        }
+        public string SelectedMode() => Mode.ToString();
     }
 }

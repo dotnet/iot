@@ -1049,19 +1049,13 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="type">The VCSEL period to decode</param>
         /// <returns>The decoded period</returns>
-        private byte GetVcselPulsePeriod(VcselType type)
+        private byte GetVcselPulsePeriod(VcselType type) => type switch
         {
-            switch (type)
-            {
-                case VcselType.VcselPeriodPreRange:
-                    return DecodeVcselPeriod(ReadByte((byte)Registers.PRE_RANGE_CONFIG_VCSEL_PERIOD));
-                case VcselType.VcselPeriodFinalRange:
-                    return DecodeVcselPeriod(ReadByte((byte)Registers.FINAL_RANGE_CONFIG_VCSEL_PERIOD));
-                default:
-                    // Should not arrive
-                    return byte.MaxValue;
-            }
-        }
+            VcselType.VcselPeriodPreRange => DecodeVcselPeriod(ReadByte((byte)Registers.PRE_RANGE_CONFIG_VCSEL_PERIOD)),
+            VcselType.VcselPeriodFinalRange => DecodeVcselPeriod(ReadByte((byte)Registers.FINAL_RANGE_CONFIG_VCSEL_PERIOD)),
+            // Should not arrive
+            _ => byte.MaxValue,
+        };
 
         /// <summary>
         /// Encode VCSEL pulse period register value from period in PCLKs

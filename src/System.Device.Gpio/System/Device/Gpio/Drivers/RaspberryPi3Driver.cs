@@ -72,25 +72,14 @@ namespace System.Device.Gpio.Drivers
 
         internal static RaspberryPi3LinuxDriver? CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo)
         {
-            RaspberryBoardInfo identification = RaspberryBoardInfo.LoadBoardInfo();
-            RaspberryPi3LinuxDriver? linuxDriver;
-            boardInfo = identification;
-            switch (identification.BoardModel)
+            boardInfo = RaspberryBoardInfo.LoadBoardInfo();
+            return boardInfo.BoardModel switch
             {
-                case RaspberryBoardInfo.Model.RaspberryPi3B:
-                case RaspberryBoardInfo.Model.RaspberryPi3BPlus:
-                case RaspberryBoardInfo.Model.RaspberryPi4:
-                    linuxDriver = new RaspberryPi3LinuxDriver();
-                    break;
-                case RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
-                    linuxDriver = new RaspberryPiCm3Driver();
-                    break;
-                default:
-                    linuxDriver = null;
-                    break;
-            }
-
-            return linuxDriver;
+                RaspberryBoardInfo.Model.RaspberryPi3B or RaspberryBoardInfo.Model.RaspberryPi3BPlus or
+                RaspberryBoardInfo.Model.RaspberryPi4 => new RaspberryPi3LinuxDriver(),
+                RaspberryBoardInfo.Model.RaspberryPiComputeModule3 => new RaspberryPiCm3Driver(),
+                _ => null,
+            };
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
