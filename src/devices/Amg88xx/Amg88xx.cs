@@ -104,7 +104,6 @@ namespace Iot.Device.Amg88xx
         {
             get
             {
-                Span<byte> buffer = _imageData;
                 Temperature[,] temperatureMatrix = new Temperature[Width, Height];
                 for (int y = 0; y < Height; y++)
                 {
