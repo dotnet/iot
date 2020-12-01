@@ -110,7 +110,7 @@ namespace Iot.Device.Amg88xx.Tests
         }
 
         [Fact]
-        public void TemperatureMatrixTest()
+        public void TemperatureImageTest()
         {
             I2cTestDevice i2cDevice = new I2cTestDevice();
             Amg88xx sensor = new Amg88xx(i2cDevice);
@@ -138,7 +138,7 @@ namespace Iot.Device.Amg88xx.Tests
             // expectation: all pixels have been read, so nothing is remaining
             Assert.Empty(i2cDevice.DataToRead);
 
-            Assert.Equal(referenceImage, sensor.TemperatureMatrix);
+            Assert.Equal(referenceImage, sensor.TemperatureImage);
         }
 
         #endregion

@@ -100,20 +100,20 @@ namespace Iot.Device.Amg88xx
         /// First index specifies the x-coordinate of the pixel and second index specifies y-coordinate of the pixel.
         /// </summary>
         /// <returns>Temperature as a two-dimensional array.</returns>
-        public Temperature[,] TemperatureMatrix
+        public Temperature[,] TemperatureImage
         {
             get
             {
-                Temperature[,] temperatureMatrix = new Temperature[Width, Height];
+                Temperature[,] temperatureImage = new Temperature[Width, Height];
                 for (int y = 0; y < Height; y++)
                 {
                     for (int x = 0; x < Width; x++)
                     {
-                        temperatureMatrix[x, y] = this[x, y];
+                        temperatureImage[x, y] = this[x, y];
                     }
                 }
 
-                return temperatureMatrix;
+                return temperatureImage;
             }
         }
 
