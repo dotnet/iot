@@ -13,18 +13,20 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoNativeGpioDriver : GpioDriver
     {
-        private readonly IArduinoHardwareLevelAccess? _hardwareLevelAccess;
-        private int _pinCount;
+        // This reference stays a null pointer forever. The implementation ignores it.
+        private readonly IArduinoHardwareLevelAccess _hardwareLevelAccess;
 
-        public ArduinoNativeGpioDriver(IArduinoHardwareLevelAccess? hardwareLevelAccess)
+        public ArduinoNativeGpioDriver()
         {
-            _hardwareLevelAccess = hardwareLevelAccess;
-            _pinCount = 15; // TODO...
+            _hardwareLevelAccess = null!;
         }
 
         protected override int PinCount
         {
-            get { return _pinCount; }
+            get
+            {
+                return _hardwareLevelAccess.GetPinCount();
+            }
         }
 
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
@@ -48,12 +50,12 @@ namespace Iot.Device.Arduino
 
         protected override PinMode GetPinMode(int pinNumber)
         {
-            throw new NotImplementedException();
+            return _hardwareLevelAccess.GetPinMode(pinNumber);
         }
 
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            throw new NotImplementedException();
+            return _hardwareLevelAccess.IsPinModeSupported(pinNumber, mode);
         }
 
         protected override PinValue Read(int pinNumber)

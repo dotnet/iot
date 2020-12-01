@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -91,13 +92,36 @@ namespace Iot.Device.Arduino
                 if (state == MethodState.Aborted && data.Length >= 2)
                 {
                     int exceptionCode = (int)d.Item2[0];
+                    // The token (if any) that caused the problem. May also be the error location
                     int targetToken = (int)d.Item2[1];
-                    SystemException ex = (SystemException)exceptionCode;
+                    SystemException sysEx = (SystemException)exceptionCode;
 
-                    if (ex == SystemException.InvalidOpCode)
+                    List<int> stackTrace = new List<int>();
+                    stackTrace.AddRange(d.Item2.Cast<int>());
+
+                    string textualStackTrace = String.Empty;
+                    // The first 0 indicates the start of the stack trace, so search it
+                    int idx = stackTrace.IndexOf(0);
+                    if (idx > 0)
+                    {
+                        stackTrace.RemoveRange(0, idx + 1);
+
+                        foreach (var m in stackTrace)
+                        {
+                            // this can be the same as above (if the error is within the given method), but not
+                            // necessarily, since the outer token can point to whatever did not work
+                            var resolved2 = set.InverseResolveToken(m);
+                            if (resolved2 != null)
+                            {
+                                textualStackTrace += $" at {resolved2.DeclaringType} - {resolved2}\r\n";
+                            }
+                        }
+                    }
+
+                    if (sysEx == SystemException.InvalidOpCode)
                     {
                         string instrName = OpCodeDefinitions.OpcodeDef[targetToken].Name;
-                        throw new InvalidOperationException($"Invalid Opcode: 0x{targetToken:X4}: {instrName}");
+                        throw new InvalidOperationException($"Invalid Opcode: 0x{targetToken:X4}: {instrName}" + textualStackTrace);
                     }
 
                     var resolved = set.InverseResolveToken(targetToken);
@@ -106,39 +130,51 @@ namespace Iot.Device.Arduino
                         throw new InvalidOperationException("Internal error: Unknown exception arguments");
                     }
 
+                    Exception ex;
                     if (exceptionCode < 0xFF)
                     {
-                        switch (ex)
+                        switch (sysEx)
                         {
                             case SystemException.MissingMethod:
-                                throw new MissingMethodException(resolved.DeclaringType?.Name, resolved.Name);
+                                ex = new MissingMethodException(resolved.DeclaringType?.Name, resolved.Name + textualStackTrace);
+                                break;
                             case SystemException.NullReference:
-                                throw new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved}");
+                                ex = new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                break;
                             case SystemException.StackOverflow:
-                                throw new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved}");
+                                ex = new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                break;
                             case SystemException.DivideByZero:
-                                throw new DivideByZeroException($"Integer Division by zero in {resolved.DeclaringType} - {resolved}");
+                                ex = new DivideByZeroException($"Integer Division by zero in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                break;
                             case SystemException.IndexOutOfRange:
-                                throw new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved}");
+                                ex = new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                break;
                             case SystemException.OutOfMemory:
-                                throw new OutOfMemoryException($"Out of memory allocating an instance of {resolved.DeclaringType} - {resolved}.");
+                                ex = new OutOfMemoryException($"Out of memory allocating an instance of {resolved.DeclaringType} - {resolved}." + textualStackTrace);
+                                break;
                             case SystemException.ArrayTypeMismatch:
-                                throw new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.DeclaringType} - {resolved}.");
+                                ex = new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.DeclaringType} - {resolved}. + textualStackTrace");
+                                break;
                             default:
-                                throw new InvalidOperationException("Unknown exception");
+                                ex = new InvalidOperationException("Unknown exception" + textualStackTrace);
+                                break;
                         }
                     }
-
-                    // TypeInfo inherits from Type, so a TypeInfo is always also a Type
-                    var resolvedException = set.InverseResolveToken(exceptionCode) as Type;
-
-                    if (resolvedException == null)
+                    else
                     {
-                        throw new InvalidOperationException("Internal error: Unknown exception type");
+                        // TypeInfo inherits from Type, so a TypeInfo is always also a Type
+                        var resolvedException = set.InverseResolveToken(exceptionCode) as Type;
+
+                        if (resolvedException == null)
+                        {
+                            throw new InvalidOperationException("Internal error: Unknown exception type");
+                        }
+
+                        ex = (Exception)Activator.CreateInstance(resolvedException, BindingFlags.Public, null, $"Location: {resolved.DeclaringType} - {resolved}" + textualStackTrace)!;
                     }
 
-                    Exception x = (Exception)Activator.CreateInstance(resolvedException, BindingFlags.Public, null, $"Location: {resolved.DeclaringType} - {resolved}")!;
-                    throw x;
+                    throw ex;
                 }
 
                 return true;

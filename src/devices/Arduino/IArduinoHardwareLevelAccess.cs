@@ -28,5 +28,14 @@ namespace Iot.Device.Arduino
 
         [ArduinoImplementation(ArduinoImplementation.Debug)]
         void DebugValue(int data);
+
+        [ArduinoImplementation(ArduinoImplementation.GetPinMode)]
+        PinMode GetPinMode(int pinNumber);
+
+        [ArduinoImplementation(ArduinoImplementation.IsPinModeSupported)]
+        bool IsPinModeSupported(int pinNumber, PinMode mode);
+
+        [ArduinoImplementation(ArduinoImplementation.GetPinCount)]
+        int GetPinCount();
     }
 }

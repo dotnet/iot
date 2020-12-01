@@ -993,7 +993,7 @@ namespace Iot.Device.Arduino
                 // If we have a ctor in the call chain we need to ensure we have its class loaded.
                 // This happens if the created object is only used in local variables but not as a class member
                 // seen so far.
-                if (dep.IsConstructor && dep.DeclaringType != null && !dep.DeclaringType.IsValueType)
+                if (dep.IsConstructor && dep.DeclaringType != null && ValueTypeSupported(dep.DeclaringType))
                 {
                     PrepareClass(set, dep.DeclaringType);
                 }
