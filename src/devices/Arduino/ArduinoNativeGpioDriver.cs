@@ -61,12 +61,12 @@ namespace Iot.Device.Arduino
         protected override PinValue Read(int pinNumber)
         {
             // We should not be throwing here, as this results in unnecessary dependencies
-            return _hardwareLevelAccess?.ReadPin(pinNumber) ?? PinValue.Low;
+            return _hardwareLevelAccess.ReadPin(pinNumber);
         }
 
         protected override void Write(int pinNumber, PinValue value)
         {
-            _hardwareLevelAccess?.WritePin(pinNumber, value == PinValue.High ? 1 : 0);
+            _hardwareLevelAccess.WritePin(pinNumber, value == PinValue.High ? 1 : 0);
         }
 
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
