@@ -16,14 +16,14 @@ namespace PiJuiceDevice.Sample
         public static void Main(string[] args)
         {
             Console.WriteLine("Hello PiJuice!");
-            I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, PiJuice.DefaultI2cAddress);
-            PiJuice piJuice = new PiJuice(I2cDevice.Create(i2CConnectionSettings));
+            I2cConnectionSettings i2CConnectionSettings = new(1, PiJuice.DefaultI2cAddress);
+            PiJuice piJuice = new(I2cDevice.Create(i2CConnectionSettings));
             Console.WriteLine($"Manufacturer :{piJuice.PiJuiceInfo.Manufacturer}");
             Console.WriteLine($"Board: {piJuice.PiJuiceInfo.Board}");
             Console.WriteLine($"Firmware version: {piJuice.PiJuiceInfo.FirmwareVersion}");
-            PiJuiceStatus piJuiceStatus = new PiJuiceStatus(piJuice);
-            PiJuicePower piJuicePower = new PiJuicePower(piJuice);
-            PiJuiceConfig piJuiceConfig = new PiJuiceConfig(piJuice);
+            PiJuiceStatus piJuiceStatus = new(piJuice);
+            PiJuicePower piJuicePower = new(piJuice);
+            PiJuiceConfig piJuiceConfig = new(piJuice);
             while (!Console.KeyAvailable)
             {
                 Console.Clear();
@@ -38,11 +38,11 @@ namespace PiJuiceDevice.Sample
                 WakeUpOnCharge wakeUp = piJuicePower.WakeUpOnCharge;
                 Console.WriteLine($"Is wake up on charge disabled: {wakeUp.Disabled}, Wake up at charging percentage: {wakeUp.WakeUpPercentage}%");
                 Console.WriteLine("Set wake up on charge percentage to 60%");
-                piJuicePower.WakeUpOnCharge = new WakeUpOnCharge { Disabled = false, WakeUpPercentage = new Ratio(60, RatioUnit.Percent) };
+                piJuicePower.WakeUpOnCharge = new(false, new Ratio(60, RatioUnit.Percent));
                 Thread.Sleep(5);
                 wakeUp = piJuicePower.WakeUpOnCharge;
                 Console.WriteLine($"Is wake up on charge disabled: {wakeUp.Disabled}, Wake up at charging percentage: {wakeUp.WakeUpPercentage.Value}%");
-                piJuicePower.WakeUpOnCharge = new WakeUpOnCharge { Disabled = true, WakeUpPercentage = new Ratio(0, RatioUnit.Percent) };
+                piJuicePower.WakeUpOnCharge = new(true, new Ratio(0, RatioUnit.Percent));
 
                 Thread.Sleep(2000);
             }

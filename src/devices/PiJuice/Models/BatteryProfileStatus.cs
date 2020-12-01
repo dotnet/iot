@@ -2,31 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#pragma warning disable CS1591, CS1572, CS1573
+
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
     /// Battery profile status
     /// </summary>
-    public class BatteryProfileStatus
-    {
-        /// <summary>
-        /// Current battery profile
-        /// </summary>
-        public string BatteryProfile { get; set; }
-
-        /// <summary>
-        /// The source for the battery profile
-        /// </summary>
-        public BatteryProfileSource BatteryProfileSource { get; set; }
-
-        /// <summary>
-        /// Whether the current battery profile is valid
-        /// </summary>
-        public bool BatteryProfileValid { get; set; }
-
-        /// <summary>
-        /// The type of battery profile
-        /// </summary>
-        public BatteryOrigin BatteryOrigin { get; set; }
-    }
+    /// <param name ="BatteryProfile">Current battery profile</param>
+    /// <param name ="BatteryProfileSource">The source for the battery profile</param>
+    /// <param name ="BatteryProfileValid">Whether the current battery profile is valid</param>
+    /// <param name ="BatteryOrigin">The type of battery profile</param>
+    public record BatteryProfileStatus(string BatteryProfile, BatteryProfileSource BatteryProfileSource, bool BatteryProfileValid, BatteryOrigin BatteryOrigin);
 }
