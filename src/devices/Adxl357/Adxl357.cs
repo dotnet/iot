@@ -83,8 +83,7 @@ namespace Iot.Device.Adxl357
             var avgZ = caliBuffer.Select(v => v.Z).Average();
 
             var x = (((avgZ - avgX) + (avgZ - avgY)) / 2);
-            x = x == 0 ? float.PositiveInfinity : x;
-            _factory = 1.0F / x;
+            _factory = x == 0 ? float.PositiveInfinity : 1.0F / x;
         }
 
         /// <summary>
