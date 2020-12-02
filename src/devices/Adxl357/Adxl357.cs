@@ -22,8 +22,9 @@ namespace Iot.Device.Adxl357
         /// </summary>
         public const byte DefaultI2CAddress = 0x1d;
 
-        private const int CalibrationBufferLength = 15;
-        private const int CalibrationInterval = 250;
+        // Default values taken from sample code https://wiki.seeedstudio.com/Grove-3-Axis_Digital_Accelerometer_40g-ADXL357/
+        private const int CalibrationBufferLengthDefault = 15;
+        private const int CalibrationIntervalDefault = 250;
 
         private float _factory = 1;
         private I2cDevice _i2CDevice;
@@ -63,7 +64,7 @@ namespace Iot.Device.Adxl357
         /// <remarks>
         /// Make sure that the sensor is placed horizontally when executing this method.
         /// </remarks>
-        public async Task CalibrateAccelerationSensor(int calibrationBufferLength = CalibrationBufferLength, int calibrationInterval = CalibrationInterval)
+        public async Task CalibrateAccelerationSensor(int calibrationBufferLength = CalibrationBufferLengthDefault, int calibrationInterval = CalibrationIntervalDefault)
         {
             var caliBuffer = new Vector3[calibrationBufferLength];
 
