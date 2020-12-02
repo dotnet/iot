@@ -6,7 +6,7 @@
 
 ## Code
 
-```C#
+```csharp
 I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, Adxl357.DefaultI2CAddress);
 I2cDevice device = I2cDevice.Create(i2CConnectionSettings);
 using Adxl357 sensor = new Adxl357(device);
