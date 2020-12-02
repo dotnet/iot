@@ -91,7 +91,8 @@ namespace Iot.Device.Arduino
         private readonly List<Type> _replacementClasses = new List<Type>()
         {
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
-            typeof(MiniException), typeof(MiniHashSet<int>), typeof(MiniEqualityComparer<int>)
+            typeof(MiniException), typeof(MiniHashSet<int>), typeof(MiniEqualityComparer<int>), typeof(MiniThread),
+            typeof(MiniEnvironment)
         };
 
         /// <summary>
@@ -226,13 +227,6 @@ namespace Iot.Device.Arduino
                     _methodInfos.Add(method, decl);
                     set.AddMethod(decl);
                 }
-            }
-
-            // Also load the core methods
-            var t = typeof(ArduinoRuntimeCore);
-            foreach (var method in t.GetMethods(BindingFlags.Public))
-            {
-                PrepareCodeInternal(set, method);
             }
 
             // And the internal classes

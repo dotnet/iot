@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Text;
+using System.Threading;
 using Iot.Device.Arduino;
 
 #pragma warning disable CS1591
@@ -32,9 +33,9 @@ namespace Arduino.Samples
                 for (int i = 0; i < 20; i++)
                 {
                     _controller.Write(_ledPin, 1);
-                    ArduinoRuntimeCore.Sleep(null!, _delay);
+                    Thread.Sleep(_delay);
                     _controller.Write(_ledPin, 0);
-                    ArduinoRuntimeCore.Sleep(null!, _delay);
+                    Thread.Sleep(_delay);
                 }
             }
 
@@ -97,9 +98,9 @@ namespace Arduino.Samples
             for (int i = 0; Smaller(i, 10); i++)
             {
                 hw.WritePin(pin, 1);
-                ArduinoRuntimeCore.Sleep(hw, delay);
+                Thread.Sleep(delay);
                 hw.WritePin(pin, 0);
-                ArduinoRuntimeCore.Sleep(hw, delay);
+                Thread.Sleep(delay);
             }
 
             hw.SetPinMode(pin, PinMode.Input);
@@ -115,9 +116,9 @@ namespace Arduino.Samples
 
             uint loopCount = 5000;
 
-            UInt32 watchStart = controller.GetMicroseconds();
+            UInt32 watchStart = ArduinoNativeHelpers.GetMicroseconds();
             // controller.SleepMicroseconds(1);
-            UInt32 elapsed = controller.GetMicroseconds() - watchStart;
+            UInt32 elapsed = ArduinoNativeHelpers.GetMicroseconds() - watchStart;
             controller.DebugValue((int)elapsed);
 
             controller.SetPinMode(debugPin, PinMode.Output);
@@ -129,13 +130,13 @@ namespace Arduino.Samples
 
             controller.SetPinMode(pin, PinMode.Output);
             controller.WritePin(pin, 1);
-            ArduinoRuntimeCore.Sleep(controller, 20);
+            Thread.Sleep(20);
 
             // send trigger signal
             controller.WritePin(pin, 0);
             // wait at least 18 milliseconds
             // here wait for 18 milliseconds will cause sensor initialization to fail
-            ArduinoRuntimeCore.Sleep(controller, 20);
+            Thread.Sleep(20);
 
             // pull up data line
             // TODO: This causes the signal to be disturbed for about 5ms. Do we need to always write a 0 before setting the mode to InputPullUp?
