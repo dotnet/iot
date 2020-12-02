@@ -144,12 +144,9 @@ namespace Iot.Device.Adxl357
 
         private float GetValueForOneAxis(byte firstByte, byte secondByte, byte thirdByte)
         {
-            uint value = ((uint)firstByte << 12) | ((uint)secondByte << 4) | ((uint)thirdByte >> 4);
+            int value = (firstByte << 12) | (secondByte << 4) | (thirdByte >> 4);
 
-            if ((value & 0x80000) == 0x80000)
-            {
-                value = (value & 0x7ffff) - 0x80000;
-            }
+            value = (value & 0x80000) == 0x80000 ? -value : value;
 
             return value * _factory;
         }
