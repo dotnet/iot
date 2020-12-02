@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
@@ -7,13 +10,19 @@ using System.Device.Pwm;
 using System.Device.Spi;
 using System.Text;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Board
 {
+    /// <summary>
+    /// Raspberry Pi specific board implementation.
+    /// Contains all the knowledge about which pins can be used for what purpose.
+    /// </summary>
     public class RaspberryPiBoard : GenericBoard
     {
         private ManagedGpioController? _managedGpioController;
 
+        /// <summary>
+        /// Creates an instance of a Rasperry Pi board.
+        /// </summary>
         public RaspberryPiBoard(PinNumberingScheme defaultNumberingScheme)
             : base(defaultNumberingScheme)
         {
@@ -21,17 +30,25 @@ namespace Iot.Device.Board
             PinCount = 28;
         }
 
+        /// <summary>
+        /// Number of pins of the board
+        /// </summary>
         public int PinCount
         {
             get;
             protected set;
         }
 
+        /// <inheritdoc />
         protected override GpioDriver? TryCreateBestGpioDriver()
         {
             return new RaspberryPi3Driver();
         }
 
+        /// <summary>
+        /// Initializes this instance
+        /// </summary>
+        /// <exception cref="NotSupportedException">The current hardware could not be identified as a valid Raspberry Pi type</exception>
         public override void Initialize()
         {
             // Needs to be a raspi 3 driver here (either unix or windows)
@@ -46,6 +63,13 @@ namespace Iot.Device.Board
             base.Initialize();
         }
 
+        /// <summary>
+        /// Convert a pin number from one scheme to another
+        /// </summary>
+        /// <param name="pinNumber">Pin number</param>
+        /// <param name="inputScheme">Input scheme</param>
+        /// <param name="outputScheme">Output scheme</param>
+        /// <returns>Pin number in the output scheme</returns>
         public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
         {
             if (inputScheme == outputScheme)
@@ -127,6 +151,7 @@ namespace Iot.Device.Board
             throw new NotSupportedException("Unsupported numbering scheme combination");
         }
 
+        /// <inheritdoc />
         public override int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings)
         {
             int scl;
@@ -193,6 +218,7 @@ namespace Iot.Device.Board
             };
         }
 
+        /// <inheritdoc />
         public override int[] GetDefaultPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
         {
             int cs = connectionSettings.ChipSelectLine;
@@ -302,6 +328,7 @@ namespace Iot.Device.Board
             return pins.ToArray();
         }
 
+        /// <inheritdoc />
         public override AlternatePinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
         {
             pinNumber = RemapPin(pinNumber, pinNumberingScheme);
@@ -451,6 +478,7 @@ namespace Iot.Device.Board
             throw new NotSupportedException($"There are no known pins for {usage}.");
         }
 
+        /// <inheritdoc />
         public override int GetDefaultPinAssignmentForPwm(int chip, int channel)
         {
             // The default assignment is 12 & 13, but 18 and 19 is supported as well
@@ -467,6 +495,11 @@ namespace Iot.Device.Board
             throw new NotSupportedException($"No such PWM Channel: Chip {chip} channel {channel}.");
         }
 
+        /// <summary>
+        /// Switches a pin to a certain alternate mode. (ALTn mode)
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the logical scheme</param>
+        /// <param name="usage">The desired usage</param>
         protected override void ActivatePinMode(int pinNumber, PinUsage usage)
         {
             if (_managedGpioController == null)
@@ -483,6 +516,12 @@ namespace Iot.Device.Board
             base.ActivatePinMode(pinNumber, usage);
         }
 
+        /// <summary>
+        /// Gets the current alternate pin mode. (ALTn mode)
+        /// </summary>
+        /// <param name="pinNumber">Pin number, in the logical scheme</param>
+        /// <returns>The current pin usage</returns>
+        /// <remarks>This also works for closed pins, but then uses a bit of heuristics to get the correct mode</remarks>
         public override PinUsage DetermineCurrentPinUsage(int pinNumber)
         {
             if (_managedGpioController == null)
@@ -525,6 +564,7 @@ namespace Iot.Device.Board
             return PinUsage.Unknown;
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)

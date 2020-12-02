@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
@@ -10,9 +13,14 @@ using System.Linq;
 using System.Text;
 using Microsoft.Win32;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Board
 {
+    /// <summary>
+    /// Base class for all board abstractions.
+    /// A "board" is a piece of hardware that offers low-level interfaces to other devices. Typically, it has GPIO pins and one or multiple SPI or I2C busses.
+    /// There should be exactly one instance of a board class per hardware component in an application, but it is possible to work with multiple boards
+    /// at once (i.e. when having a GPIO expander connected to the Raspberry Pi)
+    /// </summary>
     public abstract class Board : MarshalByRefObject, IDisposable
     {
         // See comment at GetBestDriverForBoardOnWindows. This should get some specific factory pattern
@@ -27,6 +35,15 @@ namespace Iot.Device.Board
         private bool _initialized;
         private bool _disposed;
 
+        /// <summary>
+        /// Constructs a board instance with the given default numbering scheme.
+        /// All methods will use the given numbering scheme, unless another scheme is explicitly given in a call.
+        /// </summary>
+        /// <param name="defaultNumberingScheme">Default numbering scheme for the board.</param>
+        /// <remarks>
+        /// The constructor will never throw an exception. Call <see cref="Initialize"/> to initialize the hardware and check
+        /// whether an instance can actually run on the current hardware.
+        /// </remarks>
         protected Board(PinNumberingScheme defaultNumberingScheme)
         {
             _defaultNumberingScheme = defaultNumberingScheme;
@@ -36,15 +53,20 @@ namespace Iot.Device.Board
             _disposed = false;
         }
 
-        ~Board()
-        {
-            Dispose(false);
-        }
-
+        /// <summary>
+        /// (Temporary) Register to this event to receive log messages.
+        /// </summary>
         public event Action<string, Exception?>? LogMessages;
 
+        /// <summary>
+        /// True if the board instance is initialized
+        /// </summary>
         protected bool Initialized => _initialized;
 
+        /// <summary>
+        /// True if this instance is disposed.
+        /// Any attempt to use it after this becomes true results in undefined behavior.
+        /// </summary>
         protected bool Disposed
         {
             get
@@ -53,6 +75,9 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <summary>
+        /// The default pin numbering scheme
+        /// </summary>
         public PinNumberingScheme DefaultPinNumberingScheme
         {
             get
@@ -61,6 +86,9 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <summary>
+        /// (Temporary) Log a message
+        /// </summary>
         protected void Log(string message, Exception? exception = null)
         {
             LogMessages?.Invoke(message, null);
@@ -82,6 +110,7 @@ namespace Iot.Device.Board
         /// <param name="pinNumber">The pin number, in the boards default numbering scheme</param>
         /// <param name="usage">Intended usage of the pin</param>
         /// <param name="owner">Class that owns the pin (use "this")</param>
+        /// <exception cref="InvalidOperationException">The pin is already reserved</exception>
         public virtual void ReservePin(int pinNumber, PinUsage usage, object owner)
         {
             if (!_initialized)
@@ -128,6 +157,14 @@ namespace Iot.Device.Board
             ActivatePinMode(logicalPin, usage);
         }
 
+        /// <summary>
+        /// Removes the reservation for a pin.
+        /// See <see cref="ReservePin"/> for details.
+        /// </summary>
+        /// <param name="pinNumber">The pin number to free, in the numbering scheme of the board</param>
+        /// <param name="usage">The current pin usage</param>
+        /// <param name="owner">The current pin owner</param>
+        /// <exception cref="InvalidOperationException">The pin is not reserved, or the owner is not correct</exception>
         public virtual void ReleasePin(int pinNumber, PinUsage usage, object owner)
         {
             if (!_initialized)
@@ -178,6 +215,11 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <summary>
+        /// Returns the current usage of a pin
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the current numbering scheme</param>
+        /// <returns>The current usage of a pin</returns>
         public abstract PinUsage DetermineCurrentPinUsage(int pinNumber);
 
         /// <summary>
@@ -191,6 +233,10 @@ namespace Iot.Device.Board
         {
         }
 
+        /// <summary>
+        /// Initialize the board and test whether it works on the current hardware.
+        /// </summary>
+        /// <exception cref="PlatformNotSupportedException">The required hardware cannot be found</exception>
         public virtual void Initialize()
         {
             if (_disposed)
@@ -201,11 +247,13 @@ namespace Iot.Device.Board
             _initialized = true;
         }
 
+        /// <inheritdoc cref="IDisposable.Dispose"/>
         protected virtual void Dispose(bool disposing)
         {
             _disposed = true;
         }
 
+        /// <inheritdoc cref="IDisposable.Dispose"/>
         public void Dispose()
         {
             Dispose(true);
@@ -230,11 +278,21 @@ namespace Iot.Device.Board
             public object Owner { get; }
         }
 
+        /// <summary>
+        /// Return an instance of a <see cref="GpioController"/> for the current board
+        /// </summary>
+        /// <returns>An instance of a GpioController. The controller used pin management to prevent reusing the same pin for different purposes
+        /// (or for purposes for which it is not suitable)</returns>
         public virtual GpioController CreateGpioController()
         {
             return CreateGpioController(DefaultPinNumberingScheme);
         }
 
+        /// <summary>
+        /// Return an instance of a <see cref="GpioController"/> for the current board, specifying the numbering scheme to use
+        /// </summary>
+        /// <returns>An instance of a GpioController. The controller used pin management to prevent reusing the same pin for different purposes
+        /// (or for purposes for which it is not suitable)</returns>
         public virtual GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
         {
             GpioDriver? driver = TryCreateBestGpioDriver();
@@ -247,6 +305,11 @@ namespace Iot.Device.Board
             return new ManagedGpioController(this, pinNumberingScheme, driver);
         }
 
+        /// <summary>
+        /// Tries to create the best possible GPIO driver for this hardware.
+        /// </summary>
+        /// <returns>An instance to the optimal Gpio Driver for this board, or null if none was found</returns>
+        /// <remarks>The base implementation will never return null, but create a dummy instance instead</remarks>
         protected virtual GpioDriver? TryCreateBestGpioDriver()
         {
             GpioDriver? driver = null;
@@ -317,10 +380,18 @@ namespace Iot.Device.Board
         ///     public static bool IsSpecificToCurrentEnvironment { get; }
         ///     The GpioController could use reflection to find all GpioDriver-derived classes and call this
         ///     static method to determine if the driver considers itself to be the best match for the environment.
+        /// (Implementation copied from <see cref="GpioController"/>, where it is private)
         /// </remarks>
         private static GpioDriver GetBestDriverForBoardOnWindows()
         {
-            string baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty)!.ToString();
+#pragma warning disable CA1416 // Registry.LocalMachine is only supported on Windows, but we will only hit this method if we are on Windows.
+            string? baseBoardProduct = Registry.LocalMachine.GetValue(BaseBoardProductRegistryValue, string.Empty)?.ToString();
+#pragma warning restore CA1416
+
+            if (baseBoardProduct is null)
+            {
+                throw new Exception("Single board computer type cannot be detected.");
+            }
 
             if (baseBoardProduct == RaspberryPi3Product || baseBoardProduct.StartsWith($"{RaspberryPi3Product} ") ||
                 baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
@@ -345,6 +416,14 @@ namespace Iot.Device.Board
         /// <returns>An I2cDevice connection</returns>
         protected abstract I2cDevice CreateSimpleI2cDevice(I2cConnectionSettings connectionSettings, int[] pinAssignment);
 
+        /// <summary>
+        /// Create an I2C device instance
+        /// </summary>
+        /// <param name="connectionSettings">Connection parameters (contains I2C address and bus number)</param>
+        /// <param name="pinAssignment">The set of pins to use for I2C. The parameter can be null if the hardware requires a fixed mapping from
+        /// pins to I2C for the given bus.</param>
+        /// <param name="pinNumberingScheme">The numbering scheme in which the <paramref name="pinAssignment"/> is given</param>
+        /// <returns>An I2C device instance</returns>
         public I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings, int[] pinAssignment, PinNumberingScheme pinNumberingScheme)
         {
             if (pinAssignment == null || pinAssignment.Length != 2)
@@ -355,6 +434,13 @@ namespace Iot.Device.Board
             return new I2cDeviceManager(this, connectionSettings, RemapPins(pinAssignment, pinNumberingScheme), CreateSimpleI2cDevice);
         }
 
+        /// <summary>
+        /// Create an I2C device instance on a default bus.
+        /// </summary>
+        /// <param name="connectionSettings">Connection parameters (contains I2C address and bus number)</param>
+        /// <returns>An I2C device instance</returns>
+        /// <remarks>This method can only be used for bus numbers where the corresponding pins are hardwired
+        /// (i.e. bus 0 and 1 on the Raspi always use pins 0/1 and 2/3)</remarks>
         public I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
             // Returns logical pin numbers for the selected bus (or an exception if using a bus number > 1, because that
@@ -363,6 +449,14 @@ namespace Iot.Device.Board
             return CreateI2cDevice(connectionSettings, pinAssignment, PinNumberingScheme.Logical);
         }
 
+        /// <summary>
+        /// Create an SPI device instance
+        /// </summary>
+        /// <param name="connectionSettings">Connection parameters (contains bus number and CS pin number)</param>
+        /// <param name="pinAssignment">The set of pins to use for SPI. The parameter can be null if the hardware requires a fixed mapping from
+        /// pins to SPI for the given bus.</param>
+        /// <param name="pinNumberingScheme">The numbering scheme in which the <paramref name="pinAssignment"/> is given</param>
+        /// <returns>An SPI device instance</returns>
         public SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings, int[] pinAssignment, PinNumberingScheme pinNumberingScheme)
         {
             if (pinAssignment == null)
@@ -378,6 +472,12 @@ namespace Iot.Device.Board
             return new SpiDeviceManager(this, connectionSettings, RemapPins(pinAssignment, pinNumberingScheme), CreateSimpleSpiDevice);
         }
 
+        /// <summary>
+        /// Create an SPI device instance
+        /// </summary>
+        /// /// <param name="connectionSettings">Connection parameters (contains SPI CS pin number and bus number)</param>
+        /// <returns>An SPI device instance</returns>
+        /// <remarks>This method can only be used for bus numbers where the corresponding pins are hardwired</remarks>
         public SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings)
         {
             // Returns logical pin numbers for the selected bus (or an exception if using a bus number > 1, because that
@@ -386,16 +486,40 @@ namespace Iot.Device.Board
             return CreateSpiDevice(connectionSettings, pinAssignment, PinNumberingScheme.Logical);
         }
 
+        /// <summary>
+        /// Overriden by derived implementations to create the base SPI device.
+        /// </summary>
         protected abstract SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins);
 
+        /// <summary>
+        /// Overriden by derived implementations to provide the PWM device
+        /// </summary>
         protected abstract PwmChannel CreateSimplePwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage);
 
+        /// <summary>
+        /// Creates a PWM channel
+        /// </summary>
+        /// <param name="chip">Chip number. Usually 0</param>
+        /// <param name="channel">Channel on the given chip</param>
+        /// <param name="frequency">Initial frequency</param>
+        /// <param name="dutyCyclePercentage">Initial duty cycle</param>
+        /// <param name="pin">The pin number for the pwm channel. Used if not hardwired (i.e. on the Raspi, it is possible to use different pins for the same PWM channel)</param>
+        /// <param name="pinNumberingScheme">The pin numbering scheme for the pin</param>
+        /// <returns>A pwm channel instance</returns>
         public PwmChannel CreatePwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage,
             int pin, PinNumberingScheme pinNumberingScheme)
         {
             return new PwmChannelManager(this, pin, chip, channel, frequency, dutyCyclePercentage, CreateSimplePwmChannel);
         }
 
+        /// <summary>
+        /// Creates a PWM channel for the default pin assignment
+        /// </summary>
+        /// <param name="chip">Chip number. Usually 0</param>
+        /// <param name="channel">Channel on the given chip</param>
+        /// <param name="frequency">Initial frequency</param>
+        /// <param name="dutyCyclePercentage">Initial duty cycle</param>
+        /// <returns>A pwm channel instance</returns>
         public PwmChannel CreatePwmChannel(
             int chip,
             int channel,
@@ -406,6 +530,12 @@ namespace Iot.Device.Board
             return CreatePwmChannel(chip, channel, frequency, dutyCyclePercentage, RemapPin(pin, DefaultPinNumberingScheme), PinNumberingScheme.Logical);
         }
 
+        /// <summary>
+        /// Overriden by derived class. Provides the default pin for a given channel.
+        /// </summary>
+        /// <param name="chip">Chip number</param>
+        /// <param name="channel">Channel number</param>
+        /// <returns>The default pin for the given PWM channel</returns>
         public abstract int GetDefaultPinAssignmentForPwm(int chip, int channel);
 
         /// <summary>
@@ -420,15 +550,31 @@ namespace Iot.Device.Board
         public abstract AlternatePinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage,
             PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0);
 
+        /// <summary>
+        /// Overriden by derived classes: Provides the default pin assignment for the given I2C bus
+        /// </summary>
+        /// <param name="connectionSettings">Connection settings to check</param>
+        /// <returns>The set of pins for the given I2C bus</returns>
         public abstract int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings);
 
+        /// <summary>
+        /// Overriden by derived classes: Provides the default pin assignment for the given SPI bus
+        /// </summary>
+        /// <param name="connectionSettings">Connection settings to check</param>
+        /// <returns>The set of pins for the given SPI bus</returns>
         public abstract int[] GetDefaultPinAssignmentForSpi(SpiConnectionSettings connectionSettings);
 
+        /// <summary>
+        /// Converts a pin number to the logical scheme
+        /// </summary>
         protected int RemapPin(int pin, PinNumberingScheme providedScheme)
         {
             return ConvertPinNumber(pin, providedScheme, PinNumberingScheme.Logical);
         }
 
+        /// <summary>
+        /// Converts a set of pins to the logical scheme
+        /// </summary>
         protected int[]? RemapPins(int[] pins, PinNumberingScheme providedScheme)
         {
             if (pins == null)

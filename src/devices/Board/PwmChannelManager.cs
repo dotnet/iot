@@ -1,10 +1,12 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Device.Pwm;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Board
 {
-    public class PwmChannelManager : PwmChannel
+    internal class PwmChannelManager : PwmChannel
     {
         private readonly Board _board;
         private readonly int _pin;
