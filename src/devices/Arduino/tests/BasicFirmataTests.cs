@@ -8,45 +8,42 @@ using System.Device.Gpio;
 using System.IO;
 using System.IO.Ports;
 using System.Threading;
+using Arduino.Tests;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
 {
     /// <summary>
-    /// Basic firmata tests. These tests require functional hardware, that is an Arduino, loaded with a matching firmata firmware.
+    /// Basic firmata tests. These tests require functional hardware, that is an Arduino, loaded with a matching firmata firmware. It can also
+    /// run against the *ExtendedConfigurableFirmata" simulator
     /// </summary>
-    public sealed class BasicFirmataTests : IDisposable
+    public sealed class BasicFirmataTests : IClassFixture<FirmataTestFixture>
     {
-        private ArduinoBoard _board;
+        private readonly FirmataTestFixture _fixture;
 
-        public BasicFirmataTests()
+        public BasicFirmataTests(FirmataTestFixture fixture)
         {
-            var b = ArduinoBoard.FindBoard(ArduinoBoard.GetSerialPortNames(), new List<int>() { 115200 });
-            if (b == null)
-            {
-                throw new NotSupportedException("No board found");
-            }
-
-            _board = b;
+            _fixture = fixture;
+            Board = _fixture.Board;
         }
 
-        public void Dispose()
+        public ArduinoBoard Board
         {
-            _board.Dispose();
+            get;
         }
 
         [Fact]
         public void CheckFirmwareVersion()
         {
-            Assert.NotNull(_board.FirmwareName);
-            Assert.NotEqual(new Version(), _board.FirmwareVersion);
-            Assert.True(_board.FirmwareVersion >= Version.Parse("2.11"));
+            Assert.NotNull(Board.FirmwareName);
+            Assert.NotEqual(new Version(), Board.FirmwareVersion);
+            Assert.True(Board.FirmwareVersion >= Version.Parse("2.11"));
         }
 
         [Fact]
         public void CanBlink()
         {
-            var ctrl = _board.CreateGpioController(PinNumberingScheme.Logical);
+            var ctrl = Board.CreateGpioController(PinNumberingScheme.Logical);
             Assert.NotNull(ctrl);
             ctrl.OpenPin(6, PinMode.Output);
             ctrl.SetPinMode(6, PinMode.Output);

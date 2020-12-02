@@ -3,34 +3,30 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.Ports;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Arduino.Tests;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
 {
-    public class FirmataIlExecutorTests : IDisposable
+    public sealed class FirmataIlExecutorTests : IClassFixture<FirmataTestFixture>, IDisposable
     {
-        private ArduinoBoard _board;
+        private FirmataTestFixture _fixture;
         private ArduinoCsCompiler _compiler;
 
-        public FirmataIlExecutorTests()
+        public FirmataIlExecutorTests(FirmataTestFixture fixture)
         {
-            var b = ArduinoBoard.FindBoard(ArduinoBoard.GetSerialPortNames(), new List<int>() { 115200 });
-            if (b == null)
-            {
-                throw new NotSupportedException("No board found");
-            }
-
-            _board = b;
-            _board.LogMessages += (x, y) => Console.WriteLine(x);
-            _compiler = new ArduinoCsCompiler(_board, true);
+            _fixture = fixture;
+            _compiler = new ArduinoCsCompiler(fixture.Board, true);
+            _compiler.ClearAllData(true);
         }
 
         public void Dispose()
         {
-            _compiler.ClearAllData(true);
-            _board.Dispose();
+            _compiler.Dispose();
         }
 
         public static uint AddU(uint a, uint b)
@@ -289,7 +285,7 @@ namespace Iot.Device.Arduino.Tests
             var set = _compiler.CreateExecutionSet();
             _compiler.PrepareLowLevelInterface(set);
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-            var method = _compiler.PrepareCode<Func<T1, T2, T3>>(set, methods[0]);
+            var method = _compiler.AddSimpleMethod(set, methods[0]);
 
             // First execute the method locally, so we don't have an error in the test
             T3 result = (T3)methods[0].Invoke(null, new object[] { a!, b! });

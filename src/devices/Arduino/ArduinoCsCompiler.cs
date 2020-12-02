@@ -887,17 +887,20 @@ namespace Iot.Device.Arduino
             return GetTask(set, mainEntryPoint.Method);
         }
 
-        // Todo: Make internal only (only used for tests)
-        public ArduinoTask PrepareCode<T>(ExecutionSet set, MethodBase method)
-            where T : Delegate
+        public ArduinoTask AddSimpleMethod(ExecutionSet set, MethodInfo mainEntryPoint)
         {
-            if (method == null)
+            if (mainEntryPoint == null)
             {
-                throw new ArgumentNullException(nameof(method));
+                throw new ArgumentNullException(nameof(mainEntryPoint));
             }
 
-            PrepareCodeInternal(set, method);
-            return GetTask(set, method);
+            PrepareCodeInternal(set, mainEntryPoint);
+            _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
+            FinalizeExecutionSet(set);
+            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
+            set.MainEntryPointInternal = mainEntryPoint;
+            set.Load();
+            return GetTask(set, mainEntryPoint);
         }
 
         public void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo)
