@@ -14,7 +14,10 @@ Source: https://wiki.seeedstudio.com/Grove-3-Axis_Digital_Accelerometer_40g-ADXL
 ```csharp
 I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, Adxl357.DefaultI2CAddress);
 I2cDevice device = I2cDevice.Create(i2CConnectionSettings);
-using Adxl357 sensor = new Adxl357(device);
+using Adxl357 sensor = new Adxl357(device, AccelerometerRange.Range40G);
+int calibrationBufferLength = 10;
+int calibrationInterval = 100;
+await sensor.CalibrateAccelerationSensor(calibrationBufferLength, calibrationInterval).ConfigureAwait(false);
 while (true)
 {
     // read data
@@ -27,7 +30,7 @@ while (true)
 
     // wait for 500ms
     Thread.Sleep(500);
-}}
+}
 ```
 
 ## References
