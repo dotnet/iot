@@ -21,22 +21,28 @@ namespace Ndef.Tests
         [Fact]
         public void NdefTextRecordUTF8()
         {
+            // Arrange
             const string CorrectText = "Super ça marche ";
             const string LanguageCode = "en";
             // Text is Encoding.UTF8 and once extractes "Super ça marche " (with space at the end);
             Span<byte> txtRaw = new byte[] { 0x91, 0x01, 0x14, 0x54, 0x02, 0x65, 0x6E, 0x53, 0x75, 0x70, 0x65, 0x72, 0x20, 0xC3, 0xA7, 0x61, 0x20, 0x6D, 0x61, 0x72, 0x63, 0x68, 0x65, 0x20 };
 
+            // Act
             var txtRecord = new TextRecord(txtRaw);
+
+            // Assert
             Assert.Equal(CorrectText, txtRecord.Text);
             Assert.True(txtRecord.Header.IsFirstMessage);
             Assert.False(txtRecord.Header.IsLastMessage);
             Assert.False(txtRecord.Header.IsComposedMessage);
             Assert.Equal(4, txtRecord.Header.Length);
-            Assert.Equal(20, txtRecord.Payload.Length);
+            Assert.Equal(20, txtRecord.Payload?.Length);
             Assert.Equal(LanguageCode, txtRecord.LanguageCode);
 
+            // Arrange
             // Now compose a new text message and compare it with the original one
             var newTxtRecord = new TextRecord(CorrectText, LanguageCode, Encoding.UTF8);
+            // Assert
             Assert.Equal(txtRaw.Slice(4).ToArray(), newTxtRecord.Payload);
             Assert.Equal(4, newTxtRecord.Header.Length);
         }
@@ -47,35 +53,35 @@ namespace Ndef.Tests
         [Fact]
         public void NdefMultipleMessage()
         {
+            // Arrange
             // Extract the data from the Mifare card dump
             var extract = ExtractAllBlocksFromCardDump(CardDumpExamples.Memory1KDumpMultipleEntries);
             // Get the NDEF section from the card dump
             var ndef = ExtractAllMessage(extract);
+            // Act
             // Get the NDEF Message
             NdefMessage message = new NdefMessage(ndef);
+            var firstRecord = message.Records.First();
+            var recordTestUri = message.Records[2];
+            var uriRecord = new UriRecord(recordTestUri);
+            var mediaTest = message.Records[5];
+            var media = new MediaRecord(mediaTest);
+            var ret = media.TryGetPayloadAsText(out string payloadAsText);
+            var lastRecord = message.Records.Last();
+            // Assert
             // Check if all is ok
             Assert.Equal(10, message.Records.Count);
-            var firstRecord = message.Records.First();
             Assert.True(firstRecord.Header.IsFirstMessage);
-
-            var recordTestUri = message.Records[2];
             Assert.True(UriRecord.IsUriRecord(recordTestUri));
             Assert.False(MediaRecord.IsMediaRecord(recordTestUri));
-            var uriRecord = new UriRecord(recordTestUri);
             Assert.Equal("bing.com/search?q=.net%20core%20iot", uriRecord.Uri);
             Assert.Equal(UriType.HttpsWww, uriRecord.UriType);
             Assert.Equal(new Uri("https://www.bing.com/search?q=.net%20core%20iot"), uriRecord.FullUri);
-
-            var mediaTest = message.Records[5];
             Assert.True(MediaRecord.IsMediaRecord(mediaTest));
-            var media = new MediaRecord(mediaTest);
             Assert.Equal("text/vcard", media.PayloadType);
             Assert.True(media.IsTextType);
-            var ret = media.TryGetPayloadAsText(out string payloadAsText);
             Assert.True(ret);
             Assert.Contains("VCARD", payloadAsText);
-
-            var lastRecord = message.Records.Last();
             Assert.True(lastRecord.Header.IsLastMessage);
         }
 
@@ -87,23 +93,15 @@ namespace Ndef.Tests
         [Fact]
         public void NdefMultipleWithNoise()
         {
+            // Arrange
             // Extract the data from the Mifare card dump
             var extract = ExtractAllBlocksFromCardDump(CardDumpExamples.Memory1KDump2RecordsWithNoise);
             // Get the NDEF section from the card dump
             var ndef = ExtractAllMessage(extract);
+            // Act
             // Get the NDEF Message
             NdefMessage message = new NdefMessage(ndef);
-            // Check if all is ok
-            Assert.Equal(2, message.Records.Count);
-            Assert.True(message.Records.First().Header.IsFirstMessage);
-            Assert.True(message.Records.Last().Header.IsLastMessage);
-
-            Assert.True(GeoRecord.IsGeoRecord(message.Records.First()));
             var geo = new GeoRecord(message.Records.First());
-
-            Assert.Equal(48.853231, geo.Latitude);
-            Assert.Equal(2.349207, geo.Longitude);
-
             // Create a new Geo Record with same data
             var geoNew = new GeoRecord(48.853231, 2.349207);
             // Set same header as for the previous one with the first message
@@ -112,8 +110,18 @@ namespace Ndef.Tests
             Span<byte> geoSerialized = new byte[geo.Length];
             geoNew.Serialize(geoNewSerialized);
             message.Records.First().Serialize(geoSerialized);
+
+            // Assert
+            // Check if all is ok
+            Assert.Equal(2, message.Records.Count);
+            Assert.True(message.Records.First().Header.IsFirstMessage);
+            Assert.True(message.Records.Last().Header.IsLastMessage);
+            Assert.True(GeoRecord.IsGeoRecord(message.Records.First()));
+            Assert.Equal(48.853231, geo.Latitude);
+            Assert.Equal(2.349207, geo.Longitude);
             Assert.Equal(geoSerialized.ToArray(), geoNewSerialized.ToArray());
 
+            // Act
             // Create a new MEdia record which is the same
             var mediaNew = new MediaRecord("image/jpeg", Encoding.UTF8.GetBytes("Test but not an image"));
             mediaNew.Header.MessageFlag |= MessageFlag.MessageEnd;
@@ -121,8 +129,10 @@ namespace Ndef.Tests
             Span<byte> mediaSerialized = new byte[message.Records.Last().Length];
             mediaNew.Serialize(mediaNewSerialized);
             message.Records.Last().Serialize(mediaSerialized);
+            // Assert
             Assert.Equal(mediaSerialized.ToArray(), mediaNewSerialized.ToArray());
 
+            // Arrange
             // Now create a new message and add the 2 records. We will before remove the
             // message begin and begin end flags to make sure they're properly create by
             // The serialize function
@@ -132,13 +142,16 @@ namespace Ndef.Tests
             messageNew.Records.Add(geoNew);
             messageNew.Records.Add(mediaNew);
             Span<byte> messageNewSerialiazed = new byte[messageNew.Length];
+            // Act
             messageNew.Serialize(messageNewSerialiazed);
+            // Assert
             Assert.Equal(ndef, messageNewSerialiazed.ToArray());
 
+            // Act
             // Check that the serialized buffer is the same at the raw record
             Span<byte> serializedMessage = new byte[message.Length];
             message.Serialize(serializedMessage);
-
+            // Assert
             Assert.Equal(ndef, serializedMessage.ToArray());
         }
 
@@ -148,18 +161,21 @@ namespace Ndef.Tests
         [Fact]
         public void NdefFormatedCardWithNoRecord()
         {
+            // Arrange
             // Extract the data from the Mifare card dump
             var extract = ExtractAllBlocksFromCardDump(CardDumpExamples.Memory1KDumpNdefFormated);
             // Get the NDEF section from the card dump
             var ndef = ExtractAllMessage(extract);
+            // Act
             // Get the NDEF Message
             NdefMessage message = new NdefMessage(ndef);
+            // Assert
             Assert.Empty(message.Records);
         }
 
         // This function is not exactly the same as in MifareCard.cs
         // It's a modified version
-        private byte[] ExtractAllMessage(Span<byte> toExtract)
+        private byte[]? ExtractAllMessage(Span<byte> toExtract)
         {
             int idx = 0;
             // Get rid of the 16 first bytes, it's the manufacturer block

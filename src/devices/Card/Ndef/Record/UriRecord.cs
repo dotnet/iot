@@ -13,7 +13,7 @@ namespace Iot.Device.Ndef
     public class UriRecord : NdefRecord
     {
         private UriType _uriType;
-        private string _uri;
+        private string _uri = string.Empty;
 
         /// <summary>
         /// Uri Type
@@ -98,7 +98,7 @@ namespace Iot.Device.Ndef
 
         private void ExtractAll()
         {
-            if (!IsUriRecord(this))
+            if (!IsUriRecord(this) || Payload is not object)
             {
                 throw new ArgumentException($"Record type must be {TypeNameFormat.NfcWellKnowType} and payload type 'U' (0x55)");
             }
@@ -128,7 +128,7 @@ namespace Iot.Device.Ndef
                 return false;
             }
 
-            if (ndefRecord.Header.PayloadType[0] != 0x55)
+            if (ndefRecord.Header.PayloadType?[0] != 0x55)
             {
                 return false;
             }

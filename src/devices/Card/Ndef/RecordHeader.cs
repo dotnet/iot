@@ -13,8 +13,8 @@ namespace Iot.Device.Ndef
     public class RecordHeader
     {
         private uint _payloadLength = 0;
-        private byte[] _payloadType = null;
-        private byte[] _payloadId = null;
+        private byte[]? _payloadType = null;
+        private byte[]? _payloadId = null;
 
         /// <summary>
         /// Message flag
@@ -55,7 +55,7 @@ namespace Iot.Device.Ndef
         /// <summary>
         /// Payload Type
         /// </summary>
-        public byte[] PayloadType
+        public byte[]? PayloadType
         {
             get
             {
@@ -76,7 +76,7 @@ namespace Iot.Device.Ndef
         /// <summary>
         /// Payload Id
         /// </summary>
-        public byte[] PayloadId
+        public byte[]? PayloadId
         {
             get
             {
@@ -226,7 +226,7 @@ namespace Iot.Device.Ndef
 
             if (MessageFlag.HasFlag(MessageFlag.IdLength))
             {
-                header[idxRecord++] = IdLength.Value;
+                header[idxRecord++] = IdLength!.Value;
             }
 
             if (PayloadTypeLength > 0)

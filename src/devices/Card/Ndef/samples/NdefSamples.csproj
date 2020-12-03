@@ -11,6 +11,7 @@
     </ProjectReference>
     <ProjectReference Include="..\..\Mifare\Mifare.csproj" />
     <ProjectReference Include="..\..\..\Pn5180\Pn5180.csproj" />
+    <ProjectReference Include="..\..\..\Pn532\Pn532.csproj" />
     <ProjectReference Include="..\..\..\Ft4222\Ft4222.csproj" />
     <ProjectReference Include="..\Ndef.csproj" />
   </ItemGroup>

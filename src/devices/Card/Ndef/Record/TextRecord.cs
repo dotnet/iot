@@ -13,8 +13,8 @@ namespace Iot.Device.Ndef
     public class TextRecord : NdefRecord
     {
         private Encoding _encoding = Encoding.UTF8;
-        private string _languageCode;
-        private string _text;
+        private string _languageCode = string.Empty;
+        private string _text = string.Empty;
 
         /// <summary>
         /// The Encoding type used for the text, only UTF8 and Unicode are valid
@@ -91,6 +91,7 @@ namespace Iot.Device.Ndef
             _encoding = encoding;
             // setup type of Text
             Header.PayloadType = new byte[1] { 0x054 };
+            Header.TypeNameFormat = TypeNameFormat.NfcWellKnowType;
             SetPayload();
         }
 
@@ -117,7 +118,7 @@ namespace Iot.Device.Ndef
 
         private void ExtractAll()
         {
-            if (!IsTextRecord(this))
+            if (!IsTextRecord(this) || Payload is not object)
             {
                 throw new ArgumentException($"Record type must be {TypeNameFormat.NfcWellKnowType} and payload type 'T' (0x54)");
             }
@@ -135,7 +136,7 @@ namespace Iot.Device.Ndef
         {
             var textBytes = _encoding.GetBytes(_text);
             Payload = new byte[1 + _languageCode.Length + textBytes.Length];
-            Payload[0] = (byte)((_encoding == Encoding.UTF8 ? 0 : 0b1000_0000) | _languageCode.Length);
+            Payload[0] = (byte)((_encoding == Encoding.UTF8 ? 0 : 0b1000_0000) + _languageCode.Length);
             if (_languageCode.Length > 0)
             {
                 Encoding.ASCII.GetBytes(_languageCode).CopyTo(Payload, 1);
@@ -162,7 +163,7 @@ namespace Iot.Device.Ndef
                 return false;
             }
 
-            if (ndefRecord.Header.PayloadType[0] != 0x54)
+            if (ndefRecord.Header.PayloadType?[0] != 0x54)
             {
                 return false;
             }

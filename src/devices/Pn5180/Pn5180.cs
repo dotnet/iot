@@ -464,6 +464,14 @@ namespace Iot.Device.Pn5180
             }
         }
 
+        /// <inheritdoc/>
+        public override bool ReselectTarget(byte targetNumber)
+        {
+            // TODO: this should be implemented for this reader as well
+            // We don't throw an exception, this is just telling that the selection failed
+            return false;
+        }
+
         private int TransceiveClassic(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
             // type B card have a tag number which is always more than 1

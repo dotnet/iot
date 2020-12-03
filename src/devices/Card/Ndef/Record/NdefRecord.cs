@@ -19,7 +19,7 @@ namespace Iot.Device.Ndef
         /// <summary>
         /// The record payload
         /// </summary>
-        public byte[] Payload { get; internal set; }
+        public byte[]? Payload { get; internal set; }
 
         /// <summary>
         /// The length of the NDEF Record
@@ -39,7 +39,7 @@ namespace Iot.Device.Ndef
         /// </summary>
         /// <param name="payload">The byte payload</param>
         /// <param name="recordHeader">A header, if not header specify, a default empty header will be created</param>
-        public NdefRecord(ReadOnlySpan<byte> payload, RecordHeader recordHeader = null)
+        public NdefRecord(ReadOnlySpan<byte> payload, RecordHeader? recordHeader = null)
         {
             Header = recordHeader ?? new RecordHeader();
             Payload = payload.ToArray();
