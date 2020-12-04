@@ -156,6 +156,9 @@ namespace Iot.Device.Arduino
                             case SystemException.ArrayTypeMismatch:
                                 ex = new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.DeclaringType} - {resolved}. + textualStackTrace");
                                 break;
+                            case SystemException.InvalidOperation:
+                                ex = new InvalidOperationException($"An invalid operation was attempted in {resolved.DeclaringType} - {resolved}.");
+                                break;
                             default:
                                 ex = new InvalidOperationException("Unknown exception" + textualStackTrace);
                                 break;

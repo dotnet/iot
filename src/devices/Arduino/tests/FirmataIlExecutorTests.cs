@@ -412,5 +412,42 @@ namespace Iot.Device.Arduino.Tests
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
         }
+
+        [Theory]
+        [InlineData("IntArrayTest", 4, 1, 3)]
+        [InlineData("IntArrayTest", 10, 2, 3)]
+        [InlineData("CharArrayTest", 10, 2, 'C')]
+        [InlineData("CharArrayTest", 10, 0, 'A')]
+        [InlineData("ByteArrayTest", 10, 0, 255)]
+        public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
+        {
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+        }
+
+        public static int IntArrayTest(int size, int index)
+        {
+            int[] array = new int[size];
+            array[index] = 3;
+            array[array.Length - 1] = 2;
+            return array[index];
+        }
+
+        public static int CharArrayTest(int size, int indexToRetrieve)
+        {
+            char[] array = new char[size];
+            array[0] = 'A';
+            array[1] = 'B';
+            array[3] = 'C';
+            return array[indexToRetrieve];
+        }
+
+        public static int ByteArrayTest(int size, int indexToRetrieve)
+        {
+            byte[] array = new byte[size];
+            array[0] = 0xFF;
+            array[1] = 1;
+            array[3] = 2;
+            return array[indexToRetrieve];
+        }
     }
 }

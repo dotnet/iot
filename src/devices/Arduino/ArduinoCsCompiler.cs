@@ -77,6 +77,7 @@ namespace Iot.Device.Arduino
         IndexOutOfRange = 6,
         OutOfMemory = 7,
         ArrayTypeMismatch = 8,
+        InvalidOperation = 9,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable

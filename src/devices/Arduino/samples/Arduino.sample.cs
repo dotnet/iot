@@ -38,9 +38,9 @@ namespace Arduino.Samples
         public static void Main(string[] args)
         {
             string portName = "INET";
-            if (args.Length > 1)
+            if (args.Length > 0)
             {
-                portName = args[1];
+                portName = args[0];
             }
 
             if (portName == "INET")
@@ -303,7 +303,7 @@ namespace Arduino.Samples
         {
             // Use Pin 6
             const int gpio = 6;
-            const int analogPin = 15;
+            int analogPin = GetAnalogPin1(board);
             var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
             var analogController = board.CreateAnalogController(0);
 

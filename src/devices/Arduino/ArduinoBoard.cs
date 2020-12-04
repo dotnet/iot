@@ -105,7 +105,7 @@ namespace Iot.Device.Arduino
                         b.Initialize();
                         return b;
                     }
-                    catch (Exception x) when (x is NotSupportedException || x is TimeoutException || x is IOException)
+                    catch (Exception x) when (x is NotSupportedException || x is TimeoutException || x is IOException || x is UnauthorizedAccessException)
                     {
                         b?.Dispose();
                     }
@@ -214,6 +214,22 @@ namespace Iot.Device.Arduino
             get
             {
                 return _firmwareName ?? string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Firmata version found on the board.
+        /// </summary>
+        public Version FirmataVersion
+        {
+            get
+            {
+                if (_protocolVersion == null)
+                {
+                    return new Version();
+                }
+
+                return _protocolVersion;
             }
         }
 
