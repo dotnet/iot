@@ -467,9 +467,26 @@ namespace Iot.Device.Pn5180
         /// <inheritdoc/>
         public override bool ReselectTarget(byte targetNumber)
         {
-            // TODO: this should be implemented for this reader as well
-            // We don't throw an exception, this is just telling that the selection failed
-            return false;
+            if (targetNumber == 0)
+            {
+                // TODO: this should be implemented this for Type A card for this reader
+                // This will need to send WUPA (0x52 coded on 7 bits), Anti-collision and select loops like for initial detection
+                // We don't throw an exception, this is just telling that the selection failed
+                return false;
+            }
+            else
+            {
+                var card = _activeSelected.Where(m => m.Card.TargetNumber == targetNumber).FirstOrDefault();
+                if (card is null)
+                {
+                    return false;
+                }
+
+                var ret = DeselectCardTypeB(card.Card);
+                // Deselect may fail but if selection succeed it's ok
+                ret = SelectCardTypeB(card.Card);
+                return ret;
+            }
         }
 
         private int TransceiveClassic(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)

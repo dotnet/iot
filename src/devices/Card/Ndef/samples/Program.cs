@@ -39,6 +39,7 @@ Console.WriteLine(" 3. Format a Mifare card as NDEF");
 Console.WriteLine(" 4. Write a short NDEF content (a Text and a Geo record)");
 Console.WriteLine(" 5. Write a long NDEF content (a Text, a Geo record and aURL)");
 Console.WriteLine(" 6. Check if the card is NDEF formated");
+Console.WriteLine(" 7. Erase sector 1 with default key A and B");
 var testToRun = Console.ReadKey();
 Console.WriteLine();
 
@@ -194,7 +195,7 @@ void RunTestNdef(CardTransceiver transceiver, Data106kbpsTypeA card)
     else if (testToRun.KeyChar == '3')
     {
         var ret = mifareCard.FormatNdef();
-        string msg = ret ? "Formatting successful." : "Error formating card.";
+        string msg = ret ? "Formatting successful." : "Error formatting card.";
         Console.WriteLine(msg);
     }
     else if (testToRun.KeyChar == '4')
@@ -207,9 +208,15 @@ void RunTestNdef(CardTransceiver transceiver, Data106kbpsTypeA card)
     }
     else if (testToRun.KeyChar == '6')
     {
-        var ret = mifareCard.IsFormatedNdef();
+        var ret = mifareCard.IsFormattedNdef();
         var isForm = ret ? string.Empty : " not";
-        Console.WriteLine($"This card is{isForm} NDEF formated");
+        Console.WriteLine($"This card is{isForm} NDEF formatted");
+    }
+    else if (testToRun.KeyChar == '7')
+    {
+        var ret = mifareCard.EraseSector(mifareCard.DefaultKeyA, mifareCard.DefaultKeyB, 1, false, true);
+        var isForm = ret ? string.Empty : " not";
+        Console.WriteLine($"The sector has{isForm} been erased");
     }
     else
     {
