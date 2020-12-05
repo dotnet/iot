@@ -139,28 +139,28 @@ namespace Iot.Device.Arduino
                                 ex = new MissingMethodException(resolved.DeclaringType?.Name, resolved.Name + textualStackTrace);
                                 break;
                             case SystemException.NullReference:
-                                ex = new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                ex = new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
                                 break;
                             case SystemException.StackOverflow:
-                                ex = new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                ex = new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
                                 break;
                             case SystemException.DivideByZero:
-                                ex = new DivideByZeroException($"Integer Division by zero in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                ex = new DivideByZeroException($"Integer Division by zero in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
                                 break;
                             case SystemException.IndexOutOfRange:
-                                ex = new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved}" + textualStackTrace);
+                                ex = new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
                                 break;
                             case SystemException.OutOfMemory:
-                                ex = new OutOfMemoryException($"Out of memory allocating an instance of {resolved.DeclaringType} - {resolved}." + textualStackTrace);
+                                ex = new OutOfMemoryException($"Out of memory allocating an instance of {resolved.DeclaringType} - {resolved} " + textualStackTrace);
                                 break;
                             case SystemException.ArrayTypeMismatch:
-                                ex = new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.DeclaringType} - {resolved}. + textualStackTrace");
+                                ex = new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
                                 break;
                             case SystemException.InvalidOperation:
                                 ex = new InvalidOperationException($"An invalid operation was attempted in {resolved.DeclaringType} - {resolved}.");
                                 break;
                             default:
-                                ex = new InvalidOperationException("Unknown exception" + textualStackTrace);
+                                ex = new InvalidOperationException("Unknown exception " + textualStackTrace);
                                 break;
                         }
                     }
@@ -174,7 +174,7 @@ namespace Iot.Device.Arduino
                             throw new InvalidOperationException("Internal error: Unknown exception type");
                         }
 
-                        ex = (Exception)Activator.CreateInstance(resolvedException, BindingFlags.Public, null, $"Location: {resolved.DeclaringType} - {resolved}" + textualStackTrace)!;
+                        ex = (Exception)Activator.CreateInstance(resolvedException, BindingFlags.Public, null, $"Location: {resolved.DeclaringType} - {resolved} {textualStackTrace}")!;
                     }
 
                     throw ex;
