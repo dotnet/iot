@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -190,8 +189,7 @@ namespace Iot.Device.CharacterLcd.Samples
 
         private static void SetBacklightColorTest(Hd44780 lcd)
         {
-            var colorLcd = lcd as LcdRgb;
-            if (colorLcd == null)
+            if (lcd is not LcdRgb colorLcd)
             {
                 Console.WriteLine("Color backlight not supported");
                 return;

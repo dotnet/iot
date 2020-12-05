@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -68,7 +67,11 @@ namespace Iot.Device.Media
         /// <summary>
         /// The recording volume of the sound device.
         /// </summary>
-        public override long RecordingVolume { get => GetRecordingVolume(); set => SetRecordingVolume(value); }
+        public override long RecordingVolume
+        {
+            get => GetRecordingVolume();
+            set => SetRecordingVolume(value);
+        }
 
         private bool _recordingMute;
 
@@ -632,7 +635,7 @@ namespace Iot.Device.Media
             if (_errorNum < 0)
             {
                 int code = _errorNum;
-                string errorMsg = Marshal.PtrToStringAnsi(Interop.snd_strerror(_errorNum));
+                string? errorMsg = Marshal.PtrToStringAnsi(Interop.snd_strerror(_errorNum));
 
                 Dispose();
                 throw new Exception($"{message}\nError {code}. {errorMsg}.");

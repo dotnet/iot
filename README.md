@@ -1,4 +1,5 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/iot)
+[![Discord](https://img.shields.io/discord/755370044946513932?label=Discord)](https://discord.gg/kqWhBbj)
 
 # .NET Core IoT Libraries
 
@@ -9,6 +10,10 @@ This repository contains the [System.Device.Gpio](https://www.nuget.org/packages
 The repository also contains [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings), a growing set of community-maintained [device bindings](src/devices/README.md) for IoT components.
 
 **NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
+
+# .NET Core Versions
+
+Whilst most of the device binding projects target .NET Core 2.1 for backward compatibility, the sample projects target the latest stable .NET Core. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
 
 # How to Install
 

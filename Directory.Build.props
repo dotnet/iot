@@ -8,11 +8,12 @@
     <Copyright>$(CopyrightNetFoundation)</Copyright>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <MainLibraryPath>$(MSBuildThisFileDirectory)src/System.Device.Gpio/</MainLibraryPath>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
     <Language>C#</Language>
-    <LangVersion>Latest</LangVersion>
+    <LangVersion>9</LangVersion>
     <!-- Generate snupkg package -->
     <IncludeSymbols>true</IncludeSymbols>
   </PropertyGroup>

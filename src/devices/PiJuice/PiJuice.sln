@@ -1,0 +1,39 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30503.244
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PiJuiceDevice", "PiJuiceDevice.csproj", "{735F571D-9672-465E-BF9A-2DCC2454E9C0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{61C135C2-1483-4B3D-8070-27A0DE4AF808}"
+	ProjectSection(SolutionItems) = preProject
+		samples\README.md = samples\README.md
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiJuiceDevice.sample", "samples\PiJuiceDevice.sample.csproj", "{F62EDA5A-5855-4050-A5C4-A116E07498E8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{735F571D-9672-465E-BF9A-2DCC2454E9C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{735F571D-9672-465E-BF9A-2DCC2454E9C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{735F571D-9672-465E-BF9A-2DCC2454E9C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{735F571D-9672-465E-BF9A-2DCC2454E9C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F62EDA5A-5855-4050-A5C4-A116E07498E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F62EDA5A-5855-4050-A5C4-A116E07498E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F62EDA5A-5855-4050-A5C4-A116E07498E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F62EDA5A-5855-4050-A5C4-A116E07498E8}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F62EDA5A-5855-4050-A5C4-A116E07498E8} = {61C135C2-1483-4B3D-8070-27A0DE4AF808}
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {13974C73-C93F-4C84-BA79-4E51189A5C68}
+	EndGlobalSection
+EndGlobal

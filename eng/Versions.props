@@ -2,23 +2,16 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <MicrosoftDotNetGenAPIPackageVersion>5.0.0-beta.20417.6</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>6.0.0-beta.20573.2</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
-    <SystemDrawingCommonPackageVersion>4.6.0</SystemDrawingCommonPackageVersion>
-    <SystemIOPortsPackageVersion>4.6.0</SystemIOPortsPackageVersion>
-    <MicrosoftWin32RegistryPackageVersion>4.6.0</MicrosoftWin32RegistryPackageVersion>
+    <SystemDrawingCommonPackageVersion>5.0.0</SystemDrawingCommonPackageVersion>
+    <SystemIOPortsPackageVersion>5.0.0</SystemIOPortsPackageVersion>
+    <MicrosoftWin32RegistryPackageVersion>5.0.0</MicrosoftWin32RegistryPackageVersion>
     <SystemRuntimeWindowsRuntimePackageVersion>4.6.0</SystemRuntimeWindowsRuntimePackageVersion>
+    <SystemManagementPackageVersion>5.0.0</SystemManagementPackageVersion>
+    <SystemThreadingTasksExtensionsPackageVersion>4.5.4</SystemThreadingTasksExtensionsPackageVersion>
+    <SystemMemoryPackageVersion>4.5.4</SystemMemoryPackageVersion>
+    <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
     <UnitsNetPackageVersion>4.58.0</UnitsNetPackageVersion>
-  </PropertyGroup>
-  <!-- Restore sources -->
-  <PropertyGroup>
-    <RestoreSources>
-      $(RestoreSources);
-      https://dotnetfeed.blob.core.windows.net/dotnet-tools-internal/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-iot/index.json;
-      https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
-      https://api.nuget.org/v3/index.json;
-    </RestoreSources>
   </PropertyGroup>
 </Project>

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -28,7 +27,7 @@ namespace System.Device.Gpio.Drivers
         private static readonly int s_pinOffset = ReadOffset();
         private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
         private int _pollFileDescriptor = -1;
-        private Thread _eventDetectionThread;
+        private Thread? _eventDetectionThread;
         private int _pinsToDetectEventsCount;
 
         private static int ReadOffset()

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -51,7 +50,7 @@ namespace Iot.Device.RadioReceiver
         /// <param name="frequency">FM frequency.</param>
         public Tea5767(I2cDevice i2cDevice, FrequencyRange frequencyRange, Frequency frequency)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             FrequencyRange = frequencyRange;
             Frequency = frequency;
@@ -247,7 +246,7 @@ namespace Iot.Device.RadioReceiver
         protected override void Dispose(bool disposing)
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
 
             base.Dispose(disposing);
         }
@@ -261,9 +260,7 @@ namespace Iot.Device.RadioReceiver
             return readBuffer.ToArray();
         }
 
-        private void SaveRegisters()
-        {
+        private void SaveRegisters() =>
             _i2cDevice.Write(_registers);
-        }
     }
 }

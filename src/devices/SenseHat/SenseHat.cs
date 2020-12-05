@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Drawing;
@@ -135,22 +134,22 @@ namespace Iot.Device.SenseHat
         public void Dispose()
         {
             _ledMatrix?.Dispose();
-            _ledMatrix = null;
+            _ledMatrix = null!;
 
             _joystick?.Dispose();
-            _joystick = null;
+            _joystick = null!;
 
             _gyro?.Dispose();
-            _gyro = null;
+            _gyro = null!;
 
             _mag?.Dispose();
-            _mag = null;
+            _mag = null!;
 
             _temp?.Dispose();
-            _temp = null;
+            _temp = null!;
 
             _press?.Dispose();
-            _press = null;
+            _press = null!;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -68,10 +67,10 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         /// <param name="controller"><see cref="GpioController"/> used by <see cref="Motors"/> to manage GPIO resources</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        internal Motors(GpioController controller, bool shouldDispose = true)
+        internal Motors(GpioController? controller = null, bool shouldDispose = true)
         {
-            _controller = controller;
-            _shouldDispose = shouldDispose;
+            _controller = controller ?? new();
+            _shouldDispose = shouldDispose || controller is null;
 
             _motorArray = new List<DCMotor.DCMotor>()
             {
@@ -80,42 +79,20 @@ namespace Iot.Device.ExplorerHat
             };
         }
 
-        #region IDisposable Support
-
         private bool _shouldDispose;
-        // This to avoid double dispose
-        private bool _disposedValue = false;
-
-        /// <summary>
-        /// Disposes the <see cref="Motors"/> instance
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    _motorArray[0].Dispose();
-                    _motorArray[1].Dispose();
-                    if (_shouldDispose)
-                    {
-                        _controller?.Dispose();
-                        _controller = null;
-                    }
-                }
-
-                _disposedValue = true;
-            }
-        }
 
         /// <summary>
         /// Disposes the <see cref="Motors"/> instance
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            _motorArray[0]?.Dispose();
+            _motorArray[1]?.Dispose();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null!;
+            }
         }
-
-        #endregion
     }
 }

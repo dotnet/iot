@@ -10,6 +10,6 @@ You can also use it to control servos.
 
 https://www.nxp.com/docs/en/data-sheet/PCA9685.pdf
 
-## References 
+## References
 
 https://www.nxp.com/products/analog/interfaces/ic-bus/ic-led-controllers/16-channel-12-bit-pwm-fm-plus-ic-bus-led-controller:PCA9685

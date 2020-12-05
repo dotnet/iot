@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sn74hc595", "Sn74hc595.csproj", "{5D11DBD2-E6DB-4170-BA26-CEFAD5173A02}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sn74hc595-test", "samples\Sn74hc595-test.csproj", "{5C0E11CD-E06C-4550-982E-09CE8D2D724F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sn74hc595-driver", "samples\Sn74hc595-driver.csproj", "{5C0E11CD-E06C-4550-982E-09CE8D2D724F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

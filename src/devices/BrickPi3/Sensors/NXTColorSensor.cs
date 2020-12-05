@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.ComponentModel;
@@ -109,13 +108,13 @@ namespace Iot.Device.BrickPi3.Sensors
         private const int BlueIndex = 2;
         private const int BackgroundIndex = 3;
 
-        private Brick _brick = null;
+        private Brick _brick;
         private ColorSensorMode _colorMode;
-        private Timer _timer = null;
+        private Timer _timer;
         private short[] _rawValues = new short[4];
         private int _periodRefresh;
         private int _value;
-        private string _valueAsString;
+        private string? _valueAsString;
 
         /// <summary>
         /// Initialize a NXT Color Sensor
@@ -152,39 +151,30 @@ namespace Iot.Device.BrickPi3.Sensors
             _colorMode = mode;
             brick.SetSensorType((byte)Port, (SensorType)mode);
             _periodRefresh = timeout;
+            UpdateSensor(this);
             _timer = new Timer(UpdateSensor, this, TimeSpan.FromMilliseconds(timeout), TimeSpan.FromMilliseconds(timeout));
         }
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
-        private void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
+        private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
         /// <summary>
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Period to refresh the notification of property changed in milliseconds
         /// </summary>
         public int PeriodRefresh
         {
-            get
-            {
-                return _periodRefresh;
-            }
-
+            get => _periodRefresh;
             set
             {
                 _periodRefresh = value;
@@ -197,11 +187,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Value
         {
-            get
-            {
-                return ReadRaw();
-            }
-
+            get => ReadRaw();
             internal set
             {
                 if (value != _value)
@@ -215,30 +201,21 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Return the raw value  as a string of the sensor
         /// </summary>
-        public string ValueAsString
-        {
-            get
-            {
-                return ReadAsString();
-            }
-
-            internal set
-            {
-                if (_valueAsString != value)
-                {
-                    _valueAsString = value;
-                    OnPropertyChanged(nameof(ValueAsString));
-                }
-            }
-        }
+        public string ValueAsString => ReadAsString();
 
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             Value = ReadRaw();
-            ValueAsString = ReadAsString();
+            string sensorState = ReadAsString();
+            string? previousValue = _valueAsString;
+            _valueAsString = sensorState;
+            if (sensorState != previousValue)
+            {
+                OnPropertyChanged(nameof(ValueAsString));
+            }
         }
 
         /// <summary>
@@ -246,11 +223,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public ColorSensorMode ColorMode
         {
-            get
-            {
-                return _colorMode;
-            }
-
+            get => _colorMode;
             set
             {
                 if (value != _colorMode)
@@ -270,10 +243,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Gets sensor name
         /// </summary>
         /// <returns>Sensor name</returns>
-        public string GetSensorName()
-        {
-            return "NXT Color Sensor";
-        }
+        public string GetSensorName() => "NXT Color Sensor";
 
         private void GetRawValues()
         {
@@ -294,51 +264,25 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Reads raw value from the sensor
         /// </summary>
         /// <returns>Value read from the sensor</returns>
-        public int ReadRaw()
+        public int ReadRaw() => _colorMode switch
         {
-            int val = 0;
-            switch (_colorMode)
-            {
-                case ColorSensorMode.Color:
-                    val = (int)ReadColor();
-                    break;
-                case ColorSensorMode.Reflection:
-                case ColorSensorMode.Green:
-                case ColorSensorMode.Blue:
-                    val = CalculateRawAverage();
-                    break;
-                case ColorSensorMode.Ambient:
-                    val = CalculateRawAverage();
-                    break;
-            }
-
-            return val;
-        }
+                ColorSensorMode.Color => (int)ReadColor(),
+                ColorSensorMode.Reflection or ColorSensorMode.Green or ColorSensorMode.Blue
+                    => CalculateRawAverage(),
+                ColorSensorMode.Ambient => CalculateRawAverage(),
+                _ => 0,
+        };
 
         /// <summary>
         /// Read the intensity of the reflected or ambient light in percent. In color mode the color index is returned
         /// </summary>
-        public int Read()
+        public int Read() => _colorMode switch
         {
-            int val = 0;
-            switch (_colorMode)
-            {
-                case ColorSensorMode.Ambient:
-                    val = CalculateRawAverageAsPct();
-                    break;
-                case ColorSensorMode.Color:
-                    val = (int)ReadColor();
-                    break;
-                case ColorSensorMode.Reflection:
-                    val = CalculateRawAverageAsPct();
-                    break;
-                default:
-                    val = CalculateRawAverageAsPct();
-                    break;
-            }
-
-            return val;
-        }
+            ColorSensorMode.Ambient => CalculateRawAverageAsPct(),
+            ColorSensorMode.Color => (int)ReadColor(),
+            ColorSensorMode.Reflection => CalculateRawAverageAsPct(),
+            _ => CalculateRawAverageAsPct(),
+        };
 
         private int CalculateRawAverage()
         {
@@ -360,37 +304,22 @@ namespace Iot.Device.BrickPi3.Sensors
             }
         }
 
-        private int CalculateRawAverageAsPct()
-        {
-            // Need to find out what is the ADC resolution
-            // 1023 is probably the correct one
-            return (CalculateRawAverage() * 100) / 1023;
-        }
+        // Need to find out what is the ADC resolution
+        // 1023 is probably the correct one
+        private int CalculateRawAverageAsPct() => (CalculateRawAverage() * 100) / 1023;
 
         /// <summary>
         /// Reads value from sensor represented as string
         /// </summary>
         /// <returns>Sensor value as string</returns>
-        public string ReadAsString()
+        public string ReadAsString() => _colorMode switch
         {
-            string s = string.Empty;
-            switch (_colorMode)
-            {
-                case ColorSensorMode.Color:
-                    s = ReadColor().ToString();
-                    break;
-                case ColorSensorMode.Reflection:
-                case ColorSensorMode.Green:
-                case ColorSensorMode.Blue:
-                    s = Read().ToString();
-                    break;
-                case ColorSensorMode.Ambient:
-                    s = Read().ToString();
-                    break;
-            }
-
-            return s;
-        }
+            ColorSensorMode.Color => ReadColor().ToString(),
+            ColorSensorMode.Reflection or ColorSensorMode.Green or ColorSensorMode.Blue
+                => Read().ToString(),
+            ColorSensorMode.Ambient => Read().ToString(),
+            _ => string.Empty,
+        };
 
         /// <summary>
         /// Reads the color.
@@ -427,35 +356,23 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Moves to next mode
         /// </summary>
-        public void SelectNextMode()
-        {
-            _colorMode = ColorMode.Next();
-        }
+        public void SelectNextMode() => _colorMode = ColorMode.Next();
 
         /// <summary>
         /// Moves to previous mode
         /// </summary>
-        public void SelectPreviousMode()
-        {
-            _colorMode = ColorMode.Previous();
-        }
+        public void SelectPreviousMode() => _colorMode = ColorMode.Previous();
 
         /// <summary>
         /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
-        public int NumberOfModes()
-        {
-            return Enum.GetNames(typeof(ColorSensorMode)).Length;
-        }
+        public int NumberOfModes() => Enum.GetNames(typeof(ColorSensorMode)).Length;
 
         /// <summary>
         /// Selected mode
         /// </summary>
         /// <returns>String representing selected mode</returns>
-        public string SelectedMode()
-        {
-            return ColorMode.ToString();
-        }
+        public string SelectedMode() => ColorMode.ToString();
     }
 }
