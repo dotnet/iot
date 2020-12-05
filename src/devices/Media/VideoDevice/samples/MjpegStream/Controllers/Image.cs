@@ -23,7 +23,7 @@ namespace CameraIoT.Controllers
         private readonly ILogger<ImageController> _logger;
         private readonly Camera _camera;
         private bool _isNewImage;
-        private byte[] _lastImage;
+        private byte[]? _lastImage;
 
         /// <summary>
         /// Controller creation
@@ -102,7 +102,7 @@ namespace CameraIoT.Controllers
                         Thread.Sleep(10);
                     }
 
-                    await HttpContext.Response.BodyWriter.WriteAsync(CreateHeader(_lastImage.Length));
+                    await HttpContext.Response.BodyWriter.WriteAsync(CreateHeader(_lastImage!.Length));
                     await HttpContext.Response.BodyWriter.WriteAsync(_lastImage);
                     await HttpContext.Response.BodyWriter.WriteAsync(CreateFooter());
                 }

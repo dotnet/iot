@@ -53,7 +53,7 @@ namespace CameraIoT
         /// <summary>
         /// Event for a new image ready
         /// </summary>
-        public event NewImageReadyEvent NewImageReady;
+        public event NewImageReadyEvent? NewImageReady;
 
         /// <summary>
         /// True if the camera is running
@@ -82,7 +82,7 @@ namespace CameraIoT
         /// <summary>
         /// The last image
         /// </summary>
-        public byte[] LastImage { get; internal set; }
+        public byte[]? LastImage { get; internal set; }
 
         /// <summary>
         /// Take a picture
