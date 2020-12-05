@@ -294,10 +294,11 @@ namespace Iot.Device.Arduino.Tests
             // This assertion fails on a timeout
             Assert.True(method.Invoke(cs.Token, a!, b!));
 
-            // The task has terminated
+            Assert.True(method.GetMethodResults(set, out object[] data, out MethodState state));
+
+            // The task has terminated (do this after the above, otherwise the test will not show an exception)
             Assert.Equal(MethodState.Stopped, method.State);
 
-            Assert.True(method.GetMethodResults(set, out object[] data, out MethodState state));
             // The only result is from the end of the method
             Assert.Equal(MethodState.Stopped, state);
             Assert.Single(data);
@@ -437,7 +438,7 @@ namespace Iot.Device.Arduino.Tests
             char[] array = new char[size];
             array[0] = 'A';
             array[1] = 'B';
-            array[3] = 'C';
+            array[2] = 'C';
             return array[indexToRetrieve];
         }
 

@@ -163,7 +163,18 @@ namespace Iot.Device.Arduino
                     }
                     else if (resolved is FieldInfo mi)
                     {
-                        // Skip for now - possibly static initializer, which we don't load for now
+                        // That's a static field initializer. Unfortunately, getting to the data it points to is quite ugly.
+                        // The name is something like "__StaticArrayInitTypeSize=6". We need the length (it is always in bytes, regardless of the data type)
+                        string valueName = mi.FieldType.Name;
+
+                        // This code is not written with safety in mind. If any of this fails, either there's an unhandled case we have to consider or
+                        // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
+                        string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
+                        int len = int.Parse(length);
+
+                        byte[] array = new byte[len];
+                        System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(array, mi.FieldHandle);
+                        patchValue = set.GetOrAddFieldToken(mi, array);
                     }
                     else
                     {

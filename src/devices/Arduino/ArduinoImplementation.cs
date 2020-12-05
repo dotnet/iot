@@ -33,6 +33,7 @@ namespace Iot.Device.Arduino
         ArrayClone = 26,
         GetPinMode = 27,
         IsPinModeSupported = 28,
-        GetPinCount = 29
+        GetPinCount = 29,
+        RuntimeHelpersInitializeArray = 30,
     }
 }

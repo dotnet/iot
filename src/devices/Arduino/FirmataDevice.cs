@@ -1460,9 +1460,17 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclaration);
                     SendInt32(classToken);
                     SendInt32(parentToken);
-                    // We don't need the last two bits, since the size is certainly a multiple of 4
-                    // TODO: Should handle value type sizes differently, because there size matters
-                    SendInt14((short)(sizeOfClass.Dynamic >> 2));
+                    // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
+                    // Value types, on the other hand, are not expected to be larger than 14 bits.
+                    if (isValueType)
+                    {
+                        SendInt14((short)(sizeOfClass.Dynamic));
+                    }
+                    else
+                    {
+                        SendInt14((short)(sizeOfClass.Dynamic >> 2));
+                    }
+
                     SendInt14((short)(sizeOfClass.Statics >> 2));
                     SendInt14((short)(isValueType ? 1 : 0));
                     SendInt14(member);
@@ -1474,6 +1482,37 @@ namespace Iot.Device.Arduino
                         SendInt32(bdt);
                     }
 
+                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                    _firmataStream.Flush();
+                    WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);
+                }
+            }
+        }
+
+        public void SendConstant(Int32 constantToken, byte[] data)
+        {
+            const int packetSize = 28;
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            lock (_synchronisationLock)
+            {
+                // We send 28 bytes at once (the total message size must be < 64, and ideally one packet fully uses the last byte)
+                for (int offset = 0; offset < data.Length; offset += packetSize)
+                {
+                    int remaining = Math.Min(packetSize, data.Length - offset);
+                    _dataReceived.Reset();
+                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)ExecutorCommand.ConstantData);
+                    SendInt32(constantToken);
+                    SendInt32(data.Length);
+                    SendInt32(offset);
+                    var encoded = Encoder7Bit.Encode(data, offset, remaining);
+                    _firmataStream.Write(encoded, 0, encoded.Length);
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     _firmataStream.Flush();
                     WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);

@@ -16,7 +16,7 @@ namespace Iot.Device.Arduino
         private readonly List<Class> _classes;
         private readonly Dictionary<TypeInfo, int> _patchedTypeTokens;
         private readonly Dictionary<MethodBase, int> _patchedMethodTokens;
-        private readonly Dictionary<FieldInfo, int> _patchedFieldTokens;
+        private readonly Dictionary<FieldInfo, (int Token, byte[]? InitializerData)> _patchedFieldTokens;
         private readonly HashSet<(Type Original, Type Replacement, bool Subclasses)> _classesReplaced;
         private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
 
@@ -31,7 +31,7 @@ namespace Iot.Device.Arduino
             _classes = new List<Class>();
             _patchedTypeTokens = new Dictionary<TypeInfo, int>();
             _patchedMethodTokens = new Dictionary<MethodBase, int>();
-            _patchedFieldTokens = new Dictionary<FieldInfo, int>();
+            _patchedFieldTokens = new Dictionary<FieldInfo, (int Token, byte[]? InitializerData)>();
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
 
@@ -67,6 +67,7 @@ namespace Iot.Device.Arduino
             _compiler.ClearAllData(true);
             _compiler.SendClassDeclarations(this);
             _compiler.SendMethods(this);
+            _compiler.SendConstants(_patchedFieldTokens.Values);
 
             EntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
@@ -123,15 +124,27 @@ namespace Iot.Device.Arduino
 
         public int GetOrAddFieldToken(FieldInfo field)
         {
-            int token;
-            if (_patchedFieldTokens.TryGetValue(field, out token))
+            if (_patchedFieldTokens.TryGetValue(field, out var token))
             {
-                return token;
+                return token.Token;
             }
 
-            token = _nextToken++;
-            _patchedFieldTokens.Add(field, token);
-            return token;
+            int tk = _nextToken++;
+            _patchedFieldTokens.Add(field, (tk, null));
+            return tk;
+        }
+
+        public int GetOrAddFieldToken(FieldInfo field, byte[] initializerData)
+        {
+            if (_patchedFieldTokens.TryGetValue(field, out var token))
+            {
+                return token.Token;
+            }
+
+            int tk = _nextToken++;
+
+            _patchedFieldTokens.Add(field, (tk, initializerData));
+            return tk;
         }
 
         public int GetOrAddClassToken(TypeInfo typeInfo)
@@ -228,7 +241,7 @@ namespace Iot.Device.Arduino
                 return method.Key;
             }
 
-            var field = _patchedFieldTokens.FirstOrDefault(x => x.Value == token);
+            var field = _patchedFieldTokens.FirstOrDefault(x => x.Value.Token == token);
             if (field.Key != null)
             {
                 return field.Key;

@@ -54,15 +54,16 @@ namespace Arduino.Tests
                 }
             }
 
-            public static void RunBlink(int pin, int delay)
+            public static int RunBlink(int pin, int delay)
             {
                 var gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
                 SimpleLedBinding blink = new SimpleLedBinding(gpioController, pin, delay);
                 blink.Loop();
+                return 1;
             }
         }
 
-        private void ExecuteComplexProgramSuccess<T>(Type mainClass, T mainEntryPoint)
+        private void ExecuteComplexProgramSuccess<T>(Type mainClass, T mainEntryPoint, params object[] args)
             where T : Delegate
         {
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
@@ -80,18 +81,120 @@ namespace Arduino.Tests
             }
 
             var task = exec.EntryPoint;
-            task.InvokeAsync(6, 1000);
+            task.InvokeAsync(args);
 
             task.WaitForResult();
 
-            Assert.True(task.GetMethodResults(exec, out _, out var state));
+            Assert.True(task.GetMethodResults(exec, out var returnCodes, out var state));
+            Assert.NotEmpty(returnCodes);
+            Assert.Equal(1, returnCodes[0]);
             _compiler.ClearAllData(true);
         }
 
         [Fact]
         public void RunBlinkWithGpioController()
         {
-            ExecuteComplexProgramSuccess<Action<int, int>>(typeof(SimpleLedBinding), SimpleLedBinding.RunBlink);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(SimpleLedBinding), SimpleLedBinding.RunBlink, 6, 1000);
         }
+
+        [Fact]
+        public void GetDataFromStaticByteField()
+        {
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticByteField), ClassWithStaticByteField.GetFirstByte, 0, 0);
+        }
+
+        public class ClassWithStaticByteField
+        {
+            private static byte[] _byteData =
+            {
+                1, 2, 3, 4, 5, 6
+            };
+
+            public ClassWithStaticByteField()
+            {
+            }
+
+            public byte[] ByteData
+            {
+                get
+                {
+                    return _byteData;
+                }
+            }
+
+            /// <summary>
+            /// The two input arguments are expected to be 0. This is just to make sure the tests can reuse the same infrastructure
+            /// </summary>
+            public static int GetFirstByte(int index, int extraIndex)
+            {
+                return _byteData[index + extraIndex];
+            }
+        }
+
+        [Fact]
+        public void GetDataFromClassWithStaticField2()
+        {
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticField2), ClassWithStaticField2.GetFirstByte, 0, 0);
+        }
+
+        public class ClassWithStaticField2
+        {
+            private static object?[] _byteData = new object?[]
+            {
+                new object(), new HashSet<int>(), null,
+            };
+
+            public ClassWithStaticField2()
+            {
+            }
+
+            /// <summary>
+            /// The two input arguments are expected to be 0. This is just to make sure the tests can reuse the same infrastructure
+            /// </summary>
+            public static int GetFirstByte(int index, int extraIndex)
+            {
+                if (_byteData[index + extraIndex] != null)
+                {
+                    return 1;
+                }
+
+                return 0;
+            }
+        }
+
+        [Fact]
+        public void GetDataFromStaticIntField()
+        {
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticIntField), ClassWithStaticIntField.GetFirst, 7, 0);
+        }
+
+        public class ClassWithStaticIntField
+        {
+            private static int[] _intData =
+            {
+                7, 2, 3, 4, 5, 6, 4711, 1, 80000,
+            };
+
+            public ClassWithStaticIntField()
+            {
+            }
+
+            public int[] IntData
+            {
+                get
+                {
+                    return _intData;
+                }
+            }
+
+            /// <summary>
+            /// The two input arguments are expected to be 0. This is just to make sure the tests can reuse the same infrastructure
+            /// </summary>
+            public static int GetFirst(int index, int extraIndex)
+            {
+                return _intData[index + extraIndex];
+            }
+        }
+
     }
 }

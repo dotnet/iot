@@ -21,6 +21,8 @@ namespace Iot.Device.Arduino
         KillTask = 6,
         MethodSignature = 7,
         ClassDeclaration = 8,
+        SendObject = 9,
+        ConstantData = 10,
 
         Nack = 0x7e,
         Ack = 0x7f,
@@ -93,7 +95,7 @@ namespace Iot.Device.Arduino
         {
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
             typeof(MiniException), typeof(MiniHashSet<int>), typeof(MiniEqualityComparer<int>), typeof(MiniThread),
-            typeof(MiniEnvironment)
+            typeof(MiniEnvironment), typeof(MiniRuntimeHelpers)
         };
 
         /// <summary>
@@ -321,7 +323,7 @@ namespace Iot.Device.Arduino
             List<ExecutionSet.VariableOrMethod> memberTypes = new List<ExecutionSet.VariableOrMethod>();
             for (var index = 0; index < fields.Count; index++)
             {
-                var fieldType = GetVariableType(fields[index].FieldType);
+                var fieldType = GetVariableType(fields[index].FieldType, out _);
                 if (fields[index].IsStatic)
                 {
                     fieldType = VariableKind.StaticMember;
@@ -451,6 +453,19 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public void SendConstants(IEnumerable<(int Token, byte[]? InitializerData)> constElements)
+        {
+            foreach (var e in constElements)
+            {
+                if (e.InitializerData == null)
+                {
+                    continue;
+                }
+
+                _board.Firmata.SendConstant(e.Token, e.InitializerData);
+            }
+        }
+
         internal void SendMethods(ExecutionSet set)
         {
             foreach (var me in set.Methods())
@@ -571,7 +586,6 @@ namespace Iot.Device.Arduino
                 }
                 else if (m is MethodInfo method)
                 {
-                    // TODO: Do we really need all, or is the ctor sufficient?
                     methods.Add(method);
                 }
                 else if (m is ConstructorInfo ctor)
@@ -579,6 +593,16 @@ namespace Iot.Device.Arduino
                     methods.Add(ctor);
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the size of the variable on the target platform. This is currently the largest of sizeof(void*) and sizeof(int32).
+        /// TODO: Extend when 64-Bit variables become available (double on SAM3X based boards is 64 bit, DateTime and TimeSpan also require 64 bit)
+        /// </summary>
+        /// <returns>See above</returns>
+        private int SizeOfVariableField()
+        {
+            return 4;
         }
 
         /// <summary>
@@ -595,19 +619,25 @@ namespace Iot.Device.Arduino
             int sizeStatic = 0;
             foreach (var f in fields)
             {
-                var varType = GetVariableType(f.FieldType);
+                var varType = GetVariableType(f.FieldType, out int sizeOfMember);
                 // Currently, this is always true
                 if (varType == VariableKind.Boolean || varType == VariableKind.Int32 || varType == VariableKind.Uint32 || varType == VariableKind.Object ||
                     varType == VariableKind.ValueArray || varType == VariableKind.ReferenceArray)
                 {
-                    // TODO: Need to query some properties from the board (i.e. sizeof(void*))
                     if (f.IsStatic)
                     {
-                        sizeStatic += 4;
+                        sizeStatic += SizeOfVariableField();
                     }
                     else
                     {
-                        sizeDynamic += 4;
+                        if (classType.IsValueType)
+                        {
+                            sizeDynamic += sizeOfMember;
+                        }
+                        else
+                        {
+                            sizeDynamic += SizeOfVariableField();
+                        }
                     }
                 }
             }
@@ -687,7 +717,7 @@ namespace Iot.Device.Arduino
             {
                 for (i = 0; i < declaration.MaxLocals; i++)
                 {
-                    localTypes[i] = (byte)GetVariableType(body.LocalVariables[i].LocalType);
+                    localTypes[i] = (byte)GetVariableType(body.LocalVariables[i].LocalType, out _);
                 }
             }
 
@@ -702,41 +732,79 @@ namespace Iot.Device.Arduino
 
             for (i = startOffset; i < declaration.ArgumentCount; i++)
             {
-                argTypes[i] = (byte)GetVariableType(declaration.MethodBase.GetParameters()[i - startOffset].ParameterType);
+                argTypes[i] = (byte)GetVariableType(declaration.MethodBase.GetParameters()[i - startOffset].ParameterType, out _);
             }
 
             _board.Firmata.SendMethodDeclaration(declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxLocals, (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
         }
 
-        private VariableKind GetVariableType(Type t)
+        /// <summary>
+        /// Returns the type of a variable for the IL. This merely distinguishes signed from unsigned types, since
+        /// the execution stack auto-extends smaller types.
+        /// </summary>
+        /// <param name="t">Type to query</param>
+        /// <param name="sizeOfMember">Returns the actual size of the member, used for value-type arrays (because byte[] should use just one byte per entry)</param>
+        /// <returns></returns>
+        private VariableKind GetVariableType(Type t, out int sizeOfMember)
         {
-            if (t == typeof(Int32) || t == typeof(Int16) || t == typeof(sbyte))
+            if (t == typeof(Int16))
             {
+                sizeOfMember = 2;
                 return VariableKind.Int32;
             }
 
-            if (t == typeof(UInt32) || t == typeof(UInt16) || t == typeof(byte))
+            if (t == typeof(sbyte))
             {
+                sizeOfMember = 1;
+                return VariableKind.Int32;
+            }
+
+            if (t == typeof(Int32))
+            {
+                sizeOfMember = 4;
+                return VariableKind.Int32;
+            }
+
+            if (t == typeof(UInt32))
+            {
+                sizeOfMember = 4;
+                return VariableKind.Uint32;
+            }
+
+            if (t == typeof(UInt16))
+            {
+                sizeOfMember = 2;
+                return VariableKind.Uint32;
+            }
+
+            if (t == typeof(byte))
+            {
+                sizeOfMember = 1;
                 return VariableKind.Uint32;
             }
 
             if (t == typeof(bool))
             {
+                sizeOfMember = 1;
                 return VariableKind.Boolean;
             }
 
             if (t.IsArray)
             {
-                if (t.GetElementType()!.IsValueType)
+                var elemType = t.GetElementType();
+                if (elemType!.IsValueType)
                 {
+                    GetVariableType(elemType, out sizeOfMember);
                     return VariableKind.ValueArray;
                 }
                 else
                 {
+                    sizeOfMember = SizeOfVariableField();
                     return VariableKind.ReferenceArray;
                 }
             }
 
+            sizeOfMember = SizeOfVariableField();
             return VariableKind.Object;
         }
 
