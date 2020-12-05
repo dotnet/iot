@@ -19,7 +19,7 @@ namespace Iot.Device.Ndef
         {
             get
             {
-                return Encoding.ASCII.GetString(Header.PayloadType);
+                return Encoding.ASCII.GetString(Header!.PayloadType);
             }
 
             set
@@ -50,7 +50,7 @@ namespace Iot.Device.Ndef
             payloadAsText = string.Empty;
             try
             {
-                payloadAsText = Encoding.UTF8.GetString(Payload);
+                payloadAsText = Encoding.UTF8.GetString(Payload!);
             }
             catch (Exception ex) when (ex is ArgumentException || ex is ArgumentNullException || ex is DecoderFallbackException)
             {

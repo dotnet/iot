@@ -27,7 +27,7 @@ namespace Iot.Device.Ndef
                 throw new ArgumentException($"EnumerationValue {nameof(enumerationValue)} must be of Enum type");
             }
 
-            MemberInfo[] memberInfo = enumerationValue.GetType().GetMember(enumerationValue.ToString());
+            MemberInfo[] memberInfo = enumerationValue.GetType().GetMember(enumerationValue!.ToString());
             if (memberInfo != null && memberInfo?.Length > 0)
             {
                 object[] attributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
@@ -40,7 +40,7 @@ namespace Iot.Device.Ndef
             }
 
             // Return just the name if attribute can't be found
-            return enumerationValue.ToString();
+            return enumerationValue!.ToString();
         }
     }
 }
