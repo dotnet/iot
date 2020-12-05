@@ -19,7 +19,9 @@ namespace Iot.Device.Ndef
         {
             get
             {
-                return Encoding.ASCII.GetString(Header!.PayloadType);
+                var payloadType = Encoding.ASCII.GetString(Header.PayloadType!);
+                payloadType = payloadType ?? string.Empty;
+                return payloadType;
             }
 
             set
