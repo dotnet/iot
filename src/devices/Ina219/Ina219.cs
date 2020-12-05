@@ -31,7 +31,7 @@ namespace Iot.Device.Adc
 
         // These values are the datasheet defined delays in micro seconds between requesting a Current or Power value from the INA219 and the ADC sampling having completed
         // along with any conversions.
-        private static readonly Dictionary<Ina219AdcResolutionOrSamples, int> s_readDelays = new Dictionary<Ina219AdcResolutionOrSamples, int>()
+        private static readonly Dictionary<Ina219AdcResolutionOrSamples, int> s_readDelays = new()
         {
             { Ina219AdcResolutionOrSamples.Adc9Bit, 84 },
             { Ina219AdcResolutionOrSamples.Adc10Bit, 148 },
@@ -47,19 +47,6 @@ namespace Iot.Device.Adc
         };
 
         /// <summary>
-        /// Method to initialize values during device construction
-        /// </summary>
-        /// <param name="i2cDevice">Interface to I2C device access</param>
-#if !NETCOREAPP2_1 && !NETCOREAPP3_1
-        [MemberNotNull(nameof(_i2cDevice))]
-#endif
-        private void Initialize(I2cDevice i2cDevice)
-        {
-            _currentLsb = 1F;
-            _i2cDevice = i2cDevice;
-        }
-
-        /// <summary>
         /// Construct an Ina219 device using an I2cDevice
         /// </summary>
         /// <remarks>
@@ -68,12 +55,8 @@ namespace Iot.Device.Adc
         /// <param name="i2cDevice">The I2cDevice initialized to communicate with the INA219.</param>
         public Ina219(I2cDevice i2cDevice)
         {
-            if (_i2cDevice is null)
-            {
-                throw new ArgumentException($"{nameof(i2cDevice)} is not configured");
-            }
-
-            Initialize(i2cDevice);
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _currentLsb = 1F;
         }
 
         /// <summary>
@@ -82,18 +65,9 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This binding creates an I2cDevice ufor communication with the INA219. The I2cDevice is disposed when then INA219 is disposed.
         /// </remarks>
-        /// <param name="settings">The I2cConnectionSettings object initialized with the appropiate settings to communicate with the INA219.</param>
+        /// <param name="settings">The I2cConnectionSettings object initialized with the appropriate settings to communicate with the INA219.</param>
         public Ina219(I2cConnectionSettings settings)
-        {
-            Initialize(I2cDevice.Create(settings));
-            _disposeI2cDevice = true;
-#if NETCOREAPP2_1 || NETCOREAPP3_1
-            if (_i2cDevice is null)
-            {
-                throw new ArgumentException($"{nameof(_i2cDevice)} is not configured");
-            }
-#endif
-        }
+            : this(I2cDevice.Create(settings)) => _disposeI2cDevice = true;
 
         /// <summary>
         /// Reset the INA219 to default values;
@@ -120,7 +94,6 @@ namespace Iot.Device.Adc
         public Ina219OperatingMode OperatingMode
         {
             get => (Ina219OperatingMode)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.ModeMask);
-
             set
             {
                 ushort regValue = ReadRegister(Ina219Register.Configuration);
@@ -142,7 +115,6 @@ namespace Iot.Device.Adc
         public Ina219BusVoltageRange BusVoltageRange
         {
             get => (Ina219BusVoltageRange)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.BrngMask);
-
             set
             {
                 ushort regValue = ReadRegister(Ina219Register.Configuration);
@@ -164,7 +136,6 @@ namespace Iot.Device.Adc
         public Ina219PgaSensitivity PgaSensitivity
         {
             get => (Ina219PgaSensitivity)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.PgaMask);
-
             set
             {
                 ushort regValue = ReadRegister(Ina219Register.Configuration);
@@ -185,7 +156,6 @@ namespace Iot.Device.Adc
         public Ina219AdcResolutionOrSamples BusAdcResolutionOrSamples
         {
             get => (Ina219AdcResolutionOrSamples)((ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.BadcMask) >> 4);
-
             set
             {
                 ushort regValue = ReadRegister(Ina219Register.Configuration);
@@ -208,7 +178,6 @@ namespace Iot.Device.Adc
         public Ina219AdcResolutionOrSamples ShuntAdcResolutionOrSamples
         {
             get => (Ina219AdcResolutionOrSamples)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.SadcMask);
-
             set
             {
                 ushort regValue = ReadRegister(Ina219Register.Configuration);
@@ -261,21 +230,15 @@ namespace Iot.Device.Adc
         /// Read the measured shunt voltage.
         /// </summary>
         /// <returns>The shunt potential difference</returns>
-        public ElectricPotential ReadShuntVoltage()
-        {
-            // read the shunt voltage. LSB = 10uV then convert to Volts
-            return ElectricPotential.FromVolts(ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10.0 / 1000000.0);
-        }
+        // read the shunt voltage. LSB = 10uV then convert to Volts
+        public ElectricPotential ReadShuntVoltage() => ElectricPotential.FromVolts(ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10.0 / 1000000.0);
 
         /// <summary>
         /// Read the measured Bus voltage.
         /// </summary>
         /// <returns>The Bus potential (voltage)</returns>
-        public ElectricPotential ReadBusVoltage()
-        {
-            // read the bus voltage. LSB = 4mV then convert to Volts
-            return ElectricPotential.FromVolts(((short)ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000.0);
-        }
+        // read the bus voltage. LSB = 4mV then convert to Volts
+        public ElectricPotential ReadBusVoltage() => ElectricPotential.FromVolts(((short)ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000.0);
 
         /// <summary>
         /// Read the calculated current through the INA219.

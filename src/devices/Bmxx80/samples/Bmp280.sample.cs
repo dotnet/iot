@@ -17,10 +17,10 @@ Length stationHeight = Length.FromMeters(640); // Elevation of the sensor
 // bus id on the raspberry pi 3 and 4
 const int busId = 1;
 // set this to the current sea level pressure in the area for correct altitude readings
-var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
+Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
-var i2cSettings = new I2cConnectionSettings(busId, Bmp280.DefaultI2cAddress);
-var i2cDevice = I2cDevice.Create(i2cSettings);
+I2cConnectionSettings i2cSettings = new(busId, Bmp280.DefaultI2cAddress);
+I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 using var i2CBmp280 = new Bmp280(i2cDevice);
 
 while (true)

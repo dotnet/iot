@@ -8,9 +8,9 @@ using Iot.Device.Common;
 using Iot.Device.Shtc3;
 using UnitsNet;
 
-I2cConnectionSettings settings = new (1, Iot.Device.Shtc3.Shtc3.DefaultI2cAddress);
+I2cConnectionSettings settings = new(1, Iot.Device.Shtc3.Shtc3.DefaultI2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
-using Shtc3 sensor = new Shtc3(device);
+using Shtc3 sensor = new(device);
 Console.WriteLine($"Sensor Id: {sensor.Id}");
 while (true)
 {

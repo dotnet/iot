@@ -25,7 +25,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         public const byte DefaultI2cAddress = 0x29;
 
-        private readonly bool _autoDisposable;
+        private readonly bool _shouldDispose;
         private readonly int _operationTimeout;
 
         // Default address can be found in documentation
@@ -52,10 +52,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         public bool HighResolution
         {
-            get
-            {
-                return _highResolution;
-            }
+            get => _highResolution;
             set
             {
                 _highResolution = value;
@@ -68,11 +65,11 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="i2cDevice">The I2C Device</param>
         /// <param name="operationTimeoutMilliseconds">Timeout for reading data, by default 500 milliseonds</param>
-        /// <param name="autoDisposable">True to dispose the I2C Device at dispose</param>
-        public Vl53L0X(I2cDevice i2cDevice, int operationTimeoutMilliseconds = 500, bool autoDisposable = true)
+        /// <param name="shouldDispose">True to dispose the I2C Device at dispose</param>
+        public Vl53L0X(I2cDevice i2cDevice, int operationTimeoutMilliseconds = 500, bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null.");
-            _autoDisposable = autoDisposable;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _shouldDispose = shouldDispose;
             _operationTimeout = operationTimeoutMilliseconds;
             Reset();
             Init();
@@ -80,7 +77,7 @@ namespace Iot.Device.Vl53L0X
             MaxTryReadSingle = 3;
             // Set longer range
             Precision = Precision.LongRange;
-#if NETCOREAPP2_1 || NETCOREAPP3_1
+#if NETCOREAPP2_1
             if (Information is null)
             {
                 throw new Exception("Vl53L0X device is not correctly configured.");
@@ -97,7 +94,7 @@ namespace Iot.Device.Vl53L0X
         {
             if (newAddress > 0x7F)
             {
-                throw new ArgumentException($"{nameof(newAddress)} can't exceed 0x7F");
+                throw new ArgumentException(nameof(newAddress), "Value can't exceed 0x7F");
             }
 
             try
@@ -146,7 +143,7 @@ namespace Iot.Device.Vl53L0X
         /// Reads the measurement when the mode is set to continuious.
         /// </summary>
         /// <returns>The range in millimeters, a maximum value is returned depending on the various settings</returns>
-        private ushort ReadContinuousMeasrurementMillimeters()
+        private ushort ReadContinuousMeasurementMillimeters()
         {
             Stopwatch stopWatch = Stopwatch.StartNew();
             var expirationMilliseconds = stopWatch.ElapsedMilliseconds + _operationTimeout;
@@ -154,7 +151,7 @@ namespace Iot.Device.Vl53L0X
             {
                 if (stopWatch.ElapsedMilliseconds > expirationMilliseconds)
                 {
-                    throw new IOException($"{nameof(ReadContinuousMeasrurementMillimeters)} timeout error");
+                    throw new IOException($"{nameof(ReadContinuousMeasurementMillimeters)} timeout error");
                 }
             }
 
@@ -169,7 +166,7 @@ namespace Iot.Device.Vl53L0X
         /// Get the distance depending on the measurement mode
         /// </summary>
         public ushort Distance =>
-            MeasurementMode == MeasurementMode.Continuous ? DistanceContinous : GetDistanceOnce(true);
+            MeasurementMode == MeasurementMode.Continuous ? DistanceContinuous : GetDistanceOnce(true);
 
         /// <summary>
         /// Get/Set the measurement mode used to return the distance property
@@ -181,7 +178,7 @@ namespace Iot.Device.Vl53L0X
         /// It is recommended to used this method to gethigher quality measurements
         /// </summary>
         /// <returns>Returns the distance in millimeters, if any error, returns the maximum range so 8190</returns>
-        public ushort DistanceContinous
+        public ushort DistanceContinuous
         {
             get
             {
@@ -190,7 +187,7 @@ namespace Iot.Device.Vl53L0X
                     StartContinuousMeasurement();
                 }
 
-                return ReadContinuousMeasrurementMillimeters();
+                return ReadContinuousMeasurementMillimeters();
             }
         }
 
@@ -259,7 +256,7 @@ namespace Iot.Device.Vl53L0X
                     }
                 }
 
-                return ReadContinuousMeasrurementMillimeters();
+                return ReadContinuousMeasurementMillimeters();
             }
         }
 
@@ -413,11 +410,7 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         public Precision Precision
         {
-            get
-            {
-                return _precision;
-            }
-
+            get => _precision;
             set
             {
                 _precision = value;
@@ -658,7 +651,7 @@ namespace Iot.Device.Vl53L0X
         /// Create the Info class. Initialization and closing sequences
         /// are coming form the official API
         /// </summary>
-#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+#if !NETCOREAPP2_1
         [MemberNotNull(nameof(Information))]
 #endif
         private void GetInfo()
@@ -1056,19 +1049,13 @@ namespace Iot.Device.Vl53L0X
         /// </summary>
         /// <param name="type">The VCSEL period to decode</param>
         /// <returns>The decoded period</returns>
-        private byte GetVcselPulsePeriod(VcselType type)
+        private byte GetVcselPulsePeriod(VcselType type) => type switch
         {
-            switch (type)
-            {
-                case VcselType.VcselPeriodPreRange:
-                    return DecodeVcselPeriod(ReadByte((byte)Registers.PRE_RANGE_CONFIG_VCSEL_PERIOD));
-                case VcselType.VcselPeriodFinalRange:
-                    return DecodeVcselPeriod(ReadByte((byte)Registers.FINAL_RANGE_CONFIG_VCSEL_PERIOD));
-                default:
-                    // Should not arrive
-                    return byte.MaxValue;
-            }
-        }
+            VcselType.VcselPeriodPreRange => DecodeVcselPeriod(ReadByte((byte)Registers.PRE_RANGE_CONFIG_VCSEL_PERIOD)),
+            VcselType.VcselPeriodFinalRange => DecodeVcselPeriod(ReadByte((byte)Registers.FINAL_RANGE_CONFIG_VCSEL_PERIOD)),
+            // Should not arrive
+            _ => byte.MaxValue,
+        };
 
         /// <summary>
         /// Encode VCSEL pulse period register value from period in PCLKs
@@ -1140,7 +1127,7 @@ namespace Iot.Device.Vl53L0X
         {
             if ((limitMcps < 0) || (limitMcps > 511.99))
             {
-                throw new ArgumentException($"{nameof(limitMcps)} can't be negative and more than 511.99");
+                throw new ArgumentException(nameof(limitMcps), "Value can't be negative or greater than 511.99");
             }
 
             // Q9.7 fixed point format (9 integer bits, 7 fractional bits)
@@ -1177,7 +1164,7 @@ namespace Iot.Device.Vl53L0X
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_autoDisposable)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
                 _i2cDevice = null!;

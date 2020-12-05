@@ -9,7 +9,7 @@ using Iot.Device.Display;
 const string SupportedCharacters = "0123456789aAbBcCdDeEfFgGhHiIjJlLnNoOpPrRsStuUyYzZ-=_|°[]     ";
 
 // Initialize display (busId = 1 for Raspberry Pi 2 & 3)
-using var display = new Large4Digit7SegmentDisplay(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
+using Large4Digit7SegmentDisplay display = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
     {
         // Set max brightness
         Brightness = Ht16k33.MaxBrightness

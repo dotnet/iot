@@ -3,7 +3,7 @@
     <!-- This is set to false by default when using the compilers' NuGet package. -->
     <UseSharedCompilation>true</UseSharedCompilation>
 
-    <CompilerVersion>3.8.0-4.final</CompilerVersion>
+    <CompilerVersion>3.8.0</CompilerVersion>
   </PropertyGroup>
 
   <PropertyGroup>

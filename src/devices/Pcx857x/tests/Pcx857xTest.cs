@@ -76,7 +76,6 @@ namespace Iot.Device.Pcx857x.Tests
         public class Pcx857xChipMock
         {
             private int _ports;
-#pragma warning disable SA1011
             private byte[] _registers;
             private byte[]? _lastReadBuffer;
             private byte[]? _lastWriteBuffer;
@@ -91,10 +90,10 @@ namespace Iot.Device.Pcx857x.Tests
 
             // Can't coalesce here https://github.com/dotnet/roslyn/issues/29927
             public ReadOnlySpan<byte> LastReadBuffer =>
-                _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
+                _lastReadBuffer is null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
 
             public ReadOnlySpan<byte> LastWriteBuffer =>
-                _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
+                _lastWriteBuffer is null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
 
             public void Read(Span<byte> buffer)
             {

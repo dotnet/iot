@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
+using System.Device.I2c;
+using System.Device.Spi;
 using System.Linq;
 using System.Threading;
 using Iot.Device.Card;
@@ -11,21 +14,56 @@ using Iot.Device.Card.Mifare;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
 
-#pragma warning disable SA1011
+Pn532 pn532;
 
-string device = "/dev/ttyS0";
-using Pn532 pn532 = new Pn532(device);
-if (args.Length > 0)
+Console.WriteLine("Welcome to Pn532 example.");
+Console.WriteLine("Which interface do you want to use with your Pn532?");
+Console.WriteLine("1. HSU: Hight Speed UART (high speed serial port)");
+Console.WriteLine("2. I2C");
+Console.WriteLine("3. SPI");
+var choiceInterface = Console.ReadKey();
+Console.WriteLine();
+if (choiceInterface is not { KeyChar: '1' or '2' or '3' })
 {
-    pn532.LogLevel = LogLevel.Debug;
+    Console.WriteLine($"You can only select 1, 2 or 3");
+    return;
+}
+
+Console.WriteLine("Do you want log level to Debug? Y/N");
+var debugLevelConsole = Console.ReadKey();
+Console.WriteLine();
+LogLevel debugLevel = debugLevelConsole is { KeyChar: 'Y' or 'y' } ? LogLevel.Debug : LogLevel.None;
+
+if (choiceInterface is { KeyChar: '3' })
+{
+    Console.WriteLine("Which pin number do you want as Chip Select?");
+    var pinSelectConsole = Console.ReadLine();
+    int pinSelect;
+    try
+    {
+        pinSelect = Convert.ToInt32(pinSelectConsole);
+    }
+    catch (Exception ex) when (ex is FormatException || ex is OverflowException)
+    {
+        Console.WriteLine("Impossible to convert the pin number.");
+        return;
+    }
+
+    pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0)), pinSelect, logLevel: debugLevel);
+}
+else if (choiceInterface is { KeyChar: '2' })
+{
+    pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)), debugLevel);
 }
 else
 {
-    pn532.LogLevel = LogLevel.None;
+    Console.WriteLine("Please enter the serial port to use. ex: COM3 on Windows or /dev/ttyS0 on Linux");
+
+    var device = Console.ReadLine();
+    pn532 = new Pn532(device!, debugLevel);
 }
 
-var version = pn532.FirmwareVersion;
-if (version != null)
+if (pn532.FirmwareVersion is FirmwareVersion version)
 {
     Console.WriteLine(
         $"Is it a PN532!: {version.IsPn532}, Version: {version.Version}, Version supported: {version.VersionSupported}");
@@ -37,15 +75,17 @@ if (version != null)
 
     // To run tests, uncomment the next line
     // RunTests(pn532);
-    ReadMiFare(pn532);
+    // ReadMiFare(pn532);
 
     // To read Credit Cards, uncomment the next line
-    // ReadCreditCard(pn532);
+    ReadCreditCard(pn532);
 }
 else
 {
     Console.WriteLine($"Error");
 }
+
+pn532?.Dispose();
 
 void DumpAllRegisters(Pn532 pn532)
 {
@@ -79,7 +119,7 @@ void ReadMiFare(Pn532 pn532)
     while ((!Console.KeyAvailable))
     {
         retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
-        if (retData != null)
+        if (retData is object)
         {
             break;
         }
@@ -88,24 +128,32 @@ void ReadMiFare(Pn532 pn532)
         Thread.Sleep(200);
     }
 
-    if (retData == null)
+    if (retData is null)
     {
         return;
     }
 
+    for (int i = 0; i < retData.Length; i++)
+    {
+        Console.Write($"{retData[i]:X} ");
+    }
+
+    Console.WriteLine();
+
     var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
-    if (decrypted != null)
+    if (decrypted is object)
     {
         Console.WriteLine(
             $"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
-        if (decrypted.Ats != null)
+        if (decrypted.Ats is object)
         {
             Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
         }
 
-        MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber)
+        MifareCard mifareCard = new(pn532, decrypted.TargetNumber)
         {
-            BlockNumber = 0, Command = MifareCardCommand.AuthenticationA
+            BlockNumber = 0,
+            Command = MifareCardCommand.AuthenticationA
         };
 
         mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
@@ -124,22 +172,21 @@ void ReadMiFare(Pn532 pn532)
                 ret = mifareCard.RunMifiCardCommand();
             }
 
-            if (ret >= 0 && mifareCard.Data is object)
+            if (ret >= 0)
             {
                 mifareCard.BlockNumber = block;
                 mifareCard.Command = MifareCardCommand.Read16Bytes;
                 ret = mifareCard.RunMifiCardCommand();
-                if (ret >= 0)
+                if (ret >= 0 && mifareCard.Data is object)
                 {
                     Console.WriteLine($"Bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
                 }
                 else
                 {
-                    Console.WriteLine(
-                        $"Error reading bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
+                    Console.WriteLine($"Error reading bloc: {block}");
                 }
 
-                if (block % 4 == 3)
+                if (block % 4 == 3 && mifareCard.Data is object)
                 {
                     // Check what are the permissions
                     for (byte j = 3; j > 0; j--)
@@ -203,7 +250,7 @@ void ReadCreditCard(Pn532 pn532)
     while ((!Console.KeyAvailable))
     {
         retData = pn532.AutoPoll(5, 300, new PollingType[] { PollingType.Passive106kbpsISO144443_4B });
-        if (retData != null)
+        if (retData is object)
         {
             if (retData.Length >= 3)
             {
@@ -215,7 +262,7 @@ void ReadCreditCard(Pn532 pn532)
         Thread.Sleep(200);
     }
 
-    if (retData == null)
+    if (retData is null)
     {
         return;
     }
@@ -223,7 +270,7 @@ void ReadCreditCard(Pn532 pn532)
     // Check how many tags and the type
     Console.WriteLine($"Num tags: {retData[0]}, Type: {(PollingType)retData[1]}");
     var decrypted = pn532.TryDecodeData106kbpsTypeB(retData.AsSpan().Slice(3));
-    if (decrypted != null)
+    if (decrypted is object)
     {
         Console.WriteLine(
             $"{decrypted.TargetNumber}, Serial: {BitConverter.ToString(decrypted.NfcId)}, App Data: {BitConverter.ToString(decrypted.ApplicationData)}, " +

@@ -21,7 +21,7 @@ const int initialSleep = 100;
 int sleep = initialSleep;
 Volume? volume = null;
 
-TimeEnvelope[] envelopes = new TimeEnvelope[] { new TimeEnvelope(1000), new TimeEnvelope(1000), new TimeEnvelope(4000) };
+TimeEnvelope[] envelopes = new TimeEnvelope[] { new(1000), new(1000), new(4000) };
 
 Console.WriteLine("Hello World!");
 
@@ -83,7 +83,7 @@ while (true)
     }
 
     // behavior for buttonOne
-    if (volume != null)
+    if (volume is object)
     {
         var update = true;
         var value = 0;

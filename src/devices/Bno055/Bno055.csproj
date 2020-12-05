@@ -9,7 +9,7 @@
     <Compile Include="*.cs" />
     <Compile Include="Models/*.cs" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <PackageReference Include="System.Memory" Version="4.5.3" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
   </ItemGroup>
 
 </Project>

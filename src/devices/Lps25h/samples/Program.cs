@@ -14,12 +14,12 @@ const int I2cAddress = 0x5c;
 // set this to the current sea level pressure in the area for correct altitude readings
 var defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
-using var th = new Lps25h(CreateI2cDevice());
+using Lps25h th = new(CreateI2cDevice());
 while (true)
 {
-    var tempValue = th.Temperature;
-    var preValue = th.Pressure;
-    var altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
+    Temperature tempValue = th.Temperature;
+    Pressure preValue = th.Pressure;
+    Length altValue = WeatherHelper.CalculateAltitude(preValue, defaultSeaLevelPressure, tempValue);
 
     Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
     Console.WriteLine($"Pressure: {preValue.Hectopascals:0.##}hPa");
@@ -29,6 +29,6 @@ while (true)
 
 I2cDevice CreateI2cDevice()
 {
-    I2cConnectionSettings settings = new (1, I2cAddress);
+    I2cConnectionSettings settings = new(1, I2cAddress);
     return I2cDevice.Create(settings);
 }

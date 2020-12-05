@@ -14,8 +14,8 @@ Stopwatch sw = Stopwatch.StartNew();
 // var busId = 1;
 // var selectedI2cAddress = 0b000000;     // A5 A4 A3 A2 A1 A0
 // var deviceAddress = MotorHat.I2cAddressBase + selectedI2cAddress;
-// I2cConnectionSettings settings = new (busId, deviceAddress);
-using MotorHat motorHat = new MotorHat();
+// I2cConnectionSettings settings = new(busId, deviceAddress);
+using MotorHat motorHat = new();
 using DCMotor motor = motorHat.CreateDCMotor(1);
 
 bool done = false;

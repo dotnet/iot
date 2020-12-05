@@ -11,10 +11,10 @@ using Iot.Device.Ssd1351;
 const int pinID_DC = 23;
 const int pinID_Reset = 24;
 
-using Bitmap dotnetBM = new Bitmap(128, 128);
-using System.Drawing.Graphics g = System.Drawing.Graphics.FromImage(dotnetBM);
+using Bitmap dotnetBM = new(128, 128);
+using Graphics g = Graphics.FromImage(dotnetBM);
 using SpiDevice displaySPI = SpiDevice.Create(new SpiConnectionSettings(0, 0) { Mode = SpiMode.Mode3, DataBitLength = 8, ClockFrequency = 12_000_000 /* 12MHz */ });
-using Ssd1351 ssd1351 = new Ssd1351(displaySPI, pinID_DC, pinID_Reset);
+using Ssd1351 ssd1351 = new(displaySPI, pinID_DC, pinID_Reset);
 ssd1351.ResetDisplayAsync().Wait();
 InitDisplayForAdafruit(ssd1351);
 

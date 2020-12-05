@@ -13,23 +13,13 @@ namespace Iot.Device.Mcp3428
         /// <param name="res">The resolution.</param>
         /// <returns>System.Double.</returns>
         /// <exception cref="ArgumentOutOfRangeException">res - null</exception>
-        public static double LSBValue(AdcResolution res)
+        public static double LSBValue(AdcResolution res) => res switch
         {
-            switch (res)
-            {
-                case AdcResolution.Bit12:
-                    return 1e-3;
-
-                case AdcResolution.Bit14:
-                    return 250e-6;
-
-                case AdcResolution.Bit16:
-                    return 62.5e-6;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(res), res, null);
-            }
-        }
+            AdcResolution.Bit12 => 1e-3,
+            AdcResolution.Bit14 => 250e-6,
+            AdcResolution.Bit16 => 62.5e-6,
+            _ => throw new ArgumentOutOfRangeException(nameof(res), res, null),
+        };
 
         /// <summary>
         /// Gets the divisor to scale raw data based on resolution. = 1/LSB
@@ -37,23 +27,13 @@ namespace Iot.Device.Mcp3428
         /// <param name="res">The resolution.</param>
         /// <returns>System.UInt16.</returns>
         /// <exception cref="ArgumentOutOfRangeException">res - null</exception>
-        public static ushort LsbDivisor(AdcResolution res)
+        public static ushort LsbDivisor(AdcResolution res) => res switch
         {
-            switch (res)
-            {
-                case AdcResolution.Bit12:
-                    return 1000;
-
-                case AdcResolution.Bit14:
-                    return 4000;
-
-                case AdcResolution.Bit16:
-                    return 16000;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(res), res, null);
-            }
-        }
+            AdcResolution.Bit12 => 1000,
+            AdcResolution.Bit14 => 4000,
+            AdcResolution.Bit16 => 16000,
+            _ => throw new ArgumentOutOfRangeException(nameof(res), res, null),
+        };
 
         /// <summary>
         /// Determine device I2C address based on the configuration pin states. Based on documentation TABLE 5-3-
@@ -64,48 +44,21 @@ namespace Iot.Device.Mcp3428
         public static byte I2CAddressFromPins(PinState adr0, PinState adr1)
         {
             byte addr = 0b1101000; // Base value from doc
-
-            var idx = (byte)adr0 << 4 + (byte)adr1;
-
-            switch (idx)
+            int idx = (byte)adr0 << 4 + (byte)adr1;
+            int value = idx switch
             {
-                case 0:
-                case 0x22:
-                    break;
+                0 or 0x22 => 0,
+                0x02 => 1,
+                0x01 => 2,
+                0x10 => 4,
+                0x12 => 5,
+                0x11 => 6,
+                0x20 => 3,
+                0x21 => 7,
+                _ => throw new ArgumentException("Invalid combination"),
+            };
 
-                case 0x02:
-                    addr += 1;
-                    break;
-
-                case 0x01:
-                    addr += 2;
-                    break;
-
-                case 0x10:
-                    addr += 4;
-                    break;
-
-                case 0x12:
-                    addr += 5;
-                    break;
-
-                case 0x11:
-                    addr += 6;
-                    break;
-
-                case 0x20:
-                    addr += 3;
-                    break;
-
-                case 0x21:
-                    addr += 7;
-                    break;
-
-                default:
-                    throw new ArgumentException("Invalid combination");
-            }
-
-            return addr;
+            return addr += (byte)value;
         }
 
         public static byte SetChannelBits(byte configByte, int channel)
@@ -118,43 +71,21 @@ namespace Iot.Device.Mcp3428
             return (byte)((configByte & ~Helpers.Masks.ChannelMask) | ((byte)channel << 5));
         }
 
-        public static byte SetGainBits(byte configByte, AdcGain gain)
+        public static byte SetGainBits(byte configByte, AdcGain gain) => (byte)((configByte & ~Helpers.Masks.GainMask) | (byte)gain);
+
+        public static byte SetModeBit(byte configByte, AdcMode mode) => (byte)((configByte & ~Helpers.Masks.ModeMask) | (byte)mode);
+
+        public static byte SetReadyBit(byte configByte, bool ready) => (byte)(ready ? configByte & ~Helpers.Masks.ReadyMask : configByte | Helpers.Masks.ReadyMask);
+
+        public static byte SetResolutionBits(byte configByte, AdcResolution resolution) => (byte)((configByte & ~Helpers.Masks.ResolutionMask) | (byte)resolution);
+
+        public static int UpdateFrequency(AdcResolution res) => res switch
         {
-            return (byte)((configByte & ~Helpers.Masks.GainMask) | (byte)gain);
-        }
-
-        public static byte SetModeBit(byte configByte, AdcMode mode)
-        {
-            return (byte)((configByte & ~Helpers.Masks.ModeMask) | (byte)mode);
-        }
-
-        public static byte SetReadyBit(byte configByte, bool ready)
-        {
-            return (byte)(ready ? configByte & ~Helpers.Masks.ReadyMask : configByte | Helpers.Masks.ReadyMask);
-        }
-
-        public static byte SetResolutionBits(byte configByte, AdcResolution resolution)
-        {
-            return (byte)((configByte & ~Helpers.Masks.ResolutionMask) | (byte)resolution);
-        }
-
-        public static int UpdateFrequency(AdcResolution res)
-        {
-            switch (res)
-            {
-                case AdcResolution.Bit12:
-                    return 240;
-
-                case AdcResolution.Bit14:
-                    return 60;
-
-                case AdcResolution.Bit16:
-                    return 15;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(res), res, null);
-            }
-        }
+            AdcResolution.Bit12 => 240,
+            AdcResolution.Bit14 => 60,
+            AdcResolution.Bit16 => 15,
+            _ => throw new ArgumentOutOfRangeException(nameof(res), res, null),
+        };
 
         // From datasheet 5.2
         public static class Masks

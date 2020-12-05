@@ -311,7 +311,7 @@ namespace Iot.Device.Pwm
             _device.Write(bytes);
         }
 
-        private static (ushort on, ushort off) DutyCycleToOnOff(double dutyCycle)
+        private static (ushort On, ushort Off) DutyCycleToOnOff(double dutyCycle)
         {
             Debug.Assert(dutyCycle >= 0.0 && dutyCycle <= 1.0, "Duty cycle must be between 0 and 1");
 

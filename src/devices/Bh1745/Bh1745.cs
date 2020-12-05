@@ -9,6 +9,13 @@ using System.Linq;
 
 namespace Iot.Device.Bh1745
 {
+// Tracking https://github.com/dotnet/roslyn/issues/44571
+#pragma warning disable CS1591
+    /// <summary>
+    /// Channel compensation multipliers used to compensate the 4 color channels of the Bh1745.
+    /// </summary>
+    public record ChannelCompensationMultipliers(double Red, double Green, double Blue, double Clear);
+
     /// <summary>
     /// Digital color sensor Bh1745.
     /// </summary>
@@ -35,10 +42,8 @@ namespace Iot.Device.Bh1745
         public Bh1745(I2cDevice device)
         {
             _i2cDevice = device;
-            ChannelCompensationMultipliers = new ChannelCompensationMultipliers
-            {
-                Red = 2.2, Green = 1.0, Blue = 1.8, Clear = 10.0
-            };
+            // ChannelCompensationMultipliers: Red, Green, Blue, Clear
+            ChannelCompensationMultipliers = new(2.2, 1.0, 1.8, 10.0);
 
             // reset device and set default configuration
             InitDevice();

@@ -7,8 +7,8 @@ using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Multiplexing;
 
-using var sr = new Mbi5027(Mbi5027PinMapping.Complete);
-var cancellationSource = new CancellationTokenSource();
+using Mbi5027 sr = new(Mbi5027PinMapping.Complete);
+CancellationTokenSource cancellationSource = new();
 Console.CancelKeyPress += (s, e) =>
 {
     e.Cancel = true;
@@ -27,7 +27,7 @@ void BinaryCounter(ShiftRegister sr, CancellationTokenSource cancellationSource)
 {
     int endValue = 1000;
     Console.WriteLine($"Write 0 through {endValue}");
-    var delay = 10;
+    int delay = 10;
     for (int i = 0; i < endValue; i++)
     {
         sr.ShiftByte((byte)i);
@@ -46,7 +46,7 @@ void CheckCircuit(Mbi5027 sr)
     Console.WriteLine("Checking circuit");
     sr.EnableDetectionMode();
 
-    var index = sr.BitLength - 1;
+    int index = sr.BitLength - 1;
 
     foreach (var value in sr.ReadOutputErrorStatus())
     {

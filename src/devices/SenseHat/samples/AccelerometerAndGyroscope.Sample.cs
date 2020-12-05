@@ -14,14 +14,12 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using (var ag = new SenseHatAccelerometerAndGyroscope())
+            using SenseHatAccelerometerAndGyroscope ag = new();
+            while (true)
             {
-                while (true)
-                {
-                    Console.WriteLine($"Acceleration={ag.Acceleration}");
-                    Console.WriteLine($"AngularRate={ag.AngularRate}");
-                    Thread.Sleep(100);
-                }
+                Console.WriteLine($"Acceleration={ag.Acceleration}");
+                Console.WriteLine($"AngularRate={ag.AngularRate}");
+                Thread.Sleep(100);
             }
         }
     }

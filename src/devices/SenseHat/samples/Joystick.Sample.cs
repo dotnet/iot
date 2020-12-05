@@ -14,37 +14,35 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using (var j = new SenseHatJoystick())
+            using SenseHatJoystick j = new();
+            while (true)
             {
-                while (true)
+                j.Read();
+
+                Console.Clear();
+                if (j.HoldingUp)
                 {
-                    j.Read();
+                    Console.Write("U");
+                }
 
-                    Console.Clear();
-                    if (j.HoldingUp)
-                    {
-                        Console.Write("U");
-                    }
+                if (j.HoldingDown)
+                {
+                    Console.Write("D");
+                }
 
-                    if (j.HoldingDown)
-                    {
-                        Console.Write("D");
-                    }
+                if (j.HoldingLeft)
+                {
+                    Console.Write("L");
+                }
 
-                    if (j.HoldingLeft)
-                    {
-                        Console.Write("L");
-                    }
+                if (j.HoldingRight)
+                {
+                    Console.Write("R");
+                }
 
-                    if (j.HoldingRight)
-                    {
-                        Console.Write("R");
-                    }
-
-                    if (j.HoldingButton)
-                    {
-                        Console.Write("!");
-                    }
+                if (j.HoldingButton)
+                {
+                    Console.Write("!");
                 }
             }
         }

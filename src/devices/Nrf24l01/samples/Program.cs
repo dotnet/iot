@@ -8,13 +8,13 @@ using System.Threading;
 using Iot.Device.Nrf24l01;
 
 // SPI0 CS0
-SpiConnectionSettings senderSettings = new (0, 0)
+SpiConnectionSettings senderSettings = new(0, 0)
 {
     ClockFrequency = Nrf24l01.SpiClockFrequency,
     Mode = Nrf24l01.SpiMode
 };
 // SPI1 CS0
-SpiConnectionSettings receiverSettings = new (1, 2)
+SpiConnectionSettings receiverSettings = new(1, 2)
 {
     ClockFrequency = Nrf24l01.SpiClockFrequency,
     Mode = Nrf24l01.SpiMode
@@ -23,8 +23,8 @@ using SpiDevice senderDevice = SpiDevice.Create(senderSettings);
 using SpiDevice receiverDevice = SpiDevice.Create(receiverSettings);
 
 // SPI Device, CE Pin, IRQ Pin, Receive Packet Size
-using Nrf24l01 sender = new Nrf24l01(senderDevice, 23, 24, 20);
-using Nrf24l01 receiver = new Nrf24l01(receiverDevice, 5, 6, 20);
+using Nrf24l01 sender = new(senderDevice, 23, 24, 20);
+using Nrf24l01 receiver = new(receiverDevice, 5, 6, 20);
 // Set sender send address, receiver pipe0 address (Optional)
 byte[] receiverAddress = Encoding.UTF8.GetBytes("NRF24");
 sender.Address = receiverAddress;

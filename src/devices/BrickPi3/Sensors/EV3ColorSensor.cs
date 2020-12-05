@@ -100,30 +100,15 @@ namespace Iot.Device.BrickPi3.Sensors
             }
         }
 
-        private SensorType GetEV3Mode(ColorSensorMode mode)
+        private SensorType GetEV3Mode(ColorSensorMode mode) => mode switch
         {
-            SensorType ret = SensorType.EV3ColorReflected;
-            switch (mode)
-            {
-                case ColorSensorMode.Color:
-                    ret = SensorType.EV3ColorColor;
-                    break;
-                case ColorSensorMode.Reflection:
-                    ret = SensorType.EV3ColorReflected;
-                    break;
-                case ColorSensorMode.Green:
-                    ret = SensorType.EV3ColorRawReflected;
-                    break;
-                case ColorSensorMode.Blue:
-                    ret = SensorType.EV3ColorColorComponents;
-                    break;
-                case ColorSensorMode.Ambient:
-                    ret = SensorType.EV3ColorAmbient;
-                    break;
-            }
-
-            return ret;
-        }
+            ColorSensorMode.Color => SensorType.EV3ColorColor,
+            ColorSensorMode.Reflection => SensorType.EV3ColorReflected,
+            ColorSensorMode.Green => SensorType.EV3ColorRawReflected,
+            ColorSensorMode.Blue => SensorType.EV3ColorColorComponents,
+            ColorSensorMode.Ambient => SensorType.EV3ColorAmbient,
+            _ => SensorType.EV3ColorReflected,
+        };
 
         /// <summary>
         /// Set or get the color mode
@@ -218,45 +203,23 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Get the raw value
         /// </summary>
         /// <returns></returns>
-        public int ReadRaw()
+        public int ReadRaw() => _colorMode switch
         {
-            int val = 0;
-            switch (_colorMode)
-            {
-                case ColorSensorMode.Color:
-                case ColorSensorMode.Reflection:
-                case ColorSensorMode.Ambient:
-                    val = (int)ReadColor();
-                    break;
-                case ColorSensorMode.Green:
-                case ColorSensorMode.Blue:
-                    val = CalculateRawAverage();
-                    break;
-            }
-
-            return val;
-        }
+            ColorSensorMode.Color or ColorSensorMode.Reflection or ColorSensorMode.Ambient
+                => (int)ReadColor(),
+            ColorSensorMode.Green or ColorSensorMode.Blue => CalculateRawAverage(),
+            _ => 0,
+        };
 
         /// <summary>
         /// Read the intensity of the reflected or ambient light in percent. In color mode the color index is returned
         /// </summary>
-        public int Read()
+        public int Read() => _colorMode switch
         {
-            int val = 0;
-            switch (_colorMode)
-            {
-                case ColorSensorMode.Color:
-                case ColorSensorMode.Reflection:
-                case ColorSensorMode.Ambient:
-                    val = (int)ReadColor();
-                    break;
-                default:
-                    val = CalculateRawAverageAsPct();
-                    break;
-            }
-
-            return val;
-        }
+            ColorSensorMode.Color or ColorSensorMode.Reflection or ColorSensorMode.Ambient
+                => (int)ReadColor(),
+            _ => CalculateRawAverageAsPct(),
+        };
 
         private int CalculateRawAverage()
         {
@@ -278,12 +241,9 @@ namespace Iot.Device.BrickPi3.Sensors
             }
         }
 
-        private int CalculateRawAverageAsPct()
-        {
-            // Need to find out what is the ADC resolution
-            // 1023 is probably the correct one
-            return (CalculateRawAverage() * 100) / 1023;
-        }
+        // Need to find out what is the ADC resolution
+        // 1023 is probably the correct one
+        private int CalculateRawAverageAsPct() => (CalculateRawAverage() * 100) / 1023;
 
         /// <summary>
         /// Read the test value
@@ -306,26 +266,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Get the color as a string
         /// </summary>
         /// <returns></returns>
-        public string ReadAsString()
+        public string ReadAsString() => _colorMode switch
         {
-            string s = string.Empty;
-            switch (_colorMode)
-            {
-                case ColorSensorMode.Color:
-                    s = ReadColor().ToString();
-                    break;
-                case ColorSensorMode.Reflection:
-                case ColorSensorMode.Green:
-                case ColorSensorMode.Blue:
-                    s = Read().ToString();
-                    break;
-                case ColorSensorMode.Ambient:
-                    s = Read().ToString();
-                    break;
-            }
-
-            return s;
-        }
+            ColorSensorMode.Color => ReadColor().ToString(),
+            ColorSensorMode.Reflection or ColorSensorMode.Green or ColorSensorMode.Blue
+                => Read().ToString(),
+            ColorSensorMode.Ambient => Read().ToString(),
+            _ => string.Empty,
+        };
 
         /// <summary>
         /// Reads the color.

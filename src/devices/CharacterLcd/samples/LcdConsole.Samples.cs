@@ -82,12 +82,12 @@ namespace Iot.Device.CharacterLcd.Samples
                 console.ReplaceLine(1, printTime);
                 left--;
                 // Each full minute, blink the display (but continue writing the time)
-                if (now.Second == 0 && alertTask == null)
+                if (now.Second == 0 && alertTask is null)
                 {
                     alertTask = console.BlinkDisplayAsync(3);
                 }
 
-                if (alertTask != null && alertTask.IsCompleted)
+                if (alertTask is object && alertTask.IsCompleted)
                 {
                     // Ensure we catch any exceptions (there shouldn't be any...)
                     alertTask.Wait();

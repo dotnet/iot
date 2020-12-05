@@ -13,7 +13,7 @@ int s_deviceAddress = 0x20;
 Console.WriteLine("Hello Mcp23xxx!");
 
 using Mcp23xxx mcp23xxx = GetMcp23xxxDevice(Mcp23xxxDevice.Mcp23017);
-using GpioController controllerUsingMcp = new GpioController(PinNumberingScheme.Logical, mcp23xxx);
+using GpioController controllerUsingMcp = new(PinNumberingScheme.Logical, mcp23xxx);
 // Samples are currently written specifically for the 16 bit variant
 if (mcp23xxx is Mcp23x1x mcp23x1x)
 {
@@ -27,46 +27,28 @@ if (mcp23xxx is Mcp23x1x mcp23x1x)
 // Uncomment sample to run
 // ReadBits(controllerUsingMcp);
 // Program methods
-Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice)
+Mcp23xxx GetMcp23xxxDevice(Mcp23xxxDevice mcp23xxxDevice) => mcp23xxxDevice switch
 {
-    I2cConnectionSettings i2cConnectionSettings = new (1, s_deviceAddress);
-    I2cDevice i2cDevice = I2cDevice.Create(i2cConnectionSettings);
-
-    // I2C.
-    switch (mcp23xxxDevice)
-    {
-        case Mcp23xxxDevice.Mcp23008:
-            return new Mcp23008(i2cDevice);
-        case Mcp23xxxDevice.Mcp23009:
-            return new Mcp23009(i2cDevice);
-        case Mcp23xxxDevice.Mcp23017:
-            return new Mcp23017(i2cDevice);
-        case Mcp23xxxDevice.Mcp23018:
-            return new Mcp23018(i2cDevice);
-    }
-
-    SpiConnectionSettings spiConnectionSettings = new (0, 0)
-    {
-        ClockFrequency = 1000000, Mode = SpiMode.Mode0
-    };
-
-    SpiDevice spiDevice = SpiDevice.Create(spiConnectionSettings);
-
+    // I2C
+    Mcp23xxxDevice.Mcp23008 => new Mcp23008(NewI2c()),
+    Mcp23xxxDevice.Mcp23009 => new Mcp23009(NewI2c()),
+    Mcp23xxxDevice.Mcp23017 => new Mcp23017(NewI2c()),
+    Mcp23xxxDevice.Mcp23018 => new Mcp23018(NewI2c()),
     // SPI.
-    switch (mcp23xxxDevice)
-    {
-        case Mcp23xxxDevice.Mcp23S08:
-            return new Mcp23s08(spiDevice, s_deviceAddress);
-        case Mcp23xxxDevice.Mcp23S09:
-            return new Mcp23s09(spiDevice);
-        case Mcp23xxxDevice.Mcp23S17:
-            return new Mcp23s17(spiDevice, s_deviceAddress);
-        case Mcp23xxxDevice.Mcp23S18:
-            return new Mcp23s18(spiDevice);
-    }
+    Mcp23xxxDevice.Mcp23S08 => new Mcp23s08(NewSpi(), s_deviceAddress),
+    Mcp23xxxDevice.Mcp23S09 => new Mcp23s09(NewSpi()),
+    Mcp23xxxDevice.Mcp23S17 => new Mcp23s17(NewSpi(), s_deviceAddress),
+    Mcp23xxxDevice.Mcp23S18 => new Mcp23s18(NewSpi()),
+    _ => throw new Exception($"Invalid Mcp23xxxDevice: {nameof(mcp23xxxDevice)}"),
 
-    throw new Exception($"Invalid Mcp23xxxDevice: {nameof(mcp23xxxDevice)}");
-}
+};
+
+I2cDevice NewI2c() => I2cDevice.Create(new(1, s_deviceAddress));
+
+SpiDevice NewSpi() => SpiDevice.Create(new(0, 0)
+{
+    ClockFrequency = 1000000, Mode = SpiMode.Mode0
+});
 
 void ReadSwitchesWriteLeds(Mcp23x1x mcp23x1x)
 {

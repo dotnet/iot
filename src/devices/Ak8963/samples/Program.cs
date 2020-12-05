@@ -5,13 +5,14 @@ using System;
 using System.Device.I2c;
 using System.IO;
 using System.Threading;
+using System.Numerics;
 using Iot.Device.Magnetometer;
 
-I2cConnectionSettings mpui2CConnectionSettingmpus = new (1, Ak8963.DefaultI2cAddress);
-var ak8963 = new Ak8963(I2cDevice.Create(mpui2CConnectionSettingmpus));
+I2cConnectionSettings mpui2CConnectionSettingmpus = new(1, Ak8963.DefaultI2cAddress);
+using Ak8963 ak8963 = new Ak8963(I2cDevice.Create(mpui2CConnectionSettingmpus));
 Console.WriteLine(
     "Magnetometer calibration is taking couple of seconds, move your sensor in all possible directions! Make sure you don't have a magnet or phone close by.");
-var mag = ak8963.CalibrateMagnetometer();
+Vector3 mag = ak8963.CalibrateMagnetometer();
 Console.WriteLine($"Bias:");
 Console.WriteLine($"Mag X = {mag.X}");
 Console.WriteLine($"Mag Y = {mag.Y}");
@@ -22,7 +23,7 @@ Console.Clear();
 
 while (!Console.KeyAvailable)
 {
-    var magne = ak8963.ReadMagnetometer(true, TimeSpan.FromMilliseconds(11));
+    Vector3 magne = ak8963.ReadMagnetometer(true, TimeSpan.FromMilliseconds(11));
     Console.WriteLine($"Mag X = {magne.X,15}");
     Console.WriteLine($"Mag Y = {magne.Y,15}");
     Console.WriteLine($"Mag Z = {magne.Z,15}");

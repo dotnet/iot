@@ -1,4 +1,4 @@
-﻿# μFire ISE Probe Interface - I2C Driver
+﻿# μFire ISE Probe - pH, ORP and temperature sensor
 
 ## Summary
 

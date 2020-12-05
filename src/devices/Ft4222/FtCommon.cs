@@ -80,7 +80,7 @@ namespace Iot.Device.Ft4222
         /// Get the versions of the chipset and dll
         /// </summary>
         /// <returns>Both the chipset and dll versions</returns>
-        public static (Version? chip, Version? dll) GetVersions()
+        public static (Version? Chip, Version? Dll) GetVersions()
         {
             // First, let's find a device
             var devices = GetDevices();
@@ -104,8 +104,7 @@ namespace Iot.Device.Ft4222
                 throw new InvalidOperationException($"Can't find any open device to check the versions");
             }
 
-            SafeFtHandle ftHandle = new SafeFtHandle();
-            var ftStatus = FtFunction.FT_OpenEx(devices[idx].LocId, FtOpenType.OpenByLocation, out ftHandle);
+            var ftStatus = FtFunction.FT_OpenEx(devices[idx].LocId, FtOpenType.OpenByLocation, out SafeFtHandle ftHandle);
             if (ftStatus != FtStatus.Ok)
             {
                 throw new IOException($"Can't open the device to check chipset version, status: {ftStatus}");
@@ -118,11 +117,7 @@ namespace Iot.Device.Ft4222
                 throw new IOException($"Can't find versions of chipset and FT4222, status: {ftStatus}");
             }
 
-            ftStatus = FtFunction.FT_Close(ftHandle);
-            if (ftStatus != FtStatus.Ok)
-            {
-                throw new IOException($"Can't close the device to check chipset version, status: {ftStatus}");
-            }
+            ftHandle.Dispose();
 
             Version chip = new Version((int)(ftVersion.ChipVersion >> 24), (int)((ftVersion.ChipVersion >> 16) & 0xFF),
                 (int)((ftVersion.ChipVersion >> 8) & 0xFF), (int)(ftVersion.ChipVersion & 0xFF));

@@ -41,7 +41,6 @@ namespace System.Device.Pwm.Drivers
         public override int Frequency
         {
             get => _frequency;
-
             set
             {
                 if (value <= 0)
@@ -58,7 +57,6 @@ namespace System.Device.Pwm.Drivers
         public override double DutyCycle
         {
             get => _dutyCycle;
-
             set
             {
                 if (value < 0.0 || value > 1.0)
@@ -99,17 +97,8 @@ namespace System.Device.Pwm.Drivers
 
             _frequency = frequency;
             _dutyCycle = dutyCycle;
-
-            if (controller is null)
-            {
-                _controller = new GpioController();
-                _shouldDispose = true;
-            }
-            else
-            {
-                _controller = controller;
-                _shouldDispose = shouldDispose;
-            }
+            _shouldDispose = shouldDispose || controller is null;
+            _controller = controller ?? new();
 
             UpdatePulseWidthParameters();
 
@@ -166,16 +155,10 @@ namespace System.Device.Pwm.Drivers
         }
 
         /// <summary>Starts the PWM channel.</summary>
-        public override void Start()
-        {
-            _isRunning = true;
-        }
+        public override void Start() => _isRunning = true;
 
         /// <summary>Stops the PWM channel.</summary>
-        public override void Stop()
-        {
-            _isRunning = false;
-        }
+        public override void Stop() => _isRunning = false;
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)

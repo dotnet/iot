@@ -6,11 +6,11 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Max44009;
 
-I2cConnectionSettings settings = new (1, Max44009.DefaultI2cAddress);
+I2cConnectionSettings settings = new(1, Max44009.DefaultI2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 
 // integration time is 100ms
-using Max44009 sensor = new Max44009(device, IntegrationTime.Time100);
+using Max44009 sensor = new(device, IntegrationTime.Time100);
 while (true)
 {
     // read illuminance

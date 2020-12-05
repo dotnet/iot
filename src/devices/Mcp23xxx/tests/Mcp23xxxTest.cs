@@ -115,7 +115,6 @@ namespace Iot.Device.Mcp23xxx.Tests
             private readonly bool _isSpi;
             // OLATB address is 0x15
             private readonly byte[] _registers;
-#pragma warning disable SA1011
             private byte[]? _lastReadBuffer;
             private byte[]? _lastWriteBuffer;
 
@@ -129,8 +128,8 @@ namespace Iot.Device.Mcp23xxx.Tests
             public Span<byte> Registers => _registers;
 
             // Can't coalesce here https://github.com/dotnet/roslyn/issues/29927
-            public ReadOnlySpan<byte> LastReadBuffer => _lastReadBuffer == null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
-            public ReadOnlySpan<byte> LastWriteBuffer => _lastWriteBuffer == null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
+            public ReadOnlySpan<byte> LastReadBuffer => _lastReadBuffer is null ? ReadOnlySpan<byte>.Empty : _lastReadBuffer;
+            public ReadOnlySpan<byte> LastWriteBuffer => _lastWriteBuffer is null ? ReadOnlySpan<byte>.Empty : _lastWriteBuffer;
 
             public void Read(Span<byte> buffer)
             {

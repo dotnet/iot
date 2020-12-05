@@ -1,2 +1,2 @@
-hygrometers
-thermometers
+hygrometer
+thermometer

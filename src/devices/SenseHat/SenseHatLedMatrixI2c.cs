@@ -40,7 +40,7 @@ namespace Iot.Device.SenseHat
         {
             if (colors.Length != NumberOfPixels)
             {
-                throw new ArgumentException($"`{nameof(colors)}` must have exactly {NumberOfPixels} elements.");
+                throw new ArgumentException(nameof(colors), $"Value must be {NumberOfPixels} elements. Length: {nameof(colors)}.");
             }
 
             Span<byte> buffer = stackalloc byte[FrameBufferLength + 1];
@@ -134,7 +134,7 @@ namespace Iot.Device.SenseHat
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static (byte r, byte g, byte b) DestructColor(Color color)
+        private static (byte R, byte G, byte B) DestructColor(Color color)
         {
             // 5-bit (shift by 3) look much closer to native driver (SysFs implementation)
             // but this driver is directly reflecting the registers so we will leave the
@@ -146,14 +146,11 @@ namespace Iot.Device.SenseHat
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int PositionToAddress(int x, int y)
-        {
-            return y * 24 + x;
-        }
+        private static int PositionToAddress(int x, int y) => y * 24 + x;
 
         private static I2cDevice CreateDefaultI2cDevice()
         {
-            var settings = new I2cConnectionSettings(1, I2cAddress);
+            I2cConnectionSettings settings = new(1, I2cAddress);
             return I2cDevice.Create(settings);
         }
 

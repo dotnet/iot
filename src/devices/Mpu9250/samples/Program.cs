@@ -24,15 +24,12 @@ else
 
 void MagnetometerCalibrationDeepDive(int calibrationCount)
 {
-    I2cConnectionSettings mpui2CConnectionSettingmpus = new (1, Mpu9250.DefaultI2cAddress);
-    using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
-    // In case you have an exception with AK8963. In some configuration AK8963 has its I2C address exposed
-    // So you can try the following:
-    // using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus), i2CDeviceAk8963: I2cDevice.Create(new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress)));
-    mpu9250.MagnetometerOutputBitMode = Iot.Device.Magnetometer.OutputBitMode.Output16bit;
-    mpu9250.MagnetometerMeasurementMode = Iot.Device.Magnetometer.MeasurementMode.ContinuousMeasurement100Hz;
+    I2cConnectionSettings mpui2CConnectionSettingmpus = new(1, Mpu9250.DefaultI2cAddress);
+    using Mpu9250 mpu9250 = new(I2cDevice.Create(mpui2CConnectionSettingmpus));
+    mpu9250.MagnetometerOutputBitMode = OutputBitMode.Output16bit;
+    mpu9250.MagnetometerMeasurementMode = MeasurementMode.ContinuousMeasurement100Hz;
     Console.WriteLine("Please move the magnetometer during calibration");
-    using var ioWriter = new StreamWriter("mag.csv");
+    using StreamWriter ioWriter = new("mag.csv");
     // First we read the data without calibration at all
     Console.WriteLine("Reading magnetometer data without calibration");
     ioWriter.WriteLine($"X;Y;Z");
@@ -86,7 +83,7 @@ void MagnetometerCalibrationDeepDive(int calibrationCount)
 
 void MainTest()
 {
-    I2cConnectionSettings mpui2CConnectionSettingmpus = new (1, Mpu9250.DefaultI2cAddress);
+    I2cConnectionSettings mpui2CConnectionSettingmpus = new(1, Mpu9250.DefaultI2cAddress);
     using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
     Console.WriteLine($"Check version magnetometer: {mpu9250.GetMagnetometerVersion()}");
     Console.WriteLine(
@@ -105,12 +102,12 @@ void MainTest()
 
     var resSelfTest = mpu9250.RunGyroscopeAccelerometerSelfTest();
     Console.WriteLine($"Self test:");
-    Console.WriteLine($"Gyro X = {resSelfTest.Item1.X} vs >0.005");
-    Console.WriteLine($"Gyro Y = {resSelfTest.Item1.Y} vs >0.005");
-    Console.WriteLine($"Gyro Z = {resSelfTest.Item1.Z} vs >0.005");
-    Console.WriteLine($"Acc X = {resSelfTest.Item2.X} vs >0.005 & <0.015");
-    Console.WriteLine($"Acc Y = {resSelfTest.Item2.Y} vs >0.005 & <0.015");
-    Console.WriteLine($"Acc Z = {resSelfTest.Item2.Z} vs >0.005 & <0.015");
+    Console.WriteLine($"Gyro X = {resSelfTest.GyroscopeAverage.X} vs >0.005");
+    Console.WriteLine($"Gyro Y = {resSelfTest.GyroscopeAverage.Y} vs >0.005");
+    Console.WriteLine($"Gyro Z = {resSelfTest.GyroscopeAverage.Z} vs >0.005");
+    Console.WriteLine($"Acc X = {resSelfTest.AccelerometerAverage.X} vs >0.005 & <0.015");
+    Console.WriteLine($"Acc Y = {resSelfTest.AccelerometerAverage.Y} vs >0.005 & <0.015");
+    Console.WriteLine($"Acc Z = {resSelfTest.AccelerometerAverage.Z} vs >0.005 & <0.015");
     Console.WriteLine("Running Gyroscope and Accelerometer calibration");
     mpu9250.CalibrateGyroscopeAccelerometer();
     Console.WriteLine("Calibration results:");

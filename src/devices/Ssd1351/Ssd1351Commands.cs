@@ -417,7 +417,6 @@ namespace Iot.Device.Ssd1351
             SendCommand(Ssd1351Command.SetGPIO, (byte)(((int)pin1Mode << 2) + pin0Mode));
         }
 
-#pragma warning disable SA1011
         /// <summary>
         /// This command sets the gray levels GS0 -> GS63.
         /// </summary>
@@ -425,7 +424,7 @@ namespace Iot.Device.Ssd1351
         /// If this parameter is null or an empty array then the gray leves are set to default.</param>
         public void SetGrayLevels(byte[]? grayLevels = null)
         {
-            if (grayLevels == null || grayLevels.Length == 0)
+            if (grayLevels is null || grayLevels.Length == 0)
             {
                 SendCommand(Ssd1351Command.SetDefaultGrayLevels);
             }

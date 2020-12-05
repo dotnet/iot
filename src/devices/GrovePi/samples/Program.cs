@@ -11,7 +11,7 @@ using Iot.Device.GrovePiDevice.Sensors;
 
 Console.WriteLine("Hello GrovePi!");
 PinValue relay = PinValue.Low;
-I2cConnectionSettings i2CConnectionSettings = new (1, GrovePi.DefaultI2cAddress);
+I2cConnectionSettings i2CConnectionSettings = new(1, GrovePi.DefaultI2cAddress);
 using GrovePi grovePi = new GrovePi(I2cDevice.Create(i2CConnectionSettings));
 Console.WriteLine($"Manufacturer :{grovePi.GrovePiInfo.Manufacturer}");
 Console.WriteLine($"Board: {grovePi.GrovePiInfo.Board}");
@@ -22,8 +22,8 @@ grovePi.PinMode(GrovePort.DigitalPin2, PinMode.Output);
 grovePi.PinMode(GrovePort.DigitalPin3, PinMode.Output);
 grovePi.PinMode(GrovePort.DigitalPin4, PinMode.Input);
 // 2 high level classes
-UltrasonicSensor ultrasonic = new UltrasonicSensor(grovePi, GrovePort.DigitalPin6);
-DhtSensor dhtSensor = new DhtSensor(grovePi, GrovePort.DigitalPin7, DhtType.Dht11);
+UltrasonicSensor ultrasonic = new(grovePi, GrovePort.DigitalPin6);
+DhtSensor dhtSensor = new(grovePi, GrovePort.DigitalPin7, DhtType.Dht11);
 int poten = 0;
 while (!Console.KeyAvailable)
 {

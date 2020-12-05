@@ -6,7 +6,7 @@ using System.Threading;
 using Iot.Device.Tm1637;
 
 Console.WriteLine("Hello Tm1637!");
-using Tm1637 tm1637 = new Tm1637(20, 21);
+using Tm1637 tm1637 = new(20, 21);
 tm1637.Brightness = 7;
 tm1637.ScreenOn = true;
 tm1637.ClearDisplay();

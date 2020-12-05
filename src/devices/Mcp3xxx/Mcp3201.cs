@@ -23,10 +23,7 @@ namespace Iot.Device.Adc
         /// Reads a 12-bit (0..4096) value from the device
         /// </summary>
         /// <returns>12-bit value corresponding to relative voltage level on specified device channel</returns>
-        public int Read()
-        {
-            // Read the data from the device. As the 12 bits of data start at bit 1 then read 13 bits and shift right by 1.
-            return ReadInternal(adcRequest: 0, adcResolutionBits: 12 + 1, delayBits: 0) >> 1;
-        }
+        // Read the data from the device. As the 12 bits of data start at bit 1 then read 13 bits and shift right by 1.
+        public int Read() => ReadInternal(adcRequest: 0, adcResolutionBits: 12 + 1, delayBits: 0) >> 1;
     }
 }
