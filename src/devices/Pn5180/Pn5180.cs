@@ -482,9 +482,9 @@ namespace Iot.Device.Pn5180
                     return false;
                 }
 
-                var ret = DeselectCardTypeB(card.Card);
+                DeselectCardTypeB(card.Card);
                 // Deselect may fail but if selection succeed it's ok
-                ret = SelectCardTypeB(card.Card);
+                var ret = SelectCardTypeB(card.Card);
                 return ret;
             }
         }

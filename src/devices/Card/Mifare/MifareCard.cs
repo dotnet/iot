@@ -19,6 +19,12 @@ namespace Iot.Device.Card.Mifare
     {
         // This is the actual RFID reader
         private CardTransceiver _rfid;
+        private static readonly byte[] Mifare1KBlock1 = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+        private static readonly byte[] Mifare1KBlock2 = new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+        private static readonly byte[] Mifare1KBlock4 = new byte[] { 0x03, 0x00, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private static readonly byte[] Mifare2KBlock64 = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+        private static readonly byte[] Mifare2KBlock66 = new byte[] { 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05 };
+        private static readonly byte[] Mifare4KBlock64 = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
 
         /// <summary>
         /// Default Key A
@@ -773,18 +779,9 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// Format the Card to NDEF
         /// </summary>
-        /// <returns>True if success</returns>
-        public bool FormatNdef()
-        {
-            return FormatNdef(new byte[0]);
-        }
-
-        /// <summary>
-        /// Format the Card to NDEF
-        /// </summary>
         /// <param name="keyB">The key B to be used for formatting, if empty, will use the default key B</param>
         /// <returns>True if success</returns>
-        public bool FormatNdef(ReadOnlySpan<byte> keyB)
+        public bool FormatNdef(ReadOnlySpan<byte> keyB = default)
         {
             if (Capacity is not MifareCardCapacity.Mifare1K or MifareCardCapacity.Mifare2K or MifareCardCapacity.Mifare4K)
             {
@@ -802,10 +799,10 @@ namespace Iot.Device.Card.Mifare
             // First write the data for the format
             // All block data coming from https://www.nxp.com/docs/en/application-note/AN1304.pdf page 30+
             var authOk = AuthenticateBlockKeyB(keyFormat, 1);
-            Data = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+            Data = Mifare1KBlock1;
             authOk &= WriteDataBlock(1);
             authOk &= AuthenticateBlockKeyB(keyFormat, 2);
-            Data = new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+            Data = Mifare1KBlock2;
             authOk &= WriteDataBlock(2);
             authOk &= AuthenticateBlockKeyB(keyFormat, 3);
             Data = new byte[] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0x78, 0x77, 088, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -813,22 +810,22 @@ namespace Iot.Device.Card.Mifare
             keyFormat.CopyTo(Data, 10);
             authOk &= WriteDataBlock(3);
             authOk &= AuthenticateBlockKeyB(keyFormat, 4);
-            Data = new byte[] { 0x03, 0x00, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            Data = Mifare1KBlock4;
             authOk &= WriteDataBlock(4);
 
             if (Capacity == MifareCardCapacity.Mifare2K)
             {
                 byte block = 16 * 4;
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+                Data = Mifare2KBlock64;
                 authOk &= WriteDataBlock(block);
                 block++;
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+                Data = Mifare1KBlock2; // 65 is same as 2
                 authOk &= WriteDataBlock(block);
                 block++;
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = new byte[] { 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05 };
+                Data = Mifare2KBlock66;
                 authOk &= WriteDataBlock(block);
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
                 Data = new byte[] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0x78, 0x77, 088, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -839,15 +836,15 @@ namespace Iot.Device.Card.Mifare
             {
                 byte block = 16 * 4;
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+                Data = Mifare4KBlock64;
                 authOk &= WriteDataBlock(block);
                 block++;
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+                Data = Mifare1KBlock2; // 65 is same as 2
                 authOk &= WriteDataBlock(block);
                 block++;
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+                Data = Mifare1KBlock2; // 66 is same as 2
                 authOk &= WriteDataBlock(block);
                 authOk &= AuthenticateBlockKeyB(keyFormat, block);
                 Data = new byte[] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5, 0x78, 0x77, 088, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -1018,40 +1015,40 @@ namespace Iot.Device.Card.Mifare
             // All block data coming from https://www.nxp.com/docs/en/application-note/AN1304.pdf page 30+
             var authOk = AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, 1);
             authOk &= ReadDataBlock(1);
-            authOk &= Data.SequenceEqual(new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 });
+            authOk &= Data.SequenceEqual(Mifare1KBlock1);
             authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, 2);
             authOk &= ReadDataBlock(2);
-            authOk &= Data.SequenceEqual(new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 });
+            authOk &= Data.SequenceEqual(Mifare1KBlock2);
 
             if (Capacity == MifareCardCapacity.Mifare2K)
             {
                 byte block = 16 * 4;
                 authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 });
+                authOk &= Data.SequenceEqual(Mifare2KBlock64);
                 block++;
                 authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 });
+                authOk &= Data.SequenceEqual(Mifare1KBlock2); // 65 is same as 2
                 block++;
                 authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(new byte[] { 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05 });
+                authOk &= Data.SequenceEqual(Mifare2KBlock66);
             }
             else if (Capacity == MifareCardCapacity.Mifare4K)
             {
                 byte block = 16 * 4;
                 authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 });
+                authOk &= Data.SequenceEqual(Mifare4KBlock64);
                 block++;
                 authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 });
+                authOk &= Data.SequenceEqual(Mifare1KBlock2); // 65 is same as 2
                 block++;
                 authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 });
+                authOk &= Data.SequenceEqual(Mifare1KBlock2); // 66 is same as 2
             }
 
             // GBP should be 0xC1 for the MAD sectors and 0x40 for the others for a full read/write access

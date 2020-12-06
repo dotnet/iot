@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.ComponentModel;
@@ -11,7 +10,7 @@ namespace Iot.Device.Ndef
     /// <summary>
     /// Helper to get the enumeration description instead of enumeration name
     /// </summary>
-    public static class EnumHelper
+    internal static class EnumHelper
     {
         /// <summary>
         /// Returns the description attribute or the name of the enum

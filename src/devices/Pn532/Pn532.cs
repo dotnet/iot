@@ -811,8 +811,9 @@ namespace Iot.Device.Pn532
         /// <inheritdoc/>
         public override bool ReselectTarget(byte targetNumber)
         {
-            var ret = DeselectTarget(targetNumber);
-            ret &= SelectTarget(targetNumber);
+            // First one doesn't need to succeed, only the select needs
+            DeselectTarget(targetNumber);
+            var ret = SelectTarget(targetNumber);
             return ret;
         }
 
