@@ -26,7 +26,7 @@ namespace System.Device.Gpio
         private const string HummingBoardProduct = "HummingBoard-Edge";
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
-        private readonly HashSet<int> _openPins;
+        private readonly HashSet<string> _openPins;
         private GpioDriver _driver;
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace System.Device.Gpio
         {
             _driver = driver;
             NumberingScheme = numberingScheme;
-            _openPins = new HashSet<int>();
+            _openPins = new HashSet<string>();
         }
 
         /// <summary>
@@ -91,7 +91,22 @@ namespace System.Device.Gpio
             }
 
             OpenPinCore(pinNumber);
-            _openPins.Add(pinNumber);
+            _openPins.Add(pinNumber.ToString());
+        }
+
+        /// <summary>
+        /// Opens a pin in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        public void OpenPin(string pinName)
+        {
+            if (IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Pin {pinName} is already open.");
+            }
+
+            OpenPinCore(pinName);
+            _openPins.Add(pinName);
         }
 
         /// <summary>
@@ -102,6 +117,15 @@ namespace System.Device.Gpio
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             _driver.OpenPin(logicalPinNumber);
+        }
+
+        /// <summary>
+        /// Opens a pin in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        protected virtual void OpenPinCore(string pinName)
+        {
+            _driver.OpenPin(pinName);
         }
 
         /// <summary>
@@ -116,6 +140,17 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Opens a pin and sets it to a specific mode.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="mode">The mode to be set.</param>
+        public void OpenPin(string pinName, PinMode mode)
+        {
+            OpenPin(pinName);
+            SetPinMode(pinName, mode);
+        }
+
+        /// <summary>
         /// Closes an open pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -127,7 +162,22 @@ namespace System.Device.Gpio
             }
 
             ClosePinCore(pinNumber);
-            _openPins.Remove(pinNumber);
+            _openPins.Remove(pinNumber.ToString());
+        }
+
+        /// <summary>
+        /// Closes an open pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        public void ClosePin(string pinName)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not close pin {pinName} because it is not open.");
+            }
+
+            ClosePinCore(pinName);
+            _openPins.Remove(pinName);
         }
 
         /// <summary>
@@ -138,6 +188,15 @@ namespace System.Device.Gpio
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             _driver.ClosePin(logicalPinNumber);
+        }
+
+        /// <summary>
+        /// Closes an open pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        protected virtual void ClosePinCore(string pinName)
+        {
+            _driver.ClosePin(pinName);
         }
 
         /// <summary>
@@ -162,6 +221,26 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Sets the mode to a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="mode">The mode to be set.</param>
+        public virtual void SetPinMode(string pinName, PinMode mode)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not set a mode to pin {pinName} because it is not open.");
+            }
+
+            if (!IsPinModeSupported(pinName, mode))
+            {
+                throw new InvalidOperationException($"Pin {pinName} does not support mode {mode}.");
+            }
+
+            _driver.SetPinMode(pinName, mode);
+        }
+
+        /// <summary>
         /// Gets the mode of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -178,13 +257,38 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Gets the mode of a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <returns>The mode of the pin.</returns>
+        public virtual PinMode GetPinMode(string pinName)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not get the mode of pin {pinName} because it is not open.");
+            }
+
+            return _driver.GetPinMode(pinName);
+        }
+
+        /// <summary>
         /// Checks if a specific pin is open.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <returns>The status if the pin is open or closed.</returns>
         public bool IsPinOpen(int pinNumber)
         {
-            return _openPins.Contains(pinNumber);
+            return _openPins.Contains(pinNumber.ToString());
+        }
+
+        /// <summary>
+        /// Checks if a specific pin is open.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <returns>The status if the pin is open or closed.</returns>
+        public bool IsPinOpen(string pinName)
+        {
+            return _openPins.Contains(pinName);
         }
 
         /// <summary>
@@ -197,6 +301,17 @@ namespace System.Device.Gpio
         {
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             return _driver.IsPinModeSupported(logicalPinNumber, mode);
+        }
+
+        /// <summary>
+        /// Checks if a pin supports a specific mode.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="mode">The mode to check.</param>
+        /// <returns>The status if the pin supports the mode.</returns>
+        public virtual bool IsPinModeSupported(string pinName, PinMode mode)
+        {
+            return _driver.IsPinModeSupported(pinName, mode);
         }
 
         /// <summary>
@@ -213,6 +328,21 @@ namespace System.Device.Gpio
 
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             return _driver.Read(logicalPinNumber);
+        }
+
+        /// <summary>
+        /// Reads the current value of a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <returns>The value of the pin.</returns>
+        public virtual PinValue Read(string pinName)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not read from pin {pinName} because it is not open.");
+            }
+
+            return _driver.Read(pinName);
         }
 
         /// <summary>
@@ -237,6 +367,26 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Writes a value to a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="value">The value to be written to the pin.</param>
+        public virtual void Write(string pinName, PinValue value)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not write to pin {pinName} because it is not open.");
+            }
+
+            if (_driver.GetPinMode(pinName) != PinMode.Output)
+            {
+                throw new InvalidOperationException($"Can not write to pin {pinName} because it is not set to Output mode.");
+            }
+
+            _driver.Write(pinName, value);
+        }
+
+        /// <summary>
         /// Blocks execution until an event of type eventType is received or a period of time has expired.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -247,6 +397,19 @@ namespace System.Device.Gpio
         {
             using CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
             return WaitForEvent(pinNumber, eventTypes, tokenSource.Token);
+        }
+
+        /// <summary>
+        /// Blocks execution until an event of type eventType is received or a period of time has expired.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="timeout">The time to wait for the event.</param>
+        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        public WaitForEventResult WaitForEvent(string pinName, PinEventTypes eventTypes, TimeSpan timeout)
+        {
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
+            return WaitForEvent(pinName, eventTypes, tokenSource.Token);
         }
 
         /// <summary>
@@ -268,6 +431,23 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Blocks execution until an event of type eventType is received or a cancellation is requested.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        public virtual WaitForEventResult WaitForEvent(string pinName, PinEventTypes eventTypes, CancellationToken cancellationToken)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not wait for events from pin {pinName} because it is not open.");
+            }
+
+            return _driver.WaitForEvent(pinName, eventTypes, cancellationToken);
+        }
+
+        /// <summary>
         /// Async call to wait until an event of type eventType is received or a period of time has expired.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -278,6 +458,19 @@ namespace System.Device.Gpio
         {
             using CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
             return await WaitForEventAsync(pinNumber, eventTypes, tokenSource.Token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Async call to wait until an event of type eventType is received or a period of time has expired.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="timeout">The time to wait for the event.</param>
+        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
+        public async ValueTask<WaitForEventResult> WaitForEventAsync(string pinName, PinEventTypes eventTypes, TimeSpan timeout)
+        {
+            using CancellationTokenSource tokenSource = new CancellationTokenSource(timeout);
+            return await WaitForEventAsync(pinName, eventTypes, tokenSource.Token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -299,6 +492,23 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Async call until an event of type eventType is received or a cancellation is requested.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        public virtual ValueTask<WaitForEventResult> WaitForEventAsync(string pinName, PinEventTypes eventTypes, CancellationToken token)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not wait for events from pin {pinName} because it is not open.");
+            }
+
+            return _driver.WaitForEventAsync(pinName, eventTypes, token);
+        }
+
+        /// <summary>
         /// Adds a callback that will be invoked when pinNumber has an event of type eventType.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -313,6 +523,22 @@ namespace System.Device.Gpio
 
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
             _driver.AddCallbackForPinValueChangedEvent(logicalPinNumber, eventTypes, callback);
+        }
+
+        /// <summary>
+        /// Adds a callback that will be invoked when pinNumber has an event of type eventType.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">The callback method that will be invoked.</param>
+        public virtual void RegisterCallbackForPinValueChangedEvent(string pinName, PinEventTypes eventTypes, PinChangeEventHandler callback)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not add callback for pin {pinName} because it is not open.");
+            }
+
+            _driver.AddCallbackForPinValueChangedEvent(pinName, eventTypes, callback);
         }
 
         /// <summary>
@@ -332,12 +558,27 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Removes a callback that was being invoked for pin at pinNumber.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="callback">The callback method that will be invoked.</param>
+        public virtual void UnregisterCallbackForPinValueChangedEvent(string pinName, PinChangeEventHandler callback)
+        {
+            if (!IsPinOpen(pinName))
+            {
+                throw new InvalidOperationException($"Can not remove callback for pin {pinName} because it is not open.");
+            }
+
+            _driver.RemoveCallbackForPinValueChangedEvent(pinName, callback);
+        }
+
+        /// <summary>
         /// Disposes this instance and closes all open pins associated with this controller.
         /// </summary>
         /// <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
         protected virtual void Dispose(bool disposing)
         {
-            foreach (int pin in _openPins)
+            foreach (string pin in _openPins)
             {
                 // The list contains the pin in the current NumberingScheme
                 ClosePinCore(pin);
@@ -358,6 +599,7 @@ namespace System.Device.Gpio
         /// Write the given pins with the given values.
         /// </summary>
         /// <param name="pinValuePairs">The pin/value pairs to write.</param>
+        // TODO: create a method for use a generic pinvaluepair for the gpio names case
         public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             for (int i = 0; i < pinValuePairs.Length; i++)
@@ -370,6 +612,7 @@ namespace System.Device.Gpio
         /// Read the given pins with the given pin numbers.
         /// </summary>
         /// <param name="pinValuePairs">The pin/value pairs to read.</param>
+        // TODO: create a method for use a generic pinvaluepair for the gpio names case
         public void Read(Span<PinValuePair> pinValuePairs)
         {
             for (int i = 0; i < pinValuePairs.Length; i++)
