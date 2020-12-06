@@ -33,7 +33,7 @@ foreach (DeviceInformation device in devices)
 
 if (devices.Count == 0)
 {
-    Console.WriteLine("No devices to connected to run tests.");
+    Console.WriteLine("No devices connected to run tests.");
     return;
 }
 
