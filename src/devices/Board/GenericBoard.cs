@@ -53,9 +53,15 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
-        protected override I2cDevice CreateSimpleI2cDevice(I2cConnectionSettings connectionSettings, int[] pins)
+        protected override I2cDevice CreateI2cDeviceCore(I2cConnectionSettings connectionSettings)
         {
             return I2cDevice.Create(connectionSettings);
+        }
+
+        /// <inheritdoc />
+        public override I2cBus CreateOrGetDefaultI2cBus()
+        {
+            throw new NotSupportedException("For the generic board, you need to specify the pins to use for I2C by explicitly specifying them");
         }
 
         /// <summary>
@@ -70,7 +76,8 @@ namespace Iot.Device.Board
         /// <inheritdoc />
         protected override void ActivatePinMode(int pinNumber, PinUsage usage)
         {
-            _knownUsages[pinNumber] = usage;
+            int pinNumber2 = RemapPin(pinNumber, DefaultPinNumberingScheme);
+            _knownUsages[pinNumber2] = usage;
             base.ActivatePinMode(pinNumber, usage);
         }
 
@@ -78,6 +85,7 @@ namespace Iot.Device.Board
         public override PinUsage DetermineCurrentPinUsage(int pinNumber)
         {
             PinUsage usage;
+            pinNumber = RemapPin(pinNumber, DefaultPinNumberingScheme);
             if (_knownUsages.TryGetValue(pinNumber, out usage))
             {
                 return usage;
@@ -88,7 +96,7 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
-        public override int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings)
+        public override int[] GetDefaultPinAssignmentForI2c(int busId)
         {
             throw new NotSupportedException("For the generic board, you need to specify the pins to use for I2C");
         }

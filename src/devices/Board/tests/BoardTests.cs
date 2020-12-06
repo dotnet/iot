@@ -131,8 +131,8 @@ namespace Iot.Device.Board.Tests
             board.ReservePin(1, PinUsage.I2c, this);
             // Already in use for I2c
             Assert.Throws<InvalidOperationException>(() => board.ReservePin(1, PinUsage.Gpio, this));
-            // Works, I2c can share pins
-            board.ReservePin(1, PinUsage.I2c, this);
+            // Also fails, use the shared bus instance if creating multiple devices
+            Assert.Throws<InvalidOperationException>(() => board.ReservePin(1, PinUsage.Gpio, this));
         }
 
         [Fact]
@@ -165,23 +165,45 @@ namespace Iot.Device.Board.Tests
         public void CreateI2cDeviceDefault()
         {
             var board = CreateBoard();
-            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, 3)) as I2cDeviceManager;
+            Assert.Equal(PinUsage.Unknown, board.DetermineCurrentPinUsage(0));
+            Assert.Equal(PinUsage.Unknown, board.DetermineCurrentPinUsage(1));
+            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, 3));
             Assert.NotNull(device);
-            var simDevice = device!.RawDevice as I2cDummyDevice;
-            Assert.Equal(0, simDevice!.Pins[0]);
-            Assert.Equal(1, simDevice.Pins[1]);
+            // The mocked board has pins 0 and 1 for the i2c bus
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(0));
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(1));
         }
 
         [Fact]
-        public void CreateI2cDeviceBoardNumbering()
+        public void CreateI2cBusDefaultAndRelease()
         {
             var board = CreateBoard();
-            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, 3), new int[] { 2, 4 }, PinNumberingScheme.Board) as I2cDeviceManager;
+            Assert.Equal(PinUsage.Unknown, board.DetermineCurrentPinUsage(0));
+            Assert.Equal(PinUsage.Unknown, board.DetermineCurrentPinUsage(1));
+            var bus = board.CreateOrGetI2cBus(0, new int[] { 0, 1 });
+            Assert.NotNull(bus);
+            // The mocked board has pins 0 and 1 for the i2c bus
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(0));
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(1));
+            bus.Dispose();
+            // This stays like this, because DetermineCurrentPinUsage returns the last known usage,
+            // even if the pin is closed
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(0));
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(1));
+            // This usage should be fine now
+            board.ReservePin(0, PinUsage.Pwm, this);
+        }
+
+        [Fact]
+        public void CreateI2cBusBoardNumbering()
+        {
+            var board = CreateBoard(PinNumberingScheme.Board);
+            var device = board.CreateOrGetI2cBus(0, new int[] { 2, 4 });
             Assert.NotNull(device);
-            var simDevice = device!.RawDevice as I2cDummyDevice;
+            var simDevice = device.CreateDevice(new I2cConnectionSettings(0, 3)) as I2cDummyDevice;
             Assert.NotNull(simDevice);
-            Assert.Equal(1, simDevice!.Pins[0]);
-            Assert.Equal(2, simDevice.Pins[1]);
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(2));
+            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(4));
         }
 
         [Fact]
@@ -205,6 +227,10 @@ namespace Iot.Device.Board.Tests
             var ctrl = board.CreateGpioController();
             Assert.Throws<InvalidOperationException>(() => ctrl.OpenPin(0));
             device2.Dispose();
+            // Still bad (device.Dispose does not close the bus)
+            Assert.Throws<InvalidOperationException>(() => ctrl.OpenPin(0));
+            var bus = board.CreateOrGetI2cBus(0);
+            bus.Dispose();
             // Now fine
             ctrl.OpenPin(0);
         }
@@ -247,9 +273,9 @@ namespace Iot.Device.Board.Tests
             ctrl.OpenPin(0);
         }
 
-        private Board CreateBoard()
+        private Board CreateBoard(PinNumberingScheme scheme = PinNumberingScheme.Logical)
         {
-            return new CustomGenericBoard(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
+            return new CustomGenericBoard(scheme, _mockedGpioDriver.Object);
         }
 
         private sealed class CustomGenericBoard : GenericBoard
@@ -309,14 +335,14 @@ namespace Iot.Device.Board.Tests
                 return MockedDriver;
             }
 
-            public override int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings)
+            public override int[] GetDefaultPinAssignmentForI2c(int busId)
             {
-                if (connectionSettings.BusId == 0)
+                if (busId == 0)
                 {
                     return new int[] { 0, 1 };
                 }
 
-                throw new NotSupportedException($"No simulated bus id {connectionSettings.BusId}");
+                throw new NotSupportedException($"No simulated bus id {busId}");
             }
 
             public override int[] GetDefaultPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
@@ -339,9 +365,9 @@ namespace Iot.Device.Board.Tests
                 throw new NotSupportedException($"No simulated bus id {connectionSettings.BusId}");
             }
 
-            protected override I2cDevice CreateSimpleI2cDevice(I2cConnectionSettings connectionSettings, int[] pins)
+            protected override I2cDevice CreateI2cDeviceCore(I2cConnectionSettings connectionSettings)
             {
-                return new I2cDummyDevice(connectionSettings, pins);
+                return new I2cDummyDevice(connectionSettings);
             }
 
             protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings connectionSettings, int[] pins)

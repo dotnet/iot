@@ -32,6 +32,7 @@ namespace Iot.Device.Board
         private readonly PinNumberingScheme _defaultNumberingScheme;
         private readonly object _pinReservationsLock;
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
+        private readonly Dictionary<int, I2cBus> _i2cBuses;
         private bool _initialized;
         private bool _disposed;
 
@@ -48,6 +49,7 @@ namespace Iot.Device.Board
         {
             _defaultNumberingScheme = defaultNumberingScheme;
             _pinReservations = new Dictionary<int, List<PinReservation>>();
+            _i2cBuses = new Dictionary<int, I2cBus>();
             _pinReservationsLock = new object();
             _initialized = false;
             _disposed = false;
@@ -154,7 +156,7 @@ namespace Iot.Device.Board
                 }
             }
 
-            ActivatePinMode(logicalPin, usage);
+            ActivatePinMode(pinNumber, usage);
         }
 
         /// <summary>
@@ -250,6 +252,12 @@ namespace Iot.Device.Board
         /// <inheritdoc cref="IDisposable.Dispose"/>
         protected virtual void Dispose(bool disposing)
         {
+            foreach (var bus in _i2cBuses)
+            {
+                bus.Value.Dispose();
+            }
+
+            _i2cBuses.Clear();
             _disposed = true;
         }
 
@@ -412,27 +420,55 @@ namespace Iot.Device.Board
         /// This method shall be overriden by clients, providing just the basic interface to an I2cDevice.
         /// </summary>
         /// <param name="connectionSettings">I2C Connection settings</param>
-        /// <param name="pinAssignment">Pins assigned to the device</param>
         /// <returns>An I2cDevice connection</returns>
-        protected abstract I2cDevice CreateSimpleI2cDevice(I2cConnectionSettings connectionSettings, int[] pinAssignment);
+        protected abstract I2cDevice CreateI2cDeviceCore(I2cConnectionSettings connectionSettings);
 
         /// <summary>
-        /// Create an I2C device instance
+        /// Create an I2C bus instance or return the existing instance for this bus
         /// </summary>
-        /// <param name="connectionSettings">Connection parameters (contains I2C address and bus number)</param>
-        /// <param name="pinAssignment">The set of pins to use for I2C. The parameter can be null if the hardware requires a fixed mapping from
-        /// pins to I2C for the given bus.</param>
-        /// <param name="pinNumberingScheme">The numbering scheme in which the <paramref name="pinAssignment"/> is given</param>
-        /// <returns>An I2C device instance</returns>
-        public I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings, int[] pinAssignment, PinNumberingScheme pinNumberingScheme)
+        /// <param name="busNumber">I2C bus number to create</param>
+        /// <param name="pinAssignment">The set of pins to use for I2C. Can be null if the bus already exists</param>
+        /// <returns>An I2C bus instance</returns>
+        public virtual I2cBus CreateOrGetI2cBus(int busNumber, int[]? pinAssignment)
         {
+            if (_i2cBuses.TryGetValue(busNumber, out var bus))
+            {
+                return bus;
+            }
+
             if (pinAssignment == null || pinAssignment.Length != 2)
             {
                 throw new ArgumentException($"Invalid argument. Must provide exactly two pins for I2C", nameof(pinAssignment));
             }
 
-            return new I2cDeviceManager(this, connectionSettings, RemapPins(pinAssignment, pinNumberingScheme), CreateSimpleI2cDevice);
+            bus = new I2cBus(this, busNumber, RemapPins(pinAssignment, DefaultPinNumberingScheme), CreateI2cDeviceCore);
+            _i2cBuses.Add(busNumber, bus);
+            return bus;
         }
+
+        /// <summary>
+        /// Create an I2C bus instance or return the existing instance for this bus
+        /// </summary>
+        /// <param name="busNumber">I2C bus number to create</param>
+        /// <returns>An I2C bus instance</returns>
+        public I2cBus CreateOrGetI2cBus(int busNumber)
+        {
+            if (_i2cBuses.TryGetValue(busNumber, out var bus))
+            {
+                return bus;
+            }
+
+            int[] pins = GetDefaultPinAssignmentForI2c(busNumber);
+            bus = new I2cBus(this, busNumber, pins, CreateI2cDeviceCore);
+            _i2cBuses.Add(busNumber, bus);
+            return bus;
+        }
+
+        /// <summary>
+        /// Creates the default I2C bus for this board or returns the existing bus
+        /// </summary>
+        /// <returns>An I2cBus instance</returns>
+        public abstract I2cBus CreateOrGetDefaultI2cBus();
 
         /// <summary>
         /// Create an I2C device instance on a default bus.
@@ -445,8 +481,19 @@ namespace Iot.Device.Board
         {
             // Returns logical pin numbers for the selected bus (or an exception if using a bus number > 1, because that
             // requires specifying the pins)
-            int[] pinAssignment = GetDefaultPinAssignmentForI2c(connectionSettings);
-            return CreateI2cDevice(connectionSettings, pinAssignment, PinNumberingScheme.Logical);
+            if (_i2cBuses.TryGetValue(connectionSettings.BusId, out var bus))
+            {
+                return bus.CreateDevice(connectionSettings);
+            }
+
+            int[] pinAssignment = GetDefaultPinAssignmentForI2c(connectionSettings.BusId);
+            I2cBus newBus = CreateOrGetI2cBus(connectionSettings.BusId, pinAssignment);
+            return newBus.CreateDevice(connectionSettings);
+        }
+
+        internal void RemoveBus(I2cBus bus)
+        {
+            _i2cBuses.Remove(bus.BusId);
         }
 
         /// <summary>
@@ -553,9 +600,9 @@ namespace Iot.Device.Board
         /// <summary>
         /// Overriden by derived classes: Provides the default pin assignment for the given I2C bus
         /// </summary>
-        /// <param name="connectionSettings">Connection settings to check</param>
+        /// <param name="busId">Bus Id</param>
         /// <returns>The set of pins for the given I2C bus</returns>
-        public abstract int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings);
+        public abstract int[] GetDefaultPinAssignmentForI2c(int busId);
 
         /// <summary>
         /// Overriden by derived classes: Provides the default pin assignment for the given SPI bus
@@ -600,8 +647,7 @@ namespace Iot.Device.Board
         {
             switch (usage)
             {
-                // Several I2C devices can share the same Pins (because we're allocating devices, not buses)
-                case PinUsage.I2c:
+                // Several SPI devices can share the same Pins (because we're allocating devices, not buses)
                 case PinUsage.Spi:
                     return true;
                 default:

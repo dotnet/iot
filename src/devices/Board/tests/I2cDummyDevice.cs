@@ -13,15 +13,13 @@ namespace Board.Tests
     internal class I2cDummyDevice : I2cDevice
     {
         private bool _disposed;
-        public I2cDummyDevice(I2cConnectionSettings settings, int[] pins)
+        public I2cDummyDevice(I2cConnectionSettings settings)
         {
             ConnectionSettings = settings;
-            Pins = pins;
             _disposed = false;
         }
 
         public override I2cConnectionSettings ConnectionSettings { get; }
-        public int[] Pins { get; }
 
         public override byte ReadByte()
         {

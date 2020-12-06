@@ -152,11 +152,11 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
-        public override int[] GetDefaultPinAssignmentForI2c(I2cConnectionSettings connectionSettings)
+        public override int[] GetDefaultPinAssignmentForI2c(int busId)
         {
             int scl;
             int sda;
-            switch (connectionSettings.BusId)
+            switch (busId)
             {
                 case 0:
                 {
@@ -207,7 +207,7 @@ namespace Iot.Device.Board
                     break;
 
                 default:
-                    throw new NotSupportedException($"I2C bus {connectionSettings.BusId} does not exist.");
+                    throw new NotSupportedException($"I2C bus {busId} does not exist.");
             }
 
             return new int[]
@@ -476,6 +476,12 @@ namespace Iot.Device.Board
             }
 
             throw new NotSupportedException($"There are no known pins for {usage}.");
+        }
+
+        /// <inheritdoc />
+        public override I2cBus CreateOrGetDefaultI2cBus()
+        {
+            return CreateOrGetI2cBus(1, GetDefaultPinAssignmentForI2c(1));
         }
 
         /// <inheritdoc />

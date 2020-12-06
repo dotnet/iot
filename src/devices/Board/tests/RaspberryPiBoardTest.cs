@@ -52,10 +52,10 @@ namespace Iot.Device.Board.Tests
         public void GetDefaultI2cPinsBoardNumbering()
         {
             RaspberryPiBoard b = new RaspberryPiBoard(PinNumberingScheme.Board);
-            var pins = b.GetDefaultPinAssignmentForI2c(new I2cConnectionSettings(0, 0));
+            var pins = b.GetDefaultPinAssignmentForI2c(0);
             Assert.Equal(27, pins[0]);
             Assert.Equal(28, pins[1]);
-            pins = b.GetDefaultPinAssignmentForI2c(new I2cConnectionSettings(1, 0));
+            pins = b.GetDefaultPinAssignmentForI2c(1);
             Assert.Equal(3, pins[0]);
             Assert.Equal(5, pins[1]);
         }
@@ -64,10 +64,10 @@ namespace Iot.Device.Board.Tests
         public void GetDefaultI2cPinsLogicalNumbering()
         {
             RaspberryPiBoard b = new RaspberryPiBoard(PinNumberingScheme.Logical);
-            var pins = b.GetDefaultPinAssignmentForI2c(new I2cConnectionSettings(0, 0));
+            var pins = b.GetDefaultPinAssignmentForI2c(0);
             Assert.Equal(0, pins[0]);
             Assert.Equal(1, pins[1]);
-            pins = b.GetDefaultPinAssignmentForI2c(new I2cConnectionSettings(1, 0));
+            pins = b.GetDefaultPinAssignmentForI2c(1);
             Assert.Equal(2, pins[0]);
             Assert.Equal(3, pins[1]);
         }

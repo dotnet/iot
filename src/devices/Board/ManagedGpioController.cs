@@ -40,14 +40,14 @@ namespace Iot.Device.Board
 
         protected override void OpenPinCore(int pinNumber)
         {
-            _board.ReservePin(ConvertToBoardPinNumbering(pinNumber), PinUsage.Gpio, this);
+            _board.ReservePin(pinNumber, PinUsage.Gpio, this);
             base.OpenPinCore(pinNumber);
         }
 
         protected override void ClosePinCore(int pinNumber)
         {
             base.ClosePinCore(pinNumber);
-            _board.ReleasePin(ConvertToBoardPinNumbering(pinNumber), PinUsage.Gpio, this);
+            _board.ReleasePin(pinNumber, PinUsage.Gpio, this);
         }
     }
 }
