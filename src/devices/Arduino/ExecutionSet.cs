@@ -80,19 +80,15 @@ namespace Iot.Device.Arduino
             long bytesUsed = 0;
             foreach (var cls in Classes)
             {
-                bytesUsed += 20;
+                bytesUsed += 40;
                 bytesUsed += cls.StaticSize;
                 bytesUsed += cls.Members.Count * 8; // Assuming 32 bit target system for now
             }
 
             foreach (var method in _methods)
             {
-                bytesUsed += 12;
+                bytesUsed += 48;
                 bytesUsed += method.ArgumentCount * 8;
-                if (method.TokenMap != null)
-                {
-                    bytesUsed += method.TokenMap.Count;
-                }
 
                 if (method.IlBytes != null)
                 {

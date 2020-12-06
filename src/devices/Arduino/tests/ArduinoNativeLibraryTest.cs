@@ -80,6 +80,8 @@ namespace Arduino.Tests
                 throw;
             }
 
+            Assert.True(exec.EstimateRequiredMemory() < 10000);
+
             var task = exec.EntryPoint;
             task.InvokeAsync(args);
 

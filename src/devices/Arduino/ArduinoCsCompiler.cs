@@ -23,6 +23,7 @@ namespace Iot.Device.Arduino
         ClassDeclaration = 8,
         SendObject = 9,
         ConstantData = 10,
+        Interfaces = 11,
 
         Nack = 0x7e,
         Ack = 0x7f,
@@ -102,10 +103,7 @@ namespace Iot.Device.Arduino
         /// A list of known classes whose static ctor should not be run (because it is currently unsupported and
         /// its implementation not needed/patched)
         /// </summary>
-        private readonly List<Type> _staticInitializersToSuppress = new List<Type>()
-        {
-            typeof(EqualityComparer<>), typeof(EqualityComparer<int>), typeof(Type),
-        };
+        private readonly List<Type> _staticInitializersToSuppress = new List<Type>();
 
         private readonly ArduinoBoard _board;
         private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
@@ -1030,7 +1028,7 @@ namespace Iot.Device.Arduino
             }
 
             int tk = set.GetOrAddMethodToken(methodInfo);
-            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, new List<(int First, int Second)>(), ilBytes);
+            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, ilBytes);
 
             if (set.AddMethod(newInfo))
             {
@@ -1093,34 +1091,10 @@ namespace Iot.Device.Arduino
             _methodInfos.Add(methodInfo, decl);
             _board.Log($"Method Index {decl.Index} (NewToken 0x{decl.Token:X}) is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
             SendMethodDeclaration(decl);
-            if (decl.TokenMap != null)
-            {
-                SendTokenMap(decl.Index, decl.TokenMap);
-            }
-
             if (decl.HasBody && decl.NativeMethod == ArduinoImplementation.None)
             {
                 _board.Firmata.SendMethodIlCode(decl.Index, decl.IlBytes!);
             }
-        }
-
-        private void SendTokenMap(int codeReference, List<(int Foreign, int Own)> tokenMap)
-        {
-            if (tokenMap.Count == 0)
-            {
-                return;
-            }
-
-            int[] data = new int[tokenMap.Count * 2];
-            int idx = 0;
-            foreach (var entry in tokenMap)
-            {
-                data[idx] = entry.Foreign;
-                data[idx + 1] = entry.Own;
-                idx += 2;
-            }
-
-            _board.Firmata.SendTokenMap(codeReference, data);
         }
 
         internal void ExecuteStaticCtors(ExecutionSet set)

@@ -9,11 +9,10 @@ namespace Iot.Device.Arduino
 {
     public sealed class ArduinoMethodDeclaration
     {
-        public ArduinoMethodDeclaration(int token, MethodBase methodBase, List<(int First, int Second)> tokenMap, byte[]? ilBytes)
+        public ArduinoMethodDeclaration(int token, MethodBase methodBase, byte[]? ilBytes)
         {
             Index = -1;
             MethodBase = methodBase;
-            TokenMap = tokenMap;
             IlBytes = ilBytes;
             Flags = MethodFlags.None;
             Token = token;
@@ -127,11 +126,6 @@ namespace Iot.Device.Arduino
 
         public int Token { get; }
         public MethodBase MethodBase { get; }
-
-        public List<(int First, int Second)>? TokenMap
-        {
-            get;
-        }
 
         public byte[]? IlBytes { get; }
 
