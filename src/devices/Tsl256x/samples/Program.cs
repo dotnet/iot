@@ -73,12 +73,12 @@ tsl256X.SetThreshold(0x0000, 0x00FF);
 tsl256X.InterruptPersistence = InterruptPersistence.OutOfRange06IntegrationTimePeriods;
 tsl256X.InterruptControl = InterruptControl.LevelInterrupt;
 tsl256X.Power = true;
-Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
 while (controller.Read(PinInterrupt) == PinValue.High)
 {
     Thread.Sleep(1);
 }
 
+Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
 tsl256X.Power = false;
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
