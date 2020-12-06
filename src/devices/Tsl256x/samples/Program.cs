@@ -1,0 +1,68 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.Device.Gpio;
+using System.Device.I2c;
+using System.Threading;
+using IoT.Device.Tsl256x;
+
+const int PinInterrupt = 18;
+
+Console.WriteLine("Hello TSL256x");
+I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Tsl256x.DefaultI2cAddress));
+Tsl256x tsl256X = new(i2cDevice, PackageType.Other);
+
+var ver = tsl256X.Version;
+string msg = ver.Major == 1 ? $"This is a TSL2561, revision {ver.Minor}" : $"This is a TSL2560, revision {ver.Minor}";
+Console.WriteLine(msg);
+
+tsl256X.IntegrationTime = IntegrationTime.Integration402Milliseconds;
+tsl256X.Gain = Gain.Normal;
+
+Console.WriteLine("This will get the illuminance with the standard period of 402 ms integration and normal gain");
+
+while (!Console.KeyAvailable)
+{
+    var lux = tsl256X.MeasureAndGetIlluminance();
+    Console.WriteLine($"Illuminance is {lux.Lux} Lux");
+    tsl256X.GetRawChannels(out ushort channel0, out ushort channel1);
+    Console.WriteLine($"Raw data channel 0: {channel0}, channel 1: {channel1}");
+}
+
+Console.WriteLine("Try changing the gain and read it");
+tsl256X.Gain = Gain.High;
+Console.WriteLine($"New gain {tsl256X.Gain}");
+
+Console.WriteLine("Try changing the integration time and read it");
+tsl256X.IntegrationTime = IntegrationTime.Integration13_7Milliseconds;
+Console.WriteLine($"New integration time {tsl256X.IntegrationTime}");
+
+Console.WriteLine("Set power on and check it");
+tsl256X.Power = true;
+Console.WriteLine($"Power should be true: {tsl256X.Power}");
+tsl256X.Power = false;
+Console.WriteLine($"Power should be false: {tsl256X.Power}");
+
+Console.WriteLine("Set interruption to test. Read the interrupt pin");
+GpioController controller = new();
+controller.OpenPin(PinInterrupt, PinMode.Input);
+tsl256X.InterruptControl = InterruptControl.TestMode;
+tsl256X.Power = true;
+while (controller.Read(PinInterrupt) == PinValue.High)
+{
+    Thread.Sleep(1);
+}
+
+tsl256X.Power = false;
+Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
+tsl256X.GetRawChannels(out ushort ch0, out ushort ch1);
+
+if (controller.Read(PinInterrupt) == PinValue.High)
+{
+    Console.WriteLine("Interrupt properly cleaned");
+}
+else
+{
+    Console.WriteLine("Interrupt not cleaned");
+}
