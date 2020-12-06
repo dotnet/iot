@@ -9,6 +9,9 @@ using System.Threading;
 using System.Collections.Generic;
 using Iot.Device.Bno055;
 using Iot.Device.Ft4222;
+using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.PowerMode;
+using UnitsNet;
 
 Console.WriteLine("Hello I2C, SPI and GPIO FTFI! FT4222");
 Console.WriteLine("Select the test you want to run:");
@@ -66,13 +69,18 @@ if (key.KeyChar == '4')
 void TestI2c(DeviceInformation device)
 {
     using Ft4222I2cBus ftI2c = new(device);
-    using I2cDevice i2cDevice = ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress);
-    Bno055Sensor bno055Sensor = new(i2cDevice);
+    using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
+    using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
+    bme280.SetPowerMode(Bmx280PowerMode.Normal);
 
-    Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
-    Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
-    Console.WriteLine($"Temperature source: {bno055Sensor.TemperatureSource}, Operation mode: {bno055Sensor.OperationMode}, Units: {bno055Sensor.Units}");
-    Console.WriteLine($"Powermode: {bno055Sensor.PowerMode}");
+    Console.WriteLine($"Id: {bno055.Info.ChipId}, AccId: {bno055.Info.AcceleratorId}, GyroId: {bno055.Info.GyroscopeId}, MagId: {bno055.Info.MagnetometerId}");
+    Console.WriteLine($"Firmware version: {bno055.Info.FirmwareVersion}, Bootloader: {bno055.Info.BootloaderVersion}");
+    Console.WriteLine($"Temperature source: {bno055.TemperatureSource}, Operation mode: {bno055.OperationMode}, Units: {bno055.Units}");
+
+    if (bme280.TryReadTemperature(out Temperature temperature))
+    {
+        Console.WriteLine($"Temperature: {temperature}");
+    }
 }
 
 void TestSpi()

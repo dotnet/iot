@@ -71,21 +71,24 @@ Console.WriteLine($"Dll version: {dll}");
 
 ### I2C
 
-```Ft4222I2c``` is the I2C driver which you can pass later to any device requiring I2C or directly use it to send I2C commands. The I2C implementation is fully compatible with ```System.Device.I2c.I2cDevice```.
+```Ft4222I2cBus``` is the I2C bus driver which allows you to create I2C needed for any device or use it directly to send I2C commands. The created I2C device is implementing ```System.Device.I2c.I2cDevice```.
 
-Form the ```I2cConnectionSettings``` class that you are passing, the ```BusId``` is the FTDI device index you want to use. 
-
-The example below shows how to create the I2C device and pass it to a BNO055 sensor. This sensor is the one which has been used to stress test the implementation.
+The example below shows how to create the I2C devices and pass them to a BNO055 sensor and BME280 sensors.
 
 ```csharp
 using Ft4222I2cBus ftI2c = new(FtCommon.GetDevices()[0]);
-using I2cDevice i2cDevice = ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress);
-Bno055Sensor bno055Sensor = new(i2cDevice);
+using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
+using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
+bme280.SetPowerMode(Bmx280PowerMode.Normal);
 
-Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
-Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
-Console.WriteLine($"Temperature source: {bno055Sensor.TemperatureSource}, Operation mode: {bno055Sensor.OperationMode}, Units: {bno055Sensor.Units}");
-Console.WriteLine($"Powermode: {bno055Sensor.PowerMode}");
+Console.WriteLine($"Id: {bno055.Info.ChipId}, AccId: {bno055.Info.AcceleratorId}, GyroId: {bno055.Info.GyroscopeId}, MagId: {bno055.Info.MagnetometerId}");
+Console.WriteLine($"Firmware version: {bno055.Info.FirmwareVersion}, Bootloader: {bno055.Info.BootloaderVersion}");
+Console.WriteLine($"Temperature source: {bno055.TemperatureSource}, Operation mode: {bno055.OperationMode}, Units: {bno055.Units}");
+
+if (bme280.TryReadTemperature(out Temperature temperature))
+{
+    Console.WriteLine($"Temperature: {temperature}");
+}
 ```
 
 ### SPI
