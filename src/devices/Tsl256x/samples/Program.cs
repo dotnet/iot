@@ -66,3 +66,26 @@ else
 {
     Console.WriteLine("Interrupt not cleaned");
 }
+
+// Adjust those values with a previous measurement to understand the conditions, find a level where then you can
+// hide the sensor with your arm and make it going under the minimum level or vice versa with a lamp
+tsl256X.SetThreshold(0x0000, 0x00FF);
+tsl256X.InterruptPersistence = InterruptPersistence.OutOfRange06IntegrationTimePeriods;
+tsl256X.InterruptControl = InterruptControl.LevelInterrupt;
+tsl256X.Power = true;
+Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
+while (controller.Read(PinInterrupt) == PinValue.High)
+{
+    Thread.Sleep(1);
+}
+
+tsl256X.Power = false;
+tsl256X.GetRawChannels(out ch0, out ch1);
+Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
+
+Console.WriteLine("This will use a manual integration for 2 seconds");
+tsl256X.StartManualIntegration();
+Thread.Sleep(2000);
+tsl256X.StopManualIntegration();
+tsl256X.GetRawChannels(out ch0, out ch1);
+Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");

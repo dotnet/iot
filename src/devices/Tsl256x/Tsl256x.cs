@@ -104,7 +104,7 @@ namespace IoT.Device.Tsl256x
         /// <summary>
         /// Start the manual integration
         /// </summary>
-        public void StartManulIntegration()
+        public void StartManualIntegration()
         {
             _integrationTime = IntegrationTime.Manual;
             WriteByte(Register.TIMING, (byte)((byte)_integrationTime | (byte)_gain | 0b0000_1000));
