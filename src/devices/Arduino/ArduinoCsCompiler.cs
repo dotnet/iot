@@ -87,8 +87,7 @@ namespace Iot.Device.Arduino
     {
         private readonly List<Type> _rootClasses = new List<Type>()
         {
-            typeof(System.Object), typeof(System.Type), typeof(System.String),
-            typeof(Array), typeof(Monitor), typeof(Exception),
+            typeof(System.Object)
         };
 
         // These classes substitute (part of) a framework class
@@ -98,12 +97,6 @@ namespace Iot.Device.Arduino
             typeof(MiniException), typeof(MiniHashSet<int>), typeof(MiniEqualityComparer<int>), typeof(MiniThread),
             typeof(MiniEnvironment), typeof(MiniRuntimeHelpers)
         };
-
-        /// <summary>
-        /// A list of known classes whose static ctor should not be run (because it is currently unsupported and
-        /// its implementation not needed/patched)
-        /// </summary>
-        private readonly List<Type> _staticInitializersToSuppress = new List<Type>();
 
         private readonly ArduinoBoard _board;
         private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
@@ -415,12 +408,6 @@ namespace Iot.Device.Arduino
                 var cctor = cls.Cls.TypeInitializer;
                 if (cctor == null)
                 {
-                    continue;
-                }
-
-                if (_staticInitializersToSuppress.Contains(cls.Cls))
-                {
-                    cls.SuppressInit = true;
                     continue;
                 }
 
