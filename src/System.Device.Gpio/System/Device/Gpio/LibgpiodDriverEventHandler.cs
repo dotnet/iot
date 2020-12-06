@@ -15,7 +15,8 @@ namespace System.Device.Gpio.Drivers
 
         public event PinChangeEventHandler? ValueFalling;
 
-        private int _pinNumber;
+        private int? _pinNumber;
+        private string? _pinName;
 
         public CancellationTokenSource CancellationTokenSource;
 
@@ -33,13 +34,28 @@ namespace System.Device.Gpio.Drivers
             _task = InitializeEventDetectionTask(CancellationTokenSource.Token, safeLineHandle);
         }
 
+        public LibGpiodDriverEventHandler(string pinName, SafeLineHandle safeLineHandle)
+        {
+            _pinName = pinName;
+            CancellationTokenSource = new CancellationTokenSource();
+            SubscribeForEvent(safeLineHandle);
+            _task = InitializeEventDetectionTask(CancellationTokenSource.Token, safeLineHandle);
+        }
+
         private void SubscribeForEvent(SafeLineHandle pinHandle)
         {
             int eventSuccess = Interop.libgpiod.gpiod_line_request_both_edges_events(pinHandle, s_consumerName);
 
             if (eventSuccess < 0)
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, _pinNumber, Marshal.GetLastWin32Error());
+                if (_pinNumber != null)
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, Marshal.GetLastWin32Error(), _pinNumber?.ToString()!);
+                }
+                else
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, Marshal.GetLastWin32Error(), _pinName!);
+                }
             }
         }
 
@@ -59,7 +75,14 @@ namespace System.Device.Gpio.Drivers
                     WaitEventResult waitResult = Interop.libgpiod.gpiod_line_event_wait(pinHandle, ref timeout);
                     if (waitResult == WaitEventResult.Error)
                     {
-                        throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinNumber);
+                        if (_pinNumber != null)
+                        {
+                            throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinNumber?.ToString()!);
+                        }
+                        else
+                        {
+                            throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinName!);
+                        }
                     }
 
                     if (waitResult == WaitEventResult.EventOccured)
@@ -72,7 +95,15 @@ namespace System.Device.Gpio.Drivers
                         }
 
                         PinEventTypes eventType = (eventResult.event_type == 1) ? PinEventTypes.Rising : PinEventTypes.Falling;
-                        this?.OnPinValueChanged(new PinValueChangedEventArgs(eventType, _pinNumber), eventType);
+
+                        if (_pinNumber != null)
+                        {
+                            this?.OnPinValueChanged(new PinValueChangedEventArgs(eventType, _pinNumber), eventType);
+                        }
+                        else
+                        {
+                            this?.OnPinValueChanged(new PinValueChangedEventArgs(eventType, _pinName), eventType);
+                        }
                     }
                 }
             }, token);

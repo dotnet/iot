@@ -8,27 +8,27 @@ namespace System.Device.Gpio
 {
     internal static class ExceptionHelper
     {
-        public static IOException GetIOException(ExceptionResource resource, int errorCode = -1, int pin = -1)
+        public static IOException GetIOException(ExceptionResource resource, int errorCode = -1, string pin = "-1")
         {
             return new IOException(GetResourceString(resource, errorCode, pin));
         }
 
-        public static InvalidOperationException GetInvalidOperationException(ExceptionResource resource, int pin = -1)
+        public static InvalidOperationException GetInvalidOperationException(ExceptionResource resource, string pin = "-1")
         {
             return new InvalidOperationException(GetResourceString(resource, -1, pin));
         }
 
         public static PlatformNotSupportedException GetPlatformNotSupportedException(ExceptionResource resource)
         {
-            return new PlatformNotSupportedException(GetResourceString(resource, -1, -1));
+            return new PlatformNotSupportedException(GetResourceString(resource, -1, "-1"));
         }
 
         public static ArgumentException GetArgumentException(ExceptionResource resource)
         {
-            return new ArgumentException(GetResourceString(resource, -1, -1));
+            return new ArgumentException(GetResourceString(resource, -1, "-1"));
         }
 
-        private static string GetResourceString(ExceptionResource resource, int errorCode, int pin) => resource switch
+        private static string GetResourceString(ExceptionResource resource, int errorCode, string pin) => resource switch
         {
             ExceptionResource.NoChipIteratorFound => $"Unable to find a chip iterator, error code: {errorCode}",
             ExceptionResource.NoChipFound => $"Unable to find a chip, error code: {errorCode}",
@@ -44,6 +44,7 @@ namespace System.Device.Gpio
             ExceptionResource.EventReadError => $"Error while reading pin event result, error code {errorCode}",
             ExceptionResource.NotListeningForEventError => $"Attempted to remove a callback for a pin that is not listening for events.",
             ExceptionResource.LibGpiodNotInstalled => $"Libgpiod driver not installed. More information on: https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/",
+            ExceptionResource.PinNameNotSupported => $"Open pin by name is supported only on Libgpiod driver",
             _ => throw new Exception($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message."),
         };
     }
@@ -64,5 +65,6 @@ namespace System.Device.Gpio
         EventReadError,
         NotListeningForEventError,
         LibGpiodNotInstalled,
+        PinNameNotSupported
     }
 }

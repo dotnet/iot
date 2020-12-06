@@ -3,6 +3,8 @@
 
 namespace System.Device.Gpio
 {
+    // TODO: Crete a generic typed for the gpio names case
+
     /// <summary>
     /// Simple wrapper for a pin/value pair.
     /// </summary>

@@ -13,10 +13,21 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="changeType">The change type that triggered the event.</param>
         /// <param name="pinNumber">The pin number that triggered the event.</param>
-        public PinValueChangedEventArgs(PinEventTypes changeType, int pinNumber)
+        public PinValueChangedEventArgs(PinEventTypes changeType, int? pinNumber)
         {
             ChangeType = changeType;
             PinNumber = pinNumber;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PinValueChangedEventArgs"/> class.
+        /// </summary>
+        /// <param name="changeType">The change type that triggered the event.</param>
+        /// <param name="pinName">The pin name that triggered the event.</param>
+        public PinValueChangedEventArgs(PinEventTypes changeType, string? pinName)
+        {
+            ChangeType = changeType;
+            PinName = pinName;
         }
 
         /// <summary>
@@ -27,6 +38,11 @@ namespace System.Device.Gpio
         /// <summary>
         /// The pin number that triggered the event.
         /// </summary>
-        public int PinNumber { get; }
+        public int? PinNumber { get; }
+
+        /// <summary>
+        /// The pin name that triggered the event.
+        /// </summary>
+        public string? PinName { get; }
     }
 }

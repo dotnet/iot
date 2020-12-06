@@ -31,10 +31,24 @@ namespace System.Device.Gpio
         protected internal abstract void OpenPin(int pinNumber);
 
         /// <summary>
+        /// Opens a pin in order for it to be ready to use.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        protected internal virtual void OpenPin(string pinName) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
+
+        /// <summary>
         /// Closes an open pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal abstract void ClosePin(int pinNumber);
+
+        /// <summary>
+        /// Closes an open pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        protected internal virtual void ClosePin(string pinName) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
 
         /// <summary>
         /// Sets the mode to a pin.
@@ -44,11 +58,27 @@ namespace System.Device.Gpio
         protected internal abstract void SetPinMode(int pinNumber, PinMode mode);
 
         /// <summary>
+        /// Sets the mode to a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="mode">The mode to be set.</param>
+        protected internal virtual void SetPinMode(string pinName, PinMode mode) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
+
+        /// <summary>
         /// Gets the mode of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <returns>The mode of the pin.</returns>
         protected internal abstract PinMode GetPinMode(int pinNumber);
+
+        /// <summary>
+        /// Gets the mode of a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <returns>The mode of the pin.</returns>
+        protected internal virtual PinMode GetPinMode(string pinName) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
 
         /// <summary>
         /// Checks if a pin supports a specific mode.
@@ -59,11 +89,28 @@ namespace System.Device.Gpio
         protected internal abstract bool IsPinModeSupported(int pinNumber, PinMode mode);
 
         /// <summary>
+        /// Checks if a pin supports a specific mode.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="mode">The mode to check.</param>
+        /// <returns>The status if the pin supports the mode.</returns>
+        protected internal virtual bool IsPinModeSupported(string pinName, PinMode mode) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
+
+        /// <summary>
         /// Reads the current value of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <returns>The value of the pin.</returns>
         protected internal abstract PinValue Read(int pinNumber);
+
+        /// <summary>
+        /// Reads the current value of a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <returns>The value of the pin.</returns>
+        protected internal virtual PinValue Read(string pinName) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
 
         /// <summary>
         /// Writes a value to a pin.
@@ -73,6 +120,14 @@ namespace System.Device.Gpio
         protected internal abstract void Write(int pinNumber, PinValue value);
 
         /// <summary>
+        /// Writes a value to a pin.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="value">The value to be written to the pin.</param>
+        protected internal virtual void Write(string pinName, PinValue value) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
+
+        /// <summary>
         /// Blocks execution until an event of type eventType is received or a cancellation is requested.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
@@ -80,6 +135,16 @@ namespace System.Device.Gpio
         /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
         /// <returns>A structure that contains the result of the waiting operation.</returns>
         protected internal abstract WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Blocks execution until an event of type eventType is received or a cancellation is requested.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        protected internal virtual WaitForEventResult WaitForEvent(string pinName, PinEventTypes eventTypes, CancellationToken cancellationToken) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
 
         /// <summary>
         /// Async call until an event of type eventType is received or a cancellation is requested.
@@ -94,6 +159,18 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Async call until an event of type eventType is received or a cancellation is requested.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        protected internal virtual ValueTask<WaitForEventResult> WaitForEventAsync(string pinName, PinEventTypes eventTypes, CancellationToken cancellationToken)
+        {
+            return new ValueTask<WaitForEventResult>(Task.Run(() => WaitForEvent(pinName, eventTypes, cancellationToken)));
+        }
+
+        /// <summary>
         /// Adds a handler for a pin value changed event.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
@@ -102,11 +179,28 @@ namespace System.Device.Gpio
         protected internal abstract void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback);
 
         /// <summary>
+        /// Adds a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="eventTypes">The event types to wait for.</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        protected internal virtual void AddCallbackForPinValueChangedEvent(string pinName, PinEventTypes eventTypes, PinChangeEventHandler callback) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
+
+        /// <summary>
         /// Removes a handler for a pin value changed event.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
         protected internal abstract void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback);
+
+        /// <summary>
+        /// Removes a handler for a pin value changed event.
+        /// </summary>
+        /// <param name="pinName">The pin name among the lines associated with the driver</param>
+        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        protected internal virtual void RemoveCallbackForPinValueChangedEvent(string pinName, PinChangeEventHandler callback) =>
+            throw ExceptionHelper.GetPlatformNotSupportedException(ExceptionResource.PinNameNotSupported);
 
         /// <summary>
         /// Disposes this instance, closing all open pins
