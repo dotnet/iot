@@ -44,6 +44,11 @@ namespace Iot.Device.Board
         AnalogIn = 6,
 
         /// <summary>
+        /// Pin used for analog output (Digital-to-Analog converter)
+        /// </summary>
+        AnalogOut = 7,
+
+        /// <summary>
         /// Unknown usage (i.e. for boards where this state is write-only)
         /// </summary>
         Unknown = -1
