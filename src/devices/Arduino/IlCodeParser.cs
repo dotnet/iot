@@ -188,6 +188,17 @@ namespace Iot.Device.Arduino
                     patchValue = set.GetOrAddClassToken(mb);
                     typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
                 }
+                else if (opCode == OpCode.CEE_BOX || opCode == OpCode.CEE_UNBOX || opCode == OpCode.CEE_UNBOX_ANY)
+                {
+                    var typeTarget = ResolveMember(method, token)!;
+                    TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
+                    patchValue = set.GetOrAddClassToken(mb);
+                    typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Opcode {opCode} has a token argument, but is unhandled.");
+                }
 
                 // Now use the new token instead of the old (possibly ambiguous one)
                 // Note: We don't care about the sign here, patchValue is never negative

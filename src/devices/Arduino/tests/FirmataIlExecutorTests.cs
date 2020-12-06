@@ -420,6 +420,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("CharArrayTest", 10, 2, 'C')]
         [InlineData("CharArrayTest", 10, 0, 'A')]
         [InlineData("ByteArrayTest", 10, 0, 255)]
+        [InlineData("BoxedArrayTest", 5, 2, 7)]
         public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
@@ -449,6 +450,15 @@ namespace Iot.Device.Arduino.Tests
             array[1] = 1;
             array[3] = 2;
             return array[indexToRetrieve];
+        }
+
+        public static int BoxedArrayTest(int size, int indexToRetrieve)
+        {
+            object[] array = new object[size];
+            array[0] = new object();
+            array[1] = 2;
+            array[2] = 7;
+            return (int)array[indexToRetrieve];
         }
     }
 }
