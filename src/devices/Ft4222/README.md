@@ -17,13 +17,13 @@ The version used to build this project is 1.4.2 and you can download it directly
 
 You will need to unzip the file and go to ```LibFT4222-v1.4.2\imports\LibFT4222\lib\amd64```, copy ```LibFT4222-64.dll``` to ```LibFT4222.dll``` into your path or in the same directory as the executable you are launching.
 
-Alternatively, you can register your dll globally. Copy ```LibFT4222-64.dll``` to ```LibFT4222.dll``` and then run from the directory where your ```LibFT4222.dll``` is located the following command in administrator mode: ```regsvr32.exe LibFT4222.dll```
+Alternatively, you can register your dll globally by adding its location to the PATH.
 
 ### Running it on a Windows 32 bit version
 
 You will need to unzip the file and go to ```LibFT4222-v1.4.2\imports\LibFT4222\lib\i386```, copy ```LibFT4222.dll``` to your path or in the same directory as the executable you are launching.
 
-Alternatively, you can register your dll globally. Run from the directory where your ```LibFT4222.dll``` is located the following command in administrator mode: ```regsvr32.exe LibFT4222.dll```
+Alternatively, you can register your dll globally by adding its location to the PATH.
 
 ## Linux Requirements
 
@@ -78,9 +78,9 @@ Form the ```I2cConnectionSettings``` class that you are passing, the ```BusId```
 The example below shows how to create the I2C device and pass it to a BNO055 sensor. This sensor is the one which has been used to stress test the implementation.
 
 ```csharp
-var winFtdiI2C = new Ft4222I2c(new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
-
-Bno055Sensor bno055Sensor = new Bno055Sensor(winFtdiI2C);
+using Ft4222I2cBus ftI2c = new(FtCommon.GetDevices()[0]);
+using I2cDevice i2cDevice = ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress);
+Bno055Sensor bno055Sensor = new(i2cDevice);
 
 Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
 Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");

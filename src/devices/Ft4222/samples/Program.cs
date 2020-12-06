@@ -31,13 +31,21 @@ foreach (DeviceInformation device in devices)
     Console.WriteLine($"Device type: {device.Type}");
 }
 
+if (devices.Count == 0)
+{
+    Console.WriteLine("No devices to connected to run tests.");
+    return;
+}
+
+DeviceInformation firstDevice = devices[0];
+
 var (chip, dll) = FtCommon.GetVersions();
 Console.WriteLine($"Chip version: {chip}");
 Console.WriteLine($"Dll version: {dll}");
 
 if (key.KeyChar == '1')
 {
-    TestI2c();
+    TestI2c(firstDevice);
 }
 
 if (key.KeyChar == '2')
@@ -55,11 +63,11 @@ if (key.KeyChar == '4')
     TestEvents();
 }
 
-void TestI2c()
+void TestI2c(DeviceInformation device)
 {
-    using Ft4222I2c ftI2c = new(new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
-
-    Bno055Sensor bno055Sensor = new(ftI2c);
+    using Ft4222I2cBus ftI2c = new(device);
+    using I2cDevice i2cDevice = ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress);
+    Bno055Sensor bno055Sensor = new(i2cDevice);
 
     Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
     Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
