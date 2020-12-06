@@ -51,6 +51,14 @@ internal partial class Interop
         internal static extern SafeLineHandle gpiod_chip_get_line(SafeChipHandle chip, int offset);
 
         /// <summary>
+        /// Find a GPIO line by its name.
+        /// </summary>
+        /// <param name="name">The name of the GPIO line</param>
+        /// <returns>Handle to the GPIO line or <see langword="null" /> if the line could not be found or an error occurred.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern SafeLineHandle gpiod_line_find(string name);
+
+        /// <summary>
         /// Reserve a single line, set the direction to input.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
