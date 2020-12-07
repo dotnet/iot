@@ -289,18 +289,12 @@ namespace Iot.Device.Mcp23xxx
         /// <returns>Value of intterupt pin</returns>
         protected PinValue InternalReadInterrupt(Port port)
         {
-            int pinNumber;
-            switch (port)
+            int pinNumber = port switch
             {
-                case Port.PortA:
-                    pinNumber = _interruptA;
-                    break;
-                case Port.PortB:
-                    pinNumber = _interruptB;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(port));
-            }
+                Port.PortA => _interruptA,
+                Port.PortB => _interruptB,
+                _ => throw new ArgumentOutOfRangeException(nameof(port)),
+            };
 
             if (pinNumber == -1 || _controller is null)
             {
