@@ -127,66 +127,23 @@ namespace System.Device.Gpio
         /// See http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/ for information.
         /// </summary>
         /// <returns></returns>
-        private Model GetBoardModel()
+        private Model GetBoardModel() => (Firmware & 0xFFFF) switch
         {
-            var firmware = Firmware;
-            switch (firmware & 0xFFFF)
-            {
-                case 0x2:
-                case 0x3:
-                    return Model.RaspberryPiBRev1;
-
-                case 0x4:
-                case 0x5:
-                case 0x6:
-                case 0xd:
-                case 0xe:
-                case 0xf:
-                    return Model.RaspberryPiBRev2;
-
-                case 0x7:
-                case 0x8:
-                case 0x9:
-                    return Model.RaspberryPiA;
-
-                case 0x10:
-                    return Model.RaspberryPiBPlus;
-
-                case 0x11:
-                    return Model.RaspberryPiComputeModule;
-
-                case 0x12:
-                    return Model.RaspberryPiAPlus;
-
-                case 0x1040:
-                case 0x1041:
-                    return Model.RaspberryPi2B;
-
-                case 0x0092:
-                case 0x0093:
-                    return Model.RaspberryPiZero;
-
-                case 0x00C1:
-                    return Model.RaspberryPiZeroW;
-
-                case 0x2082:
-                    return Model.RaspberryPi3B;
-
-                case 0x20D3:
-                    return Model.RaspberryPi3BPlus;
-
-                case 0x20A0:
-                case 0x2100:
-                    return Model.RaspberryPiComputeModule3;
-
-                case 0x3112:
-                case 0x3111:
-                    return Model.RaspberryPi4;
-
-                default:
-                    return Model.Unknown;
-            }
-        }
+            0x2 or 0x3 => Model.RaspberryPiBRev1,
+            0x4 or 0x5 or 0x6 or 0xd or 0xe or 0xf => Model.RaspberryPiBRev2,
+            0x7 or 0x8 or 0x9 => Model.RaspberryPiA,
+            0x10 => Model.RaspberryPiBPlus,
+            0x11 => Model.RaspberryPiComputeModule,
+            0x12 => Model.RaspberryPiAPlus,
+            0x1040 or 0x1041 => Model.RaspberryPi2B,
+            0x0092 or 0x0093 => Model.RaspberryPiZero,
+            0x00C1 => Model.RaspberryPiZeroW,
+            0x2082 => Model.RaspberryPi3B,
+            0x20D3 => Model.RaspberryPi3BPlus,
+            0x20A0 or 0x2100 => Model.RaspberryPiComputeModule3,
+            0x3112 or 0x3111 => Model.RaspberryPi4,
+            _ => Model.Unknown,
+        };
 
         /// <summary>
         /// Gets the processor name.
