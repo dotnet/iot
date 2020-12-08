@@ -17,13 +17,13 @@ The version used to build this project is 1.4.2 and you can download it directly
 
 You will need to unzip the file and go to ```LibFT4222-v1.4.2\imports\LibFT4222\lib\amd64```, copy ```LibFT4222-64.dll``` to ```LibFT4222.dll``` into your path or in the same directory as the executable you are launching.
 
-Alternatively, you can register your dll globally. Copy ```LibFT4222-64.dll``` to ```LibFT4222.dll``` and then run from the directory where your ```LibFT4222.dll``` is located the following command in administrator mode: ```regsvr32.exe LibFT4222.dll```
+Alternatively, you can register your dll globally by adding its location to the PATH.
 
 ### Running it on a Windows 32 bit version
 
 You will need to unzip the file and go to ```LibFT4222-v1.4.2\imports\LibFT4222\lib\i386```, copy ```LibFT4222.dll``` to your path or in the same directory as the executable you are launching.
 
-Alternatively, you can register your dll globally. Run from the directory where your ```LibFT4222.dll``` is located the following command in administrator mode: ```regsvr32.exe LibFT4222.dll```
+Alternatively, you can register your dll globally by adding its location to the PATH.
 
 ## Linux Requirements
 
@@ -71,21 +71,24 @@ Console.WriteLine($"Dll version: {dll}");
 
 ### I2C
 
-```Ft4222I2c``` is the I2C driver which you can pass later to any device requiring I2C or directly use it to send I2C commands. The I2C implementation is fully compatible with ```System.Device.I2c.I2cDevice```.
+```Ft4222I2cBus``` is the I2C bus driver which allows you to create I2C needed for any device or use it directly to send I2C commands. The created I2C device is implementing ```System.Device.I2c.I2cDevice```.
 
-Form the ```I2cConnectionSettings``` class that you are passing, the ```BusId``` is the FTDI device index you want to use. 
-
-The example below shows how to create the I2C device and pass it to a BNO055 sensor. This sensor is the one which has been used to stress test the implementation.
+The example below shows how to create the I2C devices and pass them to a BNO055 sensor and BME280 sensors.
 
 ```csharp
-var winFtdiI2C = new Ft4222I2c(new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
+using Ft4222I2cBus ftI2c = new(FtCommon.GetDevices()[0]);
+using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
+using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
+bme280.SetPowerMode(Bmx280PowerMode.Normal);
 
-Bno055Sensor bno055Sensor = new Bno055Sensor(winFtdiI2C);
+Console.WriteLine($"Id: {bno055.Info.ChipId}, AccId: {bno055.Info.AcceleratorId}, GyroId: {bno055.Info.GyroscopeId}, MagId: {bno055.Info.MagnetometerId}");
+Console.WriteLine($"Firmware version: {bno055.Info.FirmwareVersion}, Bootloader: {bno055.Info.BootloaderVersion}");
+Console.WriteLine($"Temperature source: {bno055.TemperatureSource}, Operation mode: {bno055.OperationMode}, Units: {bno055.Units}");
 
-Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
-Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
-Console.WriteLine($"Temperature source: {bno055Sensor.TemperatureSource}, Operation mode: {bno055Sensor.OperationMode}, Units: {bno055Sensor.Units}");
-Console.WriteLine($"Powermode: {bno055Sensor.PowerMode}");
+if (bme280.TryReadTemperature(out Temperature temperature))
+{
+    Console.WriteLine($"Temperature: {temperature}");
+}
 ```
 
 ### SPI
