@@ -1142,6 +1142,47 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Returns true if the two methods denote the same operator.
+        /// We need to handle this a bit special because it is not possible to declare i.e. operator==(Type a, Type b) outside "Type" if we want to replace it.
+        /// </summary>
+        public static bool AreSameOperatorMethods(MethodBase a, MethodBase b)
+        {
+            // A ctor can never match an ordinary method or the other way round
+            if (a.GetType() != b.GetType())
+            {
+                return false;
+            }
+
+            if (a.Name != b.Name)
+            {
+                return false;
+            }
+
+            if (a.IsStatic != b.IsStatic)
+            {
+                return false;
+            }
+
+            var argsa = a.GetParameters();
+            var argsb = b.GetParameters();
+
+            if (argsa.Length != argsb.Length)
+            {
+                return false;
+            }
+
+            // Same name and named "op_*". These are both operators, so we decide they're equal.
+            // Note that this is not necessarily true, because it is possible to define two op_equality members with different argument sets,
+            // but this is very discouraged and is hopefully not the case in the System libs.
+            if (a.Name.StartsWith("op_"))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Executes the given method with the provided arguments asynchronously
         /// </summary>
         /// <remarks>Argument count/type not checked yet</remarks>
