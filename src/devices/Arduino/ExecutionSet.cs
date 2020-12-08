@@ -83,6 +83,13 @@ namespace Iot.Device.Arduino
                 bytesUsed += 40;
                 bytesUsed += cls.StaticSize;
                 bytesUsed += cls.Members.Count * 8; // Assuming 32 bit target system for now
+                foreach (var fld in cls.Members.Where(x => x.InitialValue != null))
+                {
+                    if (fld.InitialValue is Array arr)
+                    {
+                        bytesUsed += arr.Length;
+                    }
+                }
             }
 
             foreach (var method in _methods)
@@ -347,7 +354,7 @@ namespace Iot.Device.Arduino
                 // Above, we only check the public methods, here we also look at the private ones
                 foreach (var methodb in typeToReplace.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (ArduinoCsCompiler.MethodsHaveSameSignature(methoda, methodb))
+                    if (ArduinoCsCompiler.MethodsHaveSameSignature(methoda, methodb) || ArduinoCsCompiler.AreSameOperatorMethods(methoda, methodb))
                     {
                         // Method A shall replace Method B
                         AddReplacementMethod(methodb, methoda);
@@ -423,7 +430,7 @@ namespace Iot.Device.Arduino
             }
             else if (elem.Item2 == null)
             {
-                throw new InvalidOperationException($"Should have a replacement for {original}, but it is missing.");
+                throw new InvalidOperationException($"Should have a replacement for {original.DeclaringType} - {original}, but it is missing.");
             }
 
             return elem.Item2;
