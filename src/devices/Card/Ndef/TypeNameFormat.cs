@@ -31,7 +31,7 @@ namespace Iot.Device.Ndef
         /// <summary>
         /// NFC Forum external type [NFC RTD]
         /// </summary>
-        NfcForumExpernal = 0x04,
+        NfcForumExternal = 0x04,
 
         /// <summary>
         /// Unknown

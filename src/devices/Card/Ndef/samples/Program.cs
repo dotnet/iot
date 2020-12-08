@@ -49,18 +49,17 @@ if (nfc.KeyChar == '1')
     Console.WriteLine(" 2. FT4222");
     var choice = Console.ReadKey();
     Console.WriteLine();
-    if (choice.KeyChar == '1')
+    switch (choice.KeyChar)
     {
-        pn5180 = HardwareSpiPn5180();
-    }
-    else if (choice.KeyChar == '2')
-    {
-        pn5180 = Ft4222Pn5180();
-    }
-    else
-    {
-        Console.WriteLine("Sorry, I can't understand your choice");
-        return;
+        case '1':
+            pn5180 = HardwareSpiPn5180();
+            break;
+        case '2':
+            pn5180 = Ft4222Pn5180();
+            break;
+        default:
+            Console.WriteLine("Sorry, I can't understand your choice");
+            return;
     }
 
     nfcReader = pn5180;
@@ -99,33 +98,33 @@ else
     Console.WriteLine();
     LogLevel debugLevel = debugLevelConsole is { KeyChar: 'Y' or 'y' } ? LogLevel.Debug : LogLevel.None;
 
-    if (choiceInterface is { KeyChar: '3' })
+    switch (choiceInterface.KeyChar)
     {
-        Console.WriteLine("Which pin number do you want as Chip Select?");
-        var pinSelectConsole = Console.ReadLine();
-        int pinSelect;
-        try
-        {
-            pinSelect = Convert.ToInt32(pinSelectConsole);
-        }
-        catch (Exception ex) when (ex is FormatException || ex is OverflowException)
-        {
-            Console.WriteLine("Impossible to convert the pin number.");
-            return;
-        }
+        case '3':
+            Console.WriteLine("Which pin number do you want as Chip Select?");
+            var pinSelectConsole = Console.ReadLine();
+            int pinSelect;
+            try
+            {
+                pinSelect = Convert.ToInt32(pinSelectConsole);
+            }
+            catch (Exception ex) when (ex is FormatException || ex is OverflowException)
+            {
+                Console.WriteLine("Impossible to convert the pin number.");
+                return;
+            }
 
-        pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0)), pinSelect, logLevel: debugLevel);
-    }
-    else if (choiceInterface is { KeyChar: '2' })
-    {
-        pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)), debugLevel);
-    }
-    else
-    {
-        Console.WriteLine("Please enter the serial port to use. ex: COM3 on Windows or /dev/ttyS0 on Linux");
+            pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0)), pinSelect, logLevel: debugLevel);
+            break;
+        case '2':
+            pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)), debugLevel);
+            break;
+        default:
+            Console.WriteLine("Please enter the serial port to use. ex: COM3 on Windows or /dev/ttyS0 on Linux");
 
-        var device = Console.ReadLine();
-        pn532 = new Pn532(device!, debugLevel);
+            var device = Console.ReadLine();
+            pn532 = new Pn532(device!, debugLevel);
+            break;
     }
 
     nfcReader = pn532;
@@ -183,46 +182,40 @@ void RunTestNdef(CardTransceiver transceiver, Data106kbpsTypeA card)
     mifareCard.KeyA = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     mifareCard.KeyB = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
-    if (testToRun.KeyChar == '1')
+    bool ret;
+    switch (testToRun.KeyChar)
     {
-        DumpMifare(mifareCard);
+        case '1':
+            DumpMifare(mifareCard);
+            break;
+        case '2':
+            ReadNdef(mifareCard);
+            break;
+        case '3':
+            ret = mifareCard.FormatNdef();
+            string msg = ret ? "Formatting successful." : "Error formatting card.";
+            Console.WriteLine(msg);
+            break;
+        case '4':
+            WriteNdef(mifareCard);
+            break;
+        case '5':
+            WriteLongNdef(mifareCard);
+            break;
+        case '6':
+            ret = mifareCard.IsFormattedNdef();
+            var isForm = ret ? string.Empty : " not";
+            Console.WriteLine($"This card is{isForm} NDEF formatted");
+            break;
+        case '7':
+            ret = mifareCard.EraseSector(mifareCard.DefaultKeyA, mifareCard.DefaultKeyB, 1, false, true);
+            var isErased = ret ? string.Empty : " not";
+            Console.WriteLine($"The sector has{isErased} been erased");
+            break;
+        default:
+            Console.WriteLine("Sorry, I can't understand your choice");
+            return;
     }
-    else if (testToRun.KeyChar == '2')
-    {
-        ReadNdef(mifareCard);
-    }
-    else if (testToRun.KeyChar == '3')
-    {
-        var ret = mifareCard.FormatNdef();
-        string msg = ret ? "Formatting successful." : "Error formatting card.";
-        Console.WriteLine(msg);
-    }
-    else if (testToRun.KeyChar == '4')
-    {
-        WriteNdef(mifareCard);
-    }
-    else if (testToRun.KeyChar == '5')
-    {
-        WriteLongNdef(mifareCard);
-    }
-    else if (testToRun.KeyChar == '6')
-    {
-        var ret = mifareCard.IsFormattedNdef();
-        var isForm = ret ? string.Empty : " not";
-        Console.WriteLine($"This card is{isForm} NDEF formatted");
-    }
-    else if (testToRun.KeyChar == '7')
-    {
-        var ret = mifareCard.EraseSector(mifareCard.DefaultKeyA, mifareCard.DefaultKeyB, 1, false, true);
-        var isForm = ret ? string.Empty : " not";
-        Console.WriteLine($"The sector has{isForm} been erased");
-    }
-    else
-    {
-        Console.WriteLine("Sorry, I can't understand your choice");
-        return;
-    }
-
 }
 
 void WriteNdef(MifareCard mifareCard)

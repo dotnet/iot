@@ -1337,6 +1337,5 @@ namespace Iot.Device.Card.Mifare
 
             return toReturn;
         }
-
     }
 }
