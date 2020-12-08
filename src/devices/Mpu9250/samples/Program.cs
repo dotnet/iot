@@ -28,7 +28,7 @@ void MagnetometerCalibrationDeepDive(int calibrationCount)
     using Mpu9250 mpu9250 = new(I2cDevice.Create(mpui2CConnectionSettingmpus));
     // In case you have an exception with AK8963. In some configuration AK8963 has its I2C address exposed
     // So you can try the following:
-    // using Mpu9250 mpu9250 = new(I2cDevice.Create(mpui2CConnectionSettingmpus), i2CDeviceAk8963: I2cDevice.Create(new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress)));    
+    // using Mpu9250 mpu9250 = new(I2cDevice.Create(mpui2CConnectionSettingmpus), i2CDeviceAk8963: I2cDevice.Create(new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress)));
     mpu9250.MagnetometerOutputBitMode = OutputBitMode.Output16bit;
     mpu9250.MagnetometerMeasurementMode = MeasurementMode.ContinuousMeasurement100Hz;
     Console.WriteLine("Please move the magnetometer during calibration");
