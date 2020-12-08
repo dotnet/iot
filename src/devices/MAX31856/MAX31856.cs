@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.Spi;
+using System.IO;
 using UnitsNet;
 
 namespace Iot.Device.MAX31856
@@ -35,12 +36,29 @@ namespace Iot.Device.MAX31856
         #endregion
 
         /// <summary>
-        ///  Reads the temperature from the sensor
+        /// Command to Get Temperature from the device
         /// </summary>
-        /// <returns>
-        ///  Temperature in degrees celsius
-        /// </returns>
-        public Temperature GetTemperature() => Temperature.FromDegreesCelsius(ReadTemperature());
+        /// <remarks>
+        /// Initializes the device and then reads the data next it converts the bytes to thermocouple temperature
+        /// </remarks>
+        /// <exception cref="IOException">Thrown when the device is not wired correctly or if the thermocouple has failed
+        /// </exception>
+        public bool TryGetTemperature(out Temperature temperature)
+        {
+            try
+            {
+                temperature = ReadTemperature(out byte[] spiOutputData);
+                return true;
+            }
+            catch (IOException e)
+            {
+                // The tempearture is set to 1 million if there is an exception
+                temperature = Temperature.FromDegreesCelsius(1_000_000);
+                // Write error message to council
+                Console.WriteLine("IOException :" + e.Message);
+                return false;
+            }
+        }
 
         /// <summary>
         ///  Reads the temperature from the sensor
@@ -75,7 +93,7 @@ namespace Iot.Device.MAX31856
             Span<byte> configurationSetting0 = stackalloc byte[]
             {
                 (byte)Register.WRITE_CR0,
-                0x90
+                (byte)Register.ONESHOT_FAULT_SETTING
             };
             Span<byte> configurationSetting1 = stackalloc byte[]
             {
@@ -85,24 +103,7 @@ namespace Iot.Device.MAX31856
 
             Write(configurationSetting0);
             Write(configurationSetting1);
-        }
 
-        /// <summary>
-        /// Command to Get Temperature from the Device
-        /// </summary>
-        /// <remarks>
-        /// Initializes the device and then reads the data next it converts the bytes to thermocouple temperature  and throws an exception if there is an error
-        /// </remarks>
-        private double ReadTemperature()
-        {
-            var spiOutputData = WriteRead(Register.READ_CR0, 16);
-            if ((spiOutputData[16] & (byte)Register.ERROR_OPEN) == (byte)Register.ERROR_OPEN)
-            {
-                throw new Exception("Thermocouple is not connected properly");
-            }
-
-            var temperature = ConvertspiOutputDataTemp(spiOutputData);
-            return temperature;
         }
 
         /// <summary>
@@ -111,7 +112,7 @@ namespace Iot.Device.MAX31856
         /// <remarks>
         /// Initializes the device and then reads the data for the cold junction temperature also checks for errors to throw
         /// </remarks>
-        public double ReadCJTemperature()
+        private double ReadCJTemperature()
         {
             var spiOutputData = WriteRead(Register.READ_CR0, 16);
             var coldJunctionTemperature = ConvertspiOutputDataTempColdJunction(spiOutputData);
@@ -124,17 +125,29 @@ namespace Iot.Device.MAX31856
         /// <remarks>
         /// Takes the spi data as an input and outputs the Thermocouple Temperature Reading
         /// </remarks>
-        /// <param name="spiOutputData">Spidata read from the device as 16 bytes</param>
-        private double ConvertspiOutputDataTemp(byte[] spiOutputData)
+        private Temperature ReadTemperature(out byte[] spiOutputData)
         {
+            spiOutputData = WriteRead(Register.READ_CR0, 16);
             double tempRaw = (((spiOutputData[13] & 0x7F) << 16) + (spiOutputData[14] << 8) + (spiOutputData[15]));
             double temperature = tempRaw / 4096; // temperature in degrees C
             if ((spiOutputData[13] & 0x80) == 0x80) // checks if the temp is negative
             {
-                temperature = temperature * -1;
+                temperature = -temperature;
             }
 
-            return temperature;
+            // Throws exceptions if the device is not found or if the thermocouple is not connected
+            if (spiOutputData[1] != (byte)Register.ONESHOT_FAULT_SETTING)
+            {
+                throw new IOException("Device not found");
+            }
+            else if (((spiOutputData[16] & (byte)Register.ERROR_OPEN) == (byte)Register.ERROR_OPEN))
+            {
+                throw new IOException("Thermocouple is not connected");
+            }
+
+            var temperatureOut = Temperature.FromDegreesCelsius(temperature); // Converts temperature to type Temperature struct and establishes it as Degrees C for its initial units
+
+            return temperatureOut;
         }
 
         /// <summary>
@@ -150,7 +163,7 @@ namespace Iot.Device.MAX31856
             double temperatureColdJunction = tempRaw / 256; // convert decimal ouput to temperature using a constant from the Technical Manual
             if ((spiOutputData[11] & 0x80) == 0x80) // checks if the temp is negative
             {
-                temperatureColdJunction = temperatureColdJunction * -1;
+                temperatureColdJunction = -temperatureColdJunction;
             }
 
             return temperatureColdJunction;

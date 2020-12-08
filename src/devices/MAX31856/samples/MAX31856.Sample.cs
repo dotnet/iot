@@ -5,6 +5,7 @@ using System;
 using System.Device.Spi;
 using System.Threading;
 using Iot.Device.MAX31856;
+using UnitsNet;
 
 SpiConnectionSettings settings = new(0, 0)
 {
@@ -17,13 +18,15 @@ using SpiDevice device = SpiDevice.Create(settings);
 using MAX31856 sensor = new(device, ThermocoupleType.K);
 while (true)
 {
-    // read temperature
-    var temp = sensor.GetTemperature().DegreesFahrenheit;
-    temp = Math.Round(temp, 7); // round temp output to seven significant figures from resolution in Technical Documentation
-    // read cold junction temperature of device
-    var tempCJ = sensor.GetCJTemperature().DegreesFahrenheit;
-    tempCJ = Math.Round(tempCJ, 2); // round temp output to two significant figures from resolution in Technical Documentation
-    Console.WriteLine($"Temp: {temp} ColdJunctionTemp: {tempCJ} ");
+    // Reads temperature if the device is not reading properly
+    sensor.TryGetTemperature(out Temperature temperature);
+    var temp = temperature.DegreesFahrenheit;
+    temp = Math.Round(temp, 7); // 0.0078125C Thermocouple Temperature Resolution
+
+    // read Cold Junction temperature
+    var tempColdJunction = sensor.GetCJTemperature().DegreesFahrenheit;
+    tempColdJunction = Math.Round(tempColdJunction, 2); // +-0.7C Cold Junction Accuracy
+    Console.WriteLine($"Temp: {temp} ColdJunctionTemp: {tempColdJunction} ");
 
     // wait for 2000ms
     Thread.Sleep(2000);

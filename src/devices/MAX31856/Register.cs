@@ -31,7 +31,11 @@ namespace Iot.Device.MAX31856
         /// <summary>
         /// Error code for an open thermocouple line which could be from a broken wire or disconnected device
         /// </summary>
-        ERROR_OPEN = 0x01 // error code for when the thermocouple is open read on the SR register
+        ERROR_OPEN = 0x01, // error code for when the thermocouple is open read on the SR register
 
+         /// <summary>
+         /// One shot read on register CR0 with the fault detection enabled
+         /// </summary>
+        ONESHOT_FAULT_SETTING = 0x90
     }
 }

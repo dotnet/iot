@@ -4,12 +4,12 @@
 The MAX31856 device is a SPI interface cold-junction compensated thermocouple to digital converter.
 
 ## Sensor Image
-![](device.jpg)
+![Illustration of wiring from a Raspberry Pi device](device.jpg)
 
 ## Usage
 The MAX31856.samples file contains a sample usage of the device. Note that this reads two temperatures. One is a connected thermocouple reading called ```temp``` and the other is the temperature of the device itself called ```tempCJ``` which is used internally to increase the accuracy of the thermocouple but can also be read if you find a use for it.
 
-Create a new ```SpiConnectionSettings``` Class if using a raspberry pi3 do not change these settings.
+Create a new ```SpiConnectionSettings``` Class if using a Raspberry Pi do not change these settings.
 
 ```csharp
 SpiConnectionSettings settings = new(0, 0)
