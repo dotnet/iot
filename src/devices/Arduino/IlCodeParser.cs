@@ -123,81 +123,103 @@ namespace Iot.Device.Arduino
 
                 // The new token we use for patching
                 int patchValue = 0;
-                if (opCode == OpCode.CEE_CALL || opCode == OpCode.CEE_CALLVIRT || opCode == OpCode.CEE_NEWOBJ)
+                switch (opCode)
                 {
-                    // The tokens we're interested in have the form 0x0A XX XX XX preceded by a call, callvirt or newobj instruction
-                    var methodTarget = ResolveMember(method, token)!;
-                    MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
-                    patchValue = set.GetOrAddMethodToken(mb);
-                    // Do an inverse lookup again - might have changed due to replacement
-                    methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
-                }
-
-                // an STSFLD or LDSFLD instruction.
-                else if (opCode == OpCode.CEE_STSFLD || opCode == OpCode.CEE_LDSFLD || opCode == OpCode.CEE_LDFLD || opCode == OpCode.CEE_STFLD)
-                {
-                    var fieldTarget = ResolveMember(method, token)!;
-                    FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
-                    // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
-                    patchValue = set.GetOrAddFieldToken(mb);
-                    fieldsUsed.Add(mb);
-                }
-
-                // NEWARR instruction with a type token
-                else if (opCode == OpCode.CEE_NEWARR)
-                {
-                    var typeTarget = ResolveMember(method, token)!;
-                    TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
-                    patchValue = set.GetOrAddClassToken(mb);
-                    typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
-                }
-
-                // LDTOKEN takes typically types, but can also take virtual stuff (whatever that means)
-                else if (opCode == OpCode.CEE_LDTOKEN)
-                {
-                    var resolved = ResolveMember(method, token);
-                    if (resolved is TypeInfo ti)
+                    case OpCode.CEE_CALL:
+                    case OpCode.CEE_CALLVIRT:
+                    case OpCode.CEE_NEWOBJ:
+                    case OpCode.CEE_LDFTN:
                     {
-                        patchValue = set.GetOrAddClassToken(ti);
-                        typesUsed.Add(ti);
+                        // The tokens we're interested in have the form 0x0A XX XX XX preceded by a call, callvirt or newobj instruction
+                        var methodTarget = ResolveMember(method, token)!;
+                        MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
+                        patchValue = set.GetOrAddMethodToken(mb);
+                        // Do an inverse lookup again - might have changed due to replacement
+                        methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
+                        break;
                     }
-                    else if (resolved is FieldInfo mi)
-                    {
-                        // That's a static field initializer. Unfortunately, getting to the data it points to is quite ugly.
-                        // The name is something like "__StaticArrayInitTypeSize=6". We need the length (it is always in bytes, regardless of the data type)
-                        string valueName = mi.FieldType.Name;
 
-                        // This code is not written with safety in mind. If any of this fails, either there's an unhandled case we have to consider or
-                        // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
-                        string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
-                        int len = int.Parse(length);
-
-                        byte[] array = new byte[len];
-                        System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(array, mi.FieldHandle);
-                        patchValue = set.GetOrAddFieldToken(mi, array);
-                    }
-                    else
+                    // These instructions take field tokens
+                    case OpCode.CEE_STSFLD:
+                    case OpCode.CEE_LDSFLD:
+                    case OpCode.CEE_LDFLD:
+                    case OpCode.CEE_STFLD:
+                    case OpCode.CEE_LDFLDA:
+                    case OpCode.CEE_LDSFLDA:
                     {
-                        throw new InvalidOperationException($"Unknown token type {resolved}");
+                        var fieldTarget = ResolveMember(method, token)!;
+                        FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
+                        // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
+                        patchValue = set.GetOrAddFieldToken(mb);
+                        fieldsUsed.Add(mb);
+                        break;
                     }
-                }
-                else if (opCode == OpCode.CEE_STELEM || opCode == OpCode.CEE_LDELEM)
-                {
-                    var typeTarget = ResolveMember(method, token)!;
-                    TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
-                    patchValue = set.GetOrAddClassToken(mb);
-                    typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
-                }
-                else if (opCode == OpCode.CEE_BOX || opCode == OpCode.CEE_UNBOX || opCode == OpCode.CEE_UNBOX_ANY)
-                {
-                    var typeTarget = ResolveMember(method, token)!;
-                    TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
-                    patchValue = set.GetOrAddClassToken(mb);
-                    typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
-                }
-                else
-                {
-                    throw new InvalidOperationException($"Opcode {opCode} has a token argument, but is unhandled.");
+
+                    case OpCode.CEE_NEWARR:
+                    {
+                        var typeTarget = ResolveMember(method, token)!;
+                        TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
+                        patchValue = set.GetOrAddClassToken(mb);
+                        typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                        break;
+                    }
+
+                    // LDTOKEN takes typically types, but can also take virtual stuff (whatever that means)
+                    case OpCode.CEE_LDTOKEN:
+                    case OpCode.CEE_CASTCLASS:
+                    {
+                        var resolved = ResolveMember(method, token);
+                        if (resolved is TypeInfo ti)
+                        {
+                            patchValue = set.GetOrAddClassToken(ti);
+                            typesUsed.Add(ti);
+                        }
+                        else if (resolved is FieldInfo mi)
+                        {
+                            // That's a static field initializer. Unfortunately, getting to the data it points to is quite ugly.
+                            // The name is something like "__StaticArrayInitTypeSize=6". We need the length (it is always in bytes, regardless of the data type)
+                            string valueName = mi.FieldType.Name;
+
+                            // This code is not written with safety in mind. If any of this fails, either there's an unhandled case we have to consider or
+                            // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
+                            string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
+                            int len = int.Parse(length);
+
+                            byte[] array = new byte[len];
+                            System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(array, mi.FieldHandle);
+                            patchValue = set.GetOrAddFieldToken(mi, array);
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException($"Unknown token type {resolved}");
+                        }
+
+                        break;
+                    }
+
+                    case OpCode.CEE_STELEM:
+                    case OpCode.CEE_LDELEM:
+                    case OpCode.CEE_LDELEMA:
+                    case OpCode.CEE_CONSTRAINED_:
+                    case OpCode.CEE_BOX:
+                    case OpCode.CEE_UNBOX:
+                    case OpCode.CEE_UNBOX_ANY:
+                    case OpCode.CEE_LDOBJ:
+                    case OpCode.CEE_STOBJ:
+                    case OpCode.CEE_INITOBJ:
+                    case OpCode.CEE_ISINST:
+                    case OpCode.CEE_SIZEOF:
+                    {
+                        // These take a type as argument
+                        var typeTarget = ResolveMember(method, token)!;
+                        TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
+                        patchValue = set.GetOrAddClassToken(mb);
+                        typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                        break;
+                    }
+
+                    default:
+                        throw new InvalidOperationException($"Opcode {opCode} has a token argument, but is unhandled in {method.DeclaringType} - {method}.");
                 }
 
                 // Now use the new token instead of the old (possibly ambiguous one)
