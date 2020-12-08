@@ -35,5 +35,11 @@ namespace Iot.Device.Arduino
         IsPinModeSupported = 28,
         GetPinCount = 29,
         RuntimeHelpersInitializeArray = 30,
+        RuntimeHelpersRunClassConstructor = 31,
+        TypeGetTypeFromHandle,
+        TypeOp_Equality,
+        TypeOp_Inequality,
+        TypeEquals,
+        BaseGetHashCode,
     }
 }

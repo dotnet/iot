@@ -14,5 +14,20 @@ namespace Iot.Device.Arduino
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersRunClassConstructor)]
+        public static void RunClassConstructor(RuntimeTypeHandle rtHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static int OffsetToStringData
+        {
+            get
+            {
+                // TODO: Will depend on our string implementation
+                return 12;
+            }
+        }
     }
 }
