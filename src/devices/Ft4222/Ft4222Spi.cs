@@ -89,7 +89,7 @@ namespace Iot.Device.Ft4222
         // Maximum is the System Clock / 1 = 80 MHz
         // Minimum is the System Clock / 512 = 24 / 256 = 93.75 KHz
         // Always take the below frequency to avoid over clocking
-        private (FtClockRate clk, SpiClock spiClk) CalculateBestClockRate() => _settings.ClockFrequency switch
+        private (FtClockRate Clk, SpiClock SpiClk) CalculateBestClockRate() => _settings.ClockFrequency switch
         {
             < 187500 => (FtClockRate.Clock24MHz, SpiClock.DivideBy256),
             < 234375 => (FtClockRate.Clock48MHz, SpiClock.DivideBy256),

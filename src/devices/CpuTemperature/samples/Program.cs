@@ -15,9 +15,9 @@ while (!Console.KeyAvailable)
         var temperature = cpuTemperature.ReadTemperatures();
         foreach (var entry in temperature)
         {
-            if (!double.IsNaN(entry.Item2.DegreesCelsius))
+            if (!double.IsNaN(entry.Temperature.DegreesCelsius))
             {
-                Console.WriteLine($"Temperature from {entry.Item1.ToString()}: {entry.Item2.DegreesCelsius} °C");
+                Console.WriteLine($"Temperature from {entry.Sensor.ToString()}: {entry.Temperature.DegreesCelsius} °C");
             }
             else
             {

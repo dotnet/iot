@@ -6,13 +6,11 @@ using System.Device.I2c;
 using Iot.Device.UFire;
 using UnitsNet;
 
-#pragma warning disable SA1011
-
 const int BusId = 1;
 
 PrintHelp();
 
-I2cConnectionSettings settings = new (BusId, UFireIse.I2cAddress);
+I2cConnectionSettings settings = new(BusId, UFireIse.I2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 Console.WriteLine(
         $"UFire_ISE is ready on I2C bus {device.ConnectionSettings.BusId} with address {device.ConnectionSettings.DeviceAddress}");
@@ -58,7 +56,7 @@ void Basic(I2cDevice device)
 
 void Orp(I2cDevice device)
 {
-    using UFireOrp uFireOrp = new (device);
+    using UFireOrp uFireOrp = new(device);
     if (uFireOrp.TryMeasureOxidationReductionPotential(out ElectricPotential orp))
     {
         Console.WriteLine("Eh:" + orp.Millivolts);

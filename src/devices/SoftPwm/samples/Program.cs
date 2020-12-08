@@ -7,7 +7,7 @@ using System.Threading;
 
 Console.WriteLine("Hello PWM!");
 
-using SoftwarePwmChannel pwmChannel = new (17, 200, 0);
+using SoftwarePwmChannel pwmChannel = new(17, 200, 0);
 pwmChannel.Start();
 for (double fill = 0.0; fill <= 1.0; fill += 0.01)
 {

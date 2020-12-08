@@ -16,7 +16,7 @@ namespace Iot.Device.Lsm9Ds1.Samples
 
         public static void Run()
         {
-            using (Lsm9Ds1Magnetometer m = new (CreateI2cDevice()))
+            using (Lsm9Ds1Magnetometer m = new(CreateI2cDevice()))
             {
                 Console.WriteLine("Calibrating...");
                 Console.WriteLine("Move the sensor around Z for the next 20 seconds, try covering every angle");
@@ -83,7 +83,7 @@ namespace Iot.Device.Lsm9Ds1.Samples
 
         private static I2cDevice CreateI2cDevice()
         {
-            I2cConnectionSettings settings = new (1, I2cAddress);
+            I2cConnectionSettings settings = new(1, I2cAddress);
             return I2cDevice.Create(settings);
         }
     }

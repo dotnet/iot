@@ -250,24 +250,14 @@ namespace Iot.Device.Imu
         {
             get
             {
-                float val = 0;
-                switch (GyroscopeRange)
+                float val = GyroscopeRange switch
                 {
-                    case GyroscopeRange.Range0250Dps:
-                        val = 250.0f;
-                        break;
-                    case GyroscopeRange.Range0500Dps:
-                        val = 500.0f;
-                        break;
-                    case GyroscopeRange.Range1000Dps:
-                        val = 1000.0f;
-                        break;
-                    case GyroscopeRange.Range2000Dps:
-                        val = 2000.0f;
-                        break;
-                    default:
-                        break;
-                }
+                    GyroscopeRange.Range0250Dps => 250.0f,
+                    GyroscopeRange.Range0500Dps => 500.0f,
+                    GyroscopeRange.Range1000Dps => 1000.0f,
+                    GyroscopeRange.Range2000Dps => 2000.0f,
+                    _ => 0,
+                };
 
                 val /= Adc;
                 // the sample rate diver only apply for the non FS modes
@@ -500,7 +490,7 @@ namespace Iot.Device.Imu
         /// The result bias will be stored in the AcceloremeterBias and GyroscopeBias
         /// </summary>
         /// <returns>Gyroscope and accelerometer bias</returns>
-        public (Vector3 gyroscopeBias, Vector3 accelerometerBias) CalibrateGyroscopeAccelerometer()
+        public (Vector3 GyroscopeBias, Vector3 AccelerometerBias) CalibrateGyroscopeAccelerometer()
         {
             // = 131 LSB/degrees/sec
             const int GyroSensitivity = 131;
@@ -692,7 +682,7 @@ namespace Iot.Device.Imu
         /// ]]>
         /// </summary>
         /// <returns>the gyroscope and accelerometer vectors</returns>
-        public (Vector3 gyroscopeAverage, Vector3 accelerometerAverage) RunGyroscopeAccelerometerSelfTest()
+        public (Vector3 GyroscopeAverage, Vector3 AccelerometerAverage) RunGyroscopeAccelerometerSelfTest()
         {
             // Used for the number of cycles to run the test
             // Value is 200 according to documentation AN-MPU-9250A-03

@@ -65,7 +65,6 @@ namespace Iot.Device.GrovePiDevice
         public Version GetFirmwareVerion()
         {
             WriteCommand(GrovePiCommand.Version, 0, 0, 0);
-#pragma warning disable SA1011
             byte[]? inArray = ReadCommand(GrovePiCommand.Version, 0);
             if (inArray is object)
             {
@@ -119,26 +118,18 @@ namespace Iot.Device.GrovePiDevice
         /// <returns></returns>
         public byte[]? ReadCommand(GrovePiCommand command, GrovePort pin)
         {
-            int numberBytesToRead = 0;
-            switch (command)
+            int numberBytesToRead = command switch
             {
-                case GrovePiCommand.DigitalRead:
-                    numberBytesToRead = 1;
-                    break;
-                case GrovePiCommand.AnalogRead:
-                case GrovePiCommand.UltrasonicRead:
-                case GrovePiCommand.LetBarGet:
-                    numberBytesToRead = 3;
-                    break;
-                case GrovePiCommand.Version:
-                    numberBytesToRead = 4;
-                    break;
-                case GrovePiCommand.DhtTemp:
-                    numberBytesToRead = 9;
-                    break;
-                // No other commands are for read
-                default:
-                    return null;
+                GrovePiCommand.DigitalRead => 1,
+                GrovePiCommand.AnalogRead or GrovePiCommand.UltrasonicRead or GrovePiCommand.LetBarGet => 3,
+                GrovePiCommand.Version => 4,
+                GrovePiCommand.DhtTemp => 9,
+                _ => 0,
+            };
+
+            if (numberBytesToRead == 0)
+            {
+                return null;
             }
 
             byte[] outArray = new byte[numberBytesToRead];

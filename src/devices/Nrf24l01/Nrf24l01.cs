@@ -159,7 +159,7 @@ namespace Iot.Device.Nrf24l01
 
             Initialize(pinNumberingScheme, outputPower, dataRate, channel, gpioController);
             InitializePipe();
-#if NETCOREAPP2_1 || NETCOREAPP3_1
+#if NETCOREAPP2_1
             if (_gpio is null ||
                 Pipe0 is null ||
                 Pipe1 is null ||
@@ -260,7 +260,7 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Initialize
         /// </summary>
-#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+#if !NETCOREAPP2_1
         [MemberNotNull(nameof(_gpio))]
 #endif
         private void Initialize(PinNumberingScheme pinNumberingScheme, OutputPower outputPower, DataRate dataRate, byte channel, GpioController? gpioController)
@@ -292,7 +292,7 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// Initialize nRF24L01 Pipe
         /// </summary>
-#if !NETCOREAPP2_1 && !NETCOREAPP3_1
+#if !NETCOREAPP2_1
         [MemberNotNull(nameof(Pipe0), nameof(Pipe0), nameof(Pipe1), nameof(Pipe2), nameof(Pipe3), nameof(Pipe4), nameof(Pipe5))]
 #endif
         private void InitializePipe()
@@ -555,19 +555,12 @@ namespace Iot.Device.Nrf24l01
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
 
-            byte setting;
-            switch (mode)
+            byte setting = mode switch
             {
-                case PowerMode.UP:
-                    setting = (byte)(readData[0] | (1 << 1));
-                    break;
-                case PowerMode.DOWN:
-                    setting = (byte)(readData[0] & ~(1 << 1));
-                    break;
-                default:
-                    setting = (byte)(readData[0] | (1 << 1));
-                    break;
-            }
+                PowerMode.UP => setting = (byte)(readData[0] | (1 << 1)),
+                PowerMode.DOWN => setting = (byte)(readData[0] & ~(1 << 1)),
+                _ => setting = (byte)(readData[0] | (1 << 1)),
+            };
 
             Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, setting);
 
@@ -598,19 +591,12 @@ namespace Iot.Device.Nrf24l01
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_CONFIG, 1);
 
-            byte setting;
-            switch (mode)
+            byte setting = mode switch
             {
-                case WorkingMode.Receive:
-                    setting = (byte)(readData[0] | 1);
-                    break;
-                case WorkingMode.Transmit:
-                    setting = (byte)(readData[0] & ~1);
-                    break;
-                default:
-                    setting = (byte)(readData[0] | 1);
-                    break;
-            }
+                WorkingMode.Receive => (byte)(readData[0] | 1),
+                WorkingMode.Transmit => (byte)(readData[0] & ~1),
+                _ => (byte)(readData[0] | 1),
+            };
 
             Write(Command.NRF_W_REGISTER, Register.NRF_CONFIG, setting);
 

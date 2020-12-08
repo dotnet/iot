@@ -76,7 +76,6 @@ namespace Iot.Device.Pcx857x.Tests
         public class Pcx857xChipMock
         {
             private int _ports;
-#pragma warning disable SA1011
             private byte[] _registers;
             private byte[]? _lastReadBuffer;
             private byte[]? _lastWriteBuffer;

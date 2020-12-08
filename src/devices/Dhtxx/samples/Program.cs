@@ -20,10 +20,10 @@ if (choice.KeyChar == '1')
 {
     Console.WriteLine("Press any key to stop the reading");
     // Init DHT10 through I2C
-    I2cConnectionSettings settings = new (1, Dht10.DefaultI2cAddress);
+    I2cConnectionSettings settings = new(1, Dht10.DefaultI2cAddress);
     I2cDevice device = I2cDevice.Create(settings);
 
-    using Dht10 dht = new (device);
+    using Dht10 dht = new(device);
     Dht(dht);
     return;
 }
@@ -47,7 +47,7 @@ switch (choice.KeyChar)
 {
     case '2':
         Console.WriteLine($"Reading temperature and humidity on DHT11, pin {pin}");
-        using (Dht11 dht11 = new (pin))
+        using (Dht11 dht11 = new(pin))
         {
             Dht(dht11);
         }
@@ -55,7 +55,7 @@ switch (choice.KeyChar)
         break;
     case '3':
         Console.WriteLine($"Reading temperature and humidity on DHT12, pin {pin}");
-        using (Dht12 dht12 = new (pin))
+        using (Dht12 dht12 = new(pin))
         {
             Dht(dht12);
         }
@@ -63,7 +63,7 @@ switch (choice.KeyChar)
         break;
     case '4':
         Console.WriteLine($"Reading temperature and humidity on DHT21, pin {pin}");
-        using (Dht21 dht21 = new (pin))
+        using (Dht21 dht21 = new(pin))
         {
             Dht(dht21);
         }
@@ -71,7 +71,7 @@ switch (choice.KeyChar)
         break;
     case '5':
         Console.WriteLine($"Reading temperature and humidity on DHT22, pin {pin}");
-        using (Dht22 dht22 = new (pin))
+        using (Dht22 dht22 = new(pin))
         {
             Dht(dht22);
         }

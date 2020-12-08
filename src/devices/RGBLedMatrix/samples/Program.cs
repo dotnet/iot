@@ -22,18 +22,18 @@ string weatherKey = "Please request a key from openweathermap.org";
 
 CityData[] citiesData = new CityData[]
 {
-    new ("New York", "US", "America/New_York"),
-    new ("Redmond", "US", "America/Los_Angeles"),
-    new ("Toronto", "CA", "America/Toronto"),
-    new ("Mexico", "MX", "America/Mexico_City"),
-    new ("Madrid", "ES", "Europe/Madrid"),
-    new ("London", "UK", "Europe/London"),
-    new ("Paris", "FR", "Europe/Paris"),
-    new ("Rome", "IT", "Europe/Rome"),
-    new ("Moscow", "RU", "Europe/Moscow"),
-    new ("Casablanca", "MA", "Africa/Casablanca"),
-    new ("Cairo", "EG", "Africa/Cairo"),
-    new ("Riyadh", "SA", "Asia/Riyadh")
+    new("New York", "US", "America/New_York"),
+    new("Redmond", "US", "America/Los_Angeles"),
+    new("Toronto", "CA", "America/Toronto"),
+    new("Mexico", "MX", "America/Mexico_City"),
+    new("Madrid", "ES", "Europe/Madrid"),
+    new("London", "UK", "Europe/London"),
+    new("Paris", "FR", "Europe/Paris"),
+    new("Rome", "IT", "Europe/Rome"),
+    new("Moscow", "RU", "Europe/Moscow"),
+    new("Casablanca", "MA", "Africa/Casablanca"),
+    new("Cairo", "EG", "Africa/Cairo"),
+    new("Riyadh", "SA", "Asia/Riyadh")
 };
 
 Console.WriteLine($"Hello Matrix World!");

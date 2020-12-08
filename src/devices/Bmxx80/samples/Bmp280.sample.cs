@@ -19,7 +19,7 @@ const int busId = 1;
 // set this to the current sea level pressure in the area for correct altitude readings
 Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
 
-I2cConnectionSettings i2cSettings = new (busId, Bmp280.DefaultI2cAddress);
+I2cConnectionSettings i2cSettings = new(busId, Bmp280.DefaultI2cAddress);
 I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
 using var i2CBmp280 = new Bmp280(i2cDevice);
 

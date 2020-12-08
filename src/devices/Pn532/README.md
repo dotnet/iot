@@ -1,6 +1,6 @@
 # PN532 - RFID and NFC reader
 
-PN532 is a RFID and NFC reader. It does supports various standards: IsoIec14443TypeA, IsoIec14443TypeB, Iso18092. This implementation should support as well PN533 which is a full ASB serial only implementation and have few more registers and functions but looks retro compatible with this implentation.
+PN532 is a RFID and NFC reader. It does supports various standards: IsoIec14443TypeA, IsoIec14443TypeB, Iso18092. This implementation should support as well PN533 which is a full ASB serial only implementation and have few more registers and functions but looks retro compatible with this implementation.
 
 ## Documentation
 
@@ -18,7 +18,7 @@ string device = "/dev/ttyS0";
 pn532 = new Pn532(device);
 ```
 
-To act as a crad reader, the PN532 has to be in listening mode. 2 options are available, either thru using the ```ListPassiveTarget``` either the ```AutoPoll``` functions.
+To act as a card reader, the PN532 has to be in listening mode. 2 options are available, either thru using the ```ListPassiveTarget``` either the ```AutoPoll``` functions.
 
 Example with polling a simple passive 14443 type A card like a Mifare:
 
@@ -182,8 +182,8 @@ It is possible to emulate any Type A, Type B and Felica cards.
 Communication support:
 - [X] HSU serial port: fully supported
 - [X] I2C: supported
-- [ ] SPI: experimental, using a specific chip select pin as well as using LSB with reverse bytes function rather than built in function. This is due to current limitation in the SPI implementations
-- [ ] Hardware reset pin
+- [X] SPI: supported but using a specific chip select pin as well as using LSB with reverse bytes function rather than built in function. This is due to current limitation in the SPI implementations for Raspberry Pi. **Important**: when using Chip Select, it must be a pin which is different from the SPI defined one.
+- [ ] Hardware reset pin: This can be done with the user code.
 
 Miscellaneous commands:
 - [X] Diagnose. Note: partial implementation, basics tests implemented only

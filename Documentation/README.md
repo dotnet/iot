@@ -55,7 +55,7 @@ This repository mainly contains two different components:
 
 #### How-Tos
 * [Enable SPI on Raspberry Pi](./raspi-spi.md)
-* [Enable I2C on Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/11/enabling-the-i2c-interface-on-the-raspberry-pi/)
+* [Enable I2C on Raspberry Pi](./raspi-i2c.md)
 * [Enable Hardware PWM on Raspberry Pi](./raspi-pwm.md)
 * [Enable Headless Raspberry Pi](https://hackernoon.com/raspberry-pi-headless-install-462ccabd75d0)
 * [Docker Access to Raspberry Pi GPIO Pins](https://stackoverflow.com/questions/30059784/docker-access-to-raspberry-pi-gpio-pins)

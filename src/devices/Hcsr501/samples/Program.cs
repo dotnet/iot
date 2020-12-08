@@ -9,10 +9,10 @@ using Iot.Device.Hcsr501;
 const int Hcsr501Pin = 17;
 const int LedPin = 27;
 
-using GpioController ledController = new ();
+using GpioController ledController = new();
 ledController.OpenPin(LedPin, PinMode.Output);
 
-using Hcsr501 sensor = new (Hcsr501Pin);
+using Hcsr501 sensor = new(Hcsr501Pin);
 while (true)
 {
     // adjusting the detection distance and time by rotating the potentiometer on the sensor

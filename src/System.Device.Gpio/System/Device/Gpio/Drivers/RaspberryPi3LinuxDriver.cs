@@ -9,8 +9,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-#pragma warning disable SA1011 // Closing square brackets should be spaced correctly https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/2927
-
 namespace System.Device.Gpio.Drivers
 {
     /// <summary>
@@ -144,19 +142,11 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="mode">The mode to check.</param>
         /// <returns>The status if the pin supports the mode.</returns>
-        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
+        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => mode switch
         {
-            switch (mode)
-            {
-                case PinMode.Input:
-                case PinMode.InputPullDown:
-                case PinMode.InputPullUp:
-                case PinMode.Output:
-                    return true;
-                default:
-                    return false;
-            }
-        }
+            PinMode.Input or PinMode.InputPullDown or PinMode.InputPullUp or PinMode.Output => true,
+            _ => false,
+        };
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.
@@ -341,20 +331,14 @@ namespace System.Device.Gpio.Drivers
              * to this register.
              */
             int shift = (pinNumber & 0xf) << 1;
-            uint pull = 0;
             uint bits = 0;
-            switch (mode)
+            uint pull = mode switch
             {
-                case PinMode.Input:
-                    pull = 0;
-                    break;
-                case PinMode.InputPullUp:
-                    pull = 1;
-                    break;
-                case PinMode.InputPullDown:
-                    pull = 2;
-                    break;
-            }
+                PinMode.Input => 0,
+                PinMode.InputPullUp => 1,
+                PinMode.InputPullDown => 2,
+                _ => 0,
+            };
 
             var gpioReg = _registerViewPointer;
             bits = (gpioReg->GPPUPPDN[(pinNumber >> 4)]);

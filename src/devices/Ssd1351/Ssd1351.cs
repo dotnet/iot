@@ -82,7 +82,7 @@ namespace Iot.Device.Ssd1351
         ///         BBBBBGGG GGGRRRRR
         ///         43210543 21043210
         /// </returns>
-        private (byte, byte) Color565(Color color)
+        private (byte Low, byte High) Color565(Color color)
         {
             // get the top 5 MSB of the blue or red value
             UInt16 retval = (UInt16)((_colorSequence == ColorSequence.BGR ? color.B : color.R) >> 3);

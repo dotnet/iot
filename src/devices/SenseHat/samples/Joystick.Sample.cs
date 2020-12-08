@@ -14,7 +14,7 @@ namespace Iot.Device.SenseHat.Samples
     {
         public static void Run()
         {
-            using SenseHatJoystick j = new ();
+            using SenseHatJoystick j = new();
             while (true)
             {
                 j.Read();

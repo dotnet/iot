@@ -121,34 +121,18 @@ namespace Iot.Device.Imu
             return new Vector3(magn.Y, magn.X, -magn.Z);
         }
 
-        private TimeSpan GetTimeout()
+        // TODO: find what is the value in the documentation, it should be pretty fast
+        // But taking the same value as for the slowest one so th 8Hz one
+        private TimeSpan GetTimeout() => _ak8963.MeasurementMode switch
         {
-            TimeSpan timeout = TimeSpan.Zero;
-            switch (_ak8963.MeasurementMode)
-            {
-                // TODO: find what is the value in the documentation, it should be pretty fast
-                // But taking the same value as for the slowest one so th 8Hz one
-                case MeasurementMode.SingleMeasurement:
-                case MeasurementMode.ExternalTriggedMeasurement:
-                case MeasurementMode.SelfTest:
-                case MeasurementMode.ContinuousMeasurement8Hz:
-                    // 8Hz measurement period plus 2 milliseconds
-                    timeout = TimeSpan.FromMilliseconds(127);
-                    break;
-                case MeasurementMode.ContinuousMeasurement100Hz:
-                    // 100Hz measurement period plus 2 milliseconds
-                    // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
-                    timeout = _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12);
-                    break;
-                // Those cases are not measurement and should be 0 then
-                case MeasurementMode.FuseRomAccess:
-                case MeasurementMode.PowerDown:
-                default:
-                    break;
-            }
-
-            return timeout;
-        }
+            // 8Hz measurement period plus 2 milliseconds
+            MeasurementMode.SingleMeasurement or MeasurementMode.ExternalTriggedMeasurement or MeasurementMode.SelfTest or MeasurementMode.ContinuousMeasurement8Hz
+                => TimeSpan.FromMilliseconds(127),
+            // 100Hz measurement period plus 2 milliseconds
+            // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
+            MeasurementMode.ContinuousMeasurement100Hz => _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12),
+            _ => TimeSpan.Zero,
+        };
 
         /// <summary>
         /// Select the magnetometer measurement mode
