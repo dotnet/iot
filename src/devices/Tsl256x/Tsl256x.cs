@@ -26,12 +26,12 @@ namespace IoT.Device.Tsl256x
         /// <summary>
         /// When the address select pin is to ground
         /// </summary>
-        public const int DefaultI2cAddress = 0x29;
+        public const int SecondI2cAddress = 0x29;
 
         /// <summary>
         /// When the address select pin if float
         /// </summary>
-        public const int SecondI2cAddress = 0x39;
+        public const int DefaultI2cAddress = 0x39;
 
         /// <summary>
         /// When the select pin is to VDD
@@ -49,17 +49,17 @@ namespace IoT.Device.Tsl256x
             _packageType = packageType;
             IntegrationTime = IntegrationTime.Integration402Milliseconds;
             Gain = Gain.Normal;
-            Power = false;
+            Enabled = false;
         }
 
         /// <summary>
         /// Set power On or Off
         /// </summary>
-        public bool Power
+        public bool Enabled
         {
             // 0x03 is power on, see doc page 14
-            get => ReadByte(Register.CONTROL) == 0x03;
-            set => WriteByte(Register.CONTROL | Register.CMD, value ? 0x03 : 0x00);
+            get => (ReadByte(Register.CONTROL) & 0x03) == 0x03;
+            set => WriteByte(Register.CONTROL, value ? 0x03 : 0x00);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace IoT.Device.Tsl256x
         /// </summary>
         public IntegrationTime IntegrationTime
         {
-            get => _integrationTime;
+            get => (IntegrationTime)(ReadByte(Register.TIMING) & (byte)IntegrationTime.Manual); // _integrationTime;
             set
             {
                 _integrationTime = value;
@@ -93,7 +93,7 @@ namespace IoT.Device.Tsl256x
         /// </summary>
         public Gain Gain
         {
-            get => _gain;
+            get => (Gain)(ReadByte(Register.TIMING) & (byte)Gain.High); // _gain;
             set
             {
                 _gain = value;
@@ -108,7 +108,7 @@ namespace IoT.Device.Tsl256x
         {
             _integrationTime = IntegrationTime.Manual;
             WriteByte(Register.TIMING, (byte)((byte)_integrationTime | (byte)_gain | 0b0000_1000));
-            Power = true;
+            Enabled = true;
         }
 
         /// <summary>
@@ -117,7 +117,7 @@ namespace IoT.Device.Tsl256x
         public void StopManualIntegration()
         {
             WriteByte(Register.TIMING, (byte)((byte)_integrationTime | (byte)_gain));
-            Power = false;
+            Enabled = false;
         }
 
         /// <summary>
@@ -205,7 +205,7 @@ namespace IoT.Device.Tsl256x
         /// <returns>The illuminance</returns>
         public Illuminance MeasureAndGetIlluminance()
         {
-            Power = true;
+            Enabled = true;
             switch (_integrationTime)
             {
                 case IntegrationTime.Integration13_7Milliseconds:
@@ -222,7 +222,7 @@ namespace IoT.Device.Tsl256x
                     throw new ArgumentOutOfRangeException($"Only non manual integration time are supported");
             }
 
-            Power = false;
+            Enabled = false;
             return GetIlluminance();
         }
 
@@ -342,7 +342,7 @@ namespace IoT.Device.Tsl256x
         /// <inheritdoc/>
         public void Dispose()
         {
-            throw new NotImplementedException();
+            _i2cDevice?.Dispose();
         }
     }
 }

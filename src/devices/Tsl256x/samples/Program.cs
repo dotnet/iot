@@ -7,7 +7,7 @@ using System.Device.I2c;
 using System.Threading;
 using IoT.Device.Tsl256x;
 
-const int PinInterrupt = 18;
+const int PinInterrupt = 4;
 
 Console.WriteLine("Hello TSL256x");
 I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Tsl256x.DefaultI2cAddress));
@@ -30,35 +30,35 @@ while (!Console.KeyAvailable)
     Console.WriteLine($"Raw data channel 0: {channel0}, channel 1: {channel1}");
 }
 
-Console.WriteLine("Try changing the gain and read it");
+Console.WriteLine($"Try changing the gain and read it from {tsl256X.Gain} to {Gain.High}");
 tsl256X.Gain = Gain.High;
 Console.WriteLine($"New gain {tsl256X.Gain}");
 
-Console.WriteLine("Try changing the integration time and read it");
+Console.WriteLine($"Try changing the integration time and read it from {tsl256X.IntegrationTime} to {IntegrationTime.Integration13_7Milliseconds}");
 tsl256X.IntegrationTime = IntegrationTime.Integration13_7Milliseconds;
 Console.WriteLine($"New integration time {tsl256X.IntegrationTime}");
 
 Console.WriteLine("Set power on and check it");
-tsl256X.Power = true;
-Console.WriteLine($"Power should be true: {tsl256X.Power}");
-tsl256X.Power = false;
-Console.WriteLine($"Power should be false: {tsl256X.Power}");
+tsl256X.Enabled = true;
+Console.WriteLine($"Power should be true: {tsl256X.Enabled}");
+tsl256X.Enabled = false;
+Console.WriteLine($"Power should be false: {tsl256X.Enabled}");
 
 Console.WriteLine("Set interruption to test. Read the interrupt pin");
 GpioController controller = new();
 controller.OpenPin(PinInterrupt, PinMode.Input);
 tsl256X.InterruptControl = InterruptControl.TestMode;
-tsl256X.Power = true;
+tsl256X.Enabled = true;
 while (controller.Read(PinInterrupt) == PinValue.High)
 {
     Thread.Sleep(1);
 }
 
-tsl256X.Power = false;
+tsl256X.Enabled = false;
 Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
 tsl256X.GetRawChannels(out ushort ch0, out ushort ch1);
-
-if (controller.Read(PinInterrupt) == PinValue.High)
+Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
+if (controller.Read(PinInterrupt) == PinValue.Low)
 {
     Console.WriteLine("Interrupt properly cleaned");
 }
@@ -72,14 +72,14 @@ else
 tsl256X.SetThreshold(0x0000, 0x00FF);
 tsl256X.InterruptPersistence = InterruptPersistence.OutOfRange06IntegrationTimePeriods;
 tsl256X.InterruptControl = InterruptControl.LevelInterrupt;
-tsl256X.Power = true;
+tsl256X.Enabled = true;
 while (controller.Read(PinInterrupt) == PinValue.High)
 {
     Thread.Sleep(1);
 }
 
 Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
-tsl256X.Power = false;
+tsl256X.Enabled = false;
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
 
@@ -89,3 +89,4 @@ Thread.Sleep(2000);
 tsl256X.StopManualIntegration();
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
+Console.WriteLine($"Integration time should then be {IntegrationTime.Manual} = {tsl256X.IntegrationTime}");

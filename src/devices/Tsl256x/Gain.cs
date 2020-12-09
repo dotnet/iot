@@ -6,7 +6,7 @@ namespace IoT.Device.Tsl256x
     /// <summary>
     /// Gain for integration
     /// </summary>
-    public enum Gain
+    public enum Gain : byte
     {
         /// <summary>
         /// Norma gain x1
