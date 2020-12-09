@@ -12,6 +12,6 @@
     <SystemThreadingTasksExtensionsPackageVersion>4.5.4</SystemThreadingTasksExtensionsPackageVersion>
     <SystemMemoryPackageVersion>4.5.4</SystemMemoryPackageVersion>
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
-    <UnitsNetPackageVersion>4.58.0</UnitsNetPackageVersion>
+    <UnitsNetPackageVersion>4.77.0</UnitsNetPackageVersion>
   </PropertyGroup>
 </Project>

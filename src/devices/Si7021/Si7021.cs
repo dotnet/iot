@@ -27,9 +27,9 @@ namespace Iot.Device.Si7021
         public Temperature Temperature => Temperature.FromDegreesCelsius(GetTemperature());
 
         /// <summary>
-        /// Si7021 Relative Humidity (%)
+        /// Relative Humidity
         /// </summary>
-        public Ratio Humidity => GetHumidity();
+        public RelativeHumidity Humidity => GetHumidity();
 
         /// <summary>
         /// Si7021 Firmware Revision
@@ -93,7 +93,7 @@ namespace Iot.Device.Si7021
         /// Get Si7021 Relative Humidity (%)
         /// </summary>
         /// <returns>Relative Humidity (%)</returns>
-        private Ratio GetHumidity()
+        private RelativeHumidity GetHumidity()
         {
             Span<byte> readbuff = stackalloc byte[2];
 
@@ -107,7 +107,7 @@ namespace Iot.Device.Si7021
             ushort raw = BinaryPrimitives.ReadUInt16BigEndian(readbuff);
             double humidity = 125 * raw / 65536.0 - 6;
 
-            return Ratio.FromPercent(humidity);
+            return RelativeHumidity.FromPercent(humidity);
         }
 
         /// <summary>
