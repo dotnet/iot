@@ -41,8 +41,6 @@ namespace Iot.Device.MAX31856
         /// <remarks>
         /// Initializes the device and then reads the data next it converts the bytes to thermocouple temperature
         /// </remarks>
-        /// <exception cref="IOException">Thrown when the device is not wired correctly or if the thermocouple has failed
-        /// </exception>
         public bool TryGetTemperature(out Temperature temperature)
         {
             try
