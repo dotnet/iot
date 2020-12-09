@@ -4,7 +4,21 @@ MPU6500 is a 3 axis Gyroscope, 3 axis Accelerometer and Temperature sensor that 
 
 MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation like [Grove](http://wiki.seeedstudio.com/Grove-IMU_9DOF_v2.0/) or [Sparkfun](https://www.sparkfun.com/products/13762). MPU9250 incorporate a MPU6500 and an AK8963.
 
-The Magnetometer used is an [AK8963](../Ak8963/README.md). It is managed thru the main MPU9250 and setup as a slave I2C. All operations go thru the MPU9250.
+The Magnetometer used is an [AK8963](../Ak8963/README.md). In general, it is managed thru the main MPU9250 and setup as a slave I2C. All operations go thru the MPU9250. In some cases, the AK8963 is exposed and the operations are not going thru the MPU9250 but directly.
+
+General case with AK8963 is not exposed (where you can't find it on the I2C bus at the address 0x0C)
+
+```csharp
+var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
+Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus));
+```
+
+In case the AK8963 is exposed, so you can reach it directly, you can then use the following code:
+
+```csharp
+var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
+using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus), i2CDeviceAk8963: I2cDevice.Create(new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress)));
+```
 
 ## Usage
 

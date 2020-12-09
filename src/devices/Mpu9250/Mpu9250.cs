@@ -171,7 +171,8 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <param name="i2cDevice">The I2C device</param>
         /// <param name="shouldDispose">Will automatically dispose the I2C device if true</param>
-        public Mpu9250(I2cDevice i2cDevice, bool shouldDispose = true)
+        /// <param name="i2CDeviceAk8963">An I2C Device for the AK8963 when exposed and not behind the MPU9250</param>
+        public Mpu9250(I2cDevice i2cDevice, bool shouldDispose = true, I2cDevice? i2CDeviceAk8963 = null)
             : base(i2cDevice, true)
         {
             Reset();
@@ -190,7 +191,24 @@ namespace Iot.Device.Imu
             // Speed of 400 kHz
             WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBusFrequency.Frequency400kHz);
             _shouldDispose = shouldDispose;
-            _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
+            // There are 2 options to setup the Ak8963. Either the I2C address is exposed, either not.
+            // Trying both and pick one of them
+            if (i2CDeviceAk8963 == null)
+            {
+                try
+                {
+                    _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
+                }
+                catch (IOException ex)
+                {
+                    throw new IOException($"Please try to create an I2cDevice for the AK8963, it may be exposed", ex);
+                }
+            }
+            else
+            {
+                _ak8963 = new Ak8963(i2CDeviceAk8963);
+            }
+
             if (!_ak8963.IsVersionCorrect())
             {
                 // Try to reset the device first
