@@ -6,9 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Mifare\Mifare.csproj" />
     <ProjectReference Include="..\..\..\Pn5180\Pn5180.csproj" />
     <ProjectReference Include="..\..\..\Pn532\Pn532.csproj" />
