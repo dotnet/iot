@@ -21,21 +21,20 @@ namespace Ndef.Tests
         public void NdefTextRecordUTF8()
         {
             // Arrange
-            const string CorrectText = "Super ça marche ";
+            const string CorrectText = "Super ca marche ";
             const string LanguageCode = "en";
             // Text is Encoding.UTF8 and once extractes "Super ça marche " (with space at the end);
-            Span<byte> txtRaw = new byte[] { 0x91, 0x01, 0x14, 0x54, 0x02, 0x65, 0x6E, 0x53, 0x75, 0x70, 0x65, 0x72, 0x20, 0xC3, 0xA7, 0x61, 0x20, 0x6D, 0x61, 0x72, 0x63, 0x68, 0x65, 0x20 };
+            Span<byte> txtRaw = new byte[] { 0x91, 0x01, 0x13, 0x54, 0x02, 0x65, 0x6E, 0x53, 0x75, 0x70, 0x65, 0x72, 0x20, 0x63, 0x61, 0x20, 0x6D, 0x61, 0x72, 0x63, 0x68, 0x65, 0x20 };
 
             // Act
             var txtRecord = new TextRecord(txtRaw);
-
             // Assert
             Assert.Equal(CorrectText, txtRecord.Text);
             Assert.True(txtRecord.Header.IsFirstMessage);
             Assert.False(txtRecord.Header.IsLastMessage);
             Assert.False(txtRecord.Header.IsComposedMessage);
             Assert.Equal(4, txtRecord.Header.Length);
-            Assert.Equal(20, txtRecord.Payload?.Length);
+            Assert.Equal(19, txtRecord.Payload?.Length);
             Assert.Equal(LanguageCode, txtRecord.LanguageCode);
 
             // Arrange
