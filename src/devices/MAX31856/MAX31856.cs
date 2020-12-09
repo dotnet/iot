@@ -41,8 +41,6 @@ namespace Iot.Device.MAX31856
         /// <remarks>
         /// Initializes the device and then reads the data next it converts the bytes to thermocouple temperature
         /// </remarks>
-        /// <exception cref="IOException">Thrown when the device is not wired correctly or if the thermocouple has failed
-        /// </exception>
         public bool TryGetTemperature(out Temperature temperature)
         {
             try
@@ -50,18 +48,17 @@ namespace Iot.Device.MAX31856
                 temperature = ReadTemperature(out byte[] spiOutputData);
                 return true;
             }
-            catch (IOException e)
+            catch (IOException)
             {
                 // The tempearture is set to 1 million if there is an exception
                 temperature = Temperature.FromDegreesCelsius(1_000_000);
                 // Write error message to council
-                Console.WriteLine("IOException :" + e.Message);
                 return false;
             }
         }
 
         /// <summary>
-        ///  Reads the temperature from the sensor
+        ///  Reads the temperature from the Cold-Junction sensor
         /// </summary>
         /// <returns>
         ///  Temperature in degrees celsius

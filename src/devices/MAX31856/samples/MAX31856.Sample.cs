@@ -19,14 +19,15 @@ using MAX31856 sensor = new(device, ThermocoupleType.K);
 while (true)
 {
     // Reads temperature if the device is not reading properly
-    sensor.TryGetTemperature(out Temperature temperature);
-    var temp = temperature.DegreesFahrenheit;
-    temp = Math.Round(temp, 7); // 0.0078125C Thermocouple Temperature Resolution
-
-    // read Cold Junction temperature
-    var tempColdJunction = sensor.GetCJTemperature().DegreesFahrenheit;
-    tempColdJunction = Math.Round(tempColdJunction, 2); // +-0.7C Cold Junction Accuracy
-    Console.WriteLine($"Temp: {temp} ColdJunctionTemp: {tempColdJunction} ");
+    var tempColdJunction = sensor.GetCJTemperature();
+    if (sensor.TryGetTemperature(out Temperature temperature))
+    {
+        Console.WriteLine($"Temperature: {temperature.DegreesFahrenheit:0.0000000} °F, Cold Junction: {tempColdJunction.DegreesFahrenheit:0.00} °F");
+    }
+    else
+    {
+        Console.WriteLine($"Error reading temperature, Cold Junction temperature: {tempColdJunction.DegreesFahrenheit:0.00}");
+    }
 
     // wait for 2000ms
     Thread.Sleep(2000);
