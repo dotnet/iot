@@ -3,7 +3,11 @@
 
 using System;
 using System.Device.I2c;
+using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
+using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Bmxx80.ReadResult;
 using Iot.Device.Bmxx80.Register;
 using UnitsNet;
 
@@ -81,22 +85,7 @@ namespace Iot.Device.Bmxx80
         /// Contains an undefined value if the return value is false.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out Ratio humidity)
-        {
-            if (HumiditySampling == Sampling.Skipped)
-            {
-                humidity = default;
-                return false;
-            }
-
-            // Read the temperature first to load the t_fine value for compensation.
-            TryReadTemperature(out _);
-
-            var hum = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
-
-            humidity = CompensateHumidity(hum);
-            return true;
-        }
+        public bool TryReadHumidity(out Ratio humidity) => TryReadHumidityCore(out humidity);
 
         /// <summary>
         /// Gets the required time in ms to perform a measurement with the current sampling modes.
@@ -105,6 +94,44 @@ namespace Iot.Device.Bmxx80
         public override int GetMeasurementDuration()
         {
             return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling] + s_osToMeasCycles[(int)HumiditySampling];
+        }
+
+        /// <summary>
+        /// Performs a synchronous reading.
+        /// </summary>
+        /// <returns><see cref="Bme280ReadResult"/></returns>
+        public Bme280ReadResult Read()
+        {
+            if (ReadPowerMode() != Bmx280PowerMode.Normal)
+            {
+                SetPowerMode(Bmx280PowerMode.Forced);
+                Thread.Sleep(GetMeasurementDuration());
+            }
+
+            var tempSuccess = TryReadTemperatureCore(out var temperature);
+            var pressSuccess = TryReadPressureCore(out var pressure, skipTempFineRead: true);
+            var humiditySuccess = TryReadHumidityCore(out var humidity, skipTempFineRead: true);
+
+            return new Bme280ReadResult(tempSuccess ? temperature : null, pressSuccess ? pressure : null, humiditySuccess ? humidity : null);
+        }
+
+        /// <summary>
+        /// Performs an asynchronous reading.
+        /// </summary>
+        /// <returns><see cref="Bme280ReadResult"/></returns>
+        public async Task<Bme280ReadResult> ReadAsync()
+        {
+            if (ReadPowerMode() != Bmx280PowerMode.Normal)
+            {
+                SetPowerMode(Bmx280PowerMode.Forced);
+                await Task.Delay(GetMeasurementDuration());
+            }
+
+            var tempSuccess = TryReadTemperatureCore(out var temperature);
+            var pressSuccess = TryReadPressureCore(out var pressure, skipTempFineRead: true);
+            var humiditySuccess = TryReadHumidityCore(out var humidity, skipTempFineRead: true);
+
+            return new Bme280ReadResult(tempSuccess ? temperature : null, pressSuccess ? pressure : null, humiditySuccess ? humidity : null);
         }
 
         /// <summary>
@@ -140,6 +167,26 @@ namespace Iot.Device.Bmxx80
             }
 
             return Ratio.FromPercent(varH);
+        }
+
+        private bool TryReadHumidityCore(out Ratio humidity, bool skipTempFineRead = false)
+        {
+            if (HumiditySampling == Sampling.Skipped)
+            {
+                humidity = default;
+                return false;
+            }
+
+            if (!skipTempFineRead)
+            {
+                TryReadTemperature(out _);
+            }
+
+            // Read the temperature first to load the t_fine value for compensation.
+            var hum = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
+
+            humidity = CompensateHumidity(hum);
+            return true;
         }
     }
 }
