@@ -13,6 +13,7 @@
     <SystemMemoryPackageVersion>4.5.4</SystemMemoryPackageVersion>
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
     <UnitsNetPackageVersion>4.77.0</UnitsNetPackageVersion>
+    <MicrosoftExtensionsVersion>5.0.0</MicrosoftExtensionsVersion>
     <SixLaborsImageSharpPackageVersion>1.0.2</SixLaborsImageSharpPackageVersion>
   </PropertyGroup>
 </Project>
