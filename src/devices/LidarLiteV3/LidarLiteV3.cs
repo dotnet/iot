@@ -32,7 +32,7 @@ namespace Iot.Device.DistanceSensor
         /// <param name="i2cDevice">I2C device</param>
         /// <param name="gpioController">GPIO controller</param>
         /// <param name="powerEnablePin">The pin number used to control power to the device</param>
-        public LidarLiteV3(I2cDevice i2cDevice, GpioController gpioController = null, int powerEnablePin = -1)
+        public LidarLiteV3(I2cDevice i2cDevice, GpioController? gpioController = null, int powerEnablePin = -1)
         {
             _gpioController = gpioController ?? new GpioController();
             _i2cDevice = i2cDevice;
@@ -349,8 +349,8 @@ namespace Iot.Device.DistanceSensor
         {
             _gpioController?.Dispose();
             _i2cDevice?.Dispose();
-            _gpioController = null;
-            _i2cDevice = null;
+            _gpioController = null!;
+            _i2cDevice = null!;
         }
 
         #endregion
