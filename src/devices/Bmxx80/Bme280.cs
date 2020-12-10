@@ -85,7 +85,7 @@ namespace Iot.Device.Bmxx80
         /// Contains an undefined value if the return value is false.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out Ratio humidity) => TryReadHumidityCore(out humidity);
+        public bool TryReadHumidity(out RelativeHumidity humidity) => TryReadHumidityCore(out humidity);
 
         /// <summary>
         /// Gets the required time in ms to perform a measurement with the current sampling modes.
@@ -147,8 +147,8 @@ namespace Iot.Device.Bmxx80
         /// Compensates the humidity.
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
-        /// <returns>The relative humidity (Ratio, typically used as percent).</returns>
-        private Ratio CompensateHumidity(int adcHumidity)
+        /// <returns>The relative humidity.</returns>
+        private RelativeHumidity CompensateHumidity(int adcHumidity)
         {
             // The humidity is calculated using the compensation formula in the BME280 datasheet.
             double varH = TemperatureFine - 76800.0;
@@ -166,10 +166,10 @@ namespace Iot.Device.Bmxx80
                 varH = 0;
             }
 
-            return Ratio.FromPercent(varH);
+            return RelativeHumidity.FromPercent(varH);
         }
 
-        private bool TryReadHumidityCore(out Ratio humidity, bool skipTempFineRead = false)
+        private bool TryReadHumidityCore(out RelativeHumidity humidity, bool skipTempFineRead = false)
         {
             if (HumiditySampling == Sampling.Skipped)
             {

@@ -233,26 +233,26 @@ void TestTemperatureHumidityAdjustment(Ccs811Sensor ccs811)
         "The system does not react the best way when shake like this");
     // First use with the default ones, no changes should appear
     Temperature temp = Temperature.FromDegreesCelsius(25);
-    Ratio hum = Ratio.FromPercent(50);
+    RelativeHumidity hum = RelativeHumidity.FromPercent(50);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);
     // Changing with very different temperature
     temp = Temperature.FromDegreesCelsius(70);
-    hum = Ratio.FromPercent(53.8);
+    hum = RelativeHumidity.FromPercent(53.8);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);
 
     temp = Temperature.FromDegreesCelsius(-25);
-    hum = Ratio.FromPercent(0.5);
+    hum = RelativeHumidity.FromPercent(0.5);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);
     // Back to normal which still can lead to different results than initially
     // This is due to the baseline
     temp = Temperature.FromDegreesCelsius(25);
-    hum = Ratio.FromPercent(50);
+    hum = RelativeHumidity.FromPercent(50);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);

@@ -56,7 +56,7 @@ namespace Iot.Device.Shtc3
         /// <param name="lowPower">"true" measured in low power mode, "false"(default) measured in normal power mode</param>
         /// <param name="clockStretching">"true" allow clock stretching, "false" (default) without clock stretching</param>
         /// <returns>True if operation was successful</returns>
-        public bool TryGetTemperatureAndHumidity(out Temperature temperature, out Ratio relativeHumidity, bool lowPower = false, bool clockStretching = false)
+        public bool TryGetTemperatureAndHumidity(out Temperature temperature, out RelativeHumidity relativeHumidity, bool lowPower = false, bool clockStretching = false)
         {
             if (Status == Status.Sleep)
             {
@@ -68,13 +68,13 @@ namespace Iot.Device.Shtc3
             if (!TryReadSensorData(cmd, out var st, out var srh))
             {
                 temperature = default(Temperature);
-                relativeHumidity = default(Ratio);
+                relativeHumidity = default(RelativeHumidity);
                 return false;
             }
 
             // Details in the Datasheet P9
             temperature = Temperature.FromDegreesCelsius(Math.Round(st * 175 / 65536.0 - 45, 1));
-            relativeHumidity = Ratio.FromDecimalFractions(srh / 65536.0);
+            relativeHumidity = RelativeHumidity.FromPercent(srh * 100.0 / 65536.0);
             return true;
         }
 

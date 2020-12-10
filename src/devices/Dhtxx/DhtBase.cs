@@ -72,14 +72,14 @@ namespace Iot.Device.DHTxx
         /// Get the last read of relative humidity in percentage
         /// </summary>
         /// <remarks>
-        /// If last read was not successful, it returns <code>default(Ratio)</code>
+        /// If last read was not successful, it returns <code>default(RelativeHumidity)</code>
         /// </remarks>
-        public virtual Ratio Humidity
+        public virtual RelativeHumidity Humidity
         {
             get
             {
                 ReadData();
-                return IsLastReadSuccessful ? GetHumidity(_readBuff) : default(Ratio);
+                return IsLastReadSuccessful ? GetHumidity(_readBuff) : default(RelativeHumidity);
             }
         }
 
@@ -275,7 +275,7 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Humidity</returns>
-        internal abstract Ratio GetHumidity(byte[] readBuff);
+        internal abstract RelativeHumidity GetHumidity(byte[] readBuff);
 
         /// <summary>
         /// Converting data to Temperature

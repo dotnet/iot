@@ -31,7 +31,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
-        public override Ratio Humidity
+        public override RelativeHumidity Humidity
         {
             get
             {
@@ -85,11 +85,11 @@ namespace Iot.Device.DHTxx
             _i2cDevice.Read(_dht10ReadBuff);
         }
 
-        internal override Ratio GetHumidity(byte[] readBuff)
+        internal override RelativeHumidity GetHumidity(byte[] readBuff)
         {
             int raw = (((readBuff[1] << 8) | readBuff[2]) << 4) | readBuff[3] >> 4;
 
-            return Ratio.FromDecimalFractions(raw / Math.Pow(2, 20));
+            return RelativeHumidity.FromPercent(100.0 * raw / Math.Pow(2, 20));
         }
 
         internal override Temperature GetTemperature(byte[] readBuff)

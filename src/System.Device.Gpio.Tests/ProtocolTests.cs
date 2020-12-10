@@ -65,7 +65,7 @@ namespace System.Device.Gpio.Tests
                 double pressureHPa = pressure.Hectopascals;
                 Assert.InRange(pressureHPa, 892, 1084);
 
-                Assert.True(bme280.TryReadHumidity(out Ratio relativeHumidity));
+                Assert.True(bme280.TryReadHumidity(out RelativeHumidity relativeHumidity));
                 Assert.InRange(relativeHumidity.Percent, 0, 100);
             }
         }

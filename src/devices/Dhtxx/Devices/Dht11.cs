@@ -23,7 +23,7 @@ namespace Iot.Device.DHTxx
         {
         }
 
-        internal override Ratio GetHumidity(byte[] readBuff) => Ratio.FromPercent(readBuff[0] + readBuff[1] * 0.1);
+        internal override RelativeHumidity GetHumidity(byte[] readBuff) => RelativeHumidity.FromPercent(readBuff[0] + readBuff[1] * 0.1);
 
         internal override Temperature GetTemperature(byte[] readBuff)
         {

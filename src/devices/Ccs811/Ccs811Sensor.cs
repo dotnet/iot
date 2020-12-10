@@ -351,7 +351,7 @@ namespace Iot.Device.Ccs811
         /// </summary>
         /// <param name="temperature">The temperature</param>
         /// <param name="humidity">The relative humidity, best to use Percent from 0 to 100</param>
-        public void SetEnvironmentData(Temperature temperature, Ratio humidity)
+        public void SetEnvironmentData(Temperature temperature, RelativeHumidity humidity)
         {
             if ((humidity.Percent < 0) || (humidity.Percent > 100))
             {

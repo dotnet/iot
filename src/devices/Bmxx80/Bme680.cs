@@ -400,7 +400,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out Ratio humidity) => TryReadHumidityCore(out humidity);
+        public bool TryReadHumidity(out RelativeHumidity humidity) => TryReadHumidityCore(out humidity);
 
         /// <summary>
         /// Reads the pressure. A return value indicates whether the reading succeeded.
@@ -459,7 +459,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
         /// <returns>The percentage relative humidity.</returns>
-        private Ratio CompensateHumidity(int adcHumidity)
+        private RelativeHumidity CompensateHumidity(int adcHumidity)
         {
             if (_bme680Calibration is null)
             {
@@ -484,7 +484,7 @@ namespace Iot.Device.Bmxx80
                 calculatedHumidity = 0.0;
             }
 
-            return Ratio.FromPercent(calculatedHumidity);
+            return RelativeHumidity.FromPercent(calculatedHumidity);
         }
 
         /// <summary>
@@ -616,7 +616,7 @@ namespace Iot.Device.Bmxx80
             return true;
         }
 
-        private bool TryReadHumidityCore(out Ratio humidity, bool skipTempFineRead = false)
+        private bool TryReadHumidityCore(out RelativeHumidity humidity, bool skipTempFineRead = false)
         {
             if (HumiditySampling == Sampling.Skipped)
             {
