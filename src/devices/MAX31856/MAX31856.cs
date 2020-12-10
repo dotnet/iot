@@ -51,7 +51,7 @@ namespace Iot.Device.MAX31856
             catch (IOException)
             {
                 // The tempearture is set to 1 million if there is an exception
-                temperature = Temperature.FromDegreesCelsius(1_000_000);
+                temperature = new Temperature();
                 // Write error message to council
                 return false;
             }
@@ -63,7 +63,7 @@ namespace Iot.Device.MAX31856
         /// <returns>
         ///  Temperature in degrees celsius
         /// </returns>
-        public Temperature GetCJTemperature() => Temperature.FromDegreesCelsius(ReadCJTemperature());
+        public Temperature GetColdJunctionTemperature() => Temperature.FromDegreesCelsius(ReadCJTemperature());
 
         /// <summary>
         /// Creates a new instance of the max31856.

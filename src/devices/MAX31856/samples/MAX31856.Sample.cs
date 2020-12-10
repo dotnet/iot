@@ -19,7 +19,7 @@ using MAX31856 sensor = new(device, ThermocoupleType.K);
 while (true)
 {
     // Reads temperature if the device is not reading properly
-    var tempColdJunction = sensor.GetCJTemperature();
+    var tempColdJunction = sensor.GetColdJunctionTemperature();
     if (sensor.TryGetTemperature(out Temperature temperature))
     {
         Console.WriteLine($"Temperature: {temperature.DegreesFahrenheit:0.0000000} °F, Cold Junction: {tempColdJunction.DegreesFahrenheit:0.00} °F");
