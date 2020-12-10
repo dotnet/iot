@@ -17,7 +17,7 @@ while (true)
     RelativeHumidity humValue = sensor.Humidity;
 
     Console.WriteLine($"Temperature: {tempValue.DegreesCelsius:0.#}\u00B0C");
-    Console.WriteLine($"Relative humidity: {humValue:0.#}");
+    Console.WriteLine($"Relative humidity: {humValue.Percent:0.#}%RH");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
     Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).DegreesCelsius:0.#}\u00B0C");
