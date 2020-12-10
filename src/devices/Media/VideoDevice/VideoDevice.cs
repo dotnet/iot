@@ -42,6 +42,22 @@ namespace Iot.Device.Media
         public abstract Stream Capture();
 
         /// <summary>
+        /// Start continuous capture
+        /// </summary>
+        public abstract void StartCaptureContinuous();
+
+        /// <summary>
+        /// The continuous capture stream
+        /// </summary>
+        /// <returns></returns>
+        public abstract Stream CaptureContinuous();
+
+        /// <summary>
+        /// Stop the continuous capture
+        /// </summary>
+        public abstract void StopCaptureContinuous();
+
+        /// <summary>
         /// Query controls value from the video device.
         /// </summary>
         /// <param name="type">The type of a video device's control.</param>
