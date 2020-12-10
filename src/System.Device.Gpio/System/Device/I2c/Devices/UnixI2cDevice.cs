@@ -53,11 +53,13 @@ namespace System.Device.I2c
         {
             if (_bus != null)
             {
-                _bus.RemoveDeviceNoCheck(_deviceAddress);
-
                 if (_shouldDisposeBus)
                 {
                     _bus.Dispose();
+                }
+                else
+                {
+                    _bus.RemoveDeviceNoCheck(_deviceAddress);
                 }
 
                 _bus = null!;

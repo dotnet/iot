@@ -73,7 +73,8 @@ namespace System.Device.Gpio.Tests
         private static void SetupBme280(Bme280 bme280)
         {
             // https://github.com/dotnet/iot/issues/753
-            bme280.SetPowerMode(Bmx280PowerMode.Forced);
+            bme280.SetPowerMode(Bmx280PowerMode.Normal);
+            Thread.Sleep(100);
         }
 
         private static PwmChannel CreatePwmChannelCore(int frequency, double dutyCycle)
