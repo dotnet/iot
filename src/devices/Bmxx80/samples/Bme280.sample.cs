@@ -43,10 +43,10 @@ while (true)
     Console.WriteLine($"Relative humidity: {readResult.Humidity?.Percent:0.#}%");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-    if (readResult.Temperature != null && readResult.Humidity != null)
+    if (readResult.Temperature.HasValue && readResult.Humidity.HasValue)
     {
-        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
-        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
+        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(readResult.Temperature.Value, readResult.Humidity.Value).DegreesCelsius:0.#}\u00B0C");
+        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(readResult.Temperature.Value, readResult.Humidity.Value).DegreesCelsius:0.#}\u00B0C");
     }
 
     Thread.Sleep(1000);
@@ -70,10 +70,10 @@ while (true)
     Console.WriteLine($"Relative humidity: {readResult.Humidity?.Percent:0.#}%");
 
     // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
-    if (readResult.Temperature != null && readResult.Humidity != null)
+    if (readResult.Temperature.HasValue && readResult.Humidity.HasValue)
     {
-        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
-        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint((Temperature)readResult.Temperature, (Ratio)readResult.Humidity).DegreesCelsius:0.#}\u00B0C");
+        Console.WriteLine($"Heat index: {WeatherHelper.CalculateHeatIndex(readResult.Temperature.Value, readResult.Humidity.Value).DegreesCelsius:0.#}\u00B0C");
+        Console.WriteLine($"Dew point: {WeatherHelper.CalculateDewPoint(readResult.Temperature.Value, readResult.Humidity.Value).DegreesCelsius:0.#}\u00B0C");
     }
 
     Thread.Sleep(5000);

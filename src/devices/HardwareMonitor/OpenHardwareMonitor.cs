@@ -349,7 +349,7 @@ namespace Iot.Device.HardwareMonitor
 
             value = value / count;
 
-            average = (T)Quantity.From(value, unitThatWasUsed);
+            average = (T)Quantity.From(value, unitThatWasUsed!);
             return true;
         }
 

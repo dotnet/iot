@@ -35,7 +35,7 @@ while (true)
     Thread.Sleep(1000);
 }
 
-void ConsoleWriteInfo(Temperature temperature, Ratio relativeHumidity)
+void ConsoleWriteInfo(Temperature temperature, RelativeHumidity relativeHumidity)
 {
     Console.WriteLine($"Temperature: {temperature.DegreesCelsius:0.#}\u00B0C");
     Console.WriteLine($"Humidity: {relativeHumidity.Percent:0.#}%");

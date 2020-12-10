@@ -23,7 +23,7 @@ namespace Iot.Device.Bmxx80.ReadResult
         /// <param name="pressure">The <see cref="Pressure"/> measurement.</param>
         /// <param name="humidity">The humidity measurement.</param>
         /// <param name="gasResistance">The gas resistance measurement.</param>
-        public Bme680ReadResult(Temperature? temperature, Pressure? pressure, Ratio? humidity, ElectricResistance? gasResistance)
+        public Bme680ReadResult(Temperature? temperature, Pressure? pressure, RelativeHumidity? humidity, ElectricResistance? gasResistance)
             : base(temperature, pressure, humidity)
         {
             GasResistance = gasResistance;
