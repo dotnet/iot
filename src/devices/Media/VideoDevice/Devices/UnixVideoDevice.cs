@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 namespace Iot.Device.Media
@@ -66,6 +67,23 @@ namespace Iot.Device.Media
             Close();
 
             return new MemoryStream(dataBuffer);
+        }
+
+        public override void StartCaptureContinuous()
+        {
+            Initialize();
+            SetVideoConnectionSettings();
+        }
+
+        public override Stream CaptureContinuous()
+        {
+            byte[] dataBuffer = ProcessCaptureData();
+            return new MemoryStream(dataBuffer);
+        }
+
+        public override void StopCaptureContinuous()
+        {
+            Close();
         }
 
         /// <summary>

@@ -9,6 +9,9 @@ using System.Threading;
 using System.Collections.Generic;
 using Iot.Device.Bno055;
 using Iot.Device.Ft4222;
+using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.PowerMode;
+using UnitsNet;
 
 Console.WriteLine("Hello I2C, SPI and GPIO FTFI! FT4222");
 Console.WriteLine("Select the test you want to run:");
@@ -31,13 +34,21 @@ foreach (DeviceInformation device in devices)
     Console.WriteLine($"Device type: {device.Type}");
 }
 
+if (devices.Count == 0)
+{
+    Console.WriteLine("No devices connected to run tests.");
+    return;
+}
+
+DeviceInformation firstDevice = devices[0];
+
 var (chip, dll) = FtCommon.GetVersions();
 Console.WriteLine($"Chip version: {chip}");
 Console.WriteLine($"Dll version: {dll}");
 
 if (key.KeyChar == '1')
 {
-    TestI2c();
+    TestI2c(firstDevice);
 }
 
 if (key.KeyChar == '2')
@@ -55,16 +66,21 @@ if (key.KeyChar == '4')
     TestEvents();
 }
 
-void TestI2c()
+void TestI2c(DeviceInformation device)
 {
-    using Ft4222I2c ftI2c = new(new I2cConnectionSettings(0, Bno055Sensor.DefaultI2cAddress));
+    using Ft4222I2cBus ftI2c = new(device);
+    using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
+    using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
+    bme280.SetPowerMode(Bmx280PowerMode.Normal);
 
-    Bno055Sensor bno055Sensor = new(ftI2c);
+    Console.WriteLine($"Id: {bno055.Info.ChipId}, AccId: {bno055.Info.AcceleratorId}, GyroId: {bno055.Info.GyroscopeId}, MagId: {bno055.Info.MagnetometerId}");
+    Console.WriteLine($"Firmware version: {bno055.Info.FirmwareVersion}, Bootloader: {bno055.Info.BootloaderVersion}");
+    Console.WriteLine($"Temperature source: {bno055.TemperatureSource}, Operation mode: {bno055.OperationMode}, Units: {bno055.Units}");
 
-    Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
-    Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
-    Console.WriteLine($"Temperature source: {bno055Sensor.TemperatureSource}, Operation mode: {bno055Sensor.OperationMode}, Units: {bno055Sensor.Units}");
-    Console.WriteLine($"Powermode: {bno055Sensor.PowerMode}");
+    if (bme280.TryReadTemperature(out Temperature temperature))
+    {
+        Console.WriteLine($"Temperature: {temperature}");
+    }
 }
 
 void TestSpi()
