@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.I2c;
+using System.Diagnostics;
 using System.Drawing;
 using System.Numerics;
 using UnitsNet;
@@ -13,6 +15,13 @@ namespace Iot.Device.SenseHat
     /// </summary>
     public class SenseHat : IDisposable
     {
+        /// <summary>
+        /// Default I2C bus id
+        /// </summary>
+        public const int DefaultI2cBusId = 1;
+
+        private I2cBus _i2cBus;
+        private bool _shouldDispose;
         private SenseHatLedMatrix _ledMatrix;
         private SenseHatJoystick _joystick;
         private SenseHatAccelerometerAndGyroscope _gyro;
@@ -23,14 +32,19 @@ namespace Iot.Device.SenseHat
         /// <summary>
         /// Constructs SenseHat instance
         /// </summary>
-        public SenseHat()
+        public SenseHat(I2cBus? i2cBus = null, bool shouldDispose = false)
         {
-            _ledMatrix = new SenseHatLedMatrixI2c();
-            _joystick = new SenseHatJoystick();
-            _gyro = new SenseHatAccelerometerAndGyroscope();
-            _mag = new SenseHatMagnetometer();
-            _temp = new SenseHatTemperatureAndHumidity();
-            _press = new SenseHatPressureAndTemperature();
+            _shouldDispose = shouldDispose || i2cBus == null;
+            _i2cBus = i2cBus ?? I2cBus.Create(DefaultI2cBusId);
+
+            Debug.Assert(SenseHatLedMatrixI2c.I2cAddress == SenseHatJoystick.I2cAddress, $"Default addresses for {nameof(SenseHatLedMatrixI2c)} and {nameof(SenseHatJoystick)} were expected to be the same");
+            I2cDevice joystickAndLedMatrixI2cDevice = _i2cBus.CreateDevice(SenseHatLedMatrixI2c.I2cAddress);
+            _ledMatrix = new SenseHatLedMatrixI2c(joystickAndLedMatrixI2cDevice);
+            _joystick = new SenseHatJoystick(joystickAndLedMatrixI2cDevice);
+            _gyro = new SenseHatAccelerometerAndGyroscope(_i2cBus.CreateDevice(SenseHatAccelerometerAndGyroscope.I2cAddress));
+            _mag = new SenseHatMagnetometer(_i2cBus.CreateDevice(SenseHatMagnetometer.I2cAddress));
+            _temp = new SenseHatTemperatureAndHumidity(_i2cBus.CreateDevice(SenseHatTemperatureAndHumidity.I2cAddress));
+            _press = new SenseHatPressureAndTemperature(_i2cBus.CreateDevice(SenseHatPressureAndTemperature.I2cAddress));
         }
 
         // LED Matrix
@@ -133,23 +147,32 @@ namespace Iot.Device.SenseHat
         /// <inheritdoc/>
         public void Dispose()
         {
-            _ledMatrix?.Dispose();
-            _ledMatrix = null!;
+            if (_shouldDispose)
+            {
+                _i2cBus?.Dispose();
+            }
+            else
+            {
+                _ledMatrix?.Dispose();
+                _ledMatrix = null!;
 
-            _joystick?.Dispose();
-            _joystick = null!;
+                _joystick?.Dispose();
+                _joystick = null!;
 
-            _gyro?.Dispose();
-            _gyro = null!;
+                _gyro?.Dispose();
+                _gyro = null!;
 
-            _mag?.Dispose();
-            _mag = null!;
+                _mag?.Dispose();
+                _mag = null!;
 
-            _temp?.Dispose();
-            _temp = null!;
+                _temp?.Dispose();
+                _temp = null!;
 
-            _press?.Dispose();
-            _press = null!;
+                _press?.Dispose();
+                _press = null!;
+            }
+
+            _i2cBus = null!;
         }
     }
 }

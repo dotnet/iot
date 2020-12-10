@@ -22,9 +22,9 @@ Console.WriteLine(" 4 Run callback test event on GPIO2 on Failing and Rising");
 var key = Console.ReadKey();
 Console.WriteLine();
 
-List<DeviceInformation> devices = FtCommon.GetDevices();
+List<FtDevice> devices = FtCommon.GetDevices();
 Console.WriteLine($"{devices.Count} FT4222 elements found");
-foreach (DeviceInformation device in devices)
+foreach (FtDevice device in devices)
 {
     Console.WriteLine($"Description: {device.Description}");
     Console.WriteLine($"Flags: {device.Flags}");
@@ -40,7 +40,7 @@ if (devices.Count == 0)
     return;
 }
 
-DeviceInformation firstDevice = devices[0];
+FtDevice firstDevice = devices[0];
 
 var (chip, dll) = FtCommon.GetVersions();
 Console.WriteLine($"Chip version: {chip}");
@@ -66,9 +66,9 @@ if (key.KeyChar == '4')
     TestEvents();
 }
 
-void TestI2c(DeviceInformation device)
+void TestI2c(FtDevice device)
 {
-    using Ft4222I2cBus ftI2c = new(device);
+    using I2cBus ftI2c = device.CreateI2cBus();
     using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
     using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
     bme280.SetPowerMode(Bmx280PowerMode.Normal);

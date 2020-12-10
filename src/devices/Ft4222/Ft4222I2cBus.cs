@@ -13,7 +13,7 @@ namespace Iot.Device.Ft4222
     /// <summary>
     /// FT4222 I2C Device
     /// </summary>
-    public class Ft4222I2cBus : IDisposable
+    internal class Ft4222I2cBus : I2cBus
     {
         private const uint I2cMasterFrequencyKbps = 400;
 
@@ -23,19 +23,19 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public DeviceInformation DeviceInformation { get; private set; }
+        public FtDevice DeviceInformation { get; private set; }
 
         /// <summary>
         /// Create a FT4222 I2C Device
         /// </summary>
         /// <param name="deviceInformation">Device information. Use FtCommon.GetDevices to get it.</param>
-        public Ft4222I2cBus(DeviceInformation deviceInformation)
+        public Ft4222I2cBus(FtDevice deviceInformation)
         {
             switch (deviceInformation.Type)
             {
-                case FtDevice.Ft4222HMode0or2With2Interfaces:
-                case FtDevice.Ft4222HMode1or2With4Interfaces:
-                case FtDevice.Ft4222HMode3With1Interface:
+                case FtDeviceType.Ft4222HMode0or2With2Interfaces:
+                case FtDeviceType.Ft4222HMode1or2With4Interfaces:
+                case FtDeviceType.Ft4222HMode3With1Interface:
                     break;
                 default: throw new ArgumentException($"Unknown device type: {deviceInformation.Type}");
             }
@@ -66,12 +66,8 @@ namespace Iot.Device.Ft4222
             }
         }
 
-        /// <summary>
-        /// Reads data from the specified device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address to read from.</param>
-        /// <param name="buffer">Buffer to read data to.</param>
-        public void Read(int deviceAddress, Span<byte> buffer)
+        /// <inheritdoc/>
+        public override void Read(int deviceAddress, Span<byte> buffer)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {
@@ -96,12 +92,8 @@ namespace Iot.Device.Ft4222
             }
         }
 
-        /// <summary>
-        /// Writes data to the specified device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address to write to.</param>
-        /// <param name="buffer">Buffer to write.</param>
-        public void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
+        /// <inheritdoc/>
+        public override void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {
@@ -121,24 +113,8 @@ namespace Iot.Device.Ft4222
             }
         }
 
-        /// <summary>
-        /// Reads and writes data to the specified device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address to read and write.</param>
-        /// <param name="writeBuffer">Buffer to write.</param>
-        /// <param name="readBuffer">Buffer to read data to.</param>
-        public void WriteRead(int deviceAddress, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
-        {
-            Write(deviceAddress, writeBuffer);
-            Read(deviceAddress, readBuffer);
-        }
-
-        /// <summary>
-        /// Creates I2C device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address related with the device to create.</param>
-        /// <returns>I2cDevice instance.</returns>
-        public I2cDevice CreateDevice(int deviceAddress)
+        /// <inheritdoc/>
+        public override I2cDevice CreateDevice(int deviceAddress)
         {
             if (!_usedAddresses.Add(deviceAddress))
             {
@@ -148,11 +124,8 @@ namespace Iot.Device.Ft4222
             return new Ft4222I2c(this, deviceAddress);
         }
 
-        /// <summary>
-        /// Removes I2C device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address to create</param>
-        public void RemoveDevice(int deviceAddress)
+        /// <inheritdoc/>
+        public override void RemoveDevice(int deviceAddress)
         {
             if (!_usedAddresses.Remove(deviceAddress))
             {
@@ -161,7 +134,7 @@ namespace Iot.Device.Ft4222
         }
 
         /// <inheritdoc/>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
             _ftHandle?.Dispose();
             _ftHandle = null!;

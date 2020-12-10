@@ -40,7 +40,7 @@ namespace Iot.Device.Ft4222
         /// <param name="description">Description</param>
         /// <param name="ftHandle">Handle</param>
         /// <returns>The status</returns>
-        public static FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle)
+        public static FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDeviceType chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle)
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
@@ -107,7 +107,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">Handle</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", EntryPoint = "FT_GetDeviceInfoDetail")]
-        private static extern FtStatus FT_GetDeviceInfoDetailLinux(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
+        private static extern FtStatus FT_GetDeviceInfoDetailLinux(uint index, out uint flags, out FtDeviceType chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
 
         /// <summary>
         /// Open a device
@@ -152,7 +152,7 @@ namespace Iot.Device.Ft4222
         /// <param name="ftHandle">Handle</param>
         /// <returns>The status</returns>
         [DllImport("ftd2xx", EntryPoint = "FT_GetDeviceInfoDetail")]
-        private static extern FtStatus FT_GetDeviceInfoDetailWin(uint index, out uint flags, out FtDevice chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
+        private static extern FtStatus FT_GetDeviceInfoDetailWin(uint index, out uint flags, out FtDeviceType chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
 
         /// <summary>
         /// Open a device

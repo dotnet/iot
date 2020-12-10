@@ -1,81 +1,72 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Device.I2c;
+
 namespace Iot.Device.Ft4222
 {
     /// <summary>
-    /// List of FTDI device types
+    /// FT4222 device information
     /// </summary>
-    public enum FtDevice
+    public class FtDevice
     {
         /// <summary>
-        /// FT232B or FT245B device
+        /// Instantiates a DeviceInformation object.
         /// </summary>
-        Ft232BOrFt245B = 0,
+        /// <param name="flags">Indicates device state.</param>
+        /// <param name="type">Indicates the device type.</param>
+        /// <param name="id">The Vendor ID and Product ID of the device.</param>
+        /// <param name="locId">The physical location identifier of the device.</param>
+        /// <param name="serialNumber">The device serial number.</param>
+        /// <param name="description">The device description.</param>
+        public FtDevice(FtFlag flags, FtDeviceType type, uint id, uint locId, string serialNumber, string description)
+        {
+            Flags = flags;
+            Type = type;
+            Id = id;
+            LocId = locId;
+            SerialNumber = serialNumber;
+            Description = description;
+        }
 
         /// <summary>
-        /// FT8U232AM or FT8U245AM device
+        /// Indicates device state.  Can be any combination of the following: FT_FLAGS_OPENED, FT_FLAGS_HISPEED
         /// </summary>
-        Ft8U232AmOrFTtU245Am,
+        public FtFlag Flags { get; set; }
 
         /// <summary>
-        /// FT8U100AX device
+        /// Indicates the device type.  Can be one of the following: FT_DEVICE_232R, FT_DEVICE_2232C, FT_DEVICE_BM, FT_DEVICE_AM, FT_DEVICE_100AX or FT_DEVICE_UNKNOWN
         /// </summary>
-        Ft8U100Ax,
+        public FtDeviceType Type { get; set; }
 
         /// <summary>
-        /// Unknown device
+        /// The Vendor ID and Product ID of the device.
         /// </summary>
-        UnknownDevice,
+        public uint Id { get; set; }
 
         /// <summary>
-        /// FT2232 device
+        /// The physical location identifier of the device.
         /// </summary>
-        Ft2232,
+        public uint LocId { get; set; }
 
         /// <summary>
-        /// FT232R or FT245R device
+        /// The device serial number.
         /// </summary>
-        Ft232ROrFt245R,
+        public string SerialNumber { get; set; }
 
         /// <summary>
-        /// FT2232H device
+        /// The device description.
         /// </summary>
-        Ft2232H,
+        public string Description { get; set; }
 
         /// <summary>
-        /// FT4232H device
+        /// Creates I2C bus related to this device
         /// </summary>
-        Ft4232H,
-
-        /// <summary>
-        /// FT232H device
-        /// </summary>
-        Ft232H,
-
-        /// <summary>
-        /// FT X-Series device
-        /// </summary>
-        FtXSeries,
-
-        /// <summary>
-        /// FT4222 hi-speed device Mode 0 - 2 interfaces
-        /// </summary>
-        Ft4222HMode0or2With2Interfaces,
-
-        /// <summary>
-        /// FT4222 hi-speed device Mode 1 or 2 - 4 interfaces
-        /// </summary>
-        Ft4222HMode1or2With4Interfaces,
-
-        /// <summary>
-        /// FT4222 hi-speed device Mode 3 - 1 interface
-        /// </summary>
-        Ft4222HMode3With1Interface,
-
-        /// <summary>
-        /// OTP programmer board for the FT4222.
-        /// </summary>
-        Ft4222OtpProgrammerBoard,
+        /// <returns>I2cBus instance</returns>
+        public I2cBus CreateI2cBus()
+        {
+            return new Ft4222I2cBus(this);
+        }
     }
 }
