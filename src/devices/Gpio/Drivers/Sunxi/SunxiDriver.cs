@@ -60,6 +60,8 @@ namespace Iot.Device.Gpio.Drivers
         {
             CpuxPortBaseAddress = cpuxPortBaseAddress;
             CpusPortBaseAddress = cpusPortBaseAddress;
+
+            Initialize();
         }
 
         /// <summary>
@@ -80,7 +82,6 @@ namespace Iot.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected override void OpenPin(int pinNumber)
         {
-            Initialize();
             SetPinMode(pinNumber, PinMode.Input);
         }
 
@@ -439,7 +440,7 @@ namespace Iot.Device.Gpio.Drivers
             return alphabetPosition * 32 + port;
         }
 
-        private (int PortController, int Port) UnmapPinNumber(int pinNumber)
+        private static (int PortController, int Port) UnmapPinNumber(int pinNumber)
         {
             int port = pinNumber % 32;
             int portController = (pinNumber - port) / 32;
