@@ -69,18 +69,20 @@ namespace Iot.Device.Arduino
         StaticMember = 8 // type is defined by the first value it gets
     }
 
-    public enum SystemException
+    /// <summary>
+    /// A set of tokens which is always assigned to these classes, because they need to be identifiable in the firmware
+    /// </summary>
+    public enum KnownTypeTokens
     {
         None = 0,
-        StackOverflow = 1,
-        NullReference = 2,
-        MissingMethod = 3,
-        InvalidOpCode = 4,
-        DivideByZero = 5,
-        IndexOutOfRange = 6,
-        OutOfMemory = 7,
-        ArrayTypeMismatch = 8,
-        InvalidOperation = 9,
+        Object = 1,
+        Type = 2,
+        ValueType = 3,
+        String = 4,
+        TypeInfo = 5,
+        RuntimeType = 6,
+        Nullable = 7,
+        LargestKnownTypeToken = 10,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -94,8 +96,8 @@ namespace Iot.Device.Arduino
         private readonly List<Type> _replacementClasses = new List<Type>()
         {
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
-            typeof(MiniException), typeof(MiniHashSet<int>), typeof(MiniEqualityComparer<int>), typeof(MiniThread),
-            typeof(MiniEnvironment), typeof(MiniRuntimeHelpers)
+            typeof(MiniException), typeof(MiniThread),
+            typeof(MiniEnvironment), typeof(MiniRuntimeHelpers), typeof(MiniType)
         };
 
         private readonly ArduinoBoard _board;
@@ -288,13 +290,6 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            if (classType.ContainsGenericParameters)
-            {
-                // Don't inspect unresolved generic types
-                // TODO: Need to add some magic if these are really instantiated dynamically somewhere
-                return;
-            }
-
             var replacement = set.GetReplacement(classType);
 
             if (replacement != null)
@@ -332,23 +327,23 @@ namespace Iot.Device.Arduino
                     {
                         newvar.InitialValue = fields[index].GetValue(null);
                     }
-                    else
-                    {
-                        // If this is a static field of a generic class, we have to go trough the class to obtain its value, since each concrete type has a different
-                        // instance of the field
-                        string fName = fields[index].Name;
-                        if (fName.Contains("<")) // A backing field - use its get accessor instead
-                        {
-                            fName = fName.Substring(1, fName.IndexOf(">", StringComparison.Ordinal) - 1);
-                            var prop = t.GetProperty(fName);
-                            newvar.InitialValue = prop?.GetValue(null, BindingFlags.Public | BindingFlags.NonPublic, null, null, CultureInfo.InvariantCulture);
-                        }
-                        else
-                        {
-                            var fld = t.GetField(fName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                            newvar.InitialValue = fld?.GetValue(null);
-                        }
-                    }
+                    ////else
+                    ////{
+                    ////    // If this is a static field of a generic class, we have to go trough the class to obtain its value, since each concrete type has a different
+                    ////    // instance of the field
+                    ////    string fName = fields[index].Name;
+                    ////    if (fName.Contains("<")) // A backing field - use its get accessor instead
+                    ////    {
+                    ////        fName = fName.Substring(1, fName.IndexOf(">", StringComparison.Ordinal) - 1);
+                    ////        var prop = t.GetProperty(fName);
+                    ////        newvar.InitialValue = prop?.GetValue(null, BindingFlags.Public | BindingFlags.NonPublic, null, null, CultureInfo.InvariantCulture);
+                    ////    }
+                    ////    else
+                    ////    {
+                    ////        var fld = t.GetField(fName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
+                    ////        newvar.InitialValue = fld?.GetValue(null);
+                    ////    }
+                    ////}
                 }
 
                 memberTypes.Add(newvar);
@@ -427,7 +422,6 @@ namespace Iot.Device.Arduino
                     parentToken = set.GetOrAddClassToken(parent.GetTypeInfo());
                 }
 
-                // Extend token with assembly identifier, to make sure it is unique
                 int token = set.GetOrAddClassToken(cls.GetTypeInfo());
 
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
@@ -1211,7 +1205,7 @@ namespace Iot.Device.Arduino
 
         private byte[]? GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
-            if (methodInstance.ContainsGenericParameters)
+            if (methodInstance.ContainsGenericParameters && !methodInstance.DeclaringType!.IsConstructedGenericType)
             {
                 throw new InvalidProgramException("No generics supported");
             }

@@ -159,6 +159,15 @@ namespace Iot.Device.Arduino
                             case SystemException.InvalidOperation:
                                 ex = new InvalidOperationException($"An invalid operation was attempted in {resolved.DeclaringType} - {resolved}.");
                                 break;
+                            case SystemException.ClassNotFound:
+                                ex = new TypeInitializationException($"{resolved.DeclaringType} - {resolved}", new MissingMethodException());
+                                break;
+                            case SystemException.InvalidCast:
+                                ex = new InvalidCastException($"Cast to {resolved.DeclaringType} - {resolved} is not possible. " + textualStackTrace);
+                                break;
+                            case SystemException.NotSupported:
+                                ex = new NotSupportedException($"An unsupported operation was attempted in {resolved.DeclaringType} - {resolved} at " + textualStackTrace);
+                                break;
                             default:
                                 ex = new InvalidOperationException("Unknown exception " + textualStackTrace);
                                 break;

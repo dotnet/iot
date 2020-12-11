@@ -1397,7 +1397,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendTokenMap(int codeReference, int[] data)
+        public void SendInterfaceImplementations(int classToken, int[] data)
         {
             if (_firmataStream == null)
             {
@@ -1406,21 +1406,22 @@ namespace Iot.Device.Arduino
 
             lock (_synchronisationLock)
             {
-                // Send four (two pairs) at a time, otherwise the maximum length of the message may be exceeded
+                // Send eight at a time, otherwise the maximum length of the message may be exceeded
                 for (int token = 0; token < data.Length;)
                 {
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
                     _firmataStream.WriteByte((byte)0xFF); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.SetMethodTokens);
-                    SendInt14((short)codeReference);
+                    _firmataStream.WriteByte((byte)ExecutorCommand.Interfaces);
+                    SendInt32(classToken);
                     int remaining = data.Length - token;
-                    if (remaining > 4)
+                    if (remaining > 8)
                     {
-                        remaining = 4;
+                        remaining = 8;
                     }
 
+                    // TODO: Unimplemented
                     ushort len = (ushort)data.Length;
                     // Transmit 14 bit values
                     _firmataStream.WriteByte((byte)(len & 0x7f));
@@ -1451,6 +1452,37 @@ namespace Iot.Device.Arduino
 
             lock (_synchronisationLock)
             {
+                if (members.Count == 0)
+                {
+                    // Class without a single member or field to transmit: Likely an interface
+                    _dataReceived.Reset();
+                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclaration);
+                    SendInt32(classToken);
+                    SendInt32(parentToken);
+                    // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
+                    // Value types, on the other hand, are not expected to be larger than 14 bits.
+                    if (isValueType)
+                    {
+                        SendInt14((short)(sizeOfClass.Dynamic));
+                    }
+                    else
+                    {
+                        SendInt14((short)(sizeOfClass.Dynamic >> 2));
+                    }
+
+                    SendInt14((short)(sizeOfClass.Statics >> 2));
+                    SendInt14((short)(isValueType ? 1 : 0));
+                    SendInt14(0);
+
+                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                    _firmataStream.Flush();
+                    WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);
+                    return;
+                }
+
                 for (short member = 0; member < members.Count; member++)
                 {
                     _dataReceived.Reset();

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.Exception), true, true)]
+    [ArduinoReplacement(typeof(System.Exception), true, false)]
     internal class MiniException : ISerializable
     {
         private String _message;

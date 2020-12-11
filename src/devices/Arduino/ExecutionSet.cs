@@ -11,6 +11,7 @@ namespace Iot.Device.Arduino
 {
     public class ExecutionSet
     {
+        private const int GenericTokenStep = 0x0100_0000;
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<Class> _classes;
@@ -23,6 +24,7 @@ namespace Iot.Device.Arduino
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
         private int _nextToken;
+        private int _nextGenericToken;
 
         public ExecutionSet(ArduinoCsCompiler compiler)
         {
@@ -35,7 +37,8 @@ namespace Iot.Device.Arduino
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
 
-            _nextToken = 1;
+            _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
+            _nextGenericToken = GenericTokenStep;
 
             _numDeclaredMethods = 0;
             _entryPoint = null!;
@@ -164,7 +167,46 @@ namespace Iot.Device.Arduino
                 return GetOrAddClassToken(replacement.GetTypeInfo());
             }
 
-            token = _nextToken++;
+            if (typeInfo == typeof(object))
+            {
+                token = (int)KnownTypeTokens.Object;
+            }
+            else if (typeInfo == typeof(TypeInfo))
+            {
+                token = (int)KnownTypeTokens.TypeInfo;
+            }
+            else if (typeInfo.FullName == "System.RuntimeType")
+            {
+                token = (int)KnownTypeTokens.RuntimeType;
+            }
+            else if (typeInfo == typeof(Type) || typeInfo == typeof(MiniType))
+            {
+                token = (int)KnownTypeTokens.Type;
+            }
+            else if (typeInfo.IsGenericTypeDefinition)
+            {
+                // Type with (at least one) incomplete type argument.
+                // We use token values > 24 bit, so that we can add it to the base type to implement MakeGenericType(), at least for single type arguments
+                token = _nextGenericToken;
+                _nextGenericToken += GenericTokenStep;
+            }
+            else if (typeInfo.IsGenericType)
+            {
+                // complete generic type, find whether the base definition has been defined already
+                var definition = typeInfo.GetGenericTypeDefinition();
+                int definitionToken = GetOrAddClassToken(definition.GetTypeInfo());
+                Type[] typeArguments = typeInfo.GetGenericArguments();
+                Type firstArg = typeArguments.First();
+                int firstArgToken = GetOrAddClassToken(firstArg.GetTypeInfo());
+                // Our token is the combination of the generic type and the first argument. This allows a simple implementation for Type.MakeGenericType() with
+                // generic types with a single argument
+                token = firstArgToken + definitionToken;
+            }
+            else
+            {
+                token = _nextToken++;
+            }
+
             _patchedTypeTokens.Add(typeInfo, token);
             return token;
         }

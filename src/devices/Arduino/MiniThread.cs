@@ -47,5 +47,17 @@ namespace Iot.Device.Arduino
         {
             Sleep((int)delay.TotalMilliseconds);
         }
+
+        public static bool Yield()
+        {
+            // We are running in a single-thread environment, so this is effectively a no-op
+            return false;
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.SleepMicroseconds)]
+        public static void SpinWait(int micros)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

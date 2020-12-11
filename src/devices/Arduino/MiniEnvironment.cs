@@ -17,5 +17,30 @@ namespace Iot.Device.Arduino
                 throw new NotImplementedException();
             }
         }
+
+        public static int ProcessorCount
+        {
+            get
+            {
+                return 1;
+            }
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.FailFast1)]
+        public static void FailFast(string message)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.FailFast2)]
+        public static void FailFast(string message, Exception exception)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string? GetEnvironmentVariable(string variable)
+        {
+            return null;
+        }
     }
 }

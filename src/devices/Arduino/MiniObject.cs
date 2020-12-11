@@ -34,5 +34,11 @@ namespace Iot.Device.Arduino
         {
             throw new NotImplementedException(); // This implementation never executes
         }
+
+        [ArduinoImplementation(ArduinoImplementation.ObjectReferenceEquals)]
+        public static new bool ReferenceEquals(object? a, object? b)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
