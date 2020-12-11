@@ -7,7 +7,7 @@ The MAX31856 device is a SPI interface cold-junction compensated thermocouple to
 ![Illustration of wiring from a Raspberry Pi device](device.jpg)
 
 ## Usage
-The MAX31856.samples file contains a sample usage of the device. Note that this reads two temperatures. One is a connected thermocouple reading called ```temp``` and the other is the temperature of the device itself called ```tempCJ``` which is used internally to increase the accuracy of the thermocouple but can also be read if you find a use for it.
+The MAX31856.samples file contains a sample usage of the device. Note that this reads two temperatures. One is a connected thermocouple reading which can be read using the  ```TryGetTemperature``` command and the other is the temperature of the device itself which can be read using the ```GetColdJunctionTemperature``` command. The Cold Junction Temperature is used internally to increase the accuracy of the thermocouple but can also be read if you find a use for it.
 
 Create a new ```SpiConnectionSettings``` Class if using a Raspberry Pi do not change these settings.
 
@@ -26,22 +26,24 @@ using SpiDevice device = SpiDevice.Create(settings);
 using MAX31856 sensor = new(device, ThermocoupleType.K);
 ```
 
-Now read the temperature from the device. Using the UnitsNet nuget you can convert from DegreesCelsius to DegreesFahrenheit or any other unit by changing ```.GetTemperature().DegreesFahrenheit``` to another unit of your choice.
+Now read the temperature from the device. Using the UnitsNet nuget you can see the units of your choosing. In this example you chan change```DegreesFahrenheit``` to ```DegreesCelsius``` or any other unit by changing ```.GetTemperature().DegreesFahrenheit``` to another unit of your choice.
 
 ```csharp
 while (true)
 {
-    // read temperature
-    var temp = sensor.GetTemperature().DegreesFahrenheit;
-    temp = Math.Round(temp, 7); // round temp output to seven significant figures from resolution in Technical Documentation
-    // read cold junction temperature of device
-    var tempCJ = sensor.GetCJTemperature().DegreesFahrenheit;
-    tempCJ = Math.Round(tempCJ, 2); // round temp output to two significant figures from resolution in Technical Documentation
-    Console.WriteLine($"Temp: {temp} ColdJunctionTemp: {tempCJ} ");
+    // Reads temperature if the device is not reading properly
+    var tempColdJunction = sensor.GetColdJunctionTemperature();
+    if (sensor.TryGetTemperature(out Temperature temperature))
+    {
+        Console.WriteLine($"Temperature: {temperature.DegreesFahrenheit:0.0000000} °F, Cold Junction: {tempColdJunction.DegreesFahrenheit:0.00} °F");
+    }
+    else
+    {
+        Console.WriteLine($"Error reading temperature, Cold Junction temperature: {tempColdJunction.DegreesFahrenheit:0.00}");
+    }
 
     // wait for 2000ms
     Thread.Sleep(2000);
-}
 ```
 
 **Note:** _ThermocoupleType.K is configured for a K type thermocouple if you want to use a B,E,J,K,N,R,S, or T simply change the K to the thermocouple type of your choosing._

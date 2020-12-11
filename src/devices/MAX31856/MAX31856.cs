@@ -9,7 +9,7 @@ using UnitsNet;
 namespace Iot.Device.MAX31856
 {
     /// <summary>
-    /// Add documentation here
+    /// Documentation https://datasheets.maximintegrated.com/en/ds/MAX31856.pdf
     /// </summary>
     public class MAX31856 : IDisposable
     {
@@ -50,9 +50,7 @@ namespace Iot.Device.MAX31856
             }
             catch (IOException)
             {
-                // The tempearture is set to 1 million if there is an exception
                 temperature = new Temperature();
-                // Write error message to council
                 return false;
             }
         }
@@ -61,7 +59,7 @@ namespace Iot.Device.MAX31856
         ///  Reads the temperature from the Cold-Junction sensor
         /// </summary>
         /// <returns>
-        ///  Temperature in degrees celsius
+        /// Temperature, precision +- 0.7 Celsius range from -20 Celsius to +85 Celsius
         /// </returns>
         public Temperature GetColdJunctionTemperature() => Temperature.FromDegreesCelsius(ReadCJTemperature());
 

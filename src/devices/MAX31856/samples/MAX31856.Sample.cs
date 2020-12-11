@@ -18,8 +18,8 @@ using SpiDevice device = SpiDevice.Create(settings);
 using MAX31856 sensor = new(device, ThermocoupleType.K);
 while (true)
 {
-    // Reads temperature if the device is not reading properly
     var tempColdJunction = sensor.GetColdJunctionTemperature();
+    // Attempts to read temperature if an error is thrown the temperature will read as the default value of temperature in the Temperature class
     if (sensor.TryGetTemperature(out Temperature temperature))
     {
         Console.WriteLine($"Temperature: {temperature.DegreesFahrenheit:0.0000000} °F, Cold Junction: {tempColdJunction.DegreesFahrenheit:0.00} °F");
