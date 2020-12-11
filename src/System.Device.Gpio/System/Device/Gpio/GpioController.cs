@@ -228,11 +228,6 @@ namespace System.Device.Gpio
             }
 
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-            if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
-            {
-                throw new InvalidOperationException($"Can not write to pin {logicalPinNumber} because it is not set to Output mode.");
-            }
-
             _driver.Write(logicalPinNumber, value);
         }
 
