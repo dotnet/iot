@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Device.Spi;
 using UnitsNet;
 
@@ -15,14 +16,14 @@ namespace Iot.Device.DAC
         private SpiDevice _spiDevice;
         private ElectricPotential _referenceVoltageA;
         private ElectricPotential _referenceVoltageB;
-        private bool _disposedValue;
+        private bool _disposedValue = false;
 
         /// <summary>
         /// Initializes a new instance of the AD5328 device.
         /// </summary>
         /// <param name="spiDevice">The SPI device used for communication.</param>
         /// <param name="referenceVoltageA">The reference voltage for the first 4 channels</param>
-        /// <param name="referenceVoltageB">The refrence volatage for the last 4 channels</param>
+        /// <param name="referenceVoltageB">The reference voltage for the last 4 channels</param>
         public AD5328(SpiDevice spiDevice, ElectricPotential referenceVoltageA, ElectricPotential referenceVoltageB)
         {
             _spiDevice = spiDevice;
@@ -35,14 +36,14 @@ namespace Iot.Device.DAC
         /// </summary>
         /// <param name="channel">The channel number. Zero based. channel A = 0</param>
         /// <param name="voltage">The voltage</param>
-        public void SetDACVoltage(UInt16 channel, ElectricPotential voltage)
+        public void SetVoltage(UInt16 channel, ElectricPotential voltage)
         {
             // Check what reference voltage is used: Channel 0..3 = refA, Channel 4..7 = refB
             var refV = (channel > 3) ? _referenceVoltageB : _referenceVoltageA;
             // Check if requested voltage is not higher than reference voltage
             if (voltage > refV)
             {
-                throw new ArgumentOutOfRangeException(nameof(voltage), $"Value show be equal or lower than {refV.Volts}");
+                throw new ArgumentOutOfRangeException(nameof(voltage), $"Value should be equal or lower than {refV.Volts} V");
             }
 
             // Calculate the DAC value of the voltage
@@ -53,8 +54,9 @@ namespace Iot.Device.DAC
             // DAC C, DAC D, DAC E, DAC F, DAC G, or DAC H.
             UInt16 temp = (UInt16)((channel << 12) | dacvalue);
             // Swap bytes, MSB should go out first
-            var tempBytes = BitConverter.GetBytes(temp);
-            _spiDevice.Write(new Byte[] { tempBytes[1], tempBytes[0] });
+            Span<byte> tempBytes = stackalloc byte[2];
+            BinaryPrimitives.WriteUInt16BigEndian(tempBytes, temp);
+            _spiDevice.Write(tempBytes);
         }
 
         /// <inheritdoc/>
