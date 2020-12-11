@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Device.Gpio" Version="1.2.0" />
+    <PackageReference Include="UnitsNet" Version="4.77.0" />
+  </ItemGroup>
+
+</Project>
