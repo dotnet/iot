@@ -22,7 +22,7 @@ The `LogDispatcher` class contains static methods to enable a binding to provide
 
 Logging is disabled by default. To enable logging to the console in an application, you can use this code: 
 
-```
+```csharp
 using var loggerFactory = new LoggerFactory();
 loggerFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
 
@@ -33,7 +33,8 @@ LogDispatcher.LoggerFactory = loggerFactory;
 Other loggers are available in the `Microsoft.Extensions.Logging` Nuget-package. Some help is (here)[https://docs.microsoft.com/en-us/dotnet/core/extensions/logging#non-host-console-app]. Alternatively, you can also connect the log output to your favorite logging framework, such as NLog, Log4Net and others.
 
 To enable a binding to use logging, you can call `GetCurrentClassLogger()` in the constructor to get a logger that automatically identifies the class.
-```
+
+```csharp
     private ILogger _logger;
 
     public MyTestComponent()
@@ -43,7 +44,8 @@ To enable a binding to use logging, you can call `GetCurrentClassLogger()` in th
 ```
 
 Then, logging can be performed using the methods on the obtained `ILogger` interface.
-```
+
+```csharp
 _logger.LogInformation("An informative message");
 _logger.LogError("An error situation");
 _logger.LogWarning(new PlatformNotSupportedException("Something is not supported"), "With exception context");
