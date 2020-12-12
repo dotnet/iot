@@ -5,6 +5,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="samples\**" />
+    <EmbeddedResource Remove="samples\**" />
+    <None Remove="samples\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="System.Device.Gpio" Version="1.2.0" />
     <PackageReference Include="UnitsNet" Version="4.77.0" />
   </ItemGroup>
