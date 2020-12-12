@@ -121,34 +121,18 @@ namespace Iot.Device.Imu
             return new Vector3(magn.Y, magn.X, -magn.Z);
         }
 
-        private TimeSpan GetTimeout()
+        // TODO: find what is the value in the documentation, it should be pretty fast
+        // But taking the same value as for the slowest one so th 8Hz one
+        private TimeSpan GetTimeout() => _ak8963.MeasurementMode switch
         {
-            TimeSpan timeout = TimeSpan.Zero;
-            switch (_ak8963.MeasurementMode)
-            {
-                // TODO: find what is the value in the documentation, it should be pretty fast
-                // But taking the same value as for the slowest one so th 8Hz one
-                case MeasurementMode.SingleMeasurement:
-                case MeasurementMode.ExternalTriggedMeasurement:
-                case MeasurementMode.SelfTest:
-                case MeasurementMode.ContinuousMeasurement8Hz:
-                    // 8Hz measurement period plus 2 milliseconds
-                    timeout = TimeSpan.FromMilliseconds(127);
-                    break;
-                case MeasurementMode.ContinuousMeasurement100Hz:
-                    // 100Hz measurement period plus 2 milliseconds
-                    // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
-                    timeout = _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12);
-                    break;
-                // Those cases are not measurement and should be 0 then
-                case MeasurementMode.FuseRomAccess:
-                case MeasurementMode.PowerDown:
-                default:
-                    break;
-            }
-
-            return timeout;
-        }
+            // 8Hz measurement period plus 2 milliseconds
+            MeasurementMode.SingleMeasurement or MeasurementMode.ExternalTriggedMeasurement or MeasurementMode.SelfTest or MeasurementMode.ContinuousMeasurement8Hz
+                => TimeSpan.FromMilliseconds(127),
+            // 100Hz measurement period plus 2 milliseconds
+            // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
+            MeasurementMode.ContinuousMeasurement100Hz => _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12),
+            _ => TimeSpan.Zero,
+        };
 
         /// <summary>
         /// Select the magnetometer measurement mode
@@ -187,7 +171,8 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <param name="i2cDevice">The I2C device</param>
         /// <param name="shouldDispose">Will automatically dispose the I2C device if true</param>
-        public Mpu9250(I2cDevice i2cDevice, bool shouldDispose = true)
+        /// <param name="i2CDeviceAk8963">An I2C Device for the AK8963 when exposed and not behind the MPU9250</param>
+        public Mpu9250(I2cDevice i2cDevice, bool shouldDispose = true, I2cDevice? i2CDeviceAk8963 = null)
             : base(i2cDevice, true)
         {
             Reset();
@@ -206,7 +191,24 @@ namespace Iot.Device.Imu
             // Speed of 400 kHz
             WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBusFrequency.Frequency400kHz);
             _shouldDispose = shouldDispose;
-            _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
+            // There are 2 options to setup the Ak8963. Either the I2C address is exposed, either not.
+            // Trying both and pick one of them
+            if (i2CDeviceAk8963 == null)
+            {
+                try
+                {
+                    _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
+                }
+                catch (IOException ex)
+                {
+                    throw new IOException($"Please try to create an I2cDevice for the AK8963, it may be exposed", ex);
+                }
+            }
+            else
+            {
+                _ak8963 = new Ak8963(i2CDeviceAk8963);
+            }
+
             if (!_ak8963.IsVersionCorrect())
             {
                 // Try to reset the device first

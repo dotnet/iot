@@ -61,10 +61,10 @@ namespace Iot.Device.Ahtxx
         /// Reading the humidity takes between 10 ms and 80 ms.
         /// </summary>
         /// <returns>Relative humidity reading</returns>
-        public Ratio GetHumidity()
+        public RelativeHumidity GetHumidity()
         {
             Measure();
-            return Ratio.FromPercent(_humidity);
+            return RelativeHumidity.FromPercent(_humidity);
         }
 
         /// <summary>

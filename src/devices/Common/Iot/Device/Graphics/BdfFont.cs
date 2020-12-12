@@ -131,8 +131,10 @@ namespace Iot.Device.Graphics
             {
                 charData = GlyphUshortData.AsSpan().Slice(index, Height);
             }
-
-            throw new InvalidDataException("Couldn't get the glyph data");
+            else
+            {
+                throw new InvalidDataException("Couldn't get the glyph data");
+            }
         }
 
         /// <summary>

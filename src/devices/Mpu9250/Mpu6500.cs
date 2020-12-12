@@ -250,24 +250,14 @@ namespace Iot.Device.Imu
         {
             get
             {
-                float val = 0;
-                switch (GyroscopeRange)
+                float val = GyroscopeRange switch
                 {
-                    case GyroscopeRange.Range0250Dps:
-                        val = 250.0f;
-                        break;
-                    case GyroscopeRange.Range0500Dps:
-                        val = 500.0f;
-                        break;
-                    case GyroscopeRange.Range1000Dps:
-                        val = 1000.0f;
-                        break;
-                    case GyroscopeRange.Range2000Dps:
-                        val = 2000.0f;
-                        break;
-                    default:
-                        break;
-                }
+                    GyroscopeRange.Range0250Dps => 250.0f,
+                    GyroscopeRange.Range0500Dps => 500.0f,
+                    GyroscopeRange.Range1000Dps => 1000.0f,
+                    GyroscopeRange.Range2000Dps => 2000.0f,
+                    _ => 0,
+                };
 
                 val /= Adc;
                 // the sample rate diver only apply for the non FS modes
@@ -562,12 +552,12 @@ namespace Iot.Device.Imu
                 ReadBytes(Register.FIFO_R_W, rawData);
 
                 // Form signed 16-bit integer for each sample in FIFO
-                accel_temp.X = BinaryPrimitives.ReadUInt16BigEndian(rawData);
-                accel_temp.Y = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(2));
-                accel_temp.Z = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(4));
-                gyro_temp.X = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(6));
-                gyro_temp.Y = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(8));
-                gyro_temp.Z = BinaryPrimitives.ReadUInt16BigEndian(rawData.Slice(10));
+                accel_temp.X = BinaryPrimitives.ReadInt16BigEndian(rawData);
+                accel_temp.Y = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(2));
+                accel_temp.Z = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(4));
+                gyro_temp.X = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(6));
+                gyro_temp.Y = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(8));
+                gyro_temp.Z = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(10));
 
                 acceBias += accel_temp;
                 gyroBias += gyro_temp;
@@ -613,11 +603,11 @@ namespace Iot.Device.Imu
             Span<byte> accData = stackalloc byte[2];
             // Read factory accelerometer trim values
             ReadBytes(Register.XA_OFFSET_H, accData);
-            accel_bias_reg.X = BinaryPrimitives.ReadUInt16BigEndian(accData);
+            accel_bias_reg.X = BinaryPrimitives.ReadInt16BigEndian(accData);
             ReadBytes(Register.YA_OFFSET_H, accData);
-            accel_bias_reg.Y = BinaryPrimitives.ReadUInt16BigEndian(accData);
+            accel_bias_reg.Y = BinaryPrimitives.ReadInt16BigEndian(accData);
             ReadBytes(Register.ZA_OFFSET_H, accData);
-            accel_bias_reg.Z = BinaryPrimitives.ReadUInt16BigEndian(accData);
+            accel_bias_reg.Z = BinaryPrimitives.ReadInt16BigEndian(accData);
 
             // Define mask for temperature compensation bit 0 of lower byte of
             // accelerometer bias registers

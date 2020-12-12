@@ -39,18 +39,26 @@ pinChoice = ReadKey();
 WriteLine();
 int pinReset = CheckAndAskPinNumber(pinChoice.KeyChar);
 
-Ccs811Sensor ccs811;
 if (platformChoice.KeyChar == '1')
 {
     WriteLine("Creating an instance of a CCS811 using the platform drivers.");
-    ccs811 = new Ccs811Sensor(I2cDevice.Create(new I2cConnectionSettings(3, addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress)), pinWake: pinWake, pinInterruption: pinInterrupt, pinReset: pinReset);
+    using (var ccs811 = new Ccs811Sensor(I2cDevice.Create(new I2cConnectionSettings(3, addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress)), pinWake: pinWake, pinInterruption: pinInterrupt, pinReset: pinReset))
+    {
+        Sample(ccs811);
+    }
 }
 else if (platformChoice.KeyChar == '2')
 {
     WriteLine("Creating an instance of a CCS811 using FT4222 drivers.");
-    var ftdiI2C = new Ft4222I2c(new I2cConnectionSettings(0, addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress));
-    var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
-    ccs811 = new Ccs811Sensor(ftdiI2C, gpioController, pinWake, pinInterrupt, pinReset, false);
+    using (var i2cBus = new Ft4222I2cBus(FtCommon.GetDevices()[0]))
+    {
+        int deviceAddress = addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress;
+        var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+        using (var ccs811 = new Ccs811Sensor(i2cBus.CreateDevice(deviceAddress), gpioController, pinWake, pinInterrupt, pinReset, false))
+        {
+            Sample(ccs811);
+        }
+    }
 }
 else
 {
@@ -60,115 +68,116 @@ else
     return;
 }
 
-WriteLine("Choose your operation mode:");
-int i = 0;
-OperationMode operationMode = OperationMode.ConstantPower1Second;
-foreach (var mode in Enum.GetValues(typeof(OperationMode)))
+void Sample(Ccs811Sensor ccs811)
 {
-    WriteLine($" {i++}. {mode}");
-}
-
-var modeChoice = ReadKey();
-try
-{
-    // Converting the char to decimal, removing '0' = 0x30
-    int selectedMode = Convert.ToInt32(modeChoice.KeyChar) - 0x30;
-    if ((selectedMode >= 0) && (selectedMode <= 4))
+    WriteLine("Choose your operation mode:");
+    int i = 0;
+    OperationMode operationMode = OperationMode.ConstantPower1Second;
+    foreach (var mode in Enum.GetValues(typeof(OperationMode)))
     {
-        operationMode = (OperationMode)Convert.ToInt32(selectedMode);
+        WriteLine($" {i++}. {mode}");
     }
-    else
-    {
-        ForegroundColor = ConsoleColor.Red;
-        WriteLine($"Error selecting mode, default {operationMode} will be selected");
-    }
-}
-catch (StackOverflowException)
-{
-    ForegroundColor = ConsoleColor.Yellow;
-    WriteLine($"Error selecting mode, default {operationMode} will be selected");
-}
 
-ResetColor();
-DisplayBasicInformation(ccs811);
-WriteLine($"Current operating mode: {ccs811.OperationMode}, changing for {operationMode}");
-ccs811.OperationMode = operationMode;
-WriteLine($"Current operating mode: {ccs811.OperationMode}");
-ForegroundColor = ConsoleColor.Yellow;
-WriteLine($"Warning: the sensor needs to run for 48h in operation mode {OperationMode.ConstantPower1Second} before getting accurate results. " +
-    $"Also, every time you'll start the sensor, it will need approximately 20 minutes to get accurate results as well");
-ResetColor();
-
-if (pinInterrupt >= 0)
-{
-    WriteLine("Interruption mode selected.");
-    WriteLine("Do you want to enable Threshold interruption?");
-    WriteLine("(Y)es,(N)o");
-    var threshChoice = ReadKey();
-    WriteLine();
-    if (threshChoice.KeyChar is 'Y' or 'y')
+    var modeChoice = ReadKey();
+    try
     {
-        TestThresholdAndInterrupt(ccs811);
-    }
-    else
-    {
-        Write(", once a measurement will be available, it will be displayed. Press any key to exit the program.");
-        ccs811.MeasurementReady += Ccs811MeasurementReady;
-        while (!KeyAvailable)
+        // Converting the char to decimal, removing '0' = 0x30
+        int selectedMode = Convert.ToInt32(modeChoice.KeyChar) - 0x30;
+        if ((selectedMode >= 0) && (selectedMode <= 4))
         {
-            Thread.Sleep(10);
+            operationMode = (OperationMode)Convert.ToInt32(selectedMode);
+        }
+        else
+        {
+            ForegroundColor = ConsoleColor.Red;
+            WriteLine($"Error selecting mode, default {operationMode} will be selected");
         }
     }
-}
-else
-{
-    WriteLine("What to you want to test?");
-    WriteLine(" 1. Read and display gas information for 10 times.");
-    WriteLine(" 2. Read and display gas information for 1000 times.");
-    WriteLine(" 3. Read and display detailed gas information for 10 times.");
-    WriteLine(" 4. Read and display detailed gas information for 1000 times.");
-    WriteLine(" 5. Read, load and change back the baseline.");
-    WriteLine(" 6. Test temperature and humidity changes.");
-    WriteLine(" 7. Read and log gas information 10000 times.");
-    var operationChoice = ReadKey();
-    WriteLine();
-    switch (operationChoice.KeyChar)
+    catch (StackOverflowException)
     {
-        case '1':
-            ReadAnDisplay(ccs811);
-            break;
-        case '2':
-            ReadAnDisplay(ccs811, 1000);
-            break;
-        case '3':
-            ReadAndDisplayDetails(ccs811);
-            break;
-        case '4':
-            ReadAndDisplayDetails(ccs811, 1000);
-            break;
-        case '5':
-            TestBaseline(ccs811);
-            break;
-        case '6':
-            TestTemperatureHumidityAdjustment(ccs811);
-            break;
-        case '7':
-            WriteLine("Result file will be log.csv. The file is flushed on the disk every 100 results.");
-            ReadAndLog(ccs811, 10000);
-            break;
-        default:
-            ForegroundColor = ConsoleColor.Red;
-            WriteLine("Error: Sorry, didn't get your choice, program will now exit.");
-            ResetColor();
-            break;
+        ForegroundColor = ConsoleColor.Yellow;
+        WriteLine($"Error selecting mode, default {operationMode} will be selected");
     }
-}
 
-WriteLine($"Current operating mode: {ccs811.OperationMode}, changing for {OperationMode.Idle}");
-ccs811.OperationMode = OperationMode.Idle;
-WriteLine($"Current operating mode: {ccs811.OperationMode}");
-// Dispose the CCS811 sensor
-ccs811.Dispose();
+    ResetColor();
+    DisplayBasicInformation(ccs811);
+    WriteLine($"Current operating mode: {ccs811.OperationMode}, changing for {operationMode}");
+    ccs811.OperationMode = operationMode;
+    WriteLine($"Current operating mode: {ccs811.OperationMode}");
+    ForegroundColor = ConsoleColor.Yellow;
+    WriteLine($"Warning: the sensor needs to run for 48h in operation mode {OperationMode.ConstantPower1Second} before getting accurate results. " +
+        $"Also, every time you'll start the sensor, it will need approximately 20 minutes to get accurate results as well");
+    ResetColor();
+
+    if (pinInterrupt >= 0)
+    {
+        WriteLine("Interruption mode selected.");
+        WriteLine("Do you want to enable Threshold interruption?");
+        WriteLine("(Y)es,(N)o");
+        var threshChoice = ReadKey();
+        WriteLine();
+        if (threshChoice.KeyChar is 'Y' or 'y')
+        {
+            TestThresholdAndInterrupt(ccs811);
+        }
+        else
+        {
+            Write(", once a measurement will be available, it will be displayed. Press any key to exit the program.");
+            ccs811.MeasurementReady += Ccs811MeasurementReady;
+            while (!KeyAvailable)
+            {
+                Thread.Sleep(10);
+            }
+        }
+    }
+    else
+    {
+        WriteLine("What to you want to test?");
+        WriteLine(" 1. Read and display gas information for 10 times.");
+        WriteLine(" 2. Read and display gas information for 1000 times.");
+        WriteLine(" 3. Read and display detailed gas information for 10 times.");
+        WriteLine(" 4. Read and display detailed gas information for 1000 times.");
+        WriteLine(" 5. Read, load and change back the baseline.");
+        WriteLine(" 6. Test temperature and humidity changes.");
+        WriteLine(" 7. Read and log gas information 10000 times.");
+        var operationChoice = ReadKey();
+        WriteLine();
+        switch (operationChoice.KeyChar)
+        {
+            case '1':
+                ReadAnDisplay(ccs811);
+                break;
+            case '2':
+                ReadAnDisplay(ccs811, 1000);
+                break;
+            case '3':
+                ReadAndDisplayDetails(ccs811);
+                break;
+            case '4':
+                ReadAndDisplayDetails(ccs811, 1000);
+                break;
+            case '5':
+                TestBaseline(ccs811);
+                break;
+            case '6':
+                TestTemperatureHumidityAdjustment(ccs811);
+                break;
+            case '7':
+                WriteLine("Result file will be log.csv. The file is flushed on the disk every 100 results.");
+                ReadAndLog(ccs811, 10000);
+                break;
+            default:
+                ForegroundColor = ConsoleColor.Red;
+                WriteLine("Error: Sorry, didn't get your choice, program will now exit.");
+                ResetColor();
+                break;
+        }
+    }
+
+    WriteLine($"Current operating mode: {ccs811.OperationMode}, changing for {OperationMode.Idle}");
+    ccs811.OperationMode = OperationMode.Idle;
+    WriteLine($"Current operating mode: {ccs811.OperationMode}");
+}
 
 int CheckAndAskPinNumber(char toCheck)
 {
@@ -224,26 +233,26 @@ void TestTemperatureHumidityAdjustment(Ccs811Sensor ccs811)
         "The system does not react the best way when shake like this");
     // First use with the default ones, no changes should appear
     Temperature temp = Temperature.FromDegreesCelsius(25);
-    Ratio hum = Ratio.FromPercent(50);
+    RelativeHumidity hum = RelativeHumidity.FromPercent(50);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);
     // Changing with very different temperature
     temp = Temperature.FromDegreesCelsius(70);
-    hum = Ratio.FromPercent(53.8);
+    hum = RelativeHumidity.FromPercent(53.8);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);
 
     temp = Temperature.FromDegreesCelsius(-25);
-    hum = Ratio.FromPercent(0.5);
+    hum = RelativeHumidity.FromPercent(0.5);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);
     // Back to normal which still can lead to different results than initially
     // This is due to the baseline
     temp = Temperature.FromDegreesCelsius(25);
-    hum = Ratio.FromPercent(50);
+    hum = RelativeHumidity.FromPercent(50);
     WriteLine($"Changing temperature and humidity reference to {temp.DegreesCelsius:0.00} C, {hum.Percent:0.0} %, baseline for calculation: {ccs811.BaselineAlgorithmCalculation}");
     ccs811.SetEnvironmentData(temp, hum);
     ReadAndDisplayDetails(ccs811, 100);

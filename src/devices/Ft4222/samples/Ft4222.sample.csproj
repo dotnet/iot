@@ -6,9 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-      <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Ft4222.csproj" />
     <ProjectReference Include="..\..\Bno055\Bno055.csproj" />
+    <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
   </ItemGroup>
 
 </Project>
