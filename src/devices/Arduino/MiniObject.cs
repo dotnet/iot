@@ -21,12 +21,13 @@ namespace Iot.Device.Arduino
         [ArduinoImplementation(ArduinoImplementation.GetHashCode)]
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(ArduinoImplementation.ObjectToString)]
         public override string ToString()
         {
-           throw new NotImplementedException("Todo");
+           throw new NotImplementedException();
         }
 
         [ArduinoImplementation(ArduinoImplementation.GetType)]

@@ -100,7 +100,7 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.BaseGetHashCode)]
+        [ArduinoImplementation(ArduinoImplementation.TypeGetHashCode)]
         public override int GetHashCode()
         {
             throw new NotImplementedException();

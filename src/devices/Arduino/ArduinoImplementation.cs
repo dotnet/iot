@@ -13,7 +13,9 @@ namespace Iot.Device.Arduino
         GetMicroseconds,
         Debug,
         ObjectEquals,
-        ReferenceEquals,
+        ObjectGetHashCode,
+        ObjectReferenceEquals,
+        ObjectToString,
         GetType,
         GetHashCode,
         ArrayCopy5,
@@ -25,8 +27,6 @@ namespace Iot.Device.Arduino
         StringIndexer,
         StringFormat2,
         StringFormat2b,
-        BaseTypeEquals,
-        EmptyStaticCtor,
         DefaultEqualityComparer,
         ArrayCopy3,
         StringFormat3,
@@ -36,13 +36,10 @@ namespace Iot.Device.Arduino
         GetPinCount,
         RuntimeHelpersInitializeArray,
         RuntimeHelpersRunClassConstructor,
-        TypeGetTypeFromHandle,
-        BaseGetHashCode,
         FailFast1,
         FailFast2,
 
-        TypeOp_Equality,
-        TypeOp_Inequality,
+        TypeGetTypeFromHandle,
         TypeEquals,
         TypeIsAssignableTo,
         TypeIsEnum,
@@ -51,8 +48,9 @@ namespace Iot.Device.Arduino
         TypeIsSubclassOf,
         TypeIsAssignableFrom,
         TypeCtor,
-        ObjectReferenceEquals,
         TypeMakeGenericType,
-        CreateInstanceForAnotherGenericParameter
+        TypeGetHashCode,
+
+        CreateInstanceForAnotherGenericParameter,
     }
 }

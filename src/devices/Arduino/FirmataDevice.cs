@@ -1407,7 +1407,7 @@ namespace Iot.Device.Arduino
             lock (_synchronisationLock)
             {
                 // Send eight at a time, otherwise the maximum length of the message may be exceeded
-                for (int token = 0; token < data.Length;)
+                for (int idx = 0; idx < data.Length;)
                 {
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
@@ -1415,30 +1415,21 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)0xFF); // IL data
                     _firmataStream.WriteByte((byte)ExecutorCommand.Interfaces);
                     SendInt32(classToken);
-                    int remaining = data.Length - token;
+                    int remaining = data.Length - idx;
                     if (remaining > 8)
                     {
                         remaining = 8;
                     }
 
-                    // TODO: Unimplemented
-                    ushort len = (ushort)data.Length;
-                    // Transmit 14 bit values
-                    _firmataStream.WriteByte((byte)(len & 0x7f));
-                    _firmataStream.WriteByte((byte)(len >> 7));
-                    _firmataStream.WriteByte((byte)(token & 0x7f));
-                    _firmataStream.WriteByte((byte)(token >> 7));
-
-                    for (int i = token; i < token + remaining; i++)
+                    for (int i = idx; i < idx + remaining; i++)
                     {
-                        byte[] param = BitConverter.GetBytes(data[i]);
-                        SendValuesAsTwo7bitBytes(param);
+                        SendInt32(data[i]);
                     }
 
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);
-                    token = token + remaining;
+                    WaitAndHandleIlCommandReply(ExecutorCommand.Interfaces);
+                    idx = idx + remaining;
                 }
             }
         }

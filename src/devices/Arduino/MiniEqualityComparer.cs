@@ -21,13 +21,13 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.BaseTypeEquals)]
+        // [ArduinoImplementation(ArduinoImplementation.BaseTypeEquals)]
         public virtual bool Equals(T? x, T? y)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.GetHashCode)]
+        // [ArduinoImplementation(ArduinoImplementation.GetHashCode)]
         public virtual int GetHashCode(T obj)
         {
             return 0;

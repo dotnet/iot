@@ -212,19 +212,34 @@ namespace Iot.Device.Arduino
 
         public void PrepareLowLevelInterface(ExecutionSet set)
         {
-            Type lowLevelInterface = typeof(IArduinoHardwareLevelAccess);
-            foreach (var method in lowLevelInterface.GetMethods())
+            void AddMethod(MethodInfo method, ArduinoImplementation nativeMethod)
             {
                 if (!_methodInfos.ContainsKey(method))
                 {
-                    var attr = (ArduinoImplementationAttribute)method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).First();
+                    set.GetReplacement(method.DeclaringType);
+                    MethodInfo? replacement = (MethodInfo?)set.GetReplacement(method);
+                    if (replacement != null)
+                    {
+                        method = replacement;
+                        if (set.HasMethod(method))
+                        {
+                            return;
+                        }
+                    }
 
                     int token = set.GetOrAddMethodToken(method);
-                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, MethodFlags.SpecialMethod, attr.MethodNumber);
+                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, MethodFlags.SpecialMethod, nativeMethod);
                     // Todo: Move this member to the ExecutionSet
                     _methodInfos.Add(method, decl);
                     set.AddMethod(decl);
                 }
+            }
+
+            Type lowLevelInterface = typeof(IArduinoHardwareLevelAccess);
+            foreach (var method in lowLevelInterface.GetMethods())
+            {
+                var attr = (ArduinoImplementationAttribute)method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).First();
+                AddMethod(method, attr.MethodNumber);
             }
 
             MethodInfo? methodToReplace;
@@ -270,6 +285,20 @@ namespace Iot.Device.Arduino
             type = typeof(MiniType);
             replacementMethodInfo = type.GetMethod("CreateInstanceForAnotherGenericParameter");
             set.AddReplacementMethod(methodToReplace, replacementMethodInfo);
+
+            // Some classes are dynamically created in the runtime - we need them anyway
+            // HashSet<byte> hb = new HashSet<byte>();
+            // PrepareClass(set, hb.Comparer.GetType()); // The actual instance here is GenericEqualityComparer<byte>
+
+            // We'll always need to provide these methods, or we'll get into trouble because they're not explicitly used before anything that depends on
+            // them in the runtime
+            type = typeof(System.Object);
+            replacementMethodInfo = type.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance)!; // Not the static one
+            AddMethod(replacementMethodInfo, ArduinoImplementation.ObjectEquals);
+            replacementMethodInfo = type.GetMethod("ToString")!;
+            AddMethod(replacementMethodInfo, ArduinoImplementation.ObjectToString);
+            replacementMethodInfo = type.GetMethod("GetHashCode")!;
+            AddMethod(replacementMethodInfo, ArduinoImplementation.ObjectGetHashCode);
         }
 
         public void PrepareClass(ExecutionSet set, Type classType)
@@ -374,8 +403,11 @@ namespace Iot.Device.Arduino
 
             var sizeOfClass = GetClassSize(classType);
 
+            var interfaces = classType.GetInterfaces();
+
             // Add this first, so we break the recursion to this class further down
             var newClass = new ExecutionSet.Class(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes);
+            newClass.Interfaces.AddRange(interfaces);
             set.AddClass(newClass);
         }
 
@@ -443,6 +475,8 @@ namespace Iot.Device.Arduino
 
                 _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes.");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
+
+                _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
             }
         }
 

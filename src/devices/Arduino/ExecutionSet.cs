@@ -245,6 +245,12 @@ namespace Iot.Device.Arduino
 
         public bool HasMethod(MemberInfo m)
         {
+            var replacement = GetReplacement((MethodBase)m);
+            if (replacement != null)
+            {
+                m = replacement;
+            }
+
             return _methods.Any(x => x.MethodBase == m);
         }
 
@@ -304,6 +310,17 @@ namespace Iot.Device.Arduino
                 return t.Key;
             }
 
+            // Try whether the input token is a constructed generic token, which was not expected in this combination
+            t = _patchedTypeTokens.FirstOrDefault(x => x.Value == (token & 0xFF00_0000));
+            if (t.Key != null && t.Key.IsGenericTypeDefinition)
+            {
+                var t2 = _patchedTypeTokens.FirstOrDefault(x => x.Value == (token & 0x00FF_FFFF));
+                if (t2.Key != null)
+                {
+                    return t.Key.MakeGenericType(t2.Key);
+                }
+            }
+
             return null;
         }
 
@@ -350,6 +367,7 @@ namespace Iot.Device.Arduino
                 StaticSize = staticSize;
                 Members = members;
                 NewToken = newToken;
+                Interfaces = new List<Type>();
             }
 
             public Type Cls
@@ -369,6 +387,11 @@ namespace Iot.Device.Arduino
             {
                 get;
                 internal set;
+            }
+
+            public List<Type> Interfaces
+            {
+                get;
             }
 
             public bool SuppressInit
