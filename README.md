@@ -11,29 +11,32 @@ The repository also contains [Iot.Device.Bindings](https://www.nuget.org/package
 
 **NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
 
-# .NET Core Versions
+## .NET Core Versions
 
 Whilst most of the device binding projects target .NET Core 2.1 for backward compatibility, the sample projects target the latest stable .NET Core. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
 
-# How to Install
+## How to Install
 
 You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and Iot.Device.Bindings NuGet packages from the blob feed.
   
-## NuGet.exe
-~~~~
+### NuGet.exe
+
+```shell
 nuget install System.Device.Gpio -PreRelease -Source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
 nuget install Iot.Device.Bindings -PreRelease -Source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
-~~~~
+```
 ### Official Build Status
+
 [![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/iot/dotnet.iot.github?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=268&branchName=master)
 
-## .NET CLI
-~~~~
+### .NET CLI
+
+```shell
 dotnet add package System.Device.Gpio --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
 dotnet add package Iot.Device.Bindings --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
-~~~~
+```
 
-# Contributing
+## Contributing
 
 For information on how to build this repository and to add new device bindings, please head out to [Contributing](Documentation/CONTRIBUTING.md).
 
@@ -45,7 +48,7 @@ Please contribute. We are primarily interested in the following:
 * Request a device binding or protocol that you need for your project ([file an issue](https://github.com/dotnet/iot/issues)).
 * Links to blog posts or tweets that showcase .NET Core being used for great IoT scenarios ([file an issue](https://github.com/dotnet/iot/issues)).
 
-# Getting Started
+## Getting Started
 
 After installing, please see the following areas to learn more:
 
@@ -54,15 +57,23 @@ After installing, please see the following areas to learn more:
 * [Samples](samples/README.md) - Step-by-step instructions on building your first app.
 * [Roadmap](Documentation/roadmap.md) - Areas planned or currently being worked on.
 
-## Tutorials
+All bindings (src/devices) contains a `samples` folder where you will find examples on how to use each of the devices, sensor, displays and other components.
+
+**Important**: Please make sure you are using tag that correspond to your package version to browse and reuse the samples' code. 
+
+![select branch](./Documentation/images/selectbranch.jpg)
+
+Once you have selected the right branch, you can browse the repository. The main branch contains code that is always the latest and may not been yet released to a package. So if you are using the 1.2 package, please select 1.2 tag before browsing the source code.
+
+### Tutorials
 
 * [Web service using SenseHat by Dawid Borycki (Aug 2019)](https://msdn.microsoft.com/magazine/mt833493)
 
-# Community 
+## Community 
 
 This project has adopted the code of conduct defined by the [Contributor Covenant](https://contributor-covenant.org/)
 to clarify expected behavior in our community. For more information, see the [.NET Foundation Code of Conduct](https://www.dotnetfoundation.org/code-of-conduct).
 
-# License
+## License
 
 .NET Core (including the iot repo) is licensed under the [MIT license](LICENSE).
