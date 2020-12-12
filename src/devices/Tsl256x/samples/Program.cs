@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
@@ -12,9 +13,8 @@ const int PinInterrupt = 4;
 Console.WriteLine("Hello TSL256x");
 I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Tsl256x.DefaultI2cAddress));
 Tsl256x tsl256X = new(i2cDevice, PackageType.Other);
-
 var ver = tsl256X.Version;
-string msg = ver.Major == 1 ? $"This is a TSL2561, revision {ver.Minor}" : $"This is a TSL2560, revision {ver.Minor}";
+string msg = (ver.Major & 0x01) == 0x01 ? $"This is a TSL2561, Version {ver}" : $"This is a TSL2560, Version {ver}";
 Console.WriteLine(msg);
 
 tsl256X.IntegrationTime = IntegrationTime.Integration402Milliseconds;
@@ -28,6 +28,7 @@ while (!Console.KeyAvailable)
     Console.WriteLine($"Illuminance is {lux.Lux} Lux");
     tsl256X.GetRawChannels(out ushort channel0, out ushort channel1);
     Console.WriteLine($"Raw data channel 0: {channel0}, channel 1: {channel1}");
+    Thread.Sleep(500);
 }
 
 Console.WriteLine($"Try changing the gain and read it from {tsl256X.Gain} to {Gain.High}");
@@ -43,10 +44,12 @@ tsl256X.Enabled = true;
 Console.WriteLine($"Power should be true: {tsl256X.Enabled}");
 tsl256X.Enabled = false;
 Console.WriteLine($"Power should be false: {tsl256X.Enabled}");
+tsl256X.Enabled = true;
 
-Console.WriteLine("Set interruption to test. Read the interrupt pin");
 GpioController controller = new();
 controller.OpenPin(PinInterrupt, PinMode.Input);
+Console.WriteLine($"Pin status: {controller.Read(PinInterrupt)}");
+Console.WriteLine("Set interruption to test. Read the interrupt pin");
 tsl256X.InterruptControl = InterruptControl.TestMode;
 tsl256X.Enabled = true;
 while (controller.Read(PinInterrupt) == PinValue.High)
@@ -83,9 +86,9 @@ tsl256X.Enabled = false;
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
 
-Console.WriteLine("This will use a manual integration for 2 seconds");
+Console.WriteLine("This will use a manual integration for 20 seconds");
 tsl256X.StartManualIntegration();
-Thread.Sleep(2000);
+Thread.Sleep(20000);
 tsl256X.StopManualIntegration();
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");

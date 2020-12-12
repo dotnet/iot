@@ -43,7 +43,7 @@ namespace IoT.Device.Tsl256x
         /// </summary>
         /// <param name="i2cDevice">And I2C Device</param>
         /// <param name="packageType">The type of package to have a proper illuminance calculation</param>
-        public Tsl256x(I2cDevice i2cDevice, PackageType packageType)
+        public Tsl256x(I2cDevice i2cDevice, PackageType packageType = PackageType.Other)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException($"I2C Device can't be null");
             _packageType = packageType;
@@ -168,14 +168,8 @@ namespace IoT.Device.Tsl256x
         /// <param name="channel1">Channel 1</param>
         public void GetRawChannels(out ushort channel0, out ushort channel1)
         {
-            Span<byte> channel = stackalloc byte[2];
-            // We clear the register as well when reading Channel 0
-            channel[0] = ReadByte(Register.DATA0LOW | Register.CLEAR);
-            channel[1] = ReadByte(Register.DATA0HIGH);
-            channel0 = BinaryPrimitives.ReadUInt16BigEndian(channel);
-            channel[0] = ReadByte(Register.DATA1LOW);
-            channel[1] = ReadByte(Register.DATA1HIGH);
-            channel1 = BinaryPrimitives.ReadUInt16BigEndian(channel);
+            channel0 = ReadWord(Register.DATA0LOW | Register.CLEAR);
+            channel1 = ReadByte(Register.DATA1LOW);
         }
 
         /// <summary>
@@ -324,8 +318,16 @@ namespace IoT.Device.Tsl256x
 
         private byte ReadByte(Register reg)
         {
-            _i2cDevice.WriteByte((byte)reg);
+            _i2cDevice.WriteByte((byte)(Register.CMD | reg));
             return _i2cDevice.ReadByte();
+        }
+
+        private ushort ReadWord(Register reg)
+        {
+            Span<byte> toRead = stackalloc byte[2];
+            _i2cDevice.WriteByte((byte)(Register.CMD | Register.WORD | reg));
+            _i2cDevice.Read(toRead);
+            return BinaryPrimitives.ReadUInt16BigEndian(toRead);
         }
 
         private void WriteByte(Register reg, byte toWrite)
