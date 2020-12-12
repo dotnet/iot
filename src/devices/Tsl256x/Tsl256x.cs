@@ -49,7 +49,6 @@ namespace IoT.Device.Tsl256x
             _packageType = packageType;
             IntegrationTime = IntegrationTime.Integration402Milliseconds;
             Gain = Gain.Normal;
-            Enabled = false;
         }
 
         /// <summary>
@@ -80,7 +79,8 @@ namespace IoT.Device.Tsl256x
         /// </summary>
         public IntegrationTime IntegrationTime
         {
-            get => (IntegrationTime)(ReadByte(Register.TIMING) & (byte)IntegrationTime.Manual); // _integrationTime;
+            // should be the same as _integrationTime
+            get => (IntegrationTime)(ReadByte(Register.TIMING) & (byte)IntegrationTime.Manual);
             set
             {
                 _integrationTime = value;
@@ -93,7 +93,8 @@ namespace IoT.Device.Tsl256x
         /// </summary>
         public Gain Gain
         {
-            get => (Gain)(ReadByte(Register.TIMING) & (byte)Gain.High); // _gain;
+            // should be the same as _gain
+            get => (Gain)(ReadByte(Register.TIMING) & (byte)Gain.High);
             set
             {
                 _gain = value;
@@ -106,9 +107,10 @@ namespace IoT.Device.Tsl256x
         /// </summary>
         public void StartManualIntegration()
         {
+            // We need to make sure we're on otherwise the sensor won't measure anything
+            Enabled = true;
             _integrationTime = IntegrationTime.Manual;
             WriteByte(Register.TIMING, (byte)((byte)_integrationTime | (byte)_gain | 0b0000_1000));
-            Enabled = true;
         }
 
         /// <summary>
@@ -117,7 +119,6 @@ namespace IoT.Device.Tsl256x
         public void StopManualIntegration()
         {
             WriteByte(Register.TIMING, (byte)((byte)_integrationTime | (byte)_gain));
-            Enabled = false;
         }
 
         /// <summary>
@@ -187,7 +188,7 @@ namespace IoT.Device.Tsl256x
                 case Channel.Infrared:
                     return channel1;
                 case Channel.Visible:
-                    return (ushort)(channel0 - channel1);
+                    return (channel0 > channel1) ? (ushort)(channel0 - channel1) : 0;
                 default:
                     throw new ArgumentException($"Wrong channel");
             }
@@ -199,7 +200,10 @@ namespace IoT.Device.Tsl256x
         /// <returns>The illuminance</returns>
         public Illuminance MeasureAndGetIlluminance()
         {
+            // We need to make sure we're on otherwise the sensor won't measure anything
             Enabled = true;
+            // We need to write the timing timer to start a measurement
+            WriteByte(Register.TIMING, (byte)((byte)_integrationTime | (byte)_gain));
             switch (_integrationTime)
             {
                 case IntegrationTime.Integration13_7Milliseconds:
@@ -216,7 +220,6 @@ namespace IoT.Device.Tsl256x
                     throw new ArgumentOutOfRangeException($"Only non manual integration time are supported");
             }
 
-            Enabled = false;
             return GetIlluminance();
         }
 
@@ -230,7 +233,7 @@ namespace IoT.Device.Tsl256x
             // See documentation page 23 and following for the constant and the calculation
             // Integration time scaling
             // scale channel values by 2^10
-            const int ChannelScale = 10;
+            const int ChannelScale = 1024;
             // 322/11 * 2^CH_SCALE
             const int ChannelScale13_7 = 0x7517;
             // 322/81 * 2^CH_SCALE
@@ -244,7 +247,7 @@ namespace IoT.Device.Tsl256x
 
             double ratio = ch1 / ch0;
             // Calculate the integration and scaling
-            ulong scale = 0;
+            double scale = 0;
             switch (_integrationTime)
             {
                 case IntegrationTime.Integration13_7Milliseconds:
@@ -256,14 +259,14 @@ namespace IoT.Device.Tsl256x
                 case IntegrationTime.Integration402Milliseconds:
                 case IntegrationTime.Manual:
                 default:
-                    scale = 1 << ChannelScale;
+                    scale = ChannelScale;
                     break;
             }
 
-            scale = _gain == Gain.Normal ? scale : scale << 4;
+            scale = _gain == Gain.Normal ? scale : scale * 16;
 
-            double channel0 = (ch0 * scale) >> ChannelScale;
-            double channel1 = (ch1 * scale) >> ChannelScale;
+            double channel0 = (ch0 * scale) / ChannelScale;
+            double channel1 = (ch1 * scale) / ChannelScale;
 
             double lux = 0;
             if (_packageType == PackageType.PackageCs)
@@ -327,7 +330,7 @@ namespace IoT.Device.Tsl256x
             Span<byte> toRead = stackalloc byte[2];
             _i2cDevice.WriteByte((byte)(Register.CMD | Register.WORD | reg));
             _i2cDevice.Read(toRead);
-            return BinaryPrimitives.ReadUInt16BigEndian(toRead);
+            return BinaryPrimitives.ReadUInt16LittleEndian(toRead);
         }
 
         private void WriteByte(Register reg, byte toWrite)

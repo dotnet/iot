@@ -86,9 +86,9 @@ tsl256X.Enabled = false;
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
 
-Console.WriteLine("This will use a manual integration for 20 seconds");
+Console.WriteLine("This will use a manual integration for 5 seconds");
 tsl256X.StartManualIntegration();
-Thread.Sleep(20000);
+Thread.Sleep(5000);
 tsl256X.StopManualIntegration();
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");

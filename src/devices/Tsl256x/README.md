@@ -37,7 +37,7 @@ You can determine if you have a TSL2560 or TSL2561 version:
 
 ```csharp
 var ver = tsl256X.Version;
-string msg = ver.Major == 1 ? $"This is a TSL2561, revision {ver.Minor}" : $"This is a TSL2560, revision {ver.Minor}";
+string msg = ver.Major & 0x01 == 0x01 ? $"This is a TSL2561, version {ver}" : $"This is a TSL2560, version {ver}";
 Console.WriteLine(msg);
 ```
 
@@ -69,7 +69,6 @@ while (controller.Read(PinInterrupt) == PinValue.High)
     Thread.Sleep(1);
 }
 
-tsl256X.Power = false;
 Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
 tsl256X.GetRawChannels(out ushort ch0, out ushort ch1);
 ```
@@ -89,7 +88,6 @@ while (controller.Read(PinInterrupt) == PinValue.High)
 }
 
 Console.WriteLine($"Interrupt detected, read the value to clear the interrupt");
-tsl256X.Power = false;
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
 ```
