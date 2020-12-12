@@ -19,7 +19,7 @@ using MAX31856 sensor = new(device, ThermocoupleType.K);
 while (true)
 {
     var tempColdJunction = sensor.GetColdJunctionTemperature();
-    // Attempts to read temperature if an error is thrown the temperature will read as the default value of temperature in the Temperature class
+    // Attempts to read temperature if it is in error "false" will be returned. The Temperature that is shown will default to the UnitsNet Default value and will not be the correct value of the thermocouple.
     if (sensor.TryGetTemperature(out Temperature temperature))
     {
         Console.WriteLine($"Temperature: {temperature.DegreesFahrenheit:0.0000000} °F, Cold Junction: {tempColdJunction.DegreesFahrenheit:0.00} °F");
