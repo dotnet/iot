@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.Type), true)]
+    [ArduinoReplacement(typeof(System.Type), true, true)]
     internal class MiniType
     {
 #pragma warning disable 414
@@ -148,6 +148,12 @@ namespace Iot.Device.Arduino
         public virtual Type GetEnumUnderlyingType()
         {
             return typeof(Int32);
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.CreateInstanceForAnotherGenericParameter)]
+        public static object? CreateInstanceForAnotherGenericParameter(Type? type1, Type? type2)
+        {
+            return null;
         }
     }
 }

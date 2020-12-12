@@ -70,7 +70,8 @@ namespace Iot.Device.Arduino
     }
 
     /// <summary>
-    /// A set of tokens which is always assigned to these classes, because they need to be identifiable in the firmware
+    /// A set of tokens which is always assigned to these classes, because they need to be identifiable in the firmware, i.e. the token assigned
+    /// to "System.Type" is always 2
     /// </summary>
     public enum KnownTypeTokens
     {
@@ -82,7 +83,8 @@ namespace Iot.Device.Arduino
         TypeInfo = 5,
         RuntimeType = 6,
         Nullable = 7,
-        LargestKnownTypeToken = 10,
+        Enum = 8,
+        LargestKnownTypeToken = 20,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -225,6 +227,8 @@ namespace Iot.Device.Arduino
                 }
             }
 
+            MethodInfo? methodToReplace;
+
             // And the internal classes
             foreach (var replacement in _replacementClasses)
             {
@@ -245,7 +249,7 @@ namespace Iot.Device.Arduino
                         ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
                         if (iaMethod != null)
                         {
-                            var methodToReplace = ia.TypeToReplace!.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).SingleOrDefault(x => MethodsHaveSameSignature(x, m));
+                            methodToReplace = ia.TypeToReplace!.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).SingleOrDefault(x => MethodsHaveSameSignature(x, m));
                             if (methodToReplace == null)
                             {
                                 throw new InvalidOperationException("A replacement method has nothing to replace");
@@ -256,6 +260,16 @@ namespace Iot.Device.Arduino
                     }
                 }
             }
+
+            // Some special replacements required
+            Type type = typeof(System.RuntimeTypeHandle);
+            MethodInfo? replacementMethodInfo;
+            var methods = type.GetMethods(BindingFlags.NonPublic | BindingFlags.Static);
+            methodToReplace = methods.First(x => x.Name == "CreateInstanceForAnotherGenericParameter");
+
+            type = typeof(MiniType);
+            replacementMethodInfo = type.GetMethod("CreateInstanceForAnotherGenericParameter");
+            set.AddReplacementMethod(methodToReplace, replacementMethodInfo);
         }
 
         public void PrepareClass(ExecutionSet set, Type classType)

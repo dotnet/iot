@@ -52,6 +52,7 @@ namespace Iot.Device.Arduino
         TypeIsAssignableFrom,
         TypeCtor,
         ObjectReferenceEquals,
-        TypeMakeGenericType
+        TypeMakeGenericType,
+        CreateInstanceForAnotherGenericParameter
     }
 }
