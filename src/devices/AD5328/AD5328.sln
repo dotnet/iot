@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AD5328", "AD5328.csproj", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AD5328.Samples", "samples\AD5328.Samples.csproj", "{48063FAB-172A-4DBA-B7A8-42CEB54F9DF5}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Device.Gpio", "..\..\System.Device.Gpio\System.Device.Gpio.csproj", "{DAA98C1E-CCEB-40C6-8CED-EEB899A57B00}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{48063FAB-172A-4DBA-B7A8-42CEB54F9DF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48063FAB-172A-4DBA-B7A8-42CEB54F9DF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48063FAB-172A-4DBA-B7A8-42CEB54F9DF5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAA98C1E-CCEB-40C6-8CED-EEB899A57B00}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAA98C1E-CCEB-40C6-8CED-EEB899A57B00}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAA98C1E-CCEB-40C6-8CED-EEB899A57B00}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAA98C1E-CCEB-40C6-8CED-EEB899A57B00}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
