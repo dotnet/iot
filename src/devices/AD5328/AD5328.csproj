@@ -2,12 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="samples\**" />
-    <EmbeddedResource Remove="samples\**" />
-    <None Remove="samples\**" />
+    <Compile Include="*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
