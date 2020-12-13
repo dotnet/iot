@@ -3,6 +3,7 @@
 AD5328 is an Digital-to-Analog converter (DAC) with 12 bits of resolution.
 
 ## Usage
+
 ```csharp
 using System.Device.Spi;
 using System.Threading;
@@ -21,4 +22,6 @@ dac.SetVoltage(0, ElectricPotential.FromVolts(1));
 ```
 
 ## References
+
 https://www.analog.com/en/products/ad5328.html
+
