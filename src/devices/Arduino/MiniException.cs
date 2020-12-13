@@ -50,6 +50,30 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public string Message
+        {
+            get
+            {
+                return _message;
+            }
+        }
+
+        public Exception? InnerException
+        {
+            get
+            {
+                return _innerException;
+            }
+        }
+
+        public string StackTrace
+        {
+            get
+            {
+                return string.Empty;
+            }
+        }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             throw new NotImplementedException();

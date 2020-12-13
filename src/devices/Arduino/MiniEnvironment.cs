@@ -26,6 +26,14 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public static string SystemDirectory
+        {
+            get
+            {
+                return "/"; // At the moment, we do not have a file system at all
+            }
+        }
+
         [ArduinoImplementation(ArduinoImplementation.FailFast1)]
         public static void FailFast(string message)
         {
@@ -41,6 +49,11 @@ namespace Iot.Device.Arduino
         public static string? GetEnvironmentVariable(string variable)
         {
             return null;
+        }
+
+        public static string ExpandEnvironmentVariables(string input)
+        {
+            return input;
         }
     }
 }

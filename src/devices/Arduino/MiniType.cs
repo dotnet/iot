@@ -130,11 +130,13 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(ArduinoImplementation.TypeGetGenericTypeDefinition)]
         public virtual Type GetGenericTypeDefinition()
         {
             throw new InvalidOperationException();
         }
 
+        [ArduinoImplementation(ArduinoImplementation.TypeGetGenericArguments)]
         public virtual Type[] GetGenericArguments()
         {
             return new Type[0];

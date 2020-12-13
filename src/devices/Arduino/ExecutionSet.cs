@@ -358,8 +358,6 @@ namespace Iot.Device.Arduino
 
         public class Class
         {
-            private bool _suppressInit;
-
             public Class(Type cls, int dynamicSize, int staticSize, int newToken, List<VariableOrMethod> members)
             {
                 Cls = cls;
@@ -368,6 +366,7 @@ namespace Iot.Device.Arduino
                 Members = members;
                 NewToken = newToken;
                 Interfaces = new List<Type>();
+                Name = cls.ToString();
             }
 
             public Type Cls
@@ -376,6 +375,11 @@ namespace Iot.Device.Arduino
             }
 
             public int NewToken
+            {
+                get;
+            }
+
+            public string Name
             {
                 get;
             }
@@ -396,13 +400,16 @@ namespace Iot.Device.Arduino
 
             public bool SuppressInit
             {
-                get { return _suppressInit; }
-                set { _suppressInit = value; }
+                get
+                {
+                    // Don't run the resource init functions
+                    return Cls.FullName == "System.SR";
+                }
             }
 
             public override string ToString()
             {
-                return Cls.ToString();
+                return Name;
             }
         }
 

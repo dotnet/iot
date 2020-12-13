@@ -99,7 +99,8 @@ namespace Iot.Device.Arduino
         {
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
             typeof(MiniException), typeof(MiniThread),
-            typeof(MiniEnvironment), typeof(MiniRuntimeHelpers), typeof(MiniType)
+            typeof(MiniEnvironment), typeof(MiniRuntimeHelpers), typeof(MiniType), typeof(MiniValueType),
+            typeof(MiniResourceManager), typeof(MiniEnum)
         };
 
         private readonly ArduinoBoard _board;
@@ -287,8 +288,14 @@ namespace Iot.Device.Arduino
             set.AddReplacementMethod(methodToReplace, replacementMethodInfo);
 
             // Some classes are dynamically created in the runtime - we need them anyway
-            // HashSet<byte> hb = new HashSet<byte>();
-            // PrepareClass(set, hb.Comparer.GetType()); // The actual instance here is GenericEqualityComparer<byte>
+            HashSet<object> hb = new HashSet<object>();
+            PrepareClass(set, hb.Comparer.GetType()); // The actual instance here is ObjectEqualityComparer<object>
+
+            PrepareClass(set, typeof(IEquatable<object>));
+
+            PrepareClass(set, typeof(System.Span<Int32>));
+            HashSet<string> hs = new HashSet<string>();
+            PrepareClass(set, hs.Comparer.GetType()); // GenericEqualityComparer<string>
 
             // We'll always need to provide these methods, or we'll get into trouble because they're not explicitly used before anything that depends on
             // them in the runtime
@@ -409,6 +416,10 @@ namespace Iot.Device.Arduino
             var newClass = new ExecutionSet.Class(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes);
             newClass.Interfaces.AddRange(interfaces);
             set.AddClass(newClass);
+            foreach (var iface in interfaces)
+            {
+                PrepareClassDeclaration(set, iface);
+            }
         }
 
         /// <summary>
@@ -1132,6 +1143,7 @@ namespace Iot.Device.Arduino
             {
                 if (!cls.SuppressInit && cls.Cls.TypeInitializer != null)
                 {
+                    _board.Log($"Running static initializer of {cls}.");
                     var task = GetTask(set, cls.Cls.TypeInitializer);
                     task.Invoke(CancellationToken.None);
                     task.WaitForResult();

@@ -21,13 +21,19 @@ namespace Iot.Device.Arduino
         }
 
         [ArduinoImplementation(ArduinoImplementation.ArrayCopy3)]
-        public static void Copy(System.Array sourceArray, System.Array desitnationArray, Int32 length)
+        public static void Copy(System.Array sourceArray, System.Array destinationArray, Int32 length)
         {
             throw new NotImplementedException();
         }
 
         [ArduinoImplementation(ArduinoImplementation.ArrayClone)]
         public object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.ArrayClear)]
+        public static void Clear(Array array, Int32 index, Int32 length)
         {
             throw new NotImplementedException();
         }

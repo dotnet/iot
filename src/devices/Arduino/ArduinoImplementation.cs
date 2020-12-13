@@ -50,7 +50,23 @@ namespace Iot.Device.Arduino
         TypeCtor,
         TypeMakeGenericType,
         TypeGetHashCode,
+        TypeGetGenericTypeDefinition,
+        TypeGetGenericArguments,
 
         CreateInstanceForAnotherGenericParameter,
+        ValueTypeGetHashCode,
+        ValueTypeEquals,
+        ValueTypeToString,
+        ArrayClear,
+        StringEquals,
+        StringToString,
+        StringGetHashCode,
+        StringConcat2,
+        StringConcat3,
+        StringConcat4,
+        StringCtor2,
+        StringSetElem,
+        StringGetElem,
+        StringGetPinnableReference
     }
 }

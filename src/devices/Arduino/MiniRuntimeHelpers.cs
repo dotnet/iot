@@ -29,5 +29,12 @@ namespace Iot.Device.Arduino
                 return 12;
             }
         }
+
+        [ArduinoImplementation(ArduinoImplementation.None)]
+        public static int GetHashCode(object obj)
+        {
+            // TODO: Fix
+            return 0;
+        }
     }
 }
