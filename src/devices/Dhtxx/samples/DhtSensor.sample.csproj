@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,7 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <ProjectReference Include="..\..\Common\Iot\Device\Common\CommonHelpers.csproj" />
+    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
     <None Include="README.md" />
   </ItemGroup>
 

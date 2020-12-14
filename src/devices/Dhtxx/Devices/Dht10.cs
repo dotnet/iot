@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device;
@@ -32,7 +31,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
-        public override Ratio Humidity
+        public override RelativeHumidity Humidity
         {
             get
             {
@@ -63,14 +62,19 @@ namespace Iot.Device.DHTxx
         public Dht10(I2cDevice i2cDevice)
             : base(i2cDevice)
         {
-            _i2cDevice.WriteByte(DHT10_CMD_SOFTRESET);
+            i2cDevice.WriteByte(DHT10_CMD_SOFTRESET);
             // make sure DHT10 stable (in the datasheet P7)
             DelayHelper.DelayMilliseconds(20, true);
-            _i2cDevice.WriteByte(DHT10_CMD_INIT);
+            i2cDevice.WriteByte(DHT10_CMD_INIT);
         }
 
         internal override void ReadThroughI2c()
         {
+            if (_i2cDevice is null)
+            {
+                throw new Exception("I2C decvice not configured.");
+            }
+
             // DHT10 has no calibration bits
             IsLastReadSuccessful = true;
 
@@ -81,11 +85,11 @@ namespace Iot.Device.DHTxx
             _i2cDevice.Read(_dht10ReadBuff);
         }
 
-        internal override Ratio GetHumidity(byte[] readBuff)
+        internal override RelativeHumidity GetHumidity(byte[] readBuff)
         {
             int raw = (((readBuff[1] << 8) | readBuff[2]) << 4) | readBuff[3] >> 4;
 
-            return Ratio.FromDecimalFractions(raw / Math.Pow(2, 20));
+            return RelativeHumidity.FromPercent(100.0 * raw / Math.Pow(2, 20));
         }
 
         internal override Temperature GetTemperature(byte[] readBuff)

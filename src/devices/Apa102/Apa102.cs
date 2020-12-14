@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Spi;
@@ -18,19 +17,18 @@ namespace Iot.Device.Apa102
         /// </summary>
         public Span<Color> Pixels => _pixels;
 
-        private readonly SpiDevice _spi;
+        private SpiDevice _spiDevice;
         private Color[] _pixels;
         private byte[] _buffer;
 
         /// <summary>
         /// Initializes a new instance of the APA102 device.
         /// </summary>
-        /// <param name="spi">The SPI device used for communication.</param>
+        /// <param name="spiDevice">The SPI device used for communication.</param>
         /// <param name="length">Number of LEDs</param>
-        public Apa102(SpiDevice spi, int length)
+        public Apa102(SpiDevice spiDevice, int length)
         {
-            _spi = spi ?? throw new ArgumentNullException(nameof(spi));
-
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _pixels = new Color[length];
             _buffer = new byte[(length + 2) * 4];
 
@@ -52,16 +50,16 @@ namespace Iot.Device.Apa102
                 pixel[3] = _pixels[i].R; // red
             }
 
-            _spi.Write(_buffer);
+            _spiDevice.Write(_buffer);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            _spi.Dispose();
-
-            _pixels = null;
-            _buffer = null;
+            _spiDevice?.Dispose();
+            _spiDevice = null!;
+            _pixels = null!;
+            _buffer = null!;
         }
     }
 }

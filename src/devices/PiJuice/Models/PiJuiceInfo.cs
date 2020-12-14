@@ -4,12 +4,15 @@
 
 using System;
 
+#pragma warning disable CS1591, CS1572, CS1573
+
 namespace Iot.Device.PiJuiceDevice.Models
 {
     /// <summary>
     /// PiJuice info
     /// </summary>
-    public class PiJuiceInfo
+    /// <param name="FirmwareVersion">Firmware version</param>
+    public record PiJuiceInfo(Version FirmwareVersion)
     {
         /// <summary>
         /// Manufacturer information
@@ -20,10 +23,5 @@ namespace Iot.Device.PiJuiceDevice.Models
         /// Board information
         /// </summary>
         public string Board => "PiJuice";
-
-        /// <summary>
-        /// Firmware version
-        /// </summary>
-        public Version FirmwareVersion { get; set; }
     }
 }

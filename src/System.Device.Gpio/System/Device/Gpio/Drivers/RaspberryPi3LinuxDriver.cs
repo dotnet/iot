@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Buffers.Binary;
 using System.Diagnostics;
@@ -29,11 +28,11 @@ namespace System.Device.Gpio.Drivers
         private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
         private const string ModelFilePath = "/proc/device-tree/model";
 
-        private readonly PinState[] _pinModes;
+        private readonly PinState?[] _pinModes;
         private RegisterView* _registerViewPointer = null;
         private static readonly object s_initializationLock = new object();
 
-        private UnixDriver _interruptDriver = null;
+        private UnixDriver? _interruptDriver = null;
 
         /// <summary>
         /// Returns true if this is a Raspberry Pi4
@@ -113,9 +112,8 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            _interruptDriver.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
-
+            _interruptDriver!.OpenPin(pinNumber);
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
             _interruptDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
@@ -127,10 +125,9 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            bool isOpen = _pinModes[pinNumber] != null && _pinModes[pinNumber].InUseByInterruptDriver;
-            if (isOpen)
+            if (_pinModes[pinNumber]?.InUseByInterruptDriver ?? false)
             {
-                _interruptDriver.ClosePin(pinNumber);
+                _interruptDriver!.ClosePin(pinNumber);
             }
 
             // Set pin low and mode to input upon closing a pin
@@ -145,19 +142,11 @@ namespace System.Device.Gpio.Drivers
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         /// <param name="mode">The mode to check.</param>
         /// <returns>The status if the pin supports the mode.</returns>
-        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
+        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => mode switch
         {
-            switch (mode)
-            {
-                case PinMode.Input:
-                case PinMode.InputPullDown:
-                case PinMode.InputPullUp:
-                case PinMode.Output:
-                    return true;
-                default:
-                    return false;
-            }
-        }
+            PinMode.Input or PinMode.InputPullDown or PinMode.InputPullUp or PinMode.Output => true,
+            _ => false,
+        };
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.
@@ -197,8 +186,8 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            _interruptDriver.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
+            _interruptDriver!.OpenPin(pinNumber);
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             _interruptDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
@@ -234,9 +223,9 @@ namespace System.Device.Gpio.Drivers
             register |= (mode == PinMode.Output ? 1u : 0u) << shift;
             *registerPointer = register;
 
-            if (_pinModes[pinNumber] != null)
+            if (_pinModes[pinNumber] is object)
             {
-                _pinModes[pinNumber].CurrentPinMode = mode;
+                _pinModes[pinNumber]!.CurrentPinMode = mode;
             }
             else
             {
@@ -342,20 +331,14 @@ namespace System.Device.Gpio.Drivers
              * to this register.
              */
             int shift = (pinNumber & 0xf) << 1;
-            uint pull = 0;
             uint bits = 0;
-            switch (mode)
+            uint pull = mode switch
             {
-                case PinMode.Input:
-                    pull = 0;
-                    break;
-                case PinMode.InputPullUp:
-                    pull = 1;
-                    break;
-                case PinMode.InputPullDown:
-                    pull = 2;
-                    break;
-            }
+                PinMode.Input => 0,
+                PinMode.InputPullUp => 1,
+                PinMode.InputPullDown => 2,
+                _ => 0,
+            };
 
             var gpioReg = _registerViewPointer;
             bits = (gpioReg->GPPUPPDN[(pinNumber >> 4)]);
@@ -378,8 +361,8 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            _interruptDriver.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
+            _interruptDriver!.OpenPin(pinNumber);
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             return _interruptDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
@@ -395,8 +378,8 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
 
-            _interruptDriver.OpenPin(pinNumber);
-            _pinModes[pinNumber].InUseByInterruptDriver = true;
+            _interruptDriver!.OpenPin(pinNumber);
+            _pinModes[pinNumber]!.InUseByInterruptDriver = true;
 
             return _interruptDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
@@ -623,11 +606,8 @@ namespace System.Device.Gpio.Drivers
                 _registerViewPointer = null;
             }
 
-            if (_interruptDriver != null)
-            {
-                _interruptDriver.Dispose();
-                _interruptDriver = null;
-            }
+            _interruptDriver?.Dispose();
+            _interruptDriver = null;
         }
 
         private class PinState

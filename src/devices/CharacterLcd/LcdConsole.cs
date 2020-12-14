@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Drawing;
@@ -31,7 +30,7 @@ namespace Iot.Device.CharacterLcd
         private LineWrapMode _lineFeedMode;
         private TimeSpan _scrollUpDelay;
         private string _romType;
-        private Encoding _characterEncoding;
+        private Encoding? _characterEncoding;
 
         /// <summary>
         /// Creates a new instance of the <see cref="LcdConsole"/> class using the specified LCD low-level interface.
@@ -64,21 +63,13 @@ namespace Iot.Device.CharacterLcd
         /// Position of the cursor, from left.
         /// Note: May be outside the bounds of the display.
         /// </summary>
-        public int CursorLeft
-        {
-            get;
-            private set;
-        }
+        public int CursorLeft { get; private set; }
 
         /// <summary>
         /// Position of the cursor, from top
         /// Note: May be outside the bounds of the display.
         /// </summary>
-        public int CursorTop
-        {
-            get;
-            private set;
-        }
+        public int CursorTop { get; private set; }
 
         /// <summary>
         /// If this is larger than zero, an a wait is introduced each time the display wraps to the next line or scrolls up. Can be used to print long texts to the display,
@@ -86,11 +77,7 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public TimeSpan ScrollUpDelay
         {
-            get
-            {
-                return _scrollUpDelay;
-            }
-
+            get => _scrollUpDelay;
             set
             {
                 if (value < TimeSpan.Zero)
@@ -150,10 +137,7 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         public LineWrapMode LineFeedMode
         {
-            get
-            {
-                return _lineFeedMode;
-            }
+            get => _lineFeedMode;
             set
             {
                 _lineFeedMode = value;
@@ -163,10 +147,7 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Size of the display
         /// </summary>
-        public Size Size
-        {
-            get;
-        }
+        public Size Size { get; }
 
         private void ClearStringBuffer()
         {
@@ -234,7 +215,7 @@ namespace Iot.Device.CharacterLcd
         /// </remarks>
         public void Write(string text)
         {
-            if (text == null)
+            if (text is null)
             {
                 throw new ArgumentNullException(nameof(text));
             }
@@ -477,15 +458,8 @@ namespace Iot.Device.CharacterLcd
         /// <param name="maxNumberOfCustomCharacters">The maximum number of custom characters supported by the hardware.</param>
         /// <param name="factory">Character encoding factory that delivers the mapping of the Char type to the hardware ROM character codes. May add special characters into
         /// the character ROM. Default: Null (Use internal factory)</param>
-        public static LcdCharacterEncoding CreateEncoding(CultureInfo culture, string romType, char unknownCharacter = '?', int maxNumberOfCustomCharacters = 8, LcdCharacterEncodingFactory factory = null)
-        {
-            if (factory == null)
-            {
-                factory = new LcdCharacterEncodingFactory();
-            }
-
-            return factory.Create(culture, romType, unknownCharacter, maxNumberOfCustomCharacters);
-        }
+        public static LcdCharacterEncoding CreateEncoding(CultureInfo culture, string romType, char unknownCharacter = '?', int maxNumberOfCustomCharacters = 8, LcdCharacterEncodingFactory? factory = null) =>
+            (factory ?? new LcdCharacterEncodingFactory()).Create(culture, romType, unknownCharacter, maxNumberOfCustomCharacters);
 
         /// <summary>
         /// Loads the specified encoding.
@@ -496,8 +470,7 @@ namespace Iot.Device.CharacterLcd
         /// <returns>See true if the encoding was correctly loaded.</returns>
         public bool LoadEncoding(Encoding encoding)
         {
-            LcdCharacterEncoding lcdCharacterEncoding = encoding as LcdCharacterEncoding;
-            if (lcdCharacterEncoding != null)
+            if (encoding is LcdCharacterEncoding lcdCharacterEncoding)
             {
                 return LoadEncoding(encoding);
             }
@@ -521,14 +494,14 @@ namespace Iot.Device.CharacterLcd
             bool allCharactersLoaded = encoding.AllCharactersSupported;
             lock (_lock)
             {
-                int numberOfCharctersToLoad = Math.Min(encoding.ExtraCharacters.Count, _lcd.NumberOfCustomCharactersSupported);
-                if (numberOfCharctersToLoad < encoding.ExtraCharacters.Count)
+                int numberOfCharactersToLoad = Math.Min(encoding.ExtraCharacters.Count, _lcd.NumberOfCustomCharactersSupported);
+                if (numberOfCharactersToLoad < encoding.ExtraCharacters.Count)
                 {
-                    // We can't completelly load that encoding, because there are not enough custom slots.
+                    // We can't completely load that encoding, because there are not enough custom slots.
                     allCharactersLoaded = false;
                 }
 
-                for (byte i = 0; i < numberOfCharctersToLoad; i++)
+                for (byte i = 0; i < numberOfCharactersToLoad; i++)
                 {
                     byte[] pixelMap = encoding.ExtraCharacters[i];
                     _lcd.CreateCustomCharacter(i, pixelMap);
@@ -554,7 +527,7 @@ namespace Iot.Device.CharacterLcd
         private byte[] MapChars(string line)
         {
             byte[] buffer = new byte[line.Length];
-            if (_characterEncoding == null)
+            if (_characterEncoding is null)
             {
                 for (int i = 0; i < line.Length; i++)
                 {
@@ -576,7 +549,7 @@ namespace Iot.Device.CharacterLcd
         {
             if (_shouldDispose)
             {
-                _lcd.Dispose();
+                _lcd?.Dispose();
             }
 
             GC.SuppressFinalize(this);

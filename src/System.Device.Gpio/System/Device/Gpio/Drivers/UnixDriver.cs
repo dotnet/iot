@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace System.Device.Gpio.Drivers
 {
@@ -32,7 +31,7 @@ namespace System.Device.Gpio.Drivers
                 throw new PlatformNotSupportedException(nameof(UnixDriver) + " is only supported on Linux/Unix");
             }
 
-            UnixDriver driver = null;
+            UnixDriver? driver = null;
             try
             {
                 driver = new LibGpiodDriver();

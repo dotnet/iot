@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -22,12 +21,12 @@ namespace Iot.Device.Mcp23xxx
         /// will start in a disabled state.
         /// </param>
         /// <param name="interrupt">The input pin number that is connected to the interrupt, if any.</param>
-        /// <param name="masterController">
+        /// <param name="controller">
         /// The controller for the reset and interrupt pins. If not specified, the default controller will be used.
         /// </param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Mcp23008(I2cDevice i2cDevice, int reset = -1, int interrupt = -1, GpioController masterController = null, bool shouldDispose = true)
-            : base(CreateAdapter(i2cDevice), reset, interrupt, masterController, shouldDispose)
+        public Mcp23008(I2cDevice i2cDevice, int reset = -1, int interrupt = -1, GpioController? controller = null, bool shouldDispose = true)
+            : base(CreateAdapter(i2cDevice), reset, interrupt, controller, shouldDispose)
         {
         }
 

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -86,41 +85,30 @@ namespace LedMatrixWeather
         private static Vector3 OpenWeatherIcon(Vector2 uv, string icon, float time)
         {
             uv -= new Vector2(0.5f, 0.5f);
-
-            switch (icon)
+            return icon switch
             {
-                case "01d":
-                case "01d.org":
-                    return IconSunny(uv, time);
-                case "01n":
-                    return IconMoon(uv, time);
-                case "02d":
-                    return IconPartiallySunny(uv, time);
-                case "02n": // partially cloudy at night
-                    return IconMoon(uv, time);
-                case "03d": // clouds day
-                case "03n": // clouds night
-                case "04d": // overcast clouds
-                case "04n":
-                case "11d": // with thunder
-                case "11n":
-                case "13d": // with snow
-                case "13n":
-                case "50d": // no clue what the picture represents but kinda looks like a cloud
-                case "50n":
-                    return IconClouds(uv, time);
-                case "09d":
-                case "09n":
-                case "10d": // with a bit of the sun
-                case "10n":
-                    return IconRain(uv, time);
-                default:
-                {
-                    // Don't know the icon
-                    // We're in Seattle so let's assume rain
-                    return IconRain(uv, time);
-                }
-            }
+                "01d" or "01d.org" => IconSunny(uv, time),
+                "01n" => IconMoon(uv, time),
+                "02d" => IconPartiallySunny(uv, time),
+                // partially cloudy at night
+                "02n" => IconMoon(uv, time),
+                "03d" or // clouds day
+                "03n" or // clouds night
+                "04d" or // overcast clouds
+                "04n" or
+                "11d" or // with thunder
+                "11n" or
+                "13d" or // with snow
+                "13n" or
+                "50d" or // no clue what the picture represents but kinda looks like a cloud
+                "50n" => IconClouds(uv, time),
+                "09d" or "09n" or
+                "10d" or // with a bit of the sun
+                "10n" => IconRain(uv, time),
+                // Don't know the icon
+                // We're in Seattle so let's assume rain
+                _ => IconRain(uv, time),
+            };
         }
 
         private static Vector3 IconSunny(Vector2 uv, float time)

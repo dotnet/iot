@@ -1,7 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
@@ -9,14 +11,14 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage)</TargetsForTfmSpecificContentInPackage>
-    <LangVersion>8</LangVersion>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
-
+  
   <ItemGroup>
     <_ExcludeFromCompile Include="$(DeviceRoot)**/samples/**/*.cs" />
     <_ExcludeFromCompile Include="$(DeviceRoot)**/tests/**/*.cs" />
     <_ExcludeFromCompile Include="$(DeviceRoot)**/obj/**/*.cs" />
+    <_ExcludeFromCompile Include="$(DeviceRoot)/Common/System/Runtime/CompilerServices/IsExternalInit.cs" Condition="'$(TargetFramework)' != 'netcoreapp2.1'" />
     <Compile Include="$(DeviceRoot)**/*.cs" Exclude="@(_ExcludeFromCompile)" />
   </ItemGroup>
 
@@ -25,6 +27,7 @@
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
+    <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
   </ItemGroup>
 
 </Project>

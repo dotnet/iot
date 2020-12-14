@@ -1,14 +1,16 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
 using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Bmxx80.ReadResult;
 using Iot.Device.Bmxx80.Register;
 using UnitsNet;
 
@@ -40,7 +42,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Calibration data for the <see cref="Bme680"/>.
         /// </summary>
-        private Bme680CalibrationData _bme680Calibration;
+        private Bme680CalibrationData? _bme680Calibration;
 
         /// <inheritdoc/>
         protected override int TempCalibrationFactor => 16;
@@ -357,6 +359,40 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
+        /// Performs a synchronous reading.
+        /// </summary>
+        /// <returns><see cref="Bme680ReadResult"/></returns>
+        public Bme680ReadResult Read()
+        {
+            SetPowerMode(Bme680PowerMode.Forced);
+            Thread.Sleep((int)GetMeasurementDuration(HeaterProfile).Milliseconds);
+
+            var tempSuccess = TryReadTemperatureCore(out var temperature);
+            var pressSuccess = TryReadPressureCore(out var pressure, skipTempFineRead: true);
+            var humiditySuccess = TryReadHumidityCore(out var humidity, skipTempFineRead: true);
+            var gasSuccess = TryReadGasResistanceCore(out var gasResistance);
+
+            return new Bme680ReadResult(tempSuccess ? temperature : null, pressSuccess ? pressure : null, humiditySuccess ? humidity : null, gasSuccess ? gasResistance : null);
+        }
+
+        /// <summary>
+        /// Performs an asynchronous reading.
+        /// </summary>
+        /// <returns><see cref="Bme680ReadResult"/></returns>
+        public async Task<Bme680ReadResult> ReadAsync()
+        {
+            SetPowerMode(Bme680PowerMode.Forced);
+            await Task.Delay((int)GetMeasurementDuration(HeaterProfile).Milliseconds);
+
+            var tempSuccess = TryReadTemperatureCore(out var temperature);
+            var pressSuccess = TryReadPressureCore(out var pressure, skipTempFineRead: true);
+            var humiditySuccess = TryReadHumidityCore(out var humidity, skipTempFineRead: true);
+            var gasSuccess = TryReadGasResistanceCore(out var gasResistance);
+
+            return new Bme680ReadResult(tempSuccess ? temperature : null, pressSuccess ? pressure : null, humiditySuccess ? humidity : null, gasSuccess ? gasResistance : null);
+        }
+
+        /// <summary>
         /// Reads the humidity. A return value indicates whether the reading succeeded.
         /// </summary>
         /// <param name="humidity">
@@ -364,21 +400,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out Ratio humidity)
-        {
-            if (HumiditySampling == Sampling.Skipped)
-            {
-                humidity = default;
-                return false;
-            }
-
-            // Read humidity data.
-            var hum = Read16BitsFromRegister((byte)Bme680Register.HUMIDITYDATA, Endianness.BigEndian);
-
-            TryReadTemperature(out _);
-            humidity = CompensateHumidity(hum);
-            return true;
-        }
+        public bool TryReadHumidity(out RelativeHumidity humidity) => TryReadHumidityCore(out humidity);
 
         /// <summary>
         /// Reads the pressure. A return value indicates whether the reading succeeded.
@@ -388,23 +410,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadPressure(out Pressure pressure)
-        {
-            if (PressureSampling == Sampling.Skipped)
-            {
-                pressure = Pressure.FromPascals(double.NaN);
-                return false;
-            }
-
-            // Read pressure data.
-            var press = (int)Read24BitsFromRegister((byte)Bme680Register.PRESSUREDATA, Endianness.BigEndian);
-
-            // Read the temperature first to load the t_fine value for compensation.
-            TryReadTemperature(out _);
-
-            pressure = CompensatePressure(press >> 4);
-            return true;
-        }
+        public override bool TryReadPressure(out Pressure pressure) => TryReadPressureCore(out pressure);
 
         /// <summary>
         /// Reads the temperature. A return value indicates whether the reading succeeded.
@@ -414,19 +420,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadTemperature(out Temperature temperature)
-        {
-            if (TemperatureSampling == Sampling.Skipped)
-            {
-                temperature = Temperature.FromDegreesCelsius(double.NaN);
-                return false;
-            }
-
-            var temp = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
-
-            temperature = CompensateTemperature(temp >> 4);
-            return true;
-        }
+        public override bool TryReadTemperature(out Temperature temperature) => TryReadTemperatureCore(out temperature);
 
         /// <summary>
         /// Reads the gas resistance. A return value indicates whether the reading succeeded.
@@ -436,24 +430,7 @@ namespace Iot.Device.Bmxx80
         /// the measurement was valid. Undefined otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadGasResistance(out ElectricResistance gasResistance)
-        {
-            if (!ReadGasMeasurementIsValid() || !ReadHeaterIsStable())
-            {
-                gasResistance = default;
-                return false;
-            }
-
-            // Read 10 bit gas resistance value from registers
-            var gasResRaw = Read8BitsFromRegister((byte)Bme680Register.GAS_RES);
-            var gasRange = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
-
-            var gasRes = (ushort)((ushort)(gasResRaw << 2) + (byte)(gasRange >> 6));
-            gasRange &= (byte)Bme680Mask.GAS_RANGE;
-
-            gasResistance = CalculateGasResistance(gasRes, gasRange);
-            return true;
-        }
+        public bool TryReadGasResistance(out ElectricResistance gasResistance) => TryReadGasResistanceCore(out gasResistance);
 
         /// <summary>
         /// Sets the default configuration for the sensor.
@@ -482,8 +459,13 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
         /// <returns>The percentage relative humidity.</returns>
-        private Ratio CompensateHumidity(int adcHumidity)
+        private RelativeHumidity CompensateHumidity(int adcHumidity)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // Calculate the humidity.
             var temperature = TemperatureFine / 5120.0;
             var var1 = adcHumidity - ((_bme680Calibration.DigH1 * 16.0) + ((_bme680Calibration.DigH3 / 2.0) * temperature));
@@ -502,7 +484,7 @@ namespace Iot.Device.Bmxx80
                 calculatedHumidity = 0.0;
             }
 
-            return Ratio.FromPercent(calculatedHumidity);
+            return RelativeHumidity.FromPercent(calculatedHumidity);
         }
 
         /// <summary>
@@ -512,6 +494,11 @@ namespace Iot.Device.Bmxx80
         /// <returns>The measured pressure.</returns>
         private Pressure CompensatePressure(long adcPressure)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // Calculate the pressure.
             var var1 = (TemperatureFine / 2.0) - 64000.0;
             var var2 = var1 * var1 * (_bme680Calibration.DigP6 / 131072.0);
@@ -549,6 +536,11 @@ namespace Iot.Device.Bmxx80
 
         private ElectricResistance CalculateGasResistance(ushort adcGasRes, byte gasRange)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             var var1 = 1340.0 + 5.0 * _bme680Calibration.RangeSwErr;
             var var2 = var1 * (1.0 + s_k1Lookup[gasRange] / 100.0);
             var var3 = 1.0 + s_k2Lookup[gasRange] / 100.0;
@@ -559,6 +551,11 @@ namespace Iot.Device.Bmxx80
 
         private byte CalculateHeaterResistance(Temperature setTemp, Temperature ambientTemp)
         {
+            if (_bme680Calibration is null)
+            {
+                throw new Exception($"{nameof(Bme680)} is incorrectly configured.");
+            }
+
             // limit maximum temperature to 400°C
             double temp = setTemp.DegreesCelsius;
             if (temp > 400)
@@ -603,6 +600,80 @@ namespace Iot.Device.Bmxx80
             }
 
             return durationValue;
+        }
+
+        private bool TryReadTemperatureCore(out Temperature temperature)
+        {
+            if (TemperatureSampling == Sampling.Skipped)
+            {
+                temperature = default;
+                return false;
+            }
+
+            var temp = (int)Read24BitsFromRegister((byte)Bme680Register.TEMPDATA, Endianness.BigEndian);
+
+            temperature = CompensateTemperature(temp >> 4);
+            return true;
+        }
+
+        private bool TryReadHumidityCore(out RelativeHumidity humidity, bool skipTempFineRead = false)
+        {
+            if (HumiditySampling == Sampling.Skipped)
+            {
+                humidity = default;
+                return false;
+            }
+
+            // Read humidity data.
+            var hum = Read16BitsFromRegister((byte)Bme680Register.HUMIDITYDATA, Endianness.BigEndian);
+
+            if (!skipTempFineRead)
+            {
+                TryReadTemperatureCore(out _);
+            }
+
+            humidity = CompensateHumidity(hum);
+            return true;
+        }
+
+        private bool TryReadPressureCore(out Pressure pressure, bool skipTempFineRead = false)
+        {
+            if (PressureSampling == Sampling.Skipped)
+            {
+                pressure = default;
+                return false;
+            }
+
+            // Read pressure data.
+            var press = (int)Read24BitsFromRegister((byte)Bme680Register.PRESSUREDATA, Endianness.BigEndian);
+
+            // Read the temperature first to load the t_fine value for compensation.
+            if (!skipTempFineRead)
+            {
+                TryReadTemperatureCore(out _);
+            }
+
+            pressure = CompensatePressure(press >> 4);
+            return true;
+        }
+
+        private bool TryReadGasResistanceCore(out ElectricResistance gasResistance)
+        {
+            if (!ReadGasMeasurementIsValid() || !ReadHeaterIsStable())
+            {
+                gasResistance = default;
+                return false;
+            }
+
+            // Read 10 bit gas resistance value from registers
+            var gasResRaw = Read8BitsFromRegister((byte)Bme680Register.GAS_RES);
+            var gasRange = Read8BitsFromRegister((byte)Bme680Register.GAS_RANGE);
+
+            var gasRes = (ushort)((ushort)(gasResRaw << 2) + (byte)(gasRange >> 6));
+            gasRange &= (byte)Bme680Mask.GAS_RANGE;
+
+            gasResistance = CalculateGasResistance(gasRes, gasRange);
+            return true;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
 using Iot.Device.Lsm9Ds1;
@@ -23,7 +22,7 @@ namespace Iot.Device.SenseHat
         /// <param name="i2cDevice">I2C device used to communicate with the device</param>
         /// <param name="magneticInduction">Magnetic induction</param>
         public SenseHatMagnetometer(
-            I2cDevice i2cDevice = null,
+            I2cDevice? i2cDevice = null,
             MagneticInductionScale magneticInduction = MagneticInductionScale.Scale04G)
             : base(i2cDevice ?? CreateDefaultI2cDevice(), magneticInduction)
         {
