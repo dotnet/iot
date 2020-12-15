@@ -102,9 +102,8 @@ namespace Iot.Device.Arduino
                         idx += 4;
                         continue;
                     case OpCodeType.InlineString:
-                        // String handling not supported yet
                         idx += 4;
-                        continue;
+                        break;
                     case OpCodeType.InlineR:
                     case OpCodeType.InlineI8:
                         idx += 8;
@@ -125,6 +124,13 @@ namespace Iot.Device.Arduino
                 int patchValue = 0;
                 switch (opCode)
                 {
+                    case OpCode.CEE_LDSTR:
+                    {
+                        String data = method.Module.ResolveString(token);
+                        patchValue = set.GetOrAddString(data);
+                        break;
+                    }
+
                     case OpCode.CEE_CALL:
                     case OpCode.CEE_CALLVIRT:
                     case OpCode.CEE_NEWOBJ:

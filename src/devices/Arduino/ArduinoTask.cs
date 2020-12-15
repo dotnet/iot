@@ -127,7 +127,8 @@ namespace Iot.Device.Arduino
                     var resolved = set.InverseResolveToken(targetToken);
                     if (resolved == null)
                     {
-                        throw new InvalidOperationException("Internal error: Unknown exception arguments");
+                        // We're probably missing a method - let's at least show the main context
+                        resolved = set.MainEntryPointInternal!;
                     }
 
                     Exception ex;

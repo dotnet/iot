@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -12,6 +14,8 @@ namespace Iot.Device.Arduino
     public class ExecutionSet
     {
         private const int GenericTokenStep = 0x0100_0000;
+        private const int StringTokenStep = 0x0001_0000;
+        private const int NullableToken = 0x0080_0000;
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<Class> _classes;
@@ -20,11 +24,13 @@ namespace Iot.Device.Arduino
         private readonly Dictionary<FieldInfo, (int Token, byte[]? InitializerData)> _patchedFieldTokens;
         private readonly HashSet<(Type Original, Type Replacement, bool Subclasses)> _classesReplaced;
         private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
+        private readonly Dictionary<int, string> _strings;
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
         private int _nextToken;
         private int _nextGenericToken;
+        private int _nextStringToken;
 
         public ExecutionSet(ArduinoCsCompiler compiler)
         {
@@ -36,9 +42,11 @@ namespace Iot.Device.Arduino
             _patchedFieldTokens = new Dictionary<FieldInfo, (int Token, byte[]? InitializerData)>();
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
+            _strings = new Dictionary<int, string>();
 
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
             _nextGenericToken = GenericTokenStep;
+            _nextStringToken = StringTokenStep; // The lower 16 bit are the length
 
             _numDeclaredMethods = 0;
             _entryPoint = null!;
@@ -70,7 +78,18 @@ namespace Iot.Device.Arduino
             _compiler.ClearAllData(true);
             _compiler.SendClassDeclarations(this);
             _compiler.SendMethods(this);
-            _compiler.SendConstants(_patchedFieldTokens.Values);
+            List<(int Token, byte[] Data)> converted = new List<(int Token, byte[] Data)>();
+            // Need to do this manually, due to stupid nullability conversion restrictions
+            foreach (var elem in _patchedFieldTokens.Values)
+            {
+                if (elem.InitializerData != null)
+                {
+                    converted.Add((elem.Token, elem.InitializerData));
+                }
+            }
+
+            _compiler.SendConstants(converted);
+            _compiler.SendConstants(_strings.Select(x => (x.Key, Encoding.Default.GetBytes(x.Value))));
 
             EntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
@@ -153,6 +172,16 @@ namespace Iot.Device.Arduino
             return tk;
         }
 
+        /// <summary>
+        /// Creates the new, application-global token for a class. Some bits have special meaning:
+        /// 0..23 Type id for ordinary classes (neither generics nor nullables)
+        /// 24 True if this is a Nullable{T}
+        /// 25..31 Type id for generic classes
+        /// Combinations are constructed: if the token 0x32 means "int", 0x0200_0000 means "IEquatable{T}", then 0x0200_0032 is IEquatable{int} and
+        /// 0x0280_0032 is IEquatable{Nullable{int}}
+        /// </summary>
+        /// <param name="typeInfo">Original type to add to list</param>
+        /// <returns>A new token for the given type, or the existing token if it is already in the list</returns>
         public int GetOrAddClassToken(TypeInfo typeInfo)
         {
             int token;
@@ -181,6 +210,10 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.TypeInfo;
             }
+            else if (typeInfo == typeof(string) || typeInfo == typeof(MiniString))
+            {
+                token = (int)KnownTypeTokens.String;
+            }
             else if (typeInfo.FullName == "System.RuntimeType")
             {
                 token = (int)KnownTypeTokens.RuntimeType;
@@ -195,6 +228,16 @@ namespace Iot.Device.Arduino
                 // We use token values > 24 bit, so that we can add it to the base type to implement MakeGenericType(), at least for single type arguments
                 token = _nextGenericToken;
                 _nextGenericToken += GenericTokenStep;
+            }
+            else if (typeInfo == typeof(Nullable<>))
+            {
+                token = NullableToken;
+            }
+            else if (typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                // Nullable<T>, but with a defined T
+                int baseToken = GetOrAddClassToken(typeInfo.GetGenericArguments()[0].GetTypeInfo());
+                token = baseToken + NullableToken;
             }
             else if (typeInfo.IsGenericType)
             {
@@ -312,13 +355,20 @@ namespace Iot.Device.Arduino
 
             // Try whether the input token is a constructed generic token, which was not expected in this combination
             t = _patchedTypeTokens.FirstOrDefault(x => x.Value == (token & 0xFF00_0000));
-            if (t.Key != null && t.Key.IsGenericTypeDefinition)
+            try
             {
-                var t2 = _patchedTypeTokens.FirstOrDefault(x => x.Value == (token & 0x00FF_FFFF));
-                if (t2.Key != null)
+                if (t.Key != null && t.Key.IsGenericTypeDefinition)
                 {
-                    return t.Key.MakeGenericType(t2.Key);
+                    var t2 = _patchedTypeTokens.FirstOrDefault(x => x.Value == (token & 0x00FF_FFFF));
+                    if (t2.Key != null)
+                    {
+                        return t.Key.MakeGenericType(t2.Key);
+                    }
                 }
+            }
+            catch (ArgumentException)
+            {
+                // Ignore, try next approach (if any)
             }
 
             return null;
@@ -402,8 +452,8 @@ namespace Iot.Device.Arduino
             {
                 get
                 {
-                    // Don't run the resource init functions
-                    return Cls.FullName == "System.SR";
+                    // Don't run these init functions, to complicated or depend on native functions
+                    return Cls.FullName == "System.SR" || Cls.FullName == "System.HashCode";
                 }
             }
 
@@ -522,6 +572,20 @@ namespace Iot.Device.Arduino
             }
 
             _methodsReplaced.Add((toReplace, replacement));
+        }
+
+        public int GetOrAddString(string data)
+        {
+            var existing = _strings.FirstOrDefault(x => x.Value == data);
+            if (existing.Key != 0)
+            {
+                return existing.Key;
+            }
+
+            int token = _nextStringToken + data.Length;
+            _nextStringToken += StringTokenStep;
+            _strings[token] = data;
+            return token;
         }
     }
 }

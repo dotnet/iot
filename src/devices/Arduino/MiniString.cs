@@ -1,14 +1,33 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Iot.Device.Arduino
 {
     [ArduinoReplacement(typeof(System.String), true)]
-    internal class MiniString
+    internal class MiniString : ICloneable, IComparable, IComparable<string>, IConvertible, IEquatable<string>, System.Collections.Generic.IEnumerable<char>
     {
+#pragma warning disable SA1122 // Use string.Empty for empty strings
+        private static string s_emptyString = "";
+#pragma warning restore SA1122 // Use string.Empty for empty strings
+        private int _length;
+        private int _data; // Internal char* pointer
+
         [ArduinoImplementation(ArduinoImplementation.StringCtor0)]
         public MiniString()
         {
+            _length = 0;
+            _data = 0;
+        }
+
+        public static string Empty
+        {
+            get
+            {
+                return s_emptyString;
+            }
         }
 
         [ArduinoImplementation(ArduinoImplementation.None)]
@@ -27,10 +46,29 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        public static implicit operator ReadOnlySpan<char>(MiniString? value)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            char[] chars = value.ToArray();
+            Span<char> s = new Span<char>(chars, 0, value.Length);
+            return s;
+        }
+
         public int Length
         {
-            [ArduinoImplementation(ArduinoImplementation.StringLength)]
-            get;
+            get
+            {
+                if (_data == 0)
+                {
+                    return 0;
+                }
+
+                return _length;
+            }
         }
 
         [IndexerName("Chars")]
@@ -60,6 +98,16 @@ namespace Iot.Device.Arduino
             return string.Empty;
         }
 
+        public int CompareTo(string? other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerator<char> GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
         [ArduinoImplementation(ArduinoImplementation.StringEquals)]
         public override bool Equals(object? obj)
         {
@@ -67,9 +115,9 @@ namespace Iot.Device.Arduino
         }
 
         [ArduinoImplementation(ArduinoImplementation.None)]
-        public bool Equals(string other)
+        public bool Equals(string? other)
         {
-            return Equals((object)other);
+            return Equals((object?)other);
         }
 
         [ArduinoImplementation(ArduinoImplementation.StringGetHashCode)]
@@ -83,6 +131,21 @@ namespace Iot.Device.Arduino
         {
             // This should simply do a "return this", but we can't do that here, because the types don't match
             throw new NotImplementedException();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        public int CompareTo(object? obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object Clone()
+        {
+            return this; // String is immutable
         }
 
         [ArduinoImplementation(ArduinoImplementation.StringConcat2)]
@@ -119,6 +182,91 @@ namespace Iot.Device.Arduino
         public static bool IsNullOrEmpty(string? value)
         {
             return (value == null || value.Length == 0);
+        }
+
+        public TypeCode GetTypeCode()
+        {
+            return TypeCode.String;
+        }
+
+        public bool ToBoolean(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public byte ToByte(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public char ToChar(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public DateTime ToDateTime(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public decimal ToDecimal(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public double ToDouble(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public short ToInt16(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int ToInt32(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public long ToInt64(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public sbyte ToSByte(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public float ToSingle(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public string ToString(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public object ToType(Type? conversionType, IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ushort ToUInt16(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public uint ToUInt32(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ulong ToUInt64(IFormatProvider? provider)
+        {
+            throw new NotImplementedException();
         }
     }
 }

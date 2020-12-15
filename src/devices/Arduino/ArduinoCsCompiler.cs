@@ -100,7 +100,7 @@ namespace Iot.Device.Arduino
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
             typeof(MiniException), typeof(MiniThread),
             typeof(MiniEnvironment), typeof(MiniRuntimeHelpers), typeof(MiniType), typeof(MiniValueType),
-            typeof(MiniResourceManager), typeof(MiniEnum)
+            typeof(MiniResourceManager), typeof(MiniEnum), typeof(MiniCultureInfo)
         };
 
         private readonly ArduinoBoard _board;
@@ -491,7 +491,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendConstants(IEnumerable<(int Token, byte[]? InitializerData)> constElements)
+        public void SendConstants(IEnumerable<(int Token, byte[] InitializerData)> constElements)
         {
             foreach (var e in constElements)
             {
@@ -1139,11 +1139,13 @@ namespace Iot.Device.Arduino
 
         internal void ExecuteStaticCtors(ExecutionSet set)
         {
-            foreach (var cls in set.Classes)
+            int count = set.Classes.Count;
+            for (var index = 0; index < count; index++)
             {
+                ExecutionSet.Class? cls = set.Classes[index];
                 if (!cls.SuppressInit && cls.Cls.TypeInitializer != null)
                 {
-                    _board.Log($"Running static initializer of {cls}.");
+                    _board.Log($"Running static initializer of {cls}. Step {index}/{count}...");
                     var task = GetTask(set, cls.Cls.TypeInitializer);
                     task.Invoke(CancellationToken.None);
                     task.WaitForResult();
