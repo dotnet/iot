@@ -12,8 +12,8 @@ namespace Iot.Device.Arduino
     {
 #pragma warning disable 414
         // This is used by firmware code directly. Do not reorder the members without checking the firmware
-        // The member contains the address of the class declaration
-        private UInt32 _internalType;
+        // The member contains the token of the class declaration
+        private Int32 _internalType;
 #pragma warning restore 414
 
         [ArduinoImplementation(ArduinoImplementation.TypeCtor)]
@@ -27,8 +27,8 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                // We do not support incomplete generic types, so we don't really care
-                return false;
+                // All types that have some generics return true here, whether they're open or closed. Nullable also returns true
+                return (_internalType & ExecutionSet.GenericTokenMask) != 0;
             }
         }
 

@@ -16,6 +16,7 @@ namespace Iot.Device.Arduino
         private const int GenericTokenStep = 0x0100_0000;
         private const int StringTokenStep = 0x0001_0000;
         private const int NullableToken = 0x0080_0000;
+        public const int GenericTokenMask = -8_388_608; // 0xFF80_0000 as signed
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<Class> _classes;
@@ -222,22 +223,22 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.Type;
             }
+            else if (typeInfo == typeof(Nullable<>))
+            {
+                token = NullableToken;
+            }
+            else if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                // Nullable<T>, but with a defined T
+                int baseToken = GetOrAddClassToken(typeInfo.GetGenericArguments()[0].GetTypeInfo());
+                token = baseToken + NullableToken;
+            }
             else if (typeInfo.IsGenericTypeDefinition)
             {
                 // Type with (at least one) incomplete type argument.
                 // We use token values > 24 bit, so that we can add it to the base type to implement MakeGenericType(), at least for single type arguments
                 token = _nextGenericToken;
                 _nextGenericToken += GenericTokenStep;
-            }
-            else if (typeInfo == typeof(Nullable<>))
-            {
-                token = NullableToken;
-            }
-            else if (typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>))
-            {
-                // Nullable<T>, but with a defined T
-                int baseToken = GetOrAddClassToken(typeInfo.GetGenericArguments()[0].GetTypeInfo());
-                token = baseToken + NullableToken;
             }
             else if (typeInfo.IsGenericType)
             {
@@ -452,6 +453,12 @@ namespace Iot.Device.Arduino
             {
                 get
                 {
+                    // Type initializers of open generic types are pointless to execute
+                    if (Cls.ContainsGenericParameters)
+                    {
+                        return true;
+                    }
+
                     // Don't run these init functions, to complicated or depend on native functions
                     return Cls.FullName == "System.SR" || Cls.FullName == "System.HashCode";
                 }
@@ -463,7 +470,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void AddReplacementType(Type? typeToReplace, Type replacement, bool includingSubclasses)
+        public void AddReplacementType(Type? typeToReplace, Type replacement, bool includingSubclasses, bool includingPrivates)
         {
             if (typeToReplace == null)
             {
@@ -475,7 +482,13 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            List<MethodInfo> methodsNeedingReplacement = typeToReplace.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance).ToList();
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
+            if (includingPrivates)
+            {
+                flags |= BindingFlags.NonPublic;
+            }
+
+            List<MethodInfo> methodsNeedingReplacement = typeToReplace.GetMethods(flags).ToList();
 
             foreach (var methoda in replacement.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
             {
@@ -541,7 +554,7 @@ namespace Iot.Device.Arduino
                 {
                     // If we need to replace all subclasses of x as well, we need to add them here to the replacement list, because
                     // we initially didn't know which classes will be in this set.
-                    AddReplacementType(original, x.Replacement, true);
+                    AddReplacementType(original, x.Replacement, true, false);
                     return x.Replacement;
                 }
             }

@@ -100,7 +100,8 @@ namespace Iot.Device.Arduino
             typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
             typeof(MiniException), typeof(MiniThread),
             typeof(MiniEnvironment), typeof(MiniRuntimeHelpers), typeof(MiniType), typeof(MiniValueType),
-            typeof(MiniResourceManager), typeof(MiniEnum), typeof(MiniCultureInfo)
+            typeof(MiniResourceManager), typeof(MiniEnum), typeof(MiniCultureInfo), typeof(MiniBitConverter),
+            typeof(MiniCLRConfig)
         };
 
         private readonly ArduinoBoard _board;
@@ -253,7 +254,7 @@ namespace Iot.Device.Arduino
                 if (ia.ReplaceEntireType)
                 {
                     PrepareClass(set, replacement);
-                    set.AddReplacementType(ia.TypeToReplace, replacement, ia.IncludingSubclasses);
+                    set.AddReplacementType(ia.TypeToReplace, replacement, ia.IncludingSubclasses, ia.IncludingPrivates);
                 }
                 else
                 {
@@ -296,6 +297,8 @@ namespace Iot.Device.Arduino
             PrepareClass(set, typeof(System.Span<Int32>));
             HashSet<string> hs = new HashSet<string>();
             PrepareClass(set, hs.Comparer.GetType()); // GenericEqualityComparer<string>
+
+            PrepareClass(set, typeof(IEquatable<Nullable<int>>));
 
             // We'll always need to provide these methods, or we'll get into trouble because they're not explicitly used before anything that depends on
             // them in the runtime
@@ -458,7 +461,7 @@ namespace Iot.Device.Arduino
                 // depend on other classes might give a big problem)
                 var cls = set.Classes[i];
                 var cctor = cls.Cls.TypeInitializer;
-                if (cctor == null)
+                if (cctor == null || cls.SuppressInit)
                 {
                     continue;
                 }

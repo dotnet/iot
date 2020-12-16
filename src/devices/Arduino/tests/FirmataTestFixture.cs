@@ -17,7 +17,7 @@ namespace Arduino.Tests
             try
             {
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                _socket.Connect(IPAddress.Loopback, 27015);
+                _socket.Connect(IPAddress.Loopback, 27016);
                 _socket.NoDelay = true;
                 _networkStream = new NetworkStream(_socket, true);
                 Board = new ArduinoBoard(_networkStream);

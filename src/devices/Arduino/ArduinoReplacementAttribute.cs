@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,6 +10,8 @@ namespace Iot.Device.Arduino
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Constructor | AttributeTargets.Method)]
     internal class ArduinoReplacementAttribute : Attribute
     {
+        private bool _includingPrivates;
+
         /// <summary>
         /// The attribute ctor
         /// </summary>
@@ -19,9 +22,14 @@ namespace Iot.Device.Arduino
             IncludingSubclasses = includingSubclasses;
         }
 
-        public ArduinoReplacementAttribute(string methodName)
+        /// <summary>
+        /// Use this overload if you need to replace a class that is not publicly visible (i.e. an internal implementation class in the framework)
+        /// </summary>
+        public ArduinoReplacementAttribute(string typeNameToReplace, bool replaceEntireType = false, bool includingSubclasses = false)
         {
-            MethodNameToReplace = methodName;
+            TypeToReplace = Type.GetType(typeNameToReplace);
+            ReplaceEntireType = replaceEntireType;
+            IncludingSubclasses = includingSubclasses;
         }
 
         public Type? TypeToReplace
@@ -40,9 +48,10 @@ namespace Iot.Device.Arduino
         /// </summary>
         public bool IncludingSubclasses { get; }
 
-        public string? MethodNameToReplace
+        public bool IncludingPrivates
         {
-            get;
+            get { return _includingPrivates; }
+            set { _includingPrivates = value; }
         }
     }
 }
