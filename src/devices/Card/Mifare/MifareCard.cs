@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.ComponentModel.Design;
-using System.Data;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading;
 using Iot.Device.Ndef;
 
 namespace Iot.Device.Card.Mifare
@@ -29,24 +25,24 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// Default Key A
         /// </summary>
-        public byte[] DefaultKeyA { get; } = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        public static byte[] DefaultKeyA { get; } = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
         /// <summary>
         /// Default Key B
         /// </summary>
-        public byte[] DefaultKeyB { get; } = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+        public static byte[] DefaultKeyB { get; } = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 
         /// <summary>
         /// Default first block Key A for NDEF card
         /// </summary>
         /// <remarks>See https://www.nxp.com/docs/en/application-note/AN1304.pdf for more information</remarks>
-        public byte[] DefaultFirstBlockNdefKeyA { get; } = new byte[6] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5 };
+        public static byte[] DefaultFirstBlockNdefKeyA { get; } = new byte[6] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5 };
 
         /// <summary>
         /// Default block Key A for NDEF card
         /// </summary>
         /// <remarks>See https://www.nxp.com/docs/en/application-note/AN1304.pdf for more information</remarks>
-        public byte[] DefaultBlocksNdefKeyA { get; } = new byte[6] { 0xD3, 0xF7, 0xD3, 0xF7, 0xD3, 0xF7 };
+        public static byte[] DefaultBlocksNdefKeyA { get; } = new byte[6] { 0xD3, 0xF7, 0xD3, 0xF7, 0xD3, 0xF7 };
 
         /// <summary>
         /// The tag number detected by the reader, only 1 or 2
