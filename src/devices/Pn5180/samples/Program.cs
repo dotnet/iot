@@ -222,19 +222,20 @@ void TypeA()
         {
             mifareCard.BlockNumber = block;
             mifareCard.Command = MifareCardCommand.AuthenticationB;
-            var ret = mifareCard.RunMifiCardCommand();
+            var ret = mifareCard.RunMifareCardCommand();
+            mifareCard.ReselectCard();
             if (ret < 0)
             {
                 // Try another one
                 mifareCard.Command = MifareCardCommand.AuthenticationA;
-                ret = mifareCard.RunMifiCardCommand();
+                ret = mifareCard.RunMifareCardCommand();
             }
 
             if (ret >= 0)
             {
                 mifareCard.BlockNumber = block;
                 mifareCard.Command = MifareCardCommand.Read16Bytes;
-                ret = mifareCard.RunMifiCardCommand();
+                ret = mifareCard.RunMifareCardCommand();
                 if (ret >= 0 && mifareCard.Data is object)
                 {
                     Console.WriteLine($"Bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");

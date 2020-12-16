@@ -808,6 +808,15 @@ namespace Iot.Device.Pn532
             return -1;
         }
 
+        /// <inheritdoc/>
+        public override bool ReselectTarget(byte targetNumber)
+        {
+            // First one doesn't need to succeed, only the select needs
+            DeselectTarget(targetNumber);
+            var ret = SelectTarget(targetNumber);
+            return ret;
+        }
+
         /// <summary>
         /// Automatically poll specific types of devices
         /// </summary>
