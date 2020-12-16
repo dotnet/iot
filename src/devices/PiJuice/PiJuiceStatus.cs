@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using Iot.Device.PiJuiceDevice.Models;
 using UnitsNet;
-using UnitsNet.Units;
 
 namespace Iot.Device.PiJuiceDevice
 {
@@ -110,7 +109,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryTemperature, 2);
 
-            return new Temperature(BinaryPrimitives.ReadInt16LittleEndian(response), TemperatureUnit.DegreeCelsius);
+            return Temperature.FromDegreesCelsius(BinaryPrimitives.ReadInt16LittleEndian(response));
         }
 
         /// <summary>
@@ -121,7 +120,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryVoltage, 2);
 
-            return new ElectricPotential(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricPotentialUnit.Millivolt);
+            return ElectricPotential.FromMillivolts(BinaryPrimitives.ReadInt16LittleEndian(response));
         }
 
         /// <summary>
@@ -132,7 +131,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.BatteryCurrent, 2);
 
-            return new ElectricCurrent(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricCurrentUnit.Milliampere);
+            return ElectricCurrent.FromMilliamperes(BinaryPrimitives.ReadInt16LittleEndian(response));
         }
 
         /// <summary>
@@ -143,7 +142,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.IOVoltage, 2);
 
-            return new ElectricPotential(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricPotentialUnit.Millivolt);
+            return ElectricPotential.FromMillivolts(BinaryPrimitives.ReadInt16LittleEndian(response));
         }
 
         /// <summary>
@@ -154,7 +153,7 @@ namespace Iot.Device.PiJuiceDevice
         {
             var response = _piJuice.ReadCommand(PiJuiceCommand.IOCurrent, 2);
 
-            return new ElectricCurrent(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricCurrentUnit.Milliampere);
+            return ElectricCurrent.FromMilliamperes(BinaryPrimitives.ReadInt16LittleEndian(response));
         }
 
         /// <summary>
