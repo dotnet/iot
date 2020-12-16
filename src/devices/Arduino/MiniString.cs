@@ -48,7 +48,7 @@ namespace Iot.Device.Arduino
 
         public static implicit operator ReadOnlySpan<char>(MiniString? value)
         {
-            if (value == null)
+            if (ReferenceEquals(value, null))
             {
                 throw new ArgumentNullException(nameof(value));
             }
@@ -99,6 +99,16 @@ namespace Iot.Device.Arduino
         }
 
         public int CompareTo(string? other)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int IndexOf(char c)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static string? Concat(ReadOnlySpan<char> str0, ReadOnlySpan<char> str1, ReadOnlySpan<char> str2, ReadOnlySpan<char> str3)
         {
             throw new NotImplementedException();
         }
@@ -184,6 +194,25 @@ namespace Iot.Device.Arduino
             return (value == null || value.Length == 0);
         }
 
+        [ArduinoImplementation(ArduinoImplementation.StringEqualsStatic)]
+        public static bool Equals(string a, string b)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.StringEqualsStatic)]
+        public static bool operator ==(MiniString a, MiniString b)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.StringEqualsStatic)]
+        public static bool operator !=(MiniString a, MiniString b)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.None)]
         public TypeCode GetTypeCode()
         {
             return TypeCode.String;

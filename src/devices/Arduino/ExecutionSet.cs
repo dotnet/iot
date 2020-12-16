@@ -126,6 +126,11 @@ namespace Iot.Device.Arduino
                 }
             }
 
+            foreach (var constant in _strings)
+            {
+                bytesUsed += constant.Value.Length * sizeof(char);
+            }
+
             return bytesUsed;
         }
 

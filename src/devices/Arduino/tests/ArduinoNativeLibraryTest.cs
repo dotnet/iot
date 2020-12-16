@@ -81,7 +81,7 @@ namespace Arduino.Tests
             }
 
             long memoryUsage = exec.EstimateRequiredMemory();
-            //// Assert.True(memoryUsage < 10000, $"Expected memory usage: {memoryUsage} bytes");
+            Assert.True(memoryUsage < 10000, $"Expected memory usage: {memoryUsage} bytes");
 
             var task = exec.EntryPoint;
             task.InvokeAsync(args);

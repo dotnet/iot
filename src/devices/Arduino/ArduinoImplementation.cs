@@ -68,6 +68,7 @@ namespace Iot.Device.Arduino
         StringSetElem,
         StringGetElem,
         StringGetPinnableReference,
-        BitConverterSingleToInt32Bits
+        BitConverterSingleToInt32Bits,
+        StringEqualsStatic
     }
 }
