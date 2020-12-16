@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CardRfid.csproj" />
+    <ProjectReference Include="..\Ndef\Ndef.csproj" />
   </ItemGroup>
 
 </Project>

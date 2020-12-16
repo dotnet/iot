@@ -21,5 +21,14 @@ namespace Iot.Device.Card
         /// <param name="dataFromCard">If any data are read from the card, they will be put into this array</param>
         /// <returns>-1 in case of error, otherwise the number of bytes read and copied into the <paramref name="dataFromCard"/> array</returns>
         public abstract int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard);
+
+        /// <summary>
+        /// Once you have an authentication operation failing with Mifare cards or a read/write, the card stop.
+        /// TYhe only way to have it back is to send the unselect and anti collision.
+        /// This function provides this feature
+        /// </summary>
+        /// <param name="targetNumber">The target number to reselect</param>
+        /// <returns>True if success</returns>
+        public abstract bool ReselectTarget(byte targetNumber);
     }
 }

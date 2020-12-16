@@ -75,10 +75,10 @@ if (pn532.FirmwareVersion is FirmwareVersion version)
 
     // To run tests, uncomment the next line
     // RunTests(pn532);
-    // ReadMiFare(pn532);
+    ReadMiFare(pn532);
 
     // To read Credit Cards, uncomment the next line
-    ReadCreditCard(pn532);
+    // ReadCreditCard(pn532);
 }
 else
 {
@@ -164,19 +164,21 @@ void ReadMiFare(Pn532 pn532)
         {
             mifareCard.BlockNumber = block;
             mifareCard.Command = MifareCardCommand.AuthenticationB;
-            var ret = mifareCard.RunMifiCardCommand();
+            var ret = mifareCard.RunMifareCardCommand();
+            // This will reselect the card in case of issue
+            mifareCard.ReselectCard();
             if (ret < 0)
             {
                 // Try another one
                 mifareCard.Command = MifareCardCommand.AuthenticationA;
-                ret = mifareCard.RunMifiCardCommand();
+                ret = mifareCard.RunMifareCardCommand();
             }
 
             if (ret >= 0)
             {
                 mifareCard.BlockNumber = block;
                 mifareCard.Command = MifareCardCommand.Read16Bytes;
-                ret = mifareCard.RunMifiCardCommand();
+                ret = mifareCard.RunMifareCardCommand();
                 if (ret >= 0 && mifareCard.Data is object)
                 {
                     Console.WriteLine($"Bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
