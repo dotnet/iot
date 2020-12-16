@@ -44,9 +44,9 @@ namespace Iot.Device.Hts221
         public Temperature Temperature => Temperature.FromDegreesCelsius(GetActualTemperature(ReadInt16(Register.Temperature)));
 
         /// <summary>
-        /// Humidity in %rH (percentage relative humidity)
+        /// Relative humidity
         /// </summary>
-        public Ratio Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
+        public RelativeHumidity Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
 
         private void WriteByte(Register register, byte data)
         {
@@ -87,13 +87,13 @@ namespace Iot.Device.Hts221
             return Lerp(temperatureRaw, t0raw, t1raw, t0x8C / 8.0f, t1x8C / 8.0f);
         }
 
-        private Ratio GetActualHumidity(short humidityRaw)
+        private RelativeHumidity GetActualHumidity(short humidityRaw)
         {
             // datasheet does not specify if calibration points are not changing
             // since this is almost no-op and max output data rate is 12.5Hz let's do it every time
             (short h0raw, short h1raw) = GetHumidityCalibrationPointsRaw();
             (byte h0x2rH, byte h1x2rH) = GetHumidityCalibrationPointsRH();
-            return Ratio.FromPercent(Lerp(humidityRaw, h0raw, h1raw, h0x2rH / 2.0f, h1x2rH / 2.0f));
+            return RelativeHumidity.FromPercent(Lerp(humidityRaw, h0raw, h1raw, h0x2rH / 2.0f, h1x2rH / 2.0f));
         }
 
         private static float Lerp(float x, float x0, float x1, float y0, float y1)

@@ -26,9 +26,9 @@ namespace Iot.Device.Common
         /// than it actually is. The heat index is usually used for afternoon high temperatures.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
-        /// <param name="relativeHumidity">The relative humidity (RH) expressed as a ratio</param>
+        /// <param name="relativeHumidity">The relative humidity (RH)</param>
         /// <returns>The heat index, also known as the apparent temperature</returns>
-        public static Temperature CalculateHeatIndex(Temperature airTemperature, Ratio relativeHumidity)
+        public static Temperature CalculateHeatIndex(Temperature airTemperature, RelativeHumidity relativeHumidity)
         {
             double tf = airTemperature.DegreesFahrenheit;
             double rh = relativeHumidity.Percent;
@@ -104,8 +104,8 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH)</param>
         /// <returns>The actual vapor pressure</returns>
-        public static Pressure CalculateActualVaporPressure(Temperature airTemperature, Ratio relativeHumidity) =>
-            Pressure.FromHectopascals((relativeHumidity.DecimalFractions * CalculateSaturatedVaporPressureOverWater(airTemperature).Hectopascals));
+        public static Pressure CalculateActualVaporPressure(Temperature airTemperature, RelativeHumidity relativeHumidity) =>
+            Pressure.FromHectopascals((relativeHumidity.Percent / 100.0 * CalculateSaturatedVaporPressureOverWater(airTemperature).Hectopascals));
 
         /// <summary>
         /// Calculates the dew point.
@@ -116,7 +116,7 @@ namespace Iot.Device.Common
         /// <remarks>
         /// Source https://en.wikipedia.org/wiki/Dew_point
         /// </remarks>
-        public static Temperature CalculateDewPoint(Temperature airTemperature, Ratio relativeHumidity)
+        public static Temperature CalculateDewPoint(Temperature airTemperature, RelativeHumidity relativeHumidity)
         {
             double pa = CalculateActualVaporPressure(airTemperature, relativeHumidity).Hectopascals;
             double a = 6.1121; // hPa
@@ -135,7 +135,7 @@ namespace Iot.Device.Common
         /// <remarks>
         /// Source https://de.wikipedia.org/wiki/Luftfeuchtigkeit#Absolute_Luftfeuchtigkeit
         /// </remarks>
-        public static Density CalculateAbsoluteHumidity(Temperature airTemperature, Ratio relativeHumidity)
+        public static Density CalculateAbsoluteHumidity(Temperature airTemperature, RelativeHumidity relativeHumidity)
         {
             var avp = CalculateActualVaporPressure(airTemperature, relativeHumidity).Pascals;
             double gramsPerCubicMeter = avp / (airTemperature.Kelvins * 461.5) * 1000;
@@ -154,14 +154,14 @@ namespace Iot.Device.Common
         /// <param name="airTemperatureFromBetterPlacedSensor">Temperature measured by better placed sensor</param>
         /// <returns>A corrected humidity. The value will be lower than the input value if the better placed sensor is cooler than
         /// the "bad" sensor.</returns>
-        public static Ratio GetRelativeHumidityFromActualAirTemperature(Temperature airTemperatureFromHumiditySensor,
-            Ratio relativeHumidityMeasured, Temperature airTemperatureFromBetterPlacedSensor)
+        public static RelativeHumidity GetRelativeHumidityFromActualAirTemperature(Temperature airTemperatureFromHumiditySensor,
+            RelativeHumidity relativeHumidityMeasured, Temperature airTemperatureFromBetterPlacedSensor)
         {
             Density absoluteHumidity =
                 CalculateAbsoluteHumidity(airTemperatureFromHumiditySensor, relativeHumidityMeasured);
             double avp = absoluteHumidity.GramsPerCubicMeter * (airTemperatureFromBetterPlacedSensor.Kelvins * 461.5) / 1000;
             double ret = avp / CalculateSaturatedVaporPressureOverWater(airTemperatureFromBetterPlacedSensor).Hectopascals;
-            return Ratio.FromPercent(ret);
+            return RelativeHumidity.FromPercent(ret);
 
         }
 
@@ -320,7 +320,7 @@ namespace Iot.Device.Common
         /// From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
         /// </remarks>
         public static Pressure CalculateBarometricPressure(Pressure measuredPressure, Temperature measuredTemperature,
-            Length measurementAltitude, Ratio relativeHumidity)
+            Length measurementAltitude, RelativeHumidity relativeHumidity)
         {
             Pressure vaporPressure = CalculateActualVaporPressure(measuredTemperature, relativeHumidity);
             return CalculateBarometricPressure(measuredPressure, measuredTemperature, vaporPressure,
