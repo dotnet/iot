@@ -85,7 +85,7 @@ namespace System.Device.I2c
             return _usedAddresses?.Remove(deviceAddress) ?? false;
         }
 
-        public override unsafe void Read(int deviceAddress, Span<byte> buffer)
+        internal unsafe void Read(int deviceAddress, Span<byte> buffer)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {
@@ -108,7 +108,7 @@ namespace System.Device.I2c
             }
         }
 
-        public override unsafe void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
+        internal unsafe void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {
@@ -126,7 +126,7 @@ namespace System.Device.I2c
             }
         }
 
-        public override unsafe void WriteRead(int deviceAddress, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
+        internal unsafe void WriteRead(int deviceAddress, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {

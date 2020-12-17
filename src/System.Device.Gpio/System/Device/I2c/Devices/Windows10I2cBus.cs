@@ -28,14 +28,6 @@ namespace System.Device.I2c
             return device;
         }
 
-        public override void Read(int deviceAddress, Span<byte> buffer)
-        {
-            using (Windows10I2cDevice i2cDevice = new Windows10I2cDevice(new I2cConnectionSettings(BusId, deviceAddress)))
-            {
-                i2cDevice.Read(buffer);
-            }
-        }
-
         public override void RemoveDevice(int deviceAddress)
         {
             if (!_devices.TryGetValue(deviceAddress, out Windows10I2cBusDevice? device))
@@ -50,22 +42,6 @@ namespace System.Device.I2c
         {
             _devices?.Remove(deviceAddress);
             device.DisposeDevice();
-        }
-
-        public override void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
-        {
-            using (Windows10I2cDevice i2cDevice = new Windows10I2cDevice(new I2cConnectionSettings(BusId, deviceAddress)))
-            {
-                i2cDevice.Write(buffer);
-            }
-        }
-
-        public override void WriteRead(int deviceAddress, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
-        {
-            using (Windows10I2cDevice i2cDevice = new Windows10I2cDevice(new I2cConnectionSettings(BusId, deviceAddress)))
-            {
-                i2cDevice.WriteRead(writeBuffer, readBuffer);
-            }
         }
 
         protected override void Dispose(bool disposing)

@@ -66,8 +66,7 @@ namespace Iot.Device.Ft4222
             }
         }
 
-        /// <inheritdoc/>
-        public override void Read(int deviceAddress, Span<byte> buffer)
+        internal void Read(int deviceAddress, Span<byte> buffer)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {
@@ -92,8 +91,7 @@ namespace Iot.Device.Ft4222
             }
         }
 
-        /// <inheritdoc/>
-        public override void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
+        internal void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {

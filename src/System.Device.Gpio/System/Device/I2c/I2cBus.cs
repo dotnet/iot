@@ -38,32 +38,6 @@ namespace System.Device.I2c
         /// <param name="deviceAddress">Device address to create</param>
         public abstract void RemoveDevice(int deviceAddress);
 
-        /// <summary>
-        /// Reads data from the specified device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address to read from.</param>
-        /// <param name="buffer">Buffer to read data to.</param>
-        public abstract void Read(int deviceAddress, Span<byte> buffer);
-
-        /// <summary>
-        /// Writes data to the specified device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address to write to.</param>
-        /// <param name="buffer">Buffer to write.</param>
-        public abstract void Write(int deviceAddress, ReadOnlySpan<byte> buffer);
-
-        /// <summary>
-        /// Reads and writes data to the specified device.
-        /// </summary>
-        /// <param name="deviceAddress">Device address to read and write.</param>
-        /// <param name="writeBuffer">Buffer to write.</param>
-        /// <param name="readBuffer">Buffer to read data to.</param>
-        public virtual void WriteRead(int deviceAddress, ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
-        {
-            Write(deviceAddress, writeBuffer);
-            Read(deviceAddress, readBuffer);
-        }
-
         /// <inheritdoc cref="IDisposable.Dispose"/>
         public void Dispose()
         {
