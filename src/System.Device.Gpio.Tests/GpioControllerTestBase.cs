@@ -112,12 +112,12 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void ThrowsIfWritingOnInputPin()
+        public void AllowWritingOnInputPin()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(InputPin, PinMode.Input);
-                Assert.Throws<InvalidOperationException>(() => controller.Write(InputPin, PinValue.High));
+                controller.Write(InputPin, PinValue.High);
             }
         }
 
