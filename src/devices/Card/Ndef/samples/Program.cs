@@ -208,7 +208,7 @@ void RunTestNdef(CardTransceiver transceiver, Data106kbpsTypeA card)
             Console.WriteLine($"This card is{isForm} NDEF formatted");
             break;
         case '7':
-            ret = mifareCard.EraseSector(mifareCard.DefaultKeyA, mifareCard.DefaultKeyB, 1, false, true);
+            ret = mifareCard.EraseSector(MifareCard.DefaultKeyA, MifareCard.DefaultKeyB, 1, false, true);
             var isErased = ret ? string.Empty : " not";
             Console.WriteLine($"The sector has{isErased} been erased");
             break;
