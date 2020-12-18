@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using Iot.Device.PiJuiceDevice.Models;
 using UnitsNet;
-using UnitsNet.Units;
 
 namespace Iot.Device.PiJuiceDevice
 {
@@ -19,7 +18,7 @@ namespace Iot.Device.PiJuiceDevice
     {
         private readonly PiJuice _piJuice;
 
-        private readonly List<ElectricCurrent> _usbMicroCurrentLimits = new List<ElectricCurrent> { new ElectricCurrent(1.5, ElectricCurrentUnit.Ampere), new ElectricCurrent(2.5, ElectricCurrentUnit.Ampere) };
+        private readonly List<ElectricCurrent> _usbMicroCurrentLimits = new List<ElectricCurrent> { ElectricCurrent.FromAmperes(1.5), ElectricCurrent.FromAmperes(2.5) };
         private readonly List<ElectricPotential> _usbMicroDpm = new List<ElectricPotential>();
 
         private List<string> _batteryProfiles = new List<string>();
@@ -34,7 +33,7 @@ namespace Iot.Device.PiJuiceDevice
 
             for (int i = 0; i < 8; i++)
             {
-                _usbMicroDpm.Add(new ElectricPotential(4.2 + 0.8 * i, ElectricPotentialUnit.Volt));
+                _usbMicroDpm.Add(ElectricPotential.FromVolts(4.2 + 0.8 * i));
             }
         }
 
@@ -46,17 +45,17 @@ namespace Iot.Device.PiJuiceDevice
         {
             byte[] response = _piJuice.ReadCommand(PiJuiceCommand.BatteryProfile, 14);
             return new BatteryProfile(
-                new ElectricCharge(BinaryPrimitives.ReadInt16LittleEndian(response), ElectricChargeUnit.MilliampereHour),
-                new ElectricCurrent(response[2] * 75 + 550, ElectricCurrentUnit.Milliampere),
-                new ElectricCurrent(response[3] * 50 + 50, ElectricCurrentUnit.Milliampere),
-                new ElectricPotential(response[4] * 20 + 3500, ElectricPotentialUnit.Millivolt),
-                new ElectricPotential(response[5] * 20, ElectricPotentialUnit.Millivolt),
-                new Temperature(response[6], TemperatureUnit.DegreeCelsius),
-                new Temperature(response[7], TemperatureUnit.DegreeCelsius),
-                new Temperature(response[8], TemperatureUnit.DegreeCelsius),
-                new Temperature(response[9], TemperatureUnit.DegreeCelsius),
+                ElectricCharge.FromMilliampereHours(BinaryPrimitives.ReadInt16LittleEndian(response)),
+                ElectricCurrent.FromMilliamperes(response[2] * 75 + 550),
+                ElectricCurrent.FromMilliamperes(response[3] * 50 + 50),
+                ElectricPotential.FromMillivolts(response[4] * 20 + 3500),
+                ElectricPotential.FromMillivolts(response[5] * 20),
+                Temperature.FromDegreesCelsius(response[6]),
+                Temperature.FromDegreesCelsius(response[7]),
+                Temperature.FromDegreesCelsius(response[8]),
+                Temperature.FromDegreesCelsius(response[9]),
                 (response[11] << 8) | response[10],
-                new ElectricResistance(((response[13] << 8) | response[12]) * 10, ElectricResistanceUnit.Ohm));
+                ElectricResistance.FromOhms(((response[13] << 8) | response[12]) * 10));
         }
 
         /// <summary>
@@ -105,12 +104,12 @@ namespace Iot.Device.PiJuiceDevice
 
             return new BatteryExtendedProfile(
                 chemistry,
-                new ElectricPotential((response[2] << 8) | response[1], ElectricPotentialUnit.Millivolt),
-                new ElectricPotential((response[4] << 8) | response[3], ElectricPotentialUnit.Millivolt),
-                new ElectricPotential((response[6] << 8) | response[5], ElectricPotentialUnit.Millivolt),
-                new ElectricResistance(((response[8] << 8) | response[7]) / 100.0, ElectricResistanceUnit.Milliohm),
-                new ElectricResistance(((response[10] << 8) | response[9]) / 100.0, ElectricResistanceUnit.Milliohm),
-                new ElectricResistance(((response[12] << 8) | response[11]) / 100.0, ElectricResistanceUnit.Milliohm));
+                ElectricPotential.FromMillivolts((response[2] << 8) | response[1]),
+                ElectricPotential.FromMillivolts((response[4] << 8) | response[3]),
+                ElectricPotential.FromMillivolts((response[6] << 8) | response[5]),
+                ElectricResistance.FromMilliohms(((response[8] << 8) | response[7]) / 100.0),
+                ElectricResistance.FromMilliohms(((response[10] << 8) | response[9]) / 100.0),
+                ElectricResistance.FromMilliohms(((response[12] << 8) | response[11]) / 100.0));
         }
 
         /// <summary>

@@ -60,7 +60,7 @@ namespace Iot.Device.PiJuiceDevice
 
                 return new WakeUpOnCharge(
                     response[0] == 0x7F,
-                    new Ratio((response[0] == 0x7F ? 0 : response[0]), UnitsNet.Units.RatioUnit.Percent));
+                    Ratio.FromPercent(response[0] == 0x7F ? 0 : response[0]));
             }
             set
             {
