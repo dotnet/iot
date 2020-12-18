@@ -25,7 +25,7 @@ Console.WriteLine($"Illuminance is {lux.Lux} Lux");
 
 **notes**:
 
-- Be aware, there are 2 types of packaging the CS and the Others T, FN and CL. Refer to the documentation to understand which package you hav on the board. This is an argument when creating the sensor as the calculation for the illuminance is different.
+- Be aware, there are 2 types of packaging the CS and the Others T, FN and CL. Refer to the documentation to understand which package you have on the board. This is an argument when creating the sensor as the calculation for the illuminance is different.
 - There are 3 different possible I2C addresses for this device depending on how the address pin is setup:
   - DefaultI2cAddress = 0x29: When address pin is to the ground
   - SecondI2cAddress = 0x39: When address pin is floating
@@ -63,7 +63,7 @@ Console.WriteLine("Set interruption to test. Read the interrupt pin");
 GpioController controller = new();
 controller.OpenPin(PinInterrupt, PinMode.Input);
 tsl256X.InterruptControl = InterruptControl.TestMode;
-tsl256X.Power = true;
+tsl256X.Enabled = true;
 while (controller.Read(PinInterrupt) == PinValue.High)
 {
     Thread.Sleep(1);

@@ -9,7 +9,7 @@ namespace IoT.Device.Tsl256x
     public enum PackageType
     {
         /// <summary>
-        /// PAckage type CS
+        /// Package type CS
         /// </summary>
         PackageCs = 0,
 
