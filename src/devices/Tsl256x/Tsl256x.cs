@@ -24,14 +24,14 @@ namespace IoT.Device.Tsl256x
         private PackageType _packageType;
 
         /// <summary>
-        /// When the address select pin is to ground
-        /// </summary>
-        public const int SecondI2cAddress = 0x29;
-
-        /// <summary>
         /// When the address select pin if float
         /// </summary>
         public const int DefaultI2cAddress = 0x39;
+
+        /// <summary>
+        /// When the address select pin is to ground
+        /// </summary>
+        public const int SecondI2cAddress = 0x29;
 
         /// <summary>
         /// When the select pin is to VDD
