@@ -20,7 +20,6 @@ using Iot.Device.Arduino.Sample;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Common;
-using Iot.Device.CpuTemperature;
 using Iot.Device.HardwareMonitor;
 using UnitsNet;
 
