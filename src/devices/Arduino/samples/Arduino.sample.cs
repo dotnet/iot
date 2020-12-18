@@ -278,7 +278,7 @@ namespace Arduino.Samples
         {
             // Use Pin 6
             const int gpio = 6;
-            const int analogPin = 15;
+            int analogPin = GetAnalogPin1(board);
             var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
             var analogController = board.CreateAnalogController(0);
 
@@ -305,7 +305,7 @@ namespace Arduino.Samples
 
         public static void TestAnalogCallback(ArduinoBoard board)
         {
-            const int analogPin = 15;
+            int analogPin = GetAnalogPin1(board);
             var analogController = board.CreateAnalogController(0);
 
             var pin = analogController.OpenPin(analogPin);
@@ -330,6 +330,21 @@ namespace Arduino.Samples
             pin.DisableAnalogValueChangedEvent();
             pin.Dispose();
             analogController.Dispose();
+        }
+
+        private static int GetAnalogPin1(ArduinoBoard board)
+        {
+            int analogPin = 15;
+            foreach (var pin in board.SupportedPinConfigurations)
+            {
+                if (pin.AnalogPinNumber == 1)
+                {
+                    analogPin = pin.Pin;
+                    break;
+                }
+            }
+
+            return analogPin;
         }
 
         public static void TestInput(ArduinoBoard board)
@@ -483,7 +498,7 @@ namespace Arduino.Samples
                     Console.WriteLine("Unable to read DHT11");
                 }
 
-                Thread.Sleep(2000);
+                Thread.Sleep(2500);
             }
 
             Console.ReadKey();

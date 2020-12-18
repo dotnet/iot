@@ -10,14 +10,14 @@ using System.Device.Gpio;
 namespace System.Device.Analog
 {
     /// <summary>
-    /// Driver vor analog input pins
+    /// Driver for analog input pins
     /// </summary>
     public abstract class AnalogInputPin : IDisposable
     {
         /// <summary>
         /// Fires when a value is changed for which a trigger is registered
         /// </summary>
-        public event ValueChangedEventHandler ValueChanged;
+        public event ValueChangedEventHandler? ValueChanged;
 
         /// <summary>
         /// Construct an instance of an analog pin.

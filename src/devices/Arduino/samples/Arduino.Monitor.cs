@@ -75,7 +75,7 @@ namespace Arduino.Samples
             }
         }
 
-        private static void BoardOnLogMessages(string message, Exception exception)
+        private static void BoardOnLogMessages(string message, Exception? exception)
         {
             Console.WriteLine("Log message: " + message);
             if (exception != null)
@@ -88,7 +88,7 @@ namespace Arduino.Samples
         {
             const int Gpio2 = 2;
             const int MaxMode = 10;
-            const double StationAltitude = 650;
+            Length stationAltitude = Length.FromMeters(650);
             int mode = 0;
             var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
             gpioController.OpenPin(Gpio2);
@@ -114,7 +114,7 @@ namespace Arduino.Samples
 
             gpioController.RegisterCallbackForPinValueChangedEvent(Gpio2, PinEventTypes.Falling, ChangeMode);
             var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bmp280.DefaultI2cAddress));
-            Bmp280 bmp;
+            Bmp280? bmp;
             try
             {
                 bmp = new Bmp280(device);
@@ -169,7 +169,7 @@ namespace Arduino.Samples
                         modeName = "Temperature / Barometric Pressure";
                         if (bmp != null && bmp.TryReadTemperature(out Temperature temp) && bmp.TryReadPressure(out Pressure p2))
                         {
-                            Pressure p3 = WeatherHelper.CalculateBarometricPressure(p2, temp, StationAltitude);
+                            Pressure p3 = WeatherHelper.CalculateBarometricPressure(p2, temp, stationAltitude);
                             disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s1}", temp, p3));
                         }
                         else
@@ -195,7 +195,7 @@ namespace Arduino.Samples
                         modeName = "Dew point";
                         if (bmp != null && bmp.TryReadPressure(out p2) && board.TryReadDht(3, 11, out temp, out humidity))
                         {
-                            Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity.Percent);
+                            Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
                             disp.Output.ReplaceLine(1, dewPoint.ToString("s1", CultureInfo.CurrentCulture));
                         }
                         else

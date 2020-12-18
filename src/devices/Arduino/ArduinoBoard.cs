@@ -27,11 +27,11 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoBoard : IDisposable
     {
-        private SerialPort _serialPort;
-        private Stream _serialPortStream;
-        private FirmataDevice _firmata;
-        private Version _firmwareVersion;
-        private Version _protocolVersion;
+        private SerialPort? _serialPort;
+        private Stream _dataStream;
+        private FirmataDevice? _firmata;
+        private Version? _firmwareVersion;
+        private Version? _protocolVersion;
         private string _firmwareName;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
 
@@ -44,8 +44,10 @@ namespace Iot.Device.Arduino
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
         {
-            _serialPortStream = serialPortStream;
+            _dataStream = serialPortStream;
             _spiEnabled = 0;
+            _supportedPinConfigurations = new List<SupportedPinConfiguration>();
+            _firmwareName = string.Empty;
         }
 
         /// <summary>
@@ -58,7 +60,9 @@ namespace Iot.Device.Arduino
         {
             _serialPort = new SerialPort(portName, baudRate);
             _serialPort.Open();
-            _serialPortStream = _serialPort.BaseStream;
+            _dataStream = _serialPort.BaseStream;
+            _supportedPinConfigurations = new List<SupportedPinConfiguration>();
+            _firmwareName = string.Empty;
         }
 
         /// <summary>
@@ -76,7 +80,75 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Attach to this event to retrieve log messages
         /// </summary>
-        public event Action<string, Exception> LogMessages;
+        public event Action<string, Exception?>? LogMessages;
+
+        /// <summary>
+        /// Searches the given list of com ports for a firmata device.
+        /// </summary>
+        /// <param name="comPorts">List of com ports. See <see cref="GetSerialPortNames"/>.</param>
+        /// <param name="baudRates">List of baud rates to test. <see cref="CommonBaudRates"/>.</param>
+        /// <returns>A board, already open and initialized. Null if none was found.</returns>
+        public static ArduinoBoard? FindBoard(List<string> comPorts, List<int> baudRates)
+        {
+            foreach (var port in comPorts)
+            {
+                foreach (var baud in baudRates)
+                {
+                    ArduinoBoard? b = null;
+                    try
+                    {
+                        b = new ArduinoBoard(port, baud);
+                        b.Initialize();
+                        return b;
+                    }
+                    catch (Exception x) when (x is NotSupportedException || x is TimeoutException || x is IOException || x is UnauthorizedAccessException)
+                    {
+                        b?.Dispose();
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Searches all available com ports for an Arduino device
+        /// </summary>
+        /// <returns>A board, already open and initialized. Null if none was found.</returns>
+        public static ArduinoBoard? FindBoard()
+        {
+            return FindBoard(GetSerialPortNames(), CommonBaudRates());
+        }
+
+        /// <summary>
+        /// Returns the list of available serial ports
+        /// </summary>
+        /// <returns>A list of available serial ports</returns>
+        /// <exception cref="Win32Exception">There was an error retrieving the list</exception>
+        public static List<string> GetSerialPortNames()
+        {
+            return SerialPort.GetPortNames().ToList();
+        }
+
+        /// <summary>
+        /// Returns a list of commonly used baud rates.
+        /// </summary>
+        public static List<int> CommonBaudRates()
+        {
+            return new List<int>()
+            {
+                9600,
+                19200,
+                18400,
+                57600,
+                115200,
+                230400,
+                250000,
+                500000,
+                1000000,
+                2000000,
+            };
+        }
 
         /// <summary>
         /// Initialize the board connection. This must be called before any other methods of this class.
@@ -84,13 +156,18 @@ namespace Iot.Device.Arduino
         /// <exception cref="NotSupportedException">The Firmata firmware on the connected board is too old.</exception>
         public virtual void Initialize()
         {
+            if (_firmata != null)
+            {
+                throw new InvalidOperationException("Board already initialized");
+            }
+
             _firmata = new FirmataDevice();
-            _firmata.Open(_serialPortStream);
+            _firmata.Open(_dataStream);
             _firmata.OnError += FirmataOnError;
             _protocolVersion = _firmata.QueryFirmataVersion();
             if (_protocolVersion < _firmata.QuerySupportedFirmataVersion())
             {
-                throw new NotSupportedException($"Firmata version on board is {_protocolVersion}. Expected at least {_firmata.QuerySupportedFirmataVersion()}.");
+                throw new NotSupportedException($"Firmata version on board is {_protocolVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
             }
 
             Log($"Firmata version on board is {_protocolVersion}.");
@@ -119,7 +196,7 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                return _firmwareVersion;
+                return _firmwareVersion ?? new Version();
             }
         }
 
@@ -130,7 +207,23 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                return _firmwareName;
+                return _firmwareName ?? string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Firmata version found on the board.
+        /// </summary>
+        public Version FirmataVersion
+        {
+            get
+            {
+                if (_protocolVersion == null)
+                {
+                    return new Version();
+                }
+
+                return _protocolVersion;
             }
         }
 
@@ -138,11 +231,14 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                return _firmata;
+                return _firmata ?? throw new ObjectDisposedException(nameof(ArduinoBoard));
             }
         }
 
-        internal List<SupportedPinConfiguration> SupportedPinConfigurations
+        /// <summary>
+        /// Returns the list of capabilities per pin
+        /// </summary>
+        public List<SupportedPinConfiguration> SupportedPinConfigurations
         {
             get
             {
@@ -155,7 +251,7 @@ namespace Iot.Device.Arduino
             LogMessages?.Invoke(message, null);
         }
 
-        private void FirmataOnError(string message, Exception innerException)
+        private void FirmataOnError(string message, Exception? innerException)
         {
             LogMessages?.Invoke(message, innerException);
         }
@@ -270,11 +366,11 @@ namespace Iot.Device.Arduino
         protected virtual void Dispose(bool disposing)
         {
             // Do this first, to force any blocking read operations to end
-            if (_serialPortStream != null)
+            if (_dataStream != null)
             {
-                _serialPortStream.Close();
-                _serialPortStream.Dispose();
-                _serialPortStream = null;
+                _dataStream.Close();
+                _dataStream.Dispose();
+                _dataStream = null!;
             }
 
             if (_serialPort != null)
@@ -307,7 +403,7 @@ namespace Iot.Device.Arduino
             _spiEnabled++;
             if (_spiEnabled == 1)
             {
-                _firmata.EnableSpi();
+                _firmata?.EnableSpi();
             }
         }
 
@@ -316,7 +412,7 @@ namespace Iot.Device.Arduino
             _spiEnabled--;
             if (_spiEnabled == 0)
             {
-                _firmata.DisableSpi();
+                _firmata?.DisableSpi();
             }
         }
     }

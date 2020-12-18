@@ -67,7 +67,7 @@ namespace Iot.Device.Arduino
                 {
                     Board.DisableSpi();
                     // To make sure this is called only once (and any further attempts to use this instance fail)
-                    Board = null;
+                    Board = null!;
                 }
             }
 
