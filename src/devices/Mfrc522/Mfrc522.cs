@@ -584,7 +584,7 @@ namespace Iot.Device.Mfrc522
         /// <param name="blockAddress">The block address to authenticate.</param>
         /// <param name="cardUid">The 4 bytes UUID of the card.</param>
         /// <returns>True if success.</returns>
-        public Status MifareAuthenticate(Span<byte> key, MifareCardCommand mifareCommand, byte blockAddress, Span<byte> cardUid)
+        public Status MifareAuthenticate(ReadOnlySpan<byte> key, MifareCardCommand mifareCommand, byte blockAddress, ReadOnlySpan<byte> cardUid)
         {
             if (mifareCommand != MifareCardCommand.AuthenticationA && mifareCommand != MifareCardCommand.AuthenticationB)
             {
