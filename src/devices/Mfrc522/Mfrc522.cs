@@ -152,10 +152,7 @@ namespace Iot.Device.Mfrc522
         public Gain Gain
         {
             get => (Gain)(ReadRegister(Register.RFCfg) & (byte)Gain.G48dB);
-            set
-            {
-                WriteRegister(Register.RFCfg, (byte)value);
-            }
+            set => WriteRegister(Register.RFCfg, (byte)value);
         }
 
         /// <summary>

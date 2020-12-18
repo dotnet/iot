@@ -104,8 +104,8 @@ Console.WriteLine();
 var mifare = new MifareCard(mfrc522, 0);
 mifare.SerialNumber = card.NfcId;
 mifare.Capacity = MifareCardCapacity.Mifare1K;
-mifare.KeyA = MifareCard.DefaultKeyA;
-mifare.KeyB = MifareCard.DefaultKeyB;
+mifare.KeyA = MifareCard.DefaultKeyA.ToArray();
+mifare.KeyB = MifareCard.DefaultKeyB.ToArray();
 int ret;
 
 for (byte block = 0; block < 64; block++)
@@ -119,19 +119,19 @@ for (byte block = 0; block < 64; block++)
         // Those next lines shows how to try to authenticate with other known default keys
         mifare.ReselectCard();
         // Try the other key
-        mifare.KeyA = MifareCard.DefaultKeyA;
+        mifare.KeyA = MifareCard.DefaultKeyA.ToArray();
         mifare.Command = MifareCardCommand.AuthenticationA;
         ret = mifare.RunMifareCardCommand();
         if (ret < 0)
         {
             mifare.ReselectCard();
-            mifare.KeyA = MifareCard.DefaultBlocksNdefKeyA;
+            mifare.KeyA = MifareCard.DefaultBlocksNdefKeyA.ToArray();
             mifare.Command = MifareCardCommand.AuthenticationA;
             ret = mifare.RunMifareCardCommand();
             if (ret < 0)
             {
                 mifare.ReselectCard();
-                mifare.KeyA = MifareCard.DefaultFirstBlockNdefKeyA;
+                mifare.KeyA = MifareCard.DefaultFirstBlockNdefKeyA.ToArray();
                 mifare.Command = MifareCardCommand.AuthenticationA;
                 ret = mifare.RunMifareCardCommand();
                 if (ret < 0)
@@ -184,6 +184,5 @@ for (byte block = 0; block < 64; block++)
     else
     {
         Console.WriteLine($"Authentication error");
-
     }
 }
