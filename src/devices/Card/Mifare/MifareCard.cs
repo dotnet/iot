@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.ComponentModel.Design;
-using System.Data;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Threading;
 using Iot.Device.Ndef;
 
 namespace Iot.Device.Card.Mifare
@@ -25,28 +21,32 @@ namespace Iot.Device.Card.Mifare
         private static readonly byte[] Mifare2KBlock64 = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
         private static readonly byte[] Mifare2KBlock66 = new byte[] { 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05 };
         private static readonly byte[] Mifare4KBlock64 = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+        private static readonly byte[] StaticDefaultKeyA = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        private static readonly byte[] StaticDefaultKeyB = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+        private static readonly byte[] StaticDefaultFirstBlockNdefKeyA = new byte[6] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5 };
+        private static readonly byte[] StaticDefaultBlocksNdefKeyA = new byte[6] { 0xD3, 0xF7, 0xD3, 0xF7, 0xD3, 0xF7 };
 
         /// <summary>
         /// Default Key A
         /// </summary>
-        public byte[] DefaultKeyA { get; } = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+        public static ReadOnlySpan<byte> DefaultKeyA => StaticDefaultKeyA;
 
         /// <summary>
         /// Default Key B
         /// </summary>
-        public byte[] DefaultKeyB { get; } = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+        public static ReadOnlySpan<byte> DefaultKeyB => StaticDefaultKeyB;
 
         /// <summary>
         /// Default first block Key A for NDEF card
         /// </summary>
         /// <remarks>See https://www.nxp.com/docs/en/application-note/AN1304.pdf for more information</remarks>
-        public byte[] DefaultFirstBlockNdefKeyA { get; } = new byte[6] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5 };
+        public static ReadOnlySpan<byte> DefaultFirstBlockNdefKeyA => StaticDefaultFirstBlockNdefKeyA;
 
         /// <summary>
         /// Default block Key A for NDEF card
         /// </summary>
         /// <remarks>See https://www.nxp.com/docs/en/application-note/AN1304.pdf for more information</remarks>
-        public byte[] DefaultBlocksNdefKeyA { get; } = new byte[6] { 0xD3, 0xF7, 0xD3, 0xF7, 0xD3, 0xF7 };
+        public static ReadOnlySpan<byte> DefaultBlocksNdefKeyA => StaticDefaultBlocksNdefKeyA;
 
         /// <summary>
         /// The tag number detected by the reader, only 1 or 2
@@ -790,7 +790,7 @@ namespace Iot.Device.Card.Mifare
 
             int nbBlocks = GetNumberBlocks();
 
-            byte[] keyFormat = keyB.Length == 0 ? DefaultKeyB : keyB.ToArray();
+            byte[] keyFormat = keyB.Length == 0 ? StaticDefaultKeyB : keyB.ToArray();
             if (keyFormat.Length != 6)
             {
                 throw new ArgumentException($"{nameof(keyB)} can only be empty or 6 bytes length");
@@ -868,7 +868,7 @@ namespace Iot.Device.Card.Mifare
                         Data[7] = 0x07;
                         Data[8] = 0x88;
                         Data[9] = 0x40;
-                        DefaultBlocksNdefKeyA.CopyTo(Data, 6);
+                        StaticDefaultBlocksNdefKeyA.CopyTo(Data, 6);
                         keyFormat.CopyTo(Data, 10);
                         authOk &= WriteDataBlock((byte)block);
                     }
@@ -965,7 +965,7 @@ namespace Iot.Device.Card.Mifare
                 }
                 else
                 {
-                    ret = AuthenticateBlockKeyA(DefaultBlocksNdefKeyA, (byte)(block + inc));
+                    ret = AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, (byte)(block + inc));
                 }
 
                 if (!ret)
@@ -1013,40 +1013,40 @@ namespace Iot.Device.Card.Mifare
 
             // First write the data for the format
             // All block data coming from https://www.nxp.com/docs/en/application-note/AN1304.pdf page 30+
-            var authOk = AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, 1);
+            var authOk = AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, 1);
             authOk &= ReadDataBlock(1);
             authOk &= Data.SequenceEqual(Mifare1KBlock1);
-            authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, 2);
+            authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, 2);
             authOk &= ReadDataBlock(2);
             authOk &= Data.SequenceEqual(Mifare1KBlock2);
 
             if (Capacity == MifareCardCapacity.Mifare2K)
             {
                 byte block = 16 * 4;
-                authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
+                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
                 authOk &= Data.SequenceEqual(Mifare2KBlock64);
                 block++;
-                authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
+                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
                 authOk &= Data.SequenceEqual(Mifare1KBlock2); // 65 is same as 2
                 block++;
-                authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
+                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
                 authOk &= Data.SequenceEqual(Mifare2KBlock66);
             }
             else if (Capacity == MifareCardCapacity.Mifare4K)
             {
                 byte block = 16 * 4;
-                authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
+                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
                 authOk &= Data.SequenceEqual(Mifare4KBlock64);
                 block++;
-                authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
+                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
                 authOk &= Data.SequenceEqual(Mifare1KBlock2); // 65 is same as 2
                 block++;
-                authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, block);
+                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
                 authOk &= ReadDataBlock(block);
                 authOk &= Data.SequenceEqual(Mifare1KBlock2); // 66 is same as 2
             }
@@ -1059,11 +1059,11 @@ namespace Iot.Device.Card.Mifare
                 {
                     if ((block == 3) || (block == 67))
                     {
-                        authOk &= AuthenticateBlockKeyA(DefaultFirstBlockNdefKeyA, (byte)block);
+                        authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, (byte)block);
                     }
                     else
                     {
-                        authOk &= AuthenticateBlockKeyA(DefaultBlocksNdefKeyA, (byte)block);
+                        authOk &= AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, (byte)block);
                     }
 
                     if (authOk)
@@ -1161,11 +1161,11 @@ namespace Iot.Device.Card.Mifare
 
             if (KeyB is not object or { Length: not 6 })
             {
-                KeyB = DefaultKeyB;
+                KeyB = StaticDefaultKeyB;
             }
 
             // Read block 4 and check for the data, it should be present in this one
-            var authOk = AuthenticateBlockKeyA(DefaultBlocksNdefKeyA, 4);
+            var authOk = AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, 4);
             authOk &= ReadDataBlock(4);
 
             if (!authOk)
@@ -1210,7 +1210,7 @@ namespace Iot.Device.Card.Mifare
                     continue;
                 }
 
-                authOk = AuthenticateBlockKeyA(DefaultBlocksNdefKeyA, (byte)block);
+                authOk = AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, (byte)block);
                 if (!authOk)
                 {
                     return false;

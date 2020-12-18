@@ -712,7 +712,7 @@ namespace Iot.Device.Pn5180
         /// <param name="blockAddress">The block address to authenticate</param>
         /// <param name="cardUid">The 4 bytes UUID of the card</param>
         /// <returns>True if success</returns>
-        public bool MifareAuthenticate(Span<byte> key, MifareCardCommand mifareCommand, byte blockAddress, Span<byte> cardUid)
+        public bool MifareAuthenticate(ReadOnlySpan<byte> key, MifareCardCommand mifareCommand, byte blockAddress, ReadOnlySpan<byte> cardUid)
         {
             LogInfo.Log($"{nameof(MifareAuthenticate)}: ", LogLevel.Debug);
             if (key.Length != 6)
