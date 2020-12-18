@@ -62,7 +62,7 @@ gpio.Write(10, PinValue.High);
 3. Overriding the mapping method for converting a board pin number to the driver's logical numbering scheme.
     ```C#
     // Mapping from board pins to logic pins.
-    private readonly int[] _pinNumberConverter = new int[27]
+    private static readonly int[] _pinNumberConverter = new int[27]
     {
         -1, -1, -1, MapPinNumber('A', 12), -1, MapPinNumber('A', 11), -1, MapPinNumber('A', 6), MapPinNumber('G', 6), -1,
         MapPinNumber('G', 7), MapPinNumber('A', 1), MapPinNumber('A', 7), MapPinNumber('A', 0), -1, MapPinNumber('A', 3),
@@ -77,3 +77,7 @@ gpio.Write(10, PinValue.High);
             throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
     }
     ```
+
+## References
+
+The wiki of the linux-sunxi community: https://linux-sunxi.org/Main_Page
