@@ -126,7 +126,7 @@ namespace System.Device.Analog
         /// </summary>
         /// <param name="masterController">If an external interrupt handler is required, it can be provided here. Can be null if another interrupt feature is available</param>
         /// <param name="masterPin">Input pin on the master controller.</param>
-        public abstract void EnableAnalogValueChangedEvent(GpioController masterController, int masterPin);
+        public abstract void EnableAnalogValueChangedEvent(GpioController? masterController, int masterPin);
 
         /// <summary>
         /// Disables the event callback

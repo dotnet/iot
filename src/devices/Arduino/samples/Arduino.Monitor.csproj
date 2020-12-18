@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
 	<EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
@@ -13,7 +13,7 @@
   
   <ItemGroup>
     <Compile Include="CharacterDisplay.cs" />
-	<Compile Include="Arduino.Monitor.cs" />
+    <Compile Include="Arduino.Monitor.cs" />
   </ItemGroup>
 
   <ItemGroup>

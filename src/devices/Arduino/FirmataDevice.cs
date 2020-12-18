@@ -78,7 +78,6 @@ namespace Iot.Device.Arduino
             _dataQueue = new Queue<byte>();
             _lastResponse = new List<byte>();
             _lastRequestId = 1;
-            _lastIlExecutionError = 0;
             _firmwareName = string.Empty;
         }
 
@@ -99,16 +98,16 @@ namespace Iot.Device.Arduino
                     throw new InvalidOperationException("The device is already open");
                 }
 
-            _firmataStream = stream;
-            if (_firmataStream.CanRead && _firmataStream.CanWrite)
-            {
-                StartListening();
+                _firmataStream = stream;
+                if (_firmataStream.CanRead && _firmataStream.CanWrite)
+                {
+                    StartListening();
+                }
+                else
+                {
+                    throw new NotSupportedException("Need a read-write stream to the hardware device");
+                }
             }
-            else
-            {
-                throw new NotSupportedException("Need a read-write stream to the hardware device");
-            }
-        }
         }
 
         public void Close()
@@ -1127,7 +1126,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out Ratio humidity)
+        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
         {
             if (_firmataStream == null)
             {
@@ -1167,7 +1166,7 @@ namespace Iot.Device.Arduino
                 int h = _lastResponse[5] | _lastResponse[6] << 7;
 
                 temperature = Temperature.FromDegreesCelsius(t / 10.0);
-                humidity = Ratio.FromPercent(h / 10.0);
+                humidity = RelativeHumidity.FromPercent(h / 10.0);
             }
 
             return true;
@@ -1181,7 +1180,6 @@ namespace Iot.Device.Arduino
             }
         }
 
-        
         private void SendValuesAsTwo7bitBytes(ReadOnlySpan<byte> values)
         {
             if (_firmataStream == null)

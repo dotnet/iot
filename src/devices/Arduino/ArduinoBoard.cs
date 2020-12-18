@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Device.Analog;
 using System.Text;
 using System.Device.Gpio;
@@ -348,7 +349,7 @@ namespace Iot.Device.Arduino
         /// <param name="temperature">Temperature</param>
         /// <param name="humidity">Relative humidity</param>
         /// <returns>True on success, false otherwise</returns>
-        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out Ratio humidity)
+        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
         {
             if (!_supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.DHT))
             {

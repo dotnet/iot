@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -10,9 +9,12 @@ using System.Text;
 
 namespace Iot.Device.Arduino
 {
-    internal class SupportedPinConfiguration
+    /// <summary>
+    /// Describes the capabilities of a pin
+    /// </summary>
+    public class SupportedPinConfiguration
     {
-        public SupportedPinConfiguration(int pin)
+        internal SupportedPinConfiguration(int pin)
         {
             Pin = pin;
             PinModes = new List<SupportedMode>();
@@ -21,16 +23,25 @@ namespace Iot.Device.Arduino
             AnalogPinNumber = 127; // = Not an analog pin
         }
 
+        /// <summary>
+        /// The pin number
+        /// </summary>
         public int Pin
         {
             get;
         }
 
+        /// <summary>
+        /// The list of supported modes for this pin
+        /// </summary>
         public List<SupportedMode> PinModes
         {
             get;
         }
 
+        /// <summary>
+        /// The width of the PWM register, typical value is 10 (the maximum value is then 1023)
+        /// </summary>
         public int PwmResolutionBits
         {
             get;
@@ -55,6 +66,7 @@ namespace Iot.Device.Arduino
             internal set;
         }
 
+        /// <inheritdoc />
         public override string ToString()
         {
             string pinModes = String.Join(", ", PinModes);
