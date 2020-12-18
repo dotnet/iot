@@ -9,10 +9,11 @@ namespace Iot.Device.Arduino
 {
     public sealed class ArduinoMethodDeclaration
     {
-        public ArduinoMethodDeclaration(int token, MethodBase methodBase, byte[]? ilBytes)
+        public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, byte[]? ilBytes)
         {
             Index = -1;
             MethodBase = methodBase;
+            RequestedBy = requestedBy;
             IlBytes = ilBytes;
             Flags = MethodFlags.None;
             Token = token;
@@ -94,6 +95,7 @@ namespace Iot.Device.Arduino
             NativeMethod = nativeMethod;
             MaxLocals = MaxStack = 0;
             HasBody = false;
+            RequestedBy = null;
             ArgumentCount = methodInfo.GetParameters().Length;
             if (methodInfo.CallingConvention.HasFlag(CallingConventions.HasThis))
             {
@@ -126,6 +128,11 @@ namespace Iot.Device.Arduino
 
         public int Token { get; }
         public MethodBase MethodBase { get; }
+
+        /// <summary>
+        /// To simplify backtracking: The method that first requested this one to be loaded
+        /// </summary>
+        public ArduinoMethodDeclaration? RequestedBy { get; }
 
         public byte[]? IlBytes { get; }
 

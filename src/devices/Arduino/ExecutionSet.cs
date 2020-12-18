@@ -268,12 +268,12 @@ namespace Iot.Device.Arduino
 
         public bool AddClass(Class type)
         {
-            if (_classes.Any(x => x.Cls == type.Cls))
+            if (_classes.Any(x => x.TheType == type.TheType))
             {
                 return false;
             }
 
-            if (_classesReplaced.Any(x => x.Original == type.Cls))
+            if (_classesReplaced.Any(x => x.Original == type.TheType))
             {
                 throw new InvalidOperationException($"Class {type} should have been replaced by its replacement");
             }
@@ -284,7 +284,7 @@ namespace Iot.Device.Arduino
 
         public bool HasDefinition(Type classType)
         {
-            if (_classes.Any(x => x.Cls == classType))
+            if (_classes.Any(x => x.TheType == classType))
             {
                 return true;
             }
@@ -414,18 +414,18 @@ namespace Iot.Device.Arduino
 
         public class Class
         {
-            public Class(Type cls, int dynamicSize, int staticSize, int newToken, List<VariableOrMethod> members)
+            public Class(Type type, int dynamicSize, int staticSize, int newToken, List<VariableOrMethod> members)
             {
-                Cls = cls;
+                TheType = type;
                 DynamicSize = dynamicSize;
                 StaticSize = staticSize;
                 Members = members;
                 NewToken = newToken;
                 Interfaces = new List<Type>();
-                Name = cls.ToString();
+                Name = type.ToString();
             }
 
-            public Type Cls
+            public Type TheType
             {
                 get;
             }
@@ -459,13 +459,13 @@ namespace Iot.Device.Arduino
                 get
                 {
                     // Type initializers of open generic types are pointless to execute
-                    if (Cls.ContainsGenericParameters)
+                    if (TheType.ContainsGenericParameters)
                     {
                         return true;
                     }
 
                     // Don't run these init functions, to complicated or depend on native functions
-                    return Cls.FullName == "System.SR" || Cls.FullName == "System.HashCode";
+                    return TheType.FullName == "System.SR" || TheType.FullName == "System.HashCode";
                 }
             }
 

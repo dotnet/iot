@@ -437,8 +437,8 @@ namespace Iot.Device.Arduino
                 List<FieldInfo> fields = new List<FieldInfo>();
                 List<MemberInfo> methods = new List<MemberInfo>();
 
-                GetFields(cls.Cls, fields, methods);
-                string name = cls.Cls.Name;
+                GetFields(cls.TheType, fields, methods);
+                string name = cls.TheType.Name;
                 for (var index = 0; index < methods.Count; index++)
                 {
                     var m = methods[index];
@@ -446,7 +446,7 @@ namespace Iot.Device.Arduino
                     {
                         // If this method is required because base implementations are called, we also need its implementation (obviously)
                         // Unfortunately, this can recursively require further classes and methods
-                        PrepareCodeInternal(set, (MethodBase)m); // This cast must work
+                        PrepareCodeInternal(set, (MethodBase)m, null); // This cast must work
 
                         List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x)).ToList();
                         cls.Members.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, set.GetOrAddMethodToken((MethodBase)m), baseTokens));
@@ -460,13 +460,13 @@ namespace Iot.Device.Arduino
                 // Let's hope the list no more changes, but in theory we don't know (however, creating static ctors that
                 // depend on other classes might give a big problem)
                 var cls = set.Classes[i];
-                var cctor = cls.Cls.TypeInitializer;
+                var cctor = cls.TheType.TypeInitializer;
                 if (cctor == null || cls.SuppressInit)
                 {
                     continue;
                 }
 
-                PrepareCodeInternal(set, cctor);
+                PrepareCodeInternal(set, cctor, null);
             }
         }
 
@@ -474,7 +474,7 @@ namespace Iot.Device.Arduino
         {
             foreach (var c in set.Classes)
             {
-                var cls = c.Cls;
+                var cls = c.TheType;
                 Int32 parentToken = 0;
                 Type parent = cls.BaseType!;
                 if (parent != null)
@@ -953,7 +953,7 @@ namespace Iot.Device.Arduino
             var exec = CreateExecutionSet();
             PrepareLowLevelInterface(exec);
             PrepareClass(exec, mainClass);
-            PrepareCodeInternal(exec, mainEntryPoint.Method);
+            PrepareCodeInternal(exec, mainEntryPoint.Method, null);
 
             exec.MainEntryPointInternal = mainEntryPoint.Method;
             _board.Log($"Estimated program memory usage before finalization: {exec.EstimateRequiredMemory()} bytes.");
@@ -971,7 +971,7 @@ namespace Iot.Device.Arduino
             }
 
             var set = CreateExecutionSet();
-            PrepareCodeInternal(set, mainEntryPoint.Method);
+            PrepareCodeInternal(set, mainEntryPoint.Method, null);
             _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
             FinalizeExecutionSet(set);
             _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
@@ -988,7 +988,7 @@ namespace Iot.Device.Arduino
                 throw new ArgumentNullException(nameof(mainEntryPoint));
             }
 
-            PrepareCodeInternal(set, mainEntryPoint.Method);
+            PrepareCodeInternal(set, mainEntryPoint.Method, null);
             _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
             FinalizeExecutionSet(set);
             _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
@@ -1004,7 +1004,7 @@ namespace Iot.Device.Arduino
                 throw new ArgumentNullException(nameof(mainEntryPoint));
             }
 
-            PrepareCodeInternal(set, mainEntryPoint);
+            PrepareCodeInternal(set, mainEntryPoint, null);
             _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
             FinalizeExecutionSet(set);
             _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
@@ -1013,7 +1013,7 @@ namespace Iot.Device.Arduino
             return GetTask(set, mainEntryPoint);
         }
 
-        public void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo)
+        public void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo, ArduinoMethodDeclaration? parent)
         {
             /* if (set.GetReplacement(methodInfo.DeclaringType!) != null)
             {
@@ -1071,7 +1071,7 @@ namespace Iot.Device.Arduino
             }
 
             int tk = set.GetOrAddMethodToken(methodInfo);
-            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, ilBytes);
+            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, ilBytes);
 
             if (set.AddMethod(newInfo))
             {
@@ -1083,11 +1083,11 @@ namespace Iot.Device.Arduino
                     PrepareClass(set, methodInfo.DeclaringType);
                 }
 
-                PrepareDependencies(set, methodInfo);
+                PrepareDependencies(set, methodInfo, newInfo);
             }
         }
 
-        private void PrepareDependencies(ExecutionSet set, MethodBase method)
+        private void PrepareDependencies(ExecutionSet set, MethodBase method, ArduinoMethodDeclaration parent)
         {
             HashSet<MethodBase> methods = new HashSet<MethodBase>();
 
@@ -1111,7 +1111,7 @@ namespace Iot.Device.Arduino
                     PrepareClass(set, dep.DeclaringType);
                 }
 
-                PrepareCodeInternal(set, dep);
+                PrepareCodeInternal(set, dep, parent);
             }
         }
 
@@ -1146,15 +1146,15 @@ namespace Iot.Device.Arduino
             for (var index = 0; index < count; index++)
             {
                 ExecutionSet.Class? cls = set.Classes[index];
-                if (!cls.SuppressInit && cls.Cls.TypeInitializer != null)
+                if (!cls.SuppressInit && cls.TheType.TypeInitializer != null)
                 {
                     _board.Log($"Running static initializer of {cls}. Step {index}/{count}...");
-                    var task = GetTask(set, cls.Cls.TypeInitializer);
+                    var task = GetTask(set, cls.TheType.TypeInitializer);
                     task.Invoke(CancellationToken.None);
                     task.WaitForResult();
                     if (task.GetMethodResults(set, out _, out var state) == false || state != MethodState.Stopped)
                     {
-                        throw new InvalidProgramException($"Error executing static ctor of class {cls.Cls}");
+                        throw new InvalidProgramException($"Error executing static ctor of class {cls.TheType}");
                     }
                 }
             }
