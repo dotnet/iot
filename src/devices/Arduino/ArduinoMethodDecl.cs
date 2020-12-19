@@ -86,23 +86,25 @@ namespace Iot.Device.Arduino
             Name = $"{MethodBase.DeclaringType} - {methodBase}";
         }
 
-        public ArduinoMethodDeclaration(int token, MethodInfo methodInfo, MethodFlags flags, ArduinoImplementation nativeMethod)
+        public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, MethodFlags flags, ArduinoImplementation nativeMethod)
         {
             Index = -1;
             Token = token;
-            MethodBase = methodInfo;
+            MethodBase = methodBase;
             Flags = flags;
             NativeMethod = nativeMethod;
             MaxLocals = MaxStack = 0;
             HasBody = false;
-            RequestedBy = null;
-            ArgumentCount = methodInfo.GetParameters().Length;
-            if (methodInfo.CallingConvention.HasFlag(CallingConventions.HasThis))
+            RequestedBy = requestedBy;
+            ArgumentCount = methodBase.GetParameters().Length;
+            if (methodBase.CallingConvention.HasFlag(CallingConventions.HasThis))
             {
                 ArgumentCount += 1;
             }
 
-            if (methodInfo.ReturnParameter.ParameterType == typeof(void) || methodInfo.IsConstructor)
+            MethodInfo? mi = methodBase as MethodInfo;
+
+            if ((mi != null && mi.ReturnParameter.ParameterType == typeof(void)) || methodBase.IsConstructor)
             {
                 Flags |= MethodFlags.VoidOrCtor;
             }

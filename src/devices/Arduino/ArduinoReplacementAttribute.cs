@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Constructor | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Class)]
     internal class ArduinoReplacementAttribute : Attribute
     {
         private bool _includingPrivates;

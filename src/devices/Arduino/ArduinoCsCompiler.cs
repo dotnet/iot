@@ -101,7 +101,7 @@ namespace Iot.Device.Arduino
             typeof(MiniException), typeof(MiniThread),
             typeof(MiniEnvironment), typeof(MiniRuntimeHelpers), typeof(MiniType), typeof(MiniValueType),
             typeof(MiniResourceManager), typeof(MiniEnum), typeof(MiniCultureInfo), typeof(MiniBitConverter),
-            typeof(MiniCLRConfig)
+            typeof(MiniCLRConfig), typeof(MiniSR), // typeof(MiniBitOperations)
         };
 
         private readonly ArduinoBoard _board;
@@ -120,6 +120,18 @@ namespace Iot.Device.Arduino
             {
                 ClearAllData(true);
             }
+
+            // Generate the list of all replacement classes (they're all called Mini*)
+            // For some unknown (and weird) reason, auto-detection doesn't work. It causes ctors of generic classes to be called
+            // on open types.
+            ////_replacementClasses = new List<Type>();
+            ////foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+            ////{
+            ////    if (type.GetCustomAttribute<ArduinoReplacementAttribute>() != null)
+            ////    {
+            ////        _replacementClasses.Add(type);
+            ////    }
+            ////}
         }
 
         private string GetMethodName(ArduinoMethodDeclaration decl)
@@ -230,7 +242,7 @@ namespace Iot.Device.Arduino
                     }
 
                     int token = set.GetOrAddMethodToken(method);
-                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, MethodFlags.SpecialMethod, nativeMethod);
+                    ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, null, MethodFlags.SpecialMethod, nativeMethod);
                     // Todo: Move this member to the ExecutionSet
                     _methodInfos.Add(method, decl);
                     set.AddMethod(decl);
@@ -266,7 +278,13 @@ namespace Iot.Device.Arduino
                         ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
                         if (iaMethod != null)
                         {
-                            methodToReplace = ia.TypeToReplace!.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static).SingleOrDefault(x => MethodsHaveSameSignature(x, m));
+                            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+                            if (ia.IncludingPrivates)
+                            {
+                                flags |= BindingFlags.NonPublic;
+                            }
+
+                            methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => MethodsHaveSameSignature(x, m));
                             if (methodToReplace == null)
                             {
                                 throw new InvalidOperationException("A replacement method has nothing to replace");
@@ -852,19 +870,21 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Returns true if the given method shall be internalized (has a native implementation on the arduino)
         /// </summary>
-        private bool HasArduinoImplementationAttribute(MethodBase method)
+        private bool HasArduinoImplementationAttribute(MethodBase method, out ArduinoImplementation implementation)
         {
             var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
             ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
             if (iaMethod != null && iaMethod.MethodNumber != ArduinoImplementation.None)
             {
+                implementation = iaMethod.MethodNumber;
                 return true;
             }
 
+            implementation = default;
             return false;
         }
 
-        public void CollectDependencies(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> newMethods)
+        public void CollectDependendentMethods(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> newMethods)
         {
             List<MethodBase> methodsRequired = new List<MethodBase>();
             List<FieldInfo> fieldsRequired = new List<FieldInfo>();
@@ -877,7 +897,7 @@ namespace Iot.Device.Arduino
             }
 
             // If this is true, we don't have to parse the implementation
-            if (HasArduinoImplementationAttribute(methodInfo))
+            if (HasArduinoImplementationAttribute(methodInfo, out _))
             {
                 return;
             }
@@ -900,14 +920,14 @@ namespace Iot.Device.Arduino
                     // in a stack overflow when a method is recursive (even indirect)
                     if (!set.HasMethod(me) && newMethods.Add(me))
                     {
-                        CollectDependencies(set, me, newMethods);
+                        CollectDependendentMethods(set, me, newMethods);
                     }
                 }
                 else if (finalMethod is ConstructorInfo co)
                 {
                     if (!set.HasMethod(co) && newMethods.Add(co))
                     {
-                        CollectDependencies(set, co, newMethods);
+                        CollectDependendentMethods(set, co, newMethods);
                     }
                 }
                 else
@@ -1032,6 +1052,14 @@ namespace Iot.Device.Arduino
                 }
             }
 
+            if (HasArduinoImplementationAttribute(methodInfo, out var implementation))
+            {
+                int tk1 = set.GetOrAddMethodToken(methodInfo);
+                var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation);
+                set.AddMethod(newInfo1);
+                return;
+            }
+
             var body = methodInfo.GetMethodBody();
             if (body == null && !methodInfo.IsAbstract)
             {
@@ -1083,35 +1111,30 @@ namespace Iot.Device.Arduino
                     PrepareClass(set, methodInfo.DeclaringType);
                 }
 
-                PrepareDependencies(set, methodInfo, newInfo);
-            }
-        }
+                HashSet<MethodBase> methods = new HashSet<MethodBase>();
 
-        private void PrepareDependencies(ExecutionSet set, MethodBase method, ArduinoMethodDeclaration parent)
-        {
-            HashSet<MethodBase> methods = new HashSet<MethodBase>();
+                CollectDependendentMethods(set, methodInfo, methods);
 
-            CollectDependencies(set, method, methods);
-
-            var list = methods.ToList();
-            for (var index = 0; index < list.Count; index++)
-            {
-                var dep = list[index];
-                // If we have a ctor in the call chain we need to ensure we have its class loaded.
-                // This happens if the created object is only used in local variables but not as a class member
-                // seen so far.
-                if (dep.IsConstructor && dep.DeclaringType != null && ValueTypeSupported(dep.DeclaringType))
+                var list = methods.ToList();
+                for (var index = 0; index < list.Count; index++)
                 {
-                    PrepareClass(set, dep.DeclaringType);
-                }
-                else if (dep.DeclaringType != null && HasStaticFields(dep.DeclaringType))
-                {
-                    // Also load the class declaration if it contains static fields.
-                    // TODO: We currently assume that no class is accessing static fields of another class.
-                    PrepareClass(set, dep.DeclaringType);
-                }
+                    var dep = list[index];
+                    // If we have a ctor in the call chain we need to ensure we have its class loaded.
+                    // This happens if the created object is only used in local variables but not as a class member
+                    // seen so far.
+                    if (dep.IsConstructor && dep.DeclaringType != null && ValueTypeSupported(dep.DeclaringType))
+                    {
+                        PrepareClass(set, dep.DeclaringType);
+                    }
+                    else if (dep.DeclaringType != null && HasStaticFields(dep.DeclaringType))
+                    {
+                        // Also load the class declaration if it contains static fields.
+                        // TODO: We currently assume that no class is accessing static fields of another class.
+                        PrepareClass(set, dep.DeclaringType);
+                    }
 
-                PrepareCodeInternal(set, dep, parent);
+                    PrepareCodeInternal(set, dep, newInfo);
+                }
             }
         }
 
@@ -1272,7 +1295,7 @@ namespace Iot.Device.Arduino
         {
             if (methodInstance.ContainsGenericParameters && !methodInstance.DeclaringType!.IsConstructedGenericType)
             {
-                throw new InvalidProgramException("No generics supported");
+                throw new InvalidProgramException("No open generic types/methods supported");
             }
 
             MethodBody? body = methodInstance.GetMethodBody();

@@ -53,7 +53,12 @@ namespace Iot.Device.Arduino
                 throw new ArgumentNullException(nameof(value));
             }
 
-            char[] chars = value.ToArray();
+            char[] chars = new char[value.Length];
+            for (int i = 0; i < value.Length; i++)
+            {
+                chars[i] = value[i];
+            }
+
             Span<char> s = new Span<char>(chars, 0, value.Length);
             return s;
         }
