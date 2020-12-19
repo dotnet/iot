@@ -106,13 +106,6 @@ namespace Iot.Device.Arduino
                 bytesUsed += 40;
                 bytesUsed += cls.StaticSize;
                 bytesUsed += cls.Members.Count * 8; // Assuming 32 bit target system for now
-                foreach (var fld in cls.Members.Where(x => x.InitialValue != null))
-                {
-                    if (fld.InitialValue is Array arr)
-                    {
-                        bytesUsed += arr.Length;
-                    }
-                }
             }
 
             foreach (var method in _methods)
@@ -387,7 +380,6 @@ namespace Iot.Device.Arduino
                 VariableType = variableType;
                 Token = token;
                 BaseTokens = baseTokens;
-                InitialValue = null;
             }
 
             public VariableKind VariableType
@@ -403,12 +395,6 @@ namespace Iot.Device.Arduino
             public List<int> BaseTokens
             {
                 get;
-            }
-
-            public object? InitialValue
-            {
-                get;
-                set;
             }
         }
 
@@ -487,13 +473,14 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance;
-            if (includingPrivates)
-            {
-                flags |= BindingFlags.NonPublic;
-            }
-
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
             List<MethodInfo> methodsNeedingReplacement = typeToReplace.GetMethods(flags).ToList();
+
+            if (!includingPrivates)
+            {
+                // We can't include internal methods by the filter above, so (unless we need all) remove all privates here, keeping public and internals
+                methodsNeedingReplacement = methodsNeedingReplacement.Where(x => !x.IsPrivate).ToList();
+            }
 
             foreach (var methoda in replacement.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
             {

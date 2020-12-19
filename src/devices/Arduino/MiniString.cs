@@ -9,9 +9,9 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(System.String), true)]
     internal class MiniString : ICloneable, IComparable, IComparable<string>, IConvertible, IEquatable<string>, System.Collections.Generic.IEnumerable<char>
     {
-#pragma warning disable SA1122 // Use string.Empty for empty strings
-        private static string s_emptyString = "";
-#pragma warning restore SA1122 // Use string.Empty for empty strings
+#pragma warning disable SA1122 // Use string.Empty for empty strings (This is the definition of an empty string!)
+        public static string Empty = "";
+#pragma warning restore SA1122
         private int _length;
         private int _data; // Internal char* pointer
 
@@ -20,14 +20,6 @@ namespace Iot.Device.Arduino
         {
             _length = 0;
             _data = 0;
-        }
-
-        public static string Empty
-        {
-            get
-            {
-                return s_emptyString;
-            }
         }
 
         [ArduinoImplementation(ArduinoImplementation.None)]
@@ -301,6 +293,22 @@ namespace Iot.Device.Arduino
         public ulong ToUInt64(IFormatProvider? provider)
         {
             throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.StringFastAllocateString)]
+        public static MiniString FastAllocateString(int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        // This is only intended to be used by char.ToString.
+        // It is necessary to put the code in this class instead of Char, since _firstChar is a private member.
+        // Making _firstChar internal would be dangerous since it would make it much easier to break String's immutability.
+        internal static MiniString CreateFromChar(char c)
+        {
+            MiniString result = FastAllocateString(1);
+            result.SetElem(0, c);
+            return result;
         }
     }
 }

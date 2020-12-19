@@ -95,18 +95,12 @@ namespace Iot.Device.Arduino
         };
 
         // These classes substitute (part of) a framework class
-        private readonly List<Type> _replacementClasses = new List<Type>()
-        {
-            typeof(MiniObject), typeof(MiniArray), typeof(MiniString), typeof(MiniMonitor),
-            typeof(MiniException), typeof(MiniThread),
-            typeof(MiniEnvironment), typeof(MiniRuntimeHelpers), typeof(MiniType), typeof(MiniValueType),
-            typeof(MiniResourceManager), typeof(MiniEnum), typeof(MiniCultureInfo), typeof(MiniBitConverter),
-            typeof(MiniCLRConfig), typeof(MiniSR), // typeof(MiniBitOperations)
-        };
-
         private readonly ArduinoBoard _board;
         private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
         private readonly List<IArduinoTask> _activeTasks;
+
+        // List of classes that have arduino-native implementations
+        private List<Type> _replacementClasses;
 
         public ArduinoCsCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
@@ -124,14 +118,14 @@ namespace Iot.Device.Arduino
             // Generate the list of all replacement classes (they're all called Mini*)
             // For some unknown (and weird) reason, auto-detection doesn't work. It causes ctors of generic classes to be called
             // on open types.
-            ////_replacementClasses = new List<Type>();
-            ////foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
-            ////{
-            ////    if (type.GetCustomAttribute<ArduinoReplacementAttribute>() != null)
-            ////    {
-            ////        _replacementClasses.Add(type);
-            ////    }
-            ////}
+            _replacementClasses = new List<Type>();
+            foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
+            {
+                if (type.GetCustomAttribute<ArduinoReplacementAttribute>() != null)
+                {
+                    _replacementClasses.Add(type);
+                }
+            }
         }
 
         private string GetMethodName(ArduinoMethodDeclaration decl)
@@ -380,43 +374,14 @@ namespace Iot.Device.Arduino
             List<ExecutionSet.VariableOrMethod> memberTypes = new List<ExecutionSet.VariableOrMethod>();
             for (var index = 0; index < fields.Count; index++)
             {
-                var fieldType = GetVariableType(fields[index].FieldType, out _);
-                if (fields[index].IsStatic)
+                var field = fields[index];
+                var fieldType = GetVariableType(field.FieldType, out _);
+                if (field.IsStatic)
                 {
                     fieldType = VariableKind.StaticMember;
                 }
 
-                var newvar = new ExecutionSet.VariableOrMethod(fieldType, set.GetOrAddFieldToken(fields[index]), new List<int>());
-                if (fields[index].IsStatic)
-                {
-                    var t = fields[index].DeclaringType;
-                    if (t == null)
-                    {
-                        throw new InvalidOperationException("field without a class???");
-                    }
-                    else if (t.GenericTypeArguments.Length == 0)
-                    {
-                        newvar.InitialValue = fields[index].GetValue(null);
-                    }
-                    ////else
-                    ////{
-                    ////    // If this is a static field of a generic class, we have to go trough the class to obtain its value, since each concrete type has a different
-                    ////    // instance of the field
-                    ////    string fName = fields[index].Name;
-                    ////    if (fName.Contains("<")) // A backing field - use its get accessor instead
-                    ////    {
-                    ////        fName = fName.Substring(1, fName.IndexOf(">", StringComparison.Ordinal) - 1);
-                    ////        var prop = t.GetProperty(fName);
-                    ////        newvar.InitialValue = prop?.GetValue(null, BindingFlags.Public | BindingFlags.NonPublic, null, null, CultureInfo.InvariantCulture);
-                    ////    }
-                    ////    else
-                    ////    {
-                    ////        var fld = t.GetField(fName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                    ////        newvar.InitialValue = fld?.GetValue(null);
-                    ////    }
-                    ////}
-                }
-
+                var newvar = new ExecutionSet.VariableOrMethod(fieldType, set.GetOrAddFieldToken(field), new List<int>());
                 memberTypes.Add(newvar);
             }
 

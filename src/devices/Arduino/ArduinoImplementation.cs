@@ -71,6 +71,7 @@ namespace Iot.Device.Arduino
         BitConverterSingleToInt32Bits,
         StringEqualsStatic,
         BitOperationsLog2SoftwareFallback,
-        BitOperationsTrailingZeroCount
+        BitOperationsTrailingZeroCount,
+        StringFastAllocateString
     }
 }

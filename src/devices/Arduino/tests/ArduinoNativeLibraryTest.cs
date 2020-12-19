@@ -106,6 +106,21 @@ namespace Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticByteField), ClassWithStaticByteField.GetFirstByte, 0, 0);
         }
 
+        /// <summary>
+        /// This test not only tests the value of BitConverter.IsLittleEndian but also whether accessing a static
+        /// field of a class with a native implementation works
+        /// </summary>
+        [Fact]
+        public void CpuIsLittleEndian()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWithStaticByteField), IsLittleEndianTest);
+        }
+
+        private int IsLittleEndianTest()
+        {
+            return BitConverter.IsLittleEndian ? 1 : 0;
+        }
+
         public class ClassWithStaticByteField
         {
             private static byte[] _byteData =
