@@ -74,6 +74,12 @@ namespace Iot.Device.Arduino
             }
         }
 
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterCountOnly = true)]
+        public static string GetMessageFromNativeResources(int kind)
+        {
+            return kind.ToString();
+        }
+
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             throw new NotImplementedException();

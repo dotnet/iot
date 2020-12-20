@@ -835,17 +835,18 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Returns true if the given method shall be internalized (has a native implementation on the arduino)
         /// </summary>
-        private bool HasArduinoImplementationAttribute(MethodBase method, out ArduinoImplementation implementation)
+        private static bool HasArduinoImplementationAttribute(MethodBase method,
+            out ArduinoImplementationAttribute? attribute)
         {
             var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
             ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
-            if (iaMethod != null && iaMethod.MethodNumber != ArduinoImplementation.None)
+            if (iaMethod != null)
             {
-                implementation = iaMethod.MethodNumber;
+                attribute = iaMethod;
                 return true;
             }
 
-            implementation = default;
+            attribute = null;
             return false;
         }
 
@@ -862,7 +863,7 @@ namespace Iot.Device.Arduino
             }
 
             // If this is true, we don't have to parse the implementation
-            if (HasArduinoImplementationAttribute(methodInfo, out _))
+            if (HasArduinoImplementationAttribute(methodInfo, out var attrib) && attrib!.MethodNumber != ArduinoImplementation.None)
             {
                 return;
             }
@@ -1020,7 +1021,7 @@ namespace Iot.Device.Arduino
             if (HasArduinoImplementationAttribute(methodInfo, out var implementation))
             {
                 int tk1 = set.GetOrAddMethodToken(methodInfo);
-                var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation);
+                var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
                 set.AddMethod(newInfo1);
                 return;
             }
@@ -1175,6 +1176,14 @@ namespace Iot.Device.Arduino
             if (argsa.Length != argsb.Length)
             {
                 return false;
+            }
+
+            if (HasArduinoImplementationAttribute(a, out var attrib))
+            {
+                if (attrib!.CompareByParameterCountOnly)
+                {
+                    return true;
+                }
             }
 
             for (int i = 0; i < argsa.Length; i++)

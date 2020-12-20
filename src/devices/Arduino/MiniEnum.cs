@@ -6,25 +6,38 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.Enum))]
+    [ArduinoReplacement(typeof(System.Enum), IncludingPrivates = true)]
     internal class MiniEnum
     {
         [ArduinoImplementation(ArduinoImplementation.None)]
         public override string ToString()
         {
-            return string.Empty;
+            // We don't have the metadata to print the enums as strings, so use their underlying value instead.
+            return ToUInt64().ToString();
         }
 
         [ArduinoImplementation(ArduinoImplementation.None)]
         public string ToString(string? format)
         {
-            return string.Empty;
+            return ToUInt64().ToString();
         }
 
         [ArduinoImplementation(ArduinoImplementation.None)]
         public string? ToString(string format, IFormatProvider provider)
         {
-            return string.Empty;
+            return ToUInt64().ToString();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.EnumGetHashCode)]
+        public override int GetHashCode()
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.EumToUInt64)]
+        public ulong ToUInt64()
+        {
+            throw new NotImplementedException();
         }
     }
 }

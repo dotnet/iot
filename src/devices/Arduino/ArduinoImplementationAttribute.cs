@@ -26,5 +26,14 @@ namespace Iot.Device.Arduino
         {
             get;
         }
+
+        /// <summary>
+        /// If this is set, the parameter types are only compared by number, not type (useful to replace a method with an argument of an internal type)
+        /// </summary>
+        public bool CompareByParameterCountOnly
+        {
+            get;
+            set;
+        }
     }
 }

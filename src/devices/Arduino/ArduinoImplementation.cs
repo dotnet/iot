@@ -72,6 +72,8 @@ namespace Iot.Device.Arduino
         StringEqualsStatic,
         BitOperationsLog2SoftwareFallback,
         BitOperationsTrailingZeroCount,
-        StringFastAllocateString
+        StringFastAllocateString,
+        EnumGetHashCode,
+        EumToUInt64
     }
 }

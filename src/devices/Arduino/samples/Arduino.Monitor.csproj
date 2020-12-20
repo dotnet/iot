@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
 	<EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
