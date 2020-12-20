@@ -324,7 +324,7 @@ namespace Iot.Device.Bmxx80
                     _controlRegister = (byte)Bme680Register.CTRL_MEAS;
                     break;
                 default:
-                    throw new Exception("Bmxx80 device not correctly configured. Could not find calibraton data.");
+                    throw new Exception("Bmxx80 device not correctly configured. Could not find calibration data.");
             }
 
             _calibrationData.ReadFromDevice(this);
