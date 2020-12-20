@@ -1290,22 +1290,40 @@ namespace Iot.Device.Arduino
                 SendInt14((short)codeReference);
                 for (int i = 0; i < parameters.Length; i++)
                 {
+                    byte[] param;
                     Type t = parameters[i].GetType();
                     if (t == typeof(Int32) || t == typeof(Int16) || t == typeof(sbyte) || t == typeof(bool))
                     {
-                        byte[] param = BitConverter.GetBytes(Convert.ToInt32(parameters[i]));
-                        SendValuesAsTwo7bitBytes(param);
+                        param = BitConverter.GetBytes(Convert.ToInt32(parameters[i]));
                     }
                     else if (t == typeof(UInt32) || t == typeof(UInt16) || t == typeof(byte))
                     {
-                        byte[] param = BitConverter.GetBytes(Convert.ToUInt32(parameters[i]));
-                        SendValuesAsTwo7bitBytes(param);
+                        param = BitConverter.GetBytes(Convert.ToUInt32(parameters[i]));
+                    }
+                    else if (t == typeof(float))
+                    {
+                        param = BitConverter.GetBytes(Convert.ToSingle(parameters[i]));
+                    }
+
+                    // For these, the receiver needs to know that 64 bit per parameter are expected
+                    else if (t == typeof(double))
+                    {
+                        param = BitConverter.GetBytes(Convert.ToDouble(parameters[i]));
+                    }
+                    else if (t == typeof(ulong))
+                    {
+                        param = BitConverter.GetBytes(Convert.ToUInt64(parameters[i]));
+                    }
+                    else if (t == typeof(long))
+                    {
+                        param = BitConverter.GetBytes(Convert.ToInt64(parameters[i]));
                     }
                     else // Object case for now
                     {
-                        byte[] param = BitConverter.GetBytes(Convert.ToUInt32(0));
-                        SendValuesAsTwo7bitBytes(param);
+                        param = BitConverter.GetBytes(Convert.ToUInt32(0));
                     }
+
+                    SendValuesAsTwo7bitBytes(param);
                 }
 
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);

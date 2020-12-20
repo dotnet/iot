@@ -113,12 +113,41 @@ namespace Arduino.Tests
         [Fact]
         public void CpuIsLittleEndian()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWithStaticByteField), IsLittleEndianTest);
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), IsLittleEndianTest);
         }
 
         private int IsLittleEndianTest()
         {
             return BitConverter.IsLittleEndian ? 1 : 0;
+        }
+
+        [Fact]
+        public void ClassWith64BitFieldTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWith64BitField), ClassWith64BitField.ClassMain);
+        }
+
+        public class ClassWith64BitField
+        {
+            private int _field1;
+            private long _field2;
+
+            public ClassWith64BitField()
+            {
+                _field1 = -1;
+                _field2 = 2;
+            }
+
+            public int GetResult()
+            {
+                return (int)(_field1 + _field2);
+            }
+
+            public static int ClassMain()
+            {
+                var instance = new ClassWith64BitField();
+                return instance.GetResult();
+            }
         }
 
         public class ClassWithStaticByteField

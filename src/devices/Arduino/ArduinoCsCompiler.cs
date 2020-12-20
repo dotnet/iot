@@ -58,15 +58,23 @@ namespace Iot.Device.Arduino
 
     public enum VariableKind : byte
     {
-        Void = 0,
-        Uint32 = 1,
-        Int32 = 2,
-        Boolean = 3,
-        Object = 4,
+        Void = 0, // The slot contains no data
+        Uint32 = 1, // The slot contains unsigned integer data
+        Int32 = 2, // The slot contains signed integer data
+        Boolean = 3, // The slot contains true or false
+        Object = 4, // The slot contains an object reference
         Method = 5,
-        ValueArray = 6,
-        ReferenceArray = 7,
-        StaticMember = 8 // type is defined by the first value it gets
+        ValueArray = 6, // The slot contains a reference to an array of value types (inline)
+        ReferenceArray = 7, // The slot contains a reference to an array of reference types
+        Float = 8,
+        Int64 = 16 + 1,
+        Uint64 = 16 + 2,
+        Double = 16 + 4,
+        Reference = 32, // Address of a variable
+        RuntimeFieldHandle = 33, // So far this is a pointer to a constant initializer
+        RuntimeTypeHandle = 34, // A type handle. The value is a type token
+        AddressOfVariable = 35, // An address pointing to a variable slot on another method's stack or arglist
+        StaticMember = 128, // type is defined by the first value it gets
     }
 
     /// <summary>
@@ -202,9 +210,31 @@ namespace Iot.Device.Arduino
                 {
                     retVal = (uint)inVal;
                 }
-                else
+                else if (returnType == typeof(Int32))
                 {
                     retVal = inVal;
+                }
+                else if (returnType == typeof(float))
+                {
+                    // Ugly, but performance is not a problem here
+                    retVal = BitConverter.ToSingle(BitConverter.GetBytes(inVal));
+                }
+                else if (returnType == typeof(double))
+                {
+                    retVal = BitConverter.ToDouble(BitConverter.GetBytes((long)inVal | (long)args[1] << 32));
+                }
+                else if (returnType == typeof(Int64))
+                {
+                    retVal = (long)inVal | (long)args[1] << 32;
+                }
+                else if (returnType == typeof(UInt64))
+                {
+                    ulong hi = (ulong)args[1];
+                    retVal = (ulong)inVal + (hi << 32);
+                }
+                else
+                {
+                    throw new NotSupportedException("Unsupported return type");
                 }
 
                 outObjects[0] = retVal;
@@ -620,11 +650,10 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Returns the size of the variable on the target platform. This is currently the largest of sizeof(void*) and sizeof(int32).
-        /// TODO: Extend when 64-Bit variables become available (double on SAM3X based boards is 64 bit, DateTime and TimeSpan also require 64 bit)
+        /// Returns the size of the variable on the target platform. This is currently the largest of sizeof(void*) and sizeof(int64).
         /// </summary>
         /// <returns>See above</returns>
-        private int SizeOfVariableField()
+        private int SizeOfVoidPointer()
         {
             return 4;
         }
@@ -643,25 +672,20 @@ namespace Iot.Device.Arduino
             int sizeStatic = 0;
             foreach (var f in fields)
             {
-                var varType = GetVariableType(f.FieldType, out int sizeOfMember);
-                // Currently, this is always true
-                if (varType == VariableKind.Boolean || varType == VariableKind.Int32 || varType == VariableKind.Uint32 || varType == VariableKind.Object ||
-                    varType == VariableKind.ValueArray || varType == VariableKind.ReferenceArray)
+                GetVariableType(f.FieldType, out int sizeOfMember);
+                if (f.IsStatic)
                 {
-                    if (f.IsStatic)
+                    sizeStatic += (sizeOfMember <= 4) ? 4 : 8;
+                }
+                else
+                {
+                    if (classType.IsValueType)
                     {
-                        sizeStatic += SizeOfVariableField();
+                        sizeDynamic += sizeOfMember;
                     }
                     else
                     {
-                        if (classType.IsValueType)
-                        {
-                            sizeDynamic += sizeOfMember;
-                        }
-                        else
-                        {
-                            sizeDynamic += SizeOfVariableField();
-                        }
+                        sizeDynamic += (sizeOfMember <= 4) ? 4 : 8;
                     }
                 }
             }
@@ -771,12 +795,6 @@ namespace Iot.Device.Arduino
         /// <returns></returns>
         private VariableKind GetVariableType(Type t, out int sizeOfMember)
         {
-            if (t == typeof(Int16))
-            {
-                sizeOfMember = 2;
-                return VariableKind.Int32;
-            }
-
             if (t == typeof(sbyte))
             {
                 sizeOfMember = 1;
@@ -793,6 +811,12 @@ namespace Iot.Device.Arduino
             {
                 sizeOfMember = 4;
                 return VariableKind.Uint32;
+            }
+
+            if (t == typeof(Int16))
+            {
+                sizeOfMember = 2;
+                return VariableKind.Int32;
             }
 
             if (t == typeof(UInt16))
@@ -813,6 +837,30 @@ namespace Iot.Device.Arduino
                 return VariableKind.Boolean;
             }
 
+            if (t == typeof(Int64))
+            {
+                sizeOfMember = 8;
+                return VariableKind.Int64;
+            }
+
+            if (t == typeof(UInt64))
+            {
+                sizeOfMember = 8;
+                return VariableKind.Uint64;
+            }
+
+            if (t == typeof(float))
+            {
+                sizeOfMember = 4;
+                return VariableKind.Float;
+            }
+
+            if (t == typeof(double))
+            {
+                sizeOfMember = 8;
+                return VariableKind.Double;
+            }
+
             if (t.IsArray)
             {
                 var elemType = t.GetElementType();
@@ -823,12 +871,12 @@ namespace Iot.Device.Arduino
                 }
                 else
                 {
-                    sizeOfMember = SizeOfVariableField();
+                    sizeOfMember = SizeOfVoidPointer();
                     return VariableKind.ReferenceArray;
                 }
             }
 
-            sizeOfMember = SizeOfVariableField();
+            sizeOfMember = SizeOfVoidPointer();
             return VariableKind.Object;
         }
 

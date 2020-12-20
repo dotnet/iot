@@ -144,6 +144,56 @@ namespace Iot.Device.Arduino.Tests
             return a % b;
         }
 
+        public static float AddF(float a, float b)
+        {
+            return a + b;
+        }
+
+        public static float SubF(float a, float b)
+        {
+            return a - b;
+        }
+
+        public static float MulF(float a, float b)
+        {
+            return a * b;
+        }
+
+        public static float DivF(float a, float b)
+        {
+            return a / b;
+        }
+
+        public static float ModF(float a, float b)
+        {
+            return a % b;
+        }
+
+        public static double AddD(double a, double b)
+        {
+            return a + b;
+        }
+
+        public static double SubD(double a, double b)
+        {
+            return a - b;
+        }
+
+        public static double MulD(double a, double b)
+        {
+            return a * b;
+        }
+
+        public static double DivD(double a, double b)
+        {
+            return a / b;
+        }
+
+        public static double ModD(double a, double b)
+        {
+            return a % b;
+        }
+
         public static int AndS(int a, int b)
         {
             return a & b;
@@ -288,7 +338,8 @@ namespace Iot.Device.Arduino.Tests
             var method = _compiler.AddSimpleMethod(set, methods[0]);
 
             // First execute the method locally, so we don't have an error in the test
-            T3 result = (T3)methods[0].Invoke(null, new object[] { a!, b! });
+            var uncastedResult = methods[0].Invoke(null, new object[] { a!, b! });
+            T3 result = (T3)uncastedResult;
             Assert.Equal(expectedResult, result);
 
             // This assertion fails on a timeout
@@ -365,6 +416,52 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Theory]
+        [InlineData("AddF", 10, 20, 30)]
+        [InlineData("AddF", 10, -5, 5)]
+        [InlineData("AddF", -5, -2, -7)]
+        [InlineData("SubF", 10, 2, 8)]
+        [InlineData("SubF", 10, -2, 12)]
+        [InlineData("SubF", -2.0f, -2.0f, 0)]
+        [InlineData("SubF", -4, 1, -5)]
+        [InlineData("MulF", 4, 2.5f, 10.0)]
+        [InlineData("MulF", -2, -2, 4)]
+        [InlineData("MulF", -2, 2, -4)]
+        [InlineData("DivF", 1.0f, 5.0f, 0.2f)]
+        [InlineData("DivF", 10, 20, 0)]
+        [InlineData("DivF", -10, 2, -5)]
+        [InlineData("DivF", -10, -2, 5)]
+        [InlineData("ModF", 10, 2, 0)]
+        [InlineData("ModF", 11, 2, 1)]
+        [InlineData("ModF", -11, 2, -1)]
+        public void TestArithmeticOperationSignedFloat(string methodName, float argument1, float argument2, float expected)
+        {
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+        }
+
+        [Theory]
+        [InlineData("AddD", 10, 20.0, 30.0)]
+        [InlineData("AddD", 10, -5, 5)]
+        [InlineData("AddD", -5, -2, -7)]
+        [InlineData("SubD", 10, 2, 8)]
+        [InlineData("SubD", 10, -2, 12)]
+        [InlineData("SubD", -2.0f, -2.0, 0)]
+        [InlineData("SubD", -4, 1, -5)]
+        [InlineData("MulD", 4, 2.5f, 10)]
+        [InlineData("MulD", -2, -2, 4)]
+        [InlineData("MulD", -2, 2, -4)]
+        [InlineData("DivD", 1.0f, 5.0f, 0.2)]
+        [InlineData("DivD", 10, 20, 0)]
+        [InlineData("DivD", -10, 2, -5)]
+        [InlineData("DivD", -10, -2, 5)]
+        [InlineData("ModD", 10, 2, 0)]
+        [InlineData("ModD", 11, 2, 1)]
+        [InlineData("ModD", -11, 2, -1)]
+        public void TestArithmeticOperationSignedDouble(string methodName, double argument1, double argument2, double expected)
+        {
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+        }
+
+        [Theory]
         [InlineData("AddU", 10u, 20u, 30u)]
         [InlineData("AddU", 10u, -5u, 5u)]
         [InlineData("AddU", -5u, -2u, -7u)]
@@ -407,8 +504,18 @@ namespace Iot.Device.Arduino.Tests
             return a2 + argument2;
         }
 
+        public static Int32 ResultTypesTest2(UInt32 argument1, Int32 argument2)
+        {
+            // Checks the result types of mixed-type arithmetic operations
+            Int16 a = (Int16)argument1;
+            Int32 b = argument2;
+            Int32 result = (a + b);
+            return result;
+        }
+
         [Theory]
         [InlineData("ResultTypesTest", 50, 20, 70)]
+        [InlineData("ResultTypesTest2", 21, -20, 1)]
         public void TestTypeConversions(string methodName, UInt32 argument1, int argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
