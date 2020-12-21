@@ -36,5 +36,16 @@ namespace Iot.Device.Arduino
             // TODO: Fix
             return 0;
         }
+
+        public static bool IsReferenceOrContainsReferences<T>()
+        {
+            return IsReferenceOrContainsReferencesCore(typeof(T));
+        }
+
+        [ArduinoImplementation((ArduinoImplementation.RuntimeHelpersIsReferenceOrContainsReferencesCore))]
+        private static bool IsReferenceOrContainsReferencesCore(Type t)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

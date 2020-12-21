@@ -4,7 +4,7 @@ using System.Text;
 using Iot.Device.Arduino;
 using Xunit;
 
-namespace Arduino.Tests
+namespace Iot.Device.Arduino.Tests
 {
     public class Encoder7BitTest
     {

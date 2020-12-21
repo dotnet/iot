@@ -28,9 +28,10 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// If this is set, the parameter types are only compared by number, not type (useful to replace a method with an argument of an internal type)
+        /// If this is set, the parameter types are only compared by name, not type (useful to replace a method with an argument of an internal type)
+        /// This can also be used to replace methods with generic argument types
         /// </summary>
-        public bool CompareByParameterCountOnly
+        public bool CompareByParameterNames
         {
             get;
             set;

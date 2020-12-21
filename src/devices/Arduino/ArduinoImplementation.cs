@@ -74,6 +74,12 @@ namespace Iot.Device.Arduino
         BitOperationsTrailingZeroCount,
         StringFastAllocateString,
         EnumGetHashCode,
-        EumToUInt64
+        EumToUInt64,
+        UnsafeNullRef,
+        UnsafeAs2,
+        UnsafeAddByteOffset,
+        UnsafeSizeOfType,
+        StringGetRawStringData,
+        RuntimeHelpersIsReferenceOrContainsReferencesCore
     }
 }

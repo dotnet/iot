@@ -7,7 +7,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Arduino.Tests;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
@@ -427,7 +426,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("MulF", -2, -2, 4)]
         [InlineData("MulF", -2, 2, -4)]
         [InlineData("DivF", 1.0f, 5.0f, 0.2f)]
-        [InlineData("DivF", 10, 20, 0)]
+        [InlineData("DivF", 10, 20, 0.5)]
         [InlineData("DivF", -10, 2, -5)]
         [InlineData("DivF", -10, -2, 5)]
         [InlineData("ModF", 10, 2, 0)]
@@ -450,7 +449,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("MulD", -2, -2, 4)]
         [InlineData("MulD", -2, 2, -4)]
         [InlineData("DivD", 1.0f, 5.0f, 0.2)]
-        [InlineData("DivD", 10, 20, 0)]
+        [InlineData("DivD", 10, 20, 0.5)]
         [InlineData("DivD", -10, 2, -5)]
         [InlineData("DivD", -10, -2, 5)]
         [InlineData("ModD", 10, 2, 0)]

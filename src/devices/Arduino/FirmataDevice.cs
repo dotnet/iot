@@ -58,7 +58,7 @@ namespace Iot.Device.Arduino
 
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
-        public event Action<int, MethodState, int[]>? OnSchedulerReply;
+        public event Action<int, MethodState, object>? OnSchedulerReply;
 
         public event DigitalPinValueChanged? DigitalPortValueUpdated;
 
@@ -521,14 +521,27 @@ namespace Iot.Device.Arduino
                                     break;
                                 }
 
+                                MethodState state = (MethodState)raw_data[3];
                                 int numArgs = raw_data[4];
-                                int[] results = new int[numArgs];
-                                for (int i = 0; i < numArgs; i++)
+
+                                if (state == MethodState.Aborted)
                                 {
-                                    results[i] = DecodeInt32(raw_data, i * 5 + 5);
+                                    int[] results = new int[numArgs];
+                                    // The result set is a set of tokens to build up the exception message
+                                    for (int i = 0; i < numArgs; i++)
+                                    {
+                                        results[i] = DecodeInt32(raw_data, i * 5 + 5);
+                                    }
+
+                                    OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], results);
+                                }
+                                else
+                                {
+                                    // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
+                                    var result = Decode7BitBytes(raw_data.Skip(5).ToArray(), numArgs);
+                                    OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], result);
                                 }
 
-                                OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], results);
                                 break;
                             }
 
@@ -1613,6 +1626,24 @@ namespace Iot.Device.Arduino
                 _firmataStream.WriteByte((byte)(values[i] & (uint)sbyte.MaxValue));
                 _firmataStream.WriteByte((byte)(values[i] >> 7 & sbyte.MaxValue));
             }
+        }
+
+        private byte[] Decode7BitBytes(byte[] data, int length)
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            byte[] retBytes = new byte[length];
+
+            for (int i = 0; i < length / 2; i++)
+            {
+                retBytes[i] = data[i * 2];
+                retBytes[i] += (byte)((data[(i * 2) + 1]) << 7);
+            }
+
+            return retBytes;
         }
 
         /// <summary>

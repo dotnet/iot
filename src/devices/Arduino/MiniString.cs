@@ -301,6 +301,12 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(ArduinoImplementation.StringGetRawStringData)]
+        public ref char GetRawStringData()
+        {
+            throw new NotImplementedException();
+        }
+
         // This is only intended to be used by char.ToString.
         // It is necessary to put the code in this class instead of Char, since _firstChar is a private member.
         // Making _firstChar internal would be dangerous since it would make it much easier to break String's immutability.

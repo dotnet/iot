@@ -74,7 +74,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterCountOnly = true)]
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
         public static string GetMessageFromNativeResources(int kind)
         {
             return kind.ToString();

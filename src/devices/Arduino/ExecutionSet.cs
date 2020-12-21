@@ -141,6 +141,13 @@ namespace Iot.Device.Arduino
                 return GetOrAddMethodToken(replacement);
             }
 
+            var classReplacement = GetReplacement(methodBase.DeclaringType);
+            if (classReplacement != null && replacement == null)
+            {
+                replacement = GetReplacement(methodBase, classReplacement);
+                return GetOrAddMethodToken(replacement ?? throw new InvalidOperationException($"Internal error: Expected replacement not found for {methodBase.DeclaringType} - {methodBase}"));
+            }
+
             token = _nextToken++;
             _patchedMethodTokens.Add(methodBase, token);
             return token;
@@ -567,6 +574,25 @@ namespace Iot.Device.Arduino
             }
 
             return elem.Item2;
+        }
+
+        /// <summary>
+        /// Try to find a replacement for the given method in the given class
+        /// </summary>
+        /// <param name="methodInfo">The method to replace</param>
+        /// <param name="classToSearch">With a method in this class</param>
+        /// <returns></returns>
+        public MethodBase? GetReplacement(MethodBase methodInfo, Type classToSearch)
+        {
+            foreach (var replacementMethod in classToSearch.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
+            {
+                if (ArduinoCsCompiler.MethodsHaveSameSignature(replacementMethod, methodInfo) || ArduinoCsCompiler.AreSameOperatorMethods(replacementMethod, methodInfo))
+                {
+                    return replacementMethod;
+                }
+            }
+
+            return null; // this is now likely an error
         }
 
         public void AddReplacementMethod(MethodBase? toReplace, MethodBase? replacement)

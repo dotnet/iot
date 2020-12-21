@@ -37,7 +37,7 @@ namespace Iot.Device.Arduino
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
 
         // Only a delegate, not an event, because one board can only have one compiler attached at a time
-        private Action<int, MethodState, int[]>? _compilerCallback;
+        private Action<int, MethodState, object>? _compilerCallback;
 
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
         private int _spiEnabled;
@@ -262,7 +262,7 @@ namespace Iot.Device.Arduino
             LogMessages?.Invoke(message, innerException);
         }
 
-        private void FirmataOnSchedulerReply(int method, MethodState schedulerMethodState, int[] results)
+        private void FirmataOnSchedulerReply(int method, MethodState schedulerMethodState, object results)
         {
             _compilerCallback?.Invoke(method, schedulerMethodState, results);
         }
@@ -427,7 +427,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        internal void SetCompilerCallback(Action<int, MethodState, int[]> onCompilerCallback)
+        internal void SetCompilerCallback(Action<int, MethodState, object>? onCompilerCallback)
         {
             if (onCompilerCallback == null)
             {

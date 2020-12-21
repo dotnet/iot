@@ -5,7 +5,7 @@ using System.Net.Sockets;
 using System.Text;
 using Iot.Device.Arduino;
 
-namespace Arduino.Tests
+namespace Iot.Device.Arduino.Tests
 {
     public class FirmataTestFixture : IDisposable
     {

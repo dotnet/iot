@@ -89,7 +89,7 @@ namespace Iot.Device.Arduino
             {
                 data = d.Item2;
                 state = d.Item1;
-                if (state == MethodState.Aborted && data.Length >= 2)
+                if (state == MethodState.Aborted)
                 {
                     int exceptionCode = (int)d.Item2[0];
                     // The token (if any) that caused the problem. May also be the error location

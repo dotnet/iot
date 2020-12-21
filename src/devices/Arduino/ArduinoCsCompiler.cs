@@ -146,9 +146,8 @@ namespace Iot.Device.Arduino
             _activeTasks.Remove(task);
         }
 
-        private void BoardOnCompilerCallback(int codeReference, MethodState state, int[] args)
+        private void BoardOnCompilerCallback(int codeReference, MethodState state, object args)
         {
-            object[] outObjects = new object[args.Length];
             var codeRef = _methodInfos.Values.FirstOrDefault(x => x.Index == codeReference);
             if (codeRef == null)
             {
@@ -167,8 +166,8 @@ namespace Iot.Device.Arduino
             if (state == MethodState.Aborted)
             {
                 _board.Log($"Execution of method {GetMethodName(codeRef)} caused an exception. Check previous messages.");
-                // Still update the task state, this will prevent a deadlock if somebody is waiting for this task to end
-                task.AddData(state, args.Cast<object>().ToArray());
+                // In this case, the data contains the exception tokens and the call stack tokens
+                task.AddData(state, ((int[])args).Cast<object>().ToArray());
                 return;
             }
 
@@ -180,10 +179,12 @@ namespace Iot.Device.Arduino
                 return;
             }
 
+            object[] outObjects = new object[1];
             if (state == MethodState.Stopped)
             {
                 object retVal;
-                int inVal = (int)args[0]; // initially, the list contains only ints
+                byte[] data = (byte[])args;
+
                 // The method ended, therefore we know that the only element of args is the return value and can derive its correct type
                 Type returnType;
                 // We sometimes also execute ctors directly, but they return void
@@ -204,33 +205,31 @@ namespace Iot.Device.Arduino
                 }
                 else if (returnType == typeof(bool))
                 {
-                    retVal = inVal != 0;
+                    retVal = data[0] != 0;
                 }
                 else if (returnType == typeof(UInt32))
                 {
-                    retVal = (uint)inVal;
+                    retVal = BitConverter.ToUInt32(data);
                 }
                 else if (returnType == typeof(Int32))
                 {
-                    retVal = inVal;
+                    retVal = BitConverter.ToInt32(data);
                 }
                 else if (returnType == typeof(float))
                 {
-                    // Ugly, but performance is not a problem here
-                    retVal = BitConverter.ToSingle(BitConverter.GetBytes(inVal));
+                    retVal = BitConverter.ToSingle(data);
                 }
                 else if (returnType == typeof(double))
                 {
-                    retVal = BitConverter.ToDouble(BitConverter.GetBytes((long)inVal | (long)args[1] << 32));
+                    retVal = BitConverter.ToDouble(data);
                 }
                 else if (returnType == typeof(Int64))
                 {
-                    retVal = (long)inVal | (long)args[1] << 32;
+                    retVal = BitConverter.ToInt64(data);
                 }
                 else if (returnType == typeof(UInt64))
                 {
-                    ulong hi = (ulong)args[1];
-                    retVal = (ulong)inVal + (hi << 32);
+                    retVal = BitConverter.ToUInt64(data);
                 }
                 else
                 {
@@ -1055,8 +1054,14 @@ namespace Iot.Device.Arduino
             }*/
 
             // Ensure the class is known, if it needs replacement
-            set.GetReplacement(methodInfo.DeclaringType);
+            var classReplacement = set.GetReplacement(methodInfo.DeclaringType);
             MethodBase? replacement = set.GetReplacement(methodInfo);
+            if (classReplacement != null && replacement == null)
+            {
+                // See below, this is the fix for it
+                replacement = set.GetReplacement(methodInfo, classReplacement);
+            }
+
             if (replacement != null)
             {
                 methodInfo = replacement;
@@ -1066,7 +1071,14 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            if (HasArduinoImplementationAttribute(methodInfo, out var implementation))
+            if (classReplacement != null && replacement == null)
+            {
+                // If the class requires full replacement, all methods must be replaced (or throw an error inside GetReplacement, if it is not defined), but it must
+                // never return null. Seen during development, because generic parameter types did not match.
+                throw new InvalidOperationException($"Internal error: The class {classReplacement} should fully replace {methodInfo.DeclaringType}, however method {methodInfo} has no replacement (and no error either)");
+            }
+
+            if (HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != ArduinoImplementation.None)
             {
                 int tk1 = set.GetOrAddMethodToken(methodInfo);
                 var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
@@ -1226,12 +1238,17 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
-            if (HasArduinoImplementationAttribute(a, out var attrib))
+            if (HasArduinoImplementationAttribute(a, out var attrib) && attrib!.CompareByParameterNames)
             {
-                if (attrib!.CompareByParameterCountOnly)
+                for (int i = 0; i < argsa.Length; i++)
                 {
-                    return true;
+                    if (argsa[i].Name != argsb[i].Name)
+                    {
+                        return false;
+                    }
                 }
+
+                return true;
             }
 
             for (int i = 0; i < argsa.Length; i++)
@@ -1315,7 +1332,8 @@ namespace Iot.Device.Arduino
 
         private byte[]? GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
-            if (methodInstance.ContainsGenericParameters && !methodInstance.DeclaringType!.IsConstructedGenericType)
+            if (methodInstance.ContainsGenericParameters && !methodInstance.DeclaringType!.IsConstructedGenericType
+            && methodInstance.DeclaringType != typeof(MiniUnsafe)) // This one is a very special class, the type params are actually irrelevant
             {
                 throw new InvalidProgramException("No open generic types/methods supported");
             }

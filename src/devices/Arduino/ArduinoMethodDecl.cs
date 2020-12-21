@@ -109,6 +109,11 @@ namespace Iot.Device.Arduino
                 Flags |= MethodFlags.VoidOrCtor;
             }
 
+            if (methodBase.IsVirtual)
+            {
+                Flags |= MethodFlags.Virtual;
+            }
+
             Name = $"{MethodBase.DeclaringType} - {MethodBase} (Special Method)";
         }
 
