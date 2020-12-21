@@ -43,6 +43,7 @@
     <!--Remove the Linux-specific code-->
     <Compile Remove="System\Device\Gpio\Drivers\Windows10Driver.notSupported.cs" />
     <Compile Remove="System\Device\I2c\I2cDevice.nonWindows.cs" />
+    <Compile Remove="System\Device\I2c\I2cBus.nonWindows.cs" />
     <Compile Remove="System\Device\Pwm\PwmChannel.nonWindows.cs" />
     <Compile Remove="System\Device\Spi\SpiDevice.nonWindows.cs" />
     <Compile Remove="System\Device\CommonHelpers.cs" />
@@ -53,10 +54,13 @@
     <Compile Remove="Interop\Windows\WinRT\*.cs" />
     <Compile Remove="System\Device\Gpio\Drivers\Windows10DriverPin.cs" />
     <Compile Remove="System\Device\Gpio\Drivers\Windows10Driver.cs" />
+    <Compile Remove="System\Device\I2c\Devices\Windows10I2cBus.cs" />
     <Compile Remove="System\Device\I2c\Devices\Windows10I2cDevice.cs" />
+    <Compile Remove="System\Device\I2c\Devices\Windows10I2cBusDevice.cs" />
     <Compile Remove="System\Device\Pwm\Channels\Windows10PwmChannel.cs" />
     <Compile Remove="System\Device\Spi\Devices\Windows10SpiDevice.cs" />
     <Compile Remove="System\Device\I2c\I2cDevice.Windows.cs" />
+    <Compile Remove="System\Device\I2c\I2cBus.Windows.cs" />
     <Compile Remove="System\Device\Pwm\PwmChannel.Windows.cs" />
     <Compile Remove="System\Device\Spi\SpiDevice.Windows.cs" />
 

@@ -96,7 +96,7 @@ Pn5180 HardwareSpi()
 
 Pn5180 Ft4222()
 {
-    List<DeviceInformation> devices = FtCommon.GetDevices();
+    List<FtDevice> devices = FtCommon.GetDevices();
     Console.WriteLine($"{devices.Count} FT4222 elements found");
     foreach (var device in devices)
     {
