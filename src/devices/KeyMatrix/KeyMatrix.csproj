@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <Compile Include="KeyMatrix.cs" />
+    <Compile Include="KeyMatrixEvent.cs" />
+  </ItemGroup>
+
+  <ItemGroup>    
+    <None Include="README.md" />
+  </ItemGroup>
+  
+</Project>
