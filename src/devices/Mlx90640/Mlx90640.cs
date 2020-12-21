@@ -687,7 +687,7 @@ namespace Iot.Device.Mlx90640
 
                     ktaTemp[p] = ktaTemp[p] * (1 << ktaScale2);
                     ktaTemp[p] = ktaRC[split] + ktaTemp[p];
-                    ktaTemp[p] = (float)(ktaTemp[p] / Math.Pow(2, ktaScale1));                    
+                    ktaTemp[p] = (float)(ktaTemp[p] / Math.Pow(2, ktaScale1));
                 }
             }
 
