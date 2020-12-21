@@ -75,7 +75,9 @@ namespace System.Device.Gpio.Drivers
             boardInfo = RaspberryBoardInfo.LoadBoardInfo();
             return boardInfo.BoardModel switch
             {
-                RaspberryBoardInfo.Model.RaspberryPi3B or RaspberryBoardInfo.Model.RaspberryPi3BPlus or
+                RaspberryBoardInfo.Model.RaspberryPi3B or
+                RaspberryBoardInfo.Model.RaspberryPi3APlus or
+                RaspberryBoardInfo.Model.RaspberryPi3BPlus or
                 RaspberryBoardInfo.Model.RaspberryPi4 => new RaspberryPi3LinuxDriver(),
                 RaspberryBoardInfo.Model.RaspberryPiComputeModule3 => new RaspberryPiCm3Driver(),
                 _ => null,

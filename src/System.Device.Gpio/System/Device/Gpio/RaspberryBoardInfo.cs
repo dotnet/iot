@@ -73,6 +73,11 @@ namespace System.Device.Gpio
             RaspberryPi3B,
 
             /// <summary>
+            /// Pi 3 Model A+.
+            /// </summary>
+            RaspberryPi3APlus,
+
+            /// <summary>
             /// Pi 3 Model B+.
             /// </summary>
             RaspberryPi3BPlus,
@@ -86,6 +91,11 @@ namespace System.Device.Gpio
             /// Pi 4 all versions.
             /// </summary>
             RaspberryPi4,
+
+            /// <summary>
+            /// Pi 400
+            /// </summary>
+            RaspberryPi400,
         }
 
         #region Fields
@@ -132,16 +142,18 @@ namespace System.Device.Gpio
             0x2 or 0x3 => Model.RaspberryPiBRev1,
             0x4 or 0x5 or 0x6 or 0xd or 0xe or 0xf => Model.RaspberryPiBRev2,
             0x7 or 0x8 or 0x9 => Model.RaspberryPiA,
-            0x10 => Model.RaspberryPiBPlus,
-            0x11 => Model.RaspberryPiComputeModule,
-            0x12 => Model.RaspberryPiAPlus,
-            0x1040 or 0x1041 => Model.RaspberryPi2B,
+            0x10 or 0x13 or 0x32 => Model.RaspberryPiBPlus,
+            0x11 or 0x14 or 0x61 => Model.RaspberryPiComputeModule,
+            0x12 or 0x15 or 0x21 => Model.RaspberryPiAPlus,
+            0x1040 or 0x1041 or 0x2042 => Model.RaspberryPi2B,
             0x0092 or 0x0093 => Model.RaspberryPiZero,
             0x00C1 => Model.RaspberryPiZeroW,
-            0x2082 => Model.RaspberryPi3B,
+            0x2082 or 0x2083 => Model.RaspberryPi3B,
             0x20D3 => Model.RaspberryPi3BPlus,
+            0x20E0 => Model.RaspberryPi3APlus,
             0x20A0 or 0x2100 => Model.RaspberryPiComputeModule3,
-            0x3112 or 0x3111 => Model.RaspberryPi4,
+            0x3111 or 0x3112 or 0x3114 => Model.RaspberryPi4,
+            0x3130 => Model.RaspberryPi400,
             _ => Model.Unknown,
         };
 
