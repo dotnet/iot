@@ -50,7 +50,7 @@ if (platformChoice.KeyChar == '1')
 else if (platformChoice.KeyChar == '2')
 {
     WriteLine("Creating an instance of a CCS811 using FT4222 drivers.");
-    using (var i2cBus = new Ft4222I2cBus(FtCommon.GetDevices()[0]))
+    using (var i2cBus = FtCommon.GetDevices()[0].CreateI2cBus())
     {
         int deviceAddress = addressChoice.KeyChar == '1' ? Ccs811Sensor.I2cFirstAddress : Ccs811Sensor.I2cSecondAddress;
         var gpioController = new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());

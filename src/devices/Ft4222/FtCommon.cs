@@ -19,9 +19,9 @@ namespace Iot.Device.Ft4222
         /// Returns the list of FT4222 connected
         /// </summary>
         /// <returns>A list of devices connected</returns>
-        public static List<DeviceInformation> GetDevices()
+        public static List<FtDevice> GetDevices()
         {
-            List<DeviceInformation> devInfos = new List<DeviceInformation>();
+            List<FtDevice> devInfos = new List<FtDevice>();
             FtStatus ftStatus = 0;
 
             // Check device
@@ -39,7 +39,7 @@ namespace Iot.Device.Ft4222
             for (uint i = 0; i < numOfDevices; i++)
             {
                 uint flags = 0;
-                FtDevice ftDevice;
+                FtDeviceType ftDevice;
                 uint id;
                 uint locId;
                 IntPtr handle;
@@ -50,7 +50,7 @@ namespace Iot.Device.Ft4222
                     throw new IOException($"Can't read device information on device index {i}, error {ftStatus}");
                 }
 
-                var devInfo = new DeviceInformation(
+                var devInfo = new FtDevice(
                     (FtFlag)flags,
                     ftDevice,
                     id,

@@ -61,7 +61,8 @@ namespace Iot.Device.Ft4222
         /// <inheritdoc/>
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
-            _i2cBus.WriteRead(_deviceAddress, writeBuffer, readBuffer);
+            _i2cBus.Write(_deviceAddress, writeBuffer);
+            _i2cBus.Read(_deviceAddress, readBuffer);
         }
 
         /// <inheritdoc/>

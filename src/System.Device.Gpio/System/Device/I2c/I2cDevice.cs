@@ -70,7 +70,7 @@ namespace System.Device.I2c
             }
             else
             {
-                return new UnixI2cDevice(settings);
+                return new UnixI2cDevice(UnixI2cBus.Create(settings.BusId), settings.DeviceAddress, shouldDisposeBus: true);
             }
         }
 

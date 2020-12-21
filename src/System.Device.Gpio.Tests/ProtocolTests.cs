@@ -53,21 +53,61 @@ namespace System.Device.Gpio.Tests
         {
             using (Bme280 bme280 = CreateBme280())
             {
-                Assert.True(bme280.TryReadTemperature(out Temperature temperature));
-
-                // assuming that tests are run in the room temperature
-                // worst case scenario: it's very hot outside
-                Assert.InRange(temperature.DegreesCelsius, 15, 40);
-
-                Assert.True(bme280.TryReadPressure(out Pressure pressure));
-                // https://en.wikipedia.org/wiki/List_of_weather_records
-                // Min and max are extremes recorded on land
-                double pressureHPa = pressure.Hectopascals;
-                Assert.InRange(pressureHPa, 892, 1084);
-
-                Assert.True(bme280.TryReadHumidity(out RelativeHumidity relativeHumidity));
-                Assert.InRange(relativeHumidity.Percent, 0, 100);
+                TestBme280Reading(bme280);
             }
+        }
+
+        [Fact]
+        [Trait("feature", "i2c")]
+        public void I2C_I2cBus_Bme280CanRead()
+        {
+            using (I2cBus i2cBus = CreateI2cBusForBme280())
+            using (Bme280 bme280 = CreateBme280(i2cBus))
+            {
+                TestBme280Reading(bme280);
+            }
+        }
+
+        private static void TestBme280Reading(Bme280 bme280)
+        {
+            Assert.True(bme280.TryReadTemperature(out Temperature temperature));
+
+            // assuming that tests are run in the room temperature
+            // worst case scenario: it's very hot outside
+            Assert.InRange(temperature.DegreesCelsius, 15, 40);
+
+            Assert.True(bme280.TryReadPressure(out Pressure pressure));
+            // https://en.wikipedia.org/wiki/List_of_weather_records
+            // Min and max are extremes recorded on land
+            double pressureHPa = pressure.Hectopascals;
+            Assert.InRange(pressureHPa, 892, 1084);
+
+            Assert.True(bme280.TryReadHumidity(out RelativeHumidity relativeHumidity));
+            Assert.InRange(relativeHumidity.Percent, 0, 100);
+        }
+
+        [Fact]
+        [Trait("feature", "i2c")]
+        public void I2C_I2cBus_MultipleDispose()
+        {
+            // Every dispose operation we do twice to make sure it won't cause issues.
+            // Devices are frequently wrapped and this can happen in real apps
+
+            // we dispose device first, then bus
+            I2cBus i2cBus = CreateI2cBusForBme280();
+            Bme280 bme280 = CreateBme280(i2cBus);
+            bme280.Dispose();
+            bme280.Dispose();
+            i2cBus.Dispose();
+            i2cBus.Dispose();
+
+            // we dispose bus first, then device
+            i2cBus = CreateI2cBusForBme280();
+            bme280 = CreateBme280(i2cBus);
+            i2cBus.Dispose();
+            i2cBus.Dispose();
+            bme280.Dispose();
+            bme280.Dispose();
         }
 
         [Fact]

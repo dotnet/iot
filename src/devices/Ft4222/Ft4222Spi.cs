@@ -23,7 +23,7 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public DeviceInformation DeviceInformation { get; internal set; }
+        public FtDevice DeviceInformation { get; internal set; }
 
         /// <summary>
         /// Create an SPI FT4222 class

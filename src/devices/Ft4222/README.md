@@ -71,12 +71,12 @@ Console.WriteLine($"Dll version: {dll}");
 
 ### I2C
 
-```Ft4222I2cBus``` is the I2C bus driver which allows you to create I2C needed for any device or use it directly to send I2C commands. The created I2C device is implementing ```System.Device.I2c.I2cDevice```.
+`FtDevice.CreateI2cBus()` is the I2C bus driver which allows you to create I2C needed for any device or use it directly to send I2C commands. The created I2C device is implementing ```System.Device.I2c.I2cDevice```.
 
 The example below shows how to create the I2C devices and pass them to a BNO055 sensor and BME280 sensors.
 
 ```csharp
-using Ft4222I2cBus ftI2c = new(FtCommon.GetDevices()[0]);
+using I2cBus ftI2c = FtCommon.GetDevices()[0].CreateI2cBus();
 using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
 using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
 bme280.SetPowerMode(Bmx280PowerMode.Normal);
