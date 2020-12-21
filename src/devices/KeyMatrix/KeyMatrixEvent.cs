@@ -14,17 +14,17 @@ namespace Iot.Device.KeyMatrix
         /// <summary>
         /// Event type of current button. PinEventTypes.Rising is pressed，PinEventTypes.Falling is released
         /// </summary>
-        public PinEventTypes EventType;
+        public PinEventTypes EventType { get; internal set; }
 
         /// <summary>
         /// Current button's output index
         /// </summary>
-        public int Output;
+        public int Output { get; internal set; }
 
         /// <summary>
         /// Current button's input index
         /// </summary>
-        public int Input;
+        public int Input { get; internal set; }
 
         internal KeyMatrixEvent(PinEventTypes eventType, int output, int input)
         {

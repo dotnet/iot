@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ namespace Iot.Device.KeyMatrix
         /// <summary>
         /// Get or set interval in milliseconds
         /// </summary>
-        public int ScanInterval { get; set; }
+        public TimeSpan ScanInterval { get; set; }
 
         /// <summary>
         /// Get buttons' values by output
@@ -44,21 +45,38 @@ namespace Iot.Device.KeyMatrix
 
         private int[] _outputPins;
         private int[] _inputPins;
-        private GpioController _gpioController;
+        private GpioController? _gpioController;
         private PinValue[] _buttonValues;
         private bool _pinsOpened;
         private int _currentOutput = 0;
+        private bool _shouldDispose;
+        private bool _isRunning = false;
+        private KeyMatrixEvent? _lastKeyEvent;
+
+        /// <summary>
+        /// Fire an event when a key is pressed or released
+        /// </summary>
+        /// <param name="sender">The sender KeyMatrix</param>
+        /// <param name="keyMatrixEvent">The key event</param>
+        public delegate void KeyEventHandler(object sender, KeyMatrixEvent keyMatrixEvent);
+
+        /// <summary>
+        /// The raised event
+        /// </summary>
+        public event KeyEventHandler? KeyEvent;
 
         /// <summary>
         /// Initialize key matrix
         /// </summary>
-        /// <param name="gpioController">GPIO controller</param>
         /// <param name="outputPins">Output pins</param>
         /// <param name="inputPins">Input pins</param>
         /// <param name="scanInterval">Scanning interval in milliseconds</param>
-        public KeyMatrix(GpioController gpioController, IEnumerable<int> outputPins, IEnumerable<int> inputPins, int scanInterval)
+        /// <param name="gpioController">GPIO controller</param>
+        /// <param name="shouldDispose">True to dispose the GpioController</param>
+        public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            _gpioController = gpioController ?? throw new ArgumentNullException(nameof(gpioController));
+            _shouldDispose = shouldDispose || gpioController == null;
+            _gpioController = gpioController ?? new();
 
             if (outputPins == null)
             {
@@ -80,35 +98,52 @@ namespace Iot.Device.KeyMatrix
                 throw new ArgumentOutOfRangeException(nameof(inputPins), "The number of inputs must be at least 1");
             }
 
-            if (scanInterval < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(scanInterval), "Scanning interval must be 0 or positive");
-            }
-
             _outputPins = outputPins.ToArray();
             _inputPins = inputPins.ToArray();
             _buttonValues = new PinValue[_outputPins.Length * _inputPins.Length];
+            for (int i = 0; i < _buttonValues.Length; i++)
+            {
+                _buttonValues[i] = PinValue.Low;
+            }
+
             _pinsOpened = false;
-
             ScanInterval = scanInterval;
-
             OpenPins();
         }
 
         /// <summary>
-        /// Blocks execution until a key event is received
+        /// Start listening to key events
         /// </summary>
-        public KeyMatrixEvent ReadKey()
+        public void StartListeningKeyEvent()
         {
-            KeyMatrixEvent args = null;
-            _currentOutput--;
+            if (_isRunning)
+            {
+                return;
+            }
 
+            _isRunning = true;
+            new Thread(() =>
+            {
+                LoopReadKey();
+            }).Start();
+        }
+
+        /// <summary>
+        /// Stop listening to key events
+        /// </summary>
+        public void StopListeningKeyEvent()
+        {
+            _isRunning = false;
+        }
+
+        private void LoopReadKey()
+        {
             do
             {
                 Thread.Sleep(ScanInterval);
 
                 _currentOutput = (_currentOutput + 1) % _outputPins.Length;
-                _gpioController.Write(_outputPins[_currentOutput], PinValue.High);
+                _gpioController!.Write(_outputPins[_currentOutput], PinValue.High);
 
                 for (var i = 0; i < _inputPins.Length; i++)
                 {
@@ -120,16 +155,32 @@ namespace Iot.Device.KeyMatrix
 
                     if (newValue != oldValue)
                     {
-                        args = new KeyMatrixEvent(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentOutput, i);
-                        return args;
+                        KeyEvent?.Invoke(this, new KeyMatrixEvent(newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling, _currentOutput, i));
                     }
                 }
 
                 _gpioController.Write(_outputPins[_currentOutput], PinValue.Low);
             }
-            while (_pinsOpened);
+            while (_pinsOpened && _isRunning);
+        }
 
-            return args;
+        /// <summary>
+        /// Blocks execution until a key event is received
+        /// </summary>
+        public KeyMatrixEvent? ReadKey()
+        {
+            _currentOutput--;
+            KeyEvent += KeyMatrixKeyEvent;
+            _isRunning = true;
+            LoopReadKey();
+            KeyEvent -= KeyMatrixKeyEvent;
+            return _lastKeyEvent;
+        }
+
+        private void KeyMatrixKeyEvent(object sender, KeyMatrixEvent keyMatrixEvent)
+        {
+            _isRunning = false;
+            _lastKeyEvent = keyMatrixEvent;
         }
 
         /// <inheritdoc/>
@@ -137,24 +188,30 @@ namespace Iot.Device.KeyMatrix
         {
             ClosePins();
 
-            _gpioController?.Dispose();
-            _gpioController = null;
-
-            _outputPins = null;
-            _inputPins = null;
-            _buttonValues = null;
+            if (_shouldDispose)
+            {
+                _gpioController?.Dispose();
+                _gpioController = null;
+            }
+            else
+            {
+                if (_gpioController is object && _pinsOpened)
+                {
+                    ClosePins();
+                }
+            }
         }
 
         private void OpenPins()
         {
             for (int i = 0; i < _outputPins.Length; i++)
             {
-                _gpioController.OpenPin(_outputPins[i], PinMode.Output);
+                _gpioController!.OpenPin(_outputPins[i], PinMode.Output);
             }
 
             for (int i = 0; i < _inputPins.Length; i++)
             {
-                _gpioController.OpenPin(_inputPins[i], PinMode.Input);
+                _gpioController!.OpenPin(_inputPins[i], PinMode.Input);
             }
 
             _pinsOpened = true;
@@ -162,17 +219,18 @@ namespace Iot.Device.KeyMatrix
 
         private void ClosePins()
         {
+            _isRunning = false;
             _pinsOpened = false;
             Thread.Sleep(ScanInterval); // wait for current scan to complete
 
             for (int i = 0; i < _outputPins.Length; i++)
             {
-                _gpioController.ClosePin(_outputPins[i]);
+                _gpioController!.ClosePin(_outputPins[i]);
             }
 
             for (int i = 0; i < _inputPins.Length; i++)
             {
-                _gpioController.ClosePin(_inputPins[i]);
+                _gpioController!.ClosePin(_inputPins[i]);
             }
         }
     }
