@@ -200,7 +200,7 @@ namespace Iot.Device.Board.Tests
             var board = CreateBoard(PinNumberingScheme.Board);
             var device = board.CreateOrGetI2cBus(0, new int[] { 2, 4 });
             Assert.NotNull(device);
-            var simDevice = device.CreateDevice(new I2cConnectionSettings(0, 3)) as I2cDummyDevice;
+            var simDevice = device.CreateDevice(3) as I2cDummyDevice;
             Assert.NotNull(simDevice);
             Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(2));
             Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(4));

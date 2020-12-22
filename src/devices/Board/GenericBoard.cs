@@ -59,7 +59,7 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
-        public override I2cBus CreateOrGetDefaultI2cBus()
+        public override I2cBusManager CreateOrGetDefaultI2cBus()
         {
             throw new NotSupportedException("For the generic board, you need to specify the pins to use for I2C by explicitly specifying them");
         }

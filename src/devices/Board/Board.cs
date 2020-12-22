@@ -32,7 +32,7 @@ namespace Iot.Device.Board
         private readonly PinNumberingScheme _defaultNumberingScheme;
         private readonly object _pinReservationsLock;
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
-        private readonly Dictionary<int, I2cBus> _i2cBuses;
+        private readonly Dictionary<int, I2cBusManager> _i2cBuses;
         private bool _initialized;
         private bool _disposed;
 
@@ -49,7 +49,7 @@ namespace Iot.Device.Board
         {
             _defaultNumberingScheme = defaultNumberingScheme;
             _pinReservations = new Dictionary<int, List<PinReservation>>();
-            _i2cBuses = new Dictionary<int, I2cBus>();
+            _i2cBuses = new Dictionary<int, I2cBusManager>();
             _pinReservationsLock = new object();
             _initialized = false;
             _disposed = false;
@@ -429,7 +429,7 @@ namespace Iot.Device.Board
         /// <param name="busNumber">I2C bus number to create</param>
         /// <param name="pinAssignment">The set of pins to use for I2C. Can be null if the bus already exists</param>
         /// <returns>An I2C bus instance</returns>
-        public virtual I2cBus CreateOrGetI2cBus(int busNumber, int[]? pinAssignment)
+        public virtual I2cBusManager CreateOrGetI2cBus(int busNumber, int[]? pinAssignment)
         {
             if (_i2cBuses.TryGetValue(busNumber, out var bus))
             {
@@ -441,7 +441,7 @@ namespace Iot.Device.Board
                 throw new ArgumentException($"Invalid argument. Must provide exactly two pins for I2C", nameof(pinAssignment));
             }
 
-            bus = new I2cBus(this, busNumber, RemapPins(pinAssignment, DefaultPinNumberingScheme), CreateI2cDeviceCore);
+            bus = new I2cBusManager(this, busNumber, RemapPins(pinAssignment, DefaultPinNumberingScheme), CreateI2cDeviceCore);
             _i2cBuses.Add(busNumber, bus);
             return bus;
         }
@@ -451,7 +451,7 @@ namespace Iot.Device.Board
         /// </summary>
         /// <param name="busNumber">I2C bus number to create</param>
         /// <returns>An I2C bus instance</returns>
-        public I2cBus CreateOrGetI2cBus(int busNumber)
+        public I2cBusManager CreateOrGetI2cBus(int busNumber)
         {
             if (_i2cBuses.TryGetValue(busNumber, out var bus))
             {
@@ -459,7 +459,7 @@ namespace Iot.Device.Board
             }
 
             int[] pins = GetDefaultPinAssignmentForI2c(busNumber);
-            bus = new I2cBus(this, busNumber, pins, CreateI2cDeviceCore);
+            bus = new I2cBusManager(this, busNumber, pins, CreateI2cDeviceCore);
             _i2cBuses.Add(busNumber, bus);
             return bus;
         }
@@ -468,7 +468,7 @@ namespace Iot.Device.Board
         /// Creates the default I2C bus for this board or returns the existing bus
         /// </summary>
         /// <returns>An I2cBus instance</returns>
-        public abstract I2cBus CreateOrGetDefaultI2cBus();
+        public abstract I2cBusManager CreateOrGetDefaultI2cBus();
 
         /// <summary>
         /// Create an I2C device instance on a default bus.
@@ -483,15 +483,19 @@ namespace Iot.Device.Board
             // requires specifying the pins)
             if (_i2cBuses.TryGetValue(connectionSettings.BusId, out var bus))
             {
-                return bus.CreateDevice(connectionSettings);
+                return bus.CreateDevice(connectionSettings.DeviceAddress);
             }
 
             int[] pinAssignment = GetDefaultPinAssignmentForI2c(connectionSettings.BusId);
-            I2cBus newBus = CreateOrGetI2cBus(connectionSettings.BusId, pinAssignment);
-            return newBus.CreateDevice(connectionSettings);
+            I2cBusManager newBus = CreateOrGetI2cBus(connectionSettings.BusId, pinAssignment);
+            return newBus.CreateDevice(connectionSettings.DeviceAddress);
         }
 
-        internal void RemoveBus(I2cBus bus)
+        /// <summary>
+        /// This is called from the buses Dispose method, so do NOT call bus.Dispose here
+        /// </summary>
+        /// <param name="bus">The bus that's being closed</param>
+        internal void RemoveBus(I2cBusManager bus)
         {
             _i2cBuses.Remove(bus.BusId);
         }
