@@ -44,6 +44,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [BH1750FVI - Ambient Light Sensor](Bh1750fvi/README.md)
 * [MAX44009 - Ambient Light Sensor](Max44009/README.md)
 * [TCS3472x Sensors](Tcs3472x/README.md)
+* [TSL256x - Illuminance sensor](Tsl256x/README.md)
 
 ### Barometers
 
@@ -76,6 +77,11 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
 * [μFire ISE Probe - pH, ORP and temperature sensor](UFireIse/README.md)
+
+### Infrared sensors
+
+* [AMG88xx Infrared Array Sensor Family](Amg88xx/README.md)
+* [MLX90614 - Infra Red Thermometer](Mlx90614/README.md)
 
 ### Gyroscopes
 
@@ -209,6 +215,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### RFID/NFC modules
 
+* [MFRC522 - RFID reader](Mfrc522/README.md)
 * [PN5180 - RFID and NFC reader](Pn5180/README.md)
 * [PN532 - RFID and NFC reader](Pn532/README.md)
 * [RFID shared elements](Card/README.md)
@@ -221,12 +228,14 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### USB devices
 
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
+* [STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP](StUsb4500/README.md)
 
 ### GPIO or bit operating devices
 
 * [Charlieplex Segment binding](Charlieplex/README.md)
 * [Digital liquid level switch](LiquidLevel/README.md)
 * [Generic shift register](ShiftRegister/README.md)
+* [Key Matrix](KeyMatrix/README.md)
 * [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
 * [Quadrature Rotary Encoder](RotaryEncoder/README.md)
 * [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
@@ -246,6 +255,11 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Software PWM](SoftPwm/README.md)
 * [Software SPI](SoftwareSpi/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
+
+### Power monitors and related devices
+
+* [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
+* [PiJuice - power supply for Raspberry Pi](PiJuice/README.md)
 
 </categorizedDevices>
 

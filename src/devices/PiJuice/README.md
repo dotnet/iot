@@ -1,4 +1,4 @@
-# PiJuice
+# PiJuice - power supply for Raspberry Pi
 
 ## Summary
 
