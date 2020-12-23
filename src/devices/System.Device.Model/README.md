@@ -107,5 +107,5 @@ Only simple types can be serialized:
   - values out of enum range are not permitted (i.e. bitwise combination)
 - UnitsNet units
 - basic C# types
-- Vector2, Vector3, Vector4
-- Color
+- System.Numerics.Vector2, System.Numerics.Vector3, System.Numerics.Vector4
+- System.Drawing.Color
