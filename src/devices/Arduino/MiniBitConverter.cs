@@ -17,5 +17,10 @@ namespace Iot.Device.Arduino
         {
             throw new NotImplementedException();
         }
+
+        public static Int64 DoubleToInt64Bits(double value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

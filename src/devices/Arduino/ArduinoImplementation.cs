@@ -93,6 +93,11 @@ namespace Iot.Device.Arduino
         StringMiniStringConversion,
         StringUnEqualsStatic,
         RuntimeHelpersGetHashCode,
-        RuntimeHelpersIsBitwiseEquatable
+        RuntimeHelpersIsBitwiseEquatable,
+        RuntimeHelpersGetMethodTable,
+        RuntimeHelpersGetRawArrayData,
+        UnsafeIsAddressGreaterThan,
+        UnsafeIsAddressLessThan,
+        ObjectMemberwiseClone
     }
 }

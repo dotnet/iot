@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Iot.Device.Arduino
 {
     [ArduinoReplacement(typeof(System.Runtime.CompilerServices.RuntimeHelpers), true)]
-    internal class MiniRuntimeHelpers
+    internal static class MiniRuntimeHelpers
     {
         [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersInitializeArray)]
         public static void InitializeArray(Array array, RuntimeFieldHandle fldHandle)
@@ -52,8 +52,30 @@ namespace Iot.Device.Arduino
             return IsBitwiseEquatableCore(typeof(T));
         }
 
-        [ArduinoImplementation((ArduinoImplementation.RuntimeHelpersIsBitwiseEquatable))]
+        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersIsBitwiseEquatable)]
         private static bool IsBitwiseEquatableCore(Type t)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersGetMethodTable)]
+        public static unsafe void* GetMethodTable(object obj)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static unsafe ref int GetMultiDimensionalArrayBounds(Array array)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static unsafe int GetMultiDimensionalArrayRank(Array array)
+        {
+            return 1; // TODO
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersGetRawArrayData)]
+        internal static unsafe ref byte GetRawArrayData(this Array array)
         {
             throw new NotImplementedException();
         }

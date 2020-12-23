@@ -135,5 +135,73 @@ namespace Iot.Device.Arduino
         {
             return As<byte, T>(ref *(byte*)source);
         }
+
+        /// <summary>
+        /// Determines whether the memory address referenced by <paramref name="left"/> is greater than
+        /// the memory address referenced by <paramref name="right"/>.
+        /// </summary>
+        /// <remarks>
+        /// This check is conceptually similar to "(void*)(&amp;left) &gt; (void*)(&amp;right)".
+        /// </remarks>
+        [ArduinoImplementation(ArduinoImplementation.UnsafeIsAddressGreaterThan, CompareByParameterNames = true)]
+        public static bool IsAddressGreaterThan<T>(ref T left, ref T right)
+        {
+            throw new PlatformNotSupportedException();
+
+            // ldarg.0
+            // ldarg.1
+            // cgt.un
+            // ret
+        }
+
+        /// <summary>
+        /// Determines whether the memory address referenced by <paramref name="left"/> is less than
+        /// the memory address referenced by <paramref name="right"/>.
+        /// </summary>
+        /// <remarks>
+        /// This check is conceptually similar to "(void*)(&amp;left) &lt; (void*)(&amp;right)".
+        /// </remarks>
+        [ArduinoImplementation(ArduinoImplementation.UnsafeIsAddressLessThan, CompareByParameterNames = true)]
+        public static bool IsAddressLessThan<T>(ref T left, ref T right)
+        {
+            throw new PlatformNotSupportedException();
+
+            // ldarg.0
+            // ldarg.1
+            // clt.un
+            // ret
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.None)]
+        public static void InitBlockUnaligned(ref byte startAddress, byte value, uint byteCount)
+        {
+            for (uint i = 0; i < byteCount; i++)
+            {
+                AddByteOffset(ref startAddress, i) = value;
+            }
+        }
+
+        /// <summary>
+        /// Writes a value of type <typeparamref name="T"/> to the given location.
+        /// </summary>
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        public static void WriteUnaligned<T>(void* destination, T value)
+        {
+            As<byte, T>(ref *(byte*)destination) = value;
+        }
+
+        /// <summary>
+        /// Writes a value of type <typeparamref name="T"/> to the given location.
+        /// </summary>
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        public static void WriteUnaligned<T>(ref byte destination, T value)
+        {
+            As<byte, T>(ref destination) = value;
+        }
+
+        public static T ReadUnaligned<T>(ref byte source)
+        {
+            return As<byte, T>(ref source);
+        }
     }
 }

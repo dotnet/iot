@@ -30,5 +30,10 @@ namespace Iot.Device.Arduino
         {
             return string.Empty;
         }
+
+        internal static int GetHashCodeOfPtr(IntPtr ptr)
+        {
+            return (int)ptr;
+        }
     }
 }

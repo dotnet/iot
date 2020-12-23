@@ -9,7 +9,7 @@ namespace Iot.Device.Arduino
     /// <summary>
     /// This (basically empty) class replaces the implementation of <see cref="System.Object"/> in the interpreter
     /// </summary>
-    [ArduinoReplacement(typeof(Object))]
+    [ArduinoReplacement(typeof(Object), IncludingPrivates = true)]
     internal abstract class MiniObject
     {
         [ArduinoImplementation(ArduinoImplementation.ObjectEquals)]
@@ -38,6 +38,12 @@ namespace Iot.Device.Arduino
 
         [ArduinoImplementation(ArduinoImplementation.ObjectReferenceEquals)]
         public static new bool ReferenceEquals(object? a, object? b)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.ObjectMemberwiseClone)]
+        public new object MemberwiseClone()
         {
             throw new NotImplementedException();
         }
