@@ -24,7 +24,7 @@ The following example shows how to setup the screen with a PWM to control the br
 SpiConnectionSettings spiConnection = new(0, 1) { ClockFrequency = 5_000_000, Mode = SpiMode.Mode0, DataFlow = DataFlow.MsbFirst, ChipSelectLineActiveState = PinValue.Low };
 PwmChannel pwmChannel = PwmChannel.Create(0, 0);
 SpiDevice spi = SpiDevice.Create(spiConnection);
-lcd = new(27, 22, spi, pwmChannel);
+Pcd8544 lcd = new(27, 22, spi, pwmChannel);
 ```
 
 If you don't want neither a PWM neither a reset pin, you can then pass a negative pin number for reset and null for the PWM:

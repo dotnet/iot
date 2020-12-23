@@ -128,7 +128,7 @@ namespace Iot.Device.Display
                 if (_pwmBacklight != null)
                 {
                     _backlightVal = value > 1 ? 1 : value;
-
+                    _backlightVal = _backlightVal < 0 ? 0 : _backlightVal;
                     _pwmBacklight.DutyCycle = _backlightVal;
                 }
             }
