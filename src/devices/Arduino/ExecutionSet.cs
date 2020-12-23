@@ -458,7 +458,7 @@ namespace Iot.Device.Arduino
                     }
 
                     // Don't run these init functions, to complicated or depend on native functions
-                    return TheType.FullName == "System.SR" || TheType.FullName == "System.HashCode";
+                    return TheType.FullName == "System.SR";
                 }
             }
 

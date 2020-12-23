@@ -37,5 +37,21 @@ namespace Iot.Device.Arduino
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation(ArduinoImplementation.ArrayResize, CompareByParameterNames = true)]
+        public static void Resize<T>(ref T[]? array, int newSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static T[] Empty<T>()
+        {
+            return EmptyInternal<T>(typeof(T));
+        }
+
+        private static T[] EmptyInternal<T>(Type t)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

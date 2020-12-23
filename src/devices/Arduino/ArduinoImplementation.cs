@@ -80,6 +80,16 @@ namespace Iot.Device.Arduino
         UnsafeAddByteOffset,
         UnsafeSizeOfType,
         StringGetRawStringData,
-        RuntimeHelpersIsReferenceOrContainsReferencesCore
+        RuntimeHelpersIsReferenceOrContainsReferencesCore,
+        StringCtor1,
+        UnsafeAsPointer,
+        StringEqualsStringComparison,
+        StringInternalAllocateString,
+        ArrayResize,
+        UnsafeByteOffset,
+        UnsafeAreSame,
+        BufferMemmove,
+        BufferMemmoveRefArgs,
+        StringMiniStringConversion
     }
 }

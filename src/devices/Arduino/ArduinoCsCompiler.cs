@@ -1332,11 +1332,11 @@ namespace Iot.Device.Arduino
 
         private byte[]? GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
-            if (methodInstance.ContainsGenericParameters && !methodInstance.DeclaringType!.IsConstructedGenericType
-            && methodInstance.DeclaringType != typeof(MiniUnsafe)) // This one is a very special class, the type params are actually irrelevant
-            {
-                throw new InvalidProgramException("No open generic types/methods supported");
-            }
+            ////if (methodInstance.ContainsGenericParameters && !methodInstance.DeclaringType!.IsConstructedGenericType
+            ////&& methodInstance.DeclaringType != typeof(MiniUnsafe) && methodInstance.DeclaringType != typeof(MiniRuntimeHelpers)) // This one is a very special class, the type params are actually irrelevant
+            ////{
+            ////    throw new InvalidProgramException("No open generic types/methods supported");
+            ////}
 
             MethodBody? body = methodInstance.GetMethodBody();
             if (body == null)

@@ -7,19 +7,28 @@ using System.Runtime.CompilerServices;
 namespace Iot.Device.Arduino
 {
     [ArduinoReplacement(typeof(System.String), true)]
-    internal class MiniString : ICloneable, IComparable, IComparable<string>, IConvertible, IEquatable<string>, System.Collections.Generic.IEnumerable<char>
+    internal unsafe partial class MiniString : ICloneable, IComparable, IComparable<string>, IConvertible, IEquatable<string>, System.Collections.Generic.IEnumerable<char>
     {
 #pragma warning disable SA1122 // Use string.Empty for empty strings (This is the definition of an empty string!)
         public static string Empty = "";
 #pragma warning restore SA1122
-        private int _length;
-        private int _data; // Internal char* pointer
+        private readonly int _stringLength;
+
+        // This is the first char of the data this instance holds. The address of this field is the char* pointer, meaning that the actual string
+        // data is stored inline, and the object has a dynamic size!
+        private char _firstChar;
 
         [ArduinoImplementation(ArduinoImplementation.StringCtor0)]
         public MiniString()
         {
-            _length = 0;
-            _data = 0;
+            _stringLength = 0;
+            _firstChar = '\0';
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.StringCtor1)]
+        public unsafe MiniString(char* buf)
+        {
+            throw new NotImplementedException();
         }
 
         [ArduinoImplementation(ArduinoImplementation.None)]
@@ -36,6 +45,54 @@ namespace Iot.Device.Arduino
         public MiniString(char c, int count)
         {
             throw new NotImplementedException();
+        }
+
+        public MiniString(char[] value, int startIndex, int length)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (startIndex < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+            }
+
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(length));
+            }
+
+            if (startIndex > value.Length - length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+            }
+
+            if (length == 0)
+            {
+                return;
+            }
+
+            InternalAllocateString(length);
+            for (int i = startIndex; i < startIndex + length; i++)
+            {
+                SetElem(i - startIndex, value[i]);
+            }
+        }
+
+        public MiniString(char[]? value)
+        {
+            if (value == null || value.Length == 0)
+            {
+                return;
+            }
+
+            InternalAllocateString(value.Length);
+            for (int i = 0; i < value.Length; i++)
+            {
+                SetElem(i, value[i]);
+            }
         }
 
         public static implicit operator ReadOnlySpan<char>(MiniString? value)
@@ -59,12 +116,7 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                if (_data == 0)
-                {
-                    return 0;
-                }
-
-                return _length;
+                return _stringLength;
             }
         }
 
@@ -77,35 +129,12 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringFormat2)]
-        public static string Format(string format, object arg0)
-        {
-            return string.Empty;
-        }
-
-        [ArduinoImplementation(ArduinoImplementation.StringFormat3)]
-        public static string Format(string format, object arg0, object arg1)
-        {
-            return string.Empty;
-        }
-
-        [ArduinoImplementation(ArduinoImplementation.StringFormat2b)]
-        public static string Format(string format, object[] args)
-        {
-            return string.Empty;
-        }
-
         public int CompareTo(string? other)
         {
             throw new NotImplementedException();
         }
 
         public int IndexOf(char c)
-        {
-            throw new NotImplementedException();
-        }
-
-        public static string? Concat(ReadOnlySpan<char> str0, ReadOnlySpan<char> str1, ReadOnlySpan<char> str2, ReadOnlySpan<char> str3)
         {
             throw new NotImplementedException();
         }
@@ -125,6 +154,12 @@ namespace Iot.Device.Arduino
         public bool Equals(string? other)
         {
             return Equals((object?)other);
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.StringEqualsStringComparison)]
+        public bool Equals(string value, StringComparison comparisonType)
+        {
+            throw new NotImplementedException();
         }
 
         [ArduinoImplementation(ArduinoImplementation.StringGetHashCode)]
@@ -155,20 +190,16 @@ namespace Iot.Device.Arduino
             return this; // String is immutable
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringConcat2)]
-        public static string Concat(string string1, string string2)
+        [ArduinoImplementation(ArduinoImplementation.StringSetElem)]
+        private void SetElem(int idx, char c)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None)]
-        public static string Join(string? separator, params object[]? values)
-        {
-            return string.Empty;
-        }
-
-        [ArduinoImplementation(ArduinoImplementation.StringSetElem)]
-        private void SetElem(int idx, char c)
+        /// <summary>
+        /// Write access to an immutable string!
+        /// </summary>
+        private static void SetElem(String str, int idx, char c)
         {
             throw new NotImplementedException();
         }
@@ -186,7 +217,11 @@ namespace Iot.Device.Arduino
         }
 
         [ArduinoImplementation(ArduinoImplementation.None)]
+#if NETCOREAPP2_1
         public static bool IsNullOrEmpty(string? value)
+#else
+        public static bool IsNullOrEmpty([NotNullWhen(false)] string? value)
+#endif
         {
             return (value == null || value.Length == 0);
         }
@@ -296,7 +331,7 @@ namespace Iot.Device.Arduino
         }
 
         [ArduinoImplementation(ArduinoImplementation.StringFastAllocateString)]
-        public static MiniString FastAllocateString(int length)
+        public static String FastAllocateString(int length)
         {
             throw new NotImplementedException();
         }
@@ -310,11 +345,21 @@ namespace Iot.Device.Arduino
         // This is only intended to be used by char.ToString.
         // It is necessary to put the code in this class instead of Char, since _firstChar is a private member.
         // Making _firstChar internal would be dangerous since it would make it much easier to break String's immutability.
-        internal static MiniString CreateFromChar(char c)
+        internal static String CreateFromChar(char c)
         {
-            MiniString result = FastAllocateString(1);
-            result.SetElem(0, c);
+            String result = FastAllocateString(1);
+            SetElem(result, 0, c);
             return result;
+        }
+
+        /// <summary>
+        /// Allocates memory for the internal _data pointer
+        /// </summary>
+        /// <param name="length">Length, in chars</param>
+        [ArduinoImplementation(ArduinoImplementation.StringInternalAllocateString)]
+        private void InternalAllocateString(int length)
+        {
+            throw new NotImplementedException();
         }
     }
 }

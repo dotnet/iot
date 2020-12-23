@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
@@ -29,6 +25,48 @@ namespace Iot.Device.Arduino
             // ret
         }
 
+        [ArduinoImplementation(ArduinoImplementation.UnsafeAsPointer, CompareByParameterNames = true)]
+        public static void* AsPointer<T>(ref T value)
+        {
+            throw new PlatformNotSupportedException();
+
+            // ldarg.0
+            // conv.u
+            // ret
+        }
+
+        /// <summary>
+        /// Determines the byte offset from origin to target from the given references.
+        /// </summary>
+        [ArduinoImplementation(ArduinoImplementation.UnsafeByteOffset, CompareByParameterNames = true)]
+        public static IntPtr ByteOffset<T>(ref T origin, ref T target)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.UnsafeAreSame, CompareByParameterNames = true)]
+        public static bool AreSame<T>(ref T left, ref T right)
+        {
+            throw new PlatformNotSupportedException();
+
+            // ldarg.0
+            // ldarg.1
+            // ceq
+            // ret
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        public static bool IsNullRef<T>(ref T source)
+        {
+            return AsPointer(ref source) == null;
+
+            // ldarg.0
+            // ldc.i4.0
+            // conv.u
+            // ceq
+            // ret
+        }
+
         [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
         public static ref T Add<T>(ref T source, int elementOffset)
         {
@@ -45,6 +83,11 @@ namespace Iot.Device.Arduino
             // ldarg.1
             // add
             // ret
+        }
+
+        public static ref T AddByteOffset<T>(ref T source, uint byteOffset)
+        {
+            return ref AddByteOffset(ref source, (IntPtr)(void*)byteOffset);
         }
 
         public static int SizeOf<T>()
