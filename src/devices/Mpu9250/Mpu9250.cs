@@ -5,6 +5,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device;
 using System.Device.I2c;
+using System.Device.Model;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Numerics;
@@ -16,8 +17,9 @@ using UnitsNet;
 namespace Iot.Device.Imu
 {
     /// <summary>
-    /// MPU9250 class. MPU9250 has an embedded gyroscope, accelerometer and temperature. It is built on an MPU6500 and it does offers a magnetometer thru an embedded AK8963.
+    /// MPU9250 - gyroscope, accelerometer, temperature and magnetometer (thru an embedded AK8963).
     /// </summary>
+    [Interface("MPU9250 - gyroscope, accelerometer, temperature and magnetometer (thru an embedded AK8963)")]
     public class Mpu9250 : Mpu6500
     {
         private Ak8963 _ak8963;
@@ -41,6 +43,7 @@ namespace Iot.Device.Imu
         ///  /  |  \
         ///         +X
         /// </remarks>
+        [Property]
         public Vector3 MagnometerBias => new Vector3(_ak8963.MagnetometerBias.Y, _ak8963.MagnetometerBias.X, -_ak8963.MagnetometerBias.Z);
 
         /// <summary>
@@ -50,6 +53,7 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <param name="calibrationCounts">number of points to read during calibration, default is 1000</param>
         /// <returns>Returns the factory calibration data</returns>
+        [Command]
         public Vector3 CalibrateMagnetometer(int calibrationCounts = 1000)
         {
             if (_wakeOnMotion)
@@ -74,6 +78,7 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <returns>Returns the Magnetometer version number</returns>
         /// <remarks>When the wake on motion is on, you can't read the magnetometer, so this function returns 0</remarks>
+        [Property("MagnetometerVersion")]
         public byte GetMagnetometerVersion() => _wakeOnMotion ? (byte)0 : _ak8963.GetDeviceInfo();
 
         /// <summary>
@@ -115,6 +120,7 @@ namespace Iot.Device.Imu
         /// </remarks>
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
+        [Telemetry("MagneticInduction")]
         public Vector3 ReadMagnetometer(bool waitForData = true)
         {
             Vector3 magn = _ak8963.ReadMagnetometer(waitForData, GetTimeout());
@@ -153,6 +159,7 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Select the magnetometer output bit rate
         /// </summary>
+        [Property]
         public OutputBitMode MagnetometerOutputBitMode
         {
             get => _ak8963.OutputBitMode;
@@ -162,6 +169,7 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Get the magnetometer hardware adjustment bias
         /// </summary>
+        [Property]
         public Vector3 MagnetometerAdjustment => _ak8963.MagnetometerAdjustment;
 
         #endregion

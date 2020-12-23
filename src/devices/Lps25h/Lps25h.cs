@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Diagnostics;
 using UnitsNet;
 
@@ -12,6 +13,7 @@ namespace Iot.Device.Lps25h
     /// <summary>
     /// LPS25H - Piezoresistive pressure and thermometer sensor
     /// </summary>
+    [Interface("LPS25H - Piezoresistive pressure and thermometer sensor")]
     public class Lps25h : IDisposable
     {
         private const byte ReadMask = 0x80;
@@ -43,11 +45,13 @@ namespace Iot.Device.Lps25h
         /// <summary>
         /// Temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature => Temperature.FromDegreesCelsius(42.5f + ReadInt16(Register.Temperature) / 480f);
 
         /// <summary>
         /// Pressure
         /// </summary>
+        [Telemetry]
         public Pressure Pressure => Pressure.FromHectopascals(ReadInt24(Register.Pressure) / 4096.0);
 
         private void WriteByte(Register register, byte data)

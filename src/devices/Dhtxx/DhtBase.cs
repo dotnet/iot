@@ -5,6 +5,7 @@ using System;
 using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Diagnostics;
 using System.Threading;
 using UnitsNet;
@@ -14,6 +15,7 @@ namespace Iot.Device.DHTxx
     /// <summary>
     /// Temperature and Humidity Sensor DHTxx
     /// </summary>
+    [Interface("Temperature and Humidity Sensor DHTxx")]
     public abstract class DhtBase : IDisposable
     {
         /// <summary>
@@ -59,6 +61,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successful, it returns <code>default(Temperature)</code>
         /// </remarks>
+        [Telemetry]
         public virtual Temperature Temperature
         {
             get
@@ -74,6 +77,7 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successful, it returns <code>default(RelativeHumidity)</code>
         /// </remarks>
+        [Telemetry]
         public virtual RelativeHumidity Humidity
         {
             get

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Model;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -18,6 +19,7 @@ namespace Iot.Device.CpuTemperature
     /// On Windows, the value returned is driver dependent and may not represent actual CPU temperature, but more one
     /// of the case sensors. Use OpenHardwareMonitor for better environmental representation in Windows.
     /// </summary>
+    [Interface("CPU temperature")]
     public sealed class CpuTemperature : IDisposable
     {
         private bool _isAvailable;
@@ -43,6 +45,7 @@ namespace Iot.Device.CpuTemperature
         /// <summary>
         /// Gets CPU temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature
         {
             get

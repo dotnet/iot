@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.Model;
 using System.Device.Pwm;
 using System.Device.Pwm.Drivers;
 using System.Threading;
@@ -9,8 +10,9 @@ using System.Threading;
 namespace Iot.Device.Buzzer
 {
     /// <summary>
-    /// Simple buzzer binding. Supports buzzers with ground, vcc and signal pins as well as buzzers with only ground and vcc pins.
+    /// Simple buzzer.
     /// </summary>
+    [Interface("Simple buzzer")]
     public class Buzzer : IDisposable
     {
         private PwmChannel _pwmChannel;
@@ -44,6 +46,7 @@ namespace Iot.Device.Buzzer
         /// Set new or overwrite previously set frequency and start playing the sound.
         /// </summary>
         /// <param name="frequency">Tone frequency in Hertz.</param>
+        [Command]
         public void StartPlaying(double frequency)
         {
             _pwmChannel.Frequency = (int)frequency;
@@ -53,6 +56,7 @@ namespace Iot.Device.Buzzer
         /// <summary>
         /// Stop playing tone.
         /// </summary>
+        [Command]
         public void StopPlaying() => _pwmChannel.Stop();
 
         /// <summary>
@@ -60,6 +64,7 @@ namespace Iot.Device.Buzzer
         /// </summary>
         /// <param name="frequency">Tone frequency in Hertz.</param>
         /// <param name="duraton">Playing duration in millisecons.</param>
+        [Command]
         public void PlayTone(double frequency, int duraton)
         {
             StartPlaying(frequency);

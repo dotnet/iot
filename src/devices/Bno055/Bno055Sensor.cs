@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Numerics;
 using System.Threading;
 using Temperature = UnitsNet.Temperature;
@@ -13,6 +14,7 @@ namespace Iot.Device.Bno055
     /// <summary>
     /// BNO055 - inertial measurement unit (IMU)
     /// </summary>
+    [Interface("BNO055 - inertial measurement unit (IMU)")]
     public class Bno055Sensor : IDisposable
     {
         /// <summary>
@@ -35,6 +37,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get/Set the operation mode
         /// </summary>
+        [Property]
         public OperationMode OperationMode
         {
             get => _operationMode;
@@ -50,6 +53,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set/Get the power mode
         /// </summary>
+        [Property]
         public PowerMode PowerMode
         {
             get => (PowerMode)ReadByte(Registers.PWR_MODE);
@@ -64,6 +68,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set/Get the temperature source
         /// </summary>
+        [Property]
         public TemperatureSource TemperatureSource
         {
             get => (TemperatureSource)ReadByte(Registers.TEMP_SOURCE);
@@ -78,6 +83,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set/Get the units used. By default, international system is used
         /// </summary>
+        [Property]
         public Units Units
         {
             get => (Units)ReadByte(Registers.UNIT_SEL);
@@ -202,18 +208,21 @@ namespace Iot.Device.Bno055
         /// Get the status. If there is an error, GetError() will give more details
         /// </summary>
         /// <returns></returns>
+        [Telemetry("Status")]
         public Status GetStatus() => (Status)ReadByte(Registers.SYS_STAT);
 
         /// <summary>
         /// Get the latest error
         /// </summary>
         /// <returns>Returns the latest error</returns>
+        [Telemetry("Status")]
         public Error GetError() => (Error)ReadByte(Registers.SYS_ERR);
 
         /// <summary>
         /// Run a self test. In case of error, use GetStatus() and GetError() to get the last error
         /// </summary>
         /// <returns>Status fo the test</returns>
+        [Command]
         public TestResult RunSelfTest()
         {
             SetConfigMode(true);
@@ -231,12 +240,14 @@ namespace Iot.Device.Bno055
         /// Returns the calibration status for the system and sensors
         /// </summary>
         /// <returns>Calibration status</returns>
+        [Command]
         public CalibrationStatus GetCalibrationStatus() => (CalibrationStatus)ReadByte(Registers.CALIB_STAT);
 
         /// <summary>
         /// Get the accelerometer calibration data
         /// </summary>
         /// <returns>Returns the accelerometers calibration data</returns>
+        [Command]
         public Vector4 GetAccelerometerCalibrationData()
         {
             SetConfigMode(true);
@@ -250,6 +261,7 @@ namespace Iot.Device.Bno055
         /// Set the accelerometer calibration data
         /// </summary>
         /// <param name="calibrationData">Calibration data</param>
+        [Command]
         public void SetAccelerometerCalibrationData(Vector4 calibrationData)
         {
             SetConfigMode(true);
@@ -269,6 +281,7 @@ namespace Iot.Device.Bno055
         /// Get the magnetometer calibration data
         /// </summary>
         /// <returns>Returns the magnetometer calibration data</returns>
+        [Command]
         public Vector4 GetMagnetometerCalibrationData()
         {
             SetConfigMode(true);
@@ -282,6 +295,7 @@ namespace Iot.Device.Bno055
         /// Set the magnetometer calibration data
         /// </summary>
         /// <param name="calibrationData">Calibration data</param>
+        [Command]
         public void SetMagnetometerCalibrationData(Vector4 calibrationData)
         {
             SetConfigMode(true);
@@ -301,6 +315,7 @@ namespace Iot.Device.Bno055
         /// Get the gyroscope calibration data
         /// </summary>
         /// <returns>X, Y and Z data</returns>
+        [Command]
         public Vector3 GetGyroscopeCalibrationData()
         {
             SetConfigMode(true);
@@ -313,6 +328,7 @@ namespace Iot.Device.Bno055
         /// Set the gyroscope calibration data
         /// </summary>
         /// <param name="calibrationData">X, Y and Z data</param>
+        [Command]
         public void SetGyroscopeCalibrationData(Vector3 calibrationData)
         {
             SetConfigMode(true);
@@ -362,6 +378,7 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the orientation (Euler Angles) X = Heading, Y = Roll, Z = Pitch
         /// </summary>
+        [Telemetry(displayName: "Orientation (Euler Angles)")]
         public Vector3 Orientation
         {
             get
@@ -382,11 +399,13 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the Magnetometer
         /// </summary>
+        [Telemetry]
         public Vector3 Magnetometer => GetVectorData(Registers.MAG_DATA_X_LSB) / 16;
 
         /// <summary>
         /// Get the gyroscope
         /// </summary>
+        [Telemetry]
         public Vector3 Gyroscope
         {
             get
@@ -409,6 +428,7 @@ namespace Iot.Device.Bno055
         /// Three axis of acceleration (gravity + linear motion)
         /// Default unit in m/s^2, can be changed for mg
         /// </summary>
+        [Telemetry]
         public Vector3 Accelerometer
         {
             get
@@ -432,6 +452,7 @@ namespace Iot.Device.Bno055
         /// Three axis of linear acceleration data (acceleration minus gravity)
         /// Default unit in m/s^2, can be changed for mg
         /// </summary>
+        [Telemetry]
         public Vector3 LinearAcceleration
         {
             get
@@ -455,6 +476,7 @@ namespace Iot.Device.Bno055
         /// Three axis of gravitational acceleration (minus any movement)
         /// Default unit in m/s^2, can be changed for mg
         /// </summary>
+        [Telemetry]
         public Vector3 Gravity
         {
             get
@@ -475,12 +497,14 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the quaternion, unit is 1 Quaternion (unit less) = 2^14 returned result
         /// </summary>
+        [Telemetry]
         public Vector4 Quaternion => new Vector4(GetVectorData(Registers.QUATERNION_DATA_X_LSB),
             ReadInt16(Registers.QUATERNION_DATA_W_LSB));
 
         /// <summary>
         /// Get the temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature
         {
             get

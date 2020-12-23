@@ -6,7 +6,7 @@ using System;
 namespace Iot.Device.Rtc
 {
     /// <summary>
-    /// Base class for real time clocks (RTC)
+    /// Real time clock (RTC)
     /// </summary>
     public abstract class RtcBase : IDisposable
     {

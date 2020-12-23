@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
-using System.Device.Gpio;
-using System.Threading;
 using System.Device;
+using System.Device.Gpio;
+using System.Device.Model;
+using System.Diagnostics;
+using System.Threading;
 using UnitsNet;
 
 namespace Iot.Device.Hcsr04
@@ -13,6 +14,7 @@ namespace Iot.Device.Hcsr04
     /// <summary>
     /// HC-SR04 - Ultrasonic Ranging Module
     /// </summary>
+    [Interface("HC-SR04 - Ultrasonic Ranging Module")]
     public class Hcsr04 : IDisposable
     {
         private readonly int _echo;
@@ -26,6 +28,7 @@ namespace Iot.Device.Hcsr04
         /// <summary>
         /// Gets the current distance, usual range from 2 cm to 400 cm.
         /// </summary>
+        [Telemetry]
         public Length Distance => GetDistance();
 
         /// <summary>

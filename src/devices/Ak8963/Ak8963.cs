@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.IO;
 using System.Numerics;
 using System.Threading;
@@ -13,6 +14,7 @@ namespace Iot.Device.Magnetometer
     /// <summary>
     /// AK8963 class implementing a magnetometer
     /// </summary>
+    [Interface("AK8963 class implementing a magnetometer")]
     public sealed class Ak8963 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -26,6 +28,12 @@ namespace Iot.Device.Magnetometer
         /// Default I2C address for the AK8963
         /// </summary>
         public const byte DefaultI2cAddress = 0x0C;
+
+        /// <summary>
+        /// Default timeout to use when timeout is not provided in the reading methods
+        /// </summary>
+        [Property]
+        public TimeSpan DefaultTimeout { get; set; } = TimeSpan.FromSeconds(1);
 
         /// <summary>
         /// Default constructor for an independent AK8963
@@ -82,11 +90,13 @@ namespace Iot.Device.Magnetometer
         /// <summary>
         /// Get the magnetometer bias
         /// </summary>
+        [Property]
         public Vector3 MagnetometerBias { get; set; } = Vector3.Zero;
 
         /// <summary>
         /// Get the magnetometer hardware adjustment bias
         /// </summary>
+        [Property]
         public Vector3 MagnetometerAdjustment { get; set; } = Vector3.One;
 
         /// <summary>
@@ -191,13 +201,13 @@ namespace Iot.Device.Magnetometer
         /// <param name="waitForData">true to wait for new data</param>
         /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometerWithoutCorrection(bool waitForData, TimeSpan timeout)
+        public Vector3 ReadMagnetometerWithoutCorrection(bool waitForData = true, TimeSpan? timeout = null)
         {
             Span<byte> rawData = stackalloc byte[6];
             // Wait for a data to be present
             if (waitForData)
             {
-                DateTime dt = DateTime.Now.Add(timeout);
+                DateTime dt = DateTime.Now.Add(timeout ?? DefaultTimeout);
                 while (!HasDataToRead)
                 {
                     if (DateTime.Now > dt)
@@ -253,7 +263,8 @@ namespace Iot.Device.Magnetometer
         /// <param name="waitForData">true to wait for new data</param>
         /// <param name="timeout">timeout for waiting the data, ignored if waitForData is false</param>
         /// <returns>The data from the magnetometer</returns>
-        public Vector3 ReadMagnetometer(bool waitForData, TimeSpan timeout)
+        [Telemetry("Magnetometer")]
+        public Vector3 ReadMagnetometer(bool waitForData = true, TimeSpan? timeout = null)
         {
             var magn = ReadMagnetometerWithoutCorrection(waitForData, timeout);
             magn *= MagnetometerAdjustment;
@@ -274,6 +285,7 @@ namespace Iot.Device.Magnetometer
         /// Criteria | -200 =< HX =< 200 | -200 =< HY =< 200 | -3200 =< HZ =< -800
         /// ]]>
         /// </summary>
+        [Property]
         public bool MageneticFieldGeneratorEnabled
         {
             get => _selfTest;
@@ -288,6 +300,7 @@ namespace Iot.Device.Magnetometer
         /// <summary>
         /// Select the measurement mode
         /// </summary>
+        [Property]
         public MeasurementMode MeasurementMode
         {
             get => _measurementMode;
@@ -305,6 +318,7 @@ namespace Iot.Device.Magnetometer
         /// <summary>
         /// Select the output bit rate
         /// </summary>
+        [Property]
         public OutputBitMode OutputBitMode
         {
             get => _outputBitMode;

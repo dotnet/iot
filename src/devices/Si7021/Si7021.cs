@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
 using UnitsNet;
 
@@ -12,6 +13,7 @@ namespace Iot.Device.Si7021
     /// <summary>
     /// Temperature and Humidity Sensor Si7021
     /// </summary>
+    [Interface("Temperature and Humidity Sensor Si7021")]
     public class Si7021 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -24,21 +26,25 @@ namespace Iot.Device.Si7021
         /// <summary>
         /// Si7021 Temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature => Temperature.FromDegreesCelsius(GetTemperature());
 
         /// <summary>
         /// Relative Humidity
         /// </summary>
+        [Telemetry]
         public RelativeHumidity Humidity => GetHumidity();
 
         /// <summary>
         /// Si7021 Firmware Revision
         /// </summary>
+        [Property]
         public byte Revision => GetRevision();
 
         /// <summary>
         /// Si7021 Measurement Resolution
         /// </summary>
+        [Property]
         public Resolution Resolution { get => GetResolution(); set => SetResolution(value); }
 
         private bool _heater;
@@ -46,6 +52,7 @@ namespace Iot.Device.Si7021
         /// <summary>
         /// Si7021 Heater
         /// </summary>
+        [Property]
         public bool Heater
         {
             get => _heater;

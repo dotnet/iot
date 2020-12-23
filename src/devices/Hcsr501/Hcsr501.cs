@@ -3,12 +3,14 @@
 
 using System;
 using System.Device.Gpio;
+using System.Device.Model;
 
 namespace Iot.Device.Hcsr501
 {
     /// <summary>
     /// PIR Sensor HC-SR501
     /// </summary>
+    [Interface("PIR Sensor HC-SR501")]
     public class Hcsr501 : IDisposable
     {
         private readonly int _outPin;
@@ -36,6 +38,7 @@ namespace Iot.Device.Hcsr501
         /// <summary>
         /// If a motion is detected, return true.
         /// </summary>
+        [Telemetry]
         public bool IsMotionDetected => _controller.Read(_outPin) == PinValue.High;
 
         /// <summary>

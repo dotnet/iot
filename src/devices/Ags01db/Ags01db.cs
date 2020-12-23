@@ -5,14 +5,22 @@ using System;
 using System.Buffers.Binary;
 using System.Threading;
 using System.Device.I2c;
+using System.Device.Model;
+using UnitsNet;
 
 namespace Iot.Device.Ags01db
 {
     /// <summary>
     /// MEMS VOC Gas Sensor ASG01DB
     /// </summary>
+    [Interface("MEMS VOC Gas Sensor ASG01DB")]
     public class Ags01db : IDisposable
     {
+        /// <summary>
+        /// ASG01DB Default I2C Address
+        /// </summary>
+        public const byte DefaultI2cAddress = 0x11;
+
         // CRC const
         private const byte CRC_POLYNOMIAL = 0x31;
         private const byte CRC_INIT = 0xFF;
@@ -23,17 +31,13 @@ namespace Iot.Device.Ags01db
         /// <summary>
         /// ASG01DB VOC (Volatile Organic Compounds) Gas Concentration (ppm)
         /// </summary>
-        public double Concentration => GetConcentration();
+        [Telemetry]
+        public Ratio Concentration => Ratio.FromPartsPerMillion(GetConcentration());
 
         /// <summary>
         /// ASG01DB Version
         /// </summary>
         public byte Version => GetVersion();
-
-        /// <summary>
-        /// ASG01DB Default I2C Address
-        /// </summary>
-        public const byte DefaultI2cAddress = 0x11;
 
         /// <summary>
         /// Creates a new instance of the ASG01DB

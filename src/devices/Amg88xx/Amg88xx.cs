@@ -10,7 +10,7 @@ using UnitsNet;
 namespace Iot.Device.Amg88xx
 {
     /// <summary>
-    /// Binding for the AMG88xx family of infrared array sensors
+    /// AMG88xx - family of infrared array sensors
     /// </summary>
     public class Amg88xx : IDisposable
     {

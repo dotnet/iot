@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Numerics;
 
 namespace Iot.Device.Lsm9Ds1
@@ -11,6 +12,7 @@ namespace Iot.Device.Lsm9Ds1
     /// <summary>
     /// LSM9DS1 magnetometer
     /// </summary>
+    [Interface("LSM9DS1 magnetometer")]
     public class Lsm9Ds1Magnetometer : IDisposable
     {
         private const byte ReadMask = 0x80;
@@ -65,6 +67,7 @@ namespace Iot.Device.Lsm9Ds1
         /// <summary>
         /// Magnetic Induction measured in Gauss (G)
         /// </summary>
+        [Telemetry(displayName: "Magnetic Induction measured in Gauss (G)")]
         public Vector3 MagneticInduction => Vector3.Divide(ReadVector3(RegisterM.OutX), GetMagneticInductionDivisor());
 
         private Vector3 ReadVector3(RegisterM register)

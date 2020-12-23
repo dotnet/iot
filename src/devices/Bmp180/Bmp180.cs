@@ -6,6 +6,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
 using Iot.Device.Common;
 using UnitsNet;
@@ -15,6 +16,7 @@ namespace Iot.Device.Bmp180
     /// <summary>
     /// BMP180 - barometer, altitude and temperature sensor
     /// </summary>
+    [Interface("BMP180 - barometer, altitude and temperature sensor")]
     public class Bmp180 : IDisposable
     {
         private readonly CalibrationData _calibrationData;
@@ -51,6 +53,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Temperature in degrees celsius
         /// </returns>
+        [Telemetry("Temperature")]
         public Temperature ReadTemperature() => Temperature.FromDegreesCelsius((CalculateTrueTemperature() + 8) / 160.0);
 
         /// <summary>
@@ -59,6 +62,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Atmospheric pressure
         /// </returns>
+        [Telemetry("Pressure")]
         public Pressure ReadPressure()
         {
             // Pressure Calculations
@@ -94,6 +98,7 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Height in meters above sea level
         /// </returns>
+        [Telemetry("Altitude")]
         public Length ReadAltitude() => ReadAltitude(WeatherHelper.MeanSeaLevel);
 
         /// <summary>

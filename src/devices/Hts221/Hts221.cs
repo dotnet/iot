@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using UnitsNet;
 
 namespace Iot.Device.Hts221
@@ -11,6 +12,7 @@ namespace Iot.Device.Hts221
     /// <summary>
     /// HTS221 - Capacitive digital sensor for relative humidity and temperature
     /// </summary>
+    [Interface("HTS221 - Capacitive digital sensor for relative humidity and temperature")]
     public class Hts221 : IDisposable
     {
         private const byte ReadMask = 0x80;
@@ -41,11 +43,13 @@ namespace Iot.Device.Hts221
         /// <summary>
         /// Temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature => Temperature.FromDegreesCelsius(GetActualTemperature(ReadInt16(Register.Temperature)));
 
         /// <summary>
         /// Relative humidity
         /// </summary>
+        [Telemetry]
         public RelativeHumidity Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
 
         private void WriteByte(Register register, byte data)

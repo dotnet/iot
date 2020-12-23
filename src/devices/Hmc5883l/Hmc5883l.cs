@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Numerics;
 
 namespace Iot.Device.Hmc5883l
@@ -11,6 +12,7 @@ namespace Iot.Device.Hmc5883l
     /// <summary>
     /// 3-Axis Digital Compass HMC5883L
     /// </summary>
+    [Interface("3-Axis Digital Compass HMC5883L")]
     public class Hmc5883l : IDisposable
     {
         /// <summary>
@@ -29,6 +31,7 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// HMC5883L Direction Vector
         /// </summary>
+        [Telemetry]
         public Vector3 DirectionVector => ReadDirectionVector();
 
         /// <summary>
@@ -39,6 +42,7 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// HMC5883L Status
         /// </summary>
+        [Telemetry]
         public Status DeviceStatus => GetStatus();
 
         /// <summary>

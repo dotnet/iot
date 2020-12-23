@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
@@ -16,6 +17,7 @@ namespace Iot.Device.Bmxx80
     /// <summary>
     /// Represents a BME280 temperature, barometric pressure and humidity sensor.
     /// </summary>
+    [Interface("Represents a BME280 temperature, barometric pressure and humidity sensor.")]
     public class Bme280 : Bmx280Base
     {
         /// <summary>
@@ -45,6 +47,7 @@ namespace Iot.Device.Bmxx80
         /// Gets or sets the humidity sampling.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        [Property]
         public Sampling HumiditySampling
         {
             get => _humiditySampling;
@@ -85,6 +88,7 @@ namespace Iot.Device.Bmxx80
         /// Contains an undefined value if the return value is false.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        [Telemetry("Humidity")]
         public bool TryReadHumidity(out RelativeHumidity humidity) => TryReadHumidityCore(out humidity);
 
         /// <summary>

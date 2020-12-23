@@ -13,8 +13,7 @@ using UnitsNet;
 namespace Iot.Device.Ccs811
 {
     /// <summary>
-    /// Ultra-Low Power Digital Gas Sensor for
-    /// Monitoring Indoor Air Quality
+    /// Ultra-Low Power Digital Gas Sensor for Monitoring Indoor Air Quality
     /// Documentation can be found here: https://www.sciosense.com/products/environmental-sensors/ccs811-gas-sensor-solution/
     /// </summary>
     public class Ccs811Sensor : IDisposable

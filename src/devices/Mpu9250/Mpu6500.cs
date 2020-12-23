@@ -6,6 +6,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device;
 using System.Device.I2c;
+using System.Device.Model;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -16,8 +17,9 @@ using UnitsNet;
 namespace Iot.Device.Imu
 {
     /// <summary>
-    ///  MPU9250 class. MPU6500 has an embedded gyroscope, accelerometer and temperature.
+    /// MPU6500 - gyroscope, accelerometer and temperature sensor
     /// </summary>
+    [Interface("MPU6500 - gyroscope, accelerometer and temperature sensor")]
     public class Mpu6500 : IDisposable
     {
         /// <summary>
@@ -74,11 +76,13 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Accelerometer bias data
         /// </summary>
+        [Property]
         public Vector3 AccelerometerBias => _accelerometerBias;
 
         /// <summary>
         /// Get or set the accelerometer range
         /// </summary>
+        [Property]
         public AccelerometerRange AccelerometerRange
         {
             get => _accelerometerRange;
@@ -98,6 +102,7 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Get or set the accelerometer bandwidth
         /// </summary>
+        [Property]
         public AccelerometerBandwidth AccelerometerBandwidth
         {
             get => _accelerometerBandwidth;
@@ -116,6 +121,7 @@ namespace Iot.Device.Imu
         /// Get the real accelerometer bandwidth. This allows to calculate the real
         /// degree per second
         /// </summary>
+        [Property]
         public float AccelerationScale
         {
             get
@@ -148,6 +154,7 @@ namespace Iot.Device.Imu
         ///  /  |  \
         ///         +X
         /// </remarks>
+        [Telemetry("Acceleration")]
         public Vector3 GetAccelerometer() => GetRawAccelerometer() * AccelerationScale;
 
         private Vector3 GetRawAccelerometer()
@@ -167,6 +174,7 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Set or get the accelerometer low power mode
         /// </summary>
+        [Property]
         public AccelerometerLowPowerFrequency AccelerometerLowPowerFrequency
         {
             get => (AccelerometerLowPowerFrequency)ReadByte(Register.LP_ACCEL_ODR);
@@ -180,11 +188,13 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Gyroscope bias data
         /// </summary>
+        [Property]
         public Vector3 GyroscopeBias => _gyroscopeBias;
 
         /// <summary>
         /// Get or set the gyroscope range
         /// </summary>
+        [Property]
         public GyroscopeRange GyroscopeRange
         {
             get => _gyroscopeRange;
@@ -202,6 +212,7 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Get or set the gyroscope bandwidth
         /// </summary>
+        [Property]
         public GyroscopeBandwidth GyroscopeBandwidth
         {
             get => _gyroscopeBandwidth;
@@ -246,6 +257,7 @@ namespace Iot.Device.Imu
         /// Get the real gyroscope bandwidth. This allows to calculate the real
         /// angular rate in degree per second
         /// </summary>
+        [Property]
         public float GyroscopeScale
         {
             get
@@ -285,6 +297,7 @@ namespace Iot.Device.Imu
         ///  /  |  \
         ///         +X
         /// </remarks>
+        [Telemetry("AngularRate")]
         public Vector3 GetGyroscopeReading() => GetRawGyroscope() * GyroscopeScale;
 
         private Vector3 GetRawGyroscope()
@@ -308,6 +321,7 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Get the temperature
         /// </summary>
+        [Telemetry("Temperature")]
         public Temperature GetTemperature()
         {
             Span<byte> rawData = stackalloc byte[2]
@@ -331,6 +345,7 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <param name="accelerometerThreshold">Threshold of magnetometer x/y/z axes. LSB = 4mg. Range is 0mg to 1020mg</param>
         /// <param name="acceleratorLowPower">Frequency used to measure data for the low power consumption mode</param>
+        [Command]
         public void SetWakeOnMotion(uint accelerometerThreshold, AccelerometerLowPowerFrequency acceleratorLowPower)
         {
             // Using documentation page 31 of Product Specification to setup
@@ -399,6 +414,7 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Get or set the sample diver mode
         /// </summary>
+        [Property]
         public byte SampleRateDivider
         {
             get => ReadByte(Register.SMPLRT_DIV);
@@ -490,6 +506,7 @@ namespace Iot.Device.Imu
         /// The result bias will be stored in the AcceloremeterBias and GyroscopeBias
         /// </summary>
         /// <returns>Gyroscope and accelerometer bias</returns>
+        [Command]
         public (Vector3 GyroscopeBias, Vector3 AccelerometerBias) CalibrateGyroscopeAccelerometer()
         {
             // = 131 LSB/degrees/sec
@@ -682,6 +699,7 @@ namespace Iot.Device.Imu
         /// ]]>
         /// </summary>
         /// <returns>the gyroscope and accelerometer vectors</returns>
+        [Command]
         public (Vector3 GyroscopeAverage, Vector3 AccelerometerAverage) RunGyroscopeAccelerometerSelfTest()
         {
             // Used for the number of cycles to run the test

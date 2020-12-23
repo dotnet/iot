@@ -4,14 +4,16 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Drawing;
 using System.Threading;
 
 namespace Iot.Device.Tcs3472x
 {
     /// <summary>
-    /// Represents Tcs3472x I2C color sensor
+    /// Tcs3472x - color sensor
     /// </summary>
+    [Interface("Tcs3472x - color sensor")]
     public class Tcs3472x : IDisposable
     {
         /// <summary>
@@ -32,6 +34,7 @@ namespace Iot.Device.Tcs3472x
         /// Maximum time is 7.4 s
         /// Be aware that it is not a linear function
         /// </summary>
+        [Property]
         public double IntegrationTime
         {
             get => _integrationTime;
@@ -45,6 +48,7 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Set/Get the gain
         /// </summary>
+        [Property]
         public Gain Gain
         {
             get => _gain;
@@ -58,6 +62,7 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Get the type of sensor
         /// </summary>
+        [Property]
         public TCS3472Type ChipId { get; internal set; }
 
         /// <summary>
@@ -219,6 +224,7 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Get the color
         /// </summary>
+        [Telemetry]
         public Color Color => GetColor();
 
         private ushort I2cRead16(Registers reg)
