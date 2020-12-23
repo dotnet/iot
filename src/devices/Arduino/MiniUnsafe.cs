@@ -103,6 +103,7 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
         public static ref T AsRef<T>(void* source)
         {
             return ref As<byte, T>(ref *(byte*)source);
@@ -121,6 +122,18 @@ namespace Iot.Device.Arduino
             // ldc.i4.0
             // conv.u
             // ret
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        public static T ReadUnaligned<T>(void* source)
+        {
+            return As<byte, T>(ref *(byte*)source);
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        public static T Read<T>(void* source)
+        {
+            return As<byte, T>(ref *(byte*)source);
         }
     }
 }

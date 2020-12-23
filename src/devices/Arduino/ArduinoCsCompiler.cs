@@ -307,13 +307,16 @@ namespace Iot.Device.Arduino
                                 flags |= BindingFlags.NonPublic;
                             }
 
-                            methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => MethodsHaveSameSignature(x, m));
+                            methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => MethodsHaveSameSignature(x, m) || AreSameOperatorMethods(x, m));
                             if (methodToReplace == null)
                             {
-                                throw new InvalidOperationException("A replacement method has nothing to replace");
+                                // That may be ok if it is our own internal implementation
+                                _board.Log($"A replacement method has nothing to replace: {m.DeclaringType} - {m}");
                             }
-
-                            set.AddReplacementMethod(methodToReplace, m);
+                            else
+                            {
+                                set.AddReplacementMethod(methodToReplace, m);
+                            }
                         }
                     }
                 }

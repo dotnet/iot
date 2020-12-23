@@ -30,10 +30,9 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None)]
-        public static int GetHashCode(object obj)
+        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersGetHashCode)]
+        public static int GetHashCode(object? obj)
         {
-            // TODO: Fix
             return 0;
         }
 
@@ -44,6 +43,17 @@ namespace Iot.Device.Arduino
 
         [ArduinoImplementation((ArduinoImplementation.RuntimeHelpersIsReferenceOrContainsReferencesCore))]
         private static bool IsReferenceOrContainsReferencesCore(Type t)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static bool IsBitwiseEquatable<T>()
+        {
+            return IsBitwiseEquatableCore(typeof(T));
+        }
+
+        [ArduinoImplementation((ArduinoImplementation.RuntimeHelpersIsBitwiseEquatable))]
+        private static bool IsBitwiseEquatableCore(Type t)
         {
             throw new NotImplementedException();
         }

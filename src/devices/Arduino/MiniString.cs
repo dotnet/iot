@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.String), true)]
+    [ArduinoReplacement(typeof(System.String), IncludingPrivates = true)]
     internal unsafe partial class MiniString : ICloneable, IComparable, IComparable<string>, IConvertible, IEquatable<string>, System.Collections.Generic.IEnumerable<char>
     {
 #pragma warning disable SA1122 // Use string.Empty for empty strings (This is the definition of an empty string!)
@@ -16,7 +16,9 @@ namespace Iot.Device.Arduino
 
         // This is the first char of the data this instance holds. The address of this field is the char* pointer, meaning that the actual string
         // data is stored inline, and the object has a dynamic size!
+#pragma warning disable 414 // Used internally
         private char _firstChar;
+#pragma warning restore 414
 
         [ArduinoImplementation(ArduinoImplementation.StringCtor0)]
         public MiniString()
@@ -216,16 +218,6 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None)]
-#if NETCOREAPP2_1
-        public static bool IsNullOrEmpty(string? value)
-#else
-        public static bool IsNullOrEmpty([NotNullWhen(false)] string? value)
-#endif
-        {
-            return (value == null || value.Length == 0);
-        }
-
         [ArduinoImplementation(ArduinoImplementation.StringEqualsStatic)]
         public static bool Equals(string a, string b)
         {
@@ -238,7 +230,7 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringEqualsStatic)]
+        [ArduinoImplementation(ArduinoImplementation.StringUnEqualsStatic)]
         public static bool operator !=(MiniString a, MiniString b)
         {
             throw new NotImplementedException();

@@ -90,6 +90,9 @@ namespace Iot.Device.Arduino
         UnsafeAreSame,
         BufferMemmove,
         BufferMemmoveRefArgs,
-        StringMiniStringConversion
+        StringMiniStringConversion,
+        StringUnEqualsStatic,
+        RuntimeHelpersGetHashCode,
+        RuntimeHelpersIsBitwiseEquatable
     }
 }
