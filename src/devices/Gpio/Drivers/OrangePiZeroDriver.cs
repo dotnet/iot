@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-
 using System;
+using System.Linq;
 
 namespace Iot.Device.Gpio.Drivers
 {
@@ -14,7 +14,7 @@ namespace Iot.Device.Gpio.Drivers
     /// </remarks>
     public class OrangePiZeroDriver : Sun8iw7p1Driver
     {
-        private static readonly int[] _pinNumberConverter = new int[27]
+        private static readonly int[] _pinNumberConverter = new int[]
         {
             -1, -1, -1, MapPinNumber('A', 12), -1, MapPinNumber('A', 11), -1, MapPinNumber('A', 6), MapPinNumber('G', 6), -1,
             MapPinNumber('G', 7), MapPinNumber('A', 1), MapPinNumber('A', 7), MapPinNumber('A', 0), -1, MapPinNumber('A', 3),
@@ -25,7 +25,7 @@ namespace Iot.Device.Gpio.Drivers
         /// <summary>
         /// Orange Pi Zero has 17 GPIO pins.
         /// </summary>
-        protected override int PinCount => 17;
+        protected override int PinCount => _pinNumberConverter.Count(n => n != -1);
 
         /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.

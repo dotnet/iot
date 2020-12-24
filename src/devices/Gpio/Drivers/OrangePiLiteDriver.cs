@@ -7,23 +7,25 @@ using System.Linq;
 namespace Iot.Device.Gpio.Drivers
 {
     /// <summary>
-    /// A GPIO driver for the Orange Pi Lite 2.
+    /// A GPIO driver for the Orange Pi Lite.
     /// </summary>
     /// <remarks>
-    /// SoC: Allwinner H6 (sun50iw6p1)
+    /// SoC: Allwinner H3 (sun8iw7p1)
     /// </remarks>
-    public class OrangePiLite2Driver : Sun50iw6p1Driver
+    public class OrangePiLiteDriver : Sun8iw7p1Driver
     {
         private static readonly int[] _pinNumberConverter = new int[]
         {
-            -1, -1, -1, MapPinNumber('H', 6), -1, MapPinNumber('H', 5), -1, MapPinNumber('H', 4), MapPinNumber('D', 21), -1,
-            MapPinNumber('D', 22), MapPinNumber('D', 24), MapPinNumber('C', 9), MapPinNumber('D', 23), -1, MapPinNumber('D', 26),
-            MapPinNumber('C', 8), -1, MapPinNumber('C', 7), MapPinNumber('C', 2), -1, MapPinNumber('C', 3), MapPinNumber('D', 25),
-            MapPinNumber('C', 0), MapPinNumber('C', 5), -1, MapPinNumber('H', 3)
+            -1, -1, -1, MapPinNumber('A', 12), -1, MapPinNumber('A', 11), -1, MapPinNumber('A', 6), MapPinNumber('A', 13), -1, 
+            MapPinNumber('A', 14), MapPinNumber('A', 1), MapPinNumber('D', 14), MapPinNumber('A', 0), -1, MapPinNumber('A', 3), 
+            MapPinNumber('C', 4), -1, MapPinNumber('C', 7), MapPinNumber('C', 0), -1, MapPinNumber('C', 1), MapPinNumber('A', 2), 
+            MapPinNumber('C', 2), MapPinNumber('C', 3), -1, MapPinNumber('A', 21), MapPinNumber('A', 19), MapPinNumber('A', 18), 
+            MapPinNumber('A', 7), -1,MapPinNumber('A', 8), MapPinNumber('G', 8), MapPinNumber('A', 9), -1, MapPinNumber('A', 10), 
+            MapPinNumber('G', 9), MapPinNumber('A', 20), MapPinNumber('G', 6), -1, MapPinNumber('G', 7)
         };
 
         /// <summary>
-        /// Orange Pi Lite 2 has 17 GPIO pins.
+        /// Orange Pi Lite has 17 GPIO pins.
         /// </summary>
         protected override int PinCount => _pinNumberConverter.Count(n => n != -1);
 
