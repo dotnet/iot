@@ -27,7 +27,7 @@ while (true)
 }
 ```
 
-**Note:** You can use any PT100 or PT1000 temperature sensor which has 2/3/4 wires._
+**Note:** _You can use any PT100 or PT1000 temperature sensor which has 2/3/4 wires._
 
 ## References 
 
