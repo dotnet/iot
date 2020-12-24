@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+	<EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="program.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="MAX31865_circuit.fzz" />
+    <None Remove="MAX31865_circuit_bb.png" />
+    <None Include="README.md" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\Max31865.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+</Project>

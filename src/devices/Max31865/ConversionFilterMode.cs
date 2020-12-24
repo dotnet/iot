@@ -4,17 +4,17 @@
 namespace Iot.Device.Max31865
 {
     /// <summary>
-    /// TODO:
+    /// Notch frequencies for the noise rejection filter
     /// </summary>
     public enum ConversionFilterMode : byte
     {
         /// <summary>
-        /// TODO:
+        /// Reject 50Hz and its harmonics
         /// </summary>
         FiftyHz,
 
         /// <summary>
-        /// TODO:
+        /// Reject 60Hz and its harmonics
         /// </summary>
         SixtyHz
     }

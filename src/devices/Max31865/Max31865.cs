@@ -50,13 +50,24 @@ namespace Iot.Device.Max31865
         public const DataFlow SpiDataFlow = DataFlow.MsbFirst;
 
         /// <summary>
-        /// TODO:
+        /// MAX31865 Temperature
         /// </summary>
-        public Max31865(SpiDevice spiDevice, PlatinumResistanceThermometerType prtType, ResistanceTemperatureDetectorWires rtdWires, double referenceResistor, ConversionFilterMode filterMode = ConversionFilterMode.SixtyHz, bool shouldDispose = true)
+        public Temperature Temperature { get => Temperature.FromDegreesCelsius(GetTemperature()); }
+
+        /// <summary>
+        /// Creates a new instance of the MAX31865.
+        /// </summary>
+        /// <param name="spiDevice">The communications channel to a device on a SPI bus</param>
+        /// <param name="platinumResistanceThermometerType">.</param>
+        /// <param name="resistanceTemperatureDetectorWires">.</param>
+        /// <param name="referenceResistor">.</param>
+        /// <param name="filterMode">.</param>
+        /// <param name="shouldDispose">True to dispose the SPI device</param>
+        public Max31865(SpiDevice spiDevice, PlatinumResistanceThermometerType platinumResistanceThermometerType, ResistanceTemperatureDetectorWires resistanceTemperatureDetectorWires, double referenceResistor, ConversionFilterMode filterMode = ConversionFilterMode.SixtyHz, bool shouldDispose = true)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
-            _prtType = prtType;
-            _rtdWires = rtdWires;
+            _prtType = platinumResistanceThermometerType;
+            _rtdWires = resistanceTemperatureDetectorWires;
             _filterMode = filterMode;
             _filterModeSleep = filterMode == ConversionFilterMode.FiftyHz ? FilterMode50HzSleep : FilterMode60HzSleep;
             _referenceResistor = referenceResistor;
@@ -120,7 +131,7 @@ namespace Iot.Device.Max31865
             Span<byte> configuration = stackalloc byte[2];
             WriteRead(Register.ConfigurationRead, configuration);
 
-            // configuration[1] &= ~0x2C;
+            configuration[1] = (byte)(configuration[1] & ~0x2C);
             configuration[1] |= (byte)Configuration.FaultStatus;
 
             configuration[0] = (byte)Register.ConfigurationWrite;
@@ -141,7 +152,7 @@ namespace Iot.Device.Max31865
             }
             else
             {
-                configuration[1] ^= (byte)Configuration.Bias;
+                configuration[1] = (byte)(configuration[1] & ~(byte)Configuration.Bias);
             }
 
             configuration[0] = (byte)Register.ConfigurationWrite;
@@ -162,7 +173,7 @@ namespace Iot.Device.Max31865
             }
             else
             {
-                configuration[1] ^= (byte)Configuration.OneShot;
+                configuration[1] = (byte)(configuration[1] & ~(byte)Configuration.OneShot);
             }
 
             configuration[0] = (byte)Register.ConfigurationWrite;
@@ -176,7 +187,7 @@ namespace Iot.Device.Max31865
         /// This math originates from: http://www.analog.com/media/en/technical-documentation/application-notes/AN709_0.pdf
         /// </remarks>
         /// <returns></returns>
-        private Temperature ReadTemperature()
+        private double GetTemperature()
         {
             short rtdNominal = (short)_prtType;
             double z1, z2, z3, z4;
@@ -212,7 +223,7 @@ namespace Iot.Device.Max31865
                 temperature += 1.5243e-10 * rpoly;
             }
 
-            return Temperature.FromDegreesCelsius(temperature);
+            return temperature;
         }
 
         /// <summary>
