@@ -1,10 +1,11 @@
-﻿# MAX31865
-
-## Summary
+﻿# MAX31865 - Resistance Temperature Detector Amplifier
 The MAX31865 device is a SPI interface Resistance Temperature Detector to Digital Converter.
 
 ## Sensor Image
 ![](sensor.jpg)
+
+## Known limitations
+This version only performs the one shot temperature conversion and not the continuous temperature conversion.
 
 ## Usage
 ```C#
@@ -16,7 +17,7 @@ SpiConnectionSettings settings = new(0, 0)
 };
 
 using SpiDevice device = SpiDevice.Create(settings);
-using Max31865 sensor = new(device, PlatinumResistanceThermometerType.PT1000, ResistanceTemperatureDetectorWires.ThreeWire, 4300);
+using Max31865 sensor = new(device, PlatinumResistanceThermometerType.PT1000, ResistanceTemperatureDetectorWires.ThreeWire, ElectricResistance.FromOhms(4300));
 
 while (true)
 {

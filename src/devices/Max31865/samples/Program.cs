@@ -2,6 +2,7 @@
 using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Max31865;
+using UnitsNet;
 
 SpiConnectionSettings settings = new(0, 0)
 {
@@ -11,7 +12,7 @@ SpiConnectionSettings settings = new(0, 0)
 };
 
 using SpiDevice device = SpiDevice.Create(settings);
-using Max31865 sensor = new(device, PlatinumResistanceThermometerType.PT1000, ResistanceTemperatureDetectorWires.ThreeWire, 4300);
+using Max31865 sensor = new(device, PlatinumResistanceThermometerType.PT1000, ResistanceTemperatureDetectorWires.ThreeWire, ElectricResistance.FromOhms(4300));
 
 while (true)
 {

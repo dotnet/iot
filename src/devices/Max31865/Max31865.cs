@@ -58,19 +58,19 @@ namespace Iot.Device.Max31865
         /// Creates a new instance of the MAX31865.
         /// </summary>
         /// <param name="spiDevice">The communications channel to a device on a SPI bus</param>
-        /// <param name="platinumResistanceThermometerType">.</param>
-        /// <param name="resistanceTemperatureDetectorWires">.</param>
-        /// <param name="referenceResistor">.</param>
-        /// <param name="filterMode">.</param>
+        /// <param name="platinumResistanceThermometerType">The type of Platinum Resistance Thermometer</param>
+        /// <param name="resistanceTemperatureDetectorWires">The number of wires the Platinum Resistance Thermometer has</param>
+        /// <param name="referenceResistor">The reference resistor value in Ohms.</param>
+        /// <param name="filterMode">Noise rejection filter mode</param>
         /// <param name="shouldDispose">True to dispose the SPI device</param>
-        public Max31865(SpiDevice spiDevice, PlatinumResistanceThermometerType platinumResistanceThermometerType, ResistanceTemperatureDetectorWires resistanceTemperatureDetectorWires, double referenceResistor, ConversionFilterMode filterMode = ConversionFilterMode.SixtyHz, bool shouldDispose = true)
+        public Max31865(SpiDevice spiDevice, PlatinumResistanceThermometerType platinumResistanceThermometerType, ResistanceTemperatureDetectorWires resistanceTemperatureDetectorWires, ElectricResistance referenceResistor, ConversionFilterMode filterMode = ConversionFilterMode.SixtyHz, bool shouldDispose = true)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _prtType = platinumResistanceThermometerType;
             _rtdWires = resistanceTemperatureDetectorWires;
             _filterMode = filterMode;
             _filterModeSleep = filterMode == ConversionFilterMode.FiftyHz ? FilterMode50HzSleep : FilterMode60HzSleep;
-            _referenceResistor = referenceResistor;
+            _referenceResistor = referenceResistor.Ohms;
             _shouldDispose = shouldDispose;
             Initialize();
         }
@@ -193,7 +193,7 @@ namespace Iot.Device.Max31865
             double z1, z2, z3, z4;
             double temperature;
 
-            double resistance = Resistance();
+            double resistance = GetResistance();
 
             z1 = -RTD_A;
             z2 = RTD_A * RTD_A - (4 * RTD_B);
@@ -230,7 +230,7 @@ namespace Iot.Device.Max31865
         /// Read the resistance of the RTD and return its value in Ohms.
         /// </summary>
         /// <returns></returns>
-        private double Resistance()
+        private double GetResistance()
         {
             double rtd = ReadRawRTD();
             rtd /= 32768;
