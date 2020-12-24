@@ -6,7 +6,7 @@ using System.Device.Gpio;
 using System.Threading;
 using Iot.Device.Gpio.Drivers;
 
-namespace Iot.Device.Gpio.Samples
+namespace Sunxi.Gpio.Samples
 {
     internal class Program
     {
@@ -19,7 +19,7 @@ namespace Iot.Device.Gpio.Samples
             Console.WriteLine($"Let's blink an on-board LED!");
 
             using GpioController controller = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
-            using BoardLed.BoardLed led = new BoardLed.BoardLed("orangepi:red:status");
+            using BoardLed led = new BoardLed("orangepi:red:status");
 
             controller.OpenPin(pin, PinMode.InputPullUp);
             led.Trigger = "none";
