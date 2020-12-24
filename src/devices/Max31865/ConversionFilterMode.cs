@@ -11,11 +11,11 @@ namespace Iot.Device.Max31865
         /// <summary>
         /// Reject 50Hz and its harmonics
         /// </summary>
-        FiftyHz,
+        Filter50Hz = 65,
 
         /// <summary>
         /// Reject 60Hz and its harmonics
         /// </summary>
-        SixtyHz
+        Filter60Hz = 55
     }
 }

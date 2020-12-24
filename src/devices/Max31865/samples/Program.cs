@@ -12,7 +12,7 @@ SpiConnectionSettings settings = new(0, 0)
 };
 
 using SpiDevice device = SpiDevice.Create(settings);
-using Max31865 sensor = new(device, PlatinumResistanceThermometerType.PT1000, ResistanceTemperatureDetectorWires.ThreeWire, ElectricResistance.FromOhms(4300));
+using Max31865 sensor = new(device, PlatinumResistanceThermometerType.Pt1000, ResistanceTemperatureDetectorWires.ThreeWire, ElectricResistance.FromOhms(4300));
 
 while (true)
 {

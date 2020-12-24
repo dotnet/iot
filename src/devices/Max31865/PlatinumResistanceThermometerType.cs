@@ -11,11 +11,11 @@ namespace Iot.Device.Max31865
         /// <summary>
         /// Platinum Thermometer 100 temperature sensor
         /// </summary>
-        PT100 = 100,
+        Pt100 = 100,
 
         /// <summary>
         /// Platinum Thermometer 1000 temperature sensor
         /// </summary>
-        PT1000 = 1000
+        Pt1000 = 1000
     }
 }

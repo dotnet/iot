@@ -10,21 +10,20 @@ using UnitsNet;
 namespace Iot.Device.Max31865
 {
     /// <summary>
-    /// MAX31865 RTD-to-Digital Converter
+    /// MAX31865 Resistance Temperature Detector to Digital Converter
     /// </summary>
+    /// <remarks>
+    /// Documentation https://datasheets.maximintegrated.com/en/ds/MAX31865.pdf
+    /// </remarks>
     public class Max31865 : IDisposable
     {
-        private const short FilterMode60HzSleep = 55;
-        private const short FilterMode50HzSleep = 65;
-
         // Callender Van Dusen coefficiants A/B for temperature conversion
-        private const double RTD_A = 3.9083e-3;
-        private const double RTD_B = -5.775e-7;
+        private const double TemperatureCoefficiantA = 3.9083e-3;
+        private const double TemperatureCoefficiantB = -5.775e-7;
 
         private readonly PlatinumResistanceThermometerType _prtType;
         private readonly ResistanceTemperatureDetectorWires _rtdWires;
         private readonly ConversionFilterMode _filterMode;
-        private readonly short _filterModeSleep;
         private readonly double _referenceResistor;
         private readonly bool _shouldDispose;
         private SpiDevice _spiDevice;
@@ -63,13 +62,12 @@ namespace Iot.Device.Max31865
         /// <param name="referenceResistor">The reference resistor value in Ohms.</param>
         /// <param name="filterMode">Noise rejection filter mode</param>
         /// <param name="shouldDispose">True to dispose the SPI device</param>
-        public Max31865(SpiDevice spiDevice, PlatinumResistanceThermometerType platinumResistanceThermometerType, ResistanceTemperatureDetectorWires resistanceTemperatureDetectorWires, ElectricResistance referenceResistor, ConversionFilterMode filterMode = ConversionFilterMode.SixtyHz, bool shouldDispose = true)
+        public Max31865(SpiDevice spiDevice, PlatinumResistanceThermometerType platinumResistanceThermometerType, ResistanceTemperatureDetectorWires resistanceTemperatureDetectorWires, ElectricResistance referenceResistor, ConversionFilterMode filterMode = ConversionFilterMode.Filter60Hz, bool shouldDispose = true)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _prtType = platinumResistanceThermometerType;
             _rtdWires = resistanceTemperatureDetectorWires;
             _filterMode = filterMode;
-            _filterModeSleep = filterMode == ConversionFilterMode.FiftyHz ? FilterMode50HzSleep : FilterMode60HzSleep;
             _referenceResistor = referenceResistor.Ohms;
             _shouldDispose = shouldDispose;
             Initialize();
@@ -117,7 +115,7 @@ namespace Iot.Device.Max31865
             ReadOnlySpan<byte> configurationSetting = stackalloc byte[]
             {
                 (byte)Register.ConfigurationWrite,
-                (byte)((byte)(_rtdWires == ResistanceTemperatureDetectorWires.ThreeWire ? Configuration.ThreeWire : Configuration.TwoFourWire) | (byte)(_filterMode == ConversionFilterMode.FiftyHz ? Configuration.Filter50HZ : Configuration.Filter60HZ))
+                (byte)((byte)(_rtdWires == ResistanceTemperatureDetectorWires.ThreeWire ? Configuration.ThreeWire : Configuration.TwoFourWire) | (byte)(_filterMode == ConversionFilterMode.Filter50Hz ? Configuration.Filter50HZ : Configuration.Filter60HZ))
             };
 
             Write(configurationSetting);
@@ -131,6 +129,7 @@ namespace Iot.Device.Max31865
             Span<byte> configuration = stackalloc byte[2];
             WriteRead(Register.ConfigurationRead, configuration);
 
+            // Page 14 (Fault Status Clear (D1)) of the technical documentation
             configuration[1] = (byte)(configuration[1] & ~0x2C);
             configuration[1] |= (byte)Configuration.FaultStatus;
 
@@ -139,49 +138,35 @@ namespace Iot.Device.Max31865
         }
 
         /// <summary>
-        /// Enable/Disable the bias voltage on the RTD sensor
+        /// Enable/Disable the bias voltage on the resistance temperature detector sensor
         /// </summary>
         private void EnableBias(bool enable)
         {
             Span<byte> configuration = stackalloc byte[2];
             WriteRead(Register.ConfigurationRead, configuration);
 
-            if (enable)
-            {
-                configuration[1] |= (byte)Configuration.Bias;
-            }
-            else
-            {
-                configuration[1] = (byte)(configuration[1] & ~(byte)Configuration.Bias);
-            }
+            configuration[1] = enable ? (byte)(configuration[1] | (byte)Configuration.Bias) : (byte)(configuration[1] & ~(byte)Configuration.Bias);
 
             configuration[0] = (byte)Register.ConfigurationWrite;
             Write(configuration);
         }
 
         /// <summary>
-        /// Enable/Disable the one shot mode on the RTD sensor
+        /// Enable/Disable the one shot mode on the resistance temperature detector sensor
         /// </summary>
         private void EnableOneShot(bool enable)
         {
             Span<byte> configuration = stackalloc byte[2];
             WriteRead(Register.ConfigurationRead, configuration);
 
-            if (enable)
-            {
-                configuration[1] |= (byte)Configuration.OneShot;
-            }
-            else
-            {
-                configuration[1] = (byte)(configuration[1] & ~(byte)Configuration.OneShot);
-            }
+            configuration[1] = enable ? (byte)(configuration[1] | (byte)Configuration.OneShot) : (byte)(configuration[1] & ~(byte)Configuration.OneShot);
 
             configuration[0] = (byte)Register.ConfigurationWrite;
             Write(configuration);
         }
 
         /// <summary>
-        /// Reads the raw RTD value and converts it to a temperature using the Callender Van Dusen temperature conversion of 15 bit ADC resistance ratio data.
+        /// Reads the raw resistance temperature detector value and converts it to a temperature using the Callender Van Dusen temperature conversion of 15 bit ADC resistance ratio data.
         /// </summary>
         /// <remarks>
         /// This math originates from: http://www.analog.com/media/en/technical-documentation/application-notes/AN709_0.pdf
@@ -195,17 +180,17 @@ namespace Iot.Device.Max31865
 
             double resistance = GetResistance();
 
-            z1 = -RTD_A;
-            z2 = RTD_A * RTD_A - (4 * RTD_B);
-            z3 = (4 * RTD_B) / rtdNominal;
-            z4 = 2 * RTD_B;
+            z1 = -TemperatureCoefficiantA;
+            z2 = TemperatureCoefficiantA * TemperatureCoefficiantA - (4 * TemperatureCoefficiantB);
+            z3 = (4 * TemperatureCoefficiantB) / rtdNominal;
+            z4 = 2 * TemperatureCoefficiantB;
 
             temperature = z2 + (z3 * resistance);
             temperature = (Math.Sqrt(temperature) + z1) / z4;
 
             if (temperature < 0)
             {
-                // For the following math to work, nominal RTD resistance must be normalized to 100 ohms
+                // For the following math to work, nominal resistance temperature detector resistance must be normalized to 100 ohms
                 resistance /= rtdNominal;
                 resistance *= 100;
 
@@ -227,7 +212,7 @@ namespace Iot.Device.Max31865
         }
 
         /// <summary>
-        /// Read the resistance of the RTD and return its value in Ohms.
+        /// Read the resistance of the resistance temperature detector and return its value in Ohms.
         /// </summary>
         /// <returns></returns>
         private double GetResistance()
@@ -240,7 +225,7 @@ namespace Iot.Device.Max31865
         }
 
         /// <summary>
-        /// Read the raw 16-bit value from the RTD reistance registers in one shot mode
+        /// Read the raw 16-bit value from the resistance temperature detector reistance registers in one shot mode
         /// </summary>
         /// <returns>The raw 16-bit value, NOT temperature</returns>
         private ushort ReadRawRTD()
@@ -248,11 +233,13 @@ namespace Iot.Device.Max31865
             ClearFaults();
             EnableBias(true);
 
+            // Page 3 (Bias Voltage Startup Time) & 4 (see note 4) of the technical documentation
             Thread.Sleep(10);
 
             EnableOneShot(true);
 
-            Thread.Sleep(_filterModeSleep);
+            // Page 3 (Temperature Conversion Time) of the technical documentation
+            Thread.Sleep((short)_filterMode);
 
             Span<byte> readBuffer = stackalloc byte[3];
             WriteRead(Register.RTDMSB, readBuffer);
