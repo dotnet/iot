@@ -13,6 +13,7 @@ namespace Iot.Device.Arduino.Tests
     /// </summary>
     public class ArduinoNativeLibraryTest : IClassFixture<FirmataTestFixture>, IDisposable
     {
+        private const int MaxTestMemoryUsage = 80000;
         private FirmataTestFixture _fixture;
         private ArduinoCsCompiler _compiler;
 
@@ -81,7 +82,7 @@ namespace Iot.Device.Arduino.Tests
             }
 
             long memoryUsage = exec.EstimateRequiredMemory();
-            Assert.True(memoryUsage < 31000, $"Expected memory usage: {memoryUsage} bytes");
+            Assert.True(memoryUsage < MaxTestMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
 
             var task = exec.EntryPoint;
             task.InvokeAsync(args);
@@ -113,7 +114,7 @@ namespace Iot.Device.Arduino.Tests
             }
 
             long memoryUsage = exec.EstimateRequiredMemory();
-            Assert.True(memoryUsage < 10000, $"Expected memory usage: {memoryUsage} bytes");
+            Assert.True(memoryUsage < MaxTestMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
 
             var task = exec.EntryPoint;
             task.InvokeAsync(args);

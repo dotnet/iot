@@ -73,6 +73,11 @@ namespace Iot.Device.Arduino
             return ref AddByteOffset(ref source, (IntPtr)(elementOffset * (int)SizeOf<T>()));
         }
 
+        public static void* Add<T>(void* source, int elementOffset)
+        {
+            return (byte*)source + (elementOffset * (int)SizeOf<T>());
+        }
+
         [ArduinoImplementation(ArduinoImplementation.UnsafeAddByteOffset, CompareByParameterNames = true)]
         public static ref T AddByteOffset<T>(ref T source, IntPtr byteOffset)
         {

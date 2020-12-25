@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -785,7 +786,10 @@ namespace Iot.Device.Arduino
                 argTypes[i] = (byte)GetVariableType(declaration.MethodBase.GetParameters()[i - startOffset].ParameterType, out _);
             }
 
+            Stopwatch w = Stopwatch.StartNew();
             _board.Firmata.SendMethodDeclaration(declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxLocals, (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
+
+            _board.Log($"Loading took {w.Elapsed}.");
         }
 
         /// <summary>
@@ -897,6 +901,19 @@ namespace Iot.Device.Arduino
             }
 
             attribute = null;
+            return false;
+        }
+
+        internal static bool HasReplacementAttribute(Type type, out ArduinoReplacementAttribute? attribute)
+        {
+            var repl = type.GetCustomAttribute<ArduinoReplacementAttribute>();
+            if (repl != null)
+            {
+                attribute = repl;
+                return true;
+            }
+
+            attribute = null!;
             return false;
         }
 
@@ -1068,10 +1085,11 @@ namespace Iot.Device.Arduino
             if (replacement != null)
             {
                 methodInfo = replacement;
-                if (set.HasMethod(methodInfo))
-                {
-                    return;
-                }
+            }
+
+            if (set.HasMethod(methodInfo))
+            {
+                return;
             }
 
             if (classReplacement != null && replacement == null)
@@ -1117,6 +1135,11 @@ namespace Iot.Device.Arduino
             if (hasBody)
             {
                 ilBytes = GetMethodDependencies(set, methodInfo, foreignMethodsRequired, typesRequired, fieldsRequired);
+
+                if (fieldsRequired.Any(x => x.Name == "_stringLength"))
+                {
+                    // Not sure
+                }
 
                 foreach (var type in typesRequired.Distinct())
                 {
@@ -1256,13 +1279,45 @@ namespace Iot.Device.Arduino
 
             for (int i = 0; i < argsa.Length; i++)
             {
-                if (argsa[i].ParameterType != argsb[i].ParameterType)
+                if (!AreSameParameterTypes(argsa[i].ParameterType, argsb[i].ParameterType))
                 {
                     return false;
                 }
             }
 
             return true;
+        }
+
+        private static bool AreSameParameterTypes(Type parameterA, Type parameterB)
+        {
+            if (parameterA == parameterB)
+            {
+                return true;
+            }
+
+            // UintPtr/IntPtr have a platform specific width, that means they're different whether we run in 32 bit or in 64 bit mode on the local(!) computer.
+            // But since we know that the target platform is 32 bit, we can assume them to be equal
+            if (parameterA == typeof(UIntPtr) && parameterB == typeof(uint))
+            {
+                return true;
+            }
+
+            if (parameterA == typeof(IntPtr) && parameterB == typeof(int))
+            {
+                return true;
+            }
+
+            if (parameterA == typeof(uint) && parameterB == typeof(UIntPtr))
+            {
+                return true;
+            }
+
+            if (parameterA == typeof(int) && parameterB == typeof(IntPtr))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -1355,6 +1410,17 @@ namespace Iot.Device.Arduino
 
             IlCodeParser parser = new IlCodeParser();
             return parser.FindAndPatchTokens(set, methodInstance, body, methodsUsed, typesUsed, fieldsUsed);
+        }
+
+        public static Type GetSystemPrivateType(string typeName)
+        {
+            var ret = Type.GetType(typeName);
+            if (ret == null)
+            {
+                throw new InvalidOperationException($"Type {typeName} not found");
+            }
+
+            return ret;
         }
 
         /// <summary>

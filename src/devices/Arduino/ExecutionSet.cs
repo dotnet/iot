@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
@@ -21,10 +22,15 @@ namespace Iot.Device.Arduino
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<Class> _classes;
         private readonly Dictionary<TypeInfo, int> _patchedTypeTokens;
+        private readonly Dictionary<int, TypeInfo> _inversePatchedTypeTokens;
         private readonly Dictionary<MethodBase, int> _patchedMethodTokens;
+        private readonly Dictionary<int, MethodBase> _inversePatchedMethodTokens; // Same as the above, but the other way round
         private readonly Dictionary<FieldInfo, (int Token, byte[]? InitializerData)> _patchedFieldTokens;
+        private readonly Dictionary<int, FieldInfo> _inversePatchedFieldTokens;
         private readonly HashSet<(Type Original, Type Replacement, bool Subclasses)> _classesReplaced;
         private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
+        // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
+        private readonly List<Type> _classesToSuppress;
         private readonly Dictionary<int, string> _strings;
 
         private int _numDeclaredMethods;
@@ -41,8 +47,12 @@ namespace Iot.Device.Arduino
             _patchedTypeTokens = new Dictionary<TypeInfo, int>();
             _patchedMethodTokens = new Dictionary<MethodBase, int>();
             _patchedFieldTokens = new Dictionary<FieldInfo, (int Token, byte[]? InitializerData)>();
+            _inversePatchedMethodTokens = new Dictionary<int, MethodBase>();
+            _inversePatchedTypeTokens = new Dictionary<int, TypeInfo>();
+            _inversePatchedFieldTokens = new Dictionary<int, FieldInfo>();
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
+            _classesToSuppress = new List<Type>();
             _strings = new Dictionary<int, string>();
 
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
@@ -98,8 +108,25 @@ namespace Iot.Device.Arduino
             _compiler.ExecuteStaticCtors(this);
         }
 
+        public void SuppressType(Type t)
+        {
+            _classesToSuppress.Add(t);
+        }
+
+        public void SuppressTypes(IEnumerable<Type>? types)
+        {
+            if (types != null)
+            {
+                foreach (var t in types)
+                {
+                    SuppressType(t);
+                }
+            }
+        }
+
         public long EstimateRequiredMemory()
         {
+            Dictionary<Type, long> classSizes = new Dictionary<Type, long>();
             long bytesUsed = 0;
             foreach (var cls in Classes)
             {
@@ -113,11 +140,24 @@ namespace Iot.Device.Arduino
                 bytesUsed += 48;
                 bytesUsed += method.ArgumentCount * 8;
 
+                int methodBytes = method.IlBytes != null ? method.IlBytes.Length : 0;
                 if (method.IlBytes != null)
                 {
-                    bytesUsed += method.IlBytes.Length;
+                    bytesUsed += methodBytes;
+                }
+
+                var type = method.MethodBase.DeclaringType!;
+                if (classSizes.TryGetValue(type, out var classBytes))
+                {
+                    classSizes[type] += methodBytes;
+                }
+                else
+                {
+                    classSizes[type] = methodBytes;
                 }
             }
+
+            var orderedBySize = classSizes.OrderByDescending(x => x.Value).ToArray();
 
             foreach (var constant in _strings)
             {
@@ -150,18 +190,38 @@ namespace Iot.Device.Arduino
 
             token = _nextToken++;
             _patchedMethodTokens.Add(methodBase, token);
+            _inversePatchedMethodTokens.Add(token, methodBase);
             return token;
         }
 
         public int GetOrAddFieldToken(FieldInfo field)
         {
+            string temp = field.Name;
             if (_patchedFieldTokens.TryGetValue(field, out var token))
             {
                 return token.Token;
             }
 
+            // If both the original class and the replacement have fields, match them and define the original as the "correct" ones
+            // There shouldn't be a problem if only either one contains a field (but check size calculation!)
+            if (ArduinoCsCompiler.HasReplacementAttribute(field.DeclaringType!, out var attrib))
+            {
+                var replacementType = attrib!.TypeToReplace!;
+                var replacementField = replacementType.GetField(field.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
+                if (replacementField != null)
+                {
+                    if (_patchedFieldTokens.TryGetValue(replacementField, out token))
+                    {
+                        return token.Token;
+                    }
+
+                    field = replacementField;
+                }
+            }
+
             int tk = _nextToken++;
             _patchedFieldTokens.Add(field, (tk, null));
+            _inversePatchedFieldTokens.Add(tk, field);
             return tk;
         }
 
@@ -175,6 +235,7 @@ namespace Iot.Device.Arduino
             int tk = _nextToken++;
 
             _patchedFieldTokens.Add(field, (tk, initializerData));
+            _inversePatchedFieldTokens.Add(tk, field);
             return tk;
         }
 
@@ -263,11 +324,29 @@ namespace Iot.Device.Arduino
             }
 
             _patchedTypeTokens.Add(typeInfo, token);
+            if (!_inversePatchedTypeTokens.ContainsKey(token))
+            {
+                _inversePatchedTypeTokens.Add(token, typeInfo);
+            }
+            else
+            {
+                // This can only happen for replacement classes that won't be fully replaced. InverseResolveToken shall return the original in this case(?)
+                if (typeInfo.GetCustomAttributes((typeof(ArduinoReplacementAttribute)), false).Length == 0)
+                {
+                    _inversePatchedTypeTokens[token] = typeInfo;
+                }
+            }
+
             return token;
         }
 
         public bool AddClass(Class type)
         {
+            if (_classesToSuppress.Contains(type.TheType))
+            {
+                return false;
+            }
+
             if (_classes.Any(x => x.TheType == type.TheType))
             {
                 return false;
@@ -284,6 +363,11 @@ namespace Iot.Device.Arduino
 
         public bool HasDefinition(Type classType)
         {
+            if (_classesToSuppress.Contains(classType))
+            {
+                return true;
+            }
+
             if (_classes.Any(x => x.TheType == classType))
             {
                 return true;
@@ -294,6 +378,11 @@ namespace Iot.Device.Arduino
 
         public bool HasMethod(MemberInfo m)
         {
+            if (_classesToSuppress.Contains(m.DeclaringType!))
+            {
+                return true;
+            }
+
             var replacement = GetReplacement((MethodBase)m);
             if (replacement != null)
             {
@@ -341,40 +430,38 @@ namespace Iot.Device.Arduino
         public MemberInfo? InverseResolveToken(int token)
         {
             // Todo: This is very slow - consider inversing the dictionaries during data prep
-            var method = _patchedMethodTokens.FirstOrDefault(x => x.Value == token);
-            if (method.Key != null)
+            if (_inversePatchedMethodTokens.TryGetValue(token, out var method))
             {
-                return method.Key;
+                return method;
             }
 
-            var field = _patchedFieldTokens.FirstOrDefault(x => x.Value.Token == token);
-            if (field.Key != null)
+            if (_inversePatchedFieldTokens.TryGetValue(token, out var field))
             {
-                return field.Key;
+                return field;
             }
 
-            var t = _patchedTypeTokens.FirstOrDefault(x => x.Value == token);
-            if (t.Key != null)
+            if (_inversePatchedTypeTokens.TryGetValue(token, out var t))
             {
-                return t.Key;
+                return t;
             }
 
             // Try whether the input token is a constructed generic token, which was not expected in this combination
-            t = _patchedTypeTokens.FirstOrDefault(x => x.Value == (token & 0xFF00_0000));
-            try
+            if (_inversePatchedTypeTokens.TryGetValue((int)(token & 0xFF00_0000), out t))
             {
-                if (t.Key != null && t.Key.IsGenericTypeDefinition)
+                try
                 {
-                    var t2 = _patchedTypeTokens.FirstOrDefault(x => x.Value == (token & 0x00FF_FFFF));
-                    if (t2.Key != null)
+                    if (t != null && t.IsGenericTypeDefinition)
                     {
-                        return t.Key.MakeGenericType(t2.Key);
+                        if (_inversePatchedTypeTokens.TryGetValue((int)(token & 0x00FF_FFFF), out var t2))
+                        {
+                            return t.MakeGenericType(t2);
+                        }
                     }
                 }
-            }
-            catch (ArgumentException)
-            {
-                // Ignore, try next approach (if any)
+                catch (ArgumentException)
+                {
+                    // Ignore, try next approach (if any)
+                }
             }
 
             return null;
@@ -589,6 +676,18 @@ namespace Iot.Device.Arduino
                 if (ArduinoCsCompiler.MethodsHaveSameSignature(replacementMethod, methodInfo) || ArduinoCsCompiler.AreSameOperatorMethods(replacementMethod, methodInfo))
                 {
                     return replacementMethod;
+                }
+
+                if (replacementMethod.Name == methodInfo.Name && replacementMethod.GetParameters().Length == methodInfo.GetParameters().Length &&
+                    methodInfo.IsConstructedGenericMethod && replacementMethod.IsGenericMethodDefinition &&
+                    methodInfo.GetGenericArguments().Length == replacementMethod.GetGenericArguments().Length)
+                {
+                    // The replacement method is likely the correct one, but we need to instantiate it.
+                    var repl = replacementMethod.MakeGenericMethod(methodInfo.GetGenericArguments());
+                    if (ArduinoCsCompiler.MethodsHaveSameSignature(repl, methodInfo) || ArduinoCsCompiler.AreSameOperatorMethods(repl, methodInfo))
+                    {
+                        return repl;
+                    }
                 }
             }
 

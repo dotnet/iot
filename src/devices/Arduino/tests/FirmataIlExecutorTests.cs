@@ -23,6 +23,17 @@ namespace Iot.Device.Arduino.Tests
             _compiler.ClearAllData(true);
         }
 
+        private Type[] TypesToSuppressForArithmeticTests
+        {
+            get
+            {
+                return new[]
+                {
+                    typeof(String), ArduinoCsCompiler.GetSystemPrivateType("System.SR")
+                };
+            }
+        }
+
         public void Dispose()
         {
             _compiler.Dispose();
@@ -327,17 +338,23 @@ namespace Iot.Device.Arduino.Tests
             return true;
         }
 
-        private void LoadCodeMethod<T1, T2, T3>(Type type, string methodName, T1 a, T2 b, T3 expectedResult)
+        private void LoadCodeMethod<T1, T2, T3>(Type type, string methodName, T1 a, T2 b, T3 expectedResult, Type[]? suppressTypes)
         {
             var methods = type.GetMethods().Where(x => x.Name == methodName).ToList();
             Assert.Single(methods);
             var set = _compiler.CreateExecutionSet();
+            set.SuppressTypes(suppressTypes);
             _compiler.PrepareLowLevelInterface(set);
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
             var method = _compiler.AddSimpleMethod(set, methods[0]);
 
             // First execute the method locally, so we don't have an error in the test
             var uncastedResult = methods[0].Invoke(null, new object[] { a!, b! });
+            if (uncastedResult == null)
+            {
+                throw new InvalidOperationException("Void methods not supported here");
+            }
+
             T3 result = (T3)uncastedResult;
             Assert.Equal(expectedResult, result);
 
@@ -378,7 +395,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("SmallerOrEqualS", -2, -2, true)]
         public void TestBooleanOperation(string methodName, int argument1, int argument2, bool expected)
         {
-            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
 
         [Theory]
@@ -411,7 +428,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("RshUnS", -8, 1, 2147483644)]
         public void TestArithmeticOperationSigned(string methodName, int argument1, int argument2, int expected)
         {
-            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
 
         [Theory]
@@ -434,7 +451,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("ModF", -11, 2, -1)]
         public void TestArithmeticOperationSignedFloat(string methodName, float argument1, float argument2, float expected)
         {
-            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
 
         [Theory]
@@ -457,7 +474,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("ModD", -11, 2, -1)]
         public void TestArithmeticOperationSignedDouble(string methodName, double argument1, double argument2, double expected)
         {
-            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
 
         [Theory]
@@ -484,7 +501,7 @@ namespace Iot.Device.Arduino.Tests
         public void TestArithmeticOperationUnsigned(string methodName, Int64 argument1, Int64 argument2, Int64 expected)
         {
             // Method signature as above, otherwise the test data conversion fails
-            LoadCodeMethod(GetType(), methodName, (uint)argument1, (uint)argument2, (uint)expected);
+            LoadCodeMethod(GetType(), methodName, (uint)argument1, (uint)argument2, (uint)expected, TypesToSuppressForArithmeticTests);
         }
 
         public static Int32 ResultTypesTest(UInt32 argument1, Int32 argument2)
@@ -517,7 +534,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("ResultTypesTest2", 21, -20, 1)]
         public void TestTypeConversions(string methodName, UInt32 argument1, int argument2, Int32 expected)
         {
-            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
 
         [Theory]
@@ -529,7 +546,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("BoxedArrayTest", 5, 2, 7)]
         public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected);
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
 
         public static int IntArrayTest(int size, int index)

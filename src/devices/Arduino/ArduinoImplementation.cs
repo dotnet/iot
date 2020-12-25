@@ -98,6 +98,10 @@ namespace Iot.Device.Arduino
         RuntimeHelpersGetRawArrayData,
         UnsafeIsAddressGreaterThan,
         UnsafeIsAddressLessThan,
-        ObjectMemberwiseClone
+        ObjectMemberwiseClone,
+        MiniBuffer_BulkMoveWithWriteBarrier,
+        MiniBuffer_ZeroMemory,
+        RuntimeTypeHandleValue,
+        MiniRuntimeTypeHandleGetCorElementType
     }
 }

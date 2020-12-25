@@ -633,7 +633,7 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
-            Span<byte> rawData = stackalloc byte[100];
+            Span<byte> rawData = stackalloc byte[512];
 
             int bytesRead = _firmataStream.Read(rawData);
             for (int i = 0; i < bytesRead; i++)

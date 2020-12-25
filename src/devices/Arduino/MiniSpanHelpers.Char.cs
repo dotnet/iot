@@ -12,7 +12,7 @@ using Unsafe = Iot.Device.Arduino.MiniUnsafe;
 
 namespace Iot.Device.Arduino
 {
-    internal partial class MiniSpanHelpers
+    internal static partial class MiniSpanHelpers
     {
         public static int IndexOf(ref char searchSpace, int searchSpaceLength, ref char value, int valueLength)
         {

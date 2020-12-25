@@ -116,6 +116,7 @@ namespace Iot.Device.Arduino
 
         public int Length
         {
+            [ArduinoImplementation(ArduinoImplementation.None)]
             get
             {
                 return _stringLength;

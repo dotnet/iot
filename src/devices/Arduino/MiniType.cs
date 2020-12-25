@@ -10,17 +10,17 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(System.Type), true, true)]
     internal class MiniType
     {
-#pragma warning disable 414
+#pragma warning disable 414, SX1309
         // This is used by firmware code directly. Do not reorder the members without checking the firmware
         // The member contains the token of the class declaration
-        private Int32 _internalType;
+        private Int32 m_handle;
 #pragma warning restore 414
 
         [ArduinoImplementation(ArduinoImplementation.TypeCtor)]
         protected MiniType()
         {
             // This ctor is never executed - the variable values are pushed directly
-            _internalType = 0;
+            m_handle = 0;
         }
 
         public virtual bool IsGenericType
@@ -28,7 +28,7 @@ namespace Iot.Device.Arduino
             get
             {
                 // All types that have some generics return true here, whether they're open or closed. Nullable also returns true
-                return (_internalType & ExecutionSet.GenericTokenMask) != 0;
+                return (m_handle & ExecutionSet.GenericTokenMask) != 0;
             }
         }
 
@@ -92,6 +92,11 @@ namespace Iot.Device.Arduino
             }
 
             return !a.Equals(b);
+        }
+
+        internal virtual RuntimeTypeHandle GetTypeHandleInternal()
+        {
+            return TypeHandle;
         }
 
         [ArduinoImplementation(ArduinoImplementation.TypeEquals)]

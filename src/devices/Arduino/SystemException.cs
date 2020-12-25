@@ -16,6 +16,7 @@ namespace Iot.Device.Arduino
         InvalidOperation = 9,
         ClassNotFound = 10,
         InvalidCast = 11,
-        NotSupported = 12
+        NotSupported = 12,
+        CustomException = 13,
     }
 }

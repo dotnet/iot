@@ -96,9 +96,28 @@ namespace Iot.Device.Arduino
             __BulkMoveWithWriteBarrier(ref destination, ref source, byteCount);
         }
 
-        [MethodImpl(MethodImplOptions.InternalCall)]
+        [ArduinoImplementation(ArduinoImplementation.MiniBuffer_BulkMoveWithWriteBarrier)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
-        private static extern void __BulkMoveWithWriteBarrier(ref byte destination, ref byte source, uint byteCount);
+        private static void __BulkMoveWithWriteBarrier(ref byte destination, ref byte source, uint byteCount)
+        {
+            throw new NotImplementedException();
+        }
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
+        internal static unsafe void _ZeroMemory(ref byte b, uint byteLength)
+        {
+            fixed (byte* bytePointer = &b)
+            {
+                __ZeroMemory(bytePointer, byteLength);
+            }
+        }
+
+        [ArduinoImplementation(ArduinoImplementation.MiniBuffer_ZeroMemory)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
+        private static unsafe void __ZeroMemory(void* b, uint byteLength)
+        {
+            throw new NotImplementedException();
+        }
 
     }
 }

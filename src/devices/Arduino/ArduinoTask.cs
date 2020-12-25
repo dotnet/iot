@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -132,7 +133,7 @@ namespace Iot.Device.Arduino
                     }
 
                     Exception ex;
-                    if (exceptionCode < 0xFF)
+                    if (sysEx != SystemException.CustomException)
                     {
                         switch (sysEx)
                         {
@@ -177,14 +178,12 @@ namespace Iot.Device.Arduino
                     else
                     {
                         // TypeInfo inherits from Type, so a TypeInfo is always also a Type
-                        var resolvedException = set.InverseResolveToken(exceptionCode) as Type;
-
-                        if (resolvedException == null)
+                        if (resolved == null)
                         {
                             throw new InvalidOperationException("Internal error: Unknown exception type");
                         }
 
-                        ex = (Exception)Activator.CreateInstance(resolvedException, BindingFlags.Public, null, $"Location: {resolved.DeclaringType} - {resolved} {textualStackTrace}")!;
+                        ex = (Exception)Activator.CreateInstance((Type)resolved, BindingFlags.Public | BindingFlags.CreateInstance, (Binder)null!, new object[] { $"Location: {resolved.DeclaringType} - {resolved} {textualStackTrace}" }, CultureInfo.CurrentUICulture)!;
                     }
 
                     throw ex;
