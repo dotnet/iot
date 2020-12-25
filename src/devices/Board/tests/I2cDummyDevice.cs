@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.IO;
 using System.Text;
 
 namespace Board.Tests
@@ -28,27 +29,32 @@ namespace Board.Tests
                 throw new ObjectDisposedException("This dummy instance is disposed");
             }
 
+            if (ConnectionSettings.DeviceAddress != 55)
+            {
+                throw new IOException("Nothing at this address");
+            }
+
             return 0xFF;
         }
 
         public override void Read(Span<byte> buffer)
         {
-            throw new Win32Exception(2, "No answer from device");
+            throw new IOException("No answer from device");
         }
 
         public override void WriteByte(byte value)
         {
-            throw new Win32Exception(2, "No answer from device");
+            throw new IOException("No answer from device");
         }
 
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            throw new Win32Exception(2, "No answer from device");
+            throw new IOException("No answer from device");
         }
 
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
-            throw new Win32Exception(2, "No answer from device");
+            throw new IOException("No answer from device");
         }
 
         protected override void Dispose(bool disposing)
