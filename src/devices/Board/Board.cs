@@ -325,7 +325,7 @@ namespace Iot.Device.Board
             {
                 driver = GetBestDriverForBoard();
             }
-            catch (Exception x) when (x is PlatformNotSupportedException || x is NotSupportedException) // That would be serious
+            catch (Exception x) when (x is PlatformNotSupportedException || x is NotSupportedException) // Anything else would be serious
             {
             }
 
