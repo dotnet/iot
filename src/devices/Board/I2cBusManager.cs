@@ -16,10 +16,9 @@ namespace Iot.Device.Board
     {
         private readonly int _sdaPin;
         private readonly int _sclPin;
-        private readonly Func<I2cConnectionSettings, I2cDevice> _creationFunction;
         private readonly int _bus;
         private readonly Dictionary<int, I2cDevice> _devices;
-
+        private I2cBus _busInstance;
         private Board? _board;
 
         /// <summary>
@@ -28,8 +27,8 @@ namespace Iot.Device.Board
         /// <param name="board">The board that provides this bus</param>
         /// <param name="bus">The bus number</param>
         /// <param name="pins">The pins, in the logical scheme of the board. This must be an array of exactly two pins (for SCL and SDA)</param>
-        /// <param name="creationFunction">Delegate that creates an instance of an I2c device on this bus</param>
-        public I2cBusManager(Board board, int bus, int[]? pins, Func<I2cConnectionSettings, I2cDevice> creationFunction)
+        /// <param name="busInstance">The wrapped bus instance</param>
+        public I2cBusManager(Board board, int bus, int[]? pins, I2cBus busInstance)
         {
             if (pins == null || pins.Length != 2)
             {
@@ -38,7 +37,7 @@ namespace Iot.Device.Board
 
             _board = board;
             _bus = bus;
-            _creationFunction = creationFunction ?? throw new ArgumentNullException(nameof(creationFunction));
+            _busInstance = busInstance ?? throw new ArgumentNullException(nameof(busInstance));
             _devices = new Dictionary<int, I2cDevice>();
 
             _sdaPin = pins[0];
@@ -69,7 +68,7 @@ namespace Iot.Device.Board
         /// <remarks>No test is performed whether the given device exists and is usable</remarks>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
-            var newDevice = _creationFunction(new I2cConnectionSettings(_bus, deviceAddress));
+            var newDevice = _busInstance.CreateDevice(deviceAddress);
             _devices.Add(deviceAddress, newDevice);
             return newDevice;
         }
@@ -108,6 +107,9 @@ namespace Iot.Device.Board
                 }
 
                 _devices.Clear();
+
+                _busInstance?.Dispose();
+                _busInstance = null!;
 
                 _board = null;
             }

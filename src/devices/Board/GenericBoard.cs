@@ -20,11 +20,20 @@ namespace Iot.Device.Board
         private Dictionary<int, PinUsage> _knownUsages;
 
         /// <summary>
-        /// Creates a generic board instance
+        /// Creates a generic board instance with auto-detection of the best drivers for GPIO, I2c, SPI, etc.
+        /// </summary>
+        public GenericBoard()
+            : this(PinNumberingScheme.Logical)
+        {
+        }
+
+        /// <summary>
+        ///  Creates a generic board instance with auto-detection of the best drivers for GPIO, I2c, SPI, etc.
         /// </summary>
         /// <param name="defaultNumberingScheme">Default pin numbering scheme</param>
-        public GenericBoard(PinNumberingScheme defaultNumberingScheme)
-            : base(defaultNumberingScheme)
+        /// <remarks>This ctor is protected, because it </remarks>
+        protected internal GenericBoard(PinNumberingScheme defaultNumberingScheme)
+        : base(defaultNumberingScheme)
         {
             _knownUsages = new Dictionary<int, PinUsage>();
         }
@@ -53,15 +62,15 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
-        protected override I2cDevice CreateI2cDeviceCore(I2cConnectionSettings connectionSettings)
+        protected override I2cBusManager CreateI2cBusCore(int busNumber, int[]? pins)
         {
-            return I2cDevice.Create(connectionSettings);
+            return new I2cBusManager(this, busNumber, pins, I2cBus.Create(busNumber));
         }
 
         /// <inheritdoc />
-        public override I2cBusManager CreateOrGetDefaultI2cBus()
+        public override int GetDefaultI2cBusNumber()
         {
-            throw new NotSupportedException("For the generic board, you need to specify the pins to use for I2C by explicitly specifying them");
+            throw new NotSupportedException("The generic board has no default I2C bus");
         }
 
         /// <summary>

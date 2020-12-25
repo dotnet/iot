@@ -479,9 +479,9 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
-        public override I2cBusManager CreateOrGetDefaultI2cBus()
+        public override int GetDefaultI2cBusNumber()
         {
-            return CreateOrGetI2cBus(1, GetDefaultPinAssignmentForI2c(1));
+            return 1;
         }
 
         /// <inheritdoc />

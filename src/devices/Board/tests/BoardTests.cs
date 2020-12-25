@@ -365,9 +365,9 @@ namespace Iot.Device.Board.Tests
                 throw new NotSupportedException($"No simulated bus id {connectionSettings.BusId}");
             }
 
-            protected override I2cDevice CreateI2cDeviceCore(I2cConnectionSettings connectionSettings)
+            protected override I2cBusManager CreateI2cBusCore(int busNumber, int[]? pins)
             {
-                return new I2cDummyDevice(connectionSettings);
+                return new I2cBusManager(this, busNumber, pins, new I2cDummyBus(busNumber));
             }
 
             protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings connectionSettings, int[] pins)

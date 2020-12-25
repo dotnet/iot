@@ -42,7 +42,7 @@ namespace BoardSample
             const int led0 = 0;
             const int led1 = 1;
             const int led2 = 2;
-            using Board b = new GenericBoard(PinNumberingScheme.Logical);
+            using Board b = new GenericBoard();
 
             using GpioController controller = b.CreateGpioController(PinNumberingScheme.Logical);
 
