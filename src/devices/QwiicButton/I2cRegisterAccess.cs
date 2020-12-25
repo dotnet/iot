@@ -25,7 +25,7 @@ namespace Iot.Device.QwiicButton
     /// </summary>
     public sealed class I2cRegisterAccess : IDisposable
     {
-        private I2cDevice _device;
+        private readonly I2cDevice _device;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="I2cRegisterAccess"/> class.
@@ -186,8 +186,7 @@ namespace Iot.Device.QwiicButton
         /// <inheritdoc />
         public void Dispose()
         {
-            _device?.Dispose();
-            _device = null;
+            _device.Dispose();
         }
     }
 }

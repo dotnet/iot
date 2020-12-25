@@ -80,8 +80,7 @@ namespace Iot.Device.QwiicButton
         /// <inheritdoc />
         public void Dispose()
         {
-            _registerAccess?.Dispose();
-            _registerAccess = null;
+            _registerAccess.Dispose();
         }
     }
 }

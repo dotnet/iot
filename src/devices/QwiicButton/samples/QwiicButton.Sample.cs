@@ -38,7 +38,7 @@ namespace Iot.Device.QwiicButton.Samples
                         PrintButtonStatus.Run(button);
                         break;
                     case 3:
-                        new PrintButtonStatusInterruptBased().Run(button);
+                        new PrintButtonStatusInterruptBased(button).Run();
                         break;
                     case 4:
                         LightWhenPressed.Run(button);

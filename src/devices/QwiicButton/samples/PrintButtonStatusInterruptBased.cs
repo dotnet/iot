@@ -15,12 +15,15 @@ namespace Iot.Device.QwiicButton.Samples
     /// </summary>
     internal class PrintButtonStatusInterruptBased
     {
-        private QwiicButton _button;
+        private readonly QwiicButton _button;
 
-        public void Run(QwiicButton button)
+        public PrintButtonStatusInterruptBased(QwiicButton button)
         {
             _button = button;
+        }
 
+        public void Run()
+        {
             var gpioDriver = GetGpioDriver();
             if (gpioDriver == null)
             {
@@ -43,7 +46,7 @@ namespace Iot.Device.QwiicButton.Samples
             Console.ReadKey();
         }
 
-        private GpioDriver GetGpioDriver()
+        private GpioDriver? GetGpioDriver()
         {
             Console.WriteLine();
             Console.WriteLine("Choose GPIO driver:");
