@@ -210,8 +210,8 @@ namespace Iot.Device.Board.Tests
         public void TwoI2cDevicesCanSharePins()
         {
             var board = CreateBoard();
-            var device1 = board.CreateI2cDevice(new I2cConnectionSettings(0, 1));
-            var device2 = board.CreateI2cDevice(new I2cConnectionSettings(0, 2));
+            var device1 = board.CreateI2cDevice(new I2cConnectionSettings(0, 0x55));
+            var device2 = board.CreateI2cDevice(new I2cConnectionSettings(0, 0x52));
             // Now all fine
             Assert.Equal(0xff, device1.ReadByte());
             Assert.Equal(0xff, device2.ReadByte());

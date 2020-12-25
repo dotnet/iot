@@ -29,7 +29,7 @@ namespace Board.Tests
                 throw new ObjectDisposedException("This dummy instance is disposed");
             }
 
-            if (ConnectionSettings.DeviceAddress != 55)
+            if (ConnectionSettings.DeviceAddress != 0x55 && ConnectionSettings.DeviceAddress != 0x52)
             {
                 throw new IOException("Nothing at this address");
             }

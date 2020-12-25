@@ -25,8 +25,9 @@ namespace Iot.Device.Board.Tests
                 return new I2cDummyDevice(new I2cConnectionSettings(0, x));
             });
             List<int> result = _busMock.Object.PerformBusScan();
-            Assert.True(result.Count == 1);
-            Assert.True(55 == result[0]);
+            Assert.True(result.Count == 2);
+            Assert.Equal(0x52, result[0]);
+            Assert.Equal(0x55, result[1]);
         }
     }
 }
