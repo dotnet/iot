@@ -20,13 +20,15 @@ namespace QwiicButton.Tests
             throw new NotImplementedException();
         }
 
-        public byte[] WriteBuffer { get; set; }
+        public byte[] WriteBuffer { get; set; } = new byte[0];
+
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             WriteBuffer = buffer.ToArray();
         }
 
-        public byte[] ReadBuffer { get; set; }
+        public byte[] ReadBuffer { get; set; } = new byte[0];
+
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             WriteBuffer = writeBuffer.ToArray();
@@ -37,6 +39,6 @@ namespace QwiicButton.Tests
             }
         }
 
-        public override I2cConnectionSettings ConnectionSettings { get; }
+        public override I2cConnectionSettings ConnectionSettings { get; } = new I2cConnectionSettings(0, 0);
     }
 }

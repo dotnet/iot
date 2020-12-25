@@ -39,7 +39,7 @@ namespace Iot.Device.QwiicButton
         where TRegisterMap : Enum
     {
         private readonly bool _useLittleEndian;
-        private I2cRegisterAccess _registerAccess;
+        private readonly I2cRegisterAccess _registerAccess;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="I2cRegisterAccess{TRegisterMap}"/> class.
@@ -92,8 +92,7 @@ namespace Iot.Device.QwiicButton
         /// <inheritdoc />
         public void Dispose()
         {
-            _registerAccess?.Dispose();
-            _registerAccess = null;
+            _registerAccess.Dispose();
         }
     }
 }
