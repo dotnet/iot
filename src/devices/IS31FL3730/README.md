@@ -6,7 +6,32 @@ a variety of layouts.
 [IS31FL3730](https://cdn.hackaday.io/files/1692447240935296/IS31FL3730.pdf)
 
 ## Binding Notes
+Create a new IS31FL3730 driver instance:
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
+```cs
+I2cDevice device = I2cDevice.Create(new I2cConnectionSettings(1, IS31FL3730.DefaultI2cAddress));
+IS31FL3730 matrixController = new IS31FL3730(device, new DriverConfiguration()
+{
+  IsShutdown = false,
+  IsAudioInputEnabled = false,
+  Layout = MatrixLayout.Matrix8by8,
+  Mode = MatrixMode.Both,
+  DriveStrength = DriveStrength.Drive45ma
+});
+```
 
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
+Set the data displayed on the matrix:
+```cs
+matrixController.SetMatrix(MatrixMode.Both, new byte[] { 0xFF, 0x7F, 0x0F, 0xFF, 0xF7, 0xF0, 0x77, 0xAA, 0x44, 0xCC, 0xFF });
+```
+
+Reset the matrix controller to default settings, clear the display and internal display buffer:
+```cs
+matrixController.Reset();
+```
+
+**NOTE**: You do not need to reset the display after instantiation, doing so will reset the configuration registers.
+
+The following features are not currently implemented:
+- PWM Configuration Register (0x19)
+- Audio Input Gain Lighting Effect (0x0D bits 6-4)
