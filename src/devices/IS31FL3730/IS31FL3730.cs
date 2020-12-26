@@ -14,13 +14,6 @@ namespace Iot.Device.IS31FL3730
     /// </summary>
     public class IS31FL3730 : IDisposable
     {
-        // Matrix Commands
-        private static readonly IReadOnlyList<byte> MATRIX_COMMAND_RESET = new byte[] { 0xFF, 0x00 };
-        private const byte MATRIX_COMMAND_CONFIGURATION_REGISTER = 0x00;
-        private const byte MATRIX_COMMAND_MATRIX1 = 0x01;
-        private const byte MATRIX_COMMAND_MATRIX2 = 0x0E;
-        private static readonly IReadOnlyList<byte> MATRIX_COMMAND_UPDATE = new byte[] { 0x0C, 0x01 };
-
         // Matrix Modes - Layout (8x8, 7x9, 6x10 or 5x11)
         private const byte MATRIX_MODE_8X8 = 0b00000000;
         private const byte MATRIX_MODE_7X9 = 0b00000001;
@@ -42,6 +35,13 @@ namespace Iot.Device.IS31FL3730
         /// Default I2C Address, up to four IS31FL3730's can be on the same I2C Bus.
         /// </summary>
         public const byte DefaultI2cAddress = 0x61;
+
+        // Matrix Commands
+        private const byte MATRIX_COMMAND_CONFIGURATION_REGISTER = 0x00;
+        private const byte MATRIX_COMMAND_MATRIX1 = 0x01;
+        private const byte MATRIX_COMMAND_MATRIX2 = 0x0E;
+        private static readonly IReadOnlyList<byte> MATRIX_COMMAND_RESET = new byte[] { 0xFF, 0x00 };
+        private static readonly IReadOnlyList<byte> MATRIX_COMMAND_UPDATE = new byte[] { 0x0C, 0x01 };
 
         /// <summary>
         /// I2C Device instance to communicate with the IS31FL3730.
