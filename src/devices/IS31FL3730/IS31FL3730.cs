@@ -4,6 +4,7 @@
 using System;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Linq;
 
 namespace Iot.Device.IS31FL3730
 {
@@ -30,12 +31,12 @@ namespace Iot.Device.IS31FL3730
         /// <summary>
         /// Raw matrix values for matrix 1.
         /// </summary>
-        protected byte[] _matrix1 = new byte[8];
+        protected byte[] _matrix1 = new byte[11];
 
         /// <summary>
         /// Raw matrix values for matrix 2.
         /// </summary>
-        protected byte[] _matrix2 = new byte[8];
+        protected byte[] _matrix2 = new byte[11];
 
         /// <summary>
         /// Initializes a new instance of the <see cref="IS31FL3730"/> class.
@@ -54,11 +55,11 @@ namespace Iot.Device.IS31FL3730
         /// </summary>
         public void Reset()
         {
-            _matrix1 = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            _matrix2 = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            _matrix1 = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+            _matrix2 = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-            _i2cDevice.WriteByte(0xFF);
-            _i2cDevice.WriteByte(0x00);
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0xFF, 0x00 }));
+            UpdateDisplay();
         }
 
         /// <summary>
@@ -111,8 +112,8 @@ namespace Iot.Device.IS31FL3730
                     break;
             }
 
-            _i2cDevice.WriteByte(0x00);
-            _i2cDevice.WriteByte(configuration);
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x00, configuration }));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x0D, 0b00001110 }));
         }
 
         /// <summary>
@@ -135,6 +136,8 @@ namespace Iot.Device.IS31FL3730
                     _matrix2 = display;
                     break;
             }
+
+            UpdateDisplay();
         }
 
         /// <summary>
@@ -142,16 +145,11 @@ namespace Iot.Device.IS31FL3730
         /// </summary>
         protected void UpdateDisplay()
         {
-            for (byte i = 0; i <= 7; i++)
-            {
-                _i2cDevice.WriteByte((byte)(0x01 + i));
-                _i2cDevice.WriteByte(_matrix1[i]);
-                _i2cDevice.WriteByte((byte)(0x0E + i));
-                _i2cDevice.WriteByte(_matrix2[i]);
-            }
+            _i2cDevice.Write(new ReadOnlySpan<byte>((new byte[] { 0x01 }).Concat(_matrix1).ToArray()));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x0C, 0x01 }));
 
-            _i2cDevice.WriteByte(0x0C);
-            _i2cDevice.WriteByte(0x00);
+            _i2cDevice.Write(new ReadOnlySpan<byte>((new byte[] { 0x0E }).Concat(_matrix2).ToArray()));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x0C, 0x01 }));
         }
 
         /// <inheritdoc />

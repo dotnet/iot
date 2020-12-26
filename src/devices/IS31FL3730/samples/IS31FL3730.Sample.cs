@@ -19,6 +19,8 @@ IS31FL3730 matrixController = new IS31FL3730(device, new DriverConfiguration()
   Mode = MatrixMode.Both
 });
 
-matrixController.Reset();
+matrixController.SetMatrix(MatrixMode.Both, new byte[] { 0xFF, 0x7F, 0x0F, 0xFF, 0xF7, 0xF0, 0x77, 0xAA, 0x44, 0xCC, 0xFF });
 
-matrixController.SetMatrix(MatrixMode.Both, new byte[] { 0xFF, 0x7F, 0x0F, 0xFF, 0xF7, 0xF0, 0x77, 0xAA });
+Thread.Sleep(2000);
+
+matrixController.Reset();
