@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Linq;
@@ -13,6 +14,30 @@ namespace Iot.Device.IS31FL3730
     /// </summary>
     public class IS31FL3730 : IDisposable
     {
+        // Matrix Commands
+        private static readonly IReadOnlyList<byte> MATRIX_COMMAND_RESET = new byte[] { 0xFF, 0x00 };
+        private const byte MATRIX_COMMAND_CONFIGURATION_REGISTER = 0x00;
+        private const byte MATRIX_COMMAND_MATRIX1 = 0x01;
+        private const byte MATRIX_COMMAND_MATRIX2 = 0x0E;
+        private static readonly IReadOnlyList<byte> MATRIX_COMMAND_UPDATE = new byte[] { 0x0C, 0x01 };
+
+        // Matrix Modes - Layout (8x8, 7x9, 6x10 or 5x11)
+        private const byte MATRIX_MODE_8X8 = 0b00000000;
+        private const byte MATRIX_MODE_7X9 = 0b00000001;
+        private const byte MATRIX_MODE_6X10 = 0b00000010;
+        private const byte MATRIX_MODE_5X11 = 0b00000011;
+
+        // Matrix Modes - Matrix 1 Only, Matrix 2 Only, Both Matrices
+        private const byte MATRIX_MODE_1ONLY = 0b00000000;
+        private const byte MATRIX_MODE_2ONLY = 0b00001000;
+        private const byte MATRIX_MODE_BOTH = 0b00011000;
+
+        // Matrix Modes - Soft Shutdown
+        private const byte MATRIX_MODE_SOFT_SHUTDOWN = 0b10000000;
+
+        // Matrix Modes - Audio Input
+        private const byte MATRIX_MODE_AUDIO_INPUT = 0b00000100;
+
         /// <summary>
         /// Default I2C Address, up to four IS31FL3730's can be on the same I2C Bus.
         /// </summary>
@@ -58,7 +83,7 @@ namespace Iot.Device.IS31FL3730
             _matrix1 = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
             _matrix2 = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0xFF, 0x00 }));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(MATRIX_COMMAND_RESET.ToArray<byte>()));
             UpdateDisplay();
         }
 
@@ -80,39 +105,39 @@ namespace Iot.Device.IS31FL3730
             // TODO: Clean-up magic numbers
             byte configuration = 0x00;
 
-            configuration = _configuration.IsShutdown ? (byte)(configuration | 0b10000000) : configuration;
-            configuration = _configuration.IsAudioInputEnabled ? (byte)(configuration | 0b00000100) : configuration;
+            configuration = _configuration.IsShutdown ? (byte)(configuration | MATRIX_MODE_SOFT_SHUTDOWN) : configuration;
+            configuration = _configuration.IsAudioInputEnabled ? (byte)(configuration | MATRIX_MODE_AUDIO_INPUT) : configuration;
 
             switch (_configuration.Layout)
             {
                 case MatrixLayout.Matrix8by8:
-                    configuration = (byte)(configuration | 0b00000000);
+                    configuration = (byte)(configuration | MATRIX_MODE_8X8);
                     break;
                 case MatrixLayout.Matrix7by9:
-                    configuration = (byte)(configuration | 0b00000001);
+                    configuration = (byte)(configuration | MATRIX_MODE_7X9);
                     break;
                 case MatrixLayout.Matrix6by10:
-                    configuration = (byte)(configuration | 0b00000010);
+                    configuration = (byte)(configuration | MATRIX_MODE_6X10);
                     break;
                 case MatrixLayout.Matrix5by11:
-                    configuration = (byte)(configuration | 0b00000011);
+                    configuration = (byte)(configuration | MATRIX_MODE_5X11);
                     break;
             }
 
             switch (_configuration.Mode)
             {
                 case MatrixMode.Matrix1Only:
-                    configuration = (byte)(configuration | 0b00000000);
+                    configuration = (byte)(configuration | MATRIX_MODE_1ONLY);
                     break;
                 case MatrixMode.Matrix2Only:
-                    configuration = (byte)(configuration | 0b00001000);
+                    configuration = (byte)(configuration | MATRIX_MODE_2ONLY);
                     break;
                 case MatrixMode.Both:
-                    configuration = (byte)(configuration | 0b00011000);
+                    configuration = (byte)(configuration | MATRIX_MODE_BOTH);
                     break;
             }
 
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x00, configuration }));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { MATRIX_COMMAND_CONFIGURATION_REGISTER, configuration }));
             _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x0D, 0b00001110 }));
         }
 
@@ -145,11 +170,11 @@ namespace Iot.Device.IS31FL3730
         /// </summary>
         protected void UpdateDisplay()
         {
-            _i2cDevice.Write(new ReadOnlySpan<byte>((new byte[] { 0x01 }).Concat(_matrix1).ToArray()));
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x0C, 0x01 }));
+            _i2cDevice.Write(new ReadOnlySpan<byte>((new byte[] { MATRIX_COMMAND_MATRIX1 }).Concat(_matrix1).ToArray()));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(MATRIX_COMMAND_UPDATE.ToArray<byte>()));
 
-            _i2cDevice.Write(new ReadOnlySpan<byte>((new byte[] { 0x0E }).Concat(_matrix2).ToArray()));
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x0C, 0x01 }));
+            _i2cDevice.Write(new ReadOnlySpan<byte>((new byte[] { MATRIX_COMMAND_MATRIX2 }).Concat(_matrix2).ToArray()));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(MATRIX_COMMAND_UPDATE.ToArray<byte>()));
         }
 
         /// <inheritdoc />
