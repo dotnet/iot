@@ -360,7 +360,7 @@ namespace Iot.Device.Arduino
         {
             if (!ValueTypeSupported(classType))
             {
-                throw new NotSupportedException("Value types with sizeof(Type) > sizeof(int32) not supported");
+                throw new NotSupportedException("Value types with sizeof(Type) > sizeof(int64) not supported");
             }
 
             HashSet<Type> baseTypes = new HashSet<Type>();
@@ -377,8 +377,7 @@ namespace Iot.Device.Arduino
         private bool ValueTypeSupported(Type classType)
         {
             // TODO: Should be sizeof(Variant)
-            // return !(classType.IsValueType && GetClassSize(classType).Dynamic > sizeof(int));
-            return true;
+            return !(classType.IsValueType && GetClassSize(classType).Dynamic > 64);
         }
 
         private void PrepareClassDeclaration(ExecutionSet set, Type classType)
@@ -708,7 +707,7 @@ namespace Iot.Device.Arduino
             // No support for structs right now. And basic value types (such as int) are always declared.
             if (!ValueTypeSupported(newType))
             {
-                return false;
+                throw new NotSupportedException($"Value type {newType} is not supported");
             }
 
             // If any of these are found, we add them once, but we don't search further
@@ -1136,11 +1135,6 @@ namespace Iot.Device.Arduino
             {
                 ilBytes = GetMethodDependencies(set, methodInfo, foreignMethodsRequired, typesRequired, fieldsRequired);
 
-                if (fieldsRequired.Any(x => x.Name == "_stringLength"))
-                {
-                    // Not sure
-                }
-
                 foreach (var type in typesRequired.Distinct())
                 {
                     if (!set.HasDefinition(type))
@@ -1174,7 +1168,7 @@ namespace Iot.Device.Arduino
                     // If we have a ctor in the call chain we need to ensure we have its class loaded.
                     // This happens if the created object is only used in local variables but not as a class member
                     // seen so far.
-                    if (dep.IsConstructor && dep.DeclaringType != null && ValueTypeSupported(dep.DeclaringType))
+                    if (dep.IsConstructor && dep.DeclaringType != null)
                     {
                         PrepareClass(set, dep.DeclaringType);
                     }

@@ -11,7 +11,7 @@ using Unsafe = Iot.Device.Arduino.MiniUnsafe;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement("System.SpanHelpers", true, false, IncludingPrivates = true)]
+    [ArduinoReplacement("System.SpanHelpers", null, true, false, IncludingPrivates = true)]
     internal static partial class MiniSpanHelpers
     {
         public static unsafe void ClearWithoutReferences(ref byte b, uint byteLength)

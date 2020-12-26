@@ -25,9 +25,28 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Use this overload if you need to replace a class that is not publicly visible (i.e. an internal implementation class in the framework)
         /// </summary>
-        public ArduinoReplacementAttribute(string typeNameToReplace, bool replaceEntireType = false, bool includingSubclasses = false)
+        public ArduinoReplacementAttribute(string typeNameToReplace, string? assemblyName = null, bool replaceEntireType = false, bool includingSubclasses = false)
         {
-            TypeToReplace = Type.GetType(typeNameToReplace);
+            if (assemblyName != null)
+            {
+                var assembly = Assembly.Load(assemblyName);
+                if (typeNameToReplace.Contains("+")) // Special marker giving the parent class (we can't access the object the attribute is on from here)
+                {
+                    string parent = typeNameToReplace.Substring(0, typeNameToReplace.IndexOf("+", StringComparison.OrdinalIgnoreCase));
+                    var parentType = assembly.GetType(parent);
+                    string sub = typeNameToReplace.Substring(typeNameToReplace.IndexOf("+", StringComparison.OrdinalIgnoreCase) + 1);
+                    TypeToReplace = parentType!.GetNestedType(sub, BindingFlags.Public | BindingFlags.NonPublic);
+                }
+                else
+                {
+                    TypeToReplace = assembly.GetType(typeNameToReplace);
+                }
+            }
+            else
+            {
+                TypeToReplace = Type.GetType(typeNameToReplace);
+            }
+
             ReplaceEntireType = replaceEntireType;
             IncludingSubclasses = includingSubclasses;
         }

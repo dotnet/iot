@@ -51,7 +51,7 @@ namespace Iot.Device.Arduino
         ELEMENT_TYPE_PINNED = 0x45,
     }
 
-    [ArduinoReplacement("System.RuntimeTypeHandle", true, false, IncludingPrivates = true)]
+    [ArduinoReplacement("System.RuntimeTypeHandle", "System.Private.CoreLib.dll", true, false, IncludingPrivates = true)]
     // Note: Be aware that this replaces a value type
     internal struct MiniRuntimeTypeHandle : ISerializable
     {

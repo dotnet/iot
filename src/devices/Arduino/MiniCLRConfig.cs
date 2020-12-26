@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement("System.CLRConfig", true, IncludingPrivates = true)]
+    [ArduinoReplacement("System.CLRConfig", null, true, IncludingPrivates = true)]
     internal static class MiniCLRConfig
     {
         [ArduinoImplementation(ArduinoImplementation.None)]

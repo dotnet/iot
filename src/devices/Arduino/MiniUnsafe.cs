@@ -2,7 +2,7 @@
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement("Internal.Runtime.CompilerServices.Unsafe", true, false, IncludingPrivates = true)]
+    [ArduinoReplacement("Internal.Runtime.CompilerServices.Unsafe", "System.Private.CoreLib.dll", true, false, IncludingPrivates = true)]
     internal unsafe class MiniUnsafe
     {
         // The implementation of the following two methods is identical, therefore it doesn't really matter which one we match
