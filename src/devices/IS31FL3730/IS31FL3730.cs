@@ -104,7 +104,6 @@ namespace Iot.Device.IS31FL3730
         /// </summary>
         protected void SetConfigurationRegister()
         {
-            // TODO: Clean-up magic numbers
             byte configuration = 0x00;
 
             configuration = _configuration.IsShutdown ? (byte)(configuration | MATRIX_MODE_SOFT_SHUTDOWN) : configuration;
