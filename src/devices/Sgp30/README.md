@@ -1,18 +1,8 @@
-﻿# Sgp30
+﻿# Sensorion SGP30 TVOC + eCO2 Gas Sensor
+This is a device binding for the Sensorion SGP30 TVOC + eCO2 Gas Sensor.
 
-## Summary
-Provide a brief description on what the component is and its functionality.
-
-## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
-
-**[Family Name Here]**: [Datasheet link here]
+## Datasheet
+[SGP30](https://cdn.shopify.com/s/files/1/0174/1800/files/Sensirion_Gas_Sensors_SGP30_Datasheet_EN-1148053.pdf)
 
 ## Binding Notes
-
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
-
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
-
-## References 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+**NOTE**: Once initialised, this sensor **must** be queried at least once per second or re-initialisation will be required.
