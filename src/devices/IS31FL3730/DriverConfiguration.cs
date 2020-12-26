@@ -27,5 +27,10 @@ namespace Iot.Device.IS31FL3730
         /// Identifies which of the two available matrices are active.
         /// </summary>
         public MatrixMode Mode;
+
+        /// <summary>
+        /// Sets the LED Drive Strength in mA.
+        /// </summary>
+        public DriveStrength DriveStrength;
     }
 }

@@ -16,7 +16,8 @@ IS31FL3730 matrixController = new IS31FL3730(device, new DriverConfiguration()
   IsShutdown = false,
   IsAudioInputEnabled = false,
   Layout = MatrixLayout.Matrix8by8,
-  Mode = MatrixMode.Both
+  Mode = MatrixMode.Both,
+  DriveStrength = DriveStrength.Drive45ma
 });
 
 matrixController.SetMatrix(MatrixMode.Both, new byte[] { 0xFF, 0x7F, 0x0F, 0xFF, 0xF7, 0xF0, 0x77, 0xAA, 0x44, 0xCC, 0xFF });

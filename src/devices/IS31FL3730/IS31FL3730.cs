@@ -38,6 +38,7 @@ namespace Iot.Device.IS31FL3730
 
         // Matrix Commands
         private const byte MATRIX_COMMAND_CONFIGURATION_REGISTER = 0x00;
+        private const byte MATRIX_COMMAND_DRIVE_STRENGTH = 0x0D;
         private const byte MATRIX_COMMAND_MATRIX1 = 0x01;
         private const byte MATRIX_COMMAND_MATRIX2 = 0x0E;
         private static readonly IReadOnlyList<byte> MATRIX_COMMAND_RESET = new byte[] { 0xFF, 0x00 };
@@ -73,6 +74,7 @@ namespace Iot.Device.IS31FL3730
 
             Reset();
             SetConfigurationRegister();
+            SetDriveStrength();
         }
 
         /// <summary>
@@ -138,13 +140,29 @@ namespace Iot.Device.IS31FL3730
             }
 
             _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { MATRIX_COMMAND_CONFIGURATION_REGISTER, configuration }));
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { 0x0D, 0b00001110 }));
+        }
+
+        /// <summary>
+        /// Sets the LED Drive Strength register.
+        /// </summary>
+        public void SetDriveStrength(DriveStrength driveStrength)
+        {
+            _configuration.DriveStrength = driveStrength;
+            SetDriveStrength();
+        }
+
+        /// <summary>
+        /// Sets the LED Drive Strength register.
+        /// </summary>
+        protected void SetDriveStrength()
+        {
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { MATRIX_COMMAND_DRIVE_STRENGTH, (byte)_configuration.DriveStrength }));
         }
 
         /// <summary>
         /// Set the matrix output.
         /// </summary>
-        /// <param name="matrix">Which matrix to set.</param>
+        /// /// <param name="matrix">Which matrix to set.</param>
         /// <param name="display">Values to load into the matrix.</param>
         public void SetMatrix(MatrixMode matrix, byte[] display)
         {
