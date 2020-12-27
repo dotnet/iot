@@ -14,14 +14,14 @@ namespace Iot.Device.Sgp30
     {
         // SGP30 Air Quality Sensor I2C Commands
         // NOTE: The 'Measure Test' command is used for production verification only and is not included here
-        private const ushort SGP30_INITIALISE_AIR_QUALITY = 0x2003;
-        private const ushort SGP30_MEASURE_AIR_QUALITY = 0x2008;
+        private const ushort SGP30_INITIALISE_AIR_QUALITY = 0x2003; // DONE
+        private const ushort SGP30_MEASURE_AIR_QUALITY = 0x2008; // DONE
         private const ushort SGP30_GET_BASELINE = 0x2015;
         private const ushort SGP30_SET_BASELINE = 0x201E;
         private const ushort SGP30_SET_HUMIDITY = 0x2061;
-        private const ushort SGP30_GET_FEATURESET_VERSION = 0x202F;
+        private const ushort SGP30_GET_FEATURESET_VERSION = 0x202F; // DONE
         private const ushort SGP30_MEASURE_RAW_SIGNALS = 0x2050;
-        private const ushort SGP30_GET_SERIAL_ID = 0x3682;
+        private const ushort SGP30_GET_SERIAL_ID = 0x3682; // DONE
 
         /// <summary>
         /// Default I2C Address, up to four IS31FL3730's can be on the same I2C Bus.
@@ -152,6 +152,38 @@ namespace Iot.Device.Sgp30
             {
                 CalculateChecksum(result.Eco2),
                 CalculateChecksum(result.Tvoc)
+            };
+
+            if (checksums[0] != resultArray[3] || checksums[1] != resultArray[6])
+            {
+                throw new ChecksumFailedException();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get the raw signal data without on-device processing to TVOC ppb / eCO2 ppm values.
+        /// </summary>
+        /// <returns>Raw sensor data.</returns>
+        public ushort[] GetRawSignalData()
+        {
+            Span<byte> resultBuffer = stackalloc byte[7];
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_MEASURE_RAW_SIGNALS & 0xFF00) >> 8), (byte)(SGP30_MEASURE_RAW_SIGNALS & 0x00FF) }));
+            Thread.Sleep(12);
+            _i2cDevice.Read(resultBuffer.Slice(1));
+            byte[] resultArray = resultBuffer.ToArray();
+
+            ushort[] result = new ushort[]
+            {
+                (ushort)(resultArray[1] << 8 | resultArray[2]),
+                (ushort)(resultArray[4] << 8 | resultArray[5])
+            };
+
+            byte[] checksums = new byte[]
+            {
+                CalculateChecksum(result[0]),
+                CalculateChecksum(result[1])
             };
 
             if (checksums[0] != resultArray[3] || checksums[1] != resultArray[6])

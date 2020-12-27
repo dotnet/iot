@@ -52,7 +52,9 @@ for (int i = 0; i < 30; i++)
     try
     {
         Sgp30Measurement measurement = sgp30.GetMeasurement();
+        ushort[] rawMeasurement = sgp30.GetRawSignalData();
         Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()} ppb, eCO2: {measurement.Eco2.ToString()} ppm.");
+        Console.WriteLine($"TVOC Raw: {rawMeasurement[0].ToString("X4")}, eCO2 Raw: {rawMeasurement[1].ToString("X4")}.");
         Thread.Sleep(1000);
     }
     catch (ChecksumFailedException)
