@@ -67,7 +67,7 @@ for (int i = 0; i < 30; i++)
 try
 {
     Sgp30Measurement baseline = sgp30.GetBaseline();
-    Console.WriteLine($"TVOC: {baseline.Tvoc.ToString()} ppb (baseline), eCO2: {baseline.Eco2.ToString()} ppm (baseline).");
+    Console.WriteLine($"TVOC: {baseline.Tvoc.ToString("X4")} (baseline), eCO2: {baseline.Eco2.ToString("X4")} (baseline).");
 }
 catch (ChecksumFailedException)
 {
