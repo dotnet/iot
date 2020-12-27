@@ -13,4 +13,21 @@ Console.WriteLine("Hello Sgp30 Sample!");
 I2cDevice sgp30Device = I2cDevice.Create(new I2cConnectionSettings(1, Sgp30.DefaultI2cAddress));
 Sgp30 sgp30 = new Sgp30(sgp30Device);
 
-sgp30.GetSerialId();
+try
+{
+    ushort[]? serialId = sgp30.GetSerialId();
+
+    if (serialId != null)
+    {
+        Console.WriteLine(String.Join("-", Array.ConvertAll(serialId, x => x.ToString("X4"))));
+    }
+    else
+    {
+        Console.WriteLine("Unable to retrive SGP30 device Serial ID.");
+    }
+}
+catch (ChecksumFailedException)
+{
+    Console.WriteLine("Checksum was invalid when attempting to retrieve SGP30 device Serial ID.");
+    throw;
+}
