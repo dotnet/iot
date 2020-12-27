@@ -20,7 +20,7 @@ namespace Iot.Device.Sgp30
         private const ushort SGP30_SET_BASELINE = 0x201E;
         private const ushort SGP30_SET_HUMIDITY = 0x2061;
         private const ushort SGP30_GET_FEATURESET_VERSION = 0x202F; // DONE
-        private const ushort SGP30_MEASURE_RAW_SIGNALS = 0x2050;
+        private const ushort SGP30_MEASURE_RAW_SIGNALS = 0x2050; // DONE
         private const ushort SGP30_GET_SERIAL_ID = 0x3682; // DONE
 
         /// <summary>
@@ -136,8 +136,36 @@ namespace Iot.Device.Sgp30
         /// <returns>SGP30 measurement result.</returns>
         public Sgp30Measurement GetMeasurement()
         {
+            return GetData(SGP30_MEASURE_AIR_QUALITY);
+        }
+
+        /// <summary>
+        /// Get the raw signal data without on-device processing to TVOC ppb / eCO2 ppm values.
+        /// </summary>
+        /// <returns>Raw sensor data.</returns>
+        public Sgp30Measurement GetRawSignalData()
+        {
+            return GetData(SGP30_MEASURE_RAW_SIGNALS);
+        }
+
+        /// <summary>
+        /// Get device baseline measurement data.
+        /// </summary>
+        /// <returns>Measured baseline data.</returns>
+        public Sgp30Measurement GetBaseline()
+        {
+            return GetData(SGP30_GET_BASELINE);
+        }
+
+        /// <summary>
+        /// Generalised data read for getting Measurement, Raw Measurement and Baseline data.
+        /// </summary>
+        /// <param name="command">Command to send to the SGP30.</param>
+        /// <returns>Resulting data returned from SGP30.</returns>
+        private Sgp30Measurement GetData(ushort command)
+        {
             Span<byte> resultBuffer = stackalloc byte[7];
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_MEASURE_AIR_QUALITY & 0xFF00) >> 8), (byte)(SGP30_MEASURE_AIR_QUALITY & 0x00FF) }));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((command & 0xFF00) >> 8), (byte)(command & 0x00FF) }));
             Thread.Sleep(12);
             _i2cDevice.Read(resultBuffer.Slice(1));
             byte[] resultArray = resultBuffer.ToArray();
@@ -163,37 +191,10 @@ namespace Iot.Device.Sgp30
         }
 
         /// <summary>
-        /// Get the raw signal data without on-device processing to TVOC ppb / eCO2 ppm values.
+        /// Calculates the SGP30 CRC / Checksum for a given input word.
         /// </summary>
-        /// <returns>Raw sensor data.</returns>
-        public ushort[] GetRawSignalData()
-        {
-            Span<byte> resultBuffer = stackalloc byte[7];
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_MEASURE_RAW_SIGNALS & 0xFF00) >> 8), (byte)(SGP30_MEASURE_RAW_SIGNALS & 0x00FF) }));
-            Thread.Sleep(12);
-            _i2cDevice.Read(resultBuffer.Slice(1));
-            byte[] resultArray = resultBuffer.ToArray();
-
-            ushort[] result = new ushort[]
-            {
-                (ushort)(resultArray[1] << 8 | resultArray[2]),
-                (ushort)(resultArray[4] << 8 | resultArray[5])
-            };
-
-            byte[] checksums = new byte[]
-            {
-                CalculateChecksum(result[0]),
-                CalculateChecksum(result[1])
-            };
-
-            if (checksums[0] != resultArray[3] || checksums[1] != resultArray[6])
-            {
-                throw new ChecksumFailedException();
-            }
-
-            return result;
-        }
-
+        /// <param name="data">Data word to checksum.</param>
+        /// <returns>Resulting CRC checksum byte.</returns>
         private byte CalculateChecksum(ushort data)
         {
             byte crc = 0xFF;

@@ -52,9 +52,9 @@ for (int i = 0; i < 30; i++)
     try
     {
         Sgp30Measurement measurement = sgp30.GetMeasurement();
-        ushort[] rawMeasurement = sgp30.GetRawSignalData();
+        Sgp30Measurement rawMeasurement = sgp30.GetRawSignalData();
         Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()} ppb, eCO2: {measurement.Eco2.ToString()} ppm.");
-        Console.WriteLine($"TVOC Raw: {rawMeasurement[0].ToString("X4")}, eCO2 Raw: {rawMeasurement[1].ToString("X4")}.");
+        Console.WriteLine($"TVOC Raw: {rawMeasurement.Tvoc.ToString("X4")}, eCO2 Raw: {rawMeasurement.Eco2.ToString("X4")}.");
         Thread.Sleep(1000);
     }
     catch (ChecksumFailedException)
@@ -62,4 +62,15 @@ for (int i = 0; i < 30; i++)
         Console.WriteLine("Checksum was invalid when reading SGP30 measurement.");
         throw;
     }
+}
+
+try
+{
+    Sgp30Measurement baseline = sgp30.GetBaseline();
+    Console.WriteLine($"TVOC: {baseline.Tvoc.ToString()} ppb (baseline), eCO2: {baseline.Eco2.ToString()} ppm (baseline).");
+}
+catch (ChecksumFailedException)
+{
+    Console.WriteLine("Checksum was invalid when reading SGP30 baseline data.");
+    throw;
 }
