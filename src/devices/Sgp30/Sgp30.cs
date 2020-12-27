@@ -47,28 +47,47 @@ namespace Iot.Device.Sgp30
         /// Gets the Serial ID of the SGP30 sensor.
         /// </summary>
         /// <returns>Device Serial ID.</returns>
-        public int GetSerialId()
+        public ushort[]? GetSerialId()
         {
-            ushort[] result = ExecuteCommand(SGP30_GET_SERIAL_ID, null);
-            return 0;
-            ////return result[0] << 32 | result[1] << 16 | result[0];
+            return ExecuteCommand(SGP30_GET_SERIAL_ID, null);
         }
 
-        private ushort[] ExecuteCommand(ushort command, ushort[]? parameters)
+        private ushort[]? ExecuteCommand(ushort command, ushort[]? parameters)
         {
-            IList<ushort> result = new List<ushort>();
+            ushort[]? result = null;
 
             switch (command)
             {
                 case SGP30_GET_SERIAL_ID:
-                    Span<byte> resultBuffer = null;
+                    Span<byte> resultBuffer = stackalloc byte[10];
                     _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_GET_SERIAL_ID & 0xFF00) >> 8), (byte)(SGP30_GET_SERIAL_ID & 0x00FF) }));
-                    _i2cDevice.Read(resultBuffer);
-                    Console.WriteLine(resultBuffer.ToString());
+                    _i2cDevice.Read(resultBuffer.Slice(1));
+                    byte[] resultArray = resultBuffer.ToArray();
+
+                    ushort[] serialValues = new ushort[]
+                    {
+                        (ushort)(resultArray[1] << 8 | resultArray[2]),
+                        (ushort)(resultArray[4] << 8 | resultArray[5]),
+                        (ushort)(resultArray[7] << 8 | resultArray[8])
+                    };
+
+                    byte[] checksums = new byte[]
+                    {
+                        CalculateChecksum(serialValues[0]),
+                        CalculateChecksum(serialValues[1]),
+                        CalculateChecksum(serialValues[2]),
+                    };
+
+                    if (checksums[0] != resultArray[3] || checksums[1] != resultArray[6] || checksums[2] != resultArray[9])
+                    {
+                        throw new ChecksumFailedException();
+                    }
+
+                    result = serialValues;
                     break;
             }
 
-            return result.ToArray<ushort>();
+            return result;
         }
 
         private byte CalculateChecksum(ushort data)
