@@ -209,8 +209,7 @@ namespace Iot.Device.Sgp30
                     (byte)((eco2 & 0xFF00) >> 8),
                     (byte)(eco2 & 0x00FF),
                     CalculateChecksum(eco2)
-                })
-            );
+                }));
         }
 
         /// <summary>
@@ -236,8 +235,7 @@ namespace Iot.Device.Sgp30
                     firstByte,
                     secondByte,
                     CalculateChecksum((ushort)(firstByte << 8 | secondByte))
-                })
-            );
+                }));
         }
 
         /// <summary>
