@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Device.I2c;
-using System.Linq;
-using UnitsNet;
+using System.Threading;
 
 namespace Iot.Device.Sgp30
 {
@@ -16,7 +14,7 @@ namespace Iot.Device.Sgp30
     {
         // SGP30 Air Quality Sensor I2C Commands
         // NOTE: The 'Measure Test' command is used for production verification only and is not included here
-        private const ushort SGP30_INIT_AIR_QUALITY = 0x2003;
+        private const ushort SGP30_INITIALISE_AIR_QUALITY = 0x2003;
         private const ushort SGP30_MEASURE_AIR_QUALITY = 0x2008;
         private const ushort SGP30_GET_BASELINE = 0x2015;
         private const ushort SGP30_SET_BASELINE = 0x201E;
@@ -91,6 +89,72 @@ namespace Iot.Device.Sgp30
             byte checksum = CalculateChecksum(result);
 
             if (checksum != resultArray[3])
+            {
+                throw new ChecksumFailedException();
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Initialises the SGP30 for measurement. NOTE: This call will block for up to 20 seconds.
+        /// </summary>
+        /// <returns>Initial SGP30 measurement result.</returns>
+        public Sgp30Measurement InitialiseMeasurement()
+        {
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_INITIALISE_AIR_QUALITY & 0xFF00) >> 8), (byte)(SGP30_INITIALISE_AIR_QUALITY & 0x00FF) }));
+            Thread.Sleep(10);
+
+            Sgp30Measurement result = new Sgp30Measurement
+            {
+                Tvoc = 0x0000,
+                Eco2 = 0x0000
+            };
+
+            for (int i = 0; i < 20; i++)
+            {
+                result = GetMeasurement();
+
+                if (result.Tvoc != 0 || result.Eco2 != 400)
+                {
+                    // If either eCO2 != 400ppm or TVOC != 0ppb, the device has initialised, don't wait for the
+                    // remaining initialisation measurements to complete.
+                    break;
+                }
+
+                Thread.Sleep(1000);
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get the current eCO2 and TVOC measurements from the SGP30. NOTE: This should be called at least once per
+        /// second as per the device datasheet in order to maintain accuracy of the readings. If several seconds have
+        /// passed, call <see cref="InitialiseMeasurement" />.
+        /// </summary>
+        /// <returns>SGP30 measurement result.</returns>
+        public Sgp30Measurement GetMeasurement()
+        {
+            Span<byte> resultBuffer = stackalloc byte[7];
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_INITIALISE_AIR_QUALITY & 0xFF00) >> 8), (byte)(SGP30_INITIALISE_AIR_QUALITY & 0x00FF) }));
+            Thread.Sleep(12);
+            _i2cDevice.Read(resultBuffer.Slice(1));
+            byte[] resultArray = resultBuffer.ToArray();
+
+            Sgp30Measurement result = new Sgp30Measurement
+            {
+                Tvoc = (ushort)(resultArray[1] << 8 | resultArray[2]),
+                Eco2 = (ushort)(resultArray[4] << 8 | resultArray[5])
+            };
+
+            byte[] checksums = new byte[]
+            {
+                CalculateChecksum(result.Tvoc),
+                CalculateChecksum(result.Eco2)
+            };
+
+            if (checksums[0] != resultArray[3] || checksums[1] != resultArray[6])
             {
                 throw new ChecksumFailedException();
             }

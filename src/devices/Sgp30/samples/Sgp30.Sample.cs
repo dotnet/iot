@@ -34,3 +34,29 @@ catch (ChecksumFailedException)
     Console.WriteLine("Checksum was invalid when attempting to retrieve SGP30 featureset version information.");
     throw;
 }
+
+try
+{
+    Sgp30Measurement measurement = sgp30.InitialiseMeasurement();
+    Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()}ppb, eCO2: {measurement.Eco2.ToString()}ppm.");
+}
+catch (ChecksumFailedException)
+{
+    Console.WriteLine("Checksum was invalid when initialising SGP30 measurement operation.");
+    throw;
+}
+
+for (int i = 0; i < 30; i++)
+{
+    try
+    {
+        Sgp30Measurement measurement = sgp30.GetMeasurement();
+        Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()}ppb, eCO2: {measurement.Eco2.ToString()}ppm.");
+        Thread.Sleep(1000);
+    }
+    catch (ChecksumFailedException)
+    {
+        Console.WriteLine("Checksum was invalid when reading SGP30 measurement.");
+        throw;
+    }
+}
