@@ -77,6 +77,27 @@ namespace Iot.Device.Sgp30
             return serialValues;
         }
 
+        /// <summary>
+        /// Get the device featureset version.
+        /// </summary>
+        /// <returns>Device Features.</returns>
+        public ushort GetFeaturesetVersion()
+        {
+            Span<byte> resultBuffer = stackalloc byte[3];
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_GET_FEATURESET_VERSION & 0xFF00) >> 8), (byte)(SGP30_GET_FEATURESET_VERSION & 0x00FF) }));
+            _i2cDevice.Read(resultBuffer.Slice(1));
+            byte[] resultArray = resultBuffer.ToArray();
+            ushort result = (ushort)(resultArray[0] << 8 | resultArray[1]);
+            byte checksum = CalculateChecksum(result);
+
+            if (checksum != resultArray[2])
+            {
+                throw new ChecksumFailedException();
+            }
+
+            return result;
+        }
+
         private byte CalculateChecksum(ushort data)
         {
             byte crc = 0xFF;

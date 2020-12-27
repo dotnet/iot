@@ -23,3 +23,14 @@ catch (ChecksumFailedException)
     Console.WriteLine("Checksum was invalid when attempting to retrieve SGP30 device Serial ID.");
     throw;
 }
+
+try
+{
+    ushort featureSet = sgp30.GetFeaturesetVersion();
+    Console.WriteLine(featureSet.ToString("X4"));
+}
+catch (ChecksumFailedException)
+{
+    Console.WriteLine("Checksum was invalid when attempting to retrieve SGP30 featureset version information.");
+    throw;
+}
