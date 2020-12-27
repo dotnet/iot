@@ -16,7 +16,7 @@ namespace Iot.Device.Sgp30
         // NOTE: The 'Measure Test' command is used for production verification only and is not included here
         private const ushort SGP30_INITIALISE_AIR_QUALITY = 0x2003; // DONE
         private const ushort SGP30_MEASURE_AIR_QUALITY = 0x2008; // DONE
-        private const ushort SGP30_GET_BASELINE = 0x2015;
+        private const ushort SGP30_GET_BASELINE = 0x2015; // DONE
         private const ushort SGP30_SET_BASELINE = 0x201E;
         private const ushort SGP30_SET_HUMIDITY = 0x2061;
         private const ushort SGP30_GET_FEATURESET_VERSION = 0x202F; // DONE
@@ -188,6 +188,25 @@ namespace Iot.Device.Sgp30
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Set SGP30 baseline values.
+        /// </summary>
+        /// <param name="tvoc">TVOC Baseline.</param>
+        /// <param name="eco2">eCO2 Baseline.</param>
+        public void SetBaseline(ushort tvoc, ushort eco2)
+        {
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[]
+                {
+                    (byte)((tvoc & 0xFF00) >> 8),
+                    (byte)(tvoc & 0x00FF),
+                    CalculateChecksum(tvoc),
+                    (byte)((eco2 & 0xFF00) >> 8),
+                    (byte)(eco2 & 0x00FF),
+                    CalculateChecksum(eco2)
+                })
+            );
         }
 
         /// <summary>
