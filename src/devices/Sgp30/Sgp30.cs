@@ -4,6 +4,8 @@
 using System;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Common;
+using UnitsNet;
 
 namespace Iot.Device.Sgp30
 {
@@ -17,7 +19,7 @@ namespace Iot.Device.Sgp30
         private const ushort SGP30_INITIALISE_AIR_QUALITY = 0x2003; // DONE
         private const ushort SGP30_MEASURE_AIR_QUALITY = 0x2008; // DONE
         private const ushort SGP30_GET_BASELINE = 0x2015; // DONE
-        private const ushort SGP30_SET_BASELINE = 0x201E;
+        private const ushort SGP30_SET_BASELINE = 0x201E; // DONE
         private const ushort SGP30_SET_HUMIDITY = 0x2061;
         private const ushort SGP30_GET_FEATURESET_VERSION = 0x202F; // DONE
         private const ushort SGP30_MEASURE_RAW_SIGNALS = 0x2050; // DONE
@@ -199,12 +201,41 @@ namespace Iot.Device.Sgp30
         {
             _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[]
                 {
+                    (byte)((SGP30_SET_BASELINE & 0xFF00) >> 8),
+                    (byte)(SGP30_SET_BASELINE & 0x00FF),
                     (byte)((tvoc & 0xFF00) >> 8),
                     (byte)(tvoc & 0x00FF),
                     CalculateChecksum(tvoc),
                     (byte)((eco2 & 0xFF00) >> 8),
                     (byte)(eco2 & 0x00FF),
                     CalculateChecksum(eco2)
+                })
+            );
+        }
+
+        /// <summary>
+        /// Set Humidity value on the SGP30 for more accurate readings. Requires both temperature and humidity measurements
+        /// from another active sensor to enable conversion from %RH to absolute humidity in g/m³.
+        /// </summary>
+        /// <param name="temperature">Temperature measurement.</param>
+        /// <param name="humidity">Relative Humitity measurement.</param>
+        public void SetHumidity(Temperature temperature, RelativeHumidity humidity)
+        {
+            double absoluteHumidity = WeatherHelper.CalculateAbsoluteHumidity(temperature, humidity).GramsPerCubicMeter;
+
+            // First byte contains the whole number part, from 0 to 256 g/m³
+            byte firstByte = (byte)((int)(Math.Floor(absoluteHumidity)) & 0xFF);
+
+            // Second byte contains the decimal part, expressed as the nearest whole number of 256ths of a g/m³
+            byte secondByte = (byte)((int)Math.Floor(((absoluteHumidity - Math.Floor(absoluteHumidity)) / (1 / 256))) & 0xFF);
+
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[]
+                {
+                    (byte)((SGP30_SET_HUMIDITY & 0xFF00) >> 8),
+                    (byte)(SGP30_SET_HUMIDITY & 0x00FF),
+                    firstByte,
+                    secondByte,
+                    CalculateChecksum((ushort)(firstByte << 8 | secondByte))
                 })
             );
         }
