@@ -48,7 +48,7 @@ namespace Iot.Device.Sgp30
         /// </summary>
         /// <returns>Device Serial ID.</returns>
         /// <exception cref="ChecksumFailedException">Thrown if checksum validation fails.</exception>
-        public ushort[]? GetSerialId()
+        public ushort[] GetSerialId()
         {
             Span<byte> resultBuffer = stackalloc byte[10];
             _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_GET_SERIAL_ID & 0xFF00) >> 8), (byte)(SGP30_GET_SERIAL_ID & 0x00FF) }));
@@ -57,16 +57,16 @@ namespace Iot.Device.Sgp30
 
             ushort[] serialValues = new ushort[]
             {
-                        (ushort)(resultArray[1] << 8 | resultArray[2]),
-                        (ushort)(resultArray[4] << 8 | resultArray[5]),
-                        (ushort)(resultArray[7] << 8 | resultArray[8])
+                (ushort)(resultArray[1] << 8 | resultArray[2]),
+                (ushort)(resultArray[4] << 8 | resultArray[5]),
+                (ushort)(resultArray[7] << 8 | resultArray[8])
             };
 
             byte[] checksums = new byte[]
             {
-                        CalculateChecksum(serialValues[0]),
-                        CalculateChecksum(serialValues[1]),
-                        CalculateChecksum(serialValues[2]),
+                CalculateChecksum(serialValues[0]),
+                CalculateChecksum(serialValues[1]),
+                CalculateChecksum(serialValues[2]),
             };
 
             if (checksums[0] != resultArray[3] || checksums[1] != resultArray[6] || checksums[2] != resultArray[9])

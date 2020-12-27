@@ -15,16 +15,8 @@ Sgp30 sgp30 = new Sgp30(sgp30Device);
 
 try
 {
-    ushort[]? serialId = sgp30.GetSerialId();
-
-    if (serialId != null)
-    {
-        Console.WriteLine(String.Join("-", Array.ConvertAll(serialId, x => x.ToString("X4"))));
-    }
-    else
-    {
-        Console.WriteLine("Unable to retrive SGP30 device Serial ID.");
-    }
+    ushort[] serialId = sgp30.GetSerialId();
+    Console.WriteLine(String.Join("-", Array.ConvertAll(serialId, x => x.ToString("X4"))));
 }
 catch (ChecksumFailedException)
 {
