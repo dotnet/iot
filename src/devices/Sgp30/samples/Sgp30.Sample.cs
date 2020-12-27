@@ -35,10 +35,11 @@ catch (ChecksumFailedException)
     throw;
 }
 
+Console.WriteLine("Wait for initialisation (upto 20 seconds).");
 try
 {
     Sgp30Measurement measurement = sgp30.InitialiseMeasurement();
-    Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()}ppb, eCO2: {measurement.Eco2.ToString()}ppm.");
+    Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()} ppb, eCO2: {measurement.Eco2.ToString()} ppm.");
 }
 catch (ChecksumFailedException)
 {
@@ -51,7 +52,7 @@ for (int i = 0; i < 30; i++)
     try
     {
         Sgp30Measurement measurement = sgp30.GetMeasurement();
-        Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()}ppb, eCO2: {measurement.Eco2.ToString()}ppm.");
+        Console.WriteLine($"TVOC: {measurement.Tvoc.ToString()} ppb, eCO2: {measurement.Eco2.ToString()} ppm.");
         Thread.Sleep(1000);
     }
     catch (ChecksumFailedException)

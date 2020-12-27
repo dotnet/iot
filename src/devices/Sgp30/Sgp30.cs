@@ -137,21 +137,21 @@ namespace Iot.Device.Sgp30
         public Sgp30Measurement GetMeasurement()
         {
             Span<byte> resultBuffer = stackalloc byte[7];
-            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_INITIALISE_AIR_QUALITY & 0xFF00) >> 8), (byte)(SGP30_INITIALISE_AIR_QUALITY & 0x00FF) }));
+            _i2cDevice.Write(new ReadOnlySpan<byte>(new byte[] { (byte)((SGP30_MEASURE_AIR_QUALITY & 0xFF00) >> 8), (byte)(SGP30_MEASURE_AIR_QUALITY & 0x00FF) }));
             Thread.Sleep(12);
             _i2cDevice.Read(resultBuffer.Slice(1));
             byte[] resultArray = resultBuffer.ToArray();
 
             Sgp30Measurement result = new Sgp30Measurement
             {
-                Tvoc = (ushort)(resultArray[1] << 8 | resultArray[2]),
-                Eco2 = (ushort)(resultArray[4] << 8 | resultArray[5])
+                Eco2 = (ushort)(resultArray[1] << 8 | resultArray[2]),
+                Tvoc = (ushort)(resultArray[4] << 8 | resultArray[5])
             };
 
             byte[] checksums = new byte[]
             {
-                CalculateChecksum(result.Tvoc),
-                CalculateChecksum(result.Eco2)
+                CalculateChecksum(result.Eco2),
+                CalculateChecksum(result.Tvoc)
             };
 
             if (checksums[0] != resultArray[3] || checksums[1] != resultArray[6])
