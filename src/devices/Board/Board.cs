@@ -56,11 +56,6 @@ namespace Iot.Device.Board
         }
 
         /// <summary>
-        /// (Temporary) Register to this event to receive log messages.
-        /// </summary>
-        public event Action<string, Exception?>? LogMessages;
-
-        /// <summary>
         /// True if the board instance is initialized
         /// </summary>
         protected bool Initialized => _initialized;
@@ -86,14 +81,6 @@ namespace Iot.Device.Board
             {
                 return _defaultNumberingScheme;
             }
-        }
-
-        /// <summary>
-        /// (Temporary) Log a message
-        /// </summary>
-        protected void Log(string message, Exception? exception = null)
-        {
-            LogMessages?.Invoke(message, null);
         }
 
         /// <summary>
