@@ -1345,13 +1345,9 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendMethodDeclaration(int codeReference, int declarationToken, MethodFlags methodFlags, byte maxLocals, byte argCount, ArduinoImplementation nativeMethod, byte[] localTypes, byte[] argTypes)
+        public void SendMethodDeclaration(int codeReference, int declarationToken, MethodFlags methodFlags, byte maxStack, byte argCount,
+            ArduinoImplementation nativeMethod, VariableDeclaration[] localTypes, VariableDeclaration[] argTypes)
         {
-            if (maxLocals != localTypes.Length || argCount != argTypes.Length)
-            {
-                throw new InvalidOperationException("Argument/Variable counts do not match");
-            }
-
             if (_firmataStream == null)
             {
                 throw new ObjectDisposedException(nameof(FirmataDevice));
@@ -1366,7 +1362,7 @@ namespace Iot.Device.Arduino
                 _firmataStream.WriteByte((byte)ExecutorCommand.DeclareMethod);
                 SendInt14((short)codeReference);
                 _firmataStream.WriteByte((byte)methodFlags);
-                _firmataStream.WriteByte(maxLocals);
+                _firmataStream.WriteByte(maxStack);
                 _firmataStream.WriteByte(argCount);
                 SendInt32((int)nativeMethod);
                 SendInt32(declarationToken);
@@ -1391,7 +1387,8 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)localsToSend);
                     for (int i = startIndex; i < startIndex + localsToSend; i++)
                     {
-                        _firmataStream.WriteByte(localTypes[i]);
+                        _firmataStream.WriteByte((byte)localTypes[i].Type);
+                        SendInt14((short)(localTypes[i].Size >> 2));
                     }
 
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
@@ -1416,7 +1413,8 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)localsToSend);
                     for (int i = startIndex; i < startIndex + localsToSend; i++)
                     {
-                        _firmataStream.WriteByte(argTypes[i]);
+                        _firmataStream.WriteByte((byte)argTypes[i].Type);
+                        SendInt14((short)(argTypes[i].Size >> 2));
                     }
 
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);

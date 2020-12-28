@@ -68,6 +68,7 @@ namespace Iot.Device.Arduino
         ValueArray = 6, // The slot contains a reference to an array of value types (inline)
         ReferenceArray = 7, // The slot contains a reference to an array of reference types
         Float = 8,
+        LargeValueType = 9, // The slot contains a large value type
         Int64 = 16 + 1,
         Uint64 = 16 + 2,
         Double = 16 + 4,
@@ -677,7 +678,15 @@ namespace Iot.Device.Arduino
                 GetVariableType(f.FieldType, out int sizeOfMember);
                 if (f.IsStatic)
                 {
-                    sizeStatic += (sizeOfMember <= 4) ? 4 : 8;
+                    if (classType.IsValueType)
+                    {
+                        // TODO: Case needs to be handles special, as the memory for it needs to be allocated
+                        sizeStatic += sizeOfMember;
+                    }
+                    else
+                    {
+                        sizeStatic += (sizeOfMember <= 4) ? 4 : 8;
+                    }
                 }
                 else
                 {
@@ -759,7 +768,7 @@ namespace Iot.Device.Arduino
 
         private void SendMethodDeclaration(ArduinoMethodDeclaration declaration)
         {
-            byte[] localTypes = new byte[declaration.MaxLocals];
+            VariableDeclaration[] localTypes = new VariableDeclaration[declaration.MaxLocals];
             var body = declaration.MethodBase.GetMethodBody();
             int i;
             // This is null in case of a method without implementation (an interface or abstract method). In this case, there are no locals, either
@@ -767,26 +776,32 @@ namespace Iot.Device.Arduino
             {
                 for (i = 0; i < declaration.MaxLocals; i++)
                 {
-                    localTypes[i] = (byte)GetVariableType(body.LocalVariables[i].LocalType, out _);
+                    localTypes[i].Type = GetVariableType(body.LocalVariables[i].LocalType, out var size);
+                    localTypes[i].Size = (ushort)size;
                 }
             }
 
-            byte[] argTypes = new byte[declaration.ArgumentCount];
+            VariableDeclaration[] argTypes = new VariableDeclaration[declaration.ArgumentCount];
             int startOffset = 0;
-            // If the method is not static, the fist argument is the "this" pointer, which is not explicitly mentioned in the parameter list. It is always of type object.
+            // If the method is not static, the fist argument is the "this" pointer, which is not explicitly mentioned in the parameter list. It is of type object
+            // for reference types and usually of type reference for value types (but depends whether the method is virtual or not, analyzation of these cases is underway)
             if ((declaration.MethodBase.CallingConvention & CallingConventions.HasThis) != 0)
             {
                 startOffset = 1;
-                argTypes[0] = (byte)VariableKind.Object;
+                argTypes[0].Type = VariableKind.Object;
+                argTypes[0].Size = 4;
             }
 
+            var parameters = declaration.MethodBase.GetParameters();
             for (i = startOffset; i < declaration.ArgumentCount; i++)
             {
-                argTypes[i] = (byte)GetVariableType(declaration.MethodBase.GetParameters()[i - startOffset].ParameterType, out _);
+                argTypes[i].Type = GetVariableType(parameters[i - startOffset].ParameterType, out var size);
+                argTypes[i].Size = (ushort)size;
             }
 
             Stopwatch w = Stopwatch.StartNew();
-            _board.Firmata.SendMethodDeclaration(declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxLocals, (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
+            _board.Firmata.SendMethodDeclaration(declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxStack,
+                (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
 
             _board.Log($"Loading took {w.Elapsed}.");
         }
@@ -825,6 +840,12 @@ namespace Iot.Device.Arduino
             }
 
             if (t == typeof(UInt16))
+            {
+                sizeOfMember = 2;
+                return VariableKind.Uint32;
+            }
+
+            if (t == typeof(Char))
             {
                 sizeOfMember = 2;
                 return VariableKind.Uint32;
@@ -878,6 +899,39 @@ namespace Iot.Device.Arduino
                 {
                     sizeOfMember = SizeOfVoidPointer();
                     return VariableKind.ReferenceArray;
+                }
+            }
+
+            if (t.IsEnum)
+            {
+                sizeOfMember = 4;
+                return VariableKind.Uint32;
+            }
+
+            if (t.IsValueType && !t.IsGenericTypeParameter)
+            {
+                if (t.IsGenericType)
+                {
+                    // There are a few special types for which CreateInstance always throws an exception
+                    var openType = t.GetGenericTypeDefinition();
+                    if (openType.Name.StartsWith("ByReference", StringComparison.Ordinal))
+                    {
+                        sizeOfMember = 4;
+                        return VariableKind.Reference;
+                    }
+                }
+
+                // Calculate class size (Note: Can't use GetClassSize here, as this would be recursive)
+                // TODO: Size might be overshooting here if the local computer is 64 bit.
+                var instance = Activator.CreateInstance(t);
+                sizeOfMember = System.Runtime.InteropServices.Marshal.SizeOf(instance!);
+                if (sizeOfMember <= 8)
+                {
+                    return VariableKind.Uint32;
+                }
+                else
+                {
+                    return VariableKind.LargeValueType;
                 }
             }
 

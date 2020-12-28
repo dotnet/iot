@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO.Ports;
 using System.Linq;
 using System.Net;
@@ -29,7 +30,7 @@ namespace Iot.Device.Arduino.Tests
             {
                 return new[]
                 {
-                    typeof(String), ArduinoCsCompiler.GetSystemPrivateType("System.SR")
+                    typeof(String), ArduinoCsCompiler.GetSystemPrivateType("System.SR"), ArduinoCsCompiler.GetSystemPrivateType("Iot.Device.Arduino.MiniCultureInfo")
                 };
             }
         }
