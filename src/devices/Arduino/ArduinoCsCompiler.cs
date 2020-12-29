@@ -99,11 +99,6 @@ namespace Iot.Device.Arduino
 
     public sealed class ArduinoCsCompiler : IDisposable
     {
-        private readonly List<Type> _rootClasses = new List<Type>()
-        {
-            typeof(System.Object)
-        };
-
         // These classes substitute (part of) a framework class
         private readonly ArduinoBoard _board;
         private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
@@ -359,11 +354,6 @@ namespace Iot.Device.Arduino
 
         public void PrepareClass(ExecutionSet set, Type classType)
         {
-            if (!ValueTypeSupported(classType))
-            {
-                throw new NotSupportedException("Value types with sizeof(Type) > sizeof(int64) not supported");
-            }
-
             HashSet<Type> baseTypes = new HashSet<Type>();
 
             baseTypes.Add(classType);
@@ -373,12 +363,6 @@ namespace Iot.Device.Arduino
             {
                 PrepareClassDeclaration(set, cls);
             }
-        }
-
-        private bool ValueTypeSupported(Type classType)
-        {
-            // TODO: Should be sizeof(Variant)
-            return !(classType.IsValueType && GetClassSize(classType).Dynamic > 64);
         }
 
         private void PrepareClassDeclaration(ExecutionSet set, Type classType)
@@ -713,19 +697,6 @@ namespace Iot.Device.Arduino
 
         private bool AddClassDependency(HashSet<Type> allTypes, Type newType)
         {
-            // No support for structs right now. And basic value types (such as int) are always declared.
-            if (!ValueTypeSupported(newType))
-            {
-                throw new NotSupportedException($"Value type {newType} is not supported");
-            }
-
-            // If any of these are found, we add them once, but we don't search further
-            if (_rootClasses.Contains(newType))
-            {
-                allTypes.Add(newType);
-                return false;
-            }
-
             return allTypes.Add(newType);
         }
 
@@ -887,6 +858,12 @@ namespace Iot.Device.Arduino
                 return VariableKind.Double;
             }
 
+            if (t == typeof(DateTime) || t == typeof(TimeSpan))
+            {
+                sizeOfMember = 8;
+                return VariableKind.Uint64;
+            }
+
             if (t.IsArray)
             {
                 var elemType = t.GetElementType();
@@ -919,15 +896,36 @@ namespace Iot.Device.Arduino
                         sizeOfMember = 4;
                         return VariableKind.Reference;
                     }
+
+                    // This one is special anyway (and usually explicitly created on the stack using a LOCALLOC instruction)
+                    if (openType == typeof(Span<>))
+                    {
+                        sizeOfMember = SizeOfVoidPointer();
+                        return VariableKind.ValueArray;
+                    }
                 }
 
                 // Calculate class size (Note: Can't use GetClassSize here, as this would be recursive)
                 // TODO: Size might be overshooting here if the local computer is 64 bit.
-                var instance = Activator.CreateInstance(t);
-                sizeOfMember = System.Runtime.InteropServices.Marshal.SizeOf(instance!);
+                try
+                {
+                    var instance = Activator.CreateInstance(t);
+                    sizeOfMember = System.Runtime.InteropServices.Marshal.SizeOf(instance!);
+                }
+                catch (Exception x) when (x is NotSupportedException || x is ArgumentException)
+                {
+                    // The above may fail for some types, try a by-entry iteration instead
+                    sizeOfMember = 0;
+                    foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) // Not the static ones
+                    {
+                        GetVariableType(f.FieldType, out var s);
+                        sizeOfMember += s;
+                    }
+                }
+
                 if (sizeOfMember <= 8)
                 {
-                    return VariableKind.Uint32;
+                    return VariableKind.Uint64;
                 }
                 else
                 {
@@ -1265,13 +1263,16 @@ namespace Iot.Device.Arduino
 
         internal void ExecuteStaticCtors(ExecutionSet set)
         {
-            int count = set.Classes.Count;
-            for (var index = 0; index < count; index++)
+            List<ExecutionSet.Class> classes = set.Classes.Where(x => !x.SuppressInit && x.TheType.TypeInitializer != null).ToList();
+            // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
+            // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
+            BringToFront(classes, typeof(System.DateTime));
+            for (var index = 0; index < classes.Count; index++)
             {
-                ExecutionSet.Class? cls = set.Classes[index];
+                ExecutionSet.Class? cls = classes[index];
                 if (!cls.SuppressInit && cls.TheType.TypeInitializer != null)
                 {
-                    _board.Log($"Running static initializer of {cls}. Step {index}/{count}...");
+                    _board.Log($"Running static initializer of {cls}. Step {index}/{classes.Count}...");
                     var task = GetTask(set, cls.TheType.TypeInitializer);
                     task.Invoke(CancellationToken.None);
                     task.WaitForResult();
@@ -1281,6 +1282,14 @@ namespace Iot.Device.Arduino
                     }
                 }
             }
+        }
+
+        private void BringToFront(List<ExecutionSet.Class> classes, Type type)
+        {
+            int idx = classes.FindIndex(x => x.TheType == type);
+            var temp = classes[idx];
+            classes[idx] = classes[0];
+            classes[0] = temp;
         }
 
         /// <summary>
