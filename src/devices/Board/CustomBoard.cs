@@ -39,7 +39,7 @@ namespace Iot.Device.Board
         /// <inheritdoc />
         public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
         {
-            if (inputScheme != outputScheme)
+            if (inputScheme != outputScheme || inputScheme != PinNumberingScheme.Logical)
             {
                 throw new NotSupportedException("Only logical pin numbering supported");
             }

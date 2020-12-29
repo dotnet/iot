@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.Spi;
+using System.Diagnostics;
 
 namespace Iot.Device.Board
 {
@@ -14,9 +15,9 @@ namespace Iot.Device.Board
 
         public SpiDeviceManager(Board board, SpiConnectionSettings connectionSettings, int[]? pins, Func<SpiConnectionSettings, int[], SpiDevice> createOperation)
         {
-            if (pins == null || pins.Length < 3)
+            if (pins == null || pins.Length < 3 || pins.Length > 4)
             {
-                throw new ArgumentException("Must provide a valid set of at least 3 pins", nameof(pins));
+                throw new ArgumentException("Must provide a valid set of 3 or 4 pins", nameof(pins));
             }
 
             _board = board;
@@ -38,7 +39,8 @@ namespace Iot.Device.Board
             }
             catch (Exception x)
             {
-                Console.WriteLine($"Exception: {x}");
+                // TODO: Replace with logging
+                Debug.WriteLine($"Exception: {x}");
                 _board.ReleasePin(pins[0], PinUsage.Spi, this);
                 _board.ReleasePin(pins[1], PinUsage.Spi, this);
                 _board.ReleasePin(pins[2], PinUsage.Spi, this);
