@@ -906,21 +906,11 @@ namespace Iot.Device.Arduino
                 }
 
                 // Calculate class size (Note: Can't use GetClassSize here, as this would be recursive)
-                // TODO: Size might be overshooting here if the local computer is 64 bit.
-                try
+                sizeOfMember = 0;
+                foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) // Not the static ones
                 {
-                    var instance = Activator.CreateInstance(t);
-                    sizeOfMember = System.Runtime.InteropServices.Marshal.SizeOf(instance!);
-                }
-                catch (Exception x) when (x is NotSupportedException || x is ArgumentException)
-                {
-                    // The above may fail for some types, try a by-entry iteration instead
-                    sizeOfMember = 0;
-                    foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) // Not the static ones
-                    {
-                        GetVariableType(f.FieldType, out var s);
-                        sizeOfMember += s;
-                    }
+                    GetVariableType(f.FieldType, out var s);
+                    sizeOfMember += s;
                 }
 
                 if (sizeOfMember <= 8)
@@ -929,6 +919,13 @@ namespace Iot.Device.Arduino
                 }
                 else
                 {
+                    // Round up to next 4 bytes
+                    if ((sizeOfMember & 4) != 0)
+                    {
+                        sizeOfMember += 3;
+                        sizeOfMember = sizeOfMember & ~0x3;
+                    }
+
                     return VariableKind.LargeValueType;
                 }
             }
@@ -1287,6 +1284,11 @@ namespace Iot.Device.Arduino
         private void BringToFront(List<ExecutionSet.Class> classes, Type type)
         {
             int idx = classes.FindIndex(x => x.TheType == type);
+            if (idx < 0)
+            {
+                return;
+            }
+
             var temp = classes[idx];
             classes[idx] = classes[0];
             classes[0] = temp;

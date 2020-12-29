@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -642,8 +643,15 @@ namespace Iot.Device.Arduino
             return InvariantCulture;
         }
 
+        [ArduinoReplacement("System.Globalization.CultureData", null, true, false, IncludingPrivates = true)]
         private class MiniCultureData
         {
+            private static readonly string[] _saLongTimes = new string[] { "HH:mm:ss" };
+            private static readonly string[] _saShortTimes = new string[] { "HH:mm", "hh:mm tt", "H:mm", "h:mm tt" }; // short time format
+            private static readonly string[] _saDurationFormats = new string[] { "HH:mm:ss" };
+            private static readonly string[] _saLongDates = new string[] { "dddd, dd MMMM yyyy" };
+            private static readonly string[] _saYearMonths = new string[] { "yyyy MMMM" };
+
             public string CultureName
             {
                 get
@@ -685,6 +693,62 @@ namespace Iot.Device.Arduino
             public string TwoLetterISOLanguageName => "IN";
 
             public string ThreeLetterISOLanguageName => "INV";
+
+            public int FirstDayOfWeek => 0;
+
+            public int CalendarWeekRule => 0;
+
+            public string AMDesignator => "AM";
+
+            public string PMDesignator => "PM";
+
+            public string TimeSeparator => ":";
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            public string DateSeparator(int calendarId)
+            {
+                return "/";
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            public string[] LongDates(int calendarId)
+            {
+                return _saLongDates;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            public string[] ShortDates(int calendarId)
+            {
+                return _saLongDates;
+            }
+
+            public string[] LongTimes
+            {
+                get
+                {
+                    return _saLongTimes;
+                }
+            }
+
+            public string[] ShortTimes
+            {
+                get
+                {
+                    return _saShortTimes;
+                }
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            public string[] YearMonths(int calendarId)
+            {
+                return _saYearMonths;
+            }
+
+            [SuppressMessage("Microsoft.Naming", "SA1300", Justification = "Runtime method name")]
+            public static string[]? nativeEnumTimeFormats(string localeName, uint dwFlags, bool useUserOverride)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         public class MiniCompareInfo

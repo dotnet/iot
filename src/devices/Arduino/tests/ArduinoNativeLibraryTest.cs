@@ -135,7 +135,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void ExpectArrayIndexOutOfBounds()
         {
-            ExecuteComplexProgramCausesException<Func<int, int>, ArgumentOutOfRangeException>(typeof(ArduinoNativeLibraryTest), OutOfBoundsCheck, 10);
+            ExecuteComplexProgramCausesException<Func<int, int>, IndexOutOfRangeException>(typeof(ArduinoNativeLibraryTest), OutOfBoundsCheck, 10);
         }
 
         [Fact]
