@@ -151,9 +151,9 @@ namespace System.Device.Gpio
         /// Set the specified alternate mode for the given pin.
         /// </summary>
         /// <param name="logicalPinNumber">Pin number in the logcal scheme of the driver</param>
-        /// <param name="altMode">Alternate mode to set</param>
+        /// <param name="extendedMode">Alternate mode to set</param>
         /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
-        protected internal virtual void SetExtendedPinMode(int logicalPinNumber, ExtendedPinMode altMode)
+        protected internal virtual void SetExtendedPinMode(int logicalPinNumber, ExtendedPinMode extendedMode)
         {
             // Virtual instead of abstract, so as not to be breaking.
             throw new NotSupportedException("This driver does not support alternate modes");
