@@ -8,21 +8,17 @@
   <ItemGroup>
     <Compile Include="Mlx90640.cs" />
     <Compile Include="Sampling.cs" />
+    <Compile Include="*.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="category.txt" />
+    <None Include="category.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
-    <PackageReference Include="System.Drawing.Primitives" Version="4.3.0" />
-  </ItemGroup>
-
+  
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>

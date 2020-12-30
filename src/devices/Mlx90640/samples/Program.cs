@@ -5,12 +5,13 @@ using System;
 using System.Drawing;
 using System.Device.I2c;
 using Iot.Device.Mlx90640;
+using UnitsNet;
 
-Color GetRGBColor(float v, float min, float max)
+Color GetRGBColor(Temperature v, Temperature min, Temperature max)
 {
     int idx1, idx2;
     float fractBetween = 0;
-    float vrange = max - min;
+    Temperature vrange = Temperature.FromDegreesCelsius(max.DegreesCelsius - min.DegreesCelsius);
 
     float[,] colorSpectrum =
     {
@@ -21,20 +22,20 @@ Color GetRGBColor(float v, float min, float max)
             { 255, 0, 0 }
     };
 
-    if (v <= 0.0f)
+    if (v.DegreesCelsius <= 0.0f)
     {
         idx1 = idx2 = 0;
     }
-    else if (v >= 1.0f)
+    else if (v.DegreesCelsius >= 1.0f)
     {
         idx1 = idx2 = colorSpectrum.GetLength(0) - 1;
     }
     else
     {
-        v *= (colorSpectrum.GetLength(0) - 1);
-        idx1 = (int)Math.Floor(v);
+        v = Temperature.FromDegreesCelsius(v.DegreesCelsius * (colorSpectrum.GetLength(0) - 1));
+        idx1 = (int)Math.Floor(v.DegreesCelsius);
         idx2 = idx1 + 1;
-        fractBetween = v - (float)(idx1);
+        fractBetween = (float)(v.DegreesCelsius - (float)(idx1));
     }
 
     int ir = 0, ig = 0, ib = 0;
@@ -49,21 +50,21 @@ Color GetRGBColor(float v, float min, float max)
 I2cConnectionSettings settings = new(1, Mlx90640.DefaultI2cAddress);
 using I2cDevice i2cDevice = I2cDevice.Create(settings);
 using Mlx90640 sensor = new(i2cDevice);
-sensor.SetSampling(Sampling.Sampling_02_Hz);
 
-float[] frame = new float[768];
-float min = 20.0f;
-float max = 38.0f;
-Bitmap irBmpColorSpectrum = new Bitmap(24, 32);
+sensor.SetSampling(Sampling.Sampling_02_Hz);
+Temperature[] frame = new Temperature[Mlx90640.PixelCount];
+Temperature tempMin = Temperature.FromDegreesCelsius(20.0);
+Temperature tempMax = Temperature.FromDegreesCelsius(38.0);
+Bitmap irBmpColorSpectrum = new Bitmap(Mlx90640.Width, Mlx90640.Height);
 
 frame = sensor.GetFrame();
-for (int h = 0; h < 24; h++)
+for (int h = 0; h < Mlx90640.Width; h++)
 {
-    for (int w = 0; w < 32; w++)
+    for (int w = 0; w < Mlx90640.Height; w++)
     {
-        float t = frame[h * 32 + w];
-        var tempNormalized = (t - min) / (max - min);
-        irBmpColorSpectrum.SetPixel(h, w, GetRGBColor(tempNormalized, 20, 23));
+        Temperature t = frame[h * Mlx90640.Height + w];
+        Temperature tempNormalized = Temperature.FromDegreesCelsius((t.DegreesCelsius - tempMin.DegreesCelsius) / (tempMax.DegreesCelsius - tempMin.DegreesCelsius));
+        irBmpColorSpectrum.SetPixel(h, w, GetRGBColor(tempNormalized, tempMin, tempMax));
     }
 }
 

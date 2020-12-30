@@ -13,15 +13,30 @@ namespace Iot.Device.Mlx90640
     /// <summary>
     /// Infrared Camera MLX90640
     /// </summary>
-    public sealed class Mlx90640 : IDisposable
+    public class Mlx90640 : IDisposable
     {
+        /// <summary>
+        /// Number of sensor pixel array columns
+        /// </summary>
+        public const int Width = 24;
+
+        /// <summary>
+        /// Number of sensor pixel array rows
+        /// </summary>
+        public const int Height = 32;
+
+        /// <summary>
+        /// Total number of pixels
+        /// </summary>
+        public const int PixelCount = Width * Height;
+
         private const int OPENAIR_TA_SHIFT = 8;
         private const double SCALEALPHA = 0.000001;
 
         private I2cDevice _i2cDevice;
         private ushort[] _eeData = new ushort[832];
 
-        private int[] _alpha = new int[768];
+        private int[] _alpha = new int[PixelCount];
         private double _alphaPTAT = 0;
         private byte _alphaScale = 0;
         private ushort[] _brokenPixels = new ushort[5];
@@ -35,14 +50,14 @@ namespace Iot.Device.Mlx90640
         private float[] _ilChessC = new float[3];
         private float _ksTa = 0;
         private double[] _ksTo = new double[5];
-        private byte[] _kta = new byte[768];
+        private byte[] _kta = new byte[PixelCount];
         private byte _ktaScale = 0;
         private float _ktPTAT = 0;
         private short _kVdd = 0;
-        private sbyte[] _kv = new sbyte[768];
+        private sbyte[] _kv = new sbyte[PixelCount];
         private float _kvPTAT = 0;
         private byte _kvScale = 0;
-        private int[] _offset = new int[768];
+        private int[] _offset = new int[PixelCount];
         private ushort[] _outlierPixels = new ushort[5];
         private byte _resolutionEE = 0;
         private float _tgc = 0;
@@ -86,10 +101,9 @@ namespace Iot.Device.Mlx90640
         /// <param name="mode">Sampling Mode</param>
         public void SetSampling(Sampling mode)
         {
-            ushort[] controlRegister1 = new ushort[1];
-            int value;
+            Span<ushort> controlRegister1 = stackalloc ushort[1];
 
-            value = ((byte)mode & 0x07) << 7;
+            int value = ((byte)mode & 0x07) << 7;
 
             controlRegister1 = ReadRegisters16(0x800D, 1);
             value = (controlRegister1[0] & 0xFC7F) | value;
@@ -100,9 +114,10 @@ namespace Iot.Device.Mlx90640
         /// Request both 'halves' of a frame from the sensor, merge them
         /// and calculate the temperature in C for each of 32x24 pixels.
         /// </summary>
-        public float[] GetFrame()
+        /// <returns>Temperature of the specified pixel</returns>
+        public Temperature[] GetFrame()
         {
-            float[] framebuf = new float[768];
+            Temperature[] framebuf = new Temperature[PixelCount];
             float emissivity = 0.95f;
             ushort[] mlx90640Frame = new ushort[834];
 
@@ -113,73 +128,41 @@ namespace Iot.Device.Mlx90640
                     throw new Exception("Frame data error");
                 }
 
-                float tr = GetTa(mlx90640Frame) - OPENAIR_TA_SHIFT;
+                Temperature tr = Temperature.FromDegreesCelsius(GetTa(mlx90640Frame).DegreesCelsius - OPENAIR_TA_SHIFT);
                 CalculateTo(mlx90640Frame, emissivity, tr, ref framebuf);
             }
 
             return framebuf;
         }
 
-        private void CalculateTo(ushort[] frameData, float emissivity, float tr, ref float[] result)
+        private void CalculateTo(ushort[] frameData, float emissivity, Temperature tr, ref Temperature[] result)
         {
-            float vdd;
-            float ta;
-            float ta4;
-            float tr4;
-            float taTr;
-            float gain;
-            float[] irDataCP = new float[2];
-            float irData;
-            float alphaCompensated;
-            byte mode;
-            sbyte ilPattern;
-            byte chessPattern;
-            byte pattern;
-            byte conversionPattern;
-            float sx;
-            float to;
-            float[] alphaCorrR = new float[4];
-            byte range;
-            ushort subPage;
-            float ktaScale;
-            float kvScale;
-            float alphaScale;
-            float kta;
-            float kv;
+            ushort subPage = frameData[833];
+            float vdd = GetVdd(frameData);
+            Temperature ta = GetTa(frameData);
 
-            subPage = frameData[833];
-            vdd = GetVdd(frameData);
-            ta = GetTa(frameData);
+            Temperature ta4 = Temperature.FromKelvins(Math.Pow(ta.Kelvins, 4));
+            Temperature tr4 = Temperature.FromKelvins(Math.Pow(tr.Kelvins, 4));
+            Temperature taTr = Temperature.FromKelvins(tr4.Kelvins - (tr4.Kelvins - ta4.Kelvins) / emissivity);
 
-            ta4 = (float)(ta + 273.15);
-            ta4 = ta4 * ta4;
-            ta4 = ta4 * ta4;
-            tr4 = (float)(tr + 273.15);
-            tr4 = tr4 * tr4;
-            tr4 = tr4 * tr4;
-            taTr = tr4 - (tr4 - ta4) / emissivity;
+            float ktaScale = (float)(Math.Pow(2, _ktaScale));
+            float kvScale = (float)(Math.Pow(2, _kvScale));
+            float alphaScale = (float)(Math.Pow(2, _alphaScale));
 
-            ktaScale = (float)(Math.Pow(2, _ktaScale));
-            kvScale = (float)(Math.Pow(2, _kvScale));
-            alphaScale = (float)(Math.Pow(2, _alphaScale));
-
+            Span<float> alphaCorrR = stackalloc float[4];
             alphaCorrR[0] = (float)(1 / (1 + _ksTo[0] * 40));
             alphaCorrR[1] = 1;
             alphaCorrR[2] = (float)((1 + _ksTo[1] * _ct[2]));
             alphaCorrR[3] = (float)(alphaCorrR[2] * (1 + _ksTo[2] * (_ct[3] - _ct[2])));
 
             //------------------------- Gain calculation -----------------------------------
-            gain = frameData[778];
-            if (gain > 32767)
-            {
-                gain = gain - 65536;
-            }
-
-            gain = (float)(_gainEE / gain);
+            float gain = (short)frameData[778];
+            gain = _gainEE / gain;
 
             //------------------------- To calculation -------------------------------------
-            mode = (byte)((frameData[832] & 0x1000) >> 5);
+            byte mode = (byte)((frameData[832] & 0x1000) >> 5);
 
+            Span<float> irDataCP = stackalloc float[2];
             irDataCP[0] = frameData[776];
             irDataCP[1] = frameData[808];
             for (int i = 0; i < 2; i++)
@@ -189,25 +172,26 @@ namespace Iot.Device.Mlx90640
                     irDataCP[i] = irDataCP[i] - 65536;
                 }
 
-                irDataCP[i] = irDataCP[i] * gain;
+                irDataCP[i] = gain * (short)irDataCP[i];
             }
 
-            irDataCP[0] = (float)(irDataCP[0] - _cpOffset[0] * (1 + _cpKta * (ta - 25)) * (1 + _cpKv * (vdd - 3.3)));
+            irDataCP[0] = (float)(irDataCP[0] - _cpOffset[0] * (1 + _cpKta * (ta.DegreesCelsius - 25)) * (1 + _cpKv * (vdd - 3.3)));
             if (mode == _calibrationModeEE)
             {
-                irDataCP[1] = (float)(irDataCP[1] - _cpOffset[1] * (1 + _cpKta * (ta - 25)) * (1 + _cpKv * (vdd - 3.3)));
+                irDataCP[1] = (float)(irDataCP[1] - _cpOffset[1] * (1 + _cpKta * (ta.DegreesCelsius - 25)) * (1 + _cpKv * (vdd - 3.3)));
             }
             else
             {
-                irDataCP[1] = (float)(irDataCP[1] - (_cpOffset[1] + _ilChessC[0]) * (1 + _cpKta * (ta - 25)) * (1 + _cpKv * (vdd - 3.3)));
+                irDataCP[1] = (float)(irDataCP[1] - (_cpOffset[1] + _ilChessC[0]) * (1 + _cpKta * (ta.DegreesCelsius - 25)) * (1 + _cpKv * (vdd - 3.3)));
             }
 
             for (int pixelNumber = 0; pixelNumber < 768; pixelNumber++)
             {
-                ilPattern = (sbyte)(pixelNumber / 32 - (pixelNumber / 64) * 2);
-                chessPattern = (byte)(ilPattern ^ (pixelNumber - (pixelNumber / 2) * 2));
-                conversionPattern = (byte)(((pixelNumber + 2) / 4 - (pixelNumber + 3) / 4 + (pixelNumber + 1) / 4 - pixelNumber / 4) * (1 - 2 * ilPattern));
+                sbyte ilPattern = (sbyte)(pixelNumber / 32 - (pixelNumber / 64) * 2);
+                byte chessPattern = (byte)(ilPattern ^ (pixelNumber - (pixelNumber / 2) * 2));
+                float conversionPattern = (byte)(((pixelNumber + 2) / 4 - (pixelNumber + 3) / 4 + (pixelNumber + 1) / 4 - pixelNumber / 4) * (1 - 2 * ilPattern));
 
+                byte pattern;
                 if (mode == 0)
                 {
                     pattern = (byte)ilPattern;
@@ -219,17 +203,11 @@ namespace Iot.Device.Mlx90640
 
                 if (pattern == frameData[833])
                 {
-                    irData = frameData[pixelNumber];
-                    if (irData > 32767)
-                    {
-                        irData = irData - 65536;
-                    }
+                    float irData = gain * (short)frameData[pixelNumber];
 
-                    irData = irData * gain;
-
-                    kta = _kta[pixelNumber] / ktaScale;
-                    kv = _kv[pixelNumber] / kvScale;
-                    irData = (float)(irData - _offset[pixelNumber] * (1 + kta * (ta - 25)) * (1 + kv * (vdd - 3.3)));
+                    float kta = _kta[pixelNumber] / ktaScale;
+                    float kv = _kv[pixelNumber] / kvScale;
+                    irData = (float)(irData - _offset[pixelNumber] * (1 + kta * (ta.DegreesCelsius - 25)) * (1 + kv * (vdd - 3.3)));
 
                     if (mode != _calibrationModeEE)
                     {
@@ -239,14 +217,15 @@ namespace Iot.Device.Mlx90640
                     irData = irData - _tgc * irDataCP[subPage];
                     irData = irData / emissivity;
 
-                    alphaCompensated = (float)(SCALEALPHA * alphaScale / _alpha[pixelNumber]);
-                    alphaCompensated = alphaCompensated * (1 + _ksTa * (ta - 25));
+                    float alphaCompensated = (float)(SCALEALPHA * alphaScale / _alpha[pixelNumber]);
+                    alphaCompensated = (float)(alphaCompensated * (1 + _ksTa * (ta.DegreesCelsius - 25)));
 
-                    sx = alphaCompensated * alphaCompensated * alphaCompensated * (irData + alphaCompensated * taTr);
+                    float sx = (float)(alphaCompensated * alphaCompensated * alphaCompensated * (irData + alphaCompensated * taTr.Kelvins));
                     sx = (float)(Math.Sqrt(Math.Sqrt(sx)) * _ksTo[1]);
 
-                    to = (float)(Math.Sqrt(Math.Sqrt(irData / (alphaCompensated * (1 - _ksTo[1] * 273.15) + sx) + taTr)) - 273.15);
+                    float to = (float)(Math.Sqrt(Math.Sqrt(irData / (alphaCompensated * (1 - _ksTo[1] * 273.15) + sx) + taTr.Kelvins)) - 273.15);
 
+                    byte range;
                     if (to < _ct[1])
                     {
                         range = 0;
@@ -264,57 +243,31 @@ namespace Iot.Device.Mlx90640
                         range = 3;
                     }
 
-                    to = (float)(Math.Sqrt(Math.Sqrt(irData / (alphaCompensated * alphaCorrR[range] * (1 + _ksTo[range] * (to - _ct[range]))) + taTr)) - 273.15);
+                    to = (float)(Math.Sqrt(Math.Sqrt(irData / (alphaCompensated * alphaCorrR[range] * (1 + _ksTo[range] * (to - _ct[range]))) + taTr.Kelvins)) - 273.15);
 
-                    result[pixelNumber] = to;
+                    result[pixelNumber] = Temperature.FromDegreesCelsius(to);
                 }
             }
         }
 
-        private float GetTa(ushort[] frameData)
+        private Temperature GetTa(ushort[] frameData)
         {
-            float ptat;
-            float ptatArt;
-            float vdd;
-            float ta;
-
-            vdd = GetVdd(frameData);
-
-            ptat = frameData[800];
-            if (ptat > 32767)
-            {
-                ptat = ptat - 65536;
-            }
-
-            ptatArt = frameData[768];
-            if (ptatArt > 32767)
-            {
-                ptatArt = ptatArt - 65536;
-            }
-
+            float ptat = (short)frameData[800];
+            float ptatArt = (short)frameData[PixelCount];
             ptatArt = (float)((ptat / (ptat * _alphaPTAT + ptatArt)) * Math.Pow(2, 18));
 
-            ta = (float)((ptatArt / (1 + _kvPTAT * (vdd - 3.3)) - _vPTAT25));
+            float vdd = GetVdd(frameData);
+            float ta = (float)((ptatArt / (1 + _kvPTAT * (vdd - 3.3)) - _vPTAT25));
             ta = ta / _ktPTAT + 25;
 
-            return ta;
+            return Temperature.FromDegreesCelsius(ta);
         }
 
         private float GetVdd(ushort[] frameData)
         {
-            float vdd;
-            float resolutionCorrection;
-
-            int resolutionRAM;
-
-            vdd = (float)frameData[810];
-            if (vdd > 32767)
-            {
-                vdd = vdd - 65536;
-            }
-
-            resolutionRAM = (frameData[832] & 0x0C00) >> 10;
-            resolutionCorrection = (float)(Math.Pow(2, _resolutionEE) / Math.Pow(2, resolutionRAM));
+            float vdd = (short)frameData[810];
+            int resolutionRAM = (frameData[832] & 0x0C00) >> 10;
+            float resolutionCorrection = (float)(Math.Pow(2, _resolutionEE) / Math.Pow(2, resolutionRAM));
             vdd = (float)(((resolutionCorrection * vdd - _vdd25) / _kVdd) + 3.3);
 
             return vdd;
@@ -322,31 +275,28 @@ namespace Iot.Device.Mlx90640
 
         private ushort GetFrameData(ref ushort[] frameData)
         {
-            byte dataReady = 0;
-            ushort[] controlRegister = new ushort[1];
-            ushort[] statusRegister = new ushort[0];
-            byte[] data = new byte[64];
-            byte cnt = 0;
-            ushort[] framedata = new ushort[832];
-
-            while (dataReady == 0)
+            Span<ushort> statusRegister = stackalloc ushort[0];
+            do
             {
                 statusRegister = ReadRegisters16(0x8000, 1);
-                dataReady = (byte)(statusRegister[0] & 0x0008);
             }
+            while ((byte)(statusRegister[0] & 0x0008) == 0);
 
-            while ((dataReady != 0) && (cnt < 5))
+            byte cnt = 0;
+            Span<ushort> framedata = stackalloc ushort[832];
+
+            do
             {
                 Write16(0x8000, 0x0030);
                 framedata = ReadRegisters16(0x0400, 832);
                 statusRegister = ReadRegisters16(0x8000, 1);
-                dataReady = (byte)(statusRegister[0] & 0x0008);
                 cnt += 1;
             }
+            while ((byte)(statusRegister[0] & 0x0008) == 0);
 
+            Span<ushort> controlRegister = stackalloc ushort[1];
             controlRegister = ReadRegisters16(0x800D, 1);
 
-            // todo
             for (int i = 0; i < framedata.Length; i++)
             {
                 frameData[i] = framedata[i];
@@ -465,16 +415,13 @@ namespace Iot.Device.Mlx90640
 
         private void ExtractAlphaParameters()
         {
-            int[] accRow = new int[24];
-            int[] accColumn = new int[32];
-            float[] alphaTemp = new float[768];
-
             byte accRemScale = (byte)(_eeData[32] & 0x000F);
             byte accColumnScale = (byte)((_eeData[32] & 0x00F0) >> 4);
             byte accRowScale = (byte)((_eeData[32] & 0x0F00) >> 8);
             byte alphaScale = (byte)(((_eeData[32] & 0xF000) >> 12) + 30);
             int alphaRef = _eeData[33];
 
+            Span<int> accRow = stackalloc int[24];
             for (int i = 0; i < 6; i++)
             {
                 int p = i * 4;
@@ -492,6 +439,7 @@ namespace Iot.Device.Mlx90640
                 }
             }
 
+            Span<int> accColumn = stackalloc int[32];
             for (int i = 0; i < 8; i++)
             {
                 int p = i * 4;
@@ -509,6 +457,7 @@ namespace Iot.Device.Mlx90640
                 }
             }
 
+            Span<float> alphaTemp = stackalloc float[PixelCount];
             for (int i = 0; i < 24; i++)
             {
                 for (int j = 0; j < 32; j++)
@@ -556,26 +505,20 @@ namespace Iot.Device.Mlx90640
 
         private void ExtractOffsetParameters()
         {
-            int[] occRow = new int[24];
-            int[] occColumn = new int[32];
-            int p = 0;
-            short offsetRef;
-            byte occRowScale;
-            byte occColumnScale;
-            byte occRemScale;
+            byte occRemScale = (byte)(_eeData[16] & 0x000F);
+            byte occColumnScale = (byte)((_eeData[16] & 0x00F0) >> 4);
+            byte occRowScale = (byte)((_eeData[16] & 0x0F00) >> 8);
+            short offsetRef = (short)(_eeData[17]);
 
-            occRemScale = (byte)(_eeData[16] & 0x000F);
-            occColumnScale = (byte)((_eeData[16] & 0x00F0) >> 4);
-            occRowScale = (byte)((_eeData[16] & 0x0F00) >> 8);
-            offsetRef = (short)(_eeData[17]);
             if (offsetRef > 32767)
             {
                 offsetRef = (short)(offsetRef - 65536);
             }
 
+            Span<int> occRow = stackalloc int[24];
             for (int i = 0; i < 6; i++)
             {
-                p = i * 4;
+                int p = i * 4;
                 occRow[p + 0] = (_eeData[18 + i] & 0x000F);
                 occRow[p + 1] = (_eeData[18 + i] & 0x00F0) >> 4;
                 occRow[p + 2] = (_eeData[18 + i] & 0x0F00) >> 8;
@@ -590,9 +533,10 @@ namespace Iot.Device.Mlx90640
                 }
             }
 
+            Span<int> occColumn = stackalloc int[32];
             for (int i = 0; i < 8; i++)
             {
-                p = i * 4;
+                int p = i * 4;
                 occColumn[p + 0] = (_eeData[24 + i] & 0x000F);
                 occColumn[p + 1] = (_eeData[24 + i] & 0x00F0) >> 4;
                 occColumn[p + 2] = (_eeData[24 + i] & 0x0F00) >> 8;
@@ -611,7 +555,7 @@ namespace Iot.Device.Mlx90640
             {
                 for (int j = 0; j < 32; j++)
                 {
-                    p = 32 * i + j;
+                    int p = 32 * i + j;
                     _offset[p] = (_eeData[64 + p] & 0xFC00) >> 10;
                     if (_offset[p] > 31)
                     {
@@ -626,59 +570,22 @@ namespace Iot.Device.Mlx90640
 
         private void ExtractKtaPixelParameters()
         {
-            int p = 0;
-            sbyte[] ktaRC = new sbyte[4];
-            sbyte ktaRoCo;
-            sbyte ktaRoCe;
-            sbyte ktaReCo;
-            sbyte ktaReCe;
-            byte ktaScale1;
-            byte ktaScale2;
-            byte split;
-            float[] ktaTemp = new float[768];
-            float temp;
+            Span<sbyte> ktaRC = stackalloc sbyte[4];
+            ktaRC[0] = (sbyte)((_eeData[54] & 0xFF00) >> 8);
+            ktaRC[1] = (sbyte)((_eeData[55] & 0xFF00) >> 8);
+            ktaRC[2] = (sbyte)(_eeData[54] & 0x00FF);
+            ktaRC[3] = (sbyte)(_eeData[55] & 0x00FF);
 
-            ktaRoCo = (sbyte)((_eeData[54] & 0xFF00) >> 8);
-            if (ktaRoCo > 127)
-            {
-                ktaRoCo = (sbyte)(ktaRoCo - 256);
-            }
-
-            ktaRC[0] = ktaRoCo;
-
-            ktaReCo = (sbyte)(_eeData[54] & 0x00FF);
-            if (ktaReCo > 127)
-            {
-                ktaReCo = (sbyte)(ktaReCo - 256);
-            }
-
-            ktaRC[2] = ktaReCo;
-
-            ktaRoCe = (sbyte)((_eeData[55] & 0xFF00) >> 8);
-            if (ktaRoCe > 127)
-            {
-                ktaRoCe = (sbyte)(ktaRoCe - 256);
-            }
-
-            ktaRC[1] = ktaRoCe;
-
-            ktaReCe = (sbyte)(_eeData[55] & 0x00FF);
-            if (ktaReCe > 127)
-            {
-                ktaReCe = (sbyte)(ktaReCe - 256);
-            }
-
-            ktaRC[3] = ktaReCe;
-
-            ktaScale1 = (byte)(((_eeData[56] & 0x00F0) >> 4) + 8);
-            ktaScale2 = (byte)(_eeData[56] & 0x000F);
+            byte ktaScale1 = (byte)(((_eeData[56] & 0x00F0) >> 4) + 8);
+            byte ktaScale2 = (byte)(_eeData[56] & 0x000F);
+            Span<float> ktaTemp = stackalloc float[PixelCount];
 
             for (int i = 0; i < 24; i++)
             {
                 for (int j = 0; j < 32; j++)
                 {
-                    p = 32 * i + j;
-                    split = (byte)(2 * (p / 32 - (p / 64) * 2) + p % 2);
+                    int p = 32 * i + j;
+                    byte split = (byte)(2 * (p / 32 - (p / 64) * 2) + p % 2);
                     ktaTemp[p] = (_eeData[64 + p] & 0x000E) >> 1;
                     if (ktaTemp[p] > 3)
                     {
@@ -691,7 +598,7 @@ namespace Iot.Device.Mlx90640
                 }
             }
 
-            temp = Math.Abs(ktaTemp[0]);
+            float temp = Math.Abs(ktaTemp[0]);
             for (int i = 1; i < 768; i++)
             {
                 if (Math.Abs(ktaTemp[i]) > temp)
@@ -726,26 +633,16 @@ namespace Iot.Device.Mlx90640
 
         private void ExtractKvPixelParameters()
         {
-            int p = 0;
-            sbyte[] kvt = new sbyte[4];
-            sbyte kvRoco;
-            sbyte kvRoce;
-            sbyte kvReco;
-            sbyte kvRece;
-            byte kvScale;
-            byte split;
-            float[] kvtemp = new float[768];
-            float temp;
-
-            kvRoco = (sbyte)((_eeData[52] & 0xF000) >> 12);
+            sbyte kvRoco = (sbyte)((_eeData[52] & 0xF000) >> 12);
             if (kvRoco > 7)
             {
                 kvRoco = (sbyte)(kvRoco - 16);
             }
 
+            Span<sbyte> kvt = stackalloc sbyte[4];
             kvt[0] = kvRoco;
 
-            kvReco = (sbyte)((_eeData[52] & 0x0F00) >> 8);
+            sbyte kvReco = (sbyte)((_eeData[52] & 0x0F00) >> 8);
             if (kvReco > 7)
             {
                 kvReco = (sbyte)(kvReco - 16);
@@ -753,7 +650,7 @@ namespace Iot.Device.Mlx90640
 
             kvt[2] = kvReco;
 
-            kvRoce = (sbyte)((_eeData[52] & 0x00F0) >> 4);
+            sbyte kvRoce = (sbyte)((_eeData[52] & 0x00F0) >> 4);
             if (kvRoce > 7)
             {
                 kvRoce = (sbyte)(kvRoce - 16);
@@ -761,7 +658,7 @@ namespace Iot.Device.Mlx90640
 
             kvt[1] = kvRoce;
 
-            kvRece = (sbyte)(_eeData[52] & 0x000F);
+            sbyte kvRece = (sbyte)(_eeData[52] & 0x000F);
             if (kvRece > 7)
             {
                 kvRece = (sbyte)(kvRece - 16);
@@ -769,21 +666,22 @@ namespace Iot.Device.Mlx90640
 
             kvt[3] = kvRece;
 
-            kvScale = (byte)((_eeData[56] & 0x0F00) >> 8);
+            byte kvScale = (byte)((_eeData[56] & 0x0F00) >> 8);
+
+            Span<float> kvtemp = stackalloc float[PixelCount];
 
             for (int i = 0; i < 24; i++)
             {
                 for (int j = 0; j < 32; j++)
                 {
-                    p = 32 * i + j;
-                    split = (byte)(2 * (p / 32 - (p / 64) * 2) + p % 2);
+                    int p = 32 * i + j;
+                    byte split = (byte)(2 * (p / 32 - (p / 64) * 2) + p % 2);
                     kvtemp[p] = kvt[split];
                     kvtemp[p] = (float)(kvtemp[p] / Math.Pow(2, kvScale));
-                    // kvtemp[p] = kvtemp[p] * _offset[p];
                 }
             }
 
-            temp = Math.Abs(kvtemp[0]);
+            float temp = Math.Abs(kvtemp[0]);
             for (int i = 1; i < 768; i++)
             {
                 if (Math.Abs(kvtemp[i]) > temp)
@@ -818,16 +716,9 @@ namespace Iot.Device.Mlx90640
 
         private void ExtractCPParameters()
         {
-            float[] alphaSP = new float[2];
-            short[] offsetSP = new short[2];
-            float cpKv;
-            float cpKta;
-            byte alphaScale;
-            byte ktaScale1;
-            byte kvScale;
+            float alphaScale = (byte)(((_eeData[32] & 0xF000) >> 12) + 27);
 
-            alphaScale = (byte)(((_eeData[32] & 0xF000) >> 12) + 27);
-
+            Span<short> offsetSP = stackalloc short[2];
             offsetSP[0] = (short)(_eeData[58] & 0x03FF);
             if (offsetSP[0] > 511)
             {
@@ -842,6 +733,7 @@ namespace Iot.Device.Mlx90640
 
             offsetSP[1] = (short)(offsetSP[1] + offsetSP[0]);
 
+            Span<float> alphaSP = stackalloc float[2];
             alphaSP[0] = (_eeData[57] & 0x03FF);
             if (alphaSP[0] > 511)
             {
@@ -858,22 +750,22 @@ namespace Iot.Device.Mlx90640
 
             alphaSP[1] = (1 + alphaSP[1] / 128) * alphaSP[0];
 
-            cpKta = (_eeData[59] & 0x00FF);
+            float cpKta = (_eeData[59] & 0x00FF);
             if (cpKta > 127)
             {
                 cpKta = cpKta - 256;
             }
 
-            ktaScale1 = (byte)(((_eeData[56] & 0x00F0) >> 4) + 8);
+            float ktaScale1 = (byte)(((_eeData[56] & 0x00F0) >> 4) + 8);
             _cpKta = (float)(cpKta / Math.Pow(2, ktaScale1));
 
-            cpKv = (_eeData[59] & 0xFF00) >> 8;
+            float cpKv = (_eeData[59] & 0xFF00) >> 8;
             if (cpKv > 127)
             {
                 cpKv = cpKv - 256;
             }
 
-            kvScale = (byte)((_eeData[56] & 0x0F00) >> 8);
+            float kvScale = (byte)((_eeData[56] & 0x0F00) >> 8);
             _cpKv = (float)(cpKv / Math.Pow(2, (double)kvScale));
 
             _cpAlpha[0] = alphaSP[0];
@@ -884,12 +776,10 @@ namespace Iot.Device.Mlx90640
 
         private void ExtractCILCParameters()
         {
-            float[] ilChessC = new float[3];
-            byte calibrationModeEE;
-
-            calibrationModeEE = (byte)((_eeData[10] & 0x0800) >> 4);
+            byte calibrationModeEE = (byte)((_eeData[10] & 0x0800) >> 4);
             calibrationModeEE = (byte)(calibrationModeEE ^ 0x80);
 
+            Span<float> ilChessC = stackalloc float[3];
             ilChessC[0] = (_eeData[53] & 0x003F);
             if (ilChessC[0] > 31)
             {
@@ -923,18 +813,14 @@ namespace Iot.Device.Mlx90640
         private int ExtractDeviatingPixels()
         {
             ushort pixCnt = 0;
-            ushort brokenPixCnt = 0;
-            ushort outlierPixCnt = 0;
-            int warn = 0;
-            int i;
-
             for (pixCnt = 0; pixCnt < 5; pixCnt++)
             {
                 _brokenPixels[pixCnt] = 0xFFFF;
                 _outlierPixels[pixCnt] = 0xFFFF;
             }
 
-            pixCnt = 0;
+            ushort brokenPixCnt = 0;
+            ushort outlierPixCnt = 0;
             while (pixCnt < 768 && brokenPixCnt < 5 && outlierPixCnt < 5)
             {
                 if (_eeData[pixCnt + 64] == 0)
@@ -952,6 +838,7 @@ namespace Iot.Device.Mlx90640
 
             }
 
+            int warn = 0;
             if (brokenPixCnt > 4)
             {
                 warn = -3;
@@ -968,7 +855,7 @@ namespace Iot.Device.Mlx90640
             {
                 for (pixCnt = 0; pixCnt < brokenPixCnt; pixCnt++)
                 {
-                    for (i = pixCnt + 1; i < brokenPixCnt; i++)
+                    for (int i = pixCnt + 1; i < brokenPixCnt; i++)
                     {
                         warn = CheckAdjacentPixels(_brokenPixels[pixCnt], _brokenPixels[i]);
                         if (warn != 0)
@@ -980,7 +867,7 @@ namespace Iot.Device.Mlx90640
 
                 for (pixCnt = 0; pixCnt < outlierPixCnt; pixCnt++)
                 {
-                    for (i = pixCnt + 1; i < outlierPixCnt; i++)
+                    for (int i = pixCnt + 1; i < outlierPixCnt; i++)
                     {
                         warn = CheckAdjacentPixels(_outlierPixels[pixCnt], _outlierPixels[i]);
                         if (warn != 0)
@@ -992,7 +879,7 @@ namespace Iot.Device.Mlx90640
 
                 for (pixCnt = 0; pixCnt < brokenPixCnt; pixCnt++)
                 {
-                    for (i = 0; i < outlierPixCnt; i++)
+                    for (int i = 0; i < outlierPixCnt; i++)
                     {
                         warn = CheckAdjacentPixels(_brokenPixels[pixCnt], _outlierPixels[i]);
                         if (warn != 0)
@@ -1009,9 +896,7 @@ namespace Iot.Device.Mlx90640
 
         private int CheckAdjacentPixels(ushort pix1, ushort pix2)
         {
-            int pixPosDif;
-
-            pixPosDif = pix1 - pix2;
+            int pixPosDif = pix1 - pix2;
             if (pixPosDif > -34 && pixPosDif < -30)
             {
                 return -6;
@@ -1030,7 +915,7 @@ namespace Iot.Device.Mlx90640
             return 0;
         }
 
-        internal void Write16(int writeAddress, int data)
+        private void Write16(int writeAddress, int data)
         {
             _i2cDevice.Write(new[]
             {
@@ -1041,7 +926,7 @@ namespace Iot.Device.Mlx90640
             });
         }
 
-        internal ushort[] ReadRegisters16(int addr, int length)
+        private ushort[] ReadRegisters16(int addr, int length)
         {
             Span<byte> readReg = stackalloc byte[length * 2];
             ushort[] dataOUT = new ushort[length];
