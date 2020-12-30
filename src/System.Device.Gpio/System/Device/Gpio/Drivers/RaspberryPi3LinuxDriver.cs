@@ -357,15 +357,15 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <inheritdoc />
-        protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode altMode)
+        protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode extendedPinMode)
         {
             Initialize();
             ValidatePinNumber(pinNumber);
 
-            RaspberryPiExtendedPinMode? raspiMode = altMode as RaspberryPiExtendedPinMode;
+            RaspberryPiExtendedPinMode? raspiMode = extendedPinMode as RaspberryPiExtendedPinMode;
             if (ReferenceEquals(raspiMode, null))
             {
-                throw new ArgumentException(nameof(altMode), $"Invalid extended mode: {raspiMode}");
+                throw new ArgumentException(nameof(extendedPinMode), $"Invalid extended mode: {raspiMode}");
             }
 
             /*
