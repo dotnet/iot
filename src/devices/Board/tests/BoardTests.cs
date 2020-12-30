@@ -278,6 +278,14 @@ namespace Iot.Device.Board.Tests
             return new CustomGenericBoard(scheme, _mockedGpioDriver.Object);
         }
 
+        private sealed class CustomExtendedPinMode : ExtendedPinMode
+        {
+            public CustomExtendedPinMode(string modeName)
+                : base(modeName)
+            {
+            }
+        }
+
         private sealed class CustomGenericBoard : GenericBoard
         {
             public CustomGenericBoard(PinNumberingScheme numberingScheme, GpioDriver mockedDriver)
@@ -290,6 +298,8 @@ namespace Iot.Device.Board.Tests
             {
                 get;
             }
+
+            public static readonly CustomExtendedPinMode CustomGpioMode = new CustomExtendedPinMode("Gpio");
 
             public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
             {
@@ -320,11 +330,11 @@ namespace Iot.Device.Board.Tests
             /// <summary>
             /// Overridden, because driver implementation currently does not support mocking
             /// </summary>
-            public override AlternatePinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
+            public override ExtendedPinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
             {
                 if (usage == PinUsage.Gpio)
                 {
-                    return AlternatePinMode.Gpio;
+                    return CustomGpioMode;
                 }
 
                 return base.GetHardwareModeForPinUsage(pinNumber, usage, pinNumberingScheme, bus);

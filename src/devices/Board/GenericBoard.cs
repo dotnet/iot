@@ -77,9 +77,9 @@ namespace Iot.Device.Board
         /// Check whether the given pin is usable for the given purpose.
         /// This implementation always returns unknown, since the generic board requires the user to know what he's doing.
         /// </summary>
-        public override AlternatePinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
+        public override ExtendedPinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
         {
-            return AlternatePinMode.Unknown;
+            return ExtendedPinMode.Unknown;
         }
 
         /// <inheritdoc />

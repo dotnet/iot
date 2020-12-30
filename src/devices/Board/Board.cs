@@ -585,8 +585,8 @@ namespace Iot.Device.Board
         /// <param name="pinNumberingScheme">Pin numbering scheme for the pin provided (logical or physical)</param>
         /// <param name="bus">Optional bus argument, for SPI and I2C pins</param>
         /// <returns>
-        /// A hardware-dependent instance of <see cref="AlternatePinMode"/> describing the mode the pin is in.</returns>
-        public abstract AlternatePinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage,
+        /// A hardware-dependent instance of <see cref="ExtendedPinMode"/> describing the mode the pin is in.</returns>
+        public abstract ExtendedPinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage,
             PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0);
 
         /// <summary>
