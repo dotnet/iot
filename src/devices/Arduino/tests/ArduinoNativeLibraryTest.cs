@@ -150,18 +150,18 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramCausesException<Func<int, int>, OutOfMemoryException>(typeof(ArduinoNativeLibraryTest), OutOfMemory, (1 << 31) + (1 << 30));
         }
 
-        private int OutOfBoundsCheck(int index)
+        private static int OutOfBoundsCheck(int index)
         {
             int[] array = new int[2];
             return array[index];
         }
 
-        private int DivideByZero(int zero)
+        private static int DivideByZero(int zero)
         {
             return 10 / zero;
         }
 
-        private int OutOfMemory(int sizeToAllocate)
+        private static int OutOfMemory(int sizeToAllocate)
         {
             int[] array = new int[sizeToAllocate];
             return array.Length;

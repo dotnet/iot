@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Arduino.Tests
+namespace Iot.Device.Tests
 {
     public class FrameworkBehaviorTests
     {
