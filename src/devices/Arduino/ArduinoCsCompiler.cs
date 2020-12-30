@@ -94,6 +94,7 @@ namespace Iot.Device.Arduino
         RuntimeType = 6,
         Nullable = 7,
         Enum = 8,
+        Array = 9,
         LargestKnownTypeToken = 20,
     }
 

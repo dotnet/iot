@@ -17,7 +17,7 @@ namespace Iot.Device.Arduino
         }
 
         [ArduinoImplementation]
-        internal static TimeSpan GetDateTimeNowUtcOffsetFromUtc(DateTime time, out bool isAmbiguousLocalDst)
+        public static TimeSpan GetDateTimeNowUtcOffsetFromUtc(DateTime time, out bool isAmbiguousLocalDst)
         {
             isAmbiguousLocalDst = false;
             return TimeSpan.Zero;

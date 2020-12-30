@@ -14,5 +14,15 @@ namespace Iot.Device.Arduino
             isEnabled = false;
             return false;
         }
+
+        public static object? GetData(string name)
+        {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
+            return null;
+        }
     }
 }

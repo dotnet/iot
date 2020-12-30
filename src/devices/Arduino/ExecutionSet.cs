@@ -289,6 +289,10 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.Type;
             }
+            else if (typeInfo == typeof(Array))
+            {
+                token = (int)KnownTypeTokens.Array;
+            }
             else if (typeInfo == typeof(Nullable<>))
             {
                 token = NullableToken;

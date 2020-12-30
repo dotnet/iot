@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -710,6 +711,12 @@ namespace Iot.Device.Arduino
                 "January", "February", "March", "April", "Mai", "June", "July", "August", "September", "October", "November", "December"
             };
 
+            private static readonly string _sPositiveSign = "+";
+            private static readonly string _sNegativeSign = "-";
+            private static readonly string _sThousandSeparator = "'";
+            private static readonly string _sDecimalSeparator = ".";
+            private static readonly string _sCurrency = "$";
+
             public string CultureName
             {
                 get
@@ -878,6 +885,31 @@ namespace Iot.Device.Arduino
             {
                 // Only used in hebrew
                 return null!;
+            }
+
+            internal bool UseUserOverride => false;
+
+            internal static MiniCultureData? GetCultureData(string? cultureName, bool useUserOverride)
+            {
+                return new MiniCultureData();
+            }
+
+            internal void GetNFIValues(NumberFormatInfo nfi)
+            {
+                nfi.PositiveSign = _sPositiveSign;
+                nfi.NegativeSign = _sNegativeSign;
+
+                nfi.NumberGroupSeparator = _sThousandSeparator!;
+                nfi.NumberDecimalSeparator = _sDecimalSeparator!;
+                nfi.NumberDecimalDigits = 2;
+                nfi.NumberNegativePattern = 1;
+
+                nfi.CurrencySymbol = _sCurrency!;
+                nfi.CurrencyGroupSeparator = _sThousandSeparator;
+                nfi.CurrencyDecimalSeparator = _sThousandSeparator;
+                nfi.CurrencyDecimalDigits = 2;
+                nfi.CurrencyNegativePattern = 12;
+                nfi.CurrencyPositivePattern = 2;
             }
         }
 

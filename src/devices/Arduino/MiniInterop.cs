@@ -326,6 +326,30 @@ namespace Iot.Device.Arduino
                         throw new NotSupportedException();
                 }
             }
+
+            internal static unsafe int CompareStringEx(
+                char* lpLocaleName,
+                uint dwCmpFlags,
+                char* lpString1,
+                int cchCount1,
+                char* lpString2,
+                int cchCount2,
+                void* lpVersionInformation,
+                void* lpReserved,
+                IntPtr lParam)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal static unsafe int CompareStringOrdinal(
+                char* lpString1,
+                int cchCount1,
+                char* lpString2,
+                int cchCount2,
+                bool bIgnoreCase)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
