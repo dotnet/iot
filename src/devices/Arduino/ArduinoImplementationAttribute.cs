@@ -11,6 +11,14 @@ namespace Iot.Device.Arduino
     public class ArduinoImplementationAttribute : Attribute
     {
         /// <summary>
+        /// Default ctor. Use to indicate that a method is implemented in C#
+        /// </summary>
+        public ArduinoImplementationAttribute()
+        {
+            MethodNumber = ArduinoImplementation.None;
+        }
+
+        /// <summary>
         /// The attribute ctor
         /// </summary>
         /// <param name="methodNo">Number of the implementation method. Must match the firmata code.</param>

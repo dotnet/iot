@@ -983,7 +983,7 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            GetMethodDependencies(set, methodInfo, methodsRequired, typesRequired, fieldsRequired);
+            IlCodeParser.FindAndPatchTokens(set, methodInfo, methodsRequired, typesRequired, fieldsRequired);
 
             foreach (var method in methodsRequired)
             {
@@ -1182,7 +1182,7 @@ namespace Iot.Device.Arduino
 
             if (hasBody)
             {
-                ilBytes = GetMethodDependencies(set, methodInfo, foreignMethodsRequired, typesRequired, fieldsRequired);
+                ilBytes = IlCodeParser.FindAndPatchTokens(set, methodInfo, foreignMethodsRequired, typesRequired, fieldsRequired);
 
                 foreach (var type in typesRequired.Distinct())
                 {
@@ -1323,7 +1323,8 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
-            if (HasArduinoImplementationAttribute(a, out var attrib) && attrib!.CompareByParameterNames)
+            if ((HasArduinoImplementationAttribute(a, out var attrib) && attrib!.CompareByParameterNames) ||
+                (HasArduinoImplementationAttribute(b, out attrib) && attrib!.CompareByParameterNames))
             {
                 for (int i = 0; i < argsa.Length; i++)
                 {
@@ -1445,30 +1446,6 @@ namespace Iot.Device.Arduino
             }
 
             _board.Firmata.SendKillTask(decl.Index);
-        }
-
-        private byte[]? GetMethodDependencies(ExecutionSet set, MethodBase methodInstance, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
-        {
-            ////if (methodInstance.ContainsGenericParameters && !methodInstance.DeclaringType!.IsConstructedGenericType
-            ////&& methodInstance.DeclaringType != typeof(MiniUnsafe) && methodInstance.DeclaringType != typeof(MiniRuntimeHelpers)) // This one is a very special class, the type params are actually irrelevant
-            ////{
-            ////    throw new InvalidProgramException("No open generic types/methods supported");
-            ////}
-
-            MethodBody? body = methodInstance.GetMethodBody();
-            if (body == null)
-            {
-                // Method has no (visible) implementation, so it certainly has no code dependencies as well
-                return null;
-            }
-
-            /* if (body.ExceptionHandlingClauses.Count > 0)
-            {
-                throw new InvalidProgramException("Methods with exception handling are not supported");
-            } */
-
-            IlCodeParser parser = new IlCodeParser();
-            return parser.FindAndPatchTokens(set, methodInstance, body, methodsUsed, typesUsed, fieldsUsed);
         }
 
         public static Type GetSystemPrivateType(string typeName)

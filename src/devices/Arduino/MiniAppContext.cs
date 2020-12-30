@@ -9,5 +9,10 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(AppContext), true, false, IncludingPrivates = true)]
     internal class MiniAppContext
     {
+        public static bool TryGetSwitch(string switchName, out bool isEnabled)
+        {
+            isEnabled = false;
+            return false;
+        }
     }
 }

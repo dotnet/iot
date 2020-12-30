@@ -12,29 +12,60 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-////////////////////////////////////////////////////////////////////////////
-//
-//
-//
-//  Purpose:  This class represents the software preferences of a particular
-//            culture or community.  It includes information such as the
-//            language, writing system, and a calendar used by the culture
-//            as well as methods for common operations such as printing
-//            dates and sorting strings.
-//
-//
-//
-//  !!!! NOTE WHEN CHANGING THIS CLASS !!!!
-//
-//  If adding or removing members to this class, please update CultureInfoBaseObject
-//  in ndp/clr/src/vm/object.h. Note, the "actual" layout of the class may be
-//  different than the order in which members are declared. For instance, all
-//  reference types will come first in the class before value types (like ints, bools, etc)
-//  regardless of the order in which they are declared. The best way to see the
-//  actual order of the class is to do a !dumpobj on an instance of the managed
-//  object inside of the debugger.
-//
-////////////////////////////////////////////////////////////////////////////
+    internal enum CalendarId : ushort
+    {
+        UNINITIALIZED_VALUE = 0,
+        GREGORIAN = 1,     // Gregorian (localized) calendar
+        GREGORIAN_US = 2,     // Gregorian (U.S.) calendar
+        JAPAN = 3,     // Japanese Emperor Era calendar
+        /* SSS_WARNINGS_OFF */
+        TAIWAN = 4,     // Taiwan Era calendar /* SSS_WARNINGS_ON */
+        KOREA = 5,     // Korean Tangun Era calendar
+        HIJRI = 6,     // Hijri (Arabic Lunar) calendar
+        THAI = 7,     // Thai calendar
+        HEBREW = 8,     // Hebrew (Lunar) calendar
+        GREGORIAN_ME_FRENCH = 9,     // Gregorian Middle East French calendar
+        GREGORIAN_ARABIC = 10,     // Gregorian Arabic calendar
+        GREGORIAN_XLIT_ENGLISH = 11,     // Gregorian Transliterated English calendar
+        GREGORIAN_XLIT_FRENCH = 12,
+        // Note that all calendars after this point are MANAGED ONLY for now.
+        JULIAN = 13,
+        JAPANESELUNISOLAR = 14,
+        CHINESELUNISOLAR = 15,
+        SAKA = 16,     // reserved to match Office but not implemented in our code
+        LUNAR_ETO_CHN = 17,     // reserved to match Office but not implemented in our code
+        LUNAR_ETO_KOR = 18,     // reserved to match Office but not implemented in our code
+        LUNAR_ETO_ROKUYOU = 19,     // reserved to match Office but not implemented in our code
+        KOREANLUNISOLAR = 20,
+        TAIWANLUNISOLAR = 21,
+        PERSIAN = 22,
+        UMALQURA = 23,
+        LAST_CALENDAR = 23 // Last calendar ID
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    //
+    //
+    //
+    //  Purpose:  This class represents the software preferences of a particular
+    //            culture or community.  It includes information such as the
+    //            language, writing system, and a calendar used by the culture
+    //            as well as methods for common operations such as printing
+    //            dates and sorting strings.
+    //
+    //
+    //
+    //  !!!! NOTE WHEN CHANGING THIS CLASS !!!!
+    //
+    //  If adding or removing members to this class, please update CultureInfoBaseObject
+    //  in ndp/clr/src/vm/object.h. Note, the "actual" layout of the class may be
+    //  different than the order in which members are declared. For instance, all
+    //  reference types will come first in the class before value types (like ints, bools, etc)
+    //  regardless of the order in which they are declared. The best way to see the
+    //  actual order of the class is to do a !dumpobj on an instance of the managed
+    //  object inside of the debugger.
+    //
+    ////////////////////////////////////////////////////////////////////////////
     [ArduinoReplacement(typeof(CultureInfo), true, false, IncludingPrivates = true)]
     internal class MiniCultureInfo : IFormatProvider, ICloneable
     {
@@ -651,6 +682,33 @@ namespace Iot.Device.Arduino
             private static readonly string[] _saDurationFormats = new string[] { "HH:mm:ss" };
             private static readonly string[] _saLongDates = new string[] { "dddd, dd MMMM yyyy" };
             private static readonly string[] _saYearMonths = new string[] { "yyyy MMMM" };
+            private static readonly CalendarId[] _saCalendars = new CalendarId[]
+            {
+                CalendarId.GREGORIAN
+            };
+
+            private static readonly string[] _saEraNames = new string[] { "AD", "BC" };
+            private static readonly string[] _saAbbreviatedDayNames = new string[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            private static readonly string[] _saDayNames = new string[]
+            {
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+            };
+
+            private static readonly string[] _saAbbreviatedMonthNames = new string[]
+            {
+                "Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+            };
+
+            private static readonly string[] _saMonthNames = new string[]
+            {
+                "January", "February", "March", "April", "Mai", "June", "July", "August", "September", "October", "November", "December"
+            };
 
             public string CultureName
             {
@@ -711,13 +769,13 @@ namespace Iot.Device.Arduino
             }
 
             [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
-            public string[] LongDates(int calendarId)
+            public string[] LongDates(CalendarId calendarId)
             {
                 return _saLongDates;
             }
 
             [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
-            public string[] ShortDates(int calendarId)
+            public string[] ShortDates(CalendarId calendarId)
             {
                 return _saLongDates;
             }
@@ -739,15 +797,87 @@ namespace Iot.Device.Arduino
             }
 
             [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
-            public string[] YearMonths(int calendarId)
+            public string[] YearMonths(CalendarId calendarId)
             {
                 return _saYearMonths;
             }
 
+            /// <summary>
+            /// All available calendar type(s). The first one is the default calendar.
+            /// </summary>
+            internal CalendarId[] CalendarIds
+            {
+                get
+                {
+                    return _saCalendars;
+                }
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal string MonthDay(CalendarId calendarId)
+            {
+                return "MMMM dd";
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal MiniCultureData GetCalendar(CalendarId calendarId)
+            {
+                return this;
+            }
+
             [SuppressMessage("Microsoft.Naming", "SA1300", Justification = "Runtime method name")]
-            public static string[]? nativeEnumTimeFormats(string localeName, uint dwFlags, bool useUserOverride)
+            internal static string[]? nativeEnumTimeFormats(string localeName, uint dwFlags, bool useUserOverride)
             {
                 throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal String[] EraNames(CalendarId calendarId)
+            {
+                return _saEraNames;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal String[] AbbreviatedDayNames(CalendarId calendarId)
+            {
+                return _saAbbreviatedDayNames;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal String[] DayNames(CalendarId calendarId)
+            {
+                return _saDayNames;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal String[] AbbreviatedGenitiveMonthNames(CalendarId calendarId)
+            {
+                return _saAbbreviatedMonthNames;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal String[] AbbreviatedMonthNames(CalendarId calendarId)
+            {
+                return _saAbbreviatedMonthNames;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal String[] MonthNames(CalendarId calendarId)
+            {
+                return _saMonthNames;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal String[] GenitiveMonthNames(CalendarId calendarId)
+            {
+                return _saMonthNames;
+            }
+
+            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            internal string[] LeapYearMonthNames(CalendarId calendarId)
+            {
+                // Only used in hebrew
+                return null!;
             }
         }
 

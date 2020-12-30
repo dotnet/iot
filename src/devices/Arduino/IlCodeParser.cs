@@ -7,13 +7,9 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    internal class IlCodeParser
+    internal static class IlCodeParser
     {
-        public IlCodeParser()
-        {
-        }
-
-        private OpCode DecodeOpcode(byte[] pCode, ref int index)
+        private static OpCode DecodeOpcode(byte[] pCode, ref int index)
         {
             OpCode opcode;
             int pdwLen = 1;
@@ -51,9 +47,16 @@ namespace Iot.Device.Arduino
         /// method depends on (fields, classes and other methods). Then we do a lookup and patch the token with a replacement token that
         /// is unique within our program. So we do not have to care about module boundaries.
         /// </summary>
-        public byte[] FindAndPatchTokens(ExecutionSet set, MethodBase method, MethodBody body, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
+        public static byte[]? FindAndPatchTokens(ExecutionSet set, MethodBase method, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
             // We need to copy the code, because we're going to patch it
+            var body = method.GetMethodBody();
+            if (body == null)
+            {
+                // Method has no (visible) implementation, so it certainly has no code dependencies as well
+                return null;
+            }
+
             var byteCode = body.GetILAsByteArray()?.ToArray();
             if (byteCode == null)
             {
@@ -248,7 +251,7 @@ namespace Iot.Device.Arduino
             return byteCode;
         }
 
-        private MemberInfo? ResolveMember(MethodBase method, int metadataToken)
+        private static MemberInfo? ResolveMember(MethodBase method, int metadataToken)
         {
             Type type = method.DeclaringType!;
             Type[] typeArgs = new Type[0];
