@@ -92,7 +92,7 @@ namespace Iot.Device.Max31865
             get
             {
                 Span<byte> readBuffer = stackalloc byte[2];
-                WriteRead(Register.FaultSatus, readBuffer);
+                WriteRead(Register.FaultStatus, readBuffer);
 
                 return new FaultStatus(
                     (readBuffer[1] & 0x04) == 0x04,
