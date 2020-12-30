@@ -6,8 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="Mlx90640.cs" />
-    <Compile Include="Sampling.cs" />
     <Compile Include="*.cs" />
   </ItemGroup>
 
