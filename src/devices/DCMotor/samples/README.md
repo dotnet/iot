@@ -24,7 +24,7 @@ static void Main(string[] args)
     // 3 pin mode
     // using (DCMotor motor = DCMotor.Create(PwmChannel.Create(0, 0, frequency: 50), 23, 24))
     // Start Stop mode - wrapper with additional methods to disable/enable output regardless of the Speed value
-    // using (DCMotorWithStartStop motor = new DCMotorWithStartStop(DCMotor.Create( _any version above_ )))
+    // using (DCMotorStartStop motor = new DCMotorStartStop(DCMotor.Create( _any version above_ )))
     using (DCMotor motor = DCMotor.Create(6, 27, 22))
     {
         bool done = false;

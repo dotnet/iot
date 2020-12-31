@@ -1,18 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
-
-using System;
-using System.Device.Gpio;
-using System.Device.Pwm;
-using System.Device.Pwm.Drivers;
 
 namespace Iot.Device.DCMotor
 {
     /// <summary>
     /// Direct current (DC) motor with Start/Stop
     /// </summary>
-    public class DCMotorWithStartStop : DCMotor
+    public class DCMotorStartStop : DCMotor
     {
         private DCMotor _inner;
         private bool _stopped = false;
@@ -22,7 +16,7 @@ namespace Iot.Device.DCMotor
         /// Constructs instance with added Start() and Stop() as additional protection
         /// </summary>
         /// <param name="innerMotor">Crate DCMotor instance</param>
-        public DCMotorWithStartStop(DCMotor innerMotor)
+        public DCMotorStartStop(DCMotor innerMotor)
             : base(null, false)
         {
             _inner = innerMotor;
@@ -60,6 +54,25 @@ namespace Iot.Device.DCMotor
                 if (!_stopped)
                 {
                     _inner.Speed = _speed;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get or Set motor status.
+        /// </summary>
+        public bool Enabled
+        {
+            get => !_stopped;
+            set
+            {
+                if (value)
+                {
+                    Start();
+                }
+                else
+                {
+                    Stop();
                 }
             }
         }
