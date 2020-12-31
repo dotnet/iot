@@ -171,7 +171,7 @@ namespace Iot.Device.Max31865
         /// <remarks>
         /// This math originates from: http://www.analog.com/media/en/technical-documentation/application-notes/AN709_0.pdf
         /// </remarks>
-        /// <returns></returns>
+        /// <returns>Temperature in degrees celsius</returns>
         private double GetTemperature()
         {
             short rtdNominal = (short)_prtType;
@@ -212,9 +212,9 @@ namespace Iot.Device.Max31865
         }
 
         /// <summary>
-        /// Read the resistance of the resistance temperature detector and return its value in Ohms.
+        /// Read the resistance of the resistance temperature detector.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>Resistance in Ohms</returns>
         private double GetResistance()
         {
             double rtd = ReadRawRTD();
