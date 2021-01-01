@@ -58,6 +58,7 @@ namespace Iot.Device.Arduino
         OutOfMemory = 3
     }
 
+    [Flags]
     public enum VariableKind : byte
     {
         Void = 0, // The slot contains no data
@@ -397,7 +398,7 @@ namespace Iot.Device.Arduino
                 var fieldType = GetVariableType(field.FieldType, out _);
                 if (field.IsStatic)
                 {
-                    fieldType = VariableKind.StaticMember;
+                    fieldType |= VariableKind.StaticMember;
                 }
 
                 var newvar = new ExecutionSet.VariableOrMethod(fieldType, set.GetOrAddFieldToken(field), new List<int>());

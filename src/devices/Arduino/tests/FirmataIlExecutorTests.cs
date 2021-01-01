@@ -546,9 +546,18 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("CharArrayTest", 10, 0, 'A')]
         [InlineData("ByteArrayTest", 10, 0, 255)]
         [InlineData("BoxedArrayTest", 5, 2, 7)]
+        public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
+        {
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
+        }
+
+        [Theory]
         [InlineData("StructCtorBehaviorTest1", 5, 1, 2)]
         [InlineData("StructCtorBehaviorTest2", 5, 1, 5)]
-        public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
+        [InlineData("StructMethodCall1", 66, 33, -99)]
+        [InlineData("StructMethodCall2", 66, 33, -66)]
+        [InlineData("StructArray", 5, 2, 10)]
+        public void StructTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
@@ -604,6 +613,42 @@ namespace Iot.Device.Arduino.Tests
             SmallStruct s = default;
             s.Ticks = size;
             return (int)s.Ticks;
+        }
+
+        public static int StructMethodCall1(int arg1, int arg2)
+        {
+            SmallStruct s = default;
+            s.Ticks = arg1;
+            s.Add(arg2);
+            var t = -s;
+            return (int)t.Ticks;
+        }
+
+        public static int StructMethodCall2(int arg1, int arg2)
+        {
+            SmallStruct s = default;
+            s.Ticks = arg1;
+            s.Negate();
+            return (int)s.Ticks;
+        }
+
+        public static int StructArray(int size, int indexToRetrieve)
+        {
+            SmallStruct a = new SmallStruct(2);
+            SmallStruct[] array = new SmallStruct[size];
+            array[0].Ticks = 5;
+            array[1] = a;
+            array[2] = new SmallStruct(10);
+
+            a.Ticks = 27;
+            if (array[1].Ticks == 27)
+            {
+                // This shouldn't happen (copying a to the array above should make a copy)
+                throw new InvalidProgramException();
+            }
+
+            SmallStruct t = array[indexToRetrieve];
+            return (int)t.Ticks;
         }
 
         private struct SmallStruct
