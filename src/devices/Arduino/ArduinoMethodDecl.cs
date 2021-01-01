@@ -69,13 +69,13 @@ namespace Iot.Device.Arduino
             {
                 if (methodInfo.ReturnParameter == null || methodInfo.ReturnParameter.ParameterType == typeof(void))
                 {
-                    Flags |= MethodFlags.VoidOrCtor;
+                    Flags |= MethodFlags.Void;
                 }
             }
 
-            if (methodBase.IsConstructor)
+            if (methodBase.IsConstructor && !methodBase.IsStatic)
             {
-                Flags |= MethodFlags.VoidOrCtor;
+                Flags |= MethodFlags.Ctor;
             }
 
             if (methodBase.IsAbstract)
@@ -104,9 +104,19 @@ namespace Iot.Device.Arduino
 
             MethodInfo? mi = methodBase as MethodInfo;
 
-            if ((mi != null && mi.ReturnParameter.ParameterType == typeof(void)) || methodBase.IsConstructor)
+            if (mi != null && mi.ReturnParameter.ParameterType == typeof(void))
             {
-                Flags |= MethodFlags.VoidOrCtor;
+                Flags |= MethodFlags.Void;
+            }
+
+            if (methodBase.IsConstructor && !methodBase.IsStatic)
+            {
+                Flags |= MethodFlags.Ctor;
+            }
+
+            if (methodBase.IsStatic)
+            {
+                Flags |= MethodFlags.Static;
             }
 
             if (methodBase.IsVirtual)

@@ -8,6 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
+using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
@@ -545,6 +546,8 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("CharArrayTest", 10, 0, 'A')]
         [InlineData("ByteArrayTest", 10, 0, 255)]
         [InlineData("BoxedArrayTest", 5, 2, 7)]
+        [InlineData("StructCtorBehaviorTest1", 5, 1, 2)]
+        [InlineData("StructCtorBehaviorTest2", 5, 1, 5)]
         public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
@@ -583,6 +586,63 @@ namespace Iot.Device.Arduino.Tests
             array[1] = 2;
             array[2] = 7;
             return (int)array[indexToRetrieve];
+        }
+
+        public static int StructCtorBehaviorTest1(int size, int indexToRetrieve)
+        {
+            object[] array = new object[size];
+            array[0] = new object();
+            array[1] = new SmallStruct(2);
+            array[2] = 7;
+
+            SmallStruct t = (SmallStruct)array[indexToRetrieve];
+            return (int)t.Ticks;
+        }
+
+        public static int StructCtorBehaviorTest2(int size, int indexToRetrieve)
+        {
+            SmallStruct s = default;
+            s.Ticks = size;
+            return (int)s.Ticks;
+        }
+
+        private struct SmallStruct
+        {
+            private Int64 _ticks;
+
+            public SmallStruct(Int64 ticks)
+            {
+                _ticks = ticks;
+            }
+
+            public Int64 Ticks
+            {
+                get
+                {
+                    return _ticks;
+                }
+                set
+                {
+                    _ticks = value;
+                }
+            }
+
+            public void Add(int moreTicks)
+            {
+                _ticks += moreTicks;
+            }
+
+            public void Negate()
+            {
+                // stupid implementation, but test case
+                SmallStruct s2 = -this;
+                _ticks = s2.Ticks;
+            }
+
+            public static SmallStruct operator -(SmallStruct st)
+            {
+                return new SmallStruct(-st.Ticks);
+            }
         }
     }
 }

@@ -37,8 +37,9 @@ namespace Iot.Device.Arduino
         Static = 1,
         Virtual = 2,
         SpecialMethod = 4, // Method will resolve to a built-in function on the arduino
-        VoidOrCtor = 8, // The method returns void or is a ctor (which only implicitly returns "this")
-        Abstract = 16, // The method is abstract (or an interface stub)
+        Void = 8, // The method returns void
+        Ctor = 16, // The method is a ctor (which only implicitly returns "this"); the flag is not set for static ctors.
+        Abstract = 32, // The method is abstract (or an interface stub)
     }
 
     public enum MethodState
