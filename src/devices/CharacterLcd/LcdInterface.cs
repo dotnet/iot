@@ -5,6 +5,7 @@ using System;
 using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Threading;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -38,6 +39,19 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <param name="values">Each byte represents command to be send</param>
         public abstract void SendCommands(ReadOnlySpan<byte> values);
+
+        /// <summary>
+        /// The initialization sequence and some other complex commands should be sent with delays, or the display may
+        /// behave unexpectedly. It may show random, blinking characters
+        /// or display text very faintly only.
+        /// </summary>
+        /// <param name="command">The command to send</param>
+        public virtual void SendCommandAndWait(byte command)
+        {
+            // Must not run the init sequence to fast or undefined behavior may occur
+            SendCommand(command);
+            Thread.Sleep(1);
+        }
 
         /// <summary>
         /// True if device uses 8-bits for communication, false if device uses 4-bits
