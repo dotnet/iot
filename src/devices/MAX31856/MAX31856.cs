@@ -24,14 +24,14 @@ namespace Iot.Device.MAX31856
         public const int SpiClockFrequency = 5_000_000;
 
         /// <summary>
-        /// Spi Clock Frequency from the Technical Manual of the device
+        /// Set the SPI data flow to MSB First
         /// </summary>
-        public const int DataFlow = 0;
+        public const DataFlow SpiDataFlow = DataFlow.MsbFirst;
 
         /// <summary>
         /// MAX31856 SPI Mode
         /// </summary>
-        public const SpiMode SpiMode = System.Device.Spi.SpiMode.Mode1;
+        public const SpiMode SpiModeSetup = SpiMode.Mode1;
 
         #endregion
 
@@ -46,12 +46,12 @@ namespace Iot.Device.MAX31856
             try
             {
                 temperature = ReadTemperature(out byte[] spiOutputData);
-                return true;
+                return false;
             }
             catch (IOException)
             {
                 temperature = new Temperature();
-                return false;
+                return true;
             }
         }
 
@@ -67,7 +67,7 @@ namespace Iot.Device.MAX31856
         /// Creates a new instance of the max31856.
         /// </summary>
         /// <param name="spiDevice">The communications channel to a device on a SPI bus</param>
-        /// <param name="thermocoupleType">Thermocouple Type T,K,R</param>
+        /// <param name="thermocoupleType">Thermocouple Default Type is T can change to B,E,J,K,N,R,S</param>
         public MAX31856(SpiDevice spiDevice, ThermocoupleType thermocoupleType)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
@@ -204,6 +204,5 @@ namespace Iot.Device.MAX31856
             _spiDevice?.Dispose();
             _spiDevice = null!;
         }
-
     }
 }
