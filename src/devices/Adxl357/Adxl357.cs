@@ -23,7 +23,7 @@ namespace Iot.Device.Adxl357
         public const byte DefaultI2CAddress = 0x1d;
 
         // Default values taken from sample code https://wiki.seeedstudio.com/Grove-3-Axis_Digital_Accelerometer_40g-ADXL357/
-        private const int CalibrationBufferLengthDefault = 15;
+        private const int SamplesDefault = 15;
         private const int CalibrationIntervalDefault = 250;
 
         private float _factory = 1;
@@ -57,18 +57,18 @@ namespace Iot.Device.Adxl357
 
         /// <summary>
         /// Calibrates the accelerometer.
-        /// You can override default <paramref name="calibrationBufferLength"/> and <paramref name="calibrationInterval"/> if required.
+        /// You can override default <paramref name="samples"/> and <paramref name="calibrationInterval"/> if required.
         /// </summary>
-        /// <param name="calibrationBufferLength">The number of times every axis is measured. The average of these measurements is used to calibrate each axis.</param>
+        /// <param name="samples">The number of times every axis is measured. The average of these measurements is used to calibrate each axis.</param>
         /// <param name="calibrationInterval">The time in milliseconds to wait between each measurement.</param>
         /// <remarks>
         /// Make sure that the sensor is placed horizontally when executing this method.
         /// </remarks>
-        public async Task CalibrateAccelerationSensor(int calibrationBufferLength = CalibrationBufferLengthDefault, int calibrationInterval = CalibrationIntervalDefault)
+        public async Task CalibrateAccelerationSensor(int samples = SamplesDefault, int calibrationInterval = CalibrationIntervalDefault)
         {
-            var caliBuffer = new Vector3[calibrationBufferLength];
+            var caliBuffer = new Vector3[samples];
 
-            for (int i = 0; i < calibrationBufferLength; i++)
+            for (int i = 0; i < samples; i++)
             {
                 var acc = GetRawAccelerometer();
                 caliBuffer[i].X = acc.X;
