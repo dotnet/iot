@@ -85,11 +85,11 @@ namespace Iot.Device.DistanceSensor
         {
             try
             {
-            WriteRegister(Register.ACQ_COMMAND, 0x00);
-        }
+                WriteRegister(Register.ACQ_COMMAND, 0x00);
+            }
             catch (IOException ex)
             {
-                // `IOException: Error 121 performing I2C data transfer.` is thrown every time 
+                // `IOException: Error 121 performing I2C data transfer.` is thrown every time
                 // the device is reset on the Raspberry PI.  I think the reset signal causes
                 // a disruption in the I2C connection.  Without shallowing this exception,
                 // Reset() would always throw the IOException.
