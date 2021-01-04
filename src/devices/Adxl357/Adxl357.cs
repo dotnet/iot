@@ -60,13 +60,14 @@ namespace Iot.Device.Adxl357
         /// You can override default <paramref name="samples"/> and <paramref name="calibrationInterval"/> if required.
         /// </summary>
         /// <param name="samples">The number of times every axis is measured. The average of these measurements is used to calibrate each axis.</param>
-        /// <param name="calibrationInterval">The time in milliseconds to wait between each measurement.</param>
+        /// <param name="calibrationInterval">The time in milliseconds to wait between each measurement. If null is provided, <see cref="CalibrationIntervalDefault"/> in milliseconds is used.</param>
         /// <remarks>
         /// Make sure that the sensor is placed horizontally when executing this method.
         /// </remarks>
-        public async Task CalibrateAccelerationSensor(int samples = SamplesDefault, int calibrationInterval = CalibrationIntervalDefault)
+        public async Task CalibrateAccelerationSensor(int samples = SamplesDefault, TimeSpan? calibrationInterval = null)
         {
             var caliBuffer = new Vector3[samples];
+            calibrationInterval ??= TimeSpan.FromMilliseconds(CalibrationIntervalDefault);
 
             for (int i = 0; i < samples; i++)
             {
@@ -75,7 +76,7 @@ namespace Iot.Device.Adxl357
                 caliBuffer[i].Y = acc.Y;
                 caliBuffer[i].Z = acc.Z;
 
-                await Task.Delay(calibrationInterval).ConfigureAwait(false);
+                await Task.Delay(calibrationInterval.Value).ConfigureAwait(false);
             }
 
             var avgX = caliBuffer.Select(v => v.X).Average();

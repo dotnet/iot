@@ -11,7 +11,7 @@ I2cConnectionSettings i2CConnectionSettings = new I2cConnectionSettings(1, Adxl3
 I2cDevice device = I2cDevice.Create(i2CConnectionSettings);
 using Adxl357 sensor = new Adxl357(device, AccelerometerRange.Range40G);
 int samples = 10;
-int calibrationInterval = 100;
+TimeSpan calibrationInterval = TimeSpan.FromMilliseconds(100);
 await sensor.CalibrateAccelerationSensor(samples, calibrationInterval).ConfigureAwait(false);
 while (true)
 {
