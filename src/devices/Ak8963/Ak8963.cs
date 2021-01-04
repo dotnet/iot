@@ -71,6 +71,7 @@ namespace Iot.Device.Magnetometer
         /// <summary>
         /// Reset the device
         /// </summary>
+        [Command]
         public void Reset()
         {
             WriteRegister(Register.RSV, 0x01);

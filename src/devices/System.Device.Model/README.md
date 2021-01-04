@@ -64,13 +64,13 @@ Usage is similar to Telemetry with some additions:
 - it's not allowed for more than one writers or readers with the same name to be present on the same interface
 
 ```csharp
-        [Property]
-        public Sampling HumiditySampling { get { /*...*/ } set { /* ... */ } }
+[Property]
+public Sampling HumiditySampling { get { /*...*/ } set { /* ... */ } }
 
-        [Property("PowerMode")]
-        public void SetPowerMode(Bme680PowerMode powerMode) { /*...*/ }
-        [Property("PowerMode")]
-        public Bme680PowerMode ReadPowerMode() { /*...*/ }
+[Property("PowerMode")]
+public void SetPowerMode(Bme680PowerMode powerMode) { /*...*/ }
+[Property("PowerMode")]
+public Bme680PowerMode ReadPowerMode() { /*...*/ }
 ```
 
 ## ComponentAttribute
@@ -79,14 +79,14 @@ Components represent references to other (instances) of interfaces.
 They can only be put on the properties, the return type of the property or its ancestor class should have an `Interface` attribute.
 
 ```csharp
-        [Component]
-        public SenseHatTemperatureAndHumidity TemperatureAndHumidity { get; private set; }
+[Component]
+public SenseHatTemperatureAndHumidity TemperatureAndHumidity { get; private set; }
 
 // ...
-    public class SenseHatTemperatureAndHumidity : Hts221.Hts221 { /* ... */ }
+public class SenseHatTemperatureAndHumidity : Hts221.Hts221 { /* ... */ }
 // ...
-    [Interface("HTS221 - Capacitive digital sensor for relative humidity and temperature")]
-    public class Hts221 : IDisposable { /* ... */ }
+[Interface("HTS221 - Capacitive digital sensor for relative humidity and temperature")]
+public class Hts221 : IDisposable { /* ... */ }
 ```
 
 ## CommandAttribute
@@ -94,10 +94,10 @@ They can only be put on the properties, the return type of the property or its a
 Commands can be something which can be executed on the device and they can be put only on methods.
 
 ```csharp
-        [Command]
-        public void PlayTone(double frequency, int duraton) { /* ... */ }
-        [Command]
-        protected override void SetDefaultConfiguration() { /* ... */ }
+[Command]
+public void PlayTone(double frequency, int duraton) { /* ... */ }
+[Command]
+protected override void SetDefaultConfiguration() { /* ... */ }
 ```
 
 ## Type serialization

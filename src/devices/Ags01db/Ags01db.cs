@@ -37,6 +37,7 @@ namespace Iot.Device.Ags01db
         /// <summary>
         /// ASG01DB Version
         /// </summary>
+        [Property]
         public byte Version => GetVersion();
 
         /// <summary>

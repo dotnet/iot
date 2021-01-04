@@ -98,7 +98,6 @@ namespace Iot.Device.Bmp180
         /// <returns>
         ///  Height in meters above sea level
         /// </returns>
-        [Telemetry("Altitude")]
         public Length ReadAltitude() => ReadAltitude(WeatherHelper.MeanSeaLevel);
 
         /// <summary>
