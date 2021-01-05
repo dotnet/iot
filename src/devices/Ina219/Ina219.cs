@@ -6,13 +6,14 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Device;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Diagnostics.CodeAnalysis;
 using UnitsNet;
 
 namespace Iot.Device.Adc
 {
     /// <summary>
-    /// Binding that exposes an INA219 Bidirectional Current/Power monitor.
+    /// INA219 Bidirectional Current/Power monitor.
     ///
     /// The INA219 is a high-side current shunt and power monitor with an I2C interface.
     /// The INA219 monitors both shunt drop and supply voltage, with programmable conversion
@@ -20,6 +21,7 @@ namespace Iot.Device.Adc
     /// enables direct readouts in amperes. An additional multiplying register calculates power in watts.
     /// <see href="http://www.ti.com/lit/ds/symlink/ina219.pdf"/>
     /// </summary>
+    [Interface("INA219 Bidirectional Current/Power monitor")]
     public class Ina219 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -72,6 +74,7 @@ namespace Iot.Device.Adc
         /// <summary>
         /// Reset the INA219 to default values;
         /// </summary>
+        [Command]
         public void Reset()
         {
             // Reset the device by sending a value to the configuration register with the reset but set.
@@ -91,6 +94,7 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This allows the user to selects continuous, triggered, or power-down mode of operation along with which of the shunt and bus voltage measurements are made.
         /// </remarks>
+        [Property]
         public Ina219OperatingMode OperatingMode
         {
             get => (Ina219OperatingMode)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.ModeMask);
@@ -112,6 +116,7 @@ namespace Iot.Device.Adc
         /// This allows the user to selects eiter a 16V range or a 32V range for the ADC reading the bus voltage.
         /// In general the lowest range compatible with the application parameters should be selected.
         /// </remarks>
+        [Property]
         public Ina219BusVoltageRange BusVoltageRange
         {
             get => (Ina219BusVoltageRange)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.BrngMask);
@@ -133,6 +138,7 @@ namespace Iot.Device.Adc
         /// This allows the user to selects a gain for the amplifier reading the shunt voltage before it is applied to the ADC. It can be one of +/-40mV, +/-80mV, +/-160mV or +/-320mV.
         /// In general the lowest range compatible with the application parameters should be selected.
         /// </remarks>
+        [Property]
         public Ina219PgaSensitivity PgaSensitivity
         {
             get => (Ina219PgaSensitivity)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.PgaMask);
@@ -153,6 +159,7 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This can either by the number of bits used for the ADC conversion (9-12 bits) or the number of samples at 12 bits to be averaged for the result.
         /// </remarks>
+        [Property]
         public Ina219AdcResolutionOrSamples BusAdcResolutionOrSamples
         {
             get => (Ina219AdcResolutionOrSamples)((ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.BadcMask) >> 4);
@@ -175,6 +182,7 @@ namespace Iot.Device.Adc
         /// <remarks>
         /// This can either by the number of bits used for the ADC conversion (9-12 bits) or the number of samples at 12 bits to be averaged for the result.
         /// </remarks>
+        [Property]
         public Ina219AdcResolutionOrSamples ShuntAdcResolutionOrSamples
         {
             get => (Ina219AdcResolutionOrSamples)(ReadRegister(Ina219Register.Configuration) & (ushort)Ina219ConfigurationFlags.SadcMask);
@@ -204,6 +212,7 @@ namespace Iot.Device.Adc
         /// </remarks>
         /// <param name="calibrationValue">The number of Amperes represented by the LSB of the INA219 current register.</param>
         /// <param name="currentLsb">The current value in Amperes of the least significan bit of the calibration register. Defaults to unity so that the register can be read directly.</param>
+        [Command]
         public void SetCalibration(ushort calibrationValue, float currentLsb = 1.0F)
         {
             // cache the values for later use
@@ -231,6 +240,7 @@ namespace Iot.Device.Adc
         /// </summary>
         /// <returns>The shunt potential difference</returns>
         // read the shunt voltage. LSB = 10uV then convert to Volts
+        [Telemetry("ShuntVoltage")]
         public ElectricPotential ReadShuntVoltage() => ElectricPotential.FromVolts(ReadRegister(Ina219Register.ShuntVoltage, s_readDelays[(Ina219AdcResolutionOrSamples)_shuntAdcResSamp]) * 10.0 / 1000000.0);
 
         /// <summary>
@@ -238,6 +248,7 @@ namespace Iot.Device.Adc
         /// </summary>
         /// <returns>The Bus potential (voltage)</returns>
         // read the bus voltage. LSB = 4mV then convert to Volts
+        [Telemetry("BusVoltage")]
         public ElectricPotential ReadBusVoltage() => ElectricPotential.FromVolts(((short)ReadRegister(Ina219Register.BusVoltage, s_readDelays[_busAdcResSamp]) >> 3) * 4 / 1000.0);
 
         /// <summary>
@@ -247,6 +258,7 @@ namespace Iot.Device.Adc
         /// This value is determined by an internal calculation using the calibration register and the read shunt voltage and then scaled.
         /// </remarks>
         /// <returns>The calculated current</returns>
+        [Telemetry("Current")]
         public ElectricCurrent ReadCurrent()
         {
             // According to Adafruit then large changes in load will reset the cal register
@@ -265,6 +277,7 @@ namespace Iot.Device.Adc
         /// This value is determined by an internal calculation using the calulated current and the read bus voltage and then scaled.
         /// </remarks>
         /// <returns>The calculated electric power</returns>
+        [Telemetry("Power")]
         public Power ReadPower()
         {
             // According to Adafruit then large changes in load will reset the cal register

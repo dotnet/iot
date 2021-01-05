@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.Model;
 using System.IO;
 using System.IO.Ports;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Iot.Device.Mhz19b
     /// <summary>
     /// MH-Z19B CO2 concentration sensor binding
     /// </summary>
+    [Interface("MH-Z19B CO2 concentration sensor binding")]
     public sealed class Mhz19b : IDisposable
     {
         private const int MessageBytes = 9;
@@ -62,6 +64,7 @@ namespace Iot.Device.Mhz19b
         /// <returns>CO2 volume concentration</returns>
         /// <exception cref="IOException">Communication with sensor failed</exception>
         /// <exception cref="TimeoutException">A timeout occurred while communicating with the sensor</exception>
+        [Telemetry("Co2Concentration")]
         public VolumeConcentration GetCo2Reading()
         {
             // send read command request
@@ -100,6 +103,7 @@ namespace Iot.Device.Mhz19b
         /// Initiates a zero point calibration.
         /// </summary>
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        [Command]
         public void PerformZeroPointCalibration() => SendRequest(CreateRequest(Command.CalibrateZeroPoint));
 
         /// <summary>
@@ -108,6 +112,7 @@ namespace Iot.Device.Mhz19b
         /// <param name="span">span value, between 1000[ppm] and 5000[ppm]. The typical value is 2000[ppm].</param>
         /// <exception cref="System.ArgumentException">Thrown when span value is out of range</exception>
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        [Command]
         public void PerformSpanPointCalibration(VolumeConcentration span)
         {
             if ((span.PartsPerMillion < 1000) || (span.PartsPerMillion > 5000))
@@ -128,6 +133,7 @@ namespace Iot.Device.Mhz19b
         /// </summary>
         /// <param name="state">State of automatic correction</param>
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        [Command]
         public void SetAutomaticBaselineCorrection(AbmState state)
         {
             byte[] request = CreateRequest(Command.AutoCalibrationSwitch);
@@ -142,6 +148,7 @@ namespace Iot.Device.Mhz19b
         /// </summary>
         /// <param name="detectionRange">Detection range of the sensor</param>
         /// <exception cref="System.IO.IOException">Communication with sensor failed</exception>
+        [Property("DetectionRange")]
         public void SetSensorDetectionRange(DetectionRange detectionRange)
         {
             byte[] request = CreateRequest(Command.DetectionRangeSetting);

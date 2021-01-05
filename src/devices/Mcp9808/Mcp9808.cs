@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
 using UnitsNet;
 
@@ -11,6 +12,7 @@ namespace Iot.Device.Mcp9808
     /// <summary>
     /// Microchip's MCP9808 I2C Temp sensor
     /// </summary>
+    [Interface("Microchip's MCP9808 I2C Temp sensor")]
     public class Mcp9808 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -25,6 +27,7 @@ namespace Iot.Device.Mcp9808
         /// <summary>
         /// MCP9808 Temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature { get => Temperature.FromDegreesCelsius(GetTemperature()); }
 
         private bool _disable;
@@ -32,6 +35,7 @@ namespace Iot.Device.Mcp9808
         /// <summary>
         /// Disable MCP9808
         /// </summary>
+        [Property]
         public bool Disabled
         {
             get => _disable;
@@ -82,11 +86,13 @@ namespace Iot.Device.Mcp9808
         /// Return the internal resolution register
         /// </summary>
         /// <returns>Resolution setting</returns>
+        [Property("Resolution")]
         public byte GetResolution() => Read8(Register8.MCP_RESOLUTION);
 
         /// <summary>
         /// Wakes-up the device
         /// </summary>
+        [Command]
         public void Wake()
         {
             SetShutdown(false);
@@ -98,6 +104,7 @@ namespace Iot.Device.Mcp9808
         /// <summary>
         /// Shuts down the device
         /// </summary>
+        [Command]
         public void Shutdown() => SetShutdown(true);
 
         /// <summary>

@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Numerics;
 
 namespace Iot.Device.Lsm9Ds1
@@ -11,6 +12,7 @@ namespace Iot.Device.Lsm9Ds1
     /// <summary>
     /// LSM9DS1 accelerometer and gyroscope
     /// </summary>
+    [Interface("LSM9DS1 accelerometer and gyroscope")]
     public class Lsm9Ds1AccelerometerAndGyroscope : IDisposable
     {
         private const byte ReadMask = 0x80;
@@ -44,11 +46,13 @@ namespace Iot.Device.Lsm9Ds1
         /// <summary>
         /// Acceleration measured in degrees per second (DPS)
         /// </summary>
+        [Telemetry(displayName: "Acceleration measured in degrees per second (DPS)")]
         public Vector3 AngularRate => Vector3.Divide(ReadVector3(RegisterAG.AngularRateX), GetAngularRateDivisor());
 
         /// <summary>
         /// Acceleration measured in gravitational force
         /// </summary>
+        [Telemetry(displayName: "Acceleration measured in gravitational force")]
         public Vector3 Acceleration => Vector3.Divide(ReadVector3(RegisterAG.AccelerometerX), GetAccelerationDivisor());
 
         private Vector3 ReadVector3(RegisterAG register)

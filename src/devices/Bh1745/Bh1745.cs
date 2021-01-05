@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Drawing;
 using System.Linq;
 
@@ -19,6 +20,7 @@ namespace Iot.Device.Bh1745
     /// <summary>
     /// Digital color sensor Bh1745.
     /// </summary>
+    [Interface("Digital color sensor Bh1745.")]
     public class Bh1745 : IDisposable
     {
         private byte ManufacturerId => Read8BitsFromRegister((byte)Register.MANUFACTURER_ID);
@@ -89,6 +91,7 @@ namespace Iot.Device.Bh1745
         /// Gets or sets the currently set measurement time.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if invalid MeasurementTime is set.</exception>
+        [Property]
         public MeasurementTime MeasurementTime
         {
             get => _measurementTime;
@@ -127,6 +130,7 @@ namespace Iot.Device.Bh1745
         /// Gets or sets the adc gain of the sensor.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown if invalid AdcGain is set.</exception>
+        [Property]
         public AdcGain AdcGain
         {
             get => _adcGain;
@@ -273,6 +277,7 @@ namespace Iot.Device.Bh1745
         /// Resets the device to the default configuration.
         /// On reset the sensor goes to power down mode.
         /// </summary>
+        [Command]
         public void Reset()
         {
             var status = Read8BitsFromRegister((byte)Register.SYSTEM_CONTROL);
@@ -336,6 +341,7 @@ namespace Iot.Device.Bh1745
         /// Gets the compensated color reading from the sensor.
         /// </summary>
         /// <returns></returns>
+        [Telemetry]
         public Color GetCompensatedColor()
         {
             var clearDataRaw = ReadClearDataRegister();
