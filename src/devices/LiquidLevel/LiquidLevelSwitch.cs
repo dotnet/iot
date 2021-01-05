@@ -3,12 +3,14 @@
 
 using System;
 using System.Device.Gpio;
+using System.Device.Model;
 
 namespace Iot.Device.LiquidLevel
 {
     /// <summary>
-    /// Supports any single pin output digital liquid level switch which is configured
+    /// Digital liquid level switch
     /// </summary>
+    [Interface("Digital liquid level switch")]
     public class LiquidLevelSwitch : IDisposable
     {
         private readonly int _dataPin;
@@ -38,6 +40,7 @@ namespace Iot.Device.LiquidLevel
         /// Determines whether liquid is present.
         /// </summary>
         /// <returns><code>true</code> if liquid is present, otherwise <code>false</code>.</returns>
+        [Telemetry]
         public bool IsLiquidPresent() => _controller.Read(_dataPin) == _liquidPresentPinState;
 
         /// <summary>

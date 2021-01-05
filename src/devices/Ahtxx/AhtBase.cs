@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
 using UnitsNet;
 
@@ -11,6 +12,7 @@ namespace Iot.Device.Ahtxx
     /// <summary>
     ///  Base class for common functions of the AHT10/15 and AHT20 sensors.
     /// </summary>
+    [Interface("AHTxx temperature and humidity sensor")]
     public abstract class AhtBase : IDisposable
     {
         /// <summary>
@@ -50,6 +52,7 @@ namespace Iot.Device.Ahtxx
         /// Reading the temperature takes between 10 ms and 80 ms.
         /// </summary>
         /// <returns>Temperature reading</returns>
+        [Telemetry("Temperature")]
         public Temperature GetTemperature()
         {
             Measure();
@@ -61,6 +64,7 @@ namespace Iot.Device.Ahtxx
         /// Reading the humidity takes between 10 ms and 80 ms.
         /// </summary>
         /// <returns>Relative humidity reading</returns>
+        [Telemetry("Humidity")]
         public RelativeHumidity GetHumidity()
         {
             Measure();

@@ -3,6 +3,7 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Device.Model;
 using System.Device.Spi;
 using System.Numerics;
 
@@ -11,6 +12,7 @@ namespace Iot.Device.Adxl345
     /// <summary>
     /// SPI Accelerometer ADX1345
     /// </summary>
+    [Interface("SPI Accelerometer ADX1345")]
     public class Adxl345 : IDisposable
     {
         private const int Resolution = 1024; // All g ranges resolution
@@ -36,6 +38,7 @@ namespace Iot.Device.Adxl345
         /// <summary>
         /// Read Acceleration from ADXL345
         /// </summary>
+        [Telemetry]
         public Vector3 Acceleration => ReadAcceleration();
 
         /// <summary>
