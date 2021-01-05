@@ -6,7 +6,7 @@ namespace Iot.Device.DCMotor
     /// <summary>
     /// Direct current (DC) motor with Start/Stop
     /// </summary>
-    public class DCMotorStartStop : DCMotor
+    public class DCMotorWithStartStop : DCMotor
     {
         private DCMotor _inner;
         private bool _stopped = false;
@@ -16,11 +16,20 @@ namespace Iot.Device.DCMotor
         /// Constructs instance with added Start() and Stop() as additional protection
         /// </summary>
         /// <param name="innerMotor">Crate DCMotor instance</param>
-        public DCMotorStartStop(DCMotor innerMotor)
-            : base(null, false)
+        public DCMotorWithStartStop(DCMotor innerMotor)
+            : base(null, true)
         {
             _inner = innerMotor;
             _speed = innerMotor.Speed;
+        }
+
+        /// <summary>
+        /// Releases the resources used by the <see cref="DCMotor"/> instance.
+        /// </summary>
+        public override void Dispose()
+        {
+            _inner.Dispose();
+            base.Dispose();
         }
 
         /// <summary>
