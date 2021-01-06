@@ -350,6 +350,12 @@ namespace Iot.Device.Arduino
             {
                 throw new NotImplementedException();
             }
+
+            internal static unsafe int LCMapStringEx(string lpLocaleName, uint dwMapFlags, char* lpSrcStr, int cchsrc, void* lpDestStr,
+                int cchDest, void* lpVersionInformation, void* lpReserved, IntPtr sortHandle)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

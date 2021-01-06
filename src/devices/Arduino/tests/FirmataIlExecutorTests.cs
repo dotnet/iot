@@ -546,6 +546,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("CharArrayTest", 10, 0, 'A')]
         [InlineData("ByteArrayTest", 10, 0, 255)]
         [InlineData("BoxedArrayTest", 5, 2, 7)]
+        [InlineData("StaggedArrayTest", 5, 7, (int)'3')]
         public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
@@ -558,6 +559,16 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("StructMethodCall2", 66, 33, -66)]
         [InlineData("StructArray", 5, 2, 10)]
         public void StructTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
+        {
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
+        }
+
+        [Theory]
+        [InlineData("LargeStructCtorBehaviorTest1", 5, 1, 4)]
+        [InlineData("LargeStructCtorBehaviorTest2", 5, 1, 5)]
+        [InlineData("LargeStructMethodCall2", 66, 33, 66)]
+        [InlineData("LargeStructArray", 5, 1, 10)]
+        public void LargeStructTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
@@ -595,6 +606,14 @@ namespace Iot.Device.Arduino.Tests
             array[1] = 2;
             array[2] = 7;
             return (int)array[indexToRetrieve];
+        }
+
+        public static int StaggedArrayTest(int size1, int size2)
+        {
+            char[][] staggedArray = new char[size1][];
+            staggedArray[1] = new char[size2];
+            staggedArray[1][1] = '3';
+            return staggedArray[1][1];
         }
 
         public static int StructCtorBehaviorTest1(int size, int indexToRetrieve)
@@ -651,6 +670,52 @@ namespace Iot.Device.Arduino.Tests
             return (int)t.Ticks;
         }
 
+        public static int LargeStructCtorBehaviorTest1(int size, int indexToRetrieve)
+        {
+            object[] array = new object[size];
+            array[0] = new object();
+            array[1] = new LargeStruct(2, 3, 4);
+            array[2] = 7;
+
+            LargeStruct t = (LargeStruct)array[indexToRetrieve];
+            return (int)t.D;
+        }
+
+        public static int LargeStructCtorBehaviorTest2(int size, int indexToRetrieve)
+        {
+            LargeStruct s = default;
+            s.D = size;
+            return (int)s.D;
+        }
+
+        public static int LargeStructMethodCall2(int arg1, int arg2)
+        {
+            LargeStruct s = default;
+            s.D = arg1;
+            s.Sum();
+            s.D = arg2;
+            return s.TheSum;
+        }
+
+        public static int LargeStructArray(int size, int indexToRetrieve)
+        {
+            LargeStruct a = new LargeStruct(2, 10, -1);
+            LargeStruct[] array = new LargeStruct[size];
+            array[0].D = 5;
+            array[1] = a;
+            array[2] = new LargeStruct(11, 12, 13);
+
+            a.D = 27;
+            if (array[1].D == 27)
+            {
+                // This shouldn't happen (copying a to the array above should make a copy)
+                throw new InvalidProgramException();
+            }
+
+            LargeStruct t = array[indexToRetrieve];
+            return t.B;
+        }
+
         private struct SmallStruct
         {
             private Int64 _ticks;
@@ -679,7 +744,7 @@ namespace Iot.Device.Arduino.Tests
 
             public void Negate()
             {
-                // stupid implementation, but test case
+                // stupid implementation, but test case (generates an LDOBJ instruction)
                 SmallStruct s2 = -this;
                 _ticks = s2.Ticks;
             }
@@ -687,6 +752,45 @@ namespace Iot.Device.Arduino.Tests
             public static SmallStruct operator -(SmallStruct st)
             {
                 return new SmallStruct(-st.Ticks);
+            }
+        }
+
+        private struct LargeStruct
+        {
+            private int _a;
+            private int _b;
+            private long _d;
+            private long _sum;
+
+            public LargeStruct(int a, int b, long d)
+            {
+                _a = a;
+                _b = b;
+                _d = d;
+                _sum = 0;
+            }
+
+            public int A => _a;
+
+            public int B => _b;
+
+            public long D
+            {
+                get
+                {
+                    return _d;
+                }
+                set
+                {
+                    _d = value;
+                }
+            }
+
+            public int TheSum => (int)_sum;
+
+            public void Sum()
+            {
+                _sum = _a + _b + _d;
             }
         }
     }

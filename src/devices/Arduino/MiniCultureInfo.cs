@@ -74,7 +74,7 @@ namespace Iot.Device.Arduino
         // This string is stored in _name and is authoritative.
         // We use the _cultureData to get the data for our object
         // The Invariant culture;
-        private static readonly MiniCultureInfo _invariantCultureInfo = new MiniCultureInfo(new MiniCultureData(), isReadOnly: true);
+        private static readonly MiniCultureInfo _invariantCultureInfo = new MiniCultureInfo(MiniCultureData.Invariant, isReadOnly: true);
 
         private bool _isReadOnly;
         internal NumberFormatInfo? _numInfo;
@@ -717,6 +717,8 @@ namespace Iot.Device.Arduino
             private static readonly string _sDecimalSeparator = ".";
             private static readonly string _sCurrency = "$";
 
+            private static MiniCultureData? _sInvariant; // Initialized on usage, to prevent a static ctor dependency
+
             public string CultureName
             {
                 get
@@ -746,6 +748,14 @@ namespace Iot.Device.Arduino
                 get
                 {
                     return "en-US";
+                }
+            }
+
+            public string TextInfoName
+            {
+                get
+                {
+                    return SortName;
                 }
             }
 
@@ -800,6 +810,19 @@ namespace Iot.Device.Arduino
                 get
                 {
                     return _saShortTimes;
+                }
+            }
+
+            public static MiniCultureData Invariant
+            {
+                get
+                {
+                    if (_sInvariant == null)
+                    {
+                        return _sInvariant = new MiniCultureData();
+                    }
+
+                    return _sInvariant;
                 }
             }
 
