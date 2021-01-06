@@ -678,6 +678,11 @@ namespace Iot.Device.Arduino.Tests
             array[2] = 7;
 
             LargeStruct t = (LargeStruct)array[indexToRetrieve];
+            if ((int)array[2] != 7)
+            {
+                throw new InvalidProgramException();
+            }
+
             return (int)t.D;
         }
 
