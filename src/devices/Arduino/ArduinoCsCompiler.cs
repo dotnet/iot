@@ -362,7 +362,7 @@ namespace Iot.Device.Arduino
             baseTypes.Add(classType);
             DetermineBaseAndMembers(baseTypes, classType);
 
-            foreach (var cls in baseTypes.Where(x => x.IsArray == false))
+            foreach (var cls in baseTypes)
             {
                 PrepareClassDeclaration(set, cls);
             }
@@ -391,17 +391,17 @@ namespace Iot.Device.Arduino
 
             GetFields(classType, fields, methods);
 
-            List<ExecutionSet.VariableOrMethod> memberTypes = new List<ExecutionSet.VariableOrMethod>();
+            List<ClassMember> memberTypes = new List<ClassMember>();
             for (var index = 0; index < fields.Count; index++)
             {
                 var field = fields[index];
-                var fieldType = GetVariableType(field.FieldType, out _);
+                var fieldType = GetVariableType(field.FieldType, out var size);
                 if (field.IsStatic)
                 {
                     fieldType |= VariableKind.StaticMember;
                 }
 
-                var newvar = new ExecutionSet.VariableOrMethod(fieldType, set.GetOrAddFieldToken(field), new List<int>());
+                var newvar = new ClassMember(fieldType, set.GetOrAddFieldToken(field), size);
                 memberTypes.Add(newvar);
             }
 
@@ -410,7 +410,7 @@ namespace Iot.Device.Arduino
                 var m = methods[index] as ConstructorInfo;
                 if (m != null)
                 {
-                    memberTypes.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, set.GetOrAddMethodToken(m), new List<int>()));
+                    memberTypes.Add(new ClassMember(VariableKind.Method, set.GetOrAddMethodToken(m), 0));
                 }
             }
 
@@ -419,7 +419,7 @@ namespace Iot.Device.Arduino
             var interfaces = classType.GetInterfaces();
 
             // Add this first, so we break the recursion to this class further down
-            var newClass = new ExecutionSet.Class(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes);
+            var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes);
             newClass.Interfaces.AddRange(interfaces);
             set.AddClass(newClass);
             foreach (var iface in interfaces)
@@ -441,7 +441,6 @@ namespace Iot.Device.Arduino
                 List<MemberInfo> methods = new List<MemberInfo>();
 
                 GetFields(cls.TheType, fields, methods);
-                string name = cls.TheType.Name;
                 for (var index = 0; index < methods.Count; index++)
                 {
                     var m = methods[index];
@@ -452,7 +451,7 @@ namespace Iot.Device.Arduino
                         PrepareCodeInternal(set, (MethodBase)m, null); // This cast must work
 
                         List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x)).ToList();
-                        cls.Members.Add(new ExecutionSet.VariableOrMethod(VariableKind.Method, set.GetOrAddMethodToken((MethodBase)m), baseTokens));
+                        cls.Members.Add(new ClassMember(VariableKind.Method, set.GetOrAddMethodToken((MethodBase)m), baseTokens));
                     }
                 }
             }
@@ -643,7 +642,7 @@ namespace Iot.Device.Arduino
         /// Returns the size of the variable on the target platform. This is currently the largest of sizeof(void*) and sizeof(int64).
         /// </summary>
         /// <returns>See above</returns>
-        private int SizeOfVoidPointer()
+        private static int SizeOfVoidPointer()
         {
             return 4;
         }
@@ -742,7 +741,7 @@ namespace Iot.Device.Arduino
 
         private void SendMethodDeclaration(ArduinoMethodDeclaration declaration)
         {
-            VariableDeclaration[] localTypes = new VariableDeclaration[declaration.MaxLocals];
+            ClassMember[] localTypes = new ClassMember[declaration.MaxLocals];
             var body = declaration.MethodBase.GetMethodBody();
             int i;
             // This is null in case of a method without implementation (an interface or abstract method). In this case, there are no locals, either
@@ -750,34 +749,35 @@ namespace Iot.Device.Arduino
             {
                 for (i = 0; i < declaration.MaxLocals; i++)
                 {
-                    localTypes[i].Type = GetVariableType(body.LocalVariables[i].LocalType, out var size);
-                    localTypes[i].Size = (ushort)size;
+                    var type = GetVariableType(body.LocalVariables[i].LocalType, out var size);
+                    ClassMember local = new ClassMember(type, 0, (ushort)size);
+                    localTypes[i] = local;
                 }
             }
 
-            VariableDeclaration[] argTypes = new VariableDeclaration[declaration.ArgumentCount];
+            ClassMember[] argTypes = new ClassMember[declaration.ArgumentCount];
             int startOffset = 0;
             // If the method is not static, the fist argument is the "this" pointer, which is not explicitly mentioned in the parameter list. It is of type object
             // for reference types and usually of type reference for value types (but depends whether the method is virtual or not, analyzation of these cases is underway)
             if ((declaration.MethodBase.CallingConvention & CallingConventions.HasThis) != 0)
             {
                 startOffset = 1;
-                argTypes[0].Type = VariableKind.Object;
-                argTypes[0].Size = 4;
+                argTypes[0] = new ClassMember(VariableKind.Object, 0, 4);
             }
 
             var parameters = declaration.MethodBase.GetParameters();
             for (i = startOffset; i < declaration.ArgumentCount; i++)
             {
-                argTypes[i].Type = GetVariableType(parameters[i - startOffset].ParameterType, out var size);
-                argTypes[i].Size = (ushort)size;
+                var type = GetVariableType(parameters[i - startOffset].ParameterType, out var size);
+                ClassMember arg = new ClassMember(type, 0, size);
+                argTypes[i] = arg;
             }
 
-            Stopwatch w = Stopwatch.StartNew();
+            // Stopwatch w = Stopwatch.StartNew();
             _board.Firmata.SendMethodDeclaration(declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxStack,
                 (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
 
-            _board.Log($"Loading took {w.Elapsed}.");
+            // _board.Log($"Loading took {w.Elapsed}.");
         }
 
         /// <summary>
@@ -787,7 +787,7 @@ namespace Iot.Device.Arduino
         /// <param name="t">Type to query</param>
         /// <param name="sizeOfMember">Returns the actual size of the member, used for value-type arrays (because byte[] should use just one byte per entry)</param>
         /// <returns></returns>
-        private VariableKind GetVariableType(Type t, out int sizeOfMember)
+        internal static VariableKind GetVariableType(Type t, out int sizeOfMember)
         {
             if (t == typeof(sbyte))
             {
@@ -1263,13 +1263,13 @@ namespace Iot.Device.Arduino
 
         internal void ExecuteStaticCtors(ExecutionSet set)
         {
-            List<ExecutionSet.Class> classes = set.Classes.Where(x => !x.SuppressInit && x.TheType.TypeInitializer != null).ToList();
+            List<ClassDeclaration> classes = set.Classes.Where(x => !x.SuppressInit && x.TheType.TypeInitializer != null).ToList();
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
             BringToFront(classes, typeof(System.DateTime));
             for (var index = 0; index < classes.Count; index++)
             {
-                ExecutionSet.Class? cls = classes[index];
+                ClassDeclaration? cls = classes[index];
                 if (!cls.SuppressInit && cls.TheType.TypeInitializer != null)
                 {
                     _board.Log($"Running static initializer of {cls}. Step {index}/{classes.Count}...");
@@ -1284,7 +1284,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        private void BringToFront(List<ExecutionSet.Class> classes, Type type)
+        private void BringToFront(List<ClassDeclaration> classes, Type type)
         {
             int idx = classes.FindIndex(x => x.TheType == type);
             if (idx < 0)
