@@ -20,7 +20,7 @@ namespace Iot.Device.Arduino
         public const int GenericTokenMask = -8_388_608; // 0xFF80_0000 as signed
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
-        private readonly List<Class> _classes;
+        private readonly List<ClassDeclaration> _classes;
         private readonly Dictionary<TypeInfo, int> _patchedTypeTokens;
         private readonly Dictionary<int, TypeInfo> _inversePatchedTypeTokens;
         private readonly Dictionary<MethodBase, int> _patchedMethodTokens;
@@ -32,6 +32,7 @@ namespace Iot.Device.Arduino
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
         private readonly Dictionary<int, string> _strings;
+        private readonly List<ClassMember> _largeDeclarations;
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -43,7 +44,7 @@ namespace Iot.Device.Arduino
         {
             _compiler = compiler;
             _methods = new List<ArduinoMethodDeclaration>();
-            _classes = new List<Class>();
+            _classes = new List<ClassDeclaration>();
             _patchedTypeTokens = new Dictionary<TypeInfo, int>();
             _patchedMethodTokens = new Dictionary<MethodBase, int>();
             _patchedFieldTokens = new Dictionary<FieldInfo, (int Token, byte[]? InitializerData)>();
@@ -53,6 +54,7 @@ namespace Iot.Device.Arduino
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
             _classesToSuppress = new List<Type>();
+            _largeDeclarations = new List<ClassMember>();
             _strings = new Dictionary<int, string>();
 
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
@@ -64,7 +66,7 @@ namespace Iot.Device.Arduino
             MainEntryPointInternal = null;
         }
 
-        public IList<Class> Classes => _classes;
+        public IList<ClassDeclaration> Classes => _classes;
 
         public ArduinoTask EntryPoint
         {
@@ -133,6 +135,16 @@ namespace Iot.Device.Arduino
                 bytesUsed += 40;
                 bytesUsed += cls.StaticSize;
                 bytesUsed += cls.Members.Count * 8; // Assuming 32 bit target system for now
+                foreach (var field in cls.Members)
+                {
+                    if (_inversePatchedFieldTokens.TryGetValue(field.Token, out FieldInfo? value))
+                    {
+                        if (_patchedFieldTokens.TryGetValue(value, out var data))
+                        {
+                            bytesUsed += data.InitializerData?.Length ?? 0;
+                        }
+                    }
+                }
             }
 
             foreach (var method in _methods)
@@ -229,7 +241,10 @@ namespace Iot.Device.Arduino
         {
             if (_patchedFieldTokens.TryGetValue(field, out var token))
             {
-                return token.Token;
+                // Even though the token can already exist, we need to add the data (this happens typically only once, but the field may have several uses)
+                var newEntry = (token.Token, initializerData);
+                _patchedFieldTokens[field] = newEntry;
+                return newEntry.Token;
             }
 
             int tk = _nextToken++;
@@ -344,7 +359,7 @@ namespace Iot.Device.Arduino
             return token;
         }
 
-        public bool AddClass(Class type)
+        public bool AddClass(ClassDeclaration type)
         {
             if (_classesToSuppress.Contains(type.TheType))
             {
@@ -361,8 +376,18 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException($"Class {type} should have been replaced by its replacement");
             }
 
+            ExtractLargeValueStatics(type);
+
             _classes.Add(type);
             return true;
+        }
+
+        private void ExtractLargeValueStatics(ClassDeclaration type)
+        {
+            foreach (var m in type.Members.Where(x => x.VariableType == (VariableKind.LargeValueType | VariableKind.StaticMember)))
+            {
+                _largeDeclarations.Add(m);
+            }
         }
 
         public bool HasDefinition(Type classType)
@@ -469,94 +494,6 @@ namespace Iot.Device.Arduino
             }
 
             return null;
-        }
-
-        public class VariableOrMethod
-        {
-            public VariableOrMethod(VariableKind variableType, int token, List<int> baseTokens)
-            {
-                VariableType = variableType;
-                Token = token;
-                BaseTokens = baseTokens;
-            }
-
-            public VariableKind VariableType
-            {
-                get;
-            }
-
-            public int Token
-            {
-                get;
-            }
-
-            public List<int> BaseTokens
-            {
-                get;
-            }
-        }
-
-        public class Class
-        {
-            public Class(Type type, int dynamicSize, int staticSize, int newToken, List<VariableOrMethod> members)
-            {
-                TheType = type;
-                DynamicSize = dynamicSize;
-                StaticSize = staticSize;
-                Members = members;
-                NewToken = newToken;
-                Interfaces = new List<Type>();
-                Name = type.ToString();
-            }
-
-            public Type TheType
-            {
-                get;
-            }
-
-            public int NewToken
-            {
-                get;
-            }
-
-            public string Name
-            {
-                get;
-            }
-
-            public int DynamicSize { get; }
-            public int StaticSize { get; }
-
-            public List<VariableOrMethod> Members
-            {
-                get;
-                internal set;
-            }
-
-            public List<Type> Interfaces
-            {
-                get;
-            }
-
-            public bool SuppressInit
-            {
-                get
-                {
-                    // Type initializers of open generic types are pointless to execute
-                    if (TheType.ContainsGenericParameters)
-                    {
-                        return true;
-                    }
-
-                    // Don't run these init functions, to complicated or depend on native functions
-                    return TheType.FullName == "System.SR";
-                }
-            }
-
-            public override string ToString()
-            {
-                return Name;
-            }
         }
 
         public void AddReplacementType(Type? typeToReplace, Type replacement, bool includingSubclasses, bool includingPrivates)
