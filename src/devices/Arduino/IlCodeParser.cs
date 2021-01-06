@@ -158,18 +158,21 @@ namespace Iot.Device.Arduino
                     {
                         var fieldTarget = ResolveMember(method, token)!;
                         FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
-                        var replacementField = set.GetReplacement(mb.DeclaringType);
-                        if (replacementField != null)
+                        var replacementClassForField = set.GetReplacement(mb.DeclaringType);
+                        if (replacementClassForField != null)
                         {
                             // The class whose member this is was replaced - replace the member, too.
                             // Note that this will only apply when a class that is being replaced has a public field (an example is MiniBitConverter.IsLittleEndian)
-                            var members = replacementField.FindMembers(MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, (x, y) => x.Name == mb.Name, null);
+                            var members = replacementClassForField.FindMembers(MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, (x, y) => x.Name == mb.Name, null);
                             mb = (FieldInfo)members.Single(); // If this crashes, our replacement class misses a public field
                         }
 
                         // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
                         patchValue = set.GetOrAddFieldToken(mb);
                         fieldsUsed.Add((FieldInfo)set.InverseResolveToken(patchValue)!);
+
+                        // Add the fields' class to the list of used classes, or that one will be missing if the class consists of only fields (rare, but happens)
+                        typesUsed.Add(mb.DeclaringType!.GetTypeInfo());
                         break;
                     }
 
