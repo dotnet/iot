@@ -79,7 +79,7 @@ namespace Iot.Device.Mfrc522
         /// <param name="pinReset">A reset pin for the hardware reset.</param>
         /// <param name="gpioController">A GpioController for the hardware reset.</param>
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
-        public MfRc522(string serialPort, int pinReset = -1, GpioController gpioController = null, bool shouldDispose = true)
+        public MfRc522(string serialPort, int pinReset = -1, GpioController? gpioController = null, bool shouldDispose = true)
             : this(new SerialPort(serialPort, 9600, Parity.None, 8, StopBits.One), pinReset, gpioController, shouldDispose)
         {
         }

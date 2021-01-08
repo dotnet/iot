@@ -19,7 +19,7 @@ Console.WriteLine("  1. Raspberry Pi or equivalent");
 Console.WriteLine("  2. FT4222");
 var hardchoice = Console.ReadKey();
 Console.WriteLine();
-if (hardchoice.KeyChar is not('1' or '2'))
+if (hardchoice.KeyChar is not '1' or '2')
 {
     Console.WriteLine("You have to choose option 1 or 2.");
     return;
@@ -31,7 +31,7 @@ Console.WriteLine("  2. I2C");
 Console.WriteLine("  3. UART (Serial Port)");
 var connectionChoice = Console.ReadKey();
 Console.WriteLine();
-if (connectionChoice.KeyChar is not('1' or '2' or '3'))
+if (connectionChoice.KeyChar is not '1' or '2' or '3')
 {
     Console.WriteLine("You have to choose option 1, 2 or 3.");
     return;
