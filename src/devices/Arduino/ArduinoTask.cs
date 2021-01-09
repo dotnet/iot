@@ -187,7 +187,7 @@ namespace Iot.Device.Arduino
                             throw new InvalidOperationException("Internal error: Unknown exception type");
                         }
 
-                        ex = (Exception)Activator.CreateInstance((Type)resolved, BindingFlags.Public | BindingFlags.CreateInstance, (Binder)null!, new object[] { $"Location: {resolved.DeclaringType} - {resolved} {textualStackTrace}" }, CultureInfo.CurrentUICulture)!;
+                        ex = (Exception)Activator.CreateInstance((Type)resolved, new object[] { $"Location: {resolved.DeclaringType} - {resolved} {textualStackTrace}" }, null)!;
                     }
 
                     throw ex;

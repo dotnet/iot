@@ -1266,6 +1266,7 @@ namespace Iot.Device.Arduino
             List<ClassDeclaration> classes = set.Classes.Where(x => !x.SuppressInit && x.TheType.TypeInitializer != null).ToList();
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
+            BringToFront(classes, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(classes, typeof(System.DateTime));
             for (var index = 0; index < classes.Count; index++)
             {
@@ -1286,6 +1287,11 @@ namespace Iot.Device.Arduino
 
         private void BringToFront(List<ClassDeclaration> classes, Type type)
         {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
             int idx = classes.FindIndex(x => x.TheType == type);
             if (idx < 0)
             {

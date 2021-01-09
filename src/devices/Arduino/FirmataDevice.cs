@@ -503,6 +503,7 @@ namespace Iot.Device.Arduino
                                     // Just an ack for a programming command.
                                     _lastIlExecutionError = 0;
                                     _dataReceived.Set();
+                                    Thread.Yield();
                                     return;
                                 }
 
@@ -511,6 +512,7 @@ namespace Iot.Device.Arduino
                                     // This is a Nack
                                     _lastIlExecutionError = (ExecutionError)raw_data[3];
                                     _dataReceived.Set();
+                                    Thread.Yield();
                                     return;
                                 }
 
@@ -1258,7 +1260,7 @@ namespace Iot.Device.Arduino
 
             lock (_synchronisationLock)
             {
-                const int BYTES_PER_PACKET = 20;
+                const int BYTES_PER_PACKET = 32;
                 int codeIndex = 0;
                 while (codeIndex < byteCode.Length)
                 {
@@ -1275,7 +1277,8 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)(codeIndex & 0x7f));
                     _firmataStream.WriteByte((byte)(codeIndex >> 7));
                     int bytesThisPacket = Math.Min(BYTES_PER_PACKET, byteCode.Length - codeIndex);
-                    SendValuesAsTwo7bitBytes(byteCode.AsSpan(codeIndex, bytesThisPacket));
+                    var bytesToSend = Encoder7Bit.Encode(byteCode, codeIndex, bytesThisPacket);
+                    _firmataStream.Write(bytesToSend);
                     codeIndex += bytesThisPacket;
 
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
