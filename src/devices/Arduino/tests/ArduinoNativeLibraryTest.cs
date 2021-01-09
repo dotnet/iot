@@ -230,10 +230,28 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public int MethodCallOnGenericTest()
+        {
+            var obj1 = new ClassWithGenericParameter<int>(2);
+            MiniAssert.That(obj1.CompareTo(2) == 0);
+            MiniAssert.That(obj1.CompareTo(3) == 1);
+
+            var obj2 = new ClassWithGenericParameter<string>("Test");
+            MiniAssert.That(obj2.CompareTo("Test") == 0);
+
+            return 1;
+        }
+
         [Fact]
         public void MethodCallOnValueTypeTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), MethodCallOnValueType);
+        }
+
+        [Fact]
+        public void MethodCallOnGenericClass()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), MethodCallOnGenericTest);
         }
 
         public class ClassWith64BitField
@@ -349,6 +367,22 @@ namespace Iot.Device.Arduino.Tests
             public static int GetFirst(int index, int extraIndex)
             {
                 return _intData[index + extraIndex];
+            }
+        }
+
+        public class ClassWithGenericParameter<T>
+            where T : IComparable<T>
+        {
+            private T _a;
+
+            public ClassWithGenericParameter(T a)
+            {
+                _a = a;
+            }
+
+            public int CompareTo(T other)
+            {
+                return _a.CompareTo(other);
             }
         }
 

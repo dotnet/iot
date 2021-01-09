@@ -558,6 +558,9 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("StructMethodCall1", 66, 33, -99)]
         [InlineData("StructMethodCall2", 66, 33, -66)]
         [InlineData("StructArray", 5, 2, 10)]
+        [InlineData("StructInterfaceCall1", 10, 2, 8)]
+        [InlineData("StructInterfaceCall2", 10, 2, 10)]
+        [InlineData("StructInterfaceCall3", 15, 3, 12)]
         public void StructTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
@@ -569,6 +572,13 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("LargeStructMethodCall2", 66, 33, 66)]
         [InlineData("LargeStructArray", 5, 1, 10)]
         public void LargeStructTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
+        {
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
+        }
+
+        [Theory]
+        [InlineData("CastClassTest", 0, 0, 1)]
+        public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
@@ -651,6 +661,33 @@ namespace Iot.Device.Arduino.Tests
             return (int)s.Ticks;
         }
 
+        public static int StructInterfaceCall1(int arg1, int arg2)
+        {
+            SmallStruct s = new SmallStruct(arg1);
+            s.Subtract(arg2);
+            return (int)s.Ticks;
+        }
+
+        public static int StructInterfaceCall2(int arg1, int arg2)
+        {
+            // Unlike the above, this one does not return the expected result, since it boxes an instance which is later discarded
+            SmallStruct s = new SmallStruct(arg1);
+            ISubtractable sub = s;
+            sub.Subtract(arg2);
+            return (int)s.Ticks;
+        }
+
+        public static int StructInterfaceCall3(int arg1, int arg2)
+        {
+            // This one works, though
+            SmallStruct s = new SmallStruct(arg1);
+            ISubtractable sub = s;
+            sub.Subtract(arg2);
+            // Unbox the changed instance
+            SmallStruct s2 = (SmallStruct)sub;
+            return (int)s2.Ticks;
+        }
+
         public static int StructArray(int size, int indexToRetrieve)
         {
             SmallStruct a = new SmallStruct(2);
@@ -721,7 +758,98 @@ namespace Iot.Device.Arduino.Tests
             return t.B;
         }
 
-        private struct SmallStruct
+        public static int CastClassTest(int arg1, int arg2)
+        {
+            SmallBase s = new SmallBase(1);
+            IDisposable d = s;
+
+            SmallDerived derived = new SmallDerived(2);
+            SmallBase s2 = derived;
+            s2.Foo(10);
+            MiniAssert.That(s2.A == 11);
+
+            SmallDerived derived2 = (SmallDerived)s2;
+            derived2.A = 12;
+            MiniAssert.That(s2.A == 12);
+
+            ICloneable c = derived2;
+            ICloneable c2 = (ICloneable)c.Clone();
+            SmallDerived derived3 = (SmallDerived)c2;
+            MiniAssert.That(derived3.A == 12);
+
+            d.Dispose();
+            MiniAssert.That(s.A == -1);
+
+            return 1;
+        }
+
+        private class SmallBase : IDisposable
+        {
+            private int _a;
+            public SmallBase(int a)
+            {
+                _a = a;
+            }
+
+            public int A
+            {
+                get => _a;
+                set => _a = value;
+            }
+
+            public virtual void Foo(int x)
+            {
+                _a = x;
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    _a = -1;
+                }
+                else
+                {
+                    _a = 2;
+                }
+            }
+
+            public void Dispose()
+            {
+                Dispose(true);
+            }
+        }
+
+        private class SmallDerived : SmallBase, ICloneable
+        {
+            public SmallDerived(int a)
+            : base(a)
+            {
+            }
+
+            public override void Foo(int x)
+            {
+                A = x + 1;
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                base.Dispose(disposing);
+                A = 5;
+            }
+
+            public object Clone()
+            {
+                return MemberwiseClone();
+            }
+        }
+
+        public interface ISubtractable
+        {
+            void Subtract(int amount);
+        }
+
+        private struct SmallStruct : ISubtractable
         {
             private Int64 _ticks;
 
@@ -745,6 +873,11 @@ namespace Iot.Device.Arduino.Tests
             public void Add(int moreTicks)
             {
                 _ticks += moreTicks;
+            }
+
+            public void Subtract(int ticks)
+            {
+                _ticks -= ticks;
             }
 
             public void Negate()
