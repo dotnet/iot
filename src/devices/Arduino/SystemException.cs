@@ -18,5 +18,6 @@ namespace Iot.Device.Arduino
         InvalidCast = 11,
         NotSupported = 12,
         CustomException = 13,
+        FieldAccess = 14,
     }
 }

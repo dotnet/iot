@@ -103,6 +103,7 @@ namespace Iot.Device.Arduino
         MiniBuffer_ZeroMemory,
         RuntimeTypeHandleValue,
         MiniRuntimeTypeHandleGetCorElementType,
-        Interop_GlobalizationGetCalendarInfo
+        Interop_GlobalizationGetCalendarInfo,
+        InteropGetRandomBytes
     }
 }

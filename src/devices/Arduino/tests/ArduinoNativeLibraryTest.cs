@@ -222,7 +222,7 @@ namespace Iot.Device.Arduino.Tests
             DateTime dt = new DateTime(2020, 01, 20);
             // Non-virtual method call on a value type
             dt = dt.AddDays(1.0f);
-            if (dt.DayOfYear != 20)
+            if (dt.DayOfYear != 21)
             {
                 return dt.DayOfYear;
             }

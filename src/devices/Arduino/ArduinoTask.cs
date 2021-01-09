@@ -171,6 +171,9 @@ namespace Iot.Device.Arduino
                             case SystemException.NotSupported:
                                 ex = new NotSupportedException($"An unsupported operation was attempted in {resolved.DeclaringType} - {resolved} at " + textualStackTrace);
                                 break;
+                            case SystemException.FieldAccess:
+                                ex = new FieldAccessException($"Unable to access or find field {resolved.DeclaringType} - {resolved} at " + textualStackTrace);
+                                break;
                             default:
                                 ex = new InvalidOperationException("Unknown exception " + textualStackTrace);
                                 break;

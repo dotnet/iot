@@ -64,6 +64,12 @@ namespace Iot.Device.Arduino
             PerMilleSymbol = 0x00000077
         }
 
+        [ArduinoImplementation(ArduinoImplementation.InteropGetRandomBytes)]
+        public static unsafe void GetRandomBytes(byte* buffer, int length)
+        {
+            throw new NotImplementedException();
+        }
+
         [ArduinoReplacement("Interop+Globalization", "System.Private.CoreLib.dll", false, true, IncludingPrivates = true)]
         internal static class Globalization
         {
