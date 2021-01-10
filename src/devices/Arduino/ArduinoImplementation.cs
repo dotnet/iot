@@ -104,6 +104,7 @@ namespace Iot.Device.Arduino
         RuntimeTypeHandleValue,
         MiniRuntimeTypeHandleGetCorElementType,
         Interop_GlobalizationGetCalendarInfo,
-        InteropGetRandomBytes
+        InteropGetRandomBytes,
+        StringCompareTo
     }
 }

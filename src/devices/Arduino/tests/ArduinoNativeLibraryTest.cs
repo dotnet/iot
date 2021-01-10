@@ -64,9 +64,17 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
-        private void ExecuteComplexProgramSuccess<T>(Type mainClass, T mainEntryPoint, params object[] args)
+        private void ExecuteComplexProgramSuccess<T>(Type mainClass, T mainEntryPoint, bool executeLocally, params object[] args)
             where T : Delegate
         {
+            // Execute function locally, if possible (to compare behavior)
+            if (executeLocally)
+            {
+                object? result = mainEntryPoint.DynamicInvoke(args);
+                int returnValue = (int)result!;
+                Assert.Equal(1, returnValue);
+            }
+
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
             // and derive everything required from there)
             _compiler.ClearAllData(true);
@@ -128,7 +136,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void RunBlinkWithGpioController()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(SimpleLedBinding), SimpleLedBinding.RunBlink, 6, 1000);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(SimpleLedBinding), SimpleLedBinding.RunBlink, false, 6, 1000);
         }
 
         [Fact]
@@ -169,7 +177,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void GetDataFromStaticByteField()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticByteField), ClassWithStaticByteField.GetFirstByte, 0, 0);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticByteField), ClassWithStaticByteField.GetFirstByte, true, 0, 0);
         }
 
         /// <summary>
@@ -179,7 +187,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void CpuIsLittleEndian()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), IsLittleEndianTest);
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), IsLittleEndianTest, true);
         }
 
         private int IsLittleEndianTest()
@@ -190,7 +198,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void ClassWith64BitFieldTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWith64BitField), ClassWith64BitField.ClassMain);
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWith64BitField), ClassWith64BitField.ClassMain, true);
         }
 
         public int MethodCallOnValueType()
@@ -234,7 +242,7 @@ namespace Iot.Device.Arduino.Tests
         {
             var obj1 = new ClassWithGenericParameter<int>(2);
             MiniAssert.That(obj1.CompareTo(2) == 0);
-            MiniAssert.That(obj1.CompareTo(3) == 1);
+            MiniAssert.That(obj1.CompareTo(3) == -1);
 
             var obj2 = new ClassWithGenericParameter<string>("Test");
             MiniAssert.That(obj2.CompareTo("Test") == 0);
@@ -245,13 +253,13 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void MethodCallOnValueTypeTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), MethodCallOnValueType);
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), MethodCallOnValueType, true);
         }
 
         [Fact]
         public void MethodCallOnGenericClass()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), MethodCallOnGenericTest);
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ArduinoNativeLibraryTest), MethodCallOnGenericTest, true);
         }
 
         public class ClassWith64BitField
@@ -308,7 +316,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void GetDataFromClassWithStaticField2()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticField2), ClassWithStaticField2.GetFirstByte, 0, 0);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticField2), ClassWithStaticField2.GetFirstByte, true, 0, 0);
         }
 
         public class ClassWithStaticField2
@@ -339,7 +347,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void GetDataFromStaticIntField()
         {
-            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticIntField), ClassWithStaticIntField.GetFirst, 7, 0);
+            ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticIntField), ClassWithStaticIntField.GetFirst, true, 7, 0);
         }
 
         public class ClassWithStaticIntField

@@ -401,7 +401,7 @@ namespace Iot.Device.Arduino
                     fieldType |= VariableKind.StaticMember;
                 }
 
-                var newvar = new ClassMember(fieldType, set.GetOrAddFieldToken(field), size);
+                var newvar = new ClassMember(field, fieldType, set.GetOrAddFieldToken(field), size);
                 memberTypes.Add(newvar);
             }
 
@@ -410,7 +410,7 @@ namespace Iot.Device.Arduino
                 var m = methods[index] as ConstructorInfo;
                 if (m != null)
                 {
-                    memberTypes.Add(new ClassMember(VariableKind.Method, set.GetOrAddMethodToken(m), 0));
+                    memberTypes.Add(new ClassMember(m, VariableKind.Method, set.GetOrAddMethodToken(m), new List<int>()));
                 }
             }
 
@@ -446,12 +446,14 @@ namespace Iot.Device.Arduino
                     var m = methods[index];
                     if (MemberLinkRequired(set, m, out var baseMethodInfos))
                     {
+                        var mb = (MethodBase)m; // This cast must work
+
                         // If this method is required because base implementations are called, we also need its implementation (obviously)
                         // Unfortunately, this can recursively require further classes and methods
-                        PrepareCodeInternal(set, (MethodBase)m, null); // This cast must work
+                        PrepareCodeInternal(set, mb, null);
 
                         List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x)).ToList();
-                        cls.Members.Add(new ClassMember(VariableKind.Method, set.GetOrAddMethodToken((MethodBase)m), baseTokens));
+                        cls.Members.Add(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb), baseTokens));
                     }
                 }
             }
@@ -750,7 +752,7 @@ namespace Iot.Device.Arduino
                 for (i = 0; i < declaration.MaxLocals; i++)
                 {
                     var type = GetVariableType(body.LocalVariables[i].LocalType, out var size);
-                    ClassMember local = new ClassMember(type, 0, (ushort)size);
+                    ClassMember local = new ClassMember($"Local #{i}", type, 0, (ushort)size);
                     localTypes[i] = local;
                 }
             }
@@ -762,14 +764,14 @@ namespace Iot.Device.Arduino
             if ((declaration.MethodBase.CallingConvention & CallingConventions.HasThis) != 0)
             {
                 startOffset = 1;
-                argTypes[0] = new ClassMember(VariableKind.Object, 0, 4);
+                argTypes[0] = new ClassMember($"Argument 0: this", VariableKind.Object, 0, 4);
             }
 
             var parameters = declaration.MethodBase.GetParameters();
             for (i = startOffset; i < declaration.ArgumentCount; i++)
             {
                 var type = GetVariableType(parameters[i - startOffset].ParameterType, out var size);
-                ClassMember arg = new ClassMember(type, 0, size);
+                ClassMember arg = new ClassMember($"Argument {i}", type, 0, size);
                 argTypes[i] = arg;
             }
 
