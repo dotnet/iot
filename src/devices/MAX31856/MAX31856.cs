@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using System.Device.Spi;
 using System.IO;
 using UnitsNet;
@@ -9,7 +10,7 @@ using UnitsNet;
 namespace Iot.Device.Max31856
 {
     /// <summary>
-    /// Documentation https://datasheets.maximintegrated.com/en/ds/MAX31856.pdf
+    /// MAX31856  - cold-junction compensated thermocouple to digital converter
     /// </summary>
     public class Max31856 : IDisposable
     {
@@ -19,17 +20,17 @@ namespace Iot.Device.Max31856
         #region SpiSettings
 
         /// <summary>
-        /// Spi Clock Frequency from the Technical Manual of the device
+        /// Spi Clock Frequency
         /// </summary>
         public const int SpiClockFrequency = 5_000_000;
 
         /// <summary>
-        /// Set the SPI data flow to MSB First
+        /// SPI data flow
         /// </summary>
         public const DataFlow SpiDataFlow = DataFlow.MsbFirst;
 
         /// <summary>
-        /// Max31856 SPI Mode
+        /// SPI Mode
         /// </summary>
         public const SpiMode SpiModeSetup = SpiMode.Mode1;
 
@@ -38,13 +39,9 @@ namespace Iot.Device.Max31856
         /// <summary>
         /// Command to Get Temperature from the device
         /// </summary>
-        /// <remarks>
-        /// Initializes the device and then reads the data converting the bytes to thermocouple temperature
-        /// </remarks>
         public Temperature GetTemperature()
         {
-            Temperature temperature = ReadTemperature(out byte[] spiOutputData);
-            return temperature;
+            return ReadTemperature(out byte[] spiOutputData);
         }
 
         /// <summary>
@@ -56,11 +53,11 @@ namespace Iot.Device.Max31856
         public Temperature GetColdJunctionTemperature() => Temperature.FromDegreesCelsius(ReadCJTemperature());
 
         /// <summary>
-        /// Creates a new instance of the max31856.
+        /// Creates a new instance of the Max31856.
         /// </summary>
         /// <param name="spiDevice">The communications channel to a device on a SPI bus</param>
-        /// <param name="thermocoupleType">Thermocouple Default Type is T can change to B,E,J,K,N,R,S</param>
-        public Max31856(SpiDevice spiDevice, ThermocoupleType thermocoupleType)
+        /// <param name="thermocoupleType">Thermocouple type. It Defaults to T.</param>
+        public Max31856(SpiDevice spiDevice, ThermocoupleType thermocoupleType = ThermocoupleType.T)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _thermocoupleType = (byte)thermocoupleType;
@@ -136,14 +133,15 @@ namespace Iot.Device.Max31856
         /// <param name="spiOutputData">Spidata read from the device as 16 bytes</param>
         private double ConvertspiOutputDataTempColdJunction(byte[] spiOutputData)
         {
-            var tempRaw = (((spiOutputData[11] & 0x7F) << 8) + spiOutputData[12]);
-            double temperatureColdJunction = tempRaw / 256; // convert decimal ouput to temperature using a constant from the Technical Manual
+            Span<byte> reading = new Span<byte>(spiOutputData, 11, 2);
+            reading[0] = (byte)(spiOutputData[11] & 0x3F);
+            short tempRaw = BinaryPrimitives.ReadInt16BigEndian(reading);
             if ((spiOutputData[11] & 0x80) == 0x80) // checks if the temp is negative
             {
-                temperatureColdJunction = -temperatureColdJunction;
+                return -tempRaw / 256.0;
             }
 
-            return temperatureColdJunction;
+            return tempRaw / 256.0;
         }
 
         #endregion
