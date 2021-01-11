@@ -128,6 +128,11 @@ namespace Iot.Device.Arduino
 
         public long EstimateRequiredMemory()
         {
+            return EstimateRequiredMemory(out _);
+        }
+
+        public long EstimateRequiredMemory(out List<KeyValuePair<Type, long>> details)
+        {
             Dictionary<Type, long> classSizes = new Dictionary<Type, long>();
             long bytesUsed = 0;
             foreach (var cls in Classes)
@@ -169,7 +174,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            var orderedBySize = classSizes.OrderByDescending(x => x.Value).ToArray();
+            details = classSizes.OrderByDescending(x => x.Value).ToList();
 
             foreach (var constant in _strings)
             {
