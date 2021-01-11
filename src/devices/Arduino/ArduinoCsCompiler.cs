@@ -342,6 +342,9 @@ namespace Iot.Device.Arduino
             HashSet<string> hs = new HashSet<string>();
             PrepareClass(set, hs.Comparer.GetType()); // GenericEqualityComparer<string>
 
+            HashSet<int> hi = new HashSet<int>();
+            PrepareClass(set, hi.Comparer.GetType()); // GenericEqualityComparer<int>
+
             PrepareClass(set, typeof(IEquatable<Nullable<int>>));
 
             // We'll always need to provide these methods, or we'll get into trouble because they're not explicitly used before anything that depends on
@@ -433,10 +436,106 @@ namespace Iot.Device.Arduino
         /// </summary>
         internal void FinalizeExecutionSet(ExecutionSet set)
         {
-            // This list might change during iteration
+            // Contains all classes traversed so far
+            List<ClassDeclaration> declarations = new List<ClassDeclaration>(set.Classes);
+            // Contains the new ones to be traversed this time (start with all)
+            List<ClassDeclaration> newDeclarations = new List<ClassDeclaration>(declarations);
+            while (true)
+            {
+                // Sort: Interfaces first, then bases before their derived types (so that if a base rewires one virtual method to another - possibly abstract -
+                // method, the derived method's actual implementation is linked. I.e. IEqualityComparer.Equals(object,object) -> EqualityComparer.Equals(object, object) ->
+                // EqualityComparer<T>.Equals(T,T) -> -> GenericEqualityComparer<T>.Equals(T,T)
+                newDeclarations.Sort(new ClassDeclarationByInheritanceSorter());
+                DetectRequiredVirtualMethodImplementations(set, newDeclarations);
+                if (set.Classes.Count == declarations.Count)
+                {
+                    break;
+                }
+
+                // Find the new ones
+                newDeclarations = new List<ClassDeclaration>();
+                foreach (var decl in set.Classes)
+                {
+                    if (!declarations.Contains(decl))
+                    {
+                        newDeclarations.Add(decl);
+                    }
+                }
+
+                declarations = new List<ClassDeclaration>(set.Classes);
+            }
+
+            // Last step: Of all classes in the list, load their static cctors
             for (var i = 0; i < set.Classes.Count; i++)
             {
+                // Let's hope the list no more changes, but in theory we don't know (however, creating static ctors that
+                // depend on other classes might give a big problem)
                 var cls = set.Classes[i];
+                var cctor = cls.TheType.TypeInitializer;
+                if (cctor == null || cls.SuppressInit)
+                {
+                    continue;
+                }
+
+                PrepareCodeInternal(set, cctor, null);
+            }
+        }
+
+        /// <summary>
+        /// Orders classes by inheritance (interfaces and base classes before derived classes)
+        /// </summary>
+        internal class ClassDeclarationByInheritanceSorter : IComparer<ClassDeclaration>
+        {
+            /// <inheritdoc cref="IComparer{T}.Compare"/>
+            public int Compare(ClassDeclaration? x, ClassDeclaration? y)
+            {
+                if (x == y)
+                {
+                    return 0;
+                }
+
+                // No nulls expected here
+                Type xt = x!.TheType;
+                Type yt = y!.TheType;
+
+                if (xt.IsInterface && !yt.IsInterface)
+                {
+                    return -1;
+                }
+
+                if (!xt.IsInterface && yt.IsInterface)
+                {
+                    return 1;
+                }
+
+                if (xt.IsInterface && yt.IsInterface)
+                {
+                    return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
+                }
+
+                // Both x and y are not interfaces now (and not equal)
+                if (xt.IsAssignableFrom(yt))
+                {
+                    return -1;
+                }
+
+                if (yt.IsAssignableFrom(xt))
+                {
+                    return 1;
+                }
+
+                return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
+            }
+        }
+
+        /// <summary>
+        /// Detects the required (potentially used) virtual methods in the execution set
+        /// </summary>
+        private void DetectRequiredVirtualMethodImplementations(ExecutionSet set, List<ClassDeclaration> declarations)
+        {
+            for (var i = 0; i < declarations.Count; i++)
+            {
+                var cls = declarations[i];
                 List<FieldInfo> fields = new List<FieldInfo>();
                 List<MemberInfo> methods = new List<MemberInfo>();
 
@@ -456,21 +555,6 @@ namespace Iot.Device.Arduino
                         cls.Members.Add(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb), baseTokens));
                     }
                 }
-            }
-
-            // Last step: Of all classes in the list, load their static cctors
-            for (var i = 0; i < set.Classes.Count; i++)
-            {
-                // Let's hope the list no more changes, but in theory we don't know (however, creating static ctors that
-                // depend on other classes might give a big problem)
-                var cls = set.Classes[i];
-                var cctor = cls.TheType.TypeInitializer;
-                if (cctor == null || cls.SuppressInit)
-                {
-                    continue;
-                }
-
-                PrepareCodeInternal(set, cctor, null);
             }
         }
 
