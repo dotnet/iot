@@ -317,7 +317,7 @@ namespace Iot.Device.HardwareMonitor
             Enum? unitThatWasUsed = null;
             foreach (var s in GetSensorList(hardware))
             {
-                if (s.TryGetValue(out T singleValue))
+                if (s.TryGetValue(out T? singleValue))
                 {
                     if (unitThatWasUsed == null)
                     {
