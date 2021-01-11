@@ -1482,7 +1482,7 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
                     _firmataStream.WriteByte((byte)0xFF); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclaration);
+                    _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclarationEnd);
                     SendInt32(classToken);
                     SendInt32(parentToken);
                     // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
@@ -1502,7 +1502,7 @@ namespace Iot.Device.Arduino
 
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);
+                    WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
                     return;
                 }
 
@@ -1512,7 +1512,8 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
                     _firmataStream.WriteByte((byte)0xFF); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclaration);
+                    // This incorporates a flag to optimize memory consumption on the host
+                    _firmataStream.WriteByte((byte)(member == members.Count - 1 ? ExecutorCommand.ClassDeclarationEnd : ExecutorCommand.ClassDeclaration));
                     SendInt32(classToken);
                     SendInt32(parentToken);
                     // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
@@ -1551,7 +1552,7 @@ namespace Iot.Device.Arduino
 
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);
+                    WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
                 }
             }
         }
@@ -1582,7 +1583,7 @@ namespace Iot.Device.Arduino
                     _firmataStream.Write(encoded, 0, encoded.Length);
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.SetMethodTokens);
+                    WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
                 }
             }
         }

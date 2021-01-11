@@ -15,14 +15,13 @@ namespace Iot.Device.Arduino
     {
         None = 0,
         DeclareMethod = 1,
-        SetMethodTokens = 2,
         LoadIl = 3,
         StartTask = 4,
         ResetExecutor = 5,
         KillTask = 6,
         MethodSignature = 7,
         ClassDeclaration = 8,
-        SendObject = 9,
+        ClassDeclarationEnd = 9, // Last part of class declaration
         ConstantData = 10,
         Interfaces = 11,
 
@@ -560,6 +559,7 @@ namespace Iot.Device.Arduino
 
         internal void SendClassDeclarations(ExecutionSet set)
         {
+            int idx = 0;
             foreach (var c in set.Classes)
             {
                 var cls = c.TheType;
@@ -575,10 +575,11 @@ namespace Iot.Device.Arduino
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
                 string className = cls.Name;
 
-                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes.");
+                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx} / {set.Classes.Count}");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
+                idx++;
             }
         }
 
