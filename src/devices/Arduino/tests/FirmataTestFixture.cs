@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -22,7 +23,7 @@ namespace Iot.Device.Arduino.Tests
                 _networkStream = new NetworkStream(_socket, true);
                 Board = new ArduinoBoard(_networkStream);
                 Board.Initialize();
-                Board.LogMessages += (x, y) => Console.WriteLine(x);
+                Board.LogMessages += LogMessage;
 
                 return;
             }
@@ -38,12 +39,18 @@ namespace Iot.Device.Arduino.Tests
             }
 
             Board = b;
-            Board.LogMessages += (x, y) => Console.WriteLine(x);
+            Board.LogMessages += LogMessage;
         }
 
         public ArduinoBoard Board
         {
             get;
+        }
+
+        private void LogMessage(string x, Exception? y)
+        {
+            Console.WriteLine(x);
+            Debug.WriteLine(x);
         }
 
         protected virtual void Dispose(bool disposing)
