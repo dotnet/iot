@@ -6,12 +6,12 @@ using System.Device.Spi;
 using System.IO;
 using UnitsNet;
 
-namespace Iot.Device.MAX31856
+namespace Iot.Device.Max31856
 {
     /// <summary>
     /// Documentation https://datasheets.maximintegrated.com/en/ds/MAX31856.pdf
     /// </summary>
-    public class MAX31856 : IDisposable
+    public class Max31856 : IDisposable
     {
         private readonly byte _thermocoupleType;
         private SpiDevice _spiDevice;
@@ -29,7 +29,7 @@ namespace Iot.Device.MAX31856
         public const DataFlow SpiDataFlow = DataFlow.MsbFirst;
 
         /// <summary>
-        /// MAX31856 SPI Mode
+        /// Max31856 SPI Mode
         /// </summary>
         public const SpiMode SpiModeSetup = SpiMode.Mode1;
 
@@ -39,25 +39,12 @@ namespace Iot.Device.MAX31856
         /// Command to Get Temperature from the device
         /// </summary>
         /// <remarks>
-        /// Initializes the device and then reads the data next it converts the bytes to thermocouple temperature
+        /// Initializes the device and then reads the data converting the bytes to thermocouple temperature
         /// </remarks>
-        public bool TryGetTemperature(out Temperature temperature)
+        public Temperature GetTemperature()
         {
-            temperature = TryReadTemperature(out byte[] spiOutputData);
-            if (temperature.DegreesCelsius == 1000)
-            {
-                return false;
-                throw new IOException("Device not found");
-            }
-            else if (temperature.DegreesCelsius == 1001)
-            {
-                return false;
-                throw new IOException("Thermocouple is not connected");
-            }
-            else
-            {
-                return true;
-            }
+            Temperature temperature = ReadTemperature(out byte[] spiOutputData);
+            return temperature;
         }
 
         /// <summary>
@@ -73,7 +60,7 @@ namespace Iot.Device.MAX31856
         /// </summary>
         /// <param name="spiDevice">The communications channel to a device on a SPI bus</param>
         /// <param name="thermocoupleType">Thermocouple Default Type is T can change to B,E,J,K,N,R,S</param>
-        public MAX31856(SpiDevice spiDevice, ThermocoupleType thermocoupleType)
+        public Max31856(SpiDevice spiDevice, ThermocoupleType thermocoupleType)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _thermocoupleType = (byte)thermocoupleType;
@@ -125,7 +112,7 @@ namespace Iot.Device.MAX31856
         /// <remarks>
         /// Takes the spi data as an input and outputs the Thermocouple Temperature Reading
         /// </remarks>
-        private Temperature TryReadTemperature(out byte[] spiOutputData)
+        private Temperature ReadTemperature(out byte[] spiOutputData)
         {
             spiOutputData = WriteRead(Register.READ_CR0, 16);
             double tempRaw = (((spiOutputData[13] & 0x7F) << 16) + (spiOutputData[14] << 8) + (spiOutputData[15]));
@@ -133,20 +120,6 @@ namespace Iot.Device.MAX31856
             if ((spiOutputData[13] & 0x80) == 0x80) // checks if the temp is negative
             {
                 temperature = -temperature;
-            }
-
-            // Throws exceptions if the device is not found or if the thermocouple is not connected
-            if (spiOutputData[1] != (byte)Register.ONESHOT_FAULT_SETTING)
-            {
-                temperature = 1000;
-                var temperatureOneShotFault = Temperature.FromDegreesCelsius(temperature);
-                return temperatureOneShotFault;
-            }
-            else if (((spiOutputData[16] & (byte)Register.ERROR_OPEN) == (byte)Register.ERROR_OPEN))
-            {
-                temperature = 1001;
-                var temperatureNotConnected = Temperature.FromDegreesCelsius(temperature);
-                return temperatureNotConnected;
             }
 
             var temperatureOut = Temperature.FromDegreesCelsius(temperature); // Converts temperature to type Temperature struct and establishes it as Degrees C for its initial units

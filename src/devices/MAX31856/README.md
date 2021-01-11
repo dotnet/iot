@@ -1,7 +1,7 @@
-﻿# MAX31856 - cold-junction compensated thermocouple to digital converter
+﻿# Max31856 - cold-junction compensated thermocouple to digital converter
 
 ## Summary
-The MAX31856 device is a SPI interface cold-junction compensated thermocouple to digital converter.
+The Max31856 device is a SPI interface cold-junction compensated thermocouple to digital converter.
 
 ## Sensor Image
 ![Illustration of wiring from a Raspberry Pi device](device.jpg)
@@ -10,4 +10,4 @@ The MAX31856 device is a SPI interface cold-junction compensated thermocouple to
 
 ## References 
 
-**MAX31856** [datasheet](https://datasheets.maximintegrated.com/en/ds/MAX31856.pdf)
+**Max31856** [datasheet](https://datasheets.maximintegrated.com/en/ds/Max31856.pdf)
