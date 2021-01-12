@@ -112,7 +112,6 @@ namespace Iot.Device.Max31856
         private Temperature ReadTemperature(out byte[] spiOutputData)
         {
             spiOutputData = WriteRead(Register.READ_CR0, 16);
-            Console.WriteLine("output 5" + spiOutputData[5]);
             double tempRaw = (((spiOutputData[13] & 0x7F) << 16) + (spiOutputData[14] << 8) + (spiOutputData[15]));
             double temperature = tempRaw / 4096; // temperature in degrees C
             if ((spiOutputData[13] & 0x80) == 0x80) // checks if the temp is negative
