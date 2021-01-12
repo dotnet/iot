@@ -10,7 +10,7 @@ using UnitsNet;
 namespace Iot.Device.Max31856
 {
     /// <summary>
-    /// MAX31856  - cold-junction compensated thermocouple to digital converter
+    /// Max31856  - cold-junction compensated thermocouple to digital converter
     /// </summary>
     public class Max31856 : IDisposable
     {
