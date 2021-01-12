@@ -9,7 +9,7 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement("System.CLRConfig", null, true, IncludingPrivates = true)]
     internal static class MiniCLRConfig
     {
-        [ArduinoImplementation(ArduinoImplementation.None)]
+        [ArduinoImplementation(NativeMethod.None)]
         public static bool GetBoolValueWithFallbacks(string switchName, string environmentName, bool defaultValue)
         {
             return defaultValue;

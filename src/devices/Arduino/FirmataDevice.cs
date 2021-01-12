@@ -1349,7 +1349,7 @@ namespace Iot.Device.Arduino
         }
 
         public void SendMethodDeclaration(int codeReference, int declarationToken, MethodFlags methodFlags, byte maxStack, byte argCount,
-            ArduinoImplementation nativeMethod, ClassMember[] localTypes, ClassMember[] argTypes)
+            NativeMethod nativeMethod, ClassMember[] localTypes, ClassMember[] argTypes)
         {
             if (_firmataStream == null)
             {

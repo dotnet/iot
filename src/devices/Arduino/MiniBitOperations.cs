@@ -82,7 +82,7 @@ namespace Iot.Device.Arduino
         /// Does not directly use any hardware intrinsics, nor does it incur branching.
         /// </summary>
         /// <param name="value">The value.</param>
-        [ArduinoImplementation(ArduinoImplementation.BitOperationsLog2SoftwareFallback)]
+        [ArduinoImplementation(NativeMethod.BitOperationsLog2SoftwareFallback)]
         private static int Log2SoftwareFallback(uint value)
         {
             throw new NotImplementedException();
@@ -149,7 +149,7 @@ namespace Iot.Device.Arduino
         /// Similar in behavior to the x86 instruction TZCNT.
         /// </summary>
         /// <param name="value">The value.</param>
-        [ArduinoImplementation(ArduinoImplementation.BitOperationsTrailingZeroCount)]
+        [ArduinoImplementation(NativeMethod.BitOperationsTrailingZeroCount)]
         public static int TrailingZeroCount(uint value)
         {
             throw new NotImplementedException();

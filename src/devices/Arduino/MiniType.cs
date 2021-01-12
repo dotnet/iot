@@ -16,7 +16,7 @@ namespace Iot.Device.Arduino
         private Int32 m_handle;
 #pragma warning restore 414
 
-        [ArduinoImplementation(ArduinoImplementation.TypeCtor)]
+        [ArduinoImplementation(NativeMethod.TypeCtor)]
         protected MiniType()
         {
             // This ctor is never executed - the variable values are pushed directly
@@ -34,7 +34,7 @@ namespace Iot.Device.Arduino
 
         public virtual bool IsEnum
         {
-            [ArduinoImplementation(ArduinoImplementation.TypeIsEnum)]
+            [ArduinoImplementation(NativeMethod.TypeIsEnum)]
             get
             {
                 // Needs support in the backend
@@ -52,7 +52,7 @@ namespace Iot.Device.Arduino
 
         public virtual RuntimeTypeHandle TypeHandle
         {
-            [ArduinoImplementation(ArduinoImplementation.TypeTypeHandle)]
+            [ArduinoImplementation(NativeMethod.TypeTypeHandle)]
             get
             {
                 return default;
@@ -61,14 +61,14 @@ namespace Iot.Device.Arduino
 
         public bool IsValueType
         {
-            [ArduinoImplementation(ArduinoImplementation.TypeIsValueType)]
+            [ArduinoImplementation(NativeMethod.TypeIsValueType)]
             get
             {
                 return false;
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeGetTypeFromHandle)]
+        [ArduinoImplementation(NativeMethod.TypeGetTypeFromHandle)]
         public static Type GetTypeFromHandle(RuntimeTypeHandle handle)
         {
             throw new NotImplementedException();
@@ -99,49 +99,49 @@ namespace Iot.Device.Arduino
             return TypeHandle;
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeEquals)]
+        [ArduinoImplementation(NativeMethod.TypeEquals)]
         public override bool Equals(object? obj)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeGetHashCode)]
+        [ArduinoImplementation(NativeMethod.TypeGetHashCode)]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeMakeGenericType)]
+        [ArduinoImplementation(NativeMethod.TypeMakeGenericType)]
         public virtual Type MakeGenericType(params Type[] types)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeIsAssignableTo)]
+        [ArduinoImplementation(NativeMethod.TypeIsAssignableTo)]
         public virtual bool IsAssignableTo(Type otherType)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeIsAssignableFrom)]
+        [ArduinoImplementation(NativeMethod.TypeIsAssignableFrom)]
         public virtual bool IsAssignableFrom(Type c)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeIsSubclassOf)]
+        [ArduinoImplementation(NativeMethod.TypeIsSubclassOf)]
         public virtual bool IsSubclassOf(Type c)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeGetGenericTypeDefinition)]
+        [ArduinoImplementation(NativeMethod.TypeGetGenericTypeDefinition)]
         public virtual Type GetGenericTypeDefinition()
         {
             throw new InvalidOperationException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.TypeGetGenericArguments)]
+        [ArduinoImplementation(NativeMethod.TypeGetGenericArguments)]
         public virtual Type[] GetGenericArguments()
         {
             return new Type[0];
@@ -157,7 +157,7 @@ namespace Iot.Device.Arduino
             return typeof(Int32);
         }
 
-        [ArduinoImplementation(ArduinoImplementation.CreateInstanceForAnotherGenericParameter)]
+        [ArduinoImplementation(NativeMethod.TypeCreateInstanceForAnotherGenericParameter)]
         public static object? CreateInstanceForAnotherGenericParameter(Type? type1, Type? type2)
         {
             return null;

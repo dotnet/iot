@@ -20,20 +20,20 @@ namespace Iot.Device.Arduino
         private char _firstChar;
 #pragma warning restore 414
 
-        [ArduinoImplementation(ArduinoImplementation.StringCtor0)]
+        [ArduinoImplementation(NativeMethod.StringCtor0)]
         public MiniString()
         {
             _stringLength = 0;
             _firstChar = '\0';
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringCtor1)]
+        [ArduinoImplementation(NativeMethod.StringCtor1)]
         public unsafe MiniString(char* buf)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None)]
+        [ArduinoImplementation(NativeMethod.None)]
         public MiniString(ReadOnlySpan<char> value)
             : this(' ', value.Length)
         {
@@ -43,7 +43,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringCtor2)]
+        [ArduinoImplementation(NativeMethod.StringCtor2)]
         public MiniString(char c, int count)
         {
             throw new NotImplementedException();
@@ -116,7 +116,7 @@ namespace Iot.Device.Arduino
 
         public int Length
         {
-            [ArduinoImplementation(ArduinoImplementation.None)]
+            [ArduinoImplementation(NativeMethod.None)]
             get
             {
                 return _stringLength;
@@ -132,7 +132,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringCompareTo)]
+        [ArduinoImplementation(NativeMethod.StringCompareTo)]
         public int CompareTo(string? other)
         {
             throw new NotImplementedException();
@@ -148,31 +148,31 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringEquals)]
+        [ArduinoImplementation(NativeMethod.StringEquals)]
         public override bool Equals(object? obj)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None)]
+        [ArduinoImplementation(NativeMethod.None)]
         public bool Equals(string? other)
         {
             return Equals((object?)other);
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringEqualsStringComparison)]
+        [ArduinoImplementation(NativeMethod.StringEqualsStringComparison)]
         public bool Equals(string value, StringComparison comparisonType)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringGetHashCode)]
+        [ArduinoImplementation(NativeMethod.StringGetHashCode)]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringToString)]
+        [ArduinoImplementation(NativeMethod.StringToString)]
         public override string ToString()
         {
             // This should simply do a "return this", but we can't do that here, because the types don't match
@@ -199,7 +199,7 @@ namespace Iot.Device.Arduino
             return this; // String is immutable
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringSetElem)]
+        [ArduinoImplementation(NativeMethod.StringSetElem)]
         private void SetElem(int idx, char c)
         {
             throw new NotImplementedException();
@@ -213,37 +213,37 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringGetElem)]
+        [ArduinoImplementation(NativeMethod.StringGetElem)]
         private char GetElem(int idx)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringGetPinnableReference)]
+        [ArduinoImplementation(NativeMethod.StringGetPinnableReference)]
         public ref char GetPinnableReference()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringEqualsStatic)]
+        [ArduinoImplementation(NativeMethod.StringEqualsStatic)]
         public static bool Equals(string a, string b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringEqualsStatic)]
+        [ArduinoImplementation(NativeMethod.StringEqualsStatic)]
         public static bool operator ==(MiniString a, MiniString b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringUnEqualsStatic)]
+        [ArduinoImplementation(NativeMethod.StringUnEqualsStatic)]
         public static bool operator !=(MiniString a, MiniString b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None)]
+        [ArduinoImplementation(NativeMethod.None)]
         public TypeCode GetTypeCode()
         {
             return TypeCode.String;
@@ -329,13 +329,13 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringFastAllocateString)]
+        [ArduinoImplementation(NativeMethod.StringFastAllocateString)]
         public static String FastAllocateString(int length)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.StringGetRawStringData)]
+        [ArduinoImplementation(NativeMethod.StringGetRawStringData)]
         public ref char GetRawStringData()
         {
             throw new NotImplementedException();
@@ -355,7 +355,7 @@ namespace Iot.Device.Arduino
         /// Allocates memory for the internal _data pointer
         /// </summary>
         /// <param name="length">Length, in chars</param>
-        [ArduinoImplementation(ArduinoImplementation.StringInternalAllocateString)]
+        [ArduinoImplementation(NativeMethod.StringInternalAllocateString)]
         private void InternalAllocateString(int length)
         {
             throw new NotImplementedException();

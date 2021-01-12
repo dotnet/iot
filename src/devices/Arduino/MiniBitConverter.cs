@@ -12,7 +12,7 @@ namespace Iot.Device.Arduino
         // This must be set to the endianess of the target platform, but currently all Arduinos seem to use little endian
         public static readonly bool IsLittleEndian = true;
 
-        [ArduinoImplementation(ArduinoImplementation.BitConverterSingleToInt32Bits)]
+        [ArduinoImplementation(NativeMethod.BitConverterSingleToInt32Bits)]
         public static int SingleToInt32Bits(float value)
         {
             throw new NotImplementedException();

@@ -11,7 +11,7 @@ namespace Iot.Device.Arduino
     {
         public static int TickCount
         {
-            [ArduinoImplementation(ArduinoImplementation.EnvironmentTickCount)]
+            [ArduinoImplementation(NativeMethod.EnvironmentTickCount)]
             get
             {
                 throw new NotImplementedException();
@@ -34,13 +34,13 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.FailFast1)]
+        [ArduinoImplementation(NativeMethod.EnvironmentFailFast1)]
         public static void FailFast(string message)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.FailFast2)]
+        [ArduinoImplementation(NativeMethod.EnvironmentFailFast2)]
         public static void FailFast(string message, Exception exception)
         {
             throw new NotImplementedException();

@@ -9,7 +9,7 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(DateTime), false, false, IncludingPrivates = true)]
     internal struct MiniDateTime
     {
-        [ArduinoImplementation(ArduinoImplementation.None)]
+        [ArduinoImplementation(NativeMethod.None)]
         public static bool SystemSupportsLeapSeconds()
         {
             return false;

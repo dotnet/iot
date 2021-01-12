@@ -119,7 +119,6 @@ namespace Arduino.Samples
             UInt32 watchStart = ArduinoNativeHelpers.GetMicroseconds();
             // controller.SleepMicroseconds(1);
             UInt32 elapsed = ArduinoNativeHelpers.GetMicroseconds() - watchStart;
-            controller.DebugValue((int)elapsed);
 
             controller.SetPinMode(debugPin, PinMode.Output);
             controller.WritePin(debugPin, 0);
@@ -152,7 +151,6 @@ namespace Arduino.Samples
             {
                 if (count-- == 0)
                 {
-                    controller.DebugValue(0xAAAA);
                     return 0;
                 }
             }
@@ -163,7 +161,6 @@ namespace Arduino.Samples
             {
                 if (count-- == 0)
                 {
-                    controller.DebugValue(0xBBBB);
                     return 0;
                 }
             }
@@ -178,7 +175,6 @@ namespace Arduino.Samples
                 {
                     if (count-- == 0)
                     {
-                        controller.DebugValue(i);
                         return 0;
                     }
 
@@ -191,7 +187,6 @@ namespace Arduino.Samples
                 {
                     if (count-- == 0)
                     {
-                        controller.DebugValue(i);
                         return 0;
                     }
                 }

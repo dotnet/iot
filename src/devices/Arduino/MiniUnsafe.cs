@@ -6,7 +6,7 @@ namespace Iot.Device.Arduino
     internal unsafe class MiniUnsafe
     {
         // The implementation of the following two methods is identical, therefore it doesn't really matter which one we match
-        [ArduinoImplementation(ArduinoImplementation.UnsafeAs2, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeAs2, CompareByParameterNames = true)]
         public static T As<T>(object? value)
             where T : class?
         {
@@ -16,7 +16,7 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(ArduinoImplementation.UnsafeAs2, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeAs2, CompareByParameterNames = true)]
         public static ref TTo As<TFrom, TTo>(ref TFrom source)
         {
             throw new PlatformNotSupportedException();
@@ -25,7 +25,7 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(ArduinoImplementation.UnsafeAsPointer, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeAsPointer, CompareByParameterNames = true)]
         public static void* AsPointer<T>(ref T value)
         {
             throw new PlatformNotSupportedException();
@@ -38,13 +38,13 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Determines the byte offset from origin to target from the given references.
         /// </summary>
-        [ArduinoImplementation(ArduinoImplementation.UnsafeByteOffset, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeByteOffset, CompareByParameterNames = true)]
         public static IntPtr ByteOffset<T>(ref T origin, ref T target)
         {
             throw new PlatformNotSupportedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.UnsafeAreSame, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeAreSame, CompareByParameterNames = true)]
         public static bool AreSame<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();
@@ -55,7 +55,7 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static bool IsNullRef<T>(ref T source)
         {
             return AsPointer(ref source) == null;
@@ -67,7 +67,7 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static ref T Add<T>(ref T source, int elementOffset)
         {
             return ref AddByteOffset(ref source, (IntPtr)(elementOffset * (int)SizeOf<T>()));
@@ -78,7 +78,7 @@ namespace Iot.Device.Arduino
             return (byte*)source + (elementOffset * (int)SizeOf<T>());
         }
 
-        [ArduinoImplementation(ArduinoImplementation.UnsafeAddByteOffset, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeAddByteOffset, CompareByParameterNames = true)]
         public static ref T AddByteOffset<T>(ref T source, IntPtr byteOffset)
         {
             // This method is implemented by the toolchain
@@ -102,13 +102,13 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(ArduinoImplementation.UnsafeSizeOfType)]
+        [ArduinoImplementation(NativeMethod.UnsafeSizeOfType)]
         private static int SizeOfType(Type t)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static ref T AsRef<T>(void* source)
         {
             return ref As<byte, T>(ref *(byte*)source);
@@ -119,7 +119,7 @@ namespace Iot.Device.Arduino
             throw new PlatformNotSupportedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.UnsafeNullRef)]
+        [ArduinoImplementation(NativeMethod.UnsafeNullRef)]
         public static ref T NullRef<T>()
         {
             return ref AsRef<T>(null);
@@ -129,13 +129,13 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static T ReadUnaligned<T>(void* source)
         {
             return As<byte, T>(ref *(byte*)source);
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static T Read<T>(void* source)
         {
             return As<byte, T>(ref *(byte*)source);
@@ -148,7 +148,7 @@ namespace Iot.Device.Arduino
         /// <remarks>
         /// This check is conceptually similar to "(void*)(&amp;left) &gt; (void*)(&amp;right)".
         /// </remarks>
-        [ArduinoImplementation(ArduinoImplementation.UnsafeIsAddressGreaterThan, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeIsAddressGreaterThan, CompareByParameterNames = true)]
         public static bool IsAddressGreaterThan<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();
@@ -166,7 +166,7 @@ namespace Iot.Device.Arduino
         /// <remarks>
         /// This check is conceptually similar to "(void*)(&amp;left) &lt; (void*)(&amp;right)".
         /// </remarks>
-        [ArduinoImplementation(ArduinoImplementation.UnsafeIsAddressLessThan, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.UnsafeIsAddressLessThan, CompareByParameterNames = true)]
         public static bool IsAddressLessThan<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();
@@ -177,7 +177,7 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None)]
+        [ArduinoImplementation(NativeMethod.None)]
         public static void InitBlockUnaligned(ref byte startAddress, byte value, uint byteCount)
         {
             for (uint i = 0; i < byteCount; i++)
@@ -189,7 +189,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Writes a value of type <typeparamref name="T"/> to the given location.
         /// </summary>
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static void WriteUnaligned<T>(void* destination, T value)
         {
             As<byte, T>(ref *(byte*)destination) = value;
@@ -198,7 +198,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Writes a value of type <typeparamref name="T"/> to the given location.
         /// </summary>
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static void WriteUnaligned<T>(ref byte destination, T value)
         {
             As<byte, T>(ref destination) = value;

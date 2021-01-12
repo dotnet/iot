@@ -8,25 +8,22 @@ namespace Iot.Device.Arduino
 {
     public interface IArduinoHardwareLevelAccess
     {
-        [ArduinoImplementation(ArduinoImplementation.SetPinMode)]
+        [ArduinoImplementation(NativeMethod.HardwareLevelAccessSetPinMode)]
         void SetPinMode(int pin, PinMode mode);
 
-        [ArduinoImplementation(ArduinoImplementation.WritePin)]
+        [ArduinoImplementation(NativeMethod.HardwareLevelAccessWritePin)]
         void WritePin(int pin, int value);
 
-        [ArduinoImplementation(ArduinoImplementation.ReadPin)]
+        [ArduinoImplementation(NativeMethod.HardwareLevelAccessReadPin)]
         int ReadPin(int pin);
 
-        [ArduinoImplementation(ArduinoImplementation.Debug)]
-        void DebugValue(int data);
-
-        [ArduinoImplementation(ArduinoImplementation.GetPinMode)]
+        [ArduinoImplementation(NativeMethod.HardwareLevelAccessGetPinMode)]
         PinMode GetPinMode(int pinNumber);
 
-        [ArduinoImplementation(ArduinoImplementation.IsPinModeSupported)]
+        [ArduinoImplementation(NativeMethod.HardwareLevelAccessIsPinModeSupported)]
         bool IsPinModeSupported(int pinNumber, PinMode mode);
 
-        [ArduinoImplementation(ArduinoImplementation.GetPinCount)]
+        [ArduinoImplementation(NativeMethod.HardwareLevelAccessGetPinCount)]
         int GetPinCount();
     }
 }

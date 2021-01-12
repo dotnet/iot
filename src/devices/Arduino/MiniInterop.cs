@@ -64,7 +64,7 @@ namespace Iot.Device.Arduino
             PerMilleSymbol = 0x00000077
         }
 
-        [ArduinoImplementation(ArduinoImplementation.InteropGetRandomBytes)]
+        [ArduinoImplementation(NativeMethod.InteropGetRandomBytes)]
         public static unsafe void GetRandomBytes(byte* buffer, int length)
         {
             throw new NotImplementedException();
@@ -73,13 +73,13 @@ namespace Iot.Device.Arduino
         [ArduinoReplacement("Interop+Globalization", "System.Private.CoreLib.dll", false, true, IncludingPrivates = true)]
         internal static class Globalization
         {
-            [ArduinoImplementation(ArduinoImplementation.None)]
+            [ArduinoImplementation(NativeMethod.None)]
             public static int LoadICU()
             {
                 return 1; // returning a non-zero value means false, which results in UseNLS to become false, which is probably what we want
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None)]
+            [ArduinoImplementation(NativeMethod.None)]
             internal static bool GetLocaleInfoInt(string localeName, uint localeNumberData, ref int value)
             {
                 // See pal_localeNumberData.c for the original implementation of this. We just use some invariant defaults
@@ -148,7 +148,7 @@ namespace Iot.Device.Arduino
                 return true;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None)]
+            [ArduinoImplementation(NativeMethod.None)]
             internal static unsafe bool GetLocaleInfoString(string localeName, uint localeStringData, char* value, int valueLength)
             {
                 LocaleString data = (LocaleString)localeStringData;
@@ -219,7 +219,7 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None)]
+            [ArduinoImplementation(NativeMethod.None)]
             internal static unsafe bool GetLocaleTimeFormat(string localeName, bool shortFormat, char* value, int valueLength)
             {
                 if (shortFormat)
@@ -232,7 +232,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            [ArduinoImplementation(ArduinoImplementation.Interop_GlobalizationGetCalendarInfo, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.Interop_GlobalizationGetCalendarInfo, CompareByParameterNames = true)]
             internal static unsafe int GetCalendarInfo(string localeName, int calendarId, int calendarDataType, char* result, int resultCapacity)
             {
                 return 0;

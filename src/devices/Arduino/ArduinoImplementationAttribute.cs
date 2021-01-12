@@ -15,14 +15,14 @@ namespace Iot.Device.Arduino
         /// </summary>
         public ArduinoImplementationAttribute()
         {
-            MethodNumber = ArduinoImplementation.None;
+            MethodNumber = NativeMethod.None;
         }
 
         /// <summary>
         /// The attribute ctor
         /// </summary>
         /// <param name="methodNo">Number of the implementation method. Must match the firmata code.</param>
-        public ArduinoImplementationAttribute(ArduinoImplementation methodNo)
+        public ArduinoImplementationAttribute(NativeMethod methodNo)
         {
             MethodNumber = methodNo;
         }
@@ -30,7 +30,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// The implementation number
         /// </summary>
-        public ArduinoImplementation MethodNumber
+        public NativeMethod MethodNumber
         {
             get;
         }

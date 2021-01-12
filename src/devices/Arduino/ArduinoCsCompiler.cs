@@ -255,7 +255,7 @@ namespace Iot.Device.Arduino
 
         public void PrepareLowLevelInterface(ExecutionSet set)
         {
-            void AddMethod(MethodInfo method, ArduinoImplementation nativeMethod)
+            void AddMethod(MethodInfo method, NativeMethod nativeMethod)
             {
                 if (!set.HasMethod(method))
                 {
@@ -355,11 +355,11 @@ namespace Iot.Device.Arduino
             // them in the runtime
             type = typeof(System.Object);
             replacementMethodInfo = type.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance)!; // Not the static one
-            AddMethod(replacementMethodInfo, ArduinoImplementation.ObjectEquals);
+            AddMethod(replacementMethodInfo, NativeMethod.ObjectEquals);
             replacementMethodInfo = type.GetMethod("ToString")!;
-            AddMethod(replacementMethodInfo, ArduinoImplementation.ObjectToString);
+            AddMethod(replacementMethodInfo, NativeMethod.ObjectToString);
             replacementMethodInfo = type.GetMethod("GetHashCode")!;
-            AddMethod(replacementMethodInfo, ArduinoImplementation.ObjectGetHashCode);
+            AddMethod(replacementMethodInfo, NativeMethod.ObjectGetHashCode);
         }
 
         public void PrepareClass(ExecutionSet set, Type classType)
@@ -1073,7 +1073,7 @@ namespace Iot.Device.Arduino
             }
 
             // If this is true, we don't have to parse the implementation
-            if (HasArduinoImplementationAttribute(methodInfo, out var attrib) && attrib!.MethodNumber != ArduinoImplementation.None)
+            if (HasArduinoImplementationAttribute(methodInfo, out var attrib) && attrib!.MethodNumber != NativeMethod.None)
             {
                 return;
             }
@@ -1241,7 +1241,7 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException($"Internal error: The class {classReplacement} should fully replace {methodInfo.DeclaringType}, however method {methodInfo} has no replacement (and no error either)");
             }
 
-            if (HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != ArduinoImplementation.None)
+            if (HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != NativeMethod.None)
             {
                 int tk1 = set.GetOrAddMethodToken(methodInfo);
                 var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
@@ -1345,7 +1345,7 @@ namespace Iot.Device.Arduino
             MethodBase methodInfo = decl.MethodBase;
             _board.Log($"Method Index {decl.Index} (NewToken 0x{decl.Token:X}) is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
             SendMethodDeclaration(decl);
-            if (decl.HasBody && decl.NativeMethod == ArduinoImplementation.None)
+            if (decl.HasBody && decl.NativeMethod == NativeMethod.None)
             {
                 _board.Firmata.SendMethodIlCode(decl.Index, decl.IlBytes!);
             }

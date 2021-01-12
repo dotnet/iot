@@ -10,13 +10,13 @@ namespace Iot.Device.Arduino
 {
     internal class MiniBuffer
     {
-        [ArduinoImplementation(ArduinoImplementation.BufferMemmove)]
+        [ArduinoImplementation(NativeMethod.BufferMemmove)]
         internal static unsafe void Memmove(byte* dest, byte* src, uint len)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.BufferMemmoveRefArgs)]
+        [ArduinoImplementation(NativeMethod.BufferMemmoveRefArgs)]
         private static void Memmove(ref byte dest, ref byte src, uint len)
         {
             throw new NotImplementedException();
@@ -96,7 +96,7 @@ namespace Iot.Device.Arduino
             __BulkMoveWithWriteBarrier(ref destination, ref source, byteCount);
         }
 
-        [ArduinoImplementation(ArduinoImplementation.MiniBuffer_BulkMoveWithWriteBarrier)]
+        [ArduinoImplementation(NativeMethod.MiniBuffer_BulkMoveWithWriteBarrier)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
         private static void __BulkMoveWithWriteBarrier(ref byte destination, ref byte source, uint byteCount)
         {
@@ -112,7 +112,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.MiniBuffer_ZeroMemory)]
+        [ArduinoImplementation(NativeMethod.MiniBuffer_ZeroMemory)]
         [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
         private static unsafe void __ZeroMemory(void* b, uint byteLength)
         {

@@ -13,13 +13,13 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoNativeHelpers
     {
-        [ArduinoImplementation(ArduinoImplementation.GetMicroseconds)]
+        [ArduinoImplementation(NativeMethod.ArduinoNativeHelpersGetMicroseconds)]
         public static UInt32 GetMicroseconds()
         {
             throw new PlatformNotSupportedException("This method works on the Arduino only");
         }
 
-        [ArduinoImplementation(ArduinoImplementation.SleepMicroseconds)]
+        [ArduinoImplementation(NativeMethod.ArduinoNativeHelpersSleepMicroseconds)]
         public static void SleepMicroseconds(UInt32 micros)
         {
             throw new PlatformNotSupportedException("This method works on the Arduino only");

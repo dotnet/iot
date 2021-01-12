@@ -13,19 +13,19 @@ namespace Iot.Device.Arduino
         {
         }
 
-        [ArduinoImplementation(ArduinoImplementation.ValueTypeEquals)]
+        [ArduinoImplementation(NativeMethod.ValueTypeEquals)]
         public override bool Equals(object? other)
         {
             return true;
         }
 
-        [ArduinoImplementation(ArduinoImplementation.ValueTypeGetHashCode)]
+        [ArduinoImplementation(NativeMethod.ValueTypeGetHashCode)]
         public override int GetHashCode()
         {
             return 0;
         }
 
-        [ArduinoImplementation(ArduinoImplementation.ValueTypeToString)]
+        [ArduinoImplementation(NativeMethod.ValueTypeToString)]
         public override string ToString()
         {
             return string.Empty;

@@ -779,19 +779,19 @@ namespace Iot.Device.Arduino
 
             public string TimeSeparator => ":";
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             public string DateSeparator(int calendarId)
             {
                 return "/";
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             public string[] LongDates(CalendarId calendarId)
             {
                 return _saLongDates;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             public string[] ShortDates(CalendarId calendarId)
             {
                 return _saLongDates;
@@ -826,7 +826,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             public string[] YearMonths(CalendarId calendarId)
             {
                 return _saYearMonths;
@@ -843,13 +843,13 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal string MonthDay(CalendarId calendarId)
             {
                 return "MMMM dd";
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal MiniCultureData GetCalendar(CalendarId calendarId)
             {
                 return this;
@@ -861,49 +861,49 @@ namespace Iot.Device.Arduino
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] EraNames(CalendarId calendarId)
             {
                 return _saEraNames;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] AbbreviatedDayNames(CalendarId calendarId)
             {
                 return _saAbbreviatedDayNames;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] DayNames(CalendarId calendarId)
             {
                 return _saDayNames;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] AbbreviatedGenitiveMonthNames(CalendarId calendarId)
             {
                 return _saAbbreviatedMonthNames;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] AbbreviatedMonthNames(CalendarId calendarId)
             {
                 return _saAbbreviatedMonthNames;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] MonthNames(CalendarId calendarId)
             {
                 return _saMonthNames;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] GenitiveMonthNames(CalendarId calendarId)
             {
                 return _saMonthNames;
             }
 
-            [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal string[] LeapYearMonthNames(CalendarId calendarId)
             {
                 // Only used in hebrew

@@ -12,37 +12,37 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(Object), IncludingPrivates = true)]
     internal abstract class MiniObject
     {
-        [ArduinoImplementation(ArduinoImplementation.ObjectEquals)]
+        [ArduinoImplementation(NativeMethod.ObjectEquals)]
         public override bool Equals(Object? other)
         {
             return ReferenceEquals(this, other);
         }
 
-        [ArduinoImplementation(ArduinoImplementation.GetHashCode)]
+        [ArduinoImplementation(NativeMethod.ObjectGetHashCode)]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.ObjectToString)]
+        [ArduinoImplementation(NativeMethod.ObjectToString)]
         public override string ToString()
         {
            throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.GetType)]
+        [ArduinoImplementation(NativeMethod.ObjectGetType)]
         public new Type GetType()
         {
             throw new NotImplementedException(); // This implementation never executes
         }
 
-        [ArduinoImplementation(ArduinoImplementation.ObjectReferenceEquals)]
+        [ArduinoImplementation(NativeMethod.ObjectReferenceEquals)]
         public static new bool ReferenceEquals(object? a, object? b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.ObjectMemberwiseClone)]
+        [ArduinoImplementation(NativeMethod.ObjectMemberwiseClone)]
         public new object MemberwiseClone()
         {
             throw new NotImplementedException();

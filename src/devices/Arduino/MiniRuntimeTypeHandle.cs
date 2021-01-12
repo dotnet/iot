@@ -143,7 +143,7 @@ namespace Iot.Device.Arduino
 
         public IntPtr Value
         {
-            [ArduinoImplementation(ArduinoImplementation.RuntimeTypeHandleValue)]
+            [ArduinoImplementation(NativeMethod.RuntimeTypeHandleValue)]
             get
             {
                 throw new NotImplementedException();
@@ -255,13 +255,13 @@ namespace Iot.Device.Arduino
             return outHandles;
         }
 
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         internal static object Allocate(Type type)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.CreateInstanceForAnotherGenericParameter, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.TypeCreateInstanceForAnotherGenericParameter, CompareByParameterNames = true)]
         internal static object CreateInstanceForAnotherGenericParameter(Type type, Type genericParameter)
         {
             throw new NotImplementedException();
@@ -272,7 +272,7 @@ namespace Iot.Device.Arduino
             return m_type;
         }
 
-        [ArduinoImplementation(ArduinoImplementation.MiniRuntimeTypeHandleGetCorElementType)]
+        [ArduinoImplementation(NativeMethod.RuntimeTypeHandleGetCorElementType)]
         internal static CorElementType GetCorElementType(Type type)
         {
             throw new NotImplementedException();

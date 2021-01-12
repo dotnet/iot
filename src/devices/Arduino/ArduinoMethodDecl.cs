@@ -25,9 +25,9 @@ namespace Iot.Device.Arduino
                 MaxLocals = 0;
                 MaxStack = 0;
                 HasBody = false;
-                NativeMethod = ArduinoImplementation.None;
+                NativeMethod = Arduino.NativeMethod.None;
             }
-            else if (attribs.Any(x => x.MethodNumber != ArduinoImplementation.None))
+            else if (attribs.Any(x => x.MethodNumber != Arduino.NativeMethod.None))
             {
                 MaxLocals = 0;
                 MaxStack = 0;
@@ -46,7 +46,7 @@ namespace Iot.Device.Arduino
                 MaxLocals = body.LocalVariables.Count;
                 MaxStack = body.MaxStackSize;
                 HasBody = true;
-                NativeMethod = ArduinoImplementation.None;
+                NativeMethod = Arduino.NativeMethod.None;
             }
 
             ArgumentCount = methodBase.GetParameters().Length;
@@ -86,7 +86,7 @@ namespace Iot.Device.Arduino
             Name = $"{MethodBase.DeclaringType} - {methodBase}";
         }
 
-        public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, MethodFlags flags, ArduinoImplementation nativeMethod)
+        public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, MethodFlags flags, NativeMethod nativeMethod)
         {
             Index = -1;
             Token = token;
@@ -173,7 +173,7 @@ namespace Iot.Device.Arduino
             get;
         }
 
-        public ArduinoImplementation NativeMethod { get; }
+        public NativeMethod NativeMethod { get; }
 
         public int MaxLocals
         {

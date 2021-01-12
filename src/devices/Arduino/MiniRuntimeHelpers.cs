@@ -9,13 +9,13 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(System.Runtime.CompilerServices.RuntimeHelpers), true)]
     internal static class MiniRuntimeHelpers
     {
-        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersInitializeArray)]
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersInitializeArray)]
         public static void InitializeArray(Array array, RuntimeFieldHandle fldHandle)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersRunClassConstructor)]
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersRunClassConstructor)]
         public static void RunClassConstructor(RuntimeTypeHandle rtHandle)
         {
             throw new NotImplementedException();
@@ -30,7 +30,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersGetHashCode)]
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetHashCode)]
         public static int GetHashCode(object? obj)
         {
             return 0;
@@ -41,7 +41,7 @@ namespace Iot.Device.Arduino
             return IsReferenceOrContainsReferencesCore(typeof(T));
         }
 
-        [ArduinoImplementation((ArduinoImplementation.RuntimeHelpersIsReferenceOrContainsReferencesCore))]
+        [ArduinoImplementation((NativeMethod.RuntimeHelpersIsReferenceOrContainsReferencesCore))]
         private static bool IsReferenceOrContainsReferencesCore(Type t)
         {
             throw new NotImplementedException();
@@ -52,13 +52,13 @@ namespace Iot.Device.Arduino
             return IsBitwiseEquatableCore(typeof(T));
         }
 
-        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersIsBitwiseEquatable)]
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersIsBitwiseEquatable)]
         private static bool IsBitwiseEquatableCore(Type t)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersGetMethodTable)]
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetMethodTable)]
         public static unsafe void* GetMethodTable(object obj)
         {
             throw new NotImplementedException();
@@ -74,7 +74,7 @@ namespace Iot.Device.Arduino
             return 1; // TODO
         }
 
-        [ArduinoImplementation(ArduinoImplementation.RuntimeHelpersGetRawArrayData)]
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetRawArrayData)]
         internal static unsafe ref byte GetRawArrayData(this Array array)
         {
             throw new NotImplementedException();

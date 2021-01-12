@@ -9,7 +9,7 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(System.TimeZoneInfo), false, false, IncludingPrivates = true)]
     internal class MiniTimeZoneInfo
     {
-        [ArduinoImplementation(ArduinoImplementation.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static TimeZoneInfo GetLocalTimeZone(int cachedData)
         {
             // Don't access the argument here, it has a different type

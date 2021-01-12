@@ -10,17 +10,17 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(Monitor))]
     internal class MiniMonitor
     {
-        [ArduinoImplementation(ArduinoImplementation.MonitorEnter1)]
+        [ArduinoImplementation(NativeMethod.MonitorEnter1)]
         public static void Enter(Object o)
         {
         }
 
-        [ArduinoImplementation(ArduinoImplementation.MonitorEnter2)]
+        [ArduinoImplementation(NativeMethod.MonitorEnter2)]
         public static void Enter(Object o, ref bool lockTaken)
         {
         }
 
-        [ArduinoImplementation(ArduinoImplementation.MonitorExit)]
+        [ArduinoImplementation(NativeMethod.MonitorExit)]
         public static void Exit(Object o)
         {
         }

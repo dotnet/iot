@@ -54,7 +54,7 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        [ArduinoImplementation(ArduinoImplementation.SleepMicroseconds)]
+        [ArduinoImplementation(NativeMethod.ArduinoNativeHelpersGetMicroseconds)]
         public static void SpinWait(int micros)
         {
             throw new NotImplementedException();

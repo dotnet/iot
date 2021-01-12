@@ -9,7 +9,7 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement("System.SR", IncludingPrivates = true)]
     internal class MiniSR
     {
-        [ArduinoImplementation(ArduinoImplementation.None)]
+        [ArduinoImplementation(NativeMethod.None)]
         public static string GetResourceString(string resourceKey, string? defaultString)
         {
             if (ReferenceEquals(defaultString, null))

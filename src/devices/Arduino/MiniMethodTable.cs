@@ -15,7 +15,7 @@ namespace Iot.Device.Arduino
     {
         public bool IsMultiDimensionalArray
         {
-            [ArduinoImplementation(ArduinoImplementation.None)]
+            [ArduinoImplementation(NativeMethod.None)]
             get
             {
                 return false; // TODO
