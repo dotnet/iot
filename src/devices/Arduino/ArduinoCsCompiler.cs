@@ -103,8 +103,9 @@ namespace Iot.Device.Arduino
     {
         // These classes substitute (part of) a framework class
         private readonly ArduinoBoard _board;
-        private readonly Dictionary<MethodBase, ArduinoMethodDeclaration> _methodInfos;
         private readonly List<IArduinoTask> _activeTasks;
+
+        private ExecutionSet? _activeExecutionSet;
 
         // List of classes that have arduino-native implementations
         private List<Type> _replacementClasses;
@@ -112,10 +113,10 @@ namespace Iot.Device.Arduino
         public ArduinoCsCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
             _board = board;
-            _methodInfos = new Dictionary<MethodBase, ArduinoMethodDeclaration>();
             _board.SetCompilerCallback(BoardOnCompilerCallback);
 
             _activeTasks = new List<IArduinoTask>();
+            _activeExecutionSet = null;
 
             if (resetExistingCode)
             {
@@ -147,7 +148,13 @@ namespace Iot.Device.Arduino
 
         private void BoardOnCompilerCallback(int codeReference, MethodState state, object args)
         {
-            var codeRef = _methodInfos.Values.FirstOrDefault(x => x.Index == codeReference);
+            if (_activeExecutionSet == null)
+            {
+                _board.Log($"Invalid method state message. No code currently active.");
+                return;
+            }
+
+            var codeRef = _activeExecutionSet.Methods().FirstOrDefault(x => x.Index == codeReference);
             if (codeRef == null)
             {
                 _board.Log($"Invalid method state message. Not currently knowing any method with reference {codeReference}.");
@@ -250,7 +257,7 @@ namespace Iot.Device.Arduino
         {
             void AddMethod(MethodInfo method, ArduinoImplementation nativeMethod)
             {
-                if (!_methodInfos.ContainsKey(method))
+                if (!set.HasMethod(method))
                 {
                     set.GetReplacement(method.DeclaringType);
                     MethodInfo? replacement = (MethodInfo?)set.GetReplacement(method);
@@ -265,8 +272,6 @@ namespace Iot.Device.Arduino
 
                     int token = set.GetOrAddMethodToken(method);
                     ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, null, MethodFlags.SpecialMethod, nativeMethod);
-                    // Todo: Move this member to the ExecutionSet
-                    _methodInfos.Add(method, decl);
                     set.AddMethod(decl);
                 }
             }
@@ -1127,10 +1132,9 @@ namespace Iot.Device.Arduino
 
         public ArduinoTask GetTask(ExecutionSet set, MethodBase methodInfo)
         {
-            if (_methodInfos.ContainsKey(methodInfo))
+            if (set.HasMethod(methodInfo))
             {
-                // Nothing to do, already loaded
-                var tsk = new ArduinoTask(this, _methodInfos[methodInfo]);
+                var tsk = new ArduinoTask(this, set.GetMethod(methodInfo));
                 _activeTasks.Add(tsk);
                 return tsk;
             }
@@ -1339,7 +1343,6 @@ namespace Iot.Device.Arduino
         private void SendMethod(ExecutionSet set, ArduinoMethodDeclaration decl)
         {
             MethodBase methodInfo = decl.MethodBase;
-            _methodInfos.Add(methodInfo, decl);
             _board.Log($"Method Index {decl.Index} (NewToken 0x{decl.Token:X}) is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
             SendMethodDeclaration(decl);
             if (decl.HasBody && decl.NativeMethod == ArduinoImplementation.None)
@@ -1525,21 +1528,24 @@ namespace Iot.Device.Arduino
         /// <param name="arguments">Argument list</param>
         internal void Invoke(MethodBase method, params object[] arguments)
         {
-            if (!_methodInfos.TryGetValue(method, out var decl))
+            if (_activeExecutionSet == null)
             {
-                throw new InvalidOperationException("Method must be loaded first.");
+                throw new InvalidOperationException("No execution set loaded");
             }
 
+            var decl = _activeExecutionSet.GetMethod(method);
             _board.Log($"Starting execution on {decl}...");
             _board.Firmata.ExecuteIlCode(decl.Index, arguments);
         }
 
         public void KillTask(MethodBase methodInfo)
         {
-            if (!_methodInfos.TryGetValue(methodInfo, out var decl))
+            if (_activeExecutionSet == null)
             {
-                throw new InvalidOperationException("No such method known.");
+                throw new InvalidOperationException("No execution set loaded");
             }
+
+            var decl = _activeExecutionSet.GetMethod(methodInfo);
 
             _board.Firmata.SendKillTask(decl.Index);
         }
@@ -1563,12 +1569,22 @@ namespace Iot.Device.Arduino
         {
             _board.Firmata.SendIlResetCommand(force);
             _activeTasks.Clear();
-            _methodInfos.Clear();
+            _activeExecutionSet = null;
         }
 
         public void Dispose()
         {
             _board.SetCompilerCallback(null!);
+        }
+
+        public void SetExecutionSetActive(ExecutionSet executionSet)
+        {
+            if (_activeExecutionSet != null)
+            {
+                throw new InvalidOperationException("An execution set is already active. Perform a clear first");
+            }
+
+            _activeExecutionSet = executionSet;
         }
     }
 }

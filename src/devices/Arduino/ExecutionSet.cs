@@ -89,6 +89,7 @@ namespace Iot.Device.Arduino
 
             // TODO: This should not be necessary later
             _compiler.ClearAllData(true);
+            _compiler.SetExecutionSetActive(this);
             _compiler.SendClassDeclarations(this);
             _compiler.SendMethods(this);
             List<(int Token, byte[] Data)> converted = new List<(int Token, byte[] Data)>();
@@ -675,6 +676,11 @@ namespace Iot.Device.Arduino
             _nextStringToken += StringTokenStep;
             _strings[token] = data;
             return token;
+        }
+
+        public ArduinoMethodDeclaration GetMethod(MethodBase methodInfo)
+        {
+            return _methods.First(x => x.MethodInfo == methodInfo);
         }
     }
 }
