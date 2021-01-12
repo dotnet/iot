@@ -134,7 +134,7 @@ namespace Iot.Device.Max31856
         private double ConvertspiOutputDataTempColdJunction(byte[] spiOutputData)
         {
             Span<byte> reading = new Span<byte>(spiOutputData, 11, 2);
-            reading[0] = (byte)(spiOutputData[11] & 0x3F);
+            reading[0] = (byte)(spiOutputData[11] & 0x7F);
             short tempRaw = BinaryPrimitives.ReadInt16BigEndian(reading);
             if ((spiOutputData[11] & 0x80) == 0x80) // checks if the temp is negative
             {
