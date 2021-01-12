@@ -18,6 +18,7 @@ namespace Iot.Device.Arduino
         private const int StringTokenStep = 0x0001_0000;
         private const int NullableToken = 0x0080_0000;
         public const int GenericTokenMask = -8_388_608; // 0xFF80_0000 as signed
+
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<ClassDeclaration> _classes;
@@ -32,7 +33,6 @@ namespace Iot.Device.Arduino
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
         private readonly Dictionary<int, string> _strings;
-        private readonly List<ClassMember> _largeDeclarations;
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -54,7 +54,6 @@ namespace Iot.Device.Arduino
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
             _classesToSuppress = new List<Type>();
-            _largeDeclarations = new List<ClassMember>();
             _strings = new Dictionary<int, string>();
 
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
@@ -109,6 +108,14 @@ namespace Iot.Device.Arduino
 
             // Execute all static ctors
             _compiler.ExecuteStaticCtors(this);
+        }
+
+        /// <summary>
+        /// Creates a snapshot of the execution set. Used to identify parts that are pre-loaded (or shall be?)
+        /// </summary>
+        internal SnapShot CreateSnapShot()
+        {
+            return new SnapShot(_nextToken, _nextGenericToken, _nextStringToken);
         }
 
         public void SuppressType(Type t)
@@ -384,18 +391,8 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException($"Class {type} should have been replaced by its replacement");
             }
 
-            ExtractLargeValueStatics(type);
-
             _classes.Add(type);
             return true;
-        }
-
-        private void ExtractLargeValueStatics(ClassDeclaration type)
-        {
-            foreach (var m in type.Members.Where(x => x.VariableType == (VariableKind.LargeValueType | VariableKind.StaticMember)))
-            {
-                _largeDeclarations.Add(m);
-            }
         }
 
         public bool HasDefinition(Type classType)
@@ -680,7 +677,32 @@ namespace Iot.Device.Arduino
 
         public ArduinoMethodDeclaration GetMethod(MethodBase methodInfo)
         {
-            return _methods.First(x => x.MethodInfo == methodInfo);
+            return _methods.First(x => x.MethodBase == methodInfo);
+        }
+
+        public sealed class SnapShot
+        {
+            public SnapShot(int nextToken, int nextGenericToken, int nextStringToken)
+            {
+                NextToken = nextToken;
+                NextGenericToken = nextGenericToken;
+                NextStringToken = nextStringToken;
+            }
+
+            public int NextToken
+            {
+                get;
+            }
+
+            public int NextGenericToken
+            {
+                get;
+            }
+
+            public int NextStringToken
+            {
+                get;
+            }
         }
     }
 }
