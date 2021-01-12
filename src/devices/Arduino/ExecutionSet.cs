@@ -133,6 +133,7 @@ namespace Iot.Device.Arduino
 
         public long EstimateRequiredMemory(out List<KeyValuePair<Type, long>> details)
         {
+            const int MethodBodyMinSize = 40;
             Dictionary<Type, long> classSizes = new Dictionary<Type, long>();
             long bytesUsed = 0;
             foreach (var cls in Classes)
@@ -154,8 +155,9 @@ namespace Iot.Device.Arduino
 
             foreach (var method in _methods)
             {
-                bytesUsed += 48;
-                bytesUsed += method.ArgumentCount * 8;
+                bytesUsed += MethodBodyMinSize;
+                bytesUsed += method.ArgumentCount * 4;
+                bytesUsed += method.MaxLocals * 4;
 
                 int methodBytes = method.IlBytes != null ? method.IlBytes.Length : 0;
                 if (method.IlBytes != null)
@@ -432,6 +434,17 @@ namespace Iot.Device.Arduino
             {
                 // In practice, the maximum will be much less on most Arduino boards, due to ram limits
                 throw new NotSupportedException("To many methods declared. Only 2^14 supported.");
+            }
+
+            // These conditions allow some memory optimization in the runtime. It's very rare that methods exceed these limitations.
+            if (method.MaxLocals > 255)
+            {
+                throw new NotSupportedException("Methods with more than 255 local variables are unsupported");
+            }
+
+            if (method.MaxStack > 255)
+            {
+                throw new NotSupportedException("The maximum execution stack size is 255");
             }
 
             if (_methods.Any(x => x.MethodBase == method.MethodBase))
