@@ -1,6 +1,6 @@
 {
     "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
-    "settings": {        
+    "settings": {
         "indentation": {
             "indentationSize": 4,
             "tabSize": 4,
@@ -13,6 +13,6 @@
         "documentationRules": {
             "documentInterfaces": true,
             "documentInternalElements": false
-        }        
+        }
     }
-  }
+}
