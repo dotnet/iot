@@ -6,7 +6,7 @@ MFRC522 is a very cheap RFID/NFC reader for Iso 14443 Type A cards. Part of thos
 
 MFRC522 supports SPI, I2C and UART (Serial Port). You can create the reader with any of those protocols.
 
-**Note**: most of the popular boards you'll buy are SPI only. This documentation will focus on SPI. You have in the [smaples](./samples) more information on how to setup I2C and UART.
+**Note**: most of the popular boards you'll buy are SPI only. This documentation will focus on SPI. You have in the [samples](./samples) more information on how to setup I2C and UART.
 
 ```csharp
 SpiConnectionSettings connection = new(0, 1);
