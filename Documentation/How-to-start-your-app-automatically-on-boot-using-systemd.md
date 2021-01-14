@@ -10,7 +10,7 @@ For the purpose of this document let's assume you have deployed your app under:
 
 The app name is `<myiotapp>` in this documentation you would replace the entire string including the carrots in your files.
 
-To run this you will need to make your app run as root please read the section on  [Security Considerations](#Security considerations)
+To run this you will need to make your app run as root please read the section on  [Security considerations](#Security considerations)
 
 Make sure to make your app ```<myiotapp>``` is executable by using the command:
 
@@ -139,7 +139,7 @@ Not doing so may add a risk of elevation of privileges to your device.
 ```shell
 # The commands below should be run as root (i.e. sudo)
 
-# Owher of every dependency and app should be root
+# Owner of every dependency and app should be root
 chown -R root:root /your/app/directory/
 
 # permissions for dependencies (files) should be rw for owner, read or none for anyone else
