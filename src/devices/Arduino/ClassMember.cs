@@ -30,10 +30,16 @@ namespace Iot.Device.Arduino
             Token = token;
             BaseTokens = baseTokens;
             SizeOfField = 0;
+            Method = method;
             Name = $"Method: {method.DeclaringType} - {method}";
         }
 
         public string Name
+        {
+            get;
+        }
+
+        public MethodBase? Method
         {
             get;
         }

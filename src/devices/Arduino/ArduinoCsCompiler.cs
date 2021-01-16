@@ -440,33 +440,37 @@ namespace Iot.Device.Arduino
         /// </summary>
         internal void FinalizeExecutionSet(ExecutionSet set)
         {
-            // Contains all classes traversed so far
-            List<ClassDeclaration> declarations = new List<ClassDeclaration>(set.Classes);
-            // Contains the new ones to be traversed this time (start with all)
-            List<ClassDeclaration> newDeclarations = new List<ClassDeclaration>(declarations);
-            while (true)
+            // Because the code below is still not water proof (there could have been virtual methods added only in the end), we do this twice
+            for (int i = 0; i < 2; i++)
             {
-                // Sort: Interfaces first, then bases before their derived types (so that if a base rewires one virtual method to another - possibly abstract -
-                // method, the derived method's actual implementation is linked. I.e. IEqualityComparer.Equals(object,object) -> EqualityComparer.Equals(object, object) ->
-                // EqualityComparer<T>.Equals(T,T) -> -> GenericEqualityComparer<T>.Equals(T,T)
-                newDeclarations.Sort(new ClassDeclarationByInheritanceSorter());
-                DetectRequiredVirtualMethodImplementations(set, newDeclarations);
-                if (set.Classes.Count == declarations.Count)
+                // Contains all classes traversed so far
+                List<ClassDeclaration> declarations = new List<ClassDeclaration>(set.Classes);
+                // Contains the new ones to be traversed this time (start with all)
+                List<ClassDeclaration> newDeclarations = new List<ClassDeclaration>(declarations);
+                while (true)
                 {
-                    break;
-                }
-
-                // Find the new ones
-                newDeclarations = new List<ClassDeclaration>();
-                foreach (var decl in set.Classes)
-                {
-                    if (!declarations.Contains(decl))
+                    // Sort: Interfaces first, then bases before their derived types (so that if a base rewires one virtual method to another - possibly abstract -
+                    // method, the derived method's actual implementation is linked. I.e. IEqualityComparer.Equals(object,object) -> EqualityComparer.Equals(object, object) ->
+                    // EqualityComparer<T>.Equals(T,T) -> -> GenericEqualityComparer<T>.Equals(T,T)
+                    newDeclarations.Sort(new ClassDeclarationByInheritanceSorter());
+                    DetectRequiredVirtualMethodImplementations(set, newDeclarations);
+                    if (set.Classes.Count == declarations.Count)
                     {
-                        newDeclarations.Add(decl);
+                        break;
                     }
-                }
 
-                declarations = new List<ClassDeclaration>(set.Classes);
+                    // Find the new ones
+                    newDeclarations = new List<ClassDeclaration>();
+                    foreach (var decl in set.Classes)
+                    {
+                        if (!declarations.Contains(decl))
+                        {
+                            newDeclarations.Add(decl);
+                        }
+                    }
+
+                    declarations = new List<ClassDeclaration>(set.Classes);
+                }
             }
 
             // Last step: Of all classes in the list, load their static cctors
@@ -550,6 +554,11 @@ namespace Iot.Device.Arduino
                     if (MemberLinkRequired(set, m, out var baseMethodInfos))
                     {
                         var mb = (MethodBase)m; // This cast must work
+
+                        if (cls.Members.Any(x => x.Method == m))
+                        {
+                            continue;
+                        }
 
                         // If this method is required because base implementations are called, we also need its implementation (obviously)
                         // Unfortunately, this can recursively require further classes and methods
@@ -1032,7 +1041,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Returns true if the given method shall be internalized (has a native implementation on the arduino)
         /// </summary>
-        private static bool HasArduinoImplementationAttribute(MethodBase method,
+        internal static bool HasArduinoImplementationAttribute(MethodBase method,
             out ArduinoImplementationAttribute? attribute)
         {
             var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
