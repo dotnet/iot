@@ -1056,6 +1056,13 @@ namespace Iot.Device.Arduino
             return false;
         }
 
+        internal static bool HasIntrinsicAttribute(MethodBase method)
+        {
+            var attribute = Type.GetType("System.Runtime.CompilerServices.IntrinsicAttribute", true)!;
+            var attribs = method.GetCustomAttributes(attribute);
+            return attribs.Any();
+        }
+
         internal static bool HasReplacementAttribute(Type type, out ArduinoReplacementAttribute? attribute)
         {
             var repl = type.GetCustomAttribute<ArduinoReplacementAttribute>();
@@ -1256,6 +1263,27 @@ namespace Iot.Device.Arduino
                 var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
                 set.AddMethod(newInfo1);
                 return;
+            }
+
+            if (HasIntrinsicAttribute(methodInfo))
+            {
+                // If the method is marked with [Intrinsic] (an internal attribute supporting the JIT compiler), we need to check whether it requires special handling as well.
+                // We cannot use the normal replacement technique with generic classes such as ByReference<T>, because Type.GetType doesn't allow open generic classes.
+                if (methodInfo.Name == ".ctor" && methodInfo.DeclaringType!.Name == "ByReference`1")
+                {
+                    int tk1 = set.GetOrAddMethodToken(methodInfo);
+                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, NativeMethod.ByReferenceCtor);
+                    set.AddMethod(newInfo1);
+                    return;
+                }
+
+                if (methodInfo.Name == "get_Value" && methodInfo.DeclaringType!.Name == "ByReference`1")
+                {
+                    int tk1 = set.GetOrAddMethodToken(methodInfo);
+                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, NativeMethod.ByReferenceValue);
+                    set.AddMethod(newInfo1);
+                    return;
+                }
             }
 
             var body = methodInfo.GetMethodBody();

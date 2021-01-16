@@ -39,12 +39,12 @@ namespace Iot.Device.Arduino
                 }
                 else
                 {
-                    TypeToReplace = assembly.GetType(typeNameToReplace);
+                    TypeToReplace = assembly.GetType(typeNameToReplace, true);
                 }
             }
             else
             {
-                TypeToReplace = Type.GetType(typeNameToReplace);
+                TypeToReplace = Type.GetType(typeNameToReplace, true);
             }
 
             ReplaceEntireType = replaceEntireType;

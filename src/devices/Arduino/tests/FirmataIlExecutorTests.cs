@@ -583,6 +583,13 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
         }
 
+        [Theory]
+        [InlineData("SpanImplementationBehavior", 5, 1, 1)]
+        public void SpanTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
+        {
+            LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
+        }
+
         public static int IntArrayTest(int size, int index)
         {
             int[] array = new int[size];
@@ -756,6 +763,18 @@ namespace Iot.Device.Arduino.Tests
 
             LargeStruct t = array[indexToRetrieve];
             return t.B;
+        }
+
+        public static int SpanImplementationBehavior(int a, int b)
+        {
+            Span<byte> span = stackalloc byte[]
+            {
+                (byte)a, (byte)b, (byte)(a + 1),
+            };
+
+            MiniAssert.That(span.Length == 3);
+
+            return span[1];
         }
 
         public static int CastClassTest(int arg1, int arg2)

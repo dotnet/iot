@@ -117,6 +117,9 @@ namespace Iot.Device.Arduino
 
         ArduinoNativeI2cDeviceReadByte,
         ArduinoNativeI2cDeviceWriteByte,
-        ArduinoNativeI2cDeviceInit
+        ArduinoNativeI2cDeviceInit,
+
+        ByReferenceCtor,
+        ByReferenceValue,
     }
 }

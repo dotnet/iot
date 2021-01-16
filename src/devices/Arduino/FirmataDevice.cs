@@ -1628,6 +1628,10 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public void SendReserveMemoryCommand()
+        {
+        }
+
         private void SendValuesAsTwo7bitBytes(ReadOnlySpan<byte> values)
         {
             if (_firmataStream == null)

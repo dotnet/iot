@@ -632,7 +632,10 @@ namespace Iot.Device.Arduino
             {
                 if (ArduinoCsCompiler.MethodsHaveSameSignature(replacementMethod, methodInfo) || ArduinoCsCompiler.AreSameOperatorMethods(replacementMethod, methodInfo))
                 {
-                    return replacementMethod;
+                    if (!replacementMethod.IsGenericMethodDefinition)
+                    {
+                        return replacementMethod;
+                    }
                 }
 
                 if (replacementMethod.Name == methodInfo.Name && replacementMethod.GetParameters().Length == methodInfo.GetParameters().Length &&
