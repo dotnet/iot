@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
+using System.Device.I2c;
 using System.Text;
 using System.Threading;
 using Iot.Device.Arduino;
+using Iot.Device.CharacterLcd;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
@@ -137,6 +139,12 @@ namespace Iot.Device.Arduino.Tests
         public void RunBlinkWithGpioController()
         {
             ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(SimpleLedBinding), SimpleLedBinding.RunBlink, false, 6, 1000);
+        }
+
+        [Fact]
+        public void DisplayHelloWorld()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(UseI2cDisplay), UseI2cDisplay.Run, false);
         }
 
         [Fact]
@@ -394,5 +402,20 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
+        public class UseI2cDisplay
+        {
+            public static int Run()
+            {
+                using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
+                using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
+                using Hd44780 hd44780 = new Lcd2004(lcdInterface);
+                hd44780.UnderlineCursorVisible = false;
+                hd44780.BacklightOn = true;
+                hd44780.DisplayOn = true;
+                hd44780.Clear();
+                hd44780.Write("Hello World!");
+                return 1;
+            }
+        }
     }
 }

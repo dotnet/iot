@@ -114,5 +114,9 @@ namespace Iot.Device.Arduino
 
         MiniBuffer_BulkMoveWithWriteBarrier,
         MiniBuffer_ZeroMemory,
+
+        ArduinoNativeI2cDeviceReadByte,
+        ArduinoNativeI2cDeviceWriteByte,
+        ArduinoNativeI2cDeviceInit
     }
 }
