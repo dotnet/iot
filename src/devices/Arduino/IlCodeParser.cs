@@ -204,7 +204,15 @@ namespace Iot.Device.Arduino
                             // This code is not written with safety in mind. If any of this fails, either there's an unhandled case we have to consider or
                             // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
                             string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
-                            int len = int.Parse(length);
+                            int len;
+                            if (length == "Int32")
+                            {
+                                len = 4;
+                            }
+                            else
+                            {
+                                len = int.Parse(length);
+                            }
 
                             byte[] array = new byte[len];
                             System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(array, mi.FieldHandle);
