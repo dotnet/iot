@@ -34,6 +34,15 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public static OperatingSystem OSVersion
+        {
+            get
+            {
+                // This does not have a "anything else" option...
+                return new OperatingSystem(PlatformID.Unix, new Version(1, 0));
+            }
+        }
+
         [ArduinoImplementation(NativeMethod.EnvironmentFailFast1)]
         public static void FailFast(string message)
         {

@@ -18,5 +18,10 @@ namespace Iot.Device.Arduino
         {
             // This in fact is a no-op
         }
+
+        public static void SuppressFinalize(object obj)
+        {
+            // No op (we're not running any finalizers)
+        }
     }
 }
