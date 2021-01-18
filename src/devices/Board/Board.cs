@@ -578,18 +578,6 @@ namespace Iot.Device.Board
         public abstract int GetDefaultPinAssignmentForPwm(int chip, int channel);
 
         /// <summary>
-        /// Gets the board-specific hardware mode for a particular pin and pin usage (i.e. the different ALTn modes on the raspberry pi)
-        /// </summary>
-        /// <param name="pinNumber">Pin number to use</param>
-        /// <param name="usage">Requested usage</param>
-        /// <param name="pinNumberingScheme">Pin numbering scheme for the pin provided (logical or physical)</param>
-        /// <param name="bus">Optional bus argument, for SPI and I2C pins</param>
-        /// <returns>
-        /// A hardware-dependent instance of <see cref="ExtendedPinMode"/> describing the mode the pin is in.</returns>
-        public abstract ExtendedPinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage,
-            PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0);
-
-        /// <summary>
         /// Overriden by derived classes: Provides the default pin assignment for the given I2C bus
         /// </summary>
         /// <param name="busId">Bus Id</param>

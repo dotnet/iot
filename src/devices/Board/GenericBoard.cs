@@ -73,15 +73,6 @@ namespace Iot.Device.Board
             throw new NotSupportedException("The generic board has no default I2C bus");
         }
 
-        /// <summary>
-        /// Check whether the given pin is usable for the given purpose.
-        /// This implementation always returns unknown, since the generic board requires the user to know what he's doing.
-        /// </summary>
-        public override ExtendedPinMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
-        {
-            return ExtendedPinMode.Unknown;
-        }
-
         /// <inheritdoc />
         protected override void ActivatePinMode(int pinNumber, PinUsage usage)
         {
