@@ -365,7 +365,7 @@ namespace System.Device.Gpio.Drivers
         /// <param name="altPinMode">Alternate mode to set</param>
         /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
         /// <remarks>The method is intended for usage by higher-level abstraction interfaces. User code should be very careful when using this method.</remarks>
-        protected internal void SetExtendedPinMode(int pinNumber, RaspberryPi3Driver.AltMode altPinMode)
+        protected internal void SetAlternatePinMode(int pinNumber, RaspberryPi3Driver.AltMode altPinMode)
         {
             Initialize();
             ValidatePinNumber(pinNumber);
@@ -409,7 +409,7 @@ namespace System.Device.Gpio.Drivers
         /// </summary>
         /// <param name="pinNumber">Pin number in the logical scheme of the driver</param>
         /// <returns>Current pin mode</returns>
-        protected internal RaspberryPi3Driver.AltMode GetExtendedPinMode(int pinNumber)
+        protected internal RaspberryPi3Driver.AltMode GetAlternatePinMode(int pinNumber)
         {
             Initialize();
             ValidatePinNumber(pinNumber);
