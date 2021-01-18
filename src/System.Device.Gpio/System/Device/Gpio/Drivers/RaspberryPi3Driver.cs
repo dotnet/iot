@@ -13,6 +13,7 @@ namespace System.Device.Gpio.Drivers
     public class RaspberryPi3Driver : GpioDriver
     {
         private GpioDriver _internalDriver;
+        private RaspberryPi3LinuxDriver? _linuxDriver;
 
         /* private delegates for register Properties */
         private delegate void Set_Register(ulong value);
@@ -24,39 +25,52 @@ namespace System.Device.Gpio.Drivers
         private readonly Get_Register _getClearRegister;
 
         /// <summary>
-        /// Default Gpio mode. Use <see cref="SetPinMode"/> to switch between input and output.
+        /// Used to set the Alternate Pin Mode on Raspberry Pi 3/4.
+        /// The actual pin function for anything other than Input or Output is dependent
+        /// on the pin and can be looked up in the Raspi manual.
         /// </summary>
-        public static readonly ExtendedPinMode GpioMode = new RaspberryPiExtendedPinMode("GPIO", 0);
+        public enum AltMode
+        {
+            /// <summary>
+            /// Gpio mode input
+            /// </summary>
+            Input,
 
-        /// <summary>
-        /// Alternate mode 0 for Raspberry Pi
-        /// </summary>
-        public static readonly ExtendedPinMode Alt0Mode = new RaspberryPiExtendedPinMode("Alt0", 0b100);
+            /// <summary>
+            /// Gpio mode output
+            /// </summary>
+            Output,
 
-        /// <summary>
-        /// Alternate mode 1 for Raspberry Pi
-        /// </summary>
-        public static readonly ExtendedPinMode Alt1Mode = new RaspberryPiExtendedPinMode("Alt1", 0b101);
+            /// <summary>
+            /// Mode ALT0
+            /// </summary>
+            Alt0,
 
-        /// <summary>
-        /// Alternate mode 2 for Raspberry Pi
-        /// </summary>
-        public static readonly ExtendedPinMode Alt2Mode = new RaspberryPiExtendedPinMode("Alt2", 0b110);
+            /// <summary>
+            /// Mode ALT1
+            /// </summary>
+            Alt1,
 
-        /// <summary>
-        /// Alternate mode 3 for Raspberry Pi
-        /// </summary>
-        public static readonly ExtendedPinMode Alt3Mode = new RaspberryPiExtendedPinMode("Alt3", 0b111);
+            /// <summary>
+            /// Mode ALT2
+            /// </summary>
+            Alt2,
 
-        /// <summary>
-        /// Alternate mode 4 for Raspberry Pi
-        /// </summary>
-        public static readonly ExtendedPinMode Alt4Mode = new RaspberryPiExtendedPinMode("Alt4", 0b011);
+            /// <summary>
+            /// Mode ALT3
+            /// </summary>
+            Alt3,
 
-        /// <summary>
-        /// Alternate mode 5 for Raspberry Pi
-        /// </summary>
-        public static readonly ExtendedPinMode Alt5Mode = new RaspberryPiExtendedPinMode("Alt5", 0b010);
+            /// <summary>
+            /// Mode ALT4
+            /// </summary>
+            Alt4,
+
+            /// <summary>
+            /// Mode ALT5
+            /// </summary>
+            Alt5,
+        }
 
         /// <summary>
         /// Creates an instance of the RaspberryPi3Driver.
@@ -66,18 +80,18 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                RaspberryPi3LinuxDriver? linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
+                _linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
 
-                if (linuxDriver == null)
+                if (_linuxDriver == null)
                 {
                     throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: " + boardInfo.BoardModel);
                 }
 
-                _setSetRegister = (value) => linuxDriver.SetRegister = value;
-                _setClearRegister = (value) => linuxDriver.ClearRegister = value;
-                _getSetRegister = () => linuxDriver.SetRegister;
-                _getClearRegister = () => linuxDriver.ClearRegister;
-                _internalDriver = linuxDriver;
+                _setSetRegister = (value) => _linuxDriver.SetRegister = value;
+                _setClearRegister = (value) => _linuxDriver.ClearRegister = value;
+                _getSetRegister = () => _linuxDriver.SetRegister;
+                _getClearRegister = () => _linuxDriver.ClearRegister;
+                _internalDriver = _linuxDriver;
             }
             else
             {
@@ -177,16 +191,38 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
 
-        /// <inheritdoc />
-        protected internal override ExtendedPinMode GetExtendedPinMode(int pinNumber)
+        /// <summary>
+        /// Retrieve the current alternate pin mode for a given logical pin.
+        /// This works also with closed pins.
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the logical scheme of the driver</param>
+        /// <returns>Current pin mode</returns>
+        public AltMode GetExtendedPinMode(int pinNumber)
         {
-            return _internalDriver.GetExtendedPinMode(pinNumber);
+            if (_linuxDriver == null)
+            {
+                throw new NotSupportedException("This operation is not supported with the current driver.");
+            }
+
+            return _linuxDriver.GetExtendedPinMode(pinNumber);
         }
 
-        /// <inheritdoc />
-        protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode altMode)
+        /// <summary>
+        /// Set the specified alternate mode for the given pin.
+        /// Check the manual to know what each pin can do.
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the logcal scheme of the driver</param>
+        /// <param name="altPinMode">Alternate mode to set</param>
+        /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
+        /// <remarks>The method is intended for usage by higher-level abstraction interfaces. User code should be very careful when using this method.</remarks>
+        public void SetExtendedPinMode(int pinNumber, AltMode altPinMode)
         {
-            _internalDriver.SetExtendedPinMode(pinNumber, altMode);
+            if (_linuxDriver == null)
+            {
+                throw new NotSupportedException("This operation is not supported with the current driver.");
+            }
+
+            _linuxDriver.SetExtendedPinMode(pinNumber, altPinMode);
         }
 
         /// <summary>
