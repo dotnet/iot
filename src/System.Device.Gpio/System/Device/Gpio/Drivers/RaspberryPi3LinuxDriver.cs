@@ -357,17 +357,18 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        /// <inheritdoc />
-        protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode extendedPinMode)
+        /// <summary>
+        /// Set the specified alternate mode for the given pin.
+        /// Check the manual to know what each pin can do.
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the logcal scheme of the driver</param>
+        /// <param name="altPinMode">Alternate mode to set</param>
+        /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
+        /// <remarks>The method is intended for usage by higher-level abstraction interfaces. User code should be very careful when using this method.</remarks>
+        protected internal void SetExtendedPinMode(int pinNumber, RaspberryPi3Driver.AltMode altPinMode)
         {
             Initialize();
             ValidatePinNumber(pinNumber);
-
-            RaspberryPiExtendedPinMode? raspiMode = extendedPinMode as RaspberryPiExtendedPinMode;
-            if (ReferenceEquals(raspiMode, null))
-            {
-                throw new ArgumentException(nameof(extendedPinMode), $"Invalid extended mode: {raspiMode}");
-            }
 
             /*
              * There are 6 registers (4-byte ints) that control the mode for all pins. Each
@@ -385,26 +386,30 @@ namespace System.Device.Gpio.Drivers
             // Set the 3 bits to the desired mode for that pin.
             uint modeBits = 0; // Default: Gpio input
 
-            if (raspiMode == RaspberryPi3Driver.GpioMode)
+            modeBits = altPinMode switch
             {
-                // When setting back to Gpio, set to input, as this is the default
-                modeBits = 0;
-            }
-            else if (raspiMode.ModeValue < 8)
-            {
-                modeBits = raspiMode.ModeValue;
-            }
-            else
-            {
-                throw new InvalidOperationException($"Unknown Alternate pin mode value: {raspiMode.ModeValue}");
-            }
+                RaspberryPi3Driver.AltMode.Input => 0b000,
+                RaspberryPi3Driver.AltMode.Output => 0b001,
+                RaspberryPi3Driver.AltMode.Alt0 => 0b100,
+                RaspberryPi3Driver.AltMode.Alt1 => 0b101,
+                RaspberryPi3Driver.AltMode.Alt2 => 0b110,
+                RaspberryPi3Driver.AltMode.Alt3 => 0b111,
+                RaspberryPi3Driver.AltMode.Alt4 => 0b011,
+                RaspberryPi3Driver.AltMode.Alt5 => 0b010,
+                _ => throw new InvalidOperationException($"Unknown Alternate pin mode value: {altPinMode}")
+            };
 
             register |= (modeBits) << shift;
             *registerPointer = register;
         }
 
-        /// <inheritdoc />
-        protected internal override ExtendedPinMode GetExtendedPinMode(int pinNumber)
+        /// <summary>
+        /// Retrieve the current alternate pin mode for a given logical pin.
+        /// This works also with closed pins.
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the logical scheme of the driver</param>
+        /// <returns>Current pin mode</returns>
+        protected internal RaspberryPi3Driver.AltMode GetExtendedPinMode(int pinNumber)
         {
             Initialize();
             ValidatePinNumber(pinNumber);
@@ -426,21 +431,21 @@ namespace System.Device.Gpio.Drivers
             {
                 case 0b000:
                     // Input
-                    return RaspberryPi3Driver.GpioMode;
+                    return RaspberryPi3Driver.AltMode.Input;
                 case 0b001:
-                    return RaspberryPi3Driver.GpioMode;
+                    return RaspberryPi3Driver.AltMode.Output;
                 case 0b100:
-                    return RaspberryPi3Driver.Alt0Mode;
+                    return RaspberryPi3Driver.AltMode.Alt0;
                 case 0b101:
-                    return RaspberryPi3Driver.Alt1Mode;
+                    return RaspberryPi3Driver.AltMode.Alt1;
                 case 0b110:
-                    return RaspberryPi3Driver.Alt2Mode;
+                    return RaspberryPi3Driver.AltMode.Alt2;
                 case 0b111:
-                    return RaspberryPi3Driver.Alt3Mode;
+                    return RaspberryPi3Driver.AltMode.Alt3;
                 case 0b011:
-                    return RaspberryPi3Driver.Alt4Mode;
+                    return RaspberryPi3Driver.AltMode.Alt4;
                 case 0b010:
-                    return RaspberryPi3Driver.Alt5Mode;
+                    return RaspberryPi3Driver.AltMode.Alt5;
             }
 
             // This cannot happen.

@@ -130,33 +130,5 @@ namespace System.Device.Gpio
         {
             // Nothing to do in base class.
         }
-
-        /// <summary>
-        /// Retrieve the current alternate pin mode for a given logical pin.
-        /// This works also with closed pins.
-        /// </summary>
-        /// <param name="logicalPinNumber">Pin number in the logical scheme of the driver</param>
-        /// <returns>An instance describing the active pin mode</returns>
-        protected internal virtual ExtendedPinMode GetExtendedPinMode(int logicalPinNumber)
-        {
-            // Virtual instead of abstract, so as not to be breaking.
-            // It is highly recommended to update the drivers to support this method though.
-            // Note that we cannot use the GetPinMode() method here to eventually return AlternatePinMode.Gpio, since that
-            // method requires the pin to be open, and this method must also work for closed pins, because it
-            // is illegal to open a pin in Gpio mode when it is not set to Gpio.
-            throw new NotSupportedException("This driver does not support alternate modes");
-        }
-
-        /// <summary>
-        /// Set the specified alternate mode for the given pin.
-        /// </summary>
-        /// <param name="logicalPinNumber">Pin number in the logcal scheme of the driver</param>
-        /// <param name="extendedMode">Alternate mode to set</param>
-        /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
-        protected internal virtual void SetExtendedPinMode(int logicalPinNumber, ExtendedPinMode extendedMode)
-        {
-            // Virtual instead of abstract, so as not to be breaking.
-            throw new NotSupportedException("This driver does not support alternate modes");
-        }
     }
 }

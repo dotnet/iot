@@ -206,7 +206,7 @@ namespace System.Device.Gpio.Drivers
         protected internal override ExtendedPinMode GetExtendedPinMode(int pinNumber)
         {
             return _internalDriver.GetExtendedPinMode(pinNumber);
-        }
+            }
 
         /// <inheritdoc />
         protected internal override void SetExtendedPinMode(int pinNumber, ExtendedPinMode altMode)
