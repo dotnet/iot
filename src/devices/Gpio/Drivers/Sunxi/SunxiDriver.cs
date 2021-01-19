@@ -24,10 +24,13 @@ namespace Iot.Device.Gpio.Drivers
     public unsafe class SunxiDriver : SysFsDriver
     {
         private const string GpioMemoryFilePath = "/dev/mem";
-        private readonly IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
+        private IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
+        // final_address = mapped_address + (target_address & map_mask) https://stackoverflow.com/a/37922968
+        private static readonly int _mapMask = Environment.SystemPageSize - 1;
+        private static readonly object s_initializationLock = new object();
 
-        private IntPtr _gpioPointer0 = IntPtr.Zero;
-        private IntPtr _gpioPointer1 = IntPtr.Zero;
+        private IntPtr _cpuxPointer = IntPtr.Zero;
+        private IntPtr _cpusPointer = IntPtr.Zero;
 
         /// <summary>
         /// CPUX-PORT base address.
@@ -39,10 +42,11 @@ namespace Iot.Device.Gpio.Drivers
         /// </summary>
         protected virtual int CpusPortBaseAddress { get; }
 
-        // final_address = mapped_address + (target_address & map_mask) https://stackoverflow.com/a/37922968
-        private readonly int _mapMask = Environment.SystemPageSize - 1;
-        private static readonly object s_initializationLock = new object();
-        private static readonly object s_sysFsInitializationLock = new object();
+        /// <inheritdoc/>
+        protected override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
+
+        /// <inheritdoc/>
+        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SunxiDriver"/> class.
@@ -65,31 +69,13 @@ namespace Iot.Device.Gpio.Drivers
             Initialize();
         }
 
-        /// <summary>
-        /// The number of pins provided by the driver.
-        /// </summary>
-        protected override int PinCount => throw new PlatformNotSupportedException("This driver is generic so it can not enumerate how many pins are available.");
-
-        /// <summary>
-        /// Converts a board pin number to the driver's logical numbering scheme.
-        /// </summary>
-        /// <param name="pinNumber">The board pin number to convert.</param>
-        /// <returns>The pin number in the driver's logical numbering scheme.</returns>
-        protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber) => throw new PlatformNotSupportedException("This driver is generic so it can not perform conversions between pin numbering schemes.");
-
-        /// <summary>
-        /// Opens a pin in order for it to be ready to use.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <inheritdoc/>
         protected override void OpenPin(int pinNumber)
         {
             SetPinMode(pinNumber, PinMode.Input);
         }
 
-        /// <summary>
-        /// Closes an open pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
         {
             if (_pinModes.ContainsKey(pinNumber))
@@ -117,18 +103,9 @@ namespace Iot.Device.Gpio.Drivers
             }
         }
 
-        /// <summary>
-        /// Sets the mode to a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="mode">The mode to be set.</param>
+        /// <inheritdoc/>
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
-            if (!IsPinModeSupported(pinNumber, mode))
-            {
-                throw new InvalidOperationException($"The pin {pinNumber} does not support the selected mode {mode}.");
-            }
-
             // Get port controller, port number and shift
             (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
             int cfgNum = unmapped.Port / 8;
@@ -136,47 +113,54 @@ namespace Iot.Device.Gpio.Drivers
             int pulNum = unmapped.Port / 16;
             int pulShift = unmapped.Port % 16;
 
-            // Get register address, register pointer
-            int cfgAddress, pulAddress;
+            // Pn_CFG is used to set the direction; Pn_PUL is used to set the pull up/dowm mode
             uint* cfgPointer, pulPointer;
-
-            cfgAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
-            pulAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + (pulNum + 7) * 0x04) & _mapMask;
+            int cfgOffset, pulOffset;
 
             if (unmapped.PortController < 10)
             {
-                cfgPointer = (uint*)(_gpioPointer0 + cfgAddress);
-                pulPointer = (uint*)(_gpioPointer0 + pulAddress);
+                // Pn_CFG initial offset is 0x00
+                cfgOffset = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
+                // Pn_PUL initial offset is 0x1C
+                pulOffset = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x1C + pulNum * 0x04) & _mapMask;
+
+                cfgPointer = (uint*)(_cpuxPointer + cfgOffset);
+                pulPointer = (uint*)(_cpuxPointer + pulOffset);
             }
             else
             {
-                cfgPointer = (uint*)(_gpioPointer1 + cfgAddress);
-                pulPointer = (uint*)(_gpioPointer1 + pulAddress);
+                cfgOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
+                pulOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + 0x1C + pulNum * 0x04) & _mapMask;
+
+                cfgPointer = (uint*)(_cpusPointer + cfgOffset);
+                pulPointer = (uint*)(_cpusPointer + pulOffset);
             }
 
             uint cfgValue = *cfgPointer;
             uint pulValue = *pulPointer;
 
             // Clear register
-            cfgValue &= ~(0xFU << (cfgShift * 4));
-            pulValue &= ~(0b_11U << (pulShift * 2));
+            // Input is 0b000; Output is 0b001
+            cfgValue &= ~(0b1111U << (cfgShift * 4));
+            // Pull-up is 0b01; Pull-down is 0b10; Default is 0b00
+            pulValue &= ~(0b11U << (pulShift * 2));
 
             switch (mode)
             {
                 case PinMode.Output:
-                    cfgValue |= (0b_001U << (cfgShift * 4));
+                    cfgValue |= 0b_001U << (cfgShift * 4);
                     break;
                 case PinMode.Input:
                     // After clearing the register, the value is the input mode.
                     break;
                 case PinMode.InputPullDown:
-                    pulValue |= (0b_10U << (pulShift * 2));
+                    pulValue |= 0b10U << (pulShift * 2);
                     break;
                 case PinMode.InputPullUp:
-                    pulValue |= (0b_01U << (pulShift * 2));
+                    pulValue |= 0b01U << (pulShift * 2);
                     break;
                 default:
-                    throw new ArgumentException();
+                    throw new ArgumentException("Unsupported pin mode.");
             }
 
             *cfgPointer = cfgValue;
@@ -193,185 +177,102 @@ namespace Iot.Device.Gpio.Drivers
             }
         }
 
-        /// <summary>
-        /// Writes a value to a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="value">The value to be written to the pin.</param>
+        /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
-            if (!_pinModes.ContainsKey(pinNumber))
-            {
-                throw new InvalidOperationException("Can not write a value to a pin that is not open.");
-            }
-            else
-            {
-                if (_pinModes[pinNumber].CurrentPinMode != PinMode.Output)
-                {
-                    throw new InvalidOperationException("Can not write a value to a pin that is not output mode.");
-                }
-            }
-
             (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
 
-            int dataAddress;
             uint* dataPointer;
-
-            dataAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+            int dataOffset;
 
             if (unmapped.PortController < 10)
             {
-                dataPointer = (uint*)(_gpioPointer0 + dataAddress);
+                // Pn_DAT offset is 0x10
+                dataOffset = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+                dataPointer = (uint*)(_cpuxPointer + dataOffset);
             }
             else
             {
-                dataPointer = (uint*)(_gpioPointer1 + dataAddress);
+                dataOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+                dataPointer = (uint*)(_cpusPointer + dataOffset);
             }
 
             uint dataValue = *dataPointer;
 
             if (value == PinValue.High)
             {
-                dataValue |= (uint)(1 << unmapped.Port);
+                dataValue |= 0b1U << unmapped.Port;
             }
             else
             {
-                dataValue &= (uint)~(1 << unmapped.Port);
+                dataValue &= ~(0b1U << unmapped.Port);
             }
 
             *dataPointer = dataValue;
         }
 
-        /// <summary>
-        /// Reads the current value of a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <returns>The value of the pin.</returns>
+        /// <inheritdoc/>
         protected unsafe override PinValue Read(int pinNumber)
         {
-            if (!_pinModes.ContainsKey(pinNumber))
-            {
-                throw new InvalidOperationException("Can not read a value from a pin that is not open.");
-            }
-            else
-            {
-                if (_pinModes[pinNumber].CurrentPinMode == PinMode.Output)
-                {
-                    throw new InvalidOperationException("Can not read a value from a pin that is output mode.");
-                }
-            }
-
             (int PortController, int Port) unmapped = UnmapPinNumber(pinNumber);
 
-            int dataAddress;
             uint* dataPointer;
-
-            dataAddress = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+            int dataOffset;
 
             if (unmapped.PortController < 10)
             {
-                dataPointer = (uint*)(_gpioPointer0 + dataAddress);
+                // Pn_DAT offset is 0x10
+                dataOffset = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+                dataPointer = (uint*)(_cpuxPointer + dataOffset);
             }
             else
             {
-                dataPointer = (uint*)(_gpioPointer1 + dataAddress);
+                dataOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+                dataPointer = (uint*)(_cpusPointer + dataOffset);
             }
 
             uint dataValue = *dataPointer;
 
-            return Convert.ToBoolean((dataValue >> unmapped.Port) & 1) ? PinValue.High : PinValue.Low;
+            return Convert.ToBoolean((dataValue >> unmapped.Port) & 0b1) ? PinValue.High : PinValue.Low;
         }
 
-        /// <summary>
-        /// Adds a handler for a pin value changed event.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
-            if (!_pinModes.ContainsKey(pinNumber))
-            {
-                throw new InvalidOperationException("Can not add a handler to a pin that is not open.");
-            }
-            else
-            {
-                if (_pinModes[pinNumber].CurrentPinMode == PinMode.Output)
-                {
-                    throw new InvalidOperationException("Can not add a handler to a pin that is output mode.");
-                }
-            }
-
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
             base.OpenPin(pinNumber);
             base.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
         }
 
-        /// <summary>
-        /// Removes a handler for a pin value changed event.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            if (!_pinModes.ContainsKey(pinNumber))
-            {
-                throw new InvalidOperationException("Can not add a handler to a pin that is not open.");
-            }
-
             _pinModes[pinNumber].InUseByInterruptDriver = false;
 
             base.OpenPin(pinNumber);
             base.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
         }
 
-        /// <summary>
-        /// Blocks execution until an event of type eventType is received or a cancellation is requested.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
-        /// <returns>A structure that contains the result of the waiting operation.</returns>
+        /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            if (!_pinModes.ContainsKey(pinNumber))
-            {
-                throw new InvalidOperationException("Can not add a block execution to a pin that is not open.");
-            }
-
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
             base.OpenPin(pinNumber);
             return base.WaitForEvent(pinNumber, eventTypes, cancellationToken);
         }
 
-        /// <summary>
-        /// Async call until an event of type eventType is received or a cancellation is requested.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="eventTypes">The event types to wait for.</param>
-        /// <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
-        /// <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        /// <inheritdoc/>
         protected override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            if (!_pinModes.ContainsKey(pinNumber))
-            {
-                throw new InvalidOperationException("Can not async call to a pin that is not open.");
-            }
-
             _pinModes[pinNumber].InUseByInterruptDriver = true;
 
             base.OpenPin(pinNumber);
             return base.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
         }
 
-        /// <summary>
-        /// Checks if a pin supports a specific mode.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <param name="mode">The mode to check.</param>
-        /// <returns>The status if the pin supports the mode.</returns>
+        /// <inheritdoc/>
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             return mode switch
@@ -381,78 +282,67 @@ namespace Iot.Device.Gpio.Drivers
             };
         }
 
-        /// <summary>
-        /// Gets the mode of a pin.
-        /// </summary>
-        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-        /// <returns>The mode of the pin.</returns>
+        /// <inheritdoc/>
         protected override PinMode GetPinMode(int pinNumber)
         {
-            if (!_pinModes.ContainsKey(pinNumber))
-            {
-                throw new InvalidOperationException("Can not get a pin mode of a pin that is not open.");
-            }
-
             return _pinModes[pinNumber].CurrentPinMode;
         }
 
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            if (_gpioPointer0 != IntPtr.Zero)
+            if (_cpuxPointer != IntPtr.Zero)
             {
-                Interop.munmap(_gpioPointer0, 0);
-                _gpioPointer0 = IntPtr.Zero;
+                Interop.munmap(_cpuxPointer, 0);
+                _cpuxPointer = IntPtr.Zero;
             }
 
-            if (_gpioPointer1 != IntPtr.Zero)
+            if (_cpusPointer != IntPtr.Zero)
             {
-                Interop.munmap(_gpioPointer1, 0);
-                _gpioPointer1 = IntPtr.Zero;
+                Interop.munmap(_cpusPointer, 0);
+                _cpusPointer = IntPtr.Zero;
             }
         }
 
         private void Initialize()
         {
-            if (_gpioPointer0 != IntPtr.Zero)
+            if (_cpuxPointer != IntPtr.Zero)
             {
                 return;
             }
 
             lock (s_initializationLock)
             {
-                if (_gpioPointer0 != IntPtr.Zero)
+                if (_cpuxPointer != IntPtr.Zero)
                 {
                     return;
                 }
 
                 int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
-                if (fileDescriptor == -1)
+                if (fileDescriptor < 0)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (File open error).");
                 }
 
-                IntPtr mapPointer0 = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize - 1, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpuxPortBaseAddress & ~_mapMask);
-                IntPtr mapPointer1 = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize - 1, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpusPortBaseAddress & ~_mapMask);
-                if (mapPointer0.ToInt64() == -1 || mapPointer1.ToInt64() == -1)
+                IntPtr cpuxMap = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize - 1, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpuxPortBaseAddress & ~_mapMask);
+                IntPtr cpusMap = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, fileDescriptor, CpusPortBaseAddress & ~_mapMask);
+
+                if (cpuxMap.ToInt64() == -1)
                 {
-                    if (mapPointer0.ToInt64() != -1)
-                    {
-                        Interop.munmap(mapPointer0, 0);
-                    }
+                    Interop.munmap(cpuxMap, 0);
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (CPUx initialize error).");
+                }
 
-                    if (mapPointer1.ToInt64() != -1)
-                    {
-                        Interop.munmap(mapPointer1, 0);
-                    }
-
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
+                if (cpusMap.ToInt64() == -1)
+                {
+                    Interop.munmap(cpusMap, 0);
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (CPUs initialize error).");
                 }
 
                 Interop.close(fileDescriptor);
 
-                _gpioPointer0 = mapPointer0;
-                _gpioPointer1 = mapPointer0;
+                _cpuxPointer = cpuxMap;
+                _cpusPointer = cpusMap;
             }
         }
 
@@ -464,22 +354,17 @@ namespace Iot.Device.Gpio.Drivers
         /// <returns>Pin number in the driver's logical numbering scheme.</returns>
         public static int MapPinNumber(char portController, int port)
         {
-            int alphabetPosition = MapPortController(portController);
+            int alphabetPosition = (portController >= 'A' && portController <= 'Z') ? portController - 'A' : throw new Exception();
 
             return alphabetPosition * 32 + port;
         }
 
-        private static (int PortController, int Port) UnmapPinNumber(int pinNumber)
+        protected static (int PortController, int Port) UnmapPinNumber(int pinNumber)
         {
             int port = pinNumber % 32;
             int portController = (pinNumber - port) / 32;
 
             return (portController, port);
-        }
-
-        private static int MapPortController(char portController)
-        {
-            return (portController >= 'A' && portController <= 'M') ? portController - 'A' : throw new Exception();
         }
 
         private class PinState
