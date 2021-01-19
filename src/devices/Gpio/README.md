@@ -1,6 +1,6 @@
 # Sunxi GPIO Driver for .NET
 
-**sunxi** represents the family of ARM SoCs from Allwinner Technology. This project contains a **full function(PULL-UP, PULL-DOWN)** generic GPIO driver `SunxiDriver` for Allwinner SoCs and some special GPIO drivers like `OrangePiZeroDriver`, `OrangePiLite2Driver`.
+**sunxi** represents the family of ARM SoCs from Allwinner Technology. This project contains a **full function(PULL-UP, PULL-DOWN)** generic GPIO driver `SunxiDriver` for Allwinner SoCs and some special GPIO drivers like `OrangePiZeroDriver`, `OrangePiLiteDriver`, `OrangePiLite2Driver`.
 
 ## Getting started
 
@@ -21,15 +21,15 @@ gpio.SetPinMode(pinNumber, PinMode.InputPullUp);
 PinValue value = gpio.Read(pinNumber);
 ```
 
-### Special GPIO driver: `OrangePiZeroDriver`, `OrangePiLite2Driver`
+### Special GPIO driver: `OrangePiZeroDriver`
 
 ```C#
 using GpioController gpio = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
 
-gpio.OpenPin(10);
-gpio.SetPinMode(10, PinMode.Output);
+gpio.OpenPin(7);
+gpio.SetPinMode(7, PinMode.Output);
 // Write a value to the pin.
-gpio.Write(10, PinValue.High);
+gpio.Write(7, PinValue.High);
 ```
 
 ## Adding new drivers
@@ -51,15 +51,9 @@ gpio.Write(10, PinValue.High);
 
 1. Inherit the corresponding SoC class.
     ```C#
-    // For Orange Pi Zero
     public class OrangePiZeroDriver : Sun8iw7p1Driver { }
     ```
-2. Overriding the pin count.
-    ```C#
-    // Orange Pi Zero has 17 GPIO pins.
-    protected internal override int PinCount => 17;
-    ```
-3. Overriding the mapping method for converting a board pin number to the driver's logical numbering scheme.
+2. Overriding the mapping method for converting a board pin number to the driver's logical numbering scheme.
     ```C#
     // Mapping from board pins to logic pins.
     private static readonly int[] _pinNumberConverter = new int[27]
@@ -69,6 +63,8 @@ gpio.Write(10, PinValue.High);
         MapPinNumber('A', 19), -1, MapPinNumber('A', 18), MapPinNumber('A', 15), -1, MapPinNumber('A', 16), MapPinNumber('A', 2),
         MapPinNumber('A', 14), MapPinNumber('A', 13), -1, MapPinNumber('A', 10)
     };
+
+    protected override int PinCount => _pinNumberConverter.Count(n => n != -1);
 
     protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
     {
