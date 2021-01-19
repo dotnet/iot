@@ -18,11 +18,6 @@ namespace System.Device.Gpio
         protected internal abstract int PinCount { get; }
 
         /// <summary>
-        /// True if this driver supports extended pin mode settings.
-        /// </summary>
-        protected internal virtual bool ExtendedPinModeSupported => false;
-
-        /// <summary>
         /// Converts a board pin number to the driver's logical numbering scheme.
         /// </summary>
         /// <param name="pinNumber">The board pin number to convert.</param>

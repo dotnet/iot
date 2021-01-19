@@ -45,12 +45,6 @@ namespace System.Device.Gpio.Drivers
         protected internal override int PinCount => 28;
 
         /// <summary>
-        /// This driver does support extended pin modes, called ALT0-ALT5. See the hardware spec sheet to get information about
-        /// the possible values for each pin.
-        /// </summary>
-        protected internal override bool ExtendedPinModeSupported => true;
-
-        /// <summary>
         /// Returns true if this is a Raspberry Pi4
         /// </summary>
         private bool IsPi4
