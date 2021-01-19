@@ -164,7 +164,6 @@ namespace Iot.Device.Gpio.Drivers
             }
 
             *cfgPointer = cfgValue;
-            Thread.SpinWait(150);
             *pulPointer = pulValue;
 
             if (_pinModes.ContainsKey(pinNumber))
