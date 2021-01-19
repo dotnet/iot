@@ -123,9 +123,9 @@ namespace Iot.Device.Rtc
 
             return new Ds3231Alarm1(
                 NumberHelper.Bcd2Dec((byte)(rawData[3] & 0b_0011_1111)),
-                NumberHelper.Bcd2Dec((byte)(rawData[2] & 0b_0111_1111)),
+                new TimeSpan(NumberHelper.Bcd2Dec((byte)(rawData[2] & 0b_0111_1111)),
                 NumberHelper.Bcd2Dec((byte)(rawData[1] & 0b_0111_1111)),
-                NumberHelper.Bcd2Dec((byte)(rawData[0] & 0b_0111_1111)),
+                NumberHelper.Bcd2Dec((byte)(rawData[0] & 0b_0111_1111))),
                 (Ds3231Alarm1MatchMode)matchMode);
         }
 
@@ -138,21 +138,6 @@ namespace Iot.Device.Rtc
             if (alarm == null)
             {
                 throw new ArgumentNullException(nameof(alarm));
-            }
-
-            if (alarm.Second < 0 || alarm.Second > 59)
-            {
-                throw new ArgumentOutOfRangeException(nameof(alarm), "Second must be between 0 and 59.");
-            }
-
-            if (alarm.Minute < 0 || alarm.Minute > 59)
-            {
-                throw new ArgumentOutOfRangeException(nameof(alarm), "Minute must be between 0 and 59.");
-            }
-
-            if (alarm.Hour < 0 || alarm.Hour > 23)
-            {
-                throw new ArgumentOutOfRangeException(nameof(alarm), "Hour must be between 0 and 23.");
             }
 
             if (alarm.MatchMode == Ds3231Alarm1MatchMode.DayOfWeekHoursMinutesSeconds)
@@ -173,9 +158,9 @@ namespace Iot.Device.Rtc
             Span<byte> setData = stackalloc byte[5];
             setData[0] = (byte)Ds3231Register.RTC_ALM1_SEC_REG_ADDR;
 
-            setData[1] = NumberHelper.Dec2Bcd(alarm.Second);
-            setData[2] = NumberHelper.Dec2Bcd(alarm.Minute);
-            setData[3] = NumberHelper.Dec2Bcd(alarm.Hour);
+            setData[1] = NumberHelper.Dec2Bcd(alarm.AlarmTime.Seconds);
+            setData[2] = NumberHelper.Dec2Bcd(alarm.AlarmTime.Minutes);
+            setData[3] = NumberHelper.Dec2Bcd(alarm.AlarmTime.Hours);
             setData[4] = NumberHelper.Dec2Bcd(alarm.DayOfMonthOrWeek);
 
             setData[1] |= (byte)((byte)(((byte)alarm.MatchMode) & 1) << 7); // Set A1M1 bit
@@ -205,8 +190,9 @@ namespace Iot.Device.Rtc
 
             return new Ds3231Alarm2(
                 NumberHelper.Bcd2Dec((byte)(rawData[2] & 0b_0011_1111)),
-                NumberHelper.Bcd2Dec((byte)(rawData[1] & 0b_0111_1111)),
+                new TimeSpan(NumberHelper.Bcd2Dec((byte)(rawData[1] & 0b_0111_1111)),
                 NumberHelper.Bcd2Dec((byte)(rawData[0] & 0b_0111_1111)),
+                0),
                 (Ds3231Alarm2MatchMode)matchMode);
         }
 
@@ -219,16 +205,6 @@ namespace Iot.Device.Rtc
             if (alarm == null)
             {
                 throw new ArgumentNullException(nameof(alarm));
-            }
-
-            if (alarm.Minute < 0 || alarm.Minute > 59)
-            {
-                throw new ArgumentOutOfRangeException(nameof(alarm), "Minute must be between 0 and 59.");
-            }
-
-            if (alarm.Hour < 0 || alarm.Hour > 23)
-            {
-                throw new ArgumentOutOfRangeException(nameof(alarm), "Hour must be between 0 and 23.");
             }
 
             if (alarm.MatchMode == Ds3231Alarm2MatchMode.DayOfWeekHoursMinutes)
@@ -249,8 +225,8 @@ namespace Iot.Device.Rtc
             Span<byte> setData = stackalloc byte[4];
             setData[0] = (byte)Ds3231Register.RTC_ALM2_MIN_REG_ADDR;
 
-            setData[1] = NumberHelper.Dec2Bcd(alarm.Minute);
-            setData[2] = NumberHelper.Dec2Bcd(alarm.Hour);
+            setData[1] = NumberHelper.Dec2Bcd(alarm.AlarmTime.Minutes);
+            setData[2] = NumberHelper.Dec2Bcd(alarm.AlarmTime.Hours);
             setData[3] = NumberHelper.Dec2Bcd(alarm.DayOfMonthOrWeek);
 
             setData[1] |= (byte)((byte)(((byte)alarm.MatchMode) & 1) << 7); // Set A2M2 bit

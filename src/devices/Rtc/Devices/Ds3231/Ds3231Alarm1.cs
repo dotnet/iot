@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+
 namespace Iot.Device.Rtc
 {
     /// <summary>
@@ -15,19 +17,9 @@ namespace Iot.Device.Rtc
         public int DayOfMonthOrWeek { get; set; }
 
         /// <summary>
-        /// Hour of the alarm
+        /// Get or set the time the alarm, Hour, Minute and Second are used
         /// </summary>
-        public int Hour { get; set; }
-
-        /// <summary>
-        /// Minute of the alarm
-        /// </summary>
-        public int Minute { get; set; }
-
-        /// <summary>
-        /// Second of the alarm
-        /// </summary>
-        public int Second { get; set; }
+        public TimeSpan AlarmTime { get; set; }
 
         /// <summary>
         /// Mode to use to determine when to trigger the alarm
@@ -38,16 +30,12 @@ namespace Iot.Device.Rtc
         /// Creates a new instance of alarm 1 on the DS3231
         /// </summary>
         /// <param name="dayOfMonthOrWeek">Day of month or day of week of the alarm. Which one it is depends on the match mode</param>
-        /// <param name="hour">Hour of the alarm</param>
-        /// <param name="minute">Minute of the alarm</param>
-        /// <param name="second">Second of the alarm</param>
+        /// <param name="alarmTime">Time of the alarm</param>
         /// <param name="matchMode">Mode to use to determine when to trigger the alarm</param>
-        public Ds3231Alarm1(int dayOfMonthOrWeek, int hour, int minute, int second, Ds3231Alarm1MatchMode matchMode)
+        public Ds3231Alarm1(int dayOfMonthOrWeek, TimeSpan alarmTime, Ds3231Alarm1MatchMode matchMode)
         {
             DayOfMonthOrWeek = dayOfMonthOrWeek;
-            Hour = hour;
-            Minute = minute;
-            Second = second;
+            AlarmTime = alarmTime;
             MatchMode = matchMode;
         }
     }
