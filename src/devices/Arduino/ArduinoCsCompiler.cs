@@ -96,6 +96,7 @@ namespace Iot.Device.Arduino
         Nullable = 7,
         Enum = 8,
         Array = 9,
+        ByReferenceByte = 10,
         LargestKnownTypeToken = 20,
     }
 
@@ -589,7 +590,7 @@ namespace Iot.Device.Arduino
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
                 string className = cls.Name;
 
-                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx} / {set.Classes.Count}");
+                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {set.Classes.Count}");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
@@ -612,8 +613,11 @@ namespace Iot.Device.Arduino
 
         internal void SendMethods(ExecutionSet set)
         {
+            var cnt = set.Methods().Count;
             foreach (var me in set.Methods())
             {
+                MethodBase methodInfo = me.MethodBase;
+                _board.Log($"Loading Method {me.Index + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo.Name}.");
                 SendMethod(set, me);
             }
         }
@@ -1162,6 +1166,7 @@ namespace Iot.Device.Arduino
             where T : Delegate
         {
             var exec = CreateExecutionSet();
+            exec.SuppressType("System.Number");
             PrepareLowLevelInterface(exec);
             PrepareClass(exec, mainClass);
             PrepareCodeInternal(exec, mainEntryPoint.Method, null);
@@ -1379,8 +1384,6 @@ namespace Iot.Device.Arduino
 
         private void SendMethod(ExecutionSet set, ArduinoMethodDeclaration decl)
         {
-            MethodBase methodInfo = decl.MethodBase;
-            _board.Log($"Method Index {decl.Index} (NewToken 0x{decl.Token:X}) is named {methodInfo.DeclaringType} - {methodInfo.Name}.");
             SendMethodDeclaration(decl);
             if (decl.HasBody && decl.NativeMethod == NativeMethod.None)
             {

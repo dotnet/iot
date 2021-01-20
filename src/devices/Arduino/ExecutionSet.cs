@@ -123,6 +123,12 @@ namespace Iot.Device.Arduino
             _classesToSuppress.Add(t);
         }
 
+        public void SuppressType(string name)
+        {
+            var t = Type.GetType(name, true);
+            _classesToSuppress.Add(t!);
+        }
+
         public void SuppressTypes(IEnumerable<Type>? types)
         {
             if (types != null)
@@ -323,6 +329,11 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.Array;
             }
+            else if (typeInfo.FullName != null &&
+                     typeInfo.FullName.StartsWith("System.ByReference`1[[System.Byte, System.Private.CoreLib,", StringComparison.Ordinal)) // Ignore version of library
+            {
+                token = (int)KnownTypeTokens.ByReferenceByte;
+            }
             else if (typeInfo == typeof(Nullable<>))
             {
                 token = NullableToken;
@@ -467,7 +478,7 @@ namespace Iot.Device.Arduino
             return true;
         }
 
-        public IEnumerable<ArduinoMethodDeclaration> Methods()
+        public IList<ArduinoMethodDeclaration> Methods()
         {
             return _methods;
         }

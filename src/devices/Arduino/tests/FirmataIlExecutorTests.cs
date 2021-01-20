@@ -31,7 +31,7 @@ namespace Iot.Device.Arduino.Tests
             {
                 return new[]
                 {
-                    typeof(String), ArduinoCsCompiler.GetSystemPrivateType("System.SR"), ArduinoCsCompiler.GetSystemPrivateType("Iot.Device.Arduino.MiniCultureInfo")
+                    typeof(String), ArduinoCsCompiler.GetSystemPrivateType("System.SR"), ArduinoCsCompiler.GetSystemPrivateType("Iot.Device.Arduino.MiniCultureInfo"),
                 };
             }
         }
@@ -204,6 +204,22 @@ namespace Iot.Device.Arduino.Tests
         public static double ModD(double a, double b)
         {
             return a % b;
+        }
+
+        public static double LoadDoubleConstant(double a, double b)
+        {
+            double ret = 1.0;
+            ret += a;
+            ret *= 2.0;
+            return ret + a;
+        }
+
+        public static float LoadFloatConstant(float a, float b)
+        {
+            float ret = 1.0f;
+            ret += a;
+            ret *= 2.0f;
+            return ret + a;
         }
 
         public static int AndS(int a, int b)
@@ -451,6 +467,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("ModF", 10, 2, 0)]
         [InlineData("ModF", 11, 2, 1)]
         [InlineData("ModF", -11, 2, -1)]
+        [InlineData("LoadFloatConstant", 0.0, 0.0, 2.0)] // tests the LDC.R4 instruction
         public void TestArithmeticOperationSignedFloat(string methodName, float argument1, float argument2, float expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);
@@ -474,6 +491,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("ModD", 10, 2, 0)]
         [InlineData("ModD", 11, 2, 1)]
         [InlineData("ModD", -11, 2, -1)]
+        [InlineData("LoadDoubleConstant", 0.0, 0.0, 2.0)] // tests the LDC.R8 instruction
         public void TestArithmeticOperationSignedDouble(string methodName, double argument1, double argument2, double expected)
         {
             LoadCodeMethod(GetType(), methodName, argument1, argument2, expected, TypesToSuppressForArithmeticTests);

@@ -391,14 +391,13 @@ namespace Iot.Device.CharacterLcd
         /// </remarks>
         public void Write(string text)
         {
-            byte[] buffer = ArrayPool<byte>.Shared.Rent(text.Length);
+            Span<byte> buffer = stackalloc byte[text.Length];
             for (int i = 0; i < text.Length; ++i)
             {
                 buffer[i] = (byte)text[i];
             }
 
-            SendData(new ReadOnlySpan<byte>(buffer, 0, text.Length));
-            ArrayPool<byte>.Shared.Return(buffer);
+            SendData(buffer);
         }
 
         /// <summary>

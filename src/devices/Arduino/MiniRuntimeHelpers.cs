@@ -26,7 +26,7 @@ namespace Iot.Device.Arduino
             get
             {
                 // TODO: Will depend on our string implementation
-                return 12;
+                return 8;
             }
         }
 

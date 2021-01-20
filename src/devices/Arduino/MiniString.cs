@@ -49,6 +49,7 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation]
         public MiniString(char[] value, int startIndex, int length)
         {
             if (value == null)
@@ -83,6 +84,7 @@ namespace Iot.Device.Arduino
             }
         }
 
+        [ArduinoImplementation]
         public MiniString(char[]? value)
         {
             if (value == null || value.Length == 0)
@@ -97,6 +99,7 @@ namespace Iot.Device.Arduino
             }
         }
 
+        [ArduinoImplementation]
         public static implicit operator ReadOnlySpan<char>(MiniString? value)
         {
             if (ReferenceEquals(value, null))
@@ -126,6 +129,7 @@ namespace Iot.Device.Arduino
         [IndexerName("Chars")]
         public Char this[int index]
         {
+            [ArduinoImplementation]
             get
             {
                 return GetElem(index);
@@ -138,11 +142,13 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation]
         public int IndexOf(char c)
         {
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation]
         public IEnumerator<char> GetEnumerator()
         {
             throw new NotImplementedException();
@@ -179,6 +185,7 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation]
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
@@ -194,6 +201,7 @@ namespace Iot.Device.Arduino
             return CompareTo((string)obj);
         }
 
+        [ArduinoImplementation]
         public object Clone()
         {
             return this; // String is immutable
