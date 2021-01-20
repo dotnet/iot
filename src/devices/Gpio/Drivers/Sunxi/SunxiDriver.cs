@@ -116,7 +116,8 @@ namespace Iot.Device.Gpio.Drivers
             uint* cfgPointer, pulPointer;
             int cfgOffset, pulOffset;
 
-            if (unmapped.PortController < 10)
+            // PortController from A to K
+            if (unmapped.PortController <= 10)
             {
                 // Pn_CFG initial offset is 0x00
                 cfgOffset = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
@@ -128,8 +129,8 @@ namespace Iot.Device.Gpio.Drivers
             }
             else
             {
-                cfgOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + cfgNum * 0x04) & _mapMask;
-                pulOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + 0x1C + pulNum * 0x04) & _mapMask;
+                cfgOffset = (CpusPortBaseAddress + (unmapped.PortController - 11) * 0x24 + cfgNum * 0x04) & _mapMask;
+                pulOffset = (CpusPortBaseAddress + (unmapped.PortController - 11) * 0x24 + 0x1C + pulNum * 0x04) & _mapMask;
 
                 cfgPointer = (uint*)(_cpusPointer + cfgOffset);
                 pulPointer = (uint*)(_cpusPointer + pulOffset);
@@ -183,7 +184,7 @@ namespace Iot.Device.Gpio.Drivers
             uint* dataPointer;
             int dataOffset;
 
-            if (unmapped.PortController < 10)
+            if (unmapped.PortController <= 10)
             {
                 // Pn_DAT offset is 0x10
                 dataOffset = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
@@ -191,7 +192,7 @@ namespace Iot.Device.Gpio.Drivers
             }
             else
             {
-                dataOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+                dataOffset = (CpusPortBaseAddress + (unmapped.PortController - 11) * 0x24 + 0x10) & _mapMask;
                 dataPointer = (uint*)(_cpusPointer + dataOffset);
             }
 
@@ -217,7 +218,7 @@ namespace Iot.Device.Gpio.Drivers
             uint* dataPointer;
             int dataOffset;
 
-            if (unmapped.PortController < 10)
+            if (unmapped.PortController <= 10)
             {
                 // Pn_DAT offset is 0x10
                 dataOffset = (CpuxPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
@@ -225,7 +226,7 @@ namespace Iot.Device.Gpio.Drivers
             }
             else
             {
-                dataOffset = (CpusPortBaseAddress + unmapped.PortController * 0x24 + 0x10) & _mapMask;
+                dataOffset = (CpusPortBaseAddress + (unmapped.PortController - 11) * 0x24 + 0x10) & _mapMask;
                 dataPointer = (uint*)(_cpusPointer + dataOffset);
             }
 
