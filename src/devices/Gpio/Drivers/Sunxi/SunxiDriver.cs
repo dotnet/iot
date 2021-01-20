@@ -340,7 +340,7 @@ namespace Iot.Device.Gpio.Drivers
 
                 _cpuxPointer = cpuxMap;
                 _cpusPointer = cpusMap;
-                
+
                 Interop.close(fileDescriptor);
             }
         }
