@@ -1,13 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Rtc
 {
     /// <summary>
     /// Available modes for determining when alarm 2 should trigger
     /// </summary>
-    public enum Ds3231Alarm2MatchMode : byte
+    public enum Ds3231AlarmTwoMatchMode : byte
     {
         /// <summary>
         /// Alarm 2 triggers at the start of every minute

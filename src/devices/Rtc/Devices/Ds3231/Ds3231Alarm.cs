@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.Rtc
 {
@@ -17,11 +16,11 @@ namespace Iot.Device.Rtc
         /// <summary>
         /// Indicates the first alarm
         /// </summary>
-        Alarm1,
+        AlarmOne,
 
         /// <summary>
         /// Indicates the second alarm
         /// </summary>
-        Alarm2
+        AlarmTwo
     }
 }

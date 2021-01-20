@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -108,7 +107,7 @@ namespace Iot.Device.Rtc
         /// Reads the currently set alarm 1
         /// </summary>
         /// <returns>Alarm 1</returns>
-        public Ds3231Alarm1 ReadAlarm1()
+        public Ds3231AlarmOne ReadAlarmOne()
         {
             Span<byte> rawData = stackalloc byte[4];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_ALM1_SEC_REG_ADDR);
@@ -121,33 +120,33 @@ namespace Iot.Device.Rtc
             matchMode |= (byte)((rawData[3] >> 4) & (1 << 3)); // Get A1M4 bit
             matchMode |= (byte)((rawData[3] >> 2) & (1 << 4)); // Get DY/DT bit
 
-            return new Ds3231Alarm1(
+            return new Ds3231AlarmOne(
                 NumberHelper.Bcd2Dec((byte)(rawData[3] & 0b_0011_1111)),
                 new TimeSpan(NumberHelper.Bcd2Dec((byte)(rawData[2] & 0b_0111_1111)),
                 NumberHelper.Bcd2Dec((byte)(rawData[1] & 0b_0111_1111)),
                 NumberHelper.Bcd2Dec((byte)(rawData[0] & 0b_0111_1111))),
-                (Ds3231Alarm1MatchMode)matchMode);
+                (Ds3231AlarmOneMatchMode)matchMode);
         }
 
         /// <summary>
         /// Sets alarm 1
         /// </summary>
         /// <param name="alarm">New alarm 1</param>
-        public void SetAlarm1(Ds3231Alarm1 alarm)
+        public void SetAlarmOne(Ds3231AlarmOne alarm)
         {
             if (alarm == null)
             {
                 throw new ArgumentNullException(nameof(alarm));
             }
 
-            if (alarm.MatchMode == Ds3231Alarm1MatchMode.DayOfWeekHoursMinutesSeconds)
+            if (alarm.MatchMode == Ds3231AlarmOneMatchMode.DayOfWeekHoursMinutesSeconds)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 7)
                 {
                     throw new ArgumentOutOfRangeException(nameof(alarm), "Day of week must be between 1 and 7.");
                 }
             }
-            else if (alarm.MatchMode == Ds3231Alarm1MatchMode.DayOfMonthHoursMinutesSeconds)
+            else if (alarm.MatchMode == Ds3231AlarmOneMatchMode.DayOfMonthHoursMinutesSeconds)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 31)
                 {
@@ -176,7 +175,7 @@ namespace Iot.Device.Rtc
         /// Reads the currently set alarm 2
         /// </summary>
         /// <returns>Alarm 1</returns>
-        public Ds3231Alarm2 ReadAlarm2()
+        public Ds3231AlarmTwo ReadAlarmTwo()
         {
             Span<byte> rawData = stackalloc byte[3];
             _i2cDevice.WriteByte((byte)Ds3231Register.RTC_ALM2_MIN_REG_ADDR);
@@ -188,33 +187,33 @@ namespace Iot.Device.Rtc
             matchMode |= (byte)((rawData[2] >> 5) & (1 << 2)); // Get A2M4 bit
             matchMode |= (byte)((rawData[2] >> 3) & (1 << 3)); // Get DY/DT bit
 
-            return new Ds3231Alarm2(
+            return new Ds3231AlarmTwo(
                 NumberHelper.Bcd2Dec((byte)(rawData[2] & 0b_0011_1111)),
                 new TimeSpan(NumberHelper.Bcd2Dec((byte)(rawData[1] & 0b_0111_1111)),
                 NumberHelper.Bcd2Dec((byte)(rawData[0] & 0b_0111_1111)),
                 0),
-                (Ds3231Alarm2MatchMode)matchMode);
+                (Ds3231AlarmTwoMatchMode)matchMode);
         }
 
         /// <summary>
         /// Sets alarm 2
         /// </summary>
         /// <param name="alarm">New alarm 2</param>
-        public void SetAlarm2(Ds3231Alarm2 alarm)
+        public void SetAlarmTwo(Ds3231AlarmTwo alarm)
         {
             if (alarm == null)
             {
                 throw new ArgumentNullException(nameof(alarm));
             }
 
-            if (alarm.MatchMode == Ds3231Alarm2MatchMode.DayOfWeekHoursMinutes)
+            if (alarm.MatchMode == Ds3231AlarmTwoMatchMode.DayOfWeekHoursMinutes)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 7)
                 {
                     throw new ArgumentOutOfRangeException(nameof(alarm), "Day of week must be between 1 and 7.");
                 }
             }
-            else if (alarm.MatchMode == Ds3231Alarm2MatchMode.DayOfMonthHoursMinutes)
+            else if (alarm.MatchMode == Ds3231AlarmTwoMatchMode.DayOfMonthHoursMinutes)
             {
                 if (alarm.DayOfMonthOrWeek < 1 || alarm.DayOfMonthOrWeek > 31)
                 {
@@ -252,11 +251,11 @@ namespace Iot.Device.Rtc
 
             if (a1ie)
             {
-                return Ds3231Alarm.Alarm1;
+                return Ds3231Alarm.AlarmOne;
             }
             else if (a2ie)
             {
-                return Ds3231Alarm.Alarm2;
+                return Ds3231Alarm.AlarmTwo;
             }
             else
             {
@@ -281,11 +280,11 @@ namespace Iot.Device.Rtc
             setData[1] &= unchecked((byte)~1); // Clear A1IE bit
             setData[1] &= unchecked((byte)~(1 << 1)); // Clear A2IE bit
 
-            if (alarmMode == Ds3231Alarm.Alarm1)
+            if (alarmMode == Ds3231Alarm.AlarmOne)
             {
                 setData[1] |= 1; // Set A1IE bit
             }
-            else if (alarmMode == Ds3231Alarm.Alarm2)
+            else if (alarmMode == Ds3231Alarm.AlarmTwo)
             {
                 setData[1] |= 1 << 1; // Set A2IE bit
             }

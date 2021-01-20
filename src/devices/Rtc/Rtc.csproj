@@ -15,10 +15,10 @@
     <Compile Include="Devices\Ds1307\Ds1307Register.cs" />
     <Compile Include="Devices\Ds3231\Ds3231.cs" />
     <Compile Include="Devices\Ds3231\Ds3231Alarm.cs" />
-    <Compile Include="Devices\Ds3231\Ds3231Alarm1.cs" />
-    <Compile Include="Devices\Ds3231\Ds3231Alarm1MatchMode.cs" />
-    <Compile Include="Devices\Ds3231\Ds3231Alarm2.cs" />
-    <Compile Include="Devices\Ds3231\Ds3231Alarm2MatchMode.cs" />
+    <Compile Include="Devices\Ds3231\Ds3231AlarmOne.cs" />
+    <Compile Include="Devices\Ds3231\Ds3231AlarmOneMatchMode.cs" />
+    <Compile Include="Devices\Ds3231\Ds3231AlarmTwo.cs" />
+    <Compile Include="Devices\Ds3231\Ds3231AlarmTwoMatchMode.cs" />
     <Compile Include="Devices\Ds3231\Ds3231Register.cs" />
     <Compile Include="Devices\Pcf8563\Pcf8563.cs" />
     <Compile Include="Devices\Pcf8563\Pcf8563Register.cs" />
