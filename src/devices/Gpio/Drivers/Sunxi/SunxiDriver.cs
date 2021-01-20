@@ -317,7 +317,8 @@ namespace Iot.Device.Gpio.Drivers
                 }
 
                 int fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
-                if (fileDescriptor < 0)
+
+                if (fileDescriptor == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (File open error).");
                 }
@@ -337,10 +338,10 @@ namespace Iot.Device.Gpio.Drivers
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver (CPUs initialize error).");
                 }
 
-                Interop.close(fileDescriptor);
-
                 _cpuxPointer = cpuxMap;
                 _cpusPointer = cpusMap;
+                
+                Interop.close(fileDescriptor);
             }
         }
 
