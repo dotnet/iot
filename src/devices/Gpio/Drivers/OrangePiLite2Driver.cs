@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 
 namespace Iot.Device.Gpio.Drivers
 {
@@ -23,7 +22,7 @@ namespace Iot.Device.Gpio.Drivers
         };
 
         /// <inheritdoc/>
-        protected override int PinCount => _pinNumberConverter.Count(n => n != -1);
+        protected override int PinCount => 17;
 
         /// <inheritdoc/>
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)

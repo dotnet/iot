@@ -4,6 +4,20 @@
 
 ## Getting started
 
+### Special GPIO driver: `OrangePiZeroDriver`
+
+```C#
+// For Orange Pi Zero
+using GpioController gpio = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
+
+// Open the GPIO pin.
+gpio.OpenPin(7);
+// Set the pin mode.
+gpio.SetPinMode(7, PinMode.InputPullUp);
+// Read current value of the pin.
+PinValue value = gpio.Read(7);
+```
+
 ### Generic GPIO driver: `SunxiDriver`
 
 ```C#
@@ -13,23 +27,10 @@ using GpioController gpio = new GpioController(PinNumberingScheme.Logical, new S
 
 // Convert pin number to logical scheme.
 int pinNumber = SunxiDriver.MapPinNumber(portController: 'A', port: 10);
-// Open the GPIO pin.
 gpio.OpenPin(pinNumber);
-// Set the pin mode.
-gpio.SetPinMode(pinNumber, PinMode.InputPullUp);
-// Read current value of the pin.
-PinValue value = gpio.Read(pinNumber);
-```
-
-### Special GPIO driver: `OrangePiZeroDriver`
-
-```C#
-using GpioController gpio = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
-
-gpio.OpenPin(7);
-gpio.SetPinMode(7, PinMode.Output);
+gpio.SetPinMode(pinNumber, PinMode.Output);
 // Write a value to the pin.
-gpio.Write(7, PinValue.High);
+gpio.Write(pinNumber, PinValue.High);
 ```
 
 ## Adding new drivers
@@ -64,7 +65,7 @@ gpio.Write(7, PinValue.High);
         MapPinNumber('A', 14), MapPinNumber('A', 13), -1, MapPinNumber('A', 10)
     };
 
-    protected override int PinCount => _pinNumberConverter.Count(n => n != -1);
+    protected override int PinCount => 17;
 
     protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
     {
