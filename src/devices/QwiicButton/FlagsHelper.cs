@@ -11,7 +11,7 @@ namespace Iot.Device.QwiicButton
     /// which is an <see cref="Enum"/> decorated with the <see cref="FlagsAttribute"/>
     /// and which represents a set of flags.
     /// </summary>
-    public static class FlagsHelper
+    internal static class FlagsHelper
     {
         /// <summary>
         /// Determines whether one or more bit fields are set in the provided <paramref name="flags"/> bit field.
