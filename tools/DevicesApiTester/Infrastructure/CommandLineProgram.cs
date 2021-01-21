@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -48,7 +47,7 @@ namespace DeviceApiTester.Infrastructure
             return Assembly.GetExecutingAssembly().GetTypes()
                 .Where(t => typeof(ICommandVerb).IsAssignableFrom(t) || typeof(ICommandVerbAsync).IsAssignableFrom(t))
                 .Where(t => t.GetCustomAttributes<VerbAttribute>().Any())
-                .OrderBy(t => t.GetCustomAttribute<VerbAttribute>().Name)
+                .OrderBy(t => t.GetCustomAttribute<VerbAttribute>()?.Name)
                 .ToArray();
         }
 

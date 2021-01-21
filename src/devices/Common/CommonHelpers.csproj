@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace></RootNamespace>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+	<Compile Include="Iot/Device/Common/*.cs" />
+	<Compile Include="Iot/Device/Graphics/*.cs" />
+	<Compile Include="System/Device/*.cs" />
+	<Compile Include="System/Device/Gpio/*.cs" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+</Project>

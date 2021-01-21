@@ -1,40 +1,44 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Threading;
 using System.Device.I2c;
+using System.Device.Model;
+using UnitsNet;
 
 namespace Iot.Device.Ags01db
 {
     /// <summary>
     /// MEMS VOC Gas Sensor ASG01DB
     /// </summary>
+    [Interface("MEMS VOC Gas Sensor ASG01DB")]
     public class Ags01db : IDisposable
     {
+        /// <summary>
+        /// ASG01DB Default I2C Address
+        /// </summary>
+        public const byte DefaultI2cAddress = 0x11;
+
         // CRC const
         private const byte CRC_POLYNOMIAL = 0x31;
         private const byte CRC_INIT = 0xFF;
         private I2cDevice _i2cDevice;
 
-        private int _lastMeasurment = 0;
+        private int _lastMeasurement = 0;
 
         /// <summary>
         /// ASG01DB VOC (Volatile Organic Compounds) Gas Concentration (ppm)
         /// </summary>
-        public double Concentration { get => GetConcentration(); }
+        [Telemetry]
+        public Ratio Concentration => Ratio.FromPartsPerMillion(GetConcentration());
 
         /// <summary>
         /// ASG01DB Version
         /// </summary>
-        public byte Version { get => GetVersion(); }
-
-        /// <summary>
-        /// ASG01DB Default I2C Address
-        /// </summary>
-        public const byte DefaultI2cAddress = 0x11;
+        [Property]
+        public byte Version => GetVersion();
 
         /// <summary>
         /// Creates a new instance of the ASG01DB
@@ -42,16 +46,7 @@ namespace Iot.Device.Ags01db
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Ags01db(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
-        }
-
-        /// <summary>
-        /// Cleanup
-        /// </summary>
-        public void Dispose()
-        {
-            _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
         }
 
         /// <summary>
@@ -61,9 +56,9 @@ namespace Iot.Device.Ags01db
         private double GetConcentration()
         {
             // The time of two measurements should be more than 2s.
-            while (Environment.TickCount - _lastMeasurment < 2000)
+            while (Environment.TickCount - _lastMeasurement < 2000)
             {
-                Thread.Sleep(TimeSpan.FromMilliseconds(Environment.TickCount - _lastMeasurment));
+                Thread.Sleep(Environment.TickCount - _lastMeasurement);
             }
 
             // Details in the Datasheet P5
@@ -78,7 +73,7 @@ namespace Iot.Device.Ags01db
             _i2cDevice.Write(writeBuff);
             _i2cDevice.Read(readBuff);
 
-            _lastMeasurment = Environment.TickCount;
+            _lastMeasurement = Environment.TickCount;
 
             // CRC check error
             if (!CheckCrc8(readBuff.Slice(0, 2), 2, readBuff[2]))
@@ -154,6 +149,15 @@ namespace Iot.Device.Ags01db
             {
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Cleanup
+        /// </summary>
+        public void Dispose()
+        {
+            _i2cDevice?.Dispose();
+            _i2cDevice = null!;
         }
     }
 }

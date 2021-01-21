@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -17,9 +16,9 @@ using System.Device.Pwm.Drivers;
 using Iot.Device.Adc;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
-using Iot.Units;
 
 using Xunit;
+using UnitsNet;
 
 namespace System.Device.Gpio.Tests
 {
@@ -28,6 +27,7 @@ namespace System.Device.Gpio.Tests
         public const int MinAdc = 0;
         public const int MaxAdc = 1023;
         public const int HalfAdc = MaxAdc / 2;
+        private const int Bme280I2cBusId = 1;
 
         public static void AdcValueAround(int expected, int actual, int error = 50)
         {
@@ -52,13 +52,29 @@ namespace System.Device.Gpio.Tests
 
         public static Bme280 CreateBme280()
         {
-            var settings = new I2cConnectionSettings(1, Bme280.DefaultI2cAddress);
+            var settings = new I2cConnectionSettings(Bme280I2cBusId, Bme280.DefaultI2cAddress);
             var bme280 = new Bme280(I2cDevice.Create(settings));
-
-            // https://github.com/dotnet/iot/issues/753
-            bme280.SetPowerMode(Bmx280PowerMode.Forced);
-
+            SetupBme280(bme280);
             return bme280;
+        }
+
+        public static I2cBus CreateI2cBusForBme280()
+        {
+            return I2cBus.Create(Bme280I2cBusId);
+        }
+
+        public static Bme280 CreateBme280(I2cBus i2cBus)
+        {
+            var bme280 = new Bme280(i2cBus.CreateDevice(Bme280.DefaultI2cAddress));
+            SetupBme280(bme280);
+            return bme280;
+        }
+
+        private static void SetupBme280(Bme280 bme280)
+        {
+            // https://github.com/dotnet/iot/issues/753
+            bme280.SetPowerMode(Bmx280PowerMode.Normal);
+            Thread.Sleep(100);
         }
 
         private static PwmChannel CreatePwmChannelCore(int frequency, double dutyCycle)

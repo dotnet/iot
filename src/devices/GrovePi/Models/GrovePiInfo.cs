@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -11,6 +10,15 @@ namespace Iot.Device.GrovePiDevice.Models
     /// </summary>
     public class Info
     {
+        /// <summary>
+        /// Instantiate Info object.
+        /// </summary>
+        /// <param name="softwareVersion">Firmware version.</param>
+        public Info(Version softwareVersion)
+        {
+            SoftwareVersion = softwareVersion;
+        }
+
         /// <summary>
         /// Manufacturer information
         /// </summary>

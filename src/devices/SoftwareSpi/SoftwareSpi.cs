@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Threading;
@@ -15,36 +14,59 @@ namespace Iot.Device.Spi
     public class SoftwareSpi : SpiDevice
     {
         private readonly int _clk;
-        private readonly int _miso;
-        private readonly int _mosi;
+        private readonly int _sdi;
+        private readonly int _sdo;
         private readonly int _cs;
         private readonly SpiConnectionSettings _settings;
-        private GpioController _controller;
+        private readonly bool _shouldDispose;
+        private GpioController _gpioController;
 
         /// <summary>
         /// Software implementation of the SPI.
         /// </summary>
+        /// <remarks>Note that there is a ChipSelectLine in the SPIConnectionSettings as well, either that or the cs property will be used.</remarks>
         /// <param name="clk">Clock pin.</param>
-        /// <param name="miso">Master Input Slave Output pin.</param>
-        /// <param name="mosi">Master Output Slave Input pin.</param>
-        /// <param name="cs">Chip select pin (or negated chip select).</param>
+        /// <param name="sdi">Serial data in pin. Optional, set to -1 to ignore</param>
+        /// <param name="sdo">Serial data out pin.</param>
+        /// <param name="cs">Chip select pin (or negated chip select). Optional, set to -1 to ignore.</param>
         /// <param name="settings">Settings of the SPI connection.</param>
-        /// <param name="controller">GPIO controller used for pins.</param>
-        public SoftwareSpi(int clk, int miso, int mosi, int cs, SpiConnectionSettings settings = null, GpioController controller = null)
+        /// <param name="gpioController">GPIO controller used for pins.</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public SoftwareSpi(int clk, int sdi, int sdo, int cs = -1, SpiConnectionSettings? settings = null, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            _controller = controller ?? new GpioController();
-
+            _shouldDispose = shouldDispose || gpioController is null;
+            _gpioController = gpioController ?? new GpioController();
             _settings = settings ?? new SpiConnectionSettings(-1, -1);
 
             _clk = clk;
-            _miso = miso;
-            _mosi = mosi;
-            _cs = cs;
+            _sdi = sdi;
+            _sdo = sdo;
 
-            _controller.OpenPin(_clk, PinMode.Output);
-            _controller.OpenPin(_miso, PinMode.Input);
-            _controller.OpenPin(_mosi, PinMode.Output);
-            _controller.OpenPin(_cs, PinMode.Output);
+            if (_cs != -1 && _settings.ChipSelectLine != -1 && _cs != _settings.ChipSelectLine)
+            {
+                throw new ArgumentException("Both cs and settings.ChipSelectLine can't both be set");
+            }
+
+            if (cs != -1)
+            {
+                _cs = cs;
+            }
+            else
+            {
+                _cs = _settings.ChipSelectLine;
+            }
+
+            _gpioController.OpenPin(_clk, PinMode.Output);
+            if (_sdi != -1)
+            {
+                _gpioController.OpenPin(_sdi, PinMode.Input);
+            }
+
+            _gpioController.OpenPin(_sdo, PinMode.Output);
+            if (_cs != -1)
+            {
+                _gpioController.OpenPin(_cs, PinMode.Output);
+            }
 
             // aka. CPOL - tells us which state of the clock means idle (false means 'low' or 'ground' or '0')
             bool idle = ((int)_settings.Mode & 0b10) == 0b10;
@@ -52,8 +74,12 @@ namespace Iot.Device.Spi
             // aka. CPHA - tells us when read/write is 'captured'
             bool onPulseEnd = ((int)_settings.Mode & 1) == 1;
 
-            _controller.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
-            _controller.Write(_clk, idle);
+            if (_cs != -1)
+            {
+                _gpioController.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
+            }
+
+            _gpioController.Write(_clk, idle);
 
             // TODO: To respect ClockFrequency we need to inject the right delays here
             //       and have some very accurate way to measure time.
@@ -76,11 +102,11 @@ namespace Iot.Device.Spi
                 _bitTransfer = new ScopeData(
                     enter: () =>
                     {
-                        _controller.Write(_clk, !idle);
+                        _gpioController.Write(_clk, !idle);
                     },
                     exit: () =>
                     {
-                        controller.Write(_clk, idle);
+                        _gpioController.Write(_clk, idle);
                     });
             }
             else
@@ -88,20 +114,27 @@ namespace Iot.Device.Spi
                 _bitTransfer = new ScopeData(
                     exit: () =>
                     {
-                        _controller.Write(_clk, !idle);
-                        _controller.Write(_clk, idle);
+                        _gpioController.Write(_clk, !idle);
+                        _gpioController.Write(_clk, idle);
                     });
             }
 
-            _chipSelect = new ScopeData(
-                enter: () =>
-                {
-                    _controller.Write(_cs, _settings.ChipSelectLineActiveState);
-                },
-                exit: () =>
-                {
-                    _controller.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
-                });
+            if (_cs != -1)
+            {
+                _chipSelect = new ScopeData(
+                    enter: () =>
+                    {
+                        _gpioController.Write(_cs, _settings.ChipSelectLineActiveState);
+                    },
+                    exit: () =>
+                    {
+                        _gpioController.Write(_cs, !(bool)_settings.ChipSelectLineActiveState);
+                    });
+            }
+            else
+            {
+                _chipSelect = new ScopeData();
+            }
         }
 
         /// <inheritdoc />
@@ -110,9 +143,14 @@ namespace Iot.Device.Spi
         /// <inheritdoc />
         public override void TransferFullDuplex(ReadOnlySpan<byte> dataToWrite, Span<byte> dataToRead)
         {
-            if (dataToRead.Length != dataToRead.Length)
+            if (dataToWrite.Length != dataToRead.Length)
             {
                 throw new ArgumentException(nameof(dataToWrite));
+            }
+
+            if (_sdi == -1)
+            {
+                throw new ArgumentException("Cannot read without a miso pin specified");
             }
 
             int bitLen = _settings.DataBitLength;
@@ -141,11 +179,36 @@ namespace Iot.Device.Spi
             }
         }
 
+        private void TransferWriteOnly(ReadOnlySpan<byte> dataToWrite)
+        {
+            int bitLen = _settings.DataBitLength;
+            int lastBit = bitLen - 1;
+
+            using (StartChipSelect())
+            {
+                for (int i = 0; i < dataToWrite.Length; i++)
+                {
+                    for (int j = 0; j < bitLen; j++)
+                    {
+                        using (StartBitTransfer())
+                        {
+                            int bit = _settings.DataFlow == DataFlow.MsbFirst ? lastBit - j : j;
+                            bool bitToWrite = ((dataToWrite[i] >> bit) & 1) == 1;
+                            WriteBit(bitToWrite);
+                        }
+                    }
+                }
+            }
+        }
+
         private bool ReadWriteBit(bool bitToWrite)
         {
-            _controller.Write(_mosi, bitToWrite);
-            return (bool)_controller.Read(_miso);
+            // sdo is checked higher up the call path
+            _gpioController.Write(_sdo, bitToWrite);
+            return (bool)_gpioController.Read(_sdi);
         }
+
+        private void WriteBit(bool bitToWrite) => _gpioController.Write(_sdo, bitToWrite);
 
         /// <inheritdoc />
         public override void Read(Span<byte> data)
@@ -155,11 +218,7 @@ namespace Iot.Device.Spi
         }
 
         /// <inheritdoc />
-        public override void Write(ReadOnlySpan<byte> data)
-        {
-            Span<byte> dataToRead = stackalloc byte[data.Length];
-            TransferFullDuplex(data, dataToRead);
-        }
+        public override void Write(ReadOnlySpan<byte> data) => TransferWriteOnly(data);
 
         /// <inheritdoc />
         public override void WriteByte(byte data)
@@ -180,13 +239,17 @@ namespace Iot.Device.Spi
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
-            _controller?.Dispose();
-            _controller = null;
+            if (_shouldDispose)
+            {
+                _gpioController?.Dispose();
+                _gpioController = null!;
+            }
+
             base.Dispose(disposing);
         }
 
-        private ScopeData _bitTransfer;
-        private ScopeData _chipSelect;
+        private readonly ScopeData _bitTransfer;
+        private readonly ScopeData _chipSelect;
         private Scope StartBitTransfer() => new Scope(_bitTransfer);
         private Scope StartChipSelect() => new Scope(_chipSelect);
 
@@ -195,27 +258,15 @@ namespace Iot.Device.Spi
             internal Action _enter;
             internal Action _exit;
 
-            public ScopeData(Action enter = null, Action exit = null)
+            public ScopeData(Action? enter = null, Action? exit = null)
             {
-                _enter = enter;
-                _exit = exit;
+                _enter = enter ?? new Action(() => { });
+                _exit = exit ?? new Action(() => { });
             }
 
-            public void Enter()
-            {
-                if (_enter != null)
-                {
-                    _enter();
-                }
-            }
+            public void Enter() => _enter.Invoke();
 
-            public void Exit()
-            {
-                if (_exit != null)
-                {
-                    _exit();
-                }
-            }
+            public void Exit() => _exit.Invoke();
         }
 
         private struct Scope : IDisposable
@@ -224,7 +275,7 @@ namespace Iot.Device.Spi
 
             public Scope(ScopeData data)
             {
-                _data = data;
+                _data = data ?? throw new ArgumentNullException(nameof(data));
                 data.Enter();
             }
 

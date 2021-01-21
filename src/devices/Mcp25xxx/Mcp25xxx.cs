@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -22,7 +21,8 @@ namespace Iot.Device.Mcp25xxx
         private readonly int _rx0bf;
         private readonly int _rx1bf;
         private readonly int _clkout;
-        internal GpioController _gpioController;
+        internal GpioController? _gpioController;
+        private bool _shouldDispose;
         private SpiDevice _spiDevice;
 
         /// <summary>
@@ -40,6 +40,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="gpioController">
         /// The GPIO controller for defined external pins. If not specified, the default controller will be used.
         /// </param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Mcp25xxx(
             SpiDevice spiDevice,
             int reset = -1,
@@ -50,9 +51,11 @@ namespace Iot.Device.Mcp25xxx
             int rx0bf = -1,
             int rx1bf = -1,
             int clkout = -1,
-            GpioController gpioController = null)
+            GpioController? gpioController = null,
+            bool shouldDispose = true)
         {
             _spiDevice = spiDevice;
+            _shouldDispose = shouldDispose || gpioController is null;
 
             _reset = reset;
             _tx0rts = tx0rts;
@@ -63,7 +66,7 @@ namespace Iot.Device.Mcp25xxx
             _rx1bf = rx1bf;
             _clkout = clkout;
 
-            // Only need master controller if there are external pins provided.
+            // Only need controller if there are external pins provided.
             if (_reset != -1 ||
                 _tx0rts != -1 ||
                 _tx1rts != -1 ||
@@ -125,6 +128,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_tx0rts, value);
             }
         }
@@ -136,6 +144,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_tx1rts, value);
             }
         }
@@ -147,6 +160,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_tx2rts, value);
             }
         }
@@ -158,6 +176,11 @@ namespace Iot.Device.Mcp25xxx
         {
             set
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 _gpioController.Write(_reset, value);
             }
         }
@@ -169,6 +192,11 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 return _gpioController.Read(_interrupt);
             }
         }
@@ -180,6 +208,11 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 return _gpioController.Read(_rx0bf);
             }
         }
@@ -191,6 +224,11 @@ namespace Iot.Device.Mcp25xxx
         {
             get
             {
+                if (_gpioController is null)
+                {
+                    throw new Exception("GPIO controller is not configured");
+                }
+
                 return _gpioController.Read(_rx1bf);
             }
         }
@@ -213,7 +251,9 @@ namespace Iot.Device.Mcp25xxx
             const byte dontCare = 0x00;
             ReadOnlySpan<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.Read, (byte)address, dontCare
+                (byte)InstructionFormat.Read,
+                (byte)address,
+                dontCare
             };
             Span<byte> readBuffer = stackalloc byte[3];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
@@ -231,7 +271,7 @@ namespace Iot.Device.Mcp25xxx
         {
             if (byteCount < 1)
             {
-                throw new ArgumentException($"Invalid number of bytes {byteCount}.", nameof(byteCount));
+                throw new ArgumentException(nameof(byteCount), "Invalid number of bytes.");
             }
 
             const int StackThreshold = 31; // Usually won't read more than this at a time.
@@ -351,7 +391,8 @@ namespace Iot.Device.Mcp25xxx
             const byte dontCare = 0x00;
             ReadOnlySpan<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.ReadStatus, dontCare
+                (byte)InstructionFormat.ReadStatus,
+                dontCare
             };
             Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
@@ -369,7 +410,8 @@ namespace Iot.Device.Mcp25xxx
             const byte dontCare = 0x00;
             ReadOnlySpan<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.RxStatus, dontCare
+                (byte)InstructionFormat.RxStatus,
+                dontCare
             };
             Span<byte> readBuffer = stackalloc byte[2];
             _spiDevice.TransferFullDuplex(writeBuffer, readBuffer);
@@ -389,7 +431,10 @@ namespace Iot.Device.Mcp25xxx
         {
             Span<byte> writeBuffer = stackalloc byte[]
             {
-                (byte)InstructionFormat.BitModify, (byte)address, mask, value
+                (byte)InstructionFormat.BitModify,
+                (byte)address,
+                mask,
+                value
             };
             _spiDevice.Write(writeBuffer);
         }
@@ -397,10 +442,14 @@ namespace Iot.Device.Mcp25xxx
         /// <inheritdoc/>
         public void Dispose()
         {
-            _gpioController?.Dispose();
-            _gpioController = null;
+            if (_shouldDispose)
+            {
+                _gpioController?.Dispose();
+                _gpioController = null;
+            }
+
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
     }
 }

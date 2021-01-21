@@ -1,18 +1,19 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Drawing;
 using System.Threading;
 
 namespace Iot.Device.Tcs3472x
 {
     /// <summary>
-    /// Represents Tcs3472x I2C color sensor
+    /// Tcs3472x - color sensor
     /// </summary>
+    [Interface("Tcs3472x - color sensor")]
     public class Tcs3472x : IDisposable
     {
         /// <summary>
@@ -24,7 +25,7 @@ namespace Iot.Device.Tcs3472x
         private byte _integrationTimeByte;
         private double _integrationTime;
         private bool _isLongTime;
-        private bool _autoDisposable;
+        private bool _shouldDispose;
         private Gain _gain;
 
         /// <summary>
@@ -33,12 +34,10 @@ namespace Iot.Device.Tcs3472x
         /// Maximum time is 7.4 s
         /// Be aware that it is not a linear function
         /// </summary>
+        [Property]
         public double IntegrationTime
         {
-            get
-            {
-                return _integrationTime;
-            }
+            get => _integrationTime;
             set
             {
                 _integrationTime = value;
@@ -49,12 +48,10 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Set/Get the gain
         /// </summary>
+        [Property]
         public Gain Gain
         {
-            get
-            {
-                return _gain;
-            }
+            get => _gain;
             set
             {
                 _gain = value;
@@ -65,6 +62,7 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Get the type of sensor
         /// </summary>
+        [Property]
         public TCS3472Type ChipId { get; internal set; }
 
         /// <summary>
@@ -73,13 +71,13 @@ namespace Iot.Device.Tcs3472x
         /// <param name="i2cDevice">The I2C Device class</param>
         /// <param name="integrationTime">The time to wait for sensor to read the data, minimum is 0.024 seconds, maximum in the constructor is 0.7 seconds</param>
         /// <param name="gain">The gain when integrating the color measurement</param>
-        /// <param name="autoDisposable">true to dispose the I2C Device class at dispose</param>
+        /// <param name="shouldDispose">true to dispose the I2C Device class at dispose</param>
         public Tcs3472x(I2cDevice i2cDevice, double integrationTime = 0.0024, Gain gain = Gain.Gain16X,
-            bool autoDisposable = true)
+            bool shouldDispose = true)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             // Maximum is 700 ms for the initialization. Value can be changed for a long one but not during this initialization phase
-            _autoDisposable = autoDisposable;
+            _shouldDispose = shouldDispose;
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.ID));
             ChipId = (TCS3472Type)_i2cDevice.ReadByte();
             _isLongTime = false;
@@ -171,10 +169,8 @@ namespace Iot.Device.Tcs3472x
         /// Set/Clear the colors and clear interrupts
         /// </summary>
         /// <param name="state">true to set all interrupts, false to clear</param>
-        public void SetInterrupt(bool state)
-        {
+        public void SetInterrupt(bool state) =>
             SetInterrupt(InterruptState.All, state);
-        }
 
         /// <summary>
         /// Set/clear a specific interrupt persistence
@@ -228,6 +224,7 @@ namespace Iot.Device.Tcs3472x
         /// <summary>
         /// Get the color
         /// </summary>
+        [Telemetry]
         public Color Color => GetColor();
 
         private ushort I2cRead16(Registers reg)
@@ -247,19 +244,17 @@ namespace Iot.Device.Tcs3472x
             return _i2cDevice.ReadByte();
         }
 
-        private void WriteRegister(Registers reg, byte data)
-        {
+        private void WriteRegister(Registers reg, byte data) =>
             _i2cDevice.Write(new byte[] { (byte)(Registers.COMMAND_BIT | reg), data });
-        }
 
         /// <inheritdoc/>
         public void Dispose()
         {
             PowerOff();
-            if (_autoDisposable)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
     }

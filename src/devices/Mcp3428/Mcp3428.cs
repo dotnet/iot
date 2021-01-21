@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
 
@@ -31,10 +30,7 @@ namespace Iot.Device.Mcp3428
         /// <param name="pgaGain">PGA gain</param>
         public Mcp3428(I2cDevice i2CDevice, AdcMode mode = AdcMode.Continuous,
             AdcResolution resolution = AdcResolution.Bit12, AdcGain pgaGain = AdcGain.X1)
-            : this(i2CDevice)
-        {
-            SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
-        }
+            : this(i2CDevice) => SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
 
         /// <summary>
         /// Determine device I2C address based on the configuration pin states.
@@ -42,9 +38,6 @@ namespace Iot.Device.Mcp3428
         /// <param name="adr0">The adr0 pin state</param>
         /// <param name="adr1">The adr1 pin state</param>
         /// <returns>System.Int32.</returns>
-        public static int I2CAddressFromPins(PinState adr0, PinState adr1)
-        {
-            return Helpers.I2CAddressFromPins(adr0, adr1);
-        }
+        public static int I2CAddressFromPins(PinState adr0, PinState adr1) => Helpers.I2CAddressFromPins(adr0, adr1);
     }
 }

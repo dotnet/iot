@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.ComponentModel;
@@ -16,11 +15,11 @@ namespace Iot.Device.BrickPi3.Sensors
     /// </summary>
     public class EV3UltraSonicSensor : INotifyPropertyChanged, ISensor
     {
-        private Brick _brick = null;
+        private Brick _brick;
         private UltraSonicMode _mode;
-        private Timer _timer = null;
+        private Timer _timer;
         private int _value;
-        private string _valueAsString;
+        private string? _valueAsString;
         private int _periodRefresh;
 
         /// <summary>
@@ -68,11 +67,8 @@ namespace Iot.Device.BrickPi3.Sensors
 
         private void StopTimerInternal()
         {
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null!;
         }
 
         private void OnPropertyChanged(string name)
@@ -84,7 +80,7 @@ namespace Iot.Device.BrickPi3.Sensors
         /// To notify a property has changed. The minimum time can be set up
         /// with timeout property
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
         /// Period to refresh the notification of property changed in milliseconds
@@ -126,30 +122,21 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Return the raw value  as a string of the sensor
         /// </summary>
-        public string ValueAsString
-        {
-            get
-            {
-                return ReadAsString();
-            }
-
-            internal set
-            {
-                if (_valueAsString != value)
-                {
-                    _valueAsString = value;
-                    OnPropertyChanged(nameof(ValueAsString));
-                }
-            }
-        }
+        public string ValueAsString => ReadAsString();
 
         /// <summary>
         /// Update the sensor and this will raised an event on the interface
         /// </summary>
-        public void UpdateSensor(object state)
+        public void UpdateSensor(object? state)
         {
             Value = ReadRaw();
-            ValueAsString = ReadAsString();
+            string sensorState = ReadAsString();
+            string? previousValue = _valueAsString;
+            _valueAsString = sensorState;
+            if (sensorState != previousValue)
+            {
+                OnPropertyChanged(nameof(ValueAsString));
+            }
         }
 
         /// <summary>
@@ -187,24 +174,13 @@ namespace Iot.Device.BrickPi3.Sensors
         /// Reads the sensor value as a string.
         /// </summary>
         /// <returns>The value as a string</returns>
-        public string ReadAsString()
+        public string ReadAsString() => _mode switch
         {
-            string s = string.Empty;
-            switch (_mode)
-            {
-                case UltraSonicMode.Centimeter:
-                    s = Read().ToString() + " cm";
-                    break;
-                case UltraSonicMode.Inch:
-                    s = Read().ToString() + " inch";
-                    break;
-                case UltraSonicMode.Listen:
-                    s = Read().ToString();
-                    break;
-            }
-
-            return s;
-        }
+            UltraSonicMode.Centimeter => $"{Read().ToString()} cm",
+            UltraSonicMode.Inch => $"{Read().ToString()} inch",
+            UltraSonicMode.Listen => Read().ToString(),
+            _ => string.Empty,
+        };
 
         /// <summary>
         /// Read the sensor value. Result depends on the mode
@@ -229,64 +205,46 @@ namespace Iot.Device.BrickPi3.Sensors
         {
             try
             {
-                var ret = _brick.GetSensor((byte)Port);
-                switch (_mode)
+                byte[] ret = _brick.GetSensor((byte)Port);
+                return _mode switch
                 {
-                    case UltraSonicMode.Centimeter:
-                    case UltraSonicMode.Inch:
-                        return (ret[0] + (ret[1] >> 8));
-                    case UltraSonicMode.Listen:
-                        return ret[0];
-                }
+                    UltraSonicMode.Centimeter or UltraSonicMode.Inch => (ret[0] + (ret[1] >> 8)),
+                    UltraSonicMode.Listen => ret[0],
+                    _ => int.MaxValue,
+                };
             }
             catch (Exception ex) when (ex is IOException)
             {
+                return int.MaxValue;
             }
-
-            return int.MaxValue;
         }
 
         /// <summary>
         /// Gets sensor name
         /// </summary>
         /// <returns>Sensor name</returns>
-        public string GetSensorName()
-        {
-            return "EV3 Ultrasonic";
-        }
+        public string GetSensorName() => "EV3 Ultrasonic";
 
         /// <summary>
         /// Moves to next mode
         /// </summary>
-        public void SelectNextMode()
-        {
-            Mode = Mode.Next();
-        }
+        public void SelectNextMode() => Mode = Mode.Next();
 
         /// <summary>
         /// Moves to previous mode
         /// </summary>
-        public void SelectPreviousMode()
-        {
-            Mode = Mode.Previous();
-        }
+        public void SelectPreviousMode() => Mode = Mode.Previous();
 
         /// <summary>
         /// Number of modes supported
         /// </summary>
         /// <returns>Number of modes</returns>
-        public int NumberOfModes()
-        {
-            return Enum.GetNames(typeof(UltraSonicMode)).Length;
-        }
+        public int NumberOfModes() => Enum.GetNames(typeof(UltraSonicMode)).Length;
 
         /// <summary>
         /// Selected mode
         /// </summary>
         /// <returns>String representing selected mode</returns>
-        public string SelectedMode()
-        {
-            return Mode.ToString();
-        }
+        public string SelectedMode() => Mode.ToString();
     }
 }

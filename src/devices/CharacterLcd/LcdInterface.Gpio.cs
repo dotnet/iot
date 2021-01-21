@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device;
@@ -45,9 +44,10 @@ namespace Iot.Device.CharacterLcd
             private bool _useLastByte;
 
             private GpioController _controller;
+            private bool _shouldDispose;
             private PinValuePair[] _pinBuffer = new PinValuePair[8];
 
-            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController controller = null)
+            public Gpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController? controller = null, bool shouldDispose = true)
             {
                 _rwPin = readWritePin;
                 _rsPin = registerSelectPin;
@@ -62,9 +62,10 @@ namespace Iot.Device.CharacterLcd
                 }
                 else if (dataPins.Length != 4)
                 {
-                    throw new ArgumentException($"The length of the array given to parameter {nameof(dataPins)} must be 4 or 8");
+                    throw new ArgumentException(nameof(dataPins), "The length of the array must be 4 or 8.");
                 }
 
+                _shouldDispose = shouldDispose || controller is null;
                 _controller = controller ?? new GpioController(PinNumberingScheme.Logical);
 
                 Initialize();
@@ -144,10 +145,7 @@ namespace Iot.Device.CharacterLcd
 
             public override bool BacklightOn
             {
-                get
-                {
-                    return _backlight != -1 && _controller.Read(_backlight) == PinValue.High;
-                }
+                get => _backlight != -1 && _controller.Read(_backlight) == PinValue.High;
                 set
                 {
                     if (_backlight != -1)
@@ -242,7 +240,12 @@ namespace Iot.Device.CharacterLcd
 
             protected override void Dispose(bool disposing)
             {
-                _controller?.Dispose();
+                if (_shouldDispose)
+                {
+                    _controller?.Dispose();
+                    _controller = null!;
+                }
+
                 base.Dispose(disposing);
             }
         }

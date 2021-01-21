@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Drawing;
@@ -38,24 +37,14 @@ namespace Iot.Device.Ssd1351
         /// <param name="destinationRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
         public void SendBitmap(Bitmap bm, Point sourcePoint, Rectangle destinationRect)
         {
-            if (bm == null)
+            if (bm is null)
             {
                 throw new ArgumentNullException(nameof(bm));
             }
 
-            if (sourcePoint == null)
-            {
-                throw new ArgumentNullException(nameof(sourcePoint));
-            }
-
-            if (destinationRect == null)
-            {
-                throw new ArgumentNullException(nameof(destinationRect));
-            }
-
             if (bm.PixelFormat != PixelFormat.Format32bppArgb)
             {
-                throw new ArgumentException($"Pixel format {bm.PixelFormat.ToString()} not supported.", nameof(bm.PixelFormat));
+                throw new ArgumentException(nameof(bm), $"Pixel format {bm.PixelFormat.ToString()} not supported.");
             }
 
             // get the pixel data and send it to the display
@@ -74,19 +63,14 @@ namespace Iot.Device.Ssd1351
             byte[] bitmapData; // array that takes the raw bytes of the bitmap
             byte[] outputBuffer; // array used to form the data to be written out to the SPI interface
 
-            if (bm == null)
+            if (bm is null)
             {
                 throw new ArgumentNullException(nameof(bm));
             }
 
-            if (sourceRect == null)
-            {
-                throw new ArgumentNullException(nameof(sourceRect));
-            }
-
             if (bm.PixelFormat != PixelFormat.Format32bppArgb)
             {
-                throw new ArgumentException($"Pixel format {bm.PixelFormat.ToString()} not supported.", nameof(bm.PixelFormat));
+                throw new ArgumentException(nameof(bm), $"Pixel format {bm.PixelFormat.ToString()} not supported.");
             }
 
             // allocate the working arrays.

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
@@ -122,10 +121,10 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
+        public override void Dispose()
         {
             _rgbDevice?.Dispose();
-            base.Dispose(disposing);
+            base.Dispose();
         }
     }
 }

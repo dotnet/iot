@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -60,7 +59,7 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// Sometimes the KeyB may be read
         /// </summary>
-        ReadKeyB = 0b0001_000_0000,
+        ReadKeyB = 0b0001_0000_0000,
 
         /// <summary>
         /// Read Key B With Key A

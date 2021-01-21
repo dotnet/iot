@@ -1,28 +1,29 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device;
 using System.Device.I2c;
+using System.Device.Model;
 using System.IO;
 using System.Net.Http.Headers;
 using System.Numerics;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Iot.Device.Magnetometer;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Imu
 {
     /// <summary>
-    /// MPU9250 class. MPU9250 has an embedded gyroscope, accelerometer and temperature. It is built on an MPU6500 and it does offers a magnetometer thru an embedded AK8963.
+    /// MPU9250 - gyroscope, accelerometer, temperature and magnetometer (thru an embedded AK8963).
     /// </summary>
+    [Interface("MPU9250 - gyroscope, accelerometer, temperature and magnetometer (thru an embedded AK8963)")]
     public class Mpu9250 : Mpu6500
     {
         private Ak8963 _ak8963;
-        private bool _autoDispose;
+        private bool _shouldDispose;
         // Use for the first magnetometer read when switch to continuous 100 Hz
         private bool _firstContinuousRead = true;
 
@@ -42,6 +43,7 @@ namespace Iot.Device.Imu
         ///  /  |  \
         ///         +X
         /// </remarks>
+        [Property]
         public Vector3 MagnometerBias => new Vector3(_ak8963.MagnetometerBias.Y, _ak8963.MagnetometerBias.X, -_ak8963.MagnetometerBias.Z);
 
         /// <summary>
@@ -51,6 +53,7 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <param name="calibrationCounts">number of points to read during calibration, default is 1000</param>
         /// <returns>Returns the factory calibration data</returns>
+        [Command]
         public Vector3 CalibrateMagnetometer(int calibrationCounts = 1000)
         {
             if (_wakeOnMotion)
@@ -75,6 +78,7 @@ namespace Iot.Device.Imu
         /// </summary>
         /// <returns>Returns the Magnetometer version number</returns>
         /// <remarks>When the wake on motion is on, you can't read the magnetometer, so this function returns 0</remarks>
+        [Property("MagnetometerVersion")]
         public byte GetMagnetometerVersion() => _wakeOnMotion ? (byte)0 : _ak8963.GetDeviceInfo();
 
         /// <summary>
@@ -116,50 +120,32 @@ namespace Iot.Device.Imu
         /// </remarks>
         /// <param name="waitForData">true to wait for new data</param>
         /// <returns>The data from the magnetometer</returns>
+        [Telemetry("MagneticInduction")]
         public Vector3 ReadMagnetometer(bool waitForData = true)
         {
-            var magn = _ak8963.ReadMagnetometer(waitForData, GetTimeout());
+            Vector3 magn = _ak8963.ReadMagnetometer(waitForData, GetTimeout());
             return new Vector3(magn.Y, magn.X, -magn.Z);
         }
 
-        private TimeSpan GetTimeout()
+        // TODO: find what is the value in the documentation, it should be pretty fast
+        // But taking the same value as for the slowest one so th 8Hz one
+        private TimeSpan GetTimeout() => _ak8963.MeasurementMode switch
         {
-            TimeSpan timeout = TimeSpan.Zero;
-            switch (_ak8963.MeasurementMode)
-            {
-                // TODO: find what is the value in the documentation, it should be pretty fast
-                // But taking the same value as for the slowest one so th 8Hz one
-                case MeasurementMode.SingleMeasurement:
-                case MeasurementMode.ExternalTriggedMeasurement:
-                case MeasurementMode.SelfTest:
-                case MeasurementMode.ContinuousMeasurement8Hz:
-                    // 8Hz measurement period plus 2 milliseconds
-                    timeout = TimeSpan.FromMilliseconds(127);
-                    break;
-                case MeasurementMode.ContinuousMeasurement100Hz:
-                    // 100Hz measurement period plus 2 milliseconds
-                    // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
-                    timeout = _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12);
-                    break;
-                // Those cases are not measurement and should be 0 then
-                case MeasurementMode.FuseRomAccess:
-                case MeasurementMode.PowerDown:
-                default:
-                    break;
-            }
-
-            return timeout;
-        }
+            // 8Hz measurement period plus 2 milliseconds
+            MeasurementMode.SingleMeasurement or MeasurementMode.ExternalTriggedMeasurement or MeasurementMode.SelfTest or MeasurementMode.ContinuousMeasurement8Hz
+                => TimeSpan.FromMilliseconds(127),
+            // 100Hz measurement period plus 2 milliseconds
+            // When switching to this mode, the first read can be longer than 10 ms. Tests shows up to 100 ms
+            MeasurementMode.ContinuousMeasurement100Hz => _firstContinuousRead ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromMilliseconds(12),
+            _ => TimeSpan.Zero,
+        };
 
         /// <summary>
         /// Select the magnetometer measurement mode
         /// </summary>
         public MeasurementMode MagnetometerMeasurementMode
         {
-            get
-            {
-                return _ak8963.MeasurementMode;
-            }
+            get => _ak8963.MeasurementMode;
             set
             {
                 _ak8963.MeasurementMode = value;
@@ -173,15 +159,17 @@ namespace Iot.Device.Imu
         /// <summary>
         /// Select the magnetometer output bit rate
         /// </summary>
+        [Property]
         public OutputBitMode MagnetometerOutputBitMode
         {
-            get { return _ak8963.OutputBitMode; }
-            set { _ak8963.OutputBitMode = value; }
+            get => _ak8963.OutputBitMode;
+            set => _ak8963.OutputBitMode = value;
         }
 
         /// <summary>
         /// Get the magnetometer hardware adjustment bias
         /// </summary>
+        [Property]
         public Vector3 MagnetometerAdjustment => _ak8963.MagnetometerAdjustment;
 
         #endregion
@@ -190,11 +178,11 @@ namespace Iot.Device.Imu
         /// Initialize the MPU9250
         /// </summary>
         /// <param name="i2cDevice">The I2C device</param>
-        /// <param name="autoDispose">Will automatically dispose the I2C device if true</param>
-        public Mpu9250(I2cDevice i2cDevice, bool autoDispose = true)
-            : base()
+        /// <param name="shouldDispose">Will automatically dispose the I2C device if true</param>
+        /// <param name="i2CDeviceAk8963">An I2C Device for the AK8963 when exposed and not behind the MPU9250</param>
+        public Mpu9250(I2cDevice i2cDevice, bool shouldDispose = true, I2cDevice? i2CDeviceAk8963 = null)
+            : base(i2cDevice, true)
         {
-            _i2cDevice = i2cDevice;
             Reset();
             PowerOn();
             if (!CheckVersion())
@@ -210,8 +198,25 @@ namespace Iot.Device.Imu
             WriteRegister(Register.USER_CTRL, (byte)UserControls.I2C_MST_EN);
             // Speed of 400 kHz
             WriteRegister(Register.I2C_MST_CTRL, (byte)I2cBusFrequency.Frequency400kHz);
-            _autoDispose = autoDispose;
-            _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
+            _shouldDispose = shouldDispose;
+            // There are 2 options to setup the Ak8963. Either the I2C address is exposed, either not.
+            // Trying both and pick one of them
+            if (i2CDeviceAk8963 == null)
+            {
+                try
+                {
+                    _ak8963 = new Ak8963(i2cDevice, new Ak8963Attached(), false);
+                }
+                catch (IOException ex)
+                {
+                    throw new IOException($"Please try to create an I2cDevice for the AK8963, it may be exposed", ex);
+                }
+            }
+            else
+            {
+                _ak8963 = new Ak8963(i2CDeviceAk8963);
+            }
+
             if (!_ak8963.IsVersionCorrect())
             {
                 // Try to reset the device first
@@ -269,10 +274,10 @@ namespace Iot.Device.Imu
         /// </summary>
         public new void Dispose()
         {
-            if (_autoDispose)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -110,24 +109,7 @@ namespace Iot.Device.Adc
         /// Constructs Mcp3Base instance
         /// </summary>
         /// <param name="spiDevice">Device used for SPI communication</param>
-        public Mcp3Base(SpiDevice spiDevice)
-        {
-            if (spiDevice == null)
-            {
-                throw new ArgumentNullException(nameof(spiDevice));
-            }
-
-            _spiDevice = spiDevice;
-        }
-
-        /// <summary>
-        /// Disposes Mcp3Base instances
-        /// </summary>
-        public void Dispose()
-        {
-            _spiDevice?.Dispose();
-            _spiDevice = null;
-        }
+        public Mcp3Base(SpiDevice spiDevice) => _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
 
         /// <summary>
         /// Reads a value from the device
@@ -174,6 +156,15 @@ namespace Iot.Device.Adc
 
             // return the ADC response with any possible higer bits masked out
             return retval & (int)((1L << adcResolutionBits) - 1);
+        }
+
+        /// <summary>
+        /// Disposes Mcp3Base instances
+        /// </summary>
+        public void Dispose()
+        {
+            _spiDevice?.Dispose();
+            _spiDevice = null!;
         }
     }
 }

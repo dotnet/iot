@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.Gpio;
 using CommandLine;
@@ -18,7 +17,7 @@ namespace DeviceApiTester.Commands.Gpio
 
         protected GpioController CreateGpioController()
         {
-            GpioDriver gpioDriver = DriverFactory.CreateFromEnum<GpioDriver, GpioDriverType>(Driver);
+            GpioDriver? gpioDriver = DriverFactory.CreateFromEnum<GpioDriver, GpioDriverType>(Driver);
 
             return gpioDriver != null
                 ? new GpioController(Scheme, gpioDriver)

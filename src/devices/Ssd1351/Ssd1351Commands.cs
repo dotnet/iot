@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Drawing;
@@ -422,10 +421,10 @@ namespace Iot.Device.Ssd1351
         /// This command sets the gray levels GS0 -> GS63.
         /// </summary>
         /// <param name="grayLevels">A byte array containing 64 gray levels representing GS0 -> GS63.
-        /// If this paramneter is null or an empty array then the gray leves are set to default.</param>
-        public void SetGrayLevels(byte[] grayLevels = null)
+        /// If this parameter is null or an empty array then the gray leves are set to default.</param>
+        public void SetGrayLevels(byte[]? grayLevels = null)
         {
-            if (grayLevels == null || grayLevels.Length == 0)
+            if (grayLevels is null || grayLevels.Length == 0)
             {
                 SendCommand(Ssd1351Command.SetDefaultGrayLevels);
             }

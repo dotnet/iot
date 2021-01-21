@@ -1,17 +1,23 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
+using System.Device.Model;
+using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Bmxx80.CalibrationData;
+using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Bmxx80.ReadResult;
 using Iot.Device.Bmxx80.Register;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
     /// <summary>
     /// Represents a BME280 temperature, barometric pressure and humidity sensor.
     /// </summary>
+    [Interface("Represents a BME280 temperature, barometric pressure and humidity sensor.")]
     public class Bme280 : Bmx280Base
     {
         /// <summary>
@@ -41,6 +47,7 @@ namespace Iot.Device.Bmxx80
         /// Gets or sets the humidity sampling.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        [Property]
         public Sampling HumiditySampling
         {
             get => _humiditySampling;
@@ -78,25 +85,11 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="humidity">
         /// Contains the measured humidity as %rH if the <see cref="HumiditySampling"/> was not set to <see cref="Sampling.Skipped"/>.
-        /// Contains <see cref="double.NaN"/> otherwise.
+        /// Contains an undefined value if the return value is false.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadHumidity(out double humidity)
-        {
-            if (HumiditySampling == Sampling.Skipped)
-            {
-                humidity = double.NaN;
-                return false;
-            }
-
-            // Read the temperature first to load the t_fine value for compensation.
-            TryReadTemperature(out _);
-
-            var hum = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
-
-            humidity = CompensateHumidity(hum);
-            return true;
-        }
+        [Telemetry("Humidity")]
+        public bool TryReadHumidity(out RelativeHumidity humidity) => TryReadHumidityCore(out humidity);
 
         /// <summary>
         /// Gets the required time in ms to perform a measurement with the current sampling modes.
@@ -105,6 +98,44 @@ namespace Iot.Device.Bmxx80
         public override int GetMeasurementDuration()
         {
             return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling] + s_osToMeasCycles[(int)HumiditySampling];
+        }
+
+        /// <summary>
+        /// Performs a synchronous reading.
+        /// </summary>
+        /// <returns><see cref="Bme280ReadResult"/></returns>
+        public Bme280ReadResult Read()
+        {
+            if (ReadPowerMode() != Bmx280PowerMode.Normal)
+            {
+                SetPowerMode(Bmx280PowerMode.Forced);
+                Thread.Sleep(GetMeasurementDuration());
+            }
+
+            var tempSuccess = TryReadTemperatureCore(out var temperature);
+            var pressSuccess = TryReadPressureCore(out var pressure, skipTempFineRead: true);
+            var humiditySuccess = TryReadHumidityCore(out var humidity, skipTempFineRead: true);
+
+            return new Bme280ReadResult(tempSuccess ? temperature : null, pressSuccess ? pressure : null, humiditySuccess ? humidity : null);
+        }
+
+        /// <summary>
+        /// Performs an asynchronous reading.
+        /// </summary>
+        /// <returns><see cref="Bme280ReadResult"/></returns>
+        public async Task<Bme280ReadResult> ReadAsync()
+        {
+            if (ReadPowerMode() != Bmx280PowerMode.Normal)
+            {
+                SetPowerMode(Bmx280PowerMode.Forced);
+                await Task.Delay(GetMeasurementDuration());
+            }
+
+            var tempSuccess = TryReadTemperatureCore(out var temperature);
+            var pressSuccess = TryReadPressureCore(out var pressure, skipTempFineRead: true);
+            var humiditySuccess = TryReadHumidityCore(out var humidity, skipTempFineRead: true);
+
+            return new Bme280ReadResult(tempSuccess ? temperature : null, pressSuccess ? pressure : null, humiditySuccess ? humidity : null);
         }
 
         /// <summary>
@@ -120,8 +151,8 @@ namespace Iot.Device.Bmxx80
         /// Compensates the humidity.
         /// </summary>
         /// <param name="adcHumidity">The humidity value read from the device.</param>
-        /// <returns>The percentage relative humidity.</returns>
-        private double CompensateHumidity(int adcHumidity)
+        /// <returns>The relative humidity.</returns>
+        private RelativeHumidity CompensateHumidity(int adcHumidity)
         {
             // The humidity is calculated using the compensation formula in the BME280 datasheet.
             double varH = TemperatureFine - 76800.0;
@@ -139,7 +170,27 @@ namespace Iot.Device.Bmxx80
                 varH = 0;
             }
 
-            return varH;
+            return RelativeHumidity.FromPercent(varH);
+        }
+
+        private bool TryReadHumidityCore(out RelativeHumidity humidity, bool skipTempFineRead = false)
+        {
+            if (HumiditySampling == Sampling.Skipped)
+            {
+                humidity = default;
+                return false;
+            }
+
+            if (!skipTempFineRead)
+            {
+                TryReadTemperature(out _);
+            }
+
+            // Read the temperature first to load the t_fine value for compensation.
+            var hum = Read16BitsFromRegister((byte)Bme280Register.HUMIDDATA, Endianness.BigEndian);
+
+            humidity = CompensateHumidity(hum);
+            return true;
         }
     }
 }

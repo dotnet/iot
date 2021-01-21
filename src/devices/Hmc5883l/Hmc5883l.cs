@@ -1,10 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Numerics;
 
 namespace Iot.Device.Hmc5883l
@@ -12,6 +12,7 @@ namespace Iot.Device.Hmc5883l
     /// <summary>
     /// 3-Axis Digital Compass HMC5883L
     /// </summary>
+    [Interface("3-Axis Digital Compass HMC5883L")]
     public class Hmc5883l : IDisposable
     {
         /// <summary>
@@ -30,6 +31,7 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// HMC5883L Direction Vector
         /// </summary>
+        [Telemetry]
         public Vector3 DirectionVector => ReadDirectionVector();
 
         /// <summary>
@@ -40,6 +42,7 @@ namespace Iot.Device.Hmc5883l
         /// <summary>
         /// HMC5883L Status
         /// </summary>
+        [Telemetry]
         public Status DeviceStatus => GetStatus();
 
         /// <summary>
@@ -59,7 +62,7 @@ namespace Iot.Device.Hmc5883l
             SamplesAmount samplesAmount = SamplesAmount.One,
             MeasurementConfiguration measurementConfig = MeasurementConfiguration.Normal)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _gain = (byte)gain;
             _measuringMode = (byte)measuringMode;
             _outputRate = (byte)outputRate;
@@ -142,11 +145,8 @@ namespace Iot.Device.Hmc5883l
         /// </summary>
         public void Dispose()
         {
-            if (_i2cDevice != null)
-            {
-                _i2cDevice?.Dispose();
-                _i2cDevice = null;
-            }
+            _i2cDevice?.Dispose();
+            _i2cDevice = null!;
         }
 
         /// <summary>

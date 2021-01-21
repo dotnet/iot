@@ -34,6 +34,7 @@ iot/
       Foo/
         Foo.csproj
         Foo.cs
+        Foo.sln
         README.md
         samples/
           Foo.Sample.csproj

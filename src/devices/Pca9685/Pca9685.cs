@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -181,7 +180,7 @@ namespace Iot.Device.Pwm
         public void Dispose()
         {
             _device?.Dispose();
-            _device = null;
+            _device = null!;
         }
 
         /// <summary>
@@ -312,7 +311,7 @@ namespace Iot.Device.Pwm
             _device.Write(bytes);
         }
 
-        private static (ushort on, ushort off) DutyCycleToOnOff(double dutyCycle)
+        private static (ushort On, ushort Off) DutyCycleToOnOff(double dutyCycle)
         {
             Debug.Assert(dutyCycle >= 0.0 && dutyCycle <= 1.0, "Duty cycle must be between 0 and 1");
 

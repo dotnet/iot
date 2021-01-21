@@ -1,19 +1,23 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
+
+using System.Runtime.CompilerServices;
 
 namespace System.Device.Spi
 {
     /// <summary>
-    /// Represents a SPI communication channel running on Windows 10 IoT.
+    /// The communications channel to a device on a SPI bus.
     /// </summary>
-    public abstract partial class SpiDevice : IDisposable
+    public abstract partial class SpiDevice
     {
-        /// <summary>
-        /// Creates a communications channel to a device on a SPI bus running on Windows 10 IoT.
-        /// </summary>
-        /// <param name="settings">The connection settings of a device on a SPI bus.</param>
-        /// <returns>A communications channel to a device on a SPI bus running on Windows 10 IoT.</returns>
-        public static SpiDevice Create(SpiConnectionSettings settings) => new Windows10SpiDevice(settings);
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static SpiDevice CreateWindows10SpiDevice(SpiConnectionSettings settings)
+        {
+            // This wrapper is needed to prevent Mono from loading Windows10SpiDevice
+            // which causes all fields to be loaded - one of such fields is WinRT type which does not
+            // exist on Linux which causes TypeLoadException.
+            // Using NoInlining and no explicit type prevents this from happening.
+            return new Windows10SpiDevice(settings);
+        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -14,10 +13,10 @@ namespace Iot.Device.GoPiGo3.Movements
     /// </summary>
     public class Vehicle
     {
-        private GoPiGo _goPiGo = null;
+        private GoPiGo _goPiGo;
         private bool _directionOpposite = false;
         private int _correctedDir = 1;
-        private Timer _timer = null;
+        private Timer? _timer = null;
 
         /// <summary>
         /// Create a vehicle with 2 motors, one left and one right
@@ -148,7 +147,7 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void RunMotorSyncTime(MotorPort[] ports, int[] speeds, int timeout)
         {
-            if ((ports == null) || (speeds == null))
+            if ((ports is null) || (speeds is null))
             {
                 return;
             }
@@ -159,7 +158,7 @@ namespace Iot.Device.GoPiGo3.Movements
             }
 
             // create a timer for the needed time to run
-            if (_timer == null)
+            if (_timer is null)
             {
                 _timer = new Timer(RunUntil, null, TimeSpan.FromMilliseconds(timeout), Timeout.InfiniteTimeSpan);
             }
@@ -187,15 +186,12 @@ namespace Iot.Device.GoPiGo3.Movements
             }
         }
 
-        private void RunUntil(object state)
+        private void RunUntil(object? state)
         {
             StopMotor(PortLeft);
             StopMotor(PortRight);
-            if (_timer != null)
-            {
-                _timer.Dispose();
-                _timer = null;
-            }
+            _timer?.Dispose();
+            _timer = null;
         }
 
         private void StopMotor(MotorPort port)
@@ -211,7 +207,7 @@ namespace Iot.Device.GoPiGo3.Movements
 
         private void RunMotorSyncDegrees(MotorPort[] ports, int[] speeds, int[] degrees)
         {
-            if ((ports == null) || (speeds == null) || degrees == null)
+            if ((ports is null) || (speeds is null) || degrees is null)
             {
                 return;
             }

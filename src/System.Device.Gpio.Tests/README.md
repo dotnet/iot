@@ -45,9 +45,17 @@ sudo dotnet test --filter RaspberryPiDriverTests System.Device.Gpio.sln
 
 If everything went smoothly, the output should end with a success message. 
 
+Alternatively, you can run the tests using the xunit console runner, which allows for better control of what should be executed (see the next section). 
+
+XUnit.console.runner is installed as a nuget package on the system in your home directory during the build. From the root of the project directory, execute:
+```
+pi@raspberrypi:~/projects/iot $ dotnet exec ~/.nuget/packages/xunit.runner.console/2.4.1/tools/netcoreapp2.0/xunit.console.dll artifacts/bin/System.Device.Gpio.Tests/Debug/netcoreapp2.1/System.Device.Gpio.Tests.dll -notrait "SkipOnTestRun=Windows_NT" -notrait "feature=i2c"
+```
+This runs the tests excluding the I2C tests (-notrait "feature-i2c") and excluding the Windows tests (-notrait "SkipOnTestRun=Windows_NT"). 
+
 ## Running tests depending on components/requirements
 
-Currently the full test suite requires following components, if you don't have one use following command line switches to skip
+Currently the full test suite requires following components, if you don't have one use following command line switches to skip (for the full command line, see above)
 
 | Requirements | Skip arguments |
 | --- | --- |

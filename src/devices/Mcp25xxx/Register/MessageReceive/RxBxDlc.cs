@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -29,7 +28,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             if (rxBufferNumber > 1)
             {
-                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
+                throw new ArgumentException(nameof(rxBufferNumber), $"Invalid RX Buffer Number value {rxBufferNumber}.");
             }
 
             RxBufferNumber = rxBufferNumber;
@@ -46,7 +45,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             if (rxBufferNumber > 1)
             {
-                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
+                throw new ArgumentException(nameof(rxBufferNumber), $"Invalid RX Buffer Number value {rxBufferNumber}.");
             }
 
             RxBufferNumber = rxBufferNumber;
@@ -73,36 +72,24 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         /// </summary>
         public bool ExtendedFrameRemoteTransmissionRequest { get; }
 
-        private Address GetAddress()
+        private Address GetAddress() => RxBufferNumber switch
         {
-            switch (RxBufferNumber)
-            {
-                case 0:
-                    return Address.RxB0Dlc;
-                case 1:
-                    return Address.RxB1Dlc;
-                default:
-                    throw new ArgumentException($"Invalid Rx Buffer Number value {RxBufferNumber}.", nameof(RxBufferNumber));
-            }
-        }
+            0 => Address.RxB0Dlc,
+            1 => Address.RxB1Dlc,
+            _ => throw new Exception($"Invalid value for {nameof(RxBufferNumber)}:  {RxBufferNumber}."),
+        };
 
         /// <summary>
         /// Gets the Rx Buffer Number based on the register address.
         /// </summary>
         /// <param name="address">The address to look up Rx Buffer Number.</param>
         /// <returns>The Rx Buffer Number based on the register address.</returns>
-        public static byte GetRxBufferNumber(Address address)
+        public static byte GetRxBufferNumber(Address address) => address switch
         {
-            switch (address)
-            {
-                case Address.RxB0Dlc:
-                    return 0;
-                case Address.RxB1Dlc:
-                    return 1;
-                default:
-                    throw new ArgumentException($"Invalid address value {address}.", nameof(address));
-            }
-        }
+            Address.RxB0Dlc => 0,
+            Address.RxB1Dlc => 1,
+            _ => throw new ArgumentException(nameof(address), $"Invalid address value {address}."),
+        };
 
         /// <summary>
         /// Gets the address of the register.

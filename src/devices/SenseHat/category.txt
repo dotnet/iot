@@ -7,3 +7,4 @@ gyroscope
 accelerometer
 joystick
 display
+multi

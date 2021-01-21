@@ -7,7 +7,14 @@
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
     <MainLibraryPath>$(MSBuildThisFileDirectory)../System.Device.Gpio/</MainLibraryPath>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <SystemDeviceModelProjectName>System.Device.Model</SystemDeviceModelProjectName>
+    <SystemDeviceModelPath>$(MSBuildThisFileDirectory)$(SystemDeviceModelProjectName)/$(SystemDeviceModelProjectName).csproj</SystemDeviceModelPath>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
+    <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
+  </ItemGroup>
 </Project>

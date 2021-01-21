@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System.Device.I2c;
 
@@ -35,9 +34,6 @@ namespace Iot.Device.Mcp3428
         /// <param name="resolution">ADC resolution</param>
         /// <param name="pgaGain">PGA gain</param>
         public Mcp3426(I2cDevice i2CDevice, AdcMode mode = AdcMode.Continuous, AdcResolution resolution = AdcResolution.Bit12, AdcGain pgaGain = AdcGain.X1)
-            : this(i2CDevice)
-        {
-            SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
-        }
+            : this(i2CDevice) => SetConfig(0, mode: mode, resolution: resolution, pgaGain: pgaGain);
     }
 }

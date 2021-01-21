@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
@@ -66,7 +65,7 @@ namespace Iot.Device.SenseHat
         /// <param name="index">Index</param>
         /// <returns>Tuple of X and Y coordinates</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static (int x, int y) IndexToPosition(int index)
+        public static (int X, int Y) IndexToPosition(int index)
         {
             if (index < 0 || index >= NumberOfPixelsPerRow * NumberOfPixelsPerRow)
             {

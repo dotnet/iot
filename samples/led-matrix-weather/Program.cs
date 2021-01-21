@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -20,11 +19,11 @@ namespace LedMatrixWeather
 {
     internal partial class Program
     {
-        private static Action<RGBLedMatrix> s_scenario = WeatherDemo;
-        private static Stopwatch s_showLocalIp = null;
-        private static string[] s_ips;
+        private static Action<RGBLedMatrix>? s_scenario = WeatherDemo;
+        private static Stopwatch? s_showLocalIp = null;
+        private static string[]? s_ips;
         private static bool s_networkAvailable = false;
-        private static Weather s_client;
+        private static Weather? s_client;
         private static OpenWeatherResponse s_weatherResponse;
         private static readonly TimeZoneInfo s_timeZonePst = TimeZoneInfo.FindSystemTimeZoneById("America/Los_Angeles");
 
@@ -55,17 +54,14 @@ namespace LedMatrixWeather
             {
                 matrix.StartRendering();
 
-                while (true)
+                while (s_scenario is object)
                 {
                     Action<RGBLedMatrix> scenario = s_scenario;
-
-                    if (scenario == null)
-                        break;
 
                     Stopwatch sw = Stopwatch.StartNew();
                     scenario(matrix);
 
-                    if (s_scenario != null && sw.ElapsedMilliseconds < 100)
+                    if (sw.ElapsedMilliseconds < 100)
                     {
                         Debug.WriteLine("Scenario execution finished in less than 100ms. This is likely due to bug.");
                     }
@@ -76,17 +72,12 @@ namespace LedMatrixWeather
             {
                 if (!Console.IsOutputRedirected)
                 {
-                    while (s_scenario != null)
+                    while (s_scenario is object && Console.ReadKey(intercept: true).Key != ConsoleKey.Q)
                     {
-                        switch (Console.ReadKey(intercept: true).Key)
-                        {
-                            case ConsoleKey.Q:
-                            {
-                                s_scenario = null;
-                                break;
-                            }
-                        }
+                        Thread.Sleep(10);
                     }
+
+                    s_scenario = null;
                 }
 
                 drawing.Wait();
@@ -127,7 +118,7 @@ namespace LedMatrixWeather
         {
             try
             {
-                s_weatherResponse = s_client.GetWeatherFromOpenWeather();
+                s_weatherResponse = s_client!.GetWeatherFromOpenWeather();
                 s_networkAvailable = true;
             }
             catch (Exception e)
@@ -212,7 +203,7 @@ namespace LedMatrixWeather
                 return (byte)Math.Clamp(x * 255, 0, 255);
             }
 
-            string text = null;
+            string text = string.Empty;
             int fullTextWidth = 0;
 
             Stopwatch sw = Stopwatch.StartNew();

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -28,5 +27,13 @@ namespace Iot.Device.Bh1745
                 MeasurementTime.Ms5120 => 5120,
                 _ => throw new ArgumentOutOfRangeException()
             };
+
+        /// <summary>
+        /// Converts the enum Measurement time to a TimeSpan.
+        /// </summary>
+        /// <param name="bh1745">The BH1745 device.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Thrown when a not supported MeasurementTime is used.</exception>
+        /// <returns></returns>
+        public static TimeSpan MeasurementTimeAsTimeSpan(this Bh1745 bh1745) => new TimeSpan(bh1745.MeasurementTime.ToMilliseconds());
     }
 }

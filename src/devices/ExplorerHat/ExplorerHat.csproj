@@ -1,15 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../DCMotor/DCMotor.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="*.cs" />
     <Compile Include="Gpio/*.cs" />
     <Compile Include="Lighting/*.cs" />

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -36,7 +35,7 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         {
             if (ps2Length > 0b0000_0111)
             {
-                throw new ArgumentException($"Invalid PHSEG2 value {ps2Length}.", nameof(ps2Length));
+                throw new ArgumentException(nameof(ps2Length), $"Invalid PHSEG2 value {ps2Length}.");
             }
 
             Ps2Length = ps2Length;

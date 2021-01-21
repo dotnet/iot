@@ -1,11 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.OneWire
 {
@@ -39,7 +38,7 @@ namespace Iot.Device.OneWire
                 throw new InvalidOperationException("Invalid sensor data format.");
             }
 
-            return Temperature.FromCelsius(temp * 0.001);
+            return Temperature.FromDegreesCelsius(temp * 0.001);
         }
     }
 }

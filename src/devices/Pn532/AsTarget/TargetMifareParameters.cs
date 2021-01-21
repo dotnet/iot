@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -21,15 +20,12 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] Atqa
         {
-            get
-            {
-                return _atqa;
-            }
+            get => _atqa;
             set
             {
                 if (value.Length != _atqa.Length)
                 {
-                    throw new ArgumentException($"{nameof(Atqa)} has to be {_atqa.Length} byte long");
+                    throw new ArgumentException(nameof(Atqa), $"Value must be {_atqa.Length} bytes.");
                 }
 
                 value.CopyTo(_atqa, 0);
@@ -43,15 +39,12 @@ namespace Iot.Device.Pn532.AsTarget
         /// </summary>
         public byte[] NfcId3
         {
-            get
-            {
-                return _nfcId3;
-            }
+            get => _nfcId3;
             set
             {
                 if (value.Length != _nfcId3.Length)
                 {
-                    throw new ArgumentException($"{nameof(NfcId3)} has to be {_nfcId3.Length} byte long");
+                    throw new ArgumentException(nameof(NfcId3), $"Value must be {_nfcId3.Length} bytes.");
                 }
 
                 value.CopyTo(_nfcId3, 0);

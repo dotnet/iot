@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -18,13 +17,11 @@ namespace Iot.Device.SenseHat.Samples
             // another implementation which can be used is: SenseHatLedMatrixSysFs
             // I2C implementation does not require installing anything
             // SysFs implementation is faster and has arguably better colors
-            using (var ledMatrix = new SenseHatLedMatrixI2c())
-            {
-                WriteDemo(ledMatrix);
+            using SenseHatLedMatrixI2c ledMatrix = new();
+            WriteDemo(ledMatrix);
 
-                // Uncomment to see demo of SetPixel/Fill
-                // SetPixelDemo(m);
-            }
+            // Uncomment to see demo of SetPixel/Fill
+            // SetPixelDemo(m);
         }
 
         // Not used by default but much simpler to understand
@@ -75,13 +72,11 @@ namespace Iot.Device.SenseHat.Samples
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Color Pixel(Vector2 uv, float time)
-        {
-            return Color.FromArgb(
+        private static Color Pixel(Vector2 uv, float time) =>
+            Color.FromArgb(
                 Col(0.5 + 0.5 * Math.Cos(time + uv.X)),
                 Col(0.5 + 0.5 * Math.Cos(time + uv.Y + 2.0)),
                 Col(0.5 + 0.5 * Math.Cos(time + uv.X + 4.0)));
-        }
 
         private static byte Col(double x)
         {

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Concurrent;
@@ -21,8 +20,9 @@ namespace Iot.Device.Pcx857x
         /// I2C device used for communication with the device
         /// </summary>
         protected I2cDevice Device { get; }
-        private readonly GpioController _masterGpioController;
+        private readonly GpioController? _controller;
         private readonly int _interrupt;
+        private bool _shouldDispose;
 
         // Pin mode bits- 0 for input, 1 for output to match PinMode
         private ushort _pinModes;
@@ -39,15 +39,17 @@ namespace Iot.Device.Pcx857x
         /// The GPIO controller for the <paramref name="interrupt"/>.
         /// If not specified, the default controller will be used.
         /// </param>
-        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController gpioController = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Pcx857x(I2cDevice device, int interrupt = -1, GpioController? gpioController = null, bool shouldDispose = true)
         {
             Device = device ?? throw new ArgumentNullException(nameof(device));
             _interrupt = interrupt;
+            _shouldDispose = shouldDispose || gpioController is null;
 
             if (_interrupt != -1)
             {
-                _masterGpioController = gpioController ?? new GpioController();
-                _masterGpioController.OpenPin(_interrupt, PinMode.Input);
+                _controller = gpioController ?? new GpioController();
+                _controller.OpenPin(_interrupt, PinMode.Input);
             }
 
             // These controllers do not have commands, setting the pins to high designates
@@ -109,6 +111,11 @@ namespace Iot.Device.Pcx857x
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+            }
+
             Device.Dispose();
             base.Dispose(disposing);
         }
@@ -158,12 +165,9 @@ namespace Iot.Device.Pcx857x
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void ThrowInvalidPin(string argumentName)
-        {
-            // This is a helper to allow the JIT to inline calling methods.
-            // (Methods with throws cannot be inlined.)
-            throw new ArgumentOutOfRangeException(argumentName, $"Pin numbers must be in the range of 0 to {PinCount - 1}.");
-        }
+        // This is a helper to allow the JIT to inline calling methods.
+        // (Methods with throws cannot be inlined.)
+        private void ThrowInvalidPin(string argumentName) => throw new ArgumentOutOfRangeException(argumentName, $"Pin numbers must be in the range of 0 to {PinCount - 1}.");
 
         private void ValidatePinNumber(int pinNumber)
         {

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Collections.Generic;
@@ -23,18 +22,8 @@ namespace Iot.Device.Max7219
         /// <param name="font">Font to use for drawing text</param>
         public MatrixGraphics(Max7219 device, IFont font)
         {
-            if (device == null)
-            {
-                throw new ArgumentNullException(nameof(device));
-            }
-
-            if (font == null)
-            {
-                throw new ArgumentNullException(nameof(font));
-            }
-
-            _device = device;
-            Font = font;
+            _device = device ?? throw new ArgumentNullException(nameof(device));
+            Font = font ?? throw new ArgumentNullException(nameof(font));
         }
 
         /// <summary>
@@ -48,7 +37,7 @@ namespace Iot.Device.Max7219
         public void WriteLetter(int deviceId, char chr, bool flush = true)
         {
             var charBytes = Font[chr];
-            var end = Math.Min(charBytes.Count, Max7219.NumDigits);
+            int end = Math.Min(charBytes.Count, Max7219.NumDigits);
             for (int col = 0; col < end; col++)
             {
                 _device[deviceId, col] = charBytes[col];

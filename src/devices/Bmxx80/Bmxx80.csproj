@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>8.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,16 +23,17 @@
     <Compile Include="FilteringMode\Bmx280FilteringMode.cs" />
     <Compile Include="PowerMode\Bme680PowerMode.cs" />
     <Compile Include="PowerMode\Bmx280PowerMode.cs" />
+    <Compile Include="ReadResult\Bme280ReadResult.cs" />
+    <Compile Include="ReadResult\Bme680ReadResult.cs" />
+    <Compile Include="ReadResult\Bmp280ReadResult.cs" />
     <Compile Include="Register\Bme680Register.cs" />
     <Compile Include="Register\Bmx280Register.cs" />
     <Compile Include="Register\Bmxx80Register.cs" />
     <Compile Include="Register\Bme280Register.cs" />
     <Compile Include="Sampling.cs" />
     <Compile Include="StandbyTime.cs" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>$(AdditionalProperties);RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
-    <ProjectReference Include="..\Units\Units.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
   <ItemGroup>

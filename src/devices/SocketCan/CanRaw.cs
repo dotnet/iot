@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Diagnostics;
@@ -74,7 +73,7 @@ namespace Iot.Device.SocketCan
         {
             if (data.Length < CanFrame.MaxLength)
             {
-                throw new ArgumentException($"Buffer length must be at minimum {CanFrame.MaxLength} bytes", nameof(data));
+                throw new ArgumentException(nameof(data), $"Value must be a minimum of {CanFrame.MaxLength} bytes.");
             }
 
             CanFrame frame = new CanFrame();
@@ -124,7 +123,7 @@ namespace Iot.Device.SocketCan
         {
             if (!id.IsValid)
             {
-                throw new ArgumentException($"{nameof(id)} must be a valid CanId");
+                throw new ArgumentException(nameof(id), "Value must be a valid CanId");
             }
 
             Span<Interop.CanFilter> filters = stackalloc Interop.CanFilter[1];

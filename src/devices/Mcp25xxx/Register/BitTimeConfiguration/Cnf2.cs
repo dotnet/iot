@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -30,12 +29,12 @@ namespace Iot.Device.Mcp25xxx.Register.BitTimeConfiguration
         {
             if (propagationSegmentLength > 0b0000_0111)
             {
-                throw new ArgumentException($"Invalid PRSEG value {propagationSegmentLength}.", nameof(propagationSegmentLength));
+                throw new ArgumentException(nameof(propagationSegmentLength), $"Invalid PRSEG value {propagationSegmentLength}.");
             }
 
             if (ps1Length > 0b0000_0111)
             {
-                throw new ArgumentException($"Invalid PHSEG1 value {ps1Length}.", nameof(ps1Length));
+                throw new ArgumentException(nameof(ps1Length), $"Invalid PHSEG1 value {ps1Length}.");
             }
 
             PropagationSegmentLength = propagationSegmentLength;

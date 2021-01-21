@@ -1,16 +1,17 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.I2c;
-using Iot.Units;
+using System.Device.Model;
+using UnitsNet;
 
 namespace Iot.Device.Lm75
 {
     /// <summary>
     /// Digital Temperature Sensor LM75
     /// </summary>
+    [Interface("Digital Temperature Sensor LM75")]
     public class Lm75 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -25,19 +26,18 @@ namespace Iot.Device.Lm75
         /// <summary>
         /// LM75 Temperature
         /// </summary>
-        public Temperature Temperature { get => Temperature.FromCelsius(GetTemperature()); }
+        [Telemetry]
+        public Temperature Temperature { get => Temperature.FromDegreesCelsius(GetTemperature()); }
 
         private bool _disable;
 
         /// <summary>
         /// Disable LM75
         /// </summary>
+        [Telemetry]
         public bool Disabled
         {
-            get
-            {
-                return _disable;
-            }
+            get => _disable;
             set
             {
                 SetShutdown(value);
@@ -53,8 +53,7 @@ namespace Iot.Device.Lm75
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Lm75(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
-
+            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
             Disabled = false;
         }
 
@@ -118,7 +117,7 @@ namespace Iot.Device.Lm75
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

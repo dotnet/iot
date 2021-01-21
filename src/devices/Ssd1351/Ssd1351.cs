@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -23,7 +22,7 @@ namespace Iot.Device.Ssd1351
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _spiBufferSize;
-        private readonly bool _disposeGpioController = false;
+        private readonly bool _shouldDispose;
 
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
@@ -41,25 +40,21 @@ namespace Iot.Device.Ssd1351
         /// <param name="dataCommandPin">The id of the GPIO pin used to control the DC line (data/command).</param>
         /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (data/command).</param>
         /// <param name="spiBufferSize">The size of the SPI buffer. If data larger than the buffer is sent then it is split up into multiple transmissions. The default value is 4096.</param>
-        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController gpioController = null)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public Ssd1351(SpiDevice spiDevice, int dataCommandPin, int resetPin, int spiBufferSize = DefaultSPIBufferSize, GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
-                throw new ArgumentException($"SPI Buffer Size must be between 4096 and 65536.", nameof(spiBufferSize));
+                throw new ArgumentException(nameof(spiBufferSize), "Value must be between 4096 and 65536.");
             }
 
-            _gpioDevice = gpioController;
+            _gpioDevice = gpioController ?? new GpioController();
+            _shouldDispose = shouldDispose || gpioController is null;
 
-            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
-
-            if (_gpioDevice == null)
-            {
-                _gpioDevice = new GpioController();
-                _disposeGpioController = true;
-            }
 
             _gpioDevice.OpenPin(_dcPinId, PinMode.Output);
             _gpioDevice.OpenPin(_resetPinId, PinMode.Output);
@@ -70,7 +65,7 @@ namespace Iot.Device.Ssd1351
         }
 
         /// <summary>
-        /// Convert a color structure to a byte tuple represening the colour in 565 format.
+        /// Convert a color structure to a byte tuple representing the colour in 565 format.
         /// </summary>
         /// <param name="color">The color to be converted.</param>
         /// <returns>
@@ -87,7 +82,7 @@ namespace Iot.Device.Ssd1351
         ///         BBBBBGGG GGGRRRRR
         ///         43210543 21043210
         /// </returns>
-        private (byte, byte) Color565(Color color)
+        private (byte Low, byte High) Color565(Color color)
         {
             // get the top 5 MSB of the blue or red value
             UInt16 retval = (UInt16)((_colorSequence == ColorSequence.BGR ? color.B : color.R) >> 3);
@@ -144,7 +139,7 @@ namespace Iot.Device.Ssd1351
                 }
             }
 
-            // specifiy a location for the rows and columns on the display where the data is to be written
+            // specify a location for the rows and columns on the display where the data is to be written
             SetColumnAddress(x, (byte)(x + w - 1));
             SetRowAddress(y, (byte)(y + h - 1));
 
@@ -283,14 +278,14 @@ namespace Iot.Device.Ssd1351
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_disposeGpioController)
+            if (_shouldDispose)
             {
                 _gpioDevice?.Dispose();
-                _gpioDevice = null;
+                _gpioDevice = null!;
             }
 
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
     }
 }

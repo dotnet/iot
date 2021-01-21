@@ -1,22 +1,24 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 // Ported from https://github.com/adafruit/Adafruit_BMP280_Library/blob/master/Adafruit_BMP280.cpp
 // Formulas and code examples can also be found in the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
 using System;
 using System.Device.I2c;
+using System.Device.Model;
 using System.IO;
+using Iot.Device.Bmxx80.FilteringMode;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Bmxx80.Register;
-using Iot.Device.Bmxx80.FilteringMode;
-using Iot.Units;
+using Iot.Device.Common;
+using UnitsNet;
 
 namespace Iot.Device.Bmxx80
 {
     /// <summary>
     /// Represents the core functionality of the Bmx280 family.
     /// </summary>
+    [Interface("Represents the core functionality of the Bmx280 family.")]
     public abstract class Bmx280Base : Bmxx80Base
     {
         /// <summary>
@@ -51,6 +53,7 @@ namespace Iot.Device.Bmxx80
         /// Gets or sets the IIR filter mode.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bmx280FilteringMode"/> is set to an undefined mode.</exception>
+        [Property]
         public Bmx280FilteringMode FilterMode
         {
             get => _filteringMode;
@@ -72,6 +75,7 @@ namespace Iot.Device.Bmxx80
         /// Gets or sets the standby time between two consecutive measurements.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bmxx80.StandbyTime"/> is set to an undefined mode.</exception>
+        [Property]
         public StandbyTime StandbyTime
         {
             get => _standbyTime;
@@ -97,25 +101,15 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadTemperature(out Temperature temperature)
-        {
-            if (TemperatureSampling == Sampling.Skipped)
-            {
-                temperature = Temperature.FromCelsius(double.NaN);
-                return false;
-            }
-
-            var temp = (int)Read24BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB, Endianness.BigEndian);
-
-            temperature = CompensateTemperature(temp >> 4);
-            return true;
-        }
+        [Telemetry("Temperature")]
+        public override bool TryReadTemperature(out Temperature temperature) => TryReadTemperatureCore(out temperature);
 
         /// <summary>
         /// Read the <see cref="Bmx280PowerMode"/> state.
         /// </summary>
         /// <returns>The current <see cref="Bmx280PowerMode"/>.</returns>
         /// <exception cref="NotImplementedException">Thrown when the power mode does not match a defined mode in <see cref="Bmx280PowerMode"/>.</exception>
+        [Property("PowerMode")]
         public Bmx280PowerMode ReadPowerMode()
         {
             byte read = Read8BitsFromRegister(_controlRegister);
@@ -128,13 +122,7 @@ namespace Iot.Device.Bmxx80
                 throw new IOException("Read unexpected power mode");
             }
 
-            return powerMode switch
-            {
-                0b00 => Bmx280PowerMode.Sleep,
-                0b10 => Bmx280PowerMode.Forced,
-                0b11 => Bmx280PowerMode.Normal,
-                _ => throw new NotImplementedException($"Read power mode not defined by specification.")
-            };
+            return (Bmx280PowerMode)powerMode;
         }
 
         /// <summary>
@@ -145,27 +133,8 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
-        public override bool TryReadPressure(out Pressure pressure)
-        {
-            if (PressureSampling == Sampling.Skipped)
-            {
-                pressure = Pressure.FromPascal(double.NaN);
-                return false;
-            }
-
-            // Read the temperature first to load the t_fine value for compensation.
-            TryReadTemperature(out _);
-
-            // Read pressure data.
-            var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
-
-            // Convert the raw value to the pressure in Pa.
-            var pressPa = CompensatePressure(press >> 4);
-
-            // Return the pressure as a Pressure instance.
-            pressure = Pressure.FromHectopascal(pressPa.Hectopascal / 256);
-            return true;
-        }
+        [Telemetry("Pressure")]
+        public override bool TryReadPressure(out Pressure pressure) => TryReadPressureCore(out pressure);
 
         /// <summary>
         /// Calculates the altitude in meters from the specified sea-level pressure(in hPa).
@@ -176,18 +145,26 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(Pressure seaLevelPressure, out double altitude)
+        public bool TryReadAltitude(Pressure seaLevelPressure, out Length altitude)
         {
             // Read the pressure first.
-            var success = TryReadPressure(out var pressure);
+            var success = TryReadPressureCore(out var pressure);
             if (!success)
             {
-                altitude = double.NaN;
+                altitude = default;
                 return false;
             }
 
-            // Calculate and return the altitude using the international barometric formula.
-            altitude = 44330.0 * (1.0 - Math.Pow(pressure.Hectopascal / seaLevelPressure.Hectopascal, 0.1903));
+            // Then read the temperature.
+            success = TryReadTemperatureCore(out var temperature);
+            if (!success)
+            {
+                altitude = default;
+                return false;
+            }
+
+            // Calculate and return the altitude using the hypsometric formula.
+            altitude = WeatherHelper.CalculateAltitude(pressure, seaLevelPressure, temperature);
             return true;
         }
 
@@ -199,15 +176,13 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if pressure measurement was not skipped, otherwise <code>false</code>.</returns>
-        public bool TryReadAltitude(out double altitude)
-        {
-            return TryReadAltitude(Pressure.MeanSeaLevel, out altitude);
-        }
+        public bool TryReadAltitude(out Length altitude) => TryReadAltitude(WeatherHelper.MeanSeaLevel, out altitude);
 
         /// <summary>
         /// Get the current status of the device.
         /// </summary>
         /// <returns>The <see cref="DeviceStatus"/>.</returns>
+        [Telemetry("Status")]
         public DeviceStatus ReadStatus()
         {
             var status = Read8BitsFromRegister((byte)Bmx280Register.STATUS);
@@ -229,6 +204,7 @@ namespace Iot.Device.Bmxx80
         /// Sets the power mode to the given mode
         /// </summary>
         /// <param name="powerMode">The <see cref="Bmx280PowerMode"/> to set.</param>
+        [Property("PowerMode")]
         public void SetPowerMode(Bmx280PowerMode powerMode)
         {
             byte read = Read8BitsFromRegister(_controlRegister);
@@ -247,14 +223,13 @@ namespace Iot.Device.Bmxx80
         /// Gets the required time in ms to perform a measurement with the current sampling modes.
         /// </summary>
         /// <returns>The time it takes for the chip to read data in milliseconds rounded up.</returns>
-        public virtual int GetMeasurementDuration()
-        {
-            return s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling];
-        }
+        [Property("MeasurementDuration")]
+        public virtual int GetMeasurementDuration() => s_osToMeasCycles[(int)PressureSampling] + s_osToMeasCycles[(int)TemperatureSampling];
 
         /// <summary>
         /// Sets the default configuration for the sensor.
         /// </summary>
+        [Command]
         protected override void SetDefaultConfiguration()
         {
             base.SetDefaultConfiguration();
@@ -263,36 +238,77 @@ namespace Iot.Device.Bmxx80
         }
 
         /// <summary>
-        /// Compensates the pressure in Pa, in Q24.8 format (24 integer bits and 8 fractional bits).
+        /// Performs a temperature reading.
+        /// </summary>
+        /// <returns><see cref="Temperature"/></returns>
+        protected bool TryReadTemperatureCore(out Temperature temperature)
+        {
+            if (TemperatureSampling == Sampling.Skipped)
+            {
+                temperature = default;
+                return false;
+            }
+
+            var temp = (int)Read24BitsFromRegister((byte)Bmx280Register.TEMPDATA_MSB, Endianness.BigEndian);
+
+            temperature = CompensateTemperature(temp >> 4);
+            return true;
+        }
+
+        /// <summary>
+        /// Performs a pressure reading.
+        /// </summary>
+        /// <returns><see cref="Pressure"/></returns>
+        protected bool TryReadPressureCore(out Pressure pressure, bool skipTempFineRead = false)
+        {
+            if (PressureSampling == Sampling.Skipped)
+            {
+                pressure = default;
+                return false;
+            }
+
+            if (!skipTempFineRead)
+            {
+                TryReadTemperatureCore(out _);
+            }
+
+            // Read pressure data.
+            var press = (int)Read24BitsFromRegister((byte)Bmx280Register.PRESSUREDATA, Endianness.BigEndian);
+
+            // Convert the raw value to the pressure in Pa.
+            pressure = CompensatePressure(press >> 4);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Compensates the pressure in Pa, in double format
         /// </summary>
         /// <param name="adcPressure">The pressure value read from the device.</param>
-        /// <returns>Pressure in Hectopascals (hPa).</returns>
-        /// <remarks>
-        /// Output value of “24674867” represents 24674867/256 = 96386.2 Pa = 963.862 hPa.
-        /// </remarks>
+        /// <returns>Pressure as an instance of <see cref="Pressure"/>.</returns>
         private Pressure CompensatePressure(long adcPressure)
         {
             // Formula from the datasheet http://www.adafruit.com/datasheets/BST-BMP280-DS001-11.pdf
-            // The pressure is calculated using the compensation formula in the BMP280 datasheet
-            long var1 = TemperatureFine - 128000;
-            long var2 = var1 * var1 * (long)_calibrationData.DigP6;
-            var2 = var2 + ((var1 * (long)_calibrationData.DigP5) << 17);
-            var2 = var2 + ((long)_calibrationData.DigP4 << 35);
-            var1 = ((var1 * var1 * (long)_calibrationData.DigP3) >> 8) + ((var1 * (long)_calibrationData.DigP2) << 12);
-            var1 = ((((1L << 47) + var1)) * (long)_calibrationData.DigP1) >> 33;
-            if (var1 == 0)
+            // This uses the recommended approach with floating point math
+            double var1, var2, p;
+            var1 = (TemperatureFine / 2.0) - 64000.0;
+            var2 = var1 * var1 * ((double)_calibrationData.DigP6) / 32768.0;
+            var2 = var2 + var1 * ((double)_calibrationData.DigP5) * 2.0;
+            var2 = (var2 / 4.0) + (((double)_calibrationData.DigP4) * 65536.0);
+            var1 = (((double)_calibrationData.DigP3) * var1 * var1 / 524288.0 + ((double)_calibrationData.DigP2) * var1) / 524288.0;
+            var1 = (1.0 + var1 / 32768.0) * ((double)_calibrationData.DigP1);
+            if (var1 == 0.0)
             {
-                return Pressure.FromPascal(0); // Avoid exception caused by division by zero
+                return Pressure.FromPascals(0); // Avoid exception caused by division by zero
             }
 
-            // Perform calibration operations
-            long p = 1048576 - adcPressure;
-            p = (((p << 31) - var2) * 3125) / var1;
-            var1 = ((long)_calibrationData.DigP9 * (p >> 13) * (p >> 13)) >> 25;
-            var2 = ((long)_calibrationData.DigP8 * p) >> 19;
-            p = ((p + var1 + var2) >> 8) + ((long)_calibrationData.DigP7 << 4);
+            p = 1048576.0 - (double)adcPressure;
+            p = (p - (var2 / 4096.0)) * 6250.0 / var1;
+            var1 = ((double)_calibrationData.DigP9) * p * p / 2147483648.0;
+            var2 = p * ((double)_calibrationData.DigP8) / 32768.0;
+            p = p + (var1 + var2 + ((double)_calibrationData.DigP7)) / 16.0;
 
-            return Pressure.FromPascal(p);
+            return Pressure.FromPascals(p);
         }
     }
 }

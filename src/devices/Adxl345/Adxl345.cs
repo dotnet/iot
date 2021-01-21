@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
+using System.Device.Model;
 using System.Device.Spi;
 using System.Numerics;
 
@@ -12,13 +12,14 @@ namespace Iot.Device.Adxl345
     /// <summary>
     /// SPI Accelerometer ADX1345
     /// </summary>
+    [Interface("SPI Accelerometer ADX1345")]
     public class Adxl345 : IDisposable
     {
         private const int Resolution = 1024; // All g ranges resolution
         private readonly byte _gravityRangeByte;
         private readonly int _range;
 
-        private SpiDevice _sensor = null;
+        private SpiDevice _sensor;
 
         #region SpiSetting
 
@@ -37,6 +38,7 @@ namespace Iot.Device.Adxl345
         /// <summary>
         /// Read Acceleration from ADXL345
         /// </summary>
+        [Telemetry]
         public Vector3 Acceleration => ReadAcceleration();
 
         /// <summary>
@@ -46,27 +48,16 @@ namespace Iot.Device.Adxl345
         /// <param name="gravityRange">Gravity Measurement Range</param>
         public Adxl345(SpiDevice sensor, GravityRange gravityRange)
         {
-            if (gravityRange == GravityRange.Range02)
+            _sensor = sensor ?? throw new ArgumentNullException(nameof(sensor));
+            _range = gravityRange switch
             {
-                _range = 4;
-            }
-            else if (gravityRange == GravityRange.Range04)
-            {
-                _range = 8;
-            }
-            else if (gravityRange == GravityRange.Range08)
-            {
-                _range = 16;
-            }
-            else if (gravityRange == GravityRange.Range16)
-            {
-                _range = 32;
-            }
-
+                GravityRange.Range02 => 4,
+                GravityRange.Range04 => 8,
+                GravityRange.Range08 => 16,
+                GravityRange.Range16 => 32,
+                _ => 0
+            };
             _gravityRangeByte = (byte)gravityRange;
-
-            _sensor = sensor;
-
             Initialize();
         }
 
@@ -120,10 +111,10 @@ namespace Iot.Device.Adxl345
         /// </summary>
         public void Dispose()
         {
-            if (_sensor != null)
+            if (_sensor is object)
             {
                 _sensor.Dispose();
-                _sensor = null;
+                _sensor = null!;
             }
         }
     }

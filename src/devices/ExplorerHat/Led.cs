@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -30,9 +29,11 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         /// <param name="pin">Underlying rpi GPIO pin number</param>
         /// <param name="controller"><see cref="GpioController"/> used by <see cref="Led"/> to manage GPIO resources</param>
-        internal Led(int pin, GpioController controller)
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        internal Led(int pin, GpioController? controller = null, bool shouldDispose = true)
         {
-            _controller = controller;
+            _controller = controller ?? new();
+            _shouldDispose = shouldDispose || controller is null;
             Pin = pin;
             IsOn = false;
 
@@ -44,7 +45,7 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void On()
         {
-            if (!IsOn)
+            if (!IsOn && _controller is object)
             {
                 _controller.Write(Pin, PinValue.High);
                 IsOn = true;
@@ -56,41 +57,26 @@ namespace Iot.Device.ExplorerHat
         /// </summary>
         public void Off()
         {
-            if (IsOn)
+            if (IsOn && _controller is object)
             {
                 _controller.Write(Pin, PinValue.Low);
                 IsOn = false;
             }
         }
 
-        #region IDisposable Support
-
-        private bool _disposedValue = false;
-
-        /// <summary>
-        /// Disposes the <see cref="Led"/> instance
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    Off();
-                }
-
-                _disposedValue = true;
-            }
-        }
+        private bool _shouldDispose;
 
         /// <summary>
         /// Disposes the <see cref="Led"/> instance
         /// </summary>
         public void Dispose()
         {
-            Dispose(true);
+            Off();
+            if (_shouldDispose)
+            {
+                _controller?.Dispose();
+                _controller = null!;
+            }
         }
-
-        #endregion
     }
 }

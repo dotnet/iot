@@ -1,18 +1,19 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
-using Iot.Units;
+using UnitsNet;
 
 namespace Iot.Device.Si7021
 {
     /// <summary>
     /// Temperature and Humidity Sensor Si7021
     /// </summary>
+    [Interface("Temperature and Humidity Sensor Si7021")]
     public class Si7021 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -25,21 +26,25 @@ namespace Iot.Device.Si7021
         /// <summary>
         /// Si7021 Temperature
         /// </summary>
-        public Temperature Temperature => Temperature.FromCelsius(GetTemperature());
+        [Telemetry]
+        public Temperature Temperature => Temperature.FromDegreesCelsius(GetTemperature());
 
         /// <summary>
-        /// Si7021 Relative Humidity (%)
+        /// Relative Humidity
         /// </summary>
-        public double Humidity => GetHumidity();
+        [Telemetry]
+        public RelativeHumidity Humidity => GetHumidity();
 
         /// <summary>
         /// Si7021 Firmware Revision
         /// </summary>
+        [Property]
         public byte Revision => GetRevision();
 
         /// <summary>
         /// Si7021 Measurement Resolution
         /// </summary>
+        [Property]
         public Resolution Resolution { get => GetResolution(); set => SetResolution(value); }
 
         private bool _heater;
@@ -47,6 +52,7 @@ namespace Iot.Device.Si7021
         /// <summary>
         /// Si7021 Heater
         /// </summary>
+        [Property]
         public bool Heater
         {
             get => _heater;
@@ -64,7 +70,7 @@ namespace Iot.Device.Si7021
         /// <param name="resolution">Si7021 Read Resolution</param>
         public Si7021(I2cDevice i2cDevice, Resolution resolution = Resolution.Resolution1)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             SetResolution(resolution);
         }
@@ -94,7 +100,7 @@ namespace Iot.Device.Si7021
         /// Get Si7021 Relative Humidity (%)
         /// </summary>
         /// <returns>Relative Humidity (%)</returns>
-        private double GetHumidity()
+        private RelativeHumidity GetHumidity()
         {
             Span<byte> readbuff = stackalloc byte[2];
 
@@ -108,7 +114,7 @@ namespace Iot.Device.Si7021
             ushort raw = BinaryPrimitives.ReadUInt16BigEndian(readbuff);
             double humidity = 125 * raw / 65536.0 - 6;
 
-            return Math.Round(humidity);
+            return RelativeHumidity.FromPercent(humidity);
         }
 
         /// <summary>
@@ -207,7 +213,7 @@ namespace Iot.Device.Si7021
         public void Dispose()
         {
             _i2cDevice?.Dispose();
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
     }
 }

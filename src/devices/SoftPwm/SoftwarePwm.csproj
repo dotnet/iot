@@ -1,19 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>    
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="SoftwarePwmChannel.cs" />
+    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-      <AdditionalProperties>RuntimeIdentifier=linux</AdditionalProperties>
-    </ProjectReference>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <None Include="README.md" />
   </ItemGroup>
 

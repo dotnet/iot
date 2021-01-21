@@ -1,19 +1,20 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Numerics;
 using System.Threading;
-using Iot.Units;
+using Temperature = UnitsNet.Temperature;
 
 namespace Iot.Device.Bno055
 {
     /// <summary>
     /// BNO055 - inertial measurement unit (IMU)
     /// </summary>
+    [Interface("BNO055 - inertial measurement unit (IMU)")]
     public class Bno055Sensor : IDisposable
     {
         /// <summary>
@@ -28,7 +29,7 @@ namespace Iot.Device.Bno055
         public const byte SecondI2cAddress = 0x29;
 
         private const byte DeviceId = 0xA0;
-        private readonly bool _autoDispoable;
+        private readonly bool _shouldDispose;
         private I2cDevice _i2cDevice;
         private OperationMode _operationMode;
         private Units _units;
@@ -36,12 +37,10 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get/Set the operation mode
         /// </summary>
+        [Property]
         public OperationMode OperationMode
         {
-            get
-            {
-                return _operationMode;
-            }
+            get => _operationMode;
             set
             {
                 _operationMode = value;
@@ -54,12 +53,10 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set/Get the power mode
         /// </summary>
+        [Property]
         public PowerMode PowerMode
         {
-            get
-            {
-                return (PowerMode)ReadByte(Registers.PWR_MODE);
-            }
+            get => (PowerMode)ReadByte(Registers.PWR_MODE);
             set
             {
                 SetConfigMode(true);
@@ -71,12 +68,10 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set/Get the temperature source
         /// </summary>
+        [Property]
         public TemperatureSource TemperatureSource
         {
-            get
-            {
-                return (TemperatureSource)ReadByte(Registers.TEMP_SOURCE);
-            }
+            get => (TemperatureSource)ReadByte(Registers.TEMP_SOURCE);
             set
             {
                 SetConfigMode(true);
@@ -88,12 +83,10 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Set/Get the units used. By default, international system is used
         /// </summary>
+        [Property]
         public Units Units
         {
-            get
-            {
-                return (Units)ReadByte(Registers.UNIT_SEL);
-            }
+            get => (Units)ReadByte(Registers.UNIT_SEL);
             set
             {
                 SetConfigMode(true);
@@ -106,40 +99,39 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the information about various sensor system versions and ID
         /// </summary>
-        public Info Info { get; internal set; }
+        public Info Info { get; private set; }
 
         /// <summary>
         /// Create an BNO055 sensor
         /// </summary>
         /// <param name="i2cDevice">The I2C Device</param>
         /// <param name="operationMode">The operation mode to setup</param>
-        /// <param name="autoDispoable">true to dispose the I2C device at dispose</param>
+        /// <param name="shouldDispose">true to dispose the I2C device at dispose</param>
         public Bno055Sensor(I2cDevice i2cDevice,
             OperationMode operationMode = OperationMode.AccelerometerMagnetometerGyroscopeRelativeOrientation,
-            bool autoDispoable = true)
+            bool shouldDispose = true)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} can't be null");
-            _autoDispoable = autoDispoable;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _shouldDispose = shouldDispose;
 
             // A first write to initate the device
             WriteReg(Registers.PAGE_ID, 0);
             SetConfigMode(true);
             // A second write
             WriteReg(Registers.PAGE_ID, 0);
-            // Get the ID
-            Info = new Info();
-            Info.ChipId = ReadByte(Registers.CHIP_ID);
-            if (Info.ChipId != DeviceId)
+            byte chipId = ReadByte(Registers.CHIP_ID);
+            if (chipId != DeviceId)
             {
                 throw new Exception($"{nameof(Bno055Sensor)} is not a valid sensor");
             }
 
-            Info.AcceleratorId = ReadByte(Registers.ACCEL_REV_ID);
-            Info.MagnetometerId = ReadByte(Registers.MAG_REV_ID);
-            Info.GyroscopeId = ReadByte(Registers.GYRO_REV_ID);
-            Info.FirmwareVersion = new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB));
-            Info.BootloaderVersion = new Version(ReadByte(Registers.BL_REV_ID), 0);
-
+            Info = new Info(
+                chipId,                                     // Chip Id
+                ReadByte(Registers.ACCEL_REV_ID),           // AcceleratorId
+                ReadByte(Registers.MAG_REV_ID),             // MagnetometerId
+                ReadByte(Registers.GYRO_REV_ID),            // GyroscopeId
+                new Version(ReadByte(Registers.SW_REV_ID_MSB), ReadByte(Registers.SW_REV_ID_LSB)),  // FirmwareVersion
+                new Version(ReadByte(Registers.BL_REV_ID), 0)); // BootloaderVersion
             _operationMode = operationMode;
             InitializeRegisters();
         }
@@ -216,18 +208,21 @@ namespace Iot.Device.Bno055
         /// Get the status. If there is an error, GetError() will give more details
         /// </summary>
         /// <returns></returns>
+        [Telemetry("Status")]
         public Status GetStatus() => (Status)ReadByte(Registers.SYS_STAT);
 
         /// <summary>
         /// Get the latest error
         /// </summary>
-        /// <returns>eturns the latest error</returns>
+        /// <returns>Returns the latest error</returns>
+        [Telemetry("Status")]
         public Error GetError() => (Error)ReadByte(Registers.SYS_ERR);
 
         /// <summary>
         /// Run a self test. In case of error, use GetStatus() and GetError() to get the last error
         /// </summary>
         /// <returns>Status fo the test</returns>
+        [Command]
         public TestResult RunSelfTest()
         {
             SetConfigMode(true);
@@ -245,17 +240,19 @@ namespace Iot.Device.Bno055
         /// Returns the calibration status for the system and sensors
         /// </summary>
         /// <returns>Calibration status</returns>
+        [Command]
         public CalibrationStatus GetCalibrationStatus() => (CalibrationStatus)ReadByte(Registers.CALIB_STAT);
 
         /// <summary>
         /// Get the accelerometer calibration data
         /// </summary>
         /// <returns>Returns the accelerometers calibration data</returns>
+        [Command]
         public Vector4 GetAccelerometerCalibrationData()
         {
             SetConfigMode(true);
-            var vect = GetVectorData(Registers.ACCEL_OFFSET_X_LSB);
-            var radius = ReadInt16(Registers.ACCEL_RADIUS_LSB);
+            Vector3 vect = GetVectorData(Registers.ACCEL_OFFSET_X_LSB);
+            short radius = ReadInt16(Registers.ACCEL_RADIUS_LSB);
             SetConfigMode(false);
             return new Vector4(vect, radius);
         }
@@ -264,6 +261,7 @@ namespace Iot.Device.Bno055
         /// Set the accelerometer calibration data
         /// </summary>
         /// <param name="calibrationData">Calibration data</param>
+        [Command]
         public void SetAccelerometerCalibrationData(Vector4 calibrationData)
         {
             SetConfigMode(true);
@@ -283,11 +281,12 @@ namespace Iot.Device.Bno055
         /// Get the magnetometer calibration data
         /// </summary>
         /// <returns>Returns the magnetometer calibration data</returns>
+        [Command]
         public Vector4 GetMagnetometerCalibrationData()
         {
             SetConfigMode(true);
-            var vect = GetVectorData(Registers.MAG_OFFSET_X_LSB);
-            var radius = ReadInt16(Registers.MAG_RADIUS_LSB);
+            Vector3 vect = GetVectorData(Registers.MAG_OFFSET_X_LSB);
+            short radius = ReadInt16(Registers.MAG_RADIUS_LSB);
             SetConfigMode(false);
             return new Vector4(vect, radius);
         }
@@ -296,6 +295,7 @@ namespace Iot.Device.Bno055
         /// Set the magnetometer calibration data
         /// </summary>
         /// <param name="calibrationData">Calibration data</param>
+        [Command]
         public void SetMagnetometerCalibrationData(Vector4 calibrationData)
         {
             SetConfigMode(true);
@@ -315,10 +315,11 @@ namespace Iot.Device.Bno055
         /// Get the gyroscope calibration data
         /// </summary>
         /// <returns>X, Y and Z data</returns>
+        [Command]
         public Vector3 GetGyroscopeCalibrationData()
         {
             SetConfigMode(true);
-            var vect = GetVectorData(Registers.GYRO_OFFSET_X_LSB);
+            Vector3 vect = GetVectorData(Registers.GYRO_OFFSET_X_LSB);
             SetConfigMode(false);
             return vect;
         }
@@ -327,6 +328,7 @@ namespace Iot.Device.Bno055
         /// Set the gyroscope calibration data
         /// </summary>
         /// <param name="calibrationData">X, Y and Z data</param>
+        [Command]
         public void SetGyroscopeCalibrationData(Vector3 calibrationData)
         {
             SetConfigMode(true);
@@ -376,11 +378,12 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the orientation (Euler Angles) X = Heading, Y = Roll, Z = Pitch
         /// </summary>
+        [Telemetry(displayName: "Orientation (Euler Angles)")]
         public Vector3 Orientation
         {
             get
             {
-                var retVect = GetVectorData(Registers.EULER_H_LSB);
+                Vector3 retVect = GetVectorData(Registers.EULER_H_LSB);
                 // If unit is MeterG, then divide by 900, otherwise divide by 16
                 if (_units.HasFlag(Units.EulerAnglesRadians))
                 {
@@ -396,16 +399,18 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the Magnetometer
         /// </summary>
+        [Telemetry]
         public Vector3 Magnetometer => GetVectorData(Registers.MAG_DATA_X_LSB) / 16;
 
         /// <summary>
         /// Get the gyroscope
         /// </summary>
+        [Telemetry]
         public Vector3 Gyroscope
         {
             get
             {
-                var retVect = GetVectorData(Registers.GYRO_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.GYRO_DATA_X_LSB);
                 if ((_units & Units.AngularRateRotationPerSecond) == Units.AngularRateRotationPerSecond)
                 {
                     return retVect / 900;
@@ -423,11 +428,12 @@ namespace Iot.Device.Bno055
         /// Three axis of acceleration (gravity + linear motion)
         /// Default unit in m/s^2, can be changed for mg
         /// </summary>
+        [Telemetry]
         public Vector3 Accelerometer
         {
             get
             {
-                var retVect = GetVectorData(Registers.ACCEL_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.ACCEL_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
                 {
@@ -446,11 +452,12 @@ namespace Iot.Device.Bno055
         /// Three axis of linear acceleration data (acceleration minus gravity)
         /// Default unit in m/s^2, can be changed for mg
         /// </summary>
+        [Telemetry]
         public Vector3 LinearAcceleration
         {
             get
             {
-                var retVect = GetVectorData(Registers.LINEAR_ACCEL_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.LINEAR_ACCEL_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
                 {
@@ -469,11 +476,12 @@ namespace Iot.Device.Bno055
         /// Three axis of gravitational acceleration (minus any movement)
         /// Default unit in m/s^2, can be changed for mg
         /// </summary>
+        [Telemetry]
         public Vector3 Gravity
         {
             get
             {
-                var retVect = GetVectorData(Registers.GRAVITY_DATA_X_LSB);
+                Vector3 retVect = GetVectorData(Registers.GRAVITY_DATA_X_LSB);
                 // If unit is MeterG, then no convertion, otherwise divide by 100
                 if ((_units & Units.AccelerationMeterG) == Units.AccelerationMeterG)
                 {
@@ -489,12 +497,14 @@ namespace Iot.Device.Bno055
         /// <summary>
         /// Get the quaternion, unit is 1 Quaternion (unit less) = 2^14 returned result
         /// </summary>
+        [Telemetry]
         public Vector4 Quaternion => new Vector4(GetVectorData(Registers.QUATERNION_DATA_X_LSB),
             ReadInt16(Registers.QUATERNION_DATA_W_LSB));
 
         /// <summary>
         /// Get the temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature
         {
             get
@@ -502,11 +512,11 @@ namespace Iot.Device.Bno055
                 // If unit is Farenheit, then divide by 2, otherwise no convertion
                 if ((_units & Units.TemperatureFarenheit) == Units.TemperatureFarenheit)
                 {
-                    return Temperature.FromFahrenheit(ReadByte(Registers.TEMP) / 2.0f);
+                    return Temperature.FromDegreesFahrenheit(ReadByte(Registers.TEMP) / 2.0f);
                 }
                 else
                 {
-                    return Temperature.FromCelsius(ReadByte(Registers.TEMP));
+                    return Temperature.FromDegreesCelsius(ReadByte(Registers.TEMP));
                 }
             }
         }
@@ -550,17 +560,14 @@ namespace Iot.Device.Bno055
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_autoDispoable)
+            if (_shouldDispose)
             {
                 _i2cDevice?.Dispose();
-                _i2cDevice = null;
+                _i2cDevice = null!;
             }
         }
 
-        private void WriteReg(Registers reg, byte param)
-        {
-            _i2cDevice.Write(new byte[] { (byte)reg, param });
-        }
+        private void WriteReg(Registers reg, byte param) => _i2cDevice.Write(new byte[] { (byte)reg, param });
 
         private byte ReadByte(Registers reg)
         {

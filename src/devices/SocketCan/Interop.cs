@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
@@ -84,10 +83,8 @@ namespace Iot.Device.SocketCan
             }
         }
 
-        public static void CloseSocket(IntPtr fd)
-        {
+        public static void CloseSocket(IntPtr fd) =>
             CloseSocket((int)fd);
-        }
 
         public static IntPtr CreateCanRawSocket(string networkInterface)
         {
@@ -105,10 +102,8 @@ namespace Iot.Device.SocketCan
         }
 
         public static bool SetCanRawSocketOption<T>(SafeHandle handle, CanSocketOption optName, ReadOnlySpan<T> data)
-            where T : struct
-        {
-            return SetSocketOption(handle, SOL_CAN_RAW, optName, data);
-        }
+            where T : struct =>
+            SetSocketOption(handle, SOL_CAN_RAW, optName, data);
 
         private static unsafe bool SetSocketOption<T>(SafeHandle handle, int level, CanSocketOption optName, ReadOnlySpan<T> data)
             where T : struct
@@ -141,7 +136,7 @@ namespace Iot.Device.SocketCan
 
             if (name.Length >= MaxLen)
             {
-                throw new ArgumentException($"`{name}` exceeds maximum allowed length of {MaxLen} size", nameof(name));
+                throw new ArgumentException(nameof(name), $"Value exceeds maximum allowed length of {MaxLen} size.");
             }
 
             ifreq ifr = new ifreq();
