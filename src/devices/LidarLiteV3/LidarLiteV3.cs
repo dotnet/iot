@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Buffers.Binary;
 using System.Device;
@@ -82,7 +83,21 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public void Reset()
         {
-            WriteRegister(Register.ACQ_COMMAND, 0x00);
+            try
+            {
+                WriteRegister(Register.ACQ_COMMAND, 0x00);
+            }
+            catch (IOException ex)
+            {
+                // `IOException: Error 121 performing I2C data transfer.` is thrown every time
+                // the device is reset on the Raspberry PI.  I think the reset signal causes
+                // a disruption in the I2C connection.  Without shallowing this exception,
+                // Reset() would always throw the IOException.
+                if (ex.Message != "Error 121 performing I2C data transfer.")
+                {
+                    throw;
+                }
+            }
         }
 
         /// <summary>
