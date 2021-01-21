@@ -28,26 +28,24 @@ I2C Wiring on the Raspberry PI:
 # Simple Example
 
 ```csharp
-class Program
+
+using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
 {
-    static void Main(string[] args)
+    // Take 10 measurements, each one second apart.
+    for (int i = 0; i < 10; i++)
     {
-        using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
-        {
-            // Take 10 measurements, each one second apart.
-            for (int i = 0; i < 10; i++) {
-                ushort currentDistance = llv3.MeasureDistance();
-                Console.WriteLine($"Current Distance: {currentDistance} cm");
-                Thread.Sleep(1000);
-            }
-        }
-    }
-    private static I2cDevice CreateI2cDevice()
-    {
-        var settings = new I2cConnectionSettings(1, LidarLiteV3.DefaultI2cAddress);
-        return I2cDevice.Create(settings);
+        Length currentDistance = llv3.MeasureDistance();
+        Console.WriteLine($"Current Distance: {currentDistance.Centimeters} cm");
+        Thread.Sleep(1000);
     }
 }
+
+I2cDevice CreateI2cDevice()
+{
+    var settings = new I2cConnectionSettings(1, LidarLiteV3.DefaultI2cAddress);
+    return I2cDevice.Create(settings);
+}
+
 ```
 
 # Advance Usage
@@ -58,25 +56,22 @@ Power can be controlled to the device via a GPIO pin. Use the optional construct
 specify the GPIO controller and a power enable pin number (numbering scheme depends on GpioController).
 
 ```csharp
-static void Main(string[] args)
+int powerEnablePin = 13;
+using (var llv3 = new LidarLiteV3(CreateI2cDevice(), new GpioController(), powerEnablePin))
 {
-    int powerEnablePin = 13;
-    using (var llv3 = new LidarLiteV3(CreateI2cDevice(), new GpioController(), powerEnablePin))
-    {
-        // Power off the device.
-        llv3.PowerOff();
-        // Device is completely turned off.
-        Console.WriteLine("Device is off.");
-        Thread.Sleep(5000);
-        // Power on the device, device is ready in ~22ms.
-        Console.WriteLine("Device is on.");
-        llv3.PowerOn();
-        // Sleep 50ms.
-        Thread.Sleep(50);
-        // Get a reading.
-        ushort currentDistance = llv3.MeasureDistance();
-        Console.WriteLine($"Current Distance: {currentDistance} cm");
-    }
+    // Power off the device.
+    llv3.PowerOff();
+    // Device is completely turned off.
+    Console.WriteLine("Device is off.");
+    Thread.Sleep(5000);
+    // Power on the device, device is ready in ~22ms.
+    Console.WriteLine("Device is on.");
+    llv3.PowerOn();
+    // Sleep 50ms.
+    Thread.Sleep(50);
+    // Get a reading.
+    Length currentDistance = llv3.MeasureDistance();
+    Console.WriteLine($"Current Distance: {currentDistance.Centimeters} cm");
 }
 ```
 
@@ -100,9 +95,10 @@ This is configured via `SetMeasurementRepetitionMode` passing in a mode (`Off`, 
 `RepeatInfinitely`), a loop count (if mode is `Repeat`), and a delay between measurements (default to 
 10 hz). A delay of `20` is about `100 hz`.
 
-With a repetition mode set, use `Distance` and `Velocity` to retrieve the current readings in cm.
-Negative velocity is toward the device, positive velocity is away the device.  The unit is 
-cm and depends on the delay. The default 10 hz is about 0.1 m/s.
+With a repetition mode set, use `Distance` to retrieve the current readings in `Length`.
+Use `DifferenceBetweenLastTwoDistances` to get a velocity reading.  Negative values
+indicate that the object is moving toward the device, positive indicates it's moving away.  The value 
+is dependent on the delay, and the default 10 hz is about 0.1 m/s.
 
 ```csharp
 using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
@@ -112,8 +108,8 @@ using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
     while(true)
     {
         Thread.Sleep(5);
-        ushort currentDistanceInCm = llv3.Distance;
-        int currentVelocityInCm = llv3.Velocity;
+        Length currentDistance = llv3.Distance;
+        Length currentVelocity = llv3.DifferenceBetweenLastTwoDistances;
     }
 }
 ```

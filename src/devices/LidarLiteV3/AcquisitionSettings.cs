@@ -19,7 +19,7 @@ namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
         /// <summary>
         /// Use default delay (10 hz) instead of delay configured in MEASURE_DELAY (0x45) for repetition mode
         /// </summary>
-        UseDefaultDelay = 0x20,
+        UseCustomDelay = 0x20,
 
         /// <summary>
         /// Enable reference filter, averages 8 reference measurements for increase consistency

@@ -153,14 +153,14 @@ namespace Iot.Device.DistanceSensor
 
                 // Set mode to use custom delay.
                 var currentAcqSettings = AcquisitionSettings;
-                currentAcqSettings |= AcquisitionSettings.UseDefaultDelay;
+                currentAcqSettings |= AcquisitionSettings.UseCustomDelay;
                 AcquisitionSettings = currentAcqSettings;
             }
             else
             {
                 // Set mode to use default delay.
                 var currentAcqSettings = AcquisitionSettings;
-                currentAcqSettings &= ~AcquisitionSettings.UseDefaultDelay;
+                currentAcqSettings &= ~AcquisitionSettings.UseCustomDelay;
                 AcquisitionSettings = currentAcqSettings;
             }
 
