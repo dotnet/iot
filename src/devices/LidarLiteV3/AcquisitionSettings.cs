@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 
@@ -10,10 +9,10 @@ namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
     /// Various acquisition behavior settings
     /// </summary>
     [Flags]
-    public enum AcquistionSettings
+    public enum AcquisitionSettings
     {
         /// <summary>
-        /// Enable reference process during measurement
+        /// Enables reference process during measurement
         /// </summary>
         EnableReferenceProcess = 0x40,
 
@@ -36,6 +35,6 @@ namespace Iot.Device.DistanceSensor.Models.LidarLiteV3
         /// Enable default reference acquisition count (5) instead of reference acquisition
         /// count set in REF_COUNT_VAL (0x12).
         /// </summary>
-        UseDefaultReferenceAcq = 0x04
+        UseDefaultReferenceAcquisition = 0x04
     }
 }

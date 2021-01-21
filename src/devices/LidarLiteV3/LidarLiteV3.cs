@@ -1,14 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Threading.Tasks;
 using System.Buffers.Binary;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
 using Iot.Device.DistanceSensor.Models.LidarLiteV3;
+using UnitsNet;
 
 namespace Iot.Device.DistanceSensor
 {
@@ -22,7 +23,8 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public const byte DefaultI2cAddress = 0x62;
 
-        private GpioController _gpioController;
+        private GpioController? _gpioController = null;
+        private bool _shouldDispose;
         private I2cDevice _i2cDevice;
         private int _powerEnablePin;
 
@@ -32,9 +34,11 @@ namespace Iot.Device.DistanceSensor
         /// <param name="i2cDevice">I2C device</param>
         /// <param name="gpioController">GPIO controller</param>
         /// <param name="powerEnablePin">The pin number used to control power to the device</param>
-        public LidarLiteV3(I2cDevice i2cDevice, GpioController gpioController = null, int powerEnablePin = -1)
+        /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
+        public LidarLiteV3(I2cDevice i2cDevice, GpioController? gpioController = null, int powerEnablePin = -1, bool shouldDispose = true)
         {
             _gpioController = gpioController ?? new GpioController();
+            _shouldDispose = shouldDispose;
             _i2cDevice = i2cDevice;
             _powerEnablePin = powerEnablePin;
 
@@ -52,14 +56,12 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public void PowerOff()
         {
-            if (_powerEnablePin != -1)
-            {
-                _gpioController.Write(_powerEnablePin, PinValue.Low);
-            }
-            else
+            if (_powerEnablePin == -1)
             {
                 throw new InvalidOperationException("Cannot power off without providing GPIO controller and power enable pin.");
             }
+
+            _gpioController?.Write(_powerEnablePin, PinValue.Low);
         }
 
         /// <summary>
@@ -67,14 +69,12 @@ namespace Iot.Device.DistanceSensor
         /// </summary>
         public void PowerOn()
         {
-            if (_powerEnablePin != -1)
-            {
-                _gpioController.Write(_powerEnablePin, PinValue.High);
-            }
-            else
+            if (_powerEnablePin == -1)
             {
                 throw new InvalidOperationException("Cannot power off without providing GPIO controller and power enable pin.");
             }
+
+            _gpioController?.Write(_powerEnablePin, PinValue.High);
         }
 
         /// <summary>
@@ -86,38 +86,24 @@ namespace Iot.Device.DistanceSensor
         }
 
         /// <summary>
-        /// Measure distance in cm
+        /// Measure distance.
         /// </summary>
         /// <remarks>
         /// Note: Do not call if running while in repetition mode.  It will block until
         /// repetition finishes (forever if infinite).
         /// </remarks>
         /// <param name="withReceiverBiasCorrection">Faster without bias correction, but more prone to errors if condition changes.</param>
-        /// <returns>Distance in cm</returns>
-        public async Task<int> MeasureDistanceAsync(bool withReceiverBiasCorrection = true)
+        /// <returns>Distance as a length unit.</returns>
+        public Length MeasureDistance(bool withReceiverBiasCorrection = true)
         {
             WriteRegister(Register.ACQ_COMMAND, withReceiverBiasCorrection ? (byte)0x04 : (byte)0x03);
 
             while (Status.HasFlag(SystemStatus.BusyFlag))
             {
-                await Task.Delay(4);
+                DelayHelper.DelayMicroseconds(4, allowThreadYield: true);
             }
 
             return LastDistance;
-        }
-
-        /// <summary>
-        /// Measure distance in cm
-        /// </summary>
-        /// <remarks>
-        /// Note: Do not call if running while in repetition mode.  It will block until
-        /// repetition finishes (forever if infinite).
-        /// </remarks>
-        /// <param name="withReceiverBiasCorrection">Faster without bias correction, but more prone to errors if condition changes.</param>
-        /// <returns>Distance in cm</returns>
-        public int MeasureDistance(bool withReceiverBiasCorrection = true)
-        {
-            return MeasureDistanceAsync(withReceiverBiasCorrection).Result;
         }
 
         /// <summary>
@@ -151,16 +137,16 @@ namespace Iot.Device.DistanceSensor
                 WriteRegister(Register.MEASURE_DELAY, (byte)delay);
 
                 // Set mode to use custom delay.
-                var currentAcqSettings = AcquistionSettings;
-                currentAcqSettings |= AcquistionSettings.UseDefaultDelay;
-                AcquistionSettings = currentAcqSettings;
+                var currentAcqSettings = AcquisitionSettings;
+                currentAcqSettings |= AcquisitionSettings.UseDefaultDelay;
+                AcquisitionSettings = currentAcqSettings;
             }
             else
             {
                 // Set mode to use default delay.
-                var currentAcqSettings = AcquistionSettings;
-                currentAcqSettings &= ~AcquistionSettings.UseDefaultDelay;
-                AcquistionSettings = currentAcqSettings;
+                var currentAcqSettings = AcquisitionSettings;
+                currentAcqSettings &= ~AcquisitionSettings.UseDefaultDelay;
+                AcquisitionSettings = currentAcqSettings;
             }
 
             // Kick it off with a single acquire command.
@@ -200,43 +186,43 @@ namespace Iot.Device.DistanceSensor
         #region Device Registers
 
         /// <summary>
-        /// Get the last distance measurement in cm.
+        /// Get the last distance measurement.
         /// </summary>
-        public int LastDistance
+        public Length LastDistance
         {
             get
             {
                 Span<byte> rawData = stackalloc byte[2];
                 ReadBytes(Register.FULL_DELAY, rawData);
-                return BinaryPrimitives.ReadUInt16BigEndian(rawData);
+                return Length.FromCentimeters(BinaryPrimitives.ReadUInt16BigEndian(rawData));
             }
         }
 
         /// <summary>
         /// Get the difference between the current and last measurement resulting
-        /// in a signed (2's complement) 8-bit number in cm.
+        /// in a signed (2's complement) 8-bit number.
         /// Positive is away from the device.
         /// </summary>
-        public int DifferenceBetweenLastTwoDistances
+        public Length DifferenceBetweenLastTwoDistances
         {
             get
             {
                 Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.VELOCITY, rawData);
-                return (int)(sbyte)rawData[0];
+                return Length.FromCentimeters((int)(sbyte)rawData[0]);
             }
         }
 
         /// <summary>
         /// Get or set the various settings to control the acquistion behavior.
         /// </summary>
-        public AcquistionSettings AcquistionSettings
+        public AcquisitionSettings AcquisitionSettings
         {
             get
             {
                 Span<byte> rawData = stackalloc byte[1];
                 ReadBytes(Register.ACQ_CONFIG_REG, rawData);
-                return (AcquistionSettings)rawData[0];
+                return (AcquisitionSettings)rawData[0];
             }
             set
             {
@@ -347,10 +333,14 @@ namespace Iot.Device.DistanceSensor
         /// <inheritdoc/>
         public void Dispose()
         {
-            _gpioController?.Dispose();
+            if (_shouldDispose)
+            {
+                _gpioController?.Dispose();
+                _gpioController = null;
+            }
+
             _i2cDevice?.Dispose();
-            _gpioController = null;
-            _i2cDevice = null;
+            _i2cDevice = null!;
         }
 
         #endregion
