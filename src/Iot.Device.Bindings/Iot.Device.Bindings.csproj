@@ -17,8 +17,8 @@
   <!-- The following ItemGroup is in charge of getting the source files we will compile on each TFM -->
   <ItemGroup>
     <!-- Excluding samples and test projects when getting source files -->
-    <_ExcludeProjectReferences Include="$(DeviceRoot)**/samples/*.csproj" />
-    <_ExcludeProjectReferences Include="$(DeviceRoot)**/tests/*.csproj" />
+    <_ExcludeProjectReferences Include="$(DeviceRoot)**/samples/**/*.csproj" />
+    <_ExcludeProjectReferences Include="$(DeviceRoot)**/tests/**/*.csproj" />
 
     <ProjectReference Include="$(DeviceRoot)**/*.csproj" Exclude="@(_ExcludeProjectReferences)" ReferenceOutputAssembly="false" BuildReference="false" />
   </ItemGroup>
