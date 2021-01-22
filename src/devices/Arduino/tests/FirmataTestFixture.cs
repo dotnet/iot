@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Iot.Device.Arduino;
+using Xunit;
 
 namespace Arduino.Tests
 {
@@ -34,21 +35,22 @@ namespace Arduino.Tests
             var b = ArduinoBoard.FindBoard(ArduinoBoard.GetSerialPortNames(), new List<int>() { 115200 });
             if (b == null)
             {
-                throw new NotSupportedException("No board found");
+                Board = null;
+                return;
             }
 
             Board = b;
             Board.LogMessages += (x, y) => Console.WriteLine(x);
         }
 
-        public ArduinoBoard Board
+        public ArduinoBoard? Board
         {
             get;
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            Board.Dispose();
+            Board?.Dispose();
             if (_networkStream != null)
             {
                 _networkStream.Dispose();
