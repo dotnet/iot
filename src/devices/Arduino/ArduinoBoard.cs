@@ -271,7 +271,7 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <param name="pinNumberingScheme">Pin numbering scheme to use for this controller</param>
         /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
-        public GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
+        public virtual GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
         {
             return new GpioController(pinNumberingScheme, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
         }
@@ -283,7 +283,7 @@ namespace Iot.Device.Arduino
         /// <returns>An <see cref="I2cDevice"/> instance</returns>
         /// <exception cref="NotSupportedException">The firmware reports that no pins are available for I2C. Check whether the I2C module is enabled in Firmata.
         /// Or: An invalid Bus Id or device Id was specified</exception>
-        public I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
+        public virtual I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
             if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.I2C)))
             {
@@ -294,12 +294,13 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Firmata has no support for SPI, even though the Arduino basically has an SPI interface.
-        /// This therefore returns a Software SPI device for the default Arduino SPI port on pins 11, 12 and 13.
+        /// Connect to a device connected to the primary SPI bus on the Arduino
+        /// Firmata's default implementation has no SPI support, so this first checks whether it's available at all.
         /// </summary>
         /// <param name="settings">Spi Connection settings</param>
         /// <returns>An <see cref="SpiDevice"/> instance.</returns>
-        public SpiDevice CreateSpiDevice(SpiConnectionSettings settings)
+        /// <exception cref="NotSupportedException">The Bus number is not 0, or the SPI component has not been enabled in the firmware.</exception>
+        public virtual SpiDevice CreateSpiDevice(SpiConnectionSettings settings)
         {
             if (settings.BusId != 0)
             {
@@ -322,7 +323,7 @@ namespace Iot.Device.Arduino
         /// <param name="frequency">This value is ignored</param>
         /// <param name="dutyCyclePercentage">The duty cycle as a fraction.</param>
         /// <returns></returns>
-        public PwmChannel CreatePwmChannel(
+        public virtual PwmChannel CreatePwmChannel(
             int chip,
             int channel,
             int frequency = 400,
@@ -336,7 +337,7 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <param name="chip">Must be 0</param>
         /// <returns>An <see cref="AnalogController"/> instance</returns>
-        public AnalogController CreateAnalogController(int chip)
+        public virtual AnalogController CreateAnalogController(int chip)
         {
             return new ArduinoAnalogController(this, SupportedPinConfigurations, PinNumberingScheme.Logical);
         }

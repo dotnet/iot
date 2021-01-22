@@ -25,6 +25,9 @@ namespace Iot.Device.Arduino
 
     internal delegate void AnalogPinValueUpdated(int pin, uint rawValue);
 
+    /// <summary>
+    /// Low-level communication layer for the firmata protocol. Creates the binary command stream for the different commands and returns back results.
+    /// </summary>
     internal sealed class FirmataDevice : IDisposable
     {
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
