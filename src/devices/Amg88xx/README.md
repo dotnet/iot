@@ -45,6 +45,11 @@ The temperature of a pixel specified by its coordinates can be read using an ind
 public Temperature this[int x, int y]
 ```
 
+The whole temperature image can be read as a two-dimensional array:
+```
+public Temperature[,] TemperatureImage
+```
+
 The raw reading (12-bit two's complement format) of a pixel specified by its number can be read using an indexer:
 ```
 public Int16 this[int n]

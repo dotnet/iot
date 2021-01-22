@@ -96,6 +96,28 @@ namespace Iot.Device.Amg88xx
         }
 
         /// <summary>
+        /// Gets temperature for all pixels from the current thermal image as a two-dimensional array.
+        /// First index specifies the x-coordinate of the pixel and second index specifies y-coordinate of the pixel.
+        /// </summary>
+        /// <returns>Temperature as a two-dimensional array.</returns>
+        public Temperature[,] TemperatureImage
+        {
+            get
+            {
+                Temperature[,] temperatureImage = new Temperature[Width, Height];
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int x = 0; x < Width; x++)
+                    {
+                        temperatureImage[x, y] = this[x, y];
+                    }
+                }
+
+                return temperatureImage;
+            }
+        }
+
+        /// <summary>
         /// Gets raw reading (12-bit two's complement format) of the specified pixel from the current thermal image.
         /// </summary>
         /// <param name="n">The number of the pixel to retrieve.</param>
