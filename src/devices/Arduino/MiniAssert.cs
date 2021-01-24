@@ -28,6 +28,5 @@ namespace Iot.Device.Arduino
                 throw new MiniAssertionException(message);
             }
         }
-
     }
 }

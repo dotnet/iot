@@ -13,7 +13,7 @@ namespace Iot.Device.Arduino
         HardwareLevelAccessGetPinCount,
 
         EnvironmentTickCount,
-
+        EnvironmentProcessorCount,
         EnvironmentFailFast1,
         EnvironmentFailFast2,
 
@@ -121,5 +121,8 @@ namespace Iot.Device.Arduino
 
         ByReferenceCtor,
         ByReferenceValue,
+
+        InteropQueryPerformanceFrequency,
+        InteropQueryPerformanceCounter,
     }
 }

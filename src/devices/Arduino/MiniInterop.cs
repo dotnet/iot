@@ -362,6 +362,18 @@ namespace Iot.Device.Arduino
             {
                 throw new NotImplementedException();
             }
+
+            [ArduinoImplementation(NativeMethod.InteropQueryPerformanceFrequency)]
+            internal static unsafe bool QueryPerformanceFrequency(long* lpFrequency)
+            {
+                return true;
+            }
+
+            [ArduinoImplementation(NativeMethod.InteropQueryPerformanceCounter)]
+            internal static unsafe bool QueryPerformanceCounter(long* lpCounter)
+            {
+                return true;
+            }
         }
     }
 }

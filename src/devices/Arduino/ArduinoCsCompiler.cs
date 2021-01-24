@@ -54,7 +54,8 @@ namespace Iot.Device.Arduino
         None = 0,
         EngineBusy = 1,
         InvalidArguments = 2,
-        OutOfMemory = 3
+        OutOfMemory = 3,
+        InternalError = 4,
     }
 
     [Flags]
@@ -352,6 +353,8 @@ namespace Iot.Device.Arduino
 
             PrepareClass(set, typeof(IEquatable<Nullable<int>>));
 
+            PrepareClass(set, typeof(System.Array));
+
             // We'll always need to provide these methods, or we'll get into trouble because they're not explicitly used before anything that depends on
             // them in the runtime
             type = typeof(System.Object);
@@ -575,7 +578,7 @@ namespace Iot.Device.Arduino
         internal void SendClassDeclarations(ExecutionSet set)
         {
             int idx = 0;
-            foreach (var c in set.Classes)
+            foreach (var c in set.Classes.OrderBy(x => x.NewToken))
             {
                 var cls = c.TheType;
                 Int32 parentToken = 0;
@@ -1396,6 +1399,7 @@ namespace Iot.Device.Arduino
             List<ClassDeclaration> classes = set.Classes.Where(x => !x.SuppressInit && x.TheType.TypeInitializer != null).ToList();
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
+            BringToFront(classes, typeof(Stopwatch));
             BringToFront(classes, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(classes, typeof(System.DateTime));
             for (var index = 0; index < classes.Count; index++)

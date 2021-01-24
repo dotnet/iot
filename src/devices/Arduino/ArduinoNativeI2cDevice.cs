@@ -11,7 +11,7 @@ namespace Iot.Device.Arduino
     public class ArduinoNativeI2cDevice : I2cDevice
     {
         // easier to access from the firmware here than in the structure
-        private int _deviceAddress;
+        private int _deviceAddress; // do not remove. Used in runtime.
 
         public ArduinoNativeI2cDevice(I2cConnectionSettings connectionSettings)
         {

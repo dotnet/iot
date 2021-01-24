@@ -59,5 +59,13 @@ namespace Iot.Device.Arduino
         {
             throw new NotImplementedException();
         }
+
+        public static int OptimalMaxSpinWaitsPerSpinIteration
+        {
+            get
+            {
+                return 1;
+            }
+        }
     }
 }

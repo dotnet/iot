@@ -20,9 +20,18 @@ namespace Iot.Device.Arduino
 
         public static int ProcessorCount
         {
+            [ArduinoImplementation(NativeMethod.EnvironmentProcessorCount)]
             get
             {
                 return 1;
+            }
+        }
+
+        public static bool IsSingleProcessor
+        {
+            get
+            {
+                return ProcessorCount == 1;
             }
         }
 
