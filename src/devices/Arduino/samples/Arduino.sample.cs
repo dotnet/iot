@@ -594,7 +594,7 @@ namespace Arduino.Samples
             MethodState state;
             var set = compiler.CreateExecutionSet();
             compiler.PrepareLowLevelInterface(set);
-            var dht = compiler.AddSimpleMethod(set, new Func<IArduinoHardwareLevelAccess, int, UInt32>(ArduinoCompilerSampleMethods.ReadDht11));
+            var dht = compiler.AddSimpleMethod(set, new Func<ArduinoHardwareLevelAccess, int, UInt32>(ArduinoCompilerSampleMethods.ReadDht11));
             dht.InvokeAsync(0, 3);
 
             CancellationTokenSource ts = new CancellationTokenSource(10000);
@@ -626,7 +626,7 @@ namespace Arduino.Samples
             var set = compiler.CreateExecutionSet();
             compiler.PrepareLowLevelInterface(set);
             compiler.AddSimpleMethod(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            var method3 = compiler.AddSimpleMethod(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            var method3 = compiler.AddSimpleMethod(set, new Action<ArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
             method3.InvokeAsync(0, 10, 500);
 
             // While the above method executes (and blinks the led), we query the analog input
@@ -651,7 +651,7 @@ namespace Arduino.Samples
             // Start task again and terminate it immediately
             compiler.PrepareLowLevelInterface(set);
             compiler.AddSimpleMethod(set, new Func<int, int, bool>(ArduinoCompilerSampleMethods.Smaller));
-            method3 = compiler.AddSimpleMethod(set, new Action<IArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
+            method3 = compiler.AddSimpleMethod(set, new Action<ArduinoHardwareLevelAccess, int, int>(ArduinoCompilerSampleMethods.Blink));
             method3.InvokeAsync(0, 10, 500);
             method3.Terminate();
             if (method3.State != MethodState.Killed)

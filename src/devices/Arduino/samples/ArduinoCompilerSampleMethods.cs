@@ -92,7 +92,7 @@ namespace Arduino.Samples
             return a < b;
         }
 
-        public static void Blink(IArduinoHardwareLevelAccess hw, int pin, int delay)
+        public static void Blink(ArduinoHardwareLevelAccess hw, int pin, int delay)
         {
             hw.SetPinMode(pin, PinMode.Output);
             for (int i = 0; Smaller(i, 10); i++)
@@ -106,7 +106,7 @@ namespace Arduino.Samples
             hw.SetPinMode(pin, PinMode.Input);
         }
 
-        public static UInt32 ReadDht11(IArduinoHardwareLevelAccess controller, int pin)
+        public static UInt32 ReadDht11(ArduinoHardwareLevelAccess controller, int pin)
         {
             uint count;
             uint resultLow = 0;

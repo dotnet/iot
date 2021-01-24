@@ -278,8 +278,8 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            Type lowLevelInterface = typeof(IArduinoHardwareLevelAccess);
-            foreach (var method in lowLevelInterface.GetMethods())
+            Type lowLevelInterface = typeof(ArduinoHardwareLevelAccess);
+            foreach (var method in lowLevelInterface.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
                 var attr = (ArduinoImplementationAttribute)method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).First();
                 AddMethod(method, attr.MethodNumber);
