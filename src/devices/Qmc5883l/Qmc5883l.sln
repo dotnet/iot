@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Qmc5883l", "Qmc5883l.csproj", "{2DBDAC26-A6B9-430B-A67D-3E8FD1E4DB97}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2DBDAC26-A6B9-430B-A67D-3E8FD1E4DB97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2DBDAC26-A6B9-430B-A67D-3E8FD1E4DB97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2DBDAC26-A6B9-430B-A67D-3E8FD1E4DB97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2DBDAC26-A6B9-430B-A67D-3E8FD1E4DB97}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {AD4A8F79-03A3-4A2E-B0AD-6155FAE5D469}
+	EndGlobalSection
+EndGlobal
