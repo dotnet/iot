@@ -169,13 +169,13 @@ namespace Iot.Device.DistanceSensor
         }
 
         /// <summary>
-        /// Set a new I2C address.
+        /// Set a new I2C address and dispose the device.
         /// </summary>
         /// <remarks>
         /// Note, if the device is powered off or reset, the IC2 address will reset to the default address.
         /// </remarks>
         /// <param name="address">new address, valid values are 7-bit values with 0 in the LSB.</param>
-        public void SetI2CAddress(byte address)
+        public void SetI2cAddressAndDispose(byte address)
         {
             if ((address & 1) == 1)
             {
@@ -196,6 +196,9 @@ namespace Iot.Device.DistanceSensor
 
             // Disable the default address
             WriteRegister(Register.I2C_CONFIG, 0x08);
+
+            // Dispose
+            Dispose();
         }
 
         #region Device Registers

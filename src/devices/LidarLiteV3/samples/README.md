@@ -125,7 +125,7 @@ Available addresses are 7-bit values with a 0 in the LSB order.
 using (var llv3 = new LidarLiteV3(CreateI2cDevice()))
 {
     // Set device from default `0x62` to `0x68`
-   llv3.SetI2CAddress(0x68);
+   llv3.SetI2cAddressAndDispose(0x68);
 }
 
 // Connect to the device again with the new address.
