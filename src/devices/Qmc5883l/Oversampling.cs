@@ -1,10 +1,13 @@
-﻿namespace Iot.Device.Qmc5883l
+﻿using System;
+
+namespace Iot.Device.Qmc5883l
 {
     /// <summary>
     /// Over sample Rate (OSR) registers are used to control bandwidth of an internal digital filter.
     /// Larger OSR valueleads to smaller filter bandwidth, less in-band noise and higher power consumption.It could be used to reach a
     /// good balance between noise and power. Four over sample ratio can be selected, 64, 128, 256 or 512.
     /// </summary>
+    [Flags]
     public enum Oversampling : byte
     {
         /// <summary>

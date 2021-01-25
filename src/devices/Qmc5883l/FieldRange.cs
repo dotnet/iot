@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Qmc5883l
+namespace Iot.Device.Qmc5883l
 {
     /// <summary>
     /// Field ranges of the magnetic sensor can be selected through the register RNG. The full scale field range is

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Iot.Device.Qmc5883l
+﻿namespace Iot.Device.Qmc5883l
 {
     /// <summary>
     /// Useful registeries for QMC5883L

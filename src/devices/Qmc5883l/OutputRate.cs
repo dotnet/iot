@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Qmc5883l
+﻿namespace Iot.Device.Qmc5883l
 {
     /// <summary>
     /// Output data rate is controlled by ODR registers. Four data update frequencies can be selected: 10Hz, 50Hz,
