@@ -9,7 +9,6 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <None Include="Datasheet-QMC5883L-1.0 .pdf" />
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>

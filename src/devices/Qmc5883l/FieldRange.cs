@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 
 namespace Iot.Device.Qmc5883l
 {
@@ -14,11 +17,11 @@ namespace Iot.Device.Qmc5883l
        /// <summary>
        /// Field range of 2 Gauss
        /// </summary>
-        GAUSS_2 = 0x00,
+        Gauss2 = 0x00,
 
         /// <summary>
         /// Field range of 8 Gauss
         /// </summary>
-        GAUSS_8 = 0x10
+        Gauss8 = 0x10
     }
 }

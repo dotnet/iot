@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 
 namespace Iot.Device.Qmc5883l
 {
@@ -13,21 +16,21 @@ namespace Iot.Device.Qmc5883l
         /// <summary>
         /// Output rate of 10 Hz
         /// </summary>
-        RATE_10HZ = 0x00,
+        Rate10Hz = 0x00,
 
         /// <summary>
         /// Output rate of 50 Hz
         /// </summary>
-        RATE_50HZ = 0x04,
+        Rate50Hz = 0x04,
 
         /// <summary>
         /// Output rate of 100 Hz
         /// </summary>
-        RATE_100HZ = 0x08,
+        Rate100Hz = 0x08,
 
         /// <summary>
         /// Output rate of 200 Hz
         /// </summary>
-        RATE_200HZ = 0x0C
+        Rate200Hz = 0x0C
     }
 }

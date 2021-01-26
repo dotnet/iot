@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 
 namespace Iot.Device.Qmc5883l
 {
@@ -13,21 +16,21 @@ namespace Iot.Device.Qmc5883l
         /// <summary>
         /// Over sample rate of 512
         /// </summary>
-        OS512 = 0x00,
+        Rate512 = 0x00,
 
         /// <summary>
         /// Over sample rate of 256
         /// </summary>
-        OS256 = 0x40,
+        Rate256 = 0x40,
 
         /// <summary>
         /// Over sample rate of 128
         /// </summary>
-        OS128 = 0x80,
+        Rate128 = 0x80,
 
         /// <summary>
         /// Over sample rate of 64
         /// </summary>
-        OS64 = 0xC0
+        Rate64 = 0xC0
     }
 }

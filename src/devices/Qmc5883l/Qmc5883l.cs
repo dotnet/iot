@@ -6,6 +6,7 @@ using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Device.Model;
 using System.Numerics;
+using UnitsNet;
 
 namespace Iot.Device.Qmc5883l
 {
@@ -19,24 +20,18 @@ namespace Iot.Device.Qmc5883l
         /// QMC5883L Default I2C Address
         /// </summary>
         public const byte DefaultI2cAddress = 0x0D;
-
-        /// <summary>
-        /// QMC5883L Chip id.
-        /// </summary>
-        public const byte Chip_Id = 0xff;
-
         private I2cDevice _i2cDevice;
 
         /// <summary>
         /// QMC5883L Direction Vector
         /// </summary>
         [Telemetry]
-        public Vector3 DirectionVector => ReadDirectionVector();
+        public Vector3 Direction => ReadDirectionVector();
 
         /// <summary>
         /// QMC5883L Heading (DEG)
         /// </summary>
-        public double Heading => VectorToHeading(ReadDirectionVector());
+        public Angle Heading => VectorExtentsion.GetHeading(ReadDirectionVector());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Qmc5883l"/> class.
@@ -55,12 +50,12 @@ namespace Iot.Device.Qmc5883l
         /// <param name="outputRate">Typical Data Output Rate (Hz)</param>
         /// <param name="oversampling">Bandwidth of an internal digital filter</param>
         /// <param name="fieldRange">The field range goes hand in hand with the sensitivity of the magnetic sensor</param>
-        public void SetMode(Mode mode = Mode.CONTINUOUS,
-            Interrupt interrupt = Interrupt.DISABLE,
-            RollPointer rollPointer = RollPointer.DISABLE,
-            OutputRate outputRate = OutputRate.RATE_10HZ,
-            Oversampling oversampling = Oversampling.OS128,
-            FieldRange fieldRange = FieldRange.GAUSS_2)
+        public void SetMode(Mode mode = Mode.Continuous,
+            Interrupt interrupt = Interrupt.Disable,
+            RollPointer rollPointer = RollPointer.Disable,
+            OutputRate outputRate = OutputRate.Rate10Hz,
+            Oversampling oversampling = Oversampling.Rate128,
+            FieldRange fieldRange = FieldRange.Gauss2)
         {
             Span<byte> interruptCommand = stackalloc byte[]
             {
@@ -116,23 +111,6 @@ namespace Iot.Device.Qmc5883l
             return new Vector3(BinaryPrimitives.ReadInt16BigEndian(xRead),
                                BinaryPrimitives.ReadInt16BigEndian(yRead),
                                BinaryPrimitives.ReadInt16BigEndian(zRead));
-        }
-
-        /// <summary>
-        /// Calculate heading
-        /// </summary>
-        /// <param name="vector">QMC5883L Direction Vector</param>
-        /// <returns>Heading (DEG)</returns>
-        private static double VectorToHeading(Vector3 vector)
-        {
-            double deg = Math.Atan2(vector.Y, vector.X) * 180 / Math.PI;
-
-            if (deg < 0)
-            {
-                deg += 360;
-            }
-
-            return deg;
         }
 
         /// <inheritdoc />

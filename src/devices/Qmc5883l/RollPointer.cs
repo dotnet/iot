@@ -1,4 +1,7 @@
-﻿namespace Iot.Device.Qmc5883l
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Iot.Device.Qmc5883l
 {
     /// <summary>
     /// Pointer roll-over function is controlled by ROL_PNT register. When the point roll-over function is enabled, the I2C
@@ -10,11 +13,11 @@
         /// <summary>
         /// Rolls the I2C pointer/address
         /// </summary>
-        ENABLE = 0x01,
+        Enable = 0x01,
 
         /// <summary>
         /// Doesn't roll the I2C pointer/address
         /// </summary>
-        DISABLE = 0x00
+        Disable = 0x00
     }
 }

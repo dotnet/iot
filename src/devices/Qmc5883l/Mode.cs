@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using System;
 
 namespace Iot.Device.Qmc5883l
 {
@@ -14,7 +16,7 @@ namespace Iot.Device.Qmc5883l
         /// ultra-low power LDO, I2C interface can be woken up by reading or writing any registers.There is no
         /// magnetometer measurement in the Standby mode.Internal clocking is also halted.
       /// </summary>
-      STAND_BY = 0x00,
+      Standby = 0x00,
 
         /// <summary>
         /// During the continuous-measurement mode (mode bits= 01), the magnetic sensor continuously makes
@@ -22,6 +24,6 @@ namespace Iot.Device.Qmc5883l
         /// rate registers are also located in the control register (09H), they should be set up properly for your applications in
         /// the continuous-measurement mode.
         /// </summary>
-      CONTINUOUS = 0x01
+      Continuous = 0x01
     }
 }
