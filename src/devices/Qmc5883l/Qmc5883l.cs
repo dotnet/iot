@@ -24,7 +24,7 @@ namespace Iot.Device.Qmc5883l
         /// QMC5883L Chip id.
         /// </summary>
         public const byte Chip_Id = 0xff;
-        private Interrupt _interrupt;
+
         private I2cDevice _i2cDevice;
 
         /// <summary>
@@ -62,8 +62,6 @@ namespace Iot.Device.Qmc5883l
             Oversampling oversampling = Oversampling.OS128,
             FieldRange fieldRange = FieldRange.GAUSS_2)
         {
-            _interrupt = interrupt;
-
             Span<byte> interruptCommand = stackalloc byte[]
             {
                 (byte)Registers.QMC_CONFIG_REG_2_ADDR,
