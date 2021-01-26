@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Device.Analog;
 using System.Device.Gpio;
 using System.Linq;
@@ -14,11 +15,11 @@ namespace Iot.Device.Arduino
     internal class ArduinoAnalogController : AnalogController
     {
         private readonly ArduinoBoard _board;
-        private readonly List<SupportedPinConfiguration> _supportedPinConfigurations;
+        private readonly ReadOnlyCollection<SupportedPinConfiguration> _supportedPinConfigurations;
         private readonly Dictionary<int, ValueChangedEventHandler> _callbacks;
 
         public ArduinoAnalogController(ArduinoBoard board,
-            List<SupportedPinConfiguration> supportedPinConfigurations, PinNumberingScheme scheme)
+            ReadOnlyCollection<SupportedPinConfiguration> supportedPinConfigurations, PinNumberingScheme scheme)
             : base(scheme)
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Device.Analog;
 using System.Text;
@@ -238,11 +239,11 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Returns the list of capabilities per pin
         /// </summary>
-        public List<SupportedPinConfiguration> SupportedPinConfigurations
+        public ReadOnlyCollection<SupportedPinConfiguration> SupportedPinConfigurations
         {
             get
             {
-                return _supportedPinConfigurations;
+                return _supportedPinConfigurations.AsReadOnly();
             }
         }
 
