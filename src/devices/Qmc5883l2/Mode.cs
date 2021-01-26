@@ -1,11 +1,8 @@
-﻿using System;
-
-namespace Iot.Device.Qmc5883l
+﻿namespace Iot.Device.Hmc5883l
 {
     /// <summary>
     /// Modes of Qmc5883l
     /// </summary>
-    [Flags]
     public enum Mode : byte
     {
         /// <summary>

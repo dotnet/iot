@@ -3,7 +3,7 @@
 namespace Iot.Device.Qmc5883l
 {
     /// <summary>
-    /// Status flags for QMC5883L first register
+    /// The status of QMC5883L device
     /// </summary>
     [Flags]
     public enum Status : byte

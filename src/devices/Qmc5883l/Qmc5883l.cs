@@ -20,11 +20,11 @@ namespace Iot.Device.Qmc5883l
         /// </summary>
         public const byte DefaultI2cAddress = 0x0D;
 
-        private readonly byte _mode;
-        private readonly byte _outputRate;
-        private readonly byte _fieldRange;
-        private readonly byte _oversampling;
-
+        /// <summary>
+        /// QMC5883L Chip id.
+        /// </summary>
+        public const byte Chip_Id = 0xff;
+        private Interrupt _interrupt;
         private I2cDevice _i2cDevice;
 
         /// <summary>
@@ -41,49 +41,61 @@ namespace Iot.Device.Qmc5883l
         /// <summary>
         /// Initializes a new instance of the <see cref="Qmc5883l"/> class.
         /// </summary>
-        /// <param name="i2cDevice">The I2C device used for communication.</param>
+        public Qmc5883l(I2cDevice i2cDevice)
+        {
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+        }
+
+        /// <summary>
+        /// Sets the sensors mode with additional parameters.
+        /// </summary>
         /// <param name="mode">Sensor mode</param>
+        /// <param name="interrupt">Controlls the Interrupt PIN</param>
+        /// <param name="rollPointer">When the point roll-over function is enabled, the I2C data pointer automatically rolls between 00H ~ 06H</param>
         /// <param name="outputRate">Typical Data Output Rate (Hz)</param>
         /// <param name="oversampling">Bandwidth of an internal digital filter</param>
         /// <param name="fieldRange">The field range goes hand in hand with the sensitivity of the magnetic sensor</param>
-        public Qmc5883l(
-            I2cDevice i2cDevice,
-            Mode mode = Mode.CONTINUOUS,
+        public void SetMode(Mode mode = Mode.CONTINUOUS,
+            Interrupt interrupt = Interrupt.DISABLE,
+            RollPointer rollPointer = RollPointer.DISABLE,
             OutputRate outputRate = OutputRate.RATE_10HZ,
             Oversampling oversampling = Oversampling.OS128,
             FieldRange fieldRange = FieldRange.GAUSS_2)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-            _mode = (byte)mode;
-            _outputRate = (byte)outputRate;
-            _oversampling = (byte)oversampling;
-            _fieldRange = (byte)fieldRange;
+            _interrupt = interrupt;
 
-        }
-
-        /// <summary>
-        /// Initialize the sensor
-        /// </summary>
-        private void Initialize()
-        {
-            byte config = (byte)(_oversampling | _fieldRange | _outputRate | _mode);
-
-            Span<byte> command = stackalloc byte[]
+            Span<byte> interruptCommand = stackalloc byte[]
             {
-                (byte)Registers.QMC_CONFIG_REG_1_ADDR, config
+                (byte)Registers.QMC_CONFIG_REG_2_ADDR,
+                (byte)rollPointer
             };
-            _i2cDevice.Write(command);
+            Span<byte> resetCommand = stackalloc byte[]
+            {
+                (byte)Registers.QMC_RESET_REG_ADDR,
+                0x01
+            };
+            byte config = (byte)((byte)mode | (byte)outputRate | (byte)fieldRange | (byte)oversampling);
+            Console.WriteLine(config);
+            Span<byte> setMainRegisteryCommand = stackalloc byte[]
+            {
+                (byte)Registers.QMC_CONFIG_REG_1_ADDR,
+                config
+            };
+            _i2cDevice.Write(interruptCommand);
+            _i2cDevice.Write(resetCommand);
+            _i2cDevice.Write(setMainRegisteryCommand);
         }
 
         /// <summary>
         /// Reads status register to determine if data is avaliable.
         /// </summary>
         /// <returns>1 == read is ready. 0 == read is not ready</returns>
-        private int IsReady()
+        public bool IsReady()
         {
             _i2cDevice.WriteByte((byte)Registers.QMC_STATUS_REG_ADDR);
             byte status = _i2cDevice.ReadByte();
-            return status & (byte)Status.DRDY;
+            Console.WriteLine(status);
+            return (status & 0x01) == 1;
         }
 
         /// <summary>
@@ -113,7 +125,7 @@ namespace Iot.Device.Qmc5883l
         /// </summary>
         /// <param name="vector">QMC5883L Direction Vector</param>
         /// <returns>Heading (DEG)</returns>
-        private double VectorToHeading(Vector3 vector)
+        private static double VectorToHeading(Vector3 vector)
         {
             double deg = Math.Atan2(vector.Y, vector.X) * 180 / Math.PI;
 

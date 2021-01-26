@@ -1,18 +1,36 @@
 ﻿# Qmc5883l
 
 ## Summary
-Provide a brief description on what the component is and its functionality.
+QMC5883l is a 3-Axis Magnetic Sensor commonly used as a substitute for the QMC5883l. Makers lay the claim that the 2 sensors are identical but that's false. Easiest way to tell them apart is by checking the I2c address. HMC5883L = 0x1E while QMC5883L = 0x0D
 
 ## Device Family
 Provide a list of component names and link to datasheets (if available) the binding will work with.
 
-**[Family Name Here]**: [Datasheet link here]
+**QMC5883l**: [Datasheet link here]
 
-## Binding Notes
+## Usage
+```cs
+I2cConnectionSettings settings = new(1, Qmc5883l.DefaultI2cAddress);
+using I2cDevice device = I2cDevice.Create(settings);
+using (Qmc5883l sensor = new(device))
+{
+    //Set the mode of the sensor, always make sure to call the function before using anything else.
+    //It is possible to also change the sensor mode after initialization. (Ex. Set the mode to STAND_BY to save power)
+    sensor.SetMode(outputRate: OutputRate.RATE_200HZ, fieldRange: FieldRange.GAUSS_8, oversampling: Oversampling.OS256);
 
-Provide any specifics related to binding API.  This could include how to configure component for particular functions and example code.
+    while (true)
+    {
+        // If you aren't using an interrupt PIN, then always make sure that the data is ready.
+        if (sensor.IsReady())
+        {
+            // read heading
+            Console.WriteLine($"Heading: {sensor.Heading.ToString("0.00")} °");
+            // read vectors
+            Console.WriteLine(sensor.DirectionVector.X + " : " + sensor.DirectionVector.Y + " : " + sensor.DirectionVector.Z);
+        }
 
-**NOTE**:  Don't repeat the basics related to System.Device.API* (e.g. connection settings, etc.).  This helps keep text/steps down to a minimum for maintainability.
-
-## References 
-Provide any references to other tutorials, blogs and hardware related to the component that could help others get started.
+        // wait for a second
+        Thread.Sleep(1000);
+    }
+}
+```
