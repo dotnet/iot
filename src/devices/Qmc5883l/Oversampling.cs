@@ -11,22 +11,22 @@ namespace Iot.Device.Qmc5883l
     public enum Oversampling : byte
     {
         /// <summary>
-        /// Over sample rate os 512
+        /// Over sample rate of 512
         /// </summary>
         OS512 = 0x00,
 
         /// <summary>
-        /// Over sample rate os 256
+        /// Over sample rate of 256
         /// </summary>
         OS256 = 0x40,
 
         /// <summary>
-        /// Over sample rate os 128
+        /// Over sample rate of 128
         /// </summary>
         OS128 = 0x80,
 
         /// <summary>
-        /// Over sample rate os 64
+        /// Over sample rate of 64
         /// </summary>
         OS64 = 0xC0
     }
