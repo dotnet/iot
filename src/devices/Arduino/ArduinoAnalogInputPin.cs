@@ -36,6 +36,11 @@ namespace Iot.Device.Arduino
 
         public override void DisableAnalogValueChangedEvent()
         {
+            if (_autoReportingReferenceCount == 0)
+            {
+                throw new InvalidOperationException("Attempt to disable event when no events are connected");
+            }
+
             _autoReportingReferenceCount -= 1;
             if (_autoReportingReferenceCount == 0)
             {
