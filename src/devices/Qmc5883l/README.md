@@ -4,8 +4,6 @@
 QMC5883l is a 3-Axis Magnetic Sensor commonly used as a substitute for the QMC5883l. Easiest way to tell them apart is by checking the I2c address. HMC5883L = 0x1E while QMC5883L = 0x0D
 
 ## Device Family
-Provide a list of component names and link to datasheets (if available) the binding will work with.
-
 **QMC5883l**: [https://github.com/Speedo69/iot/blob/QMC5883L/src/devices/Qmc5883l/Datasheet-QMC5883L-1.0%20.pdf]
 
 ## Usage
