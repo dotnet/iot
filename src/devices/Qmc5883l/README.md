@@ -24,7 +24,7 @@ using (Qmc5883l sensor = new(device))
     sensor.RollPointer = RollPointer.Disable;
 
     // Updates the sensors mode with our previously set properties.
-    // Make sure that is has been called at least once before starting to read any data.
+    // Make sure that it has been called at least once before starting to read any data.
     sensor.SetMode();
     while (true)
     {
