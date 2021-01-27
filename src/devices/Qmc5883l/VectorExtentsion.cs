@@ -17,7 +17,7 @@ namespace Iot.Device.Qmc5883l
         /// Calculate heading.
         /// </summary>
         /// <param name="vector">Direction Vector</param>
-        /// <returns>Heading (DEG)</returns>
+        /// <returns>Heading (Angle)</returns>
         public static Angle GetHeading(this Vector3 vector)
         {
             double deg = Math.Atan2(vector.Y, vector.X) * 180 / Math.PI;
