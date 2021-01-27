@@ -68,6 +68,7 @@ namespace Iot.Device.Qmc5883l
         /// <summary>
         /// QMC5883L Heading (DEG)
         /// </summary>
+        /// <returns>Heading(Angle)</returns>
         public Angle GetHeading() => VectorExtentsion.GetHeading(GetDirection());
 
         /// <summary>

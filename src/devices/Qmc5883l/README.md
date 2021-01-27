@@ -37,10 +37,10 @@ using (Qmc5883l sensor = new(device))
             // There are 2 ways to get the heading:
 
             // Calculates the heading from a fresh value.
-            Console.WriteLine($"Heading: {sensor.GetHeading().Degrees} °");
+            Console.WriteLine($"Heading: {sensor.GetHeading().Degrees}");
 
             // Calculates the heading from a previously stored value.
-            Console.WriteLine($"Heading: {direction.GetHeading()} °");
+            Console.WriteLine($"Heading: {direction.GetHeading()}");
         }
 
         // wait for a second
