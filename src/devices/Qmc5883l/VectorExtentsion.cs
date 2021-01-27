@@ -9,14 +9,14 @@ using UnitsNet;
 namespace Iot.Device.Qmc5883l
 {
     /// <summary>
-    /// Extentsions class for getting a heading from X and Y Vectors.
+    /// Extension class for getting a heading from X and Y Vectors.
     /// </summary>
     public static class VectorExtentsion
     {
         /// <summary>
         /// Calculate heading.
         /// </summary>
-        /// <param name="vector">QMC5883L Direction Vector</param>
+        /// <param name="vector">Direction Vector</param>
         /// <returns>Heading (DEG)</returns>
         public static Angle GetHeading(this Vector3 vector)
         {

@@ -21,17 +21,54 @@ namespace Iot.Device.Qmc5883l
         /// </summary>
         public const byte DefaultI2cAddress = 0x0D;
         private I2cDevice _i2cDevice;
+        private bool _isDeviceInitialized = false;
+
+        /// <summary>
+        /// Enables or disables the Interrupt PIN.
+        /// </summary>
+        /// <value>Disabled by default.</value>
+        public Interrupt Interrupt { get; set; } = Interrupt.Disable;
+
+        /// <summary>
+        /// When the point roll-over function is enabled, the I2C data pointer automatically rolls between 00H ~ 06H.
+        /// </summary>
+        /// <value>Disabled by default.</value>
+        public RollPointer RollPointer { get; set; } = RollPointer.Disable;
+
+        /// <summary>
+        /// Typical Data Output Rate (Hz).
+        /// </summary>
+        /// <value>10Hz by default.</value>
+        public OutputRate OutputRate { get; set; } = OutputRate.Rate10Hz;
+
+        /// <summary>
+        /// Bandwidth of an internal digital filter.
+        /// </summary>
+        /// <value>256 by default.</value>
+        public Oversampling Oversampling { get; set; } = Oversampling.Rate256;
+
+        /// <summary>
+        /// The field range goes hand in hand with the sensitivity of the magnetic sensor.
+        /// </summary>
+        /// <value>8 Gauss by default.</value>
+        public FieldRange FieldRange { get; set; } = FieldRange.Gauss8;
+
+        /// <summary>
+        /// Sensors operation mode.
+        /// </summary>
+        /// <value>In Standby mode by default. Make sure to change it to Continuous before trying to get any data!</value>
+        public Mode DeviceMode { get; set; } = Mode.Standby;
 
         /// <summary>
         /// QMC5883L Direction Vector
         /// </summary>
         [Telemetry]
-        public Vector3 Direction => ReadDirectionVector();
+        public Vector3 GetDirection() => _isDeviceInitialized ? ReadDirectionVector() : throw new SensorNotInitializedException();
 
         /// <summary>
         /// QMC5883L Heading (DEG)
         /// </summary>
-        public Angle Heading => VectorExtentsion.GetHeading(ReadDirectionVector());
+        public Angle GetHeading() => VectorExtentsion.GetHeading(GetDirection());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Qmc5883l"/> class.
@@ -42,32 +79,21 @@ namespace Iot.Device.Qmc5883l
         }
 
         /// <summary>
-        /// Sets the sensors mode with additional parameters.
+        /// Sets the sensors mode.
         /// </summary>
-        /// <param name="mode">Sensor mode</param>
-        /// <param name="interrupt">Controlls the Interrupt PIN</param>
-        /// <param name="rollPointer">When the point roll-over function is enabled, the I2C data pointer automatically rolls between 00H ~ 06H</param>
-        /// <param name="outputRate">Typical Data Output Rate (Hz)</param>
-        /// <param name="oversampling">Bandwidth of an internal digital filter</param>
-        /// <param name="fieldRange">The field range goes hand in hand with the sensitivity of the magnetic sensor</param>
-        public void SetMode(Mode mode = Mode.Continuous,
-            Interrupt interrupt = Interrupt.Disable,
-            RollPointer rollPointer = RollPointer.Disable,
-            OutputRate outputRate = OutputRate.Rate10Hz,
-            Oversampling oversampling = Oversampling.Rate128,
-            FieldRange fieldRange = FieldRange.Gauss2)
+        public void SetMode()
         {
             Span<byte> interruptCommand = stackalloc byte[]
             {
                 (byte)Registers.QMC_CONFIG_REG_2_ADDR,
-                (byte)rollPointer
+                (byte)RollPointer
             };
             Span<byte> resetCommand = stackalloc byte[]
             {
                 (byte)Registers.QMC_RESET_REG_ADDR,
                 0x01
             };
-            byte config = (byte)((byte)mode | (byte)outputRate | (byte)fieldRange | (byte)oversampling);
+            byte config = (byte)((byte)DeviceMode | (byte)OutputRate | (byte)FieldRange | (byte)Oversampling);
             Console.WriteLine(config);
             Span<byte> setMainRegisteryCommand = stackalloc byte[]
             {
@@ -77,18 +103,18 @@ namespace Iot.Device.Qmc5883l
             _i2cDevice.Write(interruptCommand);
             _i2cDevice.Write(resetCommand);
             _i2cDevice.Write(setMainRegisteryCommand);
+            _isDeviceInitialized = true;
         }
 
         /// <summary>
         /// Reads status register to determine if data is avaliable.
         /// </summary>
-        /// <returns>1 == read is ready. 0 == read is not ready</returns>
+        /// <returns>State of the register as a boolean</returns>
         public bool IsReady()
         {
             _i2cDevice.WriteByte((byte)Registers.QMC_STATUS_REG_ADDR);
             byte status = _i2cDevice.ReadByte();
-            Console.WriteLine(status);
-            return (status & 0x01) == 1;
+            return (status & (byte)Status.DRDY) == 1;
         }
 
         /// <summary>

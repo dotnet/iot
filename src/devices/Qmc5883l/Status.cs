@@ -9,7 +9,7 @@ namespace Iot.Device.Qmc5883l
     /// Status flags for QMC5883L first register
     /// </summary>
     [Flags]
-    public enum Status : byte
+    internal enum Status : byte
     {
         /// <summary>
         /// Data Ready Register (DRDY), it is set when all three axis data is ready,
