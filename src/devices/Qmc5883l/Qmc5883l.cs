@@ -95,7 +95,6 @@ namespace Iot.Device.Qmc5883l
                 0x01
             };
             byte config = (byte)((byte)DeviceMode | (byte)OutputRate | (byte)FieldRange | (byte)Oversampling);
-            Console.WriteLine(config);
             Span<byte> setMainRegisteryCommand = stackalloc byte[]
             {
                 (byte)Registers.QMC_CONFIG_REG_1_ADDR,
