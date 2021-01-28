@@ -116,14 +116,7 @@ namespace Iot.Device.Arduino
 
         private void Update()
         {
-            if (_enabled)
-            {
-                _board.Firmata.SetPwmChannel(_pin, _dutyCycle);
-            }
-            else
-            {
-                _board.Firmata.SetPwmChannel(_pin, 0);
-            }
+            _board.Firmata.SetPwmChannel(_pin, _enabled ? _dutyCycle : 0);
         }
 
         protected override void Dispose(bool disposing)
