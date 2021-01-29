@@ -10,8 +10,8 @@ This repository mainly contains two different components:
 
 ## System.Device.* APIs
 
-* [Device Bindings](https://github.com/dotnet/iot/tree/master/src/devices) - Includes a collection of APIs representing a range of sensors, displays and human interface devices based on System.Device.* APIs.
-* [DevicesApiTester CLI](https://github.com/dotnet/iot/tree/master/tools/DevicesApiTester) - Helpful utility, based on System.Device.* APIs, that include various commands for testing connected development boards and external hardware.
+* [Device Bindings](https://github.com/dotnet/iot/tree/main/src/devices) - Includes a collection of APIs representing a range of sensors, displays and human interface devices based on System.Device.* APIs.
+* [DevicesApiTester CLI](https://github.com/dotnet/iot/tree/main/tools/DevicesApiTester) - Helpful utility, based on System.Device.* APIs, that include various commands for testing connected development boards and external hardware.
 
 ### Design Reviews
 * [.NET Design Reviews: GPIO (10/2/2018)](https://youtu.be/OK0jDe8wtyg)

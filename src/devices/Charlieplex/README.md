@@ -1,6 +1,6 @@
 # Charlieplex Segment binding
 
-[Charliplexing](https://en.wikipedia.org/wiki/Charlieplexing) is a multiplexing scheme that enables controlling a significantly larger number of LEDs or other load or sensor than a [more traditional wiring scheme](https://github.com/dotnet/iot/tree/master/samples/led-blink) would allow. Charlieplexing enables addressing up to `n^2-n` LEDs where n is the number of pins available. For example, 3 pins can be used to address up to 6 LEDs, 4 pins can address 12, and 5 pins can address 20. That sounds great, however charlieplexed circuits are hard to wire due to their complexity. 
+[Charliplexing](https://en.wikipedia.org/wiki/Charlieplexing) is a multiplexing scheme that enables controlling a significantly larger number of LEDs or other load or sensor than a [more traditional wiring scheme](https://github.com/dotnet/iot/tree/main/samples/led-blink) would allow. Charlieplexing enables addressing up to `n^2-n` LEDs where n is the number of pins available. For example, 3 pins can be used to address up to 6 LEDs, 4 pins can address 12, and 5 pins can address 20. That sounds great, however charlieplexed circuits are hard to wire due to their complexity. 
 
 An even bigger challenge is that the scheme (at least in its basic form) only allows for lighting a single LED at once. On the face of it, that would seem to be a big problem. Don't worry. The LEDs change very quickly such that the eye is tricked into thinking multiple LEDs are lit at the same time. This means that your code that cannot be doing something else while the LEDs are lit. This is why the API accepts timing information. This is not what you'd expect if you are used to lighting LEDs directly from GPIO pins or via a shift register.
 
@@ -78,4 +78,4 @@ The [Controlling 20 Led's From 5 Arduino Pins Using Charlieplexing](https://www.
 
 ## Alternatives
 
-The alternative to a charlieplex circuit is a shift register. See [SN74HC595 -- 8-Bit Shift Register](https://github.com/dotnet/iot/blob/master/src/devices/Sn74hc595/README.md). A shift register is even more efficient at using pins than a charlieplex circuit, and is simpler to configure.
+The alternative to a charlieplex circuit is a shift register. See [SN74HC595 -- 8-Bit Shift Register](https://github.com/dotnet/iot/blob/main/src/devices/Sn74hc595/README.md). A shift register is even more efficient at using pins than a charlieplex circuit, and is simpler to configure.
