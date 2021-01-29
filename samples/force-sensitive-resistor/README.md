@@ -6,7 +6,7 @@ FSR generates analog signal so it should be connected to analog input of a contr
 
 ## Detecting pressure/squeezing with Fsr408, Mcp3008 and Raspberry Pi 
 
- In below example MCP3008 Analog to Digital Converter used for converting FSR analog output into digital. Read value then can be used for calculating voltage, resistance and pressure force approxinmately. We need to create Mcp3008 instance depending on how you connected it to the controller, [please refer this for more about binding MCP3008](https://github.com/dotnet/iot/tree/master/src/devices/Mcp3008/samples)
+ In below example MCP3008 Analog to Digital Converter used for converting FSR analog output into digital. Read value then can be used for calculating voltage, resistance and pressure force approxinmately. We need to create Mcp3008 instance depending on how you connected it to the controller, [please refer this for more about binding MCP3008](https://github.com/dotnet/iot/tree/main/src/devices/Mcp3008/samples)
 
 Code sample for [measuring pressure/squeezing with Fsr408 and ADC converter MCP3008](Program.cs#L24-L37):
 
@@ -78,6 +78,6 @@ The following elements are used in this sample:
 The sample is based on following resources:
 
 * [FSR data sheet](https://cdn-learn.adafruit.com/assets/assets/000/010/126/original/fsrguide.pdf)
-* [Reading Analog Input from a Potentiometer](https://github.com/dotnet/iot/tree/master/src/devices/Mcp3008/samples) 
+* [Reading Analog Input from a Potentiometer](https://github.com/dotnet/iot/tree/main/src/devices/Mcp3008/samples) 
 * [Using an FSR](https://learn.adafruit.com/force-sensitive-resistor-fsr/using-an-fsr)
 * [Basic Resistor Sensor Reading on Raspberry Pi](https://learn.adafruit.com/basic-resistor-sensor-reading-on-raspberry-pi)

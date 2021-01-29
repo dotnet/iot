@@ -27,7 +27,7 @@ nuget install Iot.Device.Bindings -PreRelease -Source https://pkgs.dev.azure.com
 ```
 ### Official Build Status
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/iot/dotnet.iot.github?branchName=master)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=268&branchName=master)
+[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/iot/dotnet.iot.github?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=268&branchName=main)
 
 ### .NET CLI
 
