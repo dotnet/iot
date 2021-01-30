@@ -90,3 +90,17 @@ For the moment this binding supports GPIO, Analog In, SPI, I2C and DHT on all pl
 - [ ] SPI support for Linux 64
 - [ ] I2C support for Linux 64
 - [ ] GPIO support for Linux 64
+
+## Samples
+
+The samples were mostly tested using an Arduino Nano, but they will certainly also run on an Arduino Uno, which is technically almost identical to the Nano. For 32-Bit ARM-based Arduinos (such as the Due), the latest development firmware could be required (see "Advanced features" above). 
+
+The image below shows the required hardware to run all the tests combined on a breadboard. 
+
+![select branch](./samples/ArduinoSample_Monitor.png)
+
+### Test code
+The project "Arduino.sample" contains a console application that allows testing individual features, such as digital output (blinking LED), digital input (button), analog input or I2C communication.
+
+### Monitor
+The project "Arduino.Monitor" is a simple real-world example. The program can run in the background and shows current environment temperature, CPU usage, CPU temperature and many other data sets on an external display. With this, you can keep an eye on your CPU temperature or the current time while the screen is off or while you're running full-screen games. The prerequisites from the [Hardware Monitor](../HardwareMonitor/README.md) need to be installed as well. 
