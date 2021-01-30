@@ -6,20 +6,33 @@ namespace Iot.Device.Arduino
 {
     public class ClassDeclaration
     {
-        public ClassDeclaration(Type type, int dynamicSize, int staticSize, int newToken, List<ClassMember> members)
+        private readonly List<ClassMember> _members;
+        private readonly List<Type> _interfaces;
+
+        public ClassDeclaration(Type type, int dynamicSize, int staticSize, int newToken, List<ClassMember> members, List<Type> interfaces)
         {
             TheType = type;
             DynamicSize = dynamicSize;
             StaticSize = staticSize;
-            Members = members;
+            _members = members;
             NewToken = newToken;
-            Interfaces = new List<Type>();
+            _interfaces = interfaces;
             Name = type.ToString();
+            ReadOnly = false;
         }
 
         public Type TheType
         {
             get;
+        }
+
+        /// <summary>
+        /// This is set to true if the class is made read-only (i.e copied to flash). No further members can be added in this case
+        /// </summary>
+        public bool ReadOnly
+        {
+            get;
+            internal set;
         }
 
         public int NewToken
@@ -35,16 +48,9 @@ namespace Iot.Device.Arduino
         public int DynamicSize { get; }
         public int StaticSize { get; }
 
-        public List<ClassMember> Members
-        {
-            get;
-            internal set;
-        }
+        public IList<ClassMember> Members => _members.AsReadOnly();
 
-        public List<Type> Interfaces
-        {
-            get;
-        }
+        public IEnumerable<Type> Interfaces => _interfaces;
 
         public bool SuppressInit
         {
@@ -59,6 +65,16 @@ namespace Iot.Device.Arduino
                 // Don't run these init functions, to complicated or depend on native functions
                 return TheType.FullName == "System.SR";
             }
+        }
+
+        public void AddClassMember(ClassMember member)
+        {
+            if (ReadOnly)
+            {
+                throw new NotSupportedException($"Cannot update class {Name}, is read-only");
+            }
+
+            _members.Add(member);
         }
 
         public override string ToString()

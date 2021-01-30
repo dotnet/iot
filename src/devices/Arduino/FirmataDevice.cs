@@ -1466,7 +1466,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, bool isValueType, List<ClassMember> members)
+        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, bool isValueType, IList<ClassMember> members)
         {
             if (_firmataStream == null)
             {
@@ -1625,6 +1625,82 @@ namespace Iot.Device.Arduino
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                 _firmataStream.Flush();
                 Thread.Sleep(100);
+            }
+        }
+
+        public void CopyToFlash()
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            lock (_synchronisationLock)
+            {
+                _dataReceived.Reset();
+                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)ExecutorCommand.CopyToFlash);
+                _firmataStream.WriteByte(0); // Command length must be at least 3 for IL commands
+                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                _firmataStream.Flush();
+                WaitAndHandleIlCommandReply(ExecutorCommand.CopyToFlash);
+            }
+        }
+
+        public void WriteFlashHeader(int dataVersion, int hashCode)
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            lock (_synchronisationLock)
+            {
+                _dataReceived.Reset();
+                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)ExecutorCommand.WriteFlashHeader);
+                SendInt32(dataVersion);
+                SendInt32(hashCode);
+                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                _firmataStream.Flush();
+                WaitAndHandleIlCommandReply(ExecutorCommand.WriteFlashHeader);
+            }
+        }
+
+        public bool IsMatchingFirmwareLoaded(int dataVersion, int hashCode)
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            lock (_synchronisationLock)
+            {
+                _dataReceived.Reset();
+                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)ExecutorCommand.CheckFlashVersion);
+                SendInt32(dataVersion);
+                SendInt32(hashCode);
+                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                _firmataStream.Flush();
+                bool result = _dataReceived.WaitOne(ProgrammingTimeout);
+                if (result == false)
+                {
+                    throw new TimeoutException($"Arduino failed to accept IL command {ExecutorCommand.CheckFlashVersion}.");
+                }
+
+                if (_lastIlExecutionError != 0)
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
 

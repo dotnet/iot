@@ -24,6 +24,10 @@ namespace Iot.Device.Arduino
         ClassDeclarationEnd = 9, // Last part of class declaration
         ConstantData = 10,
         Interfaces = 11,
+        CopyToFlash = 12,
+
+        WriteFlashHeader = 13,
+        CheckFlashVersion = 14,
 
         Nack = 0x7e,
         Ack = 0x7f,
@@ -103,6 +107,7 @@ namespace Iot.Device.Arduino
 
     public sealed class ArduinoCsCompiler : IDisposable
     {
+        private const int DataVersion = 1;
         // These classes substitute (part of) a framework class
         private readonly ArduinoBoard _board;
         private readonly List<IArduinoTask> _activeTasks;
@@ -255,6 +260,11 @@ namespace Iot.Device.Arduino
             return new ExecutionSet(this);
         }
 
+        /// <summary>
+        /// This adds a set of low-level methods to the execution set. These are intended to be copied to flash, as they will be used
+        /// by many programs. We call the method set constructed here "the kernel".
+        /// </summary>
+        /// <param name="set">Execution set</param>
         public void PrepareLowLevelInterface(ExecutionSet set)
         {
             void AddMethod(MethodInfo method, NativeMethod nativeMethod)
@@ -355,6 +365,8 @@ namespace Iot.Device.Arduino
 
             PrepareClass(set, typeof(System.Array));
 
+            PrepareClass(set, typeof(System.Object));
+
             // We'll always need to provide these methods, or we'll get into trouble because they're not explicitly used before anything that depends on
             // them in the runtime
             type = typeof(System.Object);
@@ -364,6 +376,9 @@ namespace Iot.Device.Arduino
             AddMethod(replacementMethodInfo, NativeMethod.ObjectToString);
             replacementMethodInfo = type.GetMethod("GetHashCode")!;
             AddMethod(replacementMethodInfo, NativeMethod.ObjectGetHashCode);
+
+            // Finally, mark this set as "the kernel"
+            set.CreateKernelSnapShot();
         }
 
         public void PrepareClass(ExecutionSet set, Type classType)
@@ -427,11 +442,10 @@ namespace Iot.Device.Arduino
 
             var sizeOfClass = GetClassSize(classType);
 
-            var interfaces = classType.GetInterfaces();
+            var interfaces = classType.GetInterfaces().ToList();
 
             // Add this first, so we break the recursion to this class further down
-            var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes);
-            newClass.Interfaces.AddRange(interfaces);
+            var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
             set.AddClass(newClass);
             foreach (var iface in interfaces)
             {
@@ -491,6 +505,8 @@ namespace Iot.Device.Arduino
 
                 PrepareCodeInternal(set, cctor, null);
             }
+
+            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
         }
 
         /// <summary>
@@ -569,16 +585,24 @@ namespace Iot.Device.Arduino
                         PrepareCodeInternal(set, mb, null);
 
                         List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x)).ToList();
-                        cls.Members.Add(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb), baseTokens));
+                        cls.AddClassMember(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb), baseTokens));
                     }
                 }
             }
         }
 
-        internal void SendClassDeclarations(ExecutionSet set)
+        /// <summary>
+        /// Send all class declaration from from to to.
+        /// </summary>
+        /// <param name="set">Execution set</param>
+        /// <param name="fromSnapShot">Elements to skip (already loaded)</param>
+        /// <param name="toSnapShot">Elements to include (must be a superset of <paramref name="fromSnapShot"/>)</param>
+        internal void SendClassDeclarations(ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot)
         {
             int idx = 0;
-            foreach (var c in set.Classes.OrderBy(x => x.NewToken))
+            // Include all elements that are not in from but in to. Do not include elements in neither collection.
+            var list = set.Classes.Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.NewToken) && toSnapShot.AlreadyAssignedTokens.Contains(x.NewToken));
+            foreach (var c in list.OrderBy(x => x.NewToken))
             {
                 var cls = c.TheType;
                 Int32 parentToken = 0;
@@ -1169,7 +1193,7 @@ namespace Iot.Device.Arduino
             where T : Delegate
         {
             var exec = CreateExecutionSet();
-            exec.SuppressType("System.Number");
+            // exec.SuppressType("System.Number");
             PrepareLowLevelInterface(exec);
             PrepareClass(exec, mainClass);
             PrepareCodeInternal(exec, mainEntryPoint.Method, null);
@@ -1177,7 +1201,6 @@ namespace Iot.Device.Arduino
             exec.MainEntryPointInternal = mainEntryPoint.Method;
             _board.Log($"Estimated program memory usage before finalization: {exec.EstimateRequiredMemory()} bytes.");
             FinalizeExecutionSet(exec);
-            _board.Log($"Estimated program memory usage: {exec.EstimateRequiredMemory()} bytes.");
             return exec;
         }
 
@@ -1629,6 +1652,21 @@ namespace Iot.Device.Arduino
             }
 
             _activeExecutionSet = executionSet;
+        }
+
+        public void CopyToFlash()
+        {
+            _board.Firmata.CopyToFlash();
+        }
+
+        public bool BoardHasKernelLoaded(ExecutionSet executionSet)
+        {
+            return _board.Firmata.IsMatchingFirmwareLoaded(DataVersion, executionSet.GetHashCode());
+        }
+
+        public void WriteFlashHeader(ExecutionSet executionSet)
+        {
+            _board.Firmata.WriteFlashHeader(DataVersion, executionSet.GetHashCode());
         }
     }
 }

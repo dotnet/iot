@@ -33,12 +33,14 @@ namespace Iot.Device.Arduino
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
         private readonly Dictionary<int, string> _strings;
+        private static readonly SnapShot EmptySnapShot = new SnapShot(new List<int>());
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
         private int _nextToken;
         private int _nextGenericToken;
         private int _nextStringToken;
+        private SnapShot _kernelSnapShot;
 
         public ExecutionSet(ArduinoCsCompiler compiler)
         {
@@ -62,6 +64,7 @@ namespace Iot.Device.Arduino
 
             _numDeclaredMethods = 0;
             _entryPoint = null!;
+            _kernelSnapShot = EmptySnapShot;
             MainEntryPointInternal = null;
         }
 
@@ -81,6 +84,19 @@ namespace Iot.Device.Arduino
 
         public void Load()
         {
+            if (!_compiler.BoardHasKernelLoaded(this))
+            {
+                _compiler.ClearAllData(true);
+                _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot);
+                _compiler.CopyToFlash();
+                _compiler.WriteFlashHeader(this);
+            }
+
+            Load(_kernelSnapShot, CreateSnapShot());
+        }
+
+        private void Load(SnapShot from, SnapShot to)
+        {
             if (MainEntryPointInternal == null)
             {
                 throw new InvalidOperationException("Main entry point not defined");
@@ -89,7 +105,7 @@ namespace Iot.Device.Arduino
             // TODO: This should not be necessary later
             _compiler.ClearAllData(true);
             _compiler.SetExecutionSetActive(this);
-            _compiler.SendClassDeclarations(this);
+            _compiler.SendClassDeclarations(this, from, to);
             _compiler.SendMethods(this);
             List<(int Token, byte[] Data)> converted = new List<(int Token, byte[] Data)>();
             // Need to do this manually, due to stupid nullability conversion restrictions
@@ -115,7 +131,33 @@ namespace Iot.Device.Arduino
         /// </summary>
         internal SnapShot CreateSnapShot()
         {
-            return new SnapShot(_nextToken, _nextGenericToken, _nextStringToken);
+            List<int> tokens = new List<int>();
+            // TODO: Uncomment once these can also be stored to flash
+            // tokens.AddRange(_patchedMethodTokens.Values);
+            // tokens.AddRange(_patchedFieldTokens.Values.Select(x => x.Token));
+            tokens.AddRange(_patchedTypeTokens.Values);
+            return new SnapShot(tokens);
+        }
+
+        internal void CreateKernelSnapShot()
+        {
+            // Complete the classes in the execution set - we won't be able to extend them later.
+            for (int i = 0; i < _classes.Count; i++)
+            {
+                var c = _classes[i];
+                foreach (var m in c.TheType.GetMethods(BindingFlags.Public))
+                {
+                    // Add all ctors and all virtual members (the others are not assigned to classes in our metadata)
+                    if (m.IsConstructor || m.IsVirtual || m.IsAbstract)
+                    {
+                        _compiler.PrepareCodeInternal(this, m, null);
+                    }
+                }
+            }
+
+            _compiler.FinalizeExecutionSet(this);
+
+            _kernelSnapShot = CreateSnapShot();
         }
 
         public void SuppressType(Type t)
@@ -694,29 +736,31 @@ namespace Iot.Device.Arduino
             return _methods.First(x => x.MethodBase == methodInfo);
         }
 
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                long size = EstimateRequiredMemory(out var details);
+                size ^= details.Count;
+                size ^= _methods.Sum(x => x.Token);
+                size ^= _strings.Sum(x => x.Value.GetHashCode());
+                size ^= _classes.Count;
+                return (int)size;
+            }
+        }
+
         public sealed class SnapShot
         {
-            public SnapShot(int nextToken, int nextGenericToken, int nextStringToken)
+            public SnapShot(List<int> alreadyAssignedTokens)
             {
-                NextToken = nextToken;
-                NextGenericToken = nextGenericToken;
-                NextStringToken = nextStringToken;
+                AlreadyAssignedTokens = alreadyAssignedTokens;
             }
 
-            public int NextToken
+            public List<int> AlreadyAssignedTokens
             {
                 get;
             }
 
-            public int NextGenericToken
-            {
-                get;
-            }
-
-            public int NextStringToken
-            {
-                get;
-            }
         }
     }
 }
