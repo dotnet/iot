@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Globalization;
@@ -20,17 +23,6 @@ namespace Iot.Device.Arduino.Sample
             _display.BlinkingCursorVisible = false;
             _display.UnderlineCursorVisible = false;
             _display.Clear();
-            ////for (int i = 0; i < 16; i++)
-            ////{
-            ////    for (int j = 0; j < 16; j++)
-            ////    {
-            ////        Span<byte> b = new Span<byte>(new byte[] { (byte)(j + i * 16) });
-            ////        _display.Write(b);
-            ////    }
-
-            ////    Console.ReadKey();
-            ////    _display.Clear();
-            ////}
 
             _textController = new LcdConsole(_display, "SplC780", false);
             _textController.Clear();

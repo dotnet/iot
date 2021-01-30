@@ -6,7 +6,7 @@ namespace Iot.Device.Arduino
     /// <summary>
     /// Primary firmata commands
     /// </summary>
-    public enum FirmataCommand : byte
+    internal enum FirmataCommand : byte
     {
         /// <summary>
         /// Digital pins have changed
