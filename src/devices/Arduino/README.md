@@ -17,21 +17,23 @@ You need to upload a special sketch to the Arduino. This sketch implements the "
 The binding requires Firmata Version 2.6, which is implemented i.e. by the ConfigurableFirmata project. 
 - Open the Arduino IDE
 - Go to the library manager and check that you have the "ConfigurableFirmata" library installed
-- Open "ConfigurableFirmata.ino" from the device binding folder or go to http://firmatabuilder.com/ to create your own custom firmata firmware. Make sure you have at least the features checked that you will need.
+- Open "ConfigurableFirmata.ino" from the [device binding folder](./ConfigurableFirmata/ConfigurableFirmata.ino) or go to http://firmatabuilder.com/ to create your own custom firmata firmware. Make sure you have at least the features checked that you will need.
 - Upload this sketch to your Arduino. 
 
-After these steps, you can start coding with Iot.Devices.Arduino and make your Arduino do whatever you want, from blinking LEDS to your personal weather station. For usage and examples see the samples folder. Note that ConfigurableFirmata uses a default UART speed of 57600 baud. It is recommended to increase it to 115200, though. 
+After these steps, you can start coding with Iot.Devices.Arduino and make your Arduino do whatever you want, from blinking LEDS to your personal weather station. For usage and examples see the samples folder. Note that ConfigurableFirmata uses a default UART speed of 57600 baud. It is recommended to increase it to at least 115200, though. 
+
+When the firmware starts, the on-board-LED flashes a few times, indicating the loaded firmware version (currently 2 + 11 blinks). After that, the board will enter idle state and wait for connections. 
+
 ### Advanced features
-Some of the features require extended features on the Arduino firmware. These include SPI support and DHT sensor support. These features didn't make it 
-into the main branch yet, therefore these additional steps are required:
+Some of the features of this binding require extended features on the Arduino firmware. These include SPI support and DHT sensor support. These features didn't make it into the main Firmata branch yet, therefore these additional steps are required:
 - Go to C:\users\<username>\documents\arduino\libraries and delete the "ConfigurableFirmata" folder (save any work if you've changed anything there)
 - Replace it with a clone of https://github.com/pgrawehr/ConfigurableFirmata and switch to branch "develop". 
 - Make sure you have the "DHT Sensor Library" from Adafruit installed (use the library manager for that).
-- You can now enable the DHT and SPI features at the beginning of the ConfigurableFirmata.ino file.
+- You can now enable the DHT and SPI features at the beginning of the ConfigurableFirmata.ino file. Because the new firmware will have additional features, it is recommended to use the .ino file from the examples folder of the repository. So the best start is to open the file that now lies in C:\users\<username>\documents\arduino\libraries\ConfigurableFirmata\examples\ConfigurableFirmata\ConfigurableFirmata.ino. The file has some comments at the top to enable or disable certain modules.
 - Compile and re-upload the sketch. 
 
 ## Usage
-See the example for advanced usage instructions. 
+See the examples for some advanced use cases. 
 
 Basic start:
 ```
@@ -69,7 +71,7 @@ Basic start:
             }
  ```
  
-On Windows, only one application can use the serial port at a time, therefore you'll get "permission denied" errors when you try to run your program while i.e. the Serial Port Monitor of the Arduino IDE is open when you start your program. On the other hand, trying to upload a new sketch while the program runs will also fail.
+On Windows, only one application can use the serial port at a time, therefore you'll get "permission denied" errors when you try to run your program while i.e. the Serial Port Monitor of the Arduino IDE is open when you start your program. On the other hand, trying to upload a new sketch while the program runs will also fail. Note that the serial port monitor is of little use when the firmata firmware is loaded, since the communication protocol uses a binary format. Most of the output therefore will look like garbage. 
 
 ## Known limitations
 
