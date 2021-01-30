@@ -56,7 +56,7 @@ namespace Iot.Device.QwiicButton.Samples
             Console.WriteLine("5. Libgpiod");
             Console.WriteLine();
 
-            string sampleNumber = Console.ReadLine();
+            var sampleNumber = Console.ReadLine();
             if (string.IsNullOrWhiteSpace(sampleNumber))
             {
                 sampleNumber = "0";
