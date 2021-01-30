@@ -315,14 +315,25 @@ namespace Iot.Device.CharacterLcd
                 { 'Χ', (byte)'X' },
             };
 
+            void AddToAllMaps(char c, char c1)
+            {
+                DefaultCustomMap.Add(c, (byte)c1);
+                DefaultA00Map.Add(c, (byte)c1);
+                DefaultA02Map.Add(c, (byte)c1);
+                DefaultSplC780Map.Add(c, (byte)c1);
+            }
+
             // Inserts ASCII characters ' ' to 'z', which are common to most known character sets
             for (char c = ' '; c <= 'z'; c++)
             {
-                DefaultCustomMap.Add(c, (byte)c);
-                DefaultA00Map.Add(c, (byte)c);
-                DefaultA02Map.Add(c, (byte)c);
-                DefaultSplC780Map.Add(c, (byte)c);
+                AddToAllMaps(c, c);
             }
+
+            AddToAllMaps('’', '\'');
+            AddToAllMaps('‚', '\'');
+            AddToAllMaps('‘', '\'');
+            AddToAllMaps('„', '\"');
+            AddToAllMaps('“', '\"');
 
             DefaultA00Map.Remove('\\'); // Instead of the backspace, the Yen letter is in the map, but we can use char 164 instead
             DefaultA00Map.Add('\\', 164);
@@ -862,7 +873,7 @@ namespace Iot.Device.CharacterLcd
                     0b_10001,
                     0b_01110,
                     0b_00000),
-            _ => throw new Exception("Character encoding not supported"),
+            _ => throw new NotSupportedException("Character not supported"),
         };
 
         /// <summary>
@@ -874,7 +885,7 @@ namespace Iot.Device.CharacterLcd
         /// Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
         /// </remarks>
         // TODO: Create letters for A02 map, but that one is a lot better equipped for european languages, so nothing to do for the currently supported languages
-        protected virtual byte[]? CreateLetterA02(char character) => null;
+        protected virtual byte[]? CreateLetterA02(char character) => throw new NotSupportedException("Character not supported");
 
         /// <summary>
         /// Combines a set of bytes into a pixel map
