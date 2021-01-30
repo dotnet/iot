@@ -7,9 +7,13 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 
+// Disable missing documentation warning in sample
 #pragma warning disable CS1591
 namespace Arduino.Samples
 {
+    /// <summary>
+    /// This stream saves all outgoing messages so they can be later replayed.
+    /// </summary>
     public class DebugLogStream : Stream
     {
         private readonly Stream _streamImplementation;
