@@ -4,9 +4,9 @@
 using System.Device.Spi;
 using System.Device.Gpio;
 using System.Device.Pwm.Drivers;
-using System.Drawing;
 using System.IO;
 using System.Device.Pwm;
+using System.Drawing;
 using System;
 using System.Threading;
 using Iot.Device.Display;
@@ -19,7 +19,7 @@ Console.WriteLine("  2. FT4222");
 var platformChoice = Console.ReadKey();
 Console.WriteLine();
 
-if (platformChoice is not object or { KeyChar: not('1' or '2') })
+if (platformChoice is not object or { KeyChar: not ('1' or '2') })
 {
     Console.WriteLine("You have to choose a valid platform");
     return;
@@ -74,14 +74,14 @@ if (platformChoice.KeyChar == '1')
 {
     PwmChannel? pwmChannel = pwmPin >= 0 ? PwmChannel.Create(0, pwmPin) : null;
     SpiDevice spi = SpiDevice.Create(spiConnection);
-    lcd = new(dataCommandPin, resetPin, spi, pwmChannel);
+    lcd = new(dataCommandPin, spi, resetPin, pwmChannel);
 }
 else
 {
     gpio = new(PinNumberingScheme.Logical, new Ft4222Gpio());
     Ft4222Spi ft4222Spi = new(spiConnection);
     SoftwarePwmChannel? softPwm = pwmPin >= 0 ? new(pwmPin, 1000, usePrecisionTimer: true, controller: gpio, shouldDispose: false, dutyCycle: 0) : null;
-    lcd = new(dataCommandPin, resetPin, ft4222Spi, softPwm, gpio, false);
+    lcd = new(dataCommandPin, ft4222Spi, resetPin, softPwm, gpio, false);
 }
 
 if (lcd is not object)
@@ -115,18 +115,18 @@ lcd.Contrast = 40;
 lcd.Clear();
 
 lcd.WriteLine("Test temp 0");
-lcd.Temperature = Iot.Device.Display.Pcd8544Enums.Temperature.Coefficient0;
+lcd.Temperature = Iot.Device.Display.Pcd8544Enums.ScreenTemperature.Coefficient0;
 Thread.Sleep(1500);
 lcd.WriteLine("Test temp 1");
-lcd.Temperature = Iot.Device.Display.Pcd8544Enums.Temperature.Coefficient1;
+lcd.Temperature = Iot.Device.Display.Pcd8544Enums.ScreenTemperature.Coefficient1;
 Thread.Sleep(1500);
 lcd.WriteLine("Test temp 2");
-lcd.Temperature = Iot.Device.Display.Pcd8544Enums.Temperature.Coefficient2;
+lcd.Temperature = Iot.Device.Display.Pcd8544Enums.ScreenTemperature.Coefficient2;
 Thread.Sleep(1500);
 lcd.WriteLine("Test temp 3");
-lcd.Temperature = Iot.Device.Display.Pcd8544Enums.Temperature.Coefficient3;
+lcd.Temperature = Iot.Device.Display.Pcd8544Enums.ScreenTemperature.Coefficient3;
 Thread.Sleep(1500);
-lcd.Temperature = Iot.Device.Display.Pcd8544Enums.Temperature.Coefficient0;
+lcd.Temperature = Iot.Device.Display.Pcd8544Enums.ScreenTemperature.Coefficient0;
 lcd.Clear();
 
 lcd.Write("Display is on and will switch on and off");
@@ -155,7 +155,7 @@ lcd.Write("last line");
 // this will blink the screen
 for (int i = 0; i < 6; i++)
 {
-    lcd.InverseMode = !lcd.InverseMode;
+    lcd.InvertedColors = !lcd.InvertedColors;
     Thread.Sleep(1000);
 }
 
@@ -180,7 +180,7 @@ for (byte i = 0; i < 2; i++)
     Thread.Sleep(1000);
     // Shows the first bitmap
     lcd.SetByteMap(bitmap1);
-    lcd.Refresh();
+    lcd.Draw();
     Thread.Sleep(1500);
 
     lcd.SetCursorPosition(0, 0);
@@ -191,7 +191,7 @@ for (byte i = 0; i < 2; i++)
     Thread.Sleep(1000);
     // Shows the second bitmap
     lcd.SetByteMap(bitmap2);
-    lcd.Refresh();
+    lcd.Draw();
     Thread.Sleep(1500);
     lcd.SetCursorPosition(0, 0);
     lcd.WriteLine("Large picture");
@@ -201,7 +201,7 @@ for (byte i = 0; i < 2; i++)
     Thread.Sleep(1000);
     // Shows the second bitmap
     lcd.SetByteMap(bitmap3);
-    lcd.Refresh();
+    lcd.Draw();
     Thread.Sleep(1500);
 }
 
@@ -237,7 +237,7 @@ lcd.DrawLine(0, 0, 15, 35, true);
 lcd.DrawRectangle(10, 30, 10, 20, true, true);
 lcd.DrawRectangle(12, 32, 6, 16, false, true);
 // You should not forget to refresh to draw everything
-lcd.Refresh();
+lcd.Draw();
 Thread.Sleep(2000);
 lcd.Clear();
 
@@ -248,15 +248,20 @@ gpio?.Dispose();
 
 byte[] BitmapToByteArray(Bitmap bitmap)
 {
+    if (bitmap is not object)
+    {
+        throw new ArgumentNullException(nameof(bitmap));
+    }
+
     if ((bitmap.Width != Pcd8544.PixelScreenSize.Width) || (bitmap.Height != Pcd8544.PixelScreenSize.Height))
     {
         throw new ArgumentException($"{nameof(bitmap)} should be same size as the screen {Pcd8544.PixelScreenSize.Width}x{Pcd8544.PixelScreenSize.Height}");
     }
 
-    byte[] toReturn = new byte[Pcd8544.ScreenSizeBytes];
+    byte[] toReturn = new byte[Pcd8544.ScreenBufferByteSize];
     int width = Pcd8544.Size.Width;
     Color colWhite = Color.FromArgb(255, 255, 255, 255);
-    for (int position = 0; position < Pcd8544.ScreenSizeBytes; position++)
+    for (int position = 0; position < Pcd8544.ScreenBufferByteSize; position++)
     {
         byte toStore = 0;
         for (int bit = 0; bit < 8; bit++)

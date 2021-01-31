@@ -6,7 +6,7 @@ namespace Iot.Device.Display.Pcd8544Enums
     /// <summary>
     /// Temperature set for the PCD8544
     /// </summary>
-    public enum Temperature
+    public enum ScreenTemperature
     {
         /// <summary>Temperature Coefficient 0</summary>
         Coefficient0 = 0b0000_0100,

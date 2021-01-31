@@ -1,4 +1,4 @@
-# PCD8544 - 48 × 84 pixels matrix LCD
+# PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen
 
 This is the famous screen that Nokia 5110 used. It's a SPI based device. This Nokia 5110 was very popular and many of us used to have it in their hands and that young generation have seen it in pictures. This LCD is quite cheap and easy to use.
 
@@ -30,8 +30,10 @@ Pcd8544 lcd = new(27, 22, spi, pwmChannel);
 If you don't want neither a PWM neither a reset pin, you can then pass a negative pin number for reset and null for the PWM:
 
 ```csharp
-lcd = new(27, -1, spi, null);
+lcd = new(27, spi, -1, null);
 ```
+
+Not that there is as well the possibility to pass a normal pin number for the backlight. In this case, the light will be on once the `BacklightBrightness` property if more then 0.5, otherwise off.
 
 ## Displaying text
 
@@ -60,8 +62,8 @@ lcd.DrawPoint(5, 5, true);
 lcd.DrawLine(0, 0, 15, 35, true);
 lcd.DrawRectangle(10, 30, 10, 20, true, true);
 lcd.DrawRectangle(12, 32, 6, 16, false, true);
-// You should not forget to refresh to draw everything
-lcd.Refresh();
+// You should not forget to draw what you have in memory
+lcd.Draw();
 ```
 
 Each can take `Point`, `Size` and `Rectangle` as well as input. You have to decide if you want to have the point on or off and if you fill or not the rectangle.
@@ -118,7 +120,7 @@ Note: you may want to reverse the colors first depending on what you want.
 
 ## Advance functions
 
-You can adjust couple of factors like `Bias`,  `Temperature`, `Contrast` and `Brightness`. Teh [samples](./samples/Program.cs) will run thru all of them so you can understand the impact of each of them.
+You can adjust couple of factors like `Bias`,  `Temperature`, `Contrast` and `Brightness`. The [samples](./samples/Program.cs) will run thru all of them so you can understand the impact of each of them. The `Bias` will increase the voltage and darken the screen.
 
 In general, it is recommended to leave Temperature to the 0 coefficient, if you are in normal conditions. The Bias can be left to 4 as well as a default value for normal conditions.
 
@@ -135,12 +137,12 @@ Brightness goes from 0.0 to 0.1f.
 lcd.BacklightBrightness = 0.2f;
 ```
 
-### InverseMode
+### InvertedColors
 
 An invert mode is available, it just revert the screen colors. So white pixels become black and vice versa
 
 ```csharp
-lcd.InverseMode = true;
+lcd.InvertedColors = true;
 ```
 
 ### Enabled

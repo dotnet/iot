@@ -5,21 +5,21 @@ using System;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Device.Pwm;
-using System.Threading;
 using System.Drawing;
+using System.Threading;
 using Iot.Device.Display.Pcd8544Enums;
 
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// PCD8544 - 48 × 84 pixels matrix LCD
+    /// PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen
     /// </summary>
     public class Pcd8544 : IDisposable
     {
         /// <summary>
-        /// Size of the screen 48 x 84 / 8
+        /// Size of the screen 48 x 84 / 8 in bytes
         /// </summary>
-        public const int ScreenSizeBytes = 504;
+        public const int ScreenBufferByteSize = 504;
 
         /// <summary>
         /// The size of the screen in terms of characters
@@ -27,17 +27,18 @@ namespace Iot.Device.Display
         public static Size Size => new Size(84, 6);
 
         /// <summary>
-        /// The size of the screen in terms of characters
+        /// The size of the screen in terms of pixels
         /// </summary>
         public static Size PixelScreenSize => new Size(84, 48);
 
         /// <summary>
-        /// Number of color per pixel
+        /// Number of bit per pixel for the color
         /// </summary>
-        public const int ColorPerPixel = 1;
+        public const int ColorBitPerPixel = 1;
 
         private int _dataCommandPin;
         private int _resetPin;
+        private int _backlightPin;
         private PwmChannel? _pwmBacklight;
         private SpiDevice _spiDevice;
         private GpioController _controller;
@@ -50,18 +51,18 @@ namespace Iot.Device.Display
         private byte[] _byteMap = new byte[504];
         private byte _bias;
         private bool _enabled;
-        private Temperature _temperature;
+        private ScreenTemperature _temperature;
 
         /// <summary>
         /// Create Pcd8544
         /// </summary>
         /// <param name="dataCommandPin">The data command pin.</param>
-        /// <param name="resetPin">The reset pin. Use a negative number if you don't want to use it</param>
         /// <param name="spiDevice">The SPI device.</param>
+        /// <param name="resetPin">The reset pin. Use a negative number if you don't want to use it</param>
         /// <param name="pwmBacklight">The PWM channel for the back light</param>
         /// <param name="gpioController">The GPIO Controller.</param>
         /// <param name="shouldDispose">True to dispose the GPIO controller</param>
-        public Pcd8544(int dataCommandPin, int resetPin, SpiDevice spiDevice, PwmChannel? pwmBacklight = null, GpioController? gpioController = null, bool shouldDispose = true)
+        public Pcd8544(int dataCommandPin, SpiDevice spiDevice, int resetPin = -1, PwmChannel? pwmBacklight = null, GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (dataCommandPin < 0)
             {
@@ -75,7 +76,7 @@ namespace Iot.Device.Display
             _shouldDispose = gpioController == null || shouldDispose;
             _controller = gpioController ?? new();
             _resetPin = resetPin;
-            if (resetPin > 0)
+            if (resetPin >= 0)
             {
                 _controller.OpenPin(resetPin, PinMode.Output);
                 _controller.Write(resetPin, PinValue.Low);
@@ -89,16 +90,58 @@ namespace Iot.Device.Display
             Initialize();
         }
 
+        /// <summary>
+        /// Create Pcd8544
+        /// </summary>
+        /// <param name="dataCommandPin">The data command pin.</param>
+        /// <param name="spiDevice">The SPI device.</param>
+        /// <param name="resetPin">The reset pin. Use a negative number if you don't want to use it</param>
+        /// <param name="backlightPin">The pin back light</param>
+        /// <param name="gpioController">The GPIO Controller.</param>
+        /// <param name="shouldDispose">True to dispose the GPIO controller</param>
+        public Pcd8544(int dataCommandPin, SpiDevice spiDevice, int resetPin = -1, int backlightPin = -1, GpioController? gpioController = null, bool shouldDispose = true)
+        {
+            if (dataCommandPin < 0)
+            {
+                throw new ArgumentException($"{nameof(dataCommandPin)} must be a valid pin number");
+            }
+
+            _dataCommandPin = dataCommandPin;
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
+            _shouldDispose = gpioController == null || shouldDispose;
+            _controller = gpioController ?? new();
+            _resetPin = resetPin;
+            if (resetPin >= 0)
+            {
+                _controller.OpenPin(resetPin, PinMode.Output);
+                _controller.Write(resetPin, PinValue.Low);
+                // Doc says at least 100 ns
+                Thread.Sleep(1);
+                _controller.Write(resetPin, PinValue.High);
+            }
+
+            _backlightPin = backlightPin;
+            if (backlightPin >= 0)
+            {
+                _controller.OpenPin(backlightPin, PinMode.Output);
+                _controller.Write(backlightPin, PinValue.Low);
+            }
+
+            _controller.OpenPin(_dataCommandPin, PinMode.Output);
+
+            Initialize();
+        }
+
         private void Initialize()
         {
             _bias = 4;
-            _temperature = Temperature.Coefficient0;
+            _temperature = ScreenTemperature.Coefficient0;
             _contrast = 0x30;
             _enabled = true;
             // Extended function, contrast to 0x30, temperature to coef 0, bias to 4, Screen to normal display power on, display to normal mode
-            SpiWrite(false, new byte[] { (byte)(FunctionSet.PowerOn | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast), (byte)Temperature.Coefficient0, (byte)(0x10 | _bias), (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode });
+            SpiWrite(false, new byte[] { (byte)(FunctionSet.PowerOn | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast), (byte)ScreenTemperature.Coefficient0, (byte)(0x10 | _bias), (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode });
             Clear();
-            Refresh();
+            Draw();
         }
 
         #region properties
@@ -118,24 +161,30 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
-        /// Change the back light from 0 to 100
+        /// Change the back light from 0.0 to 1.0.
+        /// If a pin is used, the threshold for full light is more then 0.5.
         /// </summary>
         public float BacklightBrightness
         {
             get => _backlightVal;
             set
             {
+                _backlightVal = value > 1 ? 1 : value;
+                _backlightVal = _backlightVal < 0 ? 0 : _backlightVal;
                 if (_pwmBacklight != null)
                 {
-                    _backlightVal = value > 1 ? 1 : value;
-                    _backlightVal = _backlightVal < 0 ? 0 : _backlightVal;
                     _pwmBacklight.DutyCycle = _backlightVal;
+                }
+
+                if (_backlightPin >= 0)
+                {
+                    _controller.Write(_backlightPin, _backlightVal > 0.5 ? PinValue.High : PinValue.Low);
                 }
             }
         }
 
         /// <summary>
-        /// The bias for 0 to 7
+        /// The bias for 0 to 7. Bias represent the voltage applied to the LCD. The highest, the darker the screen will be.
         /// </summary>
         public byte Bias
         {
@@ -150,7 +199,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// True to inverse the screen color
         /// </summary>
-        public bool InverseMode
+        public bool InvertedColors
         {
             get => _invd;
             set
@@ -176,7 +225,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Get or set the temperature coefficient
         /// </summary>
-        public Temperature Temperature
+        public ScreenTemperature Temperature
         {
             get => _temperature;
             set => SpiWrite(false, new byte[] { (byte)(_enabled ? FunctionSet.PowerOn | FunctionSet.ExtendedMode : FunctionSet.PowerOff | FunctionSet.ExtendedMode), (byte)value });
@@ -187,9 +236,9 @@ namespace Iot.Device.Display
         #region Primitive methods
 
         /// <summary>
-        /// Refresh the screen
+        /// Draw what's in memory to the the screen
         /// </summary>
-        public void Refresh() => SpiWrite(true, _byteMap);
+        public void Draw() => SpiWrite(true, _byteMap);
 
         /// <summary>
         /// Clear the screen
@@ -202,7 +251,7 @@ namespace Iot.Device.Display
             }
 
             SetCursorPosition(0, 0);
-            Refresh();
+            Draw();
         }
 
         /// <summary>
@@ -211,9 +260,9 @@ namespace Iot.Device.Display
         /// <param name="byteMap">A 504 sized byte representing the full image</param>
         public void SetByteMap(ReadOnlySpan<byte> byteMap)
         {
-            if (byteMap.Length != ScreenSizeBytes)
+            if (byteMap.Length != ScreenBufferByteSize)
             {
-                throw new ArgumentException($"{nameof(byteMap)} length have to be {ScreenSizeBytes} bytes");
+                throw new ArgumentException($"{nameof(byteMap)} length have to be {ScreenBufferByteSize} bytes");
             }
 
             SetCursorPosition(0, 0);
@@ -230,12 +279,12 @@ namespace Iot.Device.Display
         /// <param name="text">The text to write</param>
         public void Write(string text)
         {
-            byte[] letter = new byte[6];
-            foreach (char c in text.ToCharArray())
+            Span<byte> letter = stackalloc byte[6];
+            foreach (char c in text)
             {
                 // We only display specific characters and ignore the rest
                 // And only if it's in the screen
-                if (_position <= ScreenSizeBytes - 5)
+                if (_position <= ScreenBufferByteSize - 5)
                 {
                     if (c >= 0x20 && c <= 0x7F)
                     {
@@ -245,7 +294,7 @@ namespace Iot.Device.Display
                         }
 
                         letter[5] = 0x00;
-                        SpiWrite(true, letter);
+                        SpiWrite(true, letter.ToArray());
                         _position += 5;
                     }
                 }
@@ -272,9 +321,9 @@ namespace Iot.Device.Display
         /// <param name="text">Text to print</param>
         public void Write(ReadOnlySpan<byte> text)
         {
-            var length = text.Length > ScreenSizeBytes - _position ? ScreenSizeBytes - _position : text.Length;
+            var length = text.Length > ScreenBufferByteSize - _position ? ScreenBufferByteSize - _position : text.Length;
             text.Slice(0, length).CopyTo(_byteMap.AsSpan(_position));
-            Refresh();
+            Draw();
         }
 
         /// <summary>
@@ -465,7 +514,8 @@ namespace Iot.Device.Display
         {
             if (_shouldDispose)
             {
-                _controller.Dispose();
+                _controller?.Dispose();
+                _controller = null!;
             }
             else
             {
@@ -478,10 +528,17 @@ namespace Iot.Device.Display
                 {
                     _controller.ClosePin(_resetPin);
                 }
+
+                if (_controller.IsPinOpen(_backlightPin))
+                {
+                    _controller.ClosePin(_backlightPin);
+                }
             }
 
             _spiDevice.Dispose();
+            _spiDevice = null!;
             _pwmBacklight?.Dispose();
+            _pwmBacklight = null!;
         }
     }
 }
