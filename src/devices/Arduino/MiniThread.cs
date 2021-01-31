@@ -67,5 +67,16 @@ namespace Iot.Device.Arduino
                 return 1;
             }
         }
+
+        [ArduinoImplementation(NativeMethod.None)]
+        public static int GetCurrentProcessorId()
+        {
+            return 0;
+        }
+
+        public void Join()
+        {
+            // Threads are not yet supported
+        }
     }
 }

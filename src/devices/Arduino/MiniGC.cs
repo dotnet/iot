@@ -23,5 +23,17 @@ namespace Iot.Device.Arduino
         {
             // No op (we're not running any finalizers)
         }
+
+#if !NETCOREAPP2_1
+        public static GCMemoryInfo GetGCMemoryInfo()
+        {
+            return new GCMemoryInfo();
+        }
+
+        public static GCMemoryInfo GetGCMemoryInfo(GCKind kind)
+        {
+            return new GCMemoryInfo();
+        }
+#endif
     }
 }

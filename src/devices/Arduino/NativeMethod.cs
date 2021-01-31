@@ -79,6 +79,8 @@ namespace Iot.Device.Arduino
         TypeGetGenericTypeDefinition,
         TypeGetGenericArguments,
         TypeCreateInstanceForAnotherGenericParameter,
+        TypeIsArray,
+        TypeGetElementType,
 
         ValueTypeGetHashCode,
         ValueTypeEquals,

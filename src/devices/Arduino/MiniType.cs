@@ -42,11 +42,28 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public virtual bool IsArray
+        {
+            [ArduinoImplementation(NativeMethod.TypeIsArray)]
+            get
+            {
+                return false;
+            }
+        }
+
         public Assembly? Assembly
         {
             get
             {
                 return null;
+            }
+        }
+
+        public virtual string? FullName
+        {
+            get
+            {
+                return "Undefined";
             }
         }
 
@@ -155,6 +172,17 @@ namespace Iot.Device.Arduino
         public virtual Type GetEnumUnderlyingType()
         {
             return typeof(Int32);
+        }
+
+        [ArduinoImplementation(NativeMethod.TypeGetElementType)]
+        public virtual Type GetElementType()
+        {
+            throw new NotImplementedException();
+        }
+
+        public virtual PropertyInfo[] GetProperties()
+        {
+            throw new NotImplementedException();
         }
 
         [ArduinoImplementation(NativeMethod.TypeCreateInstanceForAnotherGenericParameter)]

@@ -43,6 +43,14 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public static string NewLine
+        {
+            get
+            {
+                return "\n"; // We'll have our "Arduino-OS" look like an unix style system
+            }
+        }
+
         public static OperatingSystem OSVersion
         {
             get
