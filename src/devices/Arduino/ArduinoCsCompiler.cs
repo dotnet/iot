@@ -1706,14 +1706,19 @@ namespace Iot.Device.Arduino
             _board.Firmata.CopyToFlash();
         }
 
-        public bool BoardHasKernelLoaded(ExecutionSet executionSet)
+        /// <summary>
+        /// Returns true if the given kernel snapshot is already installed on the board.
+        /// </summary>
+        /// <param name="snapShot">Kernel snapshot to verify</param>
+        /// <returns>True if the given snapshot is loaded, false if either no kernel is loaded or its checksum doesn't match</returns>
+        public bool BoardHasKernelLoaded(ExecutionSet.SnapShot snapShot)
         {
-            return _board.Firmata.IsMatchingFirmwareLoaded(DataVersion, executionSet.GetHashCode());
+            return _board.Firmata.IsMatchingFirmwareLoaded(DataVersion, snapShot.GetHashCode());
         }
 
-        public void WriteFlashHeader(ExecutionSet executionSet)
+        public void WriteFlashHeader(ExecutionSet.SnapShot snapShot)
         {
-            _board.Firmata.WriteFlashHeader(DataVersion, executionSet.GetHashCode());
+            _board.Firmata.WriteFlashHeader(DataVersion, snapShot.GetHashCode());
         }
     }
 }

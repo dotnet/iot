@@ -33,7 +33,7 @@ namespace Iot.Device.Arduino
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
         private readonly Dictionary<int, string> _strings;
-        private static readonly SnapShot EmptySnapShot = new SnapShot(new List<int>());
+        private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>());
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -84,12 +84,13 @@ namespace Iot.Device.Arduino
 
         public void Load()
         {
-            if (!_compiler.BoardHasKernelLoaded(this))
+            if (!_compiler.BoardHasKernelLoaded(_kernelSnapShot))
             {
+                // Todo: The above also returns false if the kernel is loaded but not matching. Therefore we need to do a full flash erase first
                 _compiler.ClearAllData(true);
                 _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
                 _compiler.CopyToFlash();
-                _compiler.WriteFlashHeader(this);
+                _compiler.WriteFlashHeader(_kernelSnapShot);
             }
 
             Load(_kernelSnapShot, CreateSnapShot());
@@ -136,7 +137,7 @@ namespace Iot.Device.Arduino
             // tokens.AddRange(_patchedMethodTokens.Values);
             // tokens.AddRange(_patchedFieldTokens.Values.Select(x => x.Token));
             tokens.AddRange(_patchedTypeTokens.Values);
-            return new SnapShot(tokens);
+            return new SnapShot(this, tokens);
         }
 
         internal void CreateKernelSnapShot()
@@ -747,24 +748,14 @@ namespace Iot.Device.Arduino
             return result;
         }
 
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                long size = EstimateRequiredMemory(out var details);
-                size ^= details.Count;
-                size ^= Xor(_methods.Select(x => x.Token));
-                size ^= Xor(_strings.Select(x => x.Value.GetHashCode()));
-                size ^= _classes.Count;
-                return (int)size;
-            }
-        }
-
         public sealed class SnapShot
         {
-            public SnapShot(List<int> alreadyAssignedTokens)
+            private readonly ExecutionSet? _set;
+
+            public SnapShot(ExecutionSet? set, List<int> alreadyAssignedTokens)
             {
                 AlreadyAssignedTokens = alreadyAssignedTokens;
+                _set = set;
             }
 
             public List<int> AlreadyAssignedTokens
@@ -772,6 +763,19 @@ namespace Iot.Device.Arduino
                 get;
             }
 
+            public override int GetHashCode()
+            {
+                int ret = AlreadyAssignedTokens.Count;
+                ret ^= Xor(AlreadyAssignedTokens);
+                if (AlreadyAssignedTokens.Count > 0 && _set != null)
+                {
+                    // Add the original token from the last entry in the list (could also add all of them)
+                    var element = _set.InverseResolveToken(AlreadyAssignedTokens[AlreadyAssignedTokens.Count - 1]);
+                    ret ^= element!.MetadataToken;
+                }
+
+                return ret;
+            }
         }
     }
 }
