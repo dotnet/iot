@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using UnitsNet;
@@ -597,7 +598,8 @@ namespace Iot.Device.Arduino
         /// <param name="set">Execution set</param>
         /// <param name="fromSnapShot">Elements to skip (already loaded)</param>
         /// <param name="toSnapShot">Elements to include (must be a superset of <paramref name="fromSnapShot"/>)</param>
-        internal void SendClassDeclarations(ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot)
+        /// <param name="markAsReadOnly">Mark uploaded classes as readonly</param>
+        internal void SendClassDeclarations(ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
             int idx = 0;
             // Include all elements that are not in from but in to. Do not include elements in neither collection.
@@ -621,6 +623,12 @@ namespace Iot.Device.Arduino
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
+
+                if (markAsReadOnly)
+                {
+                    c.ReadOnly = true;
+                }
+
                 idx++;
             }
         }
@@ -798,7 +806,6 @@ namespace Iot.Device.Arduino
                 {
                     if (classType.IsValueType)
                     {
-                        // TODO: Case needs to be handles special, as the memory for it needs to be allocated
                         sizeStatic += sizeOfMember;
                     }
                     else
@@ -811,6 +818,23 @@ namespace Iot.Device.Arduino
                     if (classType.IsValueType)
                     {
                         sizeDynamic += sizeOfMember;
+                    }
+                    else if (f.FieldType.IsValueType)
+                    {
+                        // Storing a value type field in a (non-value-type) class shall use the value size rounded up to 4 or 8
+                        if (sizeOfMember <= 4)
+                        {
+                            sizeDynamic += 4;
+                        }
+                        else
+                        {
+                            if (sizeOfMember % 8 != 0)
+                            {
+                                sizeOfMember = (sizeOfMember + 8) & ~0x7;
+                            }
+
+                            sizeDynamic += sizeOfMember;
+                        }
                     }
                     else
                     {
@@ -1042,14 +1066,37 @@ namespace Iot.Device.Arduino
 
                 // Calculate class size (Note: Can't use GetClassSize here, as this would be recursive)
                 sizeOfMember = 0;
+                // If this attribute is given, use its size property (which is applied ie for empty structures)
+                var attrib = t.StructLayoutAttribute;
+                int attribSize = 0;
+                if (attrib != null && attrib.Size > 0)
+                {
+                    // Minimum size is 4
+                    attribSize = Math.Max(attrib.Size, 4);
+                }
+
                 foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) // Not the static ones
                 {
                     GetVariableType(f.FieldType, out var s);
                     sizeOfMember += s;
                 }
 
+                // If the StructLayoutAttribute gives a bigger size than the field combination, use that one. It seems sometimes the field combination is bigger, maybe due to some unioning, but
+                // that feature is not supported yet.
+                if (attribSize > sizeOfMember)
+                {
+                    sizeOfMember = attribSize;
+                }
+
+                if (sizeOfMember <= 4)
+                {
+                    sizeOfMember = 4;
+                    return VariableKind.Uint32;
+                }
+
                 if (sizeOfMember <= 8)
                 {
+                    sizeOfMember = 8;
                     return VariableKind.Uint64;
                 }
                 else

@@ -87,7 +87,7 @@ namespace Iot.Device.Arduino
             if (!_compiler.BoardHasKernelLoaded(this))
             {
                 _compiler.ClearAllData(true);
-                _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot);
+                _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
                 _compiler.CopyToFlash();
                 _compiler.WriteFlashHeader(this);
             }
@@ -105,7 +105,7 @@ namespace Iot.Device.Arduino
             // TODO: This should not be necessary later
             _compiler.ClearAllData(true);
             _compiler.SetExecutionSetActive(this);
-            _compiler.SendClassDeclarations(this, from, to);
+            _compiler.SendClassDeclarations(this, from, to, false);
             _compiler.SendMethods(this);
             List<(int Token, byte[] Data)> converted = new List<(int Token, byte[] Data)>();
             // Need to do this manually, due to stupid nullability conversion restrictions
@@ -736,14 +736,25 @@ namespace Iot.Device.Arduino
             return _methods.First(x => x.MethodBase == methodInfo);
         }
 
+        private static int Xor(IEnumerable<int> inputs)
+        {
+            int result = 0;
+            foreach (int i in inputs)
+            {
+                result ^= i;
+            }
+
+            return result;
+        }
+
         public override int GetHashCode()
         {
             unchecked
             {
                 long size = EstimateRequiredMemory(out var details);
                 size ^= details.Count;
-                size ^= _methods.Sum(x => x.Token);
-                size ^= _strings.Sum(x => x.Value.GetHashCode());
+                size ^= Xor(_methods.Select(x => x.Token));
+                size ^= Xor(_strings.Select(x => x.Value.GetHashCode()));
                 size ^= _classes.Count;
                 return (int)size;
             }
