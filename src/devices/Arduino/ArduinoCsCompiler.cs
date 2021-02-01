@@ -83,6 +83,7 @@ namespace Iot.Device.Arduino
         RuntimeFieldHandle = 33, // So far this is a pointer to a constant initializer
         RuntimeTypeHandle = 34, // A type handle. The value is a type token
         AddressOfVariable = 35, // An address pointing to a variable slot on another method's stack or arglist
+        FunctionPointer = 36, // A function pointer
         StaticMember = 128, // type is defined by the first value it gets
     }
 
@@ -103,6 +104,8 @@ namespace Iot.Device.Arduino
         Enum = 8,
         Array = 9,
         ByReferenceByte = 10,
+        Delegate = 11,
+        MulticastDelegate = 12,
         LargestKnownTypeToken = 20,
     }
 
@@ -1365,19 +1368,108 @@ namespace Iot.Device.Arduino
             }
 
             var body = methodInfo.GetMethodBody();
-            if (body == null && !methodInfo.IsAbstract)
-            {
-                // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
-                _board.Log($"Error: {methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
-                return;
-            }
-
             bool hasBody = !methodInfo.IsAbstract;
 
-            var ilBytes = body?.GetILAsByteArray();
+            var ilBytes = body?.GetILAsByteArray()!.ToArray();
+
+            bool constructedCode = false;
+            MethodFlags construcedFlags = MethodFlags.None;
+            if (body == null && !methodInfo.IsAbstract)
+            {
+                Type multicastType = typeof(MulticastDelegate);
+                if (multicastType.IsAssignableFrom(methodInfo.DeclaringType))
+                {
+                    // The compiler inserts auto-generated code for the methods of the specific delegate.
+                    // We generate this code here.
+                    hasBody = true;
+                    if (methodInfo.IsConstructor)
+                    {
+                        // find the matching constructor in MulticastDelegate. Actually, we're not using a real constructor, but a method that acts on behalf of it
+                        var methods = multicastType.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                        var baseCtor = methods.Single(x => x.Name == "CtorClosedStatic"); // Implementation is same for static and instance, except for a null test
+
+                        // Make sure this stub method is in memory
+                        PrepareCodeInternal(set, baseCtor, parent);
+                        int token = baseCtor.MetadataToken;
+
+                        // the code we need to generate is
+                        // LDARG.0
+                        // LDARG.1
+                        // LDARG.2
+                        // CALL MulticastDelegate.baseCtor // with the original ctor token!
+                        // RET
+                        byte[] code = new byte[]
+                        {
+                            02, // LDARG.0
+                            03, // LDARG.1
+                            04, // LDARG.2
+                            0x28, // CALL
+                            (byte)(token & 0xFF),
+                            (byte)((token >> 8) & 0xFF),
+                            (byte)((token >> 16) & 0xFF),
+                            (byte)((token >> 24) & 0xFF),
+                            0x2A, // RET
+                        };
+                        ilBytes = code;
+                        constructedCode = true;
+                        construcedFlags = MethodFlags.Ctor;
+                    }
+                    else
+                    {
+                        var args = methodInfo.GetParameters();
+                        Type t = methodInfo.DeclaringType!;
+                        var methodDetail = (MethodInfo)methodInfo;
+                        var targetField = t.GetField("_target", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
+                        var methodPtrField = t.GetField("_methodPtr", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
+                        List<byte> code = new List<byte>();
+                        int numargs = args.Length;
+                        if (methodInfo.IsStatic)
+                        {
+                            throw new InvalidOperationException("The Invoke() method of a delegate cannot be static");
+                        }
+
+                        code.Add((byte)OpCode.CEE_LDARG_0); // This is the this pointer of the delegate. We need to get its _target and _methodPtr references
+
+                        // Leaves the target object on the stack (null for static methods). We'll have to decide in the EE whether we need it or not (meaning whether
+                        // the actual target is static or not)
+                        AddCallWithToken(code, OpCode.CEE_LDFLD, targetField.MetadataToken);
+
+                        // Push all remaining arguments to the stack -> they'll be the arguments to the method
+                        for (int i = 1; i < numargs; i++)
+                        {
+                            code.Add((byte)OpCode.CEE_LDARG_S);
+                            code.Add((byte)i);
+                        }
+
+                        code.Add((byte)OpCode.CEE_LDARG_0);
+
+                        // Leaves the target (of type method ptr) on the stack. This shall be the final argument to the calli instruction
+                        AddCallWithToken(code, OpCode.CEE_LDFLD, methodPtrField.MetadataToken);
+
+                        AddCallWithToken(code, OpCode.CEE_CALLI, 0); // The argument is irrelevant, the EE knows the calling convention to the target method, and we hope it matches
+
+                        code.Add((byte)OpCode.CEE_RET);
+                        ilBytes = code.ToArray();
+                        constructedCode = true;
+                        construcedFlags = MethodFlags.Virtual;
+                        if (methodDetail.ReturnType == typeof(void))
+                        {
+                            construcedFlags |= MethodFlags.Void;
+                        }
+                    }
+                }
+                else
+                {
+                    // TODO: There are a bunch of methods currently getting here because they're not implemented
+                    // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
+                    _board.Log($"Error: {methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
+                    return;
+                }
+            }
+
             if (ilBytes == null && hasBody)
             {
-                throw new MissingMethodException($"{methodInfo.DeclaringType} has no visible implementation");
+                throw new MissingMethodException($"{methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
             }
 
             List<MethodBase> foreignMethodsRequired = new List<MethodBase>();
@@ -1391,7 +1483,7 @@ namespace Iot.Device.Arduino
 
             if (hasBody)
             {
-                ilBytes = IlCodeParser.FindAndPatchTokens(set, methodInfo, foreignMethodsRequired, typesRequired, fieldsRequired);
+                ilBytes = IlCodeParser.FindAndPatchTokens(set, methodInfo, ilBytes!, foreignMethodsRequired, typesRequired, fieldsRequired);
 
                 foreach (var type in typesRequired.Distinct())
                 {
@@ -1403,7 +1495,16 @@ namespace Iot.Device.Arduino
             }
 
             int tk = set.GetOrAddMethodToken(methodInfo);
-            var newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, ilBytes);
+
+            ArduinoMethodDeclaration newInfo;
+            if (constructedCode)
+            {
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, construcedFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), ilBytes);
+            }
+            else
+            {
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, ilBytes);
+            }
 
             if (set.AddMethod(newInfo))
             {
@@ -1440,6 +1541,24 @@ namespace Iot.Device.Arduino
                     PrepareCodeInternal(set, dep, newInfo);
                 }
             }
+        }
+
+        private void AddCallWithToken(List<byte> code, OpCode opCode, int token)
+        {
+            if ((int)opCode < 0x100)
+            {
+                code.Add((byte)opCode);
+            }
+            else
+            {
+                code.Add(254);
+                code.Add((byte)opCode);
+            }
+
+            code.Add((byte)(token & 0xFF));
+            code.Add((byte)((token >> 8) & 0xFF));
+            code.Add((byte)((token >> 16) & 0xFF));
+            code.Add((byte)((token >> 24) & 0xFF));
         }
 
         private static bool HasStaticFields(Type cls)

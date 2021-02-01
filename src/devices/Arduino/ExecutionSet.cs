@@ -346,6 +346,14 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.Object;
             }
+            else if (typeInfo == typeof(System.Delegate))
+            {
+                token = (int)KnownTypeTokens.Delegate;
+            }
+            else if (typeInfo == typeof(System.MulticastDelegate))
+            {
+                token = (int)KnownTypeTokens.MulticastDelegate;
+            }
             else if (typeInfo.Name == "System.Enum")
             {
                 // TODO: Check handling of enums. Will probably have to provide this flag to the runtime.

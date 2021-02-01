@@ -42,11 +42,6 @@ namespace Iot.Device.Arduino
             return opcode;
         }
 
-        /// <summary>
-        /// This method does a static code analysis and finds all tokens that need resolving, so we know what the current
-        /// method depends on (fields, classes and other methods). Then we do a lookup and patch the token with a replacement token that
-        /// is unique within our program. So we do not have to care about module boundaries.
-        /// </summary>
         public static byte[]? FindAndPatchTokens(ExecutionSet set, MethodBase method, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
             // We need to copy the code, because we're going to patch it
@@ -57,7 +52,18 @@ namespace Iot.Device.Arduino
                 return null;
             }
 
-            var byteCode = body.GetILAsByteArray()?.ToArray();
+            var byteCode = body.GetILAsByteArray()!.ToArray();
+            return FindAndPatchTokens(set, method, byteCode, methodsUsed, typesUsed, fieldsUsed);
+        }
+
+        /// <summary>
+        /// This method does a static code analysis and finds all tokens that need resolving, so we know what the current
+        /// method depends on (fields, classes and other methods). Then we do a lookup and patch the token with a replacement token that
+        /// is unique within our program. So we do not have to care about module boundaries.
+        /// </summary>
+        public static byte[]? FindAndPatchTokens(ExecutionSet set, MethodBase method, byte[] byteCode, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
+        {
+            // We need to copy the code, because we're going to patch it
             if (byteCode == null)
             {
                 throw new InvalidProgramException("Method has no implementation");
@@ -107,6 +113,9 @@ namespace Iot.Device.Arduino
                     case OpCodeType.InlineString:
                         idx += 4;
                         break;
+                    case OpCodeType.InlineSig:
+                        idx += 4; // CALLI. We don't currently care about the token
+                        continue;
                     case OpCodeType.InlineR:
                     case OpCodeType.InlineI8:
                         idx += 8;
@@ -139,7 +148,7 @@ namespace Iot.Device.Arduino
                     case OpCode.CEE_NEWOBJ:
                     case OpCode.CEE_LDFTN:
                     {
-                        // The tokens we're interested in have the form 0x0A XX XX XX preceded by a call, callvirt or newobj instruction
+                        // These opcodes are followed by a method token
                         var methodTarget = ResolveMember(method, token)!;
                         MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
                         patchValue = set.GetOrAddMethodToken(mb);

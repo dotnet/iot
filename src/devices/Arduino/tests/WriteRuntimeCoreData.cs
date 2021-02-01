@@ -48,6 +48,28 @@ namespace Iot.Device.Arduino.Tests
             WriteEnumHeaderFile<KnownTypeTokens>();
         }
 
+        [Fact]
+        public void WriteVariableKind()
+        {
+            string name = nameof(VariableKind);
+            string header = FormattableString.Invariant($@"
+#pragma once
+
+enum class {name}
+{{
+");
+            string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
+            TextWriter w = new StreamWriter(outputFile, false, Encoding.UTF8);
+            w.Write(header);
+            foreach (var e in Enum.GetValues(typeof(VariableKind)))
+            {
+                w.WriteLine(FormattableString.Invariant($"    {e.ToString()} = {(byte)e},"));
+            }
+
+            w.WriteLine("};"); // Tail
+            w.Close();
+        }
+
         private void WriteEnumHeaderFile<T>()
             where T : Enum
         {
