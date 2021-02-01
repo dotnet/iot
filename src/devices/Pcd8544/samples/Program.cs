@@ -6,11 +6,13 @@ using System.Device.Gpio;
 using System.Device.Pwm.Drivers;
 using System.IO;
 using System.Device.Pwm;
-using System.Drawing;
 using System;
 using System.Threading;
 using Iot.Device.Display;
 using Iot.Device.Ft4222;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
 
 Console.WriteLine("Hello PCD8544, screen of Nokia 5110!");
 Console.WriteLine("Please select the platform you want to use:");
@@ -159,14 +161,16 @@ for (int i = 0; i < 6; i++)
     Thread.Sleep(1000);
 }
 
-Bitmap bitmapMe = new(Path.Combine("me.bmp"), true);
+using Image<Rgba32> bitmapMe = (Image<Rgba32>)Image.Load(Path.Combine("me.bmp"));
 var bitmap1 = BitmapToByteArray(bitmapMe);
-Bitmap bitmapNokia = new(Path.Combine("nokia_bw.bmp"), true);
+using Image<Rgba32> bitmapNokia = (Image<Rgba32>)Image.Load(Path.Combine("nokia_bw.bmp"));
 var bitmap2 = BitmapToByteArray(bitmapNokia);
+
 // Open a non bitmap and resize it
-Bitmap bitmapLarge = new(Image.FromFile(Path.Combine("nonbmp.jpg")), Pcd8544.PixelScreenSize);
-Bitmap newBitmapSmall1color = bitmapLarge.Clone(new Rectangle(0, 0, Pcd8544.PixelScreenSize.Width, Pcd8544.PixelScreenSize.Height), System.Drawing.Imaging.PixelFormat.Format1bppIndexed);
-var bitmap3 = BitmapToByteArray(newBitmapSmall1color);
+using Image<Rgba32> bitmapLarge = (Image<Rgba32>)Image.Load(Path.Combine("nonbmp.jpg"));
+bitmapLarge.Mutate(x => x.Resize(Pcd8544.PixelScreenSize));
+bitmapLarge.Mutate(x => x.BlackWhite());
+var bitmap3 = BitmapToByteArray(bitmapLarge);
 
 for (byte i = 0; i < 2; i++)
 {
@@ -246,7 +250,7 @@ lcd.Dispose();
 // In case we're using FT4222, gpio needs to be disposed after the screen
 gpio?.Dispose();
 
-byte[] BitmapToByteArray(Bitmap bitmap)
+byte[] BitmapToByteArray(Image<Rgba32> bitmap)
 {
     if (bitmap is not object)
     {
@@ -259,14 +263,14 @@ byte[] BitmapToByteArray(Bitmap bitmap)
     }
 
     byte[] toReturn = new byte[Pcd8544.ScreenBufferByteSize];
-    int width = Pcd8544.Size.Width;
-    Color colWhite = Color.FromArgb(255, 255, 255, 255);
+    int width = Pcd8544.PixelScreenSize.Width;
+    Rgba32 colWhite = new(255, 255, 255);
     for (int position = 0; position < Pcd8544.ScreenBufferByteSize; position++)
     {
         byte toStore = 0;
         for (int bit = 0; bit < 8; bit++)
         {
-            toStore = (byte)(toStore | ((bitmap.GetPixel(position % width, position / width * 8 + bit) == colWhite ? 0 : 1) << bit));
+            toStore = (byte)(toStore | ((bitmap[position % width, position / width * 8 + bit] == colWhite ? 0 : 1) << bit));
         }
 
         toReturn[position] = toStore;

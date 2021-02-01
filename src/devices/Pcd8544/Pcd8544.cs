@@ -5,9 +5,9 @@ using System;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.Device.Pwm;
-using System.Drawing;
 using System.Threading;
 using Iot.Device.Display.Pcd8544Enums;
+using SixLabors.ImageSharp;
 
 namespace Iot.Device.Display
 {
@@ -38,7 +38,7 @@ namespace Iot.Device.Display
 
         private int _dataCommandPin;
         private int _resetPin;
-        private int _backlightPin;
+        private int _backlightPin = -1;
         private PwmChannel? _pwmBacklight;
         private SpiDevice _spiDevice;
         private GpioController _controller;
@@ -297,6 +297,12 @@ namespace Iot.Device.Display
                         SpiWrite(true, letter.ToArray());
                         _position += 5;
                     }
+                    else if (c == 0x08)
+                    {
+                        // Case of backspace, we go back
+                        _position -= 5;
+                        _position = _position < 0 ? 0 : _position;
+                    }
                 }
             }
         }
@@ -519,23 +525,26 @@ namespace Iot.Device.Display
             }
             else
             {
-                if (_controller.IsPinOpen(_dataCommandPin))
+                if (_controller is object)
                 {
-                    _controller.ClosePin(_dataCommandPin);
-                }
+                    if (_controller.IsPinOpen(_dataCommandPin))
+                    {
+                        _controller.ClosePin(_dataCommandPin);
+                    }
 
-                if (_controller.IsPinOpen(_resetPin))
-                {
-                    _controller.ClosePin(_resetPin);
-                }
+                    if (_controller.IsPinOpen(_resetPin))
+                    {
+                        _controller.ClosePin(_resetPin);
+                    }
 
-                if (_controller.IsPinOpen(_backlightPin))
-                {
-                    _controller.ClosePin(_backlightPin);
+                    if (_controller.IsPinOpen(_backlightPin))
+                    {
+                        _controller.ClosePin(_backlightPin);
+                    }
                 }
             }
 
-            _spiDevice.Dispose();
+            _spiDevice?.Dispose();
             _spiDevice = null!;
             _pwmBacklight?.Dispose();
             _pwmBacklight = null!;
