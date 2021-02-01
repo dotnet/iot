@@ -2,13 +2,13 @@ trigger:
   batch: true
   branches:
     include:
-    - master
+    - main
     - release/3.0
     
 pr:
   branches:
     include:
-    - master
+    - main
     - release/3.0
     
 variables:

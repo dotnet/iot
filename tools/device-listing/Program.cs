@@ -19,6 +19,7 @@ string[] categoriesToDisplay = new string[]
     "barometer",
     "altimeter",
     "thermometer",
+    "infrared",
     "gyroscope",
     "compass",
     "lego",
@@ -46,6 +47,7 @@ string[] categoriesToDisplay = new string[]
     "gpio",
     "multi",
     "protocol",
+    "power",
 };
 
 Dictionary<string, string?> categoriesDescriptions = new()
@@ -59,6 +61,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "barometer", "Barometers" },
     { "altimeter", "Altimeters" },
     { "thermometer", "Thermometers" },
+    { "infrared", "Infrared sensors" },
     { "gyroscope", "Gyroscopes" },
     { "compass", "Compasses" },
     { "lego", "Lego related devices" },
@@ -90,6 +93,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "media", "Media libraries" },
     { "usb", "USB devices" },
     { "gpio", "GPIO or bit operating devices" },
+    { "power", "Power monitors and related devices" },
     { "multi", "Multi-device or robot kit" },
     // Bucket for stuff we want mentioned but there is no clear category
     // In other words: anything allowing a way to create PWM channel, SPI/I2C/... device

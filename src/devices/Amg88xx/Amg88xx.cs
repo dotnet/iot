@@ -10,7 +10,7 @@ using UnitsNet;
 namespace Iot.Device.Amg88xx
 {
     /// <summary>
-    /// Binding for the AMG88xx family of infrared array sensors
+    /// AMG88xx - family of infrared array sensors
     /// </summary>
     public class Amg88xx : IDisposable
     {
@@ -92,6 +92,28 @@ namespace Iot.Device.Amg88xx
 
                 Span<byte> buffer = _imageData;
                 return Amg88xxUtils.ConvertToTemperature(buffer.Slice(BytesPerPixel * (Width * y + x), BytesPerPixel));
+            }
+        }
+
+        /// <summary>
+        /// Gets temperature for all pixels from the current thermal image as a two-dimensional array.
+        /// First index specifies the x-coordinate of the pixel and second index specifies y-coordinate of the pixel.
+        /// </summary>
+        /// <returns>Temperature as a two-dimensional array.</returns>
+        public Temperature[,] TemperatureImage
+        {
+            get
+            {
+                Temperature[,] temperatureImage = new Temperature[Width, Height];
+                for (int y = 0; y < Height; y++)
+                {
+                    for (int x = 0; x < Width; x++)
+                    {
+                        temperatureImage[x, y] = this[x, y];
+                    }
+                }
+
+                return temperatureImage;
             }
         }
 

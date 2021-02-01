@@ -115,7 +115,12 @@ void ServoDemo(Pca9685 pca9685, int channel)
     while (true)
     {
         string? command = Console.ReadLine()?.ToLower();
-        if (command?[0] is not 'q')
+        if (command is null)
+        {
+            return;
+        }
+
+        if (command[0] is 'q')
         {
             return;
         }

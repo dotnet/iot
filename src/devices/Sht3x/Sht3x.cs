@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
 using UnitsNet;
 
@@ -11,6 +12,7 @@ namespace Iot.Device.Sht3x
     /// <summary>
     /// Humidity and Temperature Sensor SHT3x
     /// </summary>
+    [Interface("Humidity and Temperature Sensor SHT3x")]
     public class Sht3x : IDisposable
     {
         // CRC const
@@ -24,6 +26,7 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// SHT3x Resolution
         /// </summary>
+        [Property]
         public Resolution Resolution { get; set; }
 
         private double _temperature;
@@ -31,6 +34,7 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// SHT3x Temperature
         /// </summary>
+        [Telemetry]
         public Temperature Temperature
         {
             get
@@ -45,6 +49,7 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// SHT3x Relative Humidity (%)
         /// </summary>
+        [Telemetry]
         public RelativeHumidity Humidity
         {
             get
@@ -59,6 +64,7 @@ namespace Iot.Device.Sht3x
         /// <summary>
         /// SHT3x Heater
         /// </summary>
+        [Property]
         public bool Heater
         {
             get => _heater;

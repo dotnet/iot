@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ namespace Iot.Device.Bmxx80
     /// <summary>
     /// Represents a BME680 temperature, pressure, relative humidity and VOC gas sensor.
     /// </summary>
+    [Interface("Represents a BME680 temperature, pressure, relative humidity and VOC gas sensor.")]
     public class Bme680 : Bmxx80Base
     {
         private static readonly Temperature DefaultAmbientTemperature = Temperature.FromDegreesCelsius(20);
@@ -86,6 +88,7 @@ namespace Iot.Device.Bmxx80
         /// Gets or sets the humidity sampling.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Sampling"/> is set to an undefined mode.</exception>
+        [Property]
         public Sampling HumiditySampling
         {
             get => _humiditySampling;
@@ -113,6 +116,7 @@ namespace Iot.Device.Bmxx80
         /// Current heater profile is only set if the chosen profile is configured.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bme680HeaterProfile"/> is set to an undefined profile.</exception>
+        [Property]
         public Bme680HeaterProfile HeaterProfile
         {
             get => _heaterProfile;
@@ -142,6 +146,7 @@ namespace Iot.Device.Bmxx80
         /// Gets or sets the filtering mode to be used for measurements.
         /// </summary>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the <see cref="Bme680FilteringMode"/> is set to an undefined mode.</exception>
+        [Property]
         public Bme680FilteringMode FilterMode
         {
             get => _filterMode;
@@ -167,6 +172,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Gets or sets whether the heater is enabled.
         /// </summary>
+        [Property]
         public bool HeaterIsEnabled
         {
             get => _heaterIsEnabled;
@@ -187,6 +193,7 @@ namespace Iot.Device.Bmxx80
         /// <summary>
         /// Gets or sets whether gas conversions are enabled.
         /// </summary>
+        [Property]
         public bool GasConversionIsEnabled
         {
             get => _gasConversionIsEnabled;
@@ -253,6 +260,7 @@ namespace Iot.Device.Bmxx80
         /// </summary>
         /// <param name="powerMode">The <see cref="Bme680PowerMode"/> to set.</param>
         /// <exception cref="ArgumentOutOfRangeException">Thrown when the power mode does not match a defined mode in <see cref="Bme680PowerMode"/>.</exception>
+        [Property("PowerMode")]
         public void SetPowerMode(Bme680PowerMode powerMode)
         {
             if (!Enum.IsDefined(typeof(Bme680PowerMode), powerMode))
@@ -313,6 +321,7 @@ namespace Iot.Device.Bmxx80
         /// Read the <see cref="Bme680PowerMode"/> state.
         /// </summary>
         /// <returns>The current <see cref="Bme680PowerMode"/>.</returns>
+        [Property("PowerMode")]
         public Bme680PowerMode ReadPowerMode()
         {
             var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_MEAS);
@@ -400,6 +409,7 @@ namespace Iot.Device.Bmxx80
         /// Contains <see cref="double.NaN"/> otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        [Telemetry("Humidity")]
         public bool TryReadHumidity(out RelativeHumidity humidity) => TryReadHumidityCore(out humidity);
 
         /// <summary>
@@ -430,6 +440,7 @@ namespace Iot.Device.Bmxx80
         /// the measurement was valid. Undefined otherwise.
         /// </param>
         /// <returns><code>true</code> if measurement was not skipped, otherwise <code>false</code>.</returns>
+        [Telemetry("GasResistance")]
         public bool TryReadGasResistance(out ElectricResistance gasResistance) => TryReadGasResistanceCore(out gasResistance);
 
         /// <summary>

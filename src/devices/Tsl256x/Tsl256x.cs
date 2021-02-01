@@ -4,6 +4,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
+using System.Device.Model;
 using System.Threading;
 using UnitsNet;
 using UnitsNet.Units;
@@ -13,6 +14,7 @@ namespace IoT.Device.Tsl256x
     /// <summary>
     /// Light to Digital Converter TSL2560 and TSL2561
     /// </summary>
+    [Interface("Light to Digital Converter TSL2560 and TSL2561")]
     public class Tsl256x : IDisposable
     {
         // All information from datasheet https://cdn-shop.adafruit.com/datasheets/TSL2561.pdf
@@ -54,6 +56,7 @@ namespace IoT.Device.Tsl256x
         /// <summary>
         /// Set power On or Off
         /// </summary>
+        [Property]
         public bool Enabled
         {
             // 0x03 is power on, see doc page 14
@@ -65,6 +68,7 @@ namespace IoT.Device.Tsl256x
         /// Get the version 0 for major for TSL2560 and 1 for TSL2561, minor is devision number
         /// </summary>
         /// <returns>The version</returns>
+        [Property]
         public Version Version
         {
             get
@@ -77,6 +81,7 @@ namespace IoT.Device.Tsl256x
         /// <summary>
         /// Get or Set the integration time
         /// </summary>
+        [Property]
         public IntegrationTime IntegrationTime
         {
             // should be the same as _integrationTime
@@ -91,6 +96,7 @@ namespace IoT.Device.Tsl256x
         /// <summary>
         /// Get or Set the gain
         /// </summary>
+        [Property]
         public Gain Gain
         {
             // should be the same as _gain
@@ -198,6 +204,7 @@ namespace IoT.Device.Tsl256x
         /// Measure the illuminance, will wait for the measurement based on integration time
         /// </summary>
         /// <returns>The illuminance</returns>
+        [Telemetry("Illuminance")]
         public Illuminance MeasureAndGetIlluminance()
         {
             // We need to make sure we're on otherwise the sensor won't measure anything

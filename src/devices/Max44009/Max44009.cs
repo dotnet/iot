@@ -3,12 +3,14 @@
 
 using System;
 using System.Device.I2c;
+using System.Device.Model;
 
 namespace Iot.Device.Max44009
 {
     /// <summary>
     /// Ambient Light Sensor MAX44009
     /// </summary>
+    [Interface("Ambient Light Sensor MAX44009")]
     public class Max44009 : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -21,6 +23,7 @@ namespace Iot.Device.Max44009
         /// <summary>
         /// MAX44009 Illuminance (Lux)
         /// </summary>
+        [Telemetry]
         public double Illuminance => GetIlluminance();
 
         /// <summary>

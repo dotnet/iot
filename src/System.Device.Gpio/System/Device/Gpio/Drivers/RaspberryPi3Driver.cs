@@ -13,6 +13,7 @@ namespace System.Device.Gpio.Drivers
     public class RaspberryPi3Driver : GpioDriver
     {
         private GpioDriver _internalDriver;
+        private RaspberryPi3LinuxDriver? _linuxDriver;
 
         /* private delegates for register Properties */
         private delegate void Set_Register(ulong value);
@@ -24,6 +25,59 @@ namespace System.Device.Gpio.Drivers
         private readonly Get_Register _getClearRegister;
 
         /// <summary>
+        /// Used to set the Alternate Pin Mode on Raspberry Pi 3/4.
+        /// The actual pin function for anything other than Input or Output is dependent
+        /// on the pin and can be looked up in the Raspi manual.
+        /// </summary>
+        public enum AltMode
+        {
+            /// <summary>
+            /// The mode is unknown
+            /// </summary>
+            Unknown,
+
+            /// <summary>
+            /// Gpio mode input
+            /// </summary>
+            Input,
+
+            /// <summary>
+            /// Gpio mode output
+            /// </summary>
+            Output,
+
+            /// <summary>
+            /// Mode ALT0
+            /// </summary>
+            Alt0,
+
+            /// <summary>
+            /// Mode ALT1
+            /// </summary>
+            Alt1,
+
+            /// <summary>
+            /// Mode ALT2
+            /// </summary>
+            Alt2,
+
+            /// <summary>
+            /// Mode ALT3
+            /// </summary>
+            Alt3,
+
+            /// <summary>
+            /// Mode ALT4
+            /// </summary>
+            Alt4,
+
+            /// <summary>
+            /// Mode ALT5
+            /// </summary>
+            Alt5,
+        }
+
+        /// <summary>
         /// Creates an instance of the RaspberryPi3Driver.
         /// This driver works on Raspberry 3 or 4, both on Linux and on Windows
         /// </summary>
@@ -31,18 +85,18 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                RaspberryPi3LinuxDriver? linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
+                _linuxDriver = CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo);
 
-                if (linuxDriver == null)
+                if (_linuxDriver == null)
                 {
                     throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: " + boardInfo.BoardModel);
                 }
 
-                _setSetRegister = (value) => linuxDriver.SetRegister = value;
-                _setClearRegister = (value) => linuxDriver.ClearRegister = value;
-                _getSetRegister = () => linuxDriver.SetRegister;
-                _getClearRegister = () => linuxDriver.ClearRegister;
-                _internalDriver = linuxDriver;
+                _setSetRegister = (value) => _linuxDriver.SetRegister = value;
+                _setClearRegister = (value) => _linuxDriver.ClearRegister = value;
+                _getSetRegister = () => _linuxDriver.SetRegister;
+                _getClearRegister = () => _linuxDriver.ClearRegister;
+                _internalDriver = _linuxDriver;
             }
             else
             {
@@ -58,6 +112,7 @@ namespace System.Device.Gpio.Drivers
         {
             if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
+                _linuxDriver = linuxDriver;
                 _setSetRegister = (value) => linuxDriver.SetRegister = value;
                 _setClearRegister = (value) => linuxDriver.ClearRegister = value;
                 _getSetRegister = () => linuxDriver.SetRegister;
@@ -69,6 +124,11 @@ namespace System.Device.Gpio.Drivers
                 throw new NotSupportedException("This ctor is for internal use only");
             }
         }
+
+        /// <summary>
+        /// True if the driver supports <see cref="SetAlternatePinMode"/> and <see cref="GetAlternatePinMode"/>.
+        /// </summary>
+        public bool AlternatePinModeSettingSupported => _linuxDriver != null;
 
         internal static RaspberryPi3LinuxDriver? CreateInternalRaspberryPi3LinuxDriver(out RaspberryBoardInfo boardInfo)
         {
@@ -135,6 +195,40 @@ namespace System.Device.Gpio.Drivers
 
         /// <inheritdoc/>
         protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
+
+        /// <summary>
+        /// Retrieve the current alternate pin mode for a given logical pin.
+        /// This works also with closed pins.
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the logical scheme of the driver</param>
+        /// <returns>Current pin mode</returns>
+        public AltMode GetAlternatePinMode(int pinNumber)
+        {
+            if (_linuxDriver == null)
+            {
+                throw new NotSupportedException("This operation is not supported with the current driver.");
+            }
+
+            return _linuxDriver.GetAlternatePinMode(pinNumber);
+        }
+
+        /// <summary>
+        /// Set the specified alternate mode for the given pin.
+        /// Check the manual to know what each pin can do.
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the logcal scheme of the driver</param>
+        /// <param name="altPinMode">Alternate mode to set</param>
+        /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
+        /// <remarks>The method is intended for usage by higher-level abstraction interfaces. User code should be very careful when using this method.</remarks>
+        public void SetAlternatePinMode(int pinNumber, AltMode altPinMode)
+        {
+            if (_linuxDriver == null)
+            {
+                throw new NotSupportedException("This operation is not supported with the current driver.");
+            }
+
+            _linuxDriver.SetAlternatePinMode(pinNumber, altPinMode);
+        }
 
         /// <summary>
         /// Allows directly setting the "Set pin high" register. Used for special applications only

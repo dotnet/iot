@@ -19,10 +19,12 @@ static void Main(string[] args)
     // using (DCMotor motor = DCMotor.Create(27, 22))
     // using (DCMotor motor = DCMotor.Create(new SoftwarePwmChannel(27, frequency: 50), 22))
     // 2 pin mode with BiDirectional Pin
-    // using (DCMotor.Create(19, 26, null, true, true))
-    // using (DCMotor.Create(PwmChannel.Create(0, 1, 100, 0.0), 26, null, true, true))
+    // using (DCMotor motor = DCMotor.Create(19, 26, null, true, true))
+    // using (DCMotor motor = DCMotor.Create(PwmChannel.Create(0, 1, 100, 0.0), 26, null, true, true))
     // 3 pin mode
     // using (DCMotor motor = DCMotor.Create(PwmChannel.Create(0, 0, frequency: 50), 23, 24))
+    // Start Stop mode - wrapper with additional methods to disable/enable output regardless of the Speed value
+    // using (DCMotorWithStartStop motor = new DCMotorWithStartStop(DCMotor.Create( _any version above_ )))
     using (DCMotor motor = DCMotor.Create(6, 27, 22))
     {
         bool done = false;
