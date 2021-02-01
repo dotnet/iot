@@ -431,6 +431,12 @@ namespace Iot.Device.Arduino
                     fieldType |= VariableKind.StaticMember;
                 }
 
+                // The only (known) field that can contain a function pointer. Getting the type correct here helps in type tracking and debugging
+                if (field.DeclaringType == typeof(Delegate) && field.Name == "_methodPtr")
+                {
+                    fieldType = VariableKind.FunctionPointer;
+                }
+
                 var newvar = new ClassMember(field, fieldType, set.GetOrAddFieldToken(field), size);
                 memberTypes.Add(newvar);
             }

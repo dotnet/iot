@@ -358,6 +358,45 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int, int, int>>(typeof(ClassWithStaticIntField), ClassWithStaticIntField.GetFirst, true, 7, 0);
         }
 
+        [Fact]
+        public void SimpleDelegateTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWithAnEvent), ClassWithAnEvent.Test1, true);
+        }
+
+        public class ClassWithAnEvent
+        {
+            public Func<int>? RegisterHere;
+
+            public ClassWithAnEvent()
+            {
+            }
+
+            public static int Test1()
+            {
+                ClassWithAnEvent ev = new ClassWithAnEvent();
+                ev.RegisterHere = StaticNonVoidMethod;
+                int result = ev.FireEvent();
+                MiniAssert.That(result == 1);
+                return result;
+            }
+
+            public static int StaticNonVoidMethod()
+            {
+                return 1;
+            }
+
+            public int FireEvent()
+            {
+                if (RegisterHere != null)
+                {
+                    return RegisterHere.Invoke();
+                }
+
+                return -1;
+            }
+        }
+
         public class ClassWithStaticIntField
         {
             private static int[] _intData =
