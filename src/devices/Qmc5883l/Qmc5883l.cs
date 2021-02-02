@@ -5,6 +5,7 @@ using System;
 using System.Buffers.Binary;
 using System.Device.I2c;
 using System.Device.Model;
+using System.IO;
 using System.Numerics;
 using UnitsNet;
 
@@ -63,13 +64,13 @@ namespace Iot.Device.Qmc5883l
         /// QMC5883L Direction Vector
         /// </summary>
         [Telemetry]
-        public Vector3 GetDirection() => _isDeviceInitialized ? ReadDirectionVector() : throw new SensorNotInitializedException();
+        public Vector3 GetDirection() => _isDeviceInitialized ? ReadDirectionVector() : throw new IOException("Sensor has not yet been initialized. Please call SetMode() to initialize it.");
 
         /// <summary>
         /// QMC5883L Heading (DEG)
         /// </summary>
         /// <returns>Heading(Angle)</returns>
-        public Angle GetHeading() => VectorExtentsion.GetHeading(GetDirection());
+        public Angle GetHeading() => VectorExtension.GetHeading(GetDirection());
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Qmc5883l"/> class.

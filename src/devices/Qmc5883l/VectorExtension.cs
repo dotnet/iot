@@ -3,7 +3,6 @@
 
 using System;
 using System.Numerics;
-
 using UnitsNet;
 
 namespace Iot.Device.Qmc5883l
@@ -11,7 +10,7 @@ namespace Iot.Device.Qmc5883l
     /// <summary>
     /// Extension class for getting a heading from X and Y Vectors.
     /// </summary>
-    public static class VectorExtentsion
+    public static class VectorExtension
     {
         /// <summary>
         /// Calculate heading.

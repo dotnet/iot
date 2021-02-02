@@ -10,7 +10,7 @@ QMC5883l is a 3-Axis Magnetic Sensor commonly used as a substitute for the QMC58
 
 ## Usage
 
-```cs
+```csharp
 I2cConnectionSettings settings = new(1, Qmc5883l.DefaultI2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 using (Qmc5883l sensor = new(device))

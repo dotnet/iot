@@ -39,7 +39,7 @@ using (Qmc5883l sensor = new(device))
             Console.WriteLine($"Heading: {direction.GetHeading()}");
         }
 
-        // wait for a second
+        // Wait for a second.
         Thread.Sleep(1000);
     }
 }
