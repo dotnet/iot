@@ -50,7 +50,7 @@ namespace Iot.Device.Ssd13xx
             }
 
             Span<byte> writeBuffer = SliceGenericBuffer(commandBytes.Length + 1);
-
+            writeBuffer[0] = 0x00; // Control byte
             commandBytes.CopyTo(writeBuffer.Slice(1));
 
             // Be aware there is a Continuation Bit in the Control byte and can be used
