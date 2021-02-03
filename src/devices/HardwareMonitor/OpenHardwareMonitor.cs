@@ -175,6 +175,13 @@ namespace Iot.Device.HardwareMonitor
                 {
                     string? name = Convert.ToString(sensor["Name"]);
                     string? identifier = Convert.ToString(sensor["Identifier"]);
+
+                    // This is not expected to really happen
+                    if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(identifier))
+                    {
+                        continue;
+                    }
+
                     string? parent = Convert.ToString(sensor["Parent"]);
                     string? type = Convert.ToString(sensor["SensorType"]);
                     SensorType typeEnum;
@@ -621,7 +628,7 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Creates a sensor instance
             /// </summary>
-            public Sensor(ManagementObject instance, string? name, string? identifier, string? parent, SensorType typeEnum)
+            public Sensor(ManagementObject instance, string name, string identifier, string? parent, SensorType typeEnum)
             {
                 _instance = instance;
                 Name = name;
@@ -633,12 +640,12 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Name of the sensor
             /// </summary>
-            public string? Name { get; }
+            public string Name { get; }
 
             /// <summary>
             /// Sensor identifier (device path)
             /// </summary>
-            public string? Identifier { get; }
+            public string Identifier { get; }
 
             /// <summary>
             /// Sensor parent
