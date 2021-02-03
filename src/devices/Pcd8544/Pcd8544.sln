@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pcd8544", "Pcd8544.csproj",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pcd8544.samples", "samples\Pcd8544.samples.csproj", "{E0E5A91B-1F56-4E66-8885-C15C0C8E6597}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd", "..\CharacterLcd\CharacterLcd.csproj", "{F35AD83F-7414-4B89-AC3C-EDF9C4425D17}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{E0E5A91B-1F56-4E66-8885-C15C0C8E6597}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E0E5A91B-1F56-4E66-8885-C15C0C8E6597}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E0E5A91B-1F56-4E66-8885-C15C0C8E6597}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F35AD83F-7414-4B89-AC3C-EDF9C4425D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F35AD83F-7414-4B89-AC3C-EDF9C4425D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F35AD83F-7414-4B89-AC3C-EDF9C4425D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F35AD83F-7414-4B89-AC3C-EDF9C4425D17}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

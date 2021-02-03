@@ -8,14 +8,17 @@ using System.Device.Pwm;
 using System.Threading;
 using Iot.Device.Display.Pcd8544Enums;
 using SixLabors.ImageSharp;
+using Iot.Device.CharacterLcd;
 
 namespace Iot.Device.Display
 {
     /// <summary>
     /// PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen
     /// </summary>
-    public class Pcd8544 : IDisposable
+    public class Pcd8544 : ICharacterLcd, IDisposable
     {
+        private const int CharacterWidth = 6;
+
         /// <summary>
         /// Size of the screen 48 x 84 / 8 in bytes
         /// </summary>
@@ -24,7 +27,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// The size of the screen in terms of characters
         /// </summary>
-        public static Size Size => new Size(84, 6);
+        public Size Size => new Size(14, 6);
 
         /// <summary>
         /// The size of the screen in terms of pixels
@@ -47,6 +50,7 @@ namespace Iot.Device.Display
         private bool _invd = false;
         private byte _contrast = 0;
         private int _position;
+        private bool _cursorVisible = false;
 
         private byte[] _byteMap = new byte[504];
         private byte _bias;
@@ -240,6 +244,45 @@ namespace Iot.Device.Display
             }
         }
 
+        /// <inheritdoc/>
+        public bool BacklightOn { get => BacklightBrightness > 0; set => BacklightBrightness = value ? 1.0f : 0.0f; }
+
+        /// <inheritdoc/>
+        public bool DisplayOn { get => Enabled; set => Enabled = value; }
+
+        /// <inheritdoc/>
+        public bool UnderlineCursorVisible
+        {
+            get => _cursorVisible;
+            set
+            {
+                if (_cursorVisible && !value)
+                {
+                    DrawCursor(false);
+                }
+
+                _cursorVisible = value;
+                if (_cursorVisible)
+                {
+                    DrawCursor();
+                }
+            }
+        }
+
+        /// <summary>
+        /// This is not supported on this screen, this function will have no effect
+        /// </summary>
+        public bool BlinkingCursorVisible { get; set; }
+
+        /// <inheritdoc/>
+        public int NumberOfCustomCharactersSupported => 0;
+
+        /// <inheritdoc/>
+        public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
+        {
+            return;
+        }
+
         #endregion
 
         #region Primitive methods
@@ -288,7 +331,7 @@ namespace Iot.Device.Display
         /// <param name="text">The text to write</param>
         public void Write(string text)
         {
-            Span<byte> letter = stackalloc byte[6];
+            Span<byte> letter = stackalloc byte[CharacterWidth];
             foreach (char c in text)
             {
                 // We only display specific characters and ignore the rest
@@ -303,16 +346,28 @@ namespace Iot.Device.Display
                         }
 
                         letter[5] = 0x00;
-                        SpiWrite(true, letter.ToArray());
-                        _position += 5;
+                        SpiWrite(true, letter);
+                        _position += CharacterWidth;
                     }
                     else if (c == 0x08)
                     {
                         // Case of backspace, we go back
-                        _position -= 5;
+                        if (_cursorVisible)
+                        {
+                            DrawCursor(false);
+                        }
+
+                        _position -= CharacterWidth;
                         _position = _position < 0 ? 0 : _position;
+                        SetPosition(_position);
+                        DrawCursor(false);
                     }
                 }
+            }
+
+            if (_cursorVisible)
+            {
+                DrawCursor();
             }
         }
 
@@ -327,6 +382,18 @@ namespace Iot.Device.Display
             int y = _position / Size.Width + 1;
             y = y > Size.Height ? Size.Height : y;
             SetCursorPosition(0, y);
+        }
+
+        private void DrawCursor(bool visible = true)
+        {
+            Span<byte> letter = stackalloc byte[CharacterWidth];
+            for (int i = 0; i < 5; i++)
+            {
+                letter[i] = visible ? 0x80 : 0x00;
+            }
+
+            SpiWrite(true, letter);
+            SetPosition(_position);
         }
 
         /// <summary>
@@ -354,9 +421,30 @@ namespace Iot.Device.Display
                 throw new ArgumentOutOfRangeException($"The given position is not inside the display. it's 6 raws and 84 columns");
             }
 
+            if (_cursorVisible)
+            {
+                DrawCursor(false);
+            }
+
+            SetPosition(left, top);
+            if (_cursorVisible)
+            {
+                DrawCursor();
+            }
+        }
+
+        private void SetPosition(int left, int top)
+        {
             _position = left + top * Size.Width;
             Span<byte> toSend = stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)((byte)(SetAddress.XAddress) | left), (byte)((byte)(SetAddress.YAddress) | top) };
             SpiWrite(false, toSend);
+        }
+
+        private void SetPosition(int position)
+        {
+            int top = position / Size.Width;
+            int left = position - top * Size.Width;
+            SetPosition(left, top);
         }
 
         #endregion

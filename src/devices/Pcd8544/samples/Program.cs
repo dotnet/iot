@@ -153,6 +153,7 @@ lcd.SetCursorPosition(0, 4);
 lcd.Write("One more...");
 lcd.SetCursorPosition(0, 5);
 lcd.Write("last line");
+Thread.Sleep(1500);
 
 // this will blink the screen
 for (int i = 0; i < 6; i++)
@@ -160,6 +161,30 @@ for (int i = 0; i < 6; i++)
     lcd.InvertedColors = !lcd.InvertedColors;
     Thread.Sleep(1000);
 }
+
+lcd.Clear();
+lcd.SetCursorPosition(0, 0);
+lcd.UnderlineCursorVisible = true;
+for (int i = 0; i < 50; i++)
+{
+    lcd.Write($"{i}");
+    Thread.Sleep(1500);
+}
+
+lcd.Clear();
+lcd.Write("Cursor after");
+for (int i = 0; i < 5; i++)
+{
+    Thread.Sleep(2000);
+    lcd.Write("\b");
+}
+
+lcd.Clear();
+lcd.Write("More text");
+Thread.Sleep(1500);
+lcd.SetCursorPosition(0, 0);
+Thread.Sleep(1500);
+lcd.UnderlineCursorVisible = false;
 
 using Image<Rgba32> bitmapMe = (Image<Rgba32>)Image.Load(Path.Combine("me.bmp"));
 var bitmap1 = BitmapToByteArray(bitmapMe);
