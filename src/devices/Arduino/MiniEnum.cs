@@ -39,5 +39,11 @@ namespace Iot.Device.Arduino
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        public static string? InternalFormat(Type enumType, ulong value)
+        {
+            return value.ToString();
+        }
     }
 }

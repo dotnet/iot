@@ -364,9 +364,17 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWithAnEvent), ClassWithAnEvent.Test1, true);
         }
 
+        [Fact]
+        public void NonStaticDelegateTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(typeof(ClassWithAnEvent), ClassWithAnEvent.Test2, true);
+        }
+
         public class ClassWithAnEvent
         {
             public Func<int>? RegisterHere;
+
+            private int _myValue;
 
             public ClassWithAnEvent()
             {
@@ -381,9 +389,24 @@ namespace Iot.Device.Arduino.Tests
                 return result;
             }
 
+            public static int Test2()
+            {
+                ClassWithAnEvent ev = new ClassWithAnEvent();
+                ev._myValue = 2;
+                ev.RegisterHere = ev.NonVoidMethod;
+                int result = ev.FireEvent();
+                MiniAssert.That(result == 2);
+                return result - 1;
+            }
+
             public static int StaticNonVoidMethod()
             {
                 return 1;
+            }
+
+            public int NonVoidMethod()
+            {
+                return _myValue;
             }
 
             public int FireEvent()

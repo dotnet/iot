@@ -71,13 +71,39 @@ namespace Iot.Device.Arduino
 
         internal static unsafe int GetMultiDimensionalArrayRank(Array array)
         {
-            return 1; // TODO
+            throw new NotImplementedException();
         }
 
         [ArduinoImplementation(NativeMethod.RuntimeHelpersGetRawArrayData)]
         internal static unsafe ref byte GetRawArrayData(this Array array)
         {
             throw new NotImplementedException();
+        }
+
+        internal static ref byte GetRawData(this object obj) =>
+            ref MiniUnsafe.As<RawData>(obj).Data;
+
+        // Helper class to assist with unsafe pinning of arbitrary objects.
+        // It's used by VM code (for what?)
+        internal class RawData
+        {
+            public byte Data;
+        }
+
+        [ArduinoImplementation]
+        internal static new bool Equals(object? o1, object? o2)
+        {
+            if (ReferenceEquals(o1, o2))
+            {
+                return true;
+            }
+
+            if (o1 == null || o2 == null)
+            {
+                return false;
+            }
+
+            return o1.Equals(o2);
         }
     }
 }

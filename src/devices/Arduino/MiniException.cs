@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -7,12 +9,13 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.Exception), true, false)]
+    [ArduinoReplacement(typeof(System.Exception))]
     internal class MiniException : ISerializable
     {
         private String _message;
         private Exception? _innerException;
         private int _hresult;
+        private IDictionary? _data;
 
         public MiniException()
         {
@@ -74,6 +77,8 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public virtual IDictionary Data => _data ??= new ListDictionary();
+
         [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public static string GetMessageFromNativeResources(int kind)
         {
@@ -83,6 +88,11 @@ namespace Iot.Device.Arduino
         public void GetObjectData(SerializationInfo info, StreamingContext context)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual Exception GetBaseException()
+        {
+            return null!;
         }
     }
 }

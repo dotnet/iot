@@ -423,7 +423,6 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                Debug.Assert(_name != null, "[CultureInfo.DisplayName] Always expect _name to be set");
                 return _cultureData.DisplayName;
             }
         }

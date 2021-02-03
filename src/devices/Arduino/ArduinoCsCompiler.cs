@@ -733,7 +733,7 @@ namespace Iot.Device.Arduino
             return MethodsHaveSameSignature(self, candidate);
         }
 
-        private static void CollectBaseImplementations(MethodInfo method, List<MethodInfo> methodsBeingImplemented)
+        internal static void CollectBaseImplementations(MethodInfo method, List<MethodInfo> methodsBeingImplemented)
         {
             Type? cls = method.DeclaringType?.BaseType;
             while (cls != null)
