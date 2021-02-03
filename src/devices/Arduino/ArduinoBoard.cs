@@ -398,6 +398,11 @@ namespace Iot.Device.Arduino
 
         internal void DisableSpi()
         {
+            if (_spiEnabled <= 0)
+            {
+                throw new InvalidOperationException("Internal reference counting error: Spi ports already closed");
+            }
+
             _spiEnabled--;
             if (_spiEnabled == 0)
             {
