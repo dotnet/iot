@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Device.Gpio;
+using UnitsNet;
 
 namespace System.Device.Analog
 {
@@ -55,12 +56,28 @@ namespace System.Device.Analog
         }
 
         /// <summary>
-        /// Return the resolution of an analog input pin.
+        /// The minimum measurable voltage. May be negative.
         /// </summary>
-        /// <param name="numberOfBits">Returns the resolution of the ADC in number of bits, including the sign bit (if applicable)</param>
-        /// <param name="minVoltage">Minimum measurable voltage</param>
-        /// <param name="maxVoltage">Maximum measurable voltage</param>
-        public abstract void QueryResolution(out int numberOfBits, out double minVoltage, out double maxVoltage);
+        public abstract ElectricPotential MinVoltage
+        {
+            get;
+        }
+
+        /// <summary>
+        /// The largest measurable voltage.
+        /// </summary>
+        public abstract ElectricPotential MaxVoltage
+        {
+            get;
+        }
+
+        /// <summary>
+        /// Resolution of the Analog-to-Digital converter in bits. If the ADC supports negative values, the sign bit is also counted.
+        /// </summary>
+        public abstract int AdcResolutionBits
+        {
+            get;
+        }
 
         /// <summary>
         /// Read a raw value from the pin
@@ -72,7 +89,7 @@ namespace System.Device.Analog
         /// Read a raw value and convert it to a voltage
         /// </summary>
         /// <returns>Reads a new value from the input and converts it to a voltage. For many boards, the <see cref="VoltageReference"/> needs to be correctly set for this to work.</returns>
-        public virtual double ReadVoltage()
+        public virtual ElectricPotential ReadVoltage()
         {
             uint raw = ReadRaw();
             return ConvertToVoltage(raw);
@@ -81,24 +98,21 @@ namespace System.Device.Analog
         /// <summary>
         /// Converts an input raw value to a voltage
         /// </summary>
-        protected virtual double ConvertToVoltage(uint rawValue)
+        protected virtual ElectricPotential ConvertToVoltage(uint rawValue)
         {
-            QueryResolution(out int numberOfBits, out double minVoltage, out double maxVoltage);
-            if (minVoltage >= 0)
+            if (MinVoltage >= ElectricPotential.Zero)
             {
                 // The ADC can handle only positive values
-                int maxRawValue = (1 << numberOfBits) - 1;
-                double voltage = ((double)rawValue / maxRawValue) * maxVoltage;
-                return voltage;
+                int maxRawValue = (1 << AdcResolutionBits) - 1;
+                return ((double)rawValue / maxRawValue) * MaxVoltage;
             }
             else
             {
                 // The ADC also handles negative values. This means that the number of bits includes the sign.
-                uint maxRawValue = (uint)((1 << (numberOfBits - 1)) - 1);
+                uint maxRawValue = (uint)((1 << (AdcResolutionBits - 1)) - 1);
                 if (rawValue < maxRawValue)
                 {
-                    double voltage = ((double)rawValue / maxRawValue) * maxVoltage;
-                    return voltage;
+                    return ((double)rawValue / maxRawValue) * MaxVoltage;
                 }
                 else
                 {
@@ -108,17 +122,10 @@ namespace System.Device.Analog
                     uint topBits = ~maxRawValue;
                     rawValue |= topBits;
                     int raw2 = (int)rawValue;
-                    double voltage = ((double)raw2 / maxRawValue) * maxVoltage;
-                    return voltage; // This is now negative
+                    return ((double)raw2 / maxRawValue) * MaxVoltage; // result is negative
                 }
             }
         }
-
-        /// <summary>
-        /// True if this pin supports analog input
-        /// </summary>
-        /// <returns></returns>
-        public abstract bool SupportsAnalogInput();
 
         /// <summary>
         /// Enable event callback when the value of this pin changes.

@@ -94,7 +94,7 @@ namespace System.Device.Analog
                 throw new InvalidOperationException("The selected pin is already open.");
             }
 
-            AnalogInputPin openPin = OpenPinInternal(logicalPinNumber);
+            AnalogInputPin openPin = OpenPinCore(logicalPinNumber);
             _openPins.Add(openPin);
             return openPin;
         }
@@ -104,7 +104,7 @@ namespace System.Device.Analog
         /// </summary>
         /// <param name="pinNumber">Pin number, in the logical pin numbering scheme</param>
         /// <returns>An instance of a pin</returns>
-        protected abstract AnalogInputPin OpenPinInternal(int pinNumber);
+        protected abstract AnalogInputPin OpenPinCore(int pinNumber);
 
         /// <summary>
         /// Checks if a specific pin is open.

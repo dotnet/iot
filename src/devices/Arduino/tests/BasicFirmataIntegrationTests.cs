@@ -9,6 +9,7 @@ using System.IO.Ports;
 using System.Linq;
 using System.Threading;
 using Arduino.Tests;
+using UnitsNet;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
@@ -105,7 +106,7 @@ namespace Iot.Device.Arduino.Tests
             var pin = ctrl.OpenPin(pinNumber);
             Assert.NotNull(pin);
             var result = pin.ReadVoltage();
-            Assert.True(result >= 0 && result <= 5.1);
+            Assert.True(result >= ElectricPotential.Zero && result <= ElectricPotential.FromVolts(5.1));
             ctrl.Dispose();
         }
 

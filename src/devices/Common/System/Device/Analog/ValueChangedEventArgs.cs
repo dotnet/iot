@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using UnitsNet;
+
 namespace System.Device.Analog
 {
     /// <summary>
@@ -15,7 +17,7 @@ namespace System.Device.Analog
         /// <param name="newValue">The analog sensor reading, converted to voltage.</param>
         /// <param name="pinNumber">The pin number that triggered the event.</param>
         /// <param name="triggerReason">The reason for the event</param>
-        public ValueChangedEventArgs(uint rawValue, double newValue, int pinNumber, TriggerReason triggerReason)
+        public ValueChangedEventArgs(uint rawValue, ElectricPotential newValue, int pinNumber, TriggerReason triggerReason)
         {
             RawValue = rawValue;
             Value = newValue;
@@ -34,7 +36,7 @@ namespace System.Device.Analog
         /// <summary>
         /// The change type that triggered the event.
         /// </summary>
-        public double Value
+        public ElectricPotential Value
         {
             get;
         }

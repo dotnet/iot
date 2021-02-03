@@ -77,7 +77,7 @@ namespace Iot.Device.Arduino
             return _supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.ANALOG_INPUT);
         }
 
-        protected override AnalogInputPin OpenPinInternal(int pinNumber)
+        protected override AnalogInputPin OpenPinCore(int pinNumber)
         {
             // This method is called with the logical pin numbering (input pin A0 is 0, A1 is 1, etc)
             // but the SetPinMode method operates on the global numbers

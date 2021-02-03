@@ -98,8 +98,8 @@ namespace Arduino.Samples
             Console.WriteLine(" 3 Run polling button test on GPIO2");
             Console.WriteLine(" 4 Run event wait test event on GPIO2 on Falling and Rising");
             Console.WriteLine(" 5 Run callback event test on GPIO2");
-            Console.WriteLine(" 6 Run PWM test with a simple led dimming on GPIO6 port");
-            Console.WriteLine(" 7 Dim the LED according to the input on A1");
+            Console.WriteLine(" 6 Run PWM test with a LED dimming on GPIO6 port");
+            Console.WriteLine(" 7 Blink the LED according to the input on A1");
             Console.WriteLine(" 8 Read analog channel as fast as possible");
             Console.WriteLine(" 9 Run SPI tests with an MCP3008 (experimental)");
             Console.WriteLine(" 0 Detect all devices on the I2C bus");
@@ -288,12 +288,12 @@ namespace Arduino.Samples
             Console.WriteLine("Blinking GPIO6, based on analog input.");
             while (!Console.KeyAvailable)
             {
-                double voltage = pin.ReadVoltage();
+                ElectricPotential voltage = pin.ReadVoltage();
                 gpioController.Write(gpio, PinValue.High);
-                Thread.Sleep((int)voltage * 100);
+                Thread.Sleep((int)(voltage * 100).Volts);
                 voltage = pin.ReadVoltage();
                 gpioController.Write(gpio, PinValue.Low);
-                Thread.Sleep((int)voltage * 100);
+                Thread.Sleep((int)(voltage * 100).Volts);
             }
 
             pin.Dispose();

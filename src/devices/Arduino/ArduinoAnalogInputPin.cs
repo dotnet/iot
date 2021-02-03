@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Device.Analog;
 using System.Device.Gpio;
 using System.Text;
+using UnitsNet;
 
 namespace Iot.Device.Arduino
 {
@@ -53,27 +54,27 @@ namespace Iot.Device.Arduino
             if (_autoReportingReferenceCount > 0)
             {
                 int physicalPin = Controller.ConvertLogicalNumberingSchemeToPinNumber(pin);
-                double voltage = ConvertToVoltage(rawvalue);
+                var voltage = ConvertToVoltage(rawvalue);
                 var message = new ValueChangedEventArgs(rawvalue, voltage, physicalPin, TriggerReason.Timed);
                 FireValueChanged(message);
             }
         }
 
-        public override void QueryResolution(out int numberOfBits, out double minVoltage, out double maxVoltage)
-        {
-            numberOfBits = _configuration.AnalogInputResolutionBits;
-            minVoltage = 0.0;
-            maxVoltage = VoltageReference;
-        }
+        public override ElectricPotential MinVoltage => ElectricPotential.Zero;
+
+        /// <summary>
+        /// The arduino would theoretically allow for an external analog reference, but firmata currently doesn't support that.
+        /// </summary>
+        public override ElectricPotential MaxVoltage => ElectricPotential.FromVolts(5);
+
+        /// <summary>
+        /// Similar here: Some boards support more than 10 bit resolution, but we'd have to extend the firmware for that.
+        /// </summary>
+        public override int AdcResolutionBits => 10;
 
         public override uint ReadRaw()
         {
             return _board.Firmata.GetAnalogRawValue(PinNumber);
-        }
-
-        public override bool SupportsAnalogInput()
-        {
-            return _configuration.PinModes.Contains(SupportedMode.ANALOG_INPUT);
         }
     }
 }
