@@ -153,16 +153,16 @@ namespace Iot.Device.Arduino
         {
             PinEventTypes eventSeen = PinEventTypes.None;
 
-            void WaitForEventPortValueUpdated(int pin, PinValue newvalue)
+            void WaitForEventPortValueUpdated(object sender, PinValueChangedEventArgs e)
             {
-                if (pin == pinNumber)
+                if (e.PinNumber == pinNumber)
                 {
-                    if ((eventTypes & PinEventTypes.Rising) == PinEventTypes.Rising && newvalue == PinValue.High)
+                    if ((eventTypes & PinEventTypes.Rising) == PinEventTypes.Rising && e.ChangeType == PinEventTypes.Rising)
                     {
                         eventSeen = PinEventTypes.Rising;
                         _waitForEventResetEvent.Set();
                     }
-                    else if ((eventTypes & PinEventTypes.Falling) == PinEventTypes.Falling && newvalue == PinValue.Low)
+                    else if ((eventTypes & PinEventTypes.Falling) == PinEventTypes.Falling && e.ChangeType == PinEventTypes.Falling)
                     {
                         eventSeen = PinEventTypes.Falling;
                         _waitForEventResetEvent.Set();
@@ -228,19 +228,19 @@ namespace Iot.Device.Arduino
             }
         }
 
-        private void FirmataOnDigitalPortValueUpdated(int pin, PinValue newvalue)
+        private void FirmataOnDigitalPortValueUpdated(object sender, PinValueChangedEventArgs e)
         {
             CallbackContainer? cb = null;
             PinEventTypes eventTypeToFire = PinEventTypes.None;
             lock (_callbackContainersLock)
             {
-                if (_callbackContainers.TryGetValue(pin, out cb))
+                if (_callbackContainers.TryGetValue(e.PinNumber, out cb))
                 {
-                    if (newvalue == PinValue.High && cb.EventTypes.HasFlag(PinEventTypes.Rising))
+                    if (e.ChangeType == PinEventTypes.Rising && cb.EventTypes.HasFlag(PinEventTypes.Rising))
                     {
                         eventTypeToFire = PinEventTypes.Rising;
                     }
-                    else if (newvalue == PinValue.Low && cb.EventTypes.HasFlag(PinEventTypes.Falling))
+                    else if (e.ChangeType == PinEventTypes.Falling && cb.EventTypes.HasFlag(PinEventTypes.Falling))
                     {
                         eventTypeToFire = PinEventTypes.Falling;
                     }

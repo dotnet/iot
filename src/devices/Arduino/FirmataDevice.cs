@@ -17,11 +17,6 @@ using UnitsNet;
 
 namespace Iot.Device.Arduino
 {
-    /// <summary>
-    /// This delegate is used to fire digital value changed events.
-    /// </summary>
-    public delegate void DigitalPinValueChanged(int pin, PinValue newValue);
-
     internal delegate void AnalogPinValueUpdated(int pin, uint rawValue);
 
     /// <summary>
@@ -58,7 +53,7 @@ namespace Iot.Device.Arduino
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
 
-        public event DigitalPinValueChanged? DigitalPortValueUpdated;
+        public event PinChangeEventHandler? DigitalPortValueUpdated;
 
         public event AnalogPinValueUpdated? AnalogPinValueUpdated;
 
@@ -321,9 +316,10 @@ namespace Iot.Device.Arduino
                                 PinValue newValue = (pinValues & mask) == 0 ? PinValue.Low : PinValue.High;
                                 if (newValue != oldValue)
                                 {
+                                    PinEventTypes eventTypes = newValue == PinValue.High ? PinEventTypes.Rising : PinEventTypes.Falling;
                                     _lastPinValues[i + offset] = newValue;
                                     // TODO: The callback should not be within the lock
-                                    DigitalPortValueUpdated?.Invoke(i + offset, newValue);
+                                    DigitalPortValueUpdated?.Invoke(this, new PinValueChangedEventArgs(eventTypes, i + offset));
                                 }
                             }
                         }
