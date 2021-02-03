@@ -54,7 +54,7 @@ if (choiceInterface is { KeyChar: '3' })
 }
 else if (choiceInterface is { KeyChar: '2' })
 {
-    pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(2, Pn532.I2cDefaultAddress)), debugLevel);
+    pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)), debugLevel);
 }
 else
 {
@@ -76,8 +76,8 @@ if (pn532.FirmwareVersion is FirmwareVersion version)
 
     // To run tests, uncomment the next line
     // RunTests(pn532);
-    // ReadMiFare(pn532);
-    TestGPIO(pn532);
+    ReadMiFare(pn532);
+    // TestGPIO(pn532);
 
     // To read Credit Cards, uncomment the next line
     // ReadCreditCard(pn532);
