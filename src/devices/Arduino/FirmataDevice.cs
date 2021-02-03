@@ -112,29 +112,6 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void Close()
-        {
-            _inputThreadShouldExit = true;
-
-            lock (_synchronisationLock)
-            {
-                if (_firmataStream != null)
-                {
-                    _firmataStream.Close();
-                }
-
-                _firmataStream = null;
-            }
-
-            StopThread();
-
-            if (_dataReceived != null)
-            {
-                _dataReceived.Dispose();
-                _dataReceived = null!;
-            }
-        }
-
         /// <summary>
         /// Used where?
         /// </summary>
@@ -1221,7 +1198,25 @@ namespace Iot.Device.Arduino
         {
             if (disposing)
             {
-                Close();
+                _inputThreadShouldExit = true;
+
+                lock (_synchronisationLock)
+                {
+                    if (_firmataStream != null)
+                    {
+                        _firmataStream.Close();
+                    }
+
+                    _firmataStream = null;
+                }
+
+                StopThread();
+
+                if (_dataReceived != null)
+                {
+                    _dataReceived.Dispose();
+                    _dataReceived = null!;
+                }
             }
         }
 
