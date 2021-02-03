@@ -139,7 +139,8 @@ namespace Iot.Device.Display
             _contrast = 0x30;
             _enabled = true;
             // Extended function, contrast to 0x30, temperature to coef 0, bias to 4, Screen to normal display power on, display to normal mode
-            SpiWrite(false, new byte[] { (byte)(FunctionSet.PowerOn | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast), (byte)ScreenTemperature.Coefficient0, (byte)(0x10 | _bias), (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode });
+            Span<byte> toSend = stackalloc byte[] { (byte)(FunctionSet.PowerOn | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast), (byte)ScreenTemperature.Coefficient0, (byte)(0x10 | _bias), (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode };
+            SpiWrite(false, toSend);
             Clear();
             Draw();
         }
@@ -156,7 +157,8 @@ namespace Iot.Device.Display
             {
                 _enabled = value;
                 byte enab = (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff);
-                SpiWrite(false, new byte[] { enab });
+                Span<byte> toSend = stackalloc byte[] { enab };
+                SpiWrite(false, toSend);
             }
         }
 
@@ -192,7 +194,8 @@ namespace Iot.Device.Display
             set
             {
                 _bias = value < 8 ? value : throw new ArgumentException($"Bias can't be more than 7");
-                SpiWrite(false, new byte[] { (byte)(_enabled ? FunctionSet.PowerOn | FunctionSet.ExtendedMode : FunctionSet.PowerOff | FunctionSet.ExtendedMode), (byte)(0x10 | _bias) });
+                Span<byte> toSend = stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn | FunctionSet.ExtendedMode : FunctionSet.PowerOff | FunctionSet.ExtendedMode), (byte)(0x10 | _bias) };
+                SpiWrite(false, toSend);
             }
         }
 
@@ -205,7 +208,8 @@ namespace Iot.Device.Display
             set
             {
                 _invd = value;
-                SpiWrite(false, _invd ? new byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)DisplayControl.InverseVideoMode } : new byte[] { (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode });
+                Span<byte> toSend = _invd ? stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)DisplayControl.InverseVideoMode } : stackalloc byte[] { (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode };
+                SpiWrite(false, toSend);
             }
         }
 
@@ -218,7 +222,8 @@ namespace Iot.Device.Display
             set
             {
                 _contrast = value <= 127 ? value : throw new ArgumentException($"Contrast can only be between 0 and 127");
-                SpiWrite(false, new byte[] { (byte)(_enabled ? FunctionSet.PowerOn | FunctionSet.ExtendedMode : FunctionSet.PowerOff | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast) });
+                Span<byte> toSend = stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn | FunctionSet.ExtendedMode : FunctionSet.PowerOff | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast) };
+                SpiWrite(false, toSend);
             }
         }
 
@@ -228,7 +233,11 @@ namespace Iot.Device.Display
         public ScreenTemperature Temperature
         {
             get => _temperature;
-            set => SpiWrite(false, new byte[] { (byte)(_enabled ? FunctionSet.PowerOn | FunctionSet.ExtendedMode : FunctionSet.PowerOff | FunctionSet.ExtendedMode), (byte)value });
+            set
+            {
+                Span<byte> toSend = stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn | FunctionSet.ExtendedMode : FunctionSet.PowerOff | FunctionSet.ExtendedMode), (byte)value };
+                SpiWrite(false, toSend);
+            }
         }
 
         #endregion
@@ -346,7 +355,8 @@ namespace Iot.Device.Display
             }
 
             _position = left + top * Size.Width;
-            SpiWrite(false, new byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)((byte)(SetAddress.XAddress) | left), (byte)((byte)(SetAddress.YAddress) | top) });
+            Span<byte> toSend = stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)((byte)(SetAddress.XAddress) | left), (byte)((byte)(SetAddress.YAddress) | top) };
+            SpiWrite(false, toSend);
         }
 
         #endregion
@@ -509,7 +519,7 @@ namespace Iot.Device.Display
 
         #endregion
 
-        private void SpiWrite(bool isData, byte[] toSend)
+        private void SpiWrite(bool isData, ReadOnlySpan<byte> toSend)
         {
             _controller.Write(_dataCommandPin, isData ? PinValue.High : PinValue.Low);
             _spiDevice.Write(toSend);
