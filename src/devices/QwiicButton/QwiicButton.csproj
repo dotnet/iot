@@ -11,6 +11,9 @@
     <Compile Include="RegisterMapping\*.cs" />
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>QwiicButton.Tests</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

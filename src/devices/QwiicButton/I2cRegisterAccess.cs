@@ -22,7 +22,7 @@ namespace Iot.Device.QwiicButton
     /// on its register addressing.
     /// </remarks>
     /// </summary>
-    public sealed class I2cRegisterAccess : IDisposable
+    internal sealed class I2cRegisterAccess : IDisposable
     {
         private readonly I2cDevice _device;
 

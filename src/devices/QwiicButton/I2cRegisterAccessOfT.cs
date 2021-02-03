@@ -34,7 +34,7 @@ namespace Iot.Device.QwiicButton
     /// on its register addressing.
     /// </remarks>
     /// </summary>
-    public sealed class I2cRegisterAccess<TRegisterMap> : IDisposable
+    internal sealed class I2cRegisterAccess<TRegisterMap> : IDisposable
         where TRegisterMap : Enum
     {
         private readonly bool _useLittleEndian;
