@@ -31,9 +31,6 @@ namespace Iot.Device.Arduino
         private SerialPort? _serialPort;
         private Stream _dataStream;
         private FirmataDevice? _firmata;
-        private Version? _firmwareVersion;
-        private Version? _protocolVersion;
-        private string _firmwareName;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
 
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
@@ -48,7 +45,9 @@ namespace Iot.Device.Arduino
             _dataStream = serialPortStream;
             _spiEnabled = 0;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
-            _firmwareName = string.Empty;
+            FirmwareName = string.Empty;
+            FirmataVersion = new Version();
+            FirmwareVersion = new Version();
         }
 
         /// <summary>
@@ -63,7 +62,9 @@ namespace Iot.Device.Arduino
             _serialPort.Open();
             _dataStream = _serialPort.BaseStream;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
-            _firmwareName = string.Empty;
+            FirmwareName = string.Empty;
+            FirmataVersion = new Version();
+            FirmwareVersion = new Version();
         }
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Attach to this event to retrieve log messages
+        /// Attach to this event to retrieve log messages. The Exception argument may be null if it is only an informational message.
         /// </summary>
         public event Action<string, Exception?>? LogMessages;
 
@@ -163,17 +164,18 @@ namespace Iot.Device.Arduino
             _firmata = new FirmataDevice();
             _firmata.Open(_dataStream);
             _firmata.OnError += FirmataOnError;
-            _protocolVersion = _firmata.QueryFirmataVersion();
-            if (_protocolVersion < _firmata.QuerySupportedFirmataVersion())
+            FirmataVersion = _firmata.QueryFirmataVersion();
+            if (FirmataVersion < _firmata.QuerySupportedFirmataVersion())
             {
-                throw new NotSupportedException($"Firmata version on board is {_protocolVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
+                throw new NotSupportedException($"Firmata version on board is {FirmataVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
             }
 
-            Log($"Firmata version on board is {_protocolVersion}.");
+            Log($"Firmata version on board is {FirmataVersion}.");
 
-            _firmwareVersion = _firmata.QueryFirmwareVersion(out _firmwareName);
+            FirmwareVersion = _firmata.QueryFirmwareVersion(out var firmwareName);
+            FirmwareName = firmwareName;
 
-            Log($"Firmware version on board is {_firmwareVersion}");
+            Log($"Firmware version on board is {FirmwareVersion}");
 
             _firmata.QueryCapabilities();
 
@@ -193,10 +195,8 @@ namespace Iot.Device.Arduino
         /// </summary>
         public Version FirmwareVersion
         {
-            get
-            {
-                return _firmwareVersion ?? new Version();
-            }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -204,10 +204,8 @@ namespace Iot.Device.Arduino
         /// </summary>
         public string FirmwareName
         {
-            get
-            {
-                return _firmwareName ?? string.Empty;
-            }
+            get;
+            private set;
         }
 
         /// <summary>
@@ -215,15 +213,8 @@ namespace Iot.Device.Arduino
         /// </summary>
         public Version FirmataVersion
         {
-            get
-            {
-                if (_protocolVersion == null)
-                {
-                    return new Version();
-                }
-
-                return _protocolVersion;
-            }
+            get;
+            private set;
         }
 
         internal FirmataDevice Firmata
@@ -368,7 +359,6 @@ namespace Iot.Device.Arduino
             // Do this first, to force any blocking read operations to end
             if (_dataStream != null)
             {
-                _dataStream.Close();
                 _dataStream.Dispose();
                 _dataStream = null!;
             }
@@ -382,7 +372,6 @@ namespace Iot.Device.Arduino
             if (_firmata != null)
             {
                 _firmata.OnError -= FirmataOnError;
-                _firmata.Close();
                 _firmata.Dispose();
             }
 
