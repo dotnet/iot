@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -35,7 +36,7 @@ namespace Arduino.Tests
                 Console.WriteLine("Unable to connect to simulator, trying hardware...");
             }
 
-            var b = ArduinoBoard.FindBoard(ArduinoBoard.GetSerialPortNames(), new List<int>() { 115200 });
+            var b = ArduinoBoard.FindBoard(SerialPort.GetPortNames(), new List<int>() { 115200 });
             if (b == null)
             {
                 Board = null;

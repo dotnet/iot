@@ -86,10 +86,14 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Searches the given list of com ports for a firmata device.
         /// </summary>
-        /// <param name="comPorts">List of com ports. See <see cref="GetSerialPortNames"/>.</param>
+        /// <remarks>
+        /// Scanning ports and testing for devices may affect unrelated devices. It is advisable to exclude ports known to contain other hardware from this scan.
+        /// A board won't be found if its port is already open (by the same or a different process).
+        /// </remarks>
+        /// <param name="comPorts">List of com ports. Can be used with <see cref="SerialPort.GetPortNames"/>.</param>
         /// <param name="baudRates">List of baud rates to test. <see cref="CommonBaudRates"/>.</param>
         /// <returns>A board, already open and initialized. Null if none was found.</returns>
-        public static ArduinoBoard? FindBoard(List<string> comPorts, List<int> baudRates)
+        public static ArduinoBoard? FindBoard(IEnumerable<string> comPorts, IEnumerable<int> baudRates)
         {
             foreach (var port in comPorts)
             {
@@ -113,22 +117,16 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Searches all available com ports for an Arduino device
+        /// Searches all available com ports for an Arduino device.
         /// </summary>
         /// <returns>A board, already open and initialized. Null if none was found.</returns>
+        /// <remarks>
+        /// Scanning serial ports may affect unrelated devices. If there are problems, use the
+        /// <see cref="FindBoard(System.Collections.Generic.IEnumerable{string},System.Collections.Generic.IEnumerable{int})"/> overload excluding ports that shall not be tested.
+        /// </remarks>
         public static ArduinoBoard? FindBoard()
         {
-            return FindBoard(GetSerialPortNames(), CommonBaudRates());
-        }
-
-        /// <summary>
-        /// Returns the list of available serial ports
-        /// </summary>
-        /// <returns>A list of available serial ports</returns>
-        /// <exception cref="Win32Exception">There was an error retrieving the list</exception>
-        public static List<string> GetSerialPortNames()
-        {
-            return SerialPort.GetPortNames().ToList();
+            return FindBoard(SerialPort.GetPortNames(), CommonBaudRates());
         }
 
         /// <summary>
