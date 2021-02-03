@@ -2,8 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
+using SixLabors.ImageSharp;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -35,7 +34,7 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// Returns the size of the display.
         /// </summary>
-        System.Drawing.Size Size { get; }
+        Size Size { get; }
 
         /// <summary>
         /// Returns the number of custom characters for this display.

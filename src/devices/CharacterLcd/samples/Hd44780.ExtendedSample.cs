@@ -4,12 +4,12 @@
 using System;
 using System.Device.I2c;
 using System.Diagnostics;
-using System.Drawing;
 using System.Text;
 using System.Threading;
 using System.Timers;
 using System.Globalization;
 using Iot.Device.Mcp23xxx;
+using SixLabors.ImageSharp;
 
 namespace Iot.Device.CharacterLcd.Samples
 {
@@ -204,7 +204,7 @@ namespace Iot.Device.CharacterLcd.Samples
             foreach (var color in colors)
             {
                 lcd.Clear();
-                lcd.Write(color.Name);
+                lcd.Write(color.ToHex());
 
                 colorLcd.SetBacklightColor(color);
                 System.Threading.Thread.Sleep(1000);

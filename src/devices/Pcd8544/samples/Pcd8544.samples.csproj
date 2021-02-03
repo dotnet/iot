@@ -6,11 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
-    <PackageReference Include="System.Drawing.Common" Version="5.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Pcd8544.csproj" />
     <ProjectReference Include="..\..\Ft4222\Ft4222.csproj" />
