@@ -36,9 +36,9 @@ namespace Arduino.Samples
         public static void Main(string[] args)
         {
             string portName = "COM4";
-            if (args.Length > 1)
+            if (args.Length > 0)
             {
-                portName = args[1];
+                portName = args[0];
             }
 
             using (var port = new SerialPort(portName, 115200))
