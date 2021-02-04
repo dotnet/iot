@@ -39,6 +39,7 @@ namespace Iot.Device.Display
         /// </summary>
         public const int ColorBitPerPixel = 1;
 
+        private readonly byte[] _byteMap = new byte[504];
         private int _dataCommandPin;
         private int _resetPin;
         private int _backlightPin = -1;
@@ -51,8 +52,6 @@ namespace Iot.Device.Display
         private byte _contrast = 0;
         private int _position;
         private bool _cursorVisible = false;
-
-        private byte[] _byteMap = new byte[504];
         private byte _bias;
         private bool _enabled;
         private ScreenTemperature _temperature;
@@ -256,9 +255,10 @@ namespace Iot.Device.Display
             get => _cursorVisible;
             set
             {
+                // If the cursor was visible, we remove it
                 if (_cursorVisible && !value)
                 {
-                    DrawCursor(false);
+                    DrawCursor();
                 }
 
                 _cursorVisible = value;
@@ -336,16 +336,17 @@ namespace Iot.Device.Display
             {
                 // We only display specific characters and ignore the rest
                 // And only if it's in the screen
-                if (_position <= ScreenBufferByteSize - 5)
+                if (_position <= ScreenBufferByteSize - CharacterWidth)
                 {
                     if (c >= 0x20 && c <= 0x7F)
                     {
-                        for (int i = 0; i < 5; i++)
+                        for (int i = 0; i < CharacterWidth - 1; i++)
                         {
                             letter[i] = NokiaCharacters.Ascii[c - 0x20][i];
                         }
 
                         letter[5] = 0x00;
+                        letter.CopyTo(_byteMap.AsSpan(_position));
                         SpiWrite(true, letter);
                         _position += CharacterWidth;
                     }
@@ -354,13 +355,15 @@ namespace Iot.Device.Display
                         // Case of backspace, we go back
                         if (_cursorVisible)
                         {
-                            DrawCursor(false);
+                            DrawCursor();
                         }
 
                         _position -= CharacterWidth;
                         _position = _position < 0 ? 0 : _position;
                         SetPosition(_position);
-                        DrawCursor(false);
+                        SpiWrite(true, letter);
+                        letter.CopyTo(_byteMap.AsSpan(_position));
+                        SetPosition(_position);
                     }
                 }
             }
@@ -379,17 +382,24 @@ namespace Iot.Device.Display
         {
             Write(text);
             // calculate the position
-            int y = _position / Size.Width + 1;
+            int y = _position / (Size.Width * CharacterWidth) + 1;
             y = y > Size.Height ? Size.Height : y;
             SetCursorPosition(0, y);
         }
 
-        private void DrawCursor(bool visible = true)
+        private void DrawCursor()
         {
-            Span<byte> letter = stackalloc byte[CharacterWidth];
-            for (int i = 0; i < 5; i++)
+            // We won't draw the cursor outside of the screen
+            if (_position > ScreenBufferByteSize - CharacterWidth)
             {
-                letter[i] = visible ? 0x80 : 0x00;
+                return;
+            }
+
+            Span<byte> letter = stackalloc byte[CharacterWidth];
+            for (int i = 0; i < CharacterWidth - 1; i++)
+            {
+                _byteMap[_position + i] = (byte)((_byteMap[_position + i] & 0x80) == 0x80 ? _byteMap[_position + i] & 0x7F : _byteMap[_position + i] | 0x80);
+                letter[i] = _byteMap[_position + i];
             }
 
             SpiWrite(true, letter);
@@ -423,10 +433,11 @@ namespace Iot.Device.Display
 
             if (_cursorVisible)
             {
-                DrawCursor(false);
+                DrawCursor();
             }
 
-            SetPosition(left, top);
+            SetPosition(left * CharacterWidth, top);
+            _position = left * CharacterWidth + top * Size.Width * CharacterWidth;
             if (_cursorVisible)
             {
                 DrawCursor();
@@ -435,15 +446,14 @@ namespace Iot.Device.Display
 
         private void SetPosition(int left, int top)
         {
-            _position = left + top * Size.Width;
             Span<byte> toSend = stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)((byte)(SetAddress.XAddress) | left), (byte)((byte)(SetAddress.YAddress) | top) };
             SpiWrite(false, toSend);
         }
 
         private void SetPosition(int position)
         {
-            int top = position / Size.Width;
-            int left = position - top * Size.Width;
+            int top = position / (Size.Width * CharacterWidth);
+            int left = position - top * Size.Width * CharacterWidth;
             SetPosition(left, top);
         }
 

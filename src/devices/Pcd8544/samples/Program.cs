@@ -168,11 +168,11 @@ lcd.UnderlineCursorVisible = true;
 for (int i = 0; i < 50; i++)
 {
     lcd.Write($"{i}");
-    Thread.Sleep(1500);
+    Thread.Sleep(500);
 }
 
 lcd.Clear();
-lcd.Write("Cursor after");
+lcd.Write("Basckspace");
 for (int i = 0; i < 5; i++)
 {
     Thread.Sleep(2000);
@@ -183,6 +183,10 @@ lcd.Clear();
 lcd.Write("More text");
 Thread.Sleep(1500);
 lcd.SetCursorPosition(0, 0);
+Thread.Sleep(1500);
+lcd.SetCursorPosition(5, 0);
+Thread.Sleep(1500);
+lcd.SetCursorPosition(0, 5);
 Thread.Sleep(1500);
 lcd.UnderlineCursorVisible = false;
 
@@ -213,9 +217,10 @@ for (byte i = 0; i < 2; i++)
     Thread.Sleep(1500);
 
     lcd.SetCursorPosition(0, 0);
-    lcd.WriteLine("This is a nice");
-    lcd.WriteLine("picture with a");
-    lcd.WriteLine("heart displayed");
+    lcd.WriteLine("A nice");
+    lcd.WriteLine("picture with");
+    lcd.WriteLine("a heart");
+    lcd.WriteLine("displayed");
     lcd.WriteLine("on the screen");
     Thread.Sleep(1000);
     // Shows the second bitmap
@@ -271,6 +276,7 @@ Thread.Sleep(2000);
 lcd.Clear();
 
 Console.WriteLine("Thank you for your attention!");
+Thread.Sleep(2000);
 lcd.Dispose();
 // In case we're using FT4222, gpio needs to be disposed after the screen
 gpio?.Dispose();
