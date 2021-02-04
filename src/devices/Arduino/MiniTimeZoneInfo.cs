@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.TimeZoneInfo), false, false, IncludingPrivates = true)]
+    [ArduinoReplacement(typeof(System.TimeZoneInfo), false, IncludingPrivates = true)]
     internal class MiniTimeZoneInfo
     {
         [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]

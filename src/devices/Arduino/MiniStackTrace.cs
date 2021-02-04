@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(StackTrace), true, false, IncludingPrivates = true)]
+    [ArduinoReplacement(typeof(StackTrace), true, IncludingPrivates = true)]
     internal class MiniStackTrace
     {
         private Exception _exception;

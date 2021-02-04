@@ -41,10 +41,20 @@ namespace Iot.Device.Arduino
             return IsReferenceOrContainsReferencesCore(typeof(T));
         }
 
-        [ArduinoImplementation((NativeMethod.RuntimeHelpersIsReferenceOrContainsReferencesCore))]
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersIsReferenceOrContainsReferencesCore)]
         private static bool IsReferenceOrContainsReferencesCore(Type t)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// This uses an implementation in the EE to get rid of all type tests (and all possible casts)
+        /// </summary>
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersEnumEquals)]
+        public static bool EnumEquals<T>(T x, T y)
+            where T : struct, Enum
+        {
+            return x.Equals(y);
         }
 
         internal static bool IsBitwiseEquatable<T>()

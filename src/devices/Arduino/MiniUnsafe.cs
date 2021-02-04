@@ -2,7 +2,7 @@
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement("Internal.Runtime.CompilerServices.Unsafe", "System.Private.CoreLib.dll", true, false, IncludingPrivates = true)]
+    [ArduinoReplacement("Internal.Runtime.CompilerServices.Unsafe", "System.Private.CoreLib.dll", true, IncludingPrivates = true)]
     internal unsafe class MiniUnsafe
     {
         // The implementation of the following two methods is identical, therefore it doesn't really matter which one we match
@@ -78,7 +78,15 @@ namespace Iot.Device.Arduino
             return (byte*)source + (elementOffset * (int)SizeOf<T>());
         }
 
-        [ArduinoImplementation(NativeMethod.UnsafeAddByteOffset, CompareByParameterNames = true)]
+        /// <summary>
+        /// Adds an element offset to the given reference.
+        /// </summary>
+        public static ref T Add<T>(ref T source, IntPtr elementOffset)
+        {
+            return ref AddByteOffset(ref source, (IntPtr)((uint)elementOffset * (uint)SizeOf<T>()));
+        }
+
+        [ArduinoImplementation(NativeMethod.UnsafeAddByteOffset, IgnoreGenericTypes = true)]
         public static ref T AddByteOffset<T>(ref T source, IntPtr byteOffset)
         {
             // This method is implemented by the toolchain
@@ -90,7 +98,7 @@ namespace Iot.Device.Arduino
             // ret
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = false, IgnoreGenericTypes = true)]
+        [ArduinoImplementation(NativeMethod.None, IgnoreGenericTypes = true)]
         public static ref T AddByteOffset<T>(ref T source, uint byteOffset)
         {
             return ref AddByteOffset(ref source, (IntPtr)(void*)byteOffset);

@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using Iot.Device.Arduino;
+using Xunit;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -15,6 +18,11 @@ namespace Iot.Device.Arduino.Tests
 
         public FirmataTestFixture()
         {
+            var typeOfType = Type.GetType("System.Type", true)!;
+            var attribute = (TargetFrameworkAttribute)typeOfType.Assembly.GetCustomAttribute(typeof(TargetFrameworkAttribute))!;
+            var versionStr = attribute.FrameworkName.Substring(attribute.FrameworkName.IndexOf("=v", StringComparison.Ordinal) + 2);
+            Version version = Version.Parse(versionStr);
+            Assert.True(version >= new Version(5, 0));
             try
             {
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

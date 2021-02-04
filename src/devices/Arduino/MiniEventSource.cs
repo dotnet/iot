@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.Diagnostics.Tracing.EventSource), true, false, IncludingPrivates = true)]
+    [ArduinoReplacement(typeof(System.Diagnostics.Tracing.EventSource), true, IncludingPrivates = true)]
     internal class MiniEventSource : IDisposable
     {
         public MiniEventSource(Guid g, string s)

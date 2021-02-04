@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(DateTime), false, false, IncludingPrivates = true)]
+    [ArduinoReplacement(typeof(DateTime), false, IncludingPrivates = true)]
     internal struct MiniDateTime
     {
         [ArduinoImplementation(NativeMethod.None)]

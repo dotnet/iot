@@ -67,7 +67,7 @@ namespace Iot.Device.Arduino
     //  object inside of the debugger.
     //
     ////////////////////////////////////////////////////////////////////////////
-    [ArduinoReplacement(typeof(CultureInfo), true, false, IncludingPrivates = true)]
+    [ArduinoReplacement(typeof(CultureInfo), true, IncludingPrivates = true)]
     internal class MiniCultureInfo : IFormatProvider, ICloneable
     {
         // We use an RFC4646 type string to construct CultureInfo.
@@ -674,7 +674,7 @@ namespace Iot.Device.Arduino
             return InvariantCulture;
         }
 
-        [ArduinoReplacement("System.Globalization.CultureData", null, true, false, IncludingPrivates = true)]
+        [ArduinoReplacement("System.Globalization.CultureData", null, true, IncludingPrivates = true)]
         private class MiniCultureData
         {
             private static readonly string[] _saLongTimes = new string[] { "HH:mm:ss" };

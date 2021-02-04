@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(AppContext), true, false, IncludingPrivates = true)]
+    [ArduinoReplacement(typeof(AppContext), true, IncludingPrivates = true)]
     internal class MiniAppContext
     {
         public static bool TryGetSwitch(string switchName, out bool isEnabled)

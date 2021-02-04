@@ -198,52 +198,60 @@ namespace Iot.Device.Arduino
             return EstimateRequiredMemory(out _);
         }
 
-        public long EstimateRequiredMemory(out List<KeyValuePair<Type, long>> details)
+        public long EstimateRequiredMemory(out List<KeyValuePair<Type, ClassStatistics>> details)
         {
             const int MethodBodyMinSize = 40;
-            Dictionary<Type, long> classSizes = new Dictionary<Type, long>();
+            Dictionary<Type, ClassStatistics> classSizes = new Dictionary<Type, ClassStatistics>();
             long bytesUsed = 0;
             foreach (var cls in Classes)
             {
-                bytesUsed += 40;
-                bytesUsed += cls.StaticSize;
-                bytesUsed += cls.Members.Count * 8; // Assuming 32 bit target system for now
+                int classBytes = 40;
+                classBytes += cls.StaticSize;
+                classBytes += cls.Members.Count * 8; // Assuming 32 bit target system for now
                 foreach (var field in cls.Members)
                 {
                     if (_inversePatchedFieldTokens.TryGetValue(field.Token, out FieldInfo? value))
                     {
                         if (_patchedFieldTokens.TryGetValue(value, out var data))
                         {
-                            bytesUsed += data.InitializerData?.Length ?? 0;
+                            classBytes += data.InitializerData?.Length ?? 0;
                         }
                     }
                 }
+
+                bytesUsed += classBytes;
+                classSizes[cls.TheType] = new ClassStatistics(cls, classBytes);
             }
 
             foreach (var method in _methods)
             {
-                bytesUsed += MethodBodyMinSize;
-                bytesUsed += method.ArgumentCount * 4;
-                bytesUsed += method.MaxLocals * 4;
+                int methodBytes = MethodBodyMinSize;
+                methodBytes += MethodBodyMinSize;
+                methodBytes += method.ArgumentCount * 4;
+                methodBytes += method.MaxLocals * 4;
 
-                int methodBytes = method.IlBytes != null ? method.IlBytes.Length : 0;
-                if (method.IlBytes != null)
-                {
-                    bytesUsed += methodBytes;
-                }
+                methodBytes += method.IlBytes != null ? method.IlBytes.Length : 0;
 
                 var type = method.MethodBase.DeclaringType!;
-                if (classSizes.TryGetValue(type, out var classBytes))
+                if (classSizes.TryGetValue(type, out _))
                 {
-                    classSizes[type] += methodBytes;
+                    classSizes[type].MethodBytes += methodBytes;
+                    classSizes[type].Methods.Add((method, methodBytes));
                 }
                 else
                 {
-                    classSizes[type] = methodBytes;
+                    classSizes[type] = new ClassStatistics(new ClassDeclaration(type, 0, 0, 0, new List<ClassMember>(), new List<Type>()), 0);
+                    classSizes[type].MethodBytes += methodBytes;
+                    classSizes[type].Methods.Add((method, methodBytes));
                 }
             }
 
-            details = classSizes.OrderByDescending(x => x.Value).ToList();
+            foreach (var stat in classSizes.Values)
+            {
+                stat.TotalBytes = stat.ClassBytes + stat.MethodBytes;
+            }
+
+            details = classSizes.OrderByDescending(x => x.Value.TotalBytes).ToList();
 
             foreach (var constant in _strings)
             {
@@ -251,6 +259,45 @@ namespace Iot.Device.Arduino
             }
 
             return bytesUsed;
+        }
+
+        public sealed class ClassStatistics
+        {
+            public ClassStatistics(ClassDeclaration type, int classBytes)
+            {
+                Type = type;
+                ClassBytes = classBytes;
+                MethodBytes = 0;
+                TotalBytes = 0;
+                Methods = new List<(ArduinoMethodDeclaration, int)>();
+            }
+
+            public ClassDeclaration Type
+            {
+                get;
+            }
+
+            public int ClassBytes
+            {
+                get;
+            }
+
+            public int MethodBytes
+            {
+                get;
+                set;
+            }
+
+            public int TotalBytes
+            {
+                get;
+                set;
+            }
+
+            public List<(ArduinoMethodDeclaration Method, int Size)> Methods
+            {
+                get;
+            }
         }
 
         public int GetOrAddMethodToken(MethodBase methodBase)
@@ -495,7 +542,66 @@ namespace Iot.Device.Arduino
                 m = replacement;
             }
 
-            return _methods.Any(x => x.MethodBase == m);
+            return _methods.Any(x => AreMethodsIdentical(x.MethodBase, (MethodBase)m));
+        }
+
+        private bool AreMethodsIdentical(MethodBase a, MethodBase b)
+        {
+            if (a == b)
+            {
+                return true;
+            }
+
+            if (!ArduinoCsCompiler.MethodsHaveSameSignature(a, b))
+            {
+                return false;
+            }
+
+            string? astr = a!.ToString();
+            string? bstr = b!.ToString();
+
+            if (a.IsGenericMethod && b.IsGenericMethod)
+            {
+                var typeParamsa = a.GetGenericArguments();
+                var typeParamsb = b.GetGenericArguments();
+                if (typeParamsa.Length != typeParamsb.Length)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < typeParamsa.Length; i++)
+                {
+                    if (typeParamsa[i] != typeParamsb[i])
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (a.DeclaringType!.IsConstructedGenericType && b.DeclaringType!.IsConstructedGenericType)
+            {
+                var typeParamsa = a.DeclaringType.GetGenericArguments();
+                var typeParamsb = b.DeclaringType.GetGenericArguments();
+                if (typeParamsa.Length != typeParamsb.Length)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < typeParamsa.Length; i++)
+                {
+                    if (typeParamsa[i] != typeParamsb[i])
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            if (a.MetadataToken == b.MetadataToken && a.Module.FullyQualifiedName == b.Module.FullyQualifiedName)
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public bool AddMethod(ArduinoMethodDeclaration method)
@@ -517,17 +623,17 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("The maximum execution stack size is 255");
             }
 
-            if (_methods.Any(x => x.MethodBase == method.MethodBase))
+            if (_methods.Any(x => AreMethodsIdentical(x.MethodBase, method.MethodBase)))
             {
                 return false;
             }
 
-            if (_methodsReplaced.Any(x => x.Item1 == method.MethodBase))
+            if (_methodsReplaced.Any(x => AreMethodsIdentical(x.Item1, method.MethodBase)))
             {
                 throw new InvalidOperationException($"Method {method} should have been replaced by its replacement");
             }
 
-            if (_methodsReplaced.Any(x => x.Item1 == method.MethodBase && x.Item2 == null))
+            if (_methodsReplaced.Any(x => AreMethodsIdentical(x.Item1, method.MethodBase) && x.Item2 == null))
             {
                 throw new InvalidOperationException($"The method {method} should be replaced, but has no new implementation. This program will not execute");
             }
@@ -597,6 +703,12 @@ namespace Iot.Device.Arduino
             }
 
             BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
+
+            if (!includingSubclasses)
+            {
+                flags |= BindingFlags.DeclaredOnly;
+            }
+
             List<MethodInfo> methodsNeedingReplacement = typeToReplace.GetMethods(flags).ToList();
 
             if (!includingPrivates)
@@ -608,8 +720,20 @@ namespace Iot.Device.Arduino
             foreach (var methoda in replacement.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
             {
                 // Above, we only check the public methods, here we also look at the private ones
-                foreach (var methodb in typeToReplace.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
+                BindingFlags otherFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
+                if (!includingSubclasses)
                 {
+                    otherFlags |= BindingFlags.DeclaredOnly;
+                }
+
+                foreach (var methodb in typeToReplace.GetMethods(otherFlags))
+                {
+                    if (!methodsNeedingReplacement.Contains(methodb))
+                    {
+                        // This is not the one in need of replacement (or already has one, if the parameters matched a similar implementation as well)
+                        continue;
+                    }
+
                     if (ArduinoCsCompiler.MethodsHaveSameSignature(methoda, methodb) || ArduinoCsCompiler.AreSameOperatorMethods(methoda, methodb))
                     {
                         // Method A shall replace Method B
@@ -679,7 +803,7 @@ namespace Iot.Device.Arduino
 
         public MethodBase? GetReplacement(MethodBase original)
         {
-            var elem = _methodsReplaced.FirstOrDefault(x => x.Item1 == original);
+            var elem = _methodsReplaced.FirstOrDefault(x => AreMethodsIdentical(x.Item1, original));
             if (elem.Item1 == default)
             {
                 return null;
@@ -733,6 +857,13 @@ namespace Iot.Device.Arduino
                 throw new ArgumentNullException(nameof(toReplace));
             }
 
+            if (replacement != null && AreMethodsIdentical(toReplace, replacement))
+            {
+                // Replacing a method with itself may happen if virtual resolution points back to the same base class. Should fix itself later.
+                return;
+            }
+
+            string name = toReplace.Name;
             _methodsReplaced.Add((toReplace, replacement));
         }
 
@@ -752,7 +883,7 @@ namespace Iot.Device.Arduino
 
         public ArduinoMethodDeclaration GetMethod(MethodBase methodInfo)
         {
-            return _methods.First(x => x.MethodBase == methodInfo);
+            return _methods.First(x => AreMethodsIdentical(x.MethodBase, methodInfo));
         }
 
         private static int Xor(IEnumerable<int> inputs)

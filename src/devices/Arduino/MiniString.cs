@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.String), false, false, IncludingPrivates = true)]
+    [ArduinoReplacement(typeof(System.String), false, IncludingPrivates = true)]
     internal unsafe partial class MiniString : ICloneable, IComparable, IComparable<string>, IConvertible, IEquatable<string>, System.Collections.Generic.IEnumerable<char>
     {
 #pragma warning disable SA1122 // Use string.Empty for empty strings (This is the definition of an empty string!)

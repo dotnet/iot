@@ -1249,7 +1249,16 @@ namespace Iot.Device.Arduino
             where T : Delegate
         {
             var exec = CreateExecutionSet();
-            // exec.SuppressType("System.Number");
+            // We never want these types in our execution set - reflection is not supported, except in very specific cases
+            exec.SuppressType("System.Reflection.MethodBase");
+            exec.SuppressType("System.Reflection.MethodInfo");
+            exec.SuppressType("System.Reflection.ConstructorInfo");
+            exec.SuppressType("System.Reflection.Module");
+            exec.SuppressType("System.Reflection.Assembly");
+            exec.SuppressType("System.Reflection.RuntimeAssembly");
+
+            exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
+
             PrepareLowLevelInterface(exec);
             PrepareClass(exec, mainClass);
             PrepareCodeInternal(exec, mainEntryPoint.Method, null);
@@ -1602,7 +1611,7 @@ namespace Iot.Device.Arduino
                 ClassDeclaration? cls = classes[index];
                 if (!cls.SuppressInit && cls.TheType.TypeInitializer != null)
                 {
-                    _board.Log($"Running static initializer of {cls}. Step {index}/{classes.Count}...");
+                    _board.Log($"Running static initializer of {cls}. Step {index + 1}/{classes.Count}...");
                     var task = GetTask(set, cls.TheType.TypeInitializer);
                     task.Invoke(CancellationToken.None);
                     task.WaitForResult();
@@ -1675,6 +1684,11 @@ namespace Iot.Device.Arduino
                 return true;
             }
 
+            ////if ((HasArduinoImplementationAttribute(a, out attrib) && attrib!.IgnoreGenericTypes) ||
+            ////    (HasArduinoImplementationAttribute(b, out attrib) && attrib!.IgnoreGenericTypes))
+            ////{
+            ////}
+
             for (int i = 0; i < argsa.Length; i++)
             {
                 if (!AreSameParameterTypes(argsa[i].ParameterType, argsb[i].ParameterType))
@@ -1689,6 +1703,12 @@ namespace Iot.Device.Arduino
         private static bool AreSameParameterTypes(Type parameterA, Type parameterB)
         {
             if (parameterA == parameterB)
+            {
+                return true;
+            }
+
+            // FullName is null for generic type arguments, since they have no namespace
+            if (parameterA.FullName == parameterB.FullName && parameterA.Name == parameterB.Name)
             {
                 return true;
             }

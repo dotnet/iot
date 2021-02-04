@@ -126,5 +126,8 @@ namespace Iot.Device.Arduino
 
         InteropQueryPerformanceFrequency,
         InteropQueryPerformanceCounter,
+        TypeContainsGenericParameters,
+        TypeName,
+        RuntimeHelpersEnumEquals
     }
 }

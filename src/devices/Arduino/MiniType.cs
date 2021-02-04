@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    [ArduinoReplacement(typeof(System.Type), true, true)]
+    [ArduinoReplacement(typeof(System.Type), true, IncludingSubclasses = true)]
     internal class MiniType
     {
 #pragma warning disable 414, SX1309
@@ -59,6 +59,15 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public virtual string Name
+        {
+            [ArduinoImplementation(NativeMethod.TypeName)]
+            get
+            {
+                return string.Empty;
+            }
+        }
+
         public virtual string? FullName
         {
             get
@@ -66,6 +75,22 @@ namespace Iot.Device.Arduino
                 return "Undefined";
             }
         }
+
+        public bool IsRuntimeImplemented()
+        {
+            return true;
+        }
+
+        public bool ContainsGenericParameters
+        {
+            [ArduinoImplementation(NativeMethod.TypeContainsGenericParameters)]
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public bool IsSerializable => false;
 
         public virtual RuntimeTypeHandle TypeHandle
         {
