@@ -3,7 +3,7 @@
 
 namespace Iot.Device.Display.Pcd8544Enums
 {
-    internal enum DisplayControl
+    internal enum PcdDisplayControl
     {
         DisplayBlank = 0b0000_1000,
         NormalMode = 0b0000_1100,

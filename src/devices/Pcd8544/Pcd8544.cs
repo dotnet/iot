@@ -142,7 +142,7 @@ namespace Iot.Device.Display
             _contrast = 0x30;
             _enabled = true;
             // Extended function, contrast to 0x30, temperature to coef 0, bias to 4, Screen to normal display power on, display to normal mode
-            Span<byte> toSend = stackalloc byte[] { (byte)(FunctionSet.PowerOn | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast), (byte)ScreenTemperature.Coefficient0, (byte)(0x10 | _bias), (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode };
+            Span<byte> toSend = stackalloc byte[] { (byte)(FunctionSet.PowerOn | FunctionSet.ExtendedMode), (byte)(0x80 | _contrast), (byte)ScreenTemperature.Coefficient0, (byte)(0x10 | _bias), (byte)FunctionSet.PowerOn, (byte)PcdDisplayControl.NormalMode };
             SpiWrite(false, toSend);
             Clear();
             Draw();
@@ -211,7 +211,7 @@ namespace Iot.Device.Display
             set
             {
                 _invd = value;
-                Span<byte> toSend = _invd ? stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)DisplayControl.InverseVideoMode } : stackalloc byte[] { (byte)FunctionSet.PowerOn, (byte)DisplayControl.NormalMode };
+                Span<byte> toSend = _invd ? stackalloc byte[] { (byte)(_enabled ? FunctionSet.PowerOn : FunctionSet.PowerOff), (byte)PcdDisplayControl.InverseVideoMode } : stackalloc byte[] { (byte)FunctionSet.PowerOn, (byte)PcdDisplayControl.NormalMode };
                 SpiWrite(false, toSend);
             }
         }
@@ -475,7 +475,7 @@ namespace Iot.Device.Display
                 return false;
             }
 
-            int index = ((x % 84) + (int)(y * 0.125) * 84);
+            int index = ((x % 84) + (y / 8) * 84);
 
             byte bitMask = (byte)(1 << (y % 8));
 
