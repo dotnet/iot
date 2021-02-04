@@ -1191,11 +1191,11 @@ namespace Iot.Device.Pn532
         /// <summary>
         /// Read the PN532 GPIO
         /// </summary>
-        /// <param name="p7">The P7 GPIO</param>
         /// <param name="p3">The P3 GPIO</param>
+        /// <param name="p7">The P7 GPIO</param>
         /// <param name="l0L1">The specific operation mode register</param>
         /// <returns>True if success</returns>
-        public bool ReadGpio(out Port7 p7, out Port3 p3, out OperatingMode l0L1)
+        public bool ReadGpio(out Port3 p3, out Port7 p7, out OperatingMode l0L1)
         {
             // No flag as default
             p7 = 0;
@@ -1209,14 +1209,14 @@ namespace Iot.Device.Pn532
 
             Span<byte> retGPIO = stackalloc byte[3];
             ret = ReadResponse(CommandSet.ReadGPIO, retGPIO);
-            p7 = (Port7)retGPIO[0];
-            p3 = (Port3)retGPIO[1];
+            p3 = (Port3)retGPIO[0];
+            p7 = (Port7)retGPIO[1];
             l0L1 = (OperatingMode)retGPIO[2];
             return ret >= 0;
         }
 
         /// <summary>
-        /// Write the PN532 GPIO
+        /// Write the PN532 GPIO ports 3 and 7
         /// </summary>
         /// <param name="p7">The P7 GPIO</param>
         /// <param name="p3">The P3 GPIO</param>
@@ -1225,8 +1225,52 @@ namespace Iot.Device.Pn532
         {
             Span<byte> toWrite = stackalloc byte[2]
             {
-                (byte)p7,
-                (byte)p3
+                (byte)(0x80 | (byte)p3),
+                (byte)(0x80 | (byte)p7)
+            };
+            var ret = WriteCommand(CommandSet.WriteGPIO, toWrite);
+            if (ret < 0)
+            {
+                return false;
+            }
+
+            ret = ReadResponse(CommandSet.WriteGPIO, Span<byte>.Empty);
+            return ret >= 0;
+        }
+
+        /// <summary>
+        /// Write the PN532 GPIO port 3 leaving port 7 in it's current state
+        /// </summary>
+        /// <param name="p3">The P3 GPIO</param>
+        /// <returns>True if success</returns>
+        public bool WriteGpio(Port3 p3)
+        {
+            Span<byte> toWrite = stackalloc byte[2]
+            {
+                (byte)(0x80 | (byte)p3),
+                (byte)(0x00)
+            };
+            var ret = WriteCommand(CommandSet.WriteGPIO, toWrite);
+            if (ret < 0)
+            {
+                return false;
+            }
+
+            ret = ReadResponse(CommandSet.WriteGPIO, Span<byte>.Empty);
+            return ret >= 0;
+        }
+
+        /// <summary>
+        /// Write the PN532 GPIO port 7 leaving port 3 in it's current state
+        /// </summary>
+        /// <param name="p7">The P7 GPIO</param>
+        /// <returns>True if success</returns>
+        public bool WriteGpio(Port7 p7)
+        {
+            Span<byte> toWrite = stackalloc byte[2]
+            {
+                (byte)(0x00),
+                (byte)(0x80 | (byte)p7)
             };
             var ret = WriteCommand(CommandSet.WriteGPIO, toWrite);
             if (ret < 0)

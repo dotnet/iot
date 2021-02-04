@@ -8,6 +8,7 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Card;
 using Iot.Device.Card.CreditCardProcessing;
 using Iot.Device.Card.Mifare;
@@ -76,6 +77,7 @@ if (pn532.FirmwareVersion is FirmwareVersion version)
     // To run tests, uncomment the next line
     // RunTests(pn532);
     ReadMiFare(pn532);
+    // TestGPIO(pn532);
 
     // To read Credit Cards, uncomment the next line
     // ReadCreditCard(pn532);
@@ -209,6 +211,35 @@ void ReadMiFare(Pn532 pn532)
     }
 }
 
+void TestGPIO(Pn532 pn532)
+{
+    Console.WriteLine("Turning Off Port 7!");
+    var ret = pn532.WriteGpio((Port7)0);
+
+    // Access GPIO
+    ret = pn532.ReadGpio(out Port3 p3, out Port7 p7, out OperatingMode l0L1);
+    Console.WriteLine($"P7: {p7}");
+    Console.WriteLine($"P3: {p3}");
+    Console.WriteLine($"L0L1: {l0L1} ");
+
+    var on = true;
+    for (var i = 0; i < 10; i++)
+    {
+        if (on)
+        {
+            p7 = Port7.P71;
+        }
+        else
+        {
+            p7 = 0;
+        }
+
+        ret = pn532.WriteGpio(p7);
+        Task.Delay(150).Wait();
+        on = !on;
+    }
+}
+
 void RunTests(Pn532 pn532)
 {
     Console.WriteLine(
@@ -240,7 +271,7 @@ void RunTests(Pn532 pn532)
 
     Console.WriteLine($"Are results same: {redSfrus.SequenceEqual(redSfrs)}");
     // Access GPIO
-    ret = pn532.ReadGpio(out Port7 p7, out Port3 p3, out OperatingMode l0L1);
+    ret = pn532.ReadGpio(out Port3 p3, out Port7 p7, out OperatingMode l0L1);
     Console.WriteLine($"P7: {p7}");
     Console.WriteLine($"P3: {p3}");
     Console.WriteLine($"L0L1: {l0L1} ");
