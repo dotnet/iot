@@ -27,17 +27,16 @@ namespace Arduino.Samples
     /// </summary>
     internal class Program
     {
-        /// <summary>
-        /// Main entry point
-        /// </summary>
-        /// <param name="args">Unused</param>
         public static void Main(string[] args)
         {
-            string portName = "COM4";
-            if (args.Length > 1)
+            if (args.Length == 0)
             {
-                portName = args[1];
+                Console.WriteLine("Usage: Arduino.sample <PortName>");
+                Console.WriteLine("i.e.: Arduino.sample COM4");
+                return;
             }
+
+            string portName = args[0];
 
             using (var port = new SerialPort(portName, 115200))
             {
