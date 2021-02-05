@@ -13,13 +13,13 @@ namespace Iot.Device.Arduino
     internal class ArduinoGpioControllerDriver : GpioDriver
     {
         private readonly ArduinoBoard _arduinoBoard;
-        private readonly List<SupportedPinConfiguration> _supportedPinConfigurations;
+        private readonly IReadOnlyCollection<SupportedPinConfiguration> _supportedPinConfigurations;
         private readonly Dictionary<int, CallbackContainer> _callbackContainers;
         private readonly ConcurrentDictionary<int, PinMode> _pinModes;
         private readonly object _callbackContainersLock;
         private readonly AutoResetEvent _waitForEventResetEvent;
 
-        internal ArduinoGpioControllerDriver(ArduinoBoard arduinoBoard, List<SupportedPinConfiguration> supportedPinConfigurations)
+        internal ArduinoGpioControllerDriver(ArduinoBoard arduinoBoard, IReadOnlyCollection<SupportedPinConfiguration> supportedPinConfigurations)
         {
             _arduinoBoard = arduinoBoard ?? throw new ArgumentNullException(nameof(arduinoBoard));
             _supportedPinConfigurations = supportedPinConfigurations ?? throw new ArgumentNullException(nameof(supportedPinConfigurations));

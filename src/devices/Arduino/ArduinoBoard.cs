@@ -31,7 +31,7 @@ namespace Iot.Device.Arduino
         private SerialPort? _serialPort;
         private Stream _dataStream;
         private FirmataDevice? _firmata;
-        private List<SupportedPinConfiguration> _supportedPinConfigurations;
+        private IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations;
 
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
         private int _spiEnabled;
@@ -42,7 +42,7 @@ namespace Iot.Device.Arduino
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
         {
-            _dataStream = serialPortStream;
+            _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
             _spiEnabled = 0;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
             FirmwareName = string.Empty;
@@ -179,7 +179,7 @@ namespace Iot.Device.Arduino
 
             _firmata.QueryCapabilities();
 
-            _supportedPinConfigurations = _firmata.PinConfigurations; // Clone reference
+            _supportedPinConfigurations = _firmata.PinConfigurations.AsReadOnly();
 
             Log("Device capabilities: ");
             foreach (var pin in _supportedPinConfigurations)
@@ -228,11 +228,11 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Returns the list of capabilities per pin
         /// </summary>
-        public ReadOnlyCollection<SupportedPinConfiguration> SupportedPinConfigurations
+        public IReadOnlyList<SupportedPinConfiguration> SupportedPinConfigurations
         {
             get
             {
-                return _supportedPinConfigurations.AsReadOnly();
+                return _supportedPinConfigurations;
             }
         }
 
@@ -274,6 +274,11 @@ namespace Iot.Device.Arduino
         /// Or: An invalid Bus Id or device Id was specified</exception>
         public virtual I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
+            if (connectionSettings == null)
+            {
+                throw new ArgumentNullException(nameof(connectionSettings));
+            }
+
             if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.I2c)))
             {
                 throw new NotSupportedException("No Pins with I2c support found. Is the I2c module loaded?");
@@ -291,6 +296,11 @@ namespace Iot.Device.Arduino
         /// <exception cref="NotSupportedException">The Bus number is not 0, or the SPI component has not been enabled in the firmware.</exception>
         public virtual SpiDevice CreateSpiDevice(SpiConnectionSettings settings)
         {
+            if (settings == null)
+            {
+                throw new ArgumentNullException(nameof(settings));
+            }
+
             if (settings.BusId != 0)
             {
                 throw new NotSupportedException("Only Bus Id 0 is supported");
@@ -371,11 +381,9 @@ namespace Iot.Device.Arduino
 
             if (_firmata != null)
             {
-                _firmata.OnError -= FirmataOnError;
                 _firmata.Dispose();
+                _firmata = null;
             }
-
-            _firmata = null;
         }
 
         /// <summary>

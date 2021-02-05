@@ -15,11 +15,11 @@ namespace Iot.Device.Arduino
     internal class ArduinoAnalogController : AnalogController
     {
         private readonly ArduinoBoard _board;
-        private readonly ReadOnlyCollection<SupportedPinConfiguration> _supportedPinConfigurations;
+        private readonly IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations;
         private readonly Dictionary<int, ValueChangedEventHandler> _callbacks;
 
         public ArduinoAnalogController(ArduinoBoard board,
-            ReadOnlyCollection<SupportedPinConfiguration> supportedPinConfigurations, PinNumberingScheme scheme)
+            IReadOnlyList<SupportedPinConfiguration> supportedPinConfigurations, PinNumberingScheme scheme)
             : base(scheme)
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));

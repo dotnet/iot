@@ -1213,6 +1213,8 @@ namespace Iot.Device.Arduino
                     _dataReceived.Dispose();
                     _dataReceived = null!;
                 }
+
+                OnError = null;
             }
         }
 
