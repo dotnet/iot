@@ -247,7 +247,7 @@ namespace Arduino.Samples
         {
             // Use Pin 6
             const int gpio = 6;
-            var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
+            var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
             gpioController.OpenPin(gpio);
@@ -271,7 +271,7 @@ namespace Arduino.Samples
             // Use Pin 6
             const int gpio = 6;
             int analogPin = GetAnalogPin1(board);
-            var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
+            var gpioController = board.CreateGpioController();
             var analogController = board.CreateAnalogController(0);
 
             var pin = analogController.OpenPin(analogPin);
@@ -342,7 +342,7 @@ namespace Arduino.Samples
         public static void TestInput(ArduinoBoard board)
         {
             const int gpio = 2;
-            var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
+            var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
             gpioController.OpenPin(gpio);
@@ -381,7 +381,7 @@ namespace Arduino.Samples
         public static void TestEventsDirectWait(ArduinoBoard board)
         {
             const int Gpio2 = 2;
-            var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
+            var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
             gpioController.OpenPin(Gpio2);
@@ -414,7 +414,7 @@ namespace Arduino.Samples
         public static void TestEventsCallback(ArduinoBoard board)
         {
             const int Gpio2 = 2;
-            var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
+            var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
             gpioController.OpenPin(Gpio2);

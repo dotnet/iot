@@ -69,7 +69,7 @@ namespace Iot.Device.Arduino.Tests
         [SkippableFact]
         public void CanBlink()
         {
-            var ctrl = Board.CreateGpioController(PinNumberingScheme.Logical);
+            var ctrl = Board.CreateGpioController();
             Assert.NotNull(ctrl);
             ctrl.OpenPin(6, PinMode.Output);
             ctrl.SetPinMode(6, PinMode.Output);
@@ -83,7 +83,7 @@ namespace Iot.Device.Arduino.Tests
         [SkippableFact]
         public void SetPinMode()
         {
-            var ctrl = Board.CreateGpioController(PinNumberingScheme.Logical);
+            var ctrl = Board.CreateGpioController();
             Assert.NotNull(ctrl);
             ctrl.OpenPin(6, PinMode.Output);
             ctrl.SetPinMode(6, PinMode.Output);

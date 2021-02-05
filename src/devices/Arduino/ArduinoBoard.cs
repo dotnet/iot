@@ -68,18 +68,6 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Default pin numbering scheme of this board. Always <see cref="PinNumberingScheme.Logical"/>, because the Arduino has only one pin numbering scheme.
-        /// </summary>
-        public PinNumberingScheme DefaultPinNumberingScheme
-        {
-            get
-            {
-                // We have only one scheme
-                return PinNumberingScheme.Logical;
-            }
-        }
-
-        /// <summary>
         /// Attach to this event to retrieve log messages. The Exception argument may be null if it is only an informational message.
         /// </summary>
         public event Action<string, Exception?>? LogMessages;
@@ -252,17 +240,7 @@ namespace Iot.Device.Arduino
         /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
         public GpioController CreateGpioController()
         {
-            return CreateGpioController(DefaultPinNumberingScheme);
-        }
-
-        /// <summary>
-        /// Creates a GPIO Controller instance for the board. This allows working with digital input/output pins.
-        /// </summary>
-        /// <param name="pinNumberingScheme">Pin numbering scheme to use for this controller</param>
-        /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
-        public virtual GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
-        {
-            return new GpioController(pinNumberingScheme, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
+            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
         }
 
         /// <summary>

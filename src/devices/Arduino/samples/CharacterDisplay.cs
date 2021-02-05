@@ -18,7 +18,7 @@ namespace Iot.Device.Arduino.Sample
 
         public CharacterDisplay(ArduinoBoard board)
         {
-            _controller = board.CreateGpioController(PinNumberingScheme.Logical);
+            _controller = board.CreateGpioController();
             _display = new Lcd1602(8, 9, new int[] { 4, 5, 6, 7 }, -1, 1.0f, -1, _controller);
             _display.BlinkingCursorVisible = false;
             _display.UnderlineCursorVisible = false;

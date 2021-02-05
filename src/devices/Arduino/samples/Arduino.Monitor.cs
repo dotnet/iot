@@ -89,7 +89,7 @@ namespace Arduino.Samples
             const int MaxMode = 10;
             Length stationAltitude = Length.FromMeters(650);
             int mode = 0;
-            var gpioController = board.CreateGpioController(PinNumberingScheme.Board);
+            var gpioController = board.CreateGpioController();
             gpioController.OpenPin(Gpio2);
             gpioController.SetPinMode(Gpio2, PinMode.Input);
             CharacterDisplay disp = new CharacterDisplay(board);
