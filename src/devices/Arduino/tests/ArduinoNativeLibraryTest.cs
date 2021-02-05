@@ -23,7 +23,7 @@ namespace Iot.Device.Arduino.Tests
         {
             _fixture = fixture;
             _compiler = new ArduinoCsCompiler(fixture.Board, true);
-            _compiler.ClearAllData(true);
+            _compiler.ClearAllData(true, false);
         }
 
         public void Dispose()

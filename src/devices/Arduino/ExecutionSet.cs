@@ -87,7 +87,7 @@ namespace Iot.Device.Arduino
             if (!_compiler.BoardHasKernelLoaded(_kernelSnapShot))
             {
                 // Todo: The above also returns false if the kernel is loaded but not matching. Therefore we need to do a full flash erase first
-                _compiler.ClearAllData(true);
+                _compiler.ClearAllData(true, true);
                 _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
                 _compiler.CopyToFlash();
                 _compiler.WriteFlashHeader(_kernelSnapShot);
@@ -104,7 +104,7 @@ namespace Iot.Device.Arduino
             }
 
             // TODO: This should not be necessary later
-            _compiler.ClearAllData(true);
+            _compiler.ClearAllData(true, false);
             _compiler.SetExecutionSetActive(this);
             _compiler.SendClassDeclarations(this, from, to, false);
             _compiler.SendMethods(this);
@@ -547,7 +547,7 @@ namespace Iot.Device.Arduino
 
         private bool AreMethodsIdentical(MethodBase a, MethodBase b)
         {
-            if (a == b)
+            if (ReferenceEquals(a, b))
             {
                 return true;
             }
@@ -556,9 +556,6 @@ namespace Iot.Device.Arduino
             {
                 return false;
             }
-
-            string? astr = a!.ToString();
-            string? bstr = b!.ToString();
 
             if (a.IsGenericMethod && b.IsGenericMethod)
             {
@@ -803,7 +800,14 @@ namespace Iot.Device.Arduino
 
         public MethodBase? GetReplacement(MethodBase original)
         {
+            // Odd: I'm pretty sure that previously equality on MethodBase instances worked, but for some reason not all instances pointing to the same method are Equal().
             var elem = _methodsReplaced.FirstOrDefault(x => AreMethodsIdentical(x.Item1, original));
+            ////var elemTest = _methodsReplaced.FirstOrDefault(x => ReferenceEquals(x.Item1, original));
+            ////if (!ReferenceEquals(elem.Item1, elemTest.Item1))
+            ////{
+            ////    throw new NotSupportedException();
+            ////}
+
             if (elem.Item1 == default)
             {
                 return null;

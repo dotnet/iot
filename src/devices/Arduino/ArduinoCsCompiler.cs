@@ -29,6 +29,7 @@ namespace Iot.Device.Arduino
 
         WriteFlashHeader = 13,
         CheckFlashVersion = 14,
+        EraseFlash = 15,
 
         Nack = 0x7e,
         Ack = 0x7f,
@@ -131,7 +132,7 @@ namespace Iot.Device.Arduino
 
             if (resetExistingCode)
             {
-                ClearAllData(true);
+                ClearAllData(true, false);
             }
 
             // Generate the list of all replacement classes (they're all called Mini*)
@@ -1652,12 +1653,12 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
-            if (a.Name != b.Name)
+            if (a.IsStatic != b.IsStatic)
             {
                 return false;
             }
 
-            if (a.IsStatic != b.IsStatic)
+            if (a.Name != b.Name)
             {
                 return false;
             }
@@ -1683,11 +1684,6 @@ namespace Iot.Device.Arduino
 
                 return true;
             }
-
-            ////if ((HasArduinoImplementationAttribute(a, out attrib) && attrib!.IgnoreGenericTypes) ||
-            ////    (HasArduinoImplementationAttribute(b, out attrib) && attrib!.IgnoreGenericTypes))
-            ////{
-            ////}
 
             for (int i = 0; i < argsa.Length; i++)
             {
@@ -1824,8 +1820,16 @@ namespace Iot.Device.Arduino
         /// Clears all execution data from the arduino, so that the memory is freed again.
         /// </summary>
         /// <param name="force">True to also kill the current task. If false and code is being executed, nothing happens.</param>
-        public void ClearAllData(bool force)
+        /// <param name="includingFlash">Clear the flash, so a complete new kernel can be loaded</param>
+        public void ClearAllData(bool force, bool includingFlash = false)
         {
+            if (includingFlash)
+            {
+                _board.Log("Erasing flash.");
+                _board.Firmata.ClearFlash();
+            }
+
+            _board.Log("Resetting execution engine.");
             _board.Firmata.SendIlResetCommand(force);
             _activeTasks.Clear();
             _activeExecutionSet = null;

@@ -1588,6 +1588,26 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public void ClearFlash()
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            lock (_synchronisationLock)
+            {
+                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)ExecutorCommand.EraseFlash);
+                _firmataStream.WriteByte((byte)(1));
+                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                _firmataStream.Flush();
+                Thread.Sleep(100);
+            }
+        }
+
         public void SendIlResetCommand(bool force)
         {
             if (_firmataStream == null)
