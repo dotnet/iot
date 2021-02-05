@@ -39,8 +39,6 @@ namespace Arduino.Samples
                 portName = args[1];
             }
 
-            TextWriter logFile = new StringWriter();
-
             using (var port = new SerialPort(portName, 115200))
             {
                 Console.WriteLine($"Connecting to Arduino on {portName}");
@@ -54,9 +52,7 @@ namespace Arduino.Samples
                     return;
                 }
 
-                DebugLogStream dls = new DebugLogStream(port.BaseStream, logFile);
-
-                ArduinoBoard board = new ArduinoBoard(dls);
+                ArduinoBoard board = new ArduinoBoard(port.BaseStream);
                 try
                 {
                     board.LogMessages += BoardOnLogMessages;
@@ -76,8 +72,6 @@ namespace Arduino.Samples
                     board?.Dispose();
                 }
             }
-
-            Debug.Write(logFile.ToString());
         }
 
         private static void BoardOnLogMessages(string message, Exception? exception)

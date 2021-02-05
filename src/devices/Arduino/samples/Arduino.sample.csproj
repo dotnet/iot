@@ -13,7 +13,6 @@
   
   <ItemGroup>
     <Compile Include="Arduino.sample.cs" />
-    <Compile Include="DebugLogStream.cs" />
   </ItemGroup>
 
   <ItemGroup>
