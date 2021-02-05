@@ -404,12 +404,12 @@ namespace Iot.Device.Arduino
                                         default:
                                             currentPin.PinModes.Add((SupportedMode)mode);
                                             break;
-                                        case SupportedMode.ANALOG_INPUT:
-                                            currentPin.PinModes.Add(SupportedMode.ANALOG_INPUT);
+                                        case SupportedMode.AnalogInput:
+                                            currentPin.PinModes.Add(SupportedMode.AnalogInput);
                                             currentPin.AnalogInputResolutionBits = resolution;
                                             break;
-                                        case SupportedMode.PWM:
-                                            currentPin.PinModes.Add(SupportedMode.PWM);
+                                        case SupportedMode.Pwm:
+                                            currentPin.PinModes.Add(SupportedMode.Pwm);
                                             currentPin.PwmResolutionBits = resolution;
                                             break;
                                     }

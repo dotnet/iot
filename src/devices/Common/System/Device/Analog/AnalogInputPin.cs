@@ -30,7 +30,7 @@ namespace System.Device.Analog
             PinNumber = pinNumber;
         }
 
-                /// <summary>
+        /// <summary>
         /// Reference to the controller for this pin
         /// </summary>
         protected AnalogController Controller
@@ -149,21 +149,13 @@ namespace System.Device.Analog
         }
 
         /// <summary>
-        /// Close the pin
-        /// </summary>
-        public virtual void Close()
-        {
-            Controller.Close(this);
-        }
-
-        /// <summary>
         /// Dispose this instance
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Close();
+                Controller.ClosePin(this);
             }
         }
 

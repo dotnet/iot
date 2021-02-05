@@ -14,13 +14,13 @@ namespace System.Device.Analog
         /// Initializes a new instance of the <see cref="ValueChangedEventArgs"/> class.
         /// </summary>
         /// <param name="rawValue">The raw analog sensor reading</param>
-        /// <param name="newValue">The analog sensor reading, converted to voltage.</param>
+        /// <param name="value">The analog sensor reading, converted to voltage.</param>
         /// <param name="pinNumber">The pin number that triggered the event.</param>
         /// <param name="triggerReason">The reason for the event</param>
-        public ValueChangedEventArgs(uint rawValue, ElectricPotential newValue, int pinNumber, TriggerReason triggerReason)
+        public ValueChangedEventArgs(uint rawValue, ElectricPotential value, int pinNumber, TriggerReason triggerReason)
         {
             RawValue = rawValue;
-            Value = newValue;
+            Value = value;
             PinNumber = pinNumber;
             TriggerReason = triggerReason;
         }

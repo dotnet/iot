@@ -42,7 +42,7 @@ namespace Iot.Device.Arduino
             Channel = channel;
             _pin = channel;
             var caps = board.SupportedPinConfigurations.FirstOrDefault(x => x.Pin == _pin);
-            if (caps == null || !caps.PinModes.Contains(SupportedMode.PWM))
+            if (caps == null || !caps.PinModes.Contains(SupportedMode.Pwm))
             {
                 throw new NotSupportedException($"Pin {_pin} does not support PWM");
             }
@@ -102,7 +102,7 @@ namespace Iot.Device.Arduino
         public override void Start()
         {
             _enabled = true;
-            _board.Firmata.SetPinMode(_pin, SupportedMode.PWM);
+            _board.Firmata.SetPinMode(_pin, SupportedMode.Pwm);
             Update();
         }
 
@@ -110,7 +110,7 @@ namespace Iot.Device.Arduino
         public override void Stop()
         {
             _enabled = false;
-            _board.Firmata.SetPinMode(_pin, SupportedMode.DIGITAL_INPUT);
+            _board.Firmata.SetPinMode(_pin, SupportedMode.DigitalInput);
             Update();
         }
 

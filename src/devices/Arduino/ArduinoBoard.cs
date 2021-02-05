@@ -274,7 +274,7 @@ namespace Iot.Device.Arduino
         /// Or: An invalid Bus Id or device Id was specified</exception>
         public virtual I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
-            if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.I2C)))
+            if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.I2c)))
             {
                 throw new NotSupportedException("No Pins with I2c support found. Is the I2c module loaded?");
             }
@@ -296,7 +296,7 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Only Bus Id 0 is supported");
             }
 
-            if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.SPI)))
+            if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.Spi)))
             {
                 throw new NotSupportedException("No Pins with SPI support found. Is the SPI module loaded?");
             }
@@ -341,7 +341,7 @@ namespace Iot.Device.Arduino
         /// <returns>True on success, false otherwise</returns>
         public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
         {
-            if (!_supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.DHT))
+            if (!_supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.Dht))
             {
                 temperature = default;
                 humidity = default;

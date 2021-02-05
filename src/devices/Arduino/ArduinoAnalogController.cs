@@ -41,7 +41,7 @@ namespace Iot.Device.Arduino
             int numberAnalogPinsFound = 0;
             for (int i = 0; i < _supportedPinConfigurations.Count; i++)
             {
-                if (_supportedPinConfigurations[i].PinModes.Contains(SupportedMode.ANALOG_INPUT))
+                if (_supportedPinConfigurations[i].PinModes.Contains(SupportedMode.AnalogInput))
                 {
                     numberAnalogPinsFound++;
                     if (pinNumber == i)
@@ -59,7 +59,7 @@ namespace Iot.Device.Arduino
             int numberAnalogPinsFound = 0;
             for (int i = 0; i < _supportedPinConfigurations.Count; i++)
             {
-                if (_supportedPinConfigurations[i].PinModes.Contains(SupportedMode.ANALOG_INPUT))
+                if (_supportedPinConfigurations[i].PinModes.Contains(SupportedMode.AnalogInput))
                 {
                     numberAnalogPinsFound++;
                     if (logicalPinNumber == numberAnalogPinsFound - 1)
@@ -74,7 +74,7 @@ namespace Iot.Device.Arduino
 
         public override bool SupportsAnalogInput(int pinNumber)
         {
-            return _supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.ANALOG_INPUT);
+            return _supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.AnalogInput);
         }
 
         protected override AnalogInputPin OpenPinCore(int pinNumber)
@@ -82,12 +82,12 @@ namespace Iot.Device.Arduino
             // This method is called with the logical pin numbering (input pin A0 is 0, A1 is 1, etc)
             // but the SetPinMode method operates on the global numbers
             int fullNumber = ConvertLogicalNumberingSchemeToPinNumber(pinNumber);
-            _board.Firmata.SetPinMode(fullNumber, SupportedMode.ANALOG_INPUT);
+            _board.Firmata.SetPinMode(fullNumber, SupportedMode.AnalogInput);
             _board.Firmata.EnableAnalogReporting(pinNumber);
             return new ArduinoAnalogInputPin(_board, this, _supportedPinConfigurations[fullNumber], pinNumber, VoltageReference);
         }
 
-        public override void Close(AnalogInputPin pin)
+        public override void ClosePin(AnalogInputPin pin)
         {
             _board.Firmata.DisableAnalogReporting(pin.PinNumber);
         }

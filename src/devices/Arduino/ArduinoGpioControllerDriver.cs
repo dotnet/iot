@@ -57,13 +57,13 @@ namespace Iot.Device.Arduino
             switch (mode)
             {
                 case PinMode.Output:
-                    firmataMode = SupportedMode.DIGITAL_OUTPUT;
+                    firmataMode = SupportedMode.DigitalOutput;
                     break;
                 case PinMode.InputPullUp:
-                    firmataMode = SupportedMode.INPUT_PULLUP;
+                    firmataMode = SupportedMode.InputPullup;
                     break;
                 case PinMode.Input:
-                    firmataMode = SupportedMode.DIGITAL_INPUT;
+                    firmataMode = SupportedMode.DigitalInput;
                     break;
                 default:
                     throw new NotSupportedException($"Mode {mode} is not supported for this operation");
@@ -94,13 +94,13 @@ namespace Iot.Device.Arduino
             PinMode ret;
             switch (mode)
             {
-                case SupportedMode.DIGITAL_OUTPUT:
+                case SupportedMode.DigitalOutput:
                     ret = PinMode.Output;
                     break;
-                case SupportedMode.INPUT_PULLUP:
+                case SupportedMode.InputPullup:
                     ret = PinMode.InputPullUp;
                     break;
-                case SupportedMode.DIGITAL_INPUT:
+                case SupportedMode.DigitalInput:
                     ret = PinMode.Input;
                     break;
                 default:
@@ -118,13 +118,13 @@ namespace Iot.Device.Arduino
             switch (mode)
             {
                 case PinMode.Output:
-                    firmataMode = SupportedMode.DIGITAL_OUTPUT;
+                    firmataMode = SupportedMode.DigitalOutput;
                     break;
                 case PinMode.InputPullUp:
-                    firmataMode = SupportedMode.INPUT_PULLUP;
+                    firmataMode = SupportedMode.InputPullup;
                     break;
                 case PinMode.Input:
-                    firmataMode = SupportedMode.DIGITAL_INPUT;
+                    firmataMode = SupportedMode.DigitalInput;
                     break;
                 default:
                     return false;

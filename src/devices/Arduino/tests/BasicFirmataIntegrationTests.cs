@@ -59,11 +59,11 @@ namespace Iot.Device.Arduino.Tests
             Assert.NotNull(caps);
             Assert.True(caps.Count > 0);
             // These are minimum numbers all Arduinos should support, so this test should also pass on hardware (when all required modules are present)
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DIGITAL_OUTPUT)) > 10);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DIGITAL_INPUT)) > 10);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.ANALOG_INPUT)) > 5);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.I2C)) >= 2);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.SPI)) >= 3);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DigitalOutput)) > 10);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DigitalInput)) > 10);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.AnalogInput)) > 5);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.I2c)) >= 2);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.Spi)) >= 3);
         }
 
         [SkippableFact]

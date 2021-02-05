@@ -19,7 +19,7 @@ namespace System.Device.Analog
         /// Initializes a new instance of the <see cref="GpioController"/> class that will use the specified numbering scheme and driver.
         /// </summary>
         /// <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
-        public AnalogController(PinNumberingScheme numberingScheme)
+        protected AnalogController(PinNumberingScheme numberingScheme)
         {
             NumberingScheme = numberingScheme;
             _openPins = new List<AnalogInputPin>();
@@ -121,12 +121,12 @@ namespace System.Device.Analog
         /// Closes the given pin
         /// </summary>
         /// <param name="pin">The pin to close</param>
-        public virtual void Close(AnalogInputPin pin)
+        public virtual void ClosePin(AnalogInputPin pin)
         {
             if (_openPins.Remove(pin))
             {
                 // This may fire back, therefore the test above
-                pin.Close();
+                pin.Dispose();
             }
         }
 

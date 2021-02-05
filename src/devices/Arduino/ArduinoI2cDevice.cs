@@ -39,9 +39,9 @@ namespace Iot.Device.Arduino
             ConnectionSettings = connectionSettings;
 
             // Ensure the corresponding pins are set to I2C (not strictly necessary, but consistent)
-            foreach (SupportedPinConfiguration supportedPinConfiguration in _board.SupportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2C)))
+            foreach (SupportedPinConfiguration supportedPinConfiguration in _board.SupportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2c)))
             {
-                _board.Firmata.SetPinMode(supportedPinConfiguration.Pin, SupportedMode.I2C);
+                _board.Firmata.SetPinMode(supportedPinConfiguration.Pin, SupportedMode.I2c);
             }
 
             _board.Firmata.SendI2cConfigCommand();
