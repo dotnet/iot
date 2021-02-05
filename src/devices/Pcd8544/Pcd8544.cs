@@ -331,46 +331,69 @@ namespace Iot.Device.Display
         /// <param name="text">The text to write</param>
         public void Write(string text)
         {
-            Span<byte> letter = stackalloc byte[CharacterWidth];
             foreach (char c in text)
             {
                 // We only display specific characters and ignore the rest
                 // And only if it's in the screen
                 if (_position <= ScreenBufferByteSize - CharacterWidth)
                 {
-                    if (c >= 0x20 && c <= 0x7F)
-                    {
-                        for (int i = 0; i < CharacterWidth - 1; i++)
-                        {
-                            letter[i] = NokiaCharacters.Ascii[c - 0x20][i];
-                        }
-
-                        letter[5] = 0x00;
-                        letter.CopyTo(_byteMap.AsSpan(_position));
-                        SpiWrite(true, letter);
-                        _position += CharacterWidth;
-                    }
-                    else if (c == 0x08)
-                    {
-                        // Case of backspace, we go back
-                        if (_cursorVisible)
-                        {
-                            DrawCursor();
-                        }
-
-                        _position -= CharacterWidth;
-                        _position = _position < 0 ? 0 : _position;
-                        SetPosition(_position);
-                        SpiWrite(true, letter);
-                        letter.CopyTo(_byteMap.AsSpan(_position));
-                        SetPosition(_position);
-                    }
+                    WriteChar(c);
                 }
             }
 
             if (_cursorVisible)
             {
                 DrawCursor();
+            }
+        }
+
+        /// <summary>
+        /// Write a raw byte stream to the display.
+        /// Used if character translation already took place.
+        /// </summary>
+        /// <param name="text">Text to print</param>
+        public void Write(ReadOnlySpan<byte> text)
+        {
+            foreach (var c in text)
+            {
+                WriteChar((char)c);
+            }
+
+            if (_cursorVisible)
+            {
+                DrawCursor();
+            }
+        }
+
+        private void WriteChar(char c)
+        {
+            Span<byte> letter = stackalloc byte[CharacterWidth];
+            if (c >= 0x20 && c <= 0x7F)
+            {
+                for (int i = 0; i < CharacterWidth - 1; i++)
+                {
+                    letter[i] = NokiaCharacters.Ascii[c - 0x20][i];
+                }
+
+                letter[5] = 0x00;
+                letter.CopyTo(_byteMap.AsSpan(_position));
+                SpiWrite(true, letter);
+                _position += CharacterWidth;
+            }
+            else if (c == 0x08)
+            {
+                // Case of backspace, we go back
+                if (_cursorVisible)
+                {
+                    DrawCursor();
+                }
+
+                _position -= CharacterWidth;
+                _position = _position < 0 ? 0 : _position;
+                SetPosition(_position);
+                SpiWrite(true, letter);
+                letter.CopyTo(_byteMap.AsSpan(_position));
+                SetPosition(_position);
             }
         }
 
@@ -404,18 +427,6 @@ namespace Iot.Device.Display
 
             SpiWrite(true, letter);
             SetPosition(_position);
-        }
-
-        /// <summary>
-        /// Write a raw byte stream to the display.
-        /// Used if character translation already took place.
-        /// </summary>
-        /// <param name="text">Text to print</param>
-        public void Write(ReadOnlySpan<byte> text)
-        {
-            var length = text.Length > ScreenBufferByteSize - _position ? ScreenBufferByteSize - _position : text.Length;
-            text.Slice(0, length).CopyTo(_byteMap.AsSpan(_position));
-            Draw();
         }
 
         /// <summary>

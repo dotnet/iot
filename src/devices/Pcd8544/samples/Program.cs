@@ -8,11 +8,14 @@ using System.IO;
 using System.Device.Pwm;
 using System;
 using System.Threading;
+using System.Threading.Tasks;
+using System.Globalization;
 using Iot.Device.Display;
 using Iot.Device.Ft4222;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using Iot.Device.CharacterLcd;
 
 Console.WriteLine("Hello PCD8544, screen of Nokia 5110!");
 Console.WriteLine("Please select the platform you want to use:");
@@ -92,6 +95,8 @@ if (lcd is not object)
     return;
 }
 
+lcd.Enabled = true;
+
 Console.WriteLine("Choose the demonstration you want to see:");
 Console.WriteLine("  1. All");
 Console.WriteLine("  2. Brightness, Contrast, Temperature, Bias");
@@ -101,7 +106,7 @@ Console.WriteLine("  5. Display lines, points, rectangles");
 var demoChoice = Console.ReadKey();
 Console.WriteLine();
 
-if (demoChoice is not object or { KeyChar: not ('1' or '2' or '3' or '4' or '5') })
+if (demoChoice is not object or { KeyChar: not ('1' or '2' or '3' or '4' or '5' or '6') })
 {
     Console.WriteLine("You have to choose a demonstration");
     return;
@@ -126,6 +131,9 @@ switch (demoChoice.KeyChar)
         break;
     case '5':
         DisplayLinesPointsRectabngles();
+        break;
+    case '6':
+        LcdConsole();
         break;
 }
 
@@ -354,6 +362,93 @@ void DisplayLinesPointsRectabngles()
     lcd.DrawLine(0, Pcd8544.PixelScreenSize.Height - 1, Pcd8544.PixelScreenSize.Width - 1, 0, true);
     lcd.Draw();
     Thread.Sleep(2000);
+}
+
+void LcdConsole()
+{
+    LcdConsole console = new LcdConsole(lcd, "A00", false);
+    console.LineFeedMode = LineWrapMode.Truncate;
+    Console.WriteLine("Nowrap test:");
+    console.Write("This is a long text that should not wrap and just extend beyond the display");
+    console.WriteLine("This has CRLF\r\nin it and should \r\n wrap.");
+    console.Write("This goes to the last line of the display");
+    console.WriteLine("This isn't printed, because it's off the screen");
+    Console.ReadLine();
+    Console.WriteLine("Autoscroll test:");
+    console.LineFeedMode = LineWrapMode.Wrap;
+    console.WriteLine();
+    console.WriteLine("Now the display should move up.");
+    console.WriteLine("And more up.");
+    for (int i = 0; i < 20; i++)
+    {
+        console.WriteLine($"This is line {i + 1}/{20}, but longer than the screen but you really have to add a lot of text to make it big enough");
+        Thread.Sleep(500);
+    }
+
+    console.LineFeedMode = LineWrapMode.Wrap;
+    console.WriteLine("Same again, this time with full wrapping.");
+    for (int i = 0; i < 20; i++)
+    {
+        console.Write($"This is string {i + 1}/{20} longer than the screen but you really have to add a lot of text to make it big enough");
+        Thread.Sleep(500);
+    }
+
+    Console.ReadLine();
+    Console.WriteLine("Intelligent wrapping test");
+    console.LineFeedMode = LineWrapMode.WordWrap;
+    console.WriteLine("Now intelligent wrapping should wrap this long sentence at word borders and ommit spaces at the start of lines.");
+    Console.WriteLine("Not wrappable test");
+    Console.ReadLine();
+    console.WriteLine("NowThisIsOneSentenceInOneWordThatCannotBeWrappedButStillAppearAllOverUpToTheEnd");
+    Console.ReadLine();
+    Console.WriteLine("Individual line test");
+    console.Clear();
+    console.LineFeedMode = LineWrapMode.Truncate;
+    console.ReplaceLine(0, "This is all garbage that will be replaced");
+    console.ReplaceLine(0, "Running clock test");
+    int left = console.Size.Width;
+    Task? alertTask = null;
+    // Let the current time move trought the display on line 1
+    while (!Console.KeyAvailable)
+    {
+        DateTime now = DateTime.Now;
+        String time = String.Format(CultureInfo.CurrentCulture, "{0}", now.ToLongTimeString());
+        string printTime = time;
+        if (left > 0)
+        {
+            printTime = new string(' ', left) + time;
+        }
+        else if (left < 0)
+        {
+            printTime = time.Substring(-left);
+        }
+
+        console.ReplaceLine(1, printTime);
+        left--;
+        // Each full minute, blink the display (but continue writing the time)
+        if (now.Second == 0 && alertTask is null)
+        {
+            alertTask = console.BlinkDisplayAsync(3);
+        }
+
+        if (alertTask is object && alertTask.IsCompleted)
+        {
+            // Ensure we catch any exceptions (there shouldn't be any...)
+            alertTask.Wait();
+            alertTask = null;
+        }
+
+        Thread.Sleep(500);
+        // Restart when the time string has left the display
+        if (left < -time.Length)
+        {
+            left = console.Size.Width;
+        }
+    }
+
+    alertTask?.Wait();
+    Console.ReadKey();
+    console.Dispose();
 }
 
 Console.WriteLine("Thank you for your attention!");
