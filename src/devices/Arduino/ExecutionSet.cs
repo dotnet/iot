@@ -268,6 +268,8 @@ namespace Iot.Device.Arduino
                     classSizes[type].MethodBytes += methodBytes;
                     classSizes[type].Methods.Add((method, methodBytes));
                 }
+
+                bytesUsed += methodBytes;
             }
 
             foreach (var stat in classSizes.Values)
