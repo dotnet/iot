@@ -169,10 +169,10 @@ namespace Arduino.Samples
                 case 'x':
                 case 'X':
                     return false;
-                case 'c':
-                case 'C':
-                    TestIlInterpreter(board);
-                    break;
+                ////case 'c':
+                ////case 'C':
+                ////    TestIlInterpreter(board);
+                ////    break;
             }
 
             return true;
@@ -529,6 +529,7 @@ namespace Arduino.Samples
             Console.ReadKey();
         }
 
+        /* Commented out, can be updated later. These tests are currently done with unit tests, not interactive)
         public static void TestIlInterpreter(ArduinoBoard board)
         {
             ArduinoCsCompiler compiler = new ArduinoCsCompiler(board);
@@ -563,7 +564,7 @@ namespace Arduino.Samples
                 return;
             }
 
-            var task = exec.EntryPoint;
+            var task = exec.MainEntryPoint;
             task.InvokeAsync(6, 1000);
 
             task.WaitForResult();
@@ -759,5 +760,6 @@ namespace Arduino.Samples
             Console.WriteLine($"Should be 3: {result}");
             compiler.ClearAllData(true);
         }
+        */
     }
 }

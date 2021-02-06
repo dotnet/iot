@@ -359,15 +359,13 @@ namespace Iot.Device.Arduino.Tests
         private void LoadCodeMethod<T1, T2, T3>(Type type, string methodName, T1 a, T2 b, T3 expectedResult, Type[]? suppressTypes)
         {
             var methods = type.GetMethods().Where(x => x.Name == methodName).ToList();
-            Assert.Single(methods);
-            var set = _compiler.CreateExecutionSet();
-            set.SuppressTypes(suppressTypes);
-            _compiler.PrepareLowLevelInterface(set);
+            var method = methods.Single();
+
+            var set = _compiler.CreateExecutionSet(methods[0]);
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
-            var method = _compiler.AddSimpleMethod(set, methods[0]);
 
             // First execute the method locally, so we don't have an error in the test
-            var uncastedResult = methods[0].Invoke(null, new object[] { a!, b! });
+            var uncastedResult = method.Invoke(null, new object[] { a!, b! });
             if (uncastedResult == null)
             {
                 throw new InvalidOperationException("Void methods not supported here");
@@ -376,13 +374,15 @@ namespace Iot.Device.Arduino.Tests
             T3 result = (T3)uncastedResult;
             Assert.Equal(expectedResult, result);
 
-            // This assertion fails on a timeout
-            Assert.True(method.Invoke(cs.Token, a!, b!));
+            var remoteMethod = set.MainEntryPoint;
 
-            Assert.True(method.GetMethodResults(set, out object[] data, out MethodState state));
+            // This assertion fails on a timeout
+            Assert.True(remoteMethod.Invoke(cs.Token, a!, b!));
+
+            Assert.True(remoteMethod.GetMethodResults(set, out object[] data, out MethodState state));
 
             // The task has terminated (do this after the above, otherwise the test will not show an exception)
-            Assert.Equal(MethodState.Stopped, method.State);
+            Assert.Equal(MethodState.Stopped, remoteMethod.State);
 
             // The only result is from the end of the method
             Assert.Equal(MethodState.Stopped, state);
@@ -390,7 +390,7 @@ namespace Iot.Device.Arduino.Tests
 
             result = (T3)data[0];
             Assert.Equal(expectedResult, result);
-            method.Dispose();
+            remoteMethod.Dispose();
         }
 
         [Theory]

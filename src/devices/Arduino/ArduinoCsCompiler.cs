@@ -113,14 +113,16 @@ namespace Iot.Device.Arduino
     public sealed class ArduinoCsCompiler : IDisposable
     {
         private const int DataVersion = 1;
-        // These classes substitute (part of) a framework class
         private readonly ArduinoBoard _board;
         private readonly List<IArduinoTask> _activeTasks;
 
         private ExecutionSet? _activeExecutionSet;
 
         // List of classes that have arduino-native implementations
+        // These classes substitute (part of) a framework class
         private List<Type> _replacementClasses;
+
+        private bool _disposed = false;
 
         public ArduinoCsCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
@@ -136,8 +138,6 @@ namespace Iot.Device.Arduino
             }
 
             // Generate the list of all replacement classes (they're all called Mini*)
-            // For some unknown (and weird) reason, auto-detection doesn't work. It causes ctors of generic classes to be called
-            // on open types.
             _replacementClasses = new List<Type>();
             foreach (var type in Assembly.GetExecutingAssembly().GetTypes())
             {
@@ -260,18 +260,18 @@ namespace Iot.Device.Arduino
             task.AddData(state, outObjects);
         }
 
-        public ExecutionSet CreateExecutionSet()
-        {
-            return new ExecutionSet(this);
-        }
-
         /// <summary>
         /// This adds a set of low-level methods to the execution set. These are intended to be copied to flash, as they will be used
         /// by many programs. We call the method set constructed here "the kernel".
         /// </summary>
         /// <param name="set">Execution set</param>
-        public void PrepareLowLevelInterface(ExecutionSet set)
+        internal void PrepareLowLevelInterface(ExecutionSet set)
         {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+            }
+
             void AddMethod(MethodInfo method, NativeMethod nativeMethod)
             {
                 if (!set.HasMethod(method))
@@ -388,6 +388,11 @@ namespace Iot.Device.Arduino
 
         public void PrepareClass(ExecutionSet set, Type classType)
         {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+            }
+
             HashSet<Type> baseTypes = new HashSet<Type>();
 
             baseTypes.Add(classType);
@@ -469,6 +474,11 @@ namespace Iot.Device.Arduino
         /// </summary>
         internal void FinalizeExecutionSet(ExecutionSet set)
         {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+            }
+
             // Because the code below is still not water proof (there could have been virtual methods added only in the end), we do this twice
             for (int i = 0; i < 2; i++)
             {
@@ -1236,6 +1246,11 @@ namespace Iot.Device.Arduino
 
         public ArduinoTask GetTask(ExecutionSet set, MethodBase methodInfo)
         {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+            }
+
             if (set.HasMethod(methodInfo))
             {
                 var tsk = new ArduinoTask(this, set.GetMethod(methodInfo));
@@ -1246,88 +1261,99 @@ namespace Iot.Device.Arduino
             throw new InvalidOperationException($"Method {methodInfo} not loaded");
         }
 
-        public ExecutionSet PrepareProgram<T>(Type mainClass, T mainEntryPoint)
-            where T : Delegate
+        private ExecutionSet PrepareProgram(MethodInfo mainEntryPoint)
         {
-            var exec = CreateExecutionSet();
-            // We never want these types in our execution set - reflection is not supported, except in very specific cases
-            exec.SuppressType("System.Reflection.MethodBase");
-            exec.SuppressType("System.Reflection.MethodInfo");
-            exec.SuppressType("System.Reflection.ConstructorInfo");
-            exec.SuppressType("System.Reflection.Module");
-            exec.SuppressType("System.Reflection.Assembly");
-            exec.SuppressType("System.Reflection.RuntimeAssembly");
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+            }
 
-            exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
+            ExecutionSet exec;
 
-            PrepareLowLevelInterface(exec);
-            PrepareClass(exec, mainClass);
-            PrepareCodeInternal(exec, mainEntryPoint.Method, null);
+            if (ExecutionSet.CompiledKernel == null)
+            {
+                exec = new ExecutionSet(this);
+                // We never want these types in our execution set - reflection is not supported, except in very specific cases
+                exec.SuppressType("System.Reflection.MethodBase");
+                exec.SuppressType("System.Reflection.MethodInfo");
+                exec.SuppressType("System.Reflection.ConstructorInfo");
+                exec.SuppressType("System.Reflection.Module");
+                exec.SuppressType("System.Reflection.Assembly");
+                exec.SuppressType("System.Reflection.RuntimeAssembly");
 
-            exec.MainEntryPointInternal = mainEntryPoint.Method;
+                exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
+
+                PrepareLowLevelInterface(exec);
+                // Clone the kernel and save as static member
+                ExecutionSet.CompiledKernel = new ExecutionSet(exec, this);
+            }
+            else
+            {
+                // Another clone, to leave the static member alone. Replace the compiler in that kernel with the current one.
+                exec = new ExecutionSet(ExecutionSet.CompiledKernel, this);
+            }
+
+            if (mainEntryPoint.DeclaringType != null)
+            {
+                PrepareClass(exec, mainEntryPoint.DeclaringType);
+            }
+
+            PrepareCodeInternal(exec, mainEntryPoint, null);
+
+            exec.MainEntryPointInternal = mainEntryPoint;
             _board.Log($"Estimated program memory usage before finalization: {exec.EstimateRequiredMemory()} bytes.");
             FinalizeExecutionSet(exec);
             return exec;
         }
 
-        public ArduinoTask PrepareAndLoadSimpleMethod<T>(T mainEntryPoint)
+        /// <summary>
+        /// Creates and loads an execution set (a program to be executed on a remote microcontroller)
+        /// </summary>
+        /// <typeparam name="T">The type of the main entry method. Typically something like <code>Func{int, int, int}</code></typeparam>
+        /// <param name="mainEntryPoint">The main entry method for the program</param>
+        /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
+        /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
+        public ExecutionSet CreateExecutionSet<T>(T mainEntryPoint)
             where T : Delegate
         {
-            if (mainEntryPoint == null)
+            var exec = PrepareProgram(mainEntryPoint.Method);
+            try
             {
-                throw new ArgumentNullException(nameof(mainEntryPoint));
+                exec.Load();
+            }
+            catch (Exception)
+            {
+                ClearAllData(true);
+                throw;
             }
 
-            var set = CreateExecutionSet();
-            PrepareCodeInternal(set, mainEntryPoint.Method, null);
-            _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
-            FinalizeExecutionSet(set);
-            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
-            set.MainEntryPointInternal = mainEntryPoint.Method;
-            set.Load();
-            return GetTask(set, mainEntryPoint.Method);
+            return exec;
         }
 
-        public ArduinoTask AddSimpleMethod<T>(ExecutionSet set, T mainEntryPoint)
-            where T : Delegate
+        /// <summary>
+        /// Creates and loads an execution set (a program to be executed on a remote microcontroller)
+        /// </summary>
+        /// <param name="mainEntryPoint">The main entry method for the program</param>
+        /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
+        /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
+        public ExecutionSet CreateExecutionSet(MethodInfo mainEntryPoint)
         {
-            if (mainEntryPoint == null)
+            var exec = PrepareProgram(mainEntryPoint);
+            try
             {
-                throw new ArgumentNullException(nameof(mainEntryPoint));
+                exec.Load();
+            }
+            catch (Exception)
+            {
+                ClearAllData(true);
+                throw;
             }
 
-            PrepareCodeInternal(set, mainEntryPoint.Method, null);
-            _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
-            FinalizeExecutionSet(set);
-            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
-            set.MainEntryPointInternal = mainEntryPoint.Method;
-            set.Load();
-            return GetTask(set, mainEntryPoint.Method);
+            return exec;
         }
 
-        public ArduinoTask AddSimpleMethod(ExecutionSet set, MethodInfo mainEntryPoint)
+        internal void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo, ArduinoMethodDeclaration? parent)
         {
-            if (mainEntryPoint == null)
-            {
-                throw new ArgumentNullException(nameof(mainEntryPoint));
-            }
-
-            PrepareCodeInternal(set, mainEntryPoint, null);
-            _board.Log($"Estimated program memory usage before finalization: {set.EstimateRequiredMemory()} bytes.");
-            FinalizeExecutionSet(set);
-            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
-            set.MainEntryPointInternal = mainEntryPoint;
-            set.Load();
-            return GetTask(set, mainEntryPoint);
-        }
-
-        public void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo, ArduinoMethodDeclaration? parent)
-        {
-            /* if (set.GetReplacement(methodInfo.DeclaringType!) != null)
-            {
-                throw new InvalidOperationException($"{methodInfo.DeclaringType} - {methodInfo} should have been replaced.");
-            }*/
-
             // Ensure the class is known, if it needs replacement
             var classReplacement = set.GetReplacement(methodInfo.DeclaringType);
             MethodBase? replacement = set.GetReplacement(methodInfo);

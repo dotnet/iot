@@ -19,6 +19,8 @@ namespace Iot.Device.Arduino
         private const int NullableToken = 0x0080_0000;
         public const int GenericTokenMask = -8_388_608; // 0xFF80_0000 as signed
 
+        public static ExecutionSet? CompiledKernel = null;
+
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<ClassDeclaration> _classes;
@@ -42,7 +44,7 @@ namespace Iot.Device.Arduino
         private int _nextStringToken;
         private SnapShot _kernelSnapShot;
 
-        public ExecutionSet(ArduinoCsCompiler compiler)
+        internal ExecutionSet(ArduinoCsCompiler compiler)
         {
             _compiler = compiler;
             _methods = new List<ArduinoMethodDeclaration>();
@@ -68,9 +70,36 @@ namespace Iot.Device.Arduino
             MainEntryPointInternal = null;
         }
 
-        public IList<ClassDeclaration> Classes => _classes;
+        internal ExecutionSet(ExecutionSet setToClone, ArduinoCsCompiler compiler)
+        {
+            _compiler = compiler;
+            _methods = new List<ArduinoMethodDeclaration>(setToClone._methods);
+            _classes = new List<ClassDeclaration>(setToClone._classes);
 
-        public ArduinoTask EntryPoint
+            _patchedTypeTokens = new Dictionary<TypeInfo, int>(setToClone._patchedTypeTokens);
+            _patchedMethodTokens = new Dictionary<MethodBase, int>(setToClone._patchedMethodTokens);
+            _patchedFieldTokens = new Dictionary<FieldInfo, (int Token, byte[]? InitializerData)>(setToClone._patchedFieldTokens);
+            _inversePatchedMethodTokens = new Dictionary<int, MethodBase>(setToClone._inversePatchedMethodTokens);
+            _inversePatchedTypeTokens = new Dictionary<int, TypeInfo>(setToClone._inversePatchedTypeTokens);
+            _inversePatchedFieldTokens = new Dictionary<int, FieldInfo>(setToClone._inversePatchedFieldTokens);
+            _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>(setToClone._classesReplaced);
+            _methodsReplaced = new List<(MethodBase, MethodBase?)>(setToClone._methodsReplaced);
+            _classesToSuppress = new List<Type>(setToClone._classesToSuppress);
+            _strings = new Dictionary<int, string>(setToClone._strings);
+
+            _nextToken = setToClone._nextToken;
+            _nextGenericToken = setToClone._nextGenericToken;
+            _nextStringToken = setToClone._nextStringToken;
+
+            _numDeclaredMethods = setToClone._numDeclaredMethods;
+            _entryPoint = setToClone._entryPoint;
+            _kernelSnapShot = setToClone._kernelSnapShot;
+            MainEntryPointInternal = setToClone.MainEntryPointInternal;
+        }
+
+        internal IList<ClassDeclaration> Classes => _classes;
+
+        public ArduinoTask MainEntryPoint
         {
             get => _entryPoint;
             internal set => _entryPoint = value;
@@ -121,10 +150,16 @@ namespace Iot.Device.Arduino
             _compiler.SendConstants(converted);
             _compiler.SendConstants(_strings.Select(x => (x.Key, Encoding.Default.GetBytes(x.Value))));
 
-            EntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
+            MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
             // Execute all static ctors
             _compiler.ExecuteStaticCtors(this);
+        }
+
+        public ArduinoTask GetTaskForMethod<T>(T mainEntryPoint)
+            where T : Delegate
+        {
+            return _compiler.GetTask(this, mainEntryPoint.Method);
         }
 
         /// <summary>
@@ -171,26 +206,15 @@ namespace Iot.Device.Arduino
             _kernelSnapShot = CreateSnapShot();
         }
 
-        public void SuppressType(Type t)
+        internal void SuppressType(Type t)
         {
             _classesToSuppress.Add(t);
         }
 
-        public void SuppressType(string name)
+        internal void SuppressType(string name)
         {
             var t = Type.GetType(name, true);
             _classesToSuppress.Add(t!);
-        }
-
-        public void SuppressTypes(IEnumerable<Type>? types)
-        {
-            if (types != null)
-            {
-                foreach (var t in types)
-                {
-                    SuppressType(t);
-                }
-            }
         }
 
         public long EstimateRequiredMemory()
@@ -300,7 +324,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public int GetOrAddMethodToken(MethodBase methodBase)
+        internal int GetOrAddMethodToken(MethodBase methodBase)
         {
             int token;
             if (_patchedMethodTokens.TryGetValue(methodBase, out token))
@@ -327,7 +351,7 @@ namespace Iot.Device.Arduino
             return token;
         }
 
-        public int GetOrAddFieldToken(FieldInfo field)
+        internal int GetOrAddFieldToken(FieldInfo field)
         {
             string temp = field.Name;
             if (_patchedFieldTokens.TryGetValue(field, out var token))
@@ -358,7 +382,7 @@ namespace Iot.Device.Arduino
             return tk;
         }
 
-        public int GetOrAddFieldToken(FieldInfo field, byte[] initializerData)
+        internal int GetOrAddFieldToken(FieldInfo field, byte[] initializerData)
         {
             if (_patchedFieldTokens.TryGetValue(field, out var token))
             {
@@ -385,7 +409,7 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <param name="typeInfo">Original type to add to list</param>
         /// <returns>A new token for the given type, or the existing token if it is already in the list</returns>
-        public int GetOrAddClassToken(TypeInfo typeInfo)
+        internal int GetOrAddClassToken(TypeInfo typeInfo)
         {
             int token;
             if (_patchedTypeTokens.TryGetValue(typeInfo, out token))
@@ -493,7 +517,7 @@ namespace Iot.Device.Arduino
             return token;
         }
 
-        public bool AddClass(ClassDeclaration type)
+        internal bool AddClass(ClassDeclaration type)
         {
             if (_classesToSuppress.Contains(type.TheType))
             {
@@ -514,7 +538,7 @@ namespace Iot.Device.Arduino
             return true;
         }
 
-        public bool HasDefinition(Type classType)
+        internal bool HasDefinition(Type classType)
         {
             if (_classesToSuppress.Contains(classType))
             {
@@ -529,7 +553,7 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        public bool HasMethod(MemberInfo m)
+        internal bool HasMethod(MemberInfo m)
         {
             if (_classesToSuppress.Contains(m.DeclaringType!))
             {
@@ -601,7 +625,7 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        public bool AddMethod(ArduinoMethodDeclaration method)
+        internal bool AddMethod(ArduinoMethodDeclaration method)
         {
             if (_numDeclaredMethods >= Math.Pow(2, 14) - 1)
             {
@@ -642,12 +666,12 @@ namespace Iot.Device.Arduino
             return true;
         }
 
-        public IList<ArduinoMethodDeclaration> Methods()
+        internal IList<ArduinoMethodDeclaration> Methods()
         {
             return _methods;
         }
 
-        public MemberInfo? InverseResolveToken(int token)
+        internal MemberInfo? InverseResolveToken(int token)
         {
             // Todo: This is very slow - consider inversing the dictionaries during data prep
             if (_inversePatchedMethodTokens.TryGetValue(token, out var method))
@@ -687,7 +711,7 @@ namespace Iot.Device.Arduino
             return null;
         }
 
-        public void AddReplacementType(Type? typeToReplace, Type replacement, bool includingSubclasses, bool includingPrivates)
+        internal void AddReplacementType(Type? typeToReplace, Type replacement, bool includingSubclasses, bool includingPrivates)
         {
             if (typeToReplace == null)
             {
@@ -773,7 +797,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public Type? GetReplacement(Type? original)
+        internal Type? GetReplacement(Type? original)
         {
             if (original == null)
             {
@@ -798,7 +822,7 @@ namespace Iot.Device.Arduino
             return null;
         }
 
-        public MethodBase? GetReplacement(MethodBase original)
+        internal MethodBase? GetReplacement(MethodBase original)
         {
             // Odd: I'm pretty sure that previously equality on MethodBase instances worked, but for some reason not all instances pointing to the same method are Equal().
             var elem = _methodsReplaced.FirstOrDefault(x => AreMethodsIdentical(x.Item1, original));
@@ -826,7 +850,7 @@ namespace Iot.Device.Arduino
         /// <param name="methodInfo">The method to replace</param>
         /// <param name="classToSearch">With a method in this class</param>
         /// <returns></returns>
-        public MethodBase? GetReplacement(MethodBase methodInfo, Type classToSearch)
+        internal MethodBase? GetReplacement(MethodBase methodInfo, Type classToSearch)
         {
             foreach (var replacementMethod in classToSearch.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
             {
@@ -854,7 +878,7 @@ namespace Iot.Device.Arduino
             return null; // this is now likely an error
         }
 
-        public void AddReplacementMethod(MethodBase? toReplace, MethodBase? replacement)
+        internal void AddReplacementMethod(MethodBase? toReplace, MethodBase? replacement)
         {
             if (toReplace == null)
             {
@@ -871,7 +895,7 @@ namespace Iot.Device.Arduino
             _methodsReplaced.Add((toReplace, replacement));
         }
 
-        public int GetOrAddString(string data)
+        internal int GetOrAddString(string data)
         {
             var existing = _strings.FirstOrDefault(x => x.Value == data);
             if (existing.Key != 0)
@@ -885,7 +909,7 @@ namespace Iot.Device.Arduino
             return token;
         }
 
-        public ArduinoMethodDeclaration GetMethod(MethodBase methodInfo)
+        internal ArduinoMethodDeclaration GetMethod(MethodBase methodInfo)
         {
             return _methods.First(x => AreMethodsIdentical(x.MethodBase, methodInfo));
         }
