@@ -30,6 +30,8 @@ namespace Iot.Device.Arduino
                 ArgumentCount += 1;
             }
 
+            Duplicates = new List<ArduinoMethodDeclaration>();
+
             Name = $"{MethodBase.DeclaringType} - {methodBase}";
         }
 
@@ -107,6 +109,8 @@ namespace Iot.Device.Arduino
                 Flags |= MethodFlags.Abstract;
             }
 
+            Duplicates = new List<ArduinoMethodDeclaration>();
+
             Name = $"{MethodBase.DeclaringType} - {methodBase}";
         }
 
@@ -147,6 +151,8 @@ namespace Iot.Device.Arduino
             {
                 Flags |= MethodFlags.Virtual;
             }
+
+            Duplicates = new List<ArduinoMethodDeclaration>();
 
             Name = $"{MethodBase.DeclaringType} - {MethodBase} (Special Method)";
         }
@@ -212,6 +218,20 @@ namespace Iot.Device.Arduino
         public int ArgumentCount
         {
             get;
+        }
+
+        /// <summary>
+        /// Not null if the IL code of this method is an exact dupe of the other method's IL.
+        /// </summary>
+        public IList<ArduinoMethodDeclaration> Duplicates
+        {
+            get;
+        }
+
+        public ArduinoMethodDeclaration? DuplicateOf
+        {
+            get;
+            set;
         }
 
         public override string ToString()

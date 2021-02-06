@@ -527,6 +527,8 @@ namespace Iot.Device.Arduino
                 PrepareCodeInternal(set, cctor, null);
             }
 
+            set.FindCodeDuplicates();
+
             _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
         }
 

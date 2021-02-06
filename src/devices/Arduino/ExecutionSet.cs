@@ -227,6 +227,7 @@ namespace Iot.Device.Arduino
             const int MethodBodyMinSize = 40;
             Dictionary<Type, ClassStatistics> classSizes = new Dictionary<Type, ClassStatistics>();
             long bytesUsed = 0;
+            long bytesSaved = 0;
             foreach (var cls in Classes)
             {
                 int classBytes = 40;
@@ -254,7 +255,14 @@ namespace Iot.Device.Arduino
                 methodBytes += method.ArgumentCount * 4;
                 methodBytes += method.MaxLocals * 4;
 
-                methodBytes += method.IlBytes != null ? method.IlBytes.Length : 0;
+                if (method.DuplicateOf == null)
+                {
+                    methodBytes += method.IlBytes != null ? method.IlBytes.Length : 0;
+                }
+                else
+                {
+                    bytesSaved += method.IlBytes != null ? method.IlBytes.Length : 0;
+                }
 
                 var type = method.MethodBase.DeclaringType!;
                 if (classSizes.TryGetValue(type, out _))
@@ -281,6 +289,7 @@ namespace Iot.Device.Arduino
 
             foreach (var constant in _strings)
             {
+                // This is currently overestimating, since we're sending strings as ASCII only.
                 bytesUsed += constant.Value.Length * sizeof(char);
             }
 
@@ -323,6 +332,11 @@ namespace Iot.Device.Arduino
             public List<(ArduinoMethodDeclaration Method, int Size)> Methods
             {
                 get;
+            }
+
+            public override string ToString()
+            {
+                return $"Class {Type.Name} uses {MethodBytes} for code and {ClassBytes} for fields and metadata. Total {MethodBytes}.";
             }
         }
 
@@ -954,6 +968,56 @@ namespace Iot.Device.Arduino
                 }
 
                 return ret;
+            }
+        }
+
+        // Find pairs of methods with exactly the same implementation (this might be the case even if their signatures do not match, i.e. due to generics)
+        internal void FindCodeDuplicates()
+        {
+            for (int i = 0; i < _methods.Count; i++)
+            {
+                byte[]? arrayA = _methods[i].IlBytes;
+                if (arrayA == null)
+                {
+                    continue;
+                }
+
+                var methodA = _methods[i];
+
+                for (int j = 0; j < _methods.Count; j++)
+                {
+                    // The elements are marked as dupe of the first entry
+                    if (i >= j)
+                    {
+                        continue;
+                    }
+
+                    byte[]? arrayB = _methods[j].IlBytes;
+
+                    var methodB = _methods[j];
+
+                    if (arrayB == null)
+                    {
+                        continue;
+                    }
+
+                    if (arrayA.Length != arrayB.Length)
+                    {
+                        continue;
+                    }
+
+                    if (arrayA.SequenceEqual(arrayB))
+                    {
+                        // Join all duplicates with the same code into one place.
+                        while (methodA.DuplicateOf != null)
+                        {
+                            methodA = methodA.DuplicateOf;
+                        }
+
+                        methodA.Duplicates.Add(methodB);
+                        methodB.DuplicateOf = methodA;
+                    }
+                }
             }
         }
     }
