@@ -278,7 +278,7 @@ namespace Iot.Device.Display
         public int NumberOfCustomCharactersSupported => 0;
 
         /// <inheritdoc/>
-        public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
+        public void CreateCustomCharacter(int location, ReadOnlySpan<byte> characterMap)
         {
             return;
         }
@@ -352,11 +352,11 @@ namespace Iot.Device.Display
         /// Used if character translation already took place.
         /// </summary>
         /// <param name="text">Text to print</param>
-        public void Write(ReadOnlySpan<byte> text)
+        public void Write(ReadOnlySpan<char> text)
         {
             foreach (var c in text)
             {
-                WriteChar((char)c);
+                WriteChar(c);
             }
 
             if (_cursorVisible)

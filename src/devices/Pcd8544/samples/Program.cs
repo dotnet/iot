@@ -103,6 +103,7 @@ Console.WriteLine("  2. Brightness, Contrast, Temperature, Bias");
 Console.WriteLine("  3. Display text, change cursor position");
 Console.WriteLine("  4. Display images, resize images");
 Console.WriteLine("  5. Display lines, points, rectangles");
+Console.WriteLine("  6. une the LcdConsole and display texts");
 var demoChoice = Console.ReadKey();
 Console.WriteLine();
 
@@ -119,6 +120,7 @@ switch (demoChoice.KeyChar)
         DisplayTextChangePositionBlink();
         DisplayingBitmap();
         DisplayLinesPointsRectabngles();
+        LcdConsole();
         break;
     case '2':
         BrightnessContrastTemperatureBias();
@@ -269,11 +271,15 @@ void DisplayTextChangePositionBlink()
 
     Console.WriteLine("This will display a line of random bits");
     lcd.Clear();
-    lcd.WriteLine("This will display a line of random bits");
+    lcd.WriteLine("This will display a line of random characters");
     Thread.Sleep(1500);
-    byte[] textToSend = new byte[80];
+    char[] textToSend = new char[lcd.Size.Height * lcd.Size.Width];
     var rand = new Random(123456);
-    rand.NextBytes(textToSend);
+    for (int i = 0; i < textToSend.Length; i++)
+    {
+        textToSend[i] = (char)rand.Next(0, 255);
+    }
+
     lcd.Clear();
     lcd.SetCursorPosition(0, 0);
     lcd.Write(textToSend);

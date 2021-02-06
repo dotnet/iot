@@ -23,6 +23,8 @@
     <Compile Include="LcdRgb.cs" />
     <Compile Include="LineWrapMode.cs" />
     <Compile Include="Registers.cs" />
+    <Compile Include="Font5x7.cs" />
+    <Compile Include="Font5x8.cs" />
   </ItemGroup>
 
   <ItemGroup>
