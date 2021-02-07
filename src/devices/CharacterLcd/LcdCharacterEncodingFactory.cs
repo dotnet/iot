@@ -906,5 +906,33 @@ namespace Iot.Device.CharacterLcd
         /// </example>
         protected byte[] CreateCustomCharacter(byte byte0, byte byte1, byte byte2, byte byte3, byte byte4, byte byte5, byte byte6, byte byte7) =>
             new byte[] { byte0, byte1, byte2, byte3, byte4, byte5, byte6, byte7 };
+
+        /// <summary>
+        /// Convert a 8 bytes array with 5 lower bit character representation into a
+        /// 5 bytes array with all bit character representation vertically ordered.
+        /// </summary>
+        /// <param name="font8">A span of bytes, must be 8 bytes length</param>
+        /// <returns>An 5 bytes array containing the character</returns>
+        public static byte[] ConvertFont8to5bytes(ReadOnlySpan<byte> font8)
+        {
+            if (font8.Length != 8)
+            {
+                throw new ArgumentException("Font size must be 8 bytes");
+            }
+
+            byte[] font5 = new byte[5];
+            for (int i = 0; i < 5; i++)
+            {
+                byte font = 0x00;
+                for (int j = 0; j < 8; j++)
+                {
+                    font |= (byte)(((font8[j] >> (4 - i)) & 0x01) << j);
+                }
+
+                font5[i] = font;
+            }
+
+            return font5;
+        }
     }
 }

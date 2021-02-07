@@ -9,7 +9,7 @@ namespace Iot.Device.CharacterLcd
     /// <summary>
     /// A 5x8 bitmap font supporting unicode with various characters
     /// </summary>
-    class Font5x8
+    public class Font5x8
     {
         /// <summary>
         /// A dictionary of characters, where the key is the character's unicode.

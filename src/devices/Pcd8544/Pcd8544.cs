@@ -6,6 +6,7 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.Device.Pwm;
 using System.Threading;
+using System.Collections.Generic;
 using Iot.Device.Display.Pcd8544Enums;
 using SixLabors.ImageSharp;
 using Iot.Device.CharacterLcd;
@@ -55,6 +56,7 @@ namespace Iot.Device.Display
         private byte _bias;
         private bool _enabled;
         private ScreenTemperature _temperature;
+        private Dictionary<char, byte[]> _font = new Dictionary<char, byte[]>();
 
         /// <summary>
         /// Create Pcd8544
@@ -275,12 +277,39 @@ namespace Iot.Device.Display
         public bool BlinkingCursorVisible { get; set; }
 
         /// <inheritdoc/>
-        public int NumberOfCustomCharactersSupported => 0;
+        public int NumberOfCustomCharactersSupported => char.MaxValue;
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Add a specific character to the font. It will replace existing embedded font character if it does already exist.
+        /// </summary>
+        /// <remarks>
+        /// Normal font character is a 5 bytes array aligned vertically. If the array is 8 bytes long, it will assume the
+        /// font encoding is then on the lower 5 bits of each bytes.
+        /// </remarks>
+        /// <param name="location">Should be between 0 and <see cref="NumberOfCustomCharactersSupported"/>.</param>
+        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
         public void CreateCustomCharacter(int location, ReadOnlySpan<byte> characterMap)
         {
-            return;
+            if (location >= NumberOfCustomCharactersSupported)
+            {
+                throw new ArgumentException($"{location} can only be smaller than {NumberOfCustomCharactersSupported}");
+            }
+
+            if (characterMap.Length is not 8 or 5)
+            {
+                throw new ArgumentException($"Character can only be 8 or 5 bytes array");
+            }
+
+            byte[] character = characterMap.Length == 8 ?
+               LcdCharacterEncodingFactory.ConvertFont8to5bytes(characterMap.ToArray()) :
+               characterMap.ToArray();
+
+            if (_font.ContainsKey((char)location))
+            {
+                _font.Remove((char)location);
+            }
+
+            _font.Add((char)location, character);
         }
 
         #endregion
@@ -368,11 +397,23 @@ namespace Iot.Device.Display
         private void WriteChar(char c)
         {
             Span<byte> letter = stackalloc byte[CharacterWidth];
-            if (c >= 0x20 && c <= 0x7F)
+            bool isAdditionalFont = _font.ContainsKey(c);
+            if ((c >= 0x20 && c <= 0x7F) || isAdditionalFont)
             {
-                for (int i = 0; i < CharacterWidth - 1; i++)
+                if (isAdditionalFont)
                 {
-                    letter[i] = NokiaCharacters.Ascii[c - 0x20][i];
+                    byte[] additionalFont = _font[c];
+                    for (int i = 0; i < CharacterWidth - 1; i++)
+                    {
+                        letter[i] = additionalFont[i];
+                    }
+                }
+                else
+                {
+                    for (int i = 0; i < CharacterWidth - 1; i++)
+                    {
+                        letter[i] = NokiaCharacters.Ascii[c - 0x20][i];
+                    }
                 }
 
                 letter[5] = 0x00;
