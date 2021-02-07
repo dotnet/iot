@@ -35,6 +35,8 @@ namespace Iot.Device.Arduino
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
         private readonly Dictionary<int, string> _strings;
+        private readonly CompilerSettings _compilerSettings;
+
         private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>());
 
         private int _numDeclaredMethods;
@@ -43,7 +45,6 @@ namespace Iot.Device.Arduino
         private int _nextGenericToken;
         private int _nextStringToken;
         private SnapShot _kernelSnapShot;
-        private CompilerSettings _compilerSettings;
 
         internal ExecutionSet(ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
         {
@@ -68,7 +69,7 @@ namespace Iot.Device.Arduino
             _numDeclaredMethods = 0;
             _entryPoint = null!;
             _kernelSnapShot = EmptySnapShot;
-            _compilerSettings = compilerSettings;
+            _compilerSettings = compilerSettings.Clone();
             MainEntryPointInternal = null;
         }
 
@@ -101,7 +102,7 @@ namespace Iot.Device.Arduino
             _numDeclaredMethods = setToClone._numDeclaredMethods;
             _entryPoint = setToClone._entryPoint;
             _kernelSnapShot = setToClone._kernelSnapShot;
-            _compilerSettings = compilerSettings;
+            _compilerSettings = compilerSettings.Clone();
             MainEntryPointInternal = setToClone.MainEntryPointInternal;
         }
 

@@ -8,12 +8,13 @@ using System.Threading.Tasks;
 namespace Iot.Device.Arduino
 {
     [Serializable]
-    public class CompilerSettings : IEquatable<CompilerSettings>
+    public class CompilerSettings : IEquatable<CompilerSettings>, ICloneable
     {
         public CompilerSettings()
         {
             UseFlash = true;
             CreateKernelForFlashing = true;
+            AdditionalSuppressions = new List<string>();
         }
 
         /// <summary>
@@ -36,6 +37,22 @@ namespace Iot.Device.Arduino
             set;
         }
 
+        public IList<string> AdditionalSuppressions
+        {
+            get;
+            set;
+        }
+
+        object ICloneable.Clone()
+        {
+            return MemberwiseClone();
+        }
+
+        public CompilerSettings Clone()
+        {
+            return (CompilerSettings)MemberwiseClone();
+        }
+
         public bool Equals(CompilerSettings? other)
         {
             if (ReferenceEquals(null, other))
@@ -48,7 +65,7 @@ namespace Iot.Device.Arduino
                 return true;
             }
 
-            return UseFlash == other.UseFlash && CreateKernelForFlashing == other.CreateKernelForFlashing;
+            return UseFlash == other.UseFlash && CreateKernelForFlashing == other.CreateKernelForFlashing && AdditionalSuppressions.SequenceEqual(other.AdditionalSuppressions);
         }
 
         public override bool Equals(object? obj)
@@ -73,7 +90,7 @@ namespace Iot.Device.Arduino
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(UseFlash, CreateKernelForFlashing);
+            return HashCode.Combine(UseFlash, CreateKernelForFlashing, AdditionalSuppressions.Count);
         }
 
         public static bool operator ==(CompilerSettings? left, CompilerSettings? right)

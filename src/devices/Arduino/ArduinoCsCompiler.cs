@@ -1288,6 +1288,10 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
                 exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
+                foreach (string compilerSettingsAdditionalSuppression in compilerSettings.AdditionalSuppressions)
+                {
+                    exec.SuppressType(compilerSettingsAdditionalSuppression);
+                }
 
                 exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
 
