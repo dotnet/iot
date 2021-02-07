@@ -43,8 +43,9 @@ namespace Iot.Device.Arduino
         private int _nextGenericToken;
         private int _nextStringToken;
         private SnapShot _kernelSnapShot;
+        private CompilerSettings _compilerSettings;
 
-        internal ExecutionSet(ArduinoCsCompiler compiler)
+        internal ExecutionSet(ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
         {
             _compiler = compiler;
             _methods = new List<ArduinoMethodDeclaration>();
@@ -67,12 +68,18 @@ namespace Iot.Device.Arduino
             _numDeclaredMethods = 0;
             _entryPoint = null!;
             _kernelSnapShot = EmptySnapShot;
+            _compilerSettings = compilerSettings;
             MainEntryPointInternal = null;
         }
 
-        internal ExecutionSet(ExecutionSet setToClone, ArduinoCsCompiler compiler)
+        internal ExecutionSet(ExecutionSet setToClone, ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
         {
             _compiler = compiler;
+            if (setToClone._compilerSettings != compilerSettings)
+            {
+                throw new NotSupportedException("Target compiler settings must be equal to existing");
+            }
+
             _methods = new List<ArduinoMethodDeclaration>(setToClone._methods);
             _classes = new List<ClassDeclaration>(setToClone._classes);
 
@@ -94,6 +101,7 @@ namespace Iot.Device.Arduino
             _numDeclaredMethods = setToClone._numDeclaredMethods;
             _entryPoint = setToClone._entryPoint;
             _kernelSnapShot = setToClone._kernelSnapShot;
+            _compilerSettings = compilerSettings;
             MainEntryPointInternal = setToClone.MainEntryPointInternal;
         }
 
@@ -111,15 +119,25 @@ namespace Iot.Device.Arduino
             set;
         }
 
+        public CompilerSettings CompilerSettings => _compilerSettings;
+
         public void Load()
         {
-            if (!_compiler.BoardHasKernelLoaded(_kernelSnapShot))
+            if (CompilerSettings.UseFlash)
             {
-                // Todo: The above also returns false if the kernel is loaded but not matching. Therefore we need to do a full flash erase first
+                if (!_compiler.BoardHasKernelLoaded(_kernelSnapShot))
+                {
+                    // Perform a full flash erase (since the above also returns false if a wrong kernel is loaded)
+                    _compiler.ClearAllData(true, true);
+                    _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.CopyToFlash();
+                    _compiler.WriteFlashHeader(_kernelSnapShot);
+                }
+            }
+            else
+            {
+                // If flash is not used, we must make sure it's empty. Otherwise there will be conflicts.
                 _compiler.ClearAllData(true, true);
-                _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
-                _compiler.CopyToFlash();
-                _compiler.WriteFlashHeader(_kernelSnapShot);
             }
 
             Load(_kernelSnapShot, CreateSnapShot());

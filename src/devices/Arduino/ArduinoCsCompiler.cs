@@ -265,7 +265,7 @@ namespace Iot.Device.Arduino
         /// by many programs. We call the method set constructed here "the kernel".
         /// </summary>
         /// <param name="set">Execution set</param>
-        internal void PrepareLowLevelInterface(ExecutionSet set)
+        private void PrepareLowLevelInterface(ExecutionSet set)
         {
             if (_disposed)
             {
@@ -382,8 +382,11 @@ namespace Iot.Device.Arduino
             replacementMethodInfo = type.GetMethod("GetHashCode")!;
             AddMethod(replacementMethodInfo, NativeMethod.ObjectGetHashCode);
 
-            // Finally, mark this set as "the kernel"
-            set.CreateKernelSnapShot();
+            if (set.CompilerSettings.CreateKernelForFlashing)
+            {
+                // Finally, mark this set as "the kernel"
+                set.CreateKernelSnapShot();
+            }
         }
 
         public void PrepareClass(ExecutionSet set, Type classType)
@@ -1261,7 +1264,7 @@ namespace Iot.Device.Arduino
             throw new InvalidOperationException($"Method {methodInfo} not loaded");
         }
 
-        private ExecutionSet PrepareProgram(MethodInfo mainEntryPoint)
+        private ExecutionSet PrepareProgram(MethodInfo mainEntryPoint, CompilerSettings compilerSettings)
         {
             if (_disposed)
             {
@@ -1270,9 +1273,9 @@ namespace Iot.Device.Arduino
 
             ExecutionSet exec;
 
-            if (ExecutionSet.CompiledKernel == null)
+            if (ExecutionSet.CompiledKernel == null || ExecutionSet.CompiledKernel.CompilerSettings != compilerSettings)
             {
-                exec = new ExecutionSet(this);
+                exec = new ExecutionSet(this, compilerSettings);
                 // We never want these types in our execution set - reflection is not supported, except in very specific cases
                 exec.SuppressType("System.Reflection.MethodBase");
                 exec.SuppressType("System.Reflection.MethodInfo");
@@ -1280,17 +1283,29 @@ namespace Iot.Device.Arduino
                 exec.SuppressType("System.Reflection.Module");
                 exec.SuppressType("System.Reflection.Assembly");
                 exec.SuppressType("System.Reflection.RuntimeAssembly");
+                exec.SuppressType("System.Globalization.HebrewNumber");
+                exec.SuppressType(typeof(System.Globalization.HebrewCalendar));
+                exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
+                exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
+                exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
 
                 exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
 
                 PrepareLowLevelInterface(exec);
-                // Clone the kernel and save as static member
-                ExecutionSet.CompiledKernel = new ExecutionSet(exec, this);
+                if (compilerSettings.CreateKernelForFlashing)
+                {
+                    // Clone the kernel and save as static member
+                    ExecutionSet.CompiledKernel = new ExecutionSet(exec, this, compilerSettings);
+                }
+                else
+                {
+                    ExecutionSet.CompiledKernel = null;
+                }
             }
             else
             {
                 // Another clone, to leave the static member alone. Replace the compiler in that kernel with the current one.
-                exec = new ExecutionSet(ExecutionSet.CompiledKernel, this);
+                exec = new ExecutionSet(ExecutionSet.CompiledKernel, this, compilerSettings);
             }
 
             if (mainEntryPoint.DeclaringType != null)
@@ -1301,7 +1316,6 @@ namespace Iot.Device.Arduino
             PrepareCodeInternal(exec, mainEntryPoint, null);
 
             exec.MainEntryPointInternal = mainEntryPoint;
-            _board.Log($"Estimated program memory usage before finalization: {exec.EstimateRequiredMemory()} bytes.");
             FinalizeExecutionSet(exec);
             return exec;
         }
@@ -1316,7 +1330,21 @@ namespace Iot.Device.Arduino
         public ExecutionSet CreateExecutionSet<T>(T mainEntryPoint)
             where T : Delegate
         {
-            var exec = PrepareProgram(mainEntryPoint.Method);
+            return CreateExecutionSet(mainEntryPoint, new CompilerSettings());
+        }
+
+        /// <summary>
+        /// Creates and loads an execution set (a program to be executed on a remote microcontroller)
+        /// </summary>
+        /// <typeparam name="T">The type of the main entry method. Typically something like <code>Func{int, int, int}</code></typeparam>
+        /// <param name="mainEntryPoint">The main entry method for the program</param>
+        /// <param name="settings">Custom compiler settings</param>
+        /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
+        /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
+        public ExecutionSet CreateExecutionSet<T>(T mainEntryPoint, CompilerSettings settings)
+        where T : Delegate
+        {
+            var exec = PrepareProgram(mainEntryPoint.Method, settings);
             try
             {
                 exec.Load();
@@ -1331,14 +1359,15 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Creates and loads an execution set (a program to be executed on a remote microcontroller)
+        /// Creates and loads an execution set (a program to be executed on a remote microcontroller).
         /// </summary>
         /// <param name="mainEntryPoint">The main entry method for the program</param>
+        /// <param name="settings">Custom compiler settings</param>
         /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
         /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
-        public ExecutionSet CreateExecutionSet(MethodInfo mainEntryPoint)
+        public ExecutionSet CreateExecutionSet(MethodInfo mainEntryPoint, CompilerSettings settings)
         {
-            var exec = PrepareProgram(mainEntryPoint);
+            var exec = PrepareProgram(mainEntryPoint, settings);
             try
             {
                 exec.Load();

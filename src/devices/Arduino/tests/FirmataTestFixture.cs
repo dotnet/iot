@@ -55,6 +55,20 @@ namespace Iot.Device.Arduino.Tests
             get;
         }
 
+        /// <summary>
+        /// Default settings for unit tests
+        /// </summary>
+        public CompilerSettings DefaultCompilerSettings
+        {
+            get
+            {
+                return new CompilerSettings()
+                {
+                    CreateKernelForFlashing = false, UseFlash = false
+                };
+            }
+        }
+
         private void LogMessage(string x, Exception? y)
         {
             Console.WriteLine(x);

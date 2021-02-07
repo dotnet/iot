@@ -361,7 +361,7 @@ namespace Iot.Device.Arduino.Tests
             var methods = type.GetMethods().Where(x => x.Name == methodName).ToList();
             var method = methods.Single();
 
-            var set = _compiler.CreateExecutionSet(methods[0]);
+            var set = _compiler.CreateExecutionSet(methods[0], _fixture.DefaultCompilerSettings);
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
             // First execute the method locally, so we don't have an error in the test

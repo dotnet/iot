@@ -15,7 +15,7 @@ namespace Iot.Device.Arduino.Tests
     /// </summary>
     public class ArduinoNativeLibraryTest : IClassFixture<FirmataTestFixture>, IDisposable
     {
-        private const int MaxTestMemoryUsage = 200000;
+        private const int MaxTestMemoryUsage = 400000;
         private FirmataTestFixture _fixture;
         private ArduinoCsCompiler _compiler;
 
@@ -77,7 +77,7 @@ namespace Iot.Device.Arduino.Tests
                 Assert.Equal(1, returnValue);
             }
 
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint);
+            var exec = _compiler.CreateExecutionSet(mainEntryPoint, _fixture.DefaultCompilerSettings);
 
             long memoryUsage = exec.EstimateRequiredMemory();
             Assert.True(memoryUsage < MaxTestMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
@@ -100,7 +100,7 @@ namespace Iot.Device.Arduino.Tests
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
             // and derive everything required from there)
             _compiler.ClearAllData(true);
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint);
+            var exec = _compiler.CreateExecutionSet(mainEntryPoint, _fixture.DefaultCompilerSettings);
 
             long memoryUsage = exec.EstimateRequiredMemory();
             Assert.True(memoryUsage < MaxTestMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
@@ -352,7 +352,7 @@ namespace Iot.Device.Arduino.Tests
 
         public class ClassWithAnEvent
         {
-            public Func<int>? RegisterHere;
+            public Func<int>? SimpleDelegate;
 
             private int _myValue;
 
@@ -363,7 +363,7 @@ namespace Iot.Device.Arduino.Tests
             public static int Test1()
             {
                 ClassWithAnEvent ev = new ClassWithAnEvent();
-                ev.RegisterHere = StaticNonVoidMethod;
+                ev.SimpleDelegate = StaticNonVoidMethod;
                 int result = ev.FireEvent();
                 MiniAssert.That(result == 1);
                 return result;
@@ -373,7 +373,7 @@ namespace Iot.Device.Arduino.Tests
             {
                 ClassWithAnEvent ev = new ClassWithAnEvent();
                 ev._myValue = 2;
-                ev.RegisterHere = ev.NonVoidMethod;
+                ev.SimpleDelegate = ev.NonVoidMethod;
                 int result = ev.FireEvent();
                 MiniAssert.That(result == 2);
                 return result - 1;
@@ -391,9 +391,9 @@ namespace Iot.Device.Arduino.Tests
 
             public int FireEvent()
             {
-                if (RegisterHere != null)
+                if (SimpleDelegate != null)
                 {
-                    return RegisterHere.Invoke();
+                    return SimpleDelegate.Invoke();
                 }
 
                 return -1;
