@@ -1510,10 +1510,10 @@ namespace Iot.Device.Arduino
                         AddCallWithToken(code, OpCode.CEE_LDFLD, targetField.MetadataToken);
 
                         // Push all remaining arguments to the stack -> they'll be the arguments to the method
-                        for (int i = 1; i < numargs; i++)
+                        for (int i = 0; i < numargs; i++)
                         {
                             code.Add((byte)OpCode.CEE_LDARG_S);
-                            code.Add((byte)i);
+                            code.Add((byte)(i + 1));
                         }
 
                         code.Add((byte)OpCode.CEE_LDARG_0);

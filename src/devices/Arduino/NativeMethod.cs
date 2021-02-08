@@ -81,6 +81,8 @@ namespace Iot.Device.Arduino
         TypeCreateInstanceForAnotherGenericParameter,
         TypeIsArray,
         TypeGetElementType,
+        TypeContainsGenericParameters,
+        TypeName,
 
         ValueTypeGetHashCode,
         ValueTypeEquals,
@@ -111,6 +113,8 @@ namespace Iot.Device.Arduino
         RuntimeHelpersGetRawArrayData,
         RuntimeTypeHandleValue,
         RuntimeTypeHandleGetCorElementType,
+
+        RuntimeHelpersEnumEquals,
         Interop_GlobalizationGetCalendarInfo,
         InteropGetRandomBytes,
 
@@ -126,8 +130,8 @@ namespace Iot.Device.Arduino
 
         InteropQueryPerformanceFrequency,
         InteropQueryPerformanceCounter,
-        TypeContainsGenericParameters,
-        TypeName,
-        RuntimeHelpersEnumEquals
+
+        InterlockedCompareExchange_Object,
+        ExchangeAdd
     }
 }

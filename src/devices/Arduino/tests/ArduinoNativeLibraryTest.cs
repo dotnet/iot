@@ -350,21 +350,31 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test2, true);
         }
 
+        [Fact]
+        public void EventHandlerTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test3, true);
+        }
+
         public class ClassWithAnEvent
         {
+            // The code generated for simple delegates is quite different from what is required for events (which may have multiple targets)
             public Func<int>? SimpleDelegate;
+
+            public event Action<int>? SimpleEvent;
 
             private int _myValue;
 
             public ClassWithAnEvent()
             {
+                SimpleEvent = null;
             }
 
             public static int Test1()
             {
                 ClassWithAnEvent ev = new ClassWithAnEvent();
                 ev.SimpleDelegate = StaticNonVoidMethod;
-                int result = ev.FireEvent();
+                int result = ev.FireDelegate();
                 MiniAssert.That(result == 1);
                 return result;
             }
@@ -374,9 +384,20 @@ namespace Iot.Device.Arduino.Tests
                 ClassWithAnEvent ev = new ClassWithAnEvent();
                 ev._myValue = 2;
                 ev.SimpleDelegate = ev.NonVoidMethod;
-                int result = ev.FireEvent();
+                int result = ev.FireDelegate();
                 MiniAssert.That(result == 2);
                 return result - 1;
+            }
+
+            public static int Test3()
+            {
+                ClassWithAnEvent ev = new ClassWithAnEvent();
+                ev._myValue = 3;
+                ev.SimpleEvent += ev.EventHandler;
+                ev.FireEvent(1);
+                ev.SimpleEvent -= ev.EventHandler;
+                ev.FireEvent(27);
+                return ev._myValue;
             }
 
             public static int StaticNonVoidMethod()
@@ -389,7 +410,12 @@ namespace Iot.Device.Arduino.Tests
                 return _myValue;
             }
 
-            public int FireEvent()
+            public void EventHandler(int data)
+            {
+                _myValue = data;
+            }
+
+            public int FireDelegate()
             {
                 if (SimpleDelegate != null)
                 {
@@ -397,6 +423,14 @@ namespace Iot.Device.Arduino.Tests
                 }
 
                 return -1;
+            }
+
+            public void FireEvent(int data)
+            {
+                if (SimpleEvent != null)
+                {
+                    SimpleEvent.Invoke(data);
+                }
             }
         }
 

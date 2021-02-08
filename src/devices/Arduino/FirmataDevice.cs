@@ -1267,7 +1267,7 @@ namespace Iot.Device.Arduino
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
                     _firmataStream.WriteByte((byte)ExecutorCommand.LoadIl);
                     SendInt14((short)methodIndex);
                     ushort len = (ushort)byteCode.Length;
@@ -1301,7 +1301,7 @@ namespace Iot.Device.Arduino
                 _dataReceived.Reset();
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.StartTask);
                 SendInt14((short)codeReference);
                 for (int i = 0; i < parameters.Length; i++)
@@ -1361,7 +1361,7 @@ namespace Iot.Device.Arduino
                 _dataReceived.Reset();
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.DeclareMethod);
                 SendInt14((short)codeReference);
                 _firmataStream.WriteByte((byte)methodFlags);
@@ -1383,7 +1383,7 @@ namespace Iot.Device.Arduino
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
                     _firmataStream.WriteByte((byte)ExecutorCommand.MethodSignature);
                     SendInt14((short)codeReference);
                     _firmataStream.WriteByte(1); // Locals
@@ -1409,7 +1409,7 @@ namespace Iot.Device.Arduino
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
                     _firmataStream.WriteByte((byte)ExecutorCommand.MethodSignature);
                     SendInt14((short)codeReference);
                     _firmataStream.WriteByte(0); // arguments
@@ -1444,7 +1444,7 @@ namespace Iot.Device.Arduino
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
                     _firmataStream.WriteByte((byte)ExecutorCommand.Interfaces);
                     SendInt32(classToken);
                     int remaining = data.Length - idx;
@@ -1481,7 +1481,7 @@ namespace Iot.Device.Arduino
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
                     _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclarationEnd);
                     SendInt32(classToken);
                     SendInt32(parentToken);
@@ -1511,7 +1511,7 @@ namespace Iot.Device.Arduino
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
                     // This incorporates a flag to optimize memory consumption on the host
                     _firmataStream.WriteByte((byte)(member == members.Count - 1 ? ExecutorCommand.ClassDeclarationEnd : ExecutorCommand.ClassDeclaration));
                     SendInt32(classToken);
@@ -1574,7 +1574,7 @@ namespace Iot.Device.Arduino
                     _dataReceived.Reset();
                     _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0xFF); // IL data
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
                     _firmataStream.WriteByte((byte)ExecutorCommand.ConstantData);
                     SendInt32(constantToken);
                     SendInt32(data.Length);
@@ -1599,7 +1599,7 @@ namespace Iot.Device.Arduino
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.EraseFlash);
                 _firmataStream.WriteByte((byte)(1));
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
@@ -1619,7 +1619,7 @@ namespace Iot.Device.Arduino
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.ResetExecutor);
                 _firmataStream.WriteByte((byte)(force ? 1 : 0));
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
@@ -1639,7 +1639,7 @@ namespace Iot.Device.Arduino
             {
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.KillTask);
                 SendInt14((short)codeReference);
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
@@ -1660,7 +1660,7 @@ namespace Iot.Device.Arduino
                 _dataReceived.Reset();
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.CopyToFlash);
                 _firmataStream.WriteByte(0); // Command length must be at least 3 for IL commands
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
@@ -1681,7 +1681,7 @@ namespace Iot.Device.Arduino
                 _dataReceived.Reset();
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.WriteFlashHeader);
                 SendInt32(dataVersion);
                 SendInt32(hashCode);
@@ -1703,7 +1703,7 @@ namespace Iot.Device.Arduino
                 _dataReceived.Reset();
                 _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
                 _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0xFF); // IL data
+                _firmataStream.WriteByte((byte)0x7F); // IL data
                 _firmataStream.WriteByte((byte)ExecutorCommand.CheckFlashVersion);
                 SendInt32(dataVersion);
                 SendInt32(hashCode);
