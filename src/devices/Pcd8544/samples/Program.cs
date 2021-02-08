@@ -103,11 +103,10 @@ Console.WriteLine("  3. Display text, change cursor position");
 Console.WriteLine("  4. Display images, resize images");
 Console.WriteLine("  5. Display lines, points, rectangles");
 Console.WriteLine("  6. Use the LcdConsole and display texts");
-Console.WriteLine("  7. Displays special unicode character with dedicated 5x8 font");
 var demoChoice = Console.ReadKey();
 Console.WriteLine();
 
-if (demoChoice is not object or { KeyChar: < '1' or > '7' })
+if (demoChoice is not object or { KeyChar: < '1' or > '6' })
 {
     Console.WriteLine("You have to choose a demonstration");
     return;
@@ -121,7 +120,6 @@ switch (demoChoice.KeyChar)
         DisplayingBitmap();
         DisplayLinesPointsRectabngles();
         LcdConsole();
-        UnicodeCharacters();
         break;
     case '2':
         BrightnessContrastTemperatureBias();
@@ -137,9 +135,6 @@ switch (demoChoice.KeyChar)
         break;
     case '6':
         LcdConsole();
-        break;
-    case '7':
-        UnicodeCharacters();
         break;
 }
 
@@ -459,47 +454,6 @@ void LcdConsole()
     alertTask?.Wait();
     Console.ReadKey();
     console.Dispose();
-}
-
-void UnicodeCharacters()
-{
-    lcd.Clear();
-    Span<char> character = stackalloc char[1];
-    int index = 0;
-    foreach (var car in Font5x8.Characters)
-    {
-        // add the character
-        lcd.CreateCustomCharacter(car.Key, car.Value);
-        // Display it right away
-        character[0] = (char)car.Key;
-        lcd.Write(character);
-        index++;
-        if (index == lcd.Size.Height * lcd.Size.Height)
-        {
-            lcd.Clear();
-            index = 0;
-            Thread.Sleep(1500);
-        }
-    }
-
-    lcd.Clear();
-    lcd.WriteLine("Äußerst ölige, überflüssige Ölfässer im Großhandel von Ützhausen.");
-    Thread.Sleep(1500);
-    lcd.Clear();
-    lcd.WriteLine("Le français s'est formé en France. Le français est déclaré langue officielle en France en 1539.");
-    Thread.Sleep(1500);
-    lcd.Clear();
-    lcd.WriteLine("Dansk tales også i Sydslesvig (i Flensborg ca. 20 %) samt PÅ FÆRØER OG GRØNLAND.");
-    Thread.Sleep(1500);
-    lcd.Clear();
-    lcd.WriteLine("イロハニホヘト");
-    lcd.WriteLine("チリヌルヲ");
-    lcd.WriteLine("ワカヨタレソ");
-    lcd.WriteLine("ツネナラム");
-    Thread.Sleep(1500);
-    lcd.Clear();
-    lcd.WriteLine("Премьер Японии сожалеет из-за отсутствия мирного договора с Россией");
-    Thread.Sleep(1500);
 }
 
 Console.WriteLine("Thank you for your attention!");
