@@ -19,7 +19,7 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.ExchangeAdd)]
+        [ArduinoImplementation(NativeMethod.InterlockedExchangeAdd)]
         public static int ExchangeAdd(ref int location1, int value)
         {
             throw new NotImplementedException();

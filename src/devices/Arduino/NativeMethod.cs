@@ -132,6 +132,8 @@ namespace Iot.Device.Arduino
         InteropQueryPerformanceCounter,
 
         InterlockedCompareExchange_Object,
-        ExchangeAdd
+        InterlockedExchangeAdd,
+
+        DelegateInternalEqualTypes
     }
 }

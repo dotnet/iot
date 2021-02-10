@@ -19,5 +19,6 @@ namespace Iot.Device.Arduino
         NotSupported = 12,
         CustomException = 13,
         FieldAccess = 14,
+        ExecutionEngine = 15, // Note: This is forwarded as InvalidOperationException, because locally throwing ExecutionEngineException may give some headaches
     }
 }

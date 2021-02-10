@@ -174,6 +174,9 @@ namespace Iot.Device.Arduino
                             case SystemException.FieldAccess:
                                 ex = new FieldAccessException($"Unable to access or find field {resolved.DeclaringType} - {resolved} at " + textualStackTrace);
                                 break;
+                            case SystemException.ExecutionEngine:
+                                ex = new InvalidOperationException($"Execution engine exception in remote runtime at {textualStackTrace}");
+                                break;
                             default:
                                 ex = new InvalidOperationException("Unknown exception " + textualStackTrace);
                                 break;

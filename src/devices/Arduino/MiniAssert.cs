@@ -28,5 +28,21 @@ namespace Iot.Device.Arduino
                 throw new MiniAssertionException(message);
             }
         }
+
+        public static void False(bool condition)
+        {
+            if (condition)
+            {
+                throw new MiniAssertionException();
+            }
+        }
+
+        public static void False(bool condition, string message)
+        {
+            if (condition)
+            {
+                throw new MiniAssertionException(message);
+            }
+        }
     }
 }

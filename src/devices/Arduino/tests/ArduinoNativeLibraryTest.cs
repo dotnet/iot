@@ -356,6 +356,124 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test3, true);
         }
 
+        [Fact]
+        public void OverridingObjectEqualsWorksTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(ClassThatOverridesObjectEquals.Test1, true);
+        }
+
+        [Fact]
+        public void OverridingObjectEqualsInderivedClassWorksTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test2, true);
+        }
+
+        [Fact]
+        public void EqualityDoesNotReturnTrueIfTypeIsNotSame()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test3, true);
+        }
+
+        public class ClassThatOverridesObjectEquals : IEquatable<ClassThatOverridesObjectEquals>
+        {
+            private readonly int _a;
+
+            public ClassThatOverridesObjectEquals(int a)
+            {
+                _a = a;
+            }
+
+            public bool Equals(ClassThatOverridesObjectEquals? other)
+            {
+                if (ReferenceEquals(null, other))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, other))
+                {
+                    return true;
+                }
+
+                return _a == other._a;
+            }
+
+            public override bool Equals(object? obj)
+            {
+                if (ReferenceEquals(null, obj))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
+                if (obj.GetType() != GetType())
+                {
+                    return false;
+                }
+
+                return Equals((ClassThatOverridesObjectEquals)obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return _a;
+            }
+
+            public static int Test1()
+            {
+                var c1 = new ClassThatOverridesObjectEquals(42);
+                var c2 = new ClassThatOverridesObjectEquals(42);
+                MiniAssert.False(ReferenceEquals(c1, c2));
+                MiniAssert.That(c1.Equals(c2));
+                MiniAssert.That(c1.GetHashCode() == 42);
+                object o1 = c1;
+                object o2 = c2;
+                MiniAssert.That(o2.Equals(o1));
+                return 1;
+            }
+        }
+
+        /// <summary>
+        /// This class inherits from the above, but does not itself override Equals. Still the value equality should be called
+        /// </summary>
+        public class ClassThatDoesNotOverrideObjectEquals : ClassThatOverridesObjectEquals
+        {
+            public ClassThatDoesNotOverrideObjectEquals(int a)
+            : base(a)
+            {
+            }
+
+            public static int Test2()
+            {
+                var c1 = new ClassThatDoesNotOverrideObjectEquals(42);
+                var c2 = new ClassThatDoesNotOverrideObjectEquals(42);
+                MiniAssert.False(ReferenceEquals(c1, c2));
+                MiniAssert.That(c1.Equals(c2));
+                MiniAssert.That(c1.GetHashCode() == 42);
+                object o1 = c1;
+                object o2 = c2;
+                MiniAssert.That(o2.Equals(o1));
+                return 1;
+            }
+
+            public static int Test3()
+            {
+                var c1 = new ClassThatDoesNotOverrideObjectEquals(42);
+                var c2 = new ClassThatOverridesObjectEquals(42);
+                MiniAssert.False(ReferenceEquals(c1, c2));
+                MiniAssert.That(c1.Equals(c2)); // Because calls IEqualityComparer<ClassThatDoesNotOverrideObjectEquals>.Equal(), which does not an exact type test
+                MiniAssert.False(((object)c1).Equals(c2));
+                object o1 = c1;
+                object o2 = c2;
+                MiniAssert.False(o2.Equals(o1));
+                return 1;
+            }
+        }
+
         public class ClassWithAnEvent
         {
             // The code generated for simple delegates is quite different from what is required for events (which may have multiple targets)
