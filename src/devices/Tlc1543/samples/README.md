@@ -5,7 +5,14 @@ This sample shows how to calculate position of line under matrix of 5 IR sensors
 ## Initialization
 
 ```c#
-Tlc1543 adc = new Tlc1543(24, 5, 23, 25);
+SoftwareSpi spi = new SoftwareSpi(
+    clk: 25,
+    sdi: 23,
+    sdo: 24,
+    cs: 5,
+    settings: new SpiConnectionSettings(-1) { DataBitLength = Tlc1543.SpiDataBitLength });
+
+Tlc1543 adc = new Tlc1543(spi);
 ```
 
 - 24 is our address pin, 
@@ -19,7 +26,7 @@ Tlc1543 adc = new Tlc1543(24, 5, 23, 25);
 ## Changing Charge Channel
 
 ```c#
-adc.ChargeChannel = Channel.SelfTest512;
+adc.ReadPreviousAndChargeChannel(channels[0]);
 ```
 
 You can set ChargeChannel to one of the Self Test channels (if you really know what you're doing you can also set it to one of the normal channels - but remember that this may amplify noise going from one channel to the other) if you know exactly what range of values you're expecting on polled channels (less interference on channels with fast changing but weak signals). Default set for SelfTest512 as that's the middle of 10 bit range.
@@ -27,7 +34,7 @@ You can set ChargeChannel to one of the Self Test channels (if you really know w
 ## Getting data
 
 ```c#
-List<int> values = adc.ReadChannels(channelList);
+int values = adc.ReadPreviousAndChargeChannel(channels[0]);
 ```
 
 Simple way of reading values into just made list. 
