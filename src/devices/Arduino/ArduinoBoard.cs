@@ -32,6 +32,7 @@ namespace Iot.Device.Arduino
         private Stream _dataStream;
         private FirmataDevice? _firmata;
         private IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations;
+        private bool _initialized;
 
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
         private int _spiEnabled;
@@ -48,6 +49,7 @@ namespace Iot.Device.Arduino
             FirmwareName = string.Empty;
             FirmataVersion = new Version();
             FirmwareVersion = new Version();
+            _initialized = false;
         }
 
         /// <summary>
@@ -65,6 +67,7 @@ namespace Iot.Device.Arduino
             FirmwareName = string.Empty;
             FirmataVersion = new Version();
             FirmwareVersion = new Version();
+            _initialized = false;
         }
 
         /// <summary>
@@ -142,9 +145,10 @@ namespace Iot.Device.Arduino
         /// Initialize the board connection. This must be called before any other methods of this class.
         /// </summary>
         /// <exception cref="NotSupportedException">The Firmata firmware on the connected board is too old.</exception>
+        /// <exception cref="TimeoutException">There was no answer from the board</exception>
         public virtual void Initialize()
         {
-            if (_firmata != null)
+            if (_firmata != null || _initialized)
             {
                 throw new InvalidOperationException("Board already initialized");
             }
@@ -176,6 +180,8 @@ namespace Iot.Device.Arduino
             }
 
             _firmata.EnableDigitalReporting();
+
+            _initialized = true;
         }
 
         /// <summary>
@@ -240,6 +246,11 @@ namespace Iot.Device.Arduino
         /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
         public GpioController CreateGpioController()
         {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
             return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
         }
 
@@ -252,6 +263,11 @@ namespace Iot.Device.Arduino
         /// Or: An invalid Bus Id or device Id was specified</exception>
         public virtual I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
             if (connectionSettings == null)
             {
                 throw new ArgumentNullException(nameof(connectionSettings));
@@ -274,6 +290,11 @@ namespace Iot.Device.Arduino
         /// <exception cref="NotSupportedException">The Bus number is not 0, or the SPI component has not been enabled in the firmware.</exception>
         public virtual SpiDevice CreateSpiDevice(SpiConnectionSettings settings)
         {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
             if (settings == null)
             {
                 throw new ArgumentNullException(nameof(settings));
@@ -306,6 +327,11 @@ namespace Iot.Device.Arduino
             int frequency = 400,
             double dutyCyclePercentage = 0.5)
         {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
             return new ArduinoPwmChannel(this, chip, channel, frequency, dutyCyclePercentage);
         }
 
@@ -316,6 +342,11 @@ namespace Iot.Device.Arduino
         /// <returns>An <see cref="AnalogController"/> instance</returns>
         public virtual AnalogController CreateAnalogController(int chip)
         {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
             return new ArduinoAnalogController(this, SupportedPinConfigurations, PinNumberingScheme.Logical);
         }
 
@@ -329,6 +360,11 @@ namespace Iot.Device.Arduino
         /// <returns>True on success, false otherwise</returns>
         public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
         {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
             if (!_supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.Dht))
             {
                 temperature = default;
@@ -362,6 +398,8 @@ namespace Iot.Device.Arduino
                 _firmata.Dispose();
                 _firmata = null;
             }
+
+            _initialized = false;
         }
 
         /// <summary>
