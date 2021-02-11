@@ -9,11 +9,8 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <Compile Include="../../System.Device.Gpio/Interop/Unix/Interop.Libraries.cs" />
-    <Compile Include="../../System.Device.Gpio/Interop/Unix/Libc/Interop.mmap.cs" />
-    <Compile Include="../../System.Device.Gpio/Interop/Unix/Libc/Interop.munmap.cs" />
-    <Compile Include="../../System.Device.Gpio/Interop/Unix/Libc/Interop.open.cs" />
-    <Compile Include="../../System.Device.Gpio/Interop/Unix/Libc/Interop.close.cs" />
+    <Compile Include="../Interop/Unix/Interop.Libraries.cs" />
+    <Compile Include="../Interop/Unix/Libc/Interop.libc.cs" />
   </ItemGroup>
 
   <ItemGroup>
