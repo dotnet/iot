@@ -20,9 +20,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>bfc49945c0bedeffe01bb5d6f3c217dad207d0d8</Sha>
     </Dependency>
-    <Dependency Name="System.IO.Ports" Version="5.0.0">
+    <Dependency Name="System.IO.Ports" Version="5.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>bfc49945c0bedeffe01bb5d6f3c217dad207d0d8</Sha>
+      <Sha>48459b4030ba4352202387098c1fa1d5abfb9a36</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
