@@ -22,7 +22,7 @@
     </Dependency>
     <Dependency Name="System.IO.Ports" Version="5.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>48459b4030ba4352202387098c1fa1d5abfb9a36</Sha>
+      <Sha>94396b1b11e740bb2a9f03ac6f1fc21c79ee3123</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
