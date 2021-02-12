@@ -530,6 +530,30 @@ namespace Iot.Device.Arduino
                 PrepareCodeInternal(set, cctor, null);
             }
 
+            // The list of classes may contain both the original class (i.e. String) and its replacement (MiniString) with the same token and (hopefully) all else equal as well.
+            // This happens for partially replaced classes. Remove the mini class again.
+            for (int i = 0; i < set.Classes.Count; i++)
+            {
+                var cls = set.Classes[i];
+                int idx;
+                // Check whether this class is in the replacement list
+                if ((idx = _replacementClasses.IndexOf(cls.TheType)) >= 0) // No need to test for the attribute
+                {
+                    var replacement = _replacementClasses[idx];
+                    int tokenOfReplacement = set.GetOrAddClassToken(replacement.GetTypeInfo());
+                    // If there is an element satisfying this condition, it is our original class
+                    var orig = set.Classes.SingleOrDefault(x => x.NewToken == tokenOfReplacement && x.TheType != replacement);
+                    if (orig == null)
+                    {
+                        continue;
+                    }
+
+                    // Remove this replacement
+                    set.Classes.RemoveAt(i);
+                    i--;
+                }
+            }
+
             _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
         }
 
