@@ -114,7 +114,7 @@ namespace Iot.Device.Arduino
     {
         private const int DataVersion = 1;
         private readonly ArduinoBoard _board;
-        private readonly List<IArduinoTask> _activeTasks;
+        private readonly List<ArduinoTask> _activeTasks;
 
         private ExecutionSet? _activeExecutionSet;
 
@@ -129,7 +129,7 @@ namespace Iot.Device.Arduino
             _board = board;
             _board.SetCompilerCallback(BoardOnCompilerCallback);
 
-            _activeTasks = new List<IArduinoTask>();
+            _activeTasks = new List<ArduinoTask>();
             _activeExecutionSet = null;
 
             if (resetExistingCode)
@@ -153,12 +153,12 @@ namespace Iot.Device.Arduino
             return decl.MethodBase.Name;
         }
 
-        internal void TaskDone(IArduinoTask task)
+        internal void TaskDone(ArduinoTask task)
         {
             _activeTasks.Remove(task);
         }
 
-        private void BoardOnCompilerCallback(int codeReference, MethodState state, object args)
+        private void BoardOnCompilerCallback(int taskId, MethodState state, object args)
         {
             if (_activeExecutionSet == null)
             {
@@ -166,20 +166,15 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            var codeRef = _activeExecutionSet.Methods().FirstOrDefault(x => x.Index == codeReference);
-            if (codeRef == null)
-            {
-                _board.Log($"Invalid method state message. Not currently knowing any method with reference {codeReference}.");
-                return;
-            }
-
-            var task = _activeTasks.FirstOrDefault(x => x.MethodInfo == codeRef && x.State == MethodState.Running);
+            var task = _activeTasks.FirstOrDefault(x => x.TaskId == taskId && x.State == MethodState.Running);
 
             if (task == null)
             {
-                _board.Log($"Invalid method state update. {codeRef.Index} has no active task.");
+                _board.Log($"Invalid method state update. {taskId} does not denote an active task.");
                 return;
             }
+
+            var codeRef = task.MethodInfo;
 
             if (state == MethodState.Aborted)
             {
@@ -472,14 +467,52 @@ namespace Iot.Device.Arduino
             }
         }
 
+        private void CompleteClasses(ExecutionSet set)
+        {
+            // Complete the classes in the execution set - we won't be able to extend them later.
+            for (int i = 0; i < set.Classes.Count; i++)
+            {
+                var c = set.Classes[i];
+                foreach (var m in c.TheType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    // Add all virtual members (the others are not assigned to classes in our metadata)
+                    if (m.IsConstructor || m.IsVirtual || m.IsAbstract)
+                    {
+                        PrepareCodeInternal(set, m, null);
+                    }
+                    else
+                    {
+                        // Or if the method is implementing an interface
+                        List<MethodInfo> methodsBeingImplemented = new List<MethodInfo>();
+                        ArduinoCsCompiler.CollectBaseImplementations(m, methodsBeingImplemented);
+                        if (methodsBeingImplemented.Any())
+                        {
+                            PrepareCodeInternal(set, m, null);
+                        }
+                    }
+                }
+
+                foreach (var m in c.TheType.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
+                {
+                    // Add all ctors
+                    PrepareCodeInternal(set, m, null);
+                }
+            }
+        }
+
         /// <summary>
         /// Complete the execution set by making sure all dependencies are resolved
         /// </summary>
-        internal void FinalizeExecutionSet(ExecutionSet set)
+        internal void FinalizeExecutionSet(ExecutionSet set, bool completeClasses)
         {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+            }
+
+            if (completeClasses)
+            {
+                CompleteClasses(set);
             }
 
             // Because the code below is still not water proof (there could have been virtual methods added only in the end), we do this twice
@@ -500,6 +533,12 @@ namespace Iot.Device.Arduino
                     {
                         break;
                     }
+
+                    ////// If we need to have complete classes, we also need to redo this step
+                    ////if (completeClasses)
+                    ////{
+                    ////    CompleteClasses(set);
+                    ////}
 
                     // Find the new ones
                     newDeclarations = new List<ClassDeclaration>();
@@ -717,12 +756,14 @@ namespace Iot.Device.Arduino
 
             var list = set.Methods().Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
             var uploadList = list.OrderBy(x => x.Token).ToList();
-            int cnt = uploadList.Count;
+            int cnt = uploadList.Count + 1;
+            int idx = 0;
             foreach (var me in uploadList)
             {
                 MethodBase methodInfo = me.MethodBase;
-                _board.Log($"Loading Method {me.Index + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo.Name}.");
+                _board.Log($"Loading Method {idx} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo.Name}.");
                 SendMethod(set, me);
+                idx++;
             }
         }
 
@@ -999,7 +1040,7 @@ namespace Iot.Device.Arduino
             }
 
             // Stopwatch w = Stopwatch.StartNew();
-            _board.Firmata.SendMethodDeclaration(declaration.Index, declaration.Token, declaration.Flags, (byte)declaration.MaxStack,
+            _board.Firmata.SendMethodDeclaration(declaration.Token, declaration.Flags, (byte)declaration.MaxStack,
                 (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
 
             // _board.Log($"Loading took {w.Elapsed}.");
@@ -1302,9 +1343,12 @@ namespace Iot.Device.Arduino
 
             if (set.HasMethod(methodInfo))
             {
-                var tsk = new ArduinoTask(this, set.GetMethod(methodInfo));
-                _activeTasks.Add(tsk);
-                return tsk;
+                unchecked
+                {
+                    var tsk = new ArduinoTask(this, set.GetMethod(methodInfo), (short)_activeTasks.Count);
+                    _activeTasks.Add(tsk);
+                    return tsk;
+                }
             }
 
             throw new InvalidOperationException($"Method {methodInfo} not loaded");
@@ -1366,7 +1410,7 @@ namespace Iot.Device.Arduino
             PrepareCodeInternal(exec, mainEntryPoint, null);
 
             exec.MainEntryPointInternal = mainEntryPoint;
-            FinalizeExecutionSet(exec);
+            FinalizeExecutionSet(exec, false);
             return exec;
         }
 
@@ -1700,7 +1744,7 @@ namespace Iot.Device.Arduino
             SendMethodDeclaration(decl);
             if (decl.HasBody && decl.NativeMethod == NativeMethod.None)
             {
-                _board.Firmata.SendMethodIlCode(decl.Index, decl.IlBytes!);
+                _board.Firmata.SendMethodIlCode(decl.Token, decl.IlBytes!);
             }
         }
 
@@ -1885,8 +1929,9 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <remarks>Argument count/type not checked yet</remarks>
         /// <param name="method">Handle to method to invoke.</param>
+        /// <param name="taskId">An id identifying the started task (a counter usually does)</param>
         /// <param name="arguments">Argument list</param>
-        internal void Invoke(MethodBase method, params object[] arguments)
+        internal void Invoke(MethodBase method, short taskId, params object[] arguments)
         {
             if (_activeExecutionSet == null)
             {
@@ -1895,7 +1940,7 @@ namespace Iot.Device.Arduino
 
             var decl = _activeExecutionSet.GetMethod(method);
             _board.Log($"Starting execution on {decl}...");
-            _board.Firmata.ExecuteIlCode(decl.Index, arguments);
+            _board.Firmata.ExecuteIlCode(decl.Token, taskId, arguments);
         }
 
         public void KillTask(MethodBase methodInfo)
@@ -1907,7 +1952,7 @@ namespace Iot.Device.Arduino
 
             var decl = _activeExecutionSet.GetMethod(methodInfo);
 
-            _board.Firmata.SendKillTask(decl.Index);
+            _board.Firmata.SendKillTask(decl.Token);
         }
 
         public static Type GetSystemPrivateType(string typeName)

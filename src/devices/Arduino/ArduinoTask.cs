@@ -12,28 +12,25 @@ using System.Threading.Tasks;
 #pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
-    public interface IArduinoTask : IDisposable
-    {
-        MethodState State { get; }
-        ArduinoMethodDeclaration MethodInfo { get; }
-        void AddData(MethodState state, object[] args);
-    }
-
     public sealed class ArduinoTask : IArduinoTask, IDisposable
     {
         private ConcurrentQueue<(MethodState, object[])> _collectedValues;
         private AutoResetEvent _dataAdded;
-        internal ArduinoTask(ArduinoCsCompiler compiler, ArduinoMethodDeclaration methodInfo)
+
+        internal ArduinoTask(ArduinoCsCompiler compiler, ArduinoMethodDeclaration methodInfo, short taskId)
         {
             Compiler = compiler;
             MethodInfo = methodInfo;
             State = MethodState.Stopped;
             _collectedValues = new ConcurrentQueue<(MethodState, object[])>();
             _dataAdded = new AutoResetEvent(false);
+            TaskId = taskId;
         }
 
         public ArduinoCsCompiler Compiler { get; }
         public ArduinoMethodDeclaration MethodInfo { get; }
+
+        public short TaskId { get; }
 
         /// <summary>
         /// Returns the current state of the task
@@ -59,7 +56,7 @@ namespace Iot.Device.Arduino
             }
 
             State = MethodState.Running;
-            Compiler.Invoke(MethodInfo.MethodBase, arguments);
+            Compiler.Invoke(MethodInfo.MethodBase, TaskId, arguments);
         }
 
         public bool Invoke(CancellationToken cancellationToken, params object[] arguments)

@@ -89,6 +89,9 @@ namespace Iot.Device.Arduino
         ValueTypeToString,
 
         BitConverterSingleToInt32Bits,
+        BitConverterDoubleToInt64Bits,
+        BitConverterHalfToInt16Bits,
+
         BitOperationsLog2SoftwareFallback,
         BitOperationsTrailingZeroCount,
         EnumGetHashCode,
@@ -134,6 +137,6 @@ namespace Iot.Device.Arduino
         InterlockedCompareExchange_Object,
         InterlockedExchangeAdd,
 
-        DelegateInternalEqualTypes
+        DelegateInternalEqualTypes,
     }
 }

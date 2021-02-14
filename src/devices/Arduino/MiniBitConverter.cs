@@ -18,9 +18,18 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(NativeMethod.BitConverterDoubleToInt64Bits)]
         public static Int64 DoubleToInt64Bits(double value)
         {
             throw new NotImplementedException();
         }
+
+#if NET5_0
+        [ArduinoImplementation(NativeMethod.BitConverterHalfToInt16Bits)]
+        public static Int16 HalfToInt16Bits(Half value)
+        {
+            throw new NotImplementedException();
+        }
+#endif
     }
 }

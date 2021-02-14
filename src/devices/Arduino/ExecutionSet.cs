@@ -199,31 +199,7 @@ namespace Iot.Device.Arduino
 
         internal void CreateKernelSnapShot()
         {
-            // Complete the classes in the execution set - we won't be able to extend them later.
-            for (int i = 0; i < _classes.Count; i++)
-            {
-                var c = _classes[i];
-                foreach (var m in c.TheType.GetMethods(BindingFlags.Public | BindingFlags.Instance))
-                {
-                    // Add all ctors and all virtual members (the others are not assigned to classes in our metadata)
-                    if (m.IsConstructor || m.IsVirtual || m.IsAbstract)
-                    {
-                        _compiler.PrepareCodeInternal(this, m, null);
-                    }
-                    else
-                    {
-                        // Or if the method is implementing an interface
-                        List<MethodInfo> methodsBeingImplemented = new List<MethodInfo>();
-                        ArduinoCsCompiler.CollectBaseImplementations(m, methodsBeingImplemented);
-                        if (methodsBeingImplemented.Any())
-                        {
-                            _compiler.PrepareCodeInternal(this, m, null);
-                        }
-                    }
-                }
-            }
-
-            _compiler.FinalizeExecutionSet(this);
+            _compiler.FinalizeExecutionSet(this, true);
 
             _kernelSnapShot = CreateSnapShot();
         }
