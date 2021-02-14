@@ -131,6 +131,7 @@ namespace Iot.Device.Arduino
                     // Perform a full flash erase (since the above also returns false if a wrong kernel is loaded)
                     _compiler.ClearAllData(true, true);
                     _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendMethods(this, EmptySnapShot, _kernelSnapShot, true);
                     _compiler.CopyToFlash();
                     _compiler.WriteFlashHeader(_kernelSnapShot);
                 }
@@ -155,7 +156,7 @@ namespace Iot.Device.Arduino
             _compiler.ClearAllData(true, false);
             _compiler.SetExecutionSetActive(this);
             _compiler.SendClassDeclarations(this, from, to, false);
-            _compiler.SendMethods(this);
+            _compiler.SendMethods(this, from, to, false);
             List<(int Token, byte[] Data)> converted = new List<(int Token, byte[] Data)>();
             // Need to do this manually, due to stupid nullability conversion restrictions
             foreach (var elem in _patchedFieldTokens.Values)
@@ -187,8 +188,10 @@ namespace Iot.Device.Arduino
         internal SnapShot CreateSnapShot()
         {
             List<int> tokens = new List<int>();
-            // TODO: Uncomment once these can also be stored to flash
+            // Can't use this, because the list may contain replacement tokens for methods we haven't actually picked as part of this snapshot
             // tokens.AddRange(_patchedMethodTokens.Values);
+            tokens.AddRange(_methods.Select(x => x.Token));
+            // TODO: Uncomment once these can also be stored to flash
             // tokens.AddRange(_patchedFieldTokens.Values.Select(x => x.Token));
             tokens.AddRange(_patchedTypeTokens.Values);
             return new SnapShot(this, tokens);

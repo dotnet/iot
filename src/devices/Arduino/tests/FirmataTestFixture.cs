@@ -64,7 +64,7 @@ namespace Iot.Device.Arduino.Tests
             {
                 return new CompilerSettings()
                 {
-                    CreateKernelForFlashing = false, UseFlash = false
+                    CreateKernelForFlashing = true, UseFlash = true
                 };
             }
         }

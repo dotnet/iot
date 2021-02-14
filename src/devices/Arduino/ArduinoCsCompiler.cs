@@ -648,10 +648,20 @@ namespace Iot.Device.Arduino
         /// <param name="markAsReadOnly">Mark uploaded classes as readonly</param>
         internal void SendClassDeclarations(ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
+            if (markAsReadOnly)
+            {
+                _board.Log("Now loading the kernel...");
+            }
+            else
+            {
+                _board.Log("Loading user program...");
+            }
+
             int idx = 0;
             // Include all elements that are not in from but in to. Do not include elements in neither collection.
             var list = set.Classes.Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.NewToken) && toSnapShot.AlreadyAssignedTokens.Contains(x.NewToken));
-            foreach (var c in list.OrderBy(x => x.NewToken))
+            var classesToLoad = list.OrderBy(x => x.NewToken).ToList();
+            foreach (var c in classesToLoad)
             {
                 var cls = c.TheType;
                 Int32 parentToken = 0;
@@ -666,7 +676,7 @@ namespace Iot.Device.Arduino
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
                 string className = cls.Name;
 
-                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {set.Classes.Count}");
+                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
@@ -693,10 +703,22 @@ namespace Iot.Device.Arduino
             }
         }
 
-        internal void SendMethods(ExecutionSet set)
+        internal void SendMethods(ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
-            var cnt = set.Methods().Count;
-            foreach (var me in set.Methods())
+            // The flag is not currently required for methods, since they don't change
+            if (markAsReadOnly)
+            {
+                _board.Log("Now loading kernel methods...");
+            }
+            else
+            {
+                _board.Log("Loading user program methods...");
+            }
+
+            var list = set.Methods().Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
+            var uploadList = list.OrderBy(x => x.Token).ToList();
+            int cnt = uploadList.Count;
+            foreach (var me in uploadList)
             {
                 MethodBase methodInfo = me.MethodBase;
                 _board.Log($"Loading Method {me.Index + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo.Name}.");
@@ -1607,7 +1629,7 @@ namespace Iot.Device.Arduino
 
             if (set.AddMethod(newInfo))
             {
-                _board.Log($"Method {methodInfo.DeclaringType} - {methodInfo} added to the execution set");
+                _board.Log($"Method {methodInfo.DeclaringType} - {methodInfo} added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
                 // If the class containing this method contains statics, we need to send its declaration
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
