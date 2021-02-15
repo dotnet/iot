@@ -726,6 +726,11 @@ namespace Iot.Device.Arduino
                 }
 
                 idx++;
+                // Need to repeatedly copy to flash, or a set that just fits into flash cannot be loaded since the total RAM size is much less than the total flash size
+                if (set.CompilerSettings.UseFlash && (idx % 100 == 0) && markAsReadOnly)
+                {
+                    CopyToFlash();
+                }
             }
         }
 
@@ -756,14 +761,18 @@ namespace Iot.Device.Arduino
 
             var list = set.Methods().Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
             var uploadList = list.OrderBy(x => x.Token).ToList();
-            int cnt = uploadList.Count + 1;
+            int cnt = uploadList.Count;
             int idx = 0;
             foreach (var me in uploadList)
             {
                 MethodBase methodInfo = me.MethodBase;
-                _board.Log($"Loading Method {idx} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo.Name}.");
+                _board.Log($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo.Name}.");
                 SendMethod(set, me);
                 idx++;
+                if (set.CompilerSettings.UseFlash && (idx % 100 == 0) && markAsReadOnly)
+                {
+                    CopyToFlash();
+                }
             }
         }
 
