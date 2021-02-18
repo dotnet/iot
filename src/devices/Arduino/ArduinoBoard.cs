@@ -31,15 +31,17 @@ namespace Iot.Device.Arduino
         private SerialPort? _serialPort;
         private Stream? _dataStream;
         private FirmataDevice? _firmata;
-        private IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations;
+        private IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations = new List<SupportedPinConfiguration>();
         private bool _initialized;
-        private bool _isDisposed;
+        private bool _isDisposed = false;
 
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
-        private int _spiEnabled;
-        private Version _firmwareVersion;
-        private string _firmwareName;
-        private Version _firmataVersion;
+        private int _spiEnabled = 0;
+        private Version _firmwareVersion = new Version();
+        private string _firmwareName = string.Empty;
+        private Version _firmataVersion = new Version();
+
+        private object _initializationLock = new object();
 
         /// <summary>
         /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
@@ -48,13 +50,6 @@ namespace Iot.Device.Arduino
         public ArduinoBoard(Stream serialPortStream)
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
-            _spiEnabled = 0;
-            _supportedPinConfigurations = new List<SupportedPinConfiguration>();
-            _firmwareName = string.Empty;
-            _firmataVersion = new Version();
-            _firmwareVersion = new Version();
-            _initialized = false;
-            _isDisposed = false;
         }
 
         /// <summary>
@@ -67,12 +62,6 @@ namespace Iot.Device.Arduino
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
-            _supportedPinConfigurations = new List<SupportedPinConfiguration>();
-            _firmwareName = string.Empty;
-            _firmataVersion = new Version();
-            _firmwareVersion = new Version();
-            _initialized = false;
-            _isDisposed = false;
         }
 
         /// <summary>
@@ -165,56 +154,64 @@ namespace Iot.Device.Arduino
         /// <exception cref="TimeoutException">There was no answer from the board</exception>
         public virtual void Initialize()
         {
-            if (_isDisposed)
+            lock (_initializationLock)
             {
-                throw new ObjectDisposedException("Board is already disposed");
+                if (_initialized)
+                {
+                    return;
+                }
+
+                if (_isDisposed)
+                {
+                    throw new ObjectDisposedException("Board is already disposed");
+                }
+
+                if (_firmata != null)
+                {
+                    throw new InvalidOperationException("Board already initialized");
+                }
+
+                if (_serialPort != null)
+                {
+                    _serialPort.Open();
+                    _dataStream = _serialPort.BaseStream;
+                }
+                else if (_dataStream == null)
+                {
+                    // Should never get here
+                    throw new InvalidOperationException("Constructor argument error: Neither port nor stream specified");
+                }
+
+                _firmata = new FirmataDevice();
+                _firmata.Open(_dataStream);
+                _firmata.OnError += FirmataOnError;
+                _firmataVersion = _firmata.QueryFirmataVersion();
+                if (_firmataVersion < _firmata.QuerySupportedFirmataVersion())
+                {
+                    throw new NotSupportedException($"Firmata version on board is {_firmataVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
+                }
+
+                Log($"Firmata version on board is {_firmataVersion}.");
+
+                _firmwareVersion = _firmata.QueryFirmwareVersion(out var firmwareName);
+                _firmwareName = firmwareName;
+
+                Log($"Firmware version on board is {_firmwareVersion}");
+
+                _firmata.QueryCapabilities();
+
+                _supportedPinConfigurations = _firmata.PinConfigurations.AsReadOnly();
+
+                Log("Device capabilities: ");
+                foreach (var pin in _supportedPinConfigurations)
+                {
+                    Log(pin.ToString());
+                }
+
+                _firmata.EnableDigitalReporting();
+
+                _initialized = true;
             }
-
-            if (_firmata != null || _initialized)
-            {
-                throw new InvalidOperationException("Board already initialized");
-            }
-
-            if (_serialPort != null)
-            {
-                _serialPort.Open();
-                _dataStream = _serialPort.BaseStream;
-            }
-            else if (_dataStream == null)
-            {
-                // Should never get here
-                throw new InvalidOperationException("Constructor argument error: Neither port nor stream specified");
-            }
-
-            _firmata = new FirmataDevice();
-            _firmata.Open(_dataStream);
-            _firmata.OnError += FirmataOnError;
-            FirmataVersion = _firmata.QueryFirmataVersion();
-            if (FirmataVersion < _firmata.QuerySupportedFirmataVersion())
-            {
-                throw new NotSupportedException($"Firmata version on board is {FirmataVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
-            }
-
-            Log($"Firmata version on board is {FirmataVersion}.");
-
-            FirmwareVersion = _firmata.QueryFirmwareVersion(out var firmwareName);
-            FirmwareName = firmwareName;
-
-            Log($"Firmware version on board is {FirmwareVersion}");
-
-            _firmata.QueryCapabilities();
-
-            _supportedPinConfigurations = _firmata.PinConfigurations.AsReadOnly();
-
-            Log("Device capabilities: ");
-            foreach (var pin in _supportedPinConfigurations)
-            {
-                Log(pin.ToString());
-            }
-
-            _firmata.EnableDigitalReporting();
-
-            _initialized = true;
         }
 
         /// <summary>
@@ -230,10 +227,6 @@ namespace Iot.Device.Arduino
                 }
 
                 return _firmwareVersion;
-            }
-            private set
-            {
-                _firmwareVersion = value;
             }
         }
 
@@ -251,10 +244,6 @@ namespace Iot.Device.Arduino
 
                 return _firmwareName;
             }
-            private set
-            {
-                _firmwareName = value;
-            }
         }
 
         /// <summary>
@@ -270,10 +259,6 @@ namespace Iot.Device.Arduino
                 }
 
                 return _firmataVersion;
-            }
-            private set
-            {
-                _firmataVersion = value;
             }
         }
 
