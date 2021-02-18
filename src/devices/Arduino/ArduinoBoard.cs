@@ -29,13 +29,17 @@ namespace Iot.Device.Arduino
     public class ArduinoBoard : IDisposable
     {
         private SerialPort? _serialPort;
-        private Stream _dataStream;
+        private Stream? _dataStream;
         private FirmataDevice? _firmata;
         private IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations;
         private bool _initialized;
+        private bool _isDisposed;
 
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
         private int _spiEnabled;
+        private Version _firmwareVersion;
+        private string _firmwareName;
+        private Version _firmataVersion;
 
         /// <summary>
         /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
@@ -46,10 +50,11 @@ namespace Iot.Device.Arduino
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
             _spiEnabled = 0;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
-            FirmwareName = string.Empty;
-            FirmataVersion = new Version();
-            FirmwareVersion = new Version();
+            _firmwareName = string.Empty;
+            _firmataVersion = new Version();
+            _firmwareVersion = new Version();
             _initialized = false;
+            _isDisposed = false;
         }
 
         /// <summary>
@@ -60,14 +65,14 @@ namespace Iot.Device.Arduino
         /// <param name="baudRate">Baudrate to use. It is recommended to use at least 115200 Baud.</param>
         public ArduinoBoard(string portName, int baudRate)
         {
+            _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
-            _serialPort.Open();
-            _dataStream = _serialPort.BaseStream;
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
-            FirmwareName = string.Empty;
-            FirmataVersion = new Version();
-            FirmwareVersion = new Version();
+            _firmwareName = string.Empty;
+            _firmataVersion = new Version();
+            _firmwareVersion = new Version();
             _initialized = false;
+            _isDisposed = false;
         }
 
         /// <summary>
@@ -84,8 +89,13 @@ namespace Iot.Device.Arduino
         /// </remarks>
         /// <param name="comPorts">List of com ports. Can be used with <see cref="SerialPort.GetPortNames"/>.</param>
         /// <param name="baudRates">List of baud rates to test. <see cref="CommonBaudRates"/>.</param>
-        /// <returns>A board, already open and initialized. Null if none was found.</returns>
-        public static ArduinoBoard? FindBoard(IEnumerable<string> comPorts, IEnumerable<int> baudRates)
+        /// <param name="board">[Out] Returns the board reference. It is already initialized.</param>
+        /// <returns>True on success, false if no board was found</returns>
+        public static bool TryFindBoard(IEnumerable<string> comPorts, IEnumerable<int> baudRates,
+#if !NETCOREAPP2_1
+            [NotNullWhen(True)]
+#endif
+            out ArduinoBoard board)
         {
             foreach (var port in comPorts)
             {
@@ -96,7 +106,8 @@ namespace Iot.Device.Arduino
                     {
                         b = new ArduinoBoard(port, baud);
                         b.Initialize();
-                        return b;
+                        board = b;
+                        return true;
                     }
                     catch (Exception x) when (x is NotSupportedException || x is TimeoutException || x is IOException || x is UnauthorizedAccessException)
                     {
@@ -105,20 +116,26 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            return null;
+            board = null!;
+            return false;
         }
 
         /// <summary>
         /// Searches all available com ports for an Arduino device.
         /// </summary>
-        /// <returns>A board, already open and initialized. Null if none was found.</returns>
+        /// <param name="board">A board, already open and initialized. Null if none was found.</param>
+        /// <returns>True if a board was found, false otherwise</returns>
         /// <remarks>
         /// Scanning serial ports may affect unrelated devices. If there are problems, use the
-        /// <see cref="FindBoard(System.Collections.Generic.IEnumerable{string},System.Collections.Generic.IEnumerable{int})"/> overload excluding ports that shall not be tested.
+        /// <see cref="TryFindBoard(System.Collections.Generic.IEnumerable{string},System.Collections.Generic.IEnumerable{int},out Iot.Device.Arduino.ArduinoBoard?)"/> overload excluding ports that shall not be tested.
         /// </remarks>
-        public static ArduinoBoard? FindBoard()
+        public static bool TryFindBoard(
+#if !NETCOREAPP2_1
+            [NotNullWhen(true)]
+#endif
+            out ArduinoBoard board)
         {
-            return FindBoard(SerialPort.GetPortNames(), CommonBaudRates());
+            return TryFindBoard(SerialPort.GetPortNames(), CommonBaudRates(), out board);
         }
 
         /// <summary>
@@ -148,9 +165,25 @@ namespace Iot.Device.Arduino
         /// <exception cref="TimeoutException">There was no answer from the board</exception>
         public virtual void Initialize()
         {
+            if (_isDisposed)
+            {
+                throw new ObjectDisposedException("Board is already disposed");
+            }
+
             if (_firmata != null || _initialized)
             {
                 throw new InvalidOperationException("Board already initialized");
+            }
+
+            if (_serialPort != null)
+            {
+                _serialPort.Open();
+                _dataStream = _serialPort.BaseStream;
+            }
+            else if (_dataStream == null)
+            {
+                // Should never get here
+                throw new InvalidOperationException("Constructor argument error: Neither port nor stream specified");
             }
 
             _firmata = new FirmataDevice();
@@ -189,8 +222,19 @@ namespace Iot.Device.Arduino
         /// </summary>
         public Version FirmwareVersion
         {
-            get;
-            private set;
+            get
+            {
+                if (!_initialized)
+                {
+                    Initialize();
+                }
+
+                return _firmwareVersion;
+            }
+            private set
+            {
+                _firmwareVersion = value;
+            }
         }
 
         /// <summary>
@@ -198,8 +242,19 @@ namespace Iot.Device.Arduino
         /// </summary>
         public string FirmwareName
         {
-            get;
-            private set;
+            get
+            {
+                if (!_initialized)
+                {
+                    Initialize();
+                }
+
+                return _firmwareName;
+            }
+            private set
+            {
+                _firmwareName = value;
+            }
         }
 
         /// <summary>
@@ -207,15 +262,32 @@ namespace Iot.Device.Arduino
         /// </summary>
         public Version FirmataVersion
         {
-            get;
-            private set;
+            get
+            {
+                if (!_initialized)
+                {
+                    Initialize();
+                }
+
+                return _firmataVersion;
+            }
+            private set
+            {
+                _firmataVersion = value;
+            }
         }
 
         internal FirmataDevice Firmata
         {
             get
             {
-                return _firmata ?? throw new ObjectDisposedException(nameof(ArduinoBoard));
+                if (_isDisposed)
+                {
+                    throw new ObjectDisposedException(nameof(ArduinoBoard));
+                }
+
+                // This exception should not normally happen
+                return _firmata ?? throw new InvalidOperationException("Device not initialized");
             }
         }
 
@@ -226,6 +298,11 @@ namespace Iot.Device.Arduino
         {
             get
             {
+                if (!_initialized)
+                {
+                    Initialize();
+                }
+
                 return _supportedPinConfigurations;
             }
         }
@@ -416,7 +493,7 @@ namespace Iot.Device.Arduino
             _spiEnabled++;
             if (_spiEnabled == 1)
             {
-                _firmata?.EnableSpi();
+                Firmata.EnableSpi();
             }
         }
 
@@ -430,7 +507,7 @@ namespace Iot.Device.Arduino
             _spiEnabled--;
             if (_spiEnabled == 0)
             {
-                _firmata?.DisableSpi();
+                Firmata.DisableSpi();
             }
         }
     }

@@ -36,14 +36,13 @@ namespace Arduino.Tests
                 Console.WriteLine("Unable to connect to simulator, trying hardware...");
             }
 
-            var b = ArduinoBoard.FindBoard(SerialPort.GetPortNames(), new List<int>() { 115200 });
-            if (b == null)
+            if (!ArduinoBoard.TryFindBoard(SerialPort.GetPortNames(), new List<int>() { 115200 }, out var board))
             {
                 Board = null;
                 return;
             }
 
-            Board = b;
+            Board = board;
             Board.LogMessages += (x, y) => Console.WriteLine(x);
         }
 
