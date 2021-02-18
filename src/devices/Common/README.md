@@ -23,8 +23,11 @@ The `LogDispatcher` class contains static methods to enable a binding to provide
 Logging is disabled by default. To enable logging to the console in an application, you can use this code: 
 
 ```csharp
-using var loggerFactory = new LoggerFactory();
-loggerFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
+using var loggerFactory = LoggerFactory.Create(builder =>
+{
+	builder
+		.AddConsole();
+});
 
 // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
 LogDispatcher.LoggerFactory = loggerFactory;

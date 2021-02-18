@@ -8,6 +8,7 @@ using Iot.Device.Common.Samples;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Options;
 
 namespace Common.Samples.Test
 {
@@ -28,8 +29,11 @@ namespace Common.Samples.Test
         /// </summary>
         private static void LogWithStandardProvider()
         {
-            using var loggerFactory = new LoggerFactory();
-            loggerFactory.AddProvider(new ConsoleLoggerProvider((s, level) => true, false));
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddConsole();
+            });
 
             // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
             LogDispatcher.LoggerFactory = loggerFactory;
