@@ -104,7 +104,7 @@ namespace Iot.Device.Arduino
                     if (idx > 0)
                     {
                         stackTrace.RemoveRange(0, idx + 1);
-
+                        stackTrace.Reverse();
                         foreach (var m in stackTrace)
                         {
                             // this can be the same as above (if the error is within the given method), but not

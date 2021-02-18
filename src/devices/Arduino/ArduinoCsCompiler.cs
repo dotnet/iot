@@ -734,8 +734,10 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendConstants(IEnumerable<(int Token, byte[] InitializerData)> constElements)
+        public void SendConstants(IList<(int Token, byte[] InitializerData)> constElements)
         {
+            int cnt = constElements.Count;
+            int idx = 1;
             foreach (var e in constElements)
             {
                 if (e.InitializerData == null)
@@ -743,7 +745,9 @@ namespace Iot.Device.Arduino
                     continue;
                 }
 
+                _board.Log($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes");
                 _board.Firmata.SendConstant(e.Token, e.InitializerData);
+                idx++;
             }
         }
 

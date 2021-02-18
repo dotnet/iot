@@ -762,7 +762,7 @@ namespace Iot.Device.Arduino
 
             public string EnglishName => "Invariant";
 
-            public string ThreeLetterWindowsLanguageName => "Inv";
+            public string ThreeLetterWindowsLanguageName => "INV";
 
             public string TwoLetterISOLanguageName => "IN";
 

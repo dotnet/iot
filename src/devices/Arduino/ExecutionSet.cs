@@ -34,7 +34,8 @@ namespace Iot.Device.Arduino
         private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
-        private readonly Dictionary<int, string> _strings;
+        // String data, already UTF-8 encoded
+        private readonly List<(int Token, byte[] EncodedString)> _strings;
         private readonly CompilerSettings _compilerSettings;
 
         private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>());
@@ -60,7 +61,7 @@ namespace Iot.Device.Arduino
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
             _classesToSuppress = new List<Type>();
-            _strings = new Dictionary<int, string>();
+            _strings = new();
 
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
             _nextGenericToken = GenericTokenStep;
@@ -93,7 +94,7 @@ namespace Iot.Device.Arduino
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>(setToClone._classesReplaced);
             _methodsReplaced = new List<(MethodBase, MethodBase?)>(setToClone._methodsReplaced);
             _classesToSuppress = new List<Type>(setToClone._classesToSuppress);
-            _strings = new Dictionary<int, string>(setToClone._strings);
+            _strings = new(setToClone._strings);
 
             _nextToken = setToClone._nextToken;
             _nextGenericToken = setToClone._nextGenericToken;
@@ -168,7 +169,7 @@ namespace Iot.Device.Arduino
             }
 
             _compiler.SendConstants(converted);
-            _compiler.SendConstants(_strings.Select(x => (x.Key, Encoding.Default.GetBytes(x.Value))));
+            _compiler.SendConstants(_strings.ToList());
 
             MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
@@ -279,8 +280,7 @@ namespace Iot.Device.Arduino
 
             foreach (var constant in _strings)
             {
-                // This is currently overestimating, since we're sending strings as ASCII only.
-                bytesUsed += constant.Value.Length * sizeof(char);
+                bytesUsed += constant.EncodedString.Length + 4;
             }
 
             return bytesUsed;
@@ -903,15 +903,16 @@ namespace Iot.Device.Arduino
 
         internal int GetOrAddString(string data)
         {
-            var existing = _strings.FirstOrDefault(x => x.Value == data);
-            if (existing.Key != 0)
+            var encoded = Encoding.UTF8.GetBytes(data);
+            var existing = _strings.FirstOrDefault(x => x.EncodedString.SequenceEqual(encoded));
+            if (existing.Token != 0)
             {
-                return existing.Key;
+                return existing.Token;
             }
 
-            int token = _nextStringToken + data.Length;
+            int token = _nextStringToken + encoded.Length;
             _nextStringToken += StringTokenStep;
-            _strings[token] = data;
+            _strings.Add((token, encoded));
             return token;
         }
 
