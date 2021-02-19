@@ -104,6 +104,11 @@ namespace System.Device.Pwm.Channels
             return (int)((1.0 / frequency) * 1_000_000_000);
         }
 
+        private static int GetDutyCycleOnTimeNs(int pwmPeriodNs, double dutyCycle)
+        {
+            return (int)(pwmPeriodNs * dutyCycle);
+        }
+
         private void SetFrequency(int frequency, double newDutyCycle, int? dutyCycleOnTimeNs = null)
         {
             if (frequency < 0)
@@ -160,11 +165,6 @@ namespace System.Device.Pwm.Channels
             _dutyCycleWriter.Write(dutyCycleInNanoseconds);
             _dutyCycleWriter.Flush();
             _dutyCycle = dutyCycle;
-        }
-
-        private static int GetDutyCycleOnTimeNs(int pwmPeriodNs, double dutyCycle)
-        {
-            return (int)(pwmPeriodNs * dutyCycle);
         }
 
         /// <summary>

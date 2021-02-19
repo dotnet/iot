@@ -24,13 +24,6 @@ namespace Iot.Device.Adc
     [Interface("INA219 Bidirectional Current/Power monitor")]
     public class Ina219 : IDisposable
     {
-        private I2cDevice _i2cDevice;
-        private bool _disposeI2cDevice = false;
-        private ushort _calibrationValue;
-        private Ina219AdcResolutionOrSamples _busAdcResSamp;
-        private Ina219AdcResolutionOrSamples _shuntAdcResSamp;
-        private float _currentLsb;
-
         // These values are the datasheet defined delays in micro seconds between requesting a Current or Power value from the INA219 and the ADC sampling having completed
         // along with any conversions.
         private static readonly Dictionary<Ina219AdcResolutionOrSamples, int> s_readDelays = new()
@@ -47,6 +40,13 @@ namespace Iot.Device.Adc
             { Ina219AdcResolutionOrSamples.Adc64Sample, 34050 },
             { Ina219AdcResolutionOrSamples.Adc128Sample, 68100 }
         };
+
+        private I2cDevice _i2cDevice;
+        private bool _disposeI2cDevice = false;
+        private ushort _calibrationValue;
+        private Ina219AdcResolutionOrSamples _busAdcResSamp;
+        private Ina219AdcResolutionOrSamples _shuntAdcResSamp;
+        private float _currentLsb;
 
         /// <summary>
         /// Construct an Ina219 device using an I2cDevice

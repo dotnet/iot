@@ -28,9 +28,10 @@ namespace System.Device.Gpio.Drivers
         private const string DeviceTreeRanges = "/proc/device-tree/soc/ranges";
         private const string ModelFilePath = "/proc/device-tree/model";
 
+        private static readonly object s_initializationLock = new object();
+
         private readonly PinState?[] _pinModes;
         private RegisterView* _registerViewPointer = null;
-        private static readonly object s_initializationLock = new object();
 
         private UnixDriver? _interruptDriver = null;
 

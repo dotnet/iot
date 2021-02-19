@@ -23,10 +23,12 @@ namespace Iot.Device.Gpio.Drivers
     public unsafe class SunxiDriver : SysFsDriver
     {
         private const string GpioMemoryFilePath = "/dev/mem";
-        private IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
+
         // final_address = mapped_address + (target_address & map_mask) https://stackoverflow.com/a/37922968
         private static readonly int _mapMask = Environment.SystemPageSize - 1;
         private static readonly object s_initializationLock = new object();
+
+        private IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
 
         private IntPtr _cpuxPointer = IntPtr.Zero;
         private IntPtr _cpusPointer = IntPtr.Zero;

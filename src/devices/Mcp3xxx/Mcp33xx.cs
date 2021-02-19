@@ -23,6 +23,15 @@ namespace Iot.Device.Adc
         }
 
         /// <summary>
+        /// Convert a signed value with a sign bit at a particular location to an int.
+        /// </summary>
+        /// <param name="signedValue">Signed value with a sign bit at a particular location</param>
+        /// <param name="signingBit">Bit number that contains the sign bit</param>
+        /// <returns>A value corresponding to the signed value sign extended into an int</returns>
+        // if the sign bit is set then extend the signing bit to create a signed integer
+        public static int SignExtend(int signedValue, int signingBit) => (signedValue >> signingBit) == 0 ? signedValue : signedValue - (2 << signingBit);
+
+        /// <summary>
         /// Reads a  value from the device using pseudo-differential inputs
         /// </summary>
         /// <param name="valueChannel">Channel which represents the signal (valid values: 0 to channelcount - 1).</param>
@@ -70,14 +79,5 @@ namespace Iot.Device.Adc
 
             return retval;
         }
-
-        /// <summary>
-        /// Convert a signed value with a sign bit at a particular location to an int.
-        /// </summary>
-        /// <param name="signedValue">Signed value with a sign bit at a particular location</param>
-        /// <param name="signingBit">Bit number that contains the sign bit</param>
-        /// <returns>A value corresponding to the signed value sign extended into an int</returns>
-        // if the sign bit is set then extend the signing bit to create a signed integer
-        public static int SignExtend(int signedValue, int signingBit) => (signedValue >> signingBit) == 0 ? signedValue : signedValue - (2 << signingBit);
     }
 }

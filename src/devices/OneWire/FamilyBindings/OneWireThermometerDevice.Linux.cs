@@ -10,18 +10,6 @@ namespace Iot.Device.OneWire
 {
     public partial class OneWireThermometerDevice : OneWireDevice
     {
-        private async Task<Temperature> ReadTemperatureInternalAsync()
-        {
-            var data = await File.ReadAllTextAsync(Path.Combine(OneWireBus.SysfsDevicesPath, BusId, DeviceId, "w1_slave"));
-            return ParseTemperature(data);
-        }
-
-        private Temperature ReadTemperatureInternal()
-        {
-            var data = File.ReadAllText(Path.Combine(OneWireBus.SysfsDevicesPath, BusId, DeviceId, "w1_slave"));
-            return ParseTemperature(data);
-        }
-
         private static Temperature ParseTemperature(string data)
         {
             // Expected data format:
@@ -39,6 +27,18 @@ namespace Iot.Device.OneWire
             }
 
             return Temperature.FromDegreesCelsius(temp * 0.001);
+        }
+
+        private async Task<Temperature> ReadTemperatureInternalAsync()
+        {
+            var data = await File.ReadAllTextAsync(Path.Combine(OneWireBus.SysfsDevicesPath, BusId, DeviceId, "w1_slave"));
+            return ParseTemperature(data);
+        }
+
+        private Temperature ReadTemperatureInternal()
+        {
+            var data = File.ReadAllText(Path.Combine(OneWireBus.SysfsDevicesPath, BusId, DeviceId, "w1_slave"));
+            return ParseTemperature(data);
         }
     }
 }
