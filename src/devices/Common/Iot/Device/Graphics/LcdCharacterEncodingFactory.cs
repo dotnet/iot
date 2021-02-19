@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-namespace Iot.Device.CharacterLcd
+namespace Iot.Device.Graphics
 {
     /// <summary>
     /// Factory for creating Encodings that support different cultures on different LCD Displays.
@@ -912,7 +912,7 @@ namespace Iot.Device.CharacterLcd
         /// 5 bytes array with all bit character representation vertically ordered.
         /// </summary>
         /// <param name="font8">A span of bytes, must be 8 bytes length</param>
-        /// <returns>An 5 bytes array containing the character</returns>
+        /// <returns>A 5 bytes array containing the character</returns>
         public static byte[] ConvertFont8to5bytes(ReadOnlySpan<byte> font8)
         {
             if (font8.Length != 8)
@@ -933,6 +933,32 @@ namespace Iot.Device.CharacterLcd
             }
 
             return font5;
+        }
+
+        /// <summary>
+        /// Convert a 5 bytes array with 8 bits vertically encoded character representation into a
+        /// 8 bytes array with the lower 5 bits.
+        /// </summary>
+        /// <param name="font5">A span of bytes, must be 5 bytes length</param>
+        /// <returns>A 8 bytes array containing the character</returns>
+        public static byte[] ConvertFont5to8bytes(ReadOnlySpan<byte> font5)
+        {
+            if (font5.Length != 5)
+            {
+                throw new ArgumentException("Font size must be 5 bytes");
+            }
+
+            byte[] font8 = new byte[8];
+
+            for (int i = 0; i < 5; i++)
+            {
+                for (int j = 1; j < 8; j++)
+                {
+                    font8[7 - j] = (byte)(font8[7 - j] << 1 | ((font5[i] >> (7 - j)) & 1));
+                }
+            }
+
+            return font8;
         }
     }
 }

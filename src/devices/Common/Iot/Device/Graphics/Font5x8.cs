@@ -1,19 +1,21 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Display
+using System.Collections.Generic;
+
+namespace Iot.Device.Graphics
 {
     /// <summary>
     /// The specific PCD8544 font for Nokia 5110
     /// </summary>
-    public static class NokiaCharacters
+    internal class Font5x8 : BdfFont
     {
         /// <summary>
-        /// ASCII Font specific to the PCD8544 Nokia 5110 screen.
+        /// ASCII Font specific to the PCD8544 Nokia 5110 screen but can be used as a generic 5x8 font.
         /// Font characters are column bit mask.
         /// Font size is 5 pixels width and 8 pixels height. Each byte represent a vertical column for the character.
         /// </summary>
-        public static readonly byte[][] Ascii = new byte[][]
+        private static readonly byte[][] Ascii = new byte[][]
         {
             new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00 }, // 20
             new byte[] { 0x00, 0x00, 0x5f, 0x00, 0x00 }, // 21 !
@@ -112,5 +114,27 @@ namespace Iot.Device.Display
             new byte[] { 0x10, 0x08, 0x08, 0x10, 0x08 }, // 7e ←
             new byte[] { 0x78, 0x46, 0x41, 0x46, 0x78 }, // 7f →
         };
+
+        public Font5x8()
+        {
+            Width = 5;
+            Height = 8;
+            XDisplacement = 0;
+            YDisplacement = 0;
+            DefaultChar = 0x20;
+            CharsCount = Ascii.Length;
+            GlyphMapper = new Dictionary<int, int>();
+            GlyphUshortData = new ushort[CharsCount * Height];
+            for (int i = 0; i < CharsCount; i++)
+            {
+                var font8 = LcdCharacterEncodingFactory.ConvertFont5to8bytes(Ascii[i]);
+                for (int j = 0; j < 8; j++)
+                {
+                    GlyphUshortData[i * 8 + j] = font8[j];
+                }
+
+                GlyphMapper.Add(i + DefaultChar, i * 8);
+            }
+        }
     }
 }

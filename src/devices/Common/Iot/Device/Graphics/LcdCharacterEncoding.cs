@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Iot.Device.CharacterLcd
+namespace Iot.Device.Graphics
 {
     /// <summary>
     /// Provides the character encoding for an LCD display.

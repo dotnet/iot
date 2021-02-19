@@ -378,7 +378,7 @@ void LcdConsole()
     console.WriteLine("This has CRLF\r\nin it and should \r\n wrap.");
     console.Write("This goes to the last line of the display");
     console.WriteLine("This isn't printed, because it's off the screen");
-    Console.ReadLine();
+    Thread.Sleep(1500);
     Console.WriteLine("Autoscroll test:");
     console.LineFeedMode = LineWrapMode.Wrap;
     console.WriteLine();
@@ -398,19 +398,19 @@ void LcdConsole()
         Thread.Sleep(500);
     }
 
-    Console.ReadLine();
+    Thread.Sleep(1500);
     Console.WriteLine("Intelligent wrapping test");
     console.LineFeedMode = LineWrapMode.WordWrap;
     console.WriteLine("Now intelligent wrapping should wrap this long sentence at word borders and ommit spaces at the start of lines.");
     Console.WriteLine("Not wrappable test");
-    Console.ReadLine();
+    Thread.Sleep(1500);
     console.WriteLine("NowThisIsOneSentenceInOneWordThatCannotBeWrappedButStillAppearAllOverUpToTheEnd");
-    Console.ReadLine();
+    Thread.Sleep(1500);
     Console.WriteLine("Individual line test");
     console.Clear();
     console.LineFeedMode = LineWrapMode.Truncate;
     console.ReplaceLine(0, "This is all garbage that will be replaced");
-    console.ReplaceLine(0, "Running clock test");
+    console.ReplaceLine(0, "Running clock test, press enter to continue");
     int left = console.Size.Width;
     Task? alertTask = null;
     // Let the current time move trought the display on line 1

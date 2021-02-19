@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using Iot.Device.Display.Pcd8544Enums;
 using SixLabors.ImageSharp;
 using Iot.Device.CharacterLcd;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Display
 {
@@ -139,6 +140,20 @@ namespace Iot.Device.Display
 
         private void Initialize()
         {
+            // Load the font
+            Font5x8 font8 = new Font5x8();
+            foreach (var charac in font8.SupportedChars)
+            {
+                font8.GetCharData((char)charac, out ReadOnlySpan<ushort> charData);
+                byte[] font8Bytes = new byte[8];
+                for (int i = 0; i < 8; i++)
+                {
+                    font8Bytes[i] = (byte)charData[i];
+                }
+
+                CreateCustomCharacter(charac, font8Bytes);
+            }
+
             _bias = 4;
             _temperature = ScreenTemperature.Coefficient0;
             _contrast = 0x30;
@@ -397,22 +412,15 @@ namespace Iot.Device.Display
         private void WriteChar(char c)
         {
             Span<byte> letter = stackalloc byte[CharacterWidth];
-            bool isAdditionalFont = _font.ContainsKey(c);
-            if ((c >= 0x20 && c <= 0x7F) || isAdditionalFont)
+            bool isChar = _font.ContainsKey(c);
+            if (isChar)
             {
-                if (isAdditionalFont)
+                if (isChar)
                 {
-                    byte[] additionalFont = _font[c];
+                    byte[] font = _font[c];
                     for (int i = 0; i < CharacterWidth - 1; i++)
                     {
-                        letter[i] = additionalFont[i];
-                    }
-                }
-                else
-                {
-                    for (int i = 0; i < CharacterWidth - 1; i++)
-                    {
-                        letter[i] = NokiaCharacters.Ascii[c - 0x20][i];
+                        letter[i] = font[i];
                     }
                 }
 

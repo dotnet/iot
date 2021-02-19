@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="..\Common\Iot\Device\Graphics\BdfFont.cs" />
+    <Compile Include="..\Common\Iot\Device\Graphics\Font5x8.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,6 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd", "..\Characte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd.Samples", "..\CharacterLcd\samples\CharacterLcd.Samples.csproj", "{03985059-6DE5-4BB5-947C-70493DAC1BC9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{85E17B98-0745-407A-894B-214F25BAE20F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd.Tests", "..\CharacterLcd\tests\CharacterLcd.Tests.csproj", "{9395365B-927A-4E84-9294-AD243BB167D8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +37,14 @@ Global
 		{03985059-6DE5-4BB5-947C-70493DAC1BC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{03985059-6DE5-4BB5-947C-70493DAC1BC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{03985059-6DE5-4BB5-947C-70493DAC1BC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{85E17B98-0745-407A-894B-214F25BAE20F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{85E17B98-0745-407A-894B-214F25BAE20F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{85E17B98-0745-407A-894B-214F25BAE20F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{85E17B98-0745-407A-894B-214F25BAE20F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9395365B-927A-4E84-9294-AD243BB167D8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9395365B-927A-4E84-9294-AD243BB167D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9395365B-927A-4E84-9294-AD243BB167D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9395365B-927A-4E84-9294-AD243BB167D8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
