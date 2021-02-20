@@ -1557,6 +1557,27 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public void PrepareStringLoad(int constantSize, int stringSize)
+        {
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            lock (_synchronisationLock)
+            {
+                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                _firmataStream.WriteByte((byte)0x7F); // IL data
+                _firmataStream.WriteByte((byte)ExecutorCommand.SetConstantMemorySize);
+                SendInt32(constantSize);
+                SendInt32(stringSize);
+                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                _firmataStream.Flush();
+                WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
+            }
+        }
+
         public void SendConstant(Int32 constantToken, byte[] data)
         {
             const int packetSize = 28;
