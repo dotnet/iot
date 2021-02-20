@@ -8,7 +8,7 @@ namespace Iot.Device.Graphics
     /// <summary>
     /// The specific PCD8544 font for Nokia 5110
     /// </summary>
-    internal class Font5x8 : BdfFont
+    public class Font5x8 : BdfFont
     {
         /// <summary>
         /// ASCII Font specific to the PCD8544 Nokia 5110 screen but can be used as a generic 5x8 font.
@@ -115,6 +115,9 @@ namespace Iot.Device.Graphics
             new byte[] { 0x78, 0x46, 0x41, 0x46, 0x78 }, // 7f →
         };
 
+        /// <summary>
+        /// Constructor for Font 5x8
+        /// </summary>
         public Font5x8()
         {
             Width = 5;

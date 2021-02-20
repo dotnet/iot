@@ -7,11 +7,10 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="..\Common\Iot\Device\Graphics\BdfFont.cs" />
-    <Compile Include="..\Common\Iot\Device\Graphics\Font5x8.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <ProjectReference Include="../CharacterLcd/CharacterLcd.csproj" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
