@@ -413,6 +413,20 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Configures the sampling interval for analog input pins (when an event callback is enabled)
+        /// </summary>
+        /// <param name="timeSpan">Timespan between updates. Default ~20ms</param>
+        public void SetAnalogPinSamplingInterval(TimeSpan timeSpan)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            Firmata.SetAnalogInputSamplingInterval(timeSpan);
+        }
+
+        /// <summary>
         /// Special function to read DHT sensor, if supported
         /// </summary>
         /// <param name="pinNumber">Pin Number</param>

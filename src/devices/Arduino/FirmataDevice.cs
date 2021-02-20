@@ -28,7 +28,6 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
         private static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
-        private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
@@ -104,27 +103,6 @@ namespace Iot.Device.Arduino
                 {
                     throw new NotSupportedException("Need a read-write stream to the hardware device");
                 }
-            }
-        }
-
-        /// <summary>
-        /// Used where?
-        /// </summary>
-        private void SendString(byte command, string message)
-        {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            byte[] bytes = Encoding.Unicode.GetBytes(message);
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte(240);
-                _firmataStream.WriteByte((byte)(command & (uint)sbyte.MaxValue));
-                SendValuesAsTwo7bitBytes(bytes);
-                _firmataStream.WriteByte(247);
-                _firmataStream.Flush();
             }
         }
 
@@ -476,6 +454,98 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Send a command that does not generate a reply.
+        /// This method must only be used for commands that do not generate a reply. It must not be used if only the caller is not
+        /// interested in the answer.
+        /// </summary>
+        /// <param name="sequence">The command sequence to send</param>
+        public void SendCommand(FirmataCommandSequence sequence)
+        {
+            SendCommand(sequence, DefaultReplyTimeout);
+        }
+
+        /// <summary>
+        /// Send a command that does not generate a reply.
+        /// This method must only be used for commands that do not generate a reply. It must not be used if only the caller is not
+        /// interested in the answer.
+        /// </summary>
+        /// <param name="sequence">The command sequence to send</param>
+        /// <param name="timeout">A non-default timeout</param>
+        public void SendCommand(FirmataCommandSequence sequence, TimeSpan timeout)
+        {
+            if (!sequence.Validate())
+            {
+                throw new ArgumentException("The command sequence is invalid", nameof(sequence));
+            }
+
+            lock (_synchronisationLock)
+            {
+                if (_firmataStream == null)
+                {
+                    throw new ObjectDisposedException(nameof(FirmataDevice));
+                }
+
+                // Use an explicit iteration, avoids a memory allocation here
+                for (int i = 0; i < sequence.Sequence.Count; i++)
+                {
+                    _firmataStream.WriteByte(sequence.Sequence[i]);
+                }
+
+                _firmataStream.Flush();
+            }
+        }
+
+        /// <summary>
+        /// Send a command and wait for a reply
+        /// </summary>
+        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
+        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
+        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
+        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence)
+        {
+            return SendCommandAndWait(sequence, DefaultReplyTimeout);
+        }
+
+        /// <summary>
+        /// Send a command and wait for a reply
+        /// </summary>
+        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
+        /// <param name="timeout">A non-default timeout</param>
+        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
+        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
+        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
+        {
+            if (!sequence.Validate())
+            {
+                throw new ArgumentException("The command sequence is invalid", nameof(sequence));
+            }
+
+            lock (_synchronisationLock)
+            {
+                if (_firmataStream == null)
+                {
+                    throw new ObjectDisposedException(nameof(FirmataDevice));
+                }
+
+                _dataReceived.Reset();
+                // Use an explicit iteration, avoids a memory allocation here
+                for (int i = 0; i < sequence.Sequence.Count; i++)
+                {
+                    _firmataStream.WriteByte(sequence.Sequence[i]);
+                }
+
+                _firmataStream.Flush();
+                bool result = _dataReceived.WaitOne(timeout);
+                if (result == false)
+                {
+                    throw new TimeoutException("Timeout waiting for command answer");
+                }
+
+                return new List<byte>(_lastResponse);
+            }
+        }
+
+        /// <summary>
         /// Replaces the first occurrence of search in input with replace.
         /// </summary>
         private static string ReplaceFirst(String input, string search, string replace)
@@ -609,12 +679,12 @@ namespace Iot.Device.Arduino
             throw new TimeoutException("Timeout waiting for firmata version");
         }
 
-        public Version QuerySupportedFirmataVersion()
+        internal Version QuerySupportedFirmataVersion()
         {
             return new Version(FIRMATA_PROTOCOL_MAJOR_VERSION, FIRMATA_PROTOCOL_MINOR_VERSION);
         }
 
-        public Version QueryFirmwareVersion(out string firmwareName)
+        internal Version QueryFirmwareVersion(out string firmwareName)
         {
             if (_firmataStream == null)
             {
@@ -644,7 +714,7 @@ namespace Iot.Device.Arduino
             throw new TimeoutException("Timeout waiting for firmata firmware version");
         }
 
-        public void QueryCapabilities()
+        internal void QueryCapabilities()
         {
             if (_firmataStream == null)
             {
@@ -705,22 +775,14 @@ namespace Iot.Device.Arduino
             throw new TimeoutException("Timeout waiting for answer. Aborting. ", lastException);
         }
 
-        public void SetPinMode(int pin, SupportedMode firmataMode)
+        internal void SetPinMode(int pin, SupportedMode firmataMode)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
+            FirmataCommandSequence s = new FirmataCommandSequence(FirmataCommand.SET_PIN_MODE);
+            s.WriteByte((byte)pin);
+            s.WriteByte((byte)firmataMode);
             for (int i = 0; i < 3; i++)
             {
-                lock (_synchronisationLock)
-                {
-                    _firmataStream.WriteByte((byte)FirmataCommand.SET_PIN_MODE);
-                    _firmataStream.WriteByte((byte)pin);
-                    _firmataStream.WriteByte((byte)firmataMode);
-                    _firmataStream.Flush();
-                }
+                SendCommand(s);
 
                 if (GetPinMode(pin) == firmataMode)
                 {
@@ -731,51 +793,38 @@ namespace Iot.Device.Arduino
             throw new TimeoutException($"Unable to set Pin mode to {firmataMode}. Looks like a communication problem.");
         }
 
-        public SupportedMode GetPinMode(int pinNumber)
+        internal SupportedMode GetPinMode(int pinNumber)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
+            FirmataCommandSequence getPinModeSequence = new FirmataCommandSequence(FirmataCommand.START_SYSEX);
+            getPinModeSequence.WriteByte((byte)FirmataSysexCommand.PIN_STATE_QUERY);
+            getPinModeSequence.WriteByte((byte)pinNumber);
+            getPinModeSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
 
             return PerformRetries(3, () =>
             {
-                lock (_synchronisationLock)
+                var response = SendCommandAndWait(getPinModeSequence);
+
+                // The mode is byte 4
+                if (response.Count < 4)
                 {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.PIN_STATE_QUERY);
-                    _firmataStream.WriteByte((byte)pinNumber);
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-                    bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
-                    if (result == false)
-                    {
-                        throw new TimeoutException("Timeout waiting for pin mode.");
-                    }
-
-                    // The mode is byte 4
-                    if (_lastResponse.Count < 4)
-                    {
-                        throw new InvalidOperationException("Not enough data in reply");
-                    }
-
-                    if (_lastResponse[1] != pinNumber)
-                    {
-                        throw new InvalidOperationException(
-                            "The reply didn't match the query (another port was indicated)");
-                    }
-
-                    SupportedMode mode = (SupportedMode)(_lastResponse[2]);
-                    return mode;
+                    throw new InvalidOperationException("Not enough data in reply");
                 }
+
+                if (response[1] != pinNumber)
+                {
+                    throw new InvalidOperationException(
+                        "The reply didn't match the query (another port was indicated)");
+                }
+
+                SupportedMode mode = (SupportedMode)(response[2]);
+                return mode;
             });
         }
 
         /// <summary>
         /// Enables digital pin reporting for all ports (one port has 8 pins)
         /// </summary>
-        public void EnableDigitalReporting()
+        internal void EnableDigitalReporting()
         {
             if (_firmataStream == null)
             {
@@ -802,134 +851,115 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void WriteDigitalPin(int pin, PinValue value)
+        internal void WriteDigitalPin(int pin, PinValue value)
         {
             if (_firmataStream == null)
             {
                 throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.SET_DIGITAL_VALUE);
-                _firmataStream.WriteByte((byte)pin);
-                _firmataStream.WriteByte((byte)(value == PinValue.High ? 1 : 0));
-                _firmataStream.Flush();
-            }
+            FirmataCommandSequence writeDigitalPin = new FirmataCommandSequence(FirmataCommand.SET_DIGITAL_VALUE);
+            writeDigitalPin.WriteByte((byte)pin);
+            writeDigitalPin.WriteByte(value == PinValue.High ? 1 : 0);
+
+            SendCommand(writeDigitalPin);
         }
 
         public void SendI2cConfigCommand()
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                // The command is mandatory, even if the argument is typically ignored
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.I2C_CONFIG);
-                _firmataStream.WriteByte(0);
-                _firmataStream.WriteByte(0);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-            }
+            FirmataCommandSequence i2cConfigCommand = new();
+            i2cConfigCommand.WriteByte((byte)FirmataSysexCommand.I2C_CONFIG);
+            i2cConfigCommand.WriteByte(0);
+            i2cConfigCommand.WriteByte(0);
+            i2cConfigCommand.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(i2cConfigCommand);
         }
 
         public void WriteReadI2cData(int slaveAddress,  ReadOnlySpan<byte> writeData, Span<byte> replyData)
         {
-            if (_firmataStream == null)
+            // See documentation at https://github.com/firmata/protocol/blob/master/i2c.md
+            FirmataCommandSequence i2cSequence = new FirmataCommandSequence();
+            bool doWait = false;
+            if (writeData != null && writeData.Length > 0)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
+                i2cSequence.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
+                i2cSequence.WriteByte((byte)slaveAddress);
+                i2cSequence.WriteByte(0); // Write flag is 0, all other bits as well
+                i2cSequence.AddValuesAsTwo7bitBytes(writeData);
+                i2cSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             }
 
-            // See documentation at https://github.com/firmata/protocol/blob/master/i2c.md
-            lock (_synchronisationLock)
+            if (replyData != null && replyData.Length > 0)
             {
-                if (writeData != null && writeData.Length > 0)
+                doWait = true;
+                if (i2cSequence.Length > 1)
                 {
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
-                    _firmataStream.WriteByte((byte)slaveAddress);
-                    _firmataStream.WriteByte(0); // Write flag is 0, all other bits as well
-                    SendValuesAsTwo7bitBytes(writeData);
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
+                    // If the above block was executed, we have to insert another START_SYSEX, otherwise it's already there
+                    i2cSequence.WriteByte((byte)FirmataCommand.START_SYSEX);
                 }
 
-                if (replyData != null && replyData.Length > 0)
+                i2cSequence.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
+                i2cSequence.WriteByte((byte)slaveAddress);
+                i2cSequence.WriteByte(0b1000); // Read flag is 1, all other bits are 0
+                byte length = (byte)replyData.Length;
+                // Only write the length of the expected data.
+                // We could insert the register to read here, but we assume that has been written already (the client is responsible for that)
+                i2cSequence.WriteByte((byte)(length & (uint)sbyte.MaxValue));
+                i2cSequence.WriteByte((byte)(length >> 7 & sbyte.MaxValue));
+                i2cSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            }
+
+            if (doWait)
+            {
+                var response = SendCommandAndWait(i2cSequence);
+
+                if (response[0] != (byte)FirmataSysexCommand.I2C_REPLY)
                 {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
-                    _firmataStream.WriteByte((byte)slaveAddress);
-                    _firmataStream.WriteByte(0b1000); // Read flag is 1, all other bits are 0
-                    byte length = (byte)replyData.Length;
-                    // Only write the length of the expected data.
-                    // We could insert the register to read here, but we assume that has been written already (the client is responsible for that)
-                    _firmataStream.WriteByte((byte)(length & (uint)sbyte.MaxValue));
-                    _firmataStream.WriteByte((byte)(length >> 7 & sbyte.MaxValue));
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-                    bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
-                    if (result == false)
-                    {
-                        throw new TimeoutException("Timeout waiting for device reply");
-                    }
-
-                    if (_lastResponse[0] != (byte)FirmataSysexCommand.I2C_REPLY)
-                    {
-                        throw new IOException("Firmata protocol error: received incorrect query response");
-                    }
-
-                    if (_lastResponse[1] != (byte)slaveAddress && slaveAddress != 0)
-                    {
-                        throw new IOException($"Firmata protocol error: The wrong device did answer. Expected {slaveAddress} but got {_lastResponse[1]}.");
-                    }
-
-                    // Byte 0: I2C_REPLY
-                    // Bytes 1 & 2: Slave address (the MSB is always 0, since we're only supporting 7-bit addresses)
-                    // Bytes 3 & 4: Register. Often 0, and probably not needed
-                    // Anything after that: reply data, with 2 bytes for each byte in the data stream
-                    int bytesReceived = ReassembleByteString(_lastResponse, 5, _lastResponse.Count - 5, replyData);
-
-                    if (replyData.Length != bytesReceived)
-                    {
-                        throw new IOException($"Expected {replyData.Length} bytes, got only {bytesReceived}");
-                    }
+                    throw new IOException("Firmata protocol error: received incorrect query response");
                 }
+
+                if (response[1] != (byte)slaveAddress && slaveAddress != 0)
+                {
+                    throw new IOException($"Firmata protocol error: The wrong device did answer. Expected {slaveAddress} but got {response[1]}.");
+                }
+
+                // Byte 0: I2C_REPLY
+                // Bytes 1 & 2: Slave address (the MSB is always 0, since we're only supporting 7-bit addresses)
+                // Bytes 3 & 4: Register. Often 0, and probably not needed
+                // Anything after that: reply data, with 2 bytes for each byte in the data stream
+                int bytesReceived = ReassembleByteString(response, 5, response.Count - 5, replyData);
+
+                if (replyData.Length != bytesReceived)
+                {
+                    throw new IOException($"Expected {replyData.Length} bytes, got only {bytesReceived}");
+                }
+            }
+            else
+            {
+                SendCommand(i2cSequence);
             }
         }
 
         public void SetPwmChannel(int pin, double dutyCycle)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.EXTENDED_ANALOG);
-                _firmataStream.WriteByte((byte)pin);
-                // The arduino expects values between 0 and 255 for PWM channels.
-                // The frequency cannot be set.
-                int pwmMaxValue = _supportedPinConfigurations[pin].PwmResolutionBits; // This is 8 for most arduino boards
-                pwmMaxValue = (1 << pwmMaxValue) - 1;
-                int value = (int)Math.Max(0, Math.Min(dutyCycle * pwmMaxValue, pwmMaxValue));
-                _firmataStream.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
-                _firmataStream.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bit (rest unused)
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-            }
+            FirmataCommandSequence pwmCommandSequence = new();
+            pwmCommandSequence.WriteByte((byte)FirmataSysexCommand.EXTENDED_ANALOG);
+            pwmCommandSequence.WriteByte((byte)pin);
+            // The arduino expects values between 0 and 255 for PWM channels.
+            // The frequency cannot be set.
+            int pwmMaxValue = _supportedPinConfigurations[pin].PwmResolutionBits; // This is 8 for most arduino boards
+            pwmMaxValue = (1 << pwmMaxValue) - 1;
+            int value = (int)Math.Max(0, Math.Min(dutyCycle * pwmMaxValue, pwmMaxValue));
+            pwmCommandSequence.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
+            pwmCommandSequence.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bit (rest unused)
+            pwmCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(pwmCommandSequence);
         }
 
         /// <summary>
         /// This takes the pin number in Arduino's own Analog numbering scheme. So A0 shall be specifed as 0
         /// </summary>
-        public void EnableAnalogReporting(int pinNumber)
+        internal void EnableAnalogReporting(int pinNumber)
         {
             if (_firmataStream == null)
             {
@@ -944,7 +974,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void DisableAnalogReporting(int pinNumber)
+        internal void DisableAnalogReporting(int pinNumber)
         {
             if (_firmataStream == null)
             {
@@ -960,212 +990,141 @@ namespace Iot.Device.Arduino
 
         public void EnableSpi()
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
-                _firmataStream.WriteByte((byte)FirmataSpiCommand.SPI_BEGIN);
-                _firmataStream.WriteByte((byte)0);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-            }
+            FirmataCommandSequence enableSpi = new();
+            enableSpi.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
+            enableSpi.WriteByte((byte)FirmataSpiCommand.SPI_BEGIN);
+            enableSpi.WriteByte((byte)0);
+            enableSpi.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(enableSpi);
         }
 
         public void DisableSpi()
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
-                _firmataStream.WriteByte((byte)FirmataSpiCommand.SPI_END);
-                _firmataStream.WriteByte((byte)0);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-            }
+            FirmataCommandSequence disableSpi = new();
+            disableSpi.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
+            disableSpi.WriteByte((byte)FirmataSpiCommand.SPI_END);
+            disableSpi.WriteByte((byte)0);
+            disableSpi.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(disableSpi);
         }
 
         public void SpiWrite(int csPin, ReadOnlySpan<byte> writeBytes)
         {
-            lock (_synchronisationLock)
-            {
-                SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE, writeBytes);
-            }
+            // When the command is SPI_WRITE, the device answer is already discarded in the firmware.
+            var command = SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE, writeBytes, out _);
+            SendCommand(command);
         }
 
         public void SpiTransfer(int csPin, ReadOnlySpan<byte> writeBytes, Span<byte> readBytes)
         {
-            lock (_synchronisationLock)
+            var command = SpiWrite(csPin, FirmataSpiCommand.SPI_TRANSFER, writeBytes, out byte requestId);
+            var response = SendCommandAndWait(command);
+
+            if (response[0] != (byte)FirmataSysexCommand.SPI_DATA || response[1] != (byte)FirmataSpiCommand.SPI_REPLY)
             {
-                _dataReceived.Reset();
-                byte requestId = SpiWrite(csPin, FirmataSpiCommand.SPI_TRANSFER, writeBytes);
-                bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
-                if (result == false)
-                {
-                    throw new TimeoutException("Timeout waiting for device reply");
-                }
-
-                if (_lastResponse[0] != (byte)FirmataSysexCommand.SPI_DATA || _lastResponse[1] != (byte)FirmataSpiCommand.SPI_REPLY)
-                {
-                    throw new IOException("Firmata protocol error: received incorrect query response");
-                }
-
-                if (_lastResponse[3] != (byte)requestId)
-                {
-                    throw new IOException($"Firmata protocol sequence error.");
-                }
-
-                ReassembleByteString(_lastResponse, 5, _lastResponse[4] * 2, readBytes);
+                throw new IOException("Firmata protocol error: received incorrect query response");
             }
+
+            if (response[3] != (byte)requestId)
+            {
+                throw new IOException($"Firmata protocol sequence error.");
+            }
+
+            ReassembleByteString(response, 5, response[4] * 2, readBytes);
         }
 
-        private byte SpiWrite(int csPin, FirmataSpiCommand command, ReadOnlySpan<byte> writeBytes)
+        private FirmataCommandSequence SpiWrite(int csPin, FirmataSpiCommand command, ReadOnlySpan<byte> writeBytes, out byte requestId)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
+            requestId = (byte)(_lastRequestId++ & 0x7F);
 
-            byte requestId = (byte)(_lastRequestId++ & 0x7F);
-            _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-            _firmataStream.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
-            _firmataStream.WriteByte((byte)command);
-            _firmataStream.WriteByte((byte)(csPin << 3)); // Device ID / channel
-            _firmataStream.WriteByte(requestId);
-            _firmataStream.WriteByte(1); // Deselect CS after transfer (yes)
-            _firmataStream.WriteByte((byte)writeBytes.Length);
-            SendValuesAsTwo7bitBytes(writeBytes);
-            _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-            return requestId;
+            FirmataCommandSequence spiCommand = new();
+            spiCommand.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
+            spiCommand.WriteByte((byte)command);
+            spiCommand.WriteByte((byte)(csPin << 3)); // Device ID / channel
+            spiCommand.WriteByte(requestId);
+            spiCommand.WriteByte(1); // Deselect CS after transfer (yes)
+            spiCommand.WriteByte((byte)writeBytes.Length);
+            spiCommand.AddValuesAsTwo7bitBytes(writeBytes);
+            spiCommand.WriteByte((byte)FirmataCommand.END_SYSEX);
+            return spiCommand;
         }
 
-        public void SetSamplingInterval(TimeSpan interval)
+        public void SetAnalogInputSamplingInterval(TimeSpan interval)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
             int millis = (int)interval.TotalMilliseconds;
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SAMPLING_INTERVAL);
-                int value = millis;
-                _firmataStream.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
-                _firmataStream.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bits
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-            }
+            FirmataCommandSequence seq = new();
+            seq.WriteByte((byte)FirmataSysexCommand.SAMPLING_INTERVAL);
+            int value = millis;
+            seq.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
+            seq.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bits
+            seq.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(seq);
         }
 
         public void ConfigureSpiDevice(SpiConnectionSettings connectionSettings)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
             if (connectionSettings.ChipSelectLine >= 15)
             {
-                // this is currently because we derive the device id from the CS line, and that one has only 4 bits
+                // this limit is currently required because we derive the device id from the CS line, and that one has only 4 bits
                 throw new NotSupportedException("Only pins <=15 are allowed as CS line");
             }
 
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
-                _firmataStream.WriteByte((byte)FirmataSpiCommand.SPI_DEVICE_CONFIG);
-                byte deviceIdChannel = (byte)(connectionSettings.ChipSelectLine << 3);
-                _firmataStream.WriteByte((byte)(deviceIdChannel));
-                _firmataStream.WriteByte((byte)1);
-                int clockSpeed = 1_000_000; // Hz
-                _firmataStream.WriteByte((byte)(clockSpeed & 0x7F));
-                _firmataStream.WriteByte((byte)((clockSpeed >> 7) & 0x7F));
-                _firmataStream.WriteByte((byte)((clockSpeed >> 15) & 0x7F));
-                _firmataStream.WriteByte((byte)((clockSpeed >> 22) & 0x7F));
-                _firmataStream.WriteByte((byte)((clockSpeed >> 29) & 0x7F));
-                _firmataStream.WriteByte(0); // Word size (default = 8)
-                _firmataStream.WriteByte(1); // Default CS pin control (enable)
-                _firmataStream.WriteByte((byte)(connectionSettings.ChipSelectLine));
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-            }
+            FirmataCommandSequence spiConfigSequence = new();
+            spiConfigSequence.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
+            spiConfigSequence.WriteByte((byte)FirmataSpiCommand.SPI_DEVICE_CONFIG);
+            byte deviceIdChannel = (byte)(connectionSettings.ChipSelectLine << 3);
+            spiConfigSequence.WriteByte((byte)(deviceIdChannel));
+            spiConfigSequence.WriteByte((byte)1);
+            int clockSpeed = 1_000_000; // Hz
+            spiConfigSequence.WriteByte((byte)(clockSpeed & 0x7F));
+            spiConfigSequence.WriteByte((byte)((clockSpeed >> 7) & 0x7F));
+            spiConfigSequence.WriteByte((byte)((clockSpeed >> 15) & 0x7F));
+            spiConfigSequence.WriteByte((byte)((clockSpeed >> 22) & 0x7F));
+            spiConfigSequence.WriteByte((byte)((clockSpeed >> 29) & 0x7F));
+            spiConfigSequence.WriteByte(0); // Word size (default = 8)
+            spiConfigSequence.WriteByte(1); // Default CS pin control (enable)
+            spiConfigSequence.WriteByte((byte)(connectionSettings.ChipSelectLine));
+            spiConfigSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(spiConfigSequence);
         }
 
         public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
             temperature = default;
             humidity = default;
-            lock (_synchronisationLock)
+
+            FirmataCommandSequence dhtCommandSequence = new();
+            dhtCommandSequence.WriteByte((byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST);
+            dhtCommandSequence.WriteByte((byte)dhtType);
+            dhtCommandSequence.WriteByte((byte)pinNumber);
+            dhtCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            var reply = SendCommandAndWait(dhtCommandSequence);
+
+            // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
+            if (reply.Count < 7)
             {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST);
-                _firmataStream.WriteByte((byte)dhtType);
-                _firmataStream.WriteByte((byte)pinNumber);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-
-                bool result = _dataReceived.WaitOne(DefaultReplyTimeout);
-                if (result == false)
-                {
-                    throw new TimeoutException("Timeout waiting for device reply");
-                }
-
-                // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
-                if (_lastResponse.Count < 7)
-                {
-                    return false;
-                }
-
-                if (_lastResponse[0] != (byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST && _lastResponse[1] != 0)
-                {
-                    return false;
-                }
-
-                int t = _lastResponse[3] | _lastResponse[4] << 7;
-                int h = _lastResponse[5] | _lastResponse[6] << 7;
-
-                temperature = Temperature.FromDegreesCelsius(t / 10.0);
-                humidity = RelativeHumidity.FromPercent(h / 10.0);
+                return false;
             }
+
+            if (reply[0] != (byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST && reply[1] != 0)
+            {
+                return false;
+            }
+
+            int t = reply[3] | reply[4] << 7;
+            int h = reply[5] | reply[6] << 7;
+
+            temperature = Temperature.FromDegreesCelsius(t / 10.0);
+            humidity = RelativeHumidity.FromPercent(h / 10.0);
 
             return true;
         }
 
-        public uint GetAnalogRawValue(int pinNumber)
+        internal uint GetAnalogRawValue(int pinNumber)
         {
             lock (_lastAnalogValueLock)
             {
                 return _lastAnalogValues[pinNumber];
-            }
-        }
-
-        private void SendValuesAsTwo7bitBytes(ReadOnlySpan<byte> values)
-        {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                _firmataStream.WriteByte((byte)(values[i] & (uint)sbyte.MaxValue));
-                _firmataStream.WriteByte((byte)(values[i] >> 7 & sbyte.MaxValue));
             }
         }
 

@@ -299,7 +299,7 @@ namespace Arduino.Samples
         {
             int analogPin = GetAnalogPin1(board);
             var analogController = board.CreateAnalogController(0);
-
+            board.SetAnalogPinSamplingInterval(TimeSpan.FromMilliseconds(10));
             var pin = analogController.OpenPin(analogPin);
             pin.EnableAnalogValueChangedEvent(null, 0);
 
