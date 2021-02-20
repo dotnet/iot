@@ -169,12 +169,26 @@ namespace Iot.Device.Arduino
             }
 
             _compiler.SendConstants(converted);
+            int totalStringSize = CalculateTotalStringSize(_strings);
+            _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
             _compiler.SendConstants(_strings.ToList());
 
             MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
             // Execute all static ctors
             _compiler.ExecuteStaticCtors(this);
+        }
+
+        private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString)> strings)
+        {
+            int totalSize = sizeof(int); // we need a trailing empty entry
+            foreach (var elem in strings)
+            {
+                totalSize += sizeof(int);
+                totalSize += elem.EncodedString.Length;
+            }
+
+            return totalSize;
         }
 
         public ArduinoTask GetTaskForMethod<T>(T mainEntryPoint)

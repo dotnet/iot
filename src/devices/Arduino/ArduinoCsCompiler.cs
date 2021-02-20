@@ -31,6 +31,8 @@ namespace Iot.Device.Arduino
         CheckFlashVersion = 14,
         EraseFlash = 15,
 
+        SetConstantMemorySize = 16,
+
         Nack = 0x7e,
         Ack = 0x7f,
     }
@@ -461,6 +463,7 @@ namespace Iot.Device.Arduino
             // Add this first, so we break the recursion to this class further down
             var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
             set.AddClass(newClass);
+            _board.Log($"Class {newClass.Name} added to the execution with token 0x{newClass.NewToken:X}");
             foreach (var iface in interfaces)
             {
                 PrepareClassDeclaration(set, iface);
@@ -732,6 +735,11 @@ namespace Iot.Device.Arduino
                     CopyToFlash();
                 }
             }
+        }
+
+        public void PrepareStringLoad(int constantSize, int stringSize)
+        {
+            _board.Firmata.PrepareStringLoad(constantSize, stringSize);
         }
 
         public void SendConstants(IList<(int Token, byte[] InitializerData)> constElements)
@@ -1391,6 +1399,9 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
                 exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
+                // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
+                exec.SuppressType(typeof(ArduinoBoard));
+                exec.SuppressType(typeof(ArduinoCsCompiler));
                 foreach (string compilerSettingsAdditionalSuppression in compilerSettings.AdditionalSuppressions)
                 {
                     exec.SuppressType(compilerSettingsAdditionalSuppression);
