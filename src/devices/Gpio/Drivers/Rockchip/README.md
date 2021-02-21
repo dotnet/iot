@@ -74,7 +74,7 @@ PinValue value = gpio.Read(pinNumber);
         MapPinNumber(2, 'A', 2), MapPinNumber(3, 'A', 4), -1, MapPinNumber(3, 'A', 6)
     };
 
-    protected override int PinCount => _pinNumberConverter.Count(n => n != -1);
+    protected override int PinCount => 5;
 
     protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
     {
