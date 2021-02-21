@@ -17,9 +17,9 @@ Benchmarking with **Orange Pi Zero**. The operating system is Armbian, Linux ker
 
 | Drivers | Library Version | Average Frequency |  |
 | :-: | :-: | :-: | :-: |
-| SunxiDrivers | - | 185 KHz | <img src="imgs/SunxiDriver/sunxi.jpg" height="100"/> |
-| SysFsDrivers | System.Device.Gpio 1.3.0 | 692 Hz | <img src="imgs/SunxiDriver/sysfs.jpg" height="100"/> |
-| LibGpiodDrivers | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | 81 KHz | <img src="imgs/SunxiDriver/libgpiod.jpg" height="100"/> |
+| SunxiDriver | - | 185 KHz | <img src="imgs/SunxiDriver/sunxi.jpg" height="120"/> |
+| SysFsDriver | System.Device.Gpio 1.3.0 | 692 Hz | <img src="imgs/SunxiDriver/sysfs.jpg" height="120"/> |
+| LibGpiodDriver | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | 81 KHz | <img src="imgs/SunxiDriver/libgpiod.jpg" height="120"/> |
 
 ### RockchipDriver
 
@@ -27,6 +27,6 @@ Benchmarking with **Orange Pi 4**. The operating system is Armbian, Linux kernel
 
 | Drivers | Library Version | Average Frequency |  |
 | :-: | :-: | :-: | :-: |
-| RockchipDrivers | - | 426 KHz | <img src="imgs/RockchipDriver/rockchip.jpg" height="100"/> |
-| SysFsDrivers | System.Device.Gpio 1.3.0 | 3.99 KHz | <img src="imgs/RockchipDriver/sysfs.jpg" height="100"/> |
-| LibGpiodDrivers | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | Unable to test due to segment fault | - |
+| RockchipDriver | - | 426 KHz | <img src="imgs/RockchipDriver/rockchip.jpg" height="120"/> |
+| SysFsDriver | System.Device.Gpio 1.3.0 | 3.99 KHz | <img src="imgs/RockchipDriver/sysfs.jpg" height="120"/> |
+| LibGpiodDriver | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | Unable to test due to segment fault | - |
