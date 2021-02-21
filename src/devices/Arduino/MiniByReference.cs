@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
+    /// <summary>
+    /// This class is here for reference. The actual implementation is directly in the runtime.
+    /// </summary>
     // [ArduinoReplacement("System.ByReference<T>", "System.Private.CoreLib.dll", false)]
     internal ref struct MiniByReference<T>
     {

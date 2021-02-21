@@ -105,14 +105,16 @@ namespace Iot.Device.Arduino
                     {
                         stackTrace.RemoveRange(0, idx + 1);
                         stackTrace.Reverse();
-                        foreach (var m in stackTrace)
+                        for (var index = 0; index < stackTrace.Count - 1; index += 2)
                         {
+                            var methodToken = stackTrace[index + 1]; // Because of the above reversal, the token is second
+                            var pc = stackTrace[index];
                             // this can be the same as above (if the error is within the given method), but not
                             // necessarily, since the outer token can point to whatever did not work
-                            var resolved2 = set.InverseResolveToken(m);
+                            var resolved2 = set.InverseResolveToken(methodToken);
                             if (resolved2 != null)
                             {
-                                textualStackTrace += $" at {resolved2.DeclaringType} - {resolved2}\r\n";
+                                textualStackTrace += $" at {resolved2.DeclaringType} - {resolved2} Instruction 0x{pc:X4}\r\n";
                             }
                         }
                     }

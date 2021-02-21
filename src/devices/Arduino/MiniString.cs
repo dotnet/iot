@@ -110,7 +110,7 @@ namespace Iot.Device.Arduino
             char[] chars = new char[value.Length];
             for (int i = 0; i < value.Length; i++)
             {
-                chars[i] = value[i];
+                chars[i] = value.GetElem(i);
             }
 
             Span<char> s = new Span<char>(chars, 0, value.Length);

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -328,8 +329,8 @@ namespace Iot.Device.Arduino
                             methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => MethodsHaveSameSignature(x, m) || AreSameOperatorMethods(x, m));
                             if (methodToReplace == null)
                             {
-                                // That may be ok if it is our own internal implementation
-                                _board.Log($"A replacement method has nothing to replace: {m.DeclaringType} - {m}");
+                                // That may be ok if it is our own internal implementation, but for now we abort, since we currently have no such case
+                                throw new InvalidOperationException($"A replacement method has nothing to replace: {m.DeclaringType} - {m}");
                             }
                             else
                             {
@@ -778,7 +779,7 @@ namespace Iot.Device.Arduino
             foreach (var me in uploadList)
             {
                 MethodBase methodInfo = me.MethodBase;
-                _board.Log($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo.Name}.");
+                _board.Log($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo}.");
                 SendMethod(set, me);
                 idx++;
                 if (set.CompilerSettings.UseFlash && (idx % 100 == 0) && markAsReadOnly)
@@ -1251,7 +1252,10 @@ namespace Iot.Device.Arduino
         /// Returns true if the given method shall be internalized (has a native implementation on the arduino)
         /// </summary>
         internal static bool HasArduinoImplementationAttribute(MethodBase method,
-            out ArduinoImplementationAttribute? attribute)
+#if NET5_0
+        [NotNullWhen(true)]
+#endif
+        out ArduinoImplementationAttribute attribute)
         {
             var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
             ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
@@ -1261,7 +1265,7 @@ namespace Iot.Device.Arduino
                 return true;
             }
 
-            attribute = null;
+            attribute = null!;
             return false;
         }
 
@@ -1272,7 +1276,11 @@ namespace Iot.Device.Arduino
             return attribs.Any();
         }
 
-        internal static bool HasReplacementAttribute(Type type, out ArduinoReplacementAttribute? attribute)
+        internal static bool HasReplacementAttribute(Type type,
+#if NET5_0
+            [NotNullWhen(true)]
+#endif
+            out ArduinoReplacementAttribute attribute)
         {
             var repl = type.GetCustomAttribute<ArduinoReplacementAttribute>();
             if (repl != null)

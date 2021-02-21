@@ -14,5 +14,14 @@ namespace Iot.Device.Arduino
         {
             return false;
         }
+
+        public static DateTime UtcNow
+        {
+            [ArduinoImplementation(NativeMethod.DateTimeUtcNow)]
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 }

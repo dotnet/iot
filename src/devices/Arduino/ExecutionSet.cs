@@ -845,7 +845,20 @@ namespace Iot.Device.Arduino
         internal MethodBase? GetReplacement(MethodBase original)
         {
             // Odd: I'm pretty sure that previously equality on MethodBase instances worked, but for some reason not all instances pointing to the same method are Equal().
-            var elem = _methodsReplaced.FirstOrDefault(x => AreMethodsIdentical(x.Item1, original));
+            var elem = _methodsReplaced.FirstOrDefault(x =>
+            {
+                if (x.Item2 != null && ArduinoCsCompiler.HasArduinoImplementationAttribute(x.Item2, out var attrib) && attrib.IgnoreGenericTypes)
+                {
+                    // There are only very few methods with the IgnoreGenericTypes attribute. Therefore a simple test is enough
+                    if (x.Item1.Name == original.Name && ArduinoCsCompiler.HasReplacementAttribute(x.Item2.DeclaringType!, out var replacementAttribute)
+                                                      && replacementAttribute.TypeToReplace == original.DeclaringType)
+                    {
+                        return true;
+                    }
+                }
+
+                return AreMethodsIdentical(x.Item1, original);
+            });
             ////var elemTest = _methodsReplaced.FirstOrDefault(x => ReferenceEquals(x.Item1, original));
             ////if (!ReferenceEquals(elem.Item1, elemTest.Item1))
             ////{

@@ -138,5 +138,9 @@ namespace Iot.Device.Arduino
         InterlockedExchangeAdd,
 
         DelegateInternalEqualTypes,
+
+        DateTimeUtcNow,
+
+        MemoryMarshalGetArrayDataReference
     }
 }
