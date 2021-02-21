@@ -12,6 +12,7 @@ using System.Device.I2c;
 using System.Device.Pwm;
 using System.Device.Spi;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Ports;
 using System.Threading;
@@ -82,9 +83,9 @@ namespace Iot.Device.Arduino
         /// <returns>True on success, false if no board was found</returns>
         public static bool TryFindBoard(IEnumerable<string> comPorts, IEnumerable<int> baudRates,
 #if !NETCOREAPP2_1
-            [NotNullWhen(True)]
+            [NotNullWhen(true)]
 #endif
-            out ArduinoBoard board)
+            out ArduinoBoard? board)
         {
             foreach (var port in comPorts)
             {
@@ -122,7 +123,7 @@ namespace Iot.Device.Arduino
 #if !NETCOREAPP2_1
             [NotNullWhen(true)]
 #endif
-            out ArduinoBoard board)
+            out ArduinoBoard? board)
         {
             return TryFindBoard(SerialPort.GetPortNames(), CommonBaudRates(), out board);
         }
