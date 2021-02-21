@@ -16,7 +16,6 @@ namespace Iot.Device.Arduino
     {
         private readonly ArduinoBoard _board;
         private readonly IReadOnlyList<SupportedPinConfiguration> _supportedPinConfigurations;
-        private readonly Dictionary<int, ValueChangedEventHandler> _callbacks;
 
         public ArduinoAnalogController(ArduinoBoard board,
             IReadOnlyList<SupportedPinConfiguration> supportedPinConfigurations, PinNumberingScheme scheme)
@@ -24,7 +23,6 @@ namespace Iot.Device.Arduino
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));
             _supportedPinConfigurations = supportedPinConfigurations ?? throw new ArgumentNullException(nameof(supportedPinConfigurations));
-            _callbacks = new Dictionary<int, ValueChangedEventHandler>();
             PinCount = _supportedPinConfigurations.Count;
 
             // Note: While the Arduino does have an external analog input reference pin, Firmata doesn't allow configuring it.
@@ -69,7 +67,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            throw new InvalidOperationException($"Pin A{logicalPinNumber} is not existing");
+            throw new InvalidOperationException($"Pin A{logicalPinNumber} does not exist");
         }
 
         public override bool SupportsAnalogInput(int pinNumber)
@@ -90,12 +88,6 @@ namespace Iot.Device.Arduino
         public override void ClosePin(AnalogInputPin pin)
         {
             _board.Firmata.DisableAnalogReporting(pin.PinNumber);
-        }
-
-        protected override void Dispose(bool disposing)
-        {
-            _callbacks.Clear();
-            base.Dispose(disposing);
         }
     }
 }
