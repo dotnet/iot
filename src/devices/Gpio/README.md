@@ -24,11 +24,11 @@ Benchmarking with **Orange Pi Zero**, select GPIO 6 (Logical). The operating sys
 
 ### RockchipDriver
 
-Benchmarking with **Orange Pi 4**, select GPIO 150 (Logical). The operating system is Armbian bullseye, Linux kernel version is 4.4.213, and .NET version is 5.0.3.
+Benchmarking with **Orange Pi 4**, select GPIO 150 (Logical). The operating system is Armbian buster, Linux kernel version is 5.10.16, and .NET version is 5.0.3.
 
 | Drivers| Language | Library Version | Average Frequency |  |
 | :-: | :-: | :-: | :-: | :-: |
 | RockchipDriver | C# | - | 516 KHz | <img src="imgs/RockchipDriver/rockchip.jpg" height="120"/> |
 | SysFsDriver | C# | System.Device.Gpio 1.3.0 | 4.27 KHz | <img src="imgs/RockchipDriver/sysfs.jpg" height="120"/> |
-| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 <br/> libgpiod 1.6.2-1 | Unable to test due to segment fault | - |
+| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | 174 KHz | <img src="imgs/RockchipDriver/libgpiod.jpg" height="120"/> |
 | [wiringOP](https://github.com/orangepi-xunlong/wiringOP) | C | 35de015 | 584 KHz | <img src="imgs/RockchipDriver/wiringOP.jpg" height="120"/> |
