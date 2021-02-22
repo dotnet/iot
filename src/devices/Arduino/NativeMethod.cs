@@ -109,7 +109,8 @@ namespace Iot.Device.Arduino
         UnsafeIsAddressLessThan,
 
         BufferMemmove,
-        BufferMemmoveRefArgs,
+        BufferZeroMemory,
+
         RuntimeHelpersGetHashCode,
         RuntimeHelpersIsBitwiseEquatable,
         RuntimeHelpersGetMethodTable,
@@ -120,9 +121,6 @@ namespace Iot.Device.Arduino
         RuntimeHelpersEnumEquals,
         Interop_GlobalizationGetCalendarInfo,
         InteropGetRandomBytes,
-
-        MiniBuffer_BulkMoveWithWriteBarrier,
-        MiniBuffer_ZeroMemory,
 
         ArduinoNativeI2cDeviceReadByte,
         ArduinoNativeI2cDeviceWriteByte,

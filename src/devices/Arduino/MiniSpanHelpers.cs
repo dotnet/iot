@@ -18,7 +18,7 @@ namespace Iot.Device.Arduino
         {
             if (byteLength == 0)
                 return;
-            MiniBuffer._ZeroMemory(ref b, byteLength);
+            MiniBuffer.ZeroMemory(ref b, byteLength);
         }
 
         public static unsafe void ClearWithReferences(ref IntPtr ip, uint pointerSizeLength)

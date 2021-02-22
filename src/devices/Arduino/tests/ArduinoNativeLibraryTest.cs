@@ -626,10 +626,12 @@ namespace Iot.Device.Arduino.Tests
                 hd44780.BacklightOn = true;
                 hd44780.DisplayOn = true;
                 hd44780.Clear();
-                // hd44780.Write("Hello World!");
+                hd44780.Write("Hello World!");
                 hd44780.SetCursorPosition(0, 1);
                 var time = DateTime.UtcNow;
-                hd44780.Write(time.ToShortTimeString());
+                // hd44780.Write(time.ToShortDateString());
+                hd44780.SetCursorPosition(0, 2);
+                hd44780.Write(time.ToLongTimeString());
                 return 1;
             }
         }

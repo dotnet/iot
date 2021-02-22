@@ -234,7 +234,7 @@ namespace Iot.Device.Arduino
         }
 
         [ArduinoImplementation(NativeMethod.StringEqualsStatic)]
-        public static bool Equals(string a, string b)
+        public static bool Equals(string? a, string? b)
         {
             throw new NotImplementedException();
         }

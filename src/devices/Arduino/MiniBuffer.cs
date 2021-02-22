@@ -8,116 +8,76 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
-    internal class MiniBuffer
+    [ArduinoReplacement(typeof(System.Buffer), true, IncludingPrivates = true)]
+    internal static class MiniBuffer
     {
         [ArduinoImplementation(NativeMethod.BufferMemmove)]
-        internal static unsafe void Memmove(byte* dest, byte* src, uint len)
+        public static unsafe void Memmove(byte* dest, byte* src, uint len)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.BufferMemmoveRefArgs)]
-        private static void Memmove(ref byte dest, ref byte src, uint len)
+        public static unsafe void Memmove(ref byte dest, ref byte src, uint len)
         {
-            throw new NotImplementedException();
+            fixed (byte* srcPointer = &src)
+            {
+                fixed (byte* destPointer = &dest)
+                {
+                    Memmove(destPointer, srcPointer, len);
+                }
+            }
         }
 
         internal static void Memmove<T>(ref T destination, ref T source, uint elementCount)
         {
-            if (!RuntimeHelpers.IsReferenceOrContainsReferences<T>())
-            {
-                // Blittable memmove
-                Memmove(
-                    ref MiniUnsafe.As<T, byte>(ref destination),
-                    ref MiniUnsafe.As<T, byte>(ref source),
-                    elementCount * (uint)MiniUnsafe.SizeOf<T>());
-            }
-            else
-            {
-                // Non-blittable memmove
-                BulkMoveWithWriteBarrier(
-                    ref MiniUnsafe.As<T, byte>(ref destination),
-                    ref MiniUnsafe.As<T, byte>(ref source),
-                    elementCount * (uint)MiniUnsafe.SizeOf<T>());
-            }
+            // Blittable memmove. The standard CLR uses a different implementation if the element
+            // to be copied contains references, without actually specifying why, though. I guess because
+            // we (currently) have no mark-and-copy GC, there's no big difference
+            Memmove(
+                ref MiniUnsafe.As<T, byte>(ref destination),
+                ref MiniUnsafe.As<T, byte>(ref source),
+                elementCount * (uint)MiniUnsafe.SizeOf<T>());
         }
-
-        // The maximum block size to for __BulkMoveWithWriteBarrier FCall. This is required to avoid GC starvation.
-#if DEBUG // Stress the mechanism in debug builds
-        private const uint BulkMoveWithWriteBarrierChunk = 0x400;
-#else
-        private const uint BulkMoveWithWriteBarrierChunk = 0x4000;
-#endif
 
         internal static void BulkMoveWithWriteBarrier(ref byte destination, ref byte source, uint byteCount)
         {
-            if (byteCount <= BulkMoveWithWriteBarrierChunk)
-            {
-                __BulkMoveWithWriteBarrier(ref destination, ref source, byteCount);
-            }
-            else
-            {
-                _BulkMoveWithWriteBarrier(ref destination, ref source, byteCount);
-            }
+            Memmove(ref destination, ref source, byteCount);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
-        private static void _BulkMoveWithWriteBarrier(ref byte destination, ref byte source, uint byteCount)
+        internal static unsafe void Memcpy(byte* dest, byte* src, int len)
         {
-            if (MiniUnsafe.AreSame(ref source, ref destination))
-            {
-                return;
-            }
-
-            // This is equivalent to: (destination - source) >= byteCount || (destination - source) < 0
-            if ((uint)(int)MiniUnsafe.ByteOffset(ref source, ref destination) >= byteCount)
-            {
-                // Copy forwards
-                do
-                {
-                    byteCount -= BulkMoveWithWriteBarrierChunk;
-                    __BulkMoveWithWriteBarrier(ref destination, ref source, BulkMoveWithWriteBarrierChunk);
-                    destination = ref MiniUnsafe.AddByteOffset(ref destination, BulkMoveWithWriteBarrierChunk);
-                    source = ref MiniUnsafe.AddByteOffset(ref source, BulkMoveWithWriteBarrierChunk);
-                }
-                while (byteCount > BulkMoveWithWriteBarrierChunk);
-            }
-            else
-            {
-                // Copy backwards
-                do
-                {
-                    byteCount -= BulkMoveWithWriteBarrierChunk;
-                    __BulkMoveWithWriteBarrier(ref MiniUnsafe.AddByteOffset(ref destination, byteCount), ref MiniUnsafe.AddByteOffset(ref source, byteCount), BulkMoveWithWriteBarrierChunk);
-                }
-                while (byteCount > BulkMoveWithWriteBarrierChunk);
-            }
-
-            __BulkMoveWithWriteBarrier(ref destination, ref source, byteCount);
+            Memmove(dest, src, (uint)len);
         }
 
-        [ArduinoImplementation(NativeMethod.MiniBuffer_BulkMoveWithWriteBarrier)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
-        private static void __BulkMoveWithWriteBarrier(ref byte destination, ref byte source, uint byteCount)
+        internal static unsafe void Memcpy(byte* dest, byte* src, uint len)
         {
-            throw new NotImplementedException();
+            Memmove(dest, src, len);
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
-        internal static unsafe void _ZeroMemory(ref byte b, uint byteLength)
+        public static unsafe void ZeroMemory(ref byte b, uint byteLength)
         {
             fixed (byte* bytePointer = &b)
             {
-                __ZeroMemory(bytePointer, byteLength);
+                ZeroMemory(bytePointer, byteLength);
             }
         }
 
-        [ArduinoImplementation(NativeMethod.MiniBuffer_ZeroMemory)]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1300:Element should begin with upper-case letter", Justification = "CLR internal method name")]
-        private static unsafe void __ZeroMemory(void* b, uint byteLength)
+        [ArduinoImplementation(NativeMethod.BufferZeroMemory)]
+        public static unsafe void ZeroMemory(void* b, uint byteLength)
         {
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(NativeMethod.None)]
+        public static unsafe void ZeroMemory(void* b, UIntPtr length)
+        {
+            ZeroMemory(b, (uint)length);
+        }
+
+        [ArduinoImplementation(NativeMethod.None)]
+        public static unsafe void ZeroMemory(byte* b, UIntPtr length)
+        {
+            ZeroMemory((void*)b, (uint)length);
+        }
     }
 }
