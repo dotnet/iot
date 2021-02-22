@@ -47,6 +47,9 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
         /// </summary>
+        /// <remarks>
+        /// The device is initialized when the first command is sent. The constructor always succeeds.
+        /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
         {
@@ -56,6 +59,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Creates an instance of the Arduino board connection connected to a serial port
         /// </summary>
+        /// The device is initialized when the first command is sent. The constructor always succeeds.
         /// <param name="portName">Port name. On Windows, this is usually "COM3" or "COM4" for an Arduino attached via USB.
         /// On Linux, possible values include "/dev/ttyAMA0", "/dev/serial0", "/dev/ttyUSB1", etc.</param>
         /// <param name="baudRate">Baudrate to use. It is recommended to use at least 115200 Baud.</param>
@@ -153,7 +157,7 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <exception cref="NotSupportedException">The Firmata firmware on the connected board is too old.</exception>
         /// <exception cref="TimeoutException">There was no answer from the board</exception>
-        public virtual void Initialize()
+        protected virtual void Initialize()
         {
             lock (_initializationLock)
             {

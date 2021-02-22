@@ -55,8 +55,8 @@ namespace Arduino.Samples
                 try
                 {
                     board.LogMessages += BoardOnLogMessages;
-                    board.Initialize();
-                    Console.WriteLine($"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
+                    // This implicitly connects
+                    Console.WriteLine($"Connecting... Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
                     while (Menu(board))
                     {
                     }

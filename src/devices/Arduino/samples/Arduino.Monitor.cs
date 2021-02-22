@@ -58,8 +58,7 @@ namespace Arduino.Samples
                 try
                 {
                     board.LogMessages += BoardOnLogMessages;
-                    board.Initialize();
-                    Console.WriteLine($"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
+                    Console.WriteLine($"Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
                     DisplayModes(board);
                 }
                 catch (TimeoutException x)
