@@ -2,7 +2,7 @@
 
 This is a list of steps which need to happen in order to create new package version of .NET IoT.
 
-** This document is meant only for maintainers as special permissions might be required **
+**This document is meant only for maintainers as special permissions might be required**
 
 ## Steps
 
