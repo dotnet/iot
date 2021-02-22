@@ -17,7 +17,7 @@ namespace Iot.Device.Arduino
         private ArduinoBoard _board;
 
         public ArduinoAnalogInputPin(ArduinoBoard board, AnalogController controller, SupportedPinConfiguration configuration,
-            int pinNumber, double voltageReference)
+            int pinNumber, ElectricPotential voltageReference)
             : base(controller, pinNumber, voltageReference)
         {
             _board = board;

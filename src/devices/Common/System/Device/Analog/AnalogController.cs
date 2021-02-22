@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
+using UnitsNet;
 
 namespace System.Device.Analog
 {
@@ -42,7 +43,7 @@ namespace System.Device.Analog
         /// Reference voltage (the maximum voltage measurable).
         /// For some hardware, it might be necessary to manually set this value for the <see cref="AnalogInputPin.ReadVoltage"/> method to return correct values.
         /// </summary>
-        public double VoltageReference
+        public ElectricPotential VoltageReference
         {
             get;
             set;

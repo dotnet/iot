@@ -24,15 +24,12 @@ using UnitsNet;
 
 namespace Arduino.Samples
 {
-    /// <summary>
-    /// Sample application for Ft4222
-    /// </summary>
     internal class Program
     {
         /// <summary>
         /// Main entry point
         /// </summary>
-        /// <param name="args">Unused</param>
+        /// <param name="args">The first argument gives the Port name. Default "COM4"</param>
         public static void Main(string[] args)
         {
             string portName = "COM4";

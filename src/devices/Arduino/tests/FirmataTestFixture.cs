@@ -26,7 +26,12 @@ namespace Arduino.Tests
                 _socket.NoDelay = true;
                 _networkStream = new NetworkStream(_socket, true);
                 Board = new ArduinoBoard(_networkStream);
-                Board.Initialize();
+                if (!(Board.FirmataVersion > new Version(1, 0)))
+                {
+                    // Actually not expecting to get here (but the above will throw a SocketException if the remote end is not there)
+                    throw new NotSupportedException("Very old firmware found");
+                }
+
                 Board.LogMessages += (x, y) => Console.WriteLine(x);
 
                 return;

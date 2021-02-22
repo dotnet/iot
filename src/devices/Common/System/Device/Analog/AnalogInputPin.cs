@@ -23,7 +23,7 @@ namespace System.Device.Analog
         /// Construct an instance of an analog pin.
         /// This is not usually called directly. Use <see cref="AnalogController.OpenPin(int)"/> instead.
         /// </summary>
-        public AnalogInputPin(AnalogController controller, int pinNumber, double voltageReference)
+        public AnalogInputPin(AnalogController controller, int pinNumber, ElectricPotential voltageReference)
         {
             Controller = controller;
             VoltageReference = voltageReference;
@@ -42,7 +42,7 @@ namespace System.Device.Analog
         /// The reference voltage level to convert raw values into voltages.
         /// Some boards (i.e. the ADS111x series) always return an absolute voltage. Then this value is meaningless.
         /// </summary>
-        public double VoltageReference
+        public ElectricPotential VoltageReference
         {
             get;
         }

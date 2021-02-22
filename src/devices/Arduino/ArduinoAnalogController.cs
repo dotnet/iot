@@ -9,6 +9,7 @@ using System.Device.Gpio;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using UnitsNet;
 
 namespace Iot.Device.Arduino
 {
@@ -26,7 +27,7 @@ namespace Iot.Device.Arduino
             PinCount = _supportedPinConfigurations.Count;
 
             // Note: While the Arduino does have an external analog input reference pin, Firmata doesn't allow configuring it.
-            VoltageReference = 5.0;
+            VoltageReference = ElectricPotential.FromVolts(5.0);
         }
 
         public override int PinCount

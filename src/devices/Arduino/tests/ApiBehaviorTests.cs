@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
 using Moq;
 using Xunit;
@@ -37,7 +40,7 @@ namespace Iot.Device.Arduino.Tests
             streamMock.Setup(x => x.CanWrite).Returns(true);
             streamMock.Setup(x => x.Close());
             var board = new ArduinoBoard(streamMock.Object);
-            Assert.Throws<TimeoutException>(() => board.Initialize());
+            Assert.Throws<TimeoutException>(() => board.FirmataVersion);
         }
 
         [Fact]
@@ -47,7 +50,7 @@ namespace Iot.Device.Arduino.Tests
             _streamMock.Setup(x => x.CanRead).Returns(true);
             _streamMock.Setup(x => x.CanWrite).Returns(false);
             var board = new ArduinoBoard(_streamMock.Object);
-            Assert.Throws<NotSupportedException>(() => board.Initialize());
+            Assert.Throws<NotSupportedException>(() => board.FirmataVersion);
         }
     }
 }
