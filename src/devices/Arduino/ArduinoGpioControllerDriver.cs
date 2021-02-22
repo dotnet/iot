@@ -131,12 +131,7 @@ namespace Iot.Device.Arduino
             }
 
             var pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
-            if (pinConfig == null || !pinConfig.PinModes.Contains(firmataMode))
-            {
-                return false;
-            }
-
-            return true;
+            return pinConfig != null && pinConfig.PinModes.Contains(firmataMode);
         }
 
         protected override PinValue Read(int pinNumber)
