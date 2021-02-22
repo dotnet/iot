@@ -843,7 +843,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public PinValue GetDigitalPinState(int pinNumber)
+        public PinValue ReadDigitalPin(int pinNumber)
         {
             lock (_lastPinValueLock)
             {

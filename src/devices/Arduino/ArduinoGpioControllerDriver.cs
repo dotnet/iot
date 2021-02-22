@@ -104,6 +104,7 @@ namespace Iot.Device.Arduino
                     ret = PinMode.Input;
                     break;
                 default:
+                    _arduinoBoard.Log($"Unexpected pin mode found: {mode}. Is the pin not set to GPIO?");
                     ret = PinMode.Input; // TODO: Return "Unknown"
                     break;
             }
@@ -136,7 +137,7 @@ namespace Iot.Device.Arduino
 
         protected override PinValue Read(int pinNumber)
         {
-            return _arduinoBoard.Firmata.GetDigitalPinState(pinNumber);
+            return _arduinoBoard.Firmata.ReadDigitalPin(pinNumber);
         }
 
         protected override void Write(int pinNumber, PinValue value)
