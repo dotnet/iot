@@ -30,17 +30,9 @@ namespace Iot.Device.Arduino
         MonitorEnter2,
         MonitorExit,
         StringCtor0,
-        StringLength,
-        StringIndexer,
-        StringFormat2,
-        StringFormat2b,
-        StringFormat3,
         StringEquals,
         StringToString,
         StringGetHashCode,
-        StringConcat2,
-        StringConcat3,
-        StringConcat4,
         StringCtor2,
         StringSetElem,
         StringGetElem,
@@ -48,7 +40,6 @@ namespace Iot.Device.Arduino
         StringGetRawStringData,
         StringEqualsStatic,
         StringFastAllocateString,
-        StringMiniStringConversion,
         StringUnEqualsStatic,
 
         StringEqualsStringComparison,
@@ -91,6 +82,8 @@ namespace Iot.Device.Arduino
         BitConverterSingleToInt32Bits,
         BitConverterDoubleToInt64Bits,
         BitConverterHalfToInt16Bits,
+        BitConverterInt64BitsToDouble,
+        BitConverterInt32BitsToSingle,
 
         BitOperationsLog2SoftwareFallback,
         BitOperationsTrailingZeroCount,
@@ -139,6 +132,6 @@ namespace Iot.Device.Arduino
 
         DateTimeUtcNow,
 
-        MemoryMarshalGetArrayDataReference
+        MemoryMarshalGetArrayDataReference,
     }
 }

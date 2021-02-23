@@ -259,62 +259,74 @@ namespace Iot.Device.Arduino
 
         public bool ToBoolean(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            // Our MiniString.ToString() operation is a no-op, but it does the implicit conversion from MiniString to String
+            return Convert.ToBoolean(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public byte ToByte(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToByte(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public char ToChar(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToChar(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public DateTime ToDateTime(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToDateTime(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public decimal ToDecimal(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToDecimal(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public double ToDouble(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToDouble(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public short ToInt16(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToInt16(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public int ToInt32(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToInt32(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public long ToInt64(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToInt64(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public sbyte ToSByte(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToSByte(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public float ToSingle(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return Convert.ToSingle(ToString(), provider);
+            // throw new NotImplementedException();
         }
 
         public string ToString(IFormatProvider? provider)
         {
-            throw new NotImplementedException();
+            return ToString();
         }
 
         public object ToType(Type? conversionType, IFormatProvider? provider)
