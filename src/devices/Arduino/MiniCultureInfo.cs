@@ -867,6 +867,18 @@ namespace Iot.Device.Arduino
             }
 
             [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            internal String[] AbbrevEraNames(CalendarId calendarId)
+            {
+                return _saEraNames;
+            }
+
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            internal String[] AbbreviatedEnglishEraNames(CalendarId calendarId)
+            {
+                return _saEraNames;
+            }
+
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             internal String[] AbbreviatedDayNames(CalendarId calendarId)
             {
                 return _saAbbreviatedDayNames;
