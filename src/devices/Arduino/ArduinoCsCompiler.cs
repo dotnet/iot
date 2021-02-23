@@ -743,7 +743,7 @@ namespace Iot.Device.Arduino
             _board.Firmata.PrepareStringLoad(constantSize, stringSize);
         }
 
-        public void SendConstants(IList<(int Token, byte[] InitializerData)> constElements)
+        public void SendConstants(IList<(int Token, byte[] InitializerData, string StringData)> constElements)
         {
             int cnt = constElements.Count;
             int idx = 1;

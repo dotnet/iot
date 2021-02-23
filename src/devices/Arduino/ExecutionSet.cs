@@ -34,8 +34,8 @@ namespace Iot.Device.Arduino
         private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
-        // String data, already UTF-8 encoded
-        private readonly List<(int Token, byte[] EncodedString)> _strings;
+        // String data, already UTF-8 encoded. The StringData value is actually only used for debugging purposes
+        private readonly List<(int Token, byte[] EncodedString, string StringData)> _strings;
         private readonly CompilerSettings _compilerSettings;
 
         private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>());
@@ -158,13 +158,13 @@ namespace Iot.Device.Arduino
             _compiler.SetExecutionSetActive(this);
             _compiler.SendClassDeclarations(this, from, to, false);
             _compiler.SendMethods(this, from, to, false);
-            List<(int Token, byte[] Data)> converted = new List<(int Token, byte[] Data)>();
+            List<(int Token, byte[] Data, string NoData)> converted = new();
             // Need to do this manually, due to stupid nullability conversion restrictions
             foreach (var elem in _patchedFieldTokens.Values)
             {
                 if (elem.InitializerData != null)
                 {
-                    converted.Add((elem.Token, elem.InitializerData));
+                    converted.Add((elem.Token, elem.InitializerData, string.Empty));
                 }
             }
 
@@ -179,7 +179,7 @@ namespace Iot.Device.Arduino
             _compiler.ExecuteStaticCtors(this);
         }
 
-        private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString)> strings)
+        private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString, string StringData)> strings)
         {
             int totalSize = sizeof(int); // we need a trailing empty entry
             foreach (var elem in strings)
@@ -939,7 +939,7 @@ namespace Iot.Device.Arduino
 
             int token = _nextStringToken + encoded.Length;
             _nextStringToken += StringTokenStep;
-            _strings.Add((token, encoded));
+            _strings.Add((token, encoded, data));
             return token;
         }
 
