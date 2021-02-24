@@ -74,7 +74,15 @@ namespace System.Device.Spi
                 {
                     // We should try the other mode and invert the buffers manually
                     // RPI can't open Mode0 in LSB for example
-                    mode = _settings.DataFlow == DataFlow.LsbFirst ? mode &= ~UnixSpiMode.SPI_LSB_FIRST : mode |= UnixSpiMode.SPI_LSB_FIRST;
+                    if (_settings.DataFlow == DataFlow.LsbFirst)
+                    {
+                        mode &= ~UnixSpiMode.SPI_LSB_FIRST;
+                    }
+                    else
+                    {
+                        mode |= UnixSpiMode.SPI_LSB_FIRST;
+                    }
+
                     nativePtr = new IntPtr(&mode);
                     result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
                     if (result == -1)
@@ -202,23 +210,15 @@ namespace System.Device.Spi
         public override unsafe void Write(ReadOnlySpan<byte> buffer)
         {
             Initialize();
-
+            byte[] toSend = buffer.ToArray();
             if (_isInverted)
             {
-                Span<byte> toSend = stackalloc byte[buffer.Length];
-                buffer.CopyTo(toSend);
                 ReverseByte(toSend);
-                fixed (byte* dataPtr = toSend)
-                {
-                    Transfer(dataPtr, null, buffer.Length);
-                }
             }
-            else
+
+            fixed (byte* dataPtr = toSend)
             {
-                fixed (byte* dataPtr = buffer)
-                {
-                    Transfer(dataPtr, null, buffer.Length);
-                }
+                Transfer(dataPtr, null, buffer.Length);
             }
         }
 
@@ -236,30 +236,23 @@ namespace System.Device.Spi
                 throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
 
+            byte[] toSend = writeBuffer.ToArray();
             if (_isInverted)
             {
-                Span<byte> toSend = stackalloc byte[writeBuffer.Length];
-                writeBuffer.CopyTo(toSend);
                 ReverseByte(toSend);
-                fixed (byte* writeBufferPtr = toSend)
-                {
-                    fixed (byte* readBufferPtr = readBuffer)
-                    {
-                        Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
-                    }
-                }
-
-                ReverseByte(readBuffer);
             }
-            else
+
+            fixed (byte* writeBufferPtr = toSend)
             {
-                fixed (byte* writeBufferPtr = writeBuffer)
+                fixed (byte* readBufferPtr = readBuffer)
                 {
-                    fixed (byte* readBufferPtr = readBuffer)
-                    {
-                        Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
-                    }
+                    Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
                 }
+            }
+
+            if (_isInverted)
+            {
+                ReverseByte(readBuffer);
             }
         }
 

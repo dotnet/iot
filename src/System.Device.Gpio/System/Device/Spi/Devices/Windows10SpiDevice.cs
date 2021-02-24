@@ -123,17 +123,13 @@ namespace System.Device.Spi
         /// </param>
         public override void Write(ReadOnlySpan<byte> buffer)
         {
+            byte[] toSend = buffer.ToArray();
             if (_isInverted)
             {
-                Span<byte> toSend = stackalloc byte[buffer.Length];
-                buffer.CopyTo(toSend);
                 ReverseByte(toSend);
-                _winDevice.Write(toSend.ToArray());
             }
-            else
-            {
-                _winDevice.Write(buffer.ToArray());
-            }
+
+            _winDevice.Write(toSend);
         }
 
         /// <summary>
@@ -148,20 +144,21 @@ namespace System.Device.Spi
                 throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
 
+            byte[] readArray = new byte[readBuffer.Length];
+            byte[] writeArray = writeBuffer.ToArray();
+
             if (_isInverted)
             {
-                byte[] byteArray = new byte[readBuffer.Length];
-                ReverseByte(byteArray);
-                _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
-                byteArray.CopyTo(readBuffer);
-                ReverseByte(readBuffer);
+                ReverseByte(writeArray);
             }
-            else
+
+            _winDevice.TransferFullDuplex(writeArray, readArray);
+            if (_isInverted)
             {
-                byte[] byteArray = new byte[readBuffer.Length];
-                _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
-                byteArray.CopyTo(readBuffer);
+                ReverseByte(readArray);
             }
+
+            readArray.CopyTo(readBuffer);
         }
 
         protected override void Dispose(bool disposing)

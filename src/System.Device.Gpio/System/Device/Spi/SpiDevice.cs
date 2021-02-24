@@ -121,6 +121,5 @@ namespace System.Device.Spi
                 span[i] = ReverseByte(span[i]);
             }
         }
-
     }
 }

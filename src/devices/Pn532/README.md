@@ -6,7 +6,7 @@ PN532 is a RFID and NFC reader. It does supports various standards: IsoIec14443T
 
 Official documentation can be fond here: https://www.nxp.com/docs/en/user-guide/141520.pdf
 
-## USage
+## Usage
 
 You first need to create the class thru I2C, SPI or Serial.
 
