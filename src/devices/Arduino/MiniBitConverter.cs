@@ -42,6 +42,12 @@ namespace Iot.Device.Arduino
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation(NativeMethod.BitConverterInt16BitsToHalf)]
+        public static Half Int16BitsToHalf(Int16 value)
+        {
+            throw new NotImplementedException();
+        }
 #endif
     }
 }

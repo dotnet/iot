@@ -41,6 +41,7 @@ namespace Iot.Device.Arduino
         StringEqualsStatic,
         StringFastAllocateString,
         StringUnEqualsStatic,
+        StringImplicitConversion,
 
         StringEqualsStringComparison,
         StringInternalAllocateString,
@@ -84,6 +85,7 @@ namespace Iot.Device.Arduino
         BitConverterHalfToInt16Bits,
         BitConverterInt64BitsToDouble,
         BitConverterInt32BitsToSingle,
+        BitConverterInt16BitsToHalf,
 
         BitOperationsLog2SoftwareFallback,
         BitOperationsTrailingZeroCount,

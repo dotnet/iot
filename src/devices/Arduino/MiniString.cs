@@ -99,6 +99,15 @@ namespace Iot.Device.Arduino
             }
         }
 
+        /// <summary>
+        /// The purpose of this operator is to syntactically correctly perform a conversion from String to MiniString. The Implementation is a no-op.
+        /// </summary>
+        [ArduinoImplementation(NativeMethod.StringImplicitConversion)]
+        public static implicit operator MiniString(string other)
+        {
+            throw new NotImplementedException();
+        }
+
         [ArduinoImplementation]
         public static implicit operator ReadOnlySpan<char>(MiniString? value)
         {
@@ -379,6 +388,23 @@ namespace Iot.Device.Arduino
         private void InternalAllocateString(int length)
         {
             throw new NotImplementedException();
+        }
+
+        internal static unsafe bool TryGetSpan(MiniString value, int startIndex, int count, out ReadOnlySpan<char> slice)
+        {
+            if ((uint)startIndex > (uint)value.Length || (uint)count > (uint)(value.Length - startIndex))
+            {
+                slice = default;
+                return false;
+            }
+
+            // Hope this does the same as the CLR implementation
+            fixed (void* ptr = &value._firstChar)
+            {
+                slice = new ReadOnlySpan<char>(ptr, count);
+            }
+
+            return true;
         }
     }
 }
