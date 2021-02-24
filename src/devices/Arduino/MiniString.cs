@@ -99,14 +99,14 @@ namespace Iot.Device.Arduino
             }
         }
 
-        /// <summary>
-        /// The purpose of this operator is to syntactically correctly perform a conversion from String to MiniString. The Implementation is a no-op.
-        /// </summary>
-        [ArduinoImplementation(NativeMethod.StringImplicitConversion)]
-        public static implicit operator MiniString(string other)
-        {
-            throw new NotImplementedException();
-        }
+        /////// <summary>
+        /////// The purpose of this operator is to syntactically correctly perform a conversion from String to MiniString. The Implementation is a no-op.
+        /////// </summary>
+        ////[ArduinoImplementation(NativeMethod.StringImplicitConversion)]
+        ////public static implicit operator MiniString(string other)
+        ////{
+        ////    throw new NotImplementedException();
+        ////}
 
         [ArduinoImplementation]
         public static implicit operator ReadOnlySpan<char>(MiniString? value)

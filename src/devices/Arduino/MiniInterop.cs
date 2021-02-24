@@ -373,11 +373,24 @@ namespace Iot.Device.Arduino
                 int findCount,
                 out int found)
             {
-                // Simple culture-invariant FindString implementation
-                MiniAssert.That(flags == 0); // Other options not supported
-                int result = sourceString.IndexOf(findString);
-                found = findString.Length;
-                return result;
+                // NLS is not active, we should never really get here.
+                throw new NotImplementedException();
+            }
+
+            internal static unsafe int FindNLSStringEx(
+                char* lpLocaleName,
+                uint dwFindNLSStringFlags,
+                char* lpStringSource,
+                int cchSource,
+                char* lpStringValue,
+                int cchValue,
+                int* pcchFound,
+                void* lpVersionInformation,
+                void* lpReserved,
+                IntPtr sortHandle)
+            {
+                // NLS is not active, we should never really get here.
+                throw new NotImplementedException();
             }
 
             [ArduinoImplementation(NativeMethod.InteropQueryPerformanceFrequency)]

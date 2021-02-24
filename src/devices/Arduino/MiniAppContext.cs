@@ -11,6 +11,12 @@ namespace Iot.Device.Arduino
     {
         public static bool TryGetSwitch(string switchName, out bool isEnabled)
         {
+            if (switchName == "System.Globalization.Invariant")
+            {
+                isEnabled = true;
+                return true;
+            }
+
             isEnabled = false;
             return false;
         }
