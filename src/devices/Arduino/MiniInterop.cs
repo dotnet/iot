@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -361,6 +362,22 @@ namespace Iot.Device.Arduino
                 int cchDest, void* lpVersionInformation, void* lpReserved, IntPtr sortHandle)
             {
                 throw new NotImplementedException();
+            }
+
+            internal static int FindNLSString(
+                int locale,
+                uint flags,
+                [MarshalAs(UnmanagedType.LPWStr)] string sourceString,
+                int sourceCount,
+                [MarshalAs(UnmanagedType.LPWStr)] string findString,
+                int findCount,
+                out int found)
+            {
+                // Simple culture-invariant FindString implementation
+                MiniAssert.That(flags == 0); // Other options not supported
+                int result = sourceString.IndexOf(findString);
+                found = findString.Length;
+                return result;
             }
 
             [ArduinoImplementation(NativeMethod.InteropQueryPerformanceFrequency)]

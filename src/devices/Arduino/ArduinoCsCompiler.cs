@@ -1407,6 +1407,7 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
                 exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
+                exec.SuppressType("System.Globalization.Ordinal");
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
                 exec.SuppressType(typeof(ArduinoBoard));
                 exec.SuppressType(typeof(ArduinoCsCompiler));
@@ -1788,6 +1789,7 @@ namespace Iot.Device.Arduino
             BringToFront(classes, typeof(Stopwatch));
             BringToFront(classes, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(classes, typeof(System.DateTime));
+            SendToBack(classes, typeof(MiniCompareInfo));
             for (var index = 0; index < classes.Count; index++)
             {
                 ClassDeclaration? cls = classes[index];
@@ -1821,6 +1823,24 @@ namespace Iot.Device.Arduino
             var temp = classes[idx];
             classes[idx] = classes[0];
             classes[0] = temp;
+        }
+
+        private void SendToBack(List<ClassDeclaration> classes, Type type)
+        {
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
+
+            int idx = classes.FindIndex(x => x.TheType == type);
+            if (idx < 0)
+            {
+                return;
+            }
+
+            var temp = classes[idx];
+            classes[idx] = classes[classes.Count - 1];
+            classes[classes.Count - 1] = temp;
         }
 
         /// <summary>

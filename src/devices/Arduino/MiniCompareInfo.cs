@@ -35,19 +35,11 @@ namespace Iot.Device.Arduino
         // The interesting part is that since haw-US doesn't have its own sort, it has to point at another
         // locale, which is what SCOMPAREINFO does.
         [OptionalField(VersionAdded = 2)]
-        private string m_name;  // The name used to construct this CompareInfo. Do not rename (binary serialization)
-
-        [NonSerialized]
-        private IntPtr _sortHandle;
-        
-        [OptionalField(VersionAdded = 3)]
-        private SortVersion? m_SortVersion; // Do not rename (binary serialization)
-
-        private int culture; // Do not rename (binary serialization). The fields sole purpose is to support Desktop serialization.
+        private string _name; // The name used to construct this CompareInfo. Do not rename (binary serialization)
 
         internal MiniCompareInfo(CultureInfo culture)
         {
-            m_name = culture.Name;
+            _name = culture.Name;
             InitSort(culture);
         }
 
@@ -142,6 +134,7 @@ namespace Iot.Device.Arduino
             return true; // Invariant culture is always sortable
         }
 
+#if NET5_0
         /// <summary>
         /// Indicates whether a specified <see cref="Rune"/> is sortable.
         /// </summary>
@@ -156,17 +149,10 @@ namespace Iot.Device.Arduino
             int charCount = value.EncodeToUtf16(valueAsUtf16);
             return IsSortable(valueAsUtf16.Slice(0, charCount));
         }
+#endif
 
         private void InitSort(CultureInfo culture)
         {
-            if (GlobalizationMode.UseNls)
-            {
-                NlsInitSortHandle();
-            }
-            else
-            {
-                IcuInitSortHandle();
-            }
         }
 
         /// <summary>
@@ -183,7 +169,7 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                return m_name;
+                return _name;
             }
         }
 
@@ -358,7 +344,6 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [DoesNotReturn]
         private static void ThrowCompareOptionsCheckFailed(CompareOptions options)
         {
             throw new ArgumentException(
@@ -652,6 +637,7 @@ namespace Iot.Device.Arduino
             return retVal;
         }
 
+#if NET5_0
         /// <summary>
         /// Searches for the first occurrence of a <see cref="Rune"/> within a source string.
         /// </summary>
@@ -671,6 +657,7 @@ namespace Iot.Device.Arduino
             int charCount = value.EncodeToUtf16(valueAsUtf16);
             return IndexOf(source, valueAsUtf16.Slice(0, charCount), options);
         }
+#endif
 
         /// <summary>
         /// IndexOf overload used when the caller needs the length of the matching substring.
@@ -899,6 +886,7 @@ namespace Iot.Device.Arduino
             return retVal;
         }
 
+#if NET5_0
         /// <summary>
         /// Searches for the last occurrence of a <see cref="Rune"/> within a source string.
         /// </summary>
@@ -918,57 +906,7 @@ namespace Iot.Device.Arduino
             int charCount = value.EncodeToUtf16(valueAsUtf16);
             return LastIndexOf(source, valueAsUtf16.Slice(0, charCount), options);
         }
-
-        /// <summary>
-        /// Gets the SortKey for the given string with the given options.
-        /// </summary>
-        public SortKey GetSortKey(string source, CompareOptions options)
-        {
-            return InvariantCreateSortKey(source, options);
-        }
-
-        public SortKey GetSortKey(string source)
-        {
-            return InvariantCreateSortKey(source, CompareOptions.None);
-        }
-
-        /// <summary>
-        /// Computes a sort key over the specified input.
-        /// </summary>
-        /// <param name="source">The text over which to compute the sort key.</param>
-        /// <param name="destination">The buffer into which to write the resulting sort key bytes.</param>
-        /// <param name="options">The <see cref="CompareOptions"/> used for computing the sort key.</param>
-        /// <returns>The number of bytes written to <paramref name="destination"/>.</returns>
-        /// <remarks>
-        /// Use <see cref="GetSortKeyLength"/> to query the required size of <paramref name="destination"/>.
-        /// It is acceptable to provide a larger-than-necessary output buffer to this method.
-        /// </remarks>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="destination"/> is too small to contain the resulting sort key;
-        /// or <paramref name="options"/> contains an unsupported flag;
-        /// or <paramref name="source"/> cannot be processed using the desired <see cref="CompareOptions"/>
-        /// under the current <see cref="CompareInfo"/>.
-        /// </exception>
-        public int GetSortKey(ReadOnlySpan<char> source, Span<byte> destination, CompareOptions options = CompareOptions.None)
-        {
-            return InvariantGetSortKey(source, destination, options);
-        }
-
-        /// <summary>
-        /// Returns the length (in bytes) of the sort key that would be produced from the specified input.
-        /// </summary>
-        /// <param name="source">The text over which to compute the sort key.</param>
-        /// <param name="options">The <see cref="CompareOptions"/> used for computing the sort key.</param>
-        /// <returns>The length (in bytes) of the sort key.</returns>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="options"/> contains an unsupported flag;
-        /// or <paramref name="source"/> cannot be processed using the desired <see cref="CompareOptions"/>
-        /// under the current <see cref="CompareInfo"/>.
-        /// </exception>
-        public int GetSortKeyLength(ReadOnlySpan<char> source, CompareOptions options = CompareOptions.None)
-        {
-            return InvariantGetSortKeyLength(source, options);
-        }
+#endif
 
         public override bool Equals(object? value)
         {
@@ -1016,82 +954,19 @@ namespace Iot.Device.Arduino
             get
             {
                 const int LOCALE_INVARIANT = 0x007F;
-                if (m_SortVersion == null)
-                {
-                    m_SortVersion = new SortVersion(0, new Guid(0, 0, 0, 0, 0, 0, 0,
+                return new SortVersion(0, new Guid(0, 0, 0, 0, 0, 0, 0,
                                                                         (byte)(LOCALE_INVARIANT >> 24),
                                                                         (byte)((LOCALE_INVARIANT & 0x00FF0000) >> 16),
                                                                         (byte)((LOCALE_INVARIANT & 0x0000FF00) >> 8),
                                                                         (byte)(LOCALE_INVARIANT & 0xFF)));
-                }
-
-                return m_SortVersion;
             }
         }
 
         public int LCID => CultureInfo.GetCultureInfo(Name).LCID;
 
-        private SortKey InvariantCreateSortKey(string source, CompareOptions options)
+        internal static unsafe IntPtr NlsGetSortHandle(string cultureName)
         {
-            if (source == null)
-            {
-                throw new ArgumentNullException(nameof(source));
-            }
-
-            if ((options & ValidCompareMaskOffFlags) != 0)
-            {
-                throw new ArgumentException();
-            }
-
-            byte[] keyData;
-            if (source.Length == 0)
-            {
-                keyData = Array.Empty<byte>();
-            }
-            else
-            {
-                // In the invariant mode, all string comparisons are done as ordinal so when generating the sort keys we generate it according to this fact
-                keyData = new byte[source.Length * sizeof(char)];
-
-                InvariantCreateSortKeyOrdinal(source, keyData);
-            }
-
-            return new SortKey(this, source, options, keyData);
-        }
-
-        private static void InvariantCreateSortKeyOrdinal(ReadOnlySpan<char> source, Span<byte> sortKey)
-        {
-            for (int i = 0; i < source.Length; i++)
-            {
-                // convert machine-endian to big-endian
-                BinaryPrimitives.WriteUInt16BigEndian(sortKey, (ushort)source[i]);
-                sortKey = sortKey.Slice(sizeof(ushort));
-            }
-        }
-
-        private int InvariantGetSortKey(ReadOnlySpan<char> source, Span<byte> destination, CompareOptions options)
-        {
-            // Make sure the destination buffer is large enough to hold the source projection.
-            // Using unsigned arithmetic below also checks for buffer overflow since the incoming
-            // length is always a non-negative signed integer.
-            if ((uint)destination.Length < (uint)source.Length * sizeof(char))
-            {
-                throw new ArgumentException();
-            }
-
-            InvariantCreateSortKeyOrdinal(source, destination);
-
-            return source.Length * sizeof(char);
-        }
-
-        private int InvariantGetSortKeyLength(ReadOnlySpan<char> source, CompareOptions options)
-        {
-            // In invariant mode, sort keys are simply a byte projection of the source input,
-            // optionally with casing modifications. We need to make sure we don't overflow
-            // while computing the length.
-            int byteLength = source.Length * sizeof(char);
-
-            return byteLength;
+            return IntPtr.Zero;
         }
     }
 }
