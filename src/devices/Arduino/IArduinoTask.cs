@@ -13,11 +13,6 @@ namespace Iot.Device.Arduino
         MethodState State { get; }
 
         /// <summary>
-        /// The method object
-        /// </summary>
-        ArduinoMethodDeclaration MethodInfo { get; }
-
-        /// <summary>
         /// The task id
         /// </summary>
         short TaskId { get; }

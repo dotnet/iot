@@ -28,7 +28,7 @@ namespace Iot.Device.Arduino
         }
 
         public ArduinoCsCompiler Compiler { get; }
-        public ArduinoMethodDeclaration MethodInfo { get; }
+        internal ArduinoMethodDeclaration MethodInfo { get; }
 
         public short TaskId { get; }
 

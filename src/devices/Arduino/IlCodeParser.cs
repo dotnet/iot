@@ -42,18 +42,18 @@ namespace Iot.Device.Arduino
             return opcode;
         }
 
-        public static byte[]? FindAndPatchTokens(ExecutionSet set, MethodBase method, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
+        public static IlCode FindAndPatchTokens(ExecutionSet set, MethodBase method, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
         {
             // We need to copy the code, because we're going to patch it
             var body = method.GetMethodBody();
             if (body == null)
             {
                 // Method has no (visible) implementation, so it certainly has no code dependencies as well
-                return null;
+                return new IlCode(method, null);
             }
 
             var byteCode = body.GetILAsByteArray()!.ToArray();
-            return FindAndPatchTokens(set, method, byteCode, methodsUsed, typesUsed, fieldsUsed);
+            return FindAndPatchTokens(set, method, byteCode);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Iot.Device.Arduino
         /// method depends on (fields, classes and other methods). Then we do a lookup and patch the token with a replacement token that
         /// is unique within our program. So we do not have to care about module boundaries.
         /// </summary>
-        public static byte[]? FindAndPatchTokens(ExecutionSet set, MethodBase method, byte[] byteCode, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
+        public static IlCode FindAndPatchTokens(ExecutionSet set, MethodBase method, byte[] byteCode)
         {
             // We need to copy the code, because we're going to patch it
             if (byteCode == null)
@@ -75,7 +75,10 @@ namespace Iot.Device.Arduino
                 throw new InvalidProgramException("Maximum method size is 32kb");
             }
 
-            // TODO: This is very simplistic so we do not need another parser. But this might have false positives
+            List<MethodBase> methodsUsed = new List<MethodBase>();
+            List<FieldInfo> fieldsUsed = new List<FieldInfo>();
+            List<TypeInfo> typesUsed = new List<TypeInfo>();
+
             int idx = 0;
             while (idx < byteCode.Length - 5) // If less than 5 byte remain, there can't be a token within it
             {
@@ -268,7 +271,9 @@ namespace Iot.Device.Arduino
                 byteCode[tokenOffset + 3] = (byte)(patchValue >> 24);
             }
 
-            return byteCode;
+            typesUsed = typesUsed.Distinct().ToList();
+
+            return new IlCode(method, byteCode, methodsUsed, fieldsUsed, typesUsed);
         }
 
         private static MemberInfo? ResolveMember(MethodBase method, int metadataToken)

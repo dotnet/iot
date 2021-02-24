@@ -267,7 +267,7 @@ namespace Iot.Device.Arduino
                 methodBytes += method.ArgumentCount * 4;
                 methodBytes += method.MaxLocals * 4;
 
-                methodBytes += method.IlBytes != null ? method.IlBytes.Length : 0;
+                methodBytes += method.Code.IlBytes != null ? method.Code.IlBytes.Length : 0;
 
                 var type = method.MethodBase.DeclaringType!;
                 if (classSizes.TryGetValue(type, out _))
@@ -333,7 +333,7 @@ namespace Iot.Device.Arduino
                 set;
             }
 
-            public List<(ArduinoMethodDeclaration Method, int Size)> Methods
+            internal List<(ArduinoMethodDeclaration Method, int Size)> Methods
             {
                 get;
             }

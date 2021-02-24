@@ -1407,7 +1407,6 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
                 exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
-                exec.SuppressType("System.Globalization.Ordinal");
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
                 exec.SuppressType(typeof(ArduinoBoard));
                 exec.SuppressType(typeof(ArduinoCsCompiler));
@@ -1569,6 +1568,7 @@ namespace Iot.Device.Arduino
             bool hasBody = !methodInfo.IsAbstract;
 
             var ilBytes = body?.GetILAsByteArray()!.ToArray();
+            IlCode parserResult;
 
             bool constructedCode = false;
             MethodFlags construcedFlags = MethodFlags.None;
@@ -1670,10 +1670,6 @@ namespace Iot.Device.Arduino
                 throw new MissingMethodException($"{methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
             }
 
-            List<MethodBase> foreignMethodsRequired = new List<MethodBase>();
-            List<FieldInfo> fieldsRequired = new List<FieldInfo>();
-            List<TypeInfo> typesRequired = new List<TypeInfo>();
-
             if (ilBytes != null && ilBytes.Length > Math.Pow(2, 14) - 1)
             {
                 throw new InvalidProgramException($"Max IL size of real time method is 2^14 Bytes. Actual size is {ilBytes.Length}.");
@@ -1681,9 +1677,9 @@ namespace Iot.Device.Arduino
 
             if (hasBody)
             {
-                ilBytes = IlCodeParser.FindAndPatchTokens(set, methodInfo, ilBytes!, foreignMethodsRequired, typesRequired, fieldsRequired);
+                parserResult = IlCodeParser.FindAndPatchTokens(set, methodInfo, ilBytes!);
 
-                foreach (var type in typesRequired.Distinct())
+                foreach (var type in parserResult.DependentTypes)
                 {
                     if (!set.HasDefinition(type))
                     {
@@ -1691,17 +1687,21 @@ namespace Iot.Device.Arduino
                     }
                 }
             }
+            else
+            {
+                parserResult = new IlCode(methodInfo, null);
+            }
 
             int tk = set.GetOrAddMethodToken(methodInfo);
 
             ArduinoMethodDeclaration newInfo;
             if (constructedCode)
             {
-                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, construcedFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), ilBytes);
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, construcedFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), parserResult);
             }
             else
             {
-                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, ilBytes);
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, parserResult);
             }
 
             if (set.AddMethod(newInfo))
@@ -1777,7 +1777,7 @@ namespace Iot.Device.Arduino
             SendMethodDeclaration(decl);
             if (decl.HasBody && decl.NativeMethod == NativeMethod.None)
             {
-                _board.Firmata.SendMethodIlCode(decl.Token, decl.IlBytes!);
+                _board.Firmata.SendMethodIlCode(decl.Token, decl.Code.IlBytes!);
             }
         }
 
@@ -1789,7 +1789,6 @@ namespace Iot.Device.Arduino
             BringToFront(classes, typeof(Stopwatch));
             BringToFront(classes, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(classes, typeof(System.DateTime));
-            SendToBack(classes, typeof(MiniCompareInfo));
             for (var index = 0; index < classes.Count; index++)
             {
                 ClassDeclaration? cls = classes[index];
