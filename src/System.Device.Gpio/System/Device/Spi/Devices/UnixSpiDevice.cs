@@ -14,6 +14,7 @@ namespace System.Device.Spi
     {
         private const string DefaultDevicePath = "/dev/spidev";
         private const uint SPI_IOC_MESSAGE_1 = 0x40206b00;
+        private const int MaxStackallocBuffer = 256;
         private static readonly object s_initializationLock = new object();
         private readonly SpiConnectionSettings _settings;
         private int _deviceFileDescriptor = -1;
@@ -210,15 +211,22 @@ namespace System.Device.Spi
         public override unsafe void Write(ReadOnlySpan<byte> buffer)
         {
             Initialize();
-            byte[] toSend = buffer.ToArray();
+
             if (_isInverted)
             {
+                byte[] toSend = buffer.ToArray();
                 ReverseByte(toSend);
+                fixed (byte* dataPtr = toSend)
+                {
+                    Transfer(dataPtr, null, buffer.Length);
+                }
             }
-
-            fixed (byte* dataPtr = toSend)
+            else
             {
-                Transfer(dataPtr, null, buffer.Length);
+                fixed (byte* dataPtr = buffer)
+                {
+                    Transfer(dataPtr, null, buffer.Length);
+                }
             }
         }
 
@@ -236,23 +244,30 @@ namespace System.Device.Spi
                 throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
 
-            byte[] toSend = writeBuffer.ToArray();
             if (_isInverted)
             {
+                Span<byte> toSend = writeBuffer.Length > MaxStackallocBuffer ? new byte[writeBuffer.Length] : stackalloc byte[writeBuffer.Length];
+                writeBuffer.CopyTo(toSend);
                 ReverseByte(toSend);
-            }
-
-            fixed (byte* writeBufferPtr = toSend)
-            {
-                fixed (byte* readBufferPtr = readBuffer)
+                fixed (byte* writeBufferPtr = toSend)
                 {
-                    Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                    fixed (byte* readBufferPtr = readBuffer)
+                    {
+                        Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                    }
                 }
-            }
 
-            if (_isInverted)
-            {
                 ReverseByte(readBuffer);
+            }
+            else
+            {
+                fixed (byte* writeBufferPtr = writeBuffer)
+                {
+                    fixed (byte* readBufferPtr = readBuffer)
+                    {
+                        Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                    }
+                }
             }
         }
 
