@@ -153,12 +153,11 @@ namespace System.Device.Spi
             }
 
             _winDevice.TransferFullDuplex(writeArray, readArray);
+            readArray.CopyTo(readBuffer);
             if (_isInverted)
             {
-                ReverseByte(readArray);
+                ReverseByte(readBuffer);
             }
-
-            readArray.CopyTo(readBuffer);
         }
 
         protected override void Dispose(bool disposing)
