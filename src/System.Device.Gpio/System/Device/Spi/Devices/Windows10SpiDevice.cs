@@ -29,7 +29,7 @@ namespace System.Device.Spi
                 throw new PlatformNotSupportedException($"Changing{nameof(settings.ChipSelectLineActiveState)} options is not supported on the current platform.");
             }
 
-            if (settings.DataFlow == DataFlow.MsbFirst)
+            if (settings.DataFlow == DataFlow.LsbFirst)
             {
                 _isInverted = true;
             }
