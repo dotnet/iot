@@ -105,7 +105,7 @@ namespace Iot.Device.Arduino
                     break;
                 default:
                     _arduinoBoard.Log($"Unexpected pin mode found: {mode}. Is the pin not set to GPIO?");
-                    ret = PinMode.Input; // TODO: Return "Unknown"
+                    ret = PinMode.Input;
                     break;
             }
 

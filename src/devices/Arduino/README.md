@@ -36,26 +36,26 @@ Some of the features of this binding require extended features in the Arduino fi
 See the examples for some advanced use cases. 
 
 Basic start:
-```
-            // Portname is "COM3", "COM4" on Windows, "/dev/ttyUSB0" or similar on linux
-            Console.WriteLine($"Connecting to Arduino on {portName}");
-			ArduinoBoard board = new ArduinoBoard("COM3", 115200);
-			try
-			{
-				board.LogMessages += BoardOnLogMessages; // Get log messages
-				Console.WriteLine($"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
-				// Add code that uses the board here.
-			}
-			catch (TimeoutException x)
-			{
-				Console.WriteLine($"No answer from board: {x.Message} ");
-			}
-			finally
-			{
-				port.Close();
-				board?.Dispose();
-			}
-            
+```csharp
+// Portname is "COM3", "COM4" on Windows, "/dev/ttyUSB0" or similar on linux
+Console.WriteLine($"Connecting to Arduino on {portName}");
+ArduinoBoard board = new ArduinoBoard("COM3", 115200);
+try
+{
+	board.LogMessages += BoardOnLogMessages; // Get log messages
+	Console.WriteLine($"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
+	// Add code that uses the board here.
+}
+catch (TimeoutException x)
+{
+	Console.WriteLine($"No answer from board: {x.Message} ");
+}
+finally
+{
+	port.Close();
+	board?.Dispose();
+}
+
 ```
 
 On Windows, only one application can use the serial port at a time, therefore you'll get "permission denied" errors when you try to run your program while i.e. the Serial Port Monitor of the Arduino IDE is open when you start your program. On the other hand, trying to upload a new sketch while the C# program runs will also fail. Note that the serial port monitor is of little use when the firmata firmware is loaded, since the communication protocol uses a binary format. Most of the output therefore will look like garbage. 
