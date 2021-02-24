@@ -573,10 +573,11 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        internal bool HasMethod(MemberInfo m)
+        internal bool HasMethod(MemberInfo m, out IlCode? found)
         {
             if (_classesToSuppress.Contains(m.DeclaringType!))
             {
+                found = null;
                 return true;
             }
 
@@ -586,7 +587,9 @@ namespace Iot.Device.Arduino
                 m = replacement;
             }
 
-            return _methods.Any(x => AreMethodsIdentical(x.MethodBase, (MethodBase)m));
+            var find = _methods.FirstOrDefault(x => AreMethodsIdentical(x.MethodBase, (MethodBase)m));
+            found = find?.Code;
+            return find != null;
         }
 
         private bool AreMethodsIdentical(MethodBase a, MethodBase b)

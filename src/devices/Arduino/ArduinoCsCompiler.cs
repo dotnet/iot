@@ -272,14 +272,14 @@ namespace Iot.Device.Arduino
 
             void AddMethod(MethodInfo method, NativeMethod nativeMethod)
             {
-                if (!set.HasMethod(method))
+                if (!set.HasMethod(method, out _))
                 {
                     set.GetReplacement(method.DeclaringType);
                     MethodInfo? replacement = (MethodInfo?)set.GetReplacement(method);
                     if (replacement != null)
                     {
                         method = replacement;
-                        if (set.HasMethod(method))
+                        if (set.HasMethod(method, out _))
                         {
                             return;
                         }
@@ -821,7 +821,7 @@ namespace Iot.Device.Arduino
                 CollectBaseImplementations(m, methodsBeingImplemented);
 
                 // We need the implementation if at least one base implementation is being called and is used
-                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x));
+                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, out _));
             }
 
             return false;
@@ -1293,11 +1293,8 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        public void CollectDependendentMethods(ExecutionSet set, MethodBase methodInfo, HashSet<MethodBase> newMethods)
+        internal void CollectDependendentMethods(ExecutionSet set, MethodBase methodInfo, IlCode? code, HashSet<MethodBase> newMethods)
         {
-            List<MethodBase> methodsRequired = new List<MethodBase>();
-            List<FieldInfo> fieldsRequired = new List<FieldInfo>();
-            List<TypeInfo> typesRequired = new List<TypeInfo>();
             if (methodInfo.IsAbstract)
             {
                 // This is a method that will never be called directly, so we can safely skip it.
@@ -1311,9 +1308,12 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            IlCodeParser.FindAndPatchTokens(set, methodInfo, methodsRequired, typesRequired, fieldsRequired);
+            if (code == null)
+            {
+                code = IlCodeParser.FindAndPatchTokens(set, methodInfo);
+            }
 
-            foreach (var method in methodsRequired)
+            foreach (var method in code.DependentMethods)
             {
                 // Do we need to replace this method?
                 set.GetReplacement(method.DeclaringType);
@@ -1327,16 +1327,16 @@ namespace Iot.Device.Arduino
                 {
                     // Ensure we're not scanning the same implementation twice, as this would result
                     // in a stack overflow when a method is recursive (even indirect)
-                    if (!set.HasMethod(me) && newMethods.Add(me))
+                    if (!set.HasMethod(me, out var code1) && newMethods.Add(me))
                     {
-                        CollectDependendentMethods(set, me, newMethods);
+                        CollectDependendentMethods(set, me, code1, newMethods);
                     }
                 }
                 else if (finalMethod is ConstructorInfo co)
                 {
-                    if (!set.HasMethod(co) && newMethods.Add(co))
+                    if (!set.HasMethod(co, out var code2) && newMethods.Add(co))
                     {
-                        CollectDependendentMethods(set, co, newMethods);
+                        CollectDependendentMethods(set, co, code2, newMethods);
                     }
                 }
                 else
@@ -1370,7 +1370,7 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
             }
 
-            if (set.HasMethod(methodInfo))
+            if (set.HasMethod(methodInfo, out _))
             {
                 unchecked
                 {
@@ -1523,7 +1523,7 @@ namespace Iot.Device.Arduino
                 methodInfo = replacement;
             }
 
-            if (set.HasMethod(methodInfo))
+            if (set.HasMethod(methodInfo, out _))
             {
                 return;
             }
@@ -1714,9 +1714,10 @@ namespace Iot.Device.Arduino
                     PrepareClass(set, methodInfo.DeclaringType);
                 }
 
+                // TODO: Change to dictionary and transfer IlCode object to correct place (it's evaluated inside, but discarded there)
                 HashSet<MethodBase> methods = new HashSet<MethodBase>();
 
-                CollectDependendentMethods(set, methodInfo, methods);
+                CollectDependendentMethods(set, methodInfo, parserResult, methods);
 
                 var list = methods.ToList();
                 for (var index = 0; index < list.Count; index++)

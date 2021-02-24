@@ -42,7 +42,7 @@ namespace Iot.Device.Arduino
             return opcode;
         }
 
-        public static IlCode FindAndPatchTokens(ExecutionSet set, MethodBase method, List<MethodBase> methodsUsed, List<TypeInfo> typesUsed, List<FieldInfo> fieldsUsed)
+        public static IlCode FindAndPatchTokens(ExecutionSet set, MethodBase method)
         {
             // We need to copy the code, because we're going to patch it
             var body = method.GetMethodBody();
