@@ -159,6 +159,12 @@ namespace Iot.Device.Arduino
         /// <exception cref="TimeoutException">There was no answer from the board</exception>
         protected virtual void Initialize()
         {
+            // Shortcut, so we do not need to take the lock
+            if (_initialized)
+            {
+                return;
+            }
+
             lock (_initializationLock)
             {
                 if (_initialized)
@@ -226,10 +232,7 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                if (!_initialized)
-                {
-                    Initialize();
-                }
+                Initialize();
 
                 return _firmwareVersion;
             }
@@ -242,10 +245,7 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                if (!_initialized)
-                {
-                    Initialize();
-                }
+                Initialize();
 
                 return _firmwareName;
             }
@@ -258,10 +258,7 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                if (!_initialized)
-                {
-                    Initialize();
-                }
+                Initialize();
 
                 return _firmataVersion;
             }
@@ -288,10 +285,7 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                if (!_initialized)
-                {
-                    Initialize();
-                }
+                Initialize();
 
                 return _supportedPinConfigurations;
             }
@@ -313,10 +307,7 @@ namespace Iot.Device.Arduino
         /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
         public GpioController CreateGpioController()
         {
-            if (!_initialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
         }
@@ -330,10 +321,7 @@ namespace Iot.Device.Arduino
         /// Or: An invalid Bus Id or device Id was specified</exception>
         public virtual I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
-            if (!_initialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             if (connectionSettings == null)
             {
@@ -357,10 +345,7 @@ namespace Iot.Device.Arduino
         /// <exception cref="NotSupportedException">The Bus number is not 0, or the SPI component has not been enabled in the firmware.</exception>
         public virtual SpiDevice CreateSpiDevice(SpiConnectionSettings settings)
         {
-            if (!_initialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             if (settings == null)
             {
@@ -394,10 +379,7 @@ namespace Iot.Device.Arduino
             int frequency = 400,
             double dutyCyclePercentage = 0.5)
         {
-            if (!_initialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             return new ArduinoPwmChannel(this, chip, channel, frequency, dutyCyclePercentage);
         }
@@ -409,10 +391,7 @@ namespace Iot.Device.Arduino
         /// <returns>An <see cref="AnalogController"/> instance</returns>
         public virtual AnalogController CreateAnalogController(int chip)
         {
-            if (!_initialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             return new ArduinoAnalogController(this, SupportedPinConfigurations, PinNumberingScheme.Logical);
         }
@@ -423,10 +402,7 @@ namespace Iot.Device.Arduino
         /// <param name="timeSpan">Timespan between updates. Default ~20ms</param>
         public void SetAnalogPinSamplingInterval(TimeSpan timeSpan)
         {
-            if (!_initialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             Firmata.SetAnalogInputSamplingInterval(timeSpan);
         }
@@ -441,10 +417,7 @@ namespace Iot.Device.Arduino
         /// <returns>True on success, false otherwise</returns>
         public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
         {
-            if (!_initialized)
-            {
-                Initialize();
-            }
+            Initialize();
 
             if (!_supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.Dht))
             {
@@ -461,6 +434,7 @@ namespace Iot.Device.Arduino
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
+            _isDisposed = true;
             // Do this first, to force any blocking read operations to end
             if (_dataStream != null)
             {
