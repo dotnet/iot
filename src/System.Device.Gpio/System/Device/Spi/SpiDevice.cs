@@ -108,13 +108,13 @@ namespace System.Device.Spi
         /// </summary>
         /// <param name="toReverse">The byte to reverse</param>
         /// <returns></returns>
-        public static byte ReverseByte(byte toReverse) => BitReverseTable[toReverse];
+        internal static byte ReverseByte(byte toReverse) => BitReverseTable[toReverse];
 
         /// <summary>
         /// Reverse the bytes
         /// </summary>
         /// <param name="span">The Span of byte to reverse</param>
-        public static void ReverseByte(Span<byte> span)
+        internal static void ReverseByte(Span<byte> span)
         {
             for (int i = 0; i < span.Length; i++)
             {
