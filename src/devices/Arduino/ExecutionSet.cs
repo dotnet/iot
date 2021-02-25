@@ -558,6 +558,11 @@ namespace Iot.Device.Arduino
             return true;
         }
 
+        internal bool IsSuppressed(Type t)
+        {
+            return _classesToSuppress.Contains(t);
+        }
+
         internal bool HasDefinition(Type classType)
         {
             if (_classesToSuppress.Contains(classType))

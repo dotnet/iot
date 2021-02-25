@@ -488,7 +488,7 @@ namespace Iot.Device.Arduino
                     {
                         // Or if the method is implementing an interface
                         List<MethodInfo> methodsBeingImplemented = new List<MethodInfo>();
-                        ArduinoCsCompiler.CollectBaseImplementations(m, methodsBeingImplemented);
+                        ArduinoCsCompiler.CollectBaseImplementations(set, m, methodsBeingImplemented);
                         if (methodsBeingImplemented.Any())
                         {
                             PrepareCodeInternal(set, m, null);
@@ -818,7 +818,7 @@ namespace Iot.Device.Arduino
                     return false;
                 }
 
-                CollectBaseImplementations(m, methodsBeingImplemented);
+                CollectBaseImplementations(set, m, methodsBeingImplemented);
 
                 // We need the implementation if at least one base implementation is being called and is used
                 return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, out _));
@@ -856,7 +856,7 @@ namespace Iot.Device.Arduino
             return MethodsHaveSameSignature(self, candidate);
         }
 
-        internal static void CollectBaseImplementations(MethodInfo method, List<MethodInfo> methodsBeingImplemented)
+        internal static void CollectBaseImplementations(ExecutionSet set, MethodInfo method, List<MethodInfo> methodsBeingImplemented)
         {
             Type? cls = method.DeclaringType?.BaseType;
             while (cls != null)
@@ -880,6 +880,12 @@ namespace Iot.Device.Arduino
 
             foreach (var interf in cls.GetInterfaces())
             {
+                // If an interface is in the suppression list, don't use it for collecting dependencies
+                if (set.IsSuppressed(interf))
+                {
+                    continue;
+                }
+
                 foreach (var candidate in interf.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
                     if (IsOverriddenImplementation(candidate, method, true))
@@ -1407,6 +1413,8 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
                 exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
+                exec.SuppressType(typeof(IConvertible)); // Remove support for this rarely used interface which links many methods (i.e. on String)
+                exec.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
                 exec.SuppressType(typeof(ArduinoBoard));
                 exec.SuppressType(typeof(ArduinoCsCompiler));
@@ -1785,44 +1793,105 @@ namespace Iot.Device.Arduino
         internal void ExecuteStaticCtors(ExecutionSet set)
         {
             List<ClassDeclaration> classes = set.Classes.Where(x => !x.SuppressInit && x.TheType.TypeInitializer != null).ToList();
-            // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
-            // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
-            BringToFront(classes, typeof(Stopwatch));
-            BringToFront(classes, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
-            BringToFront(classes, typeof(System.DateTime));
+            List<IlCode> codeSequences = new List<IlCode>();
             for (var index = 0; index < classes.Count; index++)
             {
                 ClassDeclaration? cls = classes[index];
                 if (!cls.SuppressInit && cls.TheType.TypeInitializer != null)
                 {
-                    _board.Log($"Running static initializer of {cls}. Step {index + 1}/{classes.Count}...");
-                    var task = GetTask(set, cls.TheType.TypeInitializer);
-                    task.Invoke(CancellationToken.None);
-                    task.WaitForResult();
-                    if (task.GetMethodResults(set, out _, out var state) == false || state != MethodState.Stopped)
+                    set.HasMethod(cls.TheType.TypeInitializer, out var code);
+                    if (code == null)
                     {
-                        throw new InvalidProgramException($"Error executing static ctor of class {cls.TheType}");
+                        throw new InvalidOperationException("Inconsistent data set");
                     }
+
+                    codeSequences.Add(code);
                 }
+            }
+
+            codeSequences.Sort(new DependencySorter());
+
+            // Todo: The above doesn't work reliably yet, therefore do a bit of manual mangling.
+            // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
+            // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
+            BringToFront(codeSequences, typeof(MiniCultureInfo));
+            BringToFront(codeSequences, typeof(Stopwatch));
+            BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
+            BringToFront(codeSequences, typeof(System.DateTime));
+
+            for (var index2 = 0; index2 < codeSequences.Count; index2++)
+            {
+                var initializer = codeSequences[index2].Method;
+                _board.Log($"Running static initializer of {initializer.DeclaringType}. Step {index2 + 1}/{codeSequences.Count}...");
+                var task = GetTask(set, initializer);
+                task.Invoke(CancellationToken.None);
+                task.WaitForResult();
+                if (task.GetMethodResults(set, out _, out var state) == false || state != MethodState.Stopped)
+                {
+                    throw new InvalidProgramException($"Error executing static ctor of class {initializer.DeclaringType}");
+                }
+
             }
         }
 
-        private void BringToFront(List<ClassDeclaration> classes, Type type)
+        /// <summary>
+        /// This sorts the static constructors by dependencies. A constructor that has a dependency to another class
+        /// must be executed after that class. Let's hope the dependencies are not circular.
+        /// </summary>
+        internal class DependencySorter : IComparer<IlCode>
+        {
+            public int Compare(IlCode? x, IlCode? y)
+            {
+                if (x == null)
+                {
+                    return 1;
+                }
+
+                if (y == null)
+                {
+                    return -1;
+                }
+
+                if (x.DependentTypes.Contains(y.Method.DeclaringType))
+                {
+                    return 1;
+                }
+
+                if (x.DependentMethods.Any(a => a.DeclaringType == y.Method.DeclaringType))
+                {
+                    return 1;
+                }
+                else if (y.DependentTypes.Contains(x.Method.DeclaringType))
+                {
+                    return -1;
+                }
+                else if (y.DependentMethods.Any(a => a.DeclaringType == x.Method.DeclaringType))
+                {
+                    return -1;
+                }
+
+                return 0;
+            }
+        }
+
+        private void BringToFront(List<IlCode> classes, Type type)
         {
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            int idx = classes.FindIndex(x => x.TheType == type);
+            int idx = classes.FindIndex(x => x.Method.DeclaringType == type);
             if (idx < 0)
             {
                 return;
             }
 
             var temp = classes[idx];
-            classes[idx] = classes[0];
-            classes[0] = temp;
+            // Move the element to the front. Note: Don't replace with the element that is already there, otherwise this would
+            // eventually become last instead of second.
+            classes.RemoveAt(idx);
+            classes.Insert(0, temp);
         }
 
         private void SendToBack(List<ClassDeclaration> classes, Type type)
@@ -1838,9 +1907,10 @@ namespace Iot.Device.Arduino
                 return;
             }
 
+            // Move to back
             var temp = classes[idx];
-            classes[idx] = classes[classes.Count - 1];
-            classes[classes.Count - 1] = temp;
+            classes.RemoveAt(idx);
+            classes.Add(temp);
         }
 
         /// <summary>

@@ -50,6 +50,12 @@ namespace Iot.Device.Arduino
             set;
         }
 
+        public int BranchTargetPc
+        {
+            get;
+            set;
+        }
+
         public List<IlInstruction> PreviousInstructions
         {
             get;

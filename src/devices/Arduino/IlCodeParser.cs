@@ -80,10 +80,24 @@ namespace Iot.Device.Arduino
             List<TypeInfo> typesUsed = new List<TypeInfo>();
 
             int idx = 0;
+            IlInstruction? methodStart = null;
+            IlInstruction? current = null;
             while (idx < byteCode.Length - 5) // If less than 5 byte remain, there can't be a token within it
             {
+                int codeLocation = idx;
                 OpCode opCode = DecodeOpcode(byteCode, ref idx);
                 OpCodeType type = OpCodeDefinitions.OpcodeDef[(int)opCode].Type;
+                if (methodStart == null || current == null)
+                {
+                    methodStart = new IlInstruction(opCode, codeLocation);
+                    current = methodStart;
+                }
+                else
+                {
+                    var temp = new IlInstruction(opCode, codeLocation);
+                    current.NextInstruction = temp;
+                    current = temp;
+                }
 
                 int tokenOffset = idx;
                 switch (type)
