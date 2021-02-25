@@ -14,9 +14,11 @@ namespace System.Device.Spi
     {
         private const string DefaultDevicePath = "/dev/spidev";
         private const uint SPI_IOC_MESSAGE_1 = 0x40206b00;
+        private const int MaxStackallocBuffer = 256;
         private static readonly object s_initializationLock = new object();
         private readonly SpiConnectionSettings _settings;
         private int _deviceFileDescriptor = -1;
+        private bool _isInverted = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnixSpiDevice"/> class that will use the specified settings to communicate with the SPI device.
@@ -71,7 +73,25 @@ namespace System.Device.Spi
                 int result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
                 if (result == -1)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI mode to {_settings.Mode}.");
+                    // We should try the other mode and invert the buffers manually
+                    // RPI can't open Mode0 in LSB for example
+                    if (_settings.DataFlow == DataFlow.LsbFirst)
+                    {
+                        mode &= ~UnixSpiMode.SPI_LSB_FIRST;
+                    }
+                    else
+                    {
+                        mode |= UnixSpiMode.SPI_LSB_FIRST;
+                    }
+
+                    nativePtr = new IntPtr(&mode);
+                    result = Interop.ioctl(_deviceFileDescriptor, (uint)SpiSettings.SPI_IOC_WR_MODE, nativePtr);
+                    if (result == -1)
+                    {
+                        throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not set SPI mode to {_settings.Mode}.");
+                    }
+
+                    _isInverted = true;
                 }
 
                 byte dataLengthInBits = (byte)_settings.DataBitLength;
@@ -135,7 +155,7 @@ namespace System.Device.Spi
             byte result = 0;
             Transfer(null, &result, length);
 
-            return result;
+            return _isInverted ? ReverseByte(result) : result;
         }
 
         /// <summary>
@@ -158,6 +178,11 @@ namespace System.Device.Spi
             {
                 Transfer(null, bufferPtr, buffer.Length);
             }
+
+            if (_isInverted)
+            {
+                ReverseByte(buffer);
+            }
         }
 
         /// <summary>
@@ -167,6 +192,11 @@ namespace System.Device.Spi
         public override unsafe void WriteByte(byte value)
         {
             Initialize();
+
+            if (_isInverted)
+            {
+                value = ReverseByte(value);
+            }
 
             int length = sizeof(byte);
             Transfer(&value, null, length);
@@ -182,9 +212,22 @@ namespace System.Device.Spi
         {
             Initialize();
 
-            fixed (byte* dataPtr = buffer)
+            if (_isInverted)
             {
-                Transfer(dataPtr, null, buffer.Length);
+                Span<byte> toSend = buffer.Length > MaxStackallocBuffer ? new byte[buffer.Length] : stackalloc byte[buffer.Length];
+                buffer.CopyTo(toSend);
+                ReverseByte(toSend);
+                fixed (byte* dataPtr = toSend)
+                {
+                    Transfer(dataPtr, null, buffer.Length);
+                }
+            }
+            else
+            {
+                fixed (byte* dataPtr = buffer)
+                {
+                    Transfer(dataPtr, null, buffer.Length);
+                }
             }
         }
 
@@ -202,11 +245,29 @@ namespace System.Device.Spi
                 throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
 
-            fixed (byte* writeBufferPtr = writeBuffer)
+            if (_isInverted)
             {
-                fixed (byte* readBufferPtr = readBuffer)
+                Span<byte> toSend = writeBuffer.Length > MaxStackallocBuffer ? new byte[writeBuffer.Length] : stackalloc byte[writeBuffer.Length];
+                writeBuffer.CopyTo(toSend);
+                ReverseByte(toSend);
+                fixed (byte* writeBufferPtr = toSend)
                 {
-                    Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                    fixed (byte* readBufferPtr = readBuffer)
+                    {
+                        Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                    }
+                }
+
+                ReverseByte(readBuffer);
+            }
+            else
+            {
+                fixed (byte* writeBufferPtr = writeBuffer)
+                {
+                    fixed (byte* readBufferPtr = readBuffer)
+                    {
+                        Transfer(writeBufferPtr, readBufferPtr, writeBuffer.Length);
+                    }
                 }
             }
         }

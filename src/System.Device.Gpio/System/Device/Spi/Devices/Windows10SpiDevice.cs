@@ -14,6 +14,7 @@ namespace System.Device.Spi
     {
         private readonly SpiConnectionSettings _settings;
         private WinSpi.SpiDevice _winDevice;
+        private bool _isInverted = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Windows10SpiDevice"/> class that will use the specified settings to communicate with the SPI device.
@@ -23,9 +24,14 @@ namespace System.Device.Spi
         /// </param>
         public Windows10SpiDevice(SpiConnectionSettings settings)
         {
-            if (settings.DataFlow != DataFlow.MsbFirst || settings.ChipSelectLineActiveState != PinValue.Low)
+            if (settings.ChipSelectLineActiveState != PinValue.Low)
             {
-                throw new PlatformNotSupportedException($"Changing {nameof(settings.DataFlow)} or {nameof(settings.ChipSelectLineActiveState)} options is not supported on the current platform.");
+                throw new PlatformNotSupportedException($"Changing{nameof(settings.ChipSelectLineActiveState)} options is not supported on the current platform.");
+            }
+
+            if (settings.DataFlow == DataFlow.LsbFirst)
+            {
+                _isInverted = true;
             }
 
             _settings = settings;
@@ -73,7 +79,7 @@ namespace System.Device.Spi
         {
             byte[] buffer = new byte[1];
             _winDevice.Read(buffer);
-            return buffer[0];
+            return _isInverted ? ReverseByte(buffer[0]) : buffer[0];
         }
 
         /// <summary>
@@ -93,6 +99,11 @@ namespace System.Device.Spi
             byte[] byteArray = new byte[buffer.Length];
             _winDevice.Read(byteArray);
             new Span<byte>(byteArray).CopyTo(buffer);
+
+            if (_isInverted)
+            {
+                ReverseByte(buffer);
+            }
         }
 
         /// <summary>
@@ -101,7 +112,7 @@ namespace System.Device.Spi
         /// <param name="value">The byte to be written to the SPI device.</param>
         public override void WriteByte(byte value)
         {
-            _winDevice.Write(new[] { value });
+            _winDevice.Write(new[] { _isInverted ? ReverseByte(value) : value });
         }
 
         /// <summary>
@@ -112,7 +123,13 @@ namespace System.Device.Spi
         /// </param>
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            _winDevice.Write(buffer.ToArray());
+            byte[] toSend = buffer.ToArray();
+            if (_isInverted)
+            {
+                ReverseByte(toSend);
+            }
+
+            _winDevice.Write(toSend);
         }
 
         /// <summary>
@@ -127,9 +144,20 @@ namespace System.Device.Spi
                 throw new ArgumentException($"Parameters '{nameof(writeBuffer)}' and '{nameof(readBuffer)}' must have the same length.");
             }
 
-            byte[] byteArray = new byte[readBuffer.Length];
-            _winDevice.TransferFullDuplex(writeBuffer.ToArray(), byteArray);
-            byteArray.CopyTo(readBuffer);
+            byte[] readArray = new byte[readBuffer.Length];
+            byte[] writeArray = writeBuffer.ToArray();
+
+            if (_isInverted)
+            {
+                ReverseByte(writeArray);
+            }
+
+            _winDevice.TransferFullDuplex(writeArray, readArray);
+            readArray.CopyTo(readBuffer);
+            if (_isInverted)
+            {
+                ReverseByte(readBuffer);
+            }
         }
 
         protected override void Dispose(bool disposing)
