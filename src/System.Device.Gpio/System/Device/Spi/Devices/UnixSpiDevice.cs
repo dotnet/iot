@@ -214,7 +214,8 @@ namespace System.Device.Spi
 
             if (_isInverted)
             {
-                byte[] toSend = buffer.ToArray();
+                Span<byte> toSend = buffer.Length > MaxStackallocBuffer ? new byte[buffer.Length] : stackalloc byte[buffer.Length];
+                buffer.CopyTo(toSend);
                 ReverseByte(toSend);
                 fixed (byte* dataPtr = toSend)
                 {
