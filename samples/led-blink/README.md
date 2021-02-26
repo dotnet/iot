@@ -1,6 +1,6 @@
-# Blink an LED with .NET Core on a Raspberry Pi
+# Blink an LED with .NET on a Raspberry Pi
 
-This [sample](Program.cs) demonstrates blinking an LED. The sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://www.nuget.org/packages/System.Device.Gpio).
+This [sample](Program.cs) demonstrates blinking an LED. The sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://www.nuget.org/packages/System.Device.Gpio). The [Blink multiple LEDs](../led-blink-multiple/README.md) sample demonstrates how to add more LEDS.
 
 The following code toggles a GPIO pin on and off, which powers the LED.
 
@@ -24,6 +24,24 @@ while (true)
 The following [fritzing diagram](rpi-led.fzz) demonstrates how you should configure your breadboard to match the code above.
 
 ![Raspberry Pi Breadboard diagram](rpi-led_bb.png)
+
+## Running in containers
+
+You can run .NET GPIO apps in containers. This sample app includes a [Dockerfile](Dockerfile) that you can build and run with the following commands:
+
+```console
+$ pwd
+/home/pi/iot/samples/led-blink
+$ docker build -t led-blink .
+// snip ...
+$ docker run --rm --device /dev/gpiomem led-blink
+```
+
+Alternatively, you can run the container by mounting sysfs as a privileged container, but that's less secure and is a slower way to interact with GPIO pins.
+
+```console
+$ docker run --rm -v /sys:/sys --privileged led-blink
+```
 
 ## Resources
 
