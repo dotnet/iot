@@ -7,7 +7,7 @@ The following code toggles multiple GPIO pins on and off, which powers the LEDs.
 ```csharp
 int lightTime = 1000;
 int dimTime = 200;
-int[] pins = new int[] {4, 17, 27, 22, 5, 6};
+int[] pins = new int[] {18, 24, 25};
 
 using GpioController controller = new();
 
