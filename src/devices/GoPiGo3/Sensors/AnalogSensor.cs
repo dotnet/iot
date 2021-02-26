@@ -12,6 +12,11 @@ namespace Iot.Device.GoPiGo3.Sensors
     /// </summary>
     public class AnalogSensor : ISensor
     {
+        /// <summary>
+        /// List the supported Grove ports for the sensor
+        /// </summary>
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>() { GrovePort.Grove1, GrovePort.Grove2 };
+
         internal readonly GrovePort _mode;
         internal GoPiGo _goPiGo;
 
@@ -60,14 +65,8 @@ namespace Iot.Device.GoPiGo3.Sensors
         public GrovePort Port { get; internal set; }
 
         /// <summary>
-        /// List the supported Grove ports for the sensor
-        /// </summary>
-        public static List<GrovePort> SupportedPorts => new List<GrovePort>() { GrovePort.Grove1, GrovePort.Grove2 };
-
-        /// <summary>
         /// Get the sensor name "Analog Sensor"
         /// </summary>
         public string SensorName => "Analog Sensor";
-
     }
 }

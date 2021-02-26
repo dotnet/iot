@@ -16,8 +16,10 @@ namespace Iot.Device.Media
     {
         private const string DefaultDevicePath = "/dev/video";
         private const int BufferCount = 4;
-        private int _deviceFileDescriptor = -1;
+
         private static readonly object s_initializationLock = new object();
+
+        private int _deviceFileDescriptor = -1;
 
         /// <summary>
         /// Path to video resources located on the platform.
@@ -37,6 +39,15 @@ namespace Iot.Device.Media
         {
             Settings = settings;
             DevicePath = DefaultDevicePath;
+        }
+
+        private static unsafe void UnmappingFrameBuffers(V4l2FrameBuffer* buffers)
+        {
+            // Unmapping the applied buffer to user space
+            for (uint i = 0; i < BufferCount; i++)
+            {
+                Interop.munmap(buffers[i].Start, (int)buffers[i].Length);
+            }
         }
 
         /// <summary>
@@ -247,15 +258,6 @@ namespace Iot.Device.Media
             }
 
             return buffers;
-        }
-
-        private static unsafe void UnmappingFrameBuffers(V4l2FrameBuffer* buffers)
-        {
-            // Unmapping the applied buffer to user space
-            for (uint i = 0; i < BufferCount; i++)
-            {
-                Interop.munmap(buffers[i].Start, (int)buffers[i].Length);
-            }
         }
 
         private unsafe void SetVideoConnectionSettings()

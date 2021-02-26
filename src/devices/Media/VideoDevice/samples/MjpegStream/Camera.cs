@@ -70,14 +70,14 @@ namespace CameraIoT
         }
 
         /// <summary>
-        /// Timezone to use for the time stamp
-        /// </summary>
-        public int Timezone { get; set; } = 0;
-
-        /// <summary>
         /// Get the camera instance
         /// </summary>
         public static Camera Instance => _instance;
+
+        /// <summary>
+        /// Timezone to use for the time stamp
+        /// </summary>
+        public int Timezone { get; set; } = 0;
 
         /// <summary>
         /// The last image

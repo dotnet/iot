@@ -52,6 +52,13 @@ namespace Iot.Device.Hts221
         [Telemetry]
         public RelativeHumidity Humidity => GetActualHumidity(ReadInt16(Register.Humidity));
 
+        private static float Lerp(float x, float x0, float x1, float y0, float y1)
+        {
+            float xrange = x1 - x0;
+            float yrange = y1 - y0;
+            return y0 + (x - x0) * yrange / xrange;
+        }
+
         private void WriteByte(Register register, byte data)
         {
             Span<byte> buff = stackalloc byte[2]
@@ -98,13 +105,6 @@ namespace Iot.Device.Hts221
             (short h0raw, short h1raw) = GetHumidityCalibrationPointsRaw();
             (byte h0x2rH, byte h1x2rH) = GetHumidityCalibrationPointsRH();
             return RelativeHumidity.FromPercent(Lerp(humidityRaw, h0raw, h1raw, h0x2rH / 2.0f, h1x2rH / 2.0f));
-        }
-
-        private static float Lerp(float x, float x0, float x1, float y0, float y1)
-        {
-            float xrange = x1 - x0;
-            float yrange = y1 - y0;
-            return y0 + (x - x0) * yrange / xrange;
         }
 
         private (ushort T0x8, ushort T1x8) GetTemperatureCalibrationPointsCelsius()

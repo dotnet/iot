@@ -16,15 +16,15 @@ namespace Iot.Device.Media
     /// </summary>
     internal class UnixSoundDevice : SoundDevice
     {
+        private static readonly object s_playbackInitializationLock = new object();
+        private static readonly object s_recordingInitializationLock = new object();
+        private static readonly object s_mixerInitializationLock = new object();
+
         private IntPtr _playbackPcm;
         private IntPtr _recordingPcm;
         private IntPtr _mixer;
         private IntPtr _elem;
         private int _errorNum;
-
-        private static readonly object s_playbackInitializationLock = new object();
-        private static readonly object s_recordingInitializationLock = new object();
-        private static readonly object s_mixerInitializationLock = new object();
 
         private uint _recordingTotalTimeSeconds;
         private bool _record;

@@ -9,6 +9,23 @@ namespace System.Device.Spi
     public abstract partial class SpiDevice : IDisposable
     {
         /// <summary>
+        /// Creates a communications channel to a device on a SPI bus running on the current hardware
+        /// </summary>
+        /// <param name="settings">The connection settings of a device on a SPI bus.</param>
+        /// <returns>A communications channel to a device on a SPI bus.</returns>
+        public static SpiDevice Create(SpiConnectionSettings settings)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                return CreateWindows10SpiDevice(settings);
+            }
+            else
+            {
+                return new UnixSpiDevice(settings);
+            }
+        }
+
+        /// <summary>
         /// The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
         /// so the object returned will be a clone of the settings object.
         /// </summary>
@@ -49,23 +66,6 @@ namespace System.Device.Spi
         /// <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
         /// <param name="readBuffer">The buffer to read the data from the SPI device.</param>
         public abstract void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
-
-        /// <summary>
-        /// Creates a communications channel to a device on a SPI bus running on the current hardware
-        /// </summary>
-        /// <param name="settings">The connection settings of a device on a SPI bus.</param>
-        /// <returns>A communications channel to a device on a SPI bus.</returns>
-        public static SpiDevice Create(SpiConnectionSettings settings)
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                return CreateWindows10SpiDevice(settings);
-            }
-            else
-            {
-                return new UnixSpiDevice(settings);
-            }
-        }
 
         /// <inheritdoc cref="IDisposable.Dispose"/>
         public void Dispose()

@@ -73,6 +73,57 @@ namespace Iot.Device.Multiplexing
         public int NodeCount => _nodeCount;
 
         /// <summary>
+        /// Provides the set of Charlie nodes given the set of pins and the count provided.
+        /// If count = 0, then the Charlieplex maximum is used for the pins provided (n^2-n).
+        /// </summary>
+        /// <param name="pins">The pins to use for the segment.</param>
+        /// <param name="nodeCount">The number of nodes to use. Default is the Charlieplex maximum.</param>
+        public static CharlieplexSegmentNode[] GetNodes(int[] pins, int nodeCount = 0)
+        {
+            int pinCount = pins.Length;
+
+            if (nodeCount == 0)
+            {
+                nodeCount = (int)Math.Pow(pinCount, 2) - pinCount;
+            }
+
+            CharlieplexSegmentNode[] nodes = new CharlieplexSegmentNode[nodeCount];
+
+            int pin = 0;
+            int pinJump = 1;
+            int resetCount = pinCount - 1;
+            bool firstLeg = false;
+            for (int i = 0; i < nodeCount; i++)
+            {
+                if ((pin > 0 && pin % resetCount == 0) || pin + pinJump > resetCount)
+                {
+                    pin = 0;
+                    pinJump++;
+                }
+
+                CharlieplexSegmentNode node = new CharlieplexSegmentNode();
+
+                if (!firstLeg)
+                {
+                    node.Anode = pins[pin];
+                    node.Cathode = pins[pin + pinJump];
+                    firstLeg = true;
+                }
+                else
+                {
+                    node.Anode = pins[pin + pinJump];
+                    node.Cathode = pins[pin];
+                    firstLeg = false;
+                    pin++;
+                }
+
+                nodes[i] = node;
+            }
+
+            return nodes;
+        }
+
+        /// <summary>
         /// Write a PinValue to a node, to update Charlieplex segment.
         /// Address scheme is 0-based. Given 8 nodes, addresses would be 0-7.
         /// Displays nodes in their updated configuration for the specified duration.
@@ -144,57 +195,6 @@ namespace Iot.Device.Multiplexing
                 }
             }
             while (watch.Elapsed < duration);
-        }
-
-        /// <summary>
-        /// Provides the set of Charlie nodes given the set of pins and the count provided.
-        /// If count = 0, then the Charlieplex maximum is used for the pins provided (n^2-n).
-        /// </summary>
-        /// <param name="pins">The pins to use for the segment.</param>
-        /// <param name="nodeCount">The number of nodes to use. Default is the Charlieplex maximum.</param>
-        public static CharlieplexSegmentNode[] GetNodes(int[] pins, int nodeCount = 0)
-        {
-            int pinCount = pins.Length;
-
-            if (nodeCount == 0)
-            {
-                nodeCount = (int)Math.Pow(pinCount, 2) - pinCount;
-            }
-
-            CharlieplexSegmentNode[] nodes = new CharlieplexSegmentNode[nodeCount];
-
-            int pin = 0;
-            int pinJump = 1;
-            int resetCount = pinCount - 1;
-            bool firstLeg = false;
-            for (int i = 0; i < nodeCount; i++)
-            {
-                if ((pin > 0 && pin % resetCount == 0) || pin + pinJump > resetCount)
-                {
-                    pin = 0;
-                    pinJump++;
-                }
-
-                CharlieplexSegmentNode node = new CharlieplexSegmentNode();
-
-                if (!firstLeg)
-                {
-                    node.Anode = pins[pin];
-                    node.Cathode = pins[pin + pinJump];
-                    firstLeg = true;
-                }
-                else
-                {
-                    node.Anode = pins[pin + pinJump];
-                    node.Cathode = pins[pin];
-                    firstLeg = false;
-                    pin++;
-                }
-
-                nodes[i] = node;
-            }
-
-            return nodes;
         }
 
         /// <summary>
