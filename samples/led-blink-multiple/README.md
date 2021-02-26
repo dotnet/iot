@@ -49,5 +49,5 @@ The following [fritzing diagram](rpi-led-multiple.fzz) demonstrates how you shou
 
 * [Diffused LEDs](https://www.adafruit.com/product/297)
 * [All about LEDs](https://learn.adafruit.com/all-about-leds)
-- [Blinking an LED with Arduino](https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/blinking-the-led)
-- [Blinking an LED with Python](https://learn.adafruit.com/blinking-an-led-with-beaglebone-black/writing-a-program)
+* [Blinking an LED with Arduino](https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/blinking-the-led)
+* [Blinking an LED with Python](https://learn.adafruit.com/blinking-an-led-with-beaglebone-black/writing-a-program)
