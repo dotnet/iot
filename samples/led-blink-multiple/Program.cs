@@ -7,7 +7,7 @@ using System.Threading;
 
 int lightTime = 1000;
 int dimTime = 200;
-int[] pins = new int[] {4, 17, 27, 22, 5, 6};
+int[] pins = new int[] {18, 24, 25};
 
 using GpioController controller = new();
 
@@ -26,7 +26,7 @@ Console.CancelKeyPress += (s, e) =>
     Console.WriteLine("Pin cleanup complete!");
 };
 
-// turn LED on and off
+// turn LEDs on and off
 int index = 0;
 while (true)
 {
