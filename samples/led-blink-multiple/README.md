@@ -1,6 +1,6 @@
 # Blink multiple LEDs with .NET on a Raspberry Pi
 
-This [sample](Program.cs) demonstrates blinking multiple LEDs. The sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://www.nuget.org/packages/System.Device.Gpio). The [Blink an LED](../led-blink-multiple/README.md) sample demonstrates a slightly simpler model if you just want to blink a single LED. That sample also demonstrates how to use these samples with Docker containers.
+This [sample](Program.cs) demonstrates blinking multiple LEDs. The sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://www.nuget.org/packages/System.Device.Gpio). The [Blink an LED](../led-blink/README.md) sample demonstrates a slightly simpler model if you just want to blink a single LED. That sample also demonstrates how to use these samples with Docker containers.
 
 The following code toggles multiple GPIO pins on and off, which powers the LEDs.
 
