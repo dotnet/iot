@@ -45,7 +45,8 @@ $ docker run --rm -v /sys:/sys --privileged led-blink
 
 ## Resources
 
-* [Diffused LEDs](https://www.adafruit.com/product/297)
+* [.NET IoT Docs](https://docs.microsoft.com/dotnet/iot/)
+* [Diffused LEDs](https://www.adafruit.com/product/4203)
 * [All about LEDs](https://learn.adafruit.com/all-about-leds)
 - [Blinking an LED with Arduino](https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/blinking-the-led)
 - [Blinking an LED with Python](https://learn.adafruit.com/blinking-an-led-with-beaglebone-black/writing-a-program)
