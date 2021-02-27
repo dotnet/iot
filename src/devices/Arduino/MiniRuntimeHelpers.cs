@@ -74,14 +74,21 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// This is expected to return a specific structure describing the array bounds - our implementation works differently,
+        /// so we might eventually keep this without implementation and make sure it's not called
+        /// </summary>
+        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetMultiDimensionalArrayBounds)]
         internal static unsafe ref int GetMultiDimensionalArrayBounds(Array array)
         {
             throw new NotImplementedException();
         }
 
-        internal static unsafe int GetMultiDimensionalArrayRank(Array array)
+        // [ArduinoImplementation(NativeMethod.RuntimeHelpersGetMultiDimensionalArrayRank)]
+        internal static int GetMultiDimensionalArrayRank(Array array)
         {
-            throw new NotImplementedException();
+            // We don't support the GetLowerBounds/GetUpperBounds methods for multi-dimensional arrays
+            return 0;
         }
 
         [ArduinoImplementation(NativeMethod.RuntimeHelpersGetRawArrayData)]

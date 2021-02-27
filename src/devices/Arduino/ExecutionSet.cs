@@ -477,7 +477,7 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.Type;
             }
-            else if (typeInfo == typeof(Array))
+            else if (typeInfo == typeof(Array) || typeInfo == typeof(MiniArray))
             {
                 token = (int)KnownTypeTokens.Array;
             }

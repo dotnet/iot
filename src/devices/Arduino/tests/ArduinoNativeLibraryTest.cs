@@ -629,7 +629,7 @@ namespace Iot.Device.Arduino.Tests
                 hd44780.Write("Hello World!");
                 hd44780.SetCursorPosition(0, 1);
                 var time = DateTime.UtcNow;
-                // hd44780.Write(time.ToShortDateString());
+                hd44780.Write(time.ToShortDateString());
                 hd44780.SetCursorPosition(0, 2);
                 hd44780.Write(time.ToLongTimeString());
                 return 1;

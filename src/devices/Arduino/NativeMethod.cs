@@ -48,11 +48,6 @@ namespace Iot.Device.Arduino
         StringCtor1,
         StringCompareTo,
 
-        ArrayCopy3,
-        ArrayCopy5,
-        ArrayClone,
-        ArrayClear,
-
         RuntimeHelpersInitializeArray,
         RuntimeHelpersRunClassConstructor,
         RuntimeHelpersIsReferenceOrContainsReferencesCore,
@@ -96,7 +91,6 @@ namespace Iot.Device.Arduino
         UnsafeAddByteOffset,
         UnsafeSizeOfType,
         UnsafeAsPointer,
-        ArrayResize,
         UnsafeByteOffset,
         UnsafeAreSame,
 
@@ -110,6 +104,10 @@ namespace Iot.Device.Arduino
         RuntimeHelpersIsBitwiseEquatable,
         RuntimeHelpersGetMethodTable,
         RuntimeHelpersGetRawArrayData,
+
+        RuntimeHelpersGetMultiDimensionalArrayBounds,
+        RuntimeHelpersGetMultiDimensionalArrayRank,
+
         RuntimeTypeHandleValue,
         RuntimeTypeHandleGetCorElementType,
 
@@ -135,5 +133,8 @@ namespace Iot.Device.Arduino
         DateTimeUtcNow,
 
         MemoryMarshalGetArrayDataReference,
+
+        ArrayCopyCore,
+        ArrayClear,
     }
 }
