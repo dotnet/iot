@@ -1841,6 +1841,7 @@ namespace Iot.Device.Arduino
             BringToFront(codeSequences, typeof(Stopwatch));
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(codeSequences, typeof(System.DateTime));
+            SendToBack(codeSequences, GetSystemPrivateType("System.DateTimeFormat"));
 
             for (var index2 = 0; index2 < codeSequences.Count; index2++)
             {
@@ -1917,14 +1918,14 @@ namespace Iot.Device.Arduino
             classes.Insert(0, temp);
         }
 
-        private void SendToBack(List<ClassDeclaration> classes, Type type)
+        private void SendToBack(List<IlCode> classes, Type type)
         {
             if (type == null)
             {
                 throw new ArgumentNullException(nameof(type));
             }
 
-            int idx = classes.FindIndex(x => x.TheType == type);
+            int idx = classes.FindIndex(x => x.Method.DeclaringType == type);
             if (idx < 0)
             {
                 return;

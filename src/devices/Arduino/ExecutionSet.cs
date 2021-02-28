@@ -145,6 +145,12 @@ namespace Iot.Device.Arduino
 
                     _compiler.SendConstants(converted, EmptySnapShot, _kernelSnapShot, true);
                     _compiler.CopyToFlash();
+
+                    int totalStringSize = CalculateTotalStringSize(_strings, EmptySnapShot, _kernelSnapShot);
+                    _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
+                    _compiler.SendStrings(_strings.ToList(), EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.CopyToFlash();
+
                     _compiler.WriteFlashHeader(_kernelSnapShot);
                 }
             }
@@ -180,7 +186,7 @@ namespace Iot.Device.Arduino
             }
 
             _compiler.SendConstants(converted, from, to, false);
-            int totalStringSize = CalculateTotalStringSize(_strings);
+            int totalStringSize = CalculateTotalStringSize(_strings, from, to);
             _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
             _compiler.SendStrings(_strings.ToList(), from, to, false);
 
@@ -190,10 +196,11 @@ namespace Iot.Device.Arduino
             _compiler.ExecuteStaticCtors(this);
         }
 
-        private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString, string StringData)> strings)
+        private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString, string StringData)> strings, SnapShot fromSnapShot, SnapShot toSnapShot)
         {
             int totalSize = sizeof(int); // we need a trailing empty entry
-            foreach (var elem in strings)
+            var list = strings.Where(x => !fromSnapShot.AlreadyAssignedStringTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedStringTokens.Contains(x.Token));
+            foreach (var elem in list)
             {
                 totalSize += sizeof(int);
                 totalSize += elem.EncodedString.Length;
@@ -220,6 +227,7 @@ namespace Iot.Device.Arduino
             tokens.AddRange(_methods.Select(x => x.Token));
             tokens.AddRange(_patchedFieldTokens.Values.Where(x => x.InitializerData != null).Select(x => x.Token));
             tokens.AddRange(_patchedTypeTokens.Values);
+            stringTokens.AddRange(_strings.Select(x => x.Token));
 
             return new SnapShot(this, tokens, stringTokens);
         }
