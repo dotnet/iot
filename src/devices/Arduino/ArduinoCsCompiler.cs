@@ -743,11 +743,14 @@ namespace Iot.Device.Arduino
             _board.Firmata.PrepareStringLoad(constantSize, stringSize);
         }
 
-        public void SendConstants(IList<(int Token, byte[] InitializerData, string StringData)> constElements)
+        public void SendConstants(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
+            ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
-            int cnt = constElements.Count;
+            var list = constElements.Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
+            var uploadList = list.OrderBy(x => x.Token).ToList();
+            int cnt = uploadList.Count;
             int idx = 1;
-            foreach (var e in constElements)
+            foreach (var e in uploadList)
             {
                 if (e.InitializerData == null)
                 {
@@ -755,6 +758,26 @@ namespace Iot.Device.Arduino
                 }
 
                 _board.Log($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes");
+                _board.Firmata.SendConstant(e.Token, e.InitializerData);
+                idx++;
+            }
+        }
+
+        public void SendStrings(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
+            ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
+        {
+            var list = constElements.Where(x => !fromSnapShot.AlreadyAssignedStringTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedStringTokens.Contains(x.Token));
+            var uploadList = list.OrderBy(x => x.Token).ToList();
+            int cnt = uploadList.Count;
+            int idx = 1;
+            foreach (var e in uploadList)
+            {
+                if (e.InitializerData == null)
+                {
+                    continue;
+                }
+
+                _board.Log($"Sending string {idx}/{cnt}. Size {e.InitializerData.Length} bytes: {e.StringData}");
                 _board.Firmata.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }

@@ -38,7 +38,7 @@ namespace Iot.Device.Arduino
         private readonly List<(int Token, byte[] EncodedString, string StringData)> _strings;
         private readonly CompilerSettings _compilerSettings;
 
-        private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>());
+        private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>(), new List<int>());
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -133,6 +133,17 @@ namespace Iot.Device.Arduino
                     _compiler.ClearAllData(true, true);
                     _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
                     _compiler.SendMethods(this, EmptySnapShot, _kernelSnapShot, true);
+                    List<(int Token, byte[] Data, string NoData)> converted = new();
+                    // Need to do this manually, due to stupid nullability conversion restrictions
+                    foreach (var elem in _patchedFieldTokens.Values)
+                    {
+                        if (elem.InitializerData != null)
+                        {
+                            converted.Add((elem.Token, elem.InitializerData, string.Empty));
+                        }
+                    }
+
+                    _compiler.SendConstants(converted, EmptySnapShot, _kernelSnapShot, true);
                     _compiler.CopyToFlash();
                     _compiler.WriteFlashHeader(_kernelSnapShot);
                 }
@@ -168,10 +179,10 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            _compiler.SendConstants(converted);
+            _compiler.SendConstants(converted, from, to, false);
             int totalStringSize = CalculateTotalStringSize(_strings);
             _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
-            _compiler.SendConstants(_strings.ToList());
+            _compiler.SendStrings(_strings.ToList(), from, to, false);
 
             MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
@@ -203,13 +214,14 @@ namespace Iot.Device.Arduino
         internal SnapShot CreateSnapShot()
         {
             List<int> tokens = new List<int>();
+            List<int> stringTokens = new List<int>();
             // Can't use this, because the list may contain replacement tokens for methods we haven't actually picked as part of this snapshot
             // tokens.AddRange(_patchedMethodTokens.Values);
             tokens.AddRange(_methods.Select(x => x.Token));
-            // TODO: Uncomment once these can also be stored to flash
-            // tokens.AddRange(_patchedFieldTokens.Values.Select(x => x.Token));
+            tokens.AddRange(_patchedFieldTokens.Values.Where(x => x.InitializerData != null).Select(x => x.Token));
             tokens.AddRange(_patchedTypeTokens.Values);
-            return new SnapShot(this, tokens);
+
+            return new SnapShot(this, tokens, stringTokens);
         }
 
         internal void CreateKernelSnapShot()
@@ -971,9 +983,10 @@ namespace Iot.Device.Arduino
         {
             private readonly ExecutionSet? _set;
 
-            public SnapShot(ExecutionSet? set, List<int> alreadyAssignedTokens)
+            public SnapShot(ExecutionSet? set, List<int> alreadyAssignedTokens, List<int> alreadyAssignedStringTokens)
             {
                 AlreadyAssignedTokens = alreadyAssignedTokens;
+                AlreadyAssignedStringTokens = alreadyAssignedStringTokens;
                 _set = set;
             }
 
@@ -982,10 +995,16 @@ namespace Iot.Device.Arduino
                 get;
             }
 
+            public List<int> AlreadyAssignedStringTokens
+            {
+                get;
+            }
+
             public override int GetHashCode()
             {
                 int ret = AlreadyAssignedTokens.Count;
                 ret ^= Xor(AlreadyAssignedTokens);
+                ret ^= Xor(AlreadyAssignedStringTokens);
                 if (AlreadyAssignedTokens.Count > 0 && _set != null)
                 {
                     // Add the original token from the last entry in the list (could also add all of them)
