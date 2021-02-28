@@ -39,7 +39,7 @@ namespace Iot.Device.Arduino.Tests
             {
                 settings = new CompilerSettings()
                 {
-                    CreateKernelForFlashing = false, UseFlash = false
+                    CreateKernelForFlashing = false, UseFlashForKernel = false
                 };
                 settings.AdditionalSuppressions.Add("System.Number");
                 settings.AdditionalSuppressions.Add("System.SR");
@@ -258,7 +258,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("CastClassTest", 0, 0, 1)]
         public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = true, UseFlash = true });
+            LoadCodeMethod(methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = true, UseFlashForKernel = true });
         }
 
         [Theory]

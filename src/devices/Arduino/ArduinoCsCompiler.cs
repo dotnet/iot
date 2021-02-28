@@ -731,7 +731,7 @@ namespace Iot.Device.Arduino
 
                 idx++;
                 // Need to repeatedly copy to flash, or a set that just fits into flash cannot be loaded since the total RAM size is much less than the total flash size
-                if (set.CompilerSettings.UseFlash && (idx % 100 == 0) && markAsReadOnly)
+                if (set.CompilerSettings.DoCopyToFlash(markAsReadOnly) && (idx % 100 == 0))
                 {
                     CopyToFlash();
                 }
@@ -805,7 +805,7 @@ namespace Iot.Device.Arduino
                 _board.Log($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo}.");
                 SendMethod(set, me);
                 idx++;
-                if (set.CompilerSettings.UseFlash && (idx % 100 == 0) && markAsReadOnly)
+                if (set.CompilerSettings.DoCopyToFlash(markAsReadOnly) && (idx % 100 == 0))
                 {
                     CopyToFlash();
                 }

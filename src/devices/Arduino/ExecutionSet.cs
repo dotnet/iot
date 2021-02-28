@@ -125,7 +125,7 @@ namespace Iot.Device.Arduino
 
         public void Load()
         {
-            if (CompilerSettings.UseFlash)
+            if (CompilerSettings.CreateKernelForFlashing)
             {
                 if (!_compiler.BoardHasKernelLoaded(_kernelSnapShot))
                 {
@@ -170,8 +170,8 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException("Main entry point not defined");
             }
 
-            // TODO: This should not be necessary later
-            _compiler.ClearAllData(true, false);
+            bool doWriteProgramToFlash = CompilerSettings.DoCopyToFlash(false);
+            _compiler.ClearAllData(true, doWriteProgramToFlash);
             _compiler.SetExecutionSetActive(this);
             _compiler.SendClassDeclarations(this, from, to, false);
             _compiler.SendMethods(this, from, to, false);
@@ -189,6 +189,10 @@ namespace Iot.Device.Arduino
             int totalStringSize = CalculateTotalStringSize(_strings, from, to);
             _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
             _compiler.SendStrings(_strings.ToList(), from, to, false);
+            if (doWriteProgramToFlash)
+            {
+                _compiler.WriteFlashHeader(to);
+            }
 
             MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
