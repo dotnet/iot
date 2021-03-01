@@ -154,7 +154,7 @@ namespace Iot.Device.Arduino
                     _compiler.WriteFlashHeader(_kernelSnapShot);
                 }
             }
-            else
+            else if (!CompilerSettings.UseFlashForProgram && !CompilerSettings.UseFlashForKernel)
             {
                 // If flash is not used, we must make sure it's empty. Otherwise there will be conflicts.
                 _compiler.ClearAllData(true, true);
@@ -171,27 +171,42 @@ namespace Iot.Device.Arduino
             }
 
             bool doWriteProgramToFlash = CompilerSettings.DoCopyToFlash(false);
-            _compiler.ClearAllData(true, doWriteProgramToFlash);
-            _compiler.SetExecutionSetActive(this);
-            _compiler.SendClassDeclarations(this, from, to, false);
-            _compiler.SendMethods(this, from, to, false);
-            List<(int Token, byte[] Data, string NoData)> converted = new();
-            // Need to do this manually, due to stupid nullability conversion restrictions
-            foreach (var elem in _patchedFieldTokens.Values)
+
+            if (!_compiler.BoardHasKernelLoaded(to))
             {
-                if (elem.InitializerData != null)
+                if (from == EmptySnapShot)
                 {
-                    converted.Add((elem.Token, elem.InitializerData, string.Empty));
+                    _compiler.ClearAllData(true, true);
+                }
+
+                _compiler.ClearAllData(true, doWriteProgramToFlash);
+                _compiler.SetExecutionSetActive(this);
+                _compiler.SendClassDeclarations(this, from, to, false);
+                _compiler.SendMethods(this, from, to, false);
+                List<(int Token, byte[] Data, string NoData)> converted = new();
+                // Need to do this manually, due to stupid nullability conversion restrictions
+                foreach (var elem in _patchedFieldTokens.Values)
+                {
+                    if (elem.InitializerData != null)
+                    {
+                        converted.Add((elem.Token, elem.InitializerData, string.Empty));
+                    }
+                }
+
+                _compiler.SendConstants(converted, from, to, false);
+                _compiler.CopyToFlash();
+                int totalStringSize = CalculateTotalStringSize(_strings, from, to);
+                _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
+                _compiler.SendStrings(_strings.ToList(), from, to, false);
+                if (doWriteProgramToFlash)
+                {
+                    _compiler.WriteFlashHeader(to);
                 }
             }
-
-            _compiler.SendConstants(converted, from, to, false);
-            int totalStringSize = CalculateTotalStringSize(_strings, from, to);
-            _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
-            _compiler.SendStrings(_strings.ToList(), from, to, false);
-            if (doWriteProgramToFlash)
+            else
             {
-                _compiler.WriteFlashHeader(to);
+                // We need to activate this execution set even if we don't need to load anything
+                _compiler.SetExecutionSetActive(this);
             }
 
             MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
