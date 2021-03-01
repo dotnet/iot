@@ -33,6 +33,8 @@ You can run .NET GPIO apps in containers. This sample app includes a [Dockerfile
 $ pwd
 /home/pi/iot/samples/led-blink
 $ docker build -t led-blink .
+Sending build context to Docker daemon  13.31kB
+Step 1/10 : FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 // snip ...
 $ docker run --rm --device /dev/gpiomem led-blink
 ```
