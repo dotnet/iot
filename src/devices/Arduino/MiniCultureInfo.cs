@@ -681,6 +681,11 @@ namespace Iot.Device.Arduino
             private static readonly string[] _saShortTimes = new string[] { "HH:mm", "hh:mm tt", "H:mm", "h:mm tt" }; // short time format
             private static readonly string[] _saDurationFormats = new string[] { "HH:mm:ss" };
             private static readonly string[] _saLongDates = new string[] { "dddd, dd MMMM yyyy" };
+
+            private static readonly string[] _saShortDates = new string[]
+            {
+                "yyyy-MM-dd"
+            };
             private static readonly string[] _saYearMonths = new string[] { "yyyy MMMM" };
             private static readonly CalendarId[] _saCalendars = new CalendarId[]
             {
@@ -793,7 +798,7 @@ namespace Iot.Device.Arduino
             [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
             public string[] ShortDates(CalendarId calendarId)
             {
-                return _saLongDates;
+                return _saShortDates;
             }
 
             public string[] LongTimes
