@@ -1,4 +1,4 @@
-# GPIO Driver for Special Chip
+# GpioDriver for other boards
 
 This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO drivers, and it can provide faster GPIO access.
 
