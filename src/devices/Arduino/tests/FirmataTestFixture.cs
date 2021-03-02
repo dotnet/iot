@@ -56,6 +56,26 @@ namespace Arduino.Tests
             get;
         }
 
+        /// <summary>
+        /// Default settings for unit tests
+        /// </summary>
+        public CompilerSettings DefaultCompilerSettings
+        {
+            get
+            {
+                return new CompilerSettings()
+                {
+                    CreateKernelForFlashing = false, UseFlashForKernel = false, UseFlashForProgram = true,
+                };
+            }
+        }
+
+        private void LogMessage(string x, Exception? y)
+        {
+            Console.WriteLine(x);
+            Debug.WriteLine(x);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             Board?.Dispose();

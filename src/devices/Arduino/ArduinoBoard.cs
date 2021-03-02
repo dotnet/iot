@@ -221,6 +221,7 @@ namespace Iot.Device.Arduino
 
                 _firmata.EnableDigitalReporting();
 
+                _firmata.OnSchedulerReply += FirmataOnSchedulerReply;
                 _initialized = true;
             }
         }
@@ -299,6 +300,11 @@ namespace Iot.Device.Arduino
         private void FirmataOnError(string message, Exception? innerException)
         {
             LogMessages?.Invoke(message, innerException);
+        }
+
+        private void FirmataOnSchedulerReply(int method, MethodState schedulerMethodState, object results)
+        {
+            _compilerCallback?.Invoke(method, schedulerMethodState, results);
         }
 
         /// <summary>
@@ -450,6 +456,7 @@ namespace Iot.Device.Arduino
 
             if (_firmata != null)
             {
+                _firmata.OnError -= FirmataOnError;
                 _firmata.Dispose();
                 _firmata = null;
             }

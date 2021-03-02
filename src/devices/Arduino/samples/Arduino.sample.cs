@@ -38,6 +38,18 @@ namespace Arduino.Samples
 
             string portName = args[0];
 
+            string portName = "INET";
+            if (args.Length > 0)
+            {
+                portName = args[0];
+            }
+
+            if (portName == "INET")
+            {
+                ConnectToSocket();
+                return;
+            }
+
             using (var port = new SerialPort(portName, 115200))
             {
                 Console.WriteLine($"Connecting to Arduino on {portName}");
@@ -51,25 +63,42 @@ namespace Arduino.Samples
                     return;
                 }
 
-                ArduinoBoard board = new ArduinoBoard(port.BaseStream);
-                try
+                ConnectWithStream(port.BaseStream);
+            }
+        }
+
+        private static void ConnectWithStream(Stream stream)
+        {
+            ArduinoBoard board = new ArduinoBoard(stream);
+            try
+            {
+                board.LogMessages += BoardOnLogMessages;
+                board.Initialize();
+                Console.WriteLine(
+                    $"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
+                while (Menu(board))
                 {
-                    board.LogMessages += BoardOnLogMessages;
-                    // This implicitly connects
-                    Console.WriteLine($"Connecting... Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
-                    while (Menu(board))
-                    {
-                    }
                 }
-                catch (TimeoutException x)
-                {
-                    Console.WriteLine($"No answer from board: {x.Message} ");
-                }
-                finally
-                {
-                    port.Close();
-                    board?.Dispose();
-                }
+            }
+            catch (TimeoutException x)
+            {
+                Console.WriteLine($"No answer from board: {x.Message} ");
+            }
+            finally
+            {
+                stream.Close();
+                board?.Dispose();
+            }
+        }
+
+        private static void ConnectToSocket()
+        {
+            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            s.Connect(IPAddress.Loopback, 27016);
+            s.NoDelay = true;
+            using (NetworkStream ns = new NetworkStream(s, true))
+            {
+                ConnectWithStream(ns);
             }
         }
 
