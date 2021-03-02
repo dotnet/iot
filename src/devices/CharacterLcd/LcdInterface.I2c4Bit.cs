@@ -54,7 +54,7 @@ namespace Iot.Device.CharacterLcd
                 {
                     _backlightOn = value;
                     // Need to send a command to make this happen immediately.
-                    SendCommand(0);
+                    SendCommandAndWait(0);
                 }
             }
 
@@ -87,7 +87,7 @@ namespace Iot.Device.CharacterLcd
                 SendCommandAndWait(LCD_ENTRYMODESET | LCD_ENTRYLEFT);
             }
 
-            private void SendCommandAndWait(byte command)
+            public override void SendCommandAndWait(byte command)
             {
                 // Must not run the init sequence to fast or undefined behavior may occur
                 SendCommand(command);
