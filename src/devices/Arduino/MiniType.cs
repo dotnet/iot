@@ -110,12 +110,6 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(NativeMethod.TypeGetTypeFromHandle)]
-        public static Type GetTypeFromHandle(RuntimeTypeHandle handle)
-        {
-            throw new NotImplementedException();
-        }
-
         public static bool operator ==(MiniType? a, MiniType? b)
         {
             if (ReferenceEquals(a, null))
@@ -139,6 +133,23 @@ namespace Iot.Device.Arduino
         internal virtual RuntimeTypeHandle GetTypeHandleInternal()
         {
             return TypeHandle;
+        }
+
+        [ArduinoImplementation(NativeMethod.TypeGetTypeFromHandle)]
+        public static Type GetTypeFromHandle(RuntimeTypeHandle handle)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static TypeCode GetTypeCode(Type type)
+        {
+            return TypeCode.Empty;
+        }
+
+        [ArduinoImplementation(NativeMethod.TypeCreateInstanceForAnotherGenericParameter)]
+        public static object? CreateInstanceForAnotherGenericParameter(Type? type1, Type? type2)
+        {
+            return null;
         }
 
         [ArduinoImplementation(NativeMethod.TypeEquals)]
@@ -189,11 +200,6 @@ namespace Iot.Device.Arduino
             return new Type[0];
         }
 
-        public static TypeCode GetTypeCode(Type type)
-        {
-            return TypeCode.Empty;
-        }
-
         public virtual Type GetEnumUnderlyingType()
         {
             return typeof(Int32);
@@ -208,12 +214,6 @@ namespace Iot.Device.Arduino
         public virtual PropertyInfo[] GetProperties()
         {
             throw new NotImplementedException();
-        }
-
-        [ArduinoImplementation(NativeMethod.TypeCreateInstanceForAnotherGenericParameter)]
-        public static object? CreateInstanceForAnotherGenericParameter(Type? type1, Type? type2)
-        {
-            return null;
         }
     }
 }

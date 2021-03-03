@@ -21,6 +21,8 @@ namespace Iot.Device.Arduino
 
         public static ExecutionSet? CompiledKernel = null;
 
+        private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>(), new List<int>());
+
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<ClassDeclaration> _classes;
@@ -37,8 +39,6 @@ namespace Iot.Device.Arduino
         // String data, already UTF-8 encoded. The StringData value is actually only used for debugging purposes
         private readonly List<(int Token, byte[] EncodedString, string StringData)> _strings;
         private readonly CompilerSettings _compilerSettings;
-
-        private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>(), new List<int>());
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -122,6 +122,19 @@ namespace Iot.Device.Arduino
         }
 
         public CompilerSettings CompilerSettings => _compilerSettings;
+
+        private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString, string StringData)> strings, SnapShot fromSnapShot, SnapShot toSnapShot)
+        {
+            int totalSize = sizeof(int); // we need a trailing empty entry
+            var list = strings.Where(x => !fromSnapShot.AlreadyAssignedStringTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedStringTokens.Contains(x.Token));
+            foreach (var elem in list)
+            {
+                totalSize += sizeof(int);
+                totalSize += elem.EncodedString.Length;
+            }
+
+            return totalSize;
+        }
 
         public void Load()
         {
@@ -213,19 +226,6 @@ namespace Iot.Device.Arduino
 
             // Execute all static ctors
             _compiler.ExecuteStaticCtors(this);
-        }
-
-        private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString, string StringData)> strings, SnapShot fromSnapShot, SnapShot toSnapShot)
-        {
-            int totalSize = sizeof(int); // we need a trailing empty entry
-            var list = strings.Where(x => !fromSnapShot.AlreadyAssignedStringTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedStringTokens.Contains(x.Token));
-            foreach (var elem in list)
-            {
-                totalSize += sizeof(int);
-                totalSize += elem.EncodedString.Length;
-            }
-
-            return totalSize;
         }
 
         public ArduinoTask GetTaskForMethod<T>(T mainEntryPoint)

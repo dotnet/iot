@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 
+#pragma warning disable SA1204 // Static members should appear before non-static members (justification: Order is from original .NET implementation)
 namespace Iot.Device.Arduino
 {
     /// <summary>

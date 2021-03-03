@@ -151,6 +151,30 @@ namespace Iot.Device.Arduino
             }
         }
 
+        private static bool HasStaticFields(Type cls)
+        {
+            foreach (var fld in cls.GetFields())
+            {
+                if (fld.IsStatic)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static Type GetSystemPrivateType(string typeName)
+        {
+            var ret = Type.GetType(typeName);
+            if (ret == null)
+            {
+                throw new InvalidOperationException($"Type {typeName} not found");
+            }
+
+            return ret;
+        }
+
         private string GetMethodName(ArduinoMethodDeclaration decl)
         {
             return decl.MethodBase.Name;
@@ -1791,19 +1815,6 @@ namespace Iot.Device.Arduino
             code.Add((byte)((token >> 24) & 0xFF));
         }
 
-        private static bool HasStaticFields(Type cls)
-        {
-            foreach (var fld in cls.GetFields())
-            {
-                if (fld.IsStatic)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
         private void SendMethod(ExecutionSet set, ArduinoMethodDeclaration decl)
         {
             SendMethodDeclaration(decl);
@@ -2099,17 +2110,6 @@ namespace Iot.Device.Arduino
             var decl = _activeExecutionSet.GetMethod(methodInfo);
 
             _board.Firmata.SendKillTask(decl.Token);
-        }
-
-        public static Type GetSystemPrivateType(string typeName)
-        {
-            var ret = Type.GetType(typeName);
-            if (ret == null)
-            {
-                throw new InvalidOperationException($"Type {typeName} not found");
-            }
-
-            return ret;
         }
 
         /// <summary>

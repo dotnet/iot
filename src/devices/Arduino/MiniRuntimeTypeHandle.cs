@@ -55,26 +55,6 @@ namespace Iot.Device.Arduino
     // Note: Be aware that this replaces a value type
     internal struct MiniRuntimeTypeHandle : ISerializable
     {
-        // Returns handle for interop with EE. The handle is guaranteed to be non-null.
-        internal MiniRuntimeTypeHandle GetNativeHandle()
-        {
-            // Create local copy to avoid a race condition
-            Type type = m_type;
-            if (type == null)
-                throw new ArgumentNullException();
-            return new MiniRuntimeTypeHandle(type);
-        }
-
-        // Returns type for interop with EE. The type is guaranteed to be non-null.
-        internal Type GetTypeChecked()
-        {
-            // Create local copy to avoid a race condition
-            Type type = m_type;
-            if (type == null)
-                throw new ArgumentNullException(null);
-            return type;
-        }
-
         internal static bool IsInstanceOfType(Type type, object? o)
         {
             throw new NotImplementedException();
@@ -106,6 +86,42 @@ namespace Iot.Device.Arduino
                 ////}
             }
 
+            return type;
+        }
+
+        [ArduinoImplementation(NativeMethod.RuntimeTypeHandleGetCorElementType)]
+        internal static CorElementType GetCorElementType(Type type)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static bool HasInstantiation(Type type)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal static bool IsGenericTypeDefinition(Type type)
+        {
+            throw new NotImplementedException();
+        }
+
+        // Returns handle for interop with EE. The handle is guaranteed to be non-null.
+        internal MiniRuntimeTypeHandle GetNativeHandle()
+        {
+            // Create local copy to avoid a race condition
+            Type type = m_type;
+            if (type == null)
+                throw new ArgumentNullException();
+            return new MiniRuntimeTypeHandle(type);
+        }
+
+        // Returns type for interop with EE. The type is guaranteed to be non-null.
+        internal Type GetTypeChecked()
+        {
+            // Create local copy to avoid a race condition
+            Type type = m_type;
+            if (type == null)
+                throw new ArgumentNullException(null);
             return type;
         }
 
@@ -272,12 +288,6 @@ namespace Iot.Device.Arduino
             return m_type;
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeTypeHandleGetCorElementType)]
-        internal static CorElementType GetCorElementType(Type type)
-        {
-            throw new NotImplementedException();
-        }
-
         // What's this supposed to do?
         internal Type Instantiate(Type[]? inst)
         {
@@ -297,16 +307,6 @@ namespace Iot.Device.Arduino
                 return null!;
             }
             return inst[0];
-        }
-
-        internal static bool HasInstantiation(Type type)
-        {
-            throw new NotImplementedException();
-        }
-
-        internal static bool IsGenericTypeDefinition(Type type)
-        {
-            throw new NotImplementedException();
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
@@ -68,12 +69,6 @@ namespace Arduino.Tests
                     CreateKernelForFlashing = false, UseFlashForKernel = false, UseFlashForProgram = true,
                 };
             }
-        }
-
-        private void LogMessage(string x, Exception? y)
-        {
-            Console.WriteLine(x);
-            Debug.WriteLine(x);
         }
 
         protected virtual void Dispose(bool disposing)

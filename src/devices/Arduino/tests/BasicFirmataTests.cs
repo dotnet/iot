@@ -9,6 +9,8 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
+using Arduino.Tests;
+using UnitsNet;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
@@ -24,6 +26,7 @@ namespace Iot.Device.Arduino.Tests
         public BasicFirmataTests(FirmataTestFixture fixture)
         {
             _fixture = fixture;
+            Skip.If(_fixture.Board == null, "No Board found");
             Board = _fixture.Board;
         }
 
@@ -32,7 +35,7 @@ namespace Iot.Device.Arduino.Tests
             get;
         }
 
-        [Fact]
+        [SkippableFact]
         public void CheckFirmwareVersion()
         {
             Assert.False(string.IsNullOrWhiteSpace(Board.FirmwareName));
@@ -40,7 +43,7 @@ namespace Iot.Device.Arduino.Tests
             Assert.True(Board.FirmwareVersion >= Version.Parse("2.11"));
         }
 
-        [Fact]
+        [SkippableFact]
         public void CheckFirmataVersion()
         {
             Assert.NotNull(Board.FirmataVersion);
@@ -50,24 +53,24 @@ namespace Iot.Device.Arduino.Tests
         /// <summary>
         /// Verifies the pin capability message. Also verifies that the arduino is configured properly for these tests
         /// </summary>
-        [Fact]
+        [SkippableFact]
         public void CheckBoardFeatures()
         {
             var caps = Board.SupportedPinConfigurations;
             Assert.NotNull(caps);
             Assert.True(caps.Count > 0);
             // These are minimum numbers all Arduinos should support, so this test should also pass on hardware (when all required modules are present)
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DIGITAL_OUTPUT)) > 10);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DIGITAL_INPUT)) > 10);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.ANALOG_INPUT)) > 5);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.I2C)) >= 2);
-            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.SPI)) >= 3);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DigitalOutput)) > 10);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.DigitalInput)) > 10);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.AnalogInput)) > 5);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.I2c)) >= 2);
+            Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.Spi)) >= 3);
         }
 
-        [Fact]
+        [SkippableFact]
         public void CanBlink()
         {
-            var ctrl = Board.CreateGpioController(PinNumberingScheme.Logical);
+            var ctrl = Board.CreateGpioController();
             Assert.NotNull(ctrl);
             ctrl.OpenPin(6, PinMode.Output);
             ctrl.SetPinMode(6, PinMode.Output);
@@ -78,10 +81,10 @@ namespace Iot.Device.Arduino.Tests
             ctrl.ClosePin(6);
         }
 
-        [Fact]
+        [SkippableFact]
         public void SetPinMode()
         {
-            var ctrl = Board.CreateGpioController(PinNumberingScheme.Logical);
+            var ctrl = Board.CreateGpioController();
             Assert.NotNull(ctrl);
             ctrl.OpenPin(6, PinMode.Output);
             ctrl.SetPinMode(6, PinMode.Output);
@@ -96,7 +99,7 @@ namespace Iot.Device.Arduino.Tests
             ctrl.ClosePin(6);
         }
 
-        [Fact]
+        [SkippableFact]
         public void ReadAnalog()
         {
             int pinNumber = GetFirstAnalogPin(Board);
@@ -104,7 +107,7 @@ namespace Iot.Device.Arduino.Tests
             var pin = ctrl.OpenPin(pinNumber);
             Assert.NotNull(pin);
             var result = pin.ReadVoltage();
-            Assert.True(result >= 0 && result <= 5.1);
+            Assert.True(result >= ElectricPotential.Zero && result <= ElectricPotential.FromVolts(5.1));
             ctrl.Dispose();
         }
 

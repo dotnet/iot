@@ -11,6 +11,8 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -37,11 +39,13 @@ namespace Arduino.Samples
             }
 
             string portName = args[0];
-
-            string portName = "INET";
             if (args.Length > 0)
             {
                 portName = args[0];
+            }
+            else
+            {
+                portName = "INET";
             }
 
             if (portName == "INET")
@@ -73,7 +77,6 @@ namespace Arduino.Samples
             try
             {
                 board.LogMessages += BoardOnLogMessages;
-                board.Initialize();
                 Console.WriteLine(
                     $"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
                 while (Menu(board))

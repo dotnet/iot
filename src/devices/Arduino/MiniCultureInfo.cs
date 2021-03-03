@@ -76,6 +76,12 @@ namespace Iot.Device.Arduino
         // The Invariant culture;
         private static readonly MiniCultureInfo _invariantCultureInfo = new MiniCultureInfo(MiniCultureData.Invariant, isReadOnly: true);
 
+        // Get the current user default culture. This one is almost always used, so we create it by default.
+        private static volatile MiniCultureInfo? s_userDefaultCulture;
+
+        // The culture used in the user interface. This is mostly used to load correct localized resources.
+        private static volatile MiniCultureInfo? s_userDefaultUICulture;
+
         private bool _isReadOnly;
         internal NumberFormatInfo? _numInfo;
         internal DateTimeFormatInfo? _dateTimeInfo;
@@ -100,12 +106,6 @@ namespace Iot.Device.Arduino
         // This might be completely unrelated to the culture name if a custom culture.  Ie en-US for fj-FJ.
         // Otherwise its the sort name, ie: de-DE or de-DE_phoneb
         private string? _sortName;
-
-        // Get the current user default culture. This one is almost always used, so we create it by default.
-        private static volatile MiniCultureInfo? s_userDefaultCulture;
-
-        // The culture used in the user interface. This is mostly used to load correct localized resources.
-        private static volatile MiniCultureInfo? s_userDefaultUICulture;
 
         // WARNING: We allow diagnostic tools to directly inspect these three members (s_InvariantCultureInfo, s_DefaultThreadCurrentUICulture and s_DefaultThreadCurrentCulture)
         // See https://github.com/dotnet/corert/blob/master/Documentation/design-docs/diagnostics/diagnostics-tools-contract.md for more details.
@@ -598,6 +598,12 @@ namespace Iot.Device.Arduino
 
         public bool UseUserOverride => false;
 
+        public static MiniCultureInfo ReadOnly(MiniCultureInfo ci)
+        {
+            ci._isReadOnly = true;
+            return ci;
+        }
+
         public MiniCultureInfo GetConsoleFallbackUICulture()
         {
             return InvariantCulture;
@@ -606,12 +612,6 @@ namespace Iot.Device.Arduino
         public virtual object Clone()
         {
             return new MiniCultureInfo(0);
-        }
-
-        public static MiniCultureInfo ReadOnly(MiniCultureInfo ci)
-        {
-            ci._isReadOnly = true;
-            return ci;
         }
 
         public bool IsReadOnly => _isReadOnly;
@@ -723,6 +723,19 @@ namespace Iot.Device.Arduino
 
             private static MiniCultureData? _sInvariant; // Initialized on usage, to prevent a static ctor dependency
 
+            public static MiniCultureData Invariant
+            {
+                get
+                {
+                    if (_sInvariant == null)
+                    {
+                        return _sInvariant = new MiniCultureData();
+                    }
+
+                    return _sInvariant;
+                }
+            }
+
             public string CultureName
             {
                 get
@@ -817,17 +830,10 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            public static MiniCultureData Invariant
+            [SuppressMessage("Microsoft.Naming", "SA1300", Justification = "Runtime method name")]
+            internal static string[]? nativeEnumTimeFormats(string localeName, uint dwFlags, bool useUserOverride)
             {
-                get
-                {
-                    if (_sInvariant == null)
-                    {
-                        return _sInvariant = new MiniCultureData();
-                    }
-
-                    return _sInvariant;
-                }
+                throw new NotImplementedException();
             }
 
             [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
@@ -857,12 +863,6 @@ namespace Iot.Device.Arduino
             internal MiniCultureData GetCalendar(CalendarId calendarId)
             {
                 return this;
-            }
-
-            [SuppressMessage("Microsoft.Naming", "SA1300", Justification = "Runtime method name")]
-            internal static string[]? nativeEnumTimeFormats(string localeName, uint dwFlags, bool useUserOverride)
-            {
-                throw new NotImplementedException();
             }
 
             [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]

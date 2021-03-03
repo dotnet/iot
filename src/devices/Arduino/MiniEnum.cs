@@ -9,6 +9,12 @@ namespace Iot.Device.Arduino
     [ArduinoReplacement(typeof(System.Enum), IncludingPrivates = true)]
     internal class MiniEnum
     {
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        public static string? InternalFormat(Type enumType, ulong value)
+        {
+            return value.ToString();
+        }
+
         [ArduinoImplementation(NativeMethod.None)]
         public override string ToString()
         {
@@ -38,12 +44,6 @@ namespace Iot.Device.Arduino
         public ulong ToUInt64()
         {
             throw new NotImplementedException();
-        }
-
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
-        public static string? InternalFormat(Type enumType, ulong value)
-        {
-            return value.ToString();
         }
     }
 }

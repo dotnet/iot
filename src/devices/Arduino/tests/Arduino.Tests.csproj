@@ -19,6 +19,7 @@
     </PackageReference>
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\..\CharacterLcd\CharacterLcd.csproj" />
   </ItemGroup>
 
   <ItemGroup>
