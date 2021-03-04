@@ -12,6 +12,6 @@ var spisettings = new SpiConnectionSettings(0, 1)
 };
 
 var spidev = SpiDevice.Create(spisettings);
-var dac = new AD5328(spidev, ElectricPotential.FromVolts(2.5), ElectricPotential.FromVolts(2.5));
+using var dac = new AD5328(spidev, ElectricPotential.FromVolts(2.5), ElectricPotential.FromVolts(2.5));
 Thread.Sleep(1000);
 dac.SetVoltage(0, ElectricPotential.FromVolts(1));
