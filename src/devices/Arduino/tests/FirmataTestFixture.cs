@@ -33,7 +33,11 @@ namespace Arduino.Tests
                     throw new NotSupportedException("Very old firmware found");
                 }
 
-                Board.LogMessages += (x, y) => Console.WriteLine(x);
+                Board.LogMessages += (x, y) =>
+                {
+                    Debug.WriteLine(x);
+                    Console.WriteLine(x);
+                };
 
                 return;
             }

@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Arduino.Runtime;
 
 #pragma warning disable CS1591
 namespace Iot.Device.Arduino
@@ -194,8 +195,8 @@ namespace Iot.Device.Arduino
 
                 _compiler.ClearAllData(true, doWriteProgramToFlash);
                 _compiler.SetExecutionSetActive(this);
-                _compiler.SendClassDeclarations(this, from, to, false);
-                _compiler.SendMethods(this, from, to, false);
+                _compiler.SendClassDeclarations(this, from, to, doWriteProgramToFlash);
+                _compiler.SendMethods(this, from, to, doWriteProgramToFlash);
                 List<(int Token, byte[] Data, string NoData)> converted = new();
                 // Need to do this manually, due to stupid nullability conversion restrictions
                 foreach (var elem in _patchedFieldTokens.Values)
@@ -206,8 +207,12 @@ namespace Iot.Device.Arduino
                     }
                 }
 
-                _compiler.SendConstants(converted, from, to, false);
-                _compiler.CopyToFlash();
+                _compiler.SendConstants(converted, from, to, doWriteProgramToFlash);
+                if (doWriteProgramToFlash)
+                {
+                    _compiler.CopyToFlash();
+                }
+
                 int totalStringSize = CalculateTotalStringSize(_strings, from, to);
                 _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
                 _compiler.SendStrings(_strings.ToList(), from, to, false);

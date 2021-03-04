@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Arduino.Runtime;
 
 namespace Iot.Device.Arduino.Tests
 {

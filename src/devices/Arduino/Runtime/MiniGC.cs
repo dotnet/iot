@@ -1,0 +1,35 @@
+﻿using System;
+
+namespace Iot.Device.Arduino.Runtime
+{
+    [ArduinoReplacement(typeof(System.GC), true, IncludingPrivates = true)]
+    internal class MiniGC
+    {
+        public static T[] AllocateUninitializedArray<T>(int length, bool pinned = false) // T[] rather than T?[] to match `new T[length]` behavior
+        {
+            return new T[length]; // Initializing is so much cheaper than emulating the implementation, so that we don't care.
+        }
+
+        public static void KeepAlive(object? obj)
+        {
+            // This in fact is a no-op
+        }
+
+        public static void SuppressFinalize(object obj)
+        {
+            // No op (we're not running any finalizers)
+        }
+
+#if !NETCOREAPP2_1
+        public static GCMemoryInfo GetGCMemoryInfo()
+        {
+            return new GCMemoryInfo();
+        }
+
+        public static GCMemoryInfo GetGCMemoryInfo(GCKind kind)
+        {
+            return new GCMemoryInfo();
+        }
+#endif
+    }
+}

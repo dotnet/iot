@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using Arduino.Tests;
 using Iot.Device.Arduino;
+using Iot.Device.Arduino.Runtime;
 using Iot.Device.CharacterLcd;
 using Xunit;
 

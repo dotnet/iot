@@ -22,4 +22,46 @@
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Runtime\MiniAppContext.cs" />
+    <Compile Include="Runtime\MiniArray.cs" />
+    <Compile Include="Runtime\MiniAssert.cs" />
+    <Compile Include="Runtime\MiniAssertionException.cs" />
+    <Compile Include="Runtime\MiniBitConverter.cs" />
+    <Compile Include="Runtime\MiniBitOperations.cs" />
+    <Compile Include="Runtime\MiniBuffer.cs" />
+    <Compile Include="Runtime\MiniByReference.cs" />
+    <Compile Include="Runtime\MiniCalendar.cs" />
+    <Compile Include="Runtime\MiniCLRConfig.cs" />
+    <Compile Include="Runtime\MiniCultureInfo.cs" />
+    <Compile Include="Runtime\MiniDateTime.cs" />
+    <Compile Include="Runtime\MiniDelegate.cs" />
+    <Compile Include="Runtime\MiniEnum.cs" />
+    <Compile Include="Runtime\MiniEnvironment.cs" />
+    <Compile Include="Runtime\MiniEventSource.cs" />
+    <Compile Include="Runtime\MiniException.cs" />
+    <Compile Include="Runtime\MiniGC.cs" />
+    <Compile Include="Runtime\MiniInterlocked.cs" />
+    <Compile Include="Runtime\MiniInterop.cs" />
+    <Compile Include="Runtime\MiniMarshal.cs" />
+    <Compile Include="Runtime\MiniMemoryMarshal.cs" />
+    <Compile Include="Runtime\MiniMethodTable.cs" />
+    <Compile Include="Runtime\MiniMonitor.cs" />
+    <Compile Include="Runtime\MiniObject.cs" />
+    <Compile Include="Runtime\MiniResourceManager.cs" />
+    <Compile Include="Runtime\MiniRuntimeHelpers.cs" />
+    <Compile Include="Runtime\MiniRuntimeTypeHandle.cs" />
+    <Compile Include="Runtime\MiniSpanHelpers.Byte.cs" />
+    <Compile Include="Runtime\MiniSpanHelpers.Char.cs" />
+    <Compile Include="Runtime\MiniSpanHelpers.cs" />
+    <Compile Include="Runtime\MiniSpanHelpers.T.cs" />
+    <Compile Include="Runtime\MiniSR.cs" />
+    <Compile Include="Runtime\MiniStackTrace.cs" />
+    <Compile Include="Runtime\MiniString.cs" />
+    <Compile Include="Runtime\MiniThread.cs" />
+    <Compile Include="Runtime\MiniTimeZoneInfo.cs" />
+    <Compile Include="Runtime\MiniType.cs" />
+    <Compile Include="Runtime\MiniUnsafe.cs" />
+    <Compile Include="Runtime\MiniValueType.cs" />
+  </ItemGroup>
 </Project>

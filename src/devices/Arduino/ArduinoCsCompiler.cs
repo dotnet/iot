@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using Iot.Device.Arduino.Runtime;
 using UnitsNet;
 
 #pragma warning disable CS1591
