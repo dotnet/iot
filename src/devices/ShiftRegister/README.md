@@ -24,7 +24,7 @@ The following example code demonstrates how to use a shift register with GPIO.
 
 ```csharp
 // assuming an 8-bit shift register, like the SN74HC595 or MBI5168
-var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 8);
+ShiftRegister sr = new(ShiftRegisterPinMapping.Minimal, 8);
 
 // Light up three of first four LEDs
 sr.ShiftBit(1);
@@ -37,7 +37,7 @@ sr.Latch();
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(0b_1010_1010); //same as integer 170
+sr.ShiftByte(0b_1010_1010);
 ```
 
 The following diagram demonstrates the required wiring for using the SN74HC595 with GPIO. Other shift registers will be similar.
@@ -51,20 +51,18 @@ The bindings can use a `SpiDevice` to control the shift register. The shift regi
 The following example code demonstrates how to use a shift register with SPI.
 
 ```csharp
-var settings = new SpiConnectionSettings(0, 0);
-var spiDevice = SpiDevice.Create(settings);
 // assuming an 8-bit shift register
-var sr = new ShiftRegister(spiDevice, 8);
+ShiftRegister sr = new(SpiDevice.Create(new(0, 0)), 8);
 
 // Light up three of first four LEDs
 // The Shift() method is dissallowed when using SPI
-ShiftByte(0b_1011); // same as integer 11
+sr.ShiftByte(0b_1011); // same as integer 11
 
 // Clear register
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(0b_1010_1010); //same as integer 170
+sr.ShiftByte(0b_1010_1010);
 ```
 
 The following diagram demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
@@ -76,7 +74,7 @@ The following diagram demonstrates the required wiring for using the SN74HC595 w
 The binding supports daisy chaining, using either GPIO or SPI. The GPIO-based example below demonstrates how to instantiate the binding for controlling/addressing two -- daisy-chained -- 8-bit shift registers. This is specified by the integer value in the constructor.
 
 ```csharp
-var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 16);
+var sr = new ShiftRegister(ShiftRegisterPinMapping.Minimal, 16);
 ```
 The shift registers need to be correctly wired to enable daisy-chaining. On the SN74HC595, `QH'` in the first register would connect to `SER` in the second register. The pattern with the MBI5027 and MBI5168 is similar, `SDO` in the first register would connect to `SDI` in the second.
 
