@@ -195,8 +195,8 @@ namespace Iot.Device.Arduino
 
                 _compiler.ClearAllData(true, doWriteProgramToFlash);
                 _compiler.SetExecutionSetActive(this);
-                _compiler.SendClassDeclarations(this, from, to, doWriteProgramToFlash);
-                _compiler.SendMethods(this, from, to, doWriteProgramToFlash);
+                _compiler.SendClassDeclarations(this, from, to, false);
+                _compiler.SendMethods(this, from, to, false);
                 List<(int Token, byte[] Data, string NoData)> converted = new();
                 // Need to do this manually, due to stupid nullability conversion restrictions
                 foreach (var elem in _patchedFieldTokens.Values)
@@ -207,7 +207,7 @@ namespace Iot.Device.Arduino
                     }
                 }
 
-                _compiler.SendConstants(converted, from, to, doWriteProgramToFlash);
+                _compiler.SendConstants(converted, from, to, false);
                 if (doWriteProgramToFlash)
                 {
                     _compiler.CopyToFlash();

@@ -133,6 +133,8 @@ namespace Iot.Device.Arduino.Tests
         [SkippableFact]
         public void DisplayTheClock()
         {
+            DateTime t = new DateTime(2021, 2, 28, 20, 44, 0);
+            Assert.Equal(DayOfWeek.Sunday, t.DayOfWeek); // My code thinks this is monday. WTF???
             ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false);
         }
 
@@ -630,11 +632,18 @@ namespace Iot.Device.Arduino.Tests
                 hd44780.DisplayOn = true;
                 hd44780.Clear();
                 hd44780.Write("Hello World!");
-                hd44780.SetCursorPosition(0, 1);
-                var time = DateTime.UtcNow;
-                hd44780.Write(time.ToShortDateString());
-                hd44780.SetCursorPosition(0, 2);
-                hd44780.Write(time.ToLongTimeString());
+                for (int i = 0; i < 60; i++)
+                {
+                    hd44780.SetCursorPosition(0, 1);
+                    var time = DateTime.Now;
+                    hd44780.Write(time.ToString("dddd"));
+                    hd44780.SetCursorPosition(0, 2);
+                    hd44780.Write(time.ToString("dd. MMMM yyyy"));
+                    hd44780.SetCursorPosition(0, 3);
+                    hd44780.Write(time.ToLongTimeString());
+                    Thread.Sleep(1000);
+                }
+
                 return 1;
             }
         }

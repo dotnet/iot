@@ -687,16 +687,16 @@ namespace Iot.Device.Arduino.Runtime
             };
 
             private static readonly string[] _saEraNames = new string[] { "AD", "BC" };
-            private static readonly string[] _saAbbreviatedDayNames = new string[] { "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun" };
+            private static readonly string[] _saAbbreviatedDayNames = new string[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
             private static readonly string[] _saDayNames = new string[]
             {
+                "Sunday",
                 "Monday",
                 "Tuesday",
                 "Wednesday",
                 "Thursday",
                 "Friday",
-                "Saturday",
-                "Sunday"
+                "Saturday"
             };
 
             private static readonly string[] _saAbbreviatedMonthNames = new string[]

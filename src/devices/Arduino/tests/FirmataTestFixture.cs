@@ -53,7 +53,11 @@ namespace Arduino.Tests
             }
 
             Board = board;
-            Board.LogMessages += (x, y) => Console.WriteLine(x);
+            Board.LogMessages += (x, y) =>
+            {
+                Debug.WriteLine(x);
+                Console.WriteLine(x);
+            };
         }
 
         public ArduinoBoard? Board
