@@ -170,7 +170,7 @@ void ShiftBytes(ShiftRegister sr, int value)
     {
         int shift = i * 8;
         int downShiftedValue = value >> shift;
-        sr.ShiftByte((byte)downShiftedValue);
+        sr.ShiftByte((byte)downShiftedValue, false);
     }
 
     sr.ShiftByte((byte)value);

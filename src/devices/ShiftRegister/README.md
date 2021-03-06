@@ -109,7 +109,7 @@ for (int i = (sr.BitLength / 8) - 1; i > 0; i--)
 {
     int shift = i * 8;
     int downShiftedValue = value >> shift;
-    sr.ShiftByte((byte)downShiftedValue);
+    sr.ShiftByte((byte)downShiftedValue, false);
 }
 
 sr.ShiftByte((byte)value);
@@ -129,8 +129,8 @@ The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph-double-up.f
 
 ## Resources
 
-* SN74HC595 datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
-* MBI5027 datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
-* MBI5168 datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
+* SN74HC595 data sheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+* MBI5027 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
+* MBI5168 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
 * Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
 * Tutorial: https://www.youtube.com/watch?v=G1SzTGZ2l1c
