@@ -58,7 +58,7 @@ ShiftRegister sr = new(SpiDevice.Create(new(0, 0)), 8);
 
 // Light up three of first four LEDs
 // The ShiftBit() method is disallowed when using SPI
-sr.ShiftByte(0b_1011); // same as integer 11
+sr.ShiftByte(0b_1011);
 
 // Clear register
 sr.ShiftClear();
