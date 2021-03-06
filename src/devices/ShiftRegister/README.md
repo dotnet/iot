@@ -40,7 +40,7 @@ Thread.Sleep(1000);
 sr.ShiftByte(0b_1000_1101);
 ```
 
-The following diagram demonstrates the required wiring for using the SN74HC595 with GPIO. Other shift registers will be similar.
+The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph.fzz) demonstrates the required wiring for using the SN74HC595 with minimal mapping. Other shift registers will be similar.
 
 ![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-minimal-led-bar-graph_bb.png)
 
