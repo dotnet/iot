@@ -153,14 +153,14 @@ namespace System.Device.Gpio.Drivers
         {
             lock (_pinNumberLock)
             {
-            if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
-            {
+                if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
+                {
                     throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError,
                         pin: pinNumber);
-            }
+                }
 
-            return pinHandle.PinMode;
-        }
+                return pinHandle.PinMode;
+            }
         }
 
         /// <inheritdoc/>

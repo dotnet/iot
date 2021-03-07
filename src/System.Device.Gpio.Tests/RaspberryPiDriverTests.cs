@@ -52,5 +52,29 @@ namespace System.Device.Gpio.Tests
                 Assert.Equal(PinValue.Low, controller.Read(OpenPin));
             }
         }
+
+        [Fact]
+        public void HighPulledPinDoesNotGlitchToLowWhenChangedToOutput()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                bool didTriggerToLow = false;
+                int testPin = OutputPin; // TODO: Change to OpenPin
+                controller.OpenPin(testPin, PinMode.InputPullUp);
+                Thread.Sleep(50);
+                controller.RegisterCallbackForPinValueChangedEvent(testPin, PinEventTypes.Falling, (sender, args) =>
+                {
+                    if (args.ChangeType == PinEventTypes.Falling)
+                    {
+                        didTriggerToLow = true;
+                    }
+                });
+
+                controller.Write(testPin, PinValue.High);
+                controller.SetPinMode(testPin, PinMode.Output);
+                Thread.Sleep(50);
+                Assert.False(didTriggerToLow);
+            }
+        }
     }
 }

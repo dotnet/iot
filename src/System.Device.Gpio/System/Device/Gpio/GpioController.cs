@@ -27,6 +27,7 @@ namespace System.Device.Gpio
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
         private readonly HashSet<int> _openPins;
+        private readonly PinValue?[] _desiredPinValues;
         private GpioDriver _driver;
 
         /// <summary>
@@ -47,6 +48,7 @@ namespace System.Device.Gpio
             _driver = driver;
             NumberingScheme = numberingScheme;
             _openPins = new HashSet<int>();
+            _desiredPinValues = new PinValue?[driver.PinCount];
         }
 
         /// <summary>
@@ -116,6 +118,20 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Opens a pin and sets it to a specific mode and value.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="mode">The mode to be set.</param>
+        /// <param name="initialValue">The initial value to be set if the mode is output. The driver will attempt to set the mode without causing glitches to the other value.
+        /// (if <paramref name="initialValue"/> is <see cref="PinValue.High"/>, the pin should not glitch to low during open)</param>
+        public void OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
+        {
+            OpenPin(pinNumber);
+            Write(pinNumber, initialValue);
+            SetPinMode(pinNumber, mode);
+        }
+
+        /// <summary>
         /// Closes an open pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
@@ -158,7 +174,15 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException($"Pin {pinNumber} does not support mode {mode}.");
             }
 
-            _driver.SetPinMode(logicalPinNumber, mode);
+            var desired = _desiredPinValues[logicalPinNumber];
+            if (desired.HasValue)
+            {
+                _driver.SetPinMode(logicalPinNumber, mode, desired.Value);
+            }
+            else
+            {
+                _driver.SetPinMode(logicalPinNumber, mode);
+            }
         }
 
         /// <summary>
@@ -227,7 +251,15 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException($"Can not write to pin {pinNumber} because it is not open.");
             }
 
+            _desiredPinValues[pinNumber] = value;
+
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+
+            if (GetPinMode(logicalPinNumber) != PinMode.Output)
+            {
+                return;
+            }
+
             _driver.Write(logicalPinNumber, value);
         }
 
