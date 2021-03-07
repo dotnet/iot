@@ -45,11 +45,16 @@ sr.ShiftByte(0b_1010_1101);
 
 If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) binding, which includes more information on SPI.
 
+The following image demonstrate a [binary clock counting example](samples/Program.cs).
+
+![binary clock counting example](mbi5027-binary-block.png)
+
 ## Example circuit
 
 The following breadboard circuit demonstrates the correct wiring pattern, including error detection.
 
 ![MBI5027_BB_topview](https://user-images.githubusercontent.com/2608468/93656940-22811a00-f9e3-11ea-84db-94615a2e1a2b.png)
+
 
 It is easy to mis-wire the MBI5027. The following image captures the most basic aspects for correct configuration.
 
