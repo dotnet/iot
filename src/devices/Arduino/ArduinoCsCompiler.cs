@@ -453,6 +453,20 @@ namespace Iot.Device.Arduino
 
             GetFields(classType, fields, methods);
 
+            if (classType == typeof(String))
+            {
+                // For string, we need to make sure the fields come in the correct order the EE expects.
+                // The order can change randomly otherwise
+                int idxLength = fields.IndexOf(fields.Single(x => x.Name == "_stringLength"));
+                int idxFirstChar = fields.IndexOf(fields.Single(x => x.Name == "_firstChar"));
+                if (idxLength > idxFirstChar)
+                {
+                    var temp = fields[idxLength];
+                    fields[idxLength] = fields[idxFirstChar];
+                    fields[idxFirstChar] = temp;
+                }
+            }
+
             List<ClassMember> memberTypes = new List<ClassMember>();
             for (var index = 0; index < fields.Count; index++)
             {
@@ -532,14 +546,16 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Complete the execution set by making sure all dependencies are resolved
         /// </summary>
-        internal void FinalizeExecutionSet(ExecutionSet set, bool completeClasses)
+        /// <param name="set">The <see cref="ExecutionSet"/> to complete</param>
+        /// <param name="forKernel">True if a kernel shall be compiled (requires class completion, so the kernel classes can be finalized)</param>
+        internal void FinalizeExecutionSet(ExecutionSet set, bool forKernel)
         {
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
             }
 
-            if (completeClasses)
+            if (forKernel)
             {
                 CompleteClasses(set);
             }
@@ -619,6 +635,19 @@ namespace Iot.Device.Arduino
                     // Remove this replacement
                     set.Classes.RemoveAt(i);
                     i--;
+                }
+            }
+
+            if (!forKernel)
+            {
+                PrepareStaticCtors(set);
+                if (set.CompilerSettings.LaunchProgramFromFlash)
+                {
+                    Type t = typeof(ArduinoNativeHelpers);
+                    var method = t.GetMethod("MainStub", BindingFlags.Static | BindingFlags.NonPublic)!;
+                    PrepareCodeInternal(set, method, null);
+                    int tokenOfStartupMethod = set.GetOrAddMethodToken(method);
+                    set.TokenOfStartupMethod = tokenOfStartupMethod;
                 }
             }
 
@@ -1444,6 +1473,26 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
             }
 
+            if (!mainEntryPoint.IsStatic)
+            {
+                throw new InvalidOperationException("Main entry point must be a static method");
+            }
+
+            if (mainEntryPoint.IsConstructedGenericMethod)
+            {
+                throw new InvalidOperationException("Main entry point must not be a generic method");
+            }
+
+            if (compilerSettings.LaunchProgramFromFlash)
+            {
+                var parameters = mainEntryPoint.GetParameters();
+                if (parameters.Length > 1 && parameters[0].GetType() != typeof(string[]))
+                {
+                    // Expect the main entry point to have either no arguments or an argument of type string[] (as the default main methods do)
+                    throw new InvalidOperationException("To launch a program directly from flash, the main entry point must take 0 arguments or 1 argument of type string[]");
+                }
+            }
+
             ExecutionSet exec;
 
             if (ExecutionSet.CompiledKernel == null || ExecutionSet.CompiledKernel.CompilerSettings != compilerSettings)
@@ -1523,10 +1572,10 @@ namespace Iot.Device.Arduino
         /// <param name="settings">Custom compiler settings</param>
         /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
         /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
-        public ExecutionSet CreateExecutionSet<T>(T mainEntryPoint, CompilerSettings settings)
+        public ExecutionSet CreateExecutionSet<T>(T mainEntryPoint, CompilerSettings? settings)
         where T : Delegate
         {
-            var exec = PrepareProgram(mainEntryPoint.Method, settings);
+            var exec = PrepareProgram(mainEntryPoint.Method, settings ?? new CompilerSettings());
             try
             {
                 exec.Load();
@@ -1627,7 +1676,8 @@ namespace Iot.Device.Arduino
             IlCode parserResult;
 
             bool constructedCode = false;
-            MethodFlags construcedFlags = MethodFlags.None;
+            bool needsParsing = true;
+            MethodFlags constructedFlags = MethodFlags.None;
             if (body == null && !methodInfo.IsAbstract)
             {
                 Type multicastType = typeof(MulticastDelegate);
@@ -1666,7 +1716,7 @@ namespace Iot.Device.Arduino
                         };
                         ilBytes = code;
                         constructedCode = true;
-                        construcedFlags = MethodFlags.Ctor;
+                        constructedFlags = MethodFlags.Ctor;
                     }
                     else
                     {
@@ -1705,10 +1755,10 @@ namespace Iot.Device.Arduino
                         code.Add((byte)OpCode.CEE_RET);
                         ilBytes = code.ToArray();
                         constructedCode = true;
-                        construcedFlags = MethodFlags.Virtual;
+                        constructedFlags = MethodFlags.Virtual;
                         if (methodDetail.ReturnType == typeof(void))
                         {
-                            construcedFlags |= MethodFlags.Void;
+                            constructedFlags |= MethodFlags.Void;
                         }
                     }
                 }
@@ -1721,6 +1771,45 @@ namespace Iot.Device.Arduino
                 }
             }
 
+            if (methodInfo.Name == "MainStub" && methodInfo.DeclaringType == typeof(ArduinoNativeHelpers))
+            {
+                // Assemble the startup code for our program. This shall contain a call to all static initializers and finally a call to the
+                // original main method.
+                constructedFlags = MethodFlags.Void | MethodFlags.Static;
+                constructedCode = true;
+                int token;
+                needsParsing = false; // We insert already translated tokens (because the methods we call come from all possible places, the Resolve would otherwise fail)
+                List<byte> code = new List<byte>();
+                foreach (var m in set.FirmwareStartupSequence!)
+                {
+                    // Use patched tokens
+                    token = set.GetOrAddMethodToken(m.Method);
+                    AddCallWithToken(code, OpCode.CEE_CALL, token);
+                }
+
+                var mainMethod = set.MainEntryPointInternal!;
+                // This method must have 0 or 1 arguments (tested at the very beginning of the compiler run)
+                if (mainMethod.GetParameters().Length == 1)
+                {
+                    // the only argument is of type string[]. Create an empty array.
+                    AddCommand(code, OpCode.CEE_LDC_I4_0);
+                    token = set.GetOrAddClassToken(typeof(string[]).GetTypeInfo());
+                    AddCallWithToken(code, OpCode.CEE_NEWARR, token);
+                }
+
+                token = set.GetOrAddMethodToken(mainMethod);
+                AddCallWithToken(code, OpCode.CEE_CALL, token);
+
+                if (mainMethod.ReturnType != typeof(void))
+                {
+                    // discard return value, if any
+                    AddCommand(code, OpCode.CEE_POP);
+                }
+
+                AddCommand(code, OpCode.CEE_RET);
+                ilBytes = code.ToArray();
+            }
+
             if (ilBytes == null && hasBody)
             {
                 throw new MissingMethodException($"{methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
@@ -1731,7 +1820,11 @@ namespace Iot.Device.Arduino
                 throw new InvalidProgramException($"Max IL size of real time method is 2^14 Bytes. Actual size is {ilBytes.Length}.");
             }
 
-            if (hasBody)
+            if (needsParsing == false)
+            {
+                parserResult = new IlCode(methodInfo, ilBytes);
+            }
+            else if (hasBody)
             {
                 parserResult = IlCodeParser.FindAndPatchTokens(set, methodInfo, ilBytes!);
 
@@ -1753,7 +1846,7 @@ namespace Iot.Device.Arduino
             ArduinoMethodDeclaration newInfo;
             if (constructedCode)
             {
-                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, construcedFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), parserResult);
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, constructedFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), parserResult);
             }
             else
             {
@@ -1800,6 +1893,15 @@ namespace Iot.Device.Arduino
 
         private void AddCallWithToken(List<byte> code, OpCode opCode, int token)
         {
+            AddCommand(code, opCode);
+            code.Add((byte)(token & 0xFF));
+            code.Add((byte)((token >> 8) & 0xFF));
+            code.Add((byte)((token >> 16) & 0xFF));
+            code.Add((byte)((token >> 24) & 0xFF));
+        }
+
+        private void AddCommand(List<byte> code, OpCode opCode)
+        {
             if ((int)opCode < 0x100)
             {
                 code.Add((byte)opCode);
@@ -1809,11 +1911,6 @@ namespace Iot.Device.Arduino
                 code.Add(254);
                 code.Add((byte)opCode);
             }
-
-            code.Add((byte)(token & 0xFF));
-            code.Add((byte)((token >> 8) & 0xFF));
-            code.Add((byte)((token >> 16) & 0xFF));
-            code.Add((byte)((token >> 24) & 0xFF));
         }
 
         private void SendMethod(ExecutionSet set, ArduinoMethodDeclaration decl)
@@ -1825,7 +1922,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        internal void ExecuteStaticCtors(ExecutionSet set)
+        internal void PrepareStaticCtors(ExecutionSet set)
         {
             List<ClassDeclaration> classes = set.Classes.Where(x => !x.SuppressInit && x.TheType.TypeInitializer != null).ToList();
             List<IlCode> codeSequences = new List<IlCode>();
@@ -1854,6 +1951,18 @@ namespace Iot.Device.Arduino
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(codeSequences, typeof(System.DateTime));
             SendToBack(codeSequences, GetSystemPrivateType("System.DateTimeFormat"));
+
+            set.FirmwareStartupSequence = codeSequences;
+        }
+
+        internal void ExecuteStaticCtors(ExecutionSet set)
+        {
+            var codeSequences = set.FirmwareStartupSequence;
+            if (codeSequences == null)
+            {
+                // It could (theoretically) be empty, but never null
+                throw new InvalidOperationException("No startup code to execute");
+            }
 
             for (var index2 = 0; index2 < codeSequences.Count; index2++)
             {
@@ -2162,9 +2271,9 @@ namespace Iot.Device.Arduino
             return _board.Firmata.IsMatchingFirmwareLoaded(DataVersion, snapShot.GetHashCode());
         }
 
-        public void WriteFlashHeader(ExecutionSet.SnapShot snapShot)
+        public void WriteFlashHeader(ExecutionSet.SnapShot snapShot, int startupToken, CodeStartupFlags flags)
         {
-            _board.Firmata.WriteFlashHeader(DataVersion, snapShot.GetHashCode());
+            _board.Firmata.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
         }
     }
 }

@@ -72,6 +72,12 @@ namespace Iot.Device.Arduino.Tests
         private void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, params object[] args)
             where T : Delegate
         {
+            ExecuteComplexProgramSuccess<T>(mainEntryPoint, executeLocally, _fixture.DefaultCompilerSettings, args);
+        }
+
+        private void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, CompilerSettings settings, params object[] args)
+            where T : Delegate
+        {
             // Execute function locally, if possible (to compare behavior)
             if (executeLocally)
             {
@@ -80,7 +86,7 @@ namespace Iot.Device.Arduino.Tests
                 Assert.Equal(1, returnValue);
             }
 
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint, _fixture.DefaultCompilerSettings);
+            var exec = _compiler.CreateExecutionSet(mainEntryPoint, settings);
 
             long memoryUsage = exec.EstimateRequiredMemory();
             Assert.True(memoryUsage < MaxTestMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
@@ -133,9 +139,14 @@ namespace Iot.Device.Arduino.Tests
         [SkippableFact]
         public void DisplayTheClock()
         {
-            DateTime t = new DateTime(2021, 2, 28, 20, 44, 0);
-            Assert.Equal(DayOfWeek.Sunday, t.DayOfWeek); // My code thinks this is monday. WTF???
-            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false);
+            CompilerSettings s = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = true,
+                UseFlashForProgram = true
+            };
+
+            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false, s);
         }
 
         [SkippableFact]
@@ -189,18 +200,24 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(IsLittleEndianTest, true);
         }
 
-        private int IsLittleEndianTest()
+        private static int IsLittleEndianTest()
         {
             return BitConverter.IsLittleEndian ? 1 : 0;
         }
 
-        [SkippableFact]
-        public void ClassWith64BitFieldTest()
+        public static int MethodCallOnGenericTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(ClassWith64BitField.ClassMain, true);
+            var obj1 = new ClassWithGenericParameter<int>(2);
+            MiniAssert.That(obj1.CompareTo(2) == 0);
+            MiniAssert.That(obj1.CompareTo(3) == -1);
+
+            var obj2 = new ClassWithGenericParameter<string>("Test");
+            MiniAssert.That(obj2.CompareTo("Test") == 0);
+
+            return 1;
         }
 
-        public int MethodCallOnValueType()
+        public static int MethodCallOnValueType()
         {
             // Tests the simple cases, where the type is known. When it is not (generics), and a CONSTRAINED. prefix comes into play,
             // things get worse
@@ -237,16 +254,10 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
-        public int MethodCallOnGenericTest()
+        [SkippableFact]
+        public void ClassWith64BitFieldTest()
         {
-            var obj1 = new ClassWithGenericParameter<int>(2);
-            MiniAssert.That(obj1.CompareTo(2) == 0);
-            MiniAssert.That(obj1.CompareTo(3) == -1);
-
-            var obj2 = new ClassWithGenericParameter<string>("Test");
-            MiniAssert.That(obj2.CompareTo("Test") == 0);
-
-            return 1;
+            ExecuteComplexProgramSuccess<Func<int>>(ClassWith64BitField.ClassMain, true);
         }
 
         [SkippableFact]
@@ -624,6 +635,11 @@ namespace Iot.Device.Arduino.Tests
 
             public static int RunClock()
             {
+                const int redLed = 6;
+                using GpioController gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
+                gpioController.OpenPin(redLed, PinMode.Output);
+                gpioController.Write(redLed, PinValue.High);
+                Thread.Sleep(10000);
                 using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
                 using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
                 using Hd44780 hd44780 = new Lcd2004(lcdInterface);
@@ -632,6 +648,7 @@ namespace Iot.Device.Arduino.Tests
                 hd44780.DisplayOn = true;
                 hd44780.Clear();
                 hd44780.Write("Hello World!");
+                gpioController.Write(redLed, PinValue.Low);
                 for (int i = 0; i < 60; i++)
                 {
                     hd44780.SetCursorPosition(0, 1);
@@ -641,7 +658,10 @@ namespace Iot.Device.Arduino.Tests
                     hd44780.Write(time.ToString("dd. MMMM yyyy"));
                     hd44780.SetCursorPosition(0, 3);
                     hd44780.Write(time.ToLongTimeString());
-                    Thread.Sleep(1000);
+                    Thread.Sleep(800);
+                    gpioController.Write(redLed, PinValue.High);
+                    Thread.Sleep(100);
+                    gpioController.Write(redLed, PinValue.Low);
                 }
 
                 return 1;

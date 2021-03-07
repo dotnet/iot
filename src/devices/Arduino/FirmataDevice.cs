@@ -1637,7 +1637,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void WriteFlashHeader(int dataVersion, int hashCode)
+        public void WriteFlashHeader(int dataVersion, int hashCode, int startupToken, CodeStartupFlags startupFlags)
         {
             if (_firmataStream == null)
             {
@@ -1653,6 +1653,8 @@ namespace Iot.Device.Arduino
                 _firmataStream.WriteByte((byte)ExecutorCommand.WriteFlashHeader);
                 SendInt32(dataVersion);
                 SendInt32(hashCode);
+                SendInt32(startupToken);
+                SendInt32((int)startupFlags);
                 _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                 _firmataStream.Flush();
                 WaitAndHandleIlCommandReply(ExecutorCommand.WriteFlashHeader);

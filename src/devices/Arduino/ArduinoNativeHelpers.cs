@@ -24,5 +24,13 @@ namespace Iot.Device.Arduino
         {
             throw new PlatformNotSupportedException("This method works on the Arduino only");
         }
+
+        /// <summary>
+        /// This method serves as stub for the main startup code. The body will be dynamically generated (from the static ctors and the actual main method)
+        /// </summary>
+        internal static void MainStub()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

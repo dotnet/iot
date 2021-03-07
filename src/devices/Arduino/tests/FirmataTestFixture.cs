@@ -74,7 +74,7 @@ namespace Arduino.Tests
             {
                 return new CompilerSettings()
                 {
-                    CreateKernelForFlashing = false, UseFlashForKernel = false, UseFlashForProgram = true,
+                    CreateKernelForFlashing = true, UseFlashForKernel = true, UseFlashForProgram = false,
                 };
             }
         }

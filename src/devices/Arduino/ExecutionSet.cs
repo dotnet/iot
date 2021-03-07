@@ -73,6 +73,7 @@ namespace Iot.Device.Arduino
             _kernelSnapShot = EmptySnapShot;
             _compilerSettings = compilerSettings.Clone();
             MainEntryPointInternal = null;
+            TokenOfStartupMethod = 0;
         }
 
         internal ExecutionSet(ExecutionSet setToClone, ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
@@ -105,7 +106,13 @@ namespace Iot.Device.Arduino
             _entryPoint = setToClone._entryPoint;
             _kernelSnapShot = setToClone._kernelSnapShot;
             _compilerSettings = compilerSettings.Clone();
+            if (setToClone.FirmwareStartupSequence != null)
+            {
+                FirmwareStartupSequence = new List<IlCode>(setToClone.FirmwareStartupSequence);
+            }
+
             MainEntryPointInternal = setToClone.MainEntryPointInternal;
+            TokenOfStartupMethod = setToClone.TokenOfStartupMethod;
         }
 
         internal IList<ClassDeclaration> Classes => _classes;
@@ -123,6 +130,15 @@ namespace Iot.Device.Arduino
         }
 
         public CompilerSettings CompilerSettings => _compilerSettings;
+
+        /// <summary>
+        /// The list of methods that need to be called to start the code (static constructors and the main method)
+        /// The sequence is combined into a startup method if the program is to run directly from flash, otherwise <see cref="ArduinoCsCompiler.ExecuteStaticCtors"/> takes care of the
+        /// sequencing.
+        /// </summary>
+        internal List<IlCode>? FirmwareStartupSequence { get; set; }
+
+        public int TokenOfStartupMethod { get; set; }
 
         private static int CalculateTotalStringSize(List<(int Token, byte[] EncodedString, string StringData)> strings, SnapShot fromSnapShot, SnapShot toSnapShot)
         {
@@ -165,7 +181,8 @@ namespace Iot.Device.Arduino
                     _compiler.SendStrings(_strings.ToList(), EmptySnapShot, _kernelSnapShot, true);
                     _compiler.CopyToFlash();
 
-                    _compiler.WriteFlashHeader(_kernelSnapShot);
+                    // The kernel contains no startup method, therefore don't use one
+                    _compiler.WriteFlashHeader(_kernelSnapShot, 0, CodeStartupFlags.None);
                 }
             }
             else if (!CompilerSettings.UseFlashForProgram && !CompilerSettings.UseFlashForKernel)
@@ -218,7 +235,7 @@ namespace Iot.Device.Arduino
                 _compiler.SendStrings(_strings.ToList(), from, to, false);
                 if (doWriteProgramToFlash)
                 {
-                    _compiler.WriteFlashHeader(to);
+                    _compiler.WriteFlashHeader(to, TokenOfStartupMethod, CodeStartupFlags.None);
                 }
             }
             else

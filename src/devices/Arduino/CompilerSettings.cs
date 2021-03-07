@@ -16,6 +16,7 @@ namespace Iot.Device.Arduino
             CreateKernelForFlashing = true;
             UseFlashForProgram = false;
             AdditionalSuppressions = new List<string>();
+            LaunchProgramFromFlash = false;
         }
 
         /// <summary>
@@ -48,6 +49,16 @@ namespace Iot.Device.Arduino
         }
 
         public IList<string> AdditionalSuppressions
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Directly launch the program from flash after power is applied to the Arduino.
+        /// Only works if <see cref="CreateKernelForFlashing"/> is false and <see cref="UseFlashForProgram"/> is true.
+        /// </summary>
+        public bool LaunchProgramFromFlash
         {
             get;
             set;

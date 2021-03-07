@@ -80,6 +80,12 @@ namespace Iot.Device.Arduino.Tests
             remoteMethod.Dispose();
         }
 
+        [Fact]
+        public void MainMethodMustBeStatic()
+        {
+            Assert.Throws<InvalidOperationException>(() => _compiler.CreateExecutionSet<Action>(MainMethodMustBeStatic, new CompilerSettings()));
+        }
+
         [SkippableTheory]
         [InlineData("Equal", 2, 2, true)]
         [InlineData("Equal", 2000, 1999, false)]
