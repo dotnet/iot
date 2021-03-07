@@ -55,7 +55,6 @@ The following breadboard circuit demonstrates the correct wiring pattern, includ
 
 ![MBI5027_BB_topview](https://user-images.githubusercontent.com/2608468/93656940-22811a00-f9e3-11ea-84db-94615a2e1a2b.png)
 
-
 It is easy to mis-wire the MBI5027. The following image captures the most basic aspects for correct configuration.
 
 ![MBI5027 basic wiring](mbi5027-basic-wiring.png)
@@ -65,7 +64,6 @@ The following are key aspects to ensure are correct:
 - Pin 24 (VDD) must be wired to 5v for error correction to work correctly.
 - Pin 23 (R-EXT) must be connected to ground with a resistor, which configures the constant current.
 - Loads must connect to the MBI5027 with their cathode legs. In this example, the LED is connected to the ground rail via its anode leg and to a MBI5027 input pin via its cathode leg.
-
 
 ## Error detection
 
