@@ -26,7 +26,14 @@ namespace System.Device.Gpio
         private const string HummingBoardProduct = "HummingBoard-Edge";
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
+        /// <summary>
+        /// Set of open pins. Uses the current numbering scheme.
+        /// </summary>
         private readonly HashSet<int> _openPins;
+
+        /// <summary>
+        /// Last value that was written to the pin, or null if it was opened as input and never written. Uses logical pin number addressing
+        /// </summary>
         private readonly PinValue?[] _desiredPinValues;
         private GpioDriver _driver;
 
@@ -144,7 +151,9 @@ namespace System.Device.Gpio
 
             ClosePinCore(pinNumber);
             _openPins.Remove(pinNumber);
-            _desiredPinValues[pinNumber] = null;
+
+            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+            _desiredPinValues[logicalPinNumber] = null;
         }
 
         /// <summary>
@@ -184,6 +193,19 @@ namespace System.Device.Gpio
             {
                 _driver.SetPinMode(logicalPinNumber, mode);
             }
+        }
+
+        /// <summary>
+        /// Sets the mode to a pin and sets an initial value for an output pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to be set.</param>
+        /// <param name="initialValue">The initial value if the <paramref name="mode"/> is output. The driver will do it's best to prevent glitches to the other value when
+        /// changing from input to output.</param>
+        public void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
+        {
+            Write(pinNumber, initialValue);
+            SetPinMode(pinNumber, mode);
         }
 
         /// <summary>
@@ -252,9 +274,9 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException($"Can not write to pin {pinNumber} because it is not open.");
             }
 
-            _desiredPinValues[pinNumber] = value;
-
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
+
+            _desiredPinValues[logicalPinNumber] = value;
 
             if (GetPinMode(logicalPinNumber) != PinMode.Output)
             {
