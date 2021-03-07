@@ -144,6 +144,7 @@ namespace System.Device.Gpio
 
             ClosePinCore(pinNumber);
             _openPins.Remove(pinNumber);
+            _desiredPinValues[pinNumber] = null;
         }
 
         /// <summary>

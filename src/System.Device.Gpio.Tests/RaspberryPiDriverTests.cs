@@ -56,11 +56,25 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void HighPulledPinDoesNotGlitchToLowWhenChangedToOutput()
         {
+            ////while (!System.Diagnostics.Debugger.IsAttached)
+            ////{
+            ////    Thread.Sleep(100);
+            ////}
+
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 bool didTriggerToLow = false;
-                int testPin = OutputPin; // TODO: Change to OpenPin
-                controller.OpenPin(testPin, PinMode.InputPullUp);
+                int testPin = OutputPin;
+                // Set value to low prior to test, so that we have a defined start situation
+                controller.OpenPin(testPin, PinMode.Output);
+                controller.Write(testPin, PinValue.Low);
+                controller.ClosePin(testPin);
+                // For this test, we use the input pin as an external pull-up
+                controller.OpenPin(InputPin, PinMode.Output);
+                controller.Write(InputPin, PinValue.High);
+                Thread.Sleep(2);
+                // If we were to use InputPullup here, this would work around the problem it seems, but it would also make our test pass under almost all situations
+                controller.OpenPin(testPin, PinMode.Input);
                 Thread.Sleep(50);
                 controller.RegisterCallbackForPinValueChangedEvent(testPin, PinEventTypes.Falling, (sender, args) =>
                 {
@@ -74,6 +88,9 @@ namespace System.Device.Gpio.Tests
                 controller.SetPinMode(testPin, PinMode.Output);
                 Thread.Sleep(50);
                 Assert.False(didTriggerToLow);
+
+                controller.ClosePin(OutputPin);
+                controller.ClosePin(InputPin);
             }
         }
     }
