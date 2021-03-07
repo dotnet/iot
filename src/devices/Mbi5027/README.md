@@ -47,7 +47,7 @@ If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) bi
 
 The following image demonstrate a [binary clock counting example](samples/Program.cs).
 
-![binary clock counting example](mbi5027-binary-block.png)
+![binary clock counting example](mbi5027-binary-clock.png)
 
 ## Example circuit
 
