@@ -10,25 +10,15 @@ using static System.Console;
 int[] pins = new int[] { 4, 17, 27, 22, 5, 6, 13, 19 };
 CancellationTokenSource cts = new();
 CancellationToken token = cts.Token;
-GpioOutputSegment gpioSegment = new GpioOutputSegment(pins, cts.Token);
-IOutputSegment segment = gpioSegment;
+IOutputSegment segment = new GpioOutputSegment(pins, cts.Token);
 TimeSpan delay = TimeSpan.FromSeconds(5);
 
 Console.CancelKeyPress += (s, e) =>
 {
     cts.Cancel();
     segment.Clear();
-    gpioSegment.Dispose();
+    segment.Dispose();
 };
-
-WriteLine("Light all LEDs");
-segment.Clear();
-for (int i = 0; i < pins.Length; i++)
-{
-    segment.Write(i, 1);
-}
-
-segment.Display(delay);
 
 WriteLine("Light all LEDs");
 segment.Clear();

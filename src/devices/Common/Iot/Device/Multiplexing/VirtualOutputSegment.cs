@@ -94,5 +94,12 @@ namespace Iot.Device.Multiplexing.Utility
         /// As appropriate for a given implementation, performs a latch.
         /// </summary>
         public void Display(TimeSpan time) => _token.WaitHandle.WaitOne(time);
+
+        /// <summary>
+        /// Disposes any native resources.
+        /// </summary>
+        public void Dispose()
+        {
+        }
     }
 }

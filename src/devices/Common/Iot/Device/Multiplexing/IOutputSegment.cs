@@ -10,7 +10,7 @@ namespace Iot.Device.Multiplexing
     /// <summary>
     /// Interface that abstracts multiplexing over a segment of outputs.
     /// </summary>
-    public interface IOutputSegment
+    public interface IOutputSegment : IDisposable
     {
         /// <summary>
         /// Length of segment (number of outputs)
