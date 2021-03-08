@@ -158,7 +158,7 @@ namespace Iot.Device.Media
         /// </summary>
         /// <param name="format">Pixel format.</param>
         /// <returns>Supported resolution.</returns>
-        public override IEnumerable<IResolution> GetPixelFormatResolutions(PixelFormat format)
+        public override IEnumerable<Resolution> GetPixelFormatResolutions(PixelFormat format)
         {
             Initialize();
 
@@ -168,26 +168,29 @@ namespace Iot.Device.Media
                 pixel_format = format
             };
 
-            List<IResolution> result = new List<IResolution>();
+            List<Resolution> result = new List<Resolution>();
             while (V4l2Struct(V4l2Request.VIDIOC_ENUM_FRAMESIZES, ref size) != -1)
             {
-                IResolution resolution;
-                switch ((ResolutionType)size.type)
+                Resolution resolution;
+                switch (size.type)
                 {
-                    case ResolutionType.Discrete:
-
-                        resolution = new DiscreteResolution
+                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE:
+                        resolution = new Resolution
                         {
-                            Height = size.discrete.height,
-                            Width = size.discrete.width
+                            Type = ResolutionType.Discrete,
+                            MinHeight = size.discrete.height,
+                            MaxHeight = size.discrete.height,
+                            StepHeight = 0,
+                            MinWidth = size.discrete.width,
+                            MaxWidth = size.discrete.width,
+                            StepWidth = 0,
                         };
-
                         break;
 
-                    case ResolutionType.Continuous:
-
-                        resolution = new StepwiseResolution
+                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_CONTINUOUS:
+                        resolution = new Resolution
                         {
+                            Type = ResolutionType.Continuous,
                             MinHeight = size.stepwise.min_height,
                             MaxHeight = size.stepwise.max_height,
                             StepHeight = 1,
@@ -195,13 +198,12 @@ namespace Iot.Device.Media
                             MaxWidth = size.stepwise.max_width,
                             StepWidth = 1,
                         };
-
                         break;
 
-                    case ResolutionType.Stepwise:
-                        Console.WriteLine($"StepWise {size}");
-                        resolution = new StepwiseResolution
+                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_STEPWISE:
+                        resolution = new Resolution
                         {
+                            Type = ResolutionType.Stepwise,
                             MinHeight = size.stepwise.min_height,
                             MaxHeight = size.stepwise.max_height,
                             StepHeight = size.stepwise.step_height,
@@ -209,16 +211,19 @@ namespace Iot.Device.Media
                             MaxWidth = size.stepwise.max_width,
                             StepWidth = size.stepwise.step_width,
                         };
-
                         break;
 
                     default:
-                        resolution = new DiscreteResolution
+                        resolution = new Resolution
                         {
-                            Height = 0,
-                            Width = 0
+                            Type = ResolutionType.Discrete,
+                            MinHeight = 0,
+                            MaxHeight = 0,
+                            StepHeight = 0,
+                            MinWidth = 0,
+                            MaxWidth = 0,
+                            StepWidth = 0,
                         };
-
                         break;
                 }
 

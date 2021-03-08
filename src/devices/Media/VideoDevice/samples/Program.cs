@@ -20,14 +20,7 @@ Console.WriteLine();
 // Get the resolutions of the format
 foreach (var resolution in device.GetPixelFormatResolutions(PixelFormat.YUYV))
 {
-    if (resolution is DiscreteResolution discreteRes)
-    {
-        Console.Write($"{discreteRes.Width}x{discreteRes.Height} ");
-    }
-    else if (resolution is StepwiseResolution stepRes)
-    {
-        Console.Write($"[{stepRes.MinWidth}x{stepRes.MinHeight}]->[{stepRes.MaxWidth}x{stepRes.MaxHeight}], Step [{stepRes.StepWidth},{stepRes.StepHeight}] ");
-    }
+    Console.Write($"[{resolution.MinWidth}x{resolution.MinHeight}]->[{resolution.MaxWidth}x{resolution.MaxHeight}], Step [{resolution.StepWidth},{resolution.StepHeight}] ");
 }
 
 Console.WriteLine();

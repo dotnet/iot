@@ -75,7 +75,7 @@ namespace Iot.Device.Media
         /// </summary>
         /// <param name="format">Pixel format.</param>
         /// <returns>Supported resolution.</returns>
-        public abstract IEnumerable<IResolution> GetPixelFormatResolutions(PixelFormat format);
+        public abstract IEnumerable<Resolution> GetPixelFormatResolutions(PixelFormat format);
 
         /// <inheritdoc/>
         public void Dispose()
