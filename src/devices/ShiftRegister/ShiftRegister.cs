@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Threading;
 using System.Device.Gpio;
 using System.Device.Spi;
 
@@ -12,7 +13,7 @@ namespace Iot.Device.Multiplexing
     /// Compatible with SN74HC595, MBI5027 and MBI5168, for example.
     /// Supports SPI and GPIO control.
     /// </summary>
-    public class ShiftRegister : IDisposable
+    public class ShiftRegister : IDisposable, IOutputSegment
     {
         // Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
         // Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
@@ -28,6 +29,7 @@ namespace Iot.Device.Multiplexing
         private readonly bool _shouldDispose;
         private GpioController? _controller;
         private SpiDevice? _spiDevice;
+        private VirtualOutputSegment? _segment;
 
         /// <summary>
         /// Initialize a new shift register connected through GPIO.
@@ -45,6 +47,7 @@ namespace Iot.Device.Multiplexing
             _clock = _pinMapping.Clock;
             _latch = _pinMapping.LatchEnable;
             _bitLength = bitLength;
+            _segment = new VirtualOutputSegment(_bitLength);
             SetupPins();
         }
 
@@ -208,6 +211,63 @@ namespace Iot.Device.Multiplexing
             // SPI devices are always disposed
             _spiDevice?.Dispose();
             _spiDevice = null;
+        }
+
+        // IOutputSegment Implementation
+        // Only supported when shift register is connected with GPIO
+
+        /// <summary>
+        /// The length of the segment; the number of GPIO pins it exposes.
+        /// </summary>
+        int IOutputSegment.Length => _segment?.Length ?? 0;
+
+        /// <summary>
+        /// Writes a byte to a shift register.
+        /// Does not perform a latch.
+        /// </summary>
+        void IOutputSegment.Write(int output, PinValue value)
+        {
+            _segment?.Write(output, value);
+        }
+
+        /// <summary>
+        /// Writes a byte to a shift register.
+        /// Does not perform a latch.
+        /// </summary>
+        void IOutputSegment.Write(int value)
+        {
+            _segment?.Write(value);
+        }
+
+        /// <summary>
+        /// Clears shift register.
+        /// Performs a latch.
+        /// </summary>
+        void IOutputSegment.Clear()
+        {
+            _segment?.Clear();
+            ShiftClear();
+        }
+
+        /// <summary>
+        /// Displays segment per the cancellation token (duration or signal).
+        /// As appropriate for a given implementation, performs a latch.
+        /// </summary>
+        void IOutputSegment.Display(CancellationToken token)
+        {
+            if (_segment is null)
+            {
+                throw new Exception("`IOutputSegment` is not supported for `ShiftRegister` when using SPI.");
+            }
+
+            for (int i = _segment.Length - 1; i >= 0; i--)
+            {
+                ShiftBit(_segment[i]);
+            }
+
+            Latch();
+
+            token.WaitHandle.WaitOne();
         }
 
         private void SetupPins()
