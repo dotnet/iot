@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Device.Gpio;
 using System.Device.Spi;
+using Iot.Device.Multiplexing.Utility;
 
 namespace Iot.Device.Multiplexing
 {
@@ -27,6 +28,7 @@ namespace Iot.Device.Multiplexing
         private readonly int _latch;
         private readonly int _bitLength;
         private readonly bool _shouldDispose;
+        private readonly CancellationToken _token;
         private GpioController? _controller;
         private SpiDevice? _spiDevice;
         private VirtualOutputSegment? _segment;
@@ -38,7 +40,8 @@ namespace Iot.Device.Multiplexing
         /// <param name="bitLength">Bit length of register, including chained registers.</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public ShiftRegister(ShiftRegisterPinMapping pinMapping, int bitLength, GpioController? gpioController = null,  bool shouldDispose = true)
+        /// <param name="token">Cancellation token to use to notify cancelling the output segment.</param>
+        public ShiftRegister(ShiftRegisterPinMapping pinMapping, int bitLength, GpioController? gpioController = null,  bool shouldDispose = true, CancellationToken token = default(CancellationToken))
         {
             _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController();
@@ -47,7 +50,8 @@ namespace Iot.Device.Multiplexing
             _clock = _pinMapping.Clock;
             _latch = _pinMapping.LatchEnable;
             _bitLength = bitLength;
-            _segment = new VirtualOutputSegment(_bitLength);
+            _token = token;
+            _segment = new VirtualOutputSegment(_bitLength, _token);
             SetupPins();
         }
 
@@ -253,7 +257,7 @@ namespace Iot.Device.Multiplexing
         /// Displays segment per the cancellation token (duration or signal).
         /// As appropriate for a given implementation, performs a latch.
         /// </summary>
-        void IOutputSegment.Display(CancellationToken token)
+        void IOutputSegment.Display(TimeSpan time)
         {
             if (_segment is null)
             {
@@ -267,7 +271,7 @@ namespace Iot.Device.Multiplexing
 
             Latch();
 
-            token.WaitHandle.WaitOne();
+            _segment.Display(time);
         }
 
         private void SetupPins()

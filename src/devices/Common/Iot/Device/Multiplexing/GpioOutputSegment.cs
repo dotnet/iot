@@ -6,31 +6,35 @@ using System;
 using System.Device.Gpio;
 using System.Diagnostics;
 using System.Threading;
+using Iot.Device.Multiplexing.Utility;
 
 namespace Iot.Device.Multiplexing
 {
     /// <summary>
     /// IOutputSegment implementation that uses GpioController.
     /// </summary>
-    public class GpioOutputSegment : IOutputSegment
+    public class GpioOutputSegment : IOutputSegment, IDisposable
     {
         private readonly int[] _pins;
         private readonly bool _shouldDispose;
+        private readonly CancellationToken _token;
+        private readonly VirtualOutputSegment _segment;
         private GpioController _controller;
-        private VirtualOutputSegment _segment;
 
         /// <summary>
         /// IOutputSegment implementation that uses GpioController.
         /// </summary>
         /// <param name="pins">The GPIO pins that should be used and are connected.</param>
+        /// <param name="token">Cancellation token to use to notify cancelling the output segment.</param>
         /// <param name="gpioController">The GpioController to use. If one isn't provided, one will be created.</param>
         /// <param name="shouldDispose">The policy to use (true, by default) for disposing the GPIO controller when disposing this instance.</param>
-        public GpioOutputSegment(int[] pins, GpioController? gpioController = null, bool shouldDispose = true)
+        public GpioOutputSegment(int[] pins, CancellationToken token, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController();
             _pins = pins;
-            _segment = new VirtualOutputSegment(_pins.Length);
+            _token = token;
+            _segment = new VirtualOutputSegment(_pins.Length, _token);
 
             foreach (var pin in _pins)
             {
@@ -65,21 +69,25 @@ namespace Iot.Device.Multiplexing
         public void Clear()
         {
             _segment.Clear();
-            Display(CancellationToken.None);
+            Display();
         }
 
         /// <summary>
         /// Displays segment for a given duration.
         /// Alternative to Thread.Sleep
         /// </summary>
-        public void Display(CancellationToken token)
+        public void Display(TimeSpan time)
+        {
+            Display();
+            _segment.Display(time);
+        }
+
+        private void Display()
         {
             for (int i = 0; i < _pins.Length; i++)
             {
                 _controller.Write(_pins[i], _segment[i]);
             }
-
-            token.WaitHandle.WaitOne();
         }
 
         /// <summary>

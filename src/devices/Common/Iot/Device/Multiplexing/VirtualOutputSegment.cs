@@ -5,25 +5,28 @@ using System;
 using System.Device.Gpio;
 using System.Threading;
 
-namespace Iot.Device.Multiplexing
+namespace Iot.Device.Multiplexing.Utility
 {
     /// <summary>
     /// Interface that abstracts multiplexing over a segment of outputs.
     /// </summary>
     public class VirtualOutputSegment : IOutputSegment
     {
-        private int _length;
-        private PinValue[] _values;
+        private readonly int _length;
+        private readonly PinValue[] _values;
+        private readonly CancellationToken _token;
 
         /// <summary>
         /// A virtual implementation of IOutputSegment that manages the values of a set of virtual outputs.
         /// This type is intended as a helper to be used in IOutputSegment implementations.
         /// </summary>
         /// <param name="length">The number of outputs in the segment.</param>
-        public VirtualOutputSegment(int length)
+        /// <param name="token">Cancellation token to use to notify cancelling the output segment.</param>
+        public VirtualOutputSegment(int length, CancellationToken token)
         {
             _length = length;
             _values = new PinValue[_length];
+            _token = token;
         }
 
         /// <summary>
@@ -90,6 +93,6 @@ namespace Iot.Device.Multiplexing
         /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
         /// As appropriate for a given implementation, performs a latch.
         /// </summary>
-        public void Display(CancellationToken token) => token.WaitHandle.WaitOne();
+        public void Display(TimeSpan time) => _token.WaitHandle.WaitOne(time);
     }
 }

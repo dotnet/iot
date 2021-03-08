@@ -40,7 +40,6 @@ namespace Iot.Device.Multiplexing
         /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
         /// As appropriate for a given implementation, performs a latch.
         /// </summary>
-        void Display(CancellationToken token);
-
+        void Display(TimeSpan time);
     }
 }
