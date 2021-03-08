@@ -18,6 +18,16 @@ namespace Iot.Device.Multiplexing
         int Length { get; }
 
         /// <summary>
+        /// Segment values.
+        /// </summary>
+        PinValue this[int index] { get; }
+
+        /// <summary>
+        /// CancellationToken for segment.
+        /// </summary>
+        CancellationToken CancellationToken { get; }
+
+        /// <summary>
         /// Writes a PinValue to a multiplexed output.
         /// Does not perform a latch.
         /// </summary>

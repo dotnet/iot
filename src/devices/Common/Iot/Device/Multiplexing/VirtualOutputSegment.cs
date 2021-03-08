@@ -30,14 +30,19 @@ namespace Iot.Device.Multiplexing.Utility
         }
 
         /// <summary>
+        /// Length of segment (number of outputs).
+        /// </summary>
+        public int Length => _length;
+
+        /// <summary>
         /// Segment values.
         /// </summary>
         public PinValue this[int index] => _values[index];
 
         /// <summary>
-        /// Length of segment (number of outputs).
+        /// CancellationToken for segment.
         /// </summary>
-        public int Length => _length;
+        public CancellationToken CancellationToken => _token;
 
         /// <summary>
         /// Writes a PinValue to a multiplexed output.

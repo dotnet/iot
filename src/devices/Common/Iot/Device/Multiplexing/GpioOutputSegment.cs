@@ -48,6 +48,16 @@ namespace Iot.Device.Multiplexing
         public int Length => _segment.Length;
 
         /// <summary>
+        /// Segment values.
+        /// </summary>
+        public PinValue this[int index] => _segment[index];
+
+        /// <summary>
+        /// CancellationToken for segment.
+        /// </summary>
+        public CancellationToken CancellationToken => _token;
+
+        /// <summary>
         /// Writes a PinValue to the underlying GpioController.
         /// </summary>
         public void Write(int pin, PinValue value)

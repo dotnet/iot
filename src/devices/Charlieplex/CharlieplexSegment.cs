@@ -226,6 +226,11 @@ namespace Iot.Device.Multiplexing
         int IOutputSegment.Length => _segment.Length;
 
         /// <summary>
+        /// CancellationToken for segment.
+        /// </summary>
+        CancellationToken IOutputSegment.CancellationToken => _token;
+
+        /// <summary>
         /// Writes a byte to a shift register.
         /// Does not perform a latch.
         /// </summary>
