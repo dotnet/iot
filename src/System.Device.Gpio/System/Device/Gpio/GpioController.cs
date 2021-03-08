@@ -34,7 +34,7 @@ namespace System.Device.Gpio
         /// <summary>
         /// Last value that was written to the pin, or null if it was opened as input and never written. Uses logical pin number addressing
         /// </summary>
-        private readonly PinValue?[] _desiredPinValues;
+        private readonly Dictionary<int, PinValue?> _desiredPinValues;
         private GpioDriver _driver;
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace System.Device.Gpio
             _driver = driver;
             NumberingScheme = numberingScheme;
             _openPins = new HashSet<int>();
-            _desiredPinValues = new PinValue?[driver.PinCount];
+            _desiredPinValues = new Dictionary<int, PinValue?>();
         }
 
         /// <summary>
@@ -153,7 +153,7 @@ namespace System.Device.Gpio
             _openPins.Remove(pinNumber);
 
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-            _desiredPinValues[logicalPinNumber] = null;
+            _desiredPinValues.Remove(logicalPinNumber);
         }
 
         /// <summary>
@@ -184,8 +184,7 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException($"Pin {pinNumber} does not support mode {mode}.");
             }
 
-            var desired = _desiredPinValues[logicalPinNumber];
-            if (desired.HasValue)
+            if (_desiredPinValues.TryGetValue(logicalPinNumber, out var desired) && desired.HasValue)
             {
                 _driver.SetPinMode(logicalPinNumber, mode, desired.Value);
             }
