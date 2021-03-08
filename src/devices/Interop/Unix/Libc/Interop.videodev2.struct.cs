@@ -153,20 +153,12 @@ internal struct v4l2_pix_format
     public uint priv;
     [FieldOffset(32)]
     public uint flags;
-
-    // TODO: Implement v4l2_ycbcr_encoding enum
     [FieldOffset(36)]
     public uint ycbcr_enc;
-
-    // TODO: Implement v4l2_hsv_encoding enum
     [FieldOffset(36)]
     public uint hsv_enc;
-
-    // TODO: Implement v4l2_quantization enum
     [FieldOffset(40)]
     public uint quantization;
-
-    // TODO:: Implement v4l2_xfer_func
     [FieldOffset(44)]
     public uint xfer_func;
 }
