@@ -10,6 +10,8 @@ int dimTime = 200;
 int[] pins = new int[] {18, 24, 25};
 
 using GpioController controller = new();
+CancellationTokenSource cts = new();
+CancellationToken ct = cts.Token;
 
 // configure pins
 foreach (int pin in pins)
@@ -22,18 +24,20 @@ foreach (int pin in pins)
 // enable program to be safely terminated via CTRL-c 
 Console.CancelKeyPress += (s, e) =>
 {
+    cts.Cancel();
     controller.Dispose();
-    Console.WriteLine("Pin cleanup complete!");
 };
 
 // turn LEDs on and off
 int index = 0;
-while (true)
+while (!ct.IsCancellationRequested)
 {
     int pin = pins[index];
     Console.WriteLine($"Light pin {pin} for {lightTime}ms");
     controller.Write(pin, PinValue.High);
     Thread.Sleep(lightTime);
+
+    if (ct.IsCancellationRequested) break;
 
     Console.WriteLine($"Dim pin {pin} for {dimTime}ms");
     controller.Write(pin, PinValue.Low);
