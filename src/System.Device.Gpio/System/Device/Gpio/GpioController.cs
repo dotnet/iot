@@ -27,14 +27,9 @@ namespace System.Device.Gpio
         private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
 
         /// <summary>
-        /// Set of open pins. Uses the current numbering scheme.
+        /// If a pin element exists, that pin is open. Uses current controller's numbering scheme
         /// </summary>
-        private readonly HashSet<int> _openPins;
-
-        /// <summary>
-        /// Last value that was written to the pin, or null if it was opened as input and never written. Uses logical pin number addressing
-        /// </summary>
-        private readonly Dictionary<int, PinValue?> _desiredPinValues;
+        private readonly Dictionary<int, PinValue?> _openPins;
         private GpioDriver _driver;
 
         /// <summary>
@@ -54,8 +49,7 @@ namespace System.Device.Gpio
         {
             _driver = driver;
             NumberingScheme = numberingScheme;
-            _openPins = new HashSet<int>();
-            _desiredPinValues = new Dictionary<int, PinValue?>();
+            _openPins = new Dictionary<int, PinValue?>();
         }
 
         /// <summary>
@@ -100,7 +94,7 @@ namespace System.Device.Gpio
             }
 
             OpenPinCore(pinNumber);
-            _openPins.Add(pinNumber);
+            _openPins.Add(pinNumber, null);
         }
 
         /// <summary>
@@ -151,9 +145,6 @@ namespace System.Device.Gpio
 
             ClosePinCore(pinNumber);
             _openPins.Remove(pinNumber);
-
-            int logicalPinNumber = GetLogicalPinNumber(pinNumber);
-            _desiredPinValues.Remove(logicalPinNumber);
         }
 
         /// <summary>
@@ -184,7 +175,7 @@ namespace System.Device.Gpio
                 throw new InvalidOperationException($"Pin {pinNumber} does not support mode {mode}.");
             }
 
-            if (_desiredPinValues.TryGetValue(logicalPinNumber, out var desired) && desired.HasValue)
+            if (_openPins.TryGetValue(pinNumber, out var desired) && desired.HasValue)
             {
                 _driver.SetPinMode(logicalPinNumber, mode, desired.Value);
             }
@@ -230,7 +221,7 @@ namespace System.Device.Gpio
         /// <returns>The status if the pin is open or closed.</returns>
         public bool IsPinOpen(int pinNumber)
         {
-            return _openPins.Contains(pinNumber);
+            return _openPins.ContainsKey(pinNumber);
         }
 
         /// <summary>
@@ -275,9 +266,9 @@ namespace System.Device.Gpio
 
             int logicalPinNumber = GetLogicalPinNumber(pinNumber);
 
-            _desiredPinValues[logicalPinNumber] = value;
+            _openPins[pinNumber] = value;
 
-            if (GetPinMode(logicalPinNumber) != PinMode.Output)
+            if (_driver.GetPinMode(logicalPinNumber) != PinMode.Output)
             {
                 return;
             }
@@ -386,7 +377,7 @@ namespace System.Device.Gpio
         /// <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
         protected virtual void Dispose(bool disposing)
         {
-            foreach (int pin in _openPins)
+            foreach (int pin in _openPins.Keys)
             {
                 // The list contains the pin in the current NumberingScheme
                 ClosePinCore(pin);

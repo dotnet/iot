@@ -51,6 +51,7 @@ namespace System.Device.Gpio.Tests
             _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, It.IsAny<PinMode>())).Returns(true);
             _mockedGpioDriver.Setup(x => x.SetPinModeEx(1, It.IsAny<PinMode>()));
+            _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Input);
             var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
 
             ctrl.OpenPin(1, PinMode.Input);
@@ -62,6 +63,7 @@ namespace System.Device.Gpio.Tests
         {
             _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
+            _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
             _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
             _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
             var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
@@ -103,6 +105,7 @@ namespace System.Device.Gpio.Tests
             _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
             _mockedGpioDriver.Setup(x => x.SetPinModeEx(1, PinMode.Output));
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
+            _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
             _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
             _mockedGpioDriver.Setup(x => x.ReadEx(1)).Returns(PinValue.High);
             _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
@@ -120,6 +123,7 @@ namespace System.Device.Gpio.Tests
             _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
             _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
+            _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
             var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
             ctrl.OpenPin(1, PinMode.Output);
             ctrl.Write(1, PinValue.High);
@@ -175,6 +179,8 @@ namespace System.Device.Gpio.Tests
             _mockedGpioDriver.Setup(x => x.OpenPinEx(2));
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(2, PinMode.Output)).Returns(true);
+            _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
+            _mockedGpioDriver.Setup(x => x.GetPinModeEx(2)).Returns(PinMode.Output);
             _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
             _mockedGpioDriver.Setup(x => x.WriteEx(2, PinValue.Low));
             _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
