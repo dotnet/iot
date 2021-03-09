@@ -8,11 +8,12 @@ using Iot.Device.Multiplexing;
 using static System.Console;
 
 int[] pins = new int[] { 4, 17, 27, 22, 5, 6, 13, 19 };
+using IOutputSegment segment = new GpioOutputSegment(pins);
+
 CancellationTokenSource cts = new();
 CancellationToken token = cts.Token;
 bool controlCRequested = false;
 TimeSpan delay = TimeSpan.FromSeconds(5);
-IOutputSegment segment = new GpioOutputSegment(pins);
 
 Console.CancelKeyPress += (s, e) =>
 {

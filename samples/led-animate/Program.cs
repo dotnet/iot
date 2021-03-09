@@ -5,11 +5,18 @@ using System;
 using System.Threading;
 using Iot.Device.Multiplexing;
 
-int[] pins = new int[] { 4, 17, 27, 22, 5, 6, 13, 19 };
+// This sample is configured to use 8 leds, but can be changed to a use different number.
+// To use with directly connected GPIO pins
+// int[] pins = new int[] { 4, 17, 27, 22, 5, 6, 13, 19 };
+// using IOutputSegment segment = new GpioOutputSegment(pins);
+// To use with charlieplexing
+int[] pins = new int[] { 4, 17, 27, 22};
+using CharlieplexSegment segment = new(pins, 8);
+
+using AnimateLeds leds = new(segment);
+
 CancellationTokenSource cts = new();
 CancellationToken token = cts.Token;
-using IOutputSegment segment = new GpioOutputSegment(pins);
-using AnimateLeds leds = new(segment);
 Console.CancelKeyPress += (s, e) => 
 { 
     cts.Cancel();

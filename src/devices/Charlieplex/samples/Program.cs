@@ -5,8 +5,6 @@ using Iot.Device.Multiplexing;
 
 int[] pins = new int[] { 6, 13, 19 };
 int charlieSegmentLength = 6;
-CancellationTokenSource cts = new();
-CancellationToken token = cts.Token;
 bool controlCRequested = false;
 int twoSeconds = 2000;
 
@@ -20,6 +18,8 @@ for (int i = 0; i < charlieSegmentLength; i++)
 
 using CharlieplexSegment segment = new(pins, charlieSegmentLength);
 
+CancellationTokenSource cts = new();
+CancellationToken token = cts.Token;
 Console.CancelKeyPress += (s, e) =>
 {
     controlCRequested = true;
