@@ -5,7 +5,7 @@ using Xunit;
 
 namespace Iot.Device.Multiplexing
 {
-    public class UnitTest1
+    public class OutputSegmentTests
     {
         [Fact]
         public void SegmentLength()
@@ -51,7 +51,7 @@ namespace Iot.Device.Multiplexing
         public void SegmentValuesWriteLongByte()
         {
             VirtualOutputSegment segment = new(16);
-            segment.Write(0b_1101_0110_1111_0010);
+            segment.Write(new byte[] { 0b_1101_0110, 0b_1111_0010 });
 
             Assert.True(
                 segment[0] == 0 &&
@@ -76,9 +76,9 @@ namespace Iot.Device.Multiplexing
         public void SegmentValuesClear()
         {
             VirtualOutputSegment segment = new(8);
-            segment.Write(1000);
+            segment.Write(255);
             Assert.True(segment[3] == 1);
-            segment.Clear();
+            segment.TurnOffAll();
 
             for (int i = 0; i < segment.Length; i++)
             {

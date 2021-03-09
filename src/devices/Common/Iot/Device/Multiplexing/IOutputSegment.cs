@@ -4,11 +4,12 @@
 using System;
 using System.Device.Gpio;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Iot.Device.Multiplexing
 {
     /// <summary>
-    /// Interface that abstracts multiplexing over a segment of outputs.
+    /// Abstracts a segment of outputs from multiplexing sources (like a shift register).
     /// </summary>
     public interface IOutputSegment : IDisposable
     {
@@ -20,31 +21,43 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// Segment values.
         /// </summary>
-        PinValue this[int index] { get; }
+        PinValue this[int index] { get; set; }
 
         /// <summary>
-        /// Writes a PinValue to a virtual output.
+        /// Writes a PinValue to a virtual segment.
         /// Does not display output.
         /// </summary>
-        void Write(int output, PinValue value);
+        void Write(int index, PinValue value);
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual segment.
+        /// Writes each bit, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        void Write(byte value);
 
         /// <summary>
         /// Writes discrete underlying bits to a virtual output.
-        /// Written one byte at a time, left to right. Least significant bit will written to index 0.
+        /// Writes each byte, left to right. Least significant bit will written to index 0.
         /// Does not display output.
         /// </summary>
-        void Write(int value);
+        void Write(ReadOnlySpan<byte> value);
 
         /// <summary>
         /// Turns off all outputs.
-        /// Performs a latch.
         /// </summary>
-        void Clear();
+        void TurnOffAll();
 
         /// <summary>
-        /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
-        /// Publishes (latches) values.
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
         /// </summary>
         void Display(CancellationToken token);
+
+        /// <summary>
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+        /// </summary>
+        Task DisplayAsync(CancellationToken token);
     }
 }

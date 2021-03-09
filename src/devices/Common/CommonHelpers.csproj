@@ -11,6 +11,7 @@
     <Compile Include="*.cs" />
     <Compile Include="Iot/Device/Common/*.cs" />
     <Compile Include="Iot/Device/Graphics/*.cs" />
+    <Compile Include="Iot/Device/Multiplexing/*.cs" />    
     <Compile Include="System/Device/*.cs" />
     <Compile Include="System/Device/Gpio/*.cs" />
     <Compile Include="System/Device/Analog/*.cs" />

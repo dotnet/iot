@@ -6,6 +6,7 @@ using System;
 using System.Device.Gpio;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Multiplexing.Utility;
 
 namespace Iot.Device.Multiplexing
@@ -47,10 +48,15 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// Segment values.
         /// </summary>
-        public PinValue this[int index] => _segment[index];
+        public PinValue this[int index]
+        {
+            get => _segment[index];
+            set => _segment[index] = value;
+        }
 
         /// <summary>
-        /// Writes a PinValue to the underlying GpioController.
+        /// Writes a PinValue to a virtual segment.
+        /// Does not display output.
         /// </summary>
         public void Write(int pin, PinValue value)
         {
@@ -58,9 +64,21 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
-        /// Writes a byte to the underlying GpioController.
+        /// Writes discrete underlying bits to a virtual segment.
+        /// Writes each bit, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
         /// </summary>
-        public void Write(int value)
+        public void Write(byte value)
+        {
+            _segment.Write(value);
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual segment.
+        /// Writes each byte, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        public void Write(ReadOnlySpan<byte> value)
         {
             _segment.Write(value);
         }
@@ -68,15 +86,15 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// Writes a byte to the underlying GpioController.
         /// </summary>
-        public void Clear()
+        public void TurnOffAll()
         {
-            _segment.Clear();
+            _segment.TurnOffAll();
             Display();
         }
 
         /// <summary>
-        /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
-        /// Publishes (latches) values.
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
         /// </summary>
         public void Display(CancellationToken token)
         {
@@ -84,12 +102,25 @@ namespace Iot.Device.Multiplexing
             _segment.Display(token);
         }
 
+        /// <summary>
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+        /// </summary>
+        public Task DisplayAsync(CancellationToken token)
+        {
+            Display();
+            return _segment.DisplayAsync(token);
+        }
+
         private void Display()
         {
+            PinValuePair[] pairs = new PinValuePair[_pins.Length];
             for (int i = 0; i < _pins.Length; i++)
             {
-                _controller.Write(_pins[i], _segment[i]);
+                pairs[i] = new PinValuePair(_pins[i], _segment[i]);
             }
+
+            _controller.Write(pairs);
         }
 
         /// <summary>

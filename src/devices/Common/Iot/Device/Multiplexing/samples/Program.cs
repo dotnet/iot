@@ -19,12 +19,12 @@ Console.CancelKeyPress += (s, e) =>
 {
     controlCRequested = true;
     cts.Cancel();
-    segment.Clear();
+    segment.TurnOffAll();
     segment.Dispose();
 };
 
 WriteLine("Light all LEDs");
-segment.Clear();
+segment.TurnOffAll();
 for (int i = 0; i < pins.Length; i++)
 {
     segment.Write(i, 1);
@@ -36,7 +36,7 @@ if (DisplayShouldCancel())
 }
 
 WriteLine("Light every other LED");
-segment.Clear();
+segment.TurnOffAll();
 for (int i = 0; i < pins.Length; i++)
 {
     segment.Write(i, i % 2);
@@ -48,7 +48,7 @@ if (DisplayShouldCancel())
 }
 
 WriteLine("Light every other (other) LED");
-segment.Clear();
+segment.TurnOffAll();
 for (int i = 0; i < pins.Length; i++)
 {
     segment.Write(i, (i + 1) % 2);
@@ -60,7 +60,7 @@ if (DisplayShouldCancel())
 }
 
 WriteLine("Display binary 128");
-segment.Clear();
+segment.TurnOffAll();
 for (int i = 0; i < pins.Length; i++)
 {
     segment.Write(128);
@@ -71,7 +71,7 @@ if (DisplayShouldCancel())
     return;
 }
 
-segment.Clear();
+segment.TurnOffAll();
 WriteLine("Done.");
 
 bool DisplayShouldCancel()

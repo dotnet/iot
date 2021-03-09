@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Multiplexing.csproj" />
+    <ProjectReference Include="../../../../CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,6 +2,7 @@
 using System.Device.Gpio;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Multiplexing.Utility;
 
 namespace Iot.Device.Multiplexing
@@ -224,22 +225,37 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// Segment values.
         /// </summary>
-        PinValue IOutputSegment.this[int index] => _segment[index];
-
-        /// <summary>
-        /// Writes a byte to a shift register.
-        /// Does not perform a latch.
-        /// </summary>
-        void IOutputSegment.Write(int output, PinValue value)
+        PinValue IOutputSegment.this[int index]
         {
-            _segment.Write(output, value);
+            get => _segment[index];
+            set => _segment[index] = value;
         }
 
         /// <summary>
-        /// Writes a byte to a shift register.
-        /// Does not perform a latch.
+        /// Writes a PinValue to a virtual segment.
+        /// Does not display output.
         /// </summary>
-        void IOutputSegment.Write(int value)
+        public void Write(int index, PinValue value)
+        {
+            _segment[index] = value;
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual segment.
+        /// Writes each bit, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        public void Write(byte value)
+        {
+            _segment.Write(value);
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual output.
+        /// Writes each byte, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        void IOutputSegment.Write(ReadOnlySpan<byte> value)
         {
             _segment.Write(value);
         }
@@ -248,14 +264,14 @@ namespace Iot.Device.Multiplexing
         /// Clears shift register.
         /// Performs a latch.
         /// </summary>
-        void IOutputSegment.Clear()
+        void IOutputSegment.TurnOffAll()
         {
-            _segment.Clear();
+            _segment.TurnOffAll();
         }
 
         /// <summary>
-        /// Displays segment per the cancellation token (duration or signal).
-        /// As appropriate for a given implementation, performs a latch.
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
         /// </summary>
         void IOutputSegment.Display(CancellationToken token)
         {
@@ -265,6 +281,20 @@ namespace Iot.Device.Multiplexing
             }
 
             Display(token);
+        }
+
+        /// <summary>
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+        /// </summary>
+        Task IOutputSegment.DisplayAsync(CancellationToken token)
+        {
+            for (int i = 0; i < _segment.Length; i++)
+            {
+                _nodes[i].Value = _segment[i];
+            }
+
+            return Task.Run(() => Display(token), token);
         }
     }
 }

@@ -4,13 +4,14 @@
 using System;
 using System.Device.Gpio;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Iot.Device.Multiplexing.Utility
 {
     /// <summary>
     /// Interface that abstracts multiplexing over a segment of outputs.
     /// </summary>
-    public class VirtualOutputSegment : IOutputSegment
+    public sealed class VirtualOutputSegment : IOutputSegment
     {
         private readonly int _length;
         private readonly PinValue[] _values;
@@ -34,11 +35,15 @@ namespace Iot.Device.Multiplexing.Utility
         /// <summary>
         /// Segment values.
         /// </summary>
-        public PinValue this[int index] => _values[index];
+        public PinValue this[int index]
+        {
+            get => _values[index];
+            set => _values[index] = value;
+        }
 
         /// <summary>
-        /// Writes a PinValue to a virtual output.
-        /// Does not latch.
+        /// Writes a PinValue to a virtual segment.
+        /// Does not display output.
         /// </summary>
         public void Write(int output, PinValue value)
         {
@@ -46,31 +51,50 @@ namespace Iot.Device.Multiplexing.Utility
         }
 
         /// <summary>
-        /// Writes a byte to a virtual output.
-        /// Does not latch.
+        /// Writes discrete underlying bits to a virtual segment.
+        /// Writes each bit, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
         /// </summary>
-        public void Write(int value)
+        public void Write(byte value)
         {
-            for (int i = (_length / 8) - 1; i > 0; i--)
+            // Write to 8 right-most segment values
+            int offset = _length - 8;
+            WriteByteAsValues(value, offset);
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual output.
+        /// Writes each byte, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        public void Write(ReadOnlySpan<byte> value)
+        {
+            // Scenarios
+            // values can be shorter than byteLength
+            // values can be longer than byteLength
+            // values can be same as byteLength
+            int offset = (value.Length * 8) - _length;
+            if (offset < 0)
             {
-                int shift = i * 8;
-                int downShiftedValue = value >> shift;
-                WriteByteAsValues((byte)downShiftedValue, shift);
+                throw new Exception($"The bytes provided exceed the length of the {nameof(IOutputSegment)}.");
             }
 
-            WriteByteAsValues((byte)value, 0);
-
-            void WriteByteAsValues(byte value, int offset)
+            for (int i = 0; i < value.Length; i++)
             {
-                for (int i = 0; i < 8; i++)
-                {
-                    // create mask to determine value of bit
-                    // starts left-most and ends up right-most (after 8th interation)
-                    // 0b_1000_0000 is used; other algorithms use 128. They are the same value.
-                    int data = (0b_1000_0000 >> i) & value;
-                    int index = offset + 8 - i - 1;
-                    _values[index] = data;
-                }
+                WriteByteAsValues(value[i], offset + (i * 8));
+            }
+        }
+
+        private void WriteByteAsValues(byte value, int offset)
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                // create mask to determine value of bit
+                // starts left-most and ends up right-most (after 8th interation)
+                // 0b_1000_0000 is used; other algorithms use 128. They are the same value.
+                int data = (0b_1000_0000 >> i) & value;
+                int index = offset + 7 - i;
+                _values[index] = data;
             }
         }
 
@@ -78,7 +102,7 @@ namespace Iot.Device.Multiplexing.Utility
         /// Writes a Low PinValue to all outputs.
         /// Performs a latch.
         /// </summary>
-        public void Clear()
+        public void TurnOffAll()
         {
             for (int i = 0; i < _length; i++)
             {
@@ -87,10 +111,16 @@ namespace Iot.Device.Multiplexing.Utility
         }
 
         /// <summary>
-        /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
-        /// As appropriate for a given implementation, performs a latch.
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
         /// </summary>
         public void Display(CancellationToken token) => token.WaitHandle.WaitOne();
+
+        /// <summary>
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+        /// </summary>
+        public Task DisplayAsync(CancellationToken token) => Task.Delay(Timeout.Infinite, token);
 
         /// <summary>
         /// Disposes any native resources.

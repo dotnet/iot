@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Device.Gpio;
 using System.Device.Spi;
 using Iot.Device.Multiplexing.Utility;
@@ -30,7 +31,7 @@ namespace Iot.Device.Multiplexing
         private readonly bool _shouldDispose;
         private GpioController? _controller;
         private SpiDevice? _spiDevice;
-        private VirtualOutputSegment? _segment;
+        private VirtualOutputSegment _segment;
 
         /// <summary>
         /// Initialize a new shift register connected through GPIO.
@@ -62,6 +63,7 @@ namespace Iot.Device.Multiplexing
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _bitLength = bitLength;
+            _segment = new VirtualOutputSegment(_bitLength);
         }
 
         /// <summary>
@@ -220,44 +222,59 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// The length of the segment; the number of GPIO pins it exposes.
         /// </summary>
-        int IOutputSegment.Length => _segment?.Length ?? 0;
+        int IOutputSegment.Length => _segment.Length;
 
         /// <summary>
         /// Segment values.
         /// </summary>
-        PinValue IOutputSegment.this[int index] => _segment?[index] ?? PinValue.Low;
-
-        /// <summary>
-        /// Writes a byte to a shift register.
-        /// Does not perform a latch.
-        /// </summary>
-        void IOutputSegment.Write(int output, PinValue value)
+        PinValue IOutputSegment.this[int index]
         {
-            _segment?.Write(output, value);
+            get => _segment[index];
+            set => _segment[index] = value;
         }
 
         /// <summary>
-        /// Writes a byte to a shift register.
-        /// Does not perform a latch.
+        /// Writes a PinValue to a virtual segment.
+        /// Does not display output.
         /// </summary>
-        void IOutputSegment.Write(int value)
+        void IOutputSegment.Write(int output, PinValue value)
         {
-            _segment?.Write(value);
+            _segment.Write(output, value);
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual segment.
+        /// Writes each bit, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        public void Write(byte value)
+        {
+            _segment.Write(value);
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual output.
+        /// Writes each byte, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        public void Write(ReadOnlySpan<byte> value)
+        {
+            _segment.Write(value);
         }
 
         /// <summary>
         /// Clears shift register.
         /// Performs a latch.
         /// </summary>
-        void IOutputSegment.Clear()
+        void IOutputSegment.TurnOffAll()
         {
-            _segment?.Clear();
+            _segment.TurnOffAll();
             ShiftClear();
         }
 
         /// <summary>
-        /// Displays segment per the cancellation token (duration or signal).
-        /// As appropriate for a given implementation, performs a latch.
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
         /// </summary>
         void IOutputSegment.Display(CancellationToken token)
         {
@@ -274,6 +291,27 @@ namespace Iot.Device.Multiplexing
             Latch();
 
             _segment.Display(token);
+        }
+
+        /// <summary>
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+        /// </summary>
+        Task IOutputSegment.DisplayAsync(CancellationToken token)
+        {
+            if (_segment is null)
+            {
+                throw new Exception("`IOutputSegment` is not supported for `ShiftRegister` when using SPI.");
+            }
+
+            for (int i = _segment.Length - 1; i >= 0; i--)
+            {
+                ShiftBit(_segment[i]);
+            }
+
+            Latch();
+
+            return _segment.DisplayAsync(token);
         }
 
         private void SetupPins()

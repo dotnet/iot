@@ -12,17 +12,27 @@ public class AnimateLeds : IDisposable
 {
     private readonly int[] _leds;
     private readonly int[] _ledsRev;
+    private readonly int _litTimeDefault = 200;
+    private readonly int _dimTimeDefault = 50;
     private IOutputSegment _segment;
-    public int LitTimeDefault = 200;
-    public int DimTimeDefault = 50;
-    public int LitTime = 200;
-    public int DimTime = 50;
 
     public AnimateLeds(IOutputSegment segment)
     {
         _segment = segment;
         _leds = Enumerable.Range(0,_segment.Length).ToArray();
         _ledsRev = _leds.Reverse().ToArray();
+        LitTime = _litTimeDefault;
+        DimTime = _dimTimeDefault;
+
+    }
+
+    public int LitTime {get; set; }
+    public int DimTime {get; set; }
+
+    public void ResetTime()
+    {
+        LitTime = _litTimeDefault;
+        DimTime = _dimTimeDefault;
     }
 
     private void CycleLeds(CancellationToken token, params int[] outputs)
@@ -44,12 +54,6 @@ public class AnimateLeds : IDisposable
         }
 
         if (DisplayShouldCancel(token, DimTime)) return;
-    }
-
-    public void ResetTime()
-    {
-        LitTime = LitTimeDefault;
-        DimTime = DimTimeDefault;
     }
 
     public void Sequence(CancellationToken token, IEnumerable<int> outputs)
