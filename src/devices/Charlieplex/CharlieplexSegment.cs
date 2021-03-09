@@ -17,7 +17,6 @@ namespace Iot.Device.Multiplexing
         private readonly CharlieplexSegmentNode[] _nodes;
         private readonly int _nodeCount;
         private readonly VirtualOutputSegment _segment;
-        private readonly CancellationToken _token;
         private GpioController _gpioController;
         private CharlieplexSegmentNode _lastNode;
 
@@ -25,11 +24,10 @@ namespace Iot.Device.Multiplexing
         /// Initializes a new Charlieplex type that can be use for multiplex over a relatively small number of GPIO pins.
         /// </summary>
         /// <param name="pins">The set of pins to use.</param>
-        /// <param name="token">Cancellation token to use to notify cancelling the output segment.</param>
         /// <param name="nodeCount">The count of nodes (like LEDs) that will be addressable. If 0, then the Charlieplex maximum is used for the pins provided (n^2-n).</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public CharlieplexSegment(int[] pins, CancellationToken token, int nodeCount = 0,  GpioController? gpioController = null, bool shouldDispose = true)
+        public CharlieplexSegment(int[] pins, int nodeCount = 0,  GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (pins.Length < 2)
             {
@@ -69,8 +67,7 @@ namespace Iot.Device.Multiplexing
             _pins = pins;
             _nodeCount = nodeCount;
             _nodes = GetNodes(pins, nodeCount);
-            _token = token;
-            _segment = new VirtualOutputSegment(_nodeCount, token);
+            _segment = new VirtualOutputSegment(_nodeCount);
         }
 
         /// <summary>
@@ -143,15 +140,16 @@ namespace Iot.Device.Multiplexing
 
             if (duration > 0)
             {
-                DisplaySegment(TimeSpan.FromMilliseconds(duration));
+                using CancellationTokenSource cts = new(duration);
+                Display(cts.Token);
             }
         }
 
         /// <summary>
         /// Displays nodes in their current configuration for the specified duration.
         /// </summary>
-        /// <param name="duration">Time to display segment.</param>
-        public void DisplaySegment(TimeSpan duration)
+        /// <param name="token">CancellationToken used to signal when method should exit.</param>
+        public void Display(CancellationToken token)
         {
             /*
                 Cases to consider
@@ -163,8 +161,7 @@ namespace Iot.Device.Multiplexing
                 node.Cathode != _lastNode.Cathode | _lastNode.Anode
             */
 
-            Stopwatch watch = Stopwatch.StartNew();
-            do
+            while (!token.IsCancellationRequested)
             {
                 for (int i = 0; i < _nodes.Length; i++)
                 {
@@ -200,7 +197,6 @@ namespace Iot.Device.Multiplexing
                     _lastNode.Cathode = node.Cathode;
                 }
             }
-            while (watch.Elapsed < duration && !_token.IsCancellationRequested);
         }
 
         /// <summary>
@@ -229,11 +225,6 @@ namespace Iot.Device.Multiplexing
         /// Segment values.
         /// </summary>
         PinValue IOutputSegment.this[int index] => _segment[index];
-
-        /// <summary>
-        /// CancellationToken for segment.
-        /// </summary>
-        CancellationToken IOutputSegment.CancellationToken => _token;
 
         /// <summary>
         /// Writes a byte to a shift register.
@@ -266,17 +257,14 @@ namespace Iot.Device.Multiplexing
         /// Displays segment per the cancellation token (duration or signal).
         /// As appropriate for a given implementation, performs a latch.
         /// </summary>
-        void IOutputSegment.Display(TimeSpan time)
+        void IOutputSegment.Display(CancellationToken token)
         {
             for (int i = 0; i < _segment.Length; i++)
             {
                 _nodes[i].Value = _segment[i];
             }
 
-            if (!_token.IsCancellationRequested)
-            {
-                DisplaySegment(time);
-            }
+            Display(token);
         }
     }
 }

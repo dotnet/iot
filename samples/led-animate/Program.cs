@@ -6,28 +6,28 @@ using System.Threading;
 using Iot.Device.Multiplexing;
 
 int[] pins = new int[] {4,5,6,12,13,16,17,18,19,20};
-CancellationTokenSource cancellationSource = new();
-CancellationToken token = cancellationSource.Token;
-using IOutputSegment segment = new GpioOutputSegment(pins, token);
-AnimateLeds leds = new(segment);
+CancellationTokenSource cts = new();
+CancellationToken token = cts.Token;
+using IOutputSegment segment = new GpioOutputSegment(pins);
+using AnimateLeds leds = new(segment);
 Console.CancelKeyPress += (s, e) => 
 { 
-    e.Cancel = true;
-    cancellationSource.Cancel();
+    cts.Cancel();
+    segment.Dispose();
 };
             
 Console.WriteLine($"Animate! {pins.Length} pins are initialized.");
 
-while (!cancellationSource.IsCancellationRequested)
+while (!token.IsCancellationRequested)
 {
     Console.WriteLine($"Lit: {leds.LitTime}ms; Dim: {leds.DimTime}");
-    leds.FrontToBack(true);
-    leds.BacktoFront();
-    leds.MidToEnd();
-    leds.EndToMid();
-    leds.MidToEnd();
-    leds.LightAll();
-    leds.DimAllAtRandom();
+    leds.FrontToBack(token, true);
+    leds.BacktoFront(token);
+    leds.MidToEnd(token);
+    leds.EndToMid(token);
+    leds.MidToEnd(token);
+    leds.LightAll(token);
+    leds.DimAllAtRandom(token);
 
     if (leds.LitTime < 20)
     {
