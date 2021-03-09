@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using Iot.Device.Multiplexing;
 
-int[] pins = new int[] {4,5,6,12,13,16,17,18,19,20};
+int[] pins = new int[] { 4, 17, 27, 22, 5, 6, 13, 19 };
 CancellationTokenSource cts = new();
 CancellationToken token = cts.Token;
 using IOutputSegment segment = new GpioOutputSegment(pins);
