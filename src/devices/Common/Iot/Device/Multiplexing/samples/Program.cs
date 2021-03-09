@@ -8,16 +8,16 @@ using Iot.Device.Multiplexing;
 using static System.Console;
 
 int[] pins = new int[] { 4, 17, 27, 22, 5, 6, 13, 19 };
-CancellationTokenSource appSource = new();
-CancellationToken appToken = appSource.Token;
-CancellationTokenSource displaySource = new CancellationTokenSource();
-IOutputSegment segment = new GpioOutputSegment(pins);
+CancellationTokenSource _cts = new();
+CancellationToken _token = _cts.Token;
+bool _controlCRequested = false;
 TimeSpan delay = TimeSpan.FromSeconds(5);
+IOutputSegment segment = new GpioOutputSegment(pins);
 
 Console.CancelKeyPress += (s, e) =>
 {
-    displaySource.Cancel();
-    appSource.Cancel();
+    _controlCRequested = true;
+    _cts.Cancel();
     segment.Clear();
     segment.Dispose();
 };
@@ -77,7 +77,8 @@ WriteLine("Done.");
 
 bool DisplayShouldCancel()
 {
-    displaySource = new CancellationTokenSource(delay);
+    using CancellationTokenSource displaySource = new(delay);
+    _cts = displaySource;
     segment.Display(displaySource.Token);
-    return appSource.IsCancellationRequested;
+    return _controlCRequested;
 }
