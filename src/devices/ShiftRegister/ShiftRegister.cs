@@ -226,6 +226,11 @@ namespace Iot.Device.Multiplexing
         int IOutputSegment.Length => _segment?.Length ?? 0;
 
         /// <summary>
+        /// Segment values.
+        /// </summary>
+        PinValue IOutputSegment.this[int index] => _segment?[index] ?? PinValue.Low;
+
+        /// <summary>
         /// CancellationToken for segment.
         /// </summary>
         CancellationToken IOutputSegment.CancellationToken => _token;

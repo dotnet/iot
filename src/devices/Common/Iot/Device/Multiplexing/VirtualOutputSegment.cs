@@ -14,19 +14,16 @@ namespace Iot.Device.Multiplexing.Utility
     {
         private readonly int _length;
         private readonly PinValue[] _values;
-        private readonly CancellationToken _token;
 
         /// <summary>
         /// A virtual implementation of IOutputSegment that manages the values of a set of virtual outputs.
         /// This type is intended as a helper to be used in IOutputSegment implementations.
         /// </summary>
         /// <param name="length">The number of outputs in the segment.</param>
-        /// <param name="token">Cancellation token to use to notify cancelling the output segment.</param>
-        public VirtualOutputSegment(int length, CancellationToken token)
+        public VirtualOutputSegment(int length)
         {
             _length = length;
             _values = new PinValue[_length];
-            _token = token;
         }
 
         /// <summary>
@@ -40,13 +37,8 @@ namespace Iot.Device.Multiplexing.Utility
         public PinValue this[int index] => _values[index];
 
         /// <summary>
-        /// CancellationToken for segment.
-        /// </summary>
-        public CancellationToken CancellationToken => _token;
-
-        /// <summary>
-        /// Writes a PinValue to a multiplexed output.
-        /// Does not perform a latch.
+        /// Writes a PinValue to a virtual output.
+        /// Does not latch.
         /// </summary>
         public void Write(int output, PinValue value)
         {
@@ -54,8 +46,8 @@ namespace Iot.Device.Multiplexing.Utility
         }
 
         /// <summary>
-        /// Writes a byte to a multiplexed output.
-        /// Does not perform a latch.
+        /// Writes a byte to a virtual output.
+        /// Does not latch.
         /// </summary>
         public void Write(int value)
         {
@@ -98,7 +90,7 @@ namespace Iot.Device.Multiplexing.Utility
         /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
         /// As appropriate for a given implementation, performs a latch.
         /// </summary>
-        public void Display(TimeSpan time) => _token.WaitHandle.WaitOne(time);
+        public void Display(CancellationToken token) => token.WaitHandle.WaitOne();
 
         /// <summary>
         /// Disposes any native resources.

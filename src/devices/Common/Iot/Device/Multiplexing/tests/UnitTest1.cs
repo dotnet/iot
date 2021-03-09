@@ -7,19 +7,17 @@ namespace Iot.Device.Multiplexing
 {
     public class UnitTest1
     {
-        private readonly CancellationTokenSource _cts = new();
-
         [Fact]
         public void SegmentLength()
         {
-            VirtualOutputSegment segment = new(2, _cts.Token);
+            VirtualOutputSegment segment = new(2);
             Assert.True(segment.Length == 2);
         }
 
         [Fact]
         public void SegmentValuesWritePinValues()
         {
-            VirtualOutputSegment segment = new(4, _cts.Token);
+            VirtualOutputSegment segment = new(4);
             for (int i = 0; i < 4; i++)
             {
                 segment.Write(i, i % 2);
@@ -35,7 +33,7 @@ namespace Iot.Device.Multiplexing
         [Fact]
         public void SegmentValuesWriteByte()
         {
-            VirtualOutputSegment segment = new(8, _cts.Token);
+            VirtualOutputSegment segment = new(8);
             segment.Write(0b_1001_0110);
 
             Assert.True(
@@ -52,7 +50,7 @@ namespace Iot.Device.Multiplexing
         [Fact]
         public void SegmentValuesWriteLongByte()
         {
-            VirtualOutputSegment segment = new(16, _cts.Token);
+            VirtualOutputSegment segment = new(16);
             segment.Write(0b_1101_0110_1111_0010);
 
             Assert.True(
@@ -77,7 +75,7 @@ namespace Iot.Device.Multiplexing
         [Fact]
         public void SegmentValuesClear()
         {
-            VirtualOutputSegment segment = new(8, _cts.Token);
+            VirtualOutputSegment segment = new(8);
             segment.Write(1000);
             Assert.True(segment[3] == 1);
             segment.Clear();

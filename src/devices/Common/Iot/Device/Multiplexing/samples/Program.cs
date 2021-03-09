@@ -8,14 +8,16 @@ using Iot.Device.Multiplexing;
 using static System.Console;
 
 int[] pins = new int[] { 4, 17, 27, 22, 5, 6, 13, 19 };
-CancellationTokenSource cts = new();
-CancellationToken token = cts.Token;
-IOutputSegment segment = new GpioOutputSegment(pins, cts.Token);
+CancellationTokenSource appSource = new();
+CancellationToken appToken = appSource.Token;
+CancellationTokenSource displaySource = new CancellationTokenSource();
+IOutputSegment segment = new GpioOutputSegment(pins);
 TimeSpan delay = TimeSpan.FromSeconds(5);
 
 Console.CancelKeyPress += (s, e) =>
 {
-    cts.Cancel();
+    displaySource.Cancel();
+    appSource.Cancel();
     segment.Clear();
     segment.Dispose();
 };
@@ -27,7 +29,10 @@ for (int i = 0; i < pins.Length; i++)
     segment.Write(i, 1);
 }
 
-segment.Display(delay);
+if (DisplayShouldCancel())
+{
+    return;
+}
 
 WriteLine("Light every other LED");
 segment.Clear();
@@ -38,7 +43,7 @@ for (int i = 0; i < pins.Length; i++)
 
 segment.Display(delay);
 
-if (token.IsCancellationRequested)
+if (DisplayShouldCancel())
 {
     return;
 }
@@ -50,9 +55,7 @@ for (int i = 0; i < pins.Length; i++)
     segment.Write(i, (i + 1) % 2);
 }
 
-segment.Display(delay);
-
-if (token.IsCancellationRequested)
+if (DisplayShouldCancel())
 {
     return;
 }
@@ -64,6 +67,17 @@ for (int i = 0; i < pins.Length; i++)
     segment.Write(128);
 }
 
-segment.Display(delay);
+if (DisplayShouldCancel())
+{
+    return;
+}
+
 segment.Clear();
 WriteLine("Done.");
+
+bool DisplayShouldCancel()
+{
+    displaySource = new CancellationTokenSource(delay);
+    segment.Display(displaySource.Token);
+    return appSource.IsCancellationRequested;
+}

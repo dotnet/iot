@@ -17,7 +17,6 @@ namespace Iot.Device.Multiplexing
     {
         private readonly int[] _pins;
         private readonly bool _shouldDispose;
-        private readonly CancellationToken _token;
         private readonly VirtualOutputSegment _segment;
         private GpioController _controller;
 
@@ -25,16 +24,14 @@ namespace Iot.Device.Multiplexing
         /// IOutputSegment implementation that uses GpioController.
         /// </summary>
         /// <param name="pins">The GPIO pins that should be used and are connected.</param>
-        /// <param name="token">Cancellation token to use to notify cancelling the output segment.</param>
         /// <param name="gpioController">The GpioController to use. If one isn't provided, one will be created.</param>
         /// <param name="shouldDispose">The policy to use (true, by default) for disposing the GPIO controller when disposing this instance.</param>
-        public GpioOutputSegment(int[] pins, CancellationToken token, GpioController? gpioController = null, bool shouldDispose = true)
+        public GpioOutputSegment(int[] pins, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController();
             _pins = pins;
-            _token = token;
-            _segment = new VirtualOutputSegment(_pins.Length, _token);
+            _segment = new VirtualOutputSegment(_pins.Length);
 
             foreach (var pin in _pins)
             {
@@ -51,11 +48,6 @@ namespace Iot.Device.Multiplexing
         /// Segment values.
         /// </summary>
         public PinValue this[int index] => _segment[index];
-
-        /// <summary>
-        /// CancellationToken for segment.
-        /// </summary>
-        public CancellationToken CancellationToken => _token;
 
         /// <summary>
         /// Writes a PinValue to the underlying GpioController.
@@ -83,13 +75,13 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
-        /// Displays segment for a given duration.
-        /// Alternative to Thread.Sleep
+        /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
+        /// Publishes (latches) values.
         /// </summary>
-        public void Display(TimeSpan time)
+        public void Display(CancellationToken token)
         {
             Display();
-            _segment.Display(time);
+            _segment.Display(token);
         }
 
         private void Display()

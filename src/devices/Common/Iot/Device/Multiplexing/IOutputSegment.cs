@@ -23,20 +23,15 @@ namespace Iot.Device.Multiplexing
         PinValue this[int index] { get; }
 
         /// <summary>
-        /// CancellationToken for segment.
-        /// </summary>
-        CancellationToken CancellationToken { get; }
-
-        /// <summary>
-        /// Writes a PinValue to a multiplexed output.
-        /// Does not perform a latch.
+        /// Writes a PinValue to a virtual output.
+        /// Does not display output.
         /// </summary>
         void Write(int output, PinValue value);
 
         /// <summary>
-        /// Writes an int (processed as one of more bytes) to a multiplexed output.
+        /// Writes discrete underlying bits to a virtual output.
         /// Written one byte at a time, left to right. Least significant bit will written to index 0.
-        /// Does not perform a latch.
+        /// Does not display output.
         /// </summary>
         void Write(int value);
 
@@ -48,8 +43,8 @@ namespace Iot.Device.Multiplexing
 
         /// <summary>
         /// Displays segment until token receives a cancellation signal, possibly due to a specificated duration.
-        /// As appropriate for a given implementation, performs a latch.
+        /// Publishes (latches) values.
         /// </summary>
-        void Display(TimeSpan time);
+        void Display(CancellationToken token);
     }
 }
