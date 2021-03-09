@@ -23,8 +23,7 @@ The binding can use `GpioController` pins to control the shift register. It uses
 The following example code demonstrates how to use a shift register with GPIO.
 
 ```csharp
-// assuming an 8-bit shift register, like the SN74HC595 or MBI5168
-var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 8);
+ShiftRegister sr = new(ShiftRegisterPinMapping.Minimal, 8);
 
 // Light up three of first four LEDs
 sr.ShiftBit(1);
@@ -33,51 +32,55 @@ sr.ShiftBit(0);
 sr.ShiftBit(1);
 sr.Latch();
 
-// Clear register
-sr.ShiftClear();
+// Display for 1s
+Thread.Sleep(1000);
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(0b_1010_1010); //same as integer 170
+// ShiftByte latches data by default
+sr.ShiftByte(0b_1000_1101);
 ```
 
-The following diagram demonstrates the required wiring for using the SN74HC595 with GPIO. Other shift registers will be similar.
+The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph.fzz) demonstrates the required wiring for using the SN74HC595 with minimal mapping. Other shift registers will be similar.
 
-![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-led-bar-graph_bb.png)
+![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-minimal-led-bar-graph_bb.png)
 
 ## Using SPI
 
-The bindings can use a `SpiDevice` to control the shift register. The shift register timing maps to the SPI protocol, enabling SPI to be used. The wiring from microcontroller to shift register is straightforward: SDI -> SDI; CLK -> CLK; CEO -> LE.
+The bindings can use a `SpiDevice` to control the shift register. The shift register timing maps to the SPI protocol, enabling SPI to be used. The wiring from is straightforward, from [SPI pins](https://pinout.xyz/pinout/spi) to the shift register: SDI (MOSI) -> SDI; SCLK -> CLK; CEO -> LE.
+
+Note: The SPI protocol has terms with [casual references to slavery](https://hackaday.com/2020/06/29/updating-the-language-of-spi-pin-labels-to-remove-casual-references-to-slavery/). We're doing our part to avoid them.
 
 The following example code demonstrates how to use a shift register with SPI.
 
 ```csharp
-var settings = new SpiConnectionSettings(0, 0);
-var spiDevice = SpiDevice.Create(settings);
 // assuming an 8-bit shift register
-var sr = new ShiftRegister(spiDevice, 8);
+ShiftRegister sr = new(SpiDevice.Create(new(0, 0)), 8);
 
 // Light up three of first four LEDs
-// The Shift() method is dissallowed when using SPI
-ShiftByte(0b_1011); // same as integer 11
+// The ShiftBit() method is disallowed when using SPI
+sr.ShiftByte(0b_1011);
 
 // Clear register
 sr.ShiftClear();
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(0b_1010_1010); //same as integer 170
+sr.ShiftByte(0b_1010_1010);
 ```
 
-The following diagram demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
+The following [diagram](../Sn74hc595/sn74hc595-led-bar-graph-spi.fzz) demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
 
 ![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-led-bar-graph-spi_bb.png)
+
+Note: You need to [enable SPI on the Raspberry Pi](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) in order to use it.
 
 ## Daisy-chaining
 
 The binding supports daisy chaining, using either GPIO or SPI. The GPIO-based example below demonstrates how to instantiate the binding for controlling/addressing two -- daisy-chained -- 8-bit shift registers. This is specified by the integer value in the constructor.
 
 ```csharp
-var sr = new ShiftRegister(ShiftRegisterPinMapping.Standard, 16);
+ShiftRegister sr = new(ShiftRegisterPinMapping.Minimal, 16);
 ```
+
 The shift registers need to be correctly wired to enable daisy-chaining. On the SN74HC595, `QH'` in the first register would connect to `SER` in the second register. The pattern with the MBI5027 and MBI5168 is similar, `SDO` in the first register would connect to `SDI` in the second.
 
 You can write values across multiple daisy chained devices in one of several ways, as demonstrated in the following code. You wouldn't typically use of all these approaches, but pick one.
@@ -106,7 +109,7 @@ for (int i = (sr.BitLength / 8) - 1; i > 0; i--)
 {
     int shift = i * 8;
     int downShiftedValue = value >> shift;
-    sr.ShiftByte((byte)downShiftedValue);
+    sr.ShiftByte((byte)downShiftedValue, false);
 }
 
 sr.ShiftByte((byte)value);
@@ -120,14 +123,14 @@ foreach (var b in bytes)
 }
 ```
 
-The following diagram demonstrates the required wiring for using the SN74HC595 with daisy-chaining. Other shift registers will be similar.
+The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph-double-up.fzz) demonstrates the required wiring for using the SN74HC595 with daisy-chaining. Other shift registers will be similar. This diagram uses the `Minimal` mapping. The `Complete` mapping will differ.
 
-![sn74hc595-led-bar-graph-double-up_bb](../Sn74hc595/sn74hc595-led-bar-graph-double-up_bb.png)
+![sn74hc595-minimal-led-bar-graph-double-up_bb](../Sn74hc595/sn74hc595-minimal-led-bar-graph-double-up_bb.png)
 
 ## Resources
 
-* SN74HC595 datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
-* MBI5027 datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
-* MBI5168 datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
+* SN74HC595 data sheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+* MBI5027 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
+* MBI5168 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
 * Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
 * Tutorial: https://www.youtube.com/watch?v=G1SzTGZ2l1c
