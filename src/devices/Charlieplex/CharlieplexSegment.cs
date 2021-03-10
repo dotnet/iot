@@ -2,6 +2,8 @@
 using System.Device.Gpio;
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
+using Iot.Device.Multiplexing.Utility;
 
 namespace Iot.Device.Multiplexing
 {
@@ -9,12 +11,13 @@ namespace Iot.Device.Multiplexing
     /// Provides support for Charlieplex multiplexing.
     /// https://wikipedia.org/wiki/Charlieplexing
     /// </summary>
-    public class CharlieplexSegment : IDisposable
+    public class CharlieplexSegment : IOutputSegment, IDisposable
     {
         private readonly bool _shouldDispose;
         private readonly int[] _pins;
         private readonly CharlieplexSegmentNode[] _nodes;
         private readonly int _nodeCount;
+        private readonly VirtualOutputSegment _segment;
         private GpioController _gpioController;
         private CharlieplexSegmentNode _lastNode;
 
@@ -32,7 +35,7 @@ namespace Iot.Device.Multiplexing
                 throw new ArgumentException(nameof(CharlieplexSegment), "2 or more pins must be provided.");
             }
 
-            int charlieCount = (int)Math.Pow(pins.Length, 2) - pins.Length;
+            int charlieCount = (pins.Length * pins.Length) - pins.Length;
             if (nodeCount > charlieCount)
             {
                 throw new ArgumentException(nameof(CharlieplexSegment), $"Maximum count is {charlieCount} based on {pins.Length} pins. {nodeCount} was specified as the count.");
@@ -65,12 +68,8 @@ namespace Iot.Device.Multiplexing
             _pins = pins;
             _nodeCount = nodeCount;
             _nodes = GetNodes(pins, nodeCount);
+            _segment = new VirtualOutputSegment(_nodeCount);
         }
-
-        /// <summary>
-        /// The number of nodes (like LEDs) that can be addressed.
-        /// </summary>
-        public int NodeCount => _nodeCount;
 
         /// <summary>
         /// Provides the set of Charlie nodes given the set of pins and the count provided.
@@ -124,6 +123,11 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
+        /// The number of nodes (like LEDs) that can be addressed.
+        /// </summary>
+        public int NodeCount => _nodeCount;
+
+        /// <summary>
         /// Write a PinValue to a node, to update Charlieplex segment.
         /// Address scheme is 0-based. Given 8 nodes, addresses would be 0-7.
         /// Displays nodes in their updated configuration for the specified duration.
@@ -131,21 +135,24 @@ namespace Iot.Device.Multiplexing
         /// <param name="node">Node to update.</param>
         /// <param name="value">Value to write.</param>
         /// <param name="duration">Time to display segment, in milliseconds (default is 0; not displayed).</param>
-        public void Write(int node, PinValue value, int duration = 0)
+        public void Write(int node, PinValue value, TimeSpan duration = default(TimeSpan))
         {
             _nodes[node].Value = value;
 
-            if (duration > 0)
+            if (duration == default(TimeSpan))
             {
-                DisplaySegment(TimeSpan.FromMilliseconds(duration));
+                return;
             }
+
+            using CancellationTokenSource cts = new CancellationTokenSource(duration);
+            Display(cts.Token);
         }
 
         /// <summary>
         /// Displays nodes in their current configuration for the specified duration.
         /// </summary>
-        /// <param name="duration">Time to display segment.</param>
-        public void DisplaySegment(TimeSpan duration)
+        /// <param name="token">CancellationToken used to signal when method should exit.</param>
+        public void Display(CancellationToken token)
         {
             /*
                 Cases to consider
@@ -157,8 +164,7 @@ namespace Iot.Device.Multiplexing
                 node.Cathode != _lastNode.Cathode | _lastNode.Anode
             */
 
-            Stopwatch watch = Stopwatch.StartNew();
-            do
+            while (!token.IsCancellationRequested)
             {
                 for (int i = 0; i < _nodes.Length; i++)
                 {
@@ -194,7 +200,6 @@ namespace Iot.Device.Multiplexing
                     _lastNode.Cathode = node.Cathode;
                 }
             }
-            while (watch.Elapsed < duration);
         }
 
         /// <summary>
@@ -209,6 +214,89 @@ namespace Iot.Device.Multiplexing
                 _gpioController?.Dispose();
                 _gpioController = null!;
             }
+        }
+
+        // IOutputSegment Implementation
+        // Only supported when shift register is connected with GPIO
+
+        /// <summary>
+        /// The length of the segment; the number of GPIO pins it exposes.
+        /// </summary>
+        public int Length => _segment.Length;
+
+        /// <summary>
+        /// Segment values.
+        /// </summary>
+        PinValue IOutputSegment.this[int index]
+        {
+            get => _segment[index];
+            set => _segment[index] = value;
+        }
+
+        /// <summary>
+        /// Writes a PinValue to a virtual segment.
+        /// Does not display output.
+        /// </summary>
+        void IOutputSegment.Write(int index, PinValue value)
+        {
+            _segment[index] = value;
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual segment.
+        /// Writes each bit, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        void IOutputSegment.Write(byte value)
+        {
+            _segment.Write(value);
+        }
+
+        /// <summary>
+        /// Writes discrete underlying bits to a virtual output.
+        /// Writes each byte, left to right. Least significant bit will written to index 0.
+        /// Does not display output.
+        /// </summary>
+        void IOutputSegment.Write(ReadOnlySpan<byte> value)
+        {
+            _segment.Write(value);
+        }
+
+        /// <summary>
+        /// Clears shift register.
+        /// Performs a latch.
+        /// </summary>
+        void IOutputSegment.TurnOffAll()
+        {
+            _segment.TurnOffAll();
+        }
+
+        /// <summary>
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+        /// </summary>
+        void IOutputSegment.Display(CancellationToken token)
+        {
+            for (int i = 0; i < _segment.Length; i++)
+            {
+                _nodes[i].Value = _segment[i];
+            }
+
+            Display(token);
+        }
+
+        /// <summary>
+        /// Displays current state of segment.
+        /// Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+        /// </summary>
+        Task IOutputSegment.DisplayAsync(CancellationToken token)
+        {
+            for (int i = 0; i < _segment.Length; i++)
+            {
+                _nodes[i].Value = _segment[i];
+            }
+
+            return Task.Run(() => Display(token), token);
         }
     }
 }

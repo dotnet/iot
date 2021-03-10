@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <Compile Include="ShiftRegister.cs" />
     <Compile Include="ShiftRegisterPinMapping.cs" />
   </ItemGroup>

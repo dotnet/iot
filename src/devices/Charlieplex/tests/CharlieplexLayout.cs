@@ -54,6 +54,23 @@ namespace Charlietests
         }
 
         [Fact]
+        public void FourPinLayoutLimitEight()
+        {
+            var pins = new int[] { 1, 2, 3, 4 };
+            CharlieplexSegmentNode[] nodes = CharlieplexSegment.GetNodes(pins, 8);
+            Assert.True(true);
+            Assert.True(nodes.Length == 8);
+            Assert.True(nodes[0].Anode == 1 && nodes[0].Cathode == 2);
+            Assert.True(nodes[1].Anode == 2 && nodes[1].Cathode == 1);
+            Assert.True(nodes[2].Anode == 2 && nodes[2].Cathode == 3);
+            Assert.True(nodes[3].Anode == 3 && nodes[3].Cathode == 2);
+            Assert.True(nodes[4].Anode == 3 && nodes[4].Cathode == 4);
+            Assert.True(nodes[5].Anode == 4 && nodes[5].Cathode == 3);
+            Assert.True(nodes[6].Anode == 1 && nodes[6].Cathode == 3);
+            Assert.True(nodes[7].Anode == 3 && nodes[7].Cathode == 1);
+        }
+
+        [Fact]
         public void FivePinLayout()
         {
             var pins = new int[] { 1, 2, 3, 4, 5 };
