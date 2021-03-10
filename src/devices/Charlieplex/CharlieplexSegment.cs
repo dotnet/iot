@@ -135,15 +135,17 @@ namespace Iot.Device.Multiplexing
         /// <param name="node">Node to update.</param>
         /// <param name="value">Value to write.</param>
         /// <param name="duration">Time to display segment, in milliseconds (default is 0; not displayed).</param>
-        public void Write(int node, PinValue value, int duration = 0)
+        public void Write(int node, PinValue value, TimeSpan duration = default(TimeSpan))
         {
             _nodes[node].Value = value;
 
-            if (duration > 0)
+            if (duration == default(TimeSpan))
             {
-                using CancellationTokenSource cts = new(duration);
-                Display(cts.Token);
+                return;
             }
+
+            using CancellationTokenSource cts = new CancellationTokenSource(duration);
+            Display(cts.Token);
         }
 
         /// <summary>

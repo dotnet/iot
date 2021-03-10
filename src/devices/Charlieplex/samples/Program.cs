@@ -3,8 +3,8 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Multiplexing;
 
-int[] pins = new int[] { 6, 13, 19 };
-int charlieSegmentLength = 6;
+int[] pins = new int[] { 4, 17, 27, 22 };
+int charlieSegmentLength = 8;
 bool controlCRequested = false;
 int twoSeconds = 2000;
 
@@ -24,6 +24,7 @@ Console.CancelKeyPress += (s, e) =>
 {
     controlCRequested = true;
     cts.Cancel();
+    segment.Dispose();
 };
 
 Console.WriteLine("Light all LEDs");
@@ -43,7 +44,7 @@ for (int i = 0; i < charlieSegmentLength; i++)
     segment.Write(i, 0);
 }
 
-Console.WriteLine("Write data -- light odd values -- and then display.");
+Console.WriteLine("Light odd values");
 for (int i = 0; i < charlieSegmentLength; i++)
 {
     if (i % 2 == 1)
@@ -59,7 +60,7 @@ if (DisplayShouldCancel())
 
 for (int i = 0; i < charlieSegmentLength; i++)
 {
-    segment.Write(i, 0, 0);
+    segment.Write(i, 0);
 }
 
 var delayLengths = new int[] { 1, 5, 10, 25, 50, 100, 250, 500, 1000 };
@@ -68,8 +69,10 @@ foreach (var delay in delayLengths)
     Console.WriteLine($"Light one LED at a time -- Delay {delay}");
     for (int i = 0; i < charlieSegmentLength; i++)
     {
-        segment.Write(i, 1, delay);
-        segment.Write(i, 0, delay / 2);
+        segment.Write(i, 1);
+        DisplayShouldCancel(delay);
+        segment.Write(i, 0);
+        DisplayShouldCancel(delay / 2);
     }
 }
 
@@ -78,19 +81,31 @@ foreach (var delay in delayLengths.Reverse())
     Console.WriteLine($"Light and then dim all LEDs, in sequence. Delay: {delay}");
     for (int i = 0; i < charlieSegmentLength; i++)
     {
-        segment.Write(i, 1, delay);
+        segment.Write(i, 1);
+        DisplayShouldCancel(delay);
     }
 
     for (int i = 0; i < charlieSegmentLength; i++)
     {
-        segment.Write(i, 0, delay / 2);
+        segment.Write(i, 0);
+        DisplayShouldCancel(delay / 2);
     }
 }
 
-bool DisplayShouldCancel()
+bool DisplayShouldCancel(int delay = -1)
 {
-    using CancellationTokenSource displaySource = new(twoSeconds);
-    cts = displaySource;
+    if (controlCRequested)
+    {
+        return controlCRequested;
+    }
+
+    if (delay == -1)
+    {
+        delay = twoSeconds;
+    }
+
+    using CancellationTokenSource displaySource = CancellationTokenSource.CreateLinkedTokenSource(token);
+    displaySource.CancelAfter(delay);
     segment.Display(displaySource.Token);
     return controlCRequested;
 }
