@@ -52,16 +52,16 @@ public class AnimateLeds : IDisposable
         {
             _segment.Write(output, PinValue.Low);
         }
-
+        
         if (DisplayShouldCancel(token, DimTime)) return;
-    }
+        }
 
     public void Sequence(CancellationToken token, IEnumerable<int> outputs)
     {
         Console.WriteLine(nameof(Sequence));
-        if (token.IsCancellationRequested) return;
         foreach (int output in outputs)
         {
+            if (token.IsCancellationRequested) return;
             CycleLeds(token, output);
         }
     }
@@ -83,19 +83,21 @@ public class AnimateLeds : IDisposable
     public void MidToEnd(CancellationToken token)
     {
         Console.WriteLine(nameof(MidToEnd));
-        if (token.IsCancellationRequested) return;
         var half = _leds.Length / 2;
 
         if (half % 2 == 1)
         {
+            if (token.IsCancellationRequested) return;
             CycleLeds(token, half);
         }
+
 
         for (var i = 1; i < half+1; i ++)
         {
             var ledA= half - i;
             var ledB = half - 1 + i;
 
+            if (token.IsCancellationRequested) return;
             CycleLeds(token, ledA, ledB);
         }
     }
@@ -103,7 +105,6 @@ public class AnimateLeds : IDisposable
     public void EndToMid(CancellationToken token)
     {
         Console.WriteLine(nameof(EndToMid));
-        if (token.IsCancellationRequested) return;
         var half = _leds.Length / 2;
 
         for (var i = 0; i < half ; i++)
@@ -111,11 +112,14 @@ public class AnimateLeds : IDisposable
             var ledA = i;
             var ledB = _segment.Length - 1 - i;
 
+            if (token.IsCancellationRequested) return;
             CycleLeds(token, ledA, ledB);
         }
 
+
         if (half % 2 == 1)
         {
+            if (token.IsCancellationRequested) return;
             CycleLeds(token, half);
         }
     }
@@ -123,12 +127,11 @@ public class AnimateLeds : IDisposable
     public void LightAll(CancellationToken token)
     {
         Console.WriteLine(nameof(LightAll));
-        if (token.IsCancellationRequested) return;
         for(int i = 0; i < _leds.Length; i++)
         {
+            if (token.IsCancellationRequested) return;
             _segment.Write(i, PinValue.High);
 
-            if (token.IsCancellationRequested) return;
         }
         if (DisplayShouldCancel(token, LitTime)) return;
     }
@@ -142,15 +145,13 @@ public class AnimateLeds : IDisposable
 
         while (ledList.Count > 0)
         {
+            if (DisplayShouldCancel(token, DimTime)) return;
             var led = random.Next(_leds.Length);
 
             if (ledList.Remove(led))
             {
                 _segment.Write(led, PinValue.Low);
-                if (DisplayShouldCancel(token, DimTime)) return;
             }
-
-            if (token.IsCancellationRequested) return;
         }
 
     }
@@ -163,6 +164,11 @@ public class AnimateLeds : IDisposable
 
     bool DisplayShouldCancel(CancellationToken token, int delay)
     {
+        if (token.IsCancellationRequested)
+        {
+            return token.IsCancellationRequested;
+        }
+
         using CancellationTokenSource delaySource = CancellationTokenSource.CreateLinkedTokenSource(token);
         delaySource.CancelAfter(delay);
         _segment.Display(delaySource.Token);

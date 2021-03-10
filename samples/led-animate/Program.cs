@@ -27,7 +27,7 @@ Console.CancelKeyPress += (s, e) =>
 { 
     e.Cancel = true;
     cts.Cancel();
-    Thread.Sleep(50);
+    Thread.Sleep(250);
 };
             
 Console.WriteLine($"Animate! {segment.Length} pins are initialized.");
