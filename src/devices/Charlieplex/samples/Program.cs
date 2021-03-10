@@ -24,7 +24,6 @@ Console.CancelKeyPress += (s, e) =>
 {
     controlCRequested = true;
     cts.Cancel();
-    segment.Dispose();
 };
 
 Console.WriteLine("Light all LEDs");
@@ -37,9 +36,6 @@ if (DisplayShouldCancel())
 {
     return;
 }
-
-Console.WriteLine("Hit enter to continue.");
-Console.ReadLine();
 
 Console.WriteLine("Dim all LEDs");
 for (int i = 0; i < charlieSegmentLength; i++)
@@ -82,13 +78,11 @@ foreach (var delay in delayLengths.Reverse())
     Console.WriteLine($"Light and then dim all LEDs, in sequence. Delay: {delay}");
     for (int i = 0; i < charlieSegmentLength; i++)
     {
-        Console.WriteLine($"light pin {i}");
         segment.Write(i, 1, delay);
     }
 
     for (int i = 0; i < charlieSegmentLength; i++)
     {
-        Console.WriteLine($"dim pin {i}");
         segment.Write(i, 0, delay / 2);
     }
 }
@@ -100,3 +94,5 @@ bool DisplayShouldCancel()
     segment.Display(displaySource.Token);
     return controlCRequested;
 }
+
+segment.Dispose();

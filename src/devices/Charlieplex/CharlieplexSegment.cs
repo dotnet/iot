@@ -35,7 +35,7 @@ namespace Iot.Device.Multiplexing
                 throw new ArgumentException(nameof(CharlieplexSegment), "2 or more pins must be provided.");
             }
 
-            int charlieCount = (int)Math.Pow(pins.Length, 2) - pins.Length;
+            int charlieCount = (pins.Length * pins.Length) - pins.Length;
             if (nodeCount > charlieCount)
             {
                 throw new ArgumentException(nameof(CharlieplexSegment), $"Maximum count is {charlieCount} based on {pins.Length} pins. {nodeCount} was specified as the count.");
@@ -70,11 +70,6 @@ namespace Iot.Device.Multiplexing
             _nodes = GetNodes(pins, nodeCount);
             _segment = new VirtualOutputSegment(_nodeCount);
         }
-
-        /// <summary>
-        /// The number of nodes (like LEDs) that can be addressed.
-        /// </summary>
-        public int NodeCount => _nodeCount;
 
         /// <summary>
         /// Provides the set of Charlie nodes given the set of pins and the count provided.
@@ -126,6 +121,11 @@ namespace Iot.Device.Multiplexing
 
             return nodes;
         }
+
+        /// <summary>
+        /// The number of nodes (like LEDs) that can be addressed.
+        /// </summary>
+        public int NodeCount => _nodeCount;
 
         /// <summary>
         /// Write a PinValue to a node, to update Charlieplex segment.
@@ -235,7 +235,7 @@ namespace Iot.Device.Multiplexing
         /// Writes a PinValue to a virtual segment.
         /// Does not display output.
         /// </summary>
-        public void Write(int index, PinValue value)
+        void IOutputSegment.Write(int index, PinValue value)
         {
             _segment[index] = value;
         }
@@ -245,7 +245,7 @@ namespace Iot.Device.Multiplexing
         /// Writes each bit, left to right. Least significant bit will written to index 0.
         /// Does not display output.
         /// </summary>
-        public void Write(byte value)
+        void IOutputSegment.Write(byte value)
         {
             _segment.Write(value);
         }
