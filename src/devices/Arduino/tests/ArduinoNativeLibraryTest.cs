@@ -396,6 +396,18 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test3, true);
         }
 
+        [SkippableFact]
+        public void HashSetTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.TestHashSet, true);
+        }
+
+        [SkippableFact]
+        public void DictionaryTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.DictionaryTest, true);
+        }
+
         public class ClassThatOverridesObjectEquals : IEquatable<ClassThatOverridesObjectEquals>
         {
             private readonly int _a;
@@ -615,6 +627,50 @@ namespace Iot.Device.Arduino.Tests
             public int CompareTo(T other)
             {
                 return _a.CompareTo(other);
+            }
+        }
+
+        /// <summary>
+        /// The implementation of these classes uses quite a few low-level functions of the runtime, and they're used in GpioController.
+        /// Therefore do some explicit function testing
+        /// </summary>
+        public class CollectionsTest
+        {
+            public static int TestHashSet()
+            {
+                HashSet<int> mySet = new HashSet<int>();
+                mySet.Add(1);
+                mySet.Add(2);
+                mySet.Add(1);
+                MiniAssert.That(mySet.Count == 2);
+                MiniAssert.That(mySet.Contains(2));
+                mySet.Remove(1);
+                MiniAssert.That(mySet.Count == 1);
+                return 1;
+            }
+
+            public static int DictionaryTest()
+            {
+                Dictionary<int, PinValue?> dict = new Dictionary<int, PinValue?>();
+                dict.Add(2, null);
+                MiniAssert.That(dict[2] == null);
+                dict.Add(5, null);
+                MiniAssert.That(dict.TryGetValue(5, out var value) && value.HasValue == false);
+                dict[5] = PinValue.Low;
+                MiniAssert.That(dict.TryGetValue(5, out value));
+                if (value.HasValue)
+                {
+                    MiniAssert.That(value.Value == PinValue.Low);
+                }
+                else
+                {
+                    MiniAssert.That(false, "Value cannot be retrieved");
+                }
+
+                dict.Remove(5);
+                MiniAssert.That(dict.ContainsKey(2));
+                MiniAssert.False(dict.ContainsKey(5));
+                return 1;
             }
         }
 

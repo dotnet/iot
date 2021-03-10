@@ -503,7 +503,7 @@ namespace Iot.Device.Arduino
             // Add this first, so we break the recursion to this class further down
             var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
             set.AddClass(newClass);
-            _board.Log($"Class {newClass.Name} added to the execution with token 0x{newClass.NewToken:X}");
+            _board.Log($"Class {newClass.Name} added to the execution set with token 0x{newClass.NewToken:X}");
             foreach (var iface in interfaces)
             {
                 PrepareClassDeclaration(set, iface);

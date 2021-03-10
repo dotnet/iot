@@ -40,6 +40,7 @@ namespace Iot.Device.Arduino
         // String data, already UTF-8 encoded. The StringData value is actually only used for debugging purposes
         private readonly List<(int Token, byte[] EncodedString, string StringData)> _strings;
         private readonly CompilerSettings _compilerSettings;
+        private readonly List<(int Token, TypeInfo? Class)> _specialTypeList;
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -63,6 +64,7 @@ namespace Iot.Device.Arduino
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
             _classesToSuppress = new List<Type>();
             _strings = new();
+            _specialTypeList = new();
 
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
             _nextGenericToken = GenericTokenStep;
@@ -97,6 +99,7 @@ namespace Iot.Device.Arduino
             _methodsReplaced = new List<(MethodBase, MethodBase?)>(setToClone._methodsReplaced);
             _classesToSuppress = new List<Type>(setToClone._classesToSuppress);
             _strings = new(setToClone._strings);
+            _specialTypeList = new(setToClone._specialTypeList);
 
             _nextToken = setToClone._nextToken;
             _nextGenericToken = setToClone._nextGenericToken;
@@ -572,9 +575,33 @@ namespace Iot.Device.Arduino
                 Type[] typeArguments = typeInfo.GetGenericArguments();
                 Type firstArg = typeArguments.First();
                 int firstArgToken = GetOrAddClassToken(firstArg.GetTypeInfo());
-                // Our token is the combination of the generic type and the first argument. This allows a simple implementation for Type.MakeGenericType() with
-                // generic types with a single argument
-                token = firstArgToken + definitionToken;
+                if (firstArg.IsGenericType || typeArguments.Length > 1)
+                {
+                    // If the first argument is itself generic or there is more than one generic argument, we need to create extended metadata
+                    // The list consists of a length element, then the master token (which we create here) and then the tokens of the type arguments
+                    List<(int Token, TypeInfo? Element)> entries = new List<(int Token, TypeInfo? Element)>(); // Element is only for debugging purposes
+
+                    // one entry for the combined token, one for the left part
+                    token = (int)(0xFF000000 | _nextToken++); // Create a new token, marked "special" (top 8 bits set). Note that this also serves as separation marker
+                    // Note: While in theory, this element could again be wrapped in a Nullable<>, this is probably really rare, as generic types are almost never structs, therefore
+                    // a token such as 0x02800079 is rather IList<Nullable<int>> rather than Nullable<IList<int>>, but getting that right everywhere is difficult
+                    entries.Add((token, typeInfo)); // own type
+                    entries.Add((definitionToken, definition.GetTypeInfo())); // The generic type
+                    foreach (var t in typeArguments)
+                    {
+                        var info = t.GetTypeInfo();
+                        int token2 = GetOrAddClassToken(info);
+                        entries.Add((token2, info));
+                    }
+
+                    _specialTypeList.AddRange(entries);
+                }
+                else
+                {
+                    // Our token is the combination of the generic type and the only argument. This allows a simple implementation for Type.MakeGenericType() with
+                    // generic types with a single argument
+                    token = definitionToken + firstArgToken;
+                }
             }
             else
             {
