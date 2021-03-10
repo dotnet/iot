@@ -220,7 +220,7 @@ namespace Iot.Device.Multiplexing
         /// <summary>
         /// The length of the segment; the number of GPIO pins it exposes.
         /// </summary>
-        int IOutputSegment.Length => _segment.Length;
+        public int Length => _segment.Length;
 
         /// <summary>
         /// Segment values.
