@@ -25,8 +25,9 @@ CancellationTokenSource cts = new();
 CancellationToken token = cts.Token;
 Console.CancelKeyPress += (s, e) => 
 { 
+    e.Cancel = true;
     cts.Cancel();
-    segment.Dispose();
+    Thread.Sleep(50);
 };
             
 Console.WriteLine($"Animate! {segment.Length} pins are initialized.");
@@ -52,3 +53,5 @@ while (!token.IsCancellationRequested)
         leds.DimTime = (int)(leds.DimTime * 0.7);
     }
 }
+
+segment.Dispose();
