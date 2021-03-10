@@ -25,7 +25,7 @@ namespace Iot.Device.Multiplexing
 
         /// <summary>
         /// Writes a PinValue to a virtual segment.
-        /// Does not display output.
+        /// Does not display output until calling Display() or Display(CancellationToken ct) methods.
         /// </summary>
         void Write(int index, PinValue value);
 
