@@ -12,23 +12,13 @@ namespace Iot.Device.Common
     /// </summary>
     public static class LogDispatcher
     {
-        private static object _lock;
-
-        static LogDispatcher()
-        {
-            LoggerFactory = null;
-            _lock = new object();
-        }
+        private static object _lock = new object();
 
         /// <summary>
         /// The default logger factory for the whole assembly.
         /// If this is null (the default), logging is disabled
         /// </summary>
-        public static ILoggerFactory? LoggerFactory
-        {
-            get;
-            set;
-        }
+        public static ILoggerFactory? LoggerFactory { get; set; } = null;
 
         /// <summary>
         /// Gets a logger with the given name
