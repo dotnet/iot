@@ -13,7 +13,7 @@ The [SN74HC595 sample](samples/README.md) demonstrates how to use the shift regi
 The following example code demonstrates how to use the SN74HC595 with its most basic functions.
 
 ```csharp
-var sr = new Sn74hc595(Sn74hc595PinMapping.Standard);
+Sn74hc595 sr = new(Sn74hc595PinMapping.Minimal);
 
 // Light up three of first four LEDs
 sr.ShiftBit(1);
@@ -22,27 +22,58 @@ sr.ShiftBit(0);
 sr.ShiftBit(1);
 sr.Latch();
 
-// Clear register
-sr.ClearStorage();
+// Display for 1s
+Thread.Sleep(1000);
 
 // Write to all 8 registers with a byte value
-sr.ShiftByte(0b_1010_1010); //same as integer 170
+// ShiftByte latches data by default
+sr.ShiftByte(0b_1000_1101);
 ```
 
-The following diagram demonstrates the required wiring.
+The following [diagram](sn74hc595-minimal-led-bar-graph.fzz) demonstrates the required wiring for the `Minimal` pin mapping. In particular, `OE` must be wired to ground, and `SRCLR` must be wired high.
 
-![shift-register](sn74hc595-led-bar-graph_bb.png)
+![SN74HC595 Minimal pin mapping](sn74hc595-minimal-led-bar-graph_bb.png)
 
-If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) binding, which includes more information on SPI. 
+The following example demonstrates using additional features and requires different wiring.
 
-## Fritzing diagrams
+```csharp
+Sn74hc595 sr = new(Sn74hc595PinMapping.Complete);
 
-* [SN74HC595 -- GPIO](sn74hc595-led-bar-graph.fzz)
-* [SN74HC595 -- SPI](sn74hc595-led-bar-graph-spi.fzz)
-* [SN74HC595 -- Daisy chaining](sn74hc595-led-bar-graph-double-up.fzz)
+// Write to all 8 registers with a byte value
+// ShiftByte latches data by default
+sr.ShiftByte(0b_1000_1101);
+
+// Display for 1s
+Thread.Sleep(1000);
+
+// disable output temporarily
+sr.OutputEnable = false;
+
+// Display for 1s
+Thread.Sleep(1000);
+
+// re-enable output
+sr.OutputEnable = true;
+
+// clear storage before writing new values
+sr.ClearStorage();
+
+// Light up three of first four LEDs
+sr.ShiftBit(1);
+sr.ShiftBit(1);
+sr.ShiftBit(0);
+sr.ShiftBit(1);
+sr.Latch();
+```
+
+The following [diagram](sn74hc595-led-bar-graph.fzz) demonstrates the required wiring for the `Complete` pin mapping.
+
+![SN74HC595 Minimal pin mapping](sn74hc595-led-bar-graph_bb.png)
+
+If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) binding, which includes more information on SPI.
 
 ## Resources
 
 * Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
 * Adafruit: https://www.adafruit.com/product/450
-* Tutotial: https://www.youtube.com/watch?v=6fVbJbNPrEU
+* Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU

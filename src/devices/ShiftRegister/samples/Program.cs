@@ -146,8 +146,7 @@ void BinaryCounter(ShiftRegister sr, CancellationTokenSource cancellationSource)
         for (int i = 256; i < 4096; i++)
         {
             ShiftBytes(sr, i);
-            Thread.Sleep(25);
-            sr.ShiftClear();
+            Thread.Sleep(20);
 
             if (IsCanceled(sr, cancellationSource))
             {
@@ -170,7 +169,7 @@ void ShiftBytes(ShiftRegister sr, int value)
     {
         int shift = i * 8;
         int downShiftedValue = value >> shift;
-        sr.ShiftByte((byte)downShiftedValue);
+        sr.ShiftByte((byte)downShiftedValue, false);
     }
 
     sr.ShiftByte((byte)value);

@@ -125,6 +125,65 @@ namespace Iot.Device.Pwm
             DelayHelper.DelayMicroseconds(500, allowThreadYield: true);
         }
 
+        private static (ushort On, ushort Off) DutyCycleToOnOff(double dutyCycle)
+        {
+            Debug.Assert(dutyCycle >= 0.0 && dutyCycle <= 1.0, "Duty cycle must be between 0 and 1");
+
+            // there are actually 4097 values in the set but we can do edge values
+            // using 13th bit which overrides to always on/off
+            ushort dutyCycleSampled = (ushort)Math.Round(dutyCycle * 4096);
+
+            if (dutyCycleSampled == 0)
+            {
+                return (0, 1 << 12);
+            }
+            else if (dutyCycleSampled == 4096)
+            {
+                return (1 << 12, 0);
+            }
+            else
+            {
+                return (0, dutyCycleSampled);
+            }
+        }
+
+        private static double OnOffToDutyCycle(ushort on, ushort off)
+        {
+            ushort OnOffToDutyCycleSampled(ushort onCycles, ushort offCycles)
+            {
+                const ushort Max = (ushort)(1 << 12);
+                if (onCycles == 0)
+                {
+                    return (offCycles == Max) ? (ushort)0 : offCycles;
+                }
+                else if (onCycles == Max && offCycles == 0)
+                {
+                    return 4096;
+                }
+
+                // we didn't set this value anywhere in the code
+                throw new InvalidOperationException($"Unexpected value of duty cycle ({onCycles}, {offCycles})");
+            }
+
+            return OnOffToDutyCycleSampled(on, off) / 4096.0;
+        }
+
+        private static void CheckDutyCycle(double dutyCycle)
+        {
+            if (dutyCycle < 0.0 || dutyCycle > 1.0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(dutyCycle), dutyCycle, "Value must be between 0.0 and 1.0.");
+            }
+        }
+
+        private static void CheckChannel(int channel)
+        {
+            if (channel < 0 || channel >= 16)
+            {
+                throw new ArgumentOutOfRangeException(nameof(channel), channel, "Channel must be a value from 0 to 15.");
+            }
+        }
+
         /// <summary>
         /// Sets duty cycle on specified channel.
         /// </summary>
@@ -309,65 +368,6 @@ namespace Iot.Device.Pwm
             bytes[0] = (byte)register;
             BinaryPrimitives.WriteUInt16LittleEndian(bytes.Slice(1), value);
             _device.Write(bytes);
-        }
-
-        private static (ushort On, ushort Off) DutyCycleToOnOff(double dutyCycle)
-        {
-            Debug.Assert(dutyCycle >= 0.0 && dutyCycle <= 1.0, "Duty cycle must be between 0 and 1");
-
-            // there are actually 4097 values in the set but we can do edge values
-            // using 13th bit which overrides to always on/off
-            ushort dutyCycleSampled = (ushort)Math.Round(dutyCycle * 4096);
-
-            if (dutyCycleSampled == 0)
-            {
-                return (0, 1 << 12);
-            }
-            else if (dutyCycleSampled == 4096)
-            {
-                return (1 << 12, 0);
-            }
-            else
-            {
-                return (0, dutyCycleSampled);
-            }
-        }
-
-        private static double OnOffToDutyCycle(ushort on, ushort off)
-        {
-            ushort OnOffToDutyCycleSampled(ushort onCycles, ushort offCycles)
-            {
-                const ushort Max = (ushort)(1 << 12);
-                if (onCycles == 0)
-                {
-                    return (offCycles == Max) ? (ushort)0 : offCycles;
-                }
-                else if (onCycles == Max && offCycles == 0)
-                {
-                    return 4096;
-                }
-
-                // we didn't set this value anywhere in the code
-                throw new InvalidOperationException($"Unexpected value of duty cycle ({onCycles}, {offCycles})");
-            }
-
-            return OnOffToDutyCycleSampled(on, off) / 4096.0;
-        }
-
-        private static void CheckDutyCycle(double dutyCycle)
-        {
-            if (dutyCycle < 0.0 || dutyCycle > 1.0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(dutyCycle), dutyCycle, "Value must be between 0.0 and 1.0.");
-            }
-        }
-
-        private static void CheckChannel(int channel)
-        {
-            if (channel < 0 || channel >= 16)
-            {
-                throw new ArgumentOutOfRangeException(nameof(channel), channel, "Channel must be a value from 0 to 15.");
-            }
         }
     }
 }

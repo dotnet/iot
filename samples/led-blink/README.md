@@ -1,103 +1,54 @@
-# Blink an LED with .NET Core on a Raspberry Pi
+# Blink an LED with .NET on a Raspberry Pi
 
-This [sample](Program.cs) demonstrates blinking an LED. The sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://www.nuget.org/packages/System.Device.Gpio).
+This [sample](Program.cs) demonstrates blinking an LED. The sample also demonstrates the most basic usage of the [.NET Core GPIO library](https://www.nuget.org/packages/System.Device.Gpio). The [Blink multiple LEDs](../led-blink-multiple/README.md) sample demonstrates how to add more LEDS.
 
 The following code toggles a GPIO pin on and off, which powers the LED.
 
 ```csharp
 int pin = 18;
-GpioController controller = new GpioController();
+int lightTime = 1000;
+int dimTime = 200;
+
+using GpioController controller = new();
 controller.OpenPin(pin, PinMode.Output);
 
-int lightTimeInMilliseconds = 1000;
-int dimTimeInMilliseconds = 200;
-
-// turn LED on and off
 while (true)
 {
-    Console.WriteLine($"Light for {lightTimeInMilliseconds}ms");
     controller.Write(pin, PinValue.High);
-    Thread.Sleep(lightTimeInMilliseconds);
-    Console.WriteLine($"Dim for {dimTimeInMilliseconds}ms");
+    Thread.Sleep(lightTime);
     controller.Write(pin, PinValue.Low);
-    Thread.Sleep(dimTimeInMilliseconds); 
+    Thread.Sleep(dimTime);
 }
 ```
 
-The following [fritzing diagram](rpi-led.fzz) demonstrates how you should wire your device to match the code above.
+The following [fritzing diagram](rpi-led.fzz) demonstrates how you should configure your breadboard to match the code above.
 
 ![Raspberry Pi Breadboard diagram](rpi-led_bb.png)
 
-## Extending the sample to multiple LEDs
+## Running in containers
 
-The sample can be be adapted to use multiple LEDs. The following code defines an array of integers that specifies the pins that will be connected to LEDs. You can add or remove integers from the array, to account for the LEDs you want to use. The rest of the program iterates on the array in various ways.
+You can run .NET GPIO apps in containers. This sample app includes a [Dockerfile](Dockerfile) that you can build and run with the following commands:
 
-```csharp
-var pins = new int[] {18, 24, 25};
-var lightTime = 1000;
-var dimTime = 200;
-
-Console.WriteLine($"Let's blink an LED!");
-using GpioController controller = new GpioController();
-
-// open pins as output mode
-foreach (var pin in pins)
-{
-    controller.OpenPin(pin, PinMode.Output);
-    Console.WriteLine($"GPIO pin enabled for use: {pin}");
-}
-
-Console.CancelKeyPress += (s, e) =>
-{
-    // turn off all pins when the program is terminated, with CTRL-C
-    foreach (var pin in pins)
-    {
-        Console.WriteLine($"Dim pin {pin}");
-        controller.Write(pin, PinValue.Low);
-    }
-};
-
-// LED behavior
-while (true)
-{
-    // turn each LED on and off, one at a time
-    foreach (var pin in pins)
-    {
-        Console.WriteLine($"Light LED at pin {pin} for {lightTime}ms");
-        controller.Write(pin, PinValue.High);
-        Thread.Sleep(lightTime);
-
-        Console.WriteLine($"Dim LED at pin {pin} for {dimTime}ms");
-        controller.Write(pin, PinValue.Low);
-        Thread.Sleep(dimTime);
-    }
-
-    // turns the pins on and off and various intervals
-    // uses modulus math to turn on an arbitrary number of the LEDs with each iteration
-    for (int i = 0; i < 6; i++)
-    {
-        // Light or dim each LED
-        for (int j = 0; j < pins.Length; j++)
-        {
-            var pin = pins[j];
-            // need a `0` or a `1` for the PinValue
-            var pinValue = (i + j) % 2;
-            Console.WriteLine($"Set pin {pin} as {(PinValue)pinValue} for {lightTime}ms");
-            controller.Write(pin, pinValue);
-        }
-
-        Thread.Sleep(lightTime);
-    }
-}
+```console
+$ pwd
+/home/pi/iot/samples/led-blink
+$ docker build -t led-blink .
+Sending build context to Docker daemon  13.31kB
+Step 1/10 : FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
+// snip ...
+$ docker run --rm --device /dev/gpiomem led-blink
 ```
 
-The following [fritzing diagram](rpi-led-multiple.fzz) demonstrates how you should wire your device to match the code above.
+Alternatively, you can run the container by mounting sysfs as a privileged container, but that's less secure and is a slower way to interact with GPIO pins.
 
-![Raspberry Pi Breadboard diagram](rpi-led-multiple_bb.png)
+```console
+$ docker run --rm -v /sys:/sys --privileged led-blink
+```
 
 ## Resources
 
-* [Diffused LEDs](https://www.adafruit.com/product/297)
+* [.NET IoT Docs](https://docs.microsoft.com/dotnet/iot/)
+* [Diffused LEDs](https://www.adafruit.com/product/4203)
 * [All about LEDs](https://learn.adafruit.com/all-about-leds)
 - [Blinking an LED with Arduino](https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/blinking-the-led)
 - [Blinking an LED with Python](https://learn.adafruit.com/blinking-an-led-with-beaglebone-black/writing-a-program)

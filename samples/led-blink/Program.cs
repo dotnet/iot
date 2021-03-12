@@ -5,16 +5,14 @@ using System;
 using System.Device.Gpio;
 using System.Threading;
 
-var pin = 18;
-var lightTime = 1000;
-var dimTime = 200;
+int pin = 18;
+int lightTime = 1000;
+int dimTime = 200;
 
-Console.WriteLine($"Let's blink an LED!");
 using GpioController controller = new();
 controller.OpenPin(pin, PinMode.Output);
-Console.WriteLine($"GPIO pin enabled for use: {pin}");
+Console.WriteLine($"GPIO pin enabled: {pin}");
 
-// turn LED on and off
 while (true)
 {
     Console.WriteLine($"Light for {lightTime}ms");

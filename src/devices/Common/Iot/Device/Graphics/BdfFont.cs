@@ -120,6 +120,55 @@ namespace Iot.Device.Graphics
             return font;
         }
 
+        private static int ReadNextDecimalNumber(ref ReadOnlySpan<char> span)
+        {
+            span = span.Trim();
+
+            int sign = 1;
+            if (span.Length > 0 && span[0] == '-')
+            {
+                sign = -1;
+                span = span.Slice(1);
+            }
+
+            int number = 0;
+            while (span.Length > 0 && ((uint)(span[0] - '0')) <= 9)
+            {
+                number = number * 10 + (span[0] - '0');
+                span = span.Slice(1);
+            }
+
+            return number * sign;
+        }
+
+        private static int ReadNextHexaDecimalNumber(ref ReadOnlySpan<char> span)
+        {
+            span = span.Trim();
+
+            int number = 0;
+            while (span.Length > 0)
+            {
+                if ((uint)(span[0] - '0') <= 9)
+                {
+                    number = number * 16 + (span[0] - '0');
+                    span = span.Slice(1);
+                    continue;
+                }
+                else if ((uint)(Char.ToLowerInvariant(span[0]) - 'a') <= ((uint)('f' - 'a')))
+                {
+                    number = number * 16 + (Char.ToLowerInvariant(span[0]) - 'a') + 10;
+                    span = span.Slice(1);
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return number;
+        }
+
         /// <summary>
         /// Get character data or data for default character
         /// </summary>
@@ -276,55 +325,6 @@ namespace Iot.Device.Graphics
                         "The font data is not well formed. expected ENDCHAR tag in the beginning of glyph data.");
                 }
             }
-        }
-
-        private static int ReadNextDecimalNumber(ref ReadOnlySpan<char> span)
-        {
-            span = span.Trim();
-
-            int sign = 1;
-            if (span.Length > 0 && span[0] == '-')
-            {
-                sign = -1;
-                span = span.Slice(1);
-            }
-
-            int number = 0;
-            while (span.Length > 0 && ((uint)(span[0] - '0')) <= 9)
-            {
-                number = number * 10 + (span[0] - '0');
-                span = span.Slice(1);
-            }
-
-            return number * sign;
-        }
-
-        private static int ReadNextHexaDecimalNumber(ref ReadOnlySpan<char> span)
-        {
-            span = span.Trim();
-
-            int number = 0;
-            while (span.Length > 0)
-            {
-                if ((uint)(span[0] - '0') <= 9)
-                {
-                    number = number * 16 + (span[0] - '0');
-                    span = span.Slice(1);
-                    continue;
-                }
-                else if ((uint)(char.ToLowerInvariant(span[0]) - 'a') <= ((uint)('f' - 'a')))
-                {
-                    number = number * 16 + (char.ToLowerInvariant(span[0]) - 'a') + 10;
-                    span = span.Slice(1);
-                    continue;
-                }
-                else
-                {
-                    break;
-                }
-            }
-
-            return number;
         }
     }
 }

@@ -8,14 +8,16 @@ using System.Device.Spi;
 namespace Iot.Device.Multiplexing
 {
     /// <summary>
-    /// Represents pin bindings for the Sn74hc595.
+    /// Represents pin mapping for the Sn74hc595 binding.
+    /// Requires specifying at least three pins (serial data in, data clock, and latch).
+    /// The other two pins (output enable and shift register clear) should either be specified or separately wired.
     /// </summary>
     public struct Sn74hc595PinMapping
     {
-        /// <param name="ser">Data pin</param>
-        /// <param name="oe">Output enable pin</param>
-        /// <param name="rclk">Register clock pin (latch)</param>
+        /// <param name="ser">Serial data pin</param>
         /// <param name="srclk">Shift register pin (shift to data register)</param>
+        /// <param name="rclk">Register clock pin (latch)</param>
+        /// <param name="oe">Output enable pin</param>
         /// <param name="srclr">Shift register clear pin (shift register is cleared)</param>
         public Sn74hc595PinMapping(int ser, int srclk, int rclk, int oe = -1, int srclr = -1)
         {
@@ -28,6 +30,8 @@ namespace Iot.Device.Multiplexing
 
         /// <summary>
         /// Minimal pin bindings for the Sn74hc595.
+        /// Output enable should be wired to ground when using Minimal mapping.
+        /// Shift register clear should be wired high when using Minimal mapping.
         /// </summary>
         public static Sn74hc595PinMapping Minimal => new Sn74hc595PinMapping(16, 20, 21);
         /*

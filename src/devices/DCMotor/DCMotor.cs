@@ -39,18 +39,6 @@ namespace Iot.Device.DCMotor
         protected GpioController Controller { get; set; }
 
         /// <summary>
-        /// Releases the resources used by the <see cref="DCMotor"/> instance.
-        /// </summary>
-        public virtual void Dispose()
-        {
-            if (_shouldDispose)
-            {
-                Controller?.Dispose();
-                Controller = null!;
-            }
-        }
-
-        /// <summary>
         /// Creates <see cref="DCMotor"/> instance using only one pin which allows to control speed in one direction.
         /// </summary>
         /// <param name="speedControlChannel"><see cref="PwmChannel"/> used to control the speed of the motor</param>
@@ -268,6 +256,18 @@ namespace Iot.Device.DCMotor
                 otherDirectionPin,
                 controller,
                 shouldDispose);
+        }
+
+        /// <summary>
+        /// Releases the resources used by the <see cref="DCMotor"/> instance.
+        /// </summary>
+        public virtual void Dispose()
+        {
+            if (_shouldDispose)
+            {
+                Controller?.Dispose();
+                Controller = null!;
+            }
         }
     }
 }

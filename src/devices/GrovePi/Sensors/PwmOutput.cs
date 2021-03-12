@@ -13,6 +13,16 @@ namespace Iot.Device.GrovePiDevice.Sensors
     /// </summary>
     public class PwmOutput
     {
+        /// <summary>
+        /// Only Digital PWM are supported
+        /// </summary>
+        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
+        {
+            GrovePort.DigitalPin3,
+            GrovePort.DigitalPin5,
+            GrovePort.DigitalPin6
+        };
+
         internal GrovePi _grovePi;
         internal byte _duty;
 
@@ -106,15 +116,5 @@ namespace Iot.Device.GrovePiDevice.Sensors
         /// Get the name PWM Output
         /// </summary>
         public string SensorName => "PWM Output";
-
-        /// <summary>
-        /// Only Digital PWM are supported
-        /// </summary>
-        public static List<GrovePort> SupportedPorts => new List<GrovePort>()
-        {
-            GrovePort.DigitalPin3,
-            GrovePort.DigitalPin5,
-            GrovePort.DigitalPin6
-        };
     }
 }

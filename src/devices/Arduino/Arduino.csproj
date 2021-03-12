@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.Arduino</RootNamespace>
+  </PropertyGroup>
+
+ <ItemGroup>
+    <Compile Include="*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>$(AssemblyName).Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

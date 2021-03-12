@@ -48,7 +48,7 @@ namespace Iot.Device.Pca95x4
             data &= (byte)~(1 << bitNumber);
         }
 
-        private void SetBit(ref byte data, int bitNumber)
+        private static void SetBit(ref byte data, int bitNumber)
         {
             ValidateBitNumber(bitNumber);
             data |= (byte)(1 << bitNumber);

@@ -15,23 +15,6 @@ namespace Iot.Device.Uln2003
         /// </summary>
         private const long StepperMotorDefaultDelay = 1000;
 
-        private int _pin1;
-        private int _pin2;
-        private int _pin3;
-        private int _pin4;
-        private int _steps = 0;
-        private int _engineStep = 0;
-        private int _currentStep = 0;
-        private int _stepsToRotate = 4096;
-        private int _stepsToRotateInMode = 4096;
-        private StepperMode _mode = StepperMode.HalfStep;
-        private bool[,] _currentSwitchingSequence = _halfStepSequence;
-        private bool _isClockwise = true;
-        private GpioController _controller;
-        private bool _shouldDispose;
-        private Stopwatch _stopwatch = new Stopwatch();
-        private long _stepMicrosecondsDelay;
-
         private static bool[,] _halfStepSequence = new bool[4, 8]
         {
             { true, true, false, false, false, false, false, true },
@@ -55,6 +38,23 @@ namespace Iot.Device.Uln2003
             { false, true, true, false, false, true, true, false },
             { false, false, true, true, false, false, true, true }
         };
+
+        private int _pin1;
+        private int _pin2;
+        private int _pin3;
+        private int _pin4;
+        private int _steps = 0;
+        private int _engineStep = 0;
+        private int _currentStep = 0;
+        private int _stepsToRotate = 4096;
+        private int _stepsToRotateInMode = 4096;
+        private StepperMode _mode = StepperMode.HalfStep;
+        private bool[,] _currentSwitchingSequence = _halfStepSequence;
+        private bool _isClockwise = true;
+        private GpioController _controller;
+        private bool _shouldDispose;
+        private Stopwatch _stopwatch = new Stopwatch();
+        private long _stepMicrosecondsDelay;
 
         /// <summary>
         /// Initialize a Uln2003 class.

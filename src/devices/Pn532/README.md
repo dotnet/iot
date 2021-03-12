@@ -6,7 +6,7 @@ PN532 is a RFID and NFC reader. It does supports various standards: IsoIec14443T
 
 Official documentation can be fond here: https://www.nxp.com/docs/en/user-guide/141520.pdf
 
-## USage
+## Usage
 
 You first need to create the class thru I2C, SPI or Serial.
 
@@ -182,8 +182,9 @@ It is possible to emulate any Type A, Type B and Felica cards.
 Communication support:
 - [X] HSU serial port: fully supported
 - [X] I2C: supported
-- [X] SPI: supported but using a specific chip select pin as well as using LSB with reverse bytes function rather than built in function. This is due to current limitation in the SPI implementations for Raspberry Pi. **Important**: when using Chip Select, it must be a pin which is different from the SPI defined one.
-- [ ] Hardware reset pin: This can be done with the user code.
+- [X] SPI: supported but using a specific chip select pin
+  - SPI Mode should be Mode0 and LSB first
+- [ ] Hardware reset pin: This can be done with the user code
 
 Miscellaneous commands:
 - [X] Diagnose. Note: partial implementation, basics tests implemented only

@@ -25,13 +25,13 @@ namespace Iot.Device.Pn5180
     {
         private const int TimeoutWaitingMilliseconds = 2_000;
 
+        private static List<SelectedPiccInformation> _activeSelected = new List<SelectedPiccInformation>();
+
         private readonly SpiDevice _spiDevice;
         private readonly GpioController _gpioController;
         private bool _shouldDispose;
         private int _pinBusy;
         private int _pinNss;
-
-        private static List<SelectedPiccInformation> _activeSelected = new List<SelectedPiccInformation>();
 
         /// <summary>
         /// A radio Frequency configuration element size is 5 bytes
