@@ -1556,6 +1556,39 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public void SendSpecialTypeList(List<int> tokens)
+        {
+            const int packetSize = 5; // integers
+            if (_firmataStream == null)
+            {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+            }
+
+            lock (_synchronisationLock)
+            {
+                // We send 5 values at once (with 5 bytes each)
+                for (int offset = 0; offset < tokens.Count; offset += packetSize)
+                {
+                    int remaining = Math.Min(packetSize, tokens.Count - offset);
+                    _dataReceived.Reset();
+                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
+                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+                    _firmataStream.WriteByte((byte)0x7F); // IL data
+                    _firmataStream.WriteByte((byte)ExecutorCommand.SpecialTokenList);
+                    SendInt32(tokens.Count);
+                    SendInt32(offset);
+                    for (int i = 0; i < remaining; i++)
+                    {
+                        SendInt32(tokens[i + offset]);
+                    }
+
+                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
+                    _firmataStream.Flush();
+                    WaitAndHandleIlCommandReply(ExecutorCommand.SpecialTokenList);
+                }
+            }
+        }
+
         public void ClearFlash()
         {
             if (_firmataStream == null)

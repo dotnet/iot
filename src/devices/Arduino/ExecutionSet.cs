@@ -22,7 +22,7 @@ namespace Iot.Device.Arduino
 
         public static ExecutionSet? CompiledKernel = null;
 
-        private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>(), new List<int>());
+        private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>(), new List<int>(), new List<int>());
 
         private readonly ArduinoCsCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
@@ -182,6 +182,7 @@ namespace Iot.Device.Arduino
                     int totalStringSize = CalculateTotalStringSize(_strings, EmptySnapShot, _kernelSnapShot);
                     _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
                     _compiler.SendStrings(_strings.ToList(), EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), EmptySnapShot, _kernelSnapShot, true);
                     _compiler.CopyToFlash();
 
                     // The kernel contains no startup method, therefore don't use one
@@ -236,6 +237,7 @@ namespace Iot.Device.Arduino
                 int totalStringSize = CalculateTotalStringSize(_strings, from, to);
                 _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
                 _compiler.SendStrings(_strings.ToList(), from, to, false);
+                _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), from, to, false);
                 if (doWriteProgramToFlash)
                 {
                     _compiler.WriteFlashHeader(to, TokenOfStartupMethod, CodeStartupFlags.None);
@@ -273,7 +275,7 @@ namespace Iot.Device.Arduino
             tokens.AddRange(_patchedTypeTokens.Values);
             stringTokens.AddRange(_strings.Select(x => x.Token));
 
-            return new SnapShot(this, tokens, stringTokens);
+            return new SnapShot(this, tokens, stringTokens, _specialTypeList.Select(x => x.Token).ToList());
         }
 
         internal void CreateKernelSnapShot()
@@ -581,8 +583,10 @@ namespace Iot.Device.Arduino
                     // The list consists of a length element, then the master token (which we create here) and then the tokens of the type arguments
                     List<(int Token, TypeInfo? Element)> entries = new List<(int Token, TypeInfo? Element)>(); // Element is only for debugging purposes
 
-                    // one entry for the combined token, one for the left part
-                    token = (int)(0xFF000000 | _nextToken++); // Create a new token, marked "special" (top 8 bits set). Note that this also serves as separation marker
+                    // one entry for the length, one entry for the combined token, one for the left part.
+                    // We can't use the FF's as marker, because the list itself might contain them when combining very complex tokens.
+                    entries.Add((typeArguments.Length + 3, null));
+                    token = (int)(0xFF000000 | _nextToken++); // Create a new token, marked "special" (top 8 bits set).
                     // Note: While in theory, this element could again be wrapped in a Nullable<>, this is probably really rare, as generic types are almost never structs, therefore
                     // a token such as 0x02800079 is rather IList<Nullable<int>> rather than Nullable<IList<int>>, but getting that right everywhere is difficult
                     entries.Add((token, typeInfo)); // own type
@@ -1059,10 +1063,11 @@ namespace Iot.Device.Arduino
         {
             private readonly ExecutionSet? _set;
 
-            public SnapShot(ExecutionSet? set, List<int> alreadyAssignedTokens, List<int> alreadyAssignedStringTokens)
+            public SnapShot(ExecutionSet? set, List<int> alreadyAssignedTokens, List<int> alreadyAssignedStringTokens, List<int> specialTypes)
             {
                 AlreadyAssignedTokens = alreadyAssignedTokens;
                 AlreadyAssignedStringTokens = alreadyAssignedStringTokens;
+                SpecialTypes = specialTypes;
                 _set = set;
             }
 
@@ -1072,6 +1077,11 @@ namespace Iot.Device.Arduino
             }
 
             public List<int> AlreadyAssignedStringTokens
+            {
+                get;
+            }
+
+            public List<int> SpecialTypes
             {
                 get;
             }

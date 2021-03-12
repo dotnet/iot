@@ -695,7 +695,7 @@ namespace Iot.Device.Arduino.Tests
                 using GpioController gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
                 gpioController.OpenPin(redLed, PinMode.Output);
                 gpioController.Write(redLed, PinValue.High);
-                Thread.Sleep(10000);
+                Thread.Sleep(1000);
                 using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
                 using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
                 using Hd44780 hd44780 = new Lcd2004(lcdInterface);

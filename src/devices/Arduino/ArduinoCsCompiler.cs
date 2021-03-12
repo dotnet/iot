@@ -34,6 +34,7 @@ namespace Iot.Device.Arduino
         EraseFlash = 15,
 
         SetConstantMemorySize = 16,
+        SpecialTokenList = 17,
 
         Nack = 0x7e,
         Ack = 0x7f,
@@ -815,6 +816,13 @@ namespace Iot.Device.Arduino
                 _board.Firmata.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }
+        }
+
+        public void SendSpecialTypeList(IList<int> typeList, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool forKernel)
+        {
+            // Counting the existing list elements should be enough here.
+            var listToLoad = typeList.Skip(fromSnapShot.SpecialTypes.Count).Take(toSnapShot.SpecialTypes.Count - fromSnapShot.SpecialTypes.Count).ToList();
+            _board.Firmata.SendSpecialTypeList(listToLoad);
         }
 
         public void SendStrings(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
@@ -2275,5 +2283,6 @@ namespace Iot.Device.Arduino
         {
             _board.Firmata.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
         }
+
     }
 }
