@@ -18,6 +18,8 @@ namespace Iot.Device.Arduino.Tests
     /// Basic firmata integrations tests. These tests require functional hardware, that is an Arduino, loaded with a matching firmata firmware. It can also
     /// run against the *ExtendedConfigurableFirmata" simulator. If neither is found, the test is marked as "Inconclusive".
     /// </summary>
+    [Trait("feature", "firmata")]
+    [Trait("requires", "hardware")]
     public sealed class BasicFirmataIntegrationTests : IClassFixture<FirmataTestFixture>
     {
         private readonly FirmataTestFixture _fixture;
@@ -25,8 +27,8 @@ namespace Iot.Device.Arduino.Tests
         public BasicFirmataIntegrationTests(FirmataTestFixture fixture)
         {
             _fixture = fixture;
-            Skip.If(_fixture.Board == null, "No Board found");
-            Board = _fixture.Board;
+            // Skip.If(_fixture.Board == null, "No Board found");
+            Board = _fixture.Board ?? throw new Exception("Couldn't find the board");
         }
 
         public ArduinoBoard Board
@@ -34,7 +36,7 @@ namespace Iot.Device.Arduino.Tests
             get;
         }
 
-        [SkippableFact]
+        [Fact]
         public void CheckFirmwareVersion()
         {
             Assert.False(string.IsNullOrWhiteSpace(Board.FirmwareName));
@@ -42,7 +44,7 @@ namespace Iot.Device.Arduino.Tests
             Assert.True(Board.FirmwareVersion >= Version.Parse("2.11"));
         }
 
-        [SkippableFact]
+        [Fact]
         public void CheckFirmataVersion()
         {
             Assert.NotNull(Board.FirmataVersion);
@@ -52,7 +54,7 @@ namespace Iot.Device.Arduino.Tests
         /// <summary>
         /// Verifies the pin capability message. Also verifies that the arduino is configured properly for these tests
         /// </summary>
-        [SkippableFact]
+        [Fact]
         public void CheckBoardFeatures()
         {
             var caps = Board.SupportedPinConfigurations;
@@ -66,7 +68,7 @@ namespace Iot.Device.Arduino.Tests
             Assert.True(caps.Count(x => x.PinModes.Contains(SupportedMode.Spi)) >= 3);
         }
 
-        [SkippableFact]
+        [Fact]
         public void CanBlink()
         {
             var ctrl = Board.CreateGpioController();
@@ -80,7 +82,7 @@ namespace Iot.Device.Arduino.Tests
             ctrl.ClosePin(6);
         }
 
-        [SkippableFact]
+        [Fact]
         public void SetPinMode()
         {
             var ctrl = Board.CreateGpioController();
@@ -98,7 +100,7 @@ namespace Iot.Device.Arduino.Tests
             ctrl.ClosePin(6);
         }
 
-        [SkippableFact]
+        [Fact]
         public void ReadAnalog()
         {
             int pinNumber = GetFirstAnalogPin(Board);
