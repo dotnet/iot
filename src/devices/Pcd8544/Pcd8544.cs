@@ -22,6 +22,11 @@ namespace Iot.Device.Display
         private const int CharacterWidth = 6;
 
         /// <summary>
+        /// The size of the screen in terms of pixels
+        /// </summary>
+        public static Size PixelScreenSize => new Size(84, 48);
+
+        /// <summary>
         /// Size of the screen 48 x 84 / 8 in bytes
         /// </summary>
         public const int ScreenBufferByteSize = 504;
@@ -30,11 +35,6 @@ namespace Iot.Device.Display
         /// The size of the screen in terms of characters
         /// </summary>
         public Size Size => new Size(14, 6);
-
-        /// <summary>
-        /// The size of the screen in terms of pixels
-        /// </summary>
-        public static Size PixelScreenSize => new Size(84, 48);
 
         /// <summary>
         /// Number of bit per pixel for the color
