@@ -27,7 +27,6 @@ namespace Iot.Device.Arduino.Tests
         public BasicFirmataIntegrationTests(FirmataTestFixture fixture)
         {
             _fixture = fixture;
-            // Skip.If(_fixture.Board == null, "No Board found");
             Board = _fixture.Board ?? throw new Exception("Couldn't find the board");
         }
 
