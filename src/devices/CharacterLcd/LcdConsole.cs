@@ -2,13 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Drawing;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
+using SixLabors.ImageSharp;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -412,7 +413,7 @@ namespace Iot.Device.CharacterLcd
             for (int i = 0; i < Size.Height; i++)
             {
                 _lcd.SetCursorPosition(0, i);
-                byte[] buffer = MapChars(_currentData[i].ToString());
+                char[] buffer = MapChars(_currentData[i].ToString());
                 _lcd.Write(buffer);
             }
 
@@ -443,7 +444,7 @@ namespace Iot.Device.CharacterLcd
             // Replace the existing chars at the given position with the new text
             _currentData[CursorTop].Remove(CursorLeft, line.Length);
             _currentData[CursorTop].Insert(CursorLeft, line);
-            byte[] buffer = MapChars(line);
+            char[] buffer = MapChars(line);
             _lcd.Write(buffer);
             CursorLeft += line.Length;
         }
@@ -524,21 +525,33 @@ namespace Iot.Device.CharacterLcd
             }
         }
 
-        private byte[] MapChars(string line)
+        private char[] MapChars(string line)
         {
-            byte[] buffer = new byte[line.Length];
+            char[] buffer = new char[line.Length];
             if (_characterEncoding is null)
             {
                 for (int i = 0; i < line.Length; i++)
                 {
-                    buffer[i] = (byte)line[i];
+                    buffer[i] = line[i];
                 }
 
                 return buffer;
             }
             else
             {
-                return _characterEncoding.GetBytes(line);
+                byte[] buff = _characterEncoding.GetBytes(line);
+                if (buff is not object)
+                {
+                    return new char[0];
+                }
+
+                char[] encoded = new char[buff.Length];
+                for (int i = 0; i < buff.Length; i++)
+                {
+                    encoded[i] = (char)buff[i];
+                }
+
+                return encoded;
             }
         }
 

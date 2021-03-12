@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Iot.Device.CharacterLcd
+namespace Iot.Device.Graphics
 {
     /// <summary>
     /// Provides the character encoding for an LCD display.
@@ -67,7 +67,7 @@ namespace Iot.Device.CharacterLcd
         /// <summary>
         /// This is internally set to false if we already know that we won't be able to display all required characters
         /// </summary>
-        protected internal bool AllCharactersSupported { get; set; }
+        public bool AllCharactersSupported { get; set; }
 
         /// <summary>
         /// Specified Name of the hardcoded character memory set for which this Encoding is intended. An encoding shall only be loaded to

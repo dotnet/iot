@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.CharacterLcd;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.CharacterLcd.Samples
 {

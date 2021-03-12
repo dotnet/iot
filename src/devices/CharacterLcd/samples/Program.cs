@@ -4,10 +4,10 @@
 using System;
 using System.Device.Gpio;
 using System.Device.I2c;
-using System.Drawing;
 using Iot.Device.Mcp23xxx;
 using Iot.Device.CharacterLcd;
 using Iot.Device.CharacterLcd.Samples;
+using SixLabors.ImageSharp;
 
 // Choose the right setup for your display:
 // UsingGpioPins();

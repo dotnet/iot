@@ -29,12 +29,6 @@ namespace Iot.Device.Display
         /// </summary>
         private const int MaxNumberOfDigits = 4;
 
-        /// <summary>
-        /// This display does not support dot bits for each digit,
-        /// so the first bit should be masked before flushing to
-        /// the device
-        /// </summary>
-        private const byte SegmentMask = 0b0111_1111;
         #endregion
 
         #region Enums
@@ -168,7 +162,7 @@ namespace Iot.Device.Display
 
             foreach (byte digit in digits)
             {
-                _displayBuffer[(int)s_digitAddressList[startAddress++]] = (byte)(digit & SegmentMask);
+                _displayBuffer[(int)s_digitAddressList[startAddress++]] = (byte)(digit);
             }
 
             AutoFlush();

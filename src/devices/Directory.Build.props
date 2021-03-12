@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="$(SixLaborsImageSharpPackageVersion)" />
     <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
   </ItemGroup>
 </Project>

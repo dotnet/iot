@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.3" />
     <Compile Include="*.cs" />
     <Compile Include="Record\*.cs" />
   </ItemGroup>
