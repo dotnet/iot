@@ -1514,6 +1514,12 @@ namespace Iot.Device.Arduino
                 exec.SuppressType("System.Reflection.Assembly");
                 exec.SuppressType("System.Reflection.RuntimeAssembly");
                 exec.SuppressType("System.Globalization.HebrewNumber");
+#if NET5_0
+                // Native libraries are not supported
+                exec.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));
+#endif
+                // Only the invariant culture is supported (we might later change this to "only one culture is supported", and
+                // upload the strings matching a specific culture)
                 exec.SuppressType(typeof(System.Globalization.HebrewCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));

@@ -408,6 +408,12 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.DictionaryTest, true);
         }
 
+        [SkippableFact]
+        public void ReflectionTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.ReflectionTest, true);
+        }
+
         public class ClassThatOverridesObjectEquals : IEquatable<ClassThatOverridesObjectEquals>
         {
             private readonly int _a;
@@ -670,6 +676,46 @@ namespace Iot.Device.Arduino.Tests
                 dict.Remove(5);
                 MiniAssert.That(dict.ContainsKey(2));
                 MiniAssert.False(dict.ContainsKey(5));
+                return 1;
+            }
+
+            /// <summary>
+            /// Tests some supported reflection methods (These are implemented, because they're required by the runtime itself)
+            /// </summary>
+            /// <returns>Returns 1 on success</returns>
+            public static int ReflectionTest()
+            {
+                // First with a "simple" generic type (only one type argument)
+                List<bool> list = new List<bool>();
+                var type = list.GetType();
+                MiniAssert.That(type.IsGenericType);
+                var args = list.GetType().GetGenericArguments();
+                MiniAssert.That(args.Length == 1);
+                MiniAssert.That(args[0] == typeof(bool));
+                var main = type.GetGenericTypeDefinition();
+                MiniAssert.That(main == typeof(List<>));
+                Type listTypeReconstructed = typeof(List<>).MakeGenericType(typeof(bool));
+                MiniAssert.That(listTypeReconstructed == type);
+
+                // Some special cases
+                var test = main.GetGenericTypeDefinition();
+                MiniAssert.That(test == typeof(List<>));
+
+                var test2 = main.GetGenericArguments();
+                MiniAssert.That(test2[0] != null); // This is not really defined
+
+                // Then the more complex case with a complex generic type
+                Dictionary<int, string> dictionary = new Dictionary<int, string>();
+                var args2 = dictionary.GetType().GetGenericArguments();
+
+                MiniAssert.That(args2.Length == 2);
+                MiniAssert.That(args2[0] == typeof(int));
+                MiniAssert.That(args2[1] == typeof(string));
+
+                var main2 = dictionary.GetType().GetGenericTypeDefinition();
+                MiniAssert.That(main2 == typeof(Dictionary<,>));
+                var dictionaryReconstructed = typeof(Dictionary<,>).MakeGenericType(typeof(int), typeof(string));
+                MiniAssert.That(dictionaryReconstructed == dictionary.GetType());
                 return 1;
             }
         }
