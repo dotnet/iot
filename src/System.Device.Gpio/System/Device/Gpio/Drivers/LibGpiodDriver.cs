@@ -230,10 +230,10 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
-            int requestResult = -1;
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
             {
-                requestResult = mode switch
+                Interop.libgpiod.gpiod_line_release(pinHandle);
+                int requestResult = mode switch
                 {
                     PinMode.Input => Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName),
                     PinMode.InputPullDown => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
@@ -244,14 +244,17 @@ namespace System.Device.Gpio.Drivers
                     _ => -1,
                 };
 
+                if (requestResult == -1)
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                        pinNumber);
+                }
+
                 pinHandle.PinMode = mode;
+                return;
             }
 
-            if (requestResult == -1)
-            {
-                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
-                    pinNumber);
-            }
+            throw new InvalidOperationException($"Pin {pinNumber} is not open");
         }
 
         /// <inheritdoc/>

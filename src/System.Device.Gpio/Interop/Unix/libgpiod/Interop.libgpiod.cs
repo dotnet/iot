@@ -111,6 +111,13 @@ internal partial class Interop
         internal static extern void gpiod_line_release(IntPtr lineHandle);
 
         /// <summary>
+        /// Release a previously reserved line.
+        /// </summary>
+        /// <param name="lineHandle">GPIO line handle</param>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern void gpiod_line_release(SafeLineHandle lineHandle);
+
+        /// <summary>
         /// Request all event type notifications on a single line.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
