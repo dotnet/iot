@@ -414,6 +414,12 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.ReflectionTest, true);
         }
 
+        [SkippableFact]
+        public void CreateInstanceTest()
+        {
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.CreateInstanceTest, true);
+        }
+
         public class ClassThatOverridesObjectEquals : IEquatable<ClassThatOverridesObjectEquals>
         {
             private readonly int _a;
@@ -716,6 +722,19 @@ namespace Iot.Device.Arduino.Tests
                 MiniAssert.That(main2 == typeof(Dictionary<,>));
                 var dictionaryReconstructed = typeof(Dictionary<,>).MakeGenericType(typeof(int), typeof(string));
                 MiniAssert.That(dictionaryReconstructed == dictionary.GetType());
+                return 1;
+            }
+
+            public static int CreateInstanceTest()
+            {
+                // This is a bit stupid for now: We need to explicitly reference the type, or it won't be included in the execution set.
+                // TODO: Add possibility to explicitly include a class in the execution set
+                List<int> aList = new List<int>(2);
+                GC.KeepAlive(aList);
+                Type t = typeof(List<>).MakeGenericType(typeof(int));
+                var instance = (List<int>?)Activator.CreateInstance(t, 5);
+                MiniAssert.That(instance != null);
+                MiniAssert.That(instance!.Capacity >= 5);
                 return 1;
             }
         }

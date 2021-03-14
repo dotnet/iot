@@ -5,7 +5,10 @@ namespace Iot.Device.Arduino.Runtime
     [ArduinoReplacement("Internal.Runtime.CompilerServices.Unsafe", "System.Private.CoreLib.dll", true, IncludingPrivates = true)]
     internal unsafe class MiniUnsafe
     {
-        // The implementation of the following two methods is identical, therefore it doesn't really matter which one we match
+        /// <summary>
+        /// This method just unsafely casts object to T. The underlying implementation just does a "return this" without any type test.
+        /// The implementation of the following two methods is identical, therefore it doesn't really matter which one we match.
+        /// </summary>
         [ArduinoImplementation(NativeMethod.UnsafeAs2)]
         public static T As<T>(object? value)
             where T : class?

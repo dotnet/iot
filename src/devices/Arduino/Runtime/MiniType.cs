@@ -106,6 +106,14 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
+        public Type UnderlyingSystemType
+        {
+            get
+            {
+                return MiniUnsafe.As<Type>(this);
+            }
+        }
+
         public static bool operator ==(MiniType? a, MiniType? b)
         {
             if (ReferenceEquals(a, null))

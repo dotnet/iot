@@ -23,6 +23,7 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Runtime\MiniActivator.cs" />
     <Compile Include="Runtime\MiniAppContext.cs" />
     <Compile Include="Runtime\MiniArray.cs" />
     <Compile Include="Runtime\MiniAssert.cs" />

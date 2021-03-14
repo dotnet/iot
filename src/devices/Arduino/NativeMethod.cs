@@ -136,5 +136,7 @@ namespace Iot.Device.Arduino
 
         ArrayCopyCore,
         ArrayClear,
+
+        ActivatorCreateInstance
     }
 }
