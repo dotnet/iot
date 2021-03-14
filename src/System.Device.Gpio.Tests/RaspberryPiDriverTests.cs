@@ -56,11 +56,6 @@ namespace System.Device.Gpio.Tests
         [Fact]
         public void HighPulledPinDoesNotGlitchToLowWhenChangedToOutput()
         {
-            ////while (!System.Diagnostics.Debugger.IsAttached)
-            ////{
-            ////    Thread.Sleep(100);
-            ////}
-
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 bool didTriggerToLow = false;
