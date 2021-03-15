@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21105.12">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21160.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>938b3e8b4edcd96ca0f0cbbae63c87b3f51f7afe</Sha>
+      <Sha>7f13798e5f567b72ffe63205bf49839245f0f8c1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="6.0.0-beta.21105.12">
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="6.0.0-beta.21160.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>938b3e8b4edcd96ca0f0cbbae63c87b3f51f7afe</Sha>
+      <Sha>7f13798e5f567b72ffe63205bf49839245f0f8c1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.GenAPI" Version="6.0.0-beta.21105.12">
+    <Dependency Name="Microsoft.DotNet.GenAPI" Version="6.0.0-beta.21160.7">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>938b3e8b4edcd96ca0f0cbbae63c87b3f51f7afe</Sha>
+      <Sha>7f13798e5f567b72ffe63205bf49839245f0f8c1</Sha>
     </Dependency>
   </ToolsetDependencies>
   <!-- ProductDependencies -->
   <ProductDependencies>
-    <Dependency Name="System.Drawing.Common" Version="5.0.0">
+    <Dependency Name="Microsoft.Extensions.Logging" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>bfc49945c0bedeffe01bb5d6f3c217dad207d0d8</Sha>
     </Dependency>
+    <Dependency Name="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>bfc49945c0bedeffe01bb5d6f3c217dad207d0d8</Sha>
+    </Dependency>
+    <Dependency Name="System.Drawing.Common" Version="5.0.2">
+      <Uri>https://github.com/dotnet/runtime</Uri>
+      <Sha>5111aa12cdeb8e8703d475193f78c1848f58f6c6</Sha>
+    </Dependency>
     <Dependency Name="System.IO.Ports" Version="5.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>48459b4030ba4352202387098c1fa1d5abfb9a36</Sha>
+      <Sha>5111aa12cdeb8e8703d475193f78c1848f58f6c6</Sha>
     </Dependency>
     <Dependency Name="Microsoft.Win32.Registry" Version="5.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>

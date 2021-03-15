@@ -3,7 +3,7 @@
 
 using System;
 using System.Buffers;
-using System.Drawing;
+using SixLabors.ImageSharp;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -143,6 +143,12 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <param name="values">Data to be send to the device</param>
         protected void SendData(ReadOnlySpan<byte> values) => _lcdInterface.SendData(values);
+
+        /// <summary>
+        /// Sends data to the device
+        /// </summary>
+        /// <param name="values">Data to be send to the device</param>
+        protected void SendData(ReadOnlySpan<char> values) => _lcdInterface.SendData(values);
 
         /// <summary>
         /// Send commands to the device
@@ -358,7 +364,7 @@ namespace Iot.Device.CharacterLcd
         /// </remarks>
         /// <param name="location">Should be between 0 and 7</param>
         /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
-        public void CreateCustomCharacter(byte location, ReadOnlySpan<byte> characterMap)
+        public void CreateCustomCharacter(int location, ReadOnlySpan<byte> characterMap)
         {
             if (location >= NumberOfCustomCharactersSupported)
             {
@@ -402,7 +408,7 @@ namespace Iot.Device.CharacterLcd
         /// Used if character translation already took place
         /// </summary>
         /// <param name="text">Text to print</param>
-        public void Write(ReadOnlySpan<byte> text) => SendData(text);
+        public void Write(ReadOnlySpan<char> text) => SendData(text);
 
         /// <summary>
         /// Releases unmanaged resources used by Hd44780

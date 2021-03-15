@@ -79,19 +79,6 @@ namespace Iot.Device.BoardLed
         }
 
         /// <summary>
-        /// Get all triggers of current LED.
-        /// </summary>
-        /// <returns>The name of triggers.</returns>
-        public IEnumerable<string> EnumerateTriggers()
-        {
-            _triggerReader.BaseStream.Position = 0;
-
-            // Remove selected chars
-            return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", string.Empty)
-                .Split(' ');
-        }
-
-        /// <summary>
         /// Get all BoardLed instances of on-board LEDs.
         /// </summary>
         /// <returns>BoardLed instances.</returns>
@@ -103,6 +90,19 @@ namespace Iot.Device.BoardLed
             // Make sure it's a real LED
             return infos.Where(x => x.EnumerateFiles().Select(f => f.Name).Contains("brightness"))
                 .Select(x => new BoardLed(x.Name));
+        }
+
+        /// <summary>
+        /// Get all triggers of current LED.
+        /// </summary>
+        /// <returns>The name of triggers.</returns>
+        public IEnumerable<string> EnumerateTriggers()
+        {
+            _triggerReader.BaseStream.Position = 0;
+
+            // Remove selected chars
+            return Regex.Replace(_triggerReader.ReadToEnd(), @"\[|\]", string.Empty)
+                .Split(' ');
         }
 
         private int GetBrightness()

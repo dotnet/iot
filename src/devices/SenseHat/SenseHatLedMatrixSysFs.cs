@@ -38,6 +38,20 @@ namespace Iot.Device.SenseHat
             Fill(Color.Black);
         }
 
+        private static string? GetSenseHatDevice()
+        {
+            foreach (string dev in Directory.EnumerateFileSystemEntries("/sys/class/graphics/", "fb*"))
+            {
+                string devName = Path.Combine(dev, "name");
+                if (File.Exists(devName) && File.ReadAllText(devName).Trim() == SenseHatDeviceName)
+                {
+                    return Path.Combine("/dev/", Path.GetFileName(dev));
+                }
+            }
+
+            return null;
+        }
+
         /// <inheritdoc/>
         public override void Write(ReadOnlySpan<Color> colors)
         {
@@ -114,20 +128,6 @@ namespace Iot.Device.SenseHat
             };
 
             _deviceFile.Write(encoded);
-        }
-
-        private static string? GetSenseHatDevice()
-        {
-            foreach (string dev in Directory.EnumerateFileSystemEntries("/sys/class/graphics/", "fb*"))
-            {
-                string devName = Path.Combine(dev, "name");
-                if (File.Exists(devName) && File.ReadAllText(devName).Trim() == SenseHatDeviceName)
-                {
-                    return Path.Combine("/dev/", Path.GetFileName(dev));
-                }
-            }
-
-            return null;
         }
 
         /// <inheritdoc/>

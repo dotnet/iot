@@ -48,6 +48,71 @@ namespace Iot.Device.Shtc3
         /// </summary>
         internal Status Status => _status;
 
+        private static Register GetMeasurementCmd(bool lowPower, bool clockStretching)
+        {
+            if (lowPower)
+            {
+                if (clockStretching)
+                {
+                    return Register.SHTC3_MEAS_T_RH_CLOCKSTR_LPM;
+                }
+                else
+                {
+                    return Register.SHTC3_MEAS_T_RH_POLLING_LPM;
+                }
+            }
+            else
+            {
+                if (clockStretching)
+                {
+                    return Register.SHTC3_MEAS_T_RH_CLOCKSTR_NPM;
+                }
+                else
+                {
+                    return Register.SHTC3_MEAS_T_RH_POLLING_NPM;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Check the match to the SHTC3 product code
+        /// Table 15  while bits 11 and 5:0 contain the SHTC3 specific product code 0b_0000_1000_0000_0111
+        /// </summary>
+        /// <param name="id">Id to test</param>
+        /// <returns></returns>
+        private static bool ValidShtc3Id(int id) =>
+            (id & 0b_0000_1000_0011_1111) == 0b_0000_1000_0000_0111;
+
+        /// <summary>
+        /// 8-bit CRC Checksum Calculation
+        /// </summary>
+        /// <param name="data">Raw Data</param>
+        /// <param name="crc8">Raw CRC8</param>
+        /// <returns>Checksum is true or false</returns>
+        private static bool CheckCrc8(ReadOnlySpan<byte> data, byte crc8)
+        {
+            // Details in the Datasheet table 16 P9
+            byte crc = CRC_INIT;
+            for (int i = 0; i < 2; i++)
+            {
+                crc ^= data[i];
+
+                for (int j = 8; j > 0; j--)
+                {
+                    if ((crc & 0x80) != 0)
+                    {
+                        crc = (byte)((crc << 1) ^ CRC_POLYNOMIAL);
+                    }
+                    else
+                    {
+                        crc = (byte)(crc << 1);
+                    }
+                }
+            }
+
+            return crc == crc8;
+        }
+
         /// <summary>
         /// Try read Temperature and Humidity
         /// </summary>
@@ -103,32 +168,6 @@ namespace Iot.Device.Shtc3
             temperature = st;
             humidity = srh;
             return true;
-        }
-
-        private static Register GetMeasurementCmd(bool lowPower, bool clockStretching)
-        {
-            if (lowPower)
-            {
-                if (clockStretching)
-                {
-                    return Register.SHTC3_MEAS_T_RH_CLOCKSTR_LPM;
-                }
-                else
-                {
-                    return Register.SHTC3_MEAS_T_RH_POLLING_LPM;
-                }
-            }
-            else
-            {
-                if (clockStretching)
-                {
-                    return Register.SHTC3_MEAS_T_RH_CLOCKSTR_NPM;
-                }
-                else
-                {
-                    return Register.SHTC3_MEAS_T_RH_POLLING_NPM;
-                }
-            }
         }
 
         /// <summary>
@@ -198,45 +237,6 @@ namespace Iot.Device.Shtc3
             }
 
             return id;
-        }
-
-        /// <summary>
-        /// Check the match to the SHTC3 product code
-        /// Table 15  while bits 11 and 5:0 contain the SHTC3 specific product code 0b_0000_1000_0000_0111
-        /// </summary>
-        /// <param name="id">Id to test</param>
-        /// <returns></returns>
-        private static bool ValidShtc3Id(int id) =>
-            (id & 0b_0000_1000_0011_1111) == 0b_0000_1000_0000_0111;
-
-        /// <summary>
-        /// 8-bit CRC Checksum Calculation
-        /// </summary>
-        /// <param name="data">Raw Data</param>
-        /// <param name="crc8">Raw CRC8</param>
-        /// <returns>Checksum is true or false</returns>
-        private static bool CheckCrc8(ReadOnlySpan<byte> data, byte crc8)
-        {
-            // Details in the Datasheet table 16 P9
-            byte crc = CRC_INIT;
-            for (int i = 0; i < 2; i++)
-            {
-                crc ^= data[i];
-
-                for (int j = 8; j > 0; j--)
-                {
-                    if ((crc & 0x80) != 0)
-                    {
-                        crc = (byte)((crc << 1) ^ CRC_POLYNOMIAL);
-                    }
-                    else
-                    {
-                        crc = (byte)(crc << 1);
-                    }
-                }
-            }
-
-            return crc == crc8;
         }
 
         private void Write(Register register)

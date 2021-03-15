@@ -50,7 +50,7 @@ if (choiceInterface is { KeyChar: '3' })
         return;
     }
 
-    pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0)), pinSelect, logLevel: debugLevel);
+    pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0) { DataFlow = DataFlow.LsbFirst, Mode = SpiMode.Mode0 }), pinSelect, logLevel: debugLevel);
 }
 else if (choiceInterface is { KeyChar: '2' })
 {

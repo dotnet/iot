@@ -68,7 +68,8 @@ namespace Iot.Device.CharacterLcd
             {
                 Span<byte> buffer = stackalloc byte[]
                 {
-                    0x00, command
+                    0x00,
+                    command
                 };
                 _device.Write(buffer);
             }
@@ -93,7 +94,8 @@ namespace Iot.Device.CharacterLcd
             {
                 Span<byte> buffer = stackalloc byte[]
                 {
-                    (byte)ControlByteFlags.RegisterSelect, value
+                    (byte)ControlByteFlags.RegisterSelect,
+                    value
                 };
                 _device.Write(buffer);
             }
@@ -110,6 +112,31 @@ namespace Iot.Device.CharacterLcd
                 while (values.Length > 0)
                 {
                     ReadOnlySpan<byte> currentValues = values.Slice(0, values.Length > MaxCopy ? MaxCopy : values.Length);
+                    values = values.Slice(currentValues.Length);
+                    currentValues.CopyTo(bufferData);
+                    _device.Write(buffer.Slice(0, currentValues.Length + 1));
+                }
+            }
+
+            public override void SendData(ReadOnlySpan<char> values)
+            {
+                // There is a limit to how much data the controller can accept at once. Haven't found documentation
+                // for this yet, can probably iterate a bit more on this to find a true "max". 40 was too much.
+                const int MaxCopy = 20;
+                Span<byte> buffer = stackalloc byte[MaxCopy + 1];
+                buffer[0] = (byte)ControlByteFlags.RegisterSelect;
+                Span<byte> bufferData = buffer.Slice(1);
+
+                while (values.Length > 0)
+                {
+                    ReadOnlySpan<char> buff = values.Slice(0, values.Length > MaxCopy ? MaxCopy : values.Length);
+                    // As we are in a while loop, we can't use stackalloc
+                    Span<byte> currentValues = new byte[buff.Length];
+                    for (int i = 0; i < buff.Length; i++)
+                    {
+                        currentValues[i] = (byte)buff[i];
+                    }
+
                     values = values.Slice(currentValues.Length);
                     currentValues.CopyTo(bufferData);
                     _device.Write(buffer.Slice(0, currentValues.Length + 1));

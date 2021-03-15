@@ -3,7 +3,7 @@
 
 using System;
 using System.Globalization;
-using Iot.Device.CharacterLcd;
+using Iot.Device.Graphics;
 using Xunit;
 
 namespace CharacterLcd.Tests

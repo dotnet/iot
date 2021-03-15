@@ -24,6 +24,11 @@ namespace Iot.Device.Bmxx80
     public class Bme680 : Bmxx80Base
     {
         private static readonly Temperature DefaultAmbientTemperature = Temperature.FromDegreesCelsius(20);
+        private static readonly byte[] s_osToMeasCycles = { 0, 1, 2, 4, 8, 16 };
+        private static readonly byte[] s_osToSwitchCount = { 0, 1, 1, 1, 1, 1 };
+        private static readonly double[] s_k1Lookup = { 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.8, 0.0, 0.0, -0.2, -0.5, 0.0, -1.0, 0.0, 0.0 };
+        private static readonly double[] s_k2Lookup = { 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, -0.8, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+
         private readonly Temperature _ambientTemperatureUserDefault;
 
         /// <summary>
@@ -56,11 +61,6 @@ namespace Iot.Device.Bmxx80
         private Bme680HeaterProfile _heaterProfile;
         private Bme680FilteringMode _filterMode;
         private Sampling _humiditySampling;
-
-        private static readonly byte[] s_osToMeasCycles = { 0, 1, 2, 4, 8, 16 };
-        private static readonly byte[] s_osToSwitchCount = { 0, 1, 1, 1, 1, 1 };
-        private static readonly double[] s_k1Lookup = { 0.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, -0.8, 0.0, 0.0, -0.2, -0.5, 0.0, -1.0, 0.0, 0.0 };
-        private static readonly double[] s_k2Lookup = { 0.0, 0.0, 0.0, 0.0, 0.1, 0.7, 0.0, -0.8, -0.1, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
 
         /// <summary>
         /// Initialize a new instance of the <see cref="Bme680"/> class.

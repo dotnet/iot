@@ -16,8 +16,10 @@ namespace Iot.Device.Media
     {
         private const string DefaultDevicePath = "/dev/video";
         private const int BufferCount = 4;
-        private int _deviceFileDescriptor = -1;
+
         private static readonly object s_initializationLock = new object();
+
+        private int _deviceFileDescriptor = -1;
 
         /// <summary>
         /// Path to video resources located on the platform.
@@ -37,6 +39,15 @@ namespace Iot.Device.Media
         {
             Settings = settings;
             DevicePath = DefaultDevicePath;
+        }
+
+        private static unsafe void UnmappingFrameBuffers(V4l2FrameBuffer* buffers)
+        {
+            // Unmapping the applied buffer to user space
+            for (uint i = 0; i < BufferCount; i++)
+            {
+                Interop.munmap(buffers[i].Start, (int)buffers[i].Length);
+            }
         }
 
         /// <summary>
@@ -100,14 +111,14 @@ namespace Iot.Device.Media
             {
                 id = type
             };
-            V4l2Struct(VideoSettings.VIDIOC_QUERYCTRL, ref query);
+            V4l2Struct(V4l2Request.VIDIOC_QUERYCTRL, ref query);
 
             // Get current value
             v4l2_control ctrl = new v4l2_control
             {
                 id = type,
             };
-            V4l2Struct(VideoSettings.VIDIOC_G_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_G_CTRL, ref ctrl);
 
             return new VideoDeviceValue(
                 type.ToString(),
@@ -133,7 +144,7 @@ namespace Iot.Device.Media
             };
 
             List<PixelFormat> result = new List<PixelFormat>();
-            while (V4l2Struct(VideoSettings.VIDIOC_ENUM_FMT, ref fmtdesc) != -1)
+            while (V4l2Struct(V4l2Request.VIDIOC_ENUM_FMT, ref fmtdesc) != -1)
             {
                 result.Add(fmtdesc.pixelformat);
                 fmtdesc.index++;
@@ -147,7 +158,7 @@ namespace Iot.Device.Media
         /// </summary>
         /// <param name="format">Pixel format.</param>
         /// <returns>Supported resolution.</returns>
-        public override IEnumerable<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format)
+        public override IEnumerable<Resolution> GetPixelFormatResolutions(PixelFormat format)
         {
             Initialize();
 
@@ -157,10 +168,66 @@ namespace Iot.Device.Media
                 pixel_format = format
             };
 
-            List<(uint Width, uint Height)> result = new List<(uint Width, uint Height)>();
-            while (V4l2Struct(VideoSettings.VIDIOC_ENUM_FRAMESIZES, ref size) != -1)
+            List<Resolution> result = new List<Resolution>();
+            while (V4l2Struct(V4l2Request.VIDIOC_ENUM_FRAMESIZES, ref size) != -1)
             {
-                result.Add((size.discrete.width, size.discrete.height));
+                Resolution resolution;
+                switch (size.type)
+                {
+                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE:
+                        resolution = new Resolution
+                        {
+                            Type = ResolutionType.Discrete,
+                            MinHeight = size.discrete.height,
+                            MaxHeight = size.discrete.height,
+                            StepHeight = 0,
+                            MinWidth = size.discrete.width,
+                            MaxWidth = size.discrete.width,
+                            StepWidth = 0,
+                        };
+                        break;
+
+                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_CONTINUOUS:
+                        resolution = new Resolution
+                        {
+                            Type = ResolutionType.Continuous,
+                            MinHeight = size.stepwise.min_height,
+                            MaxHeight = size.stepwise.max_height,
+                            StepHeight = 1,
+                            MinWidth = size.stepwise.min_width,
+                            MaxWidth = size.stepwise.max_width,
+                            StepWidth = 1,
+                        };
+                        break;
+
+                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_STEPWISE:
+                        resolution = new Resolution
+                        {
+                            Type = ResolutionType.Stepwise,
+                            MinHeight = size.stepwise.min_height,
+                            MaxHeight = size.stepwise.max_height,
+                            StepHeight = size.stepwise.step_height,
+                            MinWidth = size.stepwise.min_width,
+                            MaxWidth = size.stepwise.max_width,
+                            StepWidth = size.stepwise.step_width,
+                        };
+                        break;
+
+                    default:
+                        resolution = new Resolution
+                        {
+                            Type = ResolutionType.Discrete,
+                            MinHeight = 0,
+                            MaxHeight = 0,
+                            StepHeight = 0,
+                            MinWidth = 0,
+                            MaxWidth = 0,
+                            StepWidth = 0,
+                        };
+                        break;
+                }
+
+                result.Add(resolution);
                 size.index++;
             }
 
@@ -173,12 +240,12 @@ namespace Iot.Device.Media
             {
                 // Start data stream
                 v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
-                Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMON, new IntPtr(&type));
+                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
 
                 byte[] dataBuffer = GetFrameData(buffers);
 
                 // Close data stream
-                Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMOFF, new IntPtr(&type));
+                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
 
                 UnmappingFrameBuffers(buffers);
 
@@ -194,7 +261,7 @@ namespace Iot.Device.Media
                 type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
                 memory = v4l2_memory.V4L2_MEMORY_MMAP,
             };
-            V4l2Struct(VideoSettings.VIDIOC_DQBUF, ref frame);
+            V4l2Struct(V4l2Request.VIDIOC_DQBUF, ref frame);
 
             // Get data from pointer
             IntPtr intptr = buffers[frame.index].Start;
@@ -202,7 +269,7 @@ namespace Iot.Device.Media
             Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
 
             // Requeue the buffer
-            V4l2Struct(VideoSettings.VIDIOC_QBUF, ref frame);
+            V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
 
             return dataBuffer;
         }
@@ -216,7 +283,7 @@ namespace Iot.Device.Media
                 type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
                 memory = v4l2_memory.V4L2_MEMORY_MMAP
             };
-            V4l2Struct(VideoSettings.VIDIOC_REQBUFS, ref req);
+            V4l2Struct(V4l2Request.VIDIOC_REQBUFS, ref req);
 
             // Mapping the applied buffer to user space
             V4l2FrameBuffer[] buffers = new V4l2FrameBuffer[BufferCount];
@@ -228,7 +295,7 @@ namespace Iot.Device.Media
                     type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
                     memory = v4l2_memory.V4L2_MEMORY_MMAP
                 };
-                V4l2Struct(VideoSettings.VIDIOC_QUERYBUF, ref buffer);
+                V4l2Struct(V4l2Request.VIDIOC_QUERYBUF, ref buffer);
 
                 buffers[i].Length = buffer.length;
                 buffers[i].Start = Interop.mmap(IntPtr.Zero, (int)buffer.length, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, _deviceFileDescriptor, (int)buffer.m.offset);
@@ -243,19 +310,10 @@ namespace Iot.Device.Media
                     type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
                     memory = v4l2_memory.V4L2_MEMORY_MMAP
                 };
-                V4l2Struct(VideoSettings.VIDIOC_QBUF, ref buffer);
+                V4l2Struct(V4l2Request.VIDIOC_QBUF, ref buffer);
             }
 
             return buffers;
-        }
-
-        private static unsafe void UnmappingFrameBuffers(V4l2FrameBuffer* buffers)
-        {
-            // Unmapping the applied buffer to user space
-            for (uint i = 0; i < BufferCount; i++)
-            {
-                Interop.munmap(buffers[i].Start, (int)buffers[i].Length);
-            }
         }
 
         private unsafe void SetVideoConnectionSettings()
@@ -276,7 +334,7 @@ namespace Iot.Device.Media
                     }
                 }
             };
-            V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
+            V4l2Struct(V4l2Request.VIDIOC_S_FMT, ref format);
 
             // Set exposure type
             v4l2_control ctrl = new v4l2_control
@@ -284,83 +342,83 @@ namespace Iot.Device.Media
                 id = VideoDeviceValueType.ExposureType,
                 value = (int)Settings.ExposureType
             };
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set exposure time
             // If exposure type is auto, this field is invalid
             ctrl.id = VideoDeviceValueType.ExposureTime;
             ctrl.value = Settings.ExposureTime;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set brightness
             ctrl.id = VideoDeviceValueType.Brightness;
             ctrl.value = Settings.Brightness;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set contrast
             ctrl.id = VideoDeviceValueType.Contrast;
             ctrl.value = Settings.Contrast;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set saturation
             ctrl.id = VideoDeviceValueType.Saturation;
             ctrl.value = Settings.Saturation;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set sharpness
             ctrl.id = VideoDeviceValueType.Sharpness;
             ctrl.value = Settings.Sharpness;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set gain
             ctrl.id = VideoDeviceValueType.Gain;
             ctrl.value = Settings.Gain;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set gamma
             ctrl.id = VideoDeviceValueType.Gamma;
             ctrl.value = Settings.Gamma;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set power line frequency
             ctrl.id = VideoDeviceValueType.PowerLineFrequency;
             ctrl.value = (int)Settings.PowerLineFrequency;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set white balance effect
             ctrl.id = VideoDeviceValueType.WhiteBalanceEffect;
             ctrl.value = (int)Settings.WhiteBalanceEffect;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set white balance temperature
             ctrl.id = VideoDeviceValueType.WhiteBalanceTemperature;
             ctrl.value = Settings.WhiteBalanceTemperature;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set color effect
             ctrl.id = VideoDeviceValueType.ColorEffect;
             ctrl.value = (int)Settings.ColorEffect;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set scene mode
             ctrl.id = VideoDeviceValueType.SceneMode;
             ctrl.value = (int)Settings.SceneMode;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set rotate
             ctrl.id = VideoDeviceValueType.Rotate;
             ctrl.value = Settings.Rotate;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set horizontal flip
             ctrl.id = VideoDeviceValueType.HorizontalFlip;
             ctrl.value = Settings.HorizontalFlip ? 1 : 0;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set vertical flip
             ctrl.id = VideoDeviceValueType.VerticalFlip;
             ctrl.value = Settings.VerticalFlip ? 1 : 0;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
         }
 
         private void FillVideoConnectionSettings()
@@ -486,7 +544,7 @@ namespace Iot.Device.Media
         /// <param name="request">V4L2 request value</param>
         /// <param name="struct">The struct need to be read or set</param>
         /// <returns>The ioctl result</returns>
-        private int V4l2Struct<T>(VideoSettings request, ref T @struct)
+        private int V4l2Struct<T>(int request, ref T @struct)
             where T : struct
         {
             IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(@struct));

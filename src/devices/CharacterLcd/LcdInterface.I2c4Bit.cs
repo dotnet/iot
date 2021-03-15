@@ -128,6 +128,15 @@ namespace Iot.Device.CharacterLcd
                     Write4Bits((byte)(REGISTERSELECT | ((c << 4) & 0xF0)));
                 }
             }
+
+            public override void SendData(ReadOnlySpan<char> values)
+            {
+                foreach (var c in values)
+                {
+                    Write4Bits((byte)(REGISTERSELECT | (c & 0xF0)));
+                    Write4Bits((byte)(REGISTERSELECT | ((c << 4) & 0xF0)));
+                }
+            }
         }
     }
 }

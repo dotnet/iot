@@ -16,6 +16,42 @@ namespace Iot.Device.CharacterLcd
         private bool _disposed;
 
         /// <summary>
+        /// Creates a GPIO based interface for the LCD.
+        /// </summary>
+        /// <param name="registerSelectPin">The pin that controls the register select.</param>
+        /// <param name="enablePin">The pin that controls the enable switch.</param>
+        /// <param name="dataPins">Collection of pins holding the data that will be printed on the screen.</param>
+        /// <param name="backlightPin">The optional pin that controls the backlight of the display.</param>
+        /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
+        /// <param name="readWritePin">The optional pin that controls the read and write switch.</param>
+        /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController? controller = null, bool shouldDispose = true)
+        {
+            return new Gpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller, shouldDispose);
+        }
+
+        /// <summary>
+        /// Create an integrated I2c based interface for the LCD.
+        /// </summary>
+        /// <remarks>
+        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO interface <see cref="CreateGpio(int, int, int[], int, float, int, GpioController, bool)"/>.
+        /// </remarks>
+        /// <param name="device">The I2c device for the LCD.</param>
+        /// <param name="uses8Bit">True if the device uses 8 Bit commands, false if it handles only 4 bit commands.</param>
+        public static LcdInterface CreateI2c(I2cDevice device, bool uses8Bit = true)
+        {
+            if (uses8Bit)
+            {
+                return new I2c(device);
+            }
+            else
+            {
+                return new I2c4Bit(device);
+            }
+        }
+
+        /// <summary>
         /// Sends byte to LCD device
         /// </summary>
         /// <param name="value">Byte value to be sed</param>
@@ -32,6 +68,12 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <param name="values">Bytes to be send to the device</param>
         public abstract void SendData(ReadOnlySpan<byte> values);
+
+        /// <summary>
+        /// Sends data to the LCD device
+        /// </summary>
+        /// <param name="values">Char to be send to the device</param>
+        public abstract void SendData(ReadOnlySpan<char> values);
 
         /// <summary>
         /// Send commands to the LCD device
@@ -107,42 +149,6 @@ namespace Iot.Device.CharacterLcd
             {
                 Dispose(true);
                 _disposed = true;
-            }
-        }
-
-        /// <summary>
-        /// Creates a GPIO based interface for the LCD.
-        /// </summary>
-        /// <param name="registerSelectPin">The pin that controls the register select.</param>
-        /// <param name="enablePin">The pin that controls the enable switch.</param>
-        /// <param name="dataPins">Collection of pins holding the data that will be printed on the screen.</param>
-        /// <param name="backlightPin">The optional pin that controls the backlight of the display.</param>
-        /// <param name="backlightBrightness">The brightness of the backlight. 0.0 for off, 1.0 for on.</param>
-        /// <param name="readWritePin">The optional pin that controls the read and write switch.</param>
-        /// <param name="controller">The controller to use with the LCD. If not specified, uses the platform default.</param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController? controller = null, bool shouldDispose = true)
-        {
-            return new Gpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller, shouldDispose);
-        }
-
-        /// <summary>
-        /// Create an integrated I2c based interface for the LCD.
-        /// </summary>
-        /// <remarks>
-        /// This is for on-chip I2c support. For connecting via I2c GPIO expanders, use the GPIO interface <see cref="CreateGpio(int, int, int[], int, float, int, GpioController, bool)"/>.
-        /// </remarks>
-        /// <param name="device">The I2c device for the LCD.</param>
-        /// <param name="uses8Bit">True if the device uses 8 Bit commands, false if it handles only 4 bit commands.</param>
-        public static LcdInterface CreateI2c(I2cDevice device, bool uses8Bit = true)
-        {
-            if (uses8Bit)
-            {
-                return new I2c(device);
-            }
-            else
-            {
-                return new I2c4Bit(device);
             }
         }
     }

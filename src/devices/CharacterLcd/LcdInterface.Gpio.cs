@@ -185,6 +185,15 @@ namespace Iot.Device.CharacterLcd
                 }
             }
 
+            public override void SendData(ReadOnlySpan<char> values)
+            {
+                _controller.Write(_rsPin, PinValue.High);
+                foreach (byte value in values)
+                {
+                    SendByte(value);
+                }
+            }
+
             private void SendByte(byte value)
             {
                 if (_dataPins.Length == 8)
