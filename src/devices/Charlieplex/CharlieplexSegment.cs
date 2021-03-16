@@ -193,8 +193,7 @@ namespace Iot.Device.Multiplexing
 
                     _gpioController.Write(node.Anode, node.Value);
                     // It is necessary to sleep for the LED to be seen with full brightness
-                    // It may be possible to sleep less than 1ms -- this API has ms granularity
-                    Thread.Sleep(1);
+                    Thread.SpinWait(1);
                     _gpioController.Write(node.Anode, 0);
                     _lastNode.Anode = node.Anode;
                     _lastNode.Cathode = node.Cathode;
