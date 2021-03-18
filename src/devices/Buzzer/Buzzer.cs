@@ -63,12 +63,12 @@ namespace Iot.Device.Buzzer
         /// Play tone of specific frequency for specified duration.
         /// </summary>
         /// <param name="frequency">Tone frequency in Hertz.</param>
-        /// <param name="duraton">Playing duration in millisecons.</param>
+        /// <param name="duration">Playing duration in millisecons.</param>
         [Command]
-        public void PlayTone(double frequency, int duraton)
+        public void PlayTone(double frequency, int duration)
         {
             StartPlaying(frequency);
-            Thread.Sleep(duraton);
+            Thread.Sleep(duration);
             StopPlaying();
         }
 
