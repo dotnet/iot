@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="GpioSpeedBenchmark.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\BoardLed\BoardLed.csproj" />
     <ProjectReference Include="..\Iot.Device.Gpio.csproj" />
   </ItemGroup>
