@@ -96,6 +96,10 @@ namespace Iot.Device.Arduino
                     Flags |= MethodFlags.Void;
                 }
             }
+            else if (methodBase is ConstructorInfo ctorInfo && ctorInfo.IsStatic)
+            {
+                Flags |= MethodFlags.Static | MethodFlags.Void;
+            }
 
             if (methodBase.IsConstructor && !methodBase.IsStatic)
             {
