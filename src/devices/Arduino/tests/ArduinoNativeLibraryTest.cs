@@ -143,7 +143,8 @@ namespace Iot.Device.Arduino.Tests
             {
                 CreateKernelForFlashing = false,
                 LaunchProgramFromFlash = true,
-                UseFlashForProgram = true
+                UseFlashForProgram = true,
+                AutoRestartProgram = true,
             };
 
             ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false, s);

@@ -240,7 +240,7 @@ namespace Iot.Device.Arduino
                 _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), from, to, false);
                 if (doWriteProgramToFlash)
                 {
-                    _compiler.WriteFlashHeader(to, TokenOfStartupMethod, CodeStartupFlags.None);
+                    _compiler.WriteFlashHeader(to, TokenOfStartupMethod, CompilerSettings.AutoRestartProgram ? CodeStartupFlags.AutoRestartAfterCrash : CodeStartupFlags.None);
                 }
             }
             else

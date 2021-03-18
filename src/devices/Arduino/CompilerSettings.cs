@@ -64,6 +64,15 @@ namespace Iot.Device.Arduino
             set;
         }
 
+        /// <summary>
+        /// Automatically restarts the program when it crashes (only valid if <see cref="LaunchProgramFromFlash"/> is true)
+        /// </summary>
+        public bool AutoRestartProgram
+        {
+            get;
+            set;
+        }
+
         object ICloneable.Clone()
         {
             return MemberwiseClone();
