@@ -25,10 +25,11 @@ namespace Iot.Device.Gpio.Drivers
         #pragma warning disable CS1591
         // these variables are used in subclasses
         protected const string GpioMemoryFilePath = "/dev/mem";
-        protected IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
+
         protected static readonly int _mapMask = Environment.SystemPageSize - 1;
         protected static readonly object s_initializationLock = new object();
 
+        protected IDictionary<int, PinState> _pinModes = new Dictionary<int, PinState>();
         protected IntPtr[] _gpioPointers = Array.Empty<IntPtr>();
         #pragma warning restore CS1591
 
