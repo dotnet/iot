@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Arduino
 {
@@ -18,6 +20,7 @@ namespace Iot.Device.Arduino
         private readonly ConcurrentDictionary<int, PinMode> _pinModes;
         private readonly object _callbackContainersLock;
         private readonly AutoResetEvent _waitForEventResetEvent;
+        private readonly ILogger _logger;
 
         internal ArduinoGpioControllerDriver(ArduinoBoard arduinoBoard, IReadOnlyCollection<SupportedPinConfiguration> supportedPinConfigurations)
         {
@@ -27,6 +30,7 @@ namespace Iot.Device.Arduino
             _waitForEventResetEvent = new AutoResetEvent(false);
             _callbackContainersLock = new object();
             _pinModes = new ConcurrentDictionary<int, PinMode>();
+            _logger = this.GetCurrentClassLogger();
 
             PinCount = _supportedPinConfigurations.Count;
             _arduinoBoard.Firmata.DigitalPortValueUpdated += FirmataOnDigitalPortValueUpdated;
@@ -66,12 +70,14 @@ namespace Iot.Device.Arduino
                     firmataMode = SupportedMode.DigitalInput;
                     break;
                 default:
+                    _logger.LogError($"Mode {mode} is not supported as argument to {nameof(SetPinMode)}");
                     throw new NotSupportedException($"Mode {mode} is not supported for this operation");
             }
 
             var pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
             if (pinConfig == null || !pinConfig.PinModes.Contains(firmataMode))
             {
+                _logger.LogError($"Mode {mode} is not supported on Pin {pinNumber}");
                 throw new NotSupportedException($"Mode {mode} is not supported on Pin {pinNumber}.");
             }
 
@@ -104,7 +110,7 @@ namespace Iot.Device.Arduino
                     ret = PinMode.Input;
                     break;
                 default:
-                    _arduinoBoard.Log($"Unexpected pin mode found: {mode}. Is the pin not set to GPIO?");
+                    _logger.LogError($"Unexpected pin mode found: {mode}. Is the pin not set to GPIO?");
                     ret = PinMode.Input;
                     break;
             }
