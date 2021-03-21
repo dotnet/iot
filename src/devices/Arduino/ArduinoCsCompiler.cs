@@ -472,7 +472,7 @@ namespace Iot.Device.Arduino
             for (var index = 0; index < fields.Count; index++)
             {
                 var field = fields[index];
-                var fieldType = GetVariableType(field.FieldType, out var size);
+                var fieldType = GetVariableType(field.FieldType, StructAlignment(classType, fields), out var size);
                 if (field.IsStatic)
                 {
                     fieldType |= VariableKind.StaticMember;
@@ -1020,11 +1020,14 @@ namespace Iot.Device.Arduino
             List<FieldInfo> fields = new List<FieldInfo>();
             List<MemberInfo> methods = new List<MemberInfo>();
             GetFields(classType, fields, methods);
+            int minSizeOfMember = StructAlignment(classType, fields);
+
             int sizeDynamic = 0;
             int sizeStatic = 0;
             foreach (var f in fields)
             {
-                GetVariableType(f.FieldType, out int sizeOfMember);
+                GetVariableType(f.FieldType, minSizeOfMember, out int sizeOfMember);
+
                 if (f.IsStatic)
                 {
                     if (classType.IsValueType)
@@ -1118,6 +1121,18 @@ namespace Iot.Device.Arduino
             ////}
         }
 
+        private int StructAlignment(Type t, List<FieldInfo> fields)
+        {
+            int minSizeOfMember = 1;
+            if (t.IsValueType && fields.Any(x => !x.FieldType.IsValueType))
+            {
+                _board.Log("Warning: Value types containing reference types are not fully supported and may cause undefined GC behavior.");
+                minSizeOfMember = 4;
+            }
+
+            return minSizeOfMember;
+        }
+
         private void SendMethodDeclaration(ArduinoMethodDeclaration declaration)
         {
             ClassMember[] localTypes = new ClassMember[declaration.MaxLocals];
@@ -1128,7 +1143,11 @@ namespace Iot.Device.Arduino
             {
                 for (i = 0; i < declaration.MaxLocals; i++)
                 {
-                    var type = GetVariableType(body.LocalVariables[i].LocalType, out var size);
+                    var classType = body.LocalVariables[i].LocalType;
+                    List<FieldInfo> fields = new List<FieldInfo>();
+                    List<MemberInfo> methods = new List<MemberInfo>();
+                    GetFields(classType, fields, methods);
+                    var type = GetVariableType(classType, StructAlignment(classType, fields), out int size);
                     ClassMember local = new ClassMember($"Local #{i}", type, 0, (ushort)size);
                     localTypes[i] = local;
                 }
@@ -1147,7 +1166,11 @@ namespace Iot.Device.Arduino
             var parameters = declaration.MethodBase.GetParameters();
             for (i = startOffset; i < declaration.ArgumentCount; i++)
             {
-                var type = GetVariableType(parameters[i - startOffset].ParameterType, out var size);
+                var classType = parameters[i - startOffset].ParameterType;
+                List<FieldInfo> fields = new List<FieldInfo>();
+                List<MemberInfo> methods = new List<MemberInfo>();
+                GetFields(classType, fields, methods);
+                var type = GetVariableType(parameters[i - startOffset].ParameterType, StructAlignment(classType, fields), out var size);
                 ClassMember arg = new ClassMember($"Argument {i}", type, 0, size);
                 argTypes[i] = arg;
             }
@@ -1164,85 +1187,86 @@ namespace Iot.Device.Arduino
         /// the execution stack auto-extends smaller types.
         /// </summary>
         /// <param name="t">Type to query</param>
+        /// <param name="minSizeOfMember">Minimum size of the member (used to force alignment)</param>
         /// <param name="sizeOfMember">Returns the actual size of the member, used for value-type arrays (because byte[] should use just one byte per entry)</param>
         /// <returns></returns>
-        internal static VariableKind GetVariableType(Type t, out int sizeOfMember)
+        internal static VariableKind GetVariableType(Type t, int minSizeOfMember, out int sizeOfMember)
         {
             if (t == typeof(sbyte))
             {
-                sizeOfMember = 1;
+                sizeOfMember = Math.Max(minSizeOfMember, 1);
                 return VariableKind.Int32;
             }
 
             if (t == typeof(Int32))
             {
-                sizeOfMember = 4;
+                sizeOfMember = Math.Max(minSizeOfMember, 4);
                 return VariableKind.Int32;
             }
 
             if (t == typeof(UInt32))
             {
-                sizeOfMember = 4;
+                sizeOfMember = Math.Max(minSizeOfMember, 4);
                 return VariableKind.Uint32;
             }
 
             if (t == typeof(Int16))
             {
-                sizeOfMember = 2;
+                sizeOfMember = Math.Max(minSizeOfMember, 2);
                 return VariableKind.Int32;
             }
 
             if (t == typeof(UInt16))
             {
-                sizeOfMember = 2;
+                sizeOfMember = Math.Max(minSizeOfMember, 2);
                 return VariableKind.Uint32;
             }
 
             if (t == typeof(Char))
             {
-                sizeOfMember = 2;
+                sizeOfMember = Math.Max(minSizeOfMember, 2);
                 return VariableKind.Uint32;
             }
 
             if (t == typeof(byte))
             {
-                sizeOfMember = 1;
+                sizeOfMember = Math.Max(minSizeOfMember, 1);
                 return VariableKind.Uint32;
             }
 
             if (t == typeof(bool))
             {
-                sizeOfMember = 1;
+                sizeOfMember = Math.Max(minSizeOfMember, 1);
                 return VariableKind.Boolean;
             }
 
             if (t == typeof(Int64))
             {
-                sizeOfMember = 8;
+                sizeOfMember = Math.Max(minSizeOfMember, 8);
                 return VariableKind.Int64;
             }
 
             if (t == typeof(UInt64))
             {
-                sizeOfMember = 8;
+                sizeOfMember = Math.Max(minSizeOfMember, 8);
                 return VariableKind.Uint64;
             }
 
             if (t == typeof(float))
             {
-                sizeOfMember = 4;
+                sizeOfMember = Math.Max(minSizeOfMember, 4);
                 return VariableKind.Float;
             }
 
             if (t == typeof(double))
             {
-                sizeOfMember = 8;
+                sizeOfMember = Math.Max(minSizeOfMember, 8);
                 return VariableKind.Double;
             }
 
             if (t == typeof(DateTime) || t == typeof(TimeSpan))
             {
-                sizeOfMember = 8;
+                sizeOfMember = Math.Max(minSizeOfMember, 8);
                 return VariableKind.Uint64;
             }
 
@@ -1251,7 +1275,7 @@ namespace Iot.Device.Arduino
                 var elemType = t.GetElementType();
                 if (elemType!.IsValueType)
                 {
-                    GetVariableType(elemType, out sizeOfMember);
+                    GetVariableType(elemType, minSizeOfMember, out sizeOfMember);
                     return VariableKind.ValueArray;
                 }
                 else
@@ -1263,7 +1287,7 @@ namespace Iot.Device.Arduino
 
             if (t.IsEnum)
             {
-                sizeOfMember = 4;
+                sizeOfMember = Math.Max(minSizeOfMember, 4);
                 return VariableKind.Uint32;
             }
 
@@ -1275,14 +1299,14 @@ namespace Iot.Device.Arduino
                     var openType = t.GetGenericTypeDefinition();
                     if (openType.Name.StartsWith("ByReference", StringComparison.Ordinal))
                     {
-                        sizeOfMember = 4;
+                        sizeOfMember = Math.Max(minSizeOfMember, 4);
                         return VariableKind.Reference;
                     }
 
                     // This one is special anyway (and usually explicitly created on the stack using a LOCALLOC instruction)
                     if (openType == typeof(Span<>))
                     {
-                        sizeOfMember = SizeOfVoidPointer();
+                        sizeOfMember = Math.Max(minSizeOfMember, SizeOfVoidPointer());
                         return VariableKind.ValueArray;
                     }
                 }
@@ -1300,7 +1324,7 @@ namespace Iot.Device.Arduino
 
                 foreach (var f in t.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)) // Not the static ones
                 {
-                    GetVariableType(f.FieldType, out var s);
+                    GetVariableType(f.FieldType, minSizeOfMember, out var s);
                     sizeOfMember += s;
                 }
 
@@ -1313,13 +1337,13 @@ namespace Iot.Device.Arduino
 
                 if (sizeOfMember <= 4)
                 {
-                    sizeOfMember = 4;
+                    sizeOfMember = Math.Max(minSizeOfMember, 4);
                     return VariableKind.Uint32;
                 }
 
                 if (sizeOfMember <= 8)
                 {
-                    sizeOfMember = 8;
+                    sizeOfMember = Math.Max(minSizeOfMember, 8);
                     return VariableKind.Uint64;
                 }
                 else
