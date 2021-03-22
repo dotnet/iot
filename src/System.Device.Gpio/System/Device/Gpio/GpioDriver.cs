@@ -52,7 +52,6 @@ namespace System.Device.Gpio
         /// changing from input to output.</param>
         protected internal virtual void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
         {
-            // TODO: Find out which driver support this atomically
             SetPinMode(pinNumber, mode);
             if (mode == PinMode.Output)
             {
