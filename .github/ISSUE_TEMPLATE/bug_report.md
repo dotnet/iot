@@ -27,7 +27,7 @@ assignees: ''
 
 **Versions used**
 
-<!-- Please add following information:
+<!-- Please add the following information:
 
 - `dotnet --info` on the machine being used to build
 - `dotnet --info` on the machine where app is being run (not applicable for self-contained apps)
