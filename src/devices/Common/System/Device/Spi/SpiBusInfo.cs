@@ -20,22 +20,15 @@ namespace System.Device.Spi
 
         private static int GetBufferSize()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            const string parameterPath = "/sys/module/spidev/parameters/bufsiz";
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
+                File.Exists(parameterPath) &&
+                int.TryParse(File.ReadAllText(parameterPath), out int buferSize))
             {
-                const string parameterPath = "/sys/module/spidev/parameters/bufsiz";
-                if (File.Exists(parameterPath) && int.TryParse(File.ReadAllText(parameterPath), out int buferSize))
-                {
-                    return buferSize;
-                }
-                else
-                {
-                    return -1;
-                }
+                return buferSize;
             }
-            else
-            {
-                throw new PlatformNotSupportedException("This value is only supported on Linux operating systems");
-            }
+
+            return -1;
         }
     }
 }
