@@ -1144,10 +1144,7 @@ namespace Iot.Device.Arduino
                 for (i = 0; i < declaration.MaxLocals; i++)
                 {
                     var classType = body.LocalVariables[i].LocalType;
-                    List<FieldInfo> fields = new List<FieldInfo>();
-                    List<MemberInfo> methods = new List<MemberInfo>();
-                    GetFields(classType, fields, methods);
-                    var type = GetVariableType(classType, StructAlignment(classType, fields), out int size);
+                    var type = GetVariableType(classType, 1, out int size);
                     ClassMember local = new ClassMember($"Local #{i}", type, 0, (ushort)size);
                     localTypes[i] = local;
                 }
@@ -1167,10 +1164,7 @@ namespace Iot.Device.Arduino
             for (i = startOffset; i < declaration.ArgumentCount; i++)
             {
                 var classType = parameters[i - startOffset].ParameterType;
-                List<FieldInfo> fields = new List<FieldInfo>();
-                List<MemberInfo> methods = new List<MemberInfo>();
-                GetFields(classType, fields, methods);
-                var type = GetVariableType(parameters[i - startOffset].ParameterType, StructAlignment(classType, fields), out var size);
+                var type = GetVariableType(parameters[i - startOffset].ParameterType, 1, out var size);
                 ClassMember arg = new ClassMember($"Argument {i}", type, 0, size);
                 argTypes[i] = arg;
             }
@@ -1307,7 +1301,7 @@ namespace Iot.Device.Arduino
                     if (openType == typeof(Span<>))
                     {
                         sizeOfMember = Math.Max(minSizeOfMember, SizeOfVoidPointer());
-                        return VariableKind.ValueArray;
+                        return VariableKind.LargeValueType;
                     }
                 }
 
