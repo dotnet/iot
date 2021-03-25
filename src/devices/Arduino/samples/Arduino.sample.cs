@@ -18,6 +18,8 @@ using Iot.Device.Adc;
 using Iot.Device.Arduino;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Arduino.Samples
@@ -38,6 +40,14 @@ namespace Arduino.Samples
 
             string portName = args[0];
 
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddConsole();
+            });
+
+            // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
+            LogDispatcher.LoggerFactory = loggerFactory;
+
             using (var port = new SerialPort(portName, 115200))
             {
                 Console.WriteLine($"Connecting to Arduino on {portName}");
@@ -54,7 +64,6 @@ namespace Arduino.Samples
                 ArduinoBoard board = new ArduinoBoard(port.BaseStream);
                 try
                 {
-                    board.LogMessages += BoardOnLogMessages;
                     // This implicitly connects
                     Console.WriteLine($"Connecting... Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
                     while (Menu(board))

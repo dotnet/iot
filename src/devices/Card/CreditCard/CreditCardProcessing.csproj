@@ -10,6 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
     <ProjectReference Include="..\CardRfid.csproj" />
   </ItemGroup>
 

@@ -54,7 +54,6 @@ namespace Arduino.Samples
                 ArduinoBoard board = new ArduinoBoard(port.BaseStream);
                 try
                 {
-                    board.LogMessages += BoardOnLogMessages;
                     Console.WriteLine($"Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
                     DisplayModes(board);
                 }

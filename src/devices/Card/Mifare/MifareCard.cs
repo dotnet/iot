@@ -3,7 +3,9 @@
 
 using System;
 using System.Linq;
+using Iot.Device.Common;
 using Iot.Device.Ndef;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Card.Mifare
 {
@@ -26,6 +28,8 @@ namespace Iot.Device.Card.Mifare
 
         // This is the actual RFID reader
         private CardTransceiver _rfid;
+
+        private ILogger _logger;
 
         /// <summary>
         /// Default Key A
@@ -98,6 +102,7 @@ namespace Iot.Device.Card.Mifare
         {
             _rfid = rfid;
             Target = target;
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -113,7 +118,7 @@ namespace Iot.Device.Card.Mifare
             }
 
             var ret = _rfid.Transceive(Target, Serialize(), dataOut.AsSpan());
-            LogInfo.Log($"{nameof(RunMifareCardCommand)}: {Command}, Target: {Target}, Data: {BitConverter.ToString(Serialize())}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}", LogLevel.Debug);
+            _logger.LogDebug($"{nameof(RunMifareCardCommand)}: {Command}, Target: {Target}, Data: {BitConverter.ToString(Serialize())}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}");
             if ((ret > 0) && (Command == MifareCardCommand.Read16Bytes))
             {
                 Data = dataOut;
