@@ -860,7 +860,7 @@ namespace Iot.Device.Arduino
 
             FirmataCommandSequence writeDigitalPin = new FirmataCommandSequence(FirmataCommand.SET_DIGITAL_VALUE);
             writeDigitalPin.WriteByte((byte)pin);
-            writeDigitalPin.WriteByte(value == PinValue.High ? 1 : 0);
+            writeDigitalPin.WriteByte(value == PinValue.High ? (byte)1 : (byte)0);
 
             SendCommand(writeDigitalPin);
         }
