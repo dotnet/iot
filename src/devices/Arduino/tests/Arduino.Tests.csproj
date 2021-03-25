@@ -4,11 +4,15 @@
     <TargetFrameworks>net5.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile> 
+    <!-- We don't want to run hardware test by default -->
+    <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>    
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Arduino.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="Moq" Version="4.16.0" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
@@ -16,8 +20,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
+    </PackageReference>    
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\CharacterLcd\CharacterLcd.csproj" />
   </ItemGroup>

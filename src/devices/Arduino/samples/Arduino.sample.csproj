@@ -5,9 +5,11 @@
     <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
     <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <AssemblyName>Arduino.sample</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
   </ItemGroup>
   

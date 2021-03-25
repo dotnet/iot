@@ -13,6 +13,8 @@ using System.Threading;
 using Iot.Device.Card;
 using Iot.Device.Rfid;
 using Iot.Device.Card.Mifare;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Mfrc522
 {
@@ -37,8 +39,9 @@ namespace Iot.Device.Mfrc522
         private SerialPort? _serialPort;
         private GpioController? _controller;
         private bool _shouldDispose;
+        private ILogger _logger;
 
-        #region constructors
+        #region Constructors
 
         /// <summary>
         /// Constructor for MFRC5222 with SPI interface.
@@ -51,6 +54,7 @@ namespace Iot.Device.Mfrc522
         {
             _spiDevice = spiDevice;
             _pinReset = pinReset;
+            _logger = this.GetCurrentClassLogger();
 
             HardReset(gpioController, shouldDispose);
             SetDefaultValues();
@@ -67,6 +71,7 @@ namespace Iot.Device.Mfrc522
         {
             _i2CDevice = i2cDevice;
             _pinReset = pinReset;
+            _logger = this.GetCurrentClassLogger();
 
             HardReset(gpioController, shouldDispose);
             SetDefaultValues();
@@ -93,6 +98,7 @@ namespace Iot.Device.Mfrc522
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
         public MfRc522(SerialPort serialPort, int pinReset = -1, GpioController? gpioController = null, bool shouldDispose = true)
         {
+            _logger = this.GetCurrentClassLogger();
             _serialPort = serialPort;
             _serialPort.ReadTimeout = 1000;
             _serialPort.WriteTimeout = 1000;
@@ -929,7 +935,7 @@ namespace Iot.Device.Mfrc522
             status = SendAndReceiveData(MfrcCommand.Transceive, toSendFirst.ToArray(), null);
             if (status != Status.Ok)
             {
-                LogInfo.Log($"{nameof(TwoStepsIncDecRestore)} - Error {(MfrcCommand)dataToSend[0]}", LogLevel.Debug);
+                _logger.LogWarning($"{nameof(TwoStepsIncDecRestore)} - Error {(MfrcCommand)dataToSend[0]}");
                 return -1;
             }
 

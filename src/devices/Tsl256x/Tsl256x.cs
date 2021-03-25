@@ -61,7 +61,7 @@ namespace IoT.Device.Tsl256x
         {
             // 0x03 is power on, see doc page 14
             get => (ReadByte(Register.CONTROL) & 0x03) == 0x03;
-            set => WriteByte(Register.CONTROL, value ? 0x03 : 0x00);
+            set => WriteByte(Register.CONTROL, value ? (byte)0x03 : (byte)0x00);
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace IoT.Device.Tsl256x
                 case Channel.Infrared:
                     return channel1;
                 case Channel.Visible:
-                    return (channel0 > channel1) ? (ushort)(channel0 - channel1) : 0;
+                    return (channel0 > channel1) ? (ushort)(channel0 - channel1) : (ushort)0;
                 default:
                     throw new ArgumentException($"Wrong channel");
             }

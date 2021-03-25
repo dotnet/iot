@@ -6,7 +6,7 @@ using System;
 namespace Iot.Device.Multiplexing
 {
     /// <summary>
-    /// Represents pin bindings for the Sn74hc595.
+    /// Represents pin mappings for the ShiftRegister binding.
     /// Requires specifying 3 pins (serial data in, data clock, and latch).
     /// Can specify output enable pin (otherwise, wire to ground).
     /// </summary>
@@ -29,7 +29,8 @@ namespace Iot.Device.Multiplexing
         }
 
         /// <summary>
-        /// Minimal pin bindings for the Sn74hc595.
+        /// Minimal pin bindings for ShiftRegister.
+        /// Output enable should be wired to ground when using Minimal mapping.
         /// </summary>
         public static ShiftRegisterPinMapping Minimal => new ShiftRegisterPinMapping(16, 20, 21);
         /*
@@ -39,7 +40,7 @@ namespace Iot.Device.Multiplexing
         */
 
         /// <summary>
-        /// Complete pin bindings for the Sn74hc595.
+        /// Complete pin bindings for ShiftRegister.
         /// </summary>
         public static ShiftRegisterPinMapping Complete => new ShiftRegisterPinMapping(16, 20, 21, 12);
         /*

@@ -25,14 +25,21 @@ sr.ShiftClear();
 
 void BinaryCounter(ShiftRegister sr, CancellationTokenSource cancellationSource)
 {
-    int endValue = 1000;
+    int endValue = 65_536;
     Console.WriteLine($"Write 0 through {endValue}");
-    int delay = 10;
+    int delay = 20;
+
     for (int i = 0; i < endValue; i++)
     {
+        for (int j = (sr.BitLength / 8) - 1; j > 0; j--)
+        {
+            int shift = j * 8;
+            int downShiftedValue = i >> shift;
+            sr.ShiftByte((byte)downShiftedValue, false);
+        }
+
         sr.ShiftByte((byte)i);
         Thread.Sleep(delay);
-        sr.ShiftClear();
 
         if (IsCanceled(sr, cancellationSource))
         {

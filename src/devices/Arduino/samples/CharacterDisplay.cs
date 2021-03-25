@@ -7,6 +7,7 @@ using System.Device.Gpio;
 using System.Globalization;
 using System.Text;
 using Iot.Device.CharacterLcd;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Arduino.Sample
 {

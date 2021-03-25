@@ -9,6 +9,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using Iot.Device.Arduino;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace Arduino.Tests
@@ -22,6 +24,13 @@ namespace Arduino.Tests
         {
             try
             {
+                var loggerFactory = LoggerFactory.Create(builder =>
+                {
+                    builder.AddConsole().AddProvider(new DebuggerOutputLoggerProvider());
+                });
+
+                // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
+                LogDispatcher.LoggerFactory = loggerFactory;
                 _socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 _socket.Connect(IPAddress.Loopback, 27016);
                 _socket.NoDelay = true;
@@ -32,12 +41,6 @@ namespace Arduino.Tests
                     // Actually not expecting to get here (but the above will throw a SocketException if the remote end is not there)
                     throw new NotSupportedException("Very old firmware found");
                 }
-
-                Board.LogMessages += (x, y) =>
-                {
-                    Debug.WriteLine(x);
-                    Console.WriteLine(x);
-                };
 
                 return;
             }
@@ -53,11 +56,6 @@ namespace Arduino.Tests
             }
 
             Board = board;
-            Board.LogMessages += (x, y) =>
-            {
-                Debug.WriteLine(x);
-                Console.WriteLine(x);
-            };
         }
 
         public ArduinoBoard? Board

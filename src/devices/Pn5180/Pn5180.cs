@@ -13,7 +13,9 @@ using System.Threading;
 using System.Diagnostics.CodeAnalysis;
 using Iot.Device.Card;
 using Iot.Device.Card.Mifare;
+using Iot.Device.Common;
 using Iot.Device.Rfid;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Pn5180
 {
@@ -33,6 +35,8 @@ namespace Iot.Device.Pn5180
         private int _pinBusy;
         private int _pinNss;
 
+        private ILogger _logger;
+
         /// <summary>
         /// A radio Frequency configuration element size is 5 bytes
         /// Byte 1 = Register Address
@@ -51,24 +55,6 @@ namespace Iot.Device.Pn5180
         public const SpiMode DefaultSpiMode = System.Device.Spi.SpiMode.Mode0;
 
         /// <summary>
-        /// The Log level
-        /// </summary>
-        public LogLevel LogLevel
-        {
-            get => LogInfo.LogLevel;
-            set => LogInfo.LogLevel = value;
-        }
-
-        /// <summary>
-        /// The location to log the info
-        /// </summary>
-        public LogTo LogTo
-        {
-            get => LogInfo.LogTo;
-            set => LogInfo.LogTo = value;
-        }
-
-        /// <summary>
         /// Create a PN5180 RFID/NFC reader
         /// </summary>
         /// <param name="spiDevice">The SPI device</param>
@@ -76,8 +62,7 @@ namespace Iot.Device.Pn5180
         /// <param name="pinNss">The pin for the SPI select line. This has to be handle differently than thru the normal process as PN5180 has a specific way of working</param>
         /// <param name="gpioController">A GPIO controller, null will use a default one</param>
         /// <param name="shouldDispose">Dispose the SPI and the GPIO controller at the end if true</param>
-        /// <param name="logLevel">The log level</param>
-        public Pn5180(SpiDevice spiDevice, int pinBusy, int pinNss, GpioController? gpioController = null, bool shouldDispose = true, LogLevel logLevel = LogLevel.None)
+        public Pn5180(SpiDevice spiDevice, int pinBusy, int pinNss, GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (pinBusy < 0)
             {
@@ -89,9 +74,8 @@ namespace Iot.Device.Pn5180
                 throw new ArgumentException(nameof(pinBusy), "Value must be a legal pin number. cannot be negative.");
             }
 
-            LogLevel = logLevel;
-
-            LogInfo.Log($"Opening PN5180, pin busy: {pinBusy}, pin NSS: {pinNss}", LogLevel.Debug);
+            _logger = this.GetCurrentClassLogger();
+            _logger.LogDebug($"Opening PN5180, pin busy: {pinBusy}, pin NSS: {pinNss}");
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _gpioController = gpioController ?? new GpioController(PinNumberingScheme.Logical);
             _shouldDispose = shouldDispose || gpioController is null;
@@ -206,22 +190,16 @@ namespace Iot.Device.Pn5180
             dumpEeprom[0] = (byte)Command.READ_EEPROM;
             dumpEeprom[1] = (byte)address;
             dumpEeprom[2] = (byte)eeprom.Length;
-            if (LogLevel >= LogLevel.Debug)
-            {
-                LogInfo.Log($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
-            }
+            _logger.LogDebug($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}");
 
             try
             {
                 SpiWriteRead(dumpEeprom, eeprom);
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(ReadEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}");
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(ReadEeprom)}: {nameof(TimeoutException)} during {nameof(SpiWriteRead)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(ReadEeprom)}: {nameof(TimeoutException)} during {nameof(SpiWriteRead)}");
                 return false;
             }
 
@@ -246,18 +224,12 @@ namespace Iot.Device.Pn5180
             dumpEeprom[0] = (byte)Command.WRITE_EEPROM;
             dumpEeprom[1] = (byte)address;
             eeprom.CopyTo(dumpEeprom.Slice(2));
-            if (LogLevel >= LogLevel.Debug)
-            {
-                LogInfo.Log($"{nameof(WriteEeprom)}, {nameof(eeprom)}: {BitConverter.ToString(eeprom.ToArray())}", LogLevel.Debug);
-            }
+            _logger.LogDebug($"{nameof(WriteEeprom)}, {nameof(eeprom)}: {BitConverter.ToString(eeprom.ToArray())}");
 
             try
             {
                 SpiWrite(dumpEeprom);
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(WriteEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(WriteEeprom)}, {nameof(dumpEeprom)}: {BitConverter.ToString(dumpEeprom.ToArray())}");
 
                 Span<byte> irqStatus = stackalloc byte[4];
                 ret = GetIrqStatus(irqStatus);
@@ -265,9 +237,9 @@ namespace Iot.Device.Pn5180
                 // Clear IRQ
                 SpiWriteRegister(Command.WRITE_REGISTER, Register.IRQ_CLEAR, new byte[] { 0xFF, 0xFF, 0x0F, 0x00 });
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(WriteEeprom)}: {nameof(TimeoutException)} during {nameof(SpiWrite)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(WriteEeprom)}: {nameof(TimeoutException)} during {nameof(SpiWrite)}");
                 return false;
             }
 
@@ -304,18 +276,15 @@ namespace Iot.Device.Pn5180
             sendData[0] = (byte)Command.SEND_DATA;
             sendData[1] = (byte)(numberValidBitsLastByte == 8 ? 0 : numberValidBitsLastByte);
             toSend.CopyTo(sendData.Slice(2));
-            if (LogLevel >= LogLevel.Debug)
-            {
-                LogInfo.Log($"{nameof(SendDataToCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}", LogLevel.Debug);
-            }
+            _logger.LogDebug($"{nameof(SendDataToCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}");
 
             try
             {
                 SpiWrite(sendData);
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(SendDataToCard)}: {nameof(TimeoutException)} in {nameof(SpiWrite)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(SendDataToCard)}: {nameof(TimeoutException)} in {nameof(SpiWrite)}");
                 return false;
             }
 
@@ -340,22 +309,16 @@ namespace Iot.Device.Pn5180
             Span<byte> sendData = stackalloc byte[2];
             sendData[0] = (byte)Command.READ_DATA;
             sendData[1] = 0x00;
-            if (LogLevel >= LogLevel.Debug)
-            {
-                LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}", LogLevel.Debug);
-            }
+            _logger.LogDebug($"{nameof(ReadDataFromCard)}: {nameof(sendData)}, {BitConverter.ToString(sendData.ToArray())}");
 
             try
             {
                 SpiWriteRead(sendData, toRead);
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(toRead)}, {BitConverter.ToString(toRead.ToArray())}", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(ReadDataFromCard)}: {nameof(toRead)}, {BitConverter.ToString(toRead.ToArray())}");
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(TimeoutException)} in {nameof(SpiWriteRead)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(ReadDataFromCard)}: {nameof(TimeoutException)} in {nameof(SpiWriteRead)}");
                 return false;
             }
 
@@ -376,19 +339,13 @@ namespace Iot.Device.Pn5180
             var (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
             if (numBytes == expectedToRead)
             {
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(ReadDataFromCard)}: right number of expected bytes to read", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(ReadDataFromCard)}: right number of expected bytes to read");
 
                 return ReadDataFromCard(toRead);
             }
             else if (numBytes > expectedToRead)
             {
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(ReadDataFromCard)}: wrong number of expected bytes, clearing the cache", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(ReadDataFromCard)}: wrong number of expected bytes, clearing the cache");
 
                 // Clear all
                 ReadDataFromCard(new byte[numBytes]);
@@ -408,7 +365,7 @@ namespace Iot.Device.Pn5180
         /// detect a card, select it and then send data</remarks>
         public bool ReadDataFromCard(Span<byte> toRead, out int bytesRead)
         {
-            LogInfo.Log($"{nameof(ReadDataFromCard)}: ", LogLevel.Debug);
+            _logger.LogDebug($"{nameof(ReadDataFromCard)}: ");
             var (numBytes, _) = GetNumberOfBytesReceivedAndValidBits();
             if (numBytes < 0)
             {
@@ -441,9 +398,9 @@ namespace Iot.Device.Pn5180
                 // from NXP documentation PN5180AXX-C3.pdf, Page 98
                 return ((status[0] + ((status[1] & 0x01) << 8)), (status[1] & 0b1110_0000) >> 5);
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(SendDataToCard)}: {nameof(TimeoutException)} in {nameof(SpiReadRegister)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(SendDataToCard)}: {nameof(TimeoutException)} in {nameof(SpiReadRegister)}");
                 return (-1, -1);
             }
         }
@@ -714,7 +671,7 @@ namespace Iot.Device.Pn5180
         /// <returns>True if success</returns>
         public bool MifareAuthenticate(ReadOnlySpan<byte> key, MifareCardCommand mifareCommand, byte blockAddress, ReadOnlySpan<byte> cardUid)
         {
-            LogInfo.Log($"{nameof(MifareAuthenticate)}: ", LogLevel.Debug);
+            _logger.LogDebug($"{nameof(MifareAuthenticate)}: ");
             if (key.Length != 6)
             {
                 throw new ArgumentException(nameof(key), "Value must be 6 bytes.");
@@ -738,22 +695,16 @@ namespace Iot.Device.Pn5180
             toAuthenticate[7] = (byte)(mifareCommand == MifareCardCommand.AuthenticationA ? 0x60 : 0x61);
             toAuthenticate[8] = blockAddress;
             cardUid.CopyTo(toAuthenticate.Slice(9));
-            if (LogLevel >= LogLevel.Debug)
-            {
-                LogInfo.Log($"{nameof(MifareAuthenticate)}: {nameof(toAuthenticate)}: {BitConverter.ToString(toAuthenticate.ToArray())}", LogLevel.Debug);
-            }
+            _logger.LogDebug($"{nameof(MifareAuthenticate)}: {nameof(toAuthenticate)}: {BitConverter.ToString(toAuthenticate.ToArray())}");
 
             try
             {
                 SpiWriteRead(toAuthenticate, response);
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(MifareAuthenticate)}: {nameof(response)}: {BitConverter.ToString(response.ToArray())}", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(MifareAuthenticate)}: {nameof(response)}: {BitConverter.ToString(response.ToArray())}");
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(ReadDataFromCard)}: {nameof(TimeoutException)} in {nameof(SpiWriteRead)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(ReadDataFromCard)}: {nameof(TimeoutException)} in {nameof(SpiWriteRead)}");
                 return false;
             }
 
@@ -1073,7 +1024,7 @@ namespace Iot.Device.Pn5180
                     if (numBytes != 5)
                     {
                         // This can happen if a card is pulled out of the field
-                        LogInfo.Log($"SAK length not 5", LogLevel.Debug);
+                        _logger.LogWarning($"SAK length not 5");
                         return false;
                     }
 
@@ -1436,7 +1387,7 @@ namespace Iot.Device.Pn5180
 
         private bool GetRxStatus(Span<byte> rxStatus)
         {
-            LogInfo.Log($"{nameof(GetRxStatus)}", LogLevel.Debug);
+            _logger.LogDebug($"{nameof(GetRxStatus)}");
             if (rxStatus.Length != 4)
             {
                 throw new ArgumentException(nameof(rxStatus), "Value must be 4 bytes.");
@@ -1445,14 +1396,11 @@ namespace Iot.Device.Pn5180
             try
             {
                 SpiReadRegister(Register.RX_STATUS, rxStatus);
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(GetRxStatus)}: {nameof(rxStatus)}: {BitConverter.ToString(rxStatus.ToArray())}", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(GetRxStatus)}: {nameof(rxStatus)}: {BitConverter.ToString(rxStatus.ToArray())}");
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(GetRxStatus)}: {nameof(TimeoutException)} in {nameof(SpiReadRegister)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(GetRxStatus)}: {nameof(TimeoutException)} in {nameof(SpiReadRegister)}");
                 return false;
             }
 
@@ -1461,7 +1409,7 @@ namespace Iot.Device.Pn5180
 
         private bool GetIrqStatus(Span<byte> irqStatus)
         {
-            LogInfo.Log($"{nameof(GetIrqStatus)}", LogLevel.Debug);
+            _logger.LogDebug($"{nameof(GetIrqStatus)}");
             if (irqStatus.Length != 4)
             {
                 throw new ArgumentException(nameof(irqStatus), "Value must be 4 bytes.");
@@ -1470,14 +1418,11 @@ namespace Iot.Device.Pn5180
             try
             {
                 SpiReadRegister(Register.IRQ_STATUS, irqStatus);
-                if (LogLevel >= LogLevel.Debug)
-                {
-                    LogInfo.Log($"{nameof(GetIrqStatus)}: {nameof(irqStatus)}: {BitConverter.ToString(irqStatus.ToArray())}", LogLevel.Debug);
-                }
+                _logger.LogDebug($"{nameof(GetIrqStatus)}: {nameof(irqStatus)}: {BitConverter.ToString(irqStatus.ToArray())}");
             }
-            catch (TimeoutException)
+            catch (TimeoutException tx)
             {
-                LogInfo.Log($"{nameof(GetIrqStatus)}: {nameof(TimeoutException)} in {nameof(SpiReadRegister)}", LogLevel.Debug);
+                _logger.LogError(tx, $"{nameof(GetIrqStatus)}: {nameof(TimeoutException)} in {nameof(SpiReadRegister)}");
                 return false;
             }
 

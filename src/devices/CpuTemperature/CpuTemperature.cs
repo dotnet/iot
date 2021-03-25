@@ -36,7 +36,9 @@ namespace Iot.Device.CpuTemperature
             _isAvailable = false;
             _checkedIfAvailable = false;
             _windows = false;
+#pragma warning disable CA1416 // ManagementObjectSearcher class is only functional on windows
             _managementObjectSearchers = new List<ManagementObjectSearcher>();
+#pragma warning restore CA1416
             _hardwareMonitorInUse = null;
 
             CheckAvailable();
@@ -206,7 +208,9 @@ namespace Iot.Device.CpuTemperature
                 elem.Dispose();
             }
 
+#pragma warning disable CA1416 // ManagementObjectSearcher only works on windows.
             _managementObjectSearchers.Clear();
+#pragma warning restore CA1416
 
             // Any further calls will fail
             _isAvailable = false;

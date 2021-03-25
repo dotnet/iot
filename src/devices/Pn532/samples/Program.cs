@@ -12,8 +12,11 @@ using System.Threading.Tasks;
 using Iot.Device.Card;
 using Iot.Device.Card.CreditCardProcessing;
 using Iot.Device.Card.Mifare;
+using Iot.Device.Common;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 
 Pn532 pn532;
 
@@ -33,7 +36,16 @@ if (choiceInterface is not { KeyChar: '1' or '2' or '3' })
 Console.WriteLine("Do you want log level to Debug? Y/N");
 var debugLevelConsole = Console.ReadKey();
 Console.WriteLine();
-LogLevel debugLevel = debugLevelConsole is { KeyChar: 'Y' or 'y' } ? LogLevel.Debug : LogLevel.None;
+LogLevel debugLevel = debugLevelConsole is { KeyChar: 'Y' or 'y' } ? LogLevel.Debug : LogLevel.Information;
+
+var loggerFactory = LoggerFactory.Create(builder =>
+{
+    builder.AddFilter(x => x >= debugLevel);
+    builder.AddConsole();
+});
+
+// Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
+LogDispatcher.LoggerFactory = loggerFactory;
 
 if (choiceInterface is { KeyChar: '3' })
 {
@@ -50,18 +62,18 @@ if (choiceInterface is { KeyChar: '3' })
         return;
     }
 
-    pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0) { DataFlow = DataFlow.LsbFirst, Mode = SpiMode.Mode0 }), pinSelect, logLevel: debugLevel);
+    pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0) { DataFlow = DataFlow.LsbFirst, Mode = SpiMode.Mode0 }), pinSelect);
 }
 else if (choiceInterface is { KeyChar: '2' })
 {
-    pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)), debugLevel);
+    pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)));
 }
 else
 {
     Console.WriteLine("Please enter the serial port to use. ex: COM3 on Windows or /dev/ttyS0 on Linux");
 
     var device = Console.ReadLine();
-    pn532 = new Pn532(device!, debugLevel);
+    pn532 = new Pn532(device!);
 }
 
 if (pn532.FirmwareVersion is FirmwareVersion version)

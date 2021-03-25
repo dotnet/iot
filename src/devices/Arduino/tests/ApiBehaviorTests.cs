@@ -12,6 +12,7 @@ namespace Iot.Device.Arduino.Tests
     /// Extending this class with more unit tests would require Moq'ing the Firmata interface. This is not currently possible.
     /// Simulating on the stream level is probably not worth the effort - better get the simulator to work automatically.
     /// </summary>
+    [Trait("feature", "firmata")]
     public sealed class ApiBehaviorTests : IDisposable
     {
         private Mock<Stream> _streamMock;

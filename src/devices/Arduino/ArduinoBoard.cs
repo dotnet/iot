@@ -17,6 +17,8 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using System.Linq;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Arduino
@@ -47,6 +49,8 @@ namespace Iot.Device.Arduino
 
         private object _initializationLock = new object();
 
+        private ILogger _logger;
+
         /// <summary>
         /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
         /// </summary>
@@ -57,6 +61,7 @@ namespace Iot.Device.Arduino
         public ArduinoBoard(Stream serialPortStream)
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -70,12 +75,13 @@ namespace Iot.Device.Arduino
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
-        /// Attach to this event to retrieve log messages. The Exception argument may be null if it is only an informational message.
+        /// The board logger.
         /// </summary>
-        public event Action<string, Exception?>? LogMessages;
+        protected ILogger Logger => _logger;
 
         /// <summary>
         /// Searches the given list of com ports for a firmata device.
@@ -205,21 +211,21 @@ namespace Iot.Device.Arduino
                     throw new NotSupportedException($"Firmata version on board is {_firmataVersion}. Expected {_firmata.QuerySupportedFirmataVersion()}. They must be equal.");
                 }
 
-                Log($"Firmata version on board is {_firmataVersion}.");
+                Logger.LogInformation($"Firmata version on board is {_firmataVersion}.");
 
                 _firmwareVersion = _firmata.QueryFirmwareVersion(out var firmwareName);
                 _firmwareName = firmwareName;
 
-                Log($"Firmware version on board is {_firmwareVersion}");
+                Logger.LogInformation($"Firmware version on board is {_firmwareVersion}");
 
                 _firmata.QueryCapabilities();
 
                 _supportedPinConfigurations = _firmata.PinConfigurations.AsReadOnly();
 
-                Log("Device capabilities: ");
+                Logger.LogInformation("Device capabilities: ");
                 foreach (var pin in _supportedPinConfigurations)
                 {
-                    Log(pin.ToString());
+                    Logger.LogInformation(pin.ToString());
                 }
 
                 _firmata.EnableDigitalReporting();
@@ -295,14 +301,16 @@ namespace Iot.Device.Arduino
             }
         }
 
-        internal void Log(string message)
+        private void FirmataOnError(string message, Exception? exception)
         {
-            LogMessages?.Invoke(message, null);
-        }
-
-        private void FirmataOnError(string message, Exception? innerException)
-        {
-            LogMessages?.Invoke(message, innerException);
+            if (exception != null)
+            {
+                Logger.LogError(exception, message);
+            }
+            else
+            {
+                Logger.LogInformation(message);
+            }
         }
 
         private void FirmataOnSchedulerReply(int method, MethodState schedulerMethodState, object results)

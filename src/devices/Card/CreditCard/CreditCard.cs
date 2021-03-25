@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection.PortableExecutable;
 using System.Text;
 using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Card.CreditCardProcessing
 {
@@ -36,6 +37,7 @@ namespace Iot.Device.Card.CreditCardProcessing
         private CardTransceiver _nfc;
         private bool _alreadyReadSfi = false;
         private byte _target;
+        private ILogger _logger;
 
         /// <summary>
         /// The size of the tailer elements. Some readers add an extra byte
@@ -68,6 +70,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             Tags = new List<Tag>();
             LogEntries = new List<byte[]>();
             TailerSize = tailerSize;
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -354,7 +357,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             List<Tag> appTemplates = Tag.SearchTag(Tags, 0x61);
             if (appTemplates.Count > 0)
             {
-                LogInfo.Log($"Number of App Templates: {appTemplates.Count}", LogLevel.Debug);
+                _logger.LogDebug($"Number of App Templates: {appTemplates.Count}");
                 foreach (var app in appTemplates)
                 {
                     // Find the Application Identifier 0x4F
@@ -369,7 +372,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                     }
 
                     // do we have a PDOL tag 0x9F38
-                    LogInfo.Log($"APPID: {BitConverter.ToString(appIdentifier.Data)}, Priority: {appPriotity.Data[0]}", LogLevel.Debug);
+                    _logger.LogDebug($"APPID: {BitConverter.ToString(appIdentifier.Data)}, Priority: {appPriotity.Data[0]}");
                     var ret = Select(appIdentifier.Data);
                     if (ret == ErrorType.ProcessCompletedNormal)
                     {
@@ -504,7 +507,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 for (byte record = detail.Start; record < detail.End + 1; record++)
                                 {
                                     ret = ReadRecord(detail.Sfi, record);
-                                    LogInfo.Log($"Read record {record}, SFI {detail.Sfi}, status: {ret}", LogLevel.Debug);
+                                    _logger.LogDebug($"Read record {record}, SFI {detail.Sfi}, status: {ret}");
                                 }
 
                             }
@@ -522,7 +525,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                                 for (byte sfi = 1; sfi < 11; sfi++)
                                 {
                                     ret = ReadRecord(sfi, record);
-                                    LogInfo.Log($"Read record {record}, SFI {sfi}, status: {ret}", LogLevel.Debug);
+                                    _logger.LogDebug($"Read record {record}, SFI {sfi}, status: {ret}");
                                 }
                             }
 
@@ -545,11 +548,11 @@ namespace Iot.Device.Card.CreditCardProcessing
                 var appSfi = Tag.SearchTag(Tags, 0x88).FirstOrDefault();
                 if (appSfi is object)
                 {
-                    LogInfo.Log($"AppSFI: {appSfi.Data[0]}", LogLevel.Debug);
+                    _logger.LogDebug($"AppSFI: {appSfi.Data[0]}");
                     for (byte record = 1; record < 10; record++)
                     {
                         var ret = ReadRecord(appSfi.Data[0], record);
-                        LogInfo.Log($"Read record {record}, SFI {appSfi.Data[0]}, status: {ret}", LogLevel.Debug);
+                        _logger.LogDebug($"Read record {record}, SFI {appSfi.Data[0]}, status: {ret}");
                     }
 
                     _alreadyReadSfi = true;
@@ -567,7 +570,7 @@ namespace Iot.Device.Card.CreditCardProcessing
             for (byte record = 1; record < numberOfRecords + 1; record++)
             {
                 var ret = ReadRecord(sfi, record, true);
-                LogInfo.Log($"Read record {record}, SFI {sfi},status: {ret}", LogLevel.Debug);
+                _logger.LogDebug($"Read record {record}, SFI {sfi},status: {ret}");
             }
         }
 
@@ -718,11 +721,11 @@ namespace Iot.Device.Card.CreditCardProcessing
                 }
 
                 FillTagList(Tags, received.Slice(0, ret - TailerSize));
-                LogInfo.Log($"{BitConverter.ToString(received.Slice(0, ret).ToArray())}", LogLevel.Debug);
+                _logger.LogDebug($"{BitConverter.ToString(received.Slice(0, ret).ToArray())}");
                 var ber = new BerSplitter(received.Slice(0, ret - TailerSize));
                 foreach (var b in ber.Tags)
                 {
-                    LogInfo.Log($"DataType: {dataType}, Tag: {b.TagNumber.ToString("X4")}, Data: {BitConverter.ToString(b.Data)}", LogLevel.Debug);
+                    _logger.LogDebug($"DataType: {dataType}, Tag: {b.TagNumber.ToString("X4")}, Data: {BitConverter.ToString(b.Data)}");
                 }
 
                 return new ProcessError(received.Slice(ret - TailerSize)).ErrorType;

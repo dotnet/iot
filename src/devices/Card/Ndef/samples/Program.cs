@@ -9,12 +9,14 @@ using System.Text;
 using System.Threading;
 using Iot.Device.Card;
 using Iot.Device.Card.Mifare;
+using Iot.Device.Common;
 using Iot.Device.Ft4222;
 using Iot.Device.Ndef;
 using Iot.Device.Pn5180;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
 using Iot.Device.Rfid;
+using Microsoft.Extensions.Logging;
 
 Pn5180 pn5180;
 Pn532 pn532;
@@ -96,7 +98,15 @@ else
     Console.WriteLine("Do you want log level to Debug? Y/N");
     var debugLevelConsole = Console.ReadKey();
     Console.WriteLine();
-    LogLevel debugLevel = debugLevelConsole is { KeyChar: 'Y' or 'y' } ? LogLevel.Debug : LogLevel.None;
+    LogLevel debugLevel = debugLevelConsole is { KeyChar: 'Y' or 'y' } ? LogLevel.Debug : LogLevel.Information;
+
+    var loggerFactory = LoggerFactory.Create(builder =>
+    {
+        builder.AddFilter(x => x >= debugLevel);
+        builder.AddConsole();
+    });
+
+    LogDispatcher.LoggerFactory = loggerFactory;
 
     switch (choiceInterface.KeyChar)
     {
@@ -114,16 +124,16 @@ else
                 return;
             }
 
-            pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0)), pinSelect, logLevel: debugLevel);
+            pn532 = new Pn532(SpiDevice.Create(new SpiConnectionSettings(0)), pinSelect);
             break;
         case '2':
-            pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)), debugLevel);
+            pn532 = new Pn532(I2cDevice.Create(new I2cConnectionSettings(1, Pn532.I2cDefaultAddress)));
             break;
         default:
             Console.WriteLine("Please enter the serial port to use. ex: COM3 on Windows or /dev/ttyS0 on Linux");
 
             var device = Console.ReadLine();
-            pn532 = new Pn532(device!, debugLevel);
+            pn532 = new Pn532(device!);
             break;
     }
 
