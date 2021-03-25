@@ -40,8 +40,6 @@ namespace Arduino.Samples
                 return;
             }
 
-           
-
             var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
@@ -50,7 +48,7 @@ namespace Arduino.Samples
             // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
             LogDispatcher.LoggerFactory = loggerFactory;
 
-             string portName = args[0];
+            string portName = args[0];
             if (args.Length > 0)
             {
                 portName = args[0];

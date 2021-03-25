@@ -22,8 +22,8 @@ namespace Iot.Device.Arduino.Tests
         public FirmataIlExecutorTests(FirmataTestFixture fixture)
         {
             _fixture = fixture;
-            Skip.If(_fixture.Board == null, "No Board found");
-            _compiler = new ArduinoCsCompiler(_fixture.Board, true);
+            Assert.NotNull(_fixture.Board);
+            _compiler = new ArduinoCsCompiler(_fixture.Board!, true);
             _compiler.ClearAllData(true, false);
         }
 
@@ -86,7 +86,7 @@ namespace Iot.Device.Arduino.Tests
             Assert.Throws<InvalidOperationException>(() => _compiler.CreateExecutionSet<Action>(MainMethodMustBeStatic, new CompilerSettings()));
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("Equal", 2, 2, true)]
         [InlineData("Equal", 2000, 1999, false)]
         [InlineData("Equal", -1, -1, true)]
@@ -109,7 +109,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("AddS", 10, 20, 30)]
         [InlineData("AddS", 10, -5, 5)]
         [InlineData("AddS", -5, -2, -7)]
@@ -142,7 +142,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("AddF", 10, 20, 30)]
         [InlineData("AddF", 10, -5, 5)]
         [InlineData("AddF", -5, -2, -7)]
@@ -166,7 +166,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("AddD", 10, 20.0, 30.0)]
         [InlineData("AddD", 10, -5, 5)]
         [InlineData("AddD", -5, -2, -7)]
@@ -190,7 +190,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("AddU", 10u, 20u, 30u)]
         [InlineData("AddU", 10u, -5u, 5u)]
         [InlineData("AddU", -5u, -2u, -7u)]
@@ -217,7 +217,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, (uint)argument1, (uint)argument2, (uint)expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("ResultTypesTest", 50, 20, 70)]
         [InlineData("ResultTypesTest2", 21, -20, 1)]
         public void TestTypeConversions(string methodName, UInt32 argument1, int argument2, Int32 expected)
@@ -225,7 +225,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("IntArrayTest", 4, 1, 3)]
         [InlineData("IntArrayTest", 10, 2, 3)]
         [InlineData("CharArrayTest", 10, 2, 'C')]
@@ -238,7 +238,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("StructCtorBehaviorTest1", 5, 1, 2)]
         [InlineData("StructCtorBehaviorTest2", 5, 1, 5)]
         [InlineData("StructMethodCall1", 66, 33, -99)]
@@ -252,7 +252,7 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("LargeStructCtorBehaviorTest1", 5, 1, 4)]
         [InlineData("LargeStructCtorBehaviorTest2", 5, 1, 5)]
         [InlineData("LargeStructMethodCall2", 66, 33, 66)]
@@ -262,14 +262,14 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("CastClassTest", 0, 0, 1)]
         public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = true, UseFlashForKernel = true });
         }
 
-        [SkippableTheory]
+        [Theory]
         [InlineData("SpanImplementationBehavior", 5, 1, 1)]
         public void SpanTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {

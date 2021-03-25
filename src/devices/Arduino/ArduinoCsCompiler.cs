@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using Iot.Device.Arduino.Runtime;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 #pragma warning disable CS1591
@@ -120,6 +122,7 @@ namespace Iot.Device.Arduino
         private const int DataVersion = 1;
         private readonly ArduinoBoard _board;
         private readonly List<ArduinoTask> _activeTasks;
+        private readonly ILogger _logger;
 
         private ExecutionSet? _activeExecutionSet;
 
@@ -131,6 +134,7 @@ namespace Iot.Device.Arduino
 
         public ArduinoCsCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
+            _logger = this.GetCurrentClassLogger();
             _board = board;
             _board.SetCompilerCallback(BoardOnCompilerCallback);
 
@@ -191,7 +195,7 @@ namespace Iot.Device.Arduino
         {
             if (_activeExecutionSet == null)
             {
-                _board.Log($"Invalid method state message. No code currently active.");
+                _logger.LogError($"Invalid method state message. No code currently active.");
                 return;
             }
 
@@ -199,7 +203,7 @@ namespace Iot.Device.Arduino
 
             if (task == null)
             {
-                _board.Log($"Invalid method state update. {taskId} does not denote an active task.");
+                _logger.LogError($"Invalid method state update. {taskId} does not denote an active task.");
                 return;
             }
 
@@ -207,7 +211,7 @@ namespace Iot.Device.Arduino
 
             if (state == MethodState.Aborted)
             {
-                _board.Log($"Execution of method {GetMethodName(codeRef)} caused an exception. Check previous messages.");
+                _logger.LogError($"Execution of method {GetMethodName(codeRef)} caused an exception. Check previous messages.");
                 // In this case, the data contains the exception tokens and the call stack tokens
                 task.AddData(state, ((int[])args).Cast<object>().ToArray());
                 return;
@@ -215,7 +219,7 @@ namespace Iot.Device.Arduino
 
             if (state == MethodState.Killed)
             {
-                _board.Log($"Execution of method {GetMethodName(codeRef)} was forcibly terminated.");
+                _logger.LogError($"Execution of method {GetMethodName(codeRef)} was forcibly terminated.");
                 // Still update the task state, this will prevent a deadlock if somebody is waiting for this task to end
                 task.AddData(state, new object[0]);
                 return;
@@ -504,7 +508,7 @@ namespace Iot.Device.Arduino
             // Add this first, so we break the recursion to this class further down
             var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
             set.AddClass(newClass);
-            _board.Log($"Class {newClass.Name} added to the execution set with token 0x{newClass.NewToken:X}");
+            _logger.LogDebug($"Class {newClass.Name} added to the execution set with token 0x{newClass.NewToken:X}");
             foreach (var iface in interfaces)
             {
                 PrepareClassDeclaration(set, iface);
@@ -652,7 +656,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            _board.Log($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
+            _logger.LogInformation($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
         }
 
         /// <summary>
@@ -748,11 +752,11 @@ namespace Iot.Device.Arduino
         {
             if (markAsReadOnly)
             {
-                _board.Log("Now loading the kernel...");
+                _logger.LogDebug("Now loading the kernel...");
             }
             else
             {
-                _board.Log("Loading user program...");
+                _logger.LogDebug("Loading user program...");
             }
 
             int idx = 0;
@@ -774,7 +778,7 @@ namespace Iot.Device.Arduino
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
                 string className = cls.Name;
 
-                _board.Log($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
+                _logger.LogDebug($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
@@ -812,7 +816,7 @@ namespace Iot.Device.Arduino
                     continue;
                 }
 
-                _board.Log($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes");
+                _logger.LogDebug($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes");
                 _board.Firmata.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }
@@ -839,7 +843,7 @@ namespace Iot.Device.Arduino
                     continue;
                 }
 
-                _board.Log($"Sending string {idx}/{cnt}. Size {e.InitializerData.Length} bytes: {e.StringData}");
+                _logger.LogDebug($"Sending string {idx}/{cnt}. Size {e.InitializerData.Length} bytes: {e.StringData}");
                 _board.Firmata.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }
@@ -850,11 +854,11 @@ namespace Iot.Device.Arduino
             // The flag is not currently required for methods, since they don't change
             if (markAsReadOnly)
             {
-                _board.Log("Now loading kernel methods...");
+                _logger.LogDebug("Now loading kernel methods...");
             }
             else
             {
-                _board.Log("Loading user program methods...");
+                _logger.LogDebug("Loading user program methods...");
             }
 
             var list = set.Methods().Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
@@ -864,7 +868,7 @@ namespace Iot.Device.Arduino
             foreach (var me in uploadList)
             {
                 MethodBase methodInfo = me.MethodBase;
-                _board.Log($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo}.");
+                _logger.LogDebug($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo}.");
                 SendMethod(set, me);
                 idx++;
                 if (set.CompilerSettings.DoCopyToFlash(markAsReadOnly) && (idx % 100 == 0))
@@ -1126,7 +1130,6 @@ namespace Iot.Device.Arduino
             int minSizeOfMember = 1;
             if (t.IsValueType && fields.Any(x => !x.FieldType.IsValueType))
             {
-                _board.Log("Warning: Value types containing reference types are not fully supported and may cause undefined GC behavior.");
                 minSizeOfMember = 4;
             }
 
@@ -1798,7 +1801,7 @@ namespace Iot.Device.Arduino
                 {
                     // TODO: There are a bunch of methods currently getting here because they're not implemented
                     // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
-                    _board.Log($"Error: {methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
+                    _logger.LogWarning($"{methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
                     return;
                 }
             }
@@ -1887,7 +1890,7 @@ namespace Iot.Device.Arduino
 
             if (set.AddMethod(newInfo))
             {
-                _board.Log($"Method {methodInfo.DeclaringType} - {methodInfo} added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
+                _logger.LogDebug($"Method {methodInfo.DeclaringType} - {methodInfo} added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
                 // If the class containing this method contains statics, we need to send its declaration
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
@@ -1999,7 +2002,7 @@ namespace Iot.Device.Arduino
             for (var index2 = 0; index2 < codeSequences.Count; index2++)
             {
                 var initializer = codeSequences[index2].Method;
-                _board.Log($"Running static initializer of {initializer.DeclaringType}. Step {index2 + 1}/{codeSequences.Count}...");
+                _logger.LogDebug($"Running static initializer of {initializer.DeclaringType}. Step {index2 + 1}/{codeSequences.Count}...");
                 var task = GetTask(set, initializer);
                 task.Invoke(CancellationToken.None);
                 task.WaitForResult();
@@ -2238,7 +2241,7 @@ namespace Iot.Device.Arduino
             }
 
             var decl = _activeExecutionSet.GetMethod(method);
-            _board.Log($"Starting execution on {decl}...");
+            _logger.LogInformation($"Starting execution on {decl}...");
             _board.Firmata.ExecuteIlCode(decl.Token, taskId, arguments);
         }
 
@@ -2263,11 +2266,11 @@ namespace Iot.Device.Arduino
         {
             if (includingFlash)
             {
-                _board.Log("Erasing flash.");
+                _logger.LogDebug("Erasing flash.");
                 _board.Firmata.ClearFlash();
             }
 
-            _board.Log("Resetting execution engine.");
+            _logger.LogDebug("Resetting execution engine.");
             _board.Firmata.SendIlResetCommand(force);
             _activeTasks.Clear();
             _activeExecutionSet = null;

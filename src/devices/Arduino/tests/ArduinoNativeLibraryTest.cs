@@ -24,8 +24,8 @@ namespace Iot.Device.Arduino.Tests
         public ArduinoNativeLibraryTest(FirmataTestFixture fixture)
         {
             _fixture = fixture;
-            Skip.If(_fixture.Board == null, "No Board found");
-            _compiler = new ArduinoCsCompiler(_fixture.Board, true);
+            Assert.NotNull(_fixture.Board);
+            _compiler = new ArduinoCsCompiler(_fixture.Board!, true);
             _compiler.ClearAllData(true, false);
         }
 
@@ -124,19 +124,19 @@ namespace Iot.Device.Arduino.Tests
             _compiler.ClearAllData(true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void RunBlinkWithGpioController()
         {
             ExecuteComplexProgramSuccess<Func<int, int, int>>(SimpleLedBinding.RunBlink, false, 6, 1000);
         }
 
-        [SkippableFact]
+        [Fact]
         public void DisplayHelloWorld()
         {
             ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.Run, false);
         }
 
-        [SkippableFact]
+        [Fact]
         public void DisplayTheClock()
         {
             CompilerSettings s = new CompilerSettings()
@@ -150,19 +150,19 @@ namespace Iot.Device.Arduino.Tests
             ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false, s);
         }
 
-        [SkippableFact]
+        [Fact]
         public void ExpectArrayIndexOutOfBounds()
         {
             ExecuteComplexProgramCausesException<Func<int, int>, IndexOutOfRangeException>(typeof(ArduinoNativeLibraryTest), OutOfBoundsCheck, 10);
         }
 
-        [SkippableFact]
+        [Fact]
         public void ExpectDivideByZero()
         {
             ExecuteComplexProgramCausesException<Func<int, int>, DivideByZeroException>(typeof(ArduinoNativeLibraryTest), DivideByZero, 0);
         }
 
-        [SkippableFact]
+        [Fact]
         public void ExpectOutOfMemory()
         {
             ExecuteComplexProgramCausesException<Func<int, int>, OutOfMemoryException>(typeof(ArduinoNativeLibraryTest), OutOfMemory, (1 << 31) + (1 << 30));
@@ -185,7 +185,7 @@ namespace Iot.Device.Arduino.Tests
             return array.Length;
         }
 
-        [SkippableFact]
+        [Fact]
         public void GetDataFromStaticByteField()
         {
             ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticByteField.GetFirstByte, true, 0, 0);
@@ -195,7 +195,7 @@ namespace Iot.Device.Arduino.Tests
         /// This test not only tests the value of BitConverter.IsLittleEndian but also whether accessing a static
         /// field of a class with a native implementation works
         /// </summary>
-        [SkippableFact]
+        [Fact]
         public void CpuIsLittleEndian()
         {
             ExecuteComplexProgramSuccess<Func<int>>(IsLittleEndianTest, true);
@@ -255,19 +255,19 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
-        [SkippableFact]
+        [Fact]
         public void ClassWith64BitFieldTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(ClassWith64BitField.ClassMain, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void MethodCallOnValueTypeTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(MethodCallOnValueType, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void MethodCallOnGenericClass()
         {
             ExecuteComplexProgramSuccess<Func<int>>(MethodCallOnGenericTest, true);
@@ -324,7 +324,7 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
-        [SkippableFact]
+        [Fact]
         public void GetDataFromClassWithStaticField2()
         {
             ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticField2.GetFirstByte, true, 0, 0);
@@ -355,67 +355,67 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
-        [SkippableFact]
+        [Fact]
         public void GetDataFromStaticIntField()
         {
             ExecuteComplexProgramSuccess<Func<int, int, int>>(ClassWithStaticIntField.GetFirst, true, 7, 0);
         }
 
-        [SkippableFact]
+        [Fact]
         public void SimpleDelegateTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test1, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void NonStaticDelegateTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test2, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void EventHandlerTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(ClassWithAnEvent.Test3, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void OverridingObjectEqualsWorksTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(ClassThatOverridesObjectEquals.Test1, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void OverridingObjectEqualsInderivedClassWorksTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test2, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void EqualityDoesNotReturnTrueIfTypeIsNotSame()
         {
             ExecuteComplexProgramSuccess<Func<int>>(ClassThatDoesNotOverrideObjectEquals.Test3, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void HashSetTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.TestHashSet, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void DictionaryTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.DictionaryTest, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void ReflectionTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.ReflectionTest, true);
         }
 
-        [SkippableFact]
+        [Fact]
         public void CreateInstanceTest()
         {
             ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.CreateInstanceTest, true);

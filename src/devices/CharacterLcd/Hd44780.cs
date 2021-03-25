@@ -3,8 +3,8 @@
 
 using System;
 using System.Buffers;
-using SixLabors.ImageSharp;
 using System.Threading;
+using SixLabors.ImageSharp;
 
 namespace Iot.Device.CharacterLcd
 {
