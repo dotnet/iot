@@ -22,6 +22,7 @@ using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using UnitsNet;
 
 namespace Arduino.Samples

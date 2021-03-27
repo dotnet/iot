@@ -62,15 +62,6 @@ namespace Iot.Device.Arduino
         Killed = 3,
     }
 
-    internal enum ExecutionError
-    {
-        None = 0,
-        EngineBusy = 1,
-        InvalidArguments = 2,
-        OutOfMemory = 3,
-        InternalError = 4,
-    }
-
     [Flags]
     public enum VariableKind : byte
     {

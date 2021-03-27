@@ -50,7 +50,7 @@ namespace Iot.Device.Arduino
         private object _synchronisationLock;
         private Queue<byte> _dataQueue;
 
-        private ExecutionError _lastIlExecutionError;
+        private CommandError _lastCommandError;
 
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
@@ -78,7 +78,7 @@ namespace Iot.Device.Arduino
             _dataQueue = new Queue<byte>();
             _lastResponse = new List<byte>();
             _lastRequestId = 1;
-            _lastIlExecutionError = 0;
+            _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;
         }
 
@@ -209,6 +209,7 @@ namespace Iot.Device.Arduino
                     if (timeout == 0)
                     {
                         // Synchronisation problem: The remainder of the expected message is missing
+                        _lastCommandError = CommandError.Timeout;
                         return;
                     }
                 }
@@ -223,6 +224,7 @@ namespace Iot.Device.Arduino
 
                     if (elapsed > DefaultReplyTimeout)
                     {
+                        _lastCommandError = CommandError.Timeout;
                         return;
                     }
 
@@ -258,6 +260,7 @@ namespace Iot.Device.Arduino
                     {
                         // Firmata sends this message automatically after a device reset (if you press the reset button on the arduino)
                         // If we know the version already, this is unexpected.
+                        _lastCommandError = CommandError.DeviceReset;
                         OnError?.Invoke("The device was unexpectedly reset. Please restart the communication.", null);
                     }
 
@@ -314,6 +317,7 @@ namespace Iot.Device.Arduino
                     // a sysex message must include at least one extended-command byte
                     if (bytes_read < 1)
                     {
+                        _lastCommandError = CommandError.InvalidArguments;
                         return;
                     }
 
@@ -432,18 +436,20 @@ namespace Iot.Device.Arduino
 
                             break;
                         case FirmataSysexCommand.I2C_REPLY:
-
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data;
                             _dataReceived.Set();
                             break;
 
                         case FirmataSysexCommand.SPI_DATA:
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data;
                             _dataReceived.Set();
                             break;
 
                         case FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST:
                         case FirmataSysexCommand.PIN_STATE_RESPONSE:
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
                             _dataReceived.Set();
                             break;
@@ -453,7 +459,7 @@ namespace Iot.Device.Arduino
                                 if (raw_data.Length == 4 && raw_data[1] == (byte)ExecutorCommand.Ack)
                                 {
                                     // Just an ack for a programming command.
-                                    _lastIlExecutionError = 0;
+                                    _lastCommandError = CommandError.None;
                                     _dataReceived.Set();
                                     Thread.Yield();
                                     return;
@@ -462,7 +468,7 @@ namespace Iot.Device.Arduino
                                 if (raw_data.Length == 4 && raw_data[1] == (byte)ExecutorCommand.Nack)
                                 {
                                     // This is a Nack
-                                    _lastIlExecutionError = (ExecutionError)raw_data[3];
+                                    _lastCommandError = (CommandError)raw_data[3];
                                     _dataReceived.Set();
                                     Thread.Yield();
                                     return;
@@ -471,6 +477,7 @@ namespace Iot.Device.Arduino
                                 // Data from real-time methods
                                 if (raw_data.Length < 7)
                                 {
+                                    _lastCommandError = CommandError.InvalidArguments;
                                     OnError?.Invoke("Code execution returned invalid result or state", null);
                                     break;
                                 }
@@ -487,10 +494,12 @@ namespace Iot.Device.Arduino
                                         results[i] = DecodeInt32(raw_data, i * 5 + 5);
                                     }
 
+                                    _lastCommandError = CommandError.Aborted;
                                     OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], results);
                                 }
                                 else
                                 {
+                                    _lastCommandError = CommandError.None;
                                     // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
                                     var result = Decode7BitBytes(raw_data.Skip(5).ToArray(), numArgs);
                                     OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], result);
@@ -559,7 +568,7 @@ namespace Iot.Device.Arduino
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
         public List<byte> SendCommandAndWait(FirmataCommandSequence sequence)
         {
-            return SendCommandAndWait(sequence, DefaultReplyTimeout);
+            return SendCommandAndWait(sequence, DefaultReplyTimeout, out _);
         }
 
         /// <summary>
@@ -567,9 +576,10 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
         /// <param name="timeout">A non-default timeout</param>
+        /// <param name="commandError">Error code, if the command failed</param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
+        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, out CommandError commandError)
         {
             if (!sequence.Validate())
             {
@@ -597,6 +607,7 @@ namespace Iot.Device.Arduino
                     throw new TimeoutException("Timeout waiting for command answer");
                 }
 
+                commandError = _lastCommandError;
                 return new List<byte>(_lastResponse);
             }
         }
@@ -1184,565 +1195,358 @@ namespace Iot.Device.Arduino
             }
         }
 
-        private void WaitAndHandleIlCommandReply(ExecutorCommand command)
+        private void WaitAndHandleIlCommand(FirmataIlCommandSequence commandSequence)
         {
-            bool result = _dataReceived.WaitOne(ProgrammingTimeout);
-            if (result == false)
+            WaitAndHandleIlCommand(commandSequence, ProgrammingTimeout);
+        }
+
+        private void WaitAndHandleIlCommand(FirmataIlCommandSequence commandSequence, TimeSpan timeout)
+        {
+            CommandError error;
+            try
             {
-                throw new TimeoutException($"Arduino failed to accept IL command {command}.");
+                SendCommandAndWait(commandSequence, timeout, out error);
+            }
+            catch (TimeoutException tx)
+            {
+                throw new TimeoutException($"Arduino failed to accept IL command {commandSequence.Command}.", tx);
             }
 
-            if (_lastIlExecutionError != 0)
+            if (error != 0)
             {
-                throw new TaskSchedulerException($"Task scheduler method returned state {_lastIlExecutionError}.");
+                throw new TaskSchedulerException($"Task scheduler method returned state {error}.");
             }
         }
 
         public void SendMethodIlCode(int methodToken, byte[] byteCode)
         {
-            if (_firmataStream == null)
+            const int BYTES_PER_PACKET = 32;
+            int codeIndex = 0;
+            while (codeIndex < byteCode.Length)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
+                FirmataIlCommandSequence sequence = new(ExecutorCommand.LoadIl);
+                sequence.SendInt32(methodToken);
+                ushort len = (ushort)byteCode.Length;
+                // Transmit 14 bit values
+                sequence.WriteByte((byte)(len & 0x7f));
+                sequence.WriteByte((byte)(len >> 7));
+                sequence.WriteByte((byte)(codeIndex & 0x7f));
+                sequence.WriteByte((byte)(codeIndex >> 7));
+                int bytesThisPacket = Math.Min(BYTES_PER_PACKET, byteCode.Length - codeIndex);
+                var bytesToSend = Encoder7Bit.Encode(byteCode, codeIndex, bytesThisPacket);
+                sequence.Write(bytesToSend);
+                codeIndex += bytesThisPacket;
 
-            lock (_synchronisationLock)
-            {
-                const int BYTES_PER_PACKET = 32;
-                int codeIndex = 0;
-                while (codeIndex < byteCode.Length)
-                {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.LoadIl);
-                    SendInt32(methodToken);
-                    ushort len = (ushort)byteCode.Length;
-                    // Transmit 14 bit values
-                    _firmataStream.WriteByte((byte)(len & 0x7f));
-                    _firmataStream.WriteByte((byte)(len >> 7));
-                    _firmataStream.WriteByte((byte)(codeIndex & 0x7f));
-                    _firmataStream.WriteByte((byte)(codeIndex >> 7));
-                    int bytesThisPacket = Math.Min(BYTES_PER_PACKET, byteCode.Length - codeIndex);
-                    var bytesToSend = Encoder7Bit.Encode(byteCode, codeIndex, bytesThisPacket);
-                    _firmataStream.Write(bytesToSend);
-                    codeIndex += bytesThisPacket;
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
 
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-
-                    WaitAndHandleIlCommandReply(ExecutorCommand.LoadIl);
-                }
+                WaitAndHandleIlCommand(sequence);
             }
         }
 
         public void ExecuteIlCode(int methodToken, short taskId, object[] parameters)
         {
-            if (_firmataStream == null)
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.StartTask);
+            sequence.SendInt32(methodToken);
+            sequence.SendInt14(taskId);
+            for (int i = 0; i < parameters.Length; i++)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.StartTask);
-                SendInt32(methodToken);
-                SendInt14(taskId);
-                for (int i = 0; i < parameters.Length; i++)
+                byte[] param;
+                Type t = parameters[i].GetType();
+                if (t == typeof(Int32) || t == typeof(Int16) || t == typeof(sbyte) || t == typeof(bool))
                 {
-                    byte[] param;
-                    Type t = parameters[i].GetType();
-                    if (t == typeof(Int32) || t == typeof(Int16) || t == typeof(sbyte) || t == typeof(bool))
-                    {
-                        param = BitConverter.GetBytes(Convert.ToInt32(parameters[i]));
-                    }
-                    else if (t == typeof(UInt32) || t == typeof(UInt16) || t == typeof(byte))
-                    {
-                        param = BitConverter.GetBytes(Convert.ToUInt32(parameters[i]));
-                    }
-                    else if (t == typeof(float))
-                    {
-                        param = BitConverter.GetBytes(Convert.ToSingle(parameters[i]));
-                    }
-
-                    // For these, the receiver needs to know that 64 bit per parameter are expected
-                    else if (t == typeof(double))
-                    {
-                        param = BitConverter.GetBytes(Convert.ToDouble(parameters[i]));
-                    }
-                    else if (t == typeof(ulong))
-                    {
-                        param = BitConverter.GetBytes(Convert.ToUInt64(parameters[i]));
-                    }
-                    else if (t == typeof(long))
-                    {
-                        param = BitConverter.GetBytes(Convert.ToInt64(parameters[i]));
-                    }
-                    else // Object case for now
-                    {
-                        param = BitConverter.GetBytes(Convert.ToUInt32(0));
-                    }
-
-                    SendValuesAsTwo7bitBytes(param);
+                    param = BitConverter.GetBytes(Convert.ToInt32(parameters[i]));
+                }
+                else if (t == typeof(UInt32) || t == typeof(UInt16) || t == typeof(byte))
+                {
+                    param = BitConverter.GetBytes(Convert.ToUInt32(parameters[i]));
+                }
+                else if (t == typeof(float))
+                {
+                    param = BitConverter.GetBytes(Convert.ToSingle(parameters[i]));
                 }
 
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                WaitAndHandleIlCommandReply(ExecutorCommand.StartTask);
+                // For these, the receiver needs to know that 64 bit per parameter are expected
+                else if (t == typeof(double))
+                {
+                    param = BitConverter.GetBytes(Convert.ToDouble(parameters[i]));
+                }
+                else if (t == typeof(ulong))
+                {
+                    param = BitConverter.GetBytes(Convert.ToUInt64(parameters[i]));
+                }
+                else if (t == typeof(long))
+                {
+                    param = BitConverter.GetBytes(Convert.ToInt64(parameters[i]));
+                }
+                else // Object case for now
+                {
+                    param = BitConverter.GetBytes(Convert.ToUInt32(0));
+                }
+
+                sequence.AddValuesAsTwo7bitBytes(param);
             }
+
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            WaitAndHandleIlCommand(sequence);
         }
 
         public void SendMethodDeclaration(int declarationToken, MethodFlags methodFlags, byte maxStack, byte argCount,
             NativeMethod nativeMethod, ClassMember[] localTypes, ClassMember[] argTypes)
         {
-            if (_firmataStream == null)
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.DeclareMethod);
+            sequence.SendInt32(declarationToken);
+            sequence.WriteByte((byte)methodFlags);
+            sequence.WriteByte(maxStack);
+            sequence.WriteByte(argCount);
+            sequence.SendInt32((int)nativeMethod);
+
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+
+            WaitAndHandleIlCommand(sequence);
+
+            // Types of locals first
+            int startIndex = 0;
+            int localsToSend = Math.Min(localTypes.Length, 16);
+            while (localsToSend > 0)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
+                sequence = new FirmataIlCommandSequence(ExecutorCommand.MethodSignature);
+                sequence.SendInt32(declarationToken);
+                sequence.WriteByte(1); // Locals
+                sequence.WriteByte((byte)localsToSend);
+                for (int i = startIndex; i < startIndex + localsToSend; i++)
+                {
+                    sequence.WriteByte((byte)localTypes[i].VariableType);
+                    sequence.SendInt14((short)(localTypes[i].SizeOfField >> 2));
+                }
+
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+
+                WaitAndHandleIlCommand(sequence);
+                localsToSend -= 16;
             }
 
-            lock (_synchronisationLock)
+            // Types of arguments
+            startIndex = 0;
+            localsToSend = Math.Min(argTypes.Length, 16);
+            while (localsToSend > 0)
             {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.DeclareMethod);
-                SendInt32(declarationToken);
-                _firmataStream.WriteByte((byte)methodFlags);
-                _firmataStream.WriteByte(maxStack);
-                _firmataStream.WriteByte(argCount);
-                SendInt32((int)nativeMethod);
-
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-
-                WaitAndHandleIlCommandReply(ExecutorCommand.DeclareMethod);
-
-                // Types of locals first
-                int startIndex = 0;
-                int localsToSend = Math.Min(localTypes.Length, 16);
-                while (localsToSend > 0)
+                sequence = new FirmataIlCommandSequence(ExecutorCommand.MethodSignature);
+                sequence.SendInt32(declarationToken);
+                sequence.WriteByte(0); // arguments
+                sequence.WriteByte((byte)localsToSend);
+                for (int i = startIndex; i < startIndex + localsToSend; i++)
                 {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.MethodSignature);
-                    SendInt32(declarationToken);
-                    _firmataStream.WriteByte(1); // Locals
-                    _firmataStream.WriteByte((byte)localsToSend);
-                    for (int i = startIndex; i < startIndex + localsToSend; i++)
-                    {
-                        _firmataStream.WriteByte((byte)localTypes[i].VariableType);
-                        SendInt14((short)(localTypes[i].SizeOfField >> 2));
-                    }
-
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-
-                    WaitAndHandleIlCommandReply(ExecutorCommand.DeclareMethod);
-                    localsToSend -= 16;
+                    sequence.WriteByte((byte)argTypes[i].VariableType);
+                    sequence.SendInt14((short)(argTypes[i].SizeOfField >> 2));
                 }
 
-                // Types of arguments
-                startIndex = 0;
-                localsToSend = Math.Min(argTypes.Length, 16);
-                while (localsToSend > 0)
-                {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.MethodSignature);
-                    SendInt32(declarationToken);
-                    _firmataStream.WriteByte(0); // arguments
-                    _firmataStream.WriteByte((byte)localsToSend);
-                    for (int i = startIndex; i < startIndex + localsToSend; i++)
-                    {
-                        _firmataStream.WriteByte((byte)argTypes[i].VariableType);
-                        SendInt14((short)(argTypes[i].SizeOfField >> 2));
-                    }
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
 
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-
-                    WaitAndHandleIlCommandReply(ExecutorCommand.DeclareMethod);
-                    localsToSend -= 16;
-                }
+                WaitAndHandleIlCommand(sequence);
+                localsToSend -= 16;
             }
         }
 
         public void SendInterfaceImplementations(int classToken, int[] data)
         {
-            if (_firmataStream == null)
+            // Send eight at a time, otherwise the maximum length of the message may be exceeded
+            for (int idx = 0; idx < data.Length;)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                // Send eight at a time, otherwise the maximum length of the message may be exceeded
-                for (int idx = 0; idx < data.Length;)
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.Interfaces);
+                sequence.SendInt32(classToken);
+                int remaining = data.Length - idx;
+                if (remaining > 8)
                 {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.Interfaces);
-                    SendInt32(classToken);
-                    int remaining = data.Length - idx;
-                    if (remaining > 8)
-                    {
-                        remaining = 8;
-                    }
-
-                    for (int i = idx; i < idx + remaining; i++)
-                    {
-                        SendInt32(data[i]);
-                    }
-
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.Interfaces);
-                    idx = idx + remaining;
+                    remaining = 8;
                 }
+
+                for (int i = idx; i < idx + remaining; i++)
+                {
+                    sequence.SendInt32(data[i]);
+                }
+
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+                WaitAndHandleIlCommand(sequence);
+                idx = idx + remaining;
             }
         }
 
         public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, bool isValueType, IList<ClassMember> members)
         {
-            if (_firmataStream == null)
+            if (members.Count == 0)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.ClassDeclarationEnd);
+                // Class without a single member or field to transmit: Likely an interface
+                sequence.SendInt32(classToken);
+                sequence.SendInt32(parentToken);
+                // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
+                // Value types, on the other hand, are not expected to be larger than 14 bits.
+                if (isValueType)
+                {
+                    sequence.SendInt14((short)(sizeOfClass.Dynamic));
+                }
+                else
+                {
+                    sequence.SendInt14((short)(sizeOfClass.Dynamic >> 2));
+                }
+
+                sequence.SendInt14((short)(sizeOfClass.Statics >> 2));
+                sequence.SendInt14((short)(isValueType ? 1 : 0));
+                sequence.SendInt14(0);
+
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+                WaitAndHandleIlCommand(sequence);
+                return;
             }
 
-            lock (_synchronisationLock)
+            for (short member = 0; member < members.Count; member++)
             {
-                if (members.Count == 0)
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(member == members.Count - 1 ? ExecutorCommand.ClassDeclarationEnd : ExecutorCommand.ClassDeclaration);
+                sequence.SendInt32(classToken);
+                sequence.SendInt32(parentToken);
+                // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
+                // Value types, on the other hand, are not expected to be larger than 14 bits.
+                if (isValueType)
                 {
-                    // Class without a single member or field to transmit: Likely an interface
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.ClassDeclarationEnd);
-                    SendInt32(classToken);
-                    SendInt32(parentToken);
-                    // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
-                    // Value types, on the other hand, are not expected to be larger than 14 bits.
-                    if (isValueType)
-                    {
-                        SendInt14((short)(sizeOfClass.Dynamic));
-                    }
-                    else
-                    {
-                        SendInt14((short)(sizeOfClass.Dynamic >> 2));
-                    }
-
-                    SendInt14((short)(sizeOfClass.Statics >> 2));
-                    SendInt14((short)(isValueType ? 1 : 0));
-                    SendInt14(0);
-
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
-                    return;
+                    sequence.SendInt14((short)(sizeOfClass.Dynamic));
+                }
+                else
+                {
+                    sequence.SendInt14((short)(sizeOfClass.Dynamic >> 2));
                 }
 
-                for (short member = 0; member < members.Count; member++)
+                sequence.SendInt14((short)(sizeOfClass.Statics >> 2));
+                sequence.SendInt14((short)(isValueType ? 1 : 0));
+                sequence.SendInt14(member);
+
+                sequence.WriteByte((byte)members[member].VariableType);
+                sequence.SendInt32(members[member].Token);
+                if (members[member].VariableType != VariableKind.Method)
                 {
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    // This incorporates a flag to optimize memory consumption on the host
-                    _firmataStream.WriteByte((byte)(member == members.Count - 1 ? ExecutorCommand.ClassDeclarationEnd : ExecutorCommand.ClassDeclaration));
-                    SendInt32(classToken);
-                    SendInt32(parentToken);
-                    // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
-                    // Value types, on the other hand, are not expected to be larger than 14 bits.
-                    if (isValueType)
+                    // If it is a field, transmit its size.
+                    sequence.SendInt14((short)members[member].SizeOfField);
+                }
+                else
+                {
+                    var tokenList = members[member].BaseTokens;
+                    if (tokenList != null)
                     {
-                        SendInt14((short)(sizeOfClass.Dynamic));
-                    }
-                    else
-                    {
-                        SendInt14((short)(sizeOfClass.Dynamic >> 2));
-                    }
-
-                    SendInt14((short)(sizeOfClass.Statics >> 2));
-                    SendInt14((short)(isValueType ? 1 : 0));
-                    SendInt14(member);
-
-                    _firmataStream.WriteByte((byte)members[member].VariableType);
-                    SendInt32(members[member].Token);
-                    if (members[member].VariableType != VariableKind.Method)
-                    {
-                        // If it is a field, transmit its size.
-                        SendInt14((short)members[member].SizeOfField);
-                    }
-                    else
-                    {
-                        var tokenList = members[member].BaseTokens;
-                        if (tokenList != null)
+                        foreach (int bdt in tokenList)
                         {
-                            foreach (int bdt in tokenList)
-                            {
-                                SendInt32(bdt);
-                            }
+                            sequence.SendInt32(bdt);
                         }
                     }
-
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
                 }
+
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+                WaitAndHandleIlCommand(sequence);
             }
         }
 
         public void PrepareStringLoad(int constantSize, int stringSize)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.SetConstantMemorySize);
-                SendInt32(constantSize);
-                SendInt32(stringSize);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
-            }
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.SetConstantMemorySize);
+            sequence.SendInt32(constantSize);
+            sequence.SendInt32(stringSize);
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            WaitAndHandleIlCommand(sequence);
         }
 
         public void SendConstant(Int32 constantToken, byte[] data)
         {
             const int packetSize = 28;
-            if (_firmataStream == null)
+            // We send 28 bytes at once (the total message size must be < 64, and ideally one packet fully uses the last byte)
+            for (int offset = 0; offset < data.Length; offset += packetSize)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                // We send 28 bytes at once (the total message size must be < 64, and ideally one packet fully uses the last byte)
-                for (int offset = 0; offset < data.Length; offset += packetSize)
-                {
-                    int remaining = Math.Min(packetSize, data.Length - offset);
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.ConstantData);
-                    SendInt32(constantToken);
-                    SendInt32(data.Length);
-                    SendInt32(offset);
-                    var encoded = Encoder7Bit.Encode(data, offset, remaining);
-                    _firmataStream.Write(encoded, 0, encoded.Length);
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.ClassDeclaration);
-                }
+                int remaining = Math.Min(packetSize, data.Length - offset);
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.ConstantData);
+                sequence.SendInt32(constantToken);
+                sequence.SendInt32(data.Length);
+                sequence.SendInt32(offset);
+                var encoded = Encoder7Bit.Encode(data, offset, remaining);
+                sequence.Write(encoded, 0, encoded.Length);
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+                WaitAndHandleIlCommand(sequence);
             }
         }
 
         public void SendSpecialTypeList(List<int> tokens)
         {
             const int packetSize = 5; // integers
-            if (_firmataStream == null)
+            // We send 5 values at once (with 5 bytes each)
+            for (int offset = 0; offset < tokens.Count; offset += packetSize)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                // We send 5 values at once (with 5 bytes each)
-                for (int offset = 0; offset < tokens.Count; offset += packetSize)
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.SpecialTokenList);
+                int remaining = Math.Min(packetSize, tokens.Count - offset);
+                sequence.SendInt32(tokens.Count);
+                sequence.SendInt32(offset);
+                for (int i = 0; i < remaining; i++)
                 {
-                    int remaining = Math.Min(packetSize, tokens.Count - offset);
-                    _dataReceived.Reset();
-                    _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                    _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                    _firmataStream.WriteByte((byte)0x7F); // IL data
-                    _firmataStream.WriteByte((byte)ExecutorCommand.SpecialTokenList);
-                    SendInt32(tokens.Count);
-                    SendInt32(offset);
-                    for (int i = 0; i < remaining; i++)
-                    {
-                        SendInt32(tokens[i + offset]);
-                    }
-
-                    _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                    _firmataStream.Flush();
-                    WaitAndHandleIlCommandReply(ExecutorCommand.SpecialTokenList);
+                    sequence.SendInt32(tokens[i + offset]);
                 }
+
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+                WaitAndHandleIlCommand(sequence);
             }
         }
 
         public void ClearFlash()
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.EraseFlash);
-                _firmataStream.WriteByte((byte)(1));
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                Thread.Sleep(100);
-            }
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.EraseFlash);
+            sequence.WriteByte((byte)(1));
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            WaitAndHandleIlCommand(sequence);
         }
 
         public void SendIlResetCommand(bool force)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.ResetExecutor);
-                _firmataStream.WriteByte((byte)(force ? 1 : 0));
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                Thread.Sleep(100);
-            }
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.ResetExecutor);
+            sequence.WriteByte((byte)(force ? 1 : 0));
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            WaitAndHandleIlCommand(sequence);
         }
 
         public void SendKillTask(int methodToken)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.KillTask);
-                SendInt32(methodToken);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                Thread.Sleep(100);
-            }
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.KillTask);
+            sequence.SendInt32(methodToken);
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            WaitAndHandleIlCommand(sequence);
         }
 
         public void CopyToFlash()
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.CopyToFlash);
-                _firmataStream.WriteByte(0); // Command length must be at least 3 for IL commands
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                WaitAndHandleIlCommandReply(ExecutorCommand.CopyToFlash);
-            }
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.CopyToFlash);
+            sequence.WriteByte(0); // Command length must be at least 3 for IL commands
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            WaitAndHandleIlCommand(sequence);
         }
 
         public void WriteFlashHeader(int dataVersion, int hashCode, int startupToken, CodeStartupFlags startupFlags)
         {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            lock (_synchronisationLock)
-            {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.WriteFlashHeader);
-                SendInt32(dataVersion);
-                SendInt32(hashCode);
-                SendInt32(startupToken);
-                SendInt32((int)startupFlags);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                WaitAndHandleIlCommandReply(ExecutorCommand.WriteFlashHeader);
-            }
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.WriteFlashHeader);
+            sequence.SendInt32(dataVersion);
+            sequence.SendInt32(hashCode);
+            sequence.SendInt32(startupToken);
+            sequence.SendInt32((int)startupFlags);
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            WaitAndHandleIlCommand(sequence);
         }
 
         public bool IsMatchingFirmwareLoaded(int dataVersion, int hashCode)
         {
-            if (_firmataStream == null)
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.CheckFlashVersion);
+            sequence.SendInt32(dataVersion);
+            sequence.SendInt32(hashCode);
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommandAndWait(sequence, ProgrammingTimeout, out CommandError error);
+
+            if (error != 0)
             {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
+                return false;
             }
 
-            lock (_synchronisationLock)
-            {
-                _dataReceived.Reset();
-                _firmataStream.WriteByte((byte)FirmataCommand.START_SYSEX);
-                _firmataStream.WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
-                _firmataStream.WriteByte((byte)0x7F); // IL data
-                _firmataStream.WriteByte((byte)ExecutorCommand.CheckFlashVersion);
-                SendInt32(dataVersion);
-                SendInt32(hashCode);
-                _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
-                _firmataStream.Flush();
-                bool result = _dataReceived.WaitOne(ProgrammingTimeout);
-                if (result == false)
-                {
-                    throw new TimeoutException($"Arduino failed to accept IL command {ExecutorCommand.CheckFlashVersion}.");
-                }
-
-                if (_lastIlExecutionError != 0)
-                {
-                    return false;
-                }
-
-                return true;
-            }
-        }
-
-        public void SendReserveMemoryCommand()
-        {
-        }
-
-        private void SendValuesAsTwo7bitBytes(ReadOnlySpan<byte> values)
-        {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            for (int i = 0; i < values.Length; i++)
-            {
-                _firmataStream.WriteByte((byte)(values[i] & (uint)sbyte.MaxValue));
-                _firmataStream.WriteByte((byte)(values[i] >> 7 & sbyte.MaxValue));
-            }
+            return true;
         }
 
         private byte[] Decode7BitBytes(byte[] data, int length)
@@ -1764,26 +1568,6 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Send an integer as 5 bytes (rather than 8, as <see cref="SendValuesAsTwo7bitBytes"/> would do)
-        /// </summary>
-        /// <param name="value">An integer value to send</param>
-        private void SendInt32(Int32 value)
-        {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            byte[] data = new byte[5];
-            data[0] = (byte)(value & 0x7F);
-            data[1] = (byte)((value >> 7) & 0x7F);
-            data[2] = (byte)((value >> 14) & 0x7F);
-            data[3] = (byte)((value >> 21) & 0x7F);
-            data[4] = (byte)((value >> 28) & 0x7F);
-            _firmataStream.Write(data);
-        }
-
-        /// <summary>
         /// Inverse of the above
         /// </summary>
         private int DecodeInt32(byte[] data, int fromOffset)
@@ -1794,24 +1578,6 @@ namespace Iot.Device.Arduino
             value |= data[fromOffset + 3] << 21;
             value |= data[fromOffset + 4] << 28;
             return value;
-        }
-
-        /// <summary>
-        /// Send a short as 2 bytes.
-        /// Note: Only sends 14 bit!
-        /// </summary>
-        /// <param name="value">An integer value to send</param>
-        private void SendInt14(Int16 value)
-        {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            Span<byte> data = stackalloc byte[2];
-            data[0] = (byte)(value & 0x7F);
-            data[1] = (byte)((value >> 7) & 0x7F);
-            _firmataStream.Write(data);
         }
 
         /// <summary>

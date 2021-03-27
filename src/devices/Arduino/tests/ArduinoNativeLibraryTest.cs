@@ -418,7 +418,15 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void CreateInstanceTest()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.CreateInstanceTest, true);
+            CompilerSettings s = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = false,
+                AutoRestartProgram = false,
+            };
+
+            ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.CreateInstanceTest, true, s);
         }
 
         public class ClassThatOverridesObjectEquals : IEquatable<ClassThatOverridesObjectEquals>

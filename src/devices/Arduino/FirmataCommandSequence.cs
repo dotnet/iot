@@ -36,6 +36,19 @@ namespace Iot.Device.Arduino
             _sequence.Add(b);
         }
 
+        public void Write(byte[] bytesToSend)
+        {
+            _sequence.AddRange(bytesToSend);
+        }
+
+        public void Write(byte[] bytesToSend, int startIndex, int length)
+        {
+            for (int i = startIndex; i < startIndex + length; i++)
+            {
+                _sequence.Add(bytesToSend[i]);
+            }
+        }
+
         internal bool Validate()
         {
             if (Length < 2)
