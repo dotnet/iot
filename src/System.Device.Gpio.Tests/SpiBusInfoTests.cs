@@ -11,7 +11,7 @@ namespace System.Device.Gpio.Tests
     public class SpiBusInfoTests
     {
         [Fact]
-        public void NullSpiDevice_Throws()
+        public void VerifyBufferSize()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
