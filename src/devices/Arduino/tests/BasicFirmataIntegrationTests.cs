@@ -8,7 +8,6 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
-using Arduino.Tests;
 using UnitsNet;
 using Xunit;
 
@@ -20,19 +19,11 @@ namespace Iot.Device.Arduino.Tests
     /// </summary>
     [Trait("feature", "firmata")]
     [Trait("requires", "hardware")]
-    public sealed class BasicFirmataIntegrationTests : IClassFixture<FirmataTestFixture>
+    public sealed class BasicFirmataIntegrationTests : ArduinoTestBase, IClassFixture<FirmataTestFixture>
     {
-        private readonly FirmataTestFixture _fixture;
-
         public BasicFirmataIntegrationTests(FirmataTestFixture fixture)
+        : base(fixture)
         {
-            _fixture = fixture;
-            Board = _fixture.Board ?? throw new Exception("Couldn't find the board");
-        }
-
-        public ArduinoBoard Board
-        {
-            get;
         }
 
         [Fact]

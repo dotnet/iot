@@ -9,7 +9,6 @@ using System.IO;
 using System.IO.Ports;
 using System.Linq;
 using System.Threading;
-using Arduino.Tests;
 using UnitsNet;
 using Xunit;
 

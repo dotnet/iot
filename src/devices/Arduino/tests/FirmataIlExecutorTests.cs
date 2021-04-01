@@ -8,28 +8,17 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Arduino.Tests;
 using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
 {
-    public sealed class FirmataIlExecutorTests : IClassFixture<FirmataTestFixture>, IDisposable
+    public sealed class FirmataIlExecutorTests : ArduinoTestBase, IClassFixture<FirmataTestFixture>, IDisposable
     {
-        private FirmataTestFixture _fixture;
-        private ArduinoCsCompiler _compiler;
-
         public FirmataIlExecutorTests(FirmataTestFixture fixture)
+        : base(fixture)
         {
-            _fixture = fixture;
-            Assert.NotNull(_fixture.Board);
-            _compiler = new ArduinoCsCompiler(_fixture.Board!, true);
-            _compiler.ClearAllData(true, false);
-        }
-
-        public void Dispose()
-        {
-            _compiler.Dispose();
+            Compiler.ClearAllData(true, false);
         }
 
         private void LoadCodeMethod<T1, T2, T3>(string methodName, T1 a, T2 b, T3 expectedResult, CompilerSettings? settings = null)
@@ -47,7 +36,7 @@ namespace Iot.Device.Arduino.Tests
                 settings.AdditionalSuppressions.Add("System.SR");
             }
 
-            var set = _compiler.CreateExecutionSet(methods[0], settings);
+            var set = Compiler.CreateExecutionSet(methods[0], settings);
 
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
@@ -83,7 +72,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void MainMethodMustBeStatic()
         {
-            Assert.Throws<InvalidOperationException>(() => _compiler.CreateExecutionSet<Action>(MainMethodMustBeStatic, new CompilerSettings()));
+            Assert.Throws<InvalidOperationException>(() => Compiler.CreateExecutionSet<Action>(MainMethodMustBeStatic, new CompilerSettings()));
         }
 
         [Theory]

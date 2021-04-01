@@ -2,6 +2,10 @@
 
 namespace Iot.Device.Arduino
 {
+    /// <summary>
+    /// Exception types thrown by the remote engine.
+    /// They are rethrown locally as the same type.
+    /// </summary>
     public enum SystemException
     {
         None = 0,
@@ -19,6 +23,12 @@ namespace Iot.Device.Arduino
         NotSupported = 12,
         CustomException = 13,
         FieldAccess = 14,
-        ExecutionEngine = 15, // Note: This is forwarded as InvalidOperationException, because locally throwing ExecutionEngineException may give some headaches
+
+        /// <summary>
+        /// Fatal error of the remote engine (i.e. internal memory corruption)
+        /// Note: This is forwarded as InvalidOperationException, because locally throwing ExecutionEngineException may give some headaches.
+        /// Additionally, ExecutionEngineException is actually Obsolete since .NET 4.0
+        /// </summary>
+        ExecutionEngine = 15,
     }
 }

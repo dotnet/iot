@@ -4,7 +4,6 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Text;
 using System.Threading;
-using Arduino.Tests;
 using Iot.Device.Arduino;
 using Iot.Device.Arduino.Runtime;
 using Iot.Device.CharacterLcd;
@@ -15,23 +14,14 @@ namespace Iot.Device.Arduino.Tests
     /// <summary>
     /// Tests native library functions for the IL Executor
     /// </summary>
-    public class ArduinoNativeLibraryTest : IClassFixture<FirmataTestFixture>, IDisposable
+    public class ArduinoNativeLibraryTest : ArduinoTestBase, IClassFixture<FirmataTestFixture>
     {
         private const int MaxTestMemoryUsage = 400000;
-        private FirmataTestFixture _fixture;
-        private ArduinoCsCompiler _compiler;
 
         public ArduinoNativeLibraryTest(FirmataTestFixture fixture)
+            : base(fixture)
         {
-            _fixture = fixture;
-            Assert.NotNull(_fixture.Board);
-            _compiler = new ArduinoCsCompiler(_fixture.Board!, true);
-            _compiler.ClearAllData(true, false);
-        }
-
-        public void Dispose()
-        {
-            _compiler.Dispose();
+            Compiler.ClearAllData(true, false);
         }
 
         public class SimpleLedBinding
@@ -69,85 +59,10 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
-        private void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, params object[] args)
-            where T : Delegate
-        {
-            ExecuteComplexProgramSuccess<T>(mainEntryPoint, executeLocally, _fixture.DefaultCompilerSettings, args);
-        }
-
-        private void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, CompilerSettings settings, params object[] args)
-            where T : Delegate
-        {
-            // Execute function locally, if possible (to compare behavior)
-            if (executeLocally)
-            {
-                object? result = mainEntryPoint.DynamicInvoke(args);
-                int returnValue = (int)result!;
-                Assert.Equal(1, returnValue);
-            }
-
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint, settings);
-
-            long memoryUsage = exec.EstimateRequiredMemory();
-            Assert.True(memoryUsage < MaxTestMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
-
-            var task = exec.MainEntryPoint;
-            task.InvokeAsync(args);
-
-            task.WaitForResult();
-
-            Assert.True(task.GetMethodResults(exec, out var returnCodes, out var state));
-            Assert.NotEmpty(returnCodes);
-            Assert.Equal(1, returnCodes[0]);
-            _compiler.ClearAllData(true);
-        }
-
-        private void ExecuteComplexProgramCausesException<T, TException>(Type mainClass, T mainEntryPoint, params object[] args)
-            where TException : Exception
-            where T : Delegate
-        {
-            // These operations should be combined into one, to simplify usage (just provide the main entry point,
-            // and derive everything required from there)
-            _compiler.ClearAllData(true);
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint, _fixture.DefaultCompilerSettings);
-
-            long memoryUsage = exec.EstimateRequiredMemory();
-            Assert.True(memoryUsage < MaxTestMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
-
-            var task = exec.MainEntryPoint;
-            task.InvokeAsync(args);
-
-            task.WaitForResult();
-            MethodState state = MethodState.Running;
-            Assert.Throws<TException>(() => task.GetMethodResults(exec, out var returnCodes, out state));
-            Assert.Equal(MethodState.Aborted, state);
-            _compiler.ClearAllData(true);
-        }
-
         [Fact]
         public void RunBlinkWithGpioController()
         {
             ExecuteComplexProgramSuccess<Func<int, int, int>>(SimpleLedBinding.RunBlink, false, 6, 1000);
-        }
-
-        [Fact]
-        public void DisplayHelloWorld()
-        {
-            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.Run, false);
-        }
-
-        [Fact]
-        public void DisplayTheClock()
-        {
-            CompilerSettings s = new CompilerSettings()
-            {
-                CreateKernelForFlashing = false,
-                LaunchProgramFromFlash = true,
-                UseFlashForProgram = true,
-                AutoRestartProgram = true,
-            };
-
-            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false, s);
         }
 
         [Fact]
@@ -744,56 +659,6 @@ namespace Iot.Device.Arduino.Tests
                 var instance = (List<int>?)Activator.CreateInstance(t, 5);
                 MiniAssert.That(instance != null);
                 MiniAssert.That(instance!.Capacity >= 5);
-                return 1;
-            }
-        }
-
-        public class UseI2cDisplay
-        {
-            public static int Run()
-            {
-                using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
-                using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
-                using Hd44780 hd44780 = new Lcd2004(lcdInterface);
-                hd44780.UnderlineCursorVisible = false;
-                hd44780.BacklightOn = true;
-                hd44780.DisplayOn = true;
-                hd44780.Clear();
-                hd44780.Write("Hello World!");
-                return 1;
-            }
-
-            public static int RunClock()
-            {
-                const int redLed = 6;
-                using GpioController gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
-                gpioController.OpenPin(redLed, PinMode.Output);
-                gpioController.Write(redLed, PinValue.High);
-                Thread.Sleep(1000);
-                using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
-                using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
-                using Hd44780 hd44780 = new Lcd2004(lcdInterface);
-                hd44780.UnderlineCursorVisible = false;
-                hd44780.BacklightOn = true;
-                hd44780.DisplayOn = true;
-                hd44780.Clear();
-                hd44780.Write("Hello World!");
-                gpioController.Write(redLed, PinValue.Low);
-                for (int i = 0; i < 60; i++)
-                {
-                    hd44780.SetCursorPosition(0, 1);
-                    var time = DateTime.Now;
-                    hd44780.Write(time.ToString("dddd"));
-                    hd44780.SetCursorPosition(0, 2);
-                    hd44780.Write(time.ToString("dd. MMMM yyyy"));
-                    hd44780.SetCursorPosition(0, 3);
-                    hd44780.Write(time.ToLongTimeString());
-                    Thread.Sleep(800);
-                    gpioController.Write(redLed, PinValue.High);
-                    Thread.Sleep(100);
-                    gpioController.Write(redLed, PinValue.Low);
-                }
-
                 return 1;
             }
         }

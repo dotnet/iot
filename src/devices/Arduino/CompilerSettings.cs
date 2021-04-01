@@ -17,6 +17,7 @@ namespace Iot.Device.Arduino
             UseFlashForProgram = false;
             AdditionalSuppressions = new List<string>();
             LaunchProgramFromFlash = false;
+            MaxMemoryUsage = 0;
         }
 
         /// <summary>
@@ -68,6 +69,15 @@ namespace Iot.Device.Arduino
         /// Automatically restarts the program when it crashes (only valid if <see cref="LaunchProgramFromFlash"/> is true)
         /// </summary>
         public bool AutoRestartProgram
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Maximum expected memory usage. If this value is &gt;0, an attempt to load the program will be aborted immediately
+        /// </summary>
+        public int MaxMemoryUsage
         {
             get;
             set;
