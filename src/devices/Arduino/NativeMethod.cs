@@ -137,6 +137,11 @@ namespace Iot.Device.Arduino
         ArrayCopyCore,
         ArrayClear,
 
-        ActivatorCreateInstance
+        ActivatorCreateInstance,
+
+        GcCollect,
+        GcGetTotalMemory,
+        GcGetTotalAllocatedBytes,
+        GcTotalAvailableMemoryBytes
     }
 }

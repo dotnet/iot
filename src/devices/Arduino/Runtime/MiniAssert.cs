@@ -38,5 +38,21 @@ namespace Iot.Device.Arduino.Runtime
                 throw new MiniAssertionException(message);
             }
         }
+
+        public static void NotNull(object? obj)
+        {
+            if (obj == null)
+            {
+                throw new MiniAssertionException();
+            }
+        }
+
+        public static void IsNull(object? obj)
+        {
+            if (obj != null)
+            {
+                throw new MiniAssertionException();
+            }
+        }
     }
 }
