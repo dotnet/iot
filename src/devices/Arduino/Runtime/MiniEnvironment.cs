@@ -1,10 +1,13 @@
 ﻿using System;
+using System.Threading;
 
 namespace Iot.Device.Arduino.Runtime
 {
     [ArduinoReplacement(typeof(System.Environment), true)]
     internal static class MiniEnvironment
     {
+        public static int CurrentManagedThreadId => Thread.CurrentThread.ManagedThreadId;
+
         public static int TickCount
         {
             [ArduinoImplementation(NativeMethod.EnvironmentTickCount)]

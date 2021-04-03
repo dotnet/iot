@@ -16,7 +16,7 @@ namespace Iot.Device.Arduino
             DependentMethods = new List<MethodBase>();
             DependentFields = new List<FieldInfo>();
             DependentTypes = new List<TypeInfo>();
-            Name = $"{method.DeclaringType} - {method}";
+            Name = $"{method.MethodSignature()}";
         }
 
         public IlCode(MethodBase method, byte[]? ilBytes, List<MethodBase> methods, List<FieldInfo> fields, List<TypeInfo> types)
@@ -26,7 +26,7 @@ namespace Iot.Device.Arduino
             DependentMethods = methods;
             DependentFields = fields;
             DependentTypes = types;
-            Name = $"{method.DeclaringType} - {method}";
+            Name = $"{method.MethodSignature()}";
         }
 
         public MethodBase Method

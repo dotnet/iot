@@ -264,5 +264,12 @@ namespace Iot.Device.Arduino.Tests
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
+
+        [Theory]
+        [InlineData("SimpleEnumHasValues")]
+        public void EnumTest(string methodName)
+        {
+            LoadCodeMethod(methodName, 0, 0, 1);
+        }
     }
 }

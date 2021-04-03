@@ -21,7 +21,7 @@ namespace Iot.Device.Arduino
             Token = token;
             BaseTokens = null;
             SizeOfField = sizeOfField;
-            Name = $"Field: {field.DeclaringType} - {field}";
+            Name = $"Field: {field.MemberInfoSignature()}";
         }
 
         public ClassMember(MethodBase method, VariableKind variableType, int token, List<int> baseTokens)
@@ -31,7 +31,7 @@ namespace Iot.Device.Arduino
             BaseTokens = baseTokens;
             SizeOfField = 0;
             Method = method;
-            Name = $"Method: {method.DeclaringType} - {method}";
+            Name = $"Method: {method.MethodSignature()}";
         }
 
         public string Name

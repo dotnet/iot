@@ -218,6 +218,7 @@ namespace Iot.Device.Arduino
                         var resolved = ResolveMember(method, token);
                         if (resolved is TypeInfo ti)
                         {
+                            bool isEnum = ti.IsEnum;
                             patchValue = set.GetOrAddClassToken(ti);
                             typesUsed.Add(ti);
                         }
@@ -274,7 +275,7 @@ namespace Iot.Device.Arduino
                     }
 
                     default:
-                        throw new InvalidOperationException($"Opcode {opCode} has a token argument, but is unhandled in {method.DeclaringType} - {method}.");
+                        throw new InvalidOperationException($"Opcode {opCode} has a token argument, but is unhandled in {method.MethodSignature()}.");
                 }
 
                 // Now use the new token instead of the old (possibly ambiguous one)
@@ -306,15 +307,7 @@ namespace Iot.Device.Arduino
                 methodArgs = method.GetGenericArguments();
             }
 
-            try
-            {
-                return type.Module.ResolveMember(metadataToken, typeArgs, methodArgs);
-            }
-            catch (ArgumentException)
-            {
-                // Due to our simplistic parsing below, we might find matching metadata tokens that aren't really tokens
-                return null;
-            }
+            return type.Module.ResolveMember(metadataToken, typeArgs, methodArgs);
         }
     }
 }

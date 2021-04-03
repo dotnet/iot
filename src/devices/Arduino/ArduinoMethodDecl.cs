@@ -30,7 +30,7 @@ namespace Iot.Device.Arduino
                 ArgumentCount += 1;
             }
 
-            Name = $"{MethodBase.DeclaringType} - {methodBase} (Token 0x{Token:X})";
+            Name = $"{MethodBase.MethodSignature()} (Token 0x{Token:X})";
         }
 
         public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, IlCode code)
@@ -111,7 +111,7 @@ namespace Iot.Device.Arduino
                 Flags |= MethodFlags.Abstract;
             }
 
-            Name = $"{MethodBase.DeclaringType} - {methodBase} (Token 0x{Token:X})";
+            Name = $"{MethodBase.MethodSignature()} (Token 0x{Token:X})";
         }
 
         public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, MethodFlags flags, NativeMethod nativeMethod)
@@ -153,7 +153,7 @@ namespace Iot.Device.Arduino
                 Flags |= MethodFlags.Virtual;
             }
 
-            Name = $"{MethodBase.DeclaringType} - {MethodBase} (Special Method, Token 0x{Token:X})";
+            Name = $"{MethodBase.MethodSignature()} (Special Method, Token 0x{Token:X})";
         }
 
         public bool HasBody

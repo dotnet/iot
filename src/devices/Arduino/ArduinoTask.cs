@@ -114,7 +114,7 @@ namespace Iot.Device.Arduino
                             var resolved2 = set.InverseResolveToken(methodToken);
                             if (resolved2 != null)
                             {
-                                textualStackTrace += $" at {resolved2.DeclaringType} - {resolved2} Instruction 0x{pc:X4}\r\n";
+                                textualStackTrace += $" at {resolved2.MemberInfoSignature()} Instruction 0x{pc:X4}\r\n";
                             }
                         }
                     }
@@ -138,40 +138,40 @@ namespace Iot.Device.Arduino
                         switch (sysEx)
                         {
                             case SystemException.MissingMethod:
-                                ex = new MissingMethodException(resolved.DeclaringType?.Name, resolved + " " + textualStackTrace);
+                                ex = new MissingMethodException(resolved.DeclaringType?.Name, resolved.MemberInfoSignature() + " " + textualStackTrace);
                                 break;
                             case SystemException.NullReference:
-                                ex = new NullReferenceException($"NullReferenceException in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
+                                ex = new NullReferenceException($"NullReferenceException in {resolved.MemberInfoSignature()} " + textualStackTrace);
                                 break;
                             case SystemException.StackOverflow:
-                                ex = new StackOverflowException($"StackOverflow in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
+                                ex = new StackOverflowException($"StackOverflow in {resolved.MemberInfoSignature()} " + textualStackTrace);
                                 break;
                             case SystemException.DivideByZero:
-                                ex = new DivideByZeroException($"Integer Division by zero in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
+                                ex = new DivideByZeroException($"Integer Division by zero in {resolved.MemberInfoSignature()} " + textualStackTrace);
                                 break;
                             case SystemException.IndexOutOfRange:
-                                ex = new IndexOutOfRangeException($"Index out of range in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
+                                ex = new IndexOutOfRangeException($"Index out of range in {resolved.MemberInfoSignature()} " + textualStackTrace);
                                 break;
                             case SystemException.OutOfMemory:
-                                ex = new OutOfMemoryException($"Out of memory allocating an instance of {resolved.DeclaringType} - {resolved} " + textualStackTrace);
+                                ex = new OutOfMemoryException($"Out of memory allocating an instance of {resolved.MemberInfoSignature()} - {resolved} " + textualStackTrace);
                                 break;
                             case SystemException.ArrayTypeMismatch:
-                                ex = new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.DeclaringType} - {resolved} " + textualStackTrace);
+                                ex = new ArrayTypeMismatchException($"Array type did not match in STELM or LDELEM instruction in {resolved.MemberInfoSignature()} " + textualStackTrace);
                                 break;
                             case SystemException.InvalidOperation:
-                                ex = new InvalidOperationException($"An invalid operation was attempted in {resolved.DeclaringType} - {resolved}.");
+                                ex = new InvalidOperationException($"An invalid operation was attempted in {resolved.MemberInfoSignature()}.");
                                 break;
                             case SystemException.ClassNotFound:
-                                ex = new TypeInitializationException($"{resolved.DeclaringType} - {resolved}", new MissingMethodException());
+                                ex = new TypeInitializationException($"{resolved.MemberInfoSignature()}", new MissingMethodException());
                                 break;
                             case SystemException.InvalidCast:
-                                ex = new InvalidCastException($"Cast to {resolved.DeclaringType} - {resolved} is not possible. " + textualStackTrace);
+                                ex = new InvalidCastException($"Cast to {resolved.MemberInfoSignature()} is not possible. " + textualStackTrace);
                                 break;
                             case SystemException.NotSupported:
-                                ex = new NotSupportedException($"An unsupported operation was attempted in {resolved.DeclaringType} - {resolved} at " + textualStackTrace);
+                                ex = new NotSupportedException($"An unsupported operation was attempted in {resolved.MemberInfoSignature()} at " + textualStackTrace);
                                 break;
                             case SystemException.FieldAccess:
-                                ex = new FieldAccessException($"Unable to access or find field {resolved.DeclaringType} - {resolved} at " + textualStackTrace);
+                                ex = new FieldAccessException($"Unable to access or find field {resolved.MemberInfoSignature()} at " + textualStackTrace);
                                 break;
                             case SystemException.ExecutionEngine:
                                 ex = new InvalidOperationException($"Execution engine exception in remote runtime at {textualStackTrace}");
@@ -189,7 +189,7 @@ namespace Iot.Device.Arduino
                             throw new InvalidOperationException("Internal error: Unknown exception type");
                         }
 
-                        ex = (Exception)Activator.CreateInstance((Type)resolved, new object[] { $"Location: {resolved.DeclaringType} - {resolved} {textualStackTrace}" }, null)!;
+                        ex = (Exception)Activator.CreateInstance((Type)resolved, new object[] { $"Location: {resolved.MemberInfoSignature()} {textualStackTrace}" }, null)!;
                     }
 
                     throw ex;

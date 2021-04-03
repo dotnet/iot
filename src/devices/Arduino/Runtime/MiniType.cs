@@ -219,5 +219,11 @@ namespace Iot.Device.Arduino.Runtime
         {
             throw new NotImplementedException();
         }
+
+        public virtual bool IsEnumDefined(object value)
+        {
+            // We don't have the type information to decide this
+            return true;
+        }
     }
 }

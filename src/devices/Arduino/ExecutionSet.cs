@@ -428,7 +428,7 @@ namespace Iot.Device.Arduino
             if (classReplacement != null && replacement == null)
             {
                 replacement = GetReplacement(methodBase, classReplacement);
-                return GetOrAddMethodToken(replacement ?? throw new InvalidOperationException($"Internal error: Expected replacement not found for {methodBase.DeclaringType} - {methodBase}"));
+                return GetOrAddMethodToken(replacement ?? throw new InvalidOperationException($"Internal error: Expected replacement not found for {methodBase.MemberInfoSignature()}"));
             }
 
             token = _nextToken++;
@@ -971,7 +971,7 @@ namespace Iot.Device.Arduino
             }
             else if (elem.Item2 == null)
             {
-                throw new InvalidOperationException($"Should have a replacement for {original.DeclaringType} - {original}, but it is missing.");
+                throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing.");
             }
 
             return elem.Item2;

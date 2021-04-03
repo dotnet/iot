@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Iot.Device.Arduino;
 using Xunit;
 
-namespace Arduino.Tests
+namespace Iot.Device.Arduino.Tests
 {
     public class MethodInfoExtensionsTest
     {
@@ -23,12 +23,17 @@ namespace Arduino.Tests
             Assert.Equal("System.Collections.Generic.Dictionary<System.Int32, System.String>", typeof(Dictionary<int, string>).ClassSignature());
             Assert.Equal("Dictionary<Int32, String>", typeof(Dictionary<int, string>).ClassSignature(false));
             Assert.Equal("String", typeof(string).ClassSignature(false));
+            Assert.Equal("WithGenericArg<T>", typeof(WithGenericArg<>).ClassSignature(false));
+            Assert.Equal("WithGenericArg<Int32>+Internal", typeof(WithGenericArg<Int32>.Internal).ClassSignature(false));
+            Assert.Equal("WithGenericArg<Int32>+Internal2<Boolean>", typeof(WithGenericArg<Int32>.Internal2<bool>).ClassSignature(false));
         }
 
         [Theory]
         [InlineData(typeof(ClassDeclaration), "AddClassMember", false, "public void ClassDeclaration.AddClassMember(ClassMember member)")]
         [InlineData(typeof(ClassDeclaration), "ToString", false, "public virtual String ClassDeclaration.ToString()")]
-        [InlineData(typeof(System.Collections.Generic.Dictionary<int, string>), "Add", true, "public virtual void System.Collections.Generic.Dictionary<System.Int32, System.String>.Add(System.Int32 key, System.String value)")]
+        [InlineData(typeof(Dictionary<int, string>), "Add", true, "public virtual void System.Collections.Generic.Dictionary<System.Int32, System.String>.Add(System.Int32 key, System.String value)")]
+        [InlineData(typeof(WithGenericArg<Int32>.Internal), "Foo", true, "public System.Int32 Iot.Device.Arduino.Tests.WithGenericArg<System.Int32>+Internal.Foo()")]
+        [InlineData(typeof(WithGenericArg<Int32>.Internal2<bool>), "Foo2", true, "public System.Boolean Iot.Device.Arduino.Tests.WithGenericArg<System.Int32>+Internal2<System.Boolean>.Foo2()")]
         public void MethodSignature(Type cls, string methodName, bool useFullNamespaces, string expectedString)
         {
             var me = cls.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);

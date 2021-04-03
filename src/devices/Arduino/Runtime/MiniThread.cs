@@ -1,10 +1,37 @@
 ﻿using System;
+using System.Threading;
 
 namespace Iot.Device.Arduino.Runtime
 {
     [ArduinoReplacement(typeof(System.Threading.Thread), true)]
     internal class MiniThread
     {
+        /// <summary>
+        /// Current thread value. This field must be made Thread-Local if multiple threads are supported
+        /// </summary>
+        private static MiniThread? s_currentThread;
+        public static MiniThread CurrentThread => s_currentThread ?? InitializeCurrentThread();
+
+        private string? _name;
+        // private Delegate? _delegate; // Delegate
+        // private object? _threadStartArg;
+        internal MiniThread()
+        {
+            _name = "Main Thread";
+            // _delegate = null;
+            // _threadStartArg = null;
+        }
+
+        public string? Name
+        {
+            get
+            {
+                return _name;
+            }
+        }
+
+        public int ManagedThreadId => 1;
+
         /// <summary>
         /// This method performs busy waiting for a specified number of milliseconds.
         /// It is not implemented as low-level function because this allows other code to continue.
@@ -37,6 +64,12 @@ namespace Iot.Device.Arduino.Runtime
                 // Busy waiting is ok here - the microcontroller has no sleep state
                 ticks = Environment.TickCount;
             }
+        }
+
+        public static MiniThread InitializeCurrentThread()
+        {
+            s_currentThread = new MiniThread();
+            return s_currentThread;
         }
 
         public static void Sleep(TimeSpan delay)

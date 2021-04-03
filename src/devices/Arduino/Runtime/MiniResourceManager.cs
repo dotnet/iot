@@ -7,6 +7,11 @@ namespace Iot.Device.Arduino.Runtime
     [ArduinoReplacement(typeof(System.Resources.ResourceManager), true)]
     internal class MiniResourceManager
     {
+        public string GetString(string resourceName)
+        {
+            return resourceName;
+        }
+
         public string GetString(string resourceName, CultureInfo culture)
         {
             return resourceName;

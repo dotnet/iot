@@ -98,6 +98,36 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Prints the signature of an arbitrary member
+        /// </summary>
+        public static string MemberInfoSignature(this MemberInfo mi, bool useFullNamespaces = true)
+        {
+            if (mi is Type t)
+            {
+                return t.ClassSignature(useFullNamespaces);
+            }
+
+            if (mi is FieldInfo fi)
+            {
+                if (fi.DeclaringType != null)
+                {
+                    return $"{fi.FieldType.ClassSignature(useFullNamespaces)} {fi.DeclaringType.ClassSignature(useFullNamespaces)}.{fi.Name}";
+                }
+                else
+                {
+                    return fi.Name;
+                }
+            }
+
+            if (mi is MethodBase me)
+            {
+                return me.MethodSignature(useFullNamespaces);
+            }
+
+            throw new NotSupportedException("Missing case");
+        }
+
+        /// <summary>
         /// Returns the type as a string in C# syntax.
         /// This is similar to <see cref="Type.ToString"/>, but returns the type name in a form known to C# programmers, instead of the form defined by the ECMA standard
         /// </summary>
@@ -105,6 +135,11 @@ namespace Iot.Device.Arduino
         /// <param name="useFullNamespaces">True (the default) to print full namespace info, otherwise namespaces are omitted</param>
         /// <returns>A string representing the type</returns>
         public static string ClassSignature(this Type t, bool useFullNamespaces = true)
+        {
+            return ClassSignature(t, t.GenericTypeArguments, t.GetGenericArguments(), useFullNamespaces);
+        }
+
+        private static string ClassSignature(this Type t, Type[] genericParametersToUse, Type[] genericArguments, bool useFullNamespaces = true)
         {
             if (t.IsGenericType == false)
             {
@@ -117,43 +152,65 @@ namespace Iot.Device.Arduino
             }
 
             StringBuilder b = new StringBuilder();
-            if (t.Namespace != null && useFullNamespaces)
+            if (t.Namespace != null && useFullNamespaces && !t.IsNested)
             {
                 b.Append(t.Namespace + ".");
             }
 
-            string nameSimple = t.Name; // Contains the number of generic arguments in the form `N at the end
-            int idx = nameSimple.IndexOf('`');
-            nameSimple = nameSimple.Substring(0, idx);
-            b.Append(nameSimple);
-            b.Append('<');
-            int genericParameterLength = t.GenericTypeArguments.Length;
-            for (var index = 0; index < genericParameterLength; index++)
+            if (t.IsNested && t.DeclaringType != null)
             {
-                var typeParam = t.GenericTypeArguments[index];
-                b.Append(ClassSignature(typeParam, useFullNamespaces));
-                if (index < genericParameterLength - 1)
+                // If this is an internal class to a generic outer class, the type arguments for the outer class are on this type.
+                int elementsOnParent = 0;
+                if (t.DeclaringType.IsGenericType)
                 {
-                    b.Append(", ");
+                    elementsOnParent = t.DeclaringType.GetGenericArguments().Length;
                 }
+
+                b.Append(t.DeclaringType.ClassSignature(t.GenericTypeArguments.Take(elementsOnParent).ToArray(), t.GetGenericArguments().Take(elementsOnParent).ToArray(), useFullNamespaces));
+                genericParametersToUse = genericParametersToUse.Skip(elementsOnParent).ToArray();
+                genericArguments = genericArguments.Skip(elementsOnParent).ToArray();
+                b.Append('+');
             }
 
-            // If this is an open generic type, print the generic type names instead
-            if (genericParameterLength == 0)
+            string nameSimple = t.Name; // Contains the number of generic arguments in the form `N at the end (unless it's an internal class to a generic class)
+            int idx = nameSimple.IndexOf('`');
+            if (idx >= 0)
             {
-                var args = t.GetGenericArguments();
-                for (var index = 0; index < args.Length; index++)
+                nameSimple = nameSimple.Substring(0, idx);
+            }
+
+            b.Append(nameSimple);
+            if (genericParametersToUse.Length > 0 || genericArguments.Length > 0)
+            {
+                b.Append('<');
+                int genericParameterLength = genericParametersToUse.Length;
+                for (var index = 0; index < genericParameterLength; index++)
                 {
-                    var typeParam = args[index];
-                    b.Append(typeParam.Name);
-                    if (index < args.Length - 1)
+                    var typeParam = genericParametersToUse[index];
+                    b.Append(ClassSignature(typeParam, useFullNamespaces));
+                    if (index < genericParameterLength - 1)
                     {
                         b.Append(", ");
                     }
                 }
-            }
 
-            b.Append(">");
+                // If this is an open generic type, print the generic type names instead
+                if (genericParameterLength == 0)
+                {
+                    var args = genericArguments;
+                    for (var index = 0; index < args.Length; index++)
+                    {
+                        var typeParam = args[index];
+                        b.Append(typeParam.Name);
+                        if (index < args.Length - 1)
+                        {
+                            b.Append(", ");
+                        }
+                    }
+                }
+
+                b.Append(">");
+            }
 
             return b.ToString();
         }

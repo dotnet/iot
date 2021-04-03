@@ -43,7 +43,10 @@ namespace Arduino.Samples
 
             var loggerFactory = LoggerFactory.Create(builder =>
             {
-                builder.AddConsole();
+                builder.AddConsole(lg =>
+                {
+                    lg.LogToStandardErrorThreshold = LogLevel.Error;
+                });
             });
 
             // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.

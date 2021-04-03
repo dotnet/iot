@@ -351,7 +351,7 @@ namespace Iot.Device.Arduino
                             if (methodToReplace == null)
                             {
                                 // That may be ok if it is our own internal implementation, but for now we abort, since we currently have no such case
-                                throw new InvalidOperationException($"A replacement method has nothing to replace: {m.DeclaringType} - {m}");
+                                throw new InvalidOperationException($"A replacement method has nothing to replace: {m.MethodSignature()}");
                             }
                             else
                             {
@@ -859,7 +859,7 @@ namespace Iot.Device.Arduino
             foreach (var me in uploadList)
             {
                 MethodBase methodInfo = me.MethodBase;
-                _logger.LogDebug($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.DeclaringType} - {methodInfo}.");
+                _logger.LogDebug($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.MethodSignature(false)}.");
                 SendMethod(set, me);
                 idx++;
                 if (set.CompilerSettings.DoCopyToFlash(markAsReadOnly) && (idx % 100 == 0))
@@ -1792,7 +1792,7 @@ namespace Iot.Device.Arduino
                 {
                     // TODO: There are a bunch of methods currently getting here because they're not implemented
                     // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
-                    _logger.LogWarning($"{methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
+                    _logger.LogWarning($"{methodInfo.MethodSignature()} has no visible implementation");
                     return;
                 }
             }
@@ -1838,7 +1838,7 @@ namespace Iot.Device.Arduino
 
             if (ilBytes == null && hasBody)
             {
-                throw new MissingMethodException($"{methodInfo.DeclaringType} - {methodInfo} has no visible implementation");
+                throw new MissingMethodException($"{methodInfo.MethodSignature()} has no visible implementation");
             }
 
             if (ilBytes != null && ilBytes.Length > Math.Pow(2, 14) - 1)
@@ -1881,7 +1881,7 @@ namespace Iot.Device.Arduino
 
             if (set.AddMethod(newInfo))
             {
-                _logger.LogDebug($"Method {methodInfo.DeclaringType} - {methodInfo} ({methodInfo.MethodSignature()}) added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
+                _logger.LogDebug($"Method {methodInfo.MethodSignature(false)} added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
                 // If the class containing this method contains statics, we need to send its declaration
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
