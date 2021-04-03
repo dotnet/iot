@@ -21,7 +21,8 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>    
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />    
+    <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
     <ProjectReference Include="..\..\CharacterLcd\CharacterLcd.csproj" />
   </ItemGroup>
 

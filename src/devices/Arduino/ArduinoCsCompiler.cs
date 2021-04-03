@@ -1881,7 +1881,7 @@ namespace Iot.Device.Arduino
 
             if (set.AddMethod(newInfo))
             {
-                _logger.LogDebug($"Method {methodInfo.DeclaringType} - {methodInfo} added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
+                _logger.LogDebug($"Method {methodInfo.DeclaringType} - {methodInfo} ({methodInfo.MethodSignature()}) added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
                 // If the class containing this method contains statics, we need to send its declaration
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
