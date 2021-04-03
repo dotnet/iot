@@ -6,7 +6,8 @@
     <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile> 
     <!-- We don't want to run hardware test by default -->
-    <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>    
+    <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>
+    <RootNamespace>Iot.Device.Arduino.Tests</RootNamespace>    
   </PropertyGroup>
 
   <ItemGroup>

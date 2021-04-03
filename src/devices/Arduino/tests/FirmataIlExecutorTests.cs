@@ -271,5 +271,11 @@ namespace Iot.Device.Arduino.Tests
         {
             LoadCodeMethod(methodName, 0, 0, 1);
         }
+
+        [Fact]
+        public void EnumsHaveNames()
+        {
+            LoadCodeMethod("EnumsHaveNames", 0, 0, 1);
+        }
     }
 }

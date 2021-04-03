@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Arduino.Tests
+namespace Iot.Device.Arduino.Tests
 {
     public enum TestEnum
     {

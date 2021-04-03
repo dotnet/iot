@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Arduino.Tests;
 using Iot.Device.Arduino.Runtime;
 
 namespace Iot.Device.Arduino.Tests
@@ -576,6 +575,13 @@ namespace Iot.Device.Arduino.Tests
             MiniAssert.That(t1 != TestEnum.One);
             MiniAssert.That(t1 != t2);
             MiniAssert.That(2 == (int)t2);
+            return 1;
+        }
+
+        public static int EnumsHaveNames(int arg1, int arg2)
+        {
+            TestEnum t1 = TestEnum.Three;
+            MiniAssert.That("Three" == t1.ToString());
             return 1;
         }
 
