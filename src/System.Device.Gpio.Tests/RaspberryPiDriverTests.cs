@@ -54,7 +54,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void HighPulledPinDoesNotGlitchToLowWhenChangedToOutput()
+        public void HighPulledPinDoesNotChangeToLowWhenChangedToOutput()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
