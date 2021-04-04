@@ -113,21 +113,23 @@ namespace Iot.Device.Arduino.Runtime
         ////}
 
         [ArduinoImplementation]
-        public static implicit operator ReadOnlySpan<char>(MiniString? value)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static unsafe implicit operator ReadOnlySpan<char>(MiniString? value)
         {
-            if (ReferenceEquals(value, null))
+            if (!ReferenceEquals(value, null))
             {
-                throw new ArgumentNullException(nameof(value));
+                // Unfortunately, the ctor we would need here is internal, but
+                // this should give the same result. Since we keep the reference to value,
+                // there is no problem with exiting out of the fixed block.
+                fixed (void* ptr = &value._firstChar)
+                {
+                    return new ReadOnlySpan<char>(ptr, value.Length);
+                }
             }
-
-            char[] chars = new char[value.Length];
-            for (int i = 0; i < value.Length; i++)
+            else
             {
-                chars[i] = value.GetElem(i);
+                return default;
             }
-
-            Span<char> s = new Span<char>(chars, 0, value.Length);
-            return s;
         }
 
         public int Length
@@ -253,13 +255,13 @@ namespace Iot.Device.Arduino.Runtime
         }
 
         [ArduinoImplementation(NativeMethod.StringEqualsStatic)]
-        public static bool operator ==(MiniString a, MiniString b)
+        public static bool operator ==(MiniString? a, MiniString? b)
         {
             throw new NotImplementedException();
         }
 
         [ArduinoImplementation(NativeMethod.StringUnEqualsStatic)]
-        public static bool operator !=(MiniString a, MiniString b)
+        public static bool operator !=(MiniString? a, MiniString? b)
         {
             throw new NotImplementedException();
         }
