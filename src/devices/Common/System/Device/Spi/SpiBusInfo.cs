@@ -23,9 +23,9 @@ namespace System.Device.Spi
             const string parameterPath = "/sys/module/spidev/parameters/bufsiz";
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) &&
                 File.Exists(parameterPath) &&
-                int.TryParse(File.ReadAllText(parameterPath), out int buferSize))
+                int.TryParse(File.ReadAllText(parameterPath), out int bufferSize))
             {
-                return buferSize;
+                return bufferSize;
             }
 
             return -1;
