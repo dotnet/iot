@@ -232,7 +232,9 @@ namespace System.Device.Gpio.Drivers
         {
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
             {
-                Interop.libgpiod.gpiod_line_release(pinHandle);
+                // This call does not release the handle. It only releases the lock on the handle. Without this, changing the direction of a line is not possible.
+                // Line handles cannot be freed and are cached until the chip is closed.
+                pinHandle.ReleaseLock();
                 int requestResult = mode switch
                 {
                     PinMode.Input => Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName),

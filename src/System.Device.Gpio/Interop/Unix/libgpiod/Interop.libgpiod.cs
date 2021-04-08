@@ -107,15 +107,11 @@ internal partial class Interop
         /// Release a previously reserved line.
         /// </summary>
         /// <param name="lineHandle">GPIO line handle</param>
+        /// <remarks>
+        /// This does NOT invalidate the line handle. This only releases the lock, so that a gpiod_line_request_input/gpiod_line_request_output can be called again.
+        /// </remarks>
         [DllImport(LibgpiodLibrary)]
         internal static extern void gpiod_line_release(IntPtr lineHandle);
-
-        /// <summary>
-        /// Release a previously reserved line.
-        /// </summary>
-        /// <param name="lineHandle">GPIO line handle</param>
-        [DllImport(LibgpiodLibrary)]
-        internal static extern void gpiod_line_release(SafeLineHandle lineHandle);
 
         /// <summary>
         /// Request all event type notifications on a single line.
