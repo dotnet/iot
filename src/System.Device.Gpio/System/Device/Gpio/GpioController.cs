@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Device.Gpio.Drivers;
 using System.Threading;
@@ -29,7 +30,7 @@ namespace System.Device.Gpio
         /// <summary>
         /// If a pin element exists, that pin is open. Uses current controller's numbering scheme
         /// </summary>
-        private readonly Dictionary<int, PinValue?> _openPins;
+        private readonly ConcurrentDictionary<int, PinValue?> _openPins;
         private GpioDriver _driver;
 
         /// <summary>
@@ -49,7 +50,7 @@ namespace System.Device.Gpio
         {
             _driver = driver;
             NumberingScheme = numberingScheme;
-            _openPins = new Dictionary<int, PinValue?>();
+            _openPins = new ConcurrentDictionary<int, PinValue?>();
         }
 
         /// <summary>
@@ -94,7 +95,7 @@ namespace System.Device.Gpio
             }
 
             OpenPinCore(pinNumber);
-            _openPins.Add(pinNumber, null);
+            _openPins.TryAdd(pinNumber, null);
         }
 
         /// <summary>
@@ -151,7 +152,7 @@ namespace System.Device.Gpio
             }
 
             ClosePinCore(pinNumber);
-            _openPins.Remove(pinNumber);
+            _openPins.TryRemove(pinNumber, out _);
         }
 
         /// <summary>
