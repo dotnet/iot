@@ -21,7 +21,7 @@ namespace Iot.Device.Arduino.Tests
             Compiler.ClearAllData(true, false);
         }
 
-        private void LoadCodeMethod<T1, T2, T3>(string methodName, T1 a, T2 b, T3 expectedResult, CompilerSettings? settings = null)
+        private void LoadCodeMethod<T1, T2, T3>(string methodName, T1 a, T2 b, T3 expectedResult, CompilerSettings? settings = null, bool executeLocally = true)
         {
             var methods = typeof(TestMethods).GetMethods().Where(x => x.Name == methodName).ToList();
             var method = methods.Single();
@@ -40,15 +40,21 @@ namespace Iot.Device.Arduino.Tests
 
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
-            // First execute the method locally, so we don't have an error in the test
-            var uncastedResult = method.Invoke(null, new object[] { a!, b! });
-            if (uncastedResult == null)
+            if (executeLocally)
             {
-                throw new InvalidOperationException("Void methods not supported here");
-            }
+                // First execute the method locally, so we don't have an error in the test
+                var uncastedResult = method.Invoke(null, new object[]
+                {
+                    a!, b!
+                });
+                if (uncastedResult == null)
+                {
+                    throw new InvalidOperationException("Void methods not supported here");
+                }
 
-            T3 result = (T3)uncastedResult;
-            Assert.Equal(expectedResult, result);
+                T3 result1 = (T3)uncastedResult;
+                Assert.Equal(expectedResult, result1);
+            }
 
             var remoteMethod = set.MainEntryPoint;
 
@@ -64,7 +70,7 @@ namespace Iot.Device.Arduino.Tests
             Assert.Equal(MethodState.Stopped, state);
             Assert.Single(data);
 
-            result = (T3)data[0];
+            T3 result = (T3)data[0];
             Assert.Equal(expectedResult, result);
             remoteMethod.Dispose();
         }
@@ -267,6 +273,8 @@ namespace Iot.Device.Arduino.Tests
 
         [Theory]
         [InlineData("SimpleEnumHasValues")]
+        [InlineData("EnumGetValues1")]
+        [InlineData("EnumGetValues2")]
         public void EnumTest(string methodName)
         {
             LoadCodeMethod(methodName, 0, 0, 1);
@@ -275,7 +283,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void EnumsHaveNames()
         {
-            LoadCodeMethod("EnumsHaveNames", 0, 0, 1);
+            LoadCodeMethod("EnumsHaveNames", 0, 0, 1, Fixture.DefaultCompilerSettings, false);
         }
     }
 }

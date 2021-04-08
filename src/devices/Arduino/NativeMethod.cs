@@ -84,8 +84,12 @@ namespace Iot.Device.Arduino
 
         BitOperationsLog2SoftwareFallback,
         BitOperationsTrailingZeroCount,
+
         EnumGetHashCode,
-        EumToUInt64,
+        EnumToUInt64,
+        EnumInternalBoxEnum,
+        EnumInternalGetValues,
+
         UnsafeNullRef,
         UnsafeAs2,
         UnsafeAddByteOffset,
@@ -136,12 +140,14 @@ namespace Iot.Device.Arduino
 
         ArrayCopyCore,
         ArrayClear,
+        ArrayInternalCreate,
+        ArraySetValue1,
 
         ActivatorCreateInstance,
 
         GcCollect,
         GcGetTotalMemory,
         GcGetTotalAllocatedBytes,
-        GcTotalAvailableMemoryBytes
+        GcTotalAvailableMemoryBytes,
     }
 }

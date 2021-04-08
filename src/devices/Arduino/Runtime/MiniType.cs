@@ -222,8 +222,30 @@ namespace Iot.Device.Arduino.Runtime
 
         public virtual bool IsEnumDefined(object value)
         {
-            // We don't have the type information to decide this
+            // TODO: Should be possible to implement this using GetEnumValues
             return true;
+        }
+
+        public virtual Array GetEnumValues()
+        {
+            if (!IsEnum)
+            {
+                throw new ArgumentException("enumType");
+            }
+
+            // Get all of the values
+            ulong[] values = MiniEnum.InternalGetValues(this);
+
+            // Create a generic Array
+            Array ret = Array.CreateInstance(MiniUnsafe.As<Type>(this), values.Length);
+
+            for (int i = 0; i < values.Length; i++)
+            {
+                object val = Enum.ToObject(MiniUnsafe.As<Type>(this), values[i]);
+                ret.SetValue(val, i);
+            }
+
+            return ret;
         }
     }
 }

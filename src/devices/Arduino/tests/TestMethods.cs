@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Arduino.Runtime;
+using UnitsNet.Units;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -581,7 +582,27 @@ namespace Iot.Device.Arduino.Tests
         public static int EnumsHaveNames(int arg1, int arg2)
         {
             TestEnum t1 = TestEnum.Three;
-            MiniAssert.That("Three" == t1.ToString());
+            MiniAssert.That("3" == t1.ToString());
+            return 1;
+        }
+
+        public static int EnumGetValues1(int arg1, int arg2)
+        {
+            var array = Enum.GetValues(typeof(TestEnum));
+            var typedArray = array.Cast<TestEnum>().ToArray();
+            MiniAssert.That(typedArray.Count() == 4);
+            MiniAssert.That(typedArray[0] == TestEnum.None);
+            MiniAssert.That(typedArray[1] == TestEnum.One);
+            return 1;
+        }
+
+        public static int EnumGetValues2(int arg1, int arg2)
+        {
+            var array = Enum.GetValues<TestEnum>();
+            var typedArray = array.ToArray();
+            MiniAssert.That(array.Count() == 4);
+            MiniAssert.That(typedArray[0] == TestEnum.None);
+            MiniAssert.That(typedArray[1] == TestEnum.One);
             return 1;
         }
 

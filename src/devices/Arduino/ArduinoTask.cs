@@ -176,6 +176,9 @@ namespace Iot.Device.Arduino
                             case SystemException.ExecutionEngine:
                                 ex = new InvalidOperationException($"Execution engine exception in remote runtime at {textualStackTrace}");
                                 break;
+                            case SystemException.Overflow:
+                                ex = new OverflowException($"Integer overflow in {resolved.MemberInfoSignature()} at {textualStackTrace}");
+                                break;
                             default:
                                 ex = new InvalidOperationException("Unknown exception " + textualStackTrace);
                                 break;

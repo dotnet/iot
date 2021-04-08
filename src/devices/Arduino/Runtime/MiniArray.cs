@@ -3,7 +3,7 @@
 namespace Iot.Device.Arduino.Runtime
 {
     [ArduinoReplacement(typeof(System.Array), false)]
-    internal static class MiniArray
+    internal class MiniArray
     {
         [ArduinoImplementation]
         public static void Copy(Array sourceArray, Array destinationArray, long length)
@@ -113,6 +113,170 @@ namespace Iot.Device.Arduino.Runtime
 
         [ArduinoImplementation(NativeMethod.ArrayClear)]
         public static void Clear(Array array, int index, int length)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation]
+        public static unsafe Array CreateInstance(Type elementType, int length)
+        {
+            if (elementType is null)
+            {
+                throw new ArgumentNullException(nameof(elementType));
+            }
+
+            if (length < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            return InternalCreate(elementType, 1, &length, null);
+        }
+
+        [ArduinoImplementation]
+        public static unsafe Array CreateInstance(Type elementType, int length1, int length2)
+        {
+            if (elementType is null)
+            {
+                throw new ArgumentNullException(nameof(elementType));
+            }
+
+            if (length1 < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            if (length2 < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            int* pLengths = stackalloc int[2];
+            pLengths[0] = length1;
+            pLengths[1] = length2;
+            return InternalCreate(elementType, 2, pLengths, null);
+        }
+
+        [ArduinoImplementation]
+        public static unsafe Array CreateInstance(Type elementType, int length1, int length2, int length3)
+        {
+            if (elementType is null)
+            {
+                throw new ArgumentNullException(nameof(elementType));
+            }
+
+            if (length1 < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            if (length2 < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            if (length3 < 0)
+            {
+                throw new ArgumentOutOfRangeException();
+            }
+
+            int* pLengths = stackalloc int[3];
+            pLengths[0] = length1;
+            pLengths[1] = length2;
+            pLengths[2] = length3;
+            return InternalCreate(elementType, 3, pLengths, null);
+        }
+
+        [ArduinoImplementation]
+        public static unsafe Array CreateInstance(Type elementType, params int[] lengths)
+        {
+            if (elementType is null)
+            {
+                throw new ArgumentNullException(nameof(elementType));
+            }
+
+            if (lengths == null)
+            {
+                throw new ArgumentNullException(nameof(lengths));
+            }
+
+            if (lengths.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(lengths));
+            }
+
+            // Check to make sure the lengths are all positive. Note that we check this here to give
+            // a good exception message if they are not; however we check this again inside the execution
+            // engine's low level allocation function after having made a copy of the array to prevent a
+            // malicious caller from mutating the array after this check.
+            for (int i = 0; i < lengths.Length; i++)
+            {
+                if (lengths[i] < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(lengths));
+                }
+            }
+
+            fixed (int* pLengths = &lengths[0])
+            {
+                return InternalCreate(elementType, lengths.Length, pLengths, null);
+            }
+        }
+
+        [ArduinoImplementation]
+        public static unsafe Array CreateInstance(Type elementType, int[] lengths, int[] lowerBounds)
+        {
+            if (elementType is null)
+            {
+                throw new ArgumentNullException(nameof(elementType));
+            }
+
+            if (lengths == null)
+            {
+                throw new ArgumentNullException(nameof(lengths));
+            }
+
+            if (lengths.Length == 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(lengths));
+            }
+
+            if (lowerBounds == null)
+            {
+                throw new ArgumentNullException(nameof(lowerBounds));
+            }
+
+            if (lowerBounds.Length != lengths.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(lowerBounds));
+            }
+
+            // Check to make sure the lengths are all positive. Note that we check this here to give
+            // a good exception message if they are not; however we check this again inside the execution
+            // engine's low level allocation function after having made a copy of the array to prevent a
+            // malicious caller from mutating the array after this check.
+            for (int i = 0; i < lengths.Length; i++)
+            {
+                if (lengths[i] < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(lengths));
+                }
+            }
+
+            throw new NotImplementedException();
+            // fixed (int* pLengths = &lengths[0])
+            // fixed (int* pLowerBounds = &lowerBounds[0])
+            //    return InternalCreate((void*)t.TypeHandle.Value, lengths.Length, pLengths, pLowerBounds);
+        }
+
+        [ArduinoImplementation(NativeMethod.ArrayInternalCreate)]
+        private static unsafe Array InternalCreate(Type elementType, int rank, int* pLengths, int* pLowerBounds)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(NativeMethod.ArraySetValue1)]
+        public unsafe void SetValue(object? value, int index)
         {
             throw new NotImplementedException();
         }

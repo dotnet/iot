@@ -339,6 +339,7 @@ namespace Iot.Device.Arduino.Tests
                 LaunchProgramFromFlash = false,
                 UseFlashForProgram = false,
                 AutoRestartProgram = false,
+                MaxMemoryUsage = 100_000,
             };
 
             ExecuteComplexProgramSuccess<Func<int>>(CollectionsTest.CreateInstanceTest, true, s);

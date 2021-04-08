@@ -26,6 +26,11 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
+        public T2 TestGenericArg<T2>(T2 input)
+        {
+            return input;
+        }
+
         public class Internal2<T2>
         {
             public T2? _data2;

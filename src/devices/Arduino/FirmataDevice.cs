@@ -1371,7 +1371,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, bool isValueType, IList<ClassMember> members)
+        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, short classFlags, IList<ClassMember> members)
         {
             if (members.Count == 0)
             {
@@ -1381,7 +1381,7 @@ namespace Iot.Device.Arduino
                 sequence.SendInt32(parentToken);
                 // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
                 // Value types, on the other hand, are not expected to be larger than 14 bits.
-                if (isValueType)
+                if ((classFlags & 1) == 1)
                 {
                     sequence.SendInt14((short)(sizeOfClass.Dynamic));
                 }
@@ -1391,7 +1391,7 @@ namespace Iot.Device.Arduino
                 }
 
                 sequence.SendInt14((short)(sizeOfClass.Statics >> 2));
-                sequence.SendInt14((short)(isValueType ? 1 : 0));
+                sequence.SendInt14(classFlags);
                 sequence.SendInt14(0);
 
                 sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
@@ -1406,7 +1406,7 @@ namespace Iot.Device.Arduino
                 sequence.SendInt32(parentToken);
                 // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
                 // Value types, on the other hand, are not expected to be larger than 14 bits.
-                if (isValueType)
+                if ((classFlags & 1) == 1)
                 {
                     sequence.SendInt14((short)(sizeOfClass.Dynamic));
                 }
@@ -1416,7 +1416,7 @@ namespace Iot.Device.Arduino
                 }
 
                 sequence.SendInt14((short)(sizeOfClass.Statics >> 2));
-                sequence.SendInt14((short)(isValueType ? 1 : 0));
+                sequence.SendInt14(classFlags);
                 sequence.SendInt14(member);
 
                 sequence.WriteByte((byte)members[member].VariableType);

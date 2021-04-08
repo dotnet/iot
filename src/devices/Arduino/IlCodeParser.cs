@@ -307,7 +307,16 @@ namespace Iot.Device.Arduino
                 methodArgs = method.GetGenericArguments();
             }
 
-            return type.Module.ResolveMember(metadataToken, typeArgs, methodArgs);
+            MemberInfo? ret = type.Module.ResolveMember(metadataToken, typeArgs, methodArgs);
+
+            if (ret is FieldInfo fi && fi.IsLiteral)
+            {
+                // This is very rare and probably only happens when doing weird reflection stuff.
+                // Reason we do this is because we want the "token" of constant fields to be equal to their value
+                throw new NotSupportedException("Accessing a constant field or enum member by metadataToken is not supported");
+            }
+
+            return ret;
         }
     }
 }

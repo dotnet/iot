@@ -80,6 +80,27 @@ namespace Iot.Device.Arduino
             }
 
             b.Append(me.Name);
+            if (me.IsGenericMethod || me.IsGenericMethodDefinition)
+            {
+                var genericParametersToUse = me.GetGenericArguments();
+                if (genericParametersToUse.Length > 0)
+                {
+                    b.Append('<');
+                    int genericParameterLength = genericParametersToUse.Length;
+                    for (var index = 0; index < genericParameterLength; index++)
+                    {
+                        var typeParam = genericParametersToUse[index];
+                        b.Append(ClassSignature(typeParam, useFullNamespaces));
+                        if (index < genericParameterLength - 1)
+                        {
+                            b.Append(", ");
+                        }
+                    }
+
+                    b.Append(">");
+                }
+            }
+
             b.Append('(');
             int paramLength = me.GetParameters().Length;
             for (var index = 0; index < paramLength; index++)

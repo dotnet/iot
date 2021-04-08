@@ -44,5 +44,19 @@ namespace Iot.Device.Arduino.Tests
 
             Assert.Equal(expectedString, me.MethodSignature(useFullNamespaces));
         }
+
+        [Fact]
+        public void MethodSignature2()
+        {
+            var me = typeof(WithGenericArg<int>).GetMethod("TestGenericArg", BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            if (me == null)
+            {
+                throw new InvalidOperationException("Method not found");
+            }
+
+            me = me.MakeGenericMethod(typeof(string));
+
+            Assert.Equal("public String WithGenericArg<Int32>.TestGenericArg<String>(String input)", me.MethodSignature(false));
+        }
     }
 }

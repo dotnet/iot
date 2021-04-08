@@ -21,14 +21,19 @@ namespace Iot.Device.Arduino
         ClassNotFound = 10,
         InvalidCast = 11,
         NotSupported = 12,
-        CustomException = 13,
-        FieldAccess = 14,
+        FieldAccess = 13,
+        Overflow = 14,
+
+        /// <summary>
+        /// This is an user-defined exception type (the type is encoded separately)
+        /// </summary>
+        CustomException = 20,
 
         /// <summary>
         /// Fatal error of the remote engine (i.e. internal memory corruption)
         /// Note: This is forwarded as InvalidOperationException, because locally throwing ExecutionEngineException may give some headaches.
         /// Additionally, ExecutionEngineException is actually Obsolete since .NET 4.0
         /// </summary>
-        ExecutionEngine = 15,
+        ExecutionEngine = 21,
     }
 }

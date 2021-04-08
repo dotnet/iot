@@ -11,6 +11,63 @@ namespace Iot.Device.Arduino.Runtime
             return value.ToString();
         }
 
+        public static object ToObject(Type enumType, sbyte value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, short value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, int value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, byte value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, ushort value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, uint value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, long value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, ulong value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), unchecked((long)value));
+
+        public static object ToObject(Type enumType, char value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value);
+
+        public static object ToObject(Type enumType, bool value) =>
+            InternalBoxEnum(ValidateRuntimeType(enumType), value ? 1 : 0);
+
+        private static MiniType ValidateRuntimeType(Type enumType)
+        {
+            if (enumType == null)
+            {
+                throw new ArgumentNullException(nameof(enumType));
+            }
+
+            if (!enumType.IsEnum)
+            {
+                throw new ArgumentException(nameof(enumType));
+            }
+
+            return MiniUnsafe.As<MiniType>(enumType);
+        }
+
+        [ArduinoImplementation(NativeMethod.EnumInternalBoxEnum, CompareByParameterNames = true)]
+        public static object InternalBoxEnum(MiniType enumType, long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(NativeMethod.EnumInternalGetValues, CompareByParameterNames = true)]
+        public static ulong[] InternalGetValues(MiniType enumType)
+        {
+            throw new NotImplementedException();
+        }
+
         [ArduinoImplementation(NativeMethod.None)]
         public override string ToString()
         {
@@ -36,7 +93,7 @@ namespace Iot.Device.Arduino.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.EumToUInt64)]
+        [ArduinoImplementation(NativeMethod.EnumToUInt64)]
         public ulong ToUInt64()
         {
             throw new NotImplementedException();

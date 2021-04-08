@@ -105,7 +105,11 @@ namespace Iot.Device.Arduino
         ByReferenceByte = 10,
         Delegate = 11,
         MulticastDelegate = 12,
-        LargestKnownTypeToken = 20,
+        Int32 = 20,
+        Uint32 = 21,
+        Int64 = 22,
+        Uint64 = 23,
+        LargestKnownTypeToken = 40,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -479,7 +483,26 @@ namespace Iot.Device.Arduino
                     fieldType = VariableKind.FunctionPointer;
                 }
 
-                var newvar = new ClassMember(field, fieldType, set.GetOrAddFieldToken(field), size);
+                int token = 0;
+                if (field.IsLiteral && classType.IsEnum)
+                {
+                    // This is a constant field (typically an enum value) - provide the value instead of the token
+                    var v = Convert.ToUInt64(field.GetValue(null));
+                    if (v <= UInt32.MaxValue)
+                    {
+                        token = (int)v;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
+                }
+                else
+                {
+                    token = set.GetOrAddFieldToken(field);
+                }
+
+                var newvar = new ClassMember(field, fieldType, token, size);
                 memberTypes.Add(newvar);
             }
 
@@ -769,8 +792,19 @@ namespace Iot.Device.Arduino
                 // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
                 string className = cls.Name;
 
+                short classFlags = 0;
+                if (cls.IsValueType)
+                {
+                    classFlags = 1;
+                }
+
+                if (cls.IsEnum)
+                {
+                    classFlags |= 2;
+                }
+
                 _logger.LogDebug($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
-                _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), cls.IsValueType, c.Members);
+                _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
 

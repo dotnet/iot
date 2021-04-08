@@ -513,6 +513,22 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.Object;
             }
+            else if (typeInfo == typeof(UInt32))
+            {
+                token = (int)KnownTypeTokens.Uint32;
+            }
+            else if (typeInfo == typeof(Int32))
+            {
+                token = (int)KnownTypeTokens.Int32;
+            }
+            else if (typeInfo == typeof(UInt64))
+            {
+                token = (int)KnownTypeTokens.Uint64;
+            }
+            else if (typeInfo == typeof(Int64))
+            {
+                token = (int)KnownTypeTokens.Int64;
+            }
             else if (typeInfo == typeof(System.Delegate))
             {
                 token = (int)KnownTypeTokens.Delegate;
@@ -521,10 +537,9 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.MulticastDelegate;
             }
-            else if (typeInfo.Name == "System.Enum")
+            else if (typeInfo.FullName == "System.Enum")
             {
-                // TODO: Check handling of enums. Will probably have to provide this flag to the runtime.
-                // Note that enums are not value types.
+                // Note that enums are value types, but "System.Enum" itself is not.
                 token = (int)KnownTypeTokens.Enum;
             }
             else if (typeInfo == typeof(TypeInfo))
