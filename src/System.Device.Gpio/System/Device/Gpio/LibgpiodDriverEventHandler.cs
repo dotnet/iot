@@ -21,17 +21,23 @@ namespace System.Device.Gpio.Drivers
         private Task _task;
         private bool _disposing = false;
 
-        public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle)
+        public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle, PinEventTypes pinEventTypes)
         {
             _pinNumber = pinNumber;
             CancellationTokenSource = new CancellationTokenSource();
-            SubscribeForEvent(safeLineHandle);
+            SubscribeForEvent(safeLineHandle, pinEventTypes);
             _task = InitializeEventDetectionTask(CancellationTokenSource.Token, safeLineHandle);
         }
 
-        private void SubscribeForEvent(SafeLineHandle pinHandle)
+        private void SubscribeForEvent(SafeLineHandle pinHandle, PinEventTypes pinEventTypes)
         {
-            int eventSuccess = Interop.libgpiod.gpiod_line_request_both_edges_events(pinHandle, s_consumerName);
+            var eventSuccess = ((object)pinEventTypes) switch
+            {
+                PinEventTypes.Rising => Interop.libgpiod.gpiod_line_request_rising_edge_events(pinHandle, s_consumerName),
+                PinEventTypes.Falling => Interop.libgpiod.gpiod_line_request_falling_edge_events(pinHandle, s_consumerName),
+                PinEventTypes.Rising | PinEventTypes.Falling => Interop.libgpiod.gpiod_line_request_both_edges_events(pinHandle, s_consumerName),
+                _ => throw new ArgumentOutOfRangeException(nameof(pinEventTypes), pinEventTypes, "Not supported PinEventType"),
+            };
 
             if (eventSuccess < 0)
             {

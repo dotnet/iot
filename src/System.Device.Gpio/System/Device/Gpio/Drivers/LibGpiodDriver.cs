@@ -89,7 +89,7 @@ namespace System.Device.Gpio.Drivers
         {
             if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
             {
-                LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+                LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler(pinNumber, eventTypes));
 
                 if ((eventTypes & PinEventTypes.Rising) != 0)
                 {
@@ -107,7 +107,7 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
-        private LibGpiodDriverEventHandler PopulateEventHandler(int pinNumber)
+        private LibGpiodDriverEventHandler PopulateEventHandler(int pinNumber, PinEventTypes eventTypes)
         {
             lock (_pinNumberLock)
             {
@@ -120,7 +120,7 @@ namespace System.Device.Gpio.Drivers
                     _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
                 }
 
-                return new LibGpiodDriverEventHandler(pinNumber, pinHandle!);
+                return new LibGpiodDriverEventHandler(pinNumber, pinHandle!, eventTypes);
             }
         }
 
@@ -259,7 +259,7 @@ namespace System.Device.Gpio.Drivers
         {
             if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
             {
-                LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+                LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler(pinNumber, eventTypes));
 
                 if ((eventTypes & PinEventTypes.Rising) != 0)
                 {

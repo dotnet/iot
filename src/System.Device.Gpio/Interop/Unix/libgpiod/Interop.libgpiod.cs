@@ -111,6 +111,24 @@ internal partial class Interop
         internal static extern void gpiod_line_release(IntPtr lineHandle);
 
         /// <summary>
+        /// Request rising edge event type notifications on a single line.
+        /// </summary>
+        /// <param name="line">GPIO line handle</param>
+        /// <param name="consumer">Name of the consumer.</param>
+        /// <returns>0 the operation succeeds, -1 on failure.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern int gpiod_line_request_rising_edge_events(SafeLineHandle line, string consumer);
+
+        /// <summary>
+        /// Request falling edge event type notifications on a single line.
+        /// </summary>
+        /// <param name="line">GPIO line handle</param>
+        /// <param name="consumer">Name of the consumer.</param>
+        /// <returns>0 the operation succeeds, -1 on failure.</returns>
+        [DllImport(LibgpiodLibrary, SetLastError = true)]
+        internal static extern int gpiod_line_request_falling_edge_events(SafeLineHandle line, string consumer);
+
+        /// <summary>
         /// Request all event type notifications on a single line.
         /// </summary>
         /// <param name="line">GPIO line handle</param>
