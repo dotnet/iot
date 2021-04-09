@@ -789,9 +789,6 @@ namespace Iot.Device.Arduino
 
                 int token = set.GetOrAddClassToken(cls.GetTypeInfo());
 
-                // separated for debugging purposes (the debugger cannot evaluate Type.ToString() on a conditional breakpoint)
-                string className = cls.Name;
-
                 short classFlags = 0;
                 if (cls.IsValueType)
                 {
@@ -803,7 +800,7 @@ namespace Iot.Device.Arduino
                     classFlags |= 2;
                 }
 
-                _logger.LogDebug($"Sending class declaration for {className} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
+                _logger.LogDebug($"Sending class declaration for {cls.MemberInfoSignature()} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
@@ -943,6 +940,21 @@ namespace Iot.Device.Arduino
 
         private static bool IsOverriddenImplementation(MethodInfo candidate, MethodInfo self, bool candidateIsFromInterface)
         {
+            var interf = candidate.DeclaringType;
+            if (interf != null && interf.IsInterface && self.DeclaringType != null && self.DeclaringType.IsArray == false)
+            {
+                // The interface map can be used to check whether a method (self) implements a method from an interface. For this
+                // the names need not match (and will eventually not, if the method is implemented explicitly)
+                var map = self.DeclaringType.GetInterfaceMap(interf);
+                for (int i = 0; i < map.InterfaceMethods.Length; i++)
+                {
+                    if (map.InterfaceMethods[i] == candidate && map.TargetMethods[i] == self)
+                    {
+                        return true;
+                    }
+                }
+            }
+
             if (candidate.Name != self.Name)
             {
                 return false;
