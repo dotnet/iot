@@ -5,6 +5,16 @@ namespace Iot.Device.Arduino.Runtime
     [ArduinoReplacement(typeof(System.Array), false)]
     internal class MiniArray
     {
+        public int Length
+        {
+            [ArduinoImplementation(NativeMethod.ArrayGetLength)]
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        public long LongLength => Length;
         [ArduinoImplementation]
         public static void Copy(Array sourceArray, Array destinationArray, long length)
         {
@@ -276,7 +286,13 @@ namespace Iot.Device.Arduino.Runtime
         }
 
         [ArduinoImplementation(NativeMethod.ArraySetValue1)]
-        public unsafe void SetValue(object? value, int index)
+        public void SetValue(object? value, int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation(NativeMethod.ArrayGetValue1)]
+        public object GetValue(int index)
         {
             throw new NotImplementedException();
         }

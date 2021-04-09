@@ -142,6 +142,8 @@ namespace Iot.Device.Arduino
         ArrayClear,
         ArrayInternalCreate,
         ArraySetValue1,
+        ArrayGetValue1,
+        ArrayGetLength,
 
         ActivatorCreateInstance,
 
