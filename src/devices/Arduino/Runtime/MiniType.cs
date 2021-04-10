@@ -72,6 +72,14 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
+        public virtual string? Namespace
+        {
+            get
+            {
+                return "Namespace";
+            }
+        }
+
         public bool IsRuntimeImplemented()
         {
             return true;
