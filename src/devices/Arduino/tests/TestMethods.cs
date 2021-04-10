@@ -599,10 +599,9 @@ namespace Iot.Device.Arduino.Tests
         public static int EnumGetValues2(int arg1, int arg2)
         {
             var array = Enum.GetValues<TestEnum>();
-            var typedArray = array.ToArray();
             MiniAssert.That(array.Count() == 4);
-            MiniAssert.That(typedArray[0] == TestEnum.None);
-            MiniAssert.That(typedArray[1] == TestEnum.One);
+            MiniAssert.That(array[0] == TestEnum.None);
+            MiniAssert.That(array[1] == TestEnum.One);
             return 1;
         }
 

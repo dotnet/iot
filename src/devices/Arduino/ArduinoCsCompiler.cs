@@ -800,6 +800,11 @@ namespace Iot.Device.Arduino
                     classFlags |= 2;
                 }
 
+                if (cls.IsArray)
+                {
+                    classFlags |= 4;
+                }
+
                 _logger.LogDebug($"Sending class declaration for {cls.MemberInfoSignature()} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members);
 
