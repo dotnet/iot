@@ -65,5 +65,8 @@
     <Compile Include="Runtime\MiniType.cs" />
     <Compile Include="Runtime\MiniUnsafe.cs" />
     <Compile Include="Runtime\MiniValueType.cs" />
+    <Compile Include="Runtime\UnitsNet\MiniDuration.cs" />
+    <Compile Include="Runtime\UnitsNet\MiniQuantityValue.cs" />
+    <Compile Include="Runtime\UnitsNet\MiniTemperature.cs" />
   </ItemGroup>
 </Project>

@@ -527,6 +527,21 @@ namespace Iot.Device.Arduino
             {
                 PrepareClassDeclaration(set, iface);
             }
+
+            if (classType.IsConstructedGenericType)
+            {
+                // If EqualityComparer<something> is used, we need to force a reference to IEquatable<something> and ObjectEqualityComparer<something>
+                // as they sometimes fail to get recognized. This is because of the indirections in DefaultEqualityComparer
+                var openType = classType.GetGenericTypeDefinition();
+                if (openType == typeof(EqualityComparer<>))
+                {
+                    var typeArgs = classType.GetGenericArguments();
+                    var requiredInterface = typeof(IEquatable<>).MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, requiredInterface);
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, alsoRequired);
+                }
+            }
         }
 
         private void CompleteClasses(ExecutionSet set)
@@ -1592,6 +1607,11 @@ namespace Iot.Device.Arduino
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
                 exec.SuppressType(typeof(ArduinoBoard));
                 exec.SuppressType(typeof(ArduinoCsCompiler));
+
+                // Can't afford to load these, at least not on the Arduino Due. They're way to big.
+                exec.SuppressType(typeof(UnitsNet.QuantityFormatter));
+                exec.SuppressType(typeof(UnitsNet.UnitAbbreviationsCache));
+
                 foreach (string compilerSettingsAdditionalSuppression in compilerSettings.AdditionalSuppressions)
                 {
                     exec.SuppressType(compilerSettingsAdditionalSuppression);

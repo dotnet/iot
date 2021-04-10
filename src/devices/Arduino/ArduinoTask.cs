@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -178,6 +179,9 @@ namespace Iot.Device.Arduino
                                 break;
                             case SystemException.Overflow:
                                 ex = new OverflowException($"Integer overflow in {resolved.MemberInfoSignature()} at {textualStackTrace}");
+                                break;
+                            case SystemException.Io:
+                                ex = new IOException($"I/O Exception in {resolved.MemberInfoSignature()} at {textualStackTrace}");
                                 break;
                             default:
                                 ex = new InvalidOperationException("Unknown exception " + textualStackTrace);

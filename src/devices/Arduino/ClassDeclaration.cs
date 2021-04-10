@@ -17,7 +17,7 @@ namespace Iot.Device.Arduino
             _members = members;
             NewToken = newToken;
             _interfaces = interfaces;
-            Name = type.ToString();
+            Name = type.ClassSignature(true);
             ReadOnly = false;
         }
 

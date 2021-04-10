@@ -40,7 +40,7 @@ namespace Iot.Device.Arduino.Tests
                 LaunchProgramFromFlash = true,
                 UseFlashForProgram = true,
                 AutoRestartProgram = true,
-                MaxMemoryUsage = 256 * 1024,
+                MaxMemoryUsage = 350 * 1024,
             };
 
             ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false, s);
@@ -90,7 +90,8 @@ namespace Iot.Device.Arduino.Tests
                     hd44780.SetCursorPosition(0, 0);
                     if (bme680.TryReadTemperature(out Temperature temp))
                     {
-                        hd44780.Write(temp.ToString());
+                        string temperatureLine = temp.DegreesCelsius.ToString("F1") + " °C";
+                        hd44780.Write(temperatureLine);
                     }
 
                     hd44780.SetCursorPosition(0, 1);

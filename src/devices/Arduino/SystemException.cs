@@ -23,6 +23,7 @@ namespace Iot.Device.Arduino
         NotSupported = 12,
         FieldAccess = 13,
         Overflow = 14,
+        Io = 15,
 
         /// <summary>
         /// This is an user-defined exception type (the type is encoded separately)
