@@ -46,12 +46,6 @@ namespace System.Device.Gpio.Drivers
         protected internal override int PinCount => 28;
 
         /// <summary>
-        /// This driver does support extended pin modes, called ALT0-ALT5. See the hardware spec sheet to get information about
-        /// the possible values for each pin.
-        /// </summary>
-        protected internal override bool ExtendedPinModeSupported => true;
-
-        /// <summary>
         /// Returns true if this is a Raspberry Pi4
         /// </summary>
         private bool IsPi4
@@ -355,101 +349,6 @@ namespace System.Device.Gpio.Drivers
             for (int i = 0; i < 150; i++)
             {
             }
-        }
-
-        /// <summary>
-        /// Set the specified alternate mode for the given pin.
-        /// Check the manual to know what each pin can do.
-        /// </summary>
-        /// <param name="pinNumber">Pin number in the logcal scheme of the driver</param>
-        /// <param name="altPinMode">Alternate mode to set</param>
-        /// <exception cref="NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
-        /// <remarks>The method is intended for usage by higher-level abstraction interfaces. User code should be very careful when using this method.</remarks>
-        protected internal void SetAlternatePinMode(int pinNumber, RaspberryPi3Driver.AltMode altPinMode)
-        {
-            Initialize();
-            ValidatePinNumber(pinNumber);
-
-            /*
-             * There are 6 registers (4-byte ints) that control the mode for all pins. Each
-             * register controls the mode for 10 pins. Each pin uses 3 bits in the register
-             * containing the mode.
-             */
-
-            // Define the shift to get the right 3 bits in the register
-            int shift = (pinNumber % 10) * 3;
-            // Gets a pointer to the register that holds the mode for the pin
-            uint* registerPointer = &_registerViewPointer->GPFSEL[pinNumber / 10];
-            uint register = *registerPointer;
-            // Clear the 3 bits to 0 for the pin Number.
-            register &= ~(0b111U << shift);
-            // Set the 3 bits to the desired mode for that pin.
-            uint modeBits = 0; // Default: Gpio input
-
-            modeBits = altPinMode switch
-            {
-                RaspberryPi3Driver.AltMode.Input => 0b000,
-                RaspberryPi3Driver.AltMode.Output => 0b001,
-                RaspberryPi3Driver.AltMode.Alt0 => 0b100,
-                RaspberryPi3Driver.AltMode.Alt1 => 0b101,
-                RaspberryPi3Driver.AltMode.Alt2 => 0b110,
-                RaspberryPi3Driver.AltMode.Alt3 => 0b111,
-                RaspberryPi3Driver.AltMode.Alt4 => 0b011,
-                RaspberryPi3Driver.AltMode.Alt5 => 0b010,
-                _ => throw new InvalidOperationException($"Unknown Alternate pin mode value: {altPinMode}")
-            };
-
-            register |= (modeBits) << shift;
-            *registerPointer = register;
-        }
-
-        /// <summary>
-        /// Retrieve the current alternate pin mode for a given logical pin.
-        /// This works also with closed pins.
-        /// </summary>
-        /// <param name="pinNumber">Pin number in the logical scheme of the driver</param>
-        /// <returns>Current pin mode</returns>
-        protected internal RaspberryPi3Driver.AltMode GetAlternatePinMode(int pinNumber)
-        {
-            Initialize();
-            ValidatePinNumber(pinNumber);
-            /*
-             * There are 6 registers(4-byte ints) that control the mode for all pins. Each
-             * register controls the mode for 10 pins. Each pin uses 3 bits in the register
-             * containing the mode.
-             */
-
-            // Define the shift to get the right 3 bits in the register
-            int shift = (pinNumber % 10) * 3;
-            // Gets a pointer to the register that holds the mode for the pin
-            uint* registerPointer = &_registerViewPointer->GPFSEL[pinNumber / 10];
-            uint register = *registerPointer;
-            // get the three bits of the register
-            register = (register >> shift) & 0b111;
-
-            switch (register)
-            {
-                case 0b000:
-                    // Input
-                    return RaspberryPi3Driver.AltMode.Input;
-                case 0b001:
-                    return RaspberryPi3Driver.AltMode.Output;
-                case 0b100:
-                    return RaspberryPi3Driver.AltMode.Alt0;
-                case 0b101:
-                    return RaspberryPi3Driver.AltMode.Alt1;
-                case 0b110:
-                    return RaspberryPi3Driver.AltMode.Alt2;
-                case 0b111:
-                    return RaspberryPi3Driver.AltMode.Alt3;
-                case 0b011:
-                    return RaspberryPi3Driver.AltMode.Alt4;
-                case 0b010:
-                    return RaspberryPi3Driver.AltMode.Alt5;
-            }
-
-            // This cannot happen.
-            throw new InvalidOperationException("Invalid register value");
         }
 
         /// <summary>
