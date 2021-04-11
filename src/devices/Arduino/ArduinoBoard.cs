@@ -18,6 +18,7 @@ using System.IO.Ports;
 using System.Threading;
 using System.Linq;
 using Iot.Device.Common;
+using Iot.Device.Board;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
 
@@ -29,7 +30,7 @@ namespace Iot.Device.Arduino
     /// Note that the program will run on the PC, so you cannot disconnect the
     /// Arduino while this driver is connected.
     /// </summary>
-    public class ArduinoBoard : IDisposable
+    public class ArduinoBoard : Board.Board, IDisposable
     {
         private SerialPort? _serialPort;
         private Stream? _dataStream;
@@ -56,6 +57,7 @@ namespace Iot.Device.Arduino
         /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
+        : base(PinNumberingScheme.Logical)
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
             _logger = this.GetCurrentClassLogger();
@@ -69,6 +71,7 @@ namespace Iot.Device.Arduino
         /// On Linux, possible values include "/dev/ttyAMA0", "/dev/serial0", "/dev/ttyUSB1", etc.</param>
         /// <param name="baudRate">Baudrate to use. It is recommended to use at least 115200 Baud.</param>
         public ArduinoBoard(string portName, int baudRate)
+        : base(PinNumberingScheme.Logical)
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
@@ -158,13 +161,73 @@ namespace Iot.Device.Arduino
             };
         }
 
+        /// <inheritdoc />
+        public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
+        {
+            if (inputScheme == outputScheme && inputScheme == PinNumberingScheme.Logical)
+            {
+                return pinNumber;
+            }
+
+            throw new NotSupportedException("The Arduino uses logical pin numbering only");
+        }
+
+        /// <summary>
+        /// Returns the current assignment of the given pin
+        /// </summary>
+        /// <param name="pinNumber">Pin number to query</param>
+        /// <returns>A value of the <see cref="PinUsage"/> enumeration</returns>
+        public override PinUsage DetermineCurrentPinUsage(int pinNumber)
+        {
+            SupportedMode mode = Firmata.GetPinMode(pinNumber);
+            switch (mode)
+            {
+                case SupportedMode.AnalogInput:
+                    return PinUsage.AnalogIn;
+                case SupportedMode.DigitalInput:
+                    return PinUsage.Gpio;
+                case SupportedMode.DigitalOutput:
+                    return PinUsage.Gpio;
+                case SupportedMode.Pwm:
+                    return PinUsage.Pwm;
+                case SupportedMode.Servo:
+                    break;
+                case SupportedMode.Shift:
+                    break;
+                case SupportedMode.I2c:
+                    return PinUsage.I2c;
+                case SupportedMode.OneWire:
+                    break;
+                case SupportedMode.Stepper:
+                    break;
+                case SupportedMode.Encoder:
+                    break;
+                case SupportedMode.Serial:
+                    return PinUsage.Uart;
+                case SupportedMode.InputPullup:
+                    return PinUsage.Gpio;
+                case SupportedMode.Spi:
+                    return PinUsage.Spi;
+                case SupportedMode.Sonar:
+                    break;
+                case SupportedMode.Tone:
+                    break;
+                case SupportedMode.Dht:
+                    return PinUsage.Gpio;
+            }
+
+            return PinUsage.Unknown;
+        }
+
         /// <summary>
         /// Initialize the board connection. This must be called before any other methods of this class.
         /// </summary>
         /// <exception cref="NotSupportedException">The Firmata firmware on the connected board is too old.</exception>
         /// <exception cref="TimeoutException">There was no answer from the board</exception>
-        protected virtual void Initialize()
+        protected override void Initialize()
         {
+            base.Initialize();
+
             // Shortcut, so we do not need to take the lock
             if (_initialized)
             {
@@ -313,35 +376,29 @@ namespace Iot.Device.Arduino
         /// Creates a GPIO Controller instance for the board. This allows working with digital input/output pins.
         /// </summary>
         /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>
-        public GpioController CreateGpioController()
+        public override GpioController CreateGpioController()
         {
             Initialize();
 
             return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
         }
 
-        /// <summary>
-        /// Creates an I2c device with the given connection settings.
-        /// </summary>
-        /// <param name="connectionSettings">I2c connection settings. Only Bus 0 is supported.</param>
-        /// <returns>An <see cref="I2cDevice"/> instance</returns>
-        /// <exception cref="NotSupportedException">The firmware reports that no pins are available for I2C. Check whether the I2C module is enabled in Firmata.
-        /// Or: An invalid Bus Id or device Id was specified</exception>
-        public virtual I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
+        /// <inheritdoc />
+        protected override I2cBusManager CreateI2cBusCore(int busNumber, int[]? pins)
         {
             Initialize();
-
-            if (connectionSettings == null)
-            {
-                throw new ArgumentNullException(nameof(connectionSettings));
-            }
-
             if (!SupportedPinConfigurations.Any(x => x.PinModes.Contains(SupportedMode.I2c)))
             {
                 throw new NotSupportedException("No Pins with I2c support found. Is the I2c module loaded?");
             }
 
-            return new ArduinoI2cDevice(this, connectionSettings);
+            return new I2cBusManager(this, busNumber, pins, new ArduinoI2cBus(this, busNumber));
+        }
+
+        /// <inheritdoc />
+        public override int GetDefaultI2cBusNumber()
+        {
+            return 0;
         }
 
         /// <summary>
@@ -349,9 +406,10 @@ namespace Iot.Device.Arduino
         /// Firmata's default implementation has no SPI support, so this first checks whether it's available at all.
         /// </summary>
         /// <param name="settings">Spi Connection settings</param>
+        /// <param name="pins">The pins to use.</param>
         /// <returns>An <see cref="SpiDevice"/> instance.</returns>
         /// <exception cref="NotSupportedException">The Bus number is not 0, or the SPI component has not been enabled in the firmware.</exception>
-        public virtual SpiDevice CreateSpiDevice(SpiConnectionSettings settings)
+        protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins)
         {
             Initialize();
 
@@ -381,15 +439,52 @@ namespace Iot.Device.Arduino
         /// <param name="frequency">This value is ignored</param>
         /// <param name="dutyCyclePercentage">The duty cycle as a fraction.</param>
         /// <returns></returns>
-        public virtual PwmChannel CreatePwmChannel(
+        protected override PwmChannel CreateSimplePwmChannel(
             int chip,
             int channel,
-            int frequency = 400,
-            double dutyCyclePercentage = 0.5)
+            int frequency,
+            double dutyCyclePercentage)
         {
             Initialize();
 
             return new ArduinoPwmChannel(this, chip, channel, frequency, dutyCyclePercentage);
+        }
+
+        /// <inheritdoc />
+        public override int GetDefaultPinAssignmentForPwm(int chip, int channel)
+        {
+            if (chip == 0)
+            {
+                return channel;
+            }
+
+            throw new NotSupportedException($"Unknown chip numbe {chip}");
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForI2c(int busId)
+        {
+            if (busId != 0)
+            {
+                throw new NotSupportedException("Only bus number 0 is currently supported");
+            }
+
+            var pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2c)).Select(y => y.Pin);
+
+            return pins.ToArray();
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
+        {
+            if (connectionSettings.BusId != 0)
+            {
+                throw new NotSupportedException("Only bus number 0 is currently supported");
+            }
+
+            var pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.Spi)).Select(y => y.Pin);
+
+            return pins.ToArray();
         }
 
         /// <summary>
@@ -440,7 +535,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Standard dispose pattern
         /// </summary>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             _isDisposed = true;
             // Do this first, to force any blocking read operations to end
@@ -463,15 +558,6 @@ namespace Iot.Device.Arduino
             }
 
             _initialized = false;
-        }
-
-        /// <summary>
-        /// Dispose this instance
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
 
         internal void EnableSpi()

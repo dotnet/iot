@@ -18,8 +18,11 @@ namespace Iot.Device.Board
     /// </summary>
     public class RaspberryPiBoard : GenericBoard
     {
+        private readonly object _initLock = new object();
+
         private ManagedGpioController? _managedGpioController;
         private RaspberryPi3Driver? _raspberryPi3Driver;
+        private bool _initialized;
 
         /// <summary>
         /// Creates an instance of a Rasperry Pi board.
@@ -29,6 +32,7 @@ namespace Iot.Device.Board
         {
             // TODO: Ideally detect board type, so that invalid combinations can be prevented (i.e. I2C bus 2 on Raspi 3)
             PinCount = 28;
+            _initialized = false;
         }
 
         /// <summary>
@@ -50,19 +54,34 @@ namespace Iot.Device.Board
         /// Initializes this instance
         /// </summary>
         /// <exception cref="NotSupportedException">The current hardware could not be identified as a valid Raspberry Pi type</exception>
-        public override void Initialize()
+        protected override void Initialize()
         {
-            // Needs to be a raspi 3 driver here (either unix or windows)
-            GpioDriver? driver = TryCreateBestGpioDriver();
-            if (driver == null)
+            if (_initialized)
             {
-                throw new NotSupportedException("Could not initialize the RaspberryPi GPIO driver");
+                return;
             }
 
-            _managedGpioController = new ManagedGpioController(this, DefaultPinNumberingScheme, driver);
-            _raspberryPi3Driver = driver as RaspberryPi3Driver;
+            lock (_initLock)
+            {
+                if (_initialized)
+                {
+                    return;
+                }
 
-            PinCount = _managedGpioController.PinCount;
+                // Needs to be a raspi 3 driver here (either unix or windows)
+                GpioDriver? driver = TryCreateBestGpioDriver();
+                if (driver == null)
+                {
+                    throw new NotSupportedException("Could not initialize the RaspberryPi GPIO driver");
+                }
+
+                _managedGpioController = new ManagedGpioController(this, DefaultPinNumberingScheme, driver);
+                _raspberryPi3Driver = driver as RaspberryPi3Driver;
+
+                PinCount = _managedGpioController.PinCount;
+                _initialized = true;
+            }
+
             base.Initialize();
         }
 

@@ -226,7 +226,7 @@ namespace Iot.Device.Board
         /// Initialize the board and test whether it works on the current hardware.
         /// </summary>
         /// <exception cref="PlatformNotSupportedException">The required hardware cannot be found</exception>
-        public virtual void Initialize()
+        protected virtual void Initialize()
         {
             if (_disposed)
             {
@@ -290,6 +290,8 @@ namespace Iot.Device.Board
         /// (or for purposes for which it is not suitable)</returns>
         public virtual GpioController CreateGpioController(PinNumberingScheme pinNumberingScheme)
         {
+            Initialize();
+
             GpioDriver? driver = TryCreateBestGpioDriver();
             if (driver == null)
             {
@@ -411,6 +413,7 @@ namespace Iot.Device.Board
         /// <returns>An I2C bus instance</returns>
         public virtual I2cBus CreateOrGetI2cBus(int busNumber, int[]? pinAssignment)
         {
+            Initialize();
             if (_i2cBuses.TryGetValue(busNumber, out var bus))
             {
                 return bus;
@@ -433,6 +436,7 @@ namespace Iot.Device.Board
         /// <returns>An I2C bus instance</returns>
         public I2cBus CreateOrGetI2cBus(int busNumber)
         {
+            Initialize();
             if (_i2cBuses.TryGetValue(busNumber, out var bus))
             {
                 return bus;
@@ -467,6 +471,7 @@ namespace Iot.Device.Board
         /// (i.e. bus 0 and 1 on the Raspi always use pins 0/1 and 2/3)</remarks>
         public I2cDevice CreateI2cDevice(I2cConnectionSettings connectionSettings)
         {
+            Initialize();
             // Returns logical pin numbers for the selected bus (or an exception if using a bus number > 1, because that
             // requires specifying the pins)
             if (_i2cBuses.TryGetValue(connectionSettings.BusId, out var bus))
@@ -498,6 +503,7 @@ namespace Iot.Device.Board
         /// <returns>An SPI device instance</returns>
         public SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings, int[] pinAssignment, PinNumberingScheme pinNumberingScheme)
         {
+            Initialize();
             if (pinAssignment == null)
             {
                 throw new ArgumentNullException(nameof(pinAssignment));
@@ -519,6 +525,7 @@ namespace Iot.Device.Board
         /// <remarks>This method can only be used for bus numbers where the corresponding pins are hardwired</remarks>
         public SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings)
         {
+            Initialize();
             // Returns logical pin numbers for the selected bus (or an exception if using a bus number > 1, because that
             // requires specifying the pins)
             int[] pinAssignment = GetDefaultPinAssignmentForSpi(connectionSettings);
@@ -548,6 +555,7 @@ namespace Iot.Device.Board
         public PwmChannel CreatePwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage,
             int pin, PinNumberingScheme pinNumberingScheme)
         {
+            Initialize();
             return new PwmChannelManager(this, pin, chip, channel, frequency, dutyCyclePercentage, CreateSimplePwmChannel);
         }
 
@@ -565,6 +573,7 @@ namespace Iot.Device.Board
             int frequency = 400,
             double dutyCyclePercentage = 0.5)
         {
+            Initialize();
             int pin = GetDefaultPinAssignmentForPwm(chip, channel);
             return CreatePwmChannel(chip, channel, frequency, dutyCyclePercentage, RemapPin(pin, DefaultPinNumberingScheme), PinNumberingScheme.Logical);
         }
