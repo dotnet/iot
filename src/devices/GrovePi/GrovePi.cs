@@ -45,7 +45,7 @@ namespace Iot.Device.GrovePiDevice
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _shouldDispose = shouldDispose;
-            GrovePiInfo = new Info(GetFirmwareVerion());
+            GrovePiInfo = new Info(GetFirmwareVersion());
         }
 
         /// <inheritdoc/>
@@ -62,7 +62,7 @@ namespace Iot.Device.GrovePiDevice
         /// Get the firmware version
         /// </summary>
         /// <returns>GroovePi firmware version</returns>
-        public Version GetFirmwareVerion()
+        public Version GetFirmwareVersion()
         {
             WriteCommand(GrovePiCommand.Version, 0, 0, 0);
             byte[]? inArray = ReadCommand(GrovePiCommand.Version, 0);
