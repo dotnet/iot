@@ -6,6 +6,7 @@ using System.Device.Gpio;
 using System.Device.Gpio.Tests;
 using System.Device.I2c;
 using System.Device.Spi;
+using System.Reflection;
 using Board.Tests;
 using Moq;
 using Xunit;
@@ -33,7 +34,8 @@ namespace Iot.Device.Board.Tests
             // This should always return something valid, and be it only something with an empty controller
             var board = Board.Create(PinNumberingScheme.Logical);
             Assert.NotNull(board);
-            board.Initialize();
+            var property = board.GetType().GetProperty("Initialized", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            Assert.True((bool)property.GetValue(board));
             Assert.Equal(PinNumberingScheme.Logical, board.DefaultPinNumberingScheme);
             board.Dispose();
         }
