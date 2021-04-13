@@ -34,9 +34,14 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceReadSpan)]
         public override void Read(Span<byte> buffer)
         {
-            throw new NotImplementedException();
+            // Todo: implement as backend function
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                buffer[i] = ReadByte();
+            }
         }
 
         [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceWriteByte)]
@@ -45,11 +50,13 @@ namespace Iot.Device.Arduino
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceWriteSpan)]
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceWriteRead)]
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             throw new NotImplementedException();

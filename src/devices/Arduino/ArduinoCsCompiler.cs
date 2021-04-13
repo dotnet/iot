@@ -105,11 +105,15 @@ namespace Iot.Device.Arduino
         ByReferenceByte = 10,
         Delegate = 11,
         MulticastDelegate = 12,
+        Byte = 19,
         Int32 = 20,
         Uint32 = 21,
         Int64 = 22,
         Uint64 = 23,
         LargestKnownTypeToken = 40,
+        // If more of these are required, check the ctor of ExecutionSet to make sure enough entries have been reserved
+        IEnumerableOfT = ExecutionSet.GenericTokenStep,
+        SpanOfT = ExecutionSet.GenericTokenStep * 2,
     }
 
     public sealed class ArduinoCsCompiler : IDisposable
@@ -360,6 +364,34 @@ namespace Iot.Device.Arduino
                             else
                             {
                                 set.AddReplacementMethod(methodToReplace, m);
+                            }
+                        }
+                    }
+
+                    // Also go over ctors (if any)
+                    foreach (var m in replacement.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
+                    {
+                        // Methods that have this attribute shall be replaced - if the value is ArduinoImplementation.None, the C# implementation is used,
+                        // otherwise a native implementation is provided
+                        attribs = m.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
+                        ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
+                        if (iaMethod != null)
+                        {
+                            BindingFlags flags = BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static;
+                            if (ia.IncludingPrivates)
+                            {
+                                flags |= BindingFlags.NonPublic;
+                            }
+
+                            var ctor = ia.TypeToReplace!.GetConstructors(flags).SingleOrDefault(x => MethodsHaveSameSignature(x, m) || AreSameOperatorMethods(x, m));
+                            if (ctor == null)
+                            {
+                                // That may be ok if it is our own internal implementation, but for now we abort, since we currently have no such case
+                                throw new InvalidOperationException($"A replacement method has nothing to replace: {m.MethodSignature()}");
+                            }
+                            else
+                            {
+                                set.AddReplacementMethod(ctor, m);
                             }
                         }
                     }
@@ -1062,10 +1094,6 @@ namespace Iot.Device.Arduino
             }
         }
 
-        /// <summary>
-        /// Returns the size of the variable on the target platform. This is currently the largest of sizeof(void*) and sizeof(int64).
-        /// </summary>
-        /// <returns>See above</returns>
         private static int SizeOfVoidPointer()
         {
             return 4;
@@ -1085,6 +1113,7 @@ namespace Iot.Device.Arduino
 
             int sizeDynamic = 0;
             int sizeStatic = 0;
+            int numberOfNonStaticFields = fields.Count(x => x.IsStatic == false);
             foreach (var f in fields)
             {
                 GetVariableType(f.FieldType, minSizeOfMember, out int sizeOfMember);
@@ -1104,7 +1133,15 @@ namespace Iot.Device.Arduino
                 {
                     if (classType.IsValueType)
                     {
-                        sizeDynamic += sizeOfMember;
+                        if (numberOfNonStaticFields > 1)
+                        {
+                            // If this is a value type with more than one field, add alignment, as with classes
+                            sizeDynamic += sizeOfMember <= minSizeOfMember ? minSizeOfMember : sizeOfMember;
+                        }
+                        else
+                        {
+                            sizeDynamic += sizeOfMember;
+                        }
                     }
                     else if (f.FieldType.IsValueType)
                     {
@@ -1185,7 +1222,15 @@ namespace Iot.Device.Arduino
         private int StructAlignment(Type t, List<FieldInfo> fields)
         {
             int minSizeOfMember = 1;
+            // Structs with reference type need to be aligned for the GC to probe any embedded addresses
             if (t.IsValueType && fields.Any(x => !x.FieldType.IsValueType))
+            {
+                minSizeOfMember = 4;
+            }
+
+            // Structs with multiple fields need to be aligned, too. Or we might do an unaligned memory access.
+            // TODO: This should eventually check for StructAlignmentAttribute, but then unaligned access requires support from the backend
+            else if (t.IsValueType && fields.Count(x => !x.IsStatic) > 1)
             {
                 minSizeOfMember = 4;
             }
@@ -1357,10 +1402,10 @@ namespace Iot.Device.Arduino
                         return VariableKind.Reference;
                     }
 
-                    // This one is special anyway (and usually explicitly created on the stack using a LOCALLOC instruction)
                     if (openType == typeof(Span<>))
                     {
-                        sizeOfMember = Math.Max(minSizeOfMember, SizeOfVoidPointer());
+                        // Normally, this lives on the stack only. But if it lives within another struct, it uses 8 bytes
+                        sizeOfMember = SizeOfVoidPointer() + sizeof(Int32);
                         return VariableKind.LargeValueType;
                     }
                 }

@@ -16,14 +16,26 @@ namespace Iot.Device.Arduino.Runtime
 #pragma warning disable SA1122 // Use string.Empty for empty strings (This is the definition of an empty string!)
         public static string Empty = "";
 #pragma warning restore SA1122
-        private readonly int _stringLength;
+
+#pragma warning disable CS0649 // Used internally
+        private int _stringLength;
 
         // This is the first char of the data this instance holds. The address of this field is the char* pointer, meaning that the actual string
         // data is stored inline, and the object has a dynamic size!
-#pragma warning disable 414 // Used internally
         private char _firstChar;
-#pragma warning restore 414
+#pragma warning restore CS0649
 
+        /// <summary>
+        /// This needs support in the backend as well, because the size of the allocated object must be determined beforehand
+        /// </summary>
+        [ArduinoImplementation(NativeMethod.StringCtorSpan)]
+        public MiniString(ReadOnlySpan<char> value)
+        {
+            throw new NotImplementedException();
+        }
+
+        // This is a bit odd: All of these default constructors on System::String are never actually called, because the runtime handles string construction specially.
+        /*
         [ArduinoImplementation(NativeMethod.StringCtor0)]
         public MiniString()
         {
@@ -35,16 +47,6 @@ namespace Iot.Device.Arduino.Runtime
         public unsafe MiniString(char* buf)
         {
             throw new NotImplementedException();
-        }
-
-        [ArduinoImplementation(NativeMethod.None)]
-        public MiniString(ReadOnlySpan<char> value)
-            : this(' ', value.Length)
-        {
-            for (int i = 0; i < value.Length; i++)
-            {
-                SetElem(i, value[i]);
-            }
         }
 
         [ArduinoImplementation(NativeMethod.StringCtor2)]
@@ -102,7 +104,7 @@ namespace Iot.Device.Arduino.Runtime
                 SetElem(i, value[i]);
             }
         }
-
+        */
         /////// <summary>
         /////// The purpose of this operator is to syntactically correctly perform a conversion from String to MiniString. The Implementation is a no-op.
         /////// </summary>

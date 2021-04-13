@@ -29,11 +29,9 @@ namespace Iot.Device.Arduino
         MonitorEnter1,
         MonitorEnter2,
         MonitorExit,
-        StringCtor0,
         StringEquals,
         StringToString,
         StringGetHashCode,
-        StringCtor2,
         StringSetElem,
         StringGetElem,
         StringGetPinnableReference,
@@ -42,10 +40,9 @@ namespace Iot.Device.Arduino
         StringFastAllocateString,
         StringUnEqualsStatic,
         StringImplicitConversion,
-
         StringEqualsStringComparison,
         StringInternalAllocateString,
-        StringCtor1,
+        StringCtorSpan,
         StringCompareTo,
 
         RuntimeHelpersInitializeArray,
@@ -120,7 +117,10 @@ namespace Iot.Device.Arduino
         InteropGetRandomBytes,
 
         ArduinoNativeI2cDeviceReadByte,
+        ArduinoNativeI2cDeviceReadSpan,
         ArduinoNativeI2cDeviceWriteByte,
+        ArduinoNativeI2cDeviceWriteSpan,
+        ArduinoNativeI2cDeviceWriteRead,
         ArduinoNativeI2cDeviceInit,
 
         ByReferenceCtor,

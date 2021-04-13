@@ -75,14 +75,14 @@ namespace Iot.Device.Arduino.Tests
                 using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
                 using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
                 using Hd44780 hd44780 = new Lcd2004(lcdInterface);
-                I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
-                using Bme680 bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
                 hd44780.UnderlineCursorVisible = false;
                 hd44780.BacklightOn = true;
                 hd44780.DisplayOn = true;
                 hd44780.Clear();
-                hd44780.Write("Hello World!");
+                hd44780.Write("Startup!");
                 Thread.Sleep(500);
+                I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
+                using Bme680 bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
                 hd44780.Clear();
                 gpioController.Write(redLed, PinValue.Low);
                 while (gpioController.Read(button) == PinValue.Low)

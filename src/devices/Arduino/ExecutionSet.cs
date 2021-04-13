@@ -15,7 +15,7 @@ namespace Iot.Device.Arduino
 {
     public class ExecutionSet
     {
-        private const int GenericTokenStep = 0x0100_0000;
+        internal const int GenericTokenStep = 0x0100_0000;
         private const int StringTokenStep = 0x0001_0000;
         private const int NullableToken = 0x0080_0000;
         public const int GenericTokenMask = -8_388_608; // 0xFF80_0000 as signed
@@ -67,7 +67,7 @@ namespace Iot.Device.Arduino
             _specialTypeList = new();
 
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
-            _nextGenericToken = GenericTokenStep;
+            _nextGenericToken = GenericTokenStep * 4; // The first entries are reserved (see KnownTypeTokens)
             _nextStringToken = StringTokenStep; // The lower 16 bit are the length
 
             _numDeclaredMethods = 0;
@@ -529,6 +529,10 @@ namespace Iot.Device.Arduino
             {
                 token = (int)KnownTypeTokens.Int64;
             }
+            else if (typeInfo == typeof(byte))
+            {
+                token = (int)KnownTypeTokens.Byte;
+            }
             else if (typeInfo == typeof(System.Delegate))
             {
                 token = (int)KnownTypeTokens.Delegate;
@@ -570,6 +574,14 @@ namespace Iot.Device.Arduino
             else if (typeInfo == typeof(Nullable<>))
             {
                 token = NullableToken;
+            }
+            else if (typeInfo == typeof(IEnumerable<>))
+            {
+                token = (int)KnownTypeTokens.IEnumerableOfT;
+            }
+            else if (typeInfo == typeof(Span<>))
+            {
+                token = (int)KnownTypeTokens.SpanOfT;
             }
             else if (typeInfo.IsGenericType && typeInfo.GetGenericTypeDefinition() == typeof(Nullable<>))
             {
