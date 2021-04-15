@@ -24,8 +24,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        [Trait("SkipOnTestRun", "Windows_NT")] // The WindowsDriver is kept as High when disposed.
-        public void PinValueReturnsToLowAfterDispose()
+        public void PinValueStaysSameAfterDispose()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
@@ -40,7 +39,7 @@ namespace System.Device.Gpio.Tests
             {
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.OpenPin(InputPin, PinMode.Input);
-                Assert.Equal(PinValue.Low, controller.Read(InputPin));
+                Assert.Equal(PinValue.High, controller.Read(InputPin));
             }
         }
 
@@ -169,7 +168,8 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void OpenPinDefaultsModeToInput()
+        [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown, and it seems this cannot be changed
+        public void OpenPinDefaultsModeToLastMode()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
@@ -178,7 +178,7 @@ namespace System.Device.Gpio.Tests
                 controller.SetPinMode(OutputPin, PinMode.Output);
                 controller.ClosePin(OutputPin);
                 controller.OpenPin(OutputPin);
-                Assert.Equal(PinMode.Input, controller.GetPinMode(OutputPin));
+                Assert.Equal(PinMode.Output, controller.GetPinMode(OutputPin));
             }
         }
 
