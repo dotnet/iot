@@ -171,10 +171,10 @@ namespace System.Device.Gpio.Tests
         [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown, and it seems this cannot be changed
         public void OpenPinDefaultsModeToLastMode()
         {
+            // This works for input/output on most systems, but not on pullup/down, since sometimes the hardware doesn't have read possibilities for those (ie. the Raspi 3)
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin);
-                Assert.Equal(PinMode.Input, controller.GetPinMode(OutputPin));
                 controller.SetPinMode(OutputPin, PinMode.Output);
                 controller.ClosePin(OutputPin);
                 controller.OpenPin(OutputPin);

@@ -235,6 +235,56 @@ namespace System.Device.Gpio.Drivers
             }
         }
 
+        /// <summary>
+        /// Gets the pin mode directly from the hardware. Assumes that its in a valid GPIO mode
+        /// </summary>
+        private PinMode GetPinModeFromHardware(int pinNumber)
+        {
+            ValidatePinNumber(pinNumber);
+
+            RaspberryPi3Driver.AltMode altMode = GetAlternatePinMode(pinNumber);
+            PinMode mode = altMode switch
+            {
+                RaspberryPi3Driver.AltMode.Output => PinMode.Output,
+                RaspberryPi3Driver.AltMode.Input => PinMode.Input,
+                _ => PinMode.Input
+            };
+
+            if (IsPi4)
+            {
+                int shift = (pinNumber & 0xf) << 1;
+                uint bits = 0;
+
+                // Read back the register
+                var gpioReg = _registerViewPointer;
+                bits = (gpioReg->GPPUPPDN[(pinNumber >> 4)]);
+                bits &= (3u << shift);
+                bits >>= shift;
+                mode = bits switch
+                {
+                    0 => PinMode.Input,
+                    1 => PinMode.InputPullUp,
+                    2 => PinMode.InputPullDown,
+                    _ => PinMode.Input,
+                };
+            }
+            else
+            {
+                // Pi3. We can't detect the pull mode, since it cannot be read back according to the documentation
+            }
+
+            if (_pinModes[pinNumber] is object)
+            {
+                _pinModes[pinNumber]!.CurrentPinMode = mode;
+            }
+            else
+            {
+                _pinModes[pinNumber] = new PinState(mode);
+            }
+
+            return mode;
+        }
+
         protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
         {
             // On the Raspberry Pi, we can Write the out value even if the mode is something other than out. It will take effect once we change the mode
