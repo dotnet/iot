@@ -131,9 +131,6 @@ namespace System.Device.Gpio.Drivers
                 _interruptDriver!.ClosePin(pinNumber);
             }
 
-            // Set pin low and mode to input upon closing a pin
-            Write(pinNumber, PinValue.Low);
-            SetPinMode(pinNumber, PinMode.Input);
             _pinModes[pinNumber] = null;
         }
 
@@ -157,7 +154,6 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
             Initialize();
-            SetPinMode(pinNumber, PinMode.Input);
         }
 
         /// <summary>
