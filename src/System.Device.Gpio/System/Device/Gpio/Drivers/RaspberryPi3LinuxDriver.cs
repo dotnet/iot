@@ -154,6 +154,7 @@ namespace System.Device.Gpio.Drivers
         {
             ValidatePinNumber(pinNumber);
             Initialize();
+            GetPinModeFromHardware(pinNumber);
         }
 
         /// <summary>
@@ -250,7 +251,7 @@ namespace System.Device.Gpio.Drivers
                 _ => PinMode.Input
             };
 
-            if (IsPi4)
+            if (IsPi4 && mode == PinMode.Input)
             {
                 int shift = (pinNumber & 0xf) << 1;
                 uint bits = 0;
