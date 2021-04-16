@@ -129,13 +129,8 @@ namespace System.Device.Gpio
         public void OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
         {
             OpenPin(pinNumber);
-            if (GetPinMode(pinNumber) == PinMode.Output)
-            {
-                // If we're opening in output mode, set the desired value before changing the mode to avoid glitches.
-                // Otherwise skip this, as it would toggle the output if the pin mode is currently Output but the
-                // desired value is input
-                Write(pinNumber, initialValue);
-            }
+            // Set the desired initial value
+            _openPins[pinNumber] = initialValue;
 
             SetPinMode(pinNumber, mode);
         }
