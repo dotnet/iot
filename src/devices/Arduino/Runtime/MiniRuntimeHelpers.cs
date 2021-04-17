@@ -32,6 +32,13 @@ namespace Iot.Device.Arduino.Runtime
             return 0;
         }
 
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        public static bool IsPrimitiveType(CorElementType et)
+        {
+            // COR_ELEMENT_TYPE_I1,I2,I4,I8,U1,U2,U4,U8,R4,R8,I,U,CHAR,BOOLEAN
+            return ((1 << (int)et) & 0b_0011_0000_0000_0011_1111_1111_1100) != 0;
+        }
+
         public static bool IsReferenceOrContainsReferences<T>()
         {
             return IsReferenceOrContainsReferencesCore(typeof(T));

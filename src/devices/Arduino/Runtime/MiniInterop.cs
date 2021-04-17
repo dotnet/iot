@@ -233,6 +233,12 @@ namespace Iot.Device.Arduino.Runtime
                 return 0;
             }
 
+            [ArduinoImplementation]
+            public static unsafe int ChangeCaseTurkish(char* src, int srcLen, char* dstBuffer, int dstBufferCapacity, bool bToUpper)
+            {
+                throw new NotImplementedException();
+            }
+
         }
 
         [ArduinoReplacement("Interop+Kernel32", "System.Private.CoreLib.dll", true, IncludingSubclasses = true, IncludingPrivates = true)]

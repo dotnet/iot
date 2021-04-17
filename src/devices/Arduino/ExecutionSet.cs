@@ -329,7 +329,6 @@ namespace Iot.Device.Arduino
             foreach (var method in _methods)
             {
                 int methodBytes = MethodBodyMinSize;
-                methodBytes += MethodBodyMinSize;
                 methodBytes += method.ArgumentCount * 4;
                 methodBytes += method.MaxLocals * 4;
 

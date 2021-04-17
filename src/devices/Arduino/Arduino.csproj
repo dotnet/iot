@@ -34,6 +34,7 @@
     <Compile Include="Runtime\MiniByReference.cs" />
     <Compile Include="Runtime\MiniCalendar.cs" />
     <Compile Include="Runtime\MiniCLRConfig.cs" />
+    <Compile Include="Runtime\MiniCompareInfo.cs" />
     <Compile Include="Runtime\MiniCultureInfo.cs" />
     <Compile Include="Runtime\MiniDateTime.cs" />
     <Compile Include="Runtime\MiniDelegate.cs" />
@@ -60,6 +61,7 @@
     <Compile Include="Runtime\MiniSR.cs" />
     <Compile Include="Runtime\MiniStackTrace.cs" />
     <Compile Include="Runtime\MiniString.cs" />
+    <Compile Include="Runtime\MiniTextInfo.cs" />
     <Compile Include="Runtime\MiniThread.cs" />
     <Compile Include="Runtime\MiniTimeZoneInfo.cs" />
     <Compile Include="Runtime\MiniType.cs" />

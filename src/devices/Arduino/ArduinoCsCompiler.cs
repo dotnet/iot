@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
 using Iot.Device.Arduino.Runtime;
@@ -414,13 +415,11 @@ namespace Iot.Device.Arduino
 
             PrepareClass(set, typeof(IEquatable<object>));
 
-            PrepareClass(set, typeof(System.Span<Int32>));
+            // PrepareClass(set, typeof(System.Span<Int32>));
             HashSet<string> hs = new HashSet<string>();
             PrepareClass(set, hs.Comparer.GetType()); // GenericEqualityComparer<string>
-
             HashSet<int> hi = new HashSet<int>();
             PrepareClass(set, hi.Comparer.GetType()); // GenericEqualityComparer<int>
-
             PrepareClass(set, typeof(IEquatable<Nullable<int>>));
 
             PrepareClass(set, typeof(System.Array));
@@ -570,8 +569,23 @@ namespace Iot.Device.Arduino
                     var typeArgs = classType.GetGenericArguments();
                     var requiredInterface = typeof(IEquatable<>).MakeGenericType(typeArgs);
                     PrepareClassDeclaration(set, requiredInterface);
-                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                    PrepareClassDeclaration(set, alsoRequired);
+                    if (!typeArgs[0].IsValueType)
+                    {
+                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                        PrepareClassDeclaration(set, alsoRequired);
+                    }
+                    else if (typeArgs[0].IsValueType)
+                    {
+                        try
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        catch (ArgumentException x)
+                        {
+                            _logger.LogWarning(x, x.Message);
+                        }
+                    }
                 }
             }
         }
@@ -1249,7 +1263,8 @@ namespace Iot.Device.Arduino
                 for (i = 0; i < declaration.MaxLocals; i++)
                 {
                     var classType = body.LocalVariables[i].LocalType;
-                    var type = GetVariableType(classType, 1, out int size);
+                    // This also needs alignment, because "classType" might be a long value type
+                    var type = GetVariableType(classType, SizeOfVoidPointer(), out int size);
                     ClassMember local = new ClassMember($"Local #{i}", type, 0, (ushort)size);
                     localTypes[i] = local;
                 }
@@ -1269,7 +1284,7 @@ namespace Iot.Device.Arduino
             for (i = startOffset; i < declaration.ArgumentCount; i++)
             {
                 var classType = parameters[i - startOffset].ParameterType;
-                var type = GetVariableType(parameters[i - startOffset].ParameterType, 1, out var size);
+                var type = GetVariableType(classType, SizeOfVoidPointer(), out var size);
                 ClassMember arg = new ClassMember($"Argument {i}", type, 0, size);
                 argTypes[i] = arg;
             }
@@ -1647,6 +1662,7 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
                 exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
                 exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
+                exec.SuppressType(typeof(IDeserializationCallback));
                 exec.SuppressType(typeof(IConvertible)); // Remove support for this rarely used interface which links many methods (i.e. on String)
                 exec.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
