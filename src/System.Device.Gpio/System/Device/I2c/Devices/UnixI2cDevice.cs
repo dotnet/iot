@@ -49,6 +49,11 @@ namespace System.Device.I2c
             _bus.WriteRead(_deviceAddress, writeBuffer, readBuffer);
         }
 
+        public override bool IsDeviceReady()
+        {
+            return _bus.IsDeviceReady(_deviceAddress);
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (_bus != null)

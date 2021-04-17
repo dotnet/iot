@@ -44,6 +44,23 @@ namespace System.Device.I2c
             device.DisposeDevice();
         }
 
+        public override bool IsDeviceReady(int deviceAddress)
+        {
+            if (!_devices.TryGetValue(deviceAddress, out Windows10I2cBusDevice? device))
+            {
+                try
+                {
+                    device = new Windows10I2cBusDevice(this, new I2cConnectionSettings(BusId, deviceAddress));
+                }
+                finally
+                {
+                    device.Dispose();
+                }
+            }
+
+            return device.IsDeviceReady();
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (_devices != null)

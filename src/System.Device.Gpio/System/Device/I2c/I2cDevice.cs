@@ -82,6 +82,27 @@ namespace System.Device.I2c
         }
 
         /// <summary>
+        /// Queries whether the device is available for communication. This is accomplished by sending the device address on the bus
+        /// with the write bit set, but without sending any subsequent data bytes. If the device is available, it will respond with an
+        /// ACK and this function will return true. If the device is not available, the device will not acknowlege and this funciton will
+        /// return false.
+        /// </summary>
+        /// <returns>Whether the device responded with an ACK to the address query.</returns>
+        public virtual bool IsDeviceReady()
+        {
+            // Trivial implementation if not overriden in derived class
+            try
+            {
+                Write(new byte[0]);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Disposes this instance
         /// </summary>
         /// <param name="disposing"><see langword="true"/> if explicitly disposing, <see langword="false"/> if in finalizer</param>

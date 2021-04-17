@@ -203,6 +203,37 @@ namespace System.Device.I2c
             return BusFileDescriptor >= 0;
         }
 
+        public override bool IsDeviceReady(int deviceAddress)
+        {
+            if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(deviceAddress));
+            }
+
+            return IsDeviceReadyCore((ushort)deviceAddress);
+        }
+
+        private unsafe bool IsDeviceReadyCore(ushort deviceAddress)
+        {
+            i2c_msg* messagesPtr = stackalloc i2c_msg[1];
+            messagesPtr[0] = new i2c_msg()
+            {
+                flags = I2cMessageFlags.I2C_M_WR,
+                addr = deviceAddress,
+                len = 0,
+                buf = null
+            };
+
+            var msgset = new i2c_rdwr_ioctl_data()
+            {
+                msgs = messagesPtr,
+                nmsgs = 1
+            };
+
+            int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&msgset));
+            return result >= 0; // Tested on Raspberry Pi4. Returns 1 if device responds with an ACK, -1 if not
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (HasValidFileDescriptor())

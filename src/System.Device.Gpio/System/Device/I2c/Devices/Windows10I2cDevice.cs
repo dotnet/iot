@@ -121,6 +121,12 @@ namespace System.Device.I2c
             new Span<byte>(byteArray).CopyTo(readBuffer);
         }
 
+        public override bool IsDeviceReady()
+        {
+            var result = _winI2cDevice.WritePartial(new byte[0]);
+            return result.Status == WinI2c.I2cTransferStatus.FullTransfer;
+        }
+
         protected override void Dispose(bool disposing)
         {
             _winI2cDevice?.Dispose();
