@@ -285,5 +285,11 @@ namespace Iot.Device.Arduino.Tests
         {
             LoadCodeMethod("EnumsHaveNames", 0, 0, 1, Fixture.DefaultCompilerSettings, false);
         }
+
+        [Fact]
+        public void DoubleToStringTest()
+        {
+            LoadCodeMethod("DoubleToString", 20.2, 202.1, 20.2, Fixture.DefaultCompilerSettings);
+        }
     }
 }

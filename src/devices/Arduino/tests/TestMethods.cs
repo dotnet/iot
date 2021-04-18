@@ -605,6 +605,13 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public static double DoubleToString(double arg1, double arg2)
+        {
+            string result = arg1.ToString("F1") + " °C";
+            MiniAssert.That(result == "20.2 °C");
+            return arg1;
+        }
+
         private class SmallBase : IDisposable
         {
             private int _a;
