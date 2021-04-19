@@ -151,5 +151,16 @@ namespace Iot.Device.Arduino
         GcGetTotalMemory,
         GcGetTotalAllocatedBytes,
         GcTotalAvailableMemoryBytes,
+
+        MathCeiling,
+        MathFloor,
+        MathPow,
+        MathLog,
+        MathLog2,
+        MathLog10,
+        MathSin,
+        MathCos,
+        MathTan,
+        MathSqrt,
     }
 }

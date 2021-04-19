@@ -10,6 +10,10 @@
     <RootNamespace>Iot.Device.Arduino.Tests</RootNamespace>    
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net5.0|AnyCPU'">
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
   <ItemGroup>
     <ProjectReference Include="../Arduino.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />

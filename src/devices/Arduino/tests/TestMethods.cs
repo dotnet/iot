@@ -607,8 +607,8 @@ namespace Iot.Device.Arduino.Tests
 
         public static double DoubleToString(double arg1, double arg2)
         {
-            string result = arg1.ToString("F1") + " °C";
-            MiniAssert.That(result == "20.2 °C");
+            string result = arg1.ToString("F2") + " °C";
+            MiniAssert.That(result == "20.23 °C");
             return arg1;
         }
 

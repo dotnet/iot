@@ -47,6 +47,7 @@
     <Compile Include="Runtime\MiniInterop.cs" />
     <Compile Include="Runtime\MiniIntrospectionExtensions.cs" />
     <Compile Include="Runtime\MiniMarshal.cs" />
+    <Compile Include="Runtime\MiniMath.cs" />
     <Compile Include="Runtime\MiniMemoryMarshal.cs" />
     <Compile Include="Runtime\MiniMethodTable.cs" />
     <Compile Include="Runtime\MiniMonitor.cs" />

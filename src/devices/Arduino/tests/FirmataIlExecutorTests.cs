@@ -289,7 +289,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void DoubleToStringTest()
         {
-            LoadCodeMethod("DoubleToString", 20.2, 202.1, 20.2, Fixture.DefaultCompilerSettings);
+            LoadCodeMethod("DoubleToString", 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
         }
     }
 }

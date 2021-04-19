@@ -1306,6 +1306,7 @@ namespace Iot.Device.Arduino
 
             // Types of locals first
             int startIndex = 0;
+            int totalLocals = localTypes.Length;
             int localsToSend = Math.Min(localTypes.Length, 16);
             while (localsToSend > 0)
             {
@@ -1322,11 +1323,14 @@ namespace Iot.Device.Arduino
                 sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
 
                 WaitAndHandleIlCommand(sequence);
-                localsToSend -= 16;
+                totalLocals -= 16;
+                startIndex += 16;
+                localsToSend = Math.Min(totalLocals, 16);
             }
 
             // Types of arguments
             startIndex = 0;
+            totalLocals = argTypes.Length;
             localsToSend = Math.Min(argTypes.Length, 16);
             while (localsToSend > 0)
             {
@@ -1343,7 +1347,9 @@ namespace Iot.Device.Arduino
                 sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
 
                 WaitAndHandleIlCommand(sequence);
-                localsToSend -= 16;
+                totalLocals -= 16;
+                startIndex += 16;
+                localsToSend = Math.Min(totalLocals, 16);
             }
         }
 

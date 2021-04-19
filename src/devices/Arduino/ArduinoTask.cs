@@ -139,7 +139,7 @@ namespace Iot.Device.Arduino
                         switch (sysEx)
                         {
                             case SystemException.MissingMethod:
-                                ex = new MissingMethodException(resolved.DeclaringType?.Name, resolved.MemberInfoSignature() + " " + textualStackTrace);
+                                ex = new MissingMethodException(resolved.MemberInfoSignature() + " " + textualStackTrace);
                                 break;
                             case SystemException.NullReference:
                                 ex = new NullReferenceException($"NullReferenceException in {resolved.MemberInfoSignature()} " + textualStackTrace);

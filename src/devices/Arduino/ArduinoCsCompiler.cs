@@ -1923,7 +1923,7 @@ namespace Iot.Device.Arduino
                 else
                 {
                     // TODO: There are a bunch of methods currently getting here because they're not implemented
-                    // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no implementation");
+                    // throw new MissingMethodException($"{methodInfo.DeclaringType}.{methodInfo} has no visible implementation, but is required");
                     _logger.LogWarning($"{methodInfo.MethodSignature()} has no visible implementation");
                     return;
                 }
