@@ -142,6 +142,7 @@ namespace Arduino.Samples
             Console.WriteLine(" 9 Run SPI tests with an MCP3008 (experimental)");
             Console.WriteLine(" 0 Detect all devices on the I2C bus");
             Console.WriteLine(" H Read DHT11 Humidity sensor on GPIO 3 (experimental)");
+            Console.WriteLine(" B Run I2C tests with a BME680");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
@@ -149,7 +150,7 @@ namespace Arduino.Samples
             switch (key.KeyChar)
             {
                 case '1':
-                    TestI2c(board);
+                    TestI2cBmp280(board);
                     break;
                 case '2':
                     TestGpio(board);
@@ -181,6 +182,10 @@ namespace Arduino.Samples
                 case 'h':
                 case 'H':
                     TestDht(board);
+                    break;
+                case 'b':
+                case 'B':
+                    TestI2cBme680(board);
                     break;
                 case 'x':
                 case 'X':
@@ -223,7 +228,7 @@ namespace Arduino.Samples
             }
         }
 
-        private static void TestI2c(ArduinoBoard board)
+        private static void TestI2cBmp280(ArduinoBoard board)
         {
             var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bmp280.DefaultI2cAddress));
 
@@ -240,6 +245,34 @@ namespace Arduino.Samples
             }
 
             bmp.Dispose();
+            device.Dispose();
+            Console.ReadKey();
+            Console.WriteLine();
+        }
+
+        private static void TestI2cBme680(ArduinoBoard board)
+        {
+            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
+
+            var bme = new Bme680(device, Temperature.FromDegreesCelsius(20));
+            bme.Reset();
+            Console.WriteLine("Device open");
+            while (!Console.KeyAvailable)
+            {
+                bme.SetPowerMode(Bme680PowerMode.Forced);
+                if (bme.TryReadTemperature(out var temperature) && bme.TryReadPressure(out var pressure))
+                {
+                    Console.Write($"\rTemperature: {temperature.DegreesCelsius:F2}°C. Pressure {pressure.Hectopascals:F1} hPa                  ");
+                }
+                else
+                {
+                    Console.WriteLine("Read error");
+                }
+
+                Thread.Sleep(500);
+            }
+
+            bme.Dispose();
             device.Dispose();
             Console.ReadKey();
             Console.WriteLine();

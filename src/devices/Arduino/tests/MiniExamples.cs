@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino.Tests;
 using Iot.Device.Bmxx80;
+using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.CharacterLcd;
 using UnitsNet;
 using Xunit;
@@ -83,12 +84,14 @@ namespace Iot.Device.Arduino.Tests
                 Thread.Sleep(500);
                 I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
                 using Bme680 bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
+                bme680.Reset();
                 hd44780.Clear();
                 gpioController.Write(redLed, PinValue.Low);
                 while (gpioController.Read(button) == PinValue.Low)
                 {
                     hd44780.SetCursorPosition(0, 0);
-                    if (bme680.TryReadTemperature(out Temperature temp))
+                    bme680.SetPowerMode(Bme680PowerMode.Forced);
+                    if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure))
                     {
                         string temperatureLine = temp.DegreesCelsius.ToString("F1") + " °C";
                         hd44780.Write(temperatureLine);

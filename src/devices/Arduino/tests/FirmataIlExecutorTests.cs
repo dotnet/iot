@@ -252,6 +252,9 @@ namespace Iot.Device.Arduino.Tests
         [InlineData("LargeStructCtorBehaviorTest2", 5, 1, 5)]
         [InlineData("LargeStructMethodCall2", 66, 33, 66)]
         [InlineData("LargeStructArray", 5, 1, 10)]
+        [InlineData("LargeStructAsInterface1", 5, 5, 1)]
+        [InlineData("LargeStructList1", 1, 2, 1)]
+        [InlineData("LargeStructList2", 1, 2, 1)]
         public void LargeStructTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Arduino.Runtime;
 using UnitsNet.Units;
+using Xunit;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -510,6 +512,65 @@ namespace Iot.Device.Arduino.Tests
             return s.TheSum;
         }
 
+        public static int LargeStructAsInterface1(int arg1, int arg2)
+        {
+            IDisposable d = new LargeStructWithInterface(arg1, arg2, arg1 + arg2);
+
+            LargeStructWithInterface wi = (LargeStructWithInterface)d;
+            MiniAssert.That(wi.A == arg1);
+            MiniAssert.That(wi.D == arg1 + arg2);
+
+            d.Dispose();
+
+            // This is unaffected (because the copy was not modified)
+            MiniAssert.That(wi.D == arg1 + arg2);
+
+            LargeStructWithInterface wi2 = (LargeStructWithInterface)d;
+            MiniAssert.That(wi2.D == -1);
+            return 1;
+        }
+
+        /// <summary>
+        /// There are three different implementations of GetEnumerator(), only 2 do an explicit boxing, one returns a value type
+        /// </summary>
+        public static int LargeStructList1(int arg1, int arg2)
+        {
+            List<LargeStructWithInterface> l = new List<LargeStructWithInterface>();
+            l.Add(new LargeStructWithInterface(1, 2, 3));
+            l.Add(new LargeStructWithInterface(4, 5, 6));
+            // This calls List<T>.GetEnumerator() which returns Enumerator (a value type)
+            foreach (var e in l)
+            {
+                MiniAssert.That(e.A != 0);
+            }
+
+            MiniAssert.That(l.Count == 2);
+
+            // This calls IEnumerable<T>.GetEnumerator(), which returns an IEnumerator<T>
+            var single = l.Single(x => x.A == 1);
+            MiniAssert.That(single.A == 1);
+
+            return 1;
+        }
+
+        public static int LargeStructList2(int arg1, int arg2)
+        {
+            List<LargeStructWithInterface> l = new List<LargeStructWithInterface>();
+            l.Add(new LargeStructWithInterface(1, 2, 3));
+            l.Add(new LargeStructWithInterface(4, 5, 6));
+
+            IEnumerable l2 = l;
+            // This calls IEnumerable.GetEnumerator() which returns an untyped IEnumerator
+            foreach (LargeStructWithInterface e2 in l2)
+            {
+                MiniAssert.That(e2.A != 0);
+            }
+
+            MiniAssert.That(l.Count == 2);
+
+            return 1;
+        }
+
         public static int LargeStructArray(int size, int indexToRetrieve)
         {
             LargeStruct a = new LargeStruct(2, 10, -1);
@@ -760,5 +821,46 @@ namespace Iot.Device.Arduino.Tests
                 _sum = _a + _b + _d;
             }
         }
+
+        private struct LargeStructWithInterface : IDisposable
+        {
+            private int _a;
+            private int _b;
+            private long _d;
+            private long _sum;
+
+            public LargeStructWithInterface(int a, int b, long d)
+            {
+                _a = a;
+                _b = b;
+                _d = d;
+                _sum = 0;
+            }
+
+            public int A => _a;
+
+            public int B => _b;
+
+            public long D
+            {
+                get
+                {
+                    return _d;
+                }
+                set
+                {
+                    _d = value;
+                }
+            }
+
+            public long Sum => _sum;
+
+            public void Dispose()
+            {
+                _sum = -1;
+                _d = -1;
+            }
+        }
+
     }
 }
