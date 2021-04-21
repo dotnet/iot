@@ -78,6 +78,26 @@ namespace System.Device.I2c
         }
 
         /// <summary>
+        /// Attempts to read data from the I2C device. If the read fails for any reason, returns false rather than throwing an exception.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer to read the data from the I2C device.
+        /// The length of the buffer determines how much data to read from the I2C device.</param>
+        /// <returns>true: read succeeded, false if the read failed for any reason.</returns>
+        public override bool TryRead(Span<byte> buffer)
+        {
+            if (buffer.Length == 0)
+            {
+                throw new ArgumentException($"{nameof(buffer)} cannot be empty.");
+            }
+
+            byte[] byteArray = new byte[buffer.Length];
+            WinI2c.I2cTransferResult result = _winI2cDevice.ReadPartial(byteArray);
+            new Span<byte>(byteArray).CopyTo(buffer);
+            return result.Status == WinI2c.I2cTransferStatus.FullTransfer;
+        }
+
+        /// <summary>
         /// Writes a byte to the I2C device.
         /// </summary>
         /// <param name="value">The byte to be written to the I2C device.</param>
@@ -96,6 +116,20 @@ namespace System.Device.I2c
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             _winI2cDevice.Write(buffer.ToArray());
+        }
+
+        /// <summary>
+        /// Attempts to write data to the I2C device. If the write fails for any reason, returns false rather than throwing an exception.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer contains the data to be written to the I2C device.
+        /// The data should not include the I2C device address.
+        /// </param>
+        /// <returns>true: write succeeded, false if the write failed for any reason.</returns>
+        public override bool TryWrite(ReadOnlySpan<byte> buffer)
+        {
+            WinI2c.I2cTransferResult result = _winI2cDevice.WritePartial(buffer.ToArray());
+            return result.Status == WinI2c.I2cTransferStatus.FullTransfer;
         }
 
         /// <summary>
@@ -119,12 +153,6 @@ namespace System.Device.I2c
             byte[] byteArray = new byte[readBuffer.Length];
             _winI2cDevice.WriteRead(writeBuffer.ToArray(), byteArray);
             new Span<byte>(byteArray).CopyTo(readBuffer);
-        }
-
-        public override bool IsDeviceReady()
-        {
-            var result = _winI2cDevice.WritePartial(new byte[0]);
-            return result.Status == WinI2c.I2cTransferStatus.FullTransfer;
         }
 
         protected override void Dispose(bool disposing)

@@ -85,7 +85,17 @@ namespace System.Device.I2c
             return _usedAddresses?.Remove(deviceAddress) ?? false;
         }
 
-        internal unsafe void Read(int deviceAddress, Span<byte> buffer)
+        internal void Read(int deviceAddress, Span<byte> buffer)
+        {
+            Read(deviceAddress, buffer, true);
+        }
+
+        internal bool TryRead(int deviceAddress, Span<byte> buffer)
+        {
+            return Read(deviceAddress, buffer, false);
+        }
+
+        private unsafe bool Read(int deviceAddress, Span<byte> buffer, bool throwExceptionOnIOError)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {
@@ -104,11 +114,21 @@ namespace System.Device.I2c
 
             fixed (byte* readBufferPointer = buffer)
             {
-                WriteReadCore((ushort)deviceAddress, null, readBufferPointer, 0, (ushort)buffer.Length);
+                return WriteReadCore((ushort)deviceAddress, null, readBufferPointer, 0, (ushort)buffer.Length, throwExceptionOnIOError);
             }
         }
 
-        internal unsafe void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
+        internal void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
+        {
+            Write(deviceAddress, buffer, true);
+        }
+
+        internal bool TryWrite(int deviceAddress, ReadOnlySpan<byte> buffer)
+        {
+            return Write(deviceAddress, buffer, false);
+        }
+
+        private unsafe bool Write(int deviceAddress, ReadOnlySpan<byte> buffer, bool throwExceptionOnIOError)
         {
             if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
             {
@@ -122,7 +142,7 @@ namespace System.Device.I2c
 
             fixed (byte* writeBufferPointer = buffer)
             {
-                WriteReadCore((ushort)deviceAddress, writeBufferPointer, null, (ushort)buffer.Length, 0);
+                return WriteReadCore((ushort)deviceAddress, writeBufferPointer, null, (ushort)buffer.Length, 0, throwExceptionOnIOError);
             }
         }
 
@@ -152,12 +172,12 @@ namespace System.Device.I2c
             {
                 fixed (byte* readBufferPointer = readBuffer)
                 {
-                    WriteReadCore((ushort)deviceAddress, writeBufferPointer, readBufferPointer, (ushort)writeBuffer.Length, (ushort)readBuffer.Length);
+                    WriteReadCore((ushort)deviceAddress, writeBufferPointer, readBufferPointer, (ushort)writeBuffer.Length, (ushort)readBuffer.Length, true);
                 }
             }
         }
 
-        protected virtual unsafe void WriteReadCore(ushort deviceAddress, byte* writeBuffer, byte* readBuffer, ushort writeBufferLength, ushort readBufferLength)
+        protected virtual unsafe bool WriteReadCore(ushort deviceAddress, byte* writeBuffer, byte* readBuffer, ushort writeBufferLength, ushort readBufferLength, bool throwExceptionOnIOError)
         {
             // Allocating space for 2 messages in case we want to read and write on the same call.
             i2c_msg* messagesPtr = stackalloc i2c_msg[2];
@@ -192,46 +212,18 @@ namespace System.Device.I2c
             };
 
             int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&msgset));
-            if (result < 0)
+
+            if (throwExceptionOnIOError && result < 0)
             {
                 throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
             }
+
+            return result >= 0;
         }
 
         private bool HasValidFileDescriptor()
         {
             return BusFileDescriptor >= 0;
-        }
-
-        public override bool IsDeviceReady(int deviceAddress)
-        {
-            if (deviceAddress < 0 || deviceAddress > ushort.MaxValue)
-            {
-                throw new ArgumentOutOfRangeException(nameof(deviceAddress));
-            }
-
-            return IsDeviceReadyCore((ushort)deviceAddress);
-        }
-
-        private unsafe bool IsDeviceReadyCore(ushort deviceAddress)
-        {
-            i2c_msg* messagesPtr = stackalloc i2c_msg[1];
-            messagesPtr[0] = new i2c_msg()
-            {
-                flags = I2cMessageFlags.I2C_M_WR,
-                addr = deviceAddress,
-                len = 0,
-                buf = null
-            };
-
-            var msgset = new i2c_rdwr_ioctl_data()
-            {
-                msgs = messagesPtr,
-                nmsgs = 1
-            };
-
-            int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_RDWR, new IntPtr(&msgset));
-            return result >= 0; // Tested on Raspberry Pi4. Returns 1 if device responds with an ACK, -1 if not
         }
 
         protected override void Dispose(bool disposing)

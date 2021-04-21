@@ -47,6 +47,27 @@ namespace System.Device.I2c
         public abstract void Read(Span<byte> buffer);
 
         /// <summary>
+        /// Attempts to read data from the I2C device. If the read fails for any reason, returns false rather than throwing an exception.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer to read the data from the I2C device.
+        /// The length of the buffer determines how much data to read from the I2C device.</param>
+        /// <returns>true: read succeeded, false if the read failed for any reason.</returns>
+        public virtual bool TryRead(Span<byte> buffer)
+        {
+            // Default trivial implementation only, derived I2cDevice should ideally override this
+            try
+            {
+                Read(buffer);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Writes a byte to the I2C device.
         /// </summary>
         /// <param name="value">The byte to be written to the I2C device.</param>
@@ -60,6 +81,28 @@ namespace System.Device.I2c
         /// The data should not include the I2C device address.
         /// </param>
         public abstract void Write(ReadOnlySpan<byte> buffer);
+
+        /// <summary>
+        /// Attempts to write data to the I2C device. If the write fails for any reason, returns false rather than throwing an exception.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer contains the data to be written to the I2C device.
+        /// The data should not include the I2C device address.
+        /// </param>
+        /// <returns>true: write succeeded, false if the write failed for any reason.</returns>
+        public virtual bool TryWrite(ReadOnlySpan<byte> buffer)
+        {
+            // Default trivial implementation only, derived I2cDevice should ideally override this
+            try
+            {
+                Write(buffer);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected,
@@ -79,27 +122,6 @@ namespace System.Device.I2c
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Queries whether the device is available for communication. This is accomplished by sending the device address on the bus
-        /// with the write bit set, but without sending any subsequent data bytes. If the device is available, it will respond with an
-        /// ACK and this function will return true. If the device is not available, the device will not acknowlege and this funciton will
-        /// return false.
-        /// </summary>
-        /// <returns>Whether the device responded with an ACK to the address query.</returns>
-        public virtual bool IsDeviceReady()
-        {
-            // Trivial implementation if not overriden in derived class
-            try
-            {
-                Write(new byte[0]);
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
         }
 
         /// <summary>

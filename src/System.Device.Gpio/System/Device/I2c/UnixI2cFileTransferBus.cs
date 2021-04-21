@@ -13,12 +13,19 @@ namespace System.Device.I2c
         {
         }
 
-        protected override unsafe void WriteReadCore(ushort deviceAddress, byte* writeBuffer, byte* readBuffer, ushort writeBufferLength, ushort readBufferLength)
+        protected override unsafe bool WriteReadCore(ushort deviceAddress, byte* writeBuffer, byte* readBuffer, ushort writeBufferLength, ushort readBufferLength, bool throwExceptionOnIOError)
         {
             int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, deviceAddress);
             if (result < 0)
             {
-                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                if (throwExceptionOnIOError)
+                {
+                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                }
+                else
+                {
+                    return false;
+                }
             }
 
             if (writeBuffer != null)
@@ -26,7 +33,14 @@ namespace System.Device.I2c
                 result = Interop.write(BusFileDescriptor, new IntPtr(writeBuffer), writeBufferLength);
                 if (result < 0)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                    if (throwExceptionOnIOError)
+                    {
+                        throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
 
@@ -35,9 +49,18 @@ namespace System.Device.I2c
                 result = Interop.read(BusFileDescriptor, new IntPtr(readBuffer), readBufferLength);
                 if (result < 0)
                 {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                    if (throwExceptionOnIOError)
+                    {
+                        throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
+                    }
+                    else
+                    {
+                        return false;
+                    }
                 }
             }
+
+            return true;
         }
     }
 }
