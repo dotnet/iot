@@ -49,6 +49,19 @@ namespace System.Device.Gpio.Tests
 
         [Fact]
         [Trait("feature", "i2c")]
+        public void I2C_Bme280CanAcknowledge()
+        {
+            using (var bus = SetupHelpers.CreateI2cBusForBme280())
+            {
+                using (var device = bus.CreateDevice(Bme280.DefaultI2cAddress))
+                {
+                    Assert.True(device.TryWrite(new byte[0])); // Sends address on bus with write bit set, but no data bytes.
+                }
+            }
+        }
+
+        [Fact]
+        [Trait("feature", "i2c")]
         public void I2C_Bme280CanRead()
         {
             using (Bme280 bme280 = CreateBme280())
