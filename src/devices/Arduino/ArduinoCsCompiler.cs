@@ -1019,6 +1019,9 @@ namespace Iot.Device.Arduino
                         return true;
                     }
                 }
+
+                // If we can use the interface map, don't try further, or we'll end up with wrong associations when there are multiple overloads for the same method (i.e. List<T>.GetEnumerator())
+                return false;
             }
 
             if (candidate.Name != self.Name)
