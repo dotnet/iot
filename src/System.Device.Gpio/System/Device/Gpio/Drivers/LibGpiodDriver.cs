@@ -242,7 +242,7 @@ namespace System.Device.Gpio.Drivers
                             (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN),
                     PinMode.InputPullUp => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
                             (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP),
-                    PinMode.Output => Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName),
+                    PinMode.Output => Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName, 0),
                     _ => -1,
                 };
 
@@ -262,9 +262,33 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc />
         protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
         {
-            // On the Raspberry Pi, we can Write the out value even if the mode is something other than out. It will take effect once we change the mode
-            Write(pinNumber, initialValue);
-            SetPinMode(pinNumber, mode);
+            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
+            {
+                // This call does not release the handle. It only releases the lock on the handle. Without this, changing the direction of a line is not possible.
+                // Line handles cannot be freed and are cached until the chip is closed.
+                pinHandle.ReleaseLock();
+                int requestResult = mode switch
+                {
+                    PinMode.Input => Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName),
+                    PinMode.InputPullDown => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                        (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN),
+                    PinMode.InputPullUp => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                        (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP),
+                    PinMode.Output => Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName, initialValue == PinValue.High ? 1 : 0),
+                    _ => -1,
+                };
+
+                if (requestResult == -1)
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                        pinNumber);
+                }
+
+                pinHandle.PinMode = mode;
+                return;
+            }
+
+            throw new InvalidOperationException($"Pin {pinNumber} is not open");
         }
 
         /// <inheritdoc/>
