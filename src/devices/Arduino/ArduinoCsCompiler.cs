@@ -61,6 +61,7 @@ namespace Iot.Device.Arduino
         Aborted = 1,
         Running = 2,
         Killed = 3,
+        ConnectionError
     }
 
     [Flags]

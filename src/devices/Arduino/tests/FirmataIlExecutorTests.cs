@@ -294,5 +294,14 @@ namespace Iot.Device.Arduino.Tests
         {
             LoadCodeMethod("DoubleToString", 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
         }
+
+        [Theory]
+        [InlineData(nameof(TestMethods.IntToString1), 20304)]
+        [InlineData(nameof(TestMethods.IntToString2), 20304)]
+        [InlineData(nameof(TestMethods.IntToString3), -20304)]
+        public void IntToStringTest(string methodName, int arg1)
+        {
+            LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
+        }
     }
 }

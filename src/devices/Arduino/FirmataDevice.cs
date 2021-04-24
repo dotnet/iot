@@ -353,7 +353,7 @@ namespace Iot.Device.Arduino
                                 Span<byte> bytesReceived = stackalloc byte[stringLength];
                                 ReassembleByteString(raw_data, 1, stringLength * 2, bytesReceived);
 
-                                string message1 = Encoding.ASCII.GetString(bytesReceived);
+                                string message1 = Encoding.UTF8.GetString(bytesReceived);
                                 int idxNull = message1.IndexOf('\0');
                                 if (message1.Contains("%") && idxNull > 0) // C style printf formatters
                                 {
@@ -712,6 +712,7 @@ namespace Iot.Device.Arduino
                 catch (Exception ex)
                 {
                     OnError?.Invoke($"Firmata protocol error: Parser exception {ex.Message}", ex);
+                    OnSchedulerReply?.Invoke(0, MethodState.ConnectionError, ex);
                 }
             }
         }

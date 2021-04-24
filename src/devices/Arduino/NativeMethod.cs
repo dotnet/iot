@@ -162,5 +162,7 @@ namespace Iot.Device.Arduino
         MathCos,
         MathTan,
         MathSqrt,
+
+        DebugWriteLine
     }
 }

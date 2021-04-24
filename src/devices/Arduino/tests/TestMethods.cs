@@ -673,6 +673,29 @@ namespace Iot.Device.Arduino.Tests
             return arg1;
         }
 
+        public static int IntToString1(int arg1, int arg2)
+        {
+            string result = arg1.ToString();
+            MiniAssert.That(result == "20304", result);
+            result = arg2.ToString();
+            MiniAssert.That(result == "0", result);
+            return 1;
+        }
+
+        public static int IntToString2(int arg1, int arg2)
+        {
+            string result = $"Argument 1 is {arg1} and argument 2 is {arg2}";
+            MiniAssert.That(result == "Argument 1 is 20304 and argument 2 is 0", result);
+            return 1;
+        }
+
+        public static int IntToString3(int arg1, int arg2)
+        {
+            string result = $"Argument 1 is {arg1} and argument 2 is {arg2}";
+            MiniAssert.That(result == "Argument 1 is -20304 and argument 2 is 0", result);
+            return 1;
+        }
+
         private class SmallBase : IDisposable
         {
             private int _a;
