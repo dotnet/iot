@@ -82,130 +82,130 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Theory]
-        [InlineData("Equal", 2, 2, true)]
-        [InlineData("Equal", 2000, 1999, false)]
-        [InlineData("Equal", -1, -1, true)]
-        [InlineData("SmallerS", 1, 2, true)]
-        [InlineData("SmallerOrEqualS", 7, 20, true)]
-        [InlineData("SmallerOrEqualS", 7, 7, true)]
-        [InlineData("SmallerOrEqualS", 21, 7, false)]
-        [InlineData("GreaterS", 0x12345678, 0x12345677, true)]
-        [InlineData("GreaterOrEqualS", 2, 2, true)]
-        [InlineData("GreaterOrEqualS", 787878, 787877, true)]
-        [InlineData("GreaterThanConstantS", 2701, 0, true)]
-        [InlineData("ComparisonOperators1", 1, 2, true)]
-        [InlineData("ComparisonOperators2", 100, 200, true)]
-        [InlineData("SmallerS", -1, 1, true)]
-        [InlineData("Unequal", 2, 2, false)]
-        [InlineData("SmallerOrEqualS", -2, -1, true)]
-        [InlineData("SmallerOrEqualS", -2, -2, true)]
+        [InlineData(nameof(TestMethods.Equal), 2, 2, true)]
+        [InlineData(nameof(TestMethods.Equal), 2000, 1999, false)]
+        [InlineData(nameof(TestMethods.Equal), -1, -1, true)]
+        [InlineData(nameof(TestMethods.SmallerS), 1, 2, true)]
+        [InlineData(nameof(TestMethods.SmallerOrEqualS), 7, 20, true)]
+        [InlineData(nameof(TestMethods.SmallerOrEqualS), 7, 7, true)]
+        [InlineData(nameof(TestMethods.SmallerOrEqualS), 21, 7, false)]
+        [InlineData(nameof(TestMethods.GreaterS), 0x12345678, 0x12345677, true)]
+        [InlineData(nameof(TestMethods.GreaterOrEqualS), 2, 2, true)]
+        [InlineData(nameof(TestMethods.GreaterOrEqualS), 787878, 787877, true)]
+        [InlineData(nameof(TestMethods.GreaterThanConstantS), 2701, 0, true)]
+        [InlineData(nameof(TestMethods.ComparisonOperators1), 1, 2, true)]
+        [InlineData(nameof(TestMethods.ComparisonOperators2), 100, 200, true)]
+        [InlineData(nameof(TestMethods.SmallerS), -1, 1, true)]
+        [InlineData(nameof(TestMethods.Unequal), 2, 2, false)]
+        [InlineData(nameof(TestMethods.SmallerOrEqualS), -2, -1, true)]
+        [InlineData(nameof(TestMethods.SmallerOrEqualS), -2, -2, true)]
         public void TestBooleanOperation(string methodName, int argument1, int argument2, bool expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("AddS", 10, 20, 30)]
-        [InlineData("AddS", 10, -5, 5)]
-        [InlineData("AddS", -5, -2, -7)]
-        [InlineData("SubS", 10, 2, 8)]
-        [InlineData("SubS", 10, -2, 12)]
-        [InlineData("SubS", -2, -2, 0)]
-        [InlineData("SubS", -4, 1, -5)]
-        [InlineData("MulS", 4, 6, 24)]
-        [InlineData("MulS", -2, -2, 4)]
-        [InlineData("MulS", -2, 2, -4)]
-        [InlineData("DivS", 10, 5, 2)]
-        [InlineData("DivS", 10, 20, 0)]
-        [InlineData("DivS", -10, 2, -5)]
-        [InlineData("DivS", -10, -2, 5)]
-        [InlineData("ModS", 10, 2, 0)]
-        [InlineData("ModS", 11, 2, 1)]
-        [InlineData("ModS", -11, 2, -1)]
-        [InlineData("LshS", 8, 1, 16)]
-        [InlineData("RshS", 8, 1, 4)]
-        [InlineData("RshS", -8, 1, -4)]
-        [InlineData("AndS", 0xF0, 0x1F, 0x10)]
-        [InlineData("AndS", 0xF0, 0x00, 0x00)]
-        [InlineData("OrS", 0xF0, 0x0F, 0xFF)]
-        [InlineData("NotS", 0xF0, 0, -241)]
-        [InlineData("NegS", -256, 0, 256)]
-        [InlineData("XorS", 0x0F, 0x03, 12)]
-        [InlineData("RshUnS", -8, 1, 2147483644)]
+        [InlineData(nameof(TestMethods.AddS), 10, 20, 30)]
+        [InlineData(nameof(TestMethods.AddS), 10, -5, 5)]
+        [InlineData(nameof(TestMethods.AddS), -5, -2, -7)]
+        [InlineData(nameof(TestMethods.SubS), 10, 2, 8)]
+        [InlineData(nameof(TestMethods.SubS), 10, -2, 12)]
+        [InlineData(nameof(TestMethods.SubS), -2, -2, 0)]
+        [InlineData(nameof(TestMethods.SubS), -4, 1, -5)]
+        [InlineData(nameof(TestMethods.MulS), 4, 6, 24)]
+        [InlineData(nameof(TestMethods.MulS), -2, -2, 4)]
+        [InlineData(nameof(TestMethods.MulS), -2, 2, -4)]
+        [InlineData(nameof(TestMethods.DivS), 10, 5, 2)]
+        [InlineData(nameof(TestMethods.DivS), 10, 20, 0)]
+        [InlineData(nameof(TestMethods.DivS), -10, 2, -5)]
+        [InlineData(nameof(TestMethods.DivS), -10, -2, 5)]
+        [InlineData(nameof(TestMethods.ModS), 10, 2, 0)]
+        [InlineData(nameof(TestMethods.ModS), 11, 2, 1)]
+        [InlineData(nameof(TestMethods.ModS), -11, 2, -1)]
+        [InlineData(nameof(TestMethods.LshS), 8, 1, 16)]
+        [InlineData(nameof(TestMethods.RshS), 8, 1, 4)]
+        [InlineData(nameof(TestMethods.RshS), -8, 1, -4)]
+        [InlineData(nameof(TestMethods.AndS), 0xF0, 0x1F, 0x10)]
+        [InlineData(nameof(TestMethods.AndS), 0xF0, 0x00, 0x00)]
+        [InlineData(nameof(TestMethods.OrS), 0xF0, 0x0F, 0xFF)]
+        [InlineData(nameof(TestMethods.NotS), 0xF0, 0, -241)]
+        [InlineData(nameof(TestMethods.NegS), -256, 0, 256)]
+        [InlineData(nameof(TestMethods.XorS), 0x0F, 0x03, 12)]
+        [InlineData(nameof(TestMethods.RshUnS), -8, 1, 2147483644)]
         public void TestArithmeticOperationSigned(string methodName, int argument1, int argument2, int expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("AddF", 10, 20, 30)]
-        [InlineData("AddF", 10, -5, 5)]
-        [InlineData("AddF", -5, -2, -7)]
-        [InlineData("SubF", 10, 2, 8)]
-        [InlineData("SubF", 10, -2, 12)]
-        [InlineData("SubF", -2.0f, -2.0f, 0)]
-        [InlineData("SubF", -4, 1, -5)]
-        [InlineData("MulF", 4, 2.5f, 10.0)]
-        [InlineData("MulF", -2, -2, 4)]
-        [InlineData("MulF", -2, 2, -4)]
-        [InlineData("DivF", 1.0f, 5.0f, 0.2f)]
-        [InlineData("DivF", 10, 20, 0.5)]
-        [InlineData("DivF", -10, 2, -5)]
-        [InlineData("DivF", -10, -2, 5)]
-        [InlineData("ModF", 10, 2, 0)]
-        [InlineData("ModF", 11, 2, 1)]
-        [InlineData("ModF", -11, 2, -1)]
-        [InlineData("LoadFloatConstant", 0.0, 0.0, 2.0)] // tests the LDC.R4 instruction
+        [InlineData(nameof(TestMethods.AddF), 10, 20, 30)]
+        [InlineData(nameof(TestMethods.AddF), 10, -5, 5)]
+        [InlineData(nameof(TestMethods.AddF), -5, -2, -7)]
+        [InlineData(nameof(TestMethods.SubF), 10, 2, 8)]
+        [InlineData(nameof(TestMethods.SubF), 10, -2, 12)]
+        [InlineData(nameof(TestMethods.SubF), -2.0f, -2.0f, 0)]
+        [InlineData(nameof(TestMethods.SubF), -4, 1, -5)]
+        [InlineData(nameof(TestMethods.MulF), 4, 2.5f, 10.0)]
+        [InlineData(nameof(TestMethods.MulF), -2, -2, 4)]
+        [InlineData(nameof(TestMethods.MulF), -2, 2, -4)]
+        [InlineData(nameof(TestMethods.DivF), 1.0f, 5.0f, 0.2f)]
+        [InlineData(nameof(TestMethods.DivF), 10, 20, 0.5)]
+        [InlineData(nameof(TestMethods.DivF), -10, 2, -5)]
+        [InlineData(nameof(TestMethods.DivF), -10, -2, 5)]
+        [InlineData(nameof(TestMethods.ModF), 10, 2, 0)]
+        [InlineData(nameof(TestMethods.ModF), 11, 2, 1)]
+        [InlineData(nameof(TestMethods.ModF), -11, 2, -1)]
+        [InlineData(nameof(TestMethods.LoadFloatConstant), 0.0, 0.0, 2.0)] // tests the LDC.R4 instruction
         public void TestArithmeticOperationSignedFloat(string methodName, float argument1, float argument2, float expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("AddD", 10, 20.0, 30.0)]
-        [InlineData("AddD", 10, -5, 5)]
-        [InlineData("AddD", -5, -2, -7)]
-        [InlineData("SubD", 10, 2, 8)]
-        [InlineData("SubD", 10, -2, 12)]
-        [InlineData("SubD", -2.0f, -2.0, 0)]
-        [InlineData("SubD", -4, 1, -5)]
-        [InlineData("MulD", 4, 2.5f, 10)]
-        [InlineData("MulD", -2, -2, 4)]
-        [InlineData("MulD", -2, 2, -4)]
-        [InlineData("DivD", 1.0f, 5.0f, 0.2)]
-        [InlineData("DivD", 10, 20, 0.5)]
-        [InlineData("DivD", -10, 2, -5)]
-        [InlineData("DivD", -10, -2, 5)]
-        [InlineData("ModD", 10, 2, 0)]
-        [InlineData("ModD", 11, 2, 1)]
-        [InlineData("ModD", -11, 2, -1)]
-        [InlineData("LoadDoubleConstant", 0.0, 0.0, 2.0)] // tests the LDC.R8 instruction
+        [InlineData(nameof(TestMethods.AddD), 10, 20.0, 30.0)]
+        [InlineData(nameof(TestMethods.AddD), 10, -5, 5)]
+        [InlineData(nameof(TestMethods.AddD), -5, -2, -7)]
+        [InlineData(nameof(TestMethods.SubD), 10, 2, 8)]
+        [InlineData(nameof(TestMethods.SubD), 10, -2, 12)]
+        [InlineData(nameof(TestMethods.SubD), -2.0f, -2.0, 0)]
+        [InlineData(nameof(TestMethods.SubD), -4, 1, -5)]
+        [InlineData(nameof(TestMethods.MulD), 4, 2.5f, 10)]
+        [InlineData(nameof(TestMethods.MulD), -2, -2, 4)]
+        [InlineData(nameof(TestMethods.MulD), -2, 2, -4)]
+        [InlineData(nameof(TestMethods.DivD), 1.0f, 5.0f, 0.2)]
+        [InlineData(nameof(TestMethods.DivD), 10, 20, 0.5)]
+        [InlineData(nameof(TestMethods.DivD), -10, 2, -5)]
+        [InlineData(nameof(TestMethods.DivD), -10, -2, 5)]
+        [InlineData(nameof(TestMethods.ModD), 10, 2, 0)]
+        [InlineData(nameof(TestMethods.ModD), 11, 2, 1)]
+        [InlineData(nameof(TestMethods.ModD), -11, 2, -1)]
+        [InlineData(nameof(TestMethods.LoadDoubleConstant), 0.0, 0.0, 2.0)] // tests the LDC.R8 instruction
         public void TestArithmeticOperationSignedDouble(string methodName, double argument1, double argument2, double expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("AddU", 10u, 20u, 30u)]
-        [InlineData("AddU", 10u, -5u, 5u)]
-        [InlineData("AddU", -5u, -2u, -7u)]
-        [InlineData("SubU", 10u, 2u, 8u)]
-        [InlineData("SubU", 10u, -2u, 12u)]
-        [InlineData("SubU", -2u, -2u, 0u)]
-        [InlineData("SubU", -4u, 1u, -5u)]
-        [InlineData("MulU", 4u, 6u, 24u)]
-        [InlineData("DivU", 10u, 5u, 2u)]
-        [InlineData("DivU", 10u, 20u, 0u)]
-        [InlineData("ModU", 10u, 2u, 0u)]
-        [InlineData("ModU", 11u, 2u, 1u)]
-        [InlineData("RshU", 8u, 1u, 4u)]
-        [InlineData("RshU", -8u, 1u, 2147483644)]
-        [InlineData("AndU", 0xF0u, 0x1Fu, 0x10u)]
-        [InlineData("AndU", 0xF0u, 0x00u, 0x00u)]
-        [InlineData("OrU", 0xF0u, 0x0Fu, 0xFFu)]
-        [InlineData("NotU", 0xF0u, 0u, 0xFFFFFF0Fu)]
-        [InlineData("XorU", 0x0Fu, 0x03u, 12)]
-        [InlineData("RshUnU", -8u, 1, 0x7FFFFFFCu)]
+        [InlineData(nameof(TestMethods.AddU), 10u, 20u, 30u)]
+        [InlineData(nameof(TestMethods.AddU), 10u, -5u, 5u)]
+        [InlineData(nameof(TestMethods.AddU), -5u, -2u, -7u)]
+        [InlineData(nameof(TestMethods.SubU), 10u, 2u, 8u)]
+        [InlineData(nameof(TestMethods.SubU), 10u, -2u, 12u)]
+        [InlineData(nameof(TestMethods.SubU), -2u, -2u, 0u)]
+        [InlineData(nameof(TestMethods.SubU), -4u, 1u, -5u)]
+        [InlineData(nameof(TestMethods.MulU), 4u, 6u, 24u)]
+        [InlineData(nameof(TestMethods.DivU), 10u, 5u, 2u)]
+        [InlineData(nameof(TestMethods.DivU), 10u, 20u, 0u)]
+        [InlineData(nameof(TestMethods.ModU), 10u, 2u, 0u)]
+        [InlineData(nameof(TestMethods.ModU), 11u, 2u, 1u)]
+        [InlineData(nameof(TestMethods.RshU), 8u, 1u, 4u)]
+        [InlineData(nameof(TestMethods.RshU), -8u, 1u, 2147483644)]
+        [InlineData(nameof(TestMethods.AndU), 0xF0u, 0x1Fu, 0x10u)]
+        [InlineData(nameof(TestMethods.AndU), 0xF0u, 0x00u, 0x00u)]
+        [InlineData(nameof(TestMethods.OrU), 0xF0u, 0x0Fu, 0xFFu)]
+        [InlineData(nameof(TestMethods.NotU), 0xF0u, 0u, 0xFFFFFF0Fu)]
+        [InlineData(nameof(TestMethods.XorU), 0x0Fu, 0x03u, 12)]
+        [InlineData(nameof(TestMethods.RshUnU), -8u, 1, 0x7FFFFFFCu)]
         public void TestArithmeticOperationUnsigned(string methodName, Int64 argument1, Int64 argument2, Int64 expected)
         {
             // Method signature as above, otherwise the test data conversion fails
@@ -213,71 +213,71 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Theory]
-        [InlineData("ResultTypesTest", 50, 20, 70)]
-        [InlineData("ResultTypesTest2", 21, -20, 1)]
+        [InlineData(nameof(TestMethods.ResultTypesTest), 50, 20, 70)]
+        [InlineData(nameof(TestMethods.ResultTypesTest2), 21, -20, 1)]
         public void TestTypeConversions(string methodName, UInt32 argument1, int argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("IntArrayTest", 4, 1, 3)]
-        [InlineData("IntArrayTest", 10, 2, 3)]
-        [InlineData("CharArrayTest", 10, 2, 'C')]
-        [InlineData("CharArrayTest", 10, 0, 'A')]
-        [InlineData("ByteArrayTest", 10, 0, 255)]
-        [InlineData("BoxedArrayTest", 5, 2, 7)]
-        [InlineData("StaggedArrayTest", 5, 7, (int)'3')]
+        [InlineData(nameof(TestMethods.IntArrayTest), 4, 1, 3)]
+        [InlineData(nameof(TestMethods.IntArrayTest), 10, 2, 3)]
+        [InlineData(nameof(TestMethods.CharArrayTest), 10, 2, 'C')]
+        [InlineData(nameof(TestMethods.CharArrayTest), 10, 0, 'A')]
+        [InlineData(nameof(TestMethods.ByteArrayTest), 10, 0, 255)]
+        [InlineData(nameof(TestMethods.BoxedArrayTest), 5, 2, 7)]
+        [InlineData(nameof(TestMethods.StaggedArrayTest), 5, 7, (int)'3')]
         public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("StructCtorBehaviorTest1", 5, 1, 2)]
-        [InlineData("StructCtorBehaviorTest2", 5, 1, 5)]
-        [InlineData("StructMethodCall1", 66, 33, -99)]
-        [InlineData("StructMethodCall2", 66, 33, -66)]
-        [InlineData("StructArray", 5, 2, 10)]
-        [InlineData("StructInterfaceCall1", 10, 2, 8)]
-        [InlineData("StructInterfaceCall2", 10, 2, 10)]
-        [InlineData("StructInterfaceCall3", 15, 3, 12)]
+        [InlineData(nameof(TestMethods.StructCtorBehaviorTest1), 5, 1, 2)]
+        [InlineData(nameof(TestMethods.StructCtorBehaviorTest2), 5, 1, 5)]
+        [InlineData(nameof(TestMethods.StructMethodCall1), 66, 33, -99)]
+        [InlineData(nameof(TestMethods.StructMethodCall2), 66, 33, -66)]
+        [InlineData(nameof(TestMethods.StructArray), 5, 2, 10)]
+        [InlineData(nameof(TestMethods.StructInterfaceCall1), 10, 2, 8)]
+        [InlineData(nameof(TestMethods.StructInterfaceCall2), 10, 2, 10)]
+        [InlineData(nameof(TestMethods.StructInterfaceCall3), 15, 3, 12)]
         public void StructTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("LargeStructCtorBehaviorTest1", 5, 1, 4)]
-        [InlineData("LargeStructCtorBehaviorTest2", 5, 1, 5)]
-        [InlineData("LargeStructMethodCall2", 66, 33, 66)]
-        [InlineData("LargeStructArray", 5, 1, 10)]
-        [InlineData("LargeStructAsInterface1", 5, 5, 1)]
-        [InlineData("LargeStructList1", 1, 2, 1)]
-        [InlineData("LargeStructList2", 1, 2, 1)]
+        [InlineData(nameof(TestMethods.LargeStructCtorBehaviorTest1), 5, 1, 4)]
+        [InlineData(nameof(TestMethods.LargeStructCtorBehaviorTest2), 5, 1, 5)]
+        [InlineData(nameof(TestMethods.LargeStructMethodCall2), 66, 33, 66)]
+        [InlineData(nameof(TestMethods.LargeStructArray), 5, 1, 10)]
+        [InlineData(nameof(TestMethods.LargeStructAsInterface1), 5, 5, 1)]
+        [InlineData(nameof(TestMethods.LargeStructList1), 1, 2, 1)]
+        [InlineData(nameof(TestMethods.LargeStructList2), 1, 2, 1)]
         public void LargeStructTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("CastClassTest", 0, 0, 1)]
+        [InlineData(nameof(TestMethods.CastClassTest), 0, 0, 1)]
         public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = true, UseFlashForKernel = true });
         }
 
         [Theory]
-        [InlineData("SpanImplementationBehavior", 5, 1, 1)]
+        [InlineData(nameof(TestMethods.SpanImplementationBehavior), 5, 1, 1)]
         public void SpanTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
         }
 
         [Theory]
-        [InlineData("SimpleEnumHasValues")]
-        [InlineData("EnumGetValues1")]
-        [InlineData("EnumGetValues2")]
+        [InlineData(nameof(TestMethods.SimpleEnumHasValues))]
+        [InlineData(nameof(TestMethods.EnumGetValues1))]
+        [InlineData(nameof(TestMethods.EnumGetValues2))]
         public void EnumTest(string methodName)
         {
             LoadCodeMethod(methodName, 0, 0, 1);
@@ -286,13 +286,13 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void EnumsHaveNames()
         {
-            LoadCodeMethod("EnumsHaveNames", 0, 0, 1, Fixture.DefaultCompilerSettings, false);
+            LoadCodeMethod(nameof(TestMethods.EnumsHaveNames), 0, 0, 1, Fixture.DefaultCompilerSettings, false);
         }
 
         [Fact]
         public void DoubleToStringTest()
         {
-            LoadCodeMethod("DoubleToString", 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
+            LoadCodeMethod(nameof(TestMethods.DoubleToString), 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
         }
 
         [Theory]
