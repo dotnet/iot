@@ -34,6 +34,12 @@ namespace Iot.Device.Arduino.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(NativeMethod.StringCtorCharCount)]
+        public MiniString(char c, int count)
+        {
+            throw new NotImplementedException();
+        }
+
         // This is a bit odd: All of these default constructors on System::String are never actually called, because the runtime handles string construction specially.
         /*
         [ArduinoImplementation(NativeMethod.StringCtor0)]
@@ -45,12 +51,6 @@ namespace Iot.Device.Arduino.Runtime
 
         [ArduinoImplementation(NativeMethod.StringCtor1)]
         public unsafe MiniString(char* buf)
-        {
-            throw new NotImplementedException();
-        }
-
-        [ArduinoImplementation(NativeMethod.StringCtor2)]
-        public MiniString(char c, int count)
         {
             throw new NotImplementedException();
         }

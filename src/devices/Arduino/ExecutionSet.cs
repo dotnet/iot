@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino.Runtime;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 #pragma warning disable CS1591
 namespace Iot.Device.Arduino
@@ -41,6 +43,7 @@ namespace Iot.Device.Arduino
         private readonly List<(int Token, byte[] EncodedString, string StringData)> _strings;
         private readonly CompilerSettings _compilerSettings;
         private readonly List<(int Token, TypeInfo? Class)> _specialTypeList;
+        private readonly ILogger _logger;
 
         private int _numDeclaredMethods;
         private ArduinoTask _entryPoint;
@@ -48,10 +51,12 @@ namespace Iot.Device.Arduino
         private int _nextGenericToken;
         private int _nextStringToken;
         private SnapShot _kernelSnapShot;
+        private Dictionary<Type, MethodInfo> _arrayListImpl;
 
         internal ExecutionSet(ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
         {
             _compiler = compiler;
+            _logger = this.GetCurrentClassLogger();
             _methods = new List<ArduinoMethodDeclaration>();
             _classes = new List<ClassDeclaration>();
             _patchedTypeTokens = new Dictionary<TypeInfo, int>();
@@ -63,6 +68,7 @@ namespace Iot.Device.Arduino
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new List<(MethodBase, MethodBase?)>();
             _classesToSuppress = new List<Type>();
+            _arrayListImpl = new();
             _strings = new();
             _specialTypeList = new();
 
@@ -81,6 +87,7 @@ namespace Iot.Device.Arduino
         internal ExecutionSet(ExecutionSet setToClone, ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
         {
             _compiler = compiler;
+            _logger = this.GetCurrentClassLogger();
             if (setToClone._compilerSettings != compilerSettings)
             {
                 throw new NotSupportedException("Target compiler settings must be equal to existing");
@@ -99,6 +106,7 @@ namespace Iot.Device.Arduino
             _methodsReplaced = new List<(MethodBase, MethodBase?)>(setToClone._methodsReplaced);
             _classesToSuppress = new List<Type>(setToClone._classesToSuppress);
             _strings = new(setToClone._strings);
+            _arrayListImpl = new Dictionary<Type, MethodInfo>(setToClone._arrayListImpl);
             _specialTypeList = new(setToClone._specialTypeList);
 
             _nextToken = setToClone._nextToken;
@@ -130,6 +138,14 @@ namespace Iot.Device.Arduino
         {
             get;
             set;
+        }
+
+        internal Dictionary<Type, MethodInfo> ArrayListImplementation
+        {
+            get
+            {
+                return _arrayListImpl;
+            }
         }
 
         public CompilerSettings CompilerSettings => _compilerSettings;
@@ -490,7 +506,9 @@ namespace Iot.Device.Arduino
         /// 24 True if this is a Nullable{T}
         /// 25..31 Type id for generic classes
         /// Combinations are constructed: if the token 0x32 means "int", 0x0200_0000 means "IEquatable{T}", then 0x0200_0032 is IEquatable{int} and
-        /// 0x0280_0032 is IEquatable{Nullable{int}}
+        /// 0x0280_0032 is Nullable{IEquatable{int}} (not IEquatable{Nullable{int}}!) Since Nullable{T} only works with value types, this isn't normally used.
+        /// There's a special list of very complex tokens that is used for complex combinations that can't be mapped with the above bit combinations, namely
+        /// objects with multiple template arguments such as List{List{T}} or Dictionary{TKey, TValue}
         /// </summary>
         /// <param name="typeInfo">Original type to add to list</param>
         /// <returns>A new token for the given type, or the existing token if it is already in the list</returns>
@@ -673,6 +691,7 @@ namespace Iot.Device.Arduino
             }
 
             _classes.Add(type);
+            _logger.LogDebug($"Class {type.TheType.MemberInfoSignature(true)} added to the execution set with token 0x{type.NewToken:X}");
             return true;
         }
 
@@ -808,6 +827,15 @@ namespace Iot.Device.Arduino
             _methods.Add(method);
             method.Index = _numDeclaredMethods;
             _numDeclaredMethods++;
+
+            if ((method.Flags & MethodFlags.SpecialMethod) == MethodFlags.SpecialMethod)
+            {
+                _logger.LogDebug($"Internally implemented method {method.MethodBase.MethodSignature(false)} added to the execution set with token 0x{method.Token:X}");
+            }
+            else
+            {
+                _logger.LogDebug($"Method {method.MethodBase.MethodSignature(false)} added to the execution set with token 0x{method.Token:X}");
+            }
 
             return true;
         }
@@ -1126,6 +1154,15 @@ namespace Iot.Device.Arduino
 
                 return ret;
             }
+        }
+
+        /// <summary>
+        /// This is required for the special implementation of Array.GetEnumerator that is an implementation of IList{T}
+        /// See I.8.9.1 Array types. T[] implements IList{T}.
+        /// </summary>
+        public void AddArrayImplementation(TypeInfo arrayType, MethodInfo getEnumeratorCall)
+        {
+            _arrayListImpl[arrayType] = getEnumeratorCall;
         }
     }
 }

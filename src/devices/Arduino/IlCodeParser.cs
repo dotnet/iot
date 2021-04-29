@@ -206,8 +206,13 @@ namespace Iot.Device.Arduino
                     {
                         var typeTarget = ResolveMember(method, token)!;
                         TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
+
+                        // If we create an array instance, we also need to provide this special iterator
+                        var getEnumeratorCall = typeof(Runtime.MiniArray).GetMethod("GetEnumerator")!.MakeGenericMethod(mb);
+                        methodsUsed.Add(getEnumeratorCall);
                         patchValue = set.GetOrAddClassToken(mb);
                         typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
+                        set.AddArrayImplementation(mb, getEnumeratorCall);
                         break;
                     }
 

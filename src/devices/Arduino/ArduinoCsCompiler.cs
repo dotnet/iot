@@ -17,107 +17,6 @@ using UnitsNet;
 #pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
-    internal enum ExecutorCommand : byte
-    {
-        None = 0,
-        DeclareMethod = 1,
-        LoadIl = 3,
-        StartTask = 4,
-        ResetExecutor = 5,
-        KillTask = 6,
-        MethodSignature = 7,
-        ClassDeclaration = 8,
-        ClassDeclarationEnd = 9, // Last part of class declaration
-        ConstantData = 10,
-        Interfaces = 11,
-        CopyToFlash = 12,
-
-        WriteFlashHeader = 13,
-        CheckFlashVersion = 14,
-        EraseFlash = 15,
-
-        SetConstantMemorySize = 16,
-        SpecialTokenList = 17,
-
-        Nack = 0x7e,
-        Ack = 0x7f,
-    }
-
-    [Flags]
-    public enum MethodFlags
-    {
-        None = 0,
-        Static = 1,
-        Virtual = 2,
-        SpecialMethod = 4, // Method will resolve to a built-in function on the arduino
-        Void = 8, // The method returns void
-        Ctor = 16, // The method is a ctor (which only implicitly returns "this"); the flag is not set for static ctors.
-        Abstract = 32, // The method is abstract (or an interface stub)
-    }
-
-    public enum MethodState
-    {
-        Stopped = 0,
-        Aborted = 1,
-        Running = 2,
-        Killed = 3,
-        ConnectionError
-    }
-
-    [Flags]
-    public enum VariableKind : byte
-    {
-        Void = 0, // The slot contains no data
-        Uint32 = 1, // The slot contains unsigned integer data
-        Int32 = 2, // The slot contains signed integer data
-        Boolean = 3, // The slot contains true or false
-        Object = 4, // The slot contains an object reference
-        Method = 5,
-        ValueArray = 6, // The slot contains a reference to an array of value types (inline)
-        ReferenceArray = 7, // The slot contains a reference to an array of reference types
-        Float = 8,
-        LargeValueType = 9, // The slot contains a large value type
-        Int64 = 16 + 1,
-        Uint64 = 16 + 2,
-        Double = 16 + 4,
-        Reference = 32, // Address of a variable
-        RuntimeFieldHandle = 33, // So far this is a pointer to a constant initializer
-        RuntimeTypeHandle = 34, // A type handle. The value is a type token
-        AddressOfVariable = 35, // An address pointing to a variable slot on another method's stack or arglist
-        FunctionPointer = 36, // A function pointer
-        StaticMember = 128, // type is defined by the first value it gets
-    }
-
-    /// <summary>
-    /// A set of tokens which is always assigned to these classes, because they need to be identifiable in the firmware, i.e. the token assigned
-    /// to "System.Type" is always 2
-    /// </summary>
-    public enum KnownTypeTokens
-    {
-        None = 0,
-        Object = 1,
-        Type = 2,
-        ValueType = 3,
-        String = 4,
-        TypeInfo = 5,
-        RuntimeType = 6,
-        Nullable = 7,
-        Enum = 8,
-        Array = 9,
-        ByReferenceByte = 10,
-        Delegate = 11,
-        MulticastDelegate = 12,
-        Byte = 19,
-        Int32 = 20,
-        Uint32 = 21,
-        Int64 = 22,
-        Uint64 = 23,
-        LargestKnownTypeToken = 40,
-        // If more of these are required, check the ctor of ExecutionSet to make sure enough entries have been reserved
-        IEnumerableOfT = ExecutionSet.GenericTokenStep,
-        SpanOfT = ExecutionSet.GenericTokenStep * 2,
-    }
-
     public sealed class ArduinoCsCompiler : IDisposable
     {
         private const int DataVersion = 1;
@@ -554,7 +453,6 @@ namespace Iot.Device.Arduino
             // Add this first, so we break the recursion to this class further down
             var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
             set.AddClass(newClass);
-            _logger.LogDebug($"Class {newClass.Name} added to the execution set with token 0x{newClass.NewToken:X}");
             foreach (var iface in interfaces)
             {
                 PrepareClassDeclaration(set, iface);
@@ -787,6 +685,21 @@ namespace Iot.Device.Arduino
         /// </summary>
         private void DetectRequiredVirtualMethodImplementations(ExecutionSet set, List<ClassDeclaration> declarations)
         {
+            foreach (var a in set.ArrayListImplementation)
+            {
+                // this adds MiniArray.GetEnumerator(T[]) as implementation of T[].IList<T>()
+                PrepareCodeInternal(set, a.Value, null);
+                var m = set.GetMethod(a.Value);
+                var arrayClass = set.Classes.Single(x => x.NewToken == (int)KnownTypeTokens.Array);
+                if (arrayClass.Members.All(y => y.Method != a.Value))
+                {
+                    var interestingInterface = typeof(IEnumerable<>).MakeGenericType(a.Key);
+                    var method = interestingInterface.GetMethod("GetEnumerator", BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy) ?? throw new MissingMethodException(interestingInterface.Name, "GetEnumerator");
+                    int interfaceMethodToken = set.GetOrAddMethodToken(method);
+                    arrayClass.AddClassMember(new ClassMember(a.Value, VariableKind.Method, m.Token, new List<int>() { interfaceMethodToken }));
+                }
+            }
+
             for (var i = 0; i < declarations.Count; i++)
             {
                 var cls = declarations[i];
@@ -2017,7 +1930,6 @@ namespace Iot.Device.Arduino
 
             if (set.AddMethod(newInfo))
             {
-                _logger.LogDebug($"Method {methodInfo.MethodSignature(false)} added to the execution set with index {newInfo.Index} and token 0x{newInfo.Token:X}");
                 // If the class containing this method contains statics, we need to send its declaration
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)

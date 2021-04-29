@@ -590,6 +590,64 @@ namespace Iot.Device.Arduino.Tests
             return t.B;
         }
 
+        public static int IterateOverArray1(int arg1, int arg2)
+        {
+            string[] array = new string[]
+            {
+                "Hello", "World", "of", "strings"
+            };
+
+            foreach (var s in array)
+            {
+                MiniAssert.NotNull(s);
+                MiniAssert.That(s.Length > 1);
+            }
+
+            return 1;
+        }
+
+        /// <summary>
+        /// The code of this method is significantly different from the above. While the above code is optimized to a for loop,
+        /// this one uses string[].GetIterator(), which is an implicitly compiler-generated function that exists on arrays, because T[] shall implement IList{T}
+        /// </summary>
+        public static int IterateOverArray2(int arg1, int arg2)
+        {
+            string[] array = new string[]
+            {
+                "Hello", "World", "of", "strings"
+            };
+
+            IEnumerable<string> enumerableString = array;
+
+            foreach (var s in enumerableString)
+            {
+                MiniAssert.NotNull(s);
+                MiniAssert.That(s.Length > 1);
+            }
+
+            return 1;
+        }
+
+        /// <summary>
+        /// Same as above, but this time with a value array
+        /// </summary>
+        public static int IterateOverArray3(int arg1, int arg2)
+        {
+            int[] array = new int[]
+            {
+               3, 4, 5, 6
+            };
+
+            IEnumerable<int> enumerable = array;
+
+            foreach (var s in enumerable)
+            {
+                MiniAssert.That(s > 0);
+            }
+
+            return 1;
+        }
+
         public static int SpanImplementationBehavior(int a, int b)
         {
             Span<byte> span = stackalloc byte[]

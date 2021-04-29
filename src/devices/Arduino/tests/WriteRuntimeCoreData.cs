@@ -49,6 +49,28 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Fact]
+        public void WriteExecutorCommands()
+        {
+            string name = nameof(ExecutorCommand);
+            string header = FormattableString.Invariant($@"
+#pragma once
+
+enum class {name}
+{{
+");
+            string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
+            TextWriter w = new StreamWriter(outputFile, false, Encoding.UTF8);
+            w.Write(header);
+            foreach (var e in Enum.GetValues(typeof(ExecutorCommand)))
+            {
+                w.WriteLine(FormattableString.Invariant($"    {e.ToString()} = {(byte)e},"));
+            }
+
+            w.WriteLine("};"); // Tail
+            w.Close();
+        }
+
+        [Fact]
         public void WriteVariableKind()
         {
             string name = nameof(VariableKind);

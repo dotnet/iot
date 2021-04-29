@@ -1479,11 +1479,16 @@ namespace Iot.Device.Arduino
 
         public void SendSpecialTypeList(List<int> tokens)
         {
+            SendSpecialTokenList(tokens, ExecutorCommand.SpecialTokenList);
+        }
+
+        public void SendSpecialTokenList(List<int> tokens, ExecutorCommand command)
+        {
             const int packetSize = 5; // integers
             // We send 5 values at once (with 5 bytes each)
             for (int offset = 0; offset < tokens.Count; offset += packetSize)
             {
-                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.SpecialTokenList);
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(command);
                 int remaining = Math.Min(packetSize, tokens.Count - offset);
                 sequence.SendInt32(tokens.Count);
                 sequence.SendInt32(offset);

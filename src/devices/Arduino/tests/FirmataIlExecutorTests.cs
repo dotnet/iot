@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -303,5 +304,15 @@ namespace Iot.Device.Arduino.Tests
         {
             LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
         }
+
+        [Theory]
+        [InlineData(nameof(TestMethods.IterateOverArray1), 1)]
+        [InlineData(nameof(TestMethods.IterateOverArray2), 1)]
+        [InlineData(nameof(TestMethods.IterateOverArray3), 1)]
+        public void IteratorProblems(string methodName, int arg1)
+        {
+            LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
+        }
+
     }
 }

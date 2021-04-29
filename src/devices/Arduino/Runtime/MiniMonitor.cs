@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace Iot.Device.Arduino.Runtime
 {
-    [ArduinoReplacement(typeof(Monitor))]
+    [ArduinoReplacement(typeof(Monitor), true)]
     internal class MiniMonitor
     {
         [ArduinoImplementation(NativeMethod.MonitorEnter1)]
@@ -11,9 +11,11 @@ namespace Iot.Device.Arduino.Runtime
         {
         }
 
-        [ArduinoImplementation(NativeMethod.MonitorEnter2)]
+        [ArduinoImplementation]
         public static void Enter(Object o, ref bool lockTaken)
         {
+            Enter(o);
+            lockTaken = true;
         }
 
         [ArduinoImplementation(NativeMethod.MonitorExit)]

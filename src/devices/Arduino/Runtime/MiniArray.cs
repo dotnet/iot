@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Iot.Device.Arduino.Runtime
 {
@@ -285,6 +287,14 @@ namespace Iot.Device.Arduino.Runtime
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Used by the backend to construct an instance of <see cref="ArrayIterator{T}"/>
+        /// </summary>
+        public static IEnumerator<T> GetEnumerator<T>(T[] array)
+        {
+            return new ArrayIterator<T>(array);
+        }
+
         [ArduinoImplementation(NativeMethod.ArraySetValue1)]
         public void SetValue(object? value, int index)
         {
@@ -295,6 +305,45 @@ namespace Iot.Device.Arduino.Runtime
         public object GetValue(int index)
         {
             throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// This class is used to implement the iterator on T[] that is returned on the implicitly generated GetEnumerator()
+        /// </summary>
+        internal class ArrayIterator<T> : IEnumerator<T>
+        {
+            private T[] _array;
+            private int _current;
+            public ArrayIterator(T[] array)
+            {
+                _array = array;
+                _current = -1;
+            }
+
+            public bool MoveNext()
+            {
+                _current++;
+                return _current < _array.Length;
+            }
+
+            public void Reset()
+            {
+                _current = -1;
+            }
+
+            public T Current
+            {
+                get
+                {
+                    return _array[_current];
+                }
+            }
+
+            object IEnumerator.Current => Current!;
+
+            public void Dispose()
+            {
+            }
         }
     }
 }
