@@ -160,12 +160,6 @@ namespace Iot.Device.Arduino.Runtime
         }
 
         [ArduinoImplementation]
-        public int IndexOf(char c)
-        {
-            throw new NotImplementedException();
-        }
-
-        [ArduinoImplementation]
         public IEnumerator<char> GetEnumerator()
         {
             throw new NotImplementedException();
