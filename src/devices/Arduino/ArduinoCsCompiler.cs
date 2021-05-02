@@ -780,7 +780,7 @@ namespace Iot.Device.Arduino
                     classFlags |= 4;
                 }
 
-                _logger.LogDebug($"Sending class declaration for {cls.MemberInfoSignature()} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes. Class {idx + 1} / {classesToLoad.Count}");
+                _logger.LogDebug($"Sending class {idx + 1} of {classesToLoad.Count}: Declaration for {cls.MemberInfoSignature()} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes.");
                 _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members);
 
                 _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
@@ -2041,7 +2041,7 @@ namespace Iot.Device.Arduino
             for (var index2 = 0; index2 < codeSequences.Count; index2++)
             {
                 var initializer = codeSequences[index2].Method;
-                _logger.LogDebug($"Running static initializer of {initializer.DeclaringType}. Step {index2 + 1}/{codeSequences.Count}...");
+                _logger.LogDebug($"Running static initializer of {initializer.DeclaringType!.MemberInfoSignature()}. Step {index2 + 1}/{codeSequences.Count}...");
                 var task = GetTask(set, initializer);
                 task.Invoke(CancellationToken.None);
                 task.WaitForResult();
@@ -2056,6 +2056,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// This sorts the static constructors by dependencies. A constructor that has a dependency to another class
         /// must be executed after that class. Let's hope the dependencies are not circular.
+        /// TODO: This doesn't work perfectly yet, therefore some manual tweaking is required
         /// </summary>
         internal class DependencySorter : IComparer<IlCode>
         {
@@ -2071,12 +2072,27 @@ namespace Iot.Device.Arduino
                     return -1;
                 }
 
-                if (x.DependentTypes.Contains(y.Method.DeclaringType))
+                var xType = x.Method.DeclaringType;
+                var yType = y.Method.DeclaringType;
+                if (xType == yType)
+                {
+                    return 0;
+                }
+                else if (xType == null)
+                {
+                    return 1;
+                }
+                else if (yType == null)
+                {
+                    return -1;
+                }
+
+                if (x.DependentTypes.Contains(yType))
                 {
                     return 1;
                 }
 
-                if (x.DependentMethods.Any(a => a.DeclaringType == y.Method.DeclaringType))
+                if (x.DependentMethods.Any(a => a.DeclaringType == yType))
                 {
                     return 1;
                 }
@@ -2084,9 +2100,19 @@ namespace Iot.Device.Arduino
                 {
                     return -1;
                 }
-                else if (y.DependentMethods.Any(a => a.DeclaringType == x.Method.DeclaringType))
+                else if (y.DependentMethods.Any(a => a.DeclaringType == xType))
                 {
                     return -1;
+                }
+
+                if (xType.Name.Contains("EqualityComparer", StringComparison.Ordinal) && !yType.Name.Contains("EqualityComparer", StringComparison.Ordinal))
+                {
+                    return -1;
+                }
+
+                if (yType.Name.Contains("EqualityComparer", StringComparison.Ordinal) && !xType.Name.Contains("EqualityComparer", StringComparison.Ordinal))
+                {
+                    return 1;
                 }
 
                 return 0;
