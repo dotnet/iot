@@ -296,14 +296,28 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(nameof(TestMethods.DoubleToString), 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
         }
 
+        /// <summary>
+        /// The tests of this group try to expose a problem that was once detected and fixed.
+        /// </summary>
         [Theory]
         [InlineData(nameof(TestMethods.IntToString1), 20304)]
         [InlineData(nameof(TestMethods.IntToString2), 20304)]
         [InlineData(nameof(TestMethods.IntToString3), -20304)]
         [InlineData(nameof(TestMethods.DictionaryTest1), 0)]
-        public void IntToStringTest(string methodName, int arg1)
+        [InlineData(nameof(TestMethods.DictionaryTest2), 0)]
+        [InlineData(nameof(TestMethods.LcdCharacterEncodingTest1), 0)]
+        [InlineData(nameof(TestMethods.LcdCharacterEncodingTest2), 0)]
+        public void BrokenImplementationBehaviorValidation(string methodName, int arg1)
         {
-            LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
+            var compilerSettings = new CompilerSettings()
+            {
+                AutoRestartProgram = false,
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = true
+            };
+
+            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]

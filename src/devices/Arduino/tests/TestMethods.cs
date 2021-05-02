@@ -2,10 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Arduino.Runtime;
+using Iot.Device.CharacterLcd;
+using Iot.Device.Graphics;
 using UnitsNet.Units;
 using Xunit;
 
@@ -774,6 +777,41 @@ namespace Iot.Device.Arduino.Tests
 
             Dictionary<char, byte> copy = new Dictionary<char, byte>(charDict);
             MiniAssert.That(copy['b'] == (byte)'b');
+            return 1;
+        }
+
+        public static int DictionaryTest2(int arg1, int arg2)
+        {
+            Dictionary<char, byte> charDict = new Dictionary<char, byte>();
+            charDict.Add('°', 0b1101_1111);
+
+            MiniAssert.That(charDict['°'] == 0b1101_1111);
+            return 1;
+        }
+
+        public static int LcdCharacterEncodingTest1(int arg1, int arg2)
+        {
+            LcdCharacterEncoding encoding = LcdConsole.CreateEncoding(CultureInfo.CreateSpecificCulture("de-CH"), "A00", '?', 8);
+            string testString1 = "Abc";
+            MiniAssert.That(3 == encoding.GetByteCount(testString1), "byte count does not match");
+            byte[] encoded = encoding.GetBytes(testString1);
+            MiniAssert.That((byte)'A' == encoded[0]);
+            MiniAssert.That((byte)'b' == encoded[1]);
+            MiniAssert.That((byte)'c' == encoded[2]);
+            return 1;
+        }
+
+        public static int LcdCharacterEncodingTest2(int arg1, int arg2)
+        {
+            LcdCharacterEncoding encoding = LcdConsole.CreateEncoding(CultureInfo.CreateSpecificCulture("de-CH"), "A00", '?', 8);
+            string testString1 = "22.76 °C";
+            char symbol = testString1[6];
+            MiniAssert.That(symbol == 0xb0);
+            MiniAssert.That(8 == encoding.GetByteCount(testString1), "byte count does not match");
+            byte[] encoded = encoding.GetBytes(testString1);
+            var encodedByte = encoded[6];
+            MiniAssert.That(0b1101_1111 == encodedByte, $"Byte is 0x{(int)encodedByte:X4}"); // Place of the ° character in the A00 ROM map (at least something that looks like it)
+            MiniAssert.That((byte)'C' == encoded[7]);
             return 1;
         }
 
