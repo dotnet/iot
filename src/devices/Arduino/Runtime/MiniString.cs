@@ -270,69 +270,57 @@ namespace Iot.Device.Arduino.Runtime
 
         public bool ToBoolean(IFormatProvider? provider)
         {
-            // Our MiniString.ToString() operation is a no-op, but it does the implicit conversion from MiniString to String
             return Convert.ToBoolean(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public byte ToByte(IFormatProvider? provider)
         {
             return Convert.ToByte(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public char ToChar(IFormatProvider? provider)
         {
             return Convert.ToChar(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public DateTime ToDateTime(IFormatProvider? provider)
         {
             return Convert.ToDateTime(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public decimal ToDecimal(IFormatProvider? provider)
         {
             return Convert.ToDecimal(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public double ToDouble(IFormatProvider? provider)
         {
             return Convert.ToDouble(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public short ToInt16(IFormatProvider? provider)
         {
             return Convert.ToInt16(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public int ToInt32(IFormatProvider? provider)
         {
             return Convert.ToInt32(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public long ToInt64(IFormatProvider? provider)
         {
             return Convert.ToInt64(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public sbyte ToSByte(IFormatProvider? provider)
         {
             return Convert.ToSByte(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public float ToSingle(IFormatProvider? provider)
         {
             return Convert.ToSingle(ToString(), provider);
-            // throw new NotImplementedException();
         }
 
         public string ToString(IFormatProvider? provider)
@@ -366,10 +354,9 @@ namespace Iot.Device.Arduino.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringGetRawStringData)]
         public ref char GetRawStringData()
         {
-            throw new NotImplementedException();
+            return ref _firstChar;
         }
 
         // This is only intended to be used by char.ToString.
