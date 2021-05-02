@@ -300,6 +300,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.IntToString1), 20304)]
         [InlineData(nameof(TestMethods.IntToString2), 20304)]
         [InlineData(nameof(TestMethods.IntToString3), -20304)]
+        [InlineData(nameof(TestMethods.DictionaryTest1), 0)]
         public void IntToStringTest(string methodName, int arg1)
         {
             LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);

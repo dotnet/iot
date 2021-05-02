@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -10,6 +12,7 @@ using Iot.Device.Arduino.Tests;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.CharacterLcd;
+using Iot.Device.Graphics;
 using UnitsNet;
 using Xunit;
 
@@ -82,28 +85,34 @@ namespace Iot.Device.Arduino.Tests
                 hd44780.Clear();
                 hd44780.Write("Startup!");
                 Thread.Sleep(500);
+                LcdConsole console = new LcdConsole(hd44780, "A00", false);
+                LcdCharacterEncoding encoding = LcdConsole.CreateEncoding(CultureInfo.CreateSpecificCulture("de-CH"), "A00", '?', 8);
+                console.LoadEncoding(encoding);
                 I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
                 using Bme680 bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
                 bme680.Reset();
-                hd44780.Clear();
+                console.Clear();
+                console.LineFeedMode = LineWrapMode.Truncate;
                 gpioController.Write(redLed, PinValue.Low);
                 while (gpioController.Read(button) == PinValue.Low)
                 {
-                    hd44780.SetCursorPosition(0, 0);
+                    // Debug.WriteLine("Starting loop");
+                    console.SetCursorPosition(0, 0);
                     bme680.SetPowerMode(Bme680PowerMode.Forced);
                     if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure))
                     {
-                        string temperatureLine = temp.DegreesCelsius.ToString("F1") + " °C";
-                        hd44780.Write(temperatureLine);
+                        string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C";
+                        Debug.WriteLine(temperatureLine);
+                        console.WriteLine(temperatureLine);
                     }
 
-                    hd44780.SetCursorPosition(0, 1);
+                    console.SetCursorPosition(0, 1);
                     var time = DateTime.Now;
-                    hd44780.Write(time.ToString("dddd"));
-                    hd44780.SetCursorPosition(0, 2);
-                    hd44780.Write(time.ToString("dd. MMMM yyyy    "));
-                    hd44780.SetCursorPosition(0, 3);
-                    hd44780.Write(time.ToLongTimeString());
+                    console.Write(time.ToString("dddd"));
+                    console.SetCursorPosition(0, 2);
+                    console.WriteLine(time.ToString("dd. MMMM yyyy    "));
+                    console.SetCursorPosition(0, 3);
+                    console.WriteLine(time.ToLongTimeString());
                     Thread.Sleep(800);
                     gpioController.Write(redLed, PinValue.High);
                     Thread.Sleep(100);

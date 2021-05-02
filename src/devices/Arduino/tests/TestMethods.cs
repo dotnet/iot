@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -751,6 +752,28 @@ namespace Iot.Device.Arduino.Tests
         {
             string result = $"Argument 1 is {arg1} and argument 2 is {arg2}";
             MiniAssert.That(result == "Argument 1 is -20304 and argument 2 is 0", result);
+            return 1;
+        }
+
+        /// <summary>
+        /// A broken Array.Copy implementation caused this to fail after more than 3 elements had been added
+        /// </summary>
+        public static int DictionaryTest1(int arg1, int arg2)
+        {
+            Dictionary<char, byte> charDict = new Dictionary<char, byte>();
+            for (char c = 'a'; c <= 'z'; c++)
+            {
+                charDict.Add(c, (byte)c);
+            }
+
+            foreach (var ch in charDict.Keys)
+            {
+                MiniAssert.That(ch != 0);
+                Debug.WriteLine($"Char is {ch}, int {(int)ch}");
+            }
+
+            Dictionary<char, byte> copy = new Dictionary<char, byte>(charDict);
+            MiniAssert.That(copy['b'] == (byte)'b');
             return 1;
         }
 
