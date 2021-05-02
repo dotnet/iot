@@ -2115,6 +2115,20 @@ namespace Iot.Device.Arduino
                     return 1;
                 }
 
+                if (!string.IsNullOrEmpty(xType.Namespace) && !string.IsNullOrEmpty(yType.Namespace))
+                {
+                    // Ctors from system come before any other namespaces
+                    if (xType.Namespace.StartsWith("System", StringComparison.Ordinal) && !yType.Namespace.Contains("System", StringComparison.Ordinal))
+                    {
+                        return -1;
+                    }
+
+                    if (!xType.Namespace.StartsWith("System", StringComparison.Ordinal) && yType.Namespace.Contains("System", StringComparison.Ordinal))
+                    {
+                        return 1;
+                    }
+                }
+
                 return 0;
             }
         }
