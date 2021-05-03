@@ -19,8 +19,8 @@
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
     <PackageReference Include="SixLabors.ImageSharp" Version="$(SixLaborsImageSharpPackageVersion)" />
     <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
-	
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+
+    <ProjectReference Include="$(MainLibraryPath)/System.Device.Gpio.csproj" />
   </ItemGroup>
     <!-- Automatically include these assemblies in all test projects -->
   <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
