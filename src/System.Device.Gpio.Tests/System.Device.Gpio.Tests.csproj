@@ -4,14 +4,20 @@
     <LangVersion>9</LangVersion>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
+     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+     <PackageReference Include="xunit" Version="$(xunitPackageVersion)" />
+     <PackageReference Include="xunit.runner.visualstudio" Version="$(xunitrunnervisualstudioPackageVersion)">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.utility" Version="$(xunitrunnerutilityPackageVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
   </ItemGroup>
 </Project>

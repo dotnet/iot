@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project>
+  <!-- Hint: This file is only included in projects not in the src/devices subtree. Check the file with the same name
+  there for common includes to all bindings -->
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
   <Import Project="$(RepositoryEngineeringDir)Compilers.props" />
   <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />

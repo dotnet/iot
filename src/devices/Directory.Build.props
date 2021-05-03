@@ -19,5 +19,18 @@
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
     <PackageReference Include="SixLabors.ImageSharp" Version="$(SixLaborsImageSharpPackageVersion)" />
     <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
+	
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  </ItemGroup>
+    <!-- Automatically include these assemblies in all test projects -->
+  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
+     <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
+     <PackageReference Include="xunit" Version="$(xunitPackageVersion)" />
+     <PackageReference Include="xunit.runner.visualstudio" Version="$(xunitrunnervisualstudioPackageVersion)">
+       <PrivateAssets>all</PrivateAssets>
+       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="xunit.runner.utility" Version="$(xunitrunnerutilityPackageVersion)" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
   </ItemGroup>
 </Project>

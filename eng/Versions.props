@@ -16,6 +16,11 @@
     <MicrosoftExtensionsLoggingConsolePackageVersion>5.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
     <MicrosoftExtensionsLoggingPackageVersion>5.0.0</MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsLoggingAbstractionsPackageVersion>5.0.0</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>16.9.4</MicrosoftNETTestSdkPackageVersion>
     <SixLaborsImageSharpPackageVersion>1.0.2</SixLaborsImageSharpPackageVersion>
+    <MoqPackageVersion>4.16.1</MoqPackageVersion>
+    <xunitPackageVersion>2.4.1</xunitPackageVersion>
+    <xunitrunnervisualstudioPackageVersion>2.4.3</xunitrunnervisualstudioPackageVersion>
+    <xunitrunnerutilityPackageVersion>2.4.1</xunitrunnerutilityPackageVersion>
   </PropertyGroup>
 </Project>
