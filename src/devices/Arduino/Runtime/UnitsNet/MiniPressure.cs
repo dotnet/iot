@@ -41,10 +41,29 @@ namespace Iot.Device.Arduino.Runtime.UnitsNet
             }
         }
 
+        public double Hectopascals
+        {
+            get
+            {
+                if (_unit == PressureUnit.Pascal)
+                {
+                    return _value / 100;
+                }
+                else if (_unit == PressureUnit.Hectopascal)
+                {
+                    return _value;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+        }
+
         public static Pressure FromPascals(QuantityValue value)
         {
             double v = (double)value;
-            return new Pressure(v, PressureUnit.Hectopascal);
+            return new Pressure(v, PressureUnit.Pascal);
         }
     }
 }

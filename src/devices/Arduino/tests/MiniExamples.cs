@@ -101,7 +101,7 @@ namespace Iot.Device.Arduino.Tests
                     bme680.SetPowerMode(Bme680PowerMode.Forced);
                     if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure))
                     {
-                        string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C";
+                        string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + pressure.Hectopascals.ToString("F1") + " hPa";
                         Debug.WriteLine(temperatureLine);
                         console.WriteLine(temperatureLine);
                     }
