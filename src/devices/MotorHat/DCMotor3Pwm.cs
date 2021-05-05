@@ -33,7 +33,7 @@ namespace Iot.Device.MotorHat
             set
             {
                 // Make sure the speed is between -1 and 1
-                _speed = Math.Clamp(value, -1, 1);
+                _speed = value < -1 ? -1 : (value > 1) ? 1 : value;
 
                 // The motor Direction is handled configuring in1 and in2 based on speed sign
                 if (_speed > 0)

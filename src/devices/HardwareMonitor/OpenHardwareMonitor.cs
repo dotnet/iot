@@ -313,7 +313,7 @@ namespace Iot.Device.HardwareMonitor
         /// <exception cref="NotSupportedException">There were multiple sensors found, but they return different units (i.e. CPU temperature is
         /// reported as Celsius for some cores and Fahrenheit for others)</exception>
         public bool TryGetAverage<T>(Hardware hardware,
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
         [NotNullWhen(true)]
 #endif
         out T? average)
@@ -328,13 +328,13 @@ namespace Iot.Device.HardwareMonitor
                 {
                     if (unitThatWasUsed == null)
                     {
-#if NETCOREAPP2_1
+#if !NET5_0_OR_GREATER
                         unitThatWasUsed = singleValue!.Unit;
 #else
                         unitThatWasUsed = singleValue.Unit;
 #endif
                     }
-#if NETCOREAPP2_1
+#if !NET5_0_OR_GREATER
                     else if (!unitThatWasUsed.Equals(singleValue!.Unit))
 #else
                     else if (!unitThatWasUsed.Equals(singleValue.Unit))
@@ -473,7 +473,7 @@ namespace Iot.Device.HardwareMonitor
                         {
                             if (elem.Sensor.TryGetValue(out IQuantity? value))
                             {
-#if NETCOREAPP2_1
+#if !NET5_0_OR_GREATER
                                 elem.OnNewValue(elem.Sensor, value!, timeSinceLastUpdate);
 #else
                                 elem.OnNewValue(elem.Sensor, value, timeSinceLastUpdate);
@@ -672,7 +672,7 @@ namespace Iot.Device.HardwareMonitor
             /// <param name="value">Returned value</param>
             /// <returns>True if a value was available</returns>
             public bool TryGetValue(
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
 #endif
             out IQuantity? value)
@@ -697,7 +697,7 @@ namespace Iot.Device.HardwareMonitor
             /// <param name="value">The returned value</param>
             /// <returns>True if a value of type T could be retrieved</returns>
             public bool TryGetValue<T>(
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
 #endif
             out T? value)

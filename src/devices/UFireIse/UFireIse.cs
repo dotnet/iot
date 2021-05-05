@@ -310,6 +310,12 @@ namespace Iot.Device.UFire
         private void WriteRegister(Register register, float data = 0)
         {
             // μFire ISE (Ion Specific Electrode) is 0 as default
+#if NETFRAMEWORK
+            byte[] bytes = BitConverter.GetBytes(data);
+            ChangeRegister(register);
+            _device.Write(bytes);
+            DelayHelper.DelayMilliseconds(IseCommunicationDelay, allowThreadYield: true);
+#else
             Span<byte> bytes = stackalloc byte[4]
              {
                 0,
@@ -328,6 +334,7 @@ namespace Iot.Device.UFire
             {
                 throw new Exception("Not possible to write bytes");
             }
+#endif
         }
 
         /// <summary>

@@ -102,7 +102,7 @@ namespace Iot.Device.Graphics
                 }
                 else
                 {
-                    bytes[byteIndex] = _characterMapping.GetValueOrDefault(_unknownLetter);
+                    bytes[byteIndex] = _characterMapping[_unknownLetter];
                 }
 
                 byteIndex++;

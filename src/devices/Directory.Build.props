@@ -3,6 +3,7 @@
   <Import Project="../../eng/Versions.props" />
   <Import Project="../../eng/Analyzers.props" />
   <PropertyGroup>
+    <TargetFrameworksBase>net5.0;netcoreapp2.1;net48;</TargetFrameworksBase>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
@@ -12,6 +13,7 @@
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  
 
   <ItemGroup>
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />

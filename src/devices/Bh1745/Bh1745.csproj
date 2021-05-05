@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworksBase)</TargetFrameworks>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
@@ -11,6 +11,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)/../Common/System/Runtime/CompilerServices/IsExternalInit.cs" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
     <None Include="README.md" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>
