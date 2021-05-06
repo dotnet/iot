@@ -310,7 +310,7 @@ namespace Iot.Device.UFire
         private void WriteRegister(Register register, float data = 0)
         {
             // μFire ISE (Ion Specific Electrode) is 0 as default
-#if NETFRAMEWORK
+#if NETSTANDARD2_0
             byte[] bytes = BitConverter.GetBytes(data);
             ChangeRegister(register);
             _device.Write(bytes);

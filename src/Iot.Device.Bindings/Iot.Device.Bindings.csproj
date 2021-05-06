@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net48;net5.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net5.0;netcoreapp2.1</TargetFrameworks>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -19,6 +19,19 @@
     <!-- Excluding samples and test projects when getting source files -->
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/samples/**/*.csproj" />
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/tests/**/*.csproj" />
+
+    <!-- These projects are not currently supported on Netstandard. The Netstandard build is mostly for use in projects targeting
+    the .NET Framework, where these bindings have little use.-->
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/BoardLed/BoardLed.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/BrickPi3/BrickPi3.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/GrovePi/GrovePiDevice.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/GoPiGo3/GoPiGo3.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/SocketCan/SocketCan.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/Media/Media.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/OneWire/OneWire.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/PiJuice/PiJuice.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/RGBLedMatrix/RGBLedMatrix.csproj" />
+    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/SenseHat/SenseHat.csproj" />
 
     <ProjectReference Include="$(DeviceRoot)**/*.csproj" Exclude="@(_ExcludeProjectReferences)" ReferenceOutputAssembly="false" BuildReference="false" />
   </ItemGroup>

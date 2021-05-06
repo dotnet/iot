@@ -5,7 +5,7 @@ using System;
 using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-#if !NETFRAMEWORK
+#if !NETSTANDARD2_0
 using System.Collections.Immutable;
 #endif
 using System.Device.I2c;
@@ -103,7 +103,7 @@ namespace Iot.Device.Mpr121
         public IReadOnlyDictionary<Channels, bool> ReadChannelStatuses()
         {
             RefreshChannelStatuses();
-#if !NETFRAMEWORK
+#if !NETSTANDARD2_0
             return _statuses.ToImmutableDictionary();
 #else
             return new ReadOnlyDictionary<Channels, bool>(_statuses);
@@ -231,7 +231,7 @@ namespace Iot.Device.Mpr121
 
         private void OnChannelStatusesChanged()
         {
-#if !NETFRAMEWORK
+#if !NETSTANDARD2_0
             ChannelStatusesChanged?.Invoke(this, new ChannelStatusesChangedEventArgs(_statuses.ToImmutableDictionary()));
 #else
             ChannelStatusesChanged?.Invoke(this, new ChannelStatusesChangedEventArgs(new ReadOnlyDictionary<Channels, bool>(_statuses)));

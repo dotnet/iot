@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 #pragma warning disable CS1591 // Missing documentation (these methods are mostly hidden from the user)
-#if NETFRAMEWORK
+#if NETSTANDARD2_0
 namespace Iot.Device
 {
     /// <summary>
@@ -69,17 +69,4 @@ namespace Iot.Device
     }
 }
 
-#pragma warning disable SA1403 // File may only contain a single namespace
-namespace System.Runtime.CompilerServices
-#pragma warning restore SA1403 // File may only contain a single namespace
-{
-    /// <summary>
-    /// Reserved to be used by the compiler for tracking metadata.
-    /// This class should not be used by developers in source code.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class IsExternalInit
-    {
-    }
-}
 #endif

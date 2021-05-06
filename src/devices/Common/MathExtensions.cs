@@ -16,7 +16,7 @@ namespace Iot.Device
         /// </summary>
         public static double Clamp(double val, double min, double max)
         {
-#if NETFRAMEWORK
+#if NETSTANDARD2_0
             if (val < min)
             {
                 return min;
@@ -38,7 +38,7 @@ namespace Iot.Device
         /// </summary>
         public static int Clamp(int val, int min, int max)
         {
-#if NETFRAMEWORK
+#if NETSTANDARD2_0
             if (val < min)
             {
                 return min;

@@ -10,7 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{61C1
 		samples\README.md = samples\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PiJuiceDevice.sample", "samples\PiJuiceDevice.sample.csproj", "{F62EDA5A-5855-4050-A5C4-A116E07498E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PiJuiceDevice.sample", "samples\PiJuiceDevice.sample.csproj", "{F62EDA5A-5855-4050-A5C4-A116E07498E8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{64FB7912-5242-461D-B4C3-91FF1E4F5B14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,12 +28,16 @@ Global
 		{F62EDA5A-5855-4050-A5C4-A116E07498E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F62EDA5A-5855-4050-A5C4-A116E07498E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F62EDA5A-5855-4050-A5C4-A116E07498E8}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{F62EDA5A-5855-4050-A5C4-A116E07498E8} = {61C135C2-1483-4B3D-8070-27A0DE4AF808}
+		{64FB7912-5242-461D-B4C3-91FF1E4F5B14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64FB7912-5242-461D-B4C3-91FF1E4F5B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64FB7912-5242-461D-B4C3-91FF1E4F5B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64FB7912-5242-461D-B4C3-91FF1E4F5B14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{F62EDA5A-5855-4050-A5C4-A116E07498E8} = {61C135C2-1483-4B3D-8070-27A0DE4AF808}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {13974C73-C93F-4C84-BA79-4E51189A5C68}
