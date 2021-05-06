@@ -69,5 +69,10 @@
         /// The sensor reports electric current
         /// </summary>
         Current,
+
+        /// <summary>
+        /// The sensor delivers a data amount value (i.e free space on a drive)
+        /// </summary>
+        Data,
     }
 }

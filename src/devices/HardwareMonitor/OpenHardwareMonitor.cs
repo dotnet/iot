@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using UnitsNet;
+using UnitsNet.Units;
 
 // We have a check on all constructors to ensure that we throw when not on Windows, so disabling warning on calling windows-only apis.
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -69,6 +70,7 @@ namespace Iot.Device.HardwareMonitor
             _typeMap.Add(SensorType.Energy, (typeof(Energy), x => Energy.FromWattHours(x)));
             _typeMap.Add(SensorType.HeatFlux, (typeof(HeatFlux), x => HeatFlux.FromKilowattsPerSquareMeter(x)));
             _typeMap.Add(SensorType.Current, (typeof(ElectricCurrent), x => ElectricCurrent.FromAmperes(x)));
+            _typeMap.Add(SensorType.Data, (typeof(Information), x => Information.FromGigabytes(x)));
         }
 
         /// <summary>
