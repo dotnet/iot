@@ -21,6 +21,7 @@ namespace Iot.Device.Board
 
         /// <summary>
         /// Creates a generic board instance with auto-detection of the best drivers for GPIO, I2c, SPI, etc.
+        /// The drivers are late-bound however, so whether it works or not can only be determined after pins are opened.
         /// </summary>
         public GenericBoard()
         {

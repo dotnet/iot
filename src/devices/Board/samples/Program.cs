@@ -42,7 +42,7 @@ namespace BoardSample
             const int led0 = 0;
             const int led1 = 1;
             const int led2 = 2;
-            using Board b = new GenericBoard();
+            using Board b = Board.Create();
 
             using GpioController controller = b.CreateGpioController();
 
