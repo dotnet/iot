@@ -33,7 +33,7 @@ while (!Console.KeyAvailable)
             Console.Write($"{sensor.Name}: Path {sensor.Identifier}, Parent {sensor.Parent} ");
             if (sensor.TryGetValue(out IQuantity? quantity))
             {
-                Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "{0}: {1:g}", quantity.Type, quantity));
+                Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "{0}: {1:g}", quantity!.Type, quantity));
             }
             else
             {

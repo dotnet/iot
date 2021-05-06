@@ -127,18 +127,15 @@ namespace Iot.Device.HardwareMonitor
             try
             {
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT * FROM Sensor");
-                if (searcher.Get().Count > 0)
+                foreach (var hardware in GetHardwareComponents())
                 {
-                    foreach (var hardware in GetHardwareComponents())
+                    if (hardware.Type != null && hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (hardware.Type != null && hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
-                        {
-                            _cpu = hardware;
-                        }
-                        else if (hardware.Type != null && hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
-                        {
-                            _gpu = hardware;
-                        }
+                        _cpu = hardware;
+                    }
+                    else if (hardware.Type != null && hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _gpu = hardware;
                     }
                 }
 
@@ -171,29 +168,26 @@ namespace Iot.Device.HardwareMonitor
         {
             List<Sensor> ret = new List<Sensor>();
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT * FROM Sensor");
-            if (searcher.Get().Count > 0)
+            foreach (ManagementObject sensor in searcher.Get())
             {
-                foreach (ManagementObject sensor in searcher.Get())
+                string? name = Convert.ToString(sensor["Name"]);
+                string? identifier = Convert.ToString(sensor["Identifier"]);
+
+                // This is not expected to really happen
+                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(identifier))
                 {
-                    string? name = Convert.ToString(sensor["Name"]);
-                    string? identifier = Convert.ToString(sensor["Identifier"]);
-
-                    // This is not expected to really happen
-                    if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(identifier))
-                    {
-                        continue;
-                    }
-
-                    string? parent = Convert.ToString(sensor["Parent"]);
-                    string? type = Convert.ToString(sensor["SensorType"]);
-                    SensorType typeEnum;
-                    if (!Enum.TryParse(type, true, out typeEnum))
-                    {
-                        typeEnum = SensorType.Unknown;
-                    }
-
-                    ret.Add(new Sensor(sensor, name, identifier, parent, typeEnum));
+                    continue;
                 }
+
+                string? parent = Convert.ToString(sensor["Parent"]);
+                string? type = Convert.ToString(sensor["SensorType"]);
+                SensorType typeEnum;
+                if (!Enum.TryParse(type, true, out typeEnum))
+                {
+                    typeEnum = SensorType.Unknown;
+                }
+
+                ret.Add(new Sensor(sensor, name, identifier, parent, typeEnum));
             }
 
             ret.AddRange(_derivedSensors);
@@ -214,6 +208,11 @@ namespace Iot.Device.HardwareMonitor
                 {
                     string? name = Convert.ToString(sensor["Name"]);
                     string? identifier = Convert.ToString(sensor["Identifier"]);
+                    if (name == null || identifier == null)
+                    {
+                        continue;
+                    }
+
                     string? parent = Convert.ToString(sensor["Parent"]);
                     string? type = Convert.ToString(sensor["HardwareType"]);
                     ret.Add(new Hardware(name, identifier, parent, type));
@@ -626,6 +625,7 @@ namespace Iot.Device.HardwareMonitor
         public sealed class Sensor : IDisposable
         {
             private readonly ManagementObject _instance;
+            private bool _valueRead;
 
             /// <summary>
             /// Creates a sensor instance
@@ -637,6 +637,20 @@ namespace Iot.Device.HardwareMonitor
                 Identifier = identifier;
                 Parent = parent;
                 SensorType = typeEnum;
+                InstanceId = 0;
+                _valueRead = false;
+                if (!string.IsNullOrWhiteSpace(instance.Path.RelativePath))
+                {
+                    int instanceBegin = instance.Path.RelativePath.IndexOf("InstanceId=\"", StringComparison.OrdinalIgnoreCase) + 12;
+                    int instanceEnd = instance.Path.RelativePath.IndexOf('\"', instanceBegin);
+                    if (Int32.TryParse(instance.Path.RelativePath.Substring(instanceBegin, instanceEnd - instanceBegin), out int id))
+                    {
+                        InstanceId = id;
+
+                        // Cache the searcher. We have to re-query the instances each time, or the value stays the same.
+                        ActiveCollection = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", $"SELECT Value FROM Sensor WHERE InstanceId='{InstanceId}'");
+                    }
+                }
             }
 
             /// <summary>
@@ -660,9 +674,20 @@ namespace Iot.Device.HardwareMonitor
             public SensorType SensorType { get; }
 
             /// <summary>
+            /// The instance ID. Used to retrieve a new value for the same sensor (repeatedly obtaining the same value from a sensor instance returns the same value)
+            /// </summary>
+            internal int InstanceId { get; }
+
+            /// <summary>
             /// Job associated with updating this value
             /// </summary>
             internal MonitoringJob? Job
+            {
+                get;
+                set;
+            }
+
+            private ManagementObjectSearcher? ActiveCollection
             {
                 get;
                 set;
@@ -685,11 +710,31 @@ namespace Iot.Device.HardwareMonitor
                     return false;
                 }
 
-                float newValue = Convert.ToSingle(_instance["Value"]);
-                IQuantity newValueAsUnitInstance = elem.Creator(newValue);
+                InternalGetValue(out var floatValue, elem);
+
+                IQuantity newValueAsUnitInstance = elem.Creator(floatValue);
 
                 value = newValueAsUnitInstance;
                 return true;
+            }
+
+            private void InternalGetValue(out float value, (Type Type, UnitCreator Creator) elem)
+            {
+                if (_valueRead && InstanceId != 0 && ActiveCollection != null)
+                {
+                    value = 0;
+                    // We expect exactly one instance, but unfortunately, the returned ManagementObjectCollection doesn't implement IEnumerable or IList
+                    foreach (var inst in ActiveCollection.Get())
+                    {
+                        value = Convert.ToSingle(inst.GetPropertyValue("Value"));
+                    }
+                }
+                else
+                {
+                    // The artificial instances auto-update. And if the object is new, we also don't need a refresh
+                    value = Convert.ToSingle(_instance.GetPropertyValue("Value"));
+                    _valueRead = true;
+                }
             }
 
             /// <summary>
@@ -717,7 +762,7 @@ namespace Iot.Device.HardwareMonitor
                     return false;
                 }
 
-                float newValue = Convert.ToSingle(_instance["Value"]);
+                InternalGetValue(out float newValue, elem);
                 object newValueAsUnitInstance = elem.Creator(newValue);
 
                 value = (T)newValueAsUnitInstance;
@@ -745,7 +790,7 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Create an instance of this class
             /// </summary>
-            public Hardware(string? name, string? identifier, string? parent, string? type)
+            public Hardware(string name, string identifier, string? parent, string? type)
             {
                 Name = name;
                 Identifier = identifier;
@@ -756,12 +801,12 @@ namespace Iot.Device.HardwareMonitor
             /// <summary>
             /// Name of the object
             /// </summary>
-            public string? Name { get; }
+            public string Name { get; }
 
             /// <summary>
             /// Device path
             /// </summary>
-            public string? Identifier { get; }
+            public string Identifier { get; }
 
             /// <summary>
             /// Parent in device path
