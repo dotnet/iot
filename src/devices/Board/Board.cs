@@ -61,13 +61,7 @@ namespace Iot.Device.Board
         /// True if this instance is disposed.
         /// Any attempt to use it after this becomes true results in undefined behavior.
         /// </summary>
-        protected bool Disposed
-        {
-            get
-            {
-                return _disposed;
-            }
-        }
+        protected bool Disposed => _disposed;
 
         /// <summary>
         /// The default pin numbering scheme for this board.
