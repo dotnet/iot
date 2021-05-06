@@ -57,7 +57,6 @@ namespace Iot.Device.Arduino
         /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
-        : base(PinNumberingScheme.Logical)
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
             _logger = this.GetCurrentClassLogger();
@@ -71,7 +70,6 @@ namespace Iot.Device.Arduino
         /// On Linux, possible values include "/dev/ttyAMA0", "/dev/serial0", "/dev/ttyUSB1", etc.</param>
         /// <param name="baudRate">Baudrate to use. It is recommended to use at least 115200 Baud.</param>
         public ArduinoBoard(string portName, int baudRate)
-        : base(PinNumberingScheme.Logical)
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
@@ -159,17 +157,6 @@ namespace Iot.Device.Arduino
                 1000000,
                 2000000,
             };
-        }
-
-        /// <inheritdoc />
-        public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
-        {
-            if (inputScheme == outputScheme && inputScheme == PinNumberingScheme.Logical)
-            {
-                return pinNumber;
-            }
-
-            throw new NotSupportedException("The Arduino uses logical pin numbering only");
         }
 
         /// <summary>
