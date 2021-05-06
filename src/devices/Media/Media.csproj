@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>$(TargetFrameworksReduced)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>

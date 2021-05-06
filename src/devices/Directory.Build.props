@@ -3,7 +3,10 @@
   <Import Project="../../eng/Versions.props" />
   <Import Project="../../eng/Analyzers.props" />
   <PropertyGroup>
+    <!-- Most projects should use this value to build for all possible target frameworks -->
     <TargetFrameworksBase>net5.0;netcoreapp2.1;netstandard2.0;</TargetFrameworksBase>
+    <!-- If .NET Standard is not supported (and adding support is not useful) use this instead -->
+    <TargetFrameworksReduced>net5.0;netcoreapp2.1</TargetFrameworksReduced>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
