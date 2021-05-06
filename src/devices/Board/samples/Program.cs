@@ -44,7 +44,7 @@ namespace BoardSample
             const int led2 = 2;
             using Board b = new GenericBoard();
 
-            using GpioController controller = b.CreateGpioController(PinNumberingScheme.Logical);
+            using GpioController controller = b.CreateGpioController();
 
             if (controller.PinCount > 0)
             {
@@ -131,7 +131,7 @@ namespace BoardSample
 
         private static void RaspberryPiTest()
         {
-            using var raspi = new RaspberryPiBoard(PinNumberingScheme.Logical);
+            using var raspi = new RaspberryPiBoard();
             PwmRaspiTest(raspi);
             SpiRaspiTestWithSoftwareCs(raspi);
             SpiRaspiTestWithHardwareCs(raspi);

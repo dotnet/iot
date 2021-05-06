@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Device.Spi;
 using System.Text;
 using Xunit;
 
@@ -16,54 +17,20 @@ namespace Iot.Device.Board.Tests
     /// </summary>
     public class RaspberryPiBoardTest
     {
-        /// <summary>
-        /// This shouldn't map anything in either direction
-        /// </summary>
         [Fact]
-        public void PinMappingIsReversibleLogical()
+        public void GetDefaultSpiPins()
         {
-            RaspberryPiBoard b = new RaspberryPiBoard(PinNumberingScheme.Logical);
-            for (int i = 0; i < b.PinCount; i++)
-            {
-                int mapped = b.ConvertPinNumber(i, PinNumberingScheme.Logical, PinNumberingScheme.Logical);
-                int reverse = b.ConvertPinNumber(i, PinNumberingScheme.Logical, PinNumberingScheme.Logical);
-                Assert.Equal(reverse, mapped);
-                Assert.Equal(mapped, i);
-            }
-        }
-
-        /// <summary>
-        /// The mapping is not 1:1, but must be reversible
-        /// </summary>
-        [Fact]
-        public void PinMappingIsReversibleBoard()
-        {
-            RaspberryPiBoard b = new RaspberryPiBoard(PinNumberingScheme.Board);
-            Assert.NotEqual(3, b.ConvertPinNumber(3, PinNumberingScheme.Board, PinNumberingScheme.Logical));
-            for (int i = 0; i < b.PinCount; i++)
-            {
-                int mapped = b.ConvertPinNumber(i, PinNumberingScheme.Logical, PinNumberingScheme.Board);
-                int reverse = b.ConvertPinNumber(mapped, PinNumberingScheme.Board, PinNumberingScheme.Logical);
-                Assert.Equal(i, reverse);
-            }
-        }
-
-        [Fact]
-        public void GetDefaultI2cPinsBoardNumbering()
-        {
-            RaspberryPiBoard b = new RaspberryPiBoard(PinNumberingScheme.Board);
-            var pins = b.GetDefaultPinAssignmentForI2c(0);
-            Assert.Equal(27, pins[0]);
-            Assert.Equal(28, pins[1]);
-            pins = b.GetDefaultPinAssignmentForI2c(1);
-            Assert.Equal(3, pins[0]);
-            Assert.Equal(5, pins[1]);
+            RaspberryPiBoard b = new RaspberryPiBoard();
+            var pins = b.GetDefaultPinAssignmentForSpi(new SpiConnectionSettings(0, -1));
+            Assert.Equal(9, pins[0]);
+            Assert.Equal(10, pins[1]);
+            Assert.Equal(11, pins[2]);
         }
 
         [Fact]
         public void GetDefaultI2cPinsLogicalNumbering()
         {
-            RaspberryPiBoard b = new RaspberryPiBoard(PinNumberingScheme.Logical);
+            RaspberryPiBoard b = new RaspberryPiBoard();
             var pins = b.GetDefaultPinAssignmentForI2c(0);
             Assert.Equal(0, pins[0]);
             Assert.Equal(1, pins[1]);

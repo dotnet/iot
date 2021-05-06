@@ -44,13 +44,13 @@ namespace Iot.Device.Board
             _sclPin = pins[1];
             try
             {
-                _board.ReservePin(_board.ConvertPinNumber(_sdaPin, PinNumberingScheme.Logical, _board.DefaultPinNumberingScheme), PinUsage.I2c, this);
-                _board.ReservePin(_board.ConvertPinNumber(_sclPin, PinNumberingScheme.Logical, _board.DefaultPinNumberingScheme), PinUsage.I2c, this);
+                _board.ReservePin(_sdaPin, PinUsage.I2c, this);
+                _board.ReservePin(_sclPin, PinUsage.I2c, this);
             }
             catch (Exception)
             {
-                _board.ReleasePin(_board.ConvertPinNumber(_sdaPin, PinNumberingScheme.Logical, _board.DefaultPinNumberingScheme), PinUsage.I2c, this);
-                _board.ReleasePin(_board.ConvertPinNumber(_sclPin, PinNumberingScheme.Logical, _board.DefaultPinNumberingScheme), PinUsage.I2c, this);
+                _board.ReleasePin(_sdaPin, PinUsage.I2c, this);
+                _board.ReleasePin(_sclPin, PinUsage.I2c, this);
                 throw;
             }
         }

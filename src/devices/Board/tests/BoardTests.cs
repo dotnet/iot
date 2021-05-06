@@ -32,7 +32,7 @@ namespace Iot.Device.Board.Tests
         public void ThereIsAlwaysAMatchingBoard()
         {
             // This should always return something valid, and be it only something with an empty controller
-            var board = Board.Create(PinNumberingScheme.Logical);
+            var board = Board.Create();
             Assert.NotNull(board);
             var property = board.GetType().GetProperty("Initialized", BindingFlags.Instance | BindingFlags.NonPublic)!;
             Assert.True((bool)property.GetValue(board));
@@ -76,53 +76,12 @@ namespace Iot.Device.Board.Tests
         }
 
         [Fact]
-        public void UsingBoardNumberingWorks()
-        {
-            _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
-            _mockedGpioDriver.Setup(x => x.SetPinModeEx(1, PinMode.Output));
-            _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
-            _mockedGpioDriver.Setup(x => x.GetPinModeEx(1)).Returns(PinMode.Output);
-            _mockedGpioDriver.Setup(x => x.WriteEx(1, PinValue.High));
-            _mockedGpioDriver.Setup(x => x.ReadEx(1)).Returns(PinValue.High);
-            _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
-            Board b = new CustomGenericBoard(PinNumberingScheme.Board, _mockedGpioDriver.Object);
-            var ctrl = b.CreateGpioController();
-            ctrl.OpenPin(2, PinMode.Output); // Our test board maps physical pin 2 to logical pin 1
-            ctrl.Write(2, PinValue.High);
-            Assert.Equal(PinValue.High, ctrl.Read(2));
-            ctrl.ClosePin(2);
-        }
-
-        /* This is known to be broken and should be addressed separately (#974)
-        [Fact]
-        public void UsingBoardNumberingForCallbackWorks()
-        {
-            _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
-            _mockedGpioDriver.Setup(x => x.AddCallbackForPinValueChangedEventEx(1,
-                PinEventTypes.Rising, It.IsAny<PinChangeEventHandler>()));
-            Board b = new CustomGenericBoard(PinNumberingScheme.Board, _mockedGpioDriver.Object);
-            var ctrl = b.CreateGpioController();
-            ctrl.OpenPin(2); // logical pin 1 on our test board
-            bool wasCalled = false;
-            ctrl.RegisterCallbackForPinValueChangedEvent(2, PinEventTypes.Rising, (sender, args) =>
-            {
-                wasCalled = true;
-                Assert.Equal(2, args.PinNumber);
-            });
-
-            _mockedGpioDriver.Object.FireEventHandler(1, PinEventTypes.Rising);
-
-            Assert.True(wasCalled);
-        }
-        */
-
-        [Fact]
         public void UsingMultiplePinsWorks()
         {
-            _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
-            _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, PinMode.Output)).Returns(true);
-            Board b = new CustomGenericBoard(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
-            var ctrl = b.CreateGpioController(PinNumberingScheme.Board);
+            _mockedGpioDriver.Setup(x => x.OpenPinEx(2));
+            _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(2, PinMode.Output)).Returns(true);
+            Board b = new CustomGenericBoard(_mockedGpioDriver.Object);
+            var ctrl = b.CreateGpioController();
             ctrl.OpenPin(2, PinMode.Output); // Our test board maps physical pin 2 to logical pin 1
         }
 
@@ -197,18 +156,6 @@ namespace Iot.Device.Board.Tests
         }
 
         [Fact]
-        public void CreateI2cBusBoardNumbering()
-        {
-            var board = CreateBoard(PinNumberingScheme.Board);
-            var device = board.CreateOrGetI2cBus(0, new int[] { 2, 4 });
-            Assert.NotNull(device);
-            var simDevice = device.CreateDevice(3) as I2cDummyDevice;
-            Assert.NotNull(simDevice);
-            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(2));
-            Assert.Equal(PinUsage.I2c, board.DetermineCurrentPinUsage(4));
-        }
-
-        [Fact]
         public void TwoI2cDevicesCanSharePins()
         {
             var board = CreateBoard();
@@ -275,15 +222,14 @@ namespace Iot.Device.Board.Tests
             ctrl.OpenPin(0);
         }
 
-        private Board CreateBoard(PinNumberingScheme scheme = PinNumberingScheme.Logical)
+        private Board CreateBoard()
         {
-            return new CustomGenericBoard(scheme, _mockedGpioDriver.Object);
+            return new CustomGenericBoard(_mockedGpioDriver.Object);
         }
 
         private sealed class CustomGenericBoard : GenericBoard
         {
-            public CustomGenericBoard(PinNumberingScheme numberingScheme, GpioDriver mockedDriver)
-                : base(numberingScheme)
+            public CustomGenericBoard(GpioDriver mockedDriver)
             {
                 MockedDriver = mockedDriver;
             }
@@ -291,32 +237,6 @@ namespace Iot.Device.Board.Tests
             public GpioDriver MockedDriver
             {
                 get;
-            }
-
-            public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
-            {
-                if (inputScheme == PinNumberingScheme.Logical && outputScheme == PinNumberingScheme.Board)
-                {
-                    return pinNumber switch
-                    {
-                        1 => 2,
-                        2 => 4,
-                        4 => 8,
-                        _ => base.ConvertPinNumber(pinNumber, inputScheme, outputScheme)
-                    };
-                }
-                else if (inputScheme == PinNumberingScheme.Board && outputScheme == PinNumberingScheme.Logical)
-                {
-                    return pinNumber switch
-                    {
-                        2 => 1,
-                        4 => 2,
-                        8 => 4,
-                        _ => base.ConvertPinNumber(pinNumber, inputScheme, outputScheme)
-                    };
-                }
-
-                return base.ConvertPinNumber(pinNumber, inputScheme, outputScheme);
             }
 
             protected override GpioDriver? TryCreateBestGpioDriver()

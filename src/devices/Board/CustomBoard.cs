@@ -28,23 +28,11 @@ namespace Iot.Device.Board
         /// <param name="pwmChannelCreator">Function to create a PWM channel</param>
         public CustomBoard(GpioDriver gpioDriver, Func<int, I2cBus> i2cBusCreator,
             Func<SpiConnectionSettings, SpiDevice> spiDeviceCreator, Func<int, PwmChannel> pwmChannelCreator)
-        : base(PinNumberingScheme.Logical)
         {
             _gpioDriver = gpioDriver;
             _i2CBusCreator = i2cBusCreator;
             _spiDeviceCreator = spiDeviceCreator;
             _pwmChannelCreator = pwmChannelCreator;
-        }
-
-        /// <inheritdoc />
-        public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
-        {
-            if (inputScheme != outputScheme || inputScheme != PinNumberingScheme.Logical)
-            {
-                throw new NotSupportedException("Only logical pin numbering supported");
-            }
-
-            return pinNumber;
         }
 
         /// <summary>

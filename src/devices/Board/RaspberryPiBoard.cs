@@ -27,8 +27,7 @@ namespace Iot.Device.Board
         /// <summary>
         /// Creates an instance of a Rasperry Pi board.
         /// </summary>
-        public RaspberryPiBoard(PinNumberingScheme defaultNumberingScheme)
-            : base(defaultNumberingScheme)
+        public RaspberryPiBoard()
         {
             // TODO: Ideally detect board type, so that invalid combinations can be prevented (i.e. I2C bus 2 on Raspi 3)
             PinCount = 28;
@@ -75,7 +74,7 @@ namespace Iot.Device.Board
                     throw new NotSupportedException("Could not initialize the RaspberryPi GPIO driver");
                 }
 
-                _managedGpioController = new ManagedGpioController(this, DefaultPinNumberingScheme, driver);
+                _managedGpioController = new ManagedGpioController(this, driver);
                 _raspberryPi3Driver = driver as RaspberryPi3Driver;
 
                 PinCount = _managedGpioController.PinCount;
@@ -83,94 +82,6 @@ namespace Iot.Device.Board
             }
 
             base.Initialize();
-        }
-
-        /// <summary>
-        /// Convert a pin number from one scheme to another
-        /// </summary>
-        /// <param name="pinNumber">Pin number</param>
-        /// <param name="inputScheme">Input scheme</param>
-        /// <param name="outputScheme">Output scheme</param>
-        /// <returns>Pin number in the output scheme</returns>
-        public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
-        {
-            if (inputScheme == outputScheme)
-            {
-                return pinNumber;
-            }
-
-            if (inputScheme == PinNumberingScheme.Board && outputScheme == PinNumberingScheme.Logical)
-            {
-                return pinNumber switch
-                {
-                    3 => 2,
-                    5 => 3,
-                    7 => 4,
-                    8 => 14,
-                    10 => 15,
-                    11 => 17,
-                    12 => 18,
-                    13 => 27,
-                    15 => 22,
-                    16 => 23,
-                    18 => 24,
-                    19 => 10,
-                    21 => 9,
-                    22 => 25,
-                    23 => 11,
-                    24 => 8,
-                    26 => 7,
-                    27 => 0,
-                    28 => 1,
-                    29 => 5,
-                    31 => 6,
-                    32 => 12,
-                    33 => 13,
-                    35 => 19,
-                    36 => 16,
-                    37 => 26,
-                    38 => 20,
-                    40 => 21,
-                    _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
-                };
-            }
-            else if (inputScheme == PinNumberingScheme.Logical && outputScheme == PinNumberingScheme.Board)
-            {
-                return pinNumber switch
-                {
-                    2 => 3,
-                    3 => 5,
-                    4 => 7,
-                    14 => 8,
-                    15 => 10,
-                    17 => 11,
-                    18 => 12,
-                    27 => 13,
-                    22 => 15,
-                    23 => 16,
-                    24 => 18,
-                    10 => 19,
-                    9 => 21,
-                    25 => 22,
-                    11 => 23,
-                    8 => 24,
-                    7 => 26,
-                    0 => 27,
-                    1 => 28,
-                    5 => 29,
-                    6 => 31,
-                    12 => 32,
-                    13 => 33,
-                    19 => 35,
-                    16 => 36,
-                    26 => 37,
-                    20 => 38,
-                    21 => 40,
-                    _ => throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber))
-                };
-            }
-
-            throw new NotSupportedException("Unsupported numbering scheme combination");
         }
 
         /// <inheritdoc />
@@ -235,8 +146,8 @@ namespace Iot.Device.Board
             return new int[]
             {
                 // Return in the default scheme of the board
-                ConvertPinNumber(sda, PinNumberingScheme.Logical, DefaultPinNumberingScheme),
-                ConvertPinNumber(scl, PinNumberingScheme.Logical, DefaultPinNumberingScheme)
+                sda,
+                scl
             };
         }
 
@@ -361,7 +272,6 @@ namespace Iot.Device.Board
         /// A member of <see cref="RaspberryPi3Driver.AltMode"/> describing the mode the pin is in.</returns>
         private RaspberryPi3Driver.AltMode GetHardwareModeForPinUsage(int pinNumber, PinUsage usage, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, int bus = 0)
         {
-            pinNumber = RemapPin(pinNumber, pinNumberingScheme);
             if (pinNumber >= PinCount)
             {
                 throw new InvalidOperationException($"Invalid pin number {pinNumber}");
@@ -520,12 +430,12 @@ namespace Iot.Device.Board
             // The default assignment is 12 & 13, but 18 and 19 is supported as well
             if (chip == 0 && channel == 0)
             {
-                return ConvertPinNumber(12, PinNumberingScheme.Logical, DefaultPinNumberingScheme);
+                return 12;
             }
 
             if (chip == 0 && channel == 1)
             {
-                return ConvertPinNumber(13, PinNumberingScheme.Logical, DefaultPinNumberingScheme);
+                return 13;
             }
 
             throw new NotSupportedException($"No such PWM Channel: Chip {chip} channel {channel}.");

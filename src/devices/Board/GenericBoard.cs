@@ -23,30 +23,8 @@ namespace Iot.Device.Board
         /// Creates a generic board instance with auto-detection of the best drivers for GPIO, I2c, SPI, etc.
         /// </summary>
         public GenericBoard()
-            : this(PinNumberingScheme.Logical)
-        {
-        }
-
-        /// <summary>
-        ///  Creates a generic board instance with auto-detection of the best drivers for GPIO, I2c, SPI, etc.
-        /// </summary>
-        /// <param name="defaultNumberingScheme">Default pin numbering scheme</param>
-        /// <remarks>This ctor is protected, because it </remarks>
-        protected internal GenericBoard(PinNumberingScheme defaultNumberingScheme)
-        : base(defaultNumberingScheme)
         {
             _knownUsages = new Dictionary<int, PinUsage>();
-        }
-
-        /// <inheritdoc />
-        public override int ConvertPinNumber(int pinNumber, PinNumberingScheme inputScheme, PinNumberingScheme outputScheme)
-        {
-            if (inputScheme == outputScheme)
-            {
-                return pinNumber;
-            }
-
-            throw new NotSupportedException("This board only supports logical pin numbering");
         }
 
         /// <inheritdoc />
@@ -76,8 +54,7 @@ namespace Iot.Device.Board
         /// <inheritdoc />
         protected override void ActivatePinMode(int pinNumber, PinUsage usage)
         {
-            int pinNumber2 = RemapPin(pinNumber, DefaultPinNumberingScheme);
-            _knownUsages[pinNumber2] = usage;
+            _knownUsages[pinNumber] = usage;
             base.ActivatePinMode(pinNumber, usage);
         }
 
@@ -85,7 +62,6 @@ namespace Iot.Device.Board
         public override PinUsage DetermineCurrentPinUsage(int pinNumber)
         {
             PinUsage usage;
-            pinNumber = RemapPin(pinNumber, DefaultPinNumberingScheme);
             if (_knownUsages.TryGetValue(pinNumber, out usage))
             {
                 return usage;

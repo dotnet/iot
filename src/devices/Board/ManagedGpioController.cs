@@ -21,8 +21,8 @@ namespace Iot.Device.Board
         private readonly Board _board;
         private readonly GpioDriver _driver;
 
-        public ManagedGpioController(Board board, PinNumberingScheme numberingScheme, GpioDriver driver)
-        : base(numberingScheme, driver)
+        public ManagedGpioController(Board board, GpioDriver driver)
+        : base(PinNumberingScheme.Logical, driver)
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));
@@ -30,12 +30,7 @@ namespace Iot.Device.Board
 
         protected override int GetLogicalPinNumber(int pinNumber)
         {
-            return _board.ConvertPinNumber(pinNumber, NumberingScheme, PinNumberingScheme.Logical);
-        }
-
-        private int ConvertToBoardPinNumbering(int controllerNumber)
-        {
-            return _board.ConvertPinNumber(controllerNumber, NumberingScheme, _board.DefaultPinNumberingScheme);
+            return pinNumber;
         }
 
         protected override void OpenPinCore(int pinNumber)
