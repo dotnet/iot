@@ -34,6 +34,7 @@ namespace Iot.Device.Board
         private readonly Dictionary<int, I2cBusManager> _i2cBuses;
         private bool _initialized;
         private bool _disposed;
+        private Dictionary<int, PinUsage> _knownUsages;
 
         /// <summary>
         /// Constructs a board instance with the given default numbering scheme.
@@ -47,6 +48,7 @@ namespace Iot.Device.Board
         {
             _pinReservations = new Dictionary<int, List<PinReservation>>();
             _i2cBuses = new Dictionary<int, I2cBusManager>();
+            _knownUsages = new Dictionary<int, PinUsage>();
             _pinReservationsLock = new object();
             _initialized = false;
             _disposed = false;
@@ -184,13 +186,6 @@ namespace Iot.Device.Board
         }
 
         /// <summary>
-        /// Returns the current usage of a pin
-        /// </summary>
-        /// <param name="pinNumber">Pin number in the current numbering scheme</param>
-        /// <returns>The current usage of a pin</returns>
-        public abstract PinUsage DetermineCurrentPinUsage(int pinNumber);
-
-        /// <summary>
         /// Override this method if something special needs to be done to use the pin for the given device.
         /// Many devices support multiple functions per Pin, but not at the same time, so that some kind of
         /// multiplexer needs to be set accordingly.
@@ -199,6 +194,25 @@ namespace Iot.Device.Board
         /// <param name="usage">The intended usage</param>
         protected virtual void ActivatePinMode(int pinNumber, PinUsage usage)
         {
+            _knownUsages[pinNumber] = usage;
+        }
+
+        /// <summary>
+        /// Returns the current usage of a pin
+        /// </summary>
+        /// <param name="pinNumber">Pin number in the current numbering scheme</param>
+        /// <returns>The current usage of a pin</returns>
+        /// <remarks>Note for implementations: An implementation of this method shall try to query the hardware if the cache reports <see cref="PinUsage.Unknown"/>.</remarks>
+        public virtual PinUsage DetermineCurrentPinUsage(int pinNumber)
+        {
+            PinUsage usage;
+            if (_knownUsages.TryGetValue(pinNumber, out usage))
+            {
+                return usage;
+            }
+
+            // The generic board only knows the usage if it has been explicitly set before
+            return PinUsage.Unknown;
         }
 
         /// <summary>

@@ -17,15 +17,12 @@ namespace Iot.Device.Board
     /// </summary>
     public class GenericBoard : Board
     {
-        private Dictionary<int, PinUsage> _knownUsages;
-
         /// <summary>
         /// Creates a generic board instance with auto-detection of the best drivers for GPIO, I2c, SPI, etc.
         /// The drivers are late-bound however, so whether it works or not can only be determined after pins are opened.
         /// </summary>
         public GenericBoard()
         {
-            _knownUsages = new Dictionary<int, PinUsage>();
         }
 
         /// <inheritdoc />
@@ -50,26 +47,6 @@ namespace Iot.Device.Board
         public override int GetDefaultI2cBusNumber()
         {
             throw new NotSupportedException("The generic board has no default I2C bus");
-        }
-
-        /// <inheritdoc />
-        protected override void ActivatePinMode(int pinNumber, PinUsage usage)
-        {
-            _knownUsages[pinNumber] = usage;
-            base.ActivatePinMode(pinNumber, usage);
-        }
-
-        /// <inheritdoc />
-        public override PinUsage DetermineCurrentPinUsage(int pinNumber)
-        {
-            PinUsage usage;
-            if (_knownUsages.TryGetValue(pinNumber, out usage))
-            {
-                return usage;
-            }
-
-            // The generic board only knows the usage if it has been explicitly set before
-            return PinUsage.Unknown;
         }
 
         /// <inheritdoc />
