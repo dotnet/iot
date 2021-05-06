@@ -263,6 +263,8 @@ namespace Iot.Device.Board
         /// </summary>
         /// <returns>An instance of a GpioController. The controller used pin management to prevent reusing the same pin for different purposes
         /// (or for purposes for which it is not suitable)</returns>
+        /// <exception cref="NotSupportedException">Rare: No GPIO Controller was found for the current hardware. The default implementation will return
+        /// a simulation interface if no hardware is available.</exception>
         public virtual GpioController CreateGpioController()
         {
             Initialize();
@@ -595,40 +597,38 @@ namespace Iot.Device.Board
         /// <remarks>The detection concept should be refined, but this requires a public detection api</remarks>
         public static Board Create()
         {
-            Board? board = null;
-            try
-            {
-                board = new RaspberryPiBoard();
-                board.Initialize();
-            }
-            catch (Exception x) when ((x is NotSupportedException) || (x is IOException))
-            {
-                board?.Dispose();
-                board = null;
-            }
+            Board? board = CreateBoardInternal<RaspberryPiBoard>();
 
             if (board != null)
             {
                 return board;
             }
 
-            try
-            {
-                board = new GenericBoard();
-                board.Initialize();
-            }
-            catch (Exception x) when ((x is NotSupportedException) || (x is IOException))
-            {
-                board?.Dispose();
-                board = null;
-            }
-
+            board = CreateBoardInternal<GenericBoard>();
             if (board != null)
             {
                 return board;
             }
 
             throw new PlatformNotSupportedException("Could not find a matching board driver for this hardware");
+        }
+
+        private static T? CreateBoardInternal<T>()
+            where T : Board, new()
+        {
+            T? board = null;
+            try
+            {
+                board = new T();
+                board.Initialize();
+            }
+            catch (Exception x) when ((x is NotSupportedException) || (x is IOException))
+            {
+                board?.Dispose();
+                board = null;
+            }
+
+            return board;
         }
     }
 }
