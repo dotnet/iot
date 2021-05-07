@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -45,6 +46,19 @@ namespace Iot.Device
             {
                 buffer[i] = (byte)random.Next();
             }
+        }
+
+        public static void Write(this Stream stream, Span<byte> data)
+        {
+            stream.Write(data.ToArray(), 0, data.Length);
+        }
+
+        public static int Read(this Stream stream, Span<byte> data)
+        {
+            byte[] rawData = new byte[data.Length];
+            int result = stream.Read(rawData, 0, rawData.Length);
+            rawData.CopyTo(data);
+            return result;
         }
 
         /// <summary>
