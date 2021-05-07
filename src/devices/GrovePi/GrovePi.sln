@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{61C135C2-1483-4B3D-8070-27A0DE4AF808}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrovePiDevice.sample", "samples\GrovePiDevice.sample.csproj", "{3EB7131B-0DF9-43FB-9101-950A8A0581BE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrovePiDevice.sample", "samples\GrovePiDevice.sample.csproj", "{3EB7131B-0DF9-43FB-9101-950A8A0581BE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GrovePiDevice", "GrovePiDevice.csproj", "{0E37E7A7-C104-41F0-BF03-20BFFB6CE10E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GrovePiDevice", "GrovePiDevice.csproj", "{0E37E7A7-C104-41F0-BF03-20BFFB6CE10E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,9 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3EB7131B-0DF9-43FB-9101-950A8A0581BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -46,8 +45,26 @@ Global
 		{0E37E7A7-C104-41F0-BF03-20BFFB6CE10E}.Release|x64.Build.0 = Release|Any CPU
 		{0E37E7A7-C104-41F0-BF03-20BFFB6CE10E}.Release|x86.ActiveCfg = Release|Any CPU
 		{0E37E7A7-C104-41F0-BF03-20BFFB6CE10E}.Release|x86.Build.0 = Release|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Debug|x64.Build.0 = Debug|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Debug|x86.Build.0 = Debug|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Release|x64.ActiveCfg = Release|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Release|x64.Build.0 = Release|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Release|x86.ActiveCfg = Release|Any CPU
+		{71908DF8-A1DD-47AF-86F8-5FEF5139AC6B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3EB7131B-0DF9-43FB-9101-950A8A0581BE} = {61C135C2-1483-4B3D-8070-27A0DE4AF808}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {993750A5-C041-461D-BB7F-4E697A279723}
 	EndGlobalSection
 EndGlobal

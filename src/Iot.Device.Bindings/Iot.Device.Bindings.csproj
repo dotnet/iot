@@ -20,16 +20,6 @@
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/samples/**/*.csproj" />
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/tests/**/*.csproj" />
 
-    <!-- These projects are not currently supported on Netstandard. The Netstandard build is mostly for use in projects targeting
-    the .NET Framework, where these bindings have little use.-->
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/BoardLed/BoardLed.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/BrickPi3/BrickPi3.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/GrovePi/GrovePiDevice.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/GoPiGo3/GoPiGo3.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/SocketCan/SocketCan.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/Media/Media.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/RGBLedMatrix/RGBLedMatrix.csproj" />
-
     <ProjectReference Include="$(DeviceRoot)**/*.csproj" Exclude="@(_ExcludeProjectReferences)" ReferenceOutputAssembly="false" BuildReference="false" />
   </ItemGroup>
 
