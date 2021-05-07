@@ -21,7 +21,7 @@ namespace Iot.Device.OneWire
             }
 
             var tempIdx = data.LastIndexOf("t=");
-            if (tempIdx == -1 || tempIdx + 2 >= data.Length || !int.TryParse(data.AsSpan(tempIdx + 2), out var temp))
+            if (tempIdx == -1 || tempIdx + 2 >= data.Length || !int.TryParse(data.Substring(tempIdx + 2), out var temp))
             {
                 throw new InvalidOperationException("Invalid sensor data format.");
             }
@@ -29,11 +29,13 @@ namespace Iot.Device.OneWire
             return Temperature.FromDegreesCelsius(temp * 0.001);
         }
 
+#if !NETSTANDARD2_0
         private async Task<Temperature> ReadTemperatureInternalAsync()
         {
             var data = await File.ReadAllTextAsync(Path.Combine(OneWireBus.SysfsDevicesPath, BusId, DeviceId, "w1_slave"));
             return ParseTemperature(data);
         }
+#endif
 
         private Temperature ReadTemperatureInternal()
         {

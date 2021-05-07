@@ -28,9 +28,7 @@
     <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/GoPiGo3/GoPiGo3.csproj" />
     <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/SocketCan/SocketCan.csproj" />
     <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/Media/Media.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/OneWire/OneWire.csproj" />
     <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/RGBLedMatrix/RGBLedMatrix.csproj" />
-    <_ExcludeProjectReferences Condition="$(TargetFramework)=='netstandard2.0'" Include="$(DeviceRoot)/SenseHat/SenseHat.csproj" />
 
     <ProjectReference Include="$(DeviceRoot)**/*.csproj" Exclude="@(_ExcludeProjectReferences)" ReferenceOutputAssembly="false" BuildReference="false" />
   </ItemGroup>
