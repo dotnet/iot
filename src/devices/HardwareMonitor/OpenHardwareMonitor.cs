@@ -646,9 +646,6 @@ namespace Iot.Device.HardwareMonitor
                     if (Int32.TryParse(instance.Path.RelativePath.Substring(instanceBegin, instanceEnd - instanceBegin), out int id))
                     {
                         InstanceId = id;
-
-                        // Cache the searcher. We have to re-query the instances each time, or the value stays the same.
-                        ActiveCollection = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", $"SELECT Value FROM Sensor WHERE InstanceId='{InstanceId}'");
                     }
                 }
             }
@@ -720,6 +717,12 @@ namespace Iot.Device.HardwareMonitor
 
             private void InternalGetValue(out float value, (Type Type, UnitCreator Creator) elem)
             {
+                if (_valueRead && InstanceId != 0)
+                {
+                    // Cache the searcher. We have to re-query the instances each time, or the value stays the same.
+                    ActiveCollection = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", $"SELECT Value FROM Sensor WHERE InstanceId='{InstanceId}'");
+                }
+
                 if (_valueRead && InstanceId != 0 && ActiveCollection != null)
                 {
                     value = 0;
@@ -779,6 +782,11 @@ namespace Iot.Device.HardwareMonitor
             public void Dispose()
             {
                 _instance.Dispose();
+                if (ActiveCollection != null)
+                {
+                    ActiveCollection.Dispose();
+                    ActiveCollection = null;
+                }
             }
         }
 
