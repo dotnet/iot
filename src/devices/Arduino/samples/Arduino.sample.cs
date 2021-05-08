@@ -64,7 +64,13 @@ namespace Arduino.Samples
 
             if (portName == "INET")
             {
-                ConnectToSocket();
+                IPAddress address = IPAddress.Loopback;
+                if (args.Length > 1)
+                {
+                    address = IPAddress.Parse(args[1]);
+                }
+
+                ConnectToSocket(address);
                 return;
             }
 
@@ -107,10 +113,10 @@ namespace Arduino.Samples
             }
         }
 
-        private static void ConnectToSocket()
+        private static void ConnectToSocket(IPAddress address)
         {
             Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            s.Connect(IPAddress.Loopback, 27016);
+            s.Connect(address, 27016);
             s.NoDelay = true;
             using (NetworkStream ns = new NetworkStream(s, true))
             {
@@ -197,7 +203,7 @@ namespace Arduino.Samples
 
         private static void TestPwm(ArduinoBoard board)
         {
-            int pin = 6;
+            int pin = 2;
             using (var pwm = board.CreatePwmChannel(0, pin, 100, 0))
             {
                 Console.WriteLine("Now dimming LED. Press any key to exit");
@@ -324,7 +330,7 @@ namespace Arduino.Samples
         public static void TestGpio(ArduinoBoard board)
         {
             // Use Pin 6
-            const int gpio = 6;
+            const int gpio = 2;
             var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
