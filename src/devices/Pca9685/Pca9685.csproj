@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>
