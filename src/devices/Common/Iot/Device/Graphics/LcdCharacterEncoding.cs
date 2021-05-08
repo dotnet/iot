@@ -13,11 +13,11 @@ namespace Iot.Device.Graphics
     /// </summary>
     public class LcdCharacterEncoding : Encoding
     {
-        private Dictionary<char, byte> _characterMapping;
-        private char _unknownLetter;
+        private readonly Dictionary<char, byte> _characterMapping;
+        private readonly char _unknownLetter;
         // Character pixel maps for characters that will need to be written to the character RAM for this code page
-        private List<byte[]> _extraCharacters;
-        private string _cultureName;
+        private readonly List<byte[]> _extraCharacters;
+        private readonly string _cultureName;
 
         /// <summary>
         /// Creates an instance of <see cref="LcdCharacterEncoding"/>.
@@ -25,7 +25,7 @@ namespace Iot.Device.Graphics
         /// <param name="cultureName">Culture name for this encoding (informational only)</param>
         /// <param name="readOnlyMemoryName">Name of the ROM (hard coded read-only character memory) on the display</param>
         /// <param name="characterMap">The character map to use</param>
-        /// <param name="unknownLetter">The character to print when a letter not in the map is found</param>
+        /// <param name="unknownLetter">The character to print when a letter not in the map is found. This letter must be part of the map</param>
         public LcdCharacterEncoding(string cultureName, string readOnlyMemoryName, Dictionary<char, byte> characterMap, char unknownLetter)
         {
             _cultureName = cultureName;
@@ -34,6 +34,10 @@ namespace Iot.Device.Graphics
             _extraCharacters = new List<byte[]>();
             AllCharactersSupported = true;
             ReadOnlyMemoryName = readOnlyMemoryName;
+            if (!_characterMapping.ContainsKey(unknownLetter))
+            {
+                throw new ArgumentException($"The replacement letter {unknownLetter} is not part of the character map", nameof(unknownLetter));
+            }
         }
 
         /// <summary>
