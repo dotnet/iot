@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(TargetFrameworksBase)</TargetFrameworks>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>

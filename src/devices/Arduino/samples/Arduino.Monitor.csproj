@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(TargetFrameworksBase)</TargetFrameworks>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AssemblyName>Arduino.Monitor</AssemblyName>
