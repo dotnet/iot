@@ -91,6 +91,8 @@ namespace Iot.Device.Arduino.Tests
                 I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
                 using Bme680 bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
                 bme680.Reset();
+                bme680.GasConversionIsEnabled = false;
+                bme680.HeaterIsEnabled = false;
                 console.Clear();
                 console.LineFeedMode = LineWrapMode.Truncate;
                 gpioController.Write(redLed, PinValue.Low);
