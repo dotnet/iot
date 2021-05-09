@@ -72,6 +72,7 @@
     <Compile Include="Runtime\UnitsNet\MiniLength.cs" />
     <Compile Include="Runtime\UnitsNet\MiniPressure.cs" />
     <Compile Include="Runtime\UnitsNet\MiniQuantityValue.cs" />
+    <Compile Include="Runtime\UnitsNet\MiniRelativeHumidity.cs" />
     <Compile Include="Runtime\UnitsNet\MiniTemperature.cs" />
   </ItemGroup>
 </Project>

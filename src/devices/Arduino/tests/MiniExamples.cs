@@ -98,24 +98,24 @@ namespace Iot.Device.Arduino.Tests
                 gpioController.Write(redLed, PinValue.Low);
                 while (gpioController.Read(button) == PinValue.Low)
                 {
-                    // Debug.WriteLine("Starting loop");
-                    console.SetCursorPosition(0, 0);
                     bme680.SetPowerMode(Bme680PowerMode.Forced);
                     if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure))
                     {
                         string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + pressure.Hectopascals.ToString("F1") + " hPa";
                         Debug.WriteLine(temperatureLine);
-                        console.WriteLine(temperatureLine);
+                        console.ReplaceLine(0, temperatureLine);
                     }
 
-                    console.SetCursorPosition(0, 1);
+                    if (bme680.TryReadHumidity(out RelativeHumidity humidity))
+                    {
+                        string humidityLine = humidity.Percent.ToString("F1") + "% RH";
+                        console.ReplaceLine(1, humidityLine);
+                    }
+
                     var time = DateTime.Now;
-                    console.Write(time.ToString("dddd"));
-                    console.SetCursorPosition(0, 2);
-                    console.WriteLine(time.ToString("dd. MMMM yyyy    "));
+                    console.ReplaceLine(2, time.ToString("ddd dd. MMMM yyyy"));
                     console.SetCursorPosition(0, 3);
-                    console.WriteLine(time.ToLongTimeString());
-                    Thread.Sleep(800);
+                    console.ReplaceLine(3, time.ToLongTimeString());
                     gpioController.Write(redLed, PinValue.High);
                     Thread.Sleep(100);
                     gpioController.Write(redLed, PinValue.Low);
