@@ -12,6 +12,7 @@ using Iot.Device.Arduino.Tests;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.CharacterLcd;
+using Iot.Device.Common;
 using Iot.Device.Graphics;
 using UnitsNet;
 using Xunit;
@@ -52,6 +53,7 @@ namespace Iot.Device.Arduino.Tests
 
         public class UseI2cDisplay
         {
+            private const int StationAltitude = 650;
             public static int Run()
             {
                 using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
@@ -85,6 +87,7 @@ namespace Iot.Device.Arduino.Tests
                 hd44780.Clear();
                 hd44780.Write("Startup!");
                 Thread.Sleep(500);
+                Length stationAltitude = Length.FromMeters(StationAltitude);
                 LcdConsole console = new LcdConsole(hd44780, "A00", false);
                 LcdCharacterEncoding encoding = LcdConsole.CreateEncoding(CultureInfo.CreateSpecificCulture("de-CH"), "A00", '?', 8);
                 console.LoadEncoding(encoding);
@@ -101,7 +104,9 @@ namespace Iot.Device.Arduino.Tests
                     bme680.SetPowerMode(Bme680PowerMode.Forced);
                     if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure))
                     {
-                        string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + pressure.Hectopascals.ToString("F1") + " hPa";
+                        Debug.WriteLine($"Raw data: {pressure.Hectopascals:F2} hPa, {temp.DegreesCelsius:F1} °C {stationAltitude.Meters:F1} müM");
+                        Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
+                        string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
                         Debug.WriteLine(temperatureLine);
                         console.ReplaceLine(0, temperatureLine);
                     }
