@@ -290,10 +290,12 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(nameof(TestMethods.EnumsHaveNames), 0, 0, 1, Fixture.DefaultCompilerSettings, false);
         }
 
-        [Fact]
-        public void DoubleToStringTest()
+        [Theory]
+        [InlineData(nameof(TestMethods.DoubleToString))]
+        [InlineData(nameof(TestMethods.DoubleToString2))]
+        public void DoubleToStringTest(string name)
         {
-            LoadCodeMethod(nameof(TestMethods.DoubleToString), 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
+            LoadCodeMethod(name, 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
         }
 
         /// <summary>
@@ -307,6 +309,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.DictionaryTest2), 0)]
         [InlineData(nameof(TestMethods.LcdCharacterEncodingTest1), 0)]
         [InlineData(nameof(TestMethods.LcdCharacterEncodingTest2), 0)]
+        [InlineData(nameof(TestMethods.UnitsNetTemperatureTest), 0)]
         public void BrokenImplementationBehaviorValidation(string methodName, int arg1)
         {
             var compilerSettings = new CompilerSettings()

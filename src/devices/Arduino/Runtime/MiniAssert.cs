@@ -1,4 +1,6 @@
-﻿#pragma warning disable CS1591
+﻿using System;
+
+#pragma warning disable CS1591
 namespace Iot.Device.Arduino.Runtime
 {
     /// <summary>
@@ -53,6 +55,22 @@ namespace Iot.Device.Arduino.Runtime
             {
                 throw new MiniAssertionException();
             }
+        }
+
+        public static void AreEqual(string expected, string actual)
+        {
+            That(actual == expected, $"Expected '{expected}', actual '{actual}'");
+        }
+
+        public static void AreEqual(double expected, double actual)
+        {
+            AreEqual(expected, actual, 0);
+        }
+
+        public static void AreEqual(double expected, double actual, double delta)
+        {
+            double effectiveDelta = Math.Abs(expected - actual);
+            That(effectiveDelta <= delta, $"Expected {expected}, actual {actual} +/- {delta}");
         }
     }
 }

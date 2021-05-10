@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Iot.Device.Arduino.Runtime;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Graphics;
+using UnitsNet;
 using UnitsNet.Units;
 using Xunit;
 
@@ -735,6 +736,13 @@ namespace Iot.Device.Arduino.Tests
             return arg1;
         }
 
+        public static double DoubleToString2(double arg1, double arg2)
+        {
+            string result = arg1.ToString();
+            MiniAssert.AreEqual("20.23", result);
+            return arg1;
+        }
+
         public static int IntToString1(int arg1, int arg2)
         {
             string result = arg1.ToString();
@@ -812,6 +820,15 @@ namespace Iot.Device.Arduino.Tests
             var encodedByte = encoded[6];
             MiniAssert.That(0b1101_1111 == encodedByte, $"Byte is 0x{(int)encodedByte:X4}"); // Place of the ° character in the A00 ROM map (at least something that looks like it)
             MiniAssert.That((byte)'C' == encoded[7]);
+            return 1;
+        }
+
+        public static int UnitsNetTemperatureTest(int arg1, int arg2)
+        {
+            Temperature t1 = Temperature.FromDegreesCelsius(0);
+            MiniAssert.AreEqual(273.15, t1.Kelvins, 0.01);
+            t1 = Temperature.FromDegreesCelsius(20.0);
+            MiniAssert.AreEqual(273.15 + 20.0, t1.Kelvins, 0.01);
             return 1;
         }
 

@@ -98,5 +98,22 @@ namespace Iot.Device.Arduino.Runtime
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation]
+        public override bool Equals(object? obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            UInt64 other = (UInt64)obj;
+            return ToUInt64() == other;
+        }
     }
 }

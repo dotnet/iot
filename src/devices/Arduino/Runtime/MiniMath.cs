@@ -66,7 +66,19 @@ namespace Iot.Device.Arduino.Runtime
         [ArduinoImplementation(NativeMethod.MathSqrt)]
         public static double Sqrt(double d)
         {
-            throw new NotImplementedException();
+            return Math.Sqrt(d);
+        }
+
+        [ArduinoImplementation(NativeMethod.MathExp)]
+        public static double Exp(double d)
+        {
+            return Math.Exp(d);
+        }
+
+        [ArduinoImplementation(NativeMethod.MathAbs)]
+        public static double Abs(double d)
+        {
+            return Math.Abs(d);
         }
     }
 }

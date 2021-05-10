@@ -74,6 +74,12 @@ namespace Iot.Device.Arduino.Runtime
                 return 1; // returning a non-zero value means false, which results in UseNLS to become false, which is probably what we want
             }
 
+            [ArduinoImplementation]
+            public static unsafe void InitOrdinalCasingPage(Int32 pageNumber, char* pTarget)
+            {
+                throw new NotImplementedException();
+            }
+
             [ArduinoImplementation(NativeMethod.None)]
             internal static bool GetLocaleInfoInt(string localeName, uint localeNumberData, ref int value)
             {

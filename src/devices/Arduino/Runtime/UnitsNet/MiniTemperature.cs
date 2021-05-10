@@ -31,7 +31,26 @@ namespace Iot.Device.Arduino.Runtime.UnitsNet
                 }
                 else if (_unit == TemperatureUnit.Kelvin)
                 {
+                    return _value - DEGREE_TO_KELVIN;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+        }
+
+        public double Kelvins
+        {
+            get
+            {
+                if (_unit == TemperatureUnit.DegreeCelsius)
+                {
                     return _value + DEGREE_TO_KELVIN;
+                }
+                else if (_unit == TemperatureUnit.Kelvin)
+                {
+                    return _value;
                 }
                 else
                 {

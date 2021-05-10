@@ -19,5 +19,11 @@ namespace Iot.Device.Arduino.Runtime
                 throw new NotImplementedException();
             }
         }
+
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        public static unsafe bool ValidateSystemTime(byte* time, bool localTime)
+        {
+            return true;
+        }
     }
 }

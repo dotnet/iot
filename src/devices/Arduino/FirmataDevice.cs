@@ -1515,7 +1515,15 @@ namespace Iot.Device.Arduino
             FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.ResetExecutor);
             sequence.WriteByte((byte)(force ? 1 : 0));
             sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            WaitAndHandleIlCommand(sequence);
+            try
+            {
+                WaitAndHandleIlCommand(sequence);
+            }
+            catch (TaskSchedulerException x)
+            {
+                // This exception is ok here. It just means we've killed a running task.
+                OnError?.Invoke("Terminated running task (ignored)", x);
+            }
         }
 
         public void SendKillTask(int methodToken)

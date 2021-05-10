@@ -65,5 +65,11 @@ namespace Iot.Device.Arduino.Runtime.UnitsNet
             double v = (double)value;
             return new Pressure(v, PressureUnit.Pascal);
         }
+
+        public static Pressure FromHectopascals(QuantityValue value)
+        {
+            double v = (double)value;
+            return new Pressure(v, PressureUnit.Hectopascal);
+        }
     }
 }
