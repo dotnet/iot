@@ -2,10 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.I2c;
 using System.Threading;
 using Iot.Device.SensorHub;
 
-var sh = SensorHub.Create();
+const int I2cBusId = 1;
+I2cConnectionSettings connectionSettings = new(I2cBusId, SensorHub.DefaultI2cAddress);
+SensorHub sh = new(I2cDevice.Create(connectionSettings));
 
 while (true)
 {
