@@ -33,7 +33,16 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void DisplayHelloWorld()
         {
-            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.Run, false);
+            CompilerSettings s = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = true,
+                UseFlashForProgram = true,
+                AutoRestartProgram = true,
+                MaxMemoryUsage = 350 * 1024,
+            };
+
+            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.Run, false, s);
         }
 
         [Fact]

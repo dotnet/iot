@@ -751,7 +751,7 @@ namespace Iot.Device.Arduino
             int idx = 0;
             // Include all elements that are not in from but in to. Do not include elements in neither collection.
             var list = set.Classes.Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.NewToken) && toSnapShot.AlreadyAssignedTokens.Contains(x.NewToken));
-            var classesToLoad = list.OrderBy(x => x.NewToken).ToList();
+            var classesToLoad = list.OrderBy(x => (uint)x.NewToken).ToList();
             foreach (var c in classesToLoad)
             {
                 var cls = c.TheType;
@@ -864,7 +864,7 @@ namespace Iot.Device.Arduino
             }
 
             var list = set.Methods().Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
-            var uploadList = list.OrderBy(x => x.Token).ToList();
+            var uploadList = list.OrderBy(x => (uint)x.Token).ToList();
             int cnt = uploadList.Count;
             int idx = 0;
             foreach (var me in uploadList)
