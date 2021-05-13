@@ -71,6 +71,9 @@ namespace Iot.Device.HardwareMonitor
             _typeMap.Add(SensorType.HeatFlux, (typeof(HeatFlux), x => HeatFlux.FromKilowattsPerSquareMeter(x)));
             _typeMap.Add(SensorType.Current, (typeof(ElectricCurrent), x => ElectricCurrent.FromAmperes(x)));
             _typeMap.Add(SensorType.Data, (typeof(Information), x => Information.FromGigabytes(x)));
+            _typeMap.Add(SensorType.RawValue, (typeof(Ratio), x => Ratio.FromDecimalFractions(x)));
+            _typeMap.Add(SensorType.Throughput, (typeof(BitRate), x => BitRate.FromMegabytesPerSecond(x)));
+            _typeMap.Add(SensorType.TimeSpan, (typeof(Duration), x => Duration.FromSeconds(x)));
         }
 
         /// <summary>
