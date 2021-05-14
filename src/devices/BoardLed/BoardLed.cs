@@ -119,15 +119,7 @@ namespace Iot.Device.BoardLed
 
         private void SetBrightness(int value)
         {
-            if (value < 0)
-            {
-                value = 0;
-            }
-
-            if (value > 255)
-            {
-                value = 255;
-            }
+            value = MathExtensions.Clamp(value, 0, 255);
 
             _brightnessWriter.BaseStream.SetLength(0);
             _brightnessWriter.Write(value);
