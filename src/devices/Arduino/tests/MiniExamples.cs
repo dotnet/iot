@@ -57,7 +57,7 @@ namespace Iot.Device.Arduino.Tests
                 MaxMemoryUsage = 350 * 1024,
             };
 
-            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.RunClock, false, s);
+            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.WeatherStation, false, s);
         }
 
         public class UseI2cDisplay
@@ -76,7 +76,7 @@ namespace Iot.Device.Arduino.Tests
                 return 1;
             }
 
-            public static int RunClock()
+            public static int WeatherStation()
             {
                 const int redLed = 6;
                 const int button = 2;
@@ -111,18 +111,16 @@ namespace Iot.Device.Arduino.Tests
                 while (gpioController.Read(button) == PinValue.Low)
                 {
                     bme680.SetPowerMode(Bme680PowerMode.Forced);
-                    if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure))
+                    if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure) && bme680.TryReadHumidity(out RelativeHumidity humidity))
                     {
-                        Debug.WriteLine($"Raw data: {pressure.Hectopascals:F2} hPa, {temp.DegreesCelsius:F1} °C {stationAltitude.Meters:F1} müM");
+                        // Debug.WriteLine($"Raw data: {pressure.Hectopascals:F2} hPa, {temp.DegreesCelsius:F1} °C {stationAltitude.Meters:F1} müM");
                         Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
                         string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
-                        Debug.WriteLine(temperatureLine);
+                        // Debug.WriteLine(temperatureLine);
                         console.ReplaceLine(0, temperatureLine);
-                    }
 
-                    if (bme680.TryReadHumidity(out RelativeHumidity humidity))
-                    {
-                        string humidityLine = humidity.Percent.ToString("F1") + "% RH";
+                        Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
+                        string humidityLine = humidity.Percent.ToString("F1") + "% RH, DP: " + dewPoint.DegreesCelsius.ToString("F1") + " °C";
                         console.ReplaceLine(1, humidityLine);
                     }
 
