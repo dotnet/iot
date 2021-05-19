@@ -658,7 +658,7 @@ namespace Iot.Device.Nrf24l01
 
             Span<byte> readData = WriteRead(Command.NRF_R_REGISTER, Register.NRF_RF_SETUP, 1);
 
-            byte setting = (byte)(readData[0] & (~0b_0000_1000) | ((byte)rate << 1));
+            byte setting = (byte)(readData[0] & (~0b_0010_1000) | (byte)rate);
 
             Write(Command.NRF_W_REGISTER, Register.NRF_RF_SETUP, setting);
 

@@ -9,6 +9,11 @@ namespace Iot.Device.Nrf24l01
     public enum DataRate
     {
         /// <summary>
+        /// 250kbps
+        /// </summary>
+        Rate250kbps = 0x20,
+
+        /// <summary>
         /// 1Mbps
         /// </summary>
         Rate1Mbps = 0x00,
@@ -16,6 +21,6 @@ namespace Iot.Device.Nrf24l01
         /// <summary>
         /// 2Mbps
         /// </summary>
-        Rate2Mbps = 0x01
+        Rate2Mbps = 0x08
     }
 }
