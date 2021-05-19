@@ -42,9 +42,12 @@
     <Compile Include="Runtime\MiniEnvironment.cs" />
     <Compile Include="Runtime\MiniEventSource.cs" />
     <Compile Include="Runtime\MiniException.cs" />
+    <Compile Include="Runtime\MiniFileSystem.cs" />
     <Compile Include="Runtime\MiniGC.cs" />
     <Compile Include="Runtime\MiniInterlocked.cs" />
     <Compile Include="Runtime\MiniInterop.cs" />
+    <Compile Include="Runtime\MiniInterop.Kernel32.cs" />
+    <Compile Include="Runtime\MiniInterop.Sys.cs" />
     <Compile Include="Runtime\MiniIntrospectionExtensions.cs" />
     <Compile Include="Runtime\MiniMarshal.cs" />
     <Compile Include="Runtime\MiniMath.cs" />
@@ -52,6 +55,9 @@
     <Compile Include="Runtime\MiniMethodTable.cs" />
     <Compile Include="Runtime\MiniMonitor.cs" />
     <Compile Include="Runtime\MiniObject.cs" />
+    <Compile Include="Runtime\MiniPath.cs" />
+    <Compile Include="Runtime\MiniPathHelper.cs" />
+    <Compile Include="Runtime\MiniPathInternal.cs" />
     <Compile Include="Runtime\MiniResourceManager.cs" />
     <Compile Include="Runtime\MiniRuntimeHelpers.cs" />
     <Compile Include="Runtime\MiniRuntimeTypeHandle.cs" />

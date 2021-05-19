@@ -168,7 +168,7 @@ namespace Iot.Device.Arduino
                         // These opcodes are followed by a method token
                         var methodTarget = ResolveMember(method, token)!;
                         MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
-                        patchValue = set.GetOrAddMethodToken(mb);
+                        patchValue = set.GetOrAddMethodToken(mb, method);
                         // Do an inverse lookup again - might have changed due to replacement
                         methodsUsed.Add((MethodBase)set.InverseResolveToken(patchValue)!);
                         break;

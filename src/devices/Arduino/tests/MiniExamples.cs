@@ -4,10 +4,12 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Arduino.Runtime;
 using Iot.Device.Arduino.Tests;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
@@ -46,7 +48,7 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Fact]
-        public void DisplayTheClock()
+        public void WeatherStation()
         {
             CompilerSettings s = new CompilerSettings()
             {
@@ -58,6 +60,21 @@ namespace Iot.Device.Arduino.Tests
             };
 
             ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.WeatherStation, false, s);
+        }
+
+        [Fact]
+        public void FileSystemCheck()
+        {
+            CompilerSettings s = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = true,
+                AutoRestartProgram = false,
+                MaxMemoryUsage = 350 * 1024,
+            };
+
+            ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.FileSystemTest, false, s);
         }
 
         public class UseI2cDisplay
@@ -133,6 +150,29 @@ namespace Iot.Device.Arduino.Tests
                     gpioController.Write(redLed, PinValue.Low);
                 }
 
+                return 1;
+            }
+
+            public static int FileSystemTest()
+            {
+                const string fileName = "Test.txt";
+                string pathName = Path.GetTempPath();
+                string fullName = Path.Combine(pathName, fileName);
+                Directory.CreateDirectory(pathName);
+                TextWriter tw = new StreamWriter(fullName);
+                tw.WriteLine("This is text");
+                tw.Close();
+                MiniAssert.That(File.Exists(fullName));
+
+                TextReader tr = new StreamReader(fullName);
+                string? content = tr.ReadLine();
+                if (string.IsNullOrEmpty(content))
+                {
+                    throw new MiniAssertionException("File was empty");
+                }
+
+                tr.Close();
+                MiniAssert.AreEqual("This is text", content);
                 return 1;
             }
         }

@@ -202,20 +202,20 @@ namespace Iot.Device.Arduino
 
             void AddMethod(MethodInfo method, NativeMethod nativeMethod)
             {
-                if (!set.HasMethod(method, out _))
+                if (!set.HasMethod(method, method, out _))
                 {
                     set.GetReplacement(method.DeclaringType);
-                    MethodInfo? replacement = (MethodInfo?)set.GetReplacement(method);
+                    MethodInfo? replacement = (MethodInfo?)set.GetReplacement(method, method);
                     if (replacement != null)
                     {
                         method = replacement;
-                        if (set.HasMethod(method, out _))
+                        if (set.HasMethod(method, method, out _))
                         {
                             return;
                         }
                     }
 
-                    int token = set.GetOrAddMethodToken(method);
+                    int token = set.GetOrAddMethodToken(method, method);
                     ArduinoMethodDeclaration decl = new ArduinoMethodDeclaration(token, method, null, MethodFlags.SpecialMethod, nativeMethod);
                     set.AddMethod(decl);
                 }
@@ -442,7 +442,7 @@ namespace Iot.Device.Arduino
                 var m = methods[index] as ConstructorInfo;
                 if (m != null)
                 {
-                    memberTypes.Add(new ClassMember(m, VariableKind.Method, set.GetOrAddMethodToken(m), new List<int>()));
+                    memberTypes.Add(new ClassMember(m, VariableKind.Method, set.GetOrAddMethodToken(m, m), new List<int>()));
                 }
             }
 
@@ -625,7 +625,7 @@ namespace Iot.Device.Arduino
                     Type t = typeof(ArduinoNativeHelpers);
                     var method = t.GetMethod("MainStub", BindingFlags.Static | BindingFlags.NonPublic)!;
                     PrepareCodeInternal(set, method, null);
-                    int tokenOfStartupMethod = set.GetOrAddMethodToken(method);
+                    int tokenOfStartupMethod = set.GetOrAddMethodToken(method, method);
                     set.TokenOfStartupMethod = tokenOfStartupMethod;
                 }
             }
@@ -695,7 +695,7 @@ namespace Iot.Device.Arduino
                 {
                     var interestingInterface = typeof(IEnumerable<>).MakeGenericType(a.Key);
                     var method = interestingInterface.GetMethod("GetEnumerator", BindingFlags.Public | BindingFlags.Instance | BindingFlags.FlattenHierarchy) ?? throw new MissingMethodException(interestingInterface.Name, "GetEnumerator");
-                    int interfaceMethodToken = set.GetOrAddMethodToken(method);
+                    int interfaceMethodToken = set.GetOrAddMethodToken(method, m.MethodBase);
                     arrayClass.AddClassMember(new ClassMember(a.Value, VariableKind.Method, m.Token, new List<int>() { interfaceMethodToken }));
                 }
             }
@@ -723,8 +723,8 @@ namespace Iot.Device.Arduino
                         // Unfortunately, this can recursively require further classes and methods
                         PrepareCodeInternal(set, mb, null);
 
-                        List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x)).ToList();
-                        cls.AddClassMember(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb), baseTokens));
+                        List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x, mb)).ToList();
+                        cls.AddClassMember(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb, mb), baseTokens));
                     }
                 }
             }
@@ -912,7 +912,7 @@ namespace Iot.Device.Arduino
                 CollectBaseImplementations(set, m, methodsBeingImplemented);
 
                 // We need the implementation if at least one base implementation is being called and is used
-                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, out _));
+                return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, m, out _));
             }
 
             return false;
@@ -1463,7 +1463,7 @@ namespace Iot.Device.Arduino
             {
                 // Do we need to replace this method?
                 set.GetReplacement(method.DeclaringType);
-                var finalMethod = set.GetReplacement(method);
+                var finalMethod = set.GetReplacement(method, methodInfo);
                 if (finalMethod == null)
                 {
                     finalMethod = method;
@@ -1473,14 +1473,14 @@ namespace Iot.Device.Arduino
                 {
                     // Ensure we're not scanning the same implementation twice, as this would result
                     // in a stack overflow when a method is recursive (even indirect)
-                    if (!set.HasMethod(me, out var code1) && newMethods.Add(me))
+                    if (!set.HasMethod(me, methodInfo, out var code1) && newMethods.Add(me))
                     {
                         CollectDependendentMethods(set, me, code1, newMethods);
                     }
                 }
                 else if (finalMethod is ConstructorInfo co)
                 {
-                    if (!set.HasMethod(co, out var code2) && newMethods.Add(co))
+                    if (!set.HasMethod(co, methodInfo, out var code2) && newMethods.Add(co))
                     {
                         CollectDependendentMethods(set, co, code2, newMethods);
                     }
@@ -1516,7 +1516,7 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
             }
 
-            if (set.HasMethod(methodInfo, out _))
+            if (set.HasMethod(methodInfo, methodInfo, out _))
             {
                 unchecked
                 {
@@ -1691,11 +1691,12 @@ namespace Iot.Device.Arduino
         {
             // Ensure the class is known, if it needs replacement
             var classReplacement = set.GetReplacement(methodInfo.DeclaringType);
-            MethodBase? replacement = set.GetReplacement(methodInfo);
+            MethodBase? replacement = set.GetReplacement(methodInfo, methodInfo);
+            MethodBase parentMethod = parent == null ? methodInfo : parent.MethodBase;
             if (classReplacement != null && replacement == null)
             {
                 // See below, this is the fix for it
-                replacement = set.GetReplacement(methodInfo, classReplacement);
+                replacement = set.GetReplacement(methodInfo, parentMethod, classReplacement);
             }
 
             if (replacement != null)
@@ -1703,7 +1704,7 @@ namespace Iot.Device.Arduino
                 methodInfo = replacement;
             }
 
-            if (set.HasMethod(methodInfo, out _))
+            if (set.HasMethod(methodInfo, parentMethod, out _))
             {
                 return;
             }
@@ -1717,7 +1718,7 @@ namespace Iot.Device.Arduino
 
             if (HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != NativeMethod.None)
             {
-                int tk1 = set.GetOrAddMethodToken(methodInfo);
+                int tk1 = set.GetOrAddMethodToken(methodInfo, parentMethod);
                 var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
                 set.AddMethod(newInfo1);
                 return;
@@ -1729,7 +1730,7 @@ namespace Iot.Device.Arduino
                 // We cannot use the normal replacement technique with generic classes such as ByReference<T>, because Type.GetType doesn't allow open generic classes.
                 if (methodInfo.Name == ".ctor" && methodInfo.DeclaringType!.Name == "ByReference`1")
                 {
-                    int tk1 = set.GetOrAddMethodToken(methodInfo);
+                    int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
                     var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, NativeMethod.ByReferenceCtor);
                     set.AddMethod(newInfo1);
                     return;
@@ -1737,7 +1738,7 @@ namespace Iot.Device.Arduino
 
                 if (methodInfo.Name == "get_Value" && methodInfo.DeclaringType!.Name == "ByReference`1")
                 {
-                    int tk1 = set.GetOrAddMethodToken(methodInfo);
+                    int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
                     var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, NativeMethod.ByReferenceValue);
                     set.AddMethod(newInfo1);
                     return;
@@ -1858,7 +1859,7 @@ namespace Iot.Device.Arduino
                 foreach (var m in set.FirmwareStartupSequence!)
                 {
                     // Use patched tokens
-                    token = set.GetOrAddMethodToken(m.Method);
+                    token = set.GetOrAddMethodToken(m.Method, parentMethod);
                     AddCallWithToken(code, OpCode.CEE_CALL, token);
                 }
 
@@ -1872,7 +1873,7 @@ namespace Iot.Device.Arduino
                     AddCallWithToken(code, OpCode.CEE_NEWARR, token);
                 }
 
-                token = set.GetOrAddMethodToken(mainMethod);
+                token = set.GetOrAddMethodToken(mainMethod, parentMethod);
                 AddCallWithToken(code, OpCode.CEE_CALL, token);
 
                 if (mainMethod.ReturnType != typeof(void))
@@ -1916,7 +1917,7 @@ namespace Iot.Device.Arduino
                 parserResult = new IlCode(methodInfo, null);
             }
 
-            int tk = set.GetOrAddMethodToken(methodInfo);
+            int tk = set.GetOrAddMethodToken(methodInfo, parentMethod);
 
             ArduinoMethodDeclaration newInfo;
             if (constructedCode)
@@ -2005,7 +2006,7 @@ namespace Iot.Device.Arduino
                 ClassDeclaration? cls = classes[index];
                 if (!cls.SuppressInit && cls.TheType.TypeInitializer != null)
                 {
-                    set.HasMethod(cls.TheType.TypeInitializer, out var code);
+                    set.HasMethod(cls.TheType.TypeInitializer, cls.TheType.TypeInitializer, out var code);
                     if (code == null)
                     {
                         throw new InvalidOperationException("Inconsistent data set");

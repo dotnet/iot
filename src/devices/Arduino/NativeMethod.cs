@@ -95,6 +95,7 @@ namespace Iot.Device.Arduino
         UnsafeAsPointer,
         UnsafeByteOffset,
         UnsafeAreSame,
+        UnsafeSkipInit,
 
         UnsafeIsAddressGreaterThan,
         UnsafeIsAddressLessThan,
@@ -167,5 +168,11 @@ namespace Iot.Device.Arduino
         MathAbs,
 
         DebugWriteLine,
+
+        Interop_Kernel32CreateFile,
+        Interop_Kernel32SetLastError,
+        Interop_Kernel32GetLastError,
+        Interop_Kernel32SetFilePointerEx,
+        Interop_Kernel32CloseHandle,
     }
 }

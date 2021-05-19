@@ -220,5 +220,11 @@ namespace Iot.Device.Arduino.Runtime
         {
             return As<byte, T>(ref source);
         }
+
+        [ArduinoImplementation(NativeMethod.UnsafeSkipInit)]
+        public static void SkipInit<T>(out T value)
+        {
+            throw new PlatformNotSupportedException();
+        }
     }
 }

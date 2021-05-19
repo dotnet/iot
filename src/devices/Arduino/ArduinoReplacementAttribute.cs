@@ -17,18 +17,34 @@ namespace Iot.Device.Arduino
         /// </summary>
         public ArduinoReplacementAttribute(Type typeToReplace, bool replaceEntireType = false)
         {
+            if (typeToReplace == null)
+            {
+                throw new ArgumentNullException(nameof(typeToReplace));
+            }
+
             TypeToReplace = typeToReplace;
             ReplaceEntireType = replaceEntireType;
+            TypeNameToReplace = typeToReplace.FullName!;
         }
 
         /// <summary>
         /// Use this overload if you need to replace a class that is not publicly visible (i.e. an internal implementation class in the framework)
         /// </summary>
-        public ArduinoReplacementAttribute(string typeNameToReplace, string? assemblyName = null, bool replaceEntireType = false)
+        public ArduinoReplacementAttribute(string typeNameToReplace, string? assemblyName = null, bool replaceEntireType = false, Type? typeInSameAssembly = null)
         {
+            TypeNameToReplace = typeNameToReplace;
             if (assemblyName != null)
             {
-                var assembly = Assembly.Load(assemblyName);
+                Assembly assembly;
+                if (typeInSameAssembly != null)
+                {
+                    assembly = Assembly.GetAssembly(typeInSameAssembly)!;
+                }
+                else
+                {
+                    assembly = Assembly.Load(assemblyName);
+                }
+
                 if (typeNameToReplace.Contains("+")) // Special marker giving the parent class (we can't access the object the attribute is on from here)
                 {
                     string parent = typeNameToReplace.Substring(0, typeNameToReplace.IndexOf("+", StringComparison.OrdinalIgnoreCase));
@@ -69,6 +85,11 @@ namespace Iot.Device.Arduino
         {
             get { return _includingPrivates; }
             set { _includingPrivates = value; }
+        }
+
+        public string TypeNameToReplace
+        {
+            get;
         }
     }
 }

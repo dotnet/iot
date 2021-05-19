@@ -425,7 +425,7 @@ namespace Iot.Device.Arduino
             }
         }
 
-        internal int GetOrAddMethodToken(MethodBase methodBase)
+        internal int GetOrAddMethodToken(MethodBase methodBase, MethodBase callingMethod)
         {
             int token;
             if (_patchedMethodTokens.TryGetValue(methodBase, out token))
@@ -433,17 +433,17 @@ namespace Iot.Device.Arduino
                 return token;
             }
 
-            var replacement = GetReplacement(methodBase);
+            var replacement = GetReplacement(methodBase, callingMethod);
             if (replacement != null)
             {
-                return GetOrAddMethodToken(replacement);
+                return GetOrAddMethodToken(replacement, callingMethod);
             }
 
             var classReplacement = GetReplacement(methodBase.DeclaringType);
             if (classReplacement != null && replacement == null)
             {
-                replacement = GetReplacement(methodBase, classReplacement);
-                return GetOrAddMethodToken(replacement ?? throw new InvalidOperationException($"Internal error: Expected replacement not found for {methodBase.MemberInfoSignature()}"));
+                replacement = GetReplacement(methodBase, callingMethod, classReplacement);
+                return GetOrAddMethodToken(replacement ?? throw new InvalidOperationException($"Internal error: Expected replacement not found for {methodBase.MemberInfoSignature()}"), callingMethod);
             }
 
             token = _nextToken++;
@@ -715,7 +715,7 @@ namespace Iot.Device.Arduino
             return false;
         }
 
-        internal bool HasMethod(MemberInfo m, out IlCode? found)
+        internal bool HasMethod(MemberInfo m, MethodBase callingMethod, out IlCode? found)
         {
             if (_classesToSuppress.Contains(m.DeclaringType!))
             {
@@ -723,7 +723,7 @@ namespace Iot.Device.Arduino
                 return true;
             }
 
-            var replacement = GetReplacement((MethodBase)m);
+            var replacement = GetReplacement((MethodBase)m, callingMethod);
             if (replacement != null)
             {
                 m = replacement;
@@ -921,6 +921,7 @@ namespace Iot.Device.Arduino
                     otherFlags |= BindingFlags.DeclaredOnly;
                 }
 
+                bool replacementFound = false;
                 foreach (var methodb in typeToReplace.GetMethods(otherFlags))
                 {
                     if (!methodsNeedingReplacement.Contains(methodb))
@@ -935,8 +936,14 @@ namespace Iot.Device.Arduino
                         AddReplacementMethod(methodb, methoda);
                         // Remove from the list - so we see in the end what is missing
                         methodsNeedingReplacement.Remove(methodb);
+                        replacementFound = true;
                         break;
                     }
+                }
+
+                if (!replacementFound)
+                {
+                    _logger.LogWarning($"Method {methoda.MemberInfoSignature()} has nothing to replace");
                 }
             }
 
@@ -996,7 +1003,7 @@ namespace Iot.Device.Arduino
             return null;
         }
 
-        internal MethodBase? GetReplacement(MethodBase original)
+        internal MethodBase? GetReplacement(MethodBase original, MethodBase callingMethod)
         {
             // Odd: I'm pretty sure that previously equality on MethodBase instances worked, but for some reason not all instances pointing to the same method are Equal().
             var elem = _methodsReplaced.FirstOrDefault(x =>
@@ -1025,7 +1032,7 @@ namespace Iot.Device.Arduino
             }
             else if (elem.Item2 == null)
             {
-                throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing.");
+                throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}");
             }
 
             return elem.Item2;
@@ -1035,9 +1042,10 @@ namespace Iot.Device.Arduino
         /// Try to find a replacement for the given method in the given class
         /// </summary>
         /// <param name="methodInfo">The method to replace</param>
+        /// <param name="callingMethod">The method that called into this one</param>
         /// <param name="classToSearch">With a method in this class</param>
         /// <returns></returns>
-        internal MethodBase? GetReplacement(MethodBase methodInfo, Type classToSearch)
+        internal MethodBase? GetReplacement(MethodBase methodInfo, MethodBase callingMethod, Type classToSearch)
         {
             foreach (var replacementMethod in classToSearch.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
             {
