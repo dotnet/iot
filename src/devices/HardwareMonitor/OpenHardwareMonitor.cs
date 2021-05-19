@@ -587,9 +587,15 @@ namespace Iot.Device.HardwareMonitor
                     if (cpuPower.TryGetValue(out Power power))
                     {
                         ElectricPotential potential = ElectricPotential.FromVolts(value.Value);
-                        // This function is missing in the library
-                        ElectricCurrent current = ElectricCurrent.FromAmperes(power.Watts / potential.Volts);
-                        managementInstance.Value = current.Amperes;
+                        if (potential.Volts > 0)
+                        {
+                            ElectricCurrent current = power / potential;
+                            managementInstance.Value = current.Amperes;
+                        }
+                        else
+                        {
+                            managementInstance.Value = 0;
+                        }
                     }
                 });
                 _derivedSensors.Add(newSensor);
