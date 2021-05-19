@@ -71,6 +71,52 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
+        [InlineData(-20.0)]
+        [InlineData(-10.0)]
+        [InlineData(0.0)]
+        [InlineData(10.0)]
+        [InlineData(20.0)]
+        [InlineData(30.0)]
+        [InlineData(40.0)]
+        // It is expected that the dew point is equal to the current temperature if the humidity is 100%, see issue #1299
+        public void DewPointAtSaturation(double temperature)
+        {
+            Temperature result = WeatherHelper.CalculateDewPoint(Temperature.FromDegreesCelsius(temperature), RelativeHumidity.FromPercent(100));
+            Assert.True(Math.Abs(temperature - result.DegreesCelsius) < 1E-1, $"Expected {temperature} °C, actual {result.DegreesCelsius} °C");
+        }
+
+        [Theory]
+        // Compare with https://en.wikipedia.org/wiki/Dew_point#/media/File:Dewpoint-RH.svg
+        [InlineData(77.71, 100, 50, false)]
+        [InlineData(45.79, 80, 30, false)]
+        [InlineData(27.68, 60, 29, false)]
+        [InlineData(77.71, 100, 50, true)]
+        [InlineData(45.79, 80, 30, true)]
+        [InlineData(27.68, 60, 29, true)]
+        [InlineData(14, 14, 50, false)]
+        [InlineData(14, 14, 50, true)]
+        public void DewPointIsCalculatedCorrectly2(double expected, double fahrenheit, double relativeHumidity, bool overice)
+        {
+            Temperature dewPoint = WeatherHelper.CalculateDewPoint2(Temperature.FromDegreesFahrenheit(fahrenheit), RelativeHumidity.FromPercent(relativeHumidity), overice);
+            Assert.Equal(expected, Math.Round(dewPoint.DegreesFahrenheit, 2));
+        }
+
+        [Theory]
+        [InlineData(-20.0)]
+        [InlineData(-10.0)]
+        [InlineData(0.0)]
+        [InlineData(10.0)]
+        [InlineData(20.0)]
+        [InlineData(30.0)]
+        [InlineData(40.0)]
+        // It is expected that the dew point is equal to the current temperature if the humidity is 100%, see issue #1299
+        public void DewPointAtSaturation2(double temperature)
+        {
+            Temperature result = WeatherHelper.CalculateDewPoint2(Temperature.FromDegreesCelsius(temperature), RelativeHumidity.FromPercent(100), false);
+            Assert.True(Math.Abs(temperature - result.DegreesCelsius) < 1E-3, $"Expected {temperature} °C, actual {result.DegreesCelsius} °C");
+        }
+
+        [Theory]
         [InlineData(23, 100, 50)]
         [InlineData(15, 80, 59)]
         [InlineData(5, 40, 75)]

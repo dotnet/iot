@@ -108,6 +108,15 @@ namespace Iot.Device.Common
             Pressure.FromHectopascals((relativeHumidity.Percent / 100.0 * CalculateSaturatedVaporPressureOverWater(airTemperature).Hectopascals));
 
         /// <summary>
+        /// Calculates the actual vapor pressure over ice
+        /// </summary>
+        /// <param name="airTemperature">The dry air temperature</param>
+        /// <param name="relativeHumidity">The relative humidity (RH)</param>
+        /// <returns>The actual vapor pressure</returns>
+        public static Pressure CalculateActualVaporPressureOverIce(Temperature airTemperature, RelativeHumidity relativeHumidity) =>
+            Pressure.FromHectopascals((relativeHumidity.Percent / 100.0 * CalculateSaturatedVaporPressureOverIce(airTemperature).Hectopascals));
+
+        /// <summary>
         /// Calculates the dew point.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
@@ -123,6 +132,32 @@ namespace Iot.Device.Common
             double c = 257.14; // °C
             double b = 18.678;
             double dewPoint = (c * Math.Log(pa / a)) / (b - Math.Log(pa / a));
+            return Temperature.FromDegreesCelsius(dewPoint);
+        }
+
+        /// <summary>
+        /// Calculates the dew point.
+        /// </summary>
+        /// <param name="airTemperature">The dry air temperature</param>
+        /// <param name="relativeHumidity">The relative humidity (RH)</param>
+        /// <param name="overIce">True to calculate the vapor pressure over ice</param>
+        /// <returns>The dew point</returns>
+        /// <remarks>
+        /// Source: Hans Häckel, Meteorologie. ISBN 978-3-8252-3700-4, Seite 82
+        /// </remarks>
+        public static Temperature CalculateDewPoint2(Temperature airTemperature, RelativeHumidity relativeHumidity, bool overIce)
+        {
+            double pa = 0;
+            if (overIce)
+            {
+                pa = CalculateActualVaporPressureOverIce(airTemperature, relativeHumidity).Millibars;
+            }
+            else
+            {
+                pa = CalculateActualVaporPressure(airTemperature, relativeHumidity).Millibars;
+            }
+
+            double dewPoint = (423.86 - (234.175 * Math.Log(pa))) / (Math.Log(pa) - 18.89);
             return Temperature.FromDegreesCelsius(dewPoint);
         }
 
