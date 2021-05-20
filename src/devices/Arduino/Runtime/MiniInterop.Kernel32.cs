@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Iot.Device.Arduino.Runtime
 {
@@ -248,6 +249,53 @@ namespace Iot.Device.Arduino.Runtime
             internal static Boolean SetEndOfFile(Microsoft.Win32.SafeHandles.SafeFileHandle hFile)
             {
                 return true;
+            }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32WriteFile)]
+            internal static unsafe Int32 WriteFile(SafeHandle handle, Byte* bytes, Int32 numBytesToWrite, ref Int32 numBytesWritten, System.IntPtr mustBeZero)
+            {
+                return 0;
+            }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32WriteFileOverlapped)]
+            internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, System.IntPtr numBytesWritten_mustBeZero, NativeOverlapped* lpOverlapped)
+            {
+                return 0;
+            }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32ReadFile)]
+            internal static unsafe Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToRead, ref System.Int32 numBytesRead, System.IntPtr mustBeZero)
+            {
+                return 0;
+            }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32CancelIoEx)]
+            internal static unsafe Boolean CancelIoEx(System.Runtime.InteropServices.SafeHandle handle, System.Threading.NativeOverlapped* lpOverlapped)
+            {
+                return false;
+            }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32ReadFileOverlapped)]
+            internal static unsafe System.Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, System.Byte* bytes, System.Int32 numBytesToRead, System.IntPtr numBytesRead_mustBeZero, System.Threading.NativeOverlapped* overlapped)
+            {
+                return 0;
+            }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32FlushFileBuffers)]
+            internal static Boolean FlushFileBuffers(System.Runtime.InteropServices.SafeHandle hHandle)
+            {
+                return false;
+            }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32GetFileInformationByHandleEx)]
+            internal static unsafe Boolean GetFileInformationByHandleEx(Microsoft.Win32.SafeHandles.SafeFileHandle hFile, System.Int32 FileInformationClass, void* lpFileInformation, System.UInt32 dwBufferSize)
+            {
+                return false;
+            }
+
+            internal static System.Boolean QueryUnbiasedInterruptTime(ref System.UInt64 UnbiasedTime)
+            {
+                throw new NotImplementedException();
             }
         }
 

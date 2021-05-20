@@ -9,7 +9,7 @@ namespace Iot.Device.Arduino.Runtime
     [ArduinoReplacement(typeof(Monitor), true)]
     internal class MiniMonitor
     {
-        [ArduinoImplementation(NativeMethod.MonitorEnter1)]
+        [ArduinoImplementation(NativeMethod.MonitorEnter)]
         public static void Enter(Object o)
         {
         }
@@ -34,6 +34,12 @@ namespace Iot.Device.Arduino.Runtime
         public static void Pulse(Object o)
         {
             // No op
+        }
+
+        [ArduinoImplementation(NativeMethod.MonitorWait)]
+        public static bool Wait(Object obj, Int32 millisecondsTimeout)
+        {
+            throw new NotImplementedException();
         }
     }
 }

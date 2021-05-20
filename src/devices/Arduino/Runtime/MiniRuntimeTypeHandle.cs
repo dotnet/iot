@@ -91,11 +91,13 @@ namespace Iot.Device.Arduino.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(CompareByParameterNames = true)]
         internal static bool HasInstantiation(Type type)
         {
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(CompareByParameterNames = true)]
         internal static bool IsGenericTypeDefinition(Type type)
         {
             throw new NotImplementedException();

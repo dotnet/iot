@@ -64,6 +64,15 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
+        public virtual Type BaseType
+        {
+            [ArduinoImplementation(NativeMethod.TypeGetBaseType)]
+            get
+            {
+                return null!;
+            }
+        }
+
         public virtual string? FullName
         {
             get
@@ -78,6 +87,22 @@ namespace Iot.Device.Arduino.Runtime
             {
                 return "Namespace";
             }
+        }
+
+        public System.Reflection.MethodInfo GetMethod(System.String name)
+        {
+            throw new NotSupportedException();
+        }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        internal static System.Reflection.MethodBase GetMethodBase(Type reflectedType, MethodInfo methodHandle)
+        {
+            throw new NotImplementedException();
+        }
+
+        internal String FormatTypeName()
+        {
+            return string.Empty;
         }
 
         public bool IsRuntimeImplemented()

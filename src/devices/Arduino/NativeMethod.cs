@@ -13,6 +13,7 @@ namespace Iot.Device.Arduino
         HardwareLevelAccessGetPinCount,
 
         EnvironmentTickCount,
+        EnvironmentTickCount64,
         EnvironmentProcessorCount,
         EnvironmentFailFast1,
         EnvironmentFailFast2,
@@ -26,8 +27,8 @@ namespace Iot.Device.Arduino
         ObjectGetType,
         ObjectMemberwiseClone,
 
-        MonitorEnter1,
-        MonitorEnter2,
+        MonitorEnter,
+        MonitorWait,
         MonitorExit,
         StringEquals,
         StringToString,
@@ -68,6 +69,7 @@ namespace Iot.Device.Arduino
         TypeGetElementType,
         TypeContainsGenericParameters,
         TypeName,
+        TypeGetBaseType,
 
         ValueTypeGetHashCode,
         ValueTypeEquals,
@@ -174,6 +176,13 @@ namespace Iot.Device.Arduino
         Interop_Kernel32GetLastError,
         Interop_Kernel32SetFilePointerEx,
         Interop_Kernel32CloseHandle,
-        Interop_Kernel32SetEndOfFile
+        Interop_Kernel32SetEndOfFile,
+        Interop_Kernel32WriteFile,
+        Interop_Kernel32WriteFileOverlapped,
+        Interop_Kernel32CancelIoEx,
+        Interop_Kernel32ReadFile,
+        Interop_Kernel32ReadFileOverlapped,
+        Interop_Kernel32FlushFileBuffers,
+        Interop_Kernel32GetFileInformationByHandleEx
     }
 }

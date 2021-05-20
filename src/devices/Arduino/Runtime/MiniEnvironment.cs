@@ -17,6 +17,15 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
+        public static int TickCount64
+        {
+            [ArduinoImplementation(NativeMethod.EnvironmentTickCount64)]
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public static int ProcessorCount
         {
             [ArduinoImplementation(NativeMethod.EnvironmentProcessorCount)]
@@ -56,6 +65,14 @@ namespace Iot.Device.Arduino.Runtime
             get
             {
                 return "\n"; // We'll have our "Arduino-OS" look like an unix style system
+            }
+        }
+
+        internal static System.Boolean IsWindows8OrAbove
+        {
+            get
+            {
+                return true;
             }
         }
 

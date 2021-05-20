@@ -12,6 +12,11 @@ namespace Iot.Device.Arduino.Runtime
             _exception = e;
         }
 
+        public MiniStackTrace(bool fNeedsFileInfo)
+        {
+            _exception = new Exception("Unknown exception in current thread");
+        }
+
         public int FrameCount
         {
             get
@@ -28,7 +33,13 @@ namespace Iot.Device.Arduino.Runtime
         [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
         public string ToString(int traceFormat)
         {
-            return "Stack Trace";
+            return "Stack Trace with exception " + _exception.Message;
+        }
+
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        internal void ToString(int traceFormat, System.Text.StringBuilder sb)
+        {
+            sb.AppendLine(ToString());
         }
     }
 }

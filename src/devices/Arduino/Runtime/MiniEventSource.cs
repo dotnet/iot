@@ -24,6 +24,10 @@ namespace Iot.Device.Arduino.Runtime
         {
         }
 
+        protected virtual void OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs command)
+        {
+        }
+
         [ArduinoImplementation(CompareByParameterNames = true)]
         protected unsafe void WriteEventCore(int eventId, int eventDataCount, void* data)
         {
