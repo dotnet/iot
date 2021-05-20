@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="*.cs" />
+    <Compile Include="MathExtensions.cs" />
     <Compile Include="Iot/Device/Common/*.cs" />
     <Compile Include="Iot/Device/Graphics/*.cs" />
     <Compile Include="Iot/Device/Multiplexing/*.cs" />    
@@ -18,6 +18,11 @@
     <Compile Include="System/Device/Spi/*.cs" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <Compile Include="FrameworkCompatibilityExtensions.cs" />
+    <Compile Include="IsExternalInit.cs" />
   </ItemGroup>
 
 </Project>

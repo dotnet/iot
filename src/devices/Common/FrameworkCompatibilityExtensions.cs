@@ -1,13 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 #pragma warning disable CS1591 // Missing documentation (these methods are mostly hidden from the user)
-#if NETSTANDARD2_0
 namespace Iot.Device
 {
     /// <summary>
@@ -82,5 +78,3 @@ namespace Iot.Device
         }
     }
 }
-
-#endif

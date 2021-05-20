@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
-#if NETSTANDARD2_0
 namespace System.Runtime.CompilerServices
 {
     /// <summary>
@@ -18,4 +12,3 @@ namespace System.Runtime.CompilerServices
     {
     }
 }
-#endif
