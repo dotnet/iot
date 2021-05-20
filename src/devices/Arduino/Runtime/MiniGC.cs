@@ -28,6 +28,11 @@ namespace Iot.Device.Arduino.Runtime
             // No op (we're not running any finalizers)
         }
 
+        public static void ReRegisterForFinalize(object obj)
+        {
+            // No op, like above
+        }
+
 #if NET5_0
         public static GCMemoryInfo GetGCMemoryInfo()
         {

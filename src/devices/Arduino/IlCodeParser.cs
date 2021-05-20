@@ -190,7 +190,13 @@ namespace Iot.Device.Arduino
                             // The class whose member this is was replaced - replace the member, too.
                             // Note that this will only apply when a class that is being replaced has a public field (an example is MiniBitConverter.IsLittleEndian)
                             var members = replacementClassForField.FindMembers(MemberTypes.Field, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance, (x, y) => x.Name == mb.Name, null);
-                            mb = (FieldInfo)members.Single(); // If this crashes, our replacement class misses a public field
+                            if (members.Length != 1)
+                            {
+                                // If this crashes, our replacement class misses a public field
+                                throw new InvalidOperationException($"Class {replacementClassForField.MemberInfoSignature()} is missing field {mb.Name}");
+                            }
+
+                            mb = (FieldInfo)members.Single();
                         }
 
                         // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them

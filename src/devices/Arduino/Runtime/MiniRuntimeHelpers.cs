@@ -125,5 +125,15 @@ namespace Iot.Device.Arduino.Runtime
 
             return o1.Equals(o2);
         }
+
+        public static bool ObjectHasComponentSize(object o)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static System.Boolean TryEnsureSufficientExecutionStack()
+        {
+            return true;
+        }
     }
 }

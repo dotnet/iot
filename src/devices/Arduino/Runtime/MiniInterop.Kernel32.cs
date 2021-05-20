@@ -243,6 +243,12 @@ namespace Iot.Device.Arduino.Runtime
             {
                 return true;
             }
+
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32SetEndOfFile)]
+            internal static Boolean SetEndOfFile(Microsoft.Win32.SafeHandles.SafeFileHandle hFile)
+            {
+                return true;
+            }
         }
 
         internal struct SECURITY_ATTRIBUTES

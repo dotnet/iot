@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace Iot.Device.Arduino.Runtime
 {
-    [ArduinoReplacement(typeof(System.Threading.Thread), true)]
+    // [ArduinoReplacement(typeof(System.Threading.Thread), true)]
     internal class MiniThread
     {
         /// <summary>
@@ -12,12 +12,14 @@ namespace Iot.Device.Arduino.Runtime
         private static MiniThread? s_currentThread;
         public static MiniThread CurrentThread => s_currentThread ?? InitializeCurrentThread();
 
+        private ExecutionContext _executionContext;
         private string? _name;
         // private Delegate? _delegate; // Delegate
         // private object? _threadStartArg;
         internal MiniThread()
         {
             _name = "Main Thread";
+            _executionContext = null!;
             // _delegate = null;
             // _threadStartArg = null;
         }
@@ -29,6 +31,8 @@ namespace Iot.Device.Arduino.Runtime
                 return _name;
             }
         }
+
+        public ExecutionContext? ExecutionContext => _executionContext;
 
         public int ManagedThreadId => 1;
 

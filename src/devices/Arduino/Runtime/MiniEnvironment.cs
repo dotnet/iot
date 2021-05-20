@@ -26,6 +26,15 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
+        public static int ProcessId
+        {
+            get
+            {
+                // Some magic number
+                return 0x1BBAEFFE;
+            }
+        }
+
         public static bool IsSingleProcessor
         {
             get

@@ -174,5 +174,6 @@ namespace Iot.Device.Arduino
         Interop_Kernel32GetLastError,
         Interop_Kernel32SetFilePointerEx,
         Interop_Kernel32CloseHandle,
+        Interop_Kernel32SetEndOfFile
     }
 }
