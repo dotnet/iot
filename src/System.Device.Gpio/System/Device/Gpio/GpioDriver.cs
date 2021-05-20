@@ -44,6 +44,22 @@ namespace System.Device.Gpio
         protected internal abstract void SetPinMode(int pinNumber, PinMode mode);
 
         /// <summary>
+        /// Sets the mode to a pin and sets an initial value for an output pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        /// <param name="mode">The mode to be set.</param>
+        /// <param name="initialValue">The initial value if the <paramref name="mode"/> is output. The driver will do it's best to prevent glitches to the other value when
+        /// changing from input to output.</param>
+        protected internal virtual void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
+        {
+            SetPinMode(pinNumber, mode);
+            if (mode == PinMode.Output)
+            {
+                Write(pinNumber, initialValue);
+            }
+        }
+
+        /// <summary>
         /// Gets the mode of a pin.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>

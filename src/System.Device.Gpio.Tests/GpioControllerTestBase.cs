@@ -64,6 +64,20 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        public void PinCanChangeStateWhileItIsOpen()
+        {
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                controller.OpenPin(OutputPin, PinMode.Input);
+                Thread.SpinWait(100);
+                controller.SetPinMode(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.High);
+                controller.SetPinMode(OutputPin, PinMode.Input);
+                controller.ClosePin(OutputPin);
+            }
+        }
+
+        [Fact]
         public void ThrowsInvalidOperationExceptionWhenPinIsNotOpened()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
@@ -112,12 +126,12 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void ThrowsIfWritingOnInputPin()
+        public void AllowWritingOnInputPin()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(InputPin, PinMode.Input);
-                Assert.Throws<InvalidOperationException>(() => controller.Write(InputPin, PinValue.High));
+                controller.Write(InputPin, PinValue.High);
             }
         }
 

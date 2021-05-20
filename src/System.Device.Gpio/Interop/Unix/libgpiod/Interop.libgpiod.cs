@@ -74,9 +74,10 @@ internal partial class Interop
         /// </summary>
         /// <param name="line">GPIO line handle</param>
         /// <param name="consumer">Name of the consumer.</param>
+        /// <param name="default_val">Initial value of the line</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_request_output(SafeLineHandle line, string consumer);
+        internal static extern int gpiod_line_request_output(SafeLineHandle line, string consumer, int default_val);
 
         /// <summary>
         /// Set the value of a single GPIO line.
@@ -107,6 +108,9 @@ internal partial class Interop
         /// Release a previously reserved line.
         /// </summary>
         /// <param name="lineHandle">GPIO line handle</param>
+        /// <remarks>
+        /// This does NOT invalidate the line handle. This only releases the lock, so that a gpiod_line_request_input/gpiod_line_request_output can be called again.
+        /// </remarks>
         [DllImport(LibgpiodLibrary)]
         internal static extern void gpiod_line_release(IntPtr lineHandle);
 
