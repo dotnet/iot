@@ -93,7 +93,7 @@ namespace Iot.Device.Arduino
         /// <param name="board">[Out] Returns the board reference. It is already initialized.</param>
         /// <returns>True on success, false if no board was found</returns>
         public static bool TryFindBoard(IEnumerable<string> comPorts, IEnumerable<int> baudRates,
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
 #endif
             out ArduinoBoard? board)
@@ -131,7 +131,7 @@ namespace Iot.Device.Arduino
         /// <see cref="TryFindBoard(System.Collections.Generic.IEnumerable{string},System.Collections.Generic.IEnumerable{int},out Iot.Device.Arduino.ArduinoBoard?)"/> overload excluding ports that shall not be tested.
         /// </remarks>
         public static bool TryFindBoard(
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
 #endif
             out ArduinoBoard? board)

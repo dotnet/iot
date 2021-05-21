@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{C5A43465-133D-4092-AFD5-DE329B3ED9E4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RGBLedMatrix.sample", "samples\RGBLedMatrix.sample.csproj", "{955539A1-EB0A-4984-9047-BDE955BE89B4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RGBLedMatrix.sample", "samples\RGBLedMatrix.sample.csproj", "{955539A1-EB0A-4984-9047-BDE955BE89B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RGBLedMatrix", "RGBLedMatrix.csproj", "{40A8EFFD-B81F-4A1E-A41C-27F12848D16D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RGBLedMatrix", "RGBLedMatrix.csproj", "{40A8EFFD-B81F-4A1E-A41C-27F12848D16D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{C9339537-8395-4950-AED4-C58910870439}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,9 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{955539A1-EB0A-4984-9047-BDE955BE89B4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -46,8 +45,26 @@ Global
 		{40A8EFFD-B81F-4A1E-A41C-27F12848D16D}.Release|x64.Build.0 = Release|Any CPU
 		{40A8EFFD-B81F-4A1E-A41C-27F12848D16D}.Release|x86.ActiveCfg = Release|Any CPU
 		{40A8EFFD-B81F-4A1E-A41C-27F12848D16D}.Release|x86.Build.0 = Release|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Debug|x64.Build.0 = Debug|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Debug|x86.Build.0 = Debug|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Release|x64.ActiveCfg = Release|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Release|x64.Build.0 = Release|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Release|x86.ActiveCfg = Release|Any CPU
+		{C9339537-8395-4950-AED4-C58910870439}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{955539A1-EB0A-4984-9047-BDE955BE89B4} = {C5A43465-133D-4092-AFD5-DE329B3ED9E4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1209CCFE-EF64-4071-98DF-136D4D9F4E77}
 	EndGlobalSection
 EndGlobal

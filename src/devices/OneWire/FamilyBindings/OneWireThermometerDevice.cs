@@ -59,6 +59,7 @@ namespace Iot.Device.OneWire
             }
         }
 
+#if !NETSTANDARD2_0
         /// <summary>
         /// Reads the current temperature of the device.
         /// Expect this function to be slow (about one second).
@@ -68,6 +69,7 @@ namespace Iot.Device.OneWire
         {
             return ReadTemperatureInternalAsync();
         }
+#endif
 
         /// <summary>
         /// Reads the current temperature of the device.

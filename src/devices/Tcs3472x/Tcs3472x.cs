@@ -81,7 +81,7 @@ namespace Iot.Device.Tcs3472x
             _i2cDevice.WriteByte((byte)(Registers.COMMAND_BIT | Registers.ID));
             ChipId = (TCS3472Type)_i2cDevice.ReadByte();
             _isLongTime = false;
-            IntegrationTime = Math.Clamp(integrationTime, 0.0024, 0.7);
+            IntegrationTime = MathExtensions.Clamp(integrationTime, 0.0024, 0.7);
             SetIntegrationTime(integrationTime);
             Gain = gain;
             PowerOn();
@@ -127,7 +127,7 @@ namespace Iot.Device.Tcs3472x
                 }
 
                 _isLongTime = false;
-                var timeByte = Math.Clamp((int)(0x100 - (timeSeconds / 0.0024)), 0, 255);
+                var timeByte = MathExtensions.Clamp((int)(0x100 - (timeSeconds / 0.0024)), 0, 255);
                 WriteRegister(Registers.ATIME, (byte)timeByte);
                 _integrationTimeByte = (byte)timeByte;
             }
@@ -140,7 +140,7 @@ namespace Iot.Device.Tcs3472x
 
                 _isLongTime = true;
                 var timeByte = (int)(0x100 - (timeSeconds / 0.029));
-                timeByte = Math.Clamp(timeByte, 0, 255);
+                timeByte = MathExtensions.Clamp(timeByte, 0, 255);
                 WriteRegister(Registers.WTIME, (byte)timeByte);
                 _integrationTimeByte = (byte)timeByte;
             }
@@ -211,13 +211,13 @@ namespace Iot.Device.Tcs3472x
             }
 
             int r = (int)(I2cRead16(Registers.RDATAL) * 255 / divide);
-            r = Math.Clamp(r, 0, 255);
+            r = MathExtensions.Clamp(r, 0, 255);
             int g = (int)(I2cRead16(Registers.GDATAL) * 255 / divide);
-            g = Math.Clamp(g, 0, 255);
+            g = MathExtensions.Clamp(g, 0, 255);
             int b = (int)(I2cRead16(Registers.BDATAL) * 255 / divide);
-            b = Math.Clamp(b, 0, 255);
+            b = MathExtensions.Clamp(b, 0, 255);
             int a = (int)(I2cRead16(Registers.CDATAL) * 255 / divide);
-            a = Math.Clamp(a, 0, 255);
+            a = MathExtensions.Clamp(a, 0, 255);
             return Color.FromArgb(a, r, g, b);
         }
 
