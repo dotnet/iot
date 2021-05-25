@@ -11,9 +11,14 @@ The repository also contains [Iot.Device.Bindings](https://www.nuget.org/package
 
 **NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
 
+## Hardware requirements
+While most of the bindings and examples in this project require and are designed to support specific hardware (such as [LCD displays](src/devices/CharacterLcd), [temperature sensors](src/devices/Dhtxx), [single-board computers](src/devices/Board/RaspberryPiBoard.cs), [microcontrollers](src/devices/Arduino), etc.), the library itself tries to be as hardware-independent as possible. Some bindings are even written to showcase the use of IOT interfaces with hardware that is already present in normal desktop computers (such as [keyboards](src/devices/Board/KeyboardGpioDriver.cs) or [CPU temperature sensors](src/devices/HardwareMonitor)). So to get started, you do not need expensive hardware. Or you can start out with cheap stuff, such as an Arduino Uno. 
+
 ## .NET Core Versions
 
-Whilst most of the device binding projects target .NET Core 2.1 for backward compatibility, the sample projects target the latest stable .NET Core. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
+Both libraries in this repository are cross-targetting .NET Standard 2.0, .NET Core 2.1 and .NET 5.0. They can be used from any project targeting .NET Core 2.1 or higher, and also from .NET Framework or Mono. 
+
+The sample projects target the latest stable .NET Version. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
 
 ## How to Install
 
@@ -53,7 +58,9 @@ Please contribute. We are primarily interested in the following:
 After installing, please see the following areas to learn more:
 
 * [.NET IoT 101 (Jan 2020)](https://channel9.msdn.com/Series/IoT-101) - An introduction series on how to create .NET IoT applications with a Raspberry Pi.
-* [Documentation](Documentation/README.md) - Resources related to electronics, devices, vendors, software and other IoT topics.
+* [Introduction](https://docs.microsoft.com/en-us/dotnet/iot/) - Quickstart Guides with a few examples
+* [API Documentation](https://docs.microsoft.com/en-us/dotnet/api/?view=iot-dotnet-1.3) - API documentation for all public interfaces. Be sure to choose the library version you are using. 
+* [Hardware Documentation](Documentation/README.md) - Resources related to electronics, devices, vendors, software and other IoT topics.
 * [Samples](samples/README.md) - Step-by-step instructions on building your first app.
 * [Roadmap](Documentation/roadmap.md) - Areas planned or currently being worked on.
 
