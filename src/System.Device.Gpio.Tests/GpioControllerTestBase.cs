@@ -44,7 +44,6 @@ namespace System.Device.Gpio.Tests
 
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
-                controller.OpenPin(OutputPin, PinMode.Output);
                 controller.OpenPin(InputPin, PinMode.Input);
                 Assert.Equal(PinValue.High, controller.Read(InputPin));
             }
