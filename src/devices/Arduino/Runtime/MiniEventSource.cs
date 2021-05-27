@@ -53,6 +53,15 @@ namespace Iot.Device.Arduino.Runtime
         {
         }
 
+        public static void SetCurrentThreadActivityId(Guid activityId)
+        {
+        }
+
+        public static void SetCurrentThreadActivityId(Guid activityId, out Guid oldActivityThatWillContinue)
+        {
+            oldActivityThatWillContinue = default;
+        }
+
         protected virtual void Dispose(bool disposing)
         {
         }

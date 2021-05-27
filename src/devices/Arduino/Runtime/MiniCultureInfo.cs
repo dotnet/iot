@@ -300,6 +300,9 @@ namespace Iot.Device.Arduino.Runtime
             {
                 return s_userDefaultCulture ?? InitializeUserDefaultCulture();
             }
+
+            // Required attribute, because the original property has a different type
+            [ArduinoImplementation(CompareByParameterNames = true)]
             set
             {
                 if (value == null)
@@ -317,6 +320,8 @@ namespace Iot.Device.Arduino.Runtime
             {
                 return s_userDefaultUICulture ?? InitializeUserDefaultUICulture();
             }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
             set
             {
                 if (value == null)

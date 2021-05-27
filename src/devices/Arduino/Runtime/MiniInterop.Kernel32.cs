@@ -293,6 +293,7 @@ namespace Iot.Device.Arduino.Runtime
                 return false;
             }
 
+            [ArduinoImplementation(NativeMethod.Interop_Kernel32QueryUnbiasedInterruptTime)]
             internal static System.Boolean QueryUnbiasedInterruptTime(ref System.UInt64 UnbiasedTime)
             {
                 throw new NotImplementedException();

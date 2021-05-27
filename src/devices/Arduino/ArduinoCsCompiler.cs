@@ -553,16 +553,24 @@ namespace Iot.Device.Arduino
                     // EqualityComparer<T>.Equals(T,T) -> -> GenericEqualityComparer<T>.Equals(T,T)
                     newDeclarations.Sort(new ClassDeclarationByInheritanceSorter());
                     DetectRequiredVirtualMethodImplementations(set, newDeclarations);
+
+                    // Of all classes in the list, load their static cctors. This may also add new classes in turn
+                    for (var j = 0; j < set.Classes.Count; j++)
+                    {
+                        var cls = set.Classes[j];
+                        var cctor = cls.TheType.TypeInitializer;
+                        if (cctor == null || cls.SuppressInit)
+                        {
+                            continue;
+                        }
+
+                        PrepareCodeInternal(set, cctor, null);
+                    }
+
                     if (set.Classes.Count == declarations.Count)
                     {
                         break;
                     }
-
-                    ////// If we need to have complete classes, we also need to redo this step
-                    ////if (completeClasses)
-                    ////{
-                    ////    CompleteClasses(set);
-                    ////}
 
                     // Find the new ones
                     newDeclarations = new List<ClassDeclaration>();
@@ -576,21 +584,6 @@ namespace Iot.Device.Arduino
 
                     declarations = new List<ClassDeclaration>(set.Classes);
                 }
-            }
-
-            // Last step: Of all classes in the list, load their static cctors
-            for (var i = 0; i < set.Classes.Count; i++)
-            {
-                // Let's hope the list no more changes, but in theory we don't know (however, creating static ctors that
-                // depend on other classes might give a big problem)
-                var cls = set.Classes[i];
-                var cctor = cls.TheType.TypeInitializer;
-                if (cctor == null || cls.SuppressInit)
-                {
-                    continue;
-                }
-
-                PrepareCodeInternal(set, cctor, null);
             }
 
             // The list of classes may contain both the original class (i.e. String) and its replacement (MiniString) with the same token and (hopefully) all else equal as well.
@@ -1586,6 +1579,11 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(ArduinoBoard));
                 exec.SuppressType(typeof(ArduinoCsCompiler));
 
+                // We don't currently support threads or tasks
+                // exec.SuppressType(typeof(System.Threading.Tasks.Task));
+                // exec.SuppressType(typeof(System.Threading.Tasks.ValueTask));
+                // exec.SuppressType("System.Threading.Tasks.ThreadPoolTaskScheduler");
+
                 // Can't afford to load these, at least not on the Arduino Due. They're way to big.
                 exec.SuppressType(typeof(UnitsNet.QuantityFormatter));
                 exec.SuppressType(typeof(UnitsNet.UnitAbbreviationsCache));
@@ -2021,6 +2019,8 @@ namespace Iot.Device.Arduino
             // Todo: The above doesn't work reliably yet, therefore do a bit of manual mangling.
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
+            BringToFront(codeSequences, GetSystemPrivateType("System.Diagnostics.Tracing.FrameworkEventSource"));
+            BringToFront(codeSequences, typeof(CancellationTokenSource));
             BringToFront(codeSequences, typeof(MiniCultureInfo));
             BringToFront(codeSequences, typeof(Stopwatch));
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));

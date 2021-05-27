@@ -245,5 +245,10 @@ namespace Iot.Device.Arduino.Runtime
             // Extended paths are windows-only
             return false;
         }
+
+        public static bool GetIsCaseSensitive()
+        {
+            return true;
+        }
     }
 }

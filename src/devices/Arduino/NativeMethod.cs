@@ -183,6 +183,7 @@ namespace Iot.Device.Arduino
         Interop_Kernel32ReadFile,
         Interop_Kernel32ReadFileOverlapped,
         Interop_Kernel32FlushFileBuffers,
-        Interop_Kernel32GetFileInformationByHandleEx
+        Interop_Kernel32GetFileInformationByHandleEx,
+        Interop_Kernel32QueryUnbiasedInterruptTime
     }
 }

@@ -47,6 +47,7 @@
     <Compile Include="Runtime\MiniInterlocked.cs" />
     <Compile Include="Runtime\MiniInterop.cs" />
     <Compile Include="Runtime\MiniInterop.Kernel32.cs" />
+    <Compile Include="Runtime\MiniInterop.Ole32.cs" />
     <Compile Include="Runtime\MiniInterop.Sys.cs" />
     <Compile Include="Runtime\MiniIntrospectionExtensions.cs" />
     <Compile Include="Runtime\MiniMarshal.cs" />
@@ -70,6 +71,7 @@
     <Compile Include="Runtime\MiniString.cs" />
     <Compile Include="Runtime\MiniTextInfo.cs" />
     <Compile Include="Runtime\MiniThread.cs" />
+    <Compile Include="Runtime\MiniThreadPool.cs" />
     <Compile Include="Runtime\MiniTimeZoneInfo.cs" />
     <Compile Include="Runtime\MiniType.cs" />
     <Compile Include="Runtime\MiniUnsafe.cs" />

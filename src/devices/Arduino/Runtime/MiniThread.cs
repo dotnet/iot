@@ -3,45 +3,16 @@ using System.Threading;
 
 namespace Iot.Device.Arduino.Runtime
 {
-    // [ArduinoReplacement(typeof(System.Threading.Thread), true)]
+    [ArduinoReplacement(typeof(System.Threading.Thread), false, IncludingPrivates = true)]
     internal class MiniThread
     {
-        /// <summary>
-        /// Current thread value. This field must be made Thread-Local if multiple threads are supported
-        /// </summary>
-        private static MiniThread? s_currentThread;
-        public static MiniThread CurrentThread => s_currentThread ?? InitializeCurrentThread();
-
-        private ExecutionContext _executionContext;
-        private string? _name;
-        // private Delegate? _delegate; // Delegate
-        // private object? _threadStartArg;
-        internal MiniThread()
-        {
-            _name = "Main Thread";
-            _executionContext = null!;
-            // _delegate = null;
-            // _threadStartArg = null;
-        }
-
-        public string? Name
-        {
-            get
-            {
-                return _name;
-            }
-        }
-
-        public ExecutionContext? ExecutionContext => _executionContext;
-
-        public int ManagedThreadId => 1;
-
         /// <summary>
         /// This method performs busy waiting for a specified number of milliseconds.
         /// It is not implemented as low-level function because this allows other code to continue.
         /// That means this does not block other tasks (and particularly the communication) from working.
         /// </summary>
         /// <param name="delayMs">Number of milliseconds to sleep</param>
+        [ArduinoImplementation]
         public static void Sleep(int delayMs)
         {
             if (delayMs <= 0)
@@ -70,17 +41,13 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
-        public static MiniThread InitializeCurrentThread()
-        {
-            s_currentThread = new MiniThread();
-            return s_currentThread;
-        }
-
+        [ArduinoImplementation]
         public static void Sleep(TimeSpan delay)
         {
             Sleep((int)delay.TotalMilliseconds);
         }
 
+        [ArduinoImplementation]
         public static bool Yield()
         {
             // We are running in a single-thread environment, so this is effectively a no-op
@@ -93,23 +60,16 @@ namespace Iot.Device.Arduino.Runtime
             throw new NotImplementedException();
         }
 
-        public static int OptimalMaxSpinWaitsPerSpinIteration
-        {
-            get
-            {
-                return 1;
-            }
-        }
-
         [ArduinoImplementation(NativeMethod.None)]
         public static int GetCurrentProcessorId()
         {
             return 0;
         }
 
-        public void Join()
+        [ArduinoImplementation]
+        public static int GetCurrentProcessorNumber()
         {
-            // Threads are not yet supported
+            return 0;
         }
     }
 }
