@@ -9,10 +9,7 @@
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
      <PackageReference Include="Moq" Version="$(MoqPackageVersion)" />
-
-    <PackageReference Include="xunit.runner.utility" Version="$(xunitrunnerutilityPackageVersion)" />
+     <PackageReference Include="xunit.runner.utility" Version="$(xunitrunnerutilityPackageVersion)" />
   </ItemGroup>
 </Project>
