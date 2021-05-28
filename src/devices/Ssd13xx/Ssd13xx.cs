@@ -54,9 +54,9 @@ namespace Iot.Device.Ssd13xx
         /// Send data to the display controller.
         /// </summary>
         /// <param name="data">The data to send to the display controller.</param>
-        public virtual void SendData(byte[] data)
+        public virtual void SendData(Span<byte> data)
         {
-            if (data is null)
+            if (data.IsEmpty)
             {
                 throw new ArgumentNullException(nameof(data));
             }

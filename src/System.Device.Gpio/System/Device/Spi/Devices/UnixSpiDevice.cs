@@ -118,7 +118,11 @@ namespace System.Device.Spi
         {
             UnixSpiMode mode = SpiModeToUnixSpiMode(_settings.Mode);
 
-            if (_settings.ChipSelectLineActiveState == PinValue.High)
+            if (_settings.ChipSelectLine == -1)
+            {
+                mode |= UnixSpiMode.SPI_NO_CS;
+            }
+            else if (_settings.ChipSelectLineActiveState == PinValue.High)
             {
                 mode |= UnixSpiMode.SPI_CS_HIGH;
             }

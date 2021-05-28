@@ -269,43 +269,43 @@ namespace Iot.Device.Media
             byte[] writeBuffer4 = new byte[4];
 
             writeBuffer4 = Encoding.ASCII.GetBytes(header.Chunk.ChunkId);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.Chunk.ChunkSize);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             writeBuffer4 = Encoding.ASCII.GetBytes(header.Format);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             writeBuffer4 = Encoding.ASCII.GetBytes(header.SubChunk1.ChunkId);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SubChunk1.ChunkSize);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.AudioFormat);
-            wavStream.Write(writeBuffer2);
+            wavStream.Write(writeBuffer2, 0, 2);
 
             BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.NumChannels);
-            wavStream.Write(writeBuffer2);
+            wavStream.Write(writeBuffer2, 0, 2);
 
             BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SampleRate);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.ByteRate);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BlockAlign);
-            wavStream.Write(writeBuffer2);
+            wavStream.Write(writeBuffer2, 0, 2);
 
             BinaryPrimitives.WriteUInt16LittleEndian(writeBuffer2, header.BitsPerSample);
-            wavStream.Write(writeBuffer2);
+            wavStream.Write(writeBuffer2, 0, 2);
 
             writeBuffer4 = Encoding.ASCII.GetBytes(header.SubChunk2.ChunkId);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
 
             BinaryPrimitives.WriteUInt32LittleEndian(writeBuffer4, header.SubChunk2.ChunkSize);
-            wavStream.Write(writeBuffer4);
+            wavStream.Write(writeBuffer4, 0, 4);
         }
 
         private WavHeader ReadWavHeader(Stream wavStream)

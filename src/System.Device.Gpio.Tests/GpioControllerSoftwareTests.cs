@@ -46,7 +46,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void WriteInputPinThrows()
+        public void WriteInputPinDoesNotThrow()
         {
             _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
             _mockedGpioDriver.Setup(x => x.IsPinModeSupportedEx(1, It.IsAny<PinMode>())).Returns(true);
@@ -55,7 +55,7 @@ namespace System.Device.Gpio.Tests
             var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
 
             ctrl.OpenPin(1, PinMode.Input);
-            Assert.Throws<InvalidOperationException>(() => ctrl.Write(1, PinValue.High));
+            ctrl.Write(1, PinValue.High);
         }
 
         [Fact]

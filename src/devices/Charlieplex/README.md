@@ -4,6 +4,8 @@
 
 An even bigger challenge is that the scheme (at least in its basic form) only allows for lighting a single LED at once. On the face of it, that would seem to be a big problem. Don't worry. The LEDs change very quickly such that the eye is tricked into thinking multiple LEDs are lit at the same time. This means that your code that cannot be doing something else while the LEDs are lit. This is why the API accepts timing information. This is not what you'd expect if you are used to lighting LEDs directly from GPIO pins or via a shift register.
 
+[Show dotnet: Animating 40 LEDs with charlieplexing](https://devblogs.microsoft.com/dotnet/show-dotnet-animating-40-leds-with-charlieplexing/) demonstrates using this binding.
+
 ## Usage
 
 The following code sample demonstrates addressing 6 LEDs with 3 pins.

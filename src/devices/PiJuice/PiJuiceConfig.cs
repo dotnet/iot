@@ -377,7 +377,7 @@ namespace Iot.Device.PiJuiceDevice
         /// </summary>
         private void SelectBatteryProfiles()
         {
-            var firmware = _piJuice.GetFirmwareVerion();
+            var firmware = _piJuice.GetFirmwareVersion();
             var version = (firmware.Major << 4) + firmware.Minor;
 
             if (version >= 0x14)

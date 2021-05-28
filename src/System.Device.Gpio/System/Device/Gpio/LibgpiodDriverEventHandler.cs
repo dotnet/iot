@@ -11,6 +11,8 @@ namespace System.Device.Gpio.Drivers
 {
     internal sealed class LibGpiodDriverEventHandler : IDisposable
     {
+        private const int ERROR_CODE_EINTR = 4; // Interrupted system call
+
         private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
 
         public event PinChangeEventHandler? ValueRising;
@@ -61,7 +63,14 @@ namespace System.Device.Gpio.Drivers
                     WaitEventResult waitResult = Interop.libgpiod.gpiod_line_event_wait(pinHandle, ref timeout);
                     if (waitResult == WaitEventResult.Error)
                     {
-                        throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, Marshal.GetLastWin32Error(), _pinNumber);
+                        var errorCode = Marshal.GetLastWin32Error();
+                        if (errorCode == ERROR_CODE_EINTR)
+                        {
+                            // ignore Interrupted system call error and retry
+                            continue;
+                        }
+
+                        throw ExceptionHelper.GetIOException(ExceptionResource.EventWaitError, errorCode, _pinNumber);
                     }
 
                     if (waitResult == WaitEventResult.EventOccured)

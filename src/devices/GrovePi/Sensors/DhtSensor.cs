@@ -94,8 +94,8 @@ namespace Iot.Device.GrovePiDevice.Sensors
             // This is needed for firmware 1.4.0 and also working for previous versions
             Thread.Sleep(300);
             var retArray = _grovePi.ReadCommand(GrovePiCommand.DhtTemp, _port);
-            _lastTemHum[0] = BitConverter.ToSingle(retArray.AsSpan(1, 4));
-            _lastTemHum[1] = BitConverter.ToSingle(retArray.AsSpan(5, 4));
+            _lastTemHum[0] = BitConverter.ToSingle(retArray!, 1);
+            _lastTemHum[1] = BitConverter.ToSingle(retArray!, 5);
         }
 
         /// <summary>
