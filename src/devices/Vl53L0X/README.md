@@ -47,3 +47,20 @@ SetVcselPulsePeriod(VcselType.VcselPeriodFinalRange, PeriodPulse.Period10);
 ```
 
 Please refer to the documentation to understand the impact of changing the various pulses as well as using the high resolution precision measurement. The sensor can't be precise in long range and in general, the longer it can see, the less precise are the data. High resolution will return a more precise measurement but mainly in short distance.
+
+## Changing the default I2C address
+
+You can adjust the I2C address used for this sensor. Here is a code snippet explaining how to:
+
+```csharp
+// Code snippet to change the address of a sensor
+byte newAddress = 0x28; // You can change for any valid supported address
+I2cDevice connectionToCurrentAddress = I2cDevice.Create(new I2cConnectionSettings(1, Vl53L0X.DefaultI2cAddress));
+Vl53L0X.ChangeI2cAddress(connectionToCurrentAddress, newAddress);
+I2cDevice connectionToChangedAddress = I2cDevice.Create(new I2cConnectionSettings(1, newAddress));
+using Vl53L0X vlWithChangedAddress = new(connectionToChangedAddress);
+// Do what you'd like to do here
+// Soft reset the device to setup the default address again
+vlWithChangedAddress.Reset();
+// Now the address is reset to the default one
+```
