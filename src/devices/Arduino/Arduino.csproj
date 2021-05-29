@@ -37,6 +37,7 @@
     <Compile Include="Runtime\MiniCompareInfo.cs" />
     <Compile Include="Runtime\MiniCultureInfo.cs" />
     <Compile Include="Runtime\MiniDateTime.cs" />
+    <Compile Include="Runtime\MiniDebugger.cs" />
     <Compile Include="Runtime\MiniDelegate.cs" />
     <Compile Include="Runtime\MiniEnum.cs" />
     <Compile Include="Runtime\MiniEnvironment.cs" />

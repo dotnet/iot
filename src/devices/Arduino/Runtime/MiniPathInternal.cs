@@ -87,21 +87,6 @@ namespace Iot.Device.Arduino.Runtime
         }
 
         /// <summary>
-        /// Returns true if the path is effectively empty for the current OS.
-        /// For unix, this is empty or null. For Windows, this is empty, null, or
-        /// just spaces ((char)32).
-        /// </summary>
-        internal static bool IsEffectivelyEmpty(string? path)
-        {
-            return string.IsNullOrEmpty(path);
-        }
-
-        internal static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
-        {
-            return path.IsEmpty;
-        }
-
-        /// <summary>
         /// Try to remove relative segments from the given path (without combining with a root).
         /// </summary>
         /// <param name="path">Input path</param>
@@ -245,10 +230,55 @@ namespace Iot.Device.Arduino.Runtime
             // Extended paths are windows-only
             return false;
         }
+    }
 
+    [ArduinoReplacement("System.IO.PathInternal", "System.IO.FileSystem.dll", false, typeof(System.IO.File), IncludingPrivates = true)]
+    internal sealed class MiniPathInternal_File
+    {
+        [ArduinoImplementation]
         public static bool GetIsCaseSensitive()
         {
             return true;
+        }
+
+        [ArduinoImplementation]
+        public static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
+        {
+            return path.IsEmpty;
+        }
+
+        [ArduinoImplementation]
+        public static int GetRootLength(ReadOnlySpan<char> path)
+        {
+            return path.Length > 0 && IsDirectorySeparator(path[0]) ? 1 : 0;
+        }
+
+        [ArduinoImplementation]
+        public static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
+            => path.Length > 0 && IsDirectorySeparator(path[path.Length - 1]);
+
+        public static ReadOnlySpan<char> TrimEndingDirectorySeparator(ReadOnlySpan<char> path) =>
+            EndsInDirectorySeparator(path) && !IsRoot(path) ?
+                path.Slice(0, path.Length - 1) :
+                path;
+
+        [ArduinoImplementation]
+        public static bool IsRoot(ReadOnlySpan<char> path)
+            => path.Length == GetRootLength(path);
+
+        [ArduinoImplementation]
+        public static bool IsDirectorySeparator(char c)
+        {
+            // The alternate directory separator char is the same as the directory separator,
+            // so we only need to check one.
+            return c == Path.DirectorySeparatorChar;
+        }
+
+        public static bool IsPartiallyQualified(string path)
+        {
+            // This is much simpler than Windows where paths can be rooted, but not fully qualified (such as Drive Relative)
+            // As long as the path is rooted in Unix it doesn't use the current directory and therefore is fully qualified.
+            return string.IsNullOrEmpty(path) || path[0] != Path.DirectorySeparatorChar;
         }
     }
 }

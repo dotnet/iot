@@ -6,6 +6,15 @@ namespace Iot.Device.Arduino.Runtime
     [ArduinoReplacement(typeof(System.Threading.Thread), false, IncludingPrivates = true)]
     internal class MiniThread
     {
+#pragma warning disable 414
+        private ExecutionContext? _executionContext;
+#pragma warning restore 414
+
+        public MiniThread()
+        {
+            _executionContext = null;
+        }
+
         /// <summary>
         /// This method performs busy waiting for a specified number of milliseconds.
         /// It is not implemented as low-level function because this allows other code to continue.
@@ -70,6 +79,29 @@ namespace Iot.Device.Arduino.Runtime
         public static int GetCurrentProcessorNumber()
         {
             return 0;
+        }
+
+        [ArduinoImplementation(NativeMethod.None)]
+        public static Thread GetCurrentThreadNative()
+        {
+            return MiniUnsafe.As<Thread>(new MiniThread());
+        }
+
+        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        public static DeserializationTracker GetThreadDeserializationTracker(ref int stackMark)
+        {
+            stackMark = 0;
+            return new DeserializationTracker();
+        }
+
+        [ArduinoReplacement("System.Runtime.Serialization.DeserializationTracker", null, true)]
+        internal sealed class DeserializationTracker
+        {
+            public bool DeserializationInProgress
+            {
+                get;
+                set;
+            }
         }
     }
 }

@@ -171,6 +171,8 @@ namespace Iot.Device.Arduino
 
         DebugWriteLine,
 
+        ThreadGetCurrentThreadNative,
+
         Interop_Kernel32CreateFile,
         Interop_Kernel32SetLastError,
         Interop_Kernel32GetLastError,
@@ -184,6 +186,6 @@ namespace Iot.Device.Arduino
         Interop_Kernel32ReadFileOverlapped,
         Interop_Kernel32FlushFileBuffers,
         Interop_Kernel32GetFileInformationByHandleEx,
-        Interop_Kernel32QueryUnbiasedInterruptTime
+        Interop_Kernel32QueryUnbiasedInterruptTime,
     }
 }

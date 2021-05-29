@@ -85,7 +85,7 @@ namespace Iot.Device.Arduino.Runtime
         [ArduinoImplementation]
         public static string? GetPathRoot(string? path)
         {
-            if (MiniPathInternal.IsEffectivelyEmpty(path))
+            if (MiniPathInternal_File.IsEffectivelyEmpty(path))
             {
                 return null;
             }

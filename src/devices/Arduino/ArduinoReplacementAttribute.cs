@@ -7,6 +7,17 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
+    /// <summary>
+    /// This attribute is applied to classes that contain implementations that should replace original implementations.
+    /// There are several usage possibilities and use cases:
+    /// - Provide an implementation to methods that are in the original CLR implementation calling into native code (declared extern, implemented in the runtime itself)
+    /// - Provide an implementation to methods that are to complex to use or shall do something else (i.e. Console.WriteLine)
+    /// - Implement methods that query hardware (GpioDriver, Environment.TickCount)
+    ///
+    /// The individual methods of the replacement class should be attributed with <see cref="ArduinoImplementationAttribute"/>.
+    /// If <see cref="ReplaceEntireType"/> is true, the whole source class is replaced, and an error is thrown if a method is used that does not have a replacement. If it is false,
+    /// only provided methods are replaced. Replacement methods in that case *must* be attributed and *must* be public (regardless of what visibility the original method has).
+    /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct)]
     internal class ArduinoReplacementAttribute : Attribute
     {

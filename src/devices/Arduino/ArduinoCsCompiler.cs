@@ -1593,7 +1593,7 @@ namespace Iot.Device.Arduino
                     exec.SuppressType(compilerSettingsAdditionalSuppression);
                 }
 
-                exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
+                //// exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
 
                 PrepareLowLevelInterface(exec);
                 if (compilerSettings.CreateKernelForFlashing)
