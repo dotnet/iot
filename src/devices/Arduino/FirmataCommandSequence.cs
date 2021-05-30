@@ -31,6 +31,16 @@ namespace Iot.Device.Arduino
 
         public int Length => _sequence.Count;
 
+        public static UInt32 DecodeUInt32(ReadOnlySpan<byte> data, int fromOffset)
+        {
+            Int32 value = data[fromOffset];
+            value |= data[fromOffset + 1] << 7;
+            value |= data[fromOffset + 2] << 14;
+            value |= data[fromOffset + 3] << 21;
+            value |= data[fromOffset + 4] << 28;
+            return (UInt32)value;
+        }
+
         public void WriteByte(byte b)
         {
             _sequence.Add(b);

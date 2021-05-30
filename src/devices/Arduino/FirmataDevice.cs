@@ -58,6 +58,8 @@ namespace Iot.Device.Arduino
 
         public event Action<string, Exception?>? OnError;
 
+        public event Action<byte[]>? OnSysexReply;
+
         public FirmataDevice()
         {
             _firmwareVersionMajor = 0;
@@ -437,15 +439,11 @@ namespace Iot.Device.Arduino
                             _dataReceived.Set();
                             break;
 
-                        case FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST:
-                        case FirmataSysexCommand.PIN_STATE_RESPONSE:
-                            _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
-                            _dataReceived.Set();
-                            break;
-
                         default:
-
                             // we pass the data forward as-is for any other type of sysex command
+                            _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
+                            OnSysexReply?.Invoke(raw_data);
+                            _dataReceived.Set();
                             break;
                     }
 
@@ -501,7 +499,7 @@ namespace Iot.Device.Arduino
         /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence)
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence)
         {
             return SendCommandAndWait(sequence, DefaultReplyTimeout);
         }
@@ -513,7 +511,7 @@ namespace Iot.Device.Arduino
         /// <param name="timeout">A non-default timeout</param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
         {
             if (!sequence.Validate())
             {
@@ -541,7 +539,7 @@ namespace Iot.Device.Arduino
                     throw new TimeoutException("Timeout waiting for command answer");
                 }
 
-                return new List<byte>(_lastResponse);
+                return _lastResponse.ToArray();
             }
         }
 
@@ -805,7 +803,7 @@ namespace Iot.Device.Arduino
                 var response = SendCommandAndWait(getPinModeSequence);
 
                 // The mode is byte 4
-                if (response.Count < 4)
+                if (response.Length < 4)
                 {
                     throw new InvalidOperationException("Not enough data in reply");
                 }
@@ -927,7 +925,7 @@ namespace Iot.Device.Arduino
                 // Bytes 1 & 2: Slave address (the MSB is always 0, since we're only supporting 7-bit addresses)
                 // Bytes 3 & 4: Register. Often 0, and probably not needed
                 // Anything after that: reply data, with 2 bytes for each byte in the data stream
-                int bytesReceived = ReassembleByteString(response, 5, response.Count - 5, replyData);
+                int bytesReceived = ReassembleByteString(response, 5, response.Length - 5, replyData);
 
                 if (replyData.Length != bytesReceived)
                 {
@@ -986,6 +984,52 @@ namespace Iot.Device.Arduino
                 _firmataStream.WriteByte((byte)((int)FirmataCommand.REPORT_ANALOG_PIN + pinNumber));
                 _firmataStream.WriteByte((byte)0);
             }
+        }
+
+        public void DisableFrequencyReporting(int pinNumber)
+        {
+            FirmataCommandSequence sequence = new();
+            sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
+            sequence.WriteByte(0);
+            sequence.WriteByte((byte)pinNumber);
+            sequence.WriteByte((byte)FrequencyMode.NoChange);
+            sequence.WriteByte(0);
+            sequence.WriteByte(0);
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(sequence);
+        }
+
+        public (int TimeStamp, int NewTicks, bool Success) EnableFrequencyReporting(int pinNumber, FrequencyMode mode, int reportDelay)
+        {
+            if (reportDelay >= (1 << 14))
+            {
+                throw new ArgumentOutOfRangeException(nameof(reportDelay), "The maximum update delay is 16.383ms");
+            }
+
+            FirmataCommandSequence sequence = new();
+            sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
+            sequence.WriteByte(1);
+            sequence.WriteByte((byte)pinNumber);
+            sequence.WriteByte((byte)mode);
+            sequence.WriteByte((byte)(reportDelay & 0x7f)); // lower 7 bits
+            sequence.WriteByte((byte)((reportDelay >> 7) & 0x7f));
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            var reply = SendCommandAndWait(sequence, DefaultReplyTimeout);
+
+            return DecodeFrequencyReport(new Span<byte>(reply.ToArray()));
+        }
+
+        public (int TimeStamp, int NewTicks, bool Success) DecodeFrequencyReport(Span<byte> reply)
+        {
+            if (reply.Length < 13 || reply[0] != (byte)FirmataSysexCommand.FREQUENCY_COMMAND)
+            {
+                OnError?.Invoke("Incorrect answer received", null);
+                return (0, 0, false);
+            }
+
+            int timestamp = (int)FirmataCommandSequence.DecodeUInt32(reply, 3);
+            int ticks = (int)FirmataCommandSequence.DecodeUInt32(reply, 8);
+            return (timestamp, ticks, true);
         }
 
         public void EnableSpi()
@@ -1101,7 +1145,7 @@ namespace Iot.Device.Arduino
             var reply = SendCommandAndWait(dhtCommandSequence);
 
             // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
-            if (reply.Count < 7)
+            if (reply.Length < 7)
             {
                 return false;
             }

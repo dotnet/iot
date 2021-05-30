@@ -91,5 +91,10 @@ namespace Iot.Device.Arduino
         /// DHT type sensors
         /// </summary>
         Dht = 0x0F,
+
+        /// <summary>
+        /// Frequency measurement
+        /// </summary>
+        Frequency = 0x10,
     }
 }

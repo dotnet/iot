@@ -106,6 +106,7 @@ namespace Arduino.Samples
             Console.WriteLine(" 9 Run SPI tests with an MCP3008 (experimental)");
             Console.WriteLine(" 0 Detect all devices on the I2C bus");
             Console.WriteLine(" H Read DHT11 Humidity sensor on GPIO 3 (experimental)");
+            Console.WriteLine(" F Measure frequency on GPIO2 (experimental)");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
@@ -146,12 +147,38 @@ namespace Arduino.Samples
                 case 'H':
                     TestDht(board);
                     break;
+                case 'f':
+                case 'F':
+                    TestFrequency(board);
+                    break;
                 case 'x':
                 case 'X':
                     return false;
             }
 
             return true;
+        }
+
+        private static void TestFrequency(ArduinoBoard board)
+        {
+            try
+            {
+                board.EnableFrequencyReporting(2, FrequencyMode.Rising, 500);
+
+                while (!Console.KeyAvailable)
+                {
+                    var f = board.GetMeasuredFrequency();
+                    Console.Write($"\rFrequency at GPIO2: {f}                       ");
+                    Thread.Sleep(100);
+                }
+            }
+            finally
+            {
+                board.DisableFrequencyReporting(2);
+            }
+
+            Console.ReadKey(true);
+            Console.WriteLine();
         }
 
         private static void TestPwm(ArduinoBoard board)

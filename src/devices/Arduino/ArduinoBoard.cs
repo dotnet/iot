@@ -49,6 +49,14 @@ namespace Iot.Device.Arduino
 
         private ILogger _logger;
 
+        private int _lastFrequencyUpdateClock = 0;
+        private int _lastFrequencyUpdateTicks = 0;
+        private int _frequencyReportingPin = -1;
+
+        private Frequency _currentFrequency = Frequency.Zero;
+
+        private object _frequencyLock = new object();
+
         /// <summary>
         /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
         /// </summary>
@@ -520,10 +528,92 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Enable frequency reporting on the given pin.
+        /// </summary>
+        /// <param name="pinNumber">The pin number</param>
+        /// <param name="mode">The mode on which to increase the tick count. Typically rising or falling edge.</param>
+        /// <param name="reportDelay">How often the value should update, in milliseconds. Must be positive and smaller than 2^14</param>
+        public void EnableFrequencyReporting(int pinNumber, FrequencyMode mode, int reportDelay)
+        {
+            if (_frequencyReportingPin != -1)
+            {
+                throw new InvalidOperationException($"Frequency reporting is already enabled for pin {_frequencyReportingPin}");
+            }
+
+            if (reportDelay <= 0 || reportDelay >= Math.Pow(2, 14))
+            {
+                throw new ArgumentOutOfRangeException(nameof(reportDelay), "Value must be between 1 and 2^14");
+            }
+
+            DisableFrequencyReporting(-1);
+
+            var firstQuery = Firmata.EnableFrequencyReporting(pinNumber, mode, reportDelay);
+            _lastFrequencyUpdateClock = firstQuery.TimeStamp;
+            _lastFrequencyUpdateTicks = firstQuery.NewTicks;
+            _frequencyReportingPin = pinNumber;
+
+            // By registering the event last we ensure we have a valid reading already
+            Firmata.OnSysexReply += OnFrequencyReport;
+        }
+
+        /// <summary>
+        /// Returns the last measured frequency. Returns 0 if no frequency measurement is active.
+        /// </summary>
+        /// <returns>The frequency measured during the last interval</returns>
+        public Frequency GetMeasuredFrequency()
+        {
+            if (_frequencyReportingPin == -1)
+            {
+                return Frequency.Zero;
+            }
+
+            lock (_frequencyLock)
+            {
+                return _currentFrequency;
+            }
+        }
+
+        private void OnFrequencyReport(byte[] bytes)
+        {
+            var result = Firmata.DecodeFrequencyReport(bytes);
+            if (!result.Success)
+            {
+                // Wrong message type, this is not typically an error
+                return;
+            }
+
+            lock (_frequencyLock)
+            {
+                double deltaTime = result.TimeStamp - _lastFrequencyUpdateClock;
+                double deltaTicks = result.NewTicks - _lastFrequencyUpdateTicks;
+                if (deltaTime > 0 && deltaTicks > 0) // Otherwise, this just wraps around or no time has passed
+                {
+                    _currentFrequency = Frequency.FromHertz(deltaTicks / (deltaTime / 1000));
+                }
+
+                _lastFrequencyUpdateClock = result.TimeStamp;
+                _lastFrequencyUpdateTicks = result.NewTicks;
+            }
+        }
+
+        /// <summary>
+        /// Disables automatic updating of the frequency counter for the given pin
+        /// </summary>
+        /// <param name="pinNumber">The pin to use</param>
+        public void DisableFrequencyReporting(int pinNumber)
+        {
+            Firmata.DisableFrequencyReporting(pinNumber);
+            Firmata.OnSysexReply -= OnFrequencyReport;
+            _frequencyReportingPin = -1;
+        }
+
+        /// <summary>
         /// Standard dispose pattern
         /// </summary>
         protected override void Dispose(bool disposing)
         {
+            DisableFrequencyReporting(-1);
+            _frequencyReportingPin = -1;
             _isDisposed = true;
             // Do this first, to force any blocking read operations to end
             if (_dataStream != null)
