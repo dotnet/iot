@@ -22,7 +22,7 @@ namespace Iot.Device.Arduino
         /// Send an int32 as 5 x 7 bits. This form of transmitting integers is only supported by extension modules
         /// </summary>
         /// <param name="value">The 32-Bit value to transmit</param>
-        public void SendInt32(int value)
+        public void SendUInt32(UInt32 value)
         {
             byte[] data = new byte[5];
             data[0] = (byte)(value & 0x7F);
@@ -38,7 +38,18 @@ namespace Iot.Device.Arduino
         /// Note: Only sends 14 bit!
         /// </summary>
         /// <param name="value">An integer value to send</param>
-        public void SendInt14(Int16 value)
+        public void SendUInt14(UInt16 value)
+        {
+            WriteByte((byte)(value & 0x7F));
+            WriteByte((byte)((value >> 7) & 0x7F));
+        }
+
+        public void SendInt32(Int32 value)
+        {
+            SendUInt32((uint)value);
+        }
+
+        public void SendInt14(int value)
         {
             WriteByte((byte)(value & 0x7F));
             WriteByte((byte)((value >> 7) & 0x7F));

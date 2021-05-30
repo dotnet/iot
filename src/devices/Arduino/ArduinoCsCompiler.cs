@@ -2019,6 +2019,12 @@ namespace Iot.Device.Arduino
             // Todo: The above doesn't work reliably yet, therefore do a bit of manual mangling.
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
+            // The last of the BringToFront elements below will be after the first
+            BringToFront(codeSequences, typeof(System.Text.UTF8Encoding));
+            BringToFront(codeSequences, typeof(System.Text.Encoding));
+            BringToFront(codeSequences, typeof(System.Text.EncoderFallback));
+            BringToFront(codeSequences, typeof(System.Text.EncoderReplacementFallback));
+            BringToFront(codeSequences, typeof(System.Text.EncoderExceptionFallback));
             BringToFront(codeSequences, GetSystemPrivateType("System.Diagnostics.Tracing.FrameworkEventSource"));
             BringToFront(codeSequences, typeof(CancellationTokenSource));
             BringToFront(codeSequences, typeof(MiniCultureInfo));

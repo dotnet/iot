@@ -55,6 +55,14 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
+        public Module? Module
+        {
+            get
+            {
+                return null;
+            }
+        }
+
         public virtual string Name
         {
             [ArduinoImplementation(NativeMethod.TypeName)]

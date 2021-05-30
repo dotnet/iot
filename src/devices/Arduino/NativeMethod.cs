@@ -134,6 +134,7 @@ namespace Iot.Device.Arduino
         InteropQueryPerformanceCounter,
 
         InterlockedCompareExchange_Object,
+        InterlockedCompareExchange_Int32,
         InterlockedExchangeAdd,
 
         DelegateInternalEqualTypes,
@@ -187,5 +188,8 @@ namespace Iot.Device.Arduino
         Interop_Kernel32FlushFileBuffers,
         Interop_Kernel32GetFileInformationByHandleEx,
         Interop_Kernel32QueryUnbiasedInterruptTime,
+
+        FileSystemCreateDirectory,
+        FileSystemFileExists,
     }
 }

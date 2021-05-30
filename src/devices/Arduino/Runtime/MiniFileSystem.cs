@@ -9,12 +9,14 @@ namespace Iot.Device.Arduino.Runtime
     [ArduinoReplacement("System.IO.FileSystem", "System.IO.FileSystem.dll", true, typeof(System.IO.File), IncludingPrivates = true)]
     internal static class MiniFileSystem
     {
+        [ArduinoImplementation(NativeMethod.FileSystemCreateDirectory)]
         public static void CreateDirectory(string fullPath, byte[] securityDescriptor)
         {
             throw new NotImplementedException();
         }
 
-        public static Boolean FileExists(System.String fullPath)
+        [ArduinoImplementation(NativeMethod.FileSystemFileExists)]
+        public static bool FileExists(string fullPath)
         {
             throw new NotImplementedException();
         }

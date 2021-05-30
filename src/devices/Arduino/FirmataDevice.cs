@@ -49,6 +49,7 @@ namespace Iot.Device.Arduino
         private object _lastAnalogValueLock;
         private object _synchronisationLock;
         private Queue<byte> _dataQueue;
+        private StringBuilder _lastRawLine;
 
         private CommandError _lastCommandError;
 
@@ -80,6 +81,7 @@ namespace Iot.Device.Arduino
             _lastRequestId = 1;
             _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;
+            _lastRawLine = new StringBuilder();
         }
 
         internal List<SupportedPinConfiguration> PinConfigurations
@@ -164,6 +166,15 @@ namespace Iot.Device.Arduino
             switch (command)
             {
                 default: // command not understood
+                    char c = (char)data;
+                    _lastRawLine.Append(c);
+                    if (c == '\n')
+                    {
+                        OnError?.Invoke(_lastRawLine.ToString().Trim(), null);
+                        _lastRawLine.Clear();
+                    }
+
+                    return;
                 case FirmataCommand.END_SYSEX: // should never happen
                     return;
 
@@ -189,6 +200,7 @@ namespace Iot.Device.Arduino
                 case FirmataCommand.START_SYSEX:
                     // this is a special case with no set number of bytes remaining
                     isMessageSysex = true;
+                    _lastRawLine.Clear();
                     break;
             }
 
@@ -1390,14 +1402,14 @@ namespace Iot.Device.Arduino
                 // Value types, on the other hand, are not expected to be larger than 14 bits.
                 if ((classFlags & 1) == 1)
                 {
-                    sequence.SendInt14((short)(sizeOfClass.Dynamic));
+                    sequence.SendInt14(sizeOfClass.Dynamic);
                 }
                 else
                 {
-                    sequence.SendInt14((short)(sizeOfClass.Dynamic >> 2));
+                    sequence.SendInt14(sizeOfClass.Dynamic >> 2);
                 }
 
-                sequence.SendInt14((short)(sizeOfClass.Statics >> 2));
+                sequence.SendInt14(sizeOfClass.Statics >> 2);
                 sequence.SendInt14(classFlags);
                 sequence.SendInt14(0);
 
@@ -1415,14 +1427,14 @@ namespace Iot.Device.Arduino
                 // Value types, on the other hand, are not expected to be larger than 14 bits.
                 if ((classFlags & 1) == 1)
                 {
-                    sequence.SendInt14((short)(sizeOfClass.Dynamic));
+                    sequence.SendInt14(sizeOfClass.Dynamic);
                 }
                 else
                 {
-                    sequence.SendInt14((short)(sizeOfClass.Dynamic >> 2));
+                    sequence.SendInt14(sizeOfClass.Dynamic >> 2);
                 }
 
-                sequence.SendInt14((short)(sizeOfClass.Statics >> 2));
+                sequence.SendInt14(sizeOfClass.Statics >> 2);
                 sequence.SendInt14(classFlags);
                 sequence.SendInt14(member);
 
@@ -1431,7 +1443,7 @@ namespace Iot.Device.Arduino
                 if (members[member].VariableType != VariableKind.Method)
                 {
                     // If it is a field, transmit its size.
-                    sequence.SendInt14((short)members[member].SizeOfField);
+                    sequence.SendInt14(members[member].SizeOfField);
                 }
                 else
                 {
