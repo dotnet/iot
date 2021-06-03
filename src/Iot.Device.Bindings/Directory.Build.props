@@ -7,5 +7,6 @@
     <PackageTags>.NET Core GPIO Pins SPI I2C PWM BCM2835 BCM2837 RPi IoT Device Bindings</PackageTags>
   </PropertyGroup>
 
-  <Import Project="..\..\Directory.Build.props" />
+  <Import Project="../../Directory.Build.props" />
+  <Import Project="../../eng/Versions.external.props" />
 </Project>
