@@ -4,9 +4,9 @@
 namespace Iot.Device.Ft4222
 {
     /// <summary>
-    /// SPI as slave protocol
+    /// SPI as replica protocol
     /// </summary>
-    internal enum SpiSlaveProtocol
+    internal enum SpiReplicaProtocol
     {
         /// <summary>
         /// With Protocol

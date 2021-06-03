@@ -4,7 +4,7 @@ MPU6500 is a 3 axis Gyroscope, 3 axis Accelerometer and Temperature sensor that 
 
 MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The sensor can be found in various implementation like [Grove](http://wiki.seeedstudio.com/Grove-IMU_9DOF_v2.0/) or [Sparkfun](https://www.sparkfun.com/products/13762). MPU9250 incorporate a MPU6500 and an AK8963.
 
-The Magnetometer used is an [AK8963](../Ak8963/README.md). In general, it is managed thru the main MPU9250 and setup as a slave I2C. All operations go thru the MPU9250. In some cases, the AK8963 is exposed and the operations are not going thru the MPU9250 but directly.
+The Magnetometer used is an [AK8963](../Ak8963/README.md). In general, it is managed thru the main MPU9250 and setup as a replica I2C. All operations go thru the MPU9250. In some cases, the AK8963 is exposed and the operations are not going thru the MPU9250 but directly.
 
 General case with AK8963 is not exposed (where you can't find it on the I2C bus at the address 0x0C)
 
@@ -172,19 +172,19 @@ Data are in the order of the Register from 0x3B to 0x60 so you'll get your data 
 
 It is then up to you to transform them into the correct data. You can multiply your raw data by ```AccelerometionScale``` and ```GyroscopeScale``` to convert them properly.
 
-### I2C Slave primitives
+### I2C replica primitives
 
-2 primitive functions allow to read and write any register in any of the slave devices.
+2 primitive functions allow to read and write any register in any of the replica devices.
 
 * ```I2cWrite(I2cChannel i2cChannel, byte address, byte register, byte data)```
-    * i2cChannel: The slave channel to attached to the I2C device
-    * address: The I2C address of the slave I2C element
-    * register: The register to write to the slave I2C element
-    * data: The byte data to write to the slave I2C element
+    * i2cChannel: The replica channel to attached to the I2C device
+    * address: The I2C address of the replica I2C element
+    * register: The register to write to the replica I2C element
+    * data: The byte data to write to the replica I2C element
 * ```I2cRead(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)```
-    * i2cChannel: The slave channel to attached to the I2C device
-    * address: The I2C address of the slave I2C element
-    * register: The register to write to the slave I2C element
+    * i2cChannel: The replica channel to attached to the I2C device
+    * address: The I2C address of the replica I2C element
+    * register: The register to write to the replica I2C element
     * readBytes: The read data
 
 ## Circuit

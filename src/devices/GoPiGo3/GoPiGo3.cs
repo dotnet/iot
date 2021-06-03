@@ -617,7 +617,7 @@ namespace Iot.Device.GoPiGo3
         /// Conduct an I2C transaction
         /// </summary>
         /// <param name="port">The grove port. GROVE_1 or GROVE_2</param>
-        /// <param name="addr">The I2C address of the slave to be addressed.</param>
+        /// <param name="addr">The I2C address of the secondary to be addressed.</param>
         /// <param name="arrayToSend">An array of bytes to send.</param>
         /// <param name="inBytes">The number of bytes to read.</param>
         /// <returns>Returns a byte array with what has been read from the I2C element</returns>
@@ -683,7 +683,7 @@ namespace Iot.Device.GoPiGo3
         /// Start an I2C transaction
         /// </summary>
         /// <param name="port">The Grove Port, one at the time Grove1 or Grove2</param>
-        /// <param name="addr">The I2C address of the slave to be addressed.</param>
+        /// <param name="addr">The I2C address of the secondary to be addressed.</param>
         /// <param name="arrayToSend">An array of bytes to send.</param>
         /// <param name="inBytes">The number of bytes to read.</param>
         public void GroveI2cStart(GrovePort port, byte addr, byte[] arrayToSend, byte inBytes = 0)
