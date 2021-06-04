@@ -6,7 +6,7 @@ using System;
 namespace Iot.Device.Ndef
 {
     /// <summary>
-    /// This is used to asses the block sector and understand the read/write conditions
+    /// This is used to assess the block sector and understand the read/write conditions
     /// </summary>
     [Flags]
     public enum GeneralePurposeByteConditions
