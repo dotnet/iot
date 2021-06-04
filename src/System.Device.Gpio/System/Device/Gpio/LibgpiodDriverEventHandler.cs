@@ -51,7 +51,7 @@ namespace System.Device.Gpio.Drivers
                     TimeSpec timeout = new TimeSpec
                     {
                         TvSec = new IntPtr(0),
-                        TvNsec = new IntPtr(1000000)
+                        TvNsec = new IntPtr(50_000_000)
                     };
 
                     WaitEventResult waitResult = Interop.libgpiod.gpiod_line_event_wait(pinHandle, ref timeout);
