@@ -81,7 +81,7 @@ namespace Iot.Device.Arduino
             // This method is called with the logical pin numbering (input pin A0 is 0, A1 is 1, etc)
             // but the SetPinMode method operates on the global numbers
             int fullNumber = ConvertLogicalNumberingSchemeToPinNumber(pinNumber);
-            _board.Firmata.SetPinMode(fullNumber, SupportedMode.AnalogInput);
+            _board.Firmata.SetPinMode(fullNumber, SupportedMode.AnalogInput.Value);
             _board.Firmata.EnableAnalogReporting(pinNumber);
             return new ArduinoAnalogInputPin(_board, this, _supportedPinConfigurations[fullNumber], pinNumber, VoltageReference);
         }

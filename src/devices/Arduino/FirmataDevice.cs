@@ -27,7 +27,7 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
-        private static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
+        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
@@ -379,19 +379,25 @@ namespace Iot.Device.Arduino
                                     }
 
                                     int resolution = raw_data[idx++];
-                                    switch ((SupportedMode)mode)
+                                    SupportedMode? sm = ArduinoBoard.KnownModes.FirstOrDefault(x => x.Value == mode);
+                                    if (sm == SupportedMode.AnalogInput)
                                     {
-                                        default:
-                                            currentPin.PinModes.Add((SupportedMode)mode);
-                                            break;
-                                        case SupportedMode.AnalogInput:
-                                            currentPin.PinModes.Add(SupportedMode.AnalogInput);
-                                            currentPin.AnalogInputResolutionBits = resolution;
-                                            break;
-                                        case SupportedMode.Pwm:
-                                            currentPin.PinModes.Add(SupportedMode.Pwm);
-                                            currentPin.PwmResolutionBits = resolution;
-                                            break;
+                                        currentPin.PinModes.Add(SupportedMode.AnalogInput);
+                                        currentPin.AnalogInputResolutionBits = resolution;
+                                    }
+                                    else if (sm == SupportedMode.Pwm)
+                                    {
+                                        currentPin.PinModes.Add(SupportedMode.Pwm);
+                                        currentPin.PwmResolutionBits = resolution;
+                                    }
+                                    else if (sm == null)
+                                    {
+                                        sm = new SupportedMode((byte)mode, $"Unknown mode {mode}");
+                                        currentPin.PinModes.Add(sm);
+                                    }
+                                    else
+                                    {
+                                        currentPin.PinModes.Add(sm);
                                     }
                                 }
 
@@ -458,18 +464,6 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <param name="sequence">The command sequence to send</param>
         public void SendCommand(FirmataCommandSequence sequence)
-        {
-            SendCommand(sequence, DefaultReplyTimeout);
-        }
-
-        /// <summary>
-        /// Send a command that does not generate a reply.
-        /// This method must only be used for commands that do not generate a reply. It must not be used if only the caller is not
-        /// interested in the answer.
-        /// </summary>
-        /// <param name="sequence">The command sequence to send</param>
-        /// <param name="timeout">A non-default timeout</param>
-        public void SendCommand(FirmataCommandSequence sequence, TimeSpan timeout)
         {
             if (!sequence.Validate())
             {
@@ -667,6 +661,14 @@ namespace Iot.Device.Arduino
                     {
                         // Attempt to send a SYSTEM_RESET command
                         _firmataStream.WriteByte(0xFF);
+                        Thread.Sleep(20);
+                        continue;
+                    }
+
+                    if (_actualFirmataProtocolMajorVersion == 0)
+                    {
+                        // Something went wrong
+                        Thread.Sleep(20);
                         continue;
                     }
 
@@ -773,7 +775,7 @@ namespace Iot.Device.Arduino
             throw new TimeoutException("Timeout waiting for answer. Aborting. ", lastException);
         }
 
-        internal void SetPinMode(int pin, SupportedMode firmataMode)
+        internal void SetPinMode(int pin, byte firmataMode)
         {
             FirmataCommandSequence s = new FirmataCommandSequence(FirmataCommand.SET_PIN_MODE);
             s.WriteByte((byte)pin);
@@ -791,7 +793,7 @@ namespace Iot.Device.Arduino
             throw new TimeoutException($"Unable to set Pin mode to {firmataMode}. Looks like a communication problem.");
         }
 
-        internal SupportedMode GetPinMode(int pinNumber)
+        internal byte GetPinMode(int pinNumber)
         {
             FirmataCommandSequence getPinModeSequence = new FirmataCommandSequence(FirmataCommand.START_SYSEX);
             getPinModeSequence.WriteByte((byte)FirmataSysexCommand.PIN_STATE_QUERY);
@@ -814,8 +816,7 @@ namespace Iot.Device.Arduino
                         "The reply didn't match the query (another port was indicated)");
                 }
 
-                SupportedMode mode = (SupportedMode)(response[2]);
-                return mode;
+                return (response[2]);
             });
         }
 

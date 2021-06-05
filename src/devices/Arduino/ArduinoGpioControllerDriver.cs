@@ -81,7 +81,7 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException($"Mode {mode} is not supported on Pin {pinNumber}.");
             }
 
-            _arduinoBoard.Firmata.SetPinMode(pinNumber, firmataMode);
+            _arduinoBoard.Firmata.SetPinMode(pinNumber, firmataMode.Value);
 
             // Cache this value. Since the GpioController calls GetPinMode when trying to write a pin (to verify whether it is set to output),
             // that would be very expensive here. And setting output pins should be cheap.
@@ -95,24 +95,25 @@ namespace Iot.Device.Arduino
                 return existingValue;
             }
 
-            SupportedMode mode = _arduinoBoard.Firmata.GetPinMode(pinNumber);
+            var mode = _arduinoBoard.Firmata.GetPinMode(pinNumber);
 
             PinMode ret;
-            switch (mode)
+            if (mode == SupportedMode.DigitalOutput.Value)
             {
-                case SupportedMode.DigitalOutput:
-                    ret = PinMode.Output;
-                    break;
-                case SupportedMode.InputPullup:
-                    ret = PinMode.InputPullUp;
-                    break;
-                case SupportedMode.DigitalInput:
-                    ret = PinMode.Input;
-                    break;
-                default:
-                    _logger.LogError($"Unexpected pin mode found: {mode}. Is the pin not set to GPIO?");
-                    ret = PinMode.Input;
-                    break;
+                ret = PinMode.Output;
+            }
+            else if (mode == SupportedMode.DigitalInput.Value)
+            {
+                ret = PinMode.Input;
+            }
+            else if (mode == SupportedMode.InputPullup.Value)
+            {
+                ret = PinMode.InputPullUp;
+            }
+            else
+            {
+                _logger.LogError($"Unexpected pin mode found: {mode}. Is the pin not set to GPIO?");
+                ret = PinMode.Input;
             }
 
             _pinModes[pinNumber] = ret;
