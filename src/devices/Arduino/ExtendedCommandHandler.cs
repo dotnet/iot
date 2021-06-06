@@ -89,11 +89,21 @@ namespace Iot.Device.Arduino
         {
         }
 
+        private void OnSysexDataInternal(ReplyType type, byte[] data)
+        {
+            if (_firmata == null)
+            {
+                return;
+            }
+
+            OnSysexData(type, data);
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (_firmata != null)
             {
-                _firmata.OnSysexReply -= OnSysexData;
+                _firmata.OnSysexReply -= OnSysexDataInternal;
             }
 
             _firmata = null;
