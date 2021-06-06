@@ -1600,19 +1600,6 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Inverse of the above
-        /// </summary>
-        private int DecodeInt32(byte[] data, int fromOffset)
-        {
-            int value = data[fromOffset];
-            value |= data[fromOffset + 1] << 7;
-            value |= data[fromOffset + 2] << 14;
-            value |= data[fromOffset + 3] << 21;
-            value |= data[fromOffset + 4] << 28;
-            return value;
-        }
-
-        /// <summary>
         /// Firmata uses 2 bytes to encode 8-bit data, because byte values with the top bit set
         /// are reserved for commands. This decodes such data chunks.
         /// </summary>
