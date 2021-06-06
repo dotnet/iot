@@ -112,6 +112,8 @@ namespace Iot.Device.Arduino
         private ArduinoBoard()
         {
             _logger = this.GetCurrentClassLogger();
+            // Add the extended command handlers that are defined in this library
+            _extendedCommandHandlers.Add(new DhtSensor());
         }
 
         /// <summary>
@@ -218,7 +220,6 @@ namespace Iot.Device.Arduino
         public void AddCommandHandler<T>(T newCommandHandler)
             where T : ExtendedCommandHandler
         {
-            Initialize();
             if (newCommandHandler == null)
             {
                 throw new ArgumentNullException(nameof(newCommandHandler));
@@ -240,7 +241,11 @@ namespace Iot.Device.Arduino
             }
 
             _extendedCommandHandlers.Add(newCommandHandler);
-            newCommandHandler.Registered(Firmata);
+            if (_firmata != null)
+            {
+                // Only if already initialized
+                newCommandHandler.Registered(_firmata, this);
+            }
         }
 
         /// <summary>
@@ -259,7 +264,33 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            return null;
+            throw new NotSupportedException($"No handler of type {typeof(T)} found");
+        }
+
+        /// <summary>
+        /// Gets the command handler with the provided type.
+        /// </summary>
+        /// <typeparam name="T">The type to query</typeparam>
+        /// <param name="handler">The out variable</param>
+        /// <returns>True on success, false otherwise</returns>
+        public bool TryGetCommandHandler<T>(
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out T handler)
+            where T : ExtendedCommandHandler
+        {
+            foreach (var cmd in _extendedCommandHandlers)
+            {
+                if (cmd.GetType() == typeof(T))
+                {
+                    handler = (T)cmd;
+                    return true;
+                }
+            }
+
+            handler = null!;
+            return false;
         }
 
         /// <summary>
@@ -352,6 +383,12 @@ namespace Iot.Device.Arduino
                 }
 
                 _firmata.EnableDigitalReporting();
+
+                foreach (var e in _extendedCommandHandlers)
+                {
+                    e.Registered(_firmata, this);
+                    e.OnConnected();
+                }
 
                 _initialized = true;
             }
@@ -571,28 +608,6 @@ namespace Iot.Device.Arduino
             Initialize();
 
             Firmata.SetAnalogInputSamplingInterval(timeSpan);
-        }
-
-        /// <summary>
-        /// Special function to read DHT sensor, if supported
-        /// </summary>
-        /// <param name="pinNumber">Pin Number</param>
-        /// <param name="dhtType">Type of DHT Sensor: 11 = DHT11, 22 = DHT22, etc.</param>
-        /// <param name="temperature">Temperature</param>
-        /// <param name="humidity">Relative humidity</param>
-        /// <returns>True on success, false otherwise</returns>
-        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
-        {
-            Initialize();
-
-            if (!_supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.Dht))
-            {
-                temperature = default;
-                humidity = default;
-                return false;
-            }
-
-            return Firmata.TryReadDht(pinNumber, dhtType, out temperature, out humidity);
         }
 
         /// <summary>

@@ -13,6 +13,16 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class FirmataCommandSequence
     {
+        /// <summary>
+        /// Start of sysex command byte. Used as start byte for almost all extended commands.
+        /// </summary>
+        public const byte StartSysex = (byte)FirmataCommand.START_SYSEX;
+
+        /// <summary>
+        /// End of sysex command byte. Must end all sysex commands.
+        /// </summary>
+        public const byte EndSysex = (byte)FirmataCommand.END_SYSEX;
+
         private List<byte> _sequence;
 
         /// <summary>
@@ -28,7 +38,7 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Create a new sysex command sequence
+        /// Create a new sysex command sequence. The <see cref="StartSysex"/> byte is added automatically.
         /// </summary>
         public FirmataCommandSequence()
             : this(FirmataCommand.START_SYSEX)

@@ -514,10 +514,15 @@ namespace Arduino.Samples
         public static void TestDht(ArduinoBoard board)
         {
             Console.WriteLine("Reading DHT11. Any key to quit.");
+            if (!board.TryGetCommandHandler(out DhtSensor handler))
+            {
+                Console.WriteLine("DHT Command handler not available.");
+                return;
+            }
 
             while (!Console.KeyAvailable)
             {
-                if (board.TryReadDht(3, 11, out var temperature, out var humidity))
+                if (handler.TryReadDht(3, 11, out var temperature, out var humidity))
                 {
                     Console.WriteLine($"Temperature: {temperature}, Humidity {humidity}");
                 }

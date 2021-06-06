@@ -1133,38 +1133,6 @@ namespace Iot.Device.Arduino
             SendCommand(spiConfigSequence);
         }
 
-        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
-        {
-            temperature = default;
-            humidity = default;
-
-            FirmataCommandSequence dhtCommandSequence = new();
-            dhtCommandSequence.WriteByte((byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST);
-            dhtCommandSequence.WriteByte((byte)dhtType);
-            dhtCommandSequence.WriteByte((byte)pinNumber);
-            dhtCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            var reply = SendCommandAndWait(dhtCommandSequence);
-
-            // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
-            if (reply.Length < 7)
-            {
-                return false;
-            }
-
-            if (reply[0] != (byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST && reply[1] != 0)
-            {
-                return false;
-            }
-
-            int t = reply[3] | reply[4] << 7;
-            int h = reply[5] | reply[6] << 7;
-
-            temperature = Temperature.FromDegreesCelsius(t / 10.0);
-            humidity = RelativeHumidity.FromPercent(h / 10.0);
-
-            return true;
-        }
-
         internal uint GetAnalogRawValue(int pinNumber)
         {
             lock (_lastAnalogValueLock)

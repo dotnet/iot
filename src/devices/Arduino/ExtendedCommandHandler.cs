@@ -11,6 +11,7 @@ namespace Iot.Device.Arduino
     public abstract class ExtendedCommandHandler
     {
         private FirmataDevice? _firmata;
+        private ArduinoBoard? _board;
 
         protected ExtendedCommandHandler(SupportedMode? handlesMode)
         {
@@ -27,9 +28,27 @@ namespace Iot.Device.Arduino
             get;
         }
 
-        internal void Registered(FirmataDevice firmata)
+        public ArduinoBoard Board
+        {
+            get
+            {
+                if (_board == null)
+                {
+                    throw new InvalidOperationException("Command handler is not ready");
+                }
+
+                return _board;
+            }
+        }
+
+        internal void Registered(FirmataDevice firmata, ArduinoBoard board)
         {
             _firmata = firmata;
+            _board = board;
+        }
+
+        protected internal virtual void OnConnected()
+        {
         }
 
         protected void SendCommand(FirmataCommandSequence commandSequence)
