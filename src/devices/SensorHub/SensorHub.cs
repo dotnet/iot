@@ -27,6 +27,15 @@ namespace Iot.Device.SensorHub
         public SensorHub(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            try
+            {
+                _i2cDevice.WriteByte((byte)_i2cDevice.ConnectionSettings.DeviceAddress);
+                _i2cDevice.ReadByte();
+            }
+            catch (IOException ex)
+            {
+                throw new IOException($"No response from SensorHub with address {_i2cDevice.ConnectionSettings.DeviceAddress}", ex);
+            }
         }
 
         /// <summary>

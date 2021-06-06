@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Buffers.Binary;
+using System;
 using System.Device.I2c;
 using System.IO;
 using Moq;
@@ -11,15 +11,32 @@ namespace Iot.Device.SensorHub.Tests
 {
     public class SensorHubTests
     {
-        private Mock<I2cDevice> _mockI2cDevice = new();
+        private Mock<I2cDevice> _mockI2cDevice;
+
+        public SensorHubTests()
+        {
+            _mockI2cDevice = new();
+            _mockI2cDevice.SetupGet(c => c.ConnectionSettings).Returns(new I2cConnectionSettings(1, 0x17));
+        }
 
         [Fact]
         public void Should_Throw_When_No_Offboard_Sensor_Found()
         {
             SensorHub sh = new(_mockI2cDevice.Object);
-            _mockI2cDevice.Setup(x => x.ReadByte()).Returns((byte)SensorHub.RegisterStatusErrors.OFFBOARD_TEMPERATURE_SENSOR_NOT_FOUND);
+            _mockI2cDevice.SetupSequence(x => x.ReadByte())
+                .Returns((byte)SensorHub.RegisterStatusErrors.OFFBOARD_TEMPERATURE_SENSOR_NOT_FOUND);
 
-            Assert.Throws<IOException>(() => sh.TryReadOffBoardTemperature(out var t));
+            var exception = Assert.Throws<IOException>(() => sh.TryReadOffBoardTemperature(out var t));
+            Assert.Equal("No offboard temperature sensor found", exception.Message);
+        }
+
+        [Fact]
+        public void Should_Throw_When_NoDevice_Found()
+        {
+            Func<SensorHub> sh = () => new(_mockI2cDevice.Object);
+            _mockI2cDevice.Setup(x => x.ReadByte()).Throws(new IOException("Not Connected"));
+            var exception = Assert.Throws<IOException>(sh);
+            Assert.StartsWith("No response from SensorHub", exception.Message);
         }
 
         [Fact]
