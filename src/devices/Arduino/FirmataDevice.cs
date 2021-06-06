@@ -48,6 +48,7 @@ namespace Iot.Device.Arduino
         private object _lastAnalogValueLock;
         private object _synchronisationLock;
         private Queue<byte> _dataQueue;
+        private StringBuilder _lastRawLine;
 
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
@@ -77,6 +78,7 @@ namespace Iot.Device.Arduino
             _lastResponse = new List<byte>();
             _lastRequestId = 1;
             _firmwareName = string.Empty;
+            _lastRawLine = new StringBuilder();
         }
 
         internal List<SupportedPinConfiguration> PinConfigurations
@@ -161,6 +163,16 @@ namespace Iot.Device.Arduino
             switch (command)
             {
                 default: // command not understood
+                    char c = (char)data;
+                    _lastRawLine.Append(c);
+                    if (c == '\n')
+                    {
+                        OnError?.Invoke(_lastRawLine.ToString().Trim(), null);
+                        OnSysexReply?.Invoke(ReplyType.AsciiData, Encoding.Unicode.GetBytes(_lastRawLine.ToString()));
+                        _lastRawLine.Clear();
+                    }
+
+                    return;
                 case FirmataCommand.END_SYSEX: // should never happen
                     return;
 
@@ -186,6 +198,7 @@ namespace Iot.Device.Arduino
                 case FirmataCommand.START_SYSEX:
                     // this is a special case with no set number of bytes remaining
                     isMessageSysex = true;
+                    _lastRawLine.Clear();
                     break;
             }
 

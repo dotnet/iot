@@ -87,14 +87,14 @@ namespace Iot.Device.Arduino
         }
 
         /// <inheritdoc />
-        protected override bool OnSysexData(ReplyType type, byte[] data)
+        protected override void OnSysexData(ReplyType type, byte[] data)
         {
             if (type != ReplyType.SysexCommand)
             {
-                return false;
+                return;
             }
 
-            return OnFrequencyReport(data);
+            OnFrequencyReport(data);
         }
 
         private bool OnFrequencyReport(byte[] bytes)

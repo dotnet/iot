@@ -53,6 +53,7 @@ namespace Iot.Device.Arduino
         {
             _firmata = firmata;
             _board = board;
+            _firmata.OnSysexReply += OnSysexData;
         }
 
         protected internal virtual void OnConnected()
@@ -84,13 +85,17 @@ namespace Iot.Device.Arduino
             return SendCommandAndWait(commandSequence, FirmataDevice.DefaultReplyTimeout);
         }
 
-        protected virtual bool OnSysexData(ReplyType type, byte[] data)
+        protected virtual void OnSysexData(ReplyType type, byte[] data)
         {
-            return false;
         }
 
         protected virtual void Dispose(bool disposing)
         {
+            if (_firmata != null)
+            {
+                _firmata.OnSysexReply -= OnSysexData;
+            }
+
             _firmata = null;
             _board = null;
         }
