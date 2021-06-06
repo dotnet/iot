@@ -106,7 +106,7 @@ namespace Arduino.Samples
             Console.WriteLine(" 9 Run SPI tests with an MCP3008 (experimental)");
             Console.WriteLine(" 0 Detect all devices on the I2C bus");
             Console.WriteLine(" H Read DHT11 Humidity sensor on GPIO 3 (experimental)");
-            Console.WriteLine(" F Measure frequency on GPIO2 (experimental)");
+            Console.WriteLine(" F Measure frequency on a GPIO Pin (experimental)");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
@@ -161,20 +161,38 @@ namespace Arduino.Samples
 
         private static void TestFrequency(ArduinoBoard board)
         {
+            Console.Write("Which pin number to use? ");
+            string? input = Console.ReadLine();
+            if (input == null)
+            {
+                return;
+            }
+
+            if (!int.TryParse(input, out int pin))
+            {
+                return;
+            }
+
+            if (!board.TryGetCommandHandler(out FrequencySensor sensor))
+            {
+                Console.WriteLine("Frequency handling software module missing");
+                return;
+            }
+
             try
             {
-                board.EnableFrequencyReporting(2, FrequencyMode.Rising, 500);
+                sensor.EnableFrequencyReporting(pin, FrequencyMode.Rising, 500);
 
                 while (!Console.KeyAvailable)
                 {
-                    var f = board.GetMeasuredFrequency();
-                    Console.Write($"\rFrequency at GPIO2: {f}                       ");
+                    var f = sensor.GetMeasuredFrequency();
+                    Console.Write($"\rFrequency at GPIO{pin}: {f}                       ");
                     Thread.Sleep(100);
                 }
             }
             finally
             {
-                board.DisableFrequencyReporting(2);
+                sensor.DisableFrequencyReporting(pin);
             }
 
             Console.ReadKey(true);

@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 #pragma warning disable CS1591
 
 namespace Iot.Device.Arduino
 {
-    public abstract class ExtendedCommandHandler
+    public abstract class ExtendedCommandHandler : IDisposable
     {
         private FirmataDevice? _firmata;
         private ArduinoBoard? _board;
@@ -16,11 +18,17 @@ namespace Iot.Device.Arduino
         protected ExtendedCommandHandler(SupportedMode? handlesMode)
         {
             HandlesMode = handlesMode;
+            Logger = this.GetCurrentClassLogger();
         }
 
         protected ExtendedCommandHandler()
             : this(null)
         {
+        }
+
+        public ILogger Logger
+        {
+            get;
         }
 
         public SupportedMode? HandlesMode
@@ -79,6 +87,18 @@ namespace Iot.Device.Arduino
         protected virtual bool OnSysexData(ReplyType type, byte[] data)
         {
             return false;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            _firmata = null;
+            _board = null;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

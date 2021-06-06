@@ -58,7 +58,7 @@ namespace Iot.Device.Arduino
 
         public event Action<string, Exception?>? OnError;
 
-        public event Action<byte[]>? OnSysexReply;
+        public event Action<ReplyType, byte[]>? OnSysexReply;
 
         public FirmataDevice()
         {
@@ -448,7 +448,7 @@ namespace Iot.Device.Arduino
                         default:
                             // we pass the data forward as-is for any other type of sysex command
                             _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
-                            OnSysexReply?.Invoke(raw_data);
+                            OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             _dataReceived.Set();
                             break;
                     }
@@ -985,52 +985,6 @@ namespace Iot.Device.Arduino
                 _firmataStream.WriteByte((byte)((int)FirmataCommand.REPORT_ANALOG_PIN + pinNumber));
                 _firmataStream.WriteByte((byte)0);
             }
-        }
-
-        public void DisableFrequencyReporting(int pinNumber)
-        {
-            FirmataCommandSequence sequence = new();
-            sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
-            sequence.WriteByte(0);
-            sequence.WriteByte((byte)pinNumber);
-            sequence.WriteByte((byte)FrequencyMode.NoChange);
-            sequence.WriteByte(0);
-            sequence.WriteByte(0);
-            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            SendCommand(sequence);
-        }
-
-        public (int TimeStamp, int NewTicks, bool Success) EnableFrequencyReporting(int pinNumber, FrequencyMode mode, int reportDelay)
-        {
-            if (reportDelay >= (1 << 14))
-            {
-                throw new ArgumentOutOfRangeException(nameof(reportDelay), "The maximum update delay is 16.383ms");
-            }
-
-            FirmataCommandSequence sequence = new();
-            sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
-            sequence.WriteByte(1);
-            sequence.WriteByte((byte)pinNumber);
-            sequence.WriteByte((byte)mode);
-            sequence.WriteByte((byte)(reportDelay & 0x7f)); // lower 7 bits
-            sequence.WriteByte((byte)((reportDelay >> 7) & 0x7f));
-            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            var reply = SendCommandAndWait(sequence, DefaultReplyTimeout);
-
-            return DecodeFrequencyReport(new Span<byte>(reply.ToArray()));
-        }
-
-        public (int TimeStamp, int NewTicks, bool Success) DecodeFrequencyReport(Span<byte> reply)
-        {
-            if (reply.Length < 13 || reply[0] != (byte)FirmataSysexCommand.FREQUENCY_COMMAND)
-            {
-                OnError?.Invoke("Incorrect answer received", null);
-                return (0, 0, false);
-            }
-
-            int timestamp = (int)FirmataCommandSequence.DecodeUInt32(reply, 3);
-            int ticks = (int)FirmataCommandSequence.DecodeUInt32(reply, 8);
-            return (timestamp, ticks, true);
         }
 
         public void EnableSpi()
