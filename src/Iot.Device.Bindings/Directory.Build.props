@@ -8,5 +8,4 @@
   </PropertyGroup>
 
   <Import Project="../../Directory.Build.props" />
-  <Import Project="../../eng/Versions.external.props" />
 </Project>

@@ -5,6 +5,7 @@
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
   <Import Project="$(RepositoryEngineeringDir)Compilers.props" />
   <Import Project="$(RepositoryEngineeringDir)Analyzers.props" />
+  <Import Project="$(RepositoryEngineeringDir)Versions.external.props" />
 
   <PropertyGroup>
     <Copyright>$(CopyrightNetFoundation)</Copyright>

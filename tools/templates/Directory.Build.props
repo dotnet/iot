@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <Import Project="../../src/devices/Directory.Build.props" />
+  <PropertyGroup>
+    <!-- The template generates some warnings since the binding name doesn't start with an uppercase letter.
+    It is safe to suppress since this will only happen when building the template, but not the actual binding. -->
+    <NoWarn>$(NoWarn);SA1300;SA1412</NoWarn>
+  </PropertyGroup>
+</Project>

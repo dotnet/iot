@@ -11,6 +11,5 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
   </ItemGroup>
-  <Import Project="../../eng/Versions.external.props" />
 
 </Project>
