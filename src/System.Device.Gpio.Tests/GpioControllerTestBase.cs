@@ -184,7 +184,7 @@ namespace System.Device.Gpio.Tests
                 controller.SetPinMode(OutputPin, PinMode.Output);
                 controller.ClosePin(OutputPin);
                 controller.OpenPin(OutputPin);
-                Thread.Sleep(50);
+                Thread.Sleep(1000);
                 Assert.Equal(PinMode.Output, controller.GetPinMode(OutputPin));
             }
         }
