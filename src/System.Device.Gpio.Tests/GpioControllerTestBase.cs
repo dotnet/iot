@@ -182,6 +182,7 @@ namespace System.Device.Gpio.Tests
             {
                 controller.OpenPin(OutputPin);
                 controller.SetPinMode(OutputPin, PinMode.Output);
+                Assert.Equal(PinMode.Output, controller.GetPinMode(OutputPin));
                 controller.ClosePin(OutputPin);
                 controller.OpenPin(OutputPin);
                 Thread.Sleep(1000);
