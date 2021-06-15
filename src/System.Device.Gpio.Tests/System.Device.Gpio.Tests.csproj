@@ -3,15 +3,13 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
     <LangVersion>9</LangVersion>
     <IsPackable>false</IsPackable>
+    <!-- Keep quiet about duplicate package references from props files -->
+    <NoWarn>$(NoWarn);NETSDK1023</NoWarn>
   </PropertyGroup>
-  <ItemGroup>
-    <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="xunit.runner.utility" Version="2.4.1" />
-  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
   </ItemGroup>
+
 </Project>
