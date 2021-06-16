@@ -174,6 +174,11 @@ namespace Iot.Device.Arduino
 
         public void Load()
         {
+            if (CompilerSettings.ForceFlashWrite)
+            {
+                _compiler.ClearAllData(true, true);
+            }
+
             if (CompilerSettings.CreateKernelForFlashing)
             {
                 if (!_compiler.BoardHasKernelLoaded(_kernelSnapShot))
@@ -439,17 +444,37 @@ namespace Iot.Device.Arduino
                 return GetOrAddMethodToken(replacement, callingMethod);
             }
 
+            // If the class is being replaced, search the replacement class
             var classReplacement = GetReplacement(methodBase.DeclaringType);
             if (classReplacement != null && replacement == null)
             {
                 replacement = GetReplacement(methodBase, callingMethod, classReplacement);
-                return GetOrAddMethodToken(replacement ?? throw new InvalidOperationException($"Internal error: Expected replacement not found for {methodBase.MemberInfoSignature()}"), callingMethod);
+                if (replacement == null)
+                {
+                    // If the replacement class has a static method named "NotSupportedException", we call this instead (expecting that this will never be called).
+                    // This is used so we can remove all the unsupported implementations for compiler intrinsics.
+                    MethodInfo? dummyMethod = GetNotSupportedExceptionMethod(classReplacement);
+                    if (dummyMethod != null)
+                    {
+                        return GetOrAddMethodToken(dummyMethod, callingMethod);
+                    }
+
+                    throw new InvalidOperationException($"Internal error: Expected replacement not found for {methodBase.MemberInfoSignature()}");
+                }
+
+                return GetOrAddMethodToken(replacement, callingMethod);
             }
 
             token = _nextToken++;
             _patchedMethodTokens.Add(methodBase, token);
             _inversePatchedMethodTokens.Add(token, methodBase);
             return token;
+        }
+
+        private static MethodInfo? GetNotSupportedExceptionMethod(Type classReplacement)
+        {
+            var dummyMethod = classReplacement.GetMethod(nameof(MiniX86Intrinsics.NotSupportedException), BindingFlags.Public | BindingFlags.Static);
+            return dummyMethod;
         }
 
         internal int GetOrAddFieldToken(FieldInfo field)
@@ -1032,6 +1057,12 @@ namespace Iot.Device.Arduino
             }
             else if (elem.Item2 == null)
             {
+                var classReplacement = GetReplacement(elem.Item1.DeclaringType);
+                if (GetNotSupportedExceptionMethod(classReplacement!) != null)
+                {
+                    return null;
+                }
+
                 throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}");
             }
 
@@ -1171,6 +1202,33 @@ namespace Iot.Device.Arduino
         public void AddArrayImplementation(TypeInfo arrayType, MethodInfo getEnumeratorCall)
         {
             _arrayListImpl[arrayType] = getEnumeratorCall;
+        }
+
+        public void SuppressNamespace(string namespacePrefix, bool includingSubNamespaces)
+        {
+            var assembly = typeof(System.Runtime.GCSettings).Assembly;
+            foreach (var t in assembly.GetTypes())
+            {
+                if (t.Namespace == null)
+                {
+                    continue;
+                }
+
+                if (includingSubNamespaces)
+                {
+                    if (t.Namespace.StartsWith(namespacePrefix, StringComparison.InvariantCulture))
+                    {
+                        SuppressType(t);
+                    }
+                }
+                else
+                {
+                    if (t.Namespace == namespacePrefix)
+                    {
+                        SuppressType(t);
+                    }
+                }
+            }
         }
     }
 }

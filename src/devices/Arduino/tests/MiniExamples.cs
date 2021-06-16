@@ -72,6 +72,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = true,
                 AutoRestartProgram = false,
                 MaxMemoryUsage = 350 * 1024,
+                ForceFlashWrite = true,
             };
 
             ExecuteComplexProgramSuccess<Func<int>>(UseI2cDisplay.FileSystemTest, false, s);

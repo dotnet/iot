@@ -1,20 +1,20 @@
-﻿using System.Runtime.InteropServices;
+﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Iot.Device.Arduino.Runtime
 {
     [ArduinoReplacement(typeof(Marshal), true)]
     internal class MiniMarshal
     {
-        private static int _lastError;
-
+        [ArduinoImplementation(NativeMethod.Interop_Kernel32SetLastError)]
         public static void SetLastWin32Error(int error)
         {
-            _lastError = error;
         }
 
+        [ArduinoImplementation(NativeMethod.Interop_Kernel32GetLastError)]
         public static int GetLastWin32Error()
         {
-            return _lastError;
+            throw new NotImplementedException();
         }
 
         public static bool IsPinnable(object obj)

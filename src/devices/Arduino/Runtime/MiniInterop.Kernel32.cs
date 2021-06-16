@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Win32.SafeHandles;
 
 namespace Iot.Device.Arduino.Runtime
 {
@@ -192,8 +194,21 @@ namespace Iot.Device.Arduino.Runtime
                 return 4; // the return value is the number of chars copied, not including the 0
             }
 
+            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            public static unsafe Microsoft.Win32.SafeHandles.SafeFileHandle CreateFile(System.String lpFileName, System.Int32 dwDesiredAccess,
+                System.IO.FileShare dwShareMode, SECURITY_ATTRIBUTES* lpSecurityAttributes, System.IO.FileMode dwCreationDisposition, System.Int32 dwFlagsAndAttributes, System.IntPtr hTemplateFile)
+            {
+                IntPtr file = CreateFileInternal(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
+                if (file == IntPtr.Zero)
+                {
+                    throw new IOException("IO Error", (int)GetLastError());
+                }
+
+                return new SafeFileHandle(file, true);
+            }
+
             [ArduinoImplementation(NativeMethod.Interop_Kernel32CreateFile, CompareByParameterNames = true)]
-            internal static unsafe Microsoft.Win32.SafeHandles.SafeFileHandle CreateFile(System.String lpFileName, System.Int32 dwDesiredAccess,
+            internal static unsafe IntPtr CreateFileInternal(System.String lpFileName, System.Int32 dwDesiredAccess,
                 System.IO.FileShare dwShareMode, SECURITY_ATTRIBUTES* lpSecurityAttributes, System.IO.FileMode dwCreationDisposition, System.Int32 dwFlagsAndAttributes, System.IntPtr hTemplateFile)
             {
                 throw new NotImplementedException();
@@ -252,9 +267,22 @@ namespace Iot.Device.Arduino.Runtime
             }
 
             [ArduinoImplementation(NativeMethod.Interop_Kernel32WriteFile)]
-            internal static unsafe Int32 WriteFile(SafeHandle handle, Byte* bytes, Int32 numBytesToWrite, ref Int32 numBytesWritten, System.IntPtr mustBeZero)
+            internal static unsafe Int32 WriteFileInternal(IntPtr fileHandle, Byte* bytes, Int32 numBytesToWrite)
             {
                 return 0;
+            }
+
+            internal static unsafe Int32 WriteFile(SafeHandle handle, Byte* bytes, Int32 numBytesToWrite, ref Int32 numBytesWritten, System.IntPtr mustBeZero)
+            {
+                numBytesWritten = WriteFileInternal(handle.DangerousGetHandle(), bytes, numBytesToWrite);
+                if (numBytesWritten < 0)
+                {
+                    numBytesWritten = 0;
+                    return 0;
+                }
+
+                // True
+                return 1;
             }
 
             [ArduinoImplementation(NativeMethod.Interop_Kernel32WriteFileOverlapped)]
@@ -264,9 +292,21 @@ namespace Iot.Device.Arduino.Runtime
             }
 
             [ArduinoImplementation(NativeMethod.Interop_Kernel32ReadFile)]
-            internal static unsafe Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToRead, ref System.Int32 numBytesRead, System.IntPtr mustBeZero)
+            internal static unsafe Int32 ReadFileInternal(IntPtr fileHandle, Byte* bytes, System.Int32 numBytesToRead)
             {
                 return 0;
+            }
+
+            internal static unsafe Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToRead, ref System.Int32 numBytesRead, System.IntPtr mustBeZero)
+            {
+                numBytesRead = ReadFileInternal(handle.DangerousGetHandle(), bytes, numBytesToRead);
+                if (numBytesRead < 0)
+                {
+                    numBytesRead = 0;
+                    return 0;
+                }
+
+                return 1;
             }
 
             [ArduinoImplementation(NativeMethod.Interop_Kernel32CancelIoEx)]

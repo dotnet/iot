@@ -1562,6 +1562,7 @@ namespace Iot.Device.Arduino
                 exec.SuppressType("System.Reflection.Assembly");
                 exec.SuppressType("System.Reflection.RuntimeAssembly");
                 exec.SuppressType("System.Globalization.HebrewNumber");
+                // exec.SuppressNamespace("System.Runtime.Intrinsics", true);
 #if NET5_0
                 // Native libraries are not supported
                 exec.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));

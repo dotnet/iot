@@ -24,6 +24,7 @@ namespace Iot.Device.Arduino
         RuntimeTypeHandle = 34, // A type handle. The value is a type token
         AddressOfVariable = 35, // An address pointing to a variable slot on another method's stack or arglist
         FunctionPointer = 36, // A function pointer
+        NativeHandle = 37, // A native handle (or pointer to one)
         StaticMember = 128, // type is defined by the first value it gets
     }
 }

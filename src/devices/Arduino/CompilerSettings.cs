@@ -83,6 +83,15 @@ namespace Iot.Device.Arduino
             set;
         }
 
+        /// <summary>
+        /// True to force writing the program, even if the existing code in flash seemingly matches.
+        /// </summary>
+        public bool ForceFlashWrite
+        {
+            get;
+            set;
+        }
+
         object ICloneable.Clone()
         {
             return MemberwiseClone();

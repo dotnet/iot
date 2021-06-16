@@ -77,6 +77,7 @@
     <Compile Include="Runtime\MiniType.cs" />
     <Compile Include="Runtime\MiniUnsafe.cs" />
     <Compile Include="Runtime\MiniValueType.cs" />
+    <Compile Include="Runtime\MiniX86Intrinsics.cs" />
     <Compile Include="Runtime\UnitsNet\MiniDuration.cs" />
     <Compile Include="Runtime\UnitsNet\MiniLength.cs" />
     <Compile Include="Runtime\UnitsNet\MiniPressure.cs" />
