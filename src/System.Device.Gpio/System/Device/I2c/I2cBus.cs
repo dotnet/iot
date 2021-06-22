@@ -35,7 +35,7 @@ namespace System.Device.I2c
         /// <summary>
         /// Removes I2C device.
         /// </summary>
-        /// <param name="deviceAddress">Device address to create</param>
+        /// <param name="deviceAddress">Device address to remove.</param>
         public abstract void RemoveDevice(int deviceAddress);
 
         /// <inheritdoc cref="IDisposable.Dispose"/>
