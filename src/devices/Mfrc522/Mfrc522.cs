@@ -15,6 +15,7 @@ using Iot.Device.Rfid;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
+using Iot.Device.Card.Ultralight;
 
 namespace Iot.Device.Mfrc522
 {
@@ -33,13 +34,13 @@ namespace Iot.Device.Mfrc522
         /// </summary>
         public const SpiMode DefaultSpiMode = SpiMode.Mode0;
 
-        private int _pinReset;
+        private readonly int _pinReset;
+        private readonly ILogger _logger;
+        private readonly SerialPort? _serialPort;
         private SpiDevice? _spiDevice;
         private I2cDevice? _i2CDevice;
-        private SerialPort? _serialPort;
         private GpioController? _controller;
         private bool _shouldDispose;
-        private ILogger _logger;
 
         #region Constructors
 
@@ -450,11 +451,13 @@ namespace Iot.Device.Mfrc522
         {
             byte bitFraming = (byte)(numberValidBitsLastByte == 8 ? 0 : numberValidBitsLastByte & (byte)BitFraming.TxLastBitsMask);
             byte waitIrq = command == MfrcCommand.MifareAuthenticate ? (byte)(ComIr.IdleIRq) : (byte)(ComIr.IdleIRq | ComIr.RxIRq);
+            byte irqEn = command == MfrcCommand.MifareAuthenticate ? (byte)(ComIr.IdleIRq | ComIr.ErrIRq | ComIr.SetIrq) : (byte)(ComIr.ErrIRq | ComIr.IdleIRq | ComIr.LoAlertIRq | ComIr.RxIRq | ComIr.SetIrq | ComIr.TimerIRq | ComIr.TxIRq);
 
             // Set to idle, prepare FIFO and bit framing
             WriteRegister(Register.Command, (byte)MfrcCommand.Idle);
-            WriteRegister(Register.ComIrq, 0x7f);
-            WriteRegister(Register.FifoLevel, 0x80);
+            WriteRegister(Register.ComIEn, irqEn);
+            ClearRegisterBit(Register.ComIrq, (byte)ComIr.SetIrq);
+            SetRegisterBit(Register.FifoLevel, 0x80);
             WriteRegister(Register.FifoData, sendData);
             WriteRegister(Register.BitFraming, bitFraming);
             // Set the real command
@@ -505,49 +508,6 @@ namespace Iot.Device.Mfrc522
             return Status.Ok;
         }
 
-        private bool MifareRead(byte blockAddress, Span<byte> dataFromCard)
-        {
-            if (dataFromCard.Length < 16)
-            {
-                return false;
-            }
-
-            // 16 bytes + 2 from CRC
-            byte[] receivedBuffer = new byte[18];
-            // Command + CRC
-            byte[] commandToSend = new byte[4];
-
-            commandToSend[0] = (byte)MifareCardCommand.Read16Bytes;
-            commandToSend[1] = blockAddress;
-            var status = CalculateCrc(commandToSend.AsSpan(0, 2), commandToSend.AsSpan(2));
-            if (status != Status.Ok)
-            {
-                return false;
-            }
-
-            status = SendAndReceiveData(MfrcCommand.Transceive, commandToSend, receivedBuffer);
-            if (status != Status.Ok)
-            {
-                return false;
-            }
-
-            // Check CRC
-            byte[] crc = new byte[2];
-            status = CalculateCrc(receivedBuffer.AsSpan(0, 16), crc.AsSpan());
-            if (status != Status.Ok)
-            {
-                return false;
-            }
-
-            if (receivedBuffer[16] == crc[0] && receivedBuffer[17] == crc[1])
-            {
-                receivedBuffer.AsSpan().Slice(0, 16).CopyTo(dataFromCard);
-                return true;
-            }
-
-            return false;
-        }
-
         /// <summary>
         /// Stop to communicate with a card.
         /// </summary>
@@ -570,7 +530,7 @@ namespace Iot.Device.Mfrc522
                 return true;
             }
 
-            return status == Status.Error ? false : true;
+            return status != Status.Error;
         }
 
         /// <summary>
@@ -902,35 +862,92 @@ namespace Iot.Device.Mfrc522
         {
             // targetNumber is not used here as only 1 card can be selected at a time so will be ignored
             // The dataToSend buffer contains anyway the unique of the card
-            Status status = Status.Ok;
+            Status status;
 
-            // Use built in functions for authentication
+            // Use built in functions for authentication in case of classic Mifare cards
             if ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB))
             {
-                status = SendAndReceiveData(MfrcCommand.MifareAuthenticate, dataToSend.ToArray(), null);
-                return status == Status.Ok ? 0 : -1;
+                if ((dataFromCard == null) || (dataFromCard.Length == 0))
+                {
+                    status = SendAndReceiveData(MfrcCommand.MifareAuthenticate, dataToSend.ToArray(), null);
+                }
+                else
+                {
+                    return SendWithCrc(dataToSend, dataFromCard);
 
+                }
+
+                return status == Status.Ok ? 0 : -1;
             }
             else if ((dataToSend[0] == (byte)MifareCardCommand.Incrementation) || (dataToSend[0] == (byte)MifareCardCommand.Decrementation)
                 || (dataToSend[0] == (byte)MifareCardCommand.Restore))
             {
                 return TwoStepsIncDecRestore(dataToSend, dataFromCard);
             }
-            else if (dataToSend[0] == (byte)MifareCardCommand.Read16Bytes)
+            else if (Enum.IsDefined(typeof(UltralightCommand), (UltralightCommand)dataToSend[0]))
             {
-                var ret = MifareRead(dataToSend[1], dataFromCard);
-                return ret ? dataFromCard.Length : -1;
+                if ((dataToSend[0] == (byte)UltralightCommand.ReadFast) && (dataFromCard.Length > 62))
+                {
+                    throw new ArgumentException($"Maximum number of pages to be able to read with MFRC522 is 7 as internal FIFO is limited to 64 including CRC.");
+                }
+
+                return SendWithCrc(dataToSend, dataFromCard);
             }
 
             status = SendAndReceiveData(MfrcCommand.Transceive, dataToSend.ToArray(), dataFromCard);
             return status == Status.Ok ? dataFromCard.Length : -1;
         }
 
+        private int SendWithCrc(ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        {
+            Status status;
+            // 16 bytes + 2 from CRC
+            byte[] receivedBuffer = new byte[dataFromCard.Length + 2];
+            // Command + CRC
+            byte[] commandToSend = new byte[dataToSend.Length + 2];
+
+            dataToSend.CopyTo(commandToSend);
+            status = CalculateCrc(commandToSend.AsSpan(0, dataToSend.Length), commandToSend.AsSpan(dataToSend.Length));
+            if (status != Status.Ok)
+            {
+                return -1;
+            }
+
+            status = SendAndReceiveData(MfrcCommand.Transceive, commandToSend, receivedBuffer);
+            if (status != Status.Ok)
+            {
+                Debug.WriteLine($"{status}");
+                return -1;
+            }
+
+            if (dataFromCard.Length > 0)
+            {
+                // Check CRC
+                byte[] crc = new byte[2];
+                status = CalculateCrc(receivedBuffer.AsSpan(0, dataFromCard.Length), crc.AsSpan());
+                if (status != Status.Ok)
+                {
+                    return -1;
+                }
+
+                if (receivedBuffer[dataFromCard.Length] == crc[0] && receivedBuffer[dataFromCard.Length + 1] == crc[1])
+                {
+                    receivedBuffer.AsSpan().Slice(0, dataFromCard.Length).CopyTo(dataFromCard);
+                    return dataFromCard.Length;
+                }
+
+                return -1;
+            }
+
+            return 0;
+        }
+
         private int TwoStepsIncDecRestore(ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
+            Status status;
             Span<byte> toSendFirst = stackalloc byte[4];
             dataToSend.Slice(0, 2).CopyTo(toSendFirst);
-            var status = CalculateCrc(toSendFirst.Slice(0, 2), toSendFirst.Slice(2, 2));
+            CalculateCrc(toSendFirst.Slice(0, 2), toSendFirst.Slice(2, 2));
 
             status = SendAndReceiveData(MfrcCommand.Transceive, toSendFirst.ToArray(), null);
             if (status != Status.Ok)
@@ -941,7 +958,7 @@ namespace Iot.Device.Mfrc522
 
             Span<byte> toSendSecond = stackalloc byte[dataToSend.Length];
             dataToSend.Slice(2).CopyTo(toSendSecond);
-            status = CalculateCrc(toSendSecond.Slice(0, 2), toSendSecond.Slice(2, 2));
+            CalculateCrc(toSendSecond.Slice(0, 2), toSendSecond.Slice(2, 2));
 
             status = SendAndReceiveData(MfrcCommand.Transceive, toSendSecond.ToArray(), dataFromCard);
 
