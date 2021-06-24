@@ -15,6 +15,12 @@ namespace System.Device.Gpio.Tests
         {
             Assert.True(PinValue.High.Equals(1));
             Assert.True(PinValue.Low.Equals(0));
+
+            Assert.True(PinValue.High.IsHigh);
+            Assert.False(PinValue.High.IsLow);
+
+            Assert.True(PinValue.Low.IsLow);
+            Assert.False(PinValue.Low.IsHigh);
         }
 
         [Fact]
@@ -37,6 +43,22 @@ namespace System.Device.Gpio.Tests
         {
             Assert.Equal(PinValue.Low, !PinValue.High);
             Assert.Equal(PinValue.High, !PinValue.Low);
+        }
+
+        [Fact]
+        public void VerifyIsLowOrIsHigh()
+        {
+            Assert.True(((PinValue)0).IsLow);
+            Assert.False(((PinValue)0).IsHigh);
+
+            Assert.True(((PinValue)1).IsHigh);
+            Assert.False(((PinValue)1).IsLow);
+
+            Assert.True(((PinValue)int.MaxValue).IsHigh);
+            Assert.False(((PinValue)int.MaxValue).IsLow);
+
+            Assert.True(((PinValue)int.MinValue).IsHigh);
+            Assert.False(((PinValue)int.MinValue).IsLow);
         }
     }
 }

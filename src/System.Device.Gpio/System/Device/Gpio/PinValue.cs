@@ -26,6 +26,18 @@ namespace System.Device.Gpio
         public static PinValue Low => new PinValue(0);
 
         /// <summary>
+        /// Indicates whether the value of the current <see cref="PinValue"/> is <see cref="High"/> or not.
+        /// </summary>
+        /// <value><see langword="true"/> when the value is <see cref="High"/>, <see langword="false"/> when the value is <see cref="Low"/>.</value>
+        public bool IsHigh => _value != 0;
+
+        /// <summary>
+        /// Indicates whether the value of the current <see cref="PinValue"/> is <see cref="Low"/> or not.
+        /// </summary>
+        /// <value><see langword="true"/> when the value is <see cref="Low"/>, <see langword="false"/> when the value is <see cref="High"/>.</value>
+        public bool IsLow => _value == 0;
+
+        /// <summary>
         /// Implicit conversion from int. 0 means <see cref="Low"/>, everything else means <see cref="High"/>.
         /// </summary>
         /// <param name="value">Value to set</param>
