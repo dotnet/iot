@@ -13,5 +13,6 @@ namespace Iot.Device.Arduino
         Void = 8, // The method returns void
         Ctor = 16, // The method is a ctor (which only implicitly returns "this"); the flag is not set for static ctors.
         Abstract = 32, // The method is abstract (or an interface stub)
+        ExceptionClausesPresent = 64, // The method has at least one exception clause
     }
 }

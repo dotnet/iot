@@ -1366,6 +1366,23 @@ namespace Iot.Device.Arduino
             }
         }
 
+        public void SendMethodExceptionClauses(int token, List<ExceptionClause> exceptionClauses)
+        {
+            foreach (var c in exceptionClauses)
+            {
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.ExceptionClauses);
+                sequence.SendInt32(token);
+                sequence.SendInt32((int)c.Clause);
+                sequence.SendInt32(c.TryOffset);
+                sequence.SendInt32(c.TryLength);
+                sequence.SendInt32(c.HandlerOffset);
+                sequence.SendInt32(c.HandlerLength);
+                sequence.SendInt32(c.ExceptionFilterToken);
+                sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+                WaitAndHandleIlCommand(sequence);
+            }
+        }
+
         public void SendInterfaceImplementations(int classToken, int[] data)
         {
             // Send eight at a time, otherwise the maximum length of the message may be exceeded

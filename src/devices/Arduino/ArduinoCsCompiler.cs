@@ -1993,6 +1993,10 @@ namespace Iot.Device.Arduino
             if (decl.HasBody && decl.NativeMethod == NativeMethod.None)
             {
                 _board.Firmata.SendMethodIlCode(decl.Token, decl.Code.IlBytes!);
+                if (decl.Code.ExceptionClauses != null && decl.Code.ExceptionClauses.Any())
+                {
+                    _board.Firmata.SendMethodExceptionClauses(decl.Token, decl.Code.ExceptionClauses);
+                }
             }
         }
 

@@ -299,7 +299,50 @@ namespace Iot.Device.Arduino
 
             typesUsed = typesUsed.Distinct().ToList();
 
-            return new IlCode(method, byteCode, methodsUsed, fieldsUsed, typesUsed);
+            var exceptions = AnalyzeExceptionClauses(set, method);
+            return new IlCode(method, byteCode, methodsUsed, fieldsUsed, typesUsed, exceptions);
+        }
+
+        private static List<ExceptionClause>? AnalyzeExceptionClauses(ExecutionSet set, MethodBase method)
+        {
+            var body = method.GetMethodBody();
+            if (body == null)
+            {
+                return null;
+            }
+
+            var clauses = body.ExceptionHandlingClauses;
+            if (clauses.Count == 0)
+            {
+                return null;
+            }
+
+            List<ExceptionClause> patchedClauses = new List<ExceptionClause>(clauses.Count);
+
+            foreach (var c in clauses)
+            {
+                int token = 0;
+                if (c.Flags == ExceptionHandlingClauseOptions.Filter)
+                {
+                    // Exception filters are not currently supported
+                    continue;
+                }
+
+                if (c.Flags == ExceptionHandlingClauseOptions.Fault)
+                {
+                    // I don't think the C# compiler ever generates fault clauses
+                    throw new NotSupportedException("Exception fault clauses are not supported");
+                }
+
+                if (c.Flags == ExceptionHandlingClauseOptions.Clause && c.CatchType != null)
+                {
+                    token = set.GetOrAddClassToken(c.CatchType.GetTypeInfo());
+                }
+
+                patchedClauses.Add(new ExceptionClause(c.Flags, (ushort)c.TryOffset, (ushort)c.TryLength, (ushort)c.HandlerOffset, (ushort)c.HandlerLength, token));
+            }
+
+            return patchedClauses;
         }
 
         private static MemberInfo? ResolveMember(MethodBase method, int metadataToken)

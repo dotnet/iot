@@ -22,8 +22,9 @@ namespace Iot.Device.Arduino
 
         SetConstantMemorySize = 16,
         SpecialTokenList = 17,
+        ExceptionClauses = 18,
 
-        ArrayOperations = 18,
+        ArrayOperations = 19,
 
         Nack = 0x7e,
         Ack = 0x7f,

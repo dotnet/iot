@@ -30,6 +30,11 @@ namespace Iot.Device.Arduino
                 ArgumentCount += 1;
             }
 
+            if (Code.ExceptionClauses != null && Code.ExceptionClauses.Any())
+            {
+                Flags |= MethodFlags.ExceptionClausesPresent;
+            }
+
             Name = $"{MethodBase.MethodSignature()} (Token 0x{Token:X})";
         }
 
@@ -109,6 +114,11 @@ namespace Iot.Device.Arduino
             if (methodBase.IsAbstract)
             {
                 Flags |= MethodFlags.Abstract;
+            }
+
+            if (Code.ExceptionClauses != null && Code.ExceptionClauses.Any())
+            {
+                Flags |= MethodFlags.ExceptionClausesPresent;
             }
 
             Name = $"{MethodBase.MethodSignature()} (Token 0x{Token:X})";

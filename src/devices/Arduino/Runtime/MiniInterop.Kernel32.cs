@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -231,9 +232,16 @@ namespace Iot.Device.Arduino.Runtime
                 throw new NotImplementedException();
             }
 
-            internal static string GetMessage(int errorCode)
+            [ArduinoImplementation]
+            public static string GetMessage(int errorCode)
             {
-                // Couldn't get a message, so manufacture one.
+                // We don't have the resources for the full messages available
+                return string.Format("OS error (0x{0:x})", errorCode);
+            }
+
+            [ArduinoImplementation]
+            public static string GetMessage(int errorCode, IntPtr moduleHandle)
+            {
                 return string.Format("OS error (0x{0:x})", errorCode);
             }
 
@@ -349,20 +357,43 @@ namespace Iot.Device.Arduino.Runtime
         internal static class Kernel32FileSystem
         {
             [ArduinoImplementation]
-            internal static string GetMessage(Int32 errorCode)
+            public static string GetMessage(Int32 errorCode)
             {
                 return GetMessage(errorCode, IntPtr.Zero);
             }
 
             [ArduinoImplementation]
-            internal static string GetMessage(int errorCode, IntPtr moduleHandle)
+            public static string GetMessage(int errorCode, IntPtr moduleHandle)
             {
                 // Couldn't get a message, so manufacture one.
                 return string.Format("OS error (0x{0:x})", errorCode);
             }
 
             [ArduinoImplementation(CompareByParameterNames = true)]
-            internal static bool CreateDirectory(string path, ref SECURITY_ATTRIBUTES lpSecurityAttributes)
+            public static bool CreateDirectory(string path, ref SECURITY_ATTRIBUTES lpSecurityAttributes)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        [ArduinoReplacement("Interop+Kernel32", "Microsoft.Win32.Primitives.dll", true, typeof(Win32Exception), IncludingPrivates = true)]
+        internal static class Kernel32Win32Primitives
+        {
+            [ArduinoImplementation]
+            public static string GetMessage(Int32 errorCode)
+            {
+                return GetMessage(errorCode, IntPtr.Zero);
+            }
+
+            [ArduinoImplementation]
+            public static string GetMessage(int errorCode, IntPtr moduleHandle)
+            {
+                // Couldn't get a message, so manufacture one.
+                return string.Format("OS error (0x{0:x})", errorCode);
+            }
+
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static bool CreateDirectory(string path, ref SECURITY_ATTRIBUTES lpSecurityAttributes)
             {
                 throw new NotImplementedException();
             }

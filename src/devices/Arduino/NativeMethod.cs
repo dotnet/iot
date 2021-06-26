@@ -46,6 +46,7 @@ namespace Iot.Device.Arduino
         StringCtorSpan,
         StringCompareTo,
         StringCtorCharCount,
+        StringCtorCharArray,
 
         RuntimeHelpersInitializeArray,
         RuntimeHelpersRunClassConstructor,

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -832,6 +833,79 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public static int NormalTryCatchNoException(int arg1, int arg2)
+        {
+            int a = 2;
+            try
+            {
+                a = 1;
+            }
+            catch (NotImplementedException)
+            {
+                return 78;
+            }
+
+            return a;
+        }
+
+        public static int NormalTryFinallyNoException(int arg1, int arg2)
+        {
+            int a = 2;
+            try
+            {
+                a = 3;
+            }
+            finally
+            {
+                a = 1;
+            }
+
+            return a;
+        }
+
+        public static int NormalTryFinallyWithReturn(int arg1, int arg2)
+        {
+            int a = 1;
+            var m = new MyDisposable();
+            try
+            {
+                return a;
+            }
+            finally
+            {
+                m.Dispose();
+            }
+        }
+
+        public static int NormalTryCatchWithException(int arg1, int arg2)
+        {
+            int a = 2;
+            try
+            {
+                a = 5;
+                throw new NotSupportedException("This is an exception");
+            }
+            catch (NotSupportedException)
+            {
+                a = 1;
+            }
+
+            return a;
+        }
+
+        public static int NormalTryCatchWithException2(int arg1, int arg2)
+        {
+            try
+            {
+                throw new Win32Exception(arg1);
+            }
+            catch (Win32Exception x)
+            {
+                MiniAssert.NotNull(x.Message);
+                return x.NativeErrorCode;
+            }
+        }
+
         private class SmallBase : IDisposable
         {
             private int _a;
@@ -1018,6 +1092,25 @@ namespace Iot.Device.Arduino.Tests
             {
                 _sum = -1;
                 _d = -1;
+            }
+        }
+
+        private sealed class MyDisposable : IDisposable
+        {
+            public MyDisposable()
+            {
+                IsDisposed = false;
+            }
+
+            public bool IsDisposed
+            {
+                get;
+                private set;
+            }
+
+            public void Dispose()
+            {
+                IsDisposed = true;
             }
         }
 

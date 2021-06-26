@@ -332,5 +332,15 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
         }
 
+        [Theory]
+        [InlineData(nameof(TestMethods.NormalTryCatchNoException), 1)]
+        [InlineData(nameof(TestMethods.NormalTryFinallyNoException), 1)]
+        [InlineData(nameof(TestMethods.NormalTryCatchWithException), 1)]
+        [InlineData(nameof(TestMethods.NormalTryCatchWithException2), 1)]
+        [InlineData(nameof(TestMethods.NormalTryFinallyWithReturn), 1)]
+        public void ExceptionHandlingSimple(string methodName, int arg1)
+        {
+            LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
+        }
     }
 }

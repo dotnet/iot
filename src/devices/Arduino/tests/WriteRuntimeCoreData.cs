@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Arduino;
@@ -46,6 +47,12 @@ namespace Iot.Device.Arduino.Tests
         public void WriteKnownTypeTokens()
         {
             WriteEnumHeaderFile<KnownTypeTokens>();
+        }
+
+        [Fact]
+        public void WriteExceptionClauseTypes()
+        {
+            WriteEnumHeaderFile<ExceptionHandlingClauseOptions>();
         }
 
         [Fact]

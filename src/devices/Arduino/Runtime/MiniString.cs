@@ -40,6 +40,12 @@ namespace Iot.Device.Arduino.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation(NativeMethod.StringCtorCharArray)]
+        public MiniString(char[] value, int startIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
         // This is a bit odd: All of these default constructors on System::String are never actually called, because the runtime handles string construction specially.
         /*
         [ArduinoImplementation(NativeMethod.StringCtor0)]
@@ -53,41 +59,6 @@ namespace Iot.Device.Arduino.Runtime
         public unsafe MiniString(char* buf)
         {
             throw new NotImplementedException();
-        }
-
-        [ArduinoImplementation]
-        public MiniString(char[] value, int startIndex, int length)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (startIndex < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(startIndex));
-            }
-
-            if (length < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(length));
-            }
-
-            if (startIndex > value.Length - length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(startIndex));
-            }
-
-            if (length == 0)
-            {
-                return;
-            }
-
-            InternalAllocateString(length);
-            for (int i = startIndex; i < startIndex + length; i++)
-            {
-                SetElem(i - startIndex, value[i]);
-            }
         }
 
         [ArduinoImplementation]

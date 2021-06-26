@@ -19,13 +19,14 @@ namespace Iot.Device.Arduino
             Name = $"{method.MethodSignature()}";
         }
 
-        public IlCode(MethodBase method, byte[]? ilBytes, List<MethodBase> methods, List<FieldInfo> fields, List<TypeInfo> types)
+        public IlCode(MethodBase method, byte[]? ilBytes, List<MethodBase> methods, List<FieldInfo> fields, List<TypeInfo> types, List<ExceptionClause>? exceptionClauses)
         {
             Method = method;
             IlBytes = ilBytes;
             DependentMethods = methods;
             DependentFields = fields;
             DependentTypes = types;
+            ExceptionClauses = exceptionClauses;
             Name = $"{method.MethodSignature()}";
         }
 
@@ -67,6 +68,11 @@ namespace Iot.Device.Arduino
         {
             get;
         }
+
+        /// <summary>
+        /// Exception clauses from this method. May be null.
+        /// </summary>
+        public List<ExceptionClause>? ExceptionClauses { get; }
 
         public override string ToString()
         {
