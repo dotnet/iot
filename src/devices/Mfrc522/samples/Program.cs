@@ -210,7 +210,7 @@ void ProcessUltralight()
     Console.WriteLine($"Type: {ultralight.UltralightCardType}, Ndef capacity: {ultralight.NdefCapacity}");
 
     var version = ultralight.GetVersion();
-    if ((version != null) && (version.Length >0))
+    if ((version != null) && (version.Length > 0))
     {
         Console.WriteLine("Get Version details: ");
         for (int i = 0; i < version.Length; i++)
@@ -226,7 +226,7 @@ void ProcessUltralight()
     }
 
     var sign = ultralight.GetSignature();
-    if ((sign != null) && (sign.Length >0))
+    if ((sign != null) && (sign.Length > 0))
     {
         Console.WriteLine("Signature: ");
         for (int i = 0; i < sign.Length; i++)
