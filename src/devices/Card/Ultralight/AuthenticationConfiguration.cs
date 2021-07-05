@@ -28,11 +28,11 @@ namespace Iot.Device.Card.Ultralight
         /// <summary>
         /// Is user configuration permanently locked against write access, except PWD and PACK
         /// </summary>
-        public bool IsWrittenLocked { get; set; }
+        public bool IsWritingLocked { get; set; }
 
         /// <summary>
         /// Maximum number of possible try, 0 = disabled, 1 to 7 enabled
         /// </summary>
-        public byte MaximumNumberOfPossibleTry { get; set; }
+        public byte MaximumNumberOfPossibleTries { get; set; }
     }
 }

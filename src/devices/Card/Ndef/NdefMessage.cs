@@ -69,7 +69,7 @@ namespace Iot.Device.Ndef
         {
             var (idx, size) = GetStartSizeNdef(toExtract);
             // Finally check that the end terminator TLV is 0xFE
-            var isRealEnd = toExtract[idx + size] == 0xFE;
+            bool isRealEnd = toExtract[idx + size] == 0xFE;
             if (!isRealEnd)
             {
                 return new byte[0];

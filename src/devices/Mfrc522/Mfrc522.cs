@@ -916,7 +916,7 @@ namespace Iot.Device.Mfrc522
             status = SendAndReceiveData(MfrcCommand.Transceive, commandToSend, receivedBuffer);
             if (status != Status.Ok)
             {
-                Debug.WriteLine($"{status}");
+                _logger.LogDebug($"Status failed: {status}");
                 return -1;
             }
 

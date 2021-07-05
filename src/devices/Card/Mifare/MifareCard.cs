@@ -1159,8 +1159,7 @@ namespace Iot.Device.Card.Mifare
                 case MifareCardCapacity.Mifare300:
                 case MifareCardCapacity.Unknown */
                 default:
-                    message = new NdefMessage();
-                    return false;
+                    throw new NotSupportedException();
             }
 
             if (KeyB is not object or { Length: not 6 })

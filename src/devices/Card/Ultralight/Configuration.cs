@@ -69,10 +69,10 @@ namespace Iot.Device.Card.Ultralight
             data[2] = Mirror.Page;
             data[3] = Authentication.AuthenticationPageRequirement;
             data[4] = (byte)(Authentication.IsReadWriteAuthenticationRequired ? 0b1000_0000 : 0);
-            data[4] |= (byte)(Authentication.IsWrittenLocked ? 0b0100_0000 : 0);
+            data[4] |= (byte)(Authentication.IsWritingLocked ? 0b0100_0000 : 0);
             data[4] |= (byte)(NfcCounter.IsEnabled ? 0b0001_0000 : 0);
             data[4] |= (byte)(NfcCounter.IsPasswordProtected ? 0b0000_1000 : 0);
-            data[4] |= Authentication.MaximumNumberOfPossibleTry;
+            data[4] |= Authentication.MaximumNumberOfPossibleTries;
             return data;
         }
     }

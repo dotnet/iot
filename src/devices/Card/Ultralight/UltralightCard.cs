@@ -824,12 +824,12 @@ namespace Iot.Device.Card.Ultralight
             configuration.Mirror.Page = Data[2];
             configuration.Authentication.AuthenticationPageRequirement = Data[3];
             configuration.Authentication.IsReadWriteAuthenticationRequired = ((Data[4] >> 7) & 1) == 1;
-            configuration.Authentication.IsWrittenLocked = ((Data[4] >> 6) & 1) == 1;
+            configuration.Authentication.IsWritingLocked = ((Data[4] >> 6) & 1) == 1;
             configuration.IsSleepEnabled = ((Data[0] >> 3) & 1) == 1;
             configuration.FieldDetectPin = (FieldDetectPin)(Data[0] & 0b0000_0011);
             configuration.NfcCounter.IsEnabled = ((Data[4] >> 4) & 1) == 1;
             configuration.NfcCounter.IsPasswordProtected = ((Data[4] >> 3) & 1) == 1;
-            configuration.Authentication.MaximumNumberOfPossibleTry = (byte)(Data[4] & 0b0000_0111);
+            configuration.Authentication.MaximumNumberOfPossibleTries = (byte)(Data[4] & 0b0000_0111);
             return true;
         }
 
