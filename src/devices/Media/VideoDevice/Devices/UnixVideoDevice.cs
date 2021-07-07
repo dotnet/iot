@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Iot.Device.Media
 {
@@ -90,6 +92,26 @@ namespace Iot.Device.Media
         {
             byte[] dataBuffer = ProcessCaptureData();
             return new MemoryStream(dataBuffer);
+        }
+
+        public override unsafe void CaptureContinuousBytes(Action<(byte[] ImageBuffer, int Length)> imageCallBack, CancellationToken token)
+        {
+            fixed (V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
+            {
+                // Start data stream
+                v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
+                while (!token.IsCancellationRequested)
+                {
+                    imageCallBack?.Invoke(GetFrameDataPooled(buffers));
+                }
+
+                // Close data stream
+                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
+
+                UnmappingFrameBuffers(buffers);
+
+            }
         }
 
         public override void StopCaptureContinuous()
@@ -272,6 +294,28 @@ namespace Iot.Device.Media
             V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
 
             return dataBuffer;
+        }
+
+        private unsafe (byte[] ImageBuffer, int Length) GetFrameDataPooled(V4l2FrameBuffer* buffers)
+        {
+            // Get one frame from the buffer
+            v4l2_buffer frame = new v4l2_buffer
+            {
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                memory = v4l2_memory.V4L2_MEMORY_MMAP,
+            };
+            V4l2Struct(V4l2Request.VIDIOC_DQBUF, ref frame);
+
+            // Get data from pointer
+            IntPtr intptr = buffers[frame.index].Start;
+            var length = (int)buffers[frame.index].Length;
+            byte[] dataBuffer = ArrayPool<byte>.Shared.Rent(length);
+            Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
+
+            // Requeue the buffer
+            V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
+
+            return (dataBuffer, length);
         }
 
         private unsafe V4l2FrameBuffer[] ApplyFrameBuffers()

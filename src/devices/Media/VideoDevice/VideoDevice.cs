@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace Iot.Device.Media
 {
@@ -51,6 +52,11 @@ namespace Iot.Device.Media
         /// </summary>
         /// <returns></returns>
         public abstract Stream CaptureContinuous();
+
+        /// <summary>
+        /// The continuous capture stream
+        /// </summary>
+        public abstract void CaptureContinuousBytes(Action<(byte[] ImageBuffer, int Length)> imageCallback, CancellationToken token);
 
         /// <summary>
         /// Stop the continuous capture
