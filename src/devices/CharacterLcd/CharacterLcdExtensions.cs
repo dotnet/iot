@@ -10,7 +10,7 @@ namespace Iot.Device.CharacterLcd
     public static class CharacterLcdExtensions
     {
         /// <summary>
-        /// Creates a custom character for standard displays with 8-pixel-per-row characters. See <see cref="ICharacterLcd.CreateCustomCharacter"/> for details.
+        /// Creates a custom character for standard displays with 8-pixel-per-row characters. See <see cref="ICharacterLcd.CreateCustomCharacter(int,System.ReadOnlySpan{byte})"/> for details.
         /// </summary>
         /// <param name="self">Instance of ICharacterLcd. This method can be called as extension method on this instance</param>
         /// <param name="location">Index of the character to create in the hardware character table</param>
