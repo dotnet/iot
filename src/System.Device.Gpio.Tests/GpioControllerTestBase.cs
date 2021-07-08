@@ -198,7 +198,7 @@ namespace System.Device.Gpio.Tests
             }
 
             // Close controller, to make sure we're not caching
-            using (GpioController controller = new GpioController(GetTestNumberingScheme(), driver))
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin);
                 Thread.Sleep(100);
