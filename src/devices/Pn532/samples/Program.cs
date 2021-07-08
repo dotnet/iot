@@ -489,7 +489,7 @@ void ProcessUltralight(Pn532 pn532)
         Console.WriteLine($"    {configuration.Mirror.MirrorType}, page: {configuration.Mirror.Page}, position: {configuration.Mirror.Position}");
         Console.WriteLine("  Authentication:");
         Console.WriteLine($"    Page req auth: {configuration.Authentication.AuthenticationPageRequirement}, Is auth req for read and write: {configuration.Authentication.IsReadWriteAuthenticationRequired}");
-        Console.WriteLine($"    Is write lock: {configuration.Authentication.IsWrittenLocked}, Max num tries: {configuration.Authentication.MaximumNumberOfPossibleTry}");
+        Console.WriteLine($"    Is write lock: {configuration.Authentication.IsWritingLocked}, Max num tries: {configuration.Authentication.MaximumNumberOfPossibleTries}");
         Console.WriteLine("  NFC Counter:");
         Console.WriteLine($"    Enabled: {configuration.NfcCounter.IsEnabled}, Password protected: {configuration.NfcCounter.IsPasswordProtected}");
         Console.WriteLine($"  Is strong modulation: {configuration.IsStrongModulation}");
