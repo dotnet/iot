@@ -221,7 +221,7 @@ namespace System.Device.Gpio.Drivers
             register |= (mode == PinMode.Output ? 1u : 0u) << shift;
             *registerPointer = register;
 
-            if (_pinModes[pinNumber] is object)
+            if (_pinModes[pinNumber] != null)
             {
                 _pinModes[pinNumber]!.CurrentPinMode = mode;
             }

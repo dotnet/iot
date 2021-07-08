@@ -23,8 +23,10 @@ namespace System.Device.Gpio.Tests
             _testOutputHelper = testOutputHelper;
         }
 
-        [Fact]
-        public void PinValueStaysSameAfterDispose()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void PinValueStaysSameAfterDispose(bool closeAsHigh)
         {
             var driver = GetTestDriver();
             if (driver is SysFsDriver)
@@ -37,15 +39,15 @@ namespace System.Device.Gpio.Tests
             {
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.OpenPin(InputPin, PinMode.Input);
-                controller.Write(OutputPin, PinValue.High);
+                controller.Write(OutputPin, closeAsHigh);
                 Thread.SpinWait(100);
-                Assert.Equal(PinValue.High, controller.Read(InputPin));
+                Assert.Equal(closeAsHigh, controller.Read(InputPin));
             }
 
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(InputPin, PinMode.Input);
-                Assert.Equal(PinValue.High, controller.Read(InputPin));
+                Assert.Equal(closeAsHigh, controller.Read(InputPin));
             }
         }
 
@@ -173,9 +175,11 @@ namespace System.Device.Gpio.Tests
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(PinMode.Output)]
+        [InlineData(PinMode.Input)]
         [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown, and it seems this cannot be changed
-        public void OpenPinDefaultsModeToLastMode()
+        public void OpenPinDefaultsModeToLastMode(PinMode modeToTest)
         {
             var driver = GetTestDriver();
             if (driver is SysFsDriver)
@@ -188,12 +192,17 @@ namespace System.Device.Gpio.Tests
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), driver))
             {
                 controller.OpenPin(OutputPin);
-                controller.SetPinMode(OutputPin, PinMode.Output);
-                Assert.Equal(PinMode.Output, controller.GetPinMode(OutputPin));
+                controller.SetPinMode(OutputPin, modeToTest);
+                Assert.Equal(modeToTest, controller.GetPinMode(OutputPin));
                 controller.ClosePin(OutputPin);
+            }
+
+            // Close controller, to make sure we're not caching
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), driver))
+            {
                 controller.OpenPin(OutputPin);
                 Thread.Sleep(100);
-                Assert.Equal(PinMode.Output, controller.GetPinMode(OutputPin));
+                Assert.Equal(modeToTest, controller.GetPinMode(OutputPin));
             }
         }
 
