@@ -47,6 +47,27 @@ namespace System.Device.I2c
         public abstract void Read(Span<byte> buffer);
 
         /// <summary>
+        /// Attempts to read data from the I2C device. If the read fails for any reason, returns false rather than throwing an exception.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer to read the data from the I2C device.
+        /// The length of the buffer determines how much data to read from the I2C device.</param>
+        /// <returns>true: read succeeded, false if the read failed for any reason.</returns>
+        public virtual bool ReadWithResult(Span<byte> buffer)
+        {
+            // Default trivial implementation only, derived I2cDevice should ideally override this
+            try
+            {
+                Read(buffer);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Writes a byte to the I2C device.
         /// </summary>
         /// <param name="value">The byte to be written to the I2C device.</param>
@@ -60,6 +81,28 @@ namespace System.Device.I2c
         /// The data should not include the I2C device address.
         /// </param>
         public abstract void Write(ReadOnlySpan<byte> buffer);
+
+        /// <summary>
+        /// Attempts to write data to the I2C device. If the write fails for any reason, returns false rather than throwing an exception.
+        /// </summary>
+        /// <param name="buffer">
+        /// The buffer contains the data to be written to the I2C device.
+        /// The data should not include the I2C device address.
+        /// </param>
+        /// <returns>true: write succeeded, false if the write failed for any reason.</returns>
+        public virtual bool WriteWithResult(ReadOnlySpan<byte> buffer)
+        {
+            // Default trivial implementation only, derived I2cDevice should ideally override this
+            try
+            {
+                Write(buffer);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
 
         /// <summary>
         /// Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected,

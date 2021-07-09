@@ -44,6 +44,48 @@ namespace System.Device.I2c
             device.DisposeDevice();
         }
 
+        internal bool TryRead(int deviceAddress, Span<byte> buffer)
+        {
+            if (!_devices.TryGetValue(deviceAddress, out Windows10I2cBusDevice? device))
+            {
+                // Create ephemeral device and dispose when done
+                device = new Windows10I2cBusDevice(this, new I2cConnectionSettings(BusId, deviceAddress));
+                try
+                {
+                    return device.ReadWithResult(buffer);
+                }
+                finally
+                {
+                    device.Dispose();
+                }
+            }
+            else
+            {
+                return device.ReadWithResult(buffer);
+            }
+        }
+
+        internal bool TryWrite(int deviceAddress, ReadOnlySpan<byte> buffer)
+        {
+            if (!_devices.TryGetValue(deviceAddress, out Windows10I2cBusDevice? device))
+            {
+                // Create ephemeral device and dispose when done
+                device = new Windows10I2cBusDevice(this, new I2cConnectionSettings(BusId, deviceAddress));
+                try
+                {
+                    return device.WriteWithResult(buffer);
+                }
+                finally
+                {
+                    device.Dispose();
+                }
+            }
+            else
+            {
+                return device.WriteWithResult(buffer);
+            }
+        }
+
         protected override void Dispose(bool disposing)
         {
             if (_devices != null)

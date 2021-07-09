@@ -30,6 +30,11 @@ namespace System.Device.I2c
             _bus.Read(_deviceAddress, buffer);
         }
 
+        public override bool ReadWithResult(Span<byte> buffer)
+        {
+            return _bus.ReadWithResult(_deviceAddress, buffer);
+        }
+
         public override unsafe void WriteByte(byte value)
         {
             Span<byte> toWrite = stackalloc byte[1]
@@ -42,6 +47,11 @@ namespace System.Device.I2c
         public override unsafe void Write(ReadOnlySpan<byte> buffer)
         {
             _bus.Write(_deviceAddress, buffer);
+        }
+
+        public override bool WriteWithResult(ReadOnlySpan<byte> buffer)
+        {
+            return _bus.WriteWithResult(_deviceAddress, buffer);
         }
 
         public override unsafe void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
