@@ -465,7 +465,7 @@ void ProcessUltralight(Pn532 pn532)
             Console.Write($"  Block: {ultralight.BlockNumber:X2} - ");
             for (int i = 0; i < 4; i++)
             {
-                Console.Write($"{ultralight.Data![i]:X2} ");
+                Console.Write($"{ultralight.Data[i]:X2} ");
             }
 
             var isReadOnly = ultralight.IsPageReadOnly(ultralight.BlockNumber);
@@ -536,7 +536,7 @@ void ProcessUltralight(Pn532 pn532)
             }
             else
             {
-                Console.WriteLine("Formated properly");
+                Console.WriteLine("Card is not NDEF formated.");
             }
         }
     }

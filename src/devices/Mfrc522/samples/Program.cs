@@ -335,7 +335,7 @@ void ProcessUltralight()
             }
             else
             {
-                Console.WriteLine("Formated properly");
+                Console.WriteLine("Card is not NDEF formated.");
             }
         }
     }

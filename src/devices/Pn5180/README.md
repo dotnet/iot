@@ -4,9 +4,9 @@ PN5180 is a RFID and NFC reader. It does supports various standards: ISO/IEC 144
 
 ## Documentation
 
-Official documentation can be fond here: <https://www.nxp.com/docs/en/data-sheet/PN5180A0XX_C3_C4.pdf>
+Official documentation can be fond [here](https://www.nxp.com/docs/en/data-sheet/PN5180A0XX_C3_C4.pdf)
 
-Application note on how to operate PN5180 without a library: https://www.nxp.com/docs/en/application-note/AN12650.pdf
+Application note on how to operate PN5180 without a [library](https://www.nxp.com/docs/en/application-note/AN12650.pdf)
 
 ## Board
 

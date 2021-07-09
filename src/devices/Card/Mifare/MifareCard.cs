@@ -91,7 +91,7 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// The Data which has been read or to write for the specific block
         /// </summary>
-        public byte[]? Data { get; set; }
+        public byte[] Data { get; set; } = new byte[0];
 
         /// <summary>
         /// Constructor for Mifarecard
