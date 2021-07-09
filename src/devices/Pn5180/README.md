@@ -4,9 +4,9 @@ PN5180 is a RFID and NFC reader. It does supports various standards: ISO/IEC 144
 
 ## Documentation
 
-Official documentation can be fond here: https://www.nxp.com/docs/en/data-sheet/PN5180A0XX-C3.pdf
+Official documentation can be fond [here](https://www.nxp.com/docs/en/data-sheet/PN5180A0XX_C3_C4.pdf)
 
-Application note on how to operate PN5180 without a library: https://www.nxp.com/docs/en/application-note/AN12650.pdf
+Application note on how to operate PN5180 without a [library](https://www.nxp.com/docs/en/application-note/AN12650.pdf)
 
 ## Board
 
@@ -14,7 +14,7 @@ You will find different implementation of this board. All boards should have ful
 
 ![PN5180](./samples/pn8150_ft4222.png)
 
-## USage
+## Usage
 
 You will find a full example in the [samples directory](./samples/Pn5180sample.cs). This example covers the usage of most of the public functions and properties. This example shows as well how to use the [FT4222](../FT4222/README.md) as a SPI and GPIO controller. Note that the development for the PN5180 has been done fully on a Windows 10 64 bit machine using this FT42222 to add the IoT capabilities.
 

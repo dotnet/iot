@@ -1,6 +1,6 @@
 # Mifare card - RFID Card
 
-This class supports Mifare cards. they are RFID cards responding to ISO 14443 type A. You need a specific card reader like PN532 or MFRC522 to read, write those kind of cards.
+This class supports Mifare cards. They are RFID cards responding to ISO 14443 type A. You need a specific card reader like PN532, PN5180 to read, write those kind of cards.
 
 ## Creating a card and reading it
 

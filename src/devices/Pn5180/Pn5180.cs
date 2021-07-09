@@ -410,7 +410,7 @@ namespace Iot.Device.Pn5180
         {
             // Check if we have a Mifare Card authentication request
             // Only valid for Type A card so with a target number equal to 0
-            if ((targetNumber == 0) && ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB)))
+            if (((targetNumber == 0) && ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB))) && (dataFromCard.Length == 0))
             {
                 var ret = MifareAuthenticate(dataToSend.Slice(2, 6).ToArray(), (MifareCardCommand)dataToSend[0], dataToSend[1], dataToSend.Slice(8).ToArray());
                 return ret ? 0 : -1;
@@ -1058,7 +1058,7 @@ namespace Iot.Device.Pn5180
                             null);
                         return true;
                     }
-                    else if (((atqa[0] & 0b1100_0000) == 0b01000_0000) && (i == 1))
+                    else if (((atqa[0] & 0b1100_0000) == 0b0100_0000) && (i == 1))
                     {
                         // if bit 7 is 1, then it's a 7 byte
                         uidSak.Slice(2, 4).CopyTo(uid.Slice(numberOfUid));
