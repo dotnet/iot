@@ -55,7 +55,7 @@ namespace System.Device.Gpio.Tests
             {
                 using (var device = bus.CreateDevice(Bme280.DefaultI2cAddress))
                 {
-                    Assert.True(device.TryWrite(new byte[0])); // Sends address on bus with write bit set, but no data bytes.
+                    Assert.True(device.WriteWithResult(new byte[0])); // Sends address on bus with write bit set, but no data bytes.
                 }
             }
         }

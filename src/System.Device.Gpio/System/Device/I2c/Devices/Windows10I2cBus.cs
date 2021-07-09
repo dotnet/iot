@@ -52,7 +52,7 @@ namespace System.Device.I2c
                 device = new Windows10I2cBusDevice(this, new I2cConnectionSettings(BusId, deviceAddress));
                 try
                 {
-                    return device.TryRead(buffer);
+                    return device.ReadWithResult(buffer);
                 }
                 finally
                 {
@@ -61,7 +61,7 @@ namespace System.Device.I2c
             }
             else
             {
-                return device.TryRead(buffer);
+                return device.ReadWithResult(buffer);
             }
         }
 
@@ -73,7 +73,7 @@ namespace System.Device.I2c
                 device = new Windows10I2cBusDevice(this, new I2cConnectionSettings(BusId, deviceAddress));
                 try
                 {
-                    return device.TryWrite(buffer);
+                    return device.WriteWithResult(buffer);
                 }
                 finally
                 {
@@ -82,7 +82,7 @@ namespace System.Device.I2c
             }
             else
             {
-                return device.TryWrite(buffer);
+                return device.WriteWithResult(buffer);
             }
         }
 

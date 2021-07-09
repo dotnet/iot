@@ -84,7 +84,7 @@ namespace System.Device.I2c
         /// The buffer to read the data from the I2C device.
         /// The length of the buffer determines how much data to read from the I2C device.</param>
         /// <returns>true: read succeeded, false if the read failed for any reason.</returns>
-        public override bool TryRead(Span<byte> buffer)
+        public override bool ReadWithResult(Span<byte> buffer)
         {
             if (buffer.Length == 0)
             {
@@ -126,7 +126,7 @@ namespace System.Device.I2c
         /// The data should not include the I2C device address.
         /// </param>
         /// <returns>true: write succeeded, false if the write failed for any reason.</returns>
-        public override bool TryWrite(ReadOnlySpan<byte> buffer)
+        public override bool WriteWithResult(ReadOnlySpan<byte> buffer)
         {
             WinI2c.I2cTransferResult result = _winI2cDevice.WritePartial(buffer.ToArray());
             return result.Status == WinI2c.I2cTransferStatus.FullTransfer;

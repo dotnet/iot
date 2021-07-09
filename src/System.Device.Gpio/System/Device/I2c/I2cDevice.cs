@@ -53,7 +53,7 @@ namespace System.Device.I2c
         /// The buffer to read the data from the I2C device.
         /// The length of the buffer determines how much data to read from the I2C device.</param>
         /// <returns>true: read succeeded, false if the read failed for any reason.</returns>
-        public virtual bool TryRead(Span<byte> buffer)
+        public virtual bool ReadWithResult(Span<byte> buffer)
         {
             // Default trivial implementation only, derived I2cDevice should ideally override this
             try
@@ -90,7 +90,7 @@ namespace System.Device.I2c
         /// The data should not include the I2C device address.
         /// </param>
         /// <returns>true: write succeeded, false if the write failed for any reason.</returns>
-        public virtual bool TryWrite(ReadOnlySpan<byte> buffer)
+        public virtual bool WriteWithResult(ReadOnlySpan<byte> buffer)
         {
             // Default trivial implementation only, derived I2cDevice should ideally override this
             try

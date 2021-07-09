@@ -90,7 +90,7 @@ namespace System.Device.I2c
             Read(deviceAddress, buffer, true);
         }
 
-        internal bool TryRead(int deviceAddress, Span<byte> buffer)
+        internal bool ReadWithResult(int deviceAddress, Span<byte> buffer)
         {
             return Read(deviceAddress, buffer, false);
         }
@@ -123,7 +123,7 @@ namespace System.Device.I2c
             Write(deviceAddress, buffer, true);
         }
 
-        internal bool TryWrite(int deviceAddress, ReadOnlySpan<byte> buffer)
+        internal bool WriteWithResult(int deviceAddress, ReadOnlySpan<byte> buffer)
         {
             return Write(deviceAddress, buffer, false);
         }
