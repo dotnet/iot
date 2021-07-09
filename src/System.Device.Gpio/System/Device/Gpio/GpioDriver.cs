@@ -26,6 +26,7 @@ namespace System.Device.Gpio
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.
+        /// The driver attempts to open the pin without changing its mode or value.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal abstract void OpenPin(int pinNumber);
