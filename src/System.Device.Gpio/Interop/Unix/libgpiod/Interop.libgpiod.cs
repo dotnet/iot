@@ -74,9 +74,10 @@ internal partial class Interop
         /// </summary>
         /// <param name="line">GPIO line handle</param>
         /// <param name="consumer">Name of the consumer.</param>
+        /// <param name="default_val">Initial value of the line</param>
         /// <returns>0 if the line was properly reserved, -1 on failure.</returns>
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        internal static extern int gpiod_line_request_output(SafeLineHandle line, string consumer);
+        internal static extern int gpiod_line_request_output(SafeLineHandle line, string consumer, int default_val);
 
         /// <summary>
         /// Set the value of a single GPIO line.
@@ -107,8 +108,27 @@ internal partial class Interop
         /// Release a previously reserved line.
         /// </summary>
         /// <param name="lineHandle">GPIO line handle</param>
+        /// <remarks>
+        /// This does NOT invalidate the line handle. This only releases the lock, so that a gpiod_line_request_input/gpiod_line_request_output can be called again.
+        /// </remarks>
         [DllImport(LibgpiodLibrary)]
         internal static extern void gpiod_line_release(IntPtr lineHandle);
+
+        /// <summary>
+        /// Get the direction of the pin (input or output)
+        /// </summary>
+        /// <param name="lineHandle">GPIO line handle</param>
+        /// <returns>1 for input, 2 for output</returns>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern int gpiod_line_direction(SafeLineHandle lineHandle);
+
+        /// <summary>
+        /// Read the GPIO line bias setting.
+        /// </summary>
+        /// <param name="lineHandle">GPIO line handle</param>
+        /// <returns>GPIOD_LINE_BIAS_PULL_UP (3), GPIOD_LINE_BIAS_PULL_DOWN (4), GPIOD_LINE_BIAS_DISABLE (2) or GPIOD_LINE_BIAS_UNKNOWN (1). </returns>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern int gpiod_line_bias(SafeLineHandle lineHandle);
 
         /// <summary>
         /// Request all event type notifications on a single line.

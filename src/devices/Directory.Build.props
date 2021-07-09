@@ -2,7 +2,10 @@
   <Import Project="../../eng/Compilers.props" />
   <Import Project="../../eng/Versions.props" />
   <Import Project="../../eng/Analyzers.props" />
+  <Import Project="../../eng/Versions.external.props" />
   <PropertyGroup>
+    <!-- Most projects should use this value to build for all possible target frameworks -->
+    <DefaultBindingTfms>net5.0;netcoreapp2.1;netstandard2.0;</DefaultBindingTfms>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
@@ -14,8 +17,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="$(SixLaborsImageSharpPackageVersion)" />
     <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
+    <ProjectReference Include="$(MainLibraryPath)/System.Device.Gpio.csproj" />
   </ItemGroup>
+
 </Project>

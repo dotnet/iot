@@ -153,14 +153,14 @@ namespace System.Device.Gpio.Drivers
         {
             lock (_pinNumberLock)
             {
-            if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
-            {
+                if (!_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
+                {
                     throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError,
                         pin: pinNumber);
-            }
+                }
 
-            return pinHandle.PinMode;
-        }
+                return pinHandle.PinMode;
+            }
         }
 
         /// <inheritdoc/>
@@ -185,6 +185,30 @@ namespace System.Device.Gpio.Drivers
                 if (pinHandle == null)
                 {
                     throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
+                }
+
+                int mode = Interop.libgpiod.gpiod_line_direction(pinHandle);
+                if (mode == 1)
+                {
+                    pinHandle.PinMode = PinMode.Input;
+                }
+                else if (mode == 2)
+                {
+                    pinHandle.PinMode = PinMode.Output;
+                }
+
+                if (s_isLibgpiodVersion1_5orHigher && pinHandle.PinMode == PinMode.Input)
+                {
+                    int bias = Interop.libgpiod.gpiod_line_bias(pinHandle);
+                    if (bias == (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN)
+                    {
+                        pinHandle.PinMode = PinMode.InputPullDown;
+                    }
+
+                    if (bias == (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP)
+                    {
+                        pinHandle.PinMode = PinMode.InputPullUp;
+                    }
                 }
 
                 _pinNumberToSafeLineHandle.TryAdd(pinNumber, pinHandle);
@@ -230,28 +254,65 @@ namespace System.Device.Gpio.Drivers
         /// <inheritdoc/>
         protected internal override void SetPinMode(int pinNumber, PinMode mode)
         {
-            int requestResult = -1;
             if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
             {
-                requestResult = mode switch
+                // This call does not release the handle. It only releases the lock on the handle. Without this, changing the direction of a line is not possible.
+                // Line handles cannot be freed and are cached until the chip is closed.
+                pinHandle.ReleaseLock();
+                int requestResult = mode switch
                 {
                     PinMode.Input => Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName),
                     PinMode.InputPullDown => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
                             (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN),
                     PinMode.InputPullUp => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
                             (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP),
-                    PinMode.Output => Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName),
+                    PinMode.Output => Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName, 0),
                     _ => -1,
                 };
 
+                if (requestResult == -1)
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                        pinNumber);
+                }
+
                 pinHandle.PinMode = mode;
+                return;
             }
 
-            if (requestResult == -1)
+            throw new InvalidOperationException($"Pin {pinNumber} is not open");
+        }
+
+        /// <inheritdoc />
+        protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
+        {
+            if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
             {
-                throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
-                    pinNumber);
+                // This call does not release the handle. It only releases the lock on the handle. Without this, changing the direction of a line is not possible.
+                // Line handles cannot be freed and are cached until the chip is closed.
+                pinHandle.ReleaseLock();
+                int requestResult = mode switch
+                {
+                    PinMode.Input => Interop.libgpiod.gpiod_line_request_input(pinHandle, s_consumerName),
+                    PinMode.InputPullDown => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                        (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN),
+                    PinMode.InputPullUp => Interop.libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                        (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP),
+                    PinMode.Output => Interop.libgpiod.gpiod_line_request_output(pinHandle, s_consumerName, initialValue == PinValue.High ? 1 : 0),
+                    _ => -1,
+                };
+
+                if (requestResult == -1)
+                {
+                    throw ExceptionHelper.GetIOException(ExceptionResource.SetPinModeError, Marshal.GetLastWin32Error(),
+                        pinNumber);
+                }
+
+                pinHandle.PinMode = mode;
+                return;
             }
+
+            throw new InvalidOperationException($"Pin {pinNumber} is not open");
         }
 
         /// <inheritdoc/>

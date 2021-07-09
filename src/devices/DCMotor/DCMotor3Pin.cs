@@ -57,7 +57,7 @@ namespace Iot.Device.DCMotor
             }
             set
             {
-                double val = Math.Clamp(value, -1.0, 1.0);
+                double val = MathExtensions.Clamp(value, -1.0, 1.0);
 
                 if (_speed == val)
                 {

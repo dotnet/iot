@@ -343,7 +343,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_SPIMaster_MultiReadWrite(SafeFtHandle ftHandle, in byte readBuffer, in byte writeBuffer, byte singleWriteBytes, ushort multiWriteBytes, ushort multiReadBytes, out uint sizeOfRead);
 
         /// <summary>
-        /// Initialize the chipset as a SPI slave
+        /// Initialize the chipset as a SPI replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
@@ -351,16 +351,16 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_SPISlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
-        /// Initialize the chipset as a SPI slave
+        /// Initialize the chipset as a SPI replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="protocolOpt">Initialize with, without protocol or never send the acknowledge</param>
         /// <returns>The status</returns>
         [DllImport("libft4222", CallingConvention = CallingConvention.Cdecl)]
-        public static extern FtStatus FT4222_SPISlave_InitEx(SafeFtHandle ftHandle, SpiSlaveProtocol protocolOpt);
+        public static extern FtStatus FT4222_SPISlave_InitEx(SafeFtHandle ftHandle, SpiReplicaProtocol protocolOpt);
 
         /// <summary>
-        /// Set SPI as slave clock modes
+        /// Set SPI as replica clock modes
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="cpol">The clock polarity</param>
@@ -379,7 +379,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_SPISlave_GetRxStatus(SafeFtHandle ftHandle, out ushort pRxSize);
 
         /// <summary>
-        /// Operate a SPI read as slave
+        /// Operate a SPI read as replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="buffer">The output read buffer</param>
@@ -390,7 +390,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_SPISlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeOfRead);
 
         /// <summary>
-        /// Operate a SPI write as a slave
+        /// Operate a SPI write as a replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="buffer">The buffer to write</param>
@@ -401,7 +401,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_SPISlave_Write(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
-        /// Get or set the SPI as slave Rx quick response
+        /// Get or set the SPI as replica Rx quick response
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="enable">True to enable it, false to disable it</param>
@@ -518,7 +518,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CMaster_GetStatus(SafeFtHandle ftHandle, out byte controllerStatus);
 
         /// <summary>
-        /// Initialize the chip as an I2C slave
+        /// Initialize the chip as an I2C replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
@@ -526,7 +526,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Init(SafeFtHandle ftHandle);
 
         /// <summary>
-        /// Reset the I2C as a slave
+        /// Reset the I2C as a replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <returns>The status</returns>
@@ -534,7 +534,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Reset(SafeFtHandle ftHandle);
 
         /// <summary>
-        /// Get the I2C address as a slave
+        /// Get the I2C address as a replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="addr">The I2C device address</param>
@@ -543,7 +543,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_GetAddress(SafeFtHandle ftHandle, out byte addr);
 
         /// <summary>
-        /// Get the I2C address as a slave
+        /// Get the I2C address as a replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="addr">The I2C device address</param>
@@ -552,7 +552,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_SetAddress(SafeFtHandle ftHandle, byte addr);
 
         /// <summary>
-        /// Get the I2C as a slave RX status
+        /// Get the I2C as a replica RX status
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="pRxSize">the RX size</param>
@@ -561,7 +561,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_GetRxStatus(SafeFtHandle ftHandle, out ushort pRxSize);
 
         /// <summary>
-        /// Operate an I2C read as a slave
+        /// Operate an I2C read as a replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="buffer">The output read buffer</param>
@@ -572,7 +572,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Read(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
-        /// Write on the I2C device as slave
+        /// Write on the I2C device as replica
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="buffer">The buffer to write</param>
@@ -583,7 +583,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_Write(SafeFtHandle ftHandle, in byte buffer, ushort bufferSize, out ushort sizeTransferred);
 
         /// <summary>
-        /// Set I2C as a slave clock stretch
+        /// Set I2C as a replica clock stretch
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="enable">True to enable, false to disable</param>
@@ -592,7 +592,7 @@ namespace Iot.Device.Ft4222
         public static extern FtStatus FT4222_I2CSlave_SetClockStretch(SafeFtHandle ftHandle, bool enable);
 
         /// <summary>
-        /// Set I2C as a slave response word
+        /// Set I2C as a replica response word
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="responseWord">The response word</param>

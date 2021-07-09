@@ -8,8 +8,7 @@ Returns a set of sensor measurements for the current hardware. The values includ
 
 ## Binding Notes
 
-This binding works on Windows only. It requires that OpenHardwareMonitor (https://openhardwaremonitor.org/) is running in the background. While that tool requires elevated permissions to work, 
-the binding (and the application using it) does not. 
+This binding works on Windows only. It requires that OpenHardwareMonitor (https://openhardwaremonitor.org/) is running in the background. While that tool requires elevated permissions to work, the binding (and the application using it) does not. Check out https://github.com/hexagon-oss/openhardwaremonitor for an improved fork with some additional features.
 
 The binding supports some additional, "virtual" sensor measuments that are derived from other values. The following extra values are provided:
 

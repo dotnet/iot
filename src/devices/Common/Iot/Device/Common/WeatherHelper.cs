@@ -7,7 +7,8 @@ using UnitsNet;
 namespace Iot.Device.Common
 {
     /// <summary>
-    /// Helpers for weather
+    /// This class contains methods to calculate meteorological values from different
+    /// sensor measurements. Multiple sensor inputs are used to generate additional information.
     /// </summary>
     public static class WeatherHelper
     {
@@ -17,8 +18,6 @@ namespace Iot.Device.Common
         public static readonly Pressure MeanSeaLevel = Pressure.FromPascals(101325);
 
         #region TemperatureAndRelativeHumidity
-        // Formulas taken from https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
-        // US government website, therefore public domain.
 
         /// <summary>
         /// The heat index (or apparent temperature) is used to measure the amount of discomfort
@@ -28,6 +27,9 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH)</param>
         /// <returns>The heat index, also known as the apparent temperature</returns>
+        /// <remarks>
+        /// Formula from https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
+        /// </remarks>
         public static Temperature CalculateHeatIndex(Temperature airTemperature, RelativeHumidity relativeHumidity)
         {
             double tf = airTemperature.DegreesFahrenheit;
@@ -108,7 +110,8 @@ namespace Iot.Device.Common
             Pressure.FromHectopascals((relativeHumidity.Percent / 100.0 * CalculateSaturatedVaporPressureOverWater(airTemperature).Hectopascals));
 
         /// <summary>
-        /// Calculates the dew point.
+        /// Calculates the dew point. The dew point is the temperature at which, given the other values remain constant - dew or fog would start
+        /// building up.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH)</param>
@@ -127,7 +130,7 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Calculates the absolute humidity in g/m³
+        /// Calculates the absolute humidity in g/m³.
         /// </summary>
         /// <param name="airTemperature">The dry air temperature</param>
         /// <param name="relativeHumidity">The relative humidity (RH)</param>
@@ -172,7 +175,7 @@ namespace Iot.Device.Common
         // for different parameters
 
         /// <summary>
-        /// Calculates the altitude in meters from the given pressure, sea-level pressure and air temperature
+        /// Calculates the altitude in meters from the given pressure, sea-level pressure and air temperature.
         /// </summary>
         /// <param name="pressure">The pressure at the point for which altitude is being calculated</param>
         /// <param name="seaLevelPressure">The sea-level pressure</param>
@@ -255,7 +258,7 @@ namespace Iot.Device.Common
         /// <param name="measuredTemperature">Measured temperature at the observation point</param>
         /// <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
         /// to be used above ~750m). Do not use the height obtained by calling <see cref="CalculateAltitude(UnitsNet.Pressure)"/>
-        /// or any of its overloads, since what would use redundant data.</param>
+        /// or any of its overloads, since that would use redundant data.</param>
         /// <returns>The barometric pressure at the point of observation</returns>
         /// <remarks>
         /// From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen

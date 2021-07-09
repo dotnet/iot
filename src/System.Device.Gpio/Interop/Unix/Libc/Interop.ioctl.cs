@@ -29,7 +29,7 @@ internal enum I2cSettings : uint
     /// <summary>Get the adapter functionality mask.</summary>
     I2C_FUNCS = 0x0705,
 
-    /// <summary>Use this slave address, even if it is already in use by a driver.</summary>
+    /// <summary>Use this replica address, even if it is already in use by a driver.</summary>
     I2C_SLAVE_FORCE = 0x0706,
 
     /// <summary>Combined R/W transfer (one STOP only).</summary>
@@ -51,10 +51,10 @@ internal unsafe struct i2c_msg
 [Flags]
 internal enum I2cMessageFlags : ushort
 {
-    /// <summary>Write data to slave.</summary>
+    /// <summary>Write data to replica.</summary>
     I2C_M_WR = 0x0000,
 
-    /// <summary>Read data from slave.</summary>
+    /// <summary>Read data from replica.</summary>
     I2C_M_RD = 0x0001
 }
 

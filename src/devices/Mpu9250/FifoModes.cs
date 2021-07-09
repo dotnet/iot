@@ -7,7 +7,7 @@ namespace Iot.Device.Imu
 {
     /// <summary>
     /// You can select the sensors from which you want data
-    /// FIFO modes used to select the accelerometer, gyroscope axises, temperature and I2C slaves
+    /// FIFO modes used to select the accelerometer, gyroscope axises, temperature and I2C replicas
     /// You can combine any of those modes.
     /// </summary>
     [Flags]
@@ -19,19 +19,19 @@ namespace Iot.Device.Imu
         None = 0b0000_0000,
 
         /// <summary>
-        /// I2C Slave 0
+        /// I2C Replica 0
         /// </summary>
-        I2CSlave0 = 0b0000_0001,
+        I2CReplica0 = 0b0000_0001,
 
         /// <summary>
-        /// I2C Slave 1
+        /// I2C Replica 1
         /// </summary>
-        I2CSlave1 = 0b0000_0010,
+        I2CReplica1 = 0b0000_0010,
 
         /// <summary>
-        /// I2C Slave 2
+        /// I2C Replica 2
         /// </summary>
-        I2CSlave2 = 0b0000_0100,
+        I2CReplica2 = 0b0000_0100,
 
         /// <summary>
         /// Accelerometer

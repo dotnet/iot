@@ -953,7 +953,7 @@ namespace Iot.Device.Pn5180
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type A card has been detected</returns>
         public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
         [NotNullWhen(true)]
 #endif
         out Data106kbpsTypeA? card, int timeoutPollingMilliseconds)
@@ -1112,7 +1112,7 @@ namespace Iot.Device.Pn5180
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type B card has been detected</returns>
         public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
         [NotNullWhen(true)]
 #endif
         out Data106kbpsTypeB? card, int timeoutPollingMilliseconds)
@@ -1466,9 +1466,9 @@ namespace Iot.Device.Pn5180
 
         private void SpiWrite(ReadOnlySpan<byte> toSend)
         {
-            // Both master and slave devices must operate with the same timing.The master device
+            // Both primary and secondary devices must operate with the same timing.The primary device
             // always places data on the SDO line a half cycle before the clock edge SCK, in order for
-            // the slave device to latch the data.
+            // the secondary device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:
             // 1.Assert NSS to Low
@@ -1504,9 +1504,9 @@ namespace Iot.Device.Pn5180
 
         private void SpiRead(Span<byte> toRead)
         {
-            // Both master and slave devices must operate with the same timing.The master device
+            // Both primary and secondary devices must operate with the same timing.The primary device
             // always places data on the SDI line a half cycle before the clock edge SCK, in order for
-            // the slave device to latch the data.
+            // the secondary device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:
             // 1.Assert NSS to Low

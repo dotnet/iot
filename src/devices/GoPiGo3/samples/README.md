@@ -59,4 +59,4 @@ while (!Console.KeyAvailable)
 }
 ```
 
-Please keep in mind that default behavior when GoPiGo is disposed, the SpiDevice as well. You can override this default behavior by changing ```autoDispose``` to false.
+Please keep in mind that default behavior when GoPiGo is disposed, the SpiDevice as well. You can override this default behavior by changing ```shouldDispose``` to false.

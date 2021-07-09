@@ -30,7 +30,7 @@ namespace Iot.Device.OneWire
 
         /// <summary>
         /// Enumerates all devices currently detected on this bus. Platform can update device list
-        /// periodically. To manually trigger an update call <see cref="ScanForDeviceChangesAsync" />.
+        /// periodically. To manually trigger an update call <see cref="ScanForDeviceChanges" />.
         /// </summary>
         /// <param name="family">Family id used to filter enumerated devices.</param>
         /// <returns>A list of discovered devices.</returns>
@@ -42,6 +42,7 @@ namespace Iot.Device.OneWire
             }
         }
 
+#if !NETSTANDARD2_0
         /// <summary>
         /// Start a new scan for device changes on the bus.
         /// </summary>
@@ -49,6 +50,7 @@ namespace Iot.Device.OneWire
         /// <param name="numScans">Number of scans to do to find numDevices devices. Use -1 for platform default.</param>
         /// <returns>Task representing the async work.</returns>
         public Task ScanForDeviceChangesAsync(int numDevices = -1, int numScans = -1) => ScanForDeviceChangesInternalAsync(this, numDevices, numScans);
+#endif
 
         /// <summary>
         /// Start a new scan for device changes on the bus.

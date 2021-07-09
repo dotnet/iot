@@ -55,7 +55,7 @@ Once the calibration is done, you will be able to read the data with the bias co
 
 ## Using a different I2C interface
 
-This sensor is used for example in the [MPU9250](../Mpu9250/README.md). The MPU9250 is in this case a master I2C controlling the slave AK8963 I2C sensor. An abstract class is available to implement basic I2C operation:
+This sensor is used for example in the [MPU9250](../Mpu9250/README.md). The MPU9250 is in this case a master I2C controlling the secondary AK8963 I2C sensor. An abstract class is available to implement basic I2C operation:
 
 ```csharp
 public abstract class Ak8963I2cBase

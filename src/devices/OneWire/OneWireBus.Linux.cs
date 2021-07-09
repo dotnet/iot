@@ -36,10 +36,11 @@ namespace Iot.Device.OneWire
 
         internal static DeviceFamily GetDeviceFamilyInternal(string busId, string devId)
         {
-            int.TryParse(devId.AsSpan(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var devFamily);
+            int.TryParse(devId.Substring(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var devFamily);
             return (DeviceFamily)devFamily;
         }
 
+#if !NETSTANDARD2_0
         internal static async Task ScanForDeviceChangesInternalAsync(OneWireBus bus, int numDevices, int numScans)
         {
             if (numDevices > 0)
@@ -49,6 +50,7 @@ namespace Iot.Device.OneWire
 
             await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
         }
+#endif
 
         internal static void ScanForDeviceChangesInternal(OneWireBus bus, int numDevices, int numScans)
         {

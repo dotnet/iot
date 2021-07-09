@@ -114,87 +114,87 @@ namespace Iot.Device.Imu
         I2C_MST_CTRL = 0x24,
 
         /// <summary>
-        /// I2C Slave 0 Control Address
+        /// I2C Replica 0 Control Address
         /// </summary>
         I2C_SLV0_ADDR = 0x25,
 
         /// <summary>
-        /// I2C Slave 0 Control Register
+        /// I2C Replica 0 Control Register
         /// </summary>
         I2C_SLV0_REG = 0x26,
 
         /// <summary>
-        /// I2C Slave 0 Control
+        /// I2C Replica 0 Control
         /// </summary>
         I2C_SLV0_CTRL = 0x27,
 
         /// <summary>
-        /// I2C Slave 1 Control Address
+        /// I2C Replica 1 Control Address
         /// </summary>
         I2C_SLV1_ADDR = 0x28,
 
         /// <summary>
-        /// I2C Slave 1 Control Register
+        /// I2C Replica 1 Control Register
         /// </summary>
         I2C_SLV1_REG = 0x29,
 
         /// <summary>
-        /// I2C Slave 1 Control
+        /// I2C Replica 1 Control
         /// </summary>
         I2C_SLV1_CTRL = 0x2A,
 
         /// <summary>
-        /// I2C Slave 2 Control Address
+        /// I2C Replica 2 Control Address
         /// </summary>
         I2C_SLV2_ADDR = 0x2B,
 
         /// <summary>
-        /// I2C Slave 2 Control Register
+        /// I2C Replica 2 Control Register
         /// </summary>
         I2C_SLV2_REG = 0x2C,
 
         /// <summary>
-        /// I2C Slave 2 Control
+        /// I2C Replica 2 Control
         /// </summary>
         I2C_SLV2_CTRL = 0x2D,
 
         /// <summary>
-        /// I2C Slave 3 Control Address
+        /// I2C Replica 3 Control Address
         /// </summary>
         I2C_SLV3_ADDR = 0x2E,
 
         /// <summary>
-        /// I2C Slave 3 Control Register
+        /// I2C Replica 3 Control Register
         /// </summary>
         I2C_SLV3_REG = 0x2F,
 
         /// <summary>
-        /// I2C Slave 3 Control
+        /// I2C Replica 3 Control
         /// </summary>
         I2C_SLV3_CTRL = 0x30,
 
         /// <summary>
-        /// I2C Slave 4 Control Address
+        /// I2C Replica 4 Control Address
         /// </summary>
         I2C_SLV4_ADDR = 0x31,
 
         /// <summary>
-        /// I2C Slave 4 Control Register
+        /// I2C Replica 4 Control Register
         /// </summary>
         I2C_SLV4_REG = 0x32,
 
         /// <summary>
-        /// I2C Slave 4 Control Data to Write
+        /// I2C Replica 4 Control Data to Write
         /// </summary>
         I2C_SLV4_DO = 0x33,
 
         /// <summary>
-        /// I2C Slave 4 Control
+        /// I2C Replica 4 Control
         /// </summary>
         I2C_SLV4_CTRL = 0x34,
 
         /// <summary>
-        /// I2C Slave 4 Control Data to Read
+        /// I2C Replica 4 Control Data to Read
         /// </summary>
         I2C_SLV4_DI = 0x35,
 
@@ -409,22 +409,22 @@ namespace Iot.Device.Imu
         EXT_SENS_DATA_23 = 0x60,
 
         /// <summary>
-        /// I2C Slave 0 Control Data to Write
+        /// I2C Replica 0 Control Data to Write
         /// </summary>
         I2C_SLV0_DO = 0x63,
 
         /// <summary>
-        /// I2C Slave 1 Control Data to Write
+        /// I2C Replica 1 Control Data to Write
         /// </summary>
         I2C_SLV1_DO = 0x64,
 
         /// <summary>
-        /// I2C Slave 2 Control Data to Write
+        /// I2C Replica 2 Control Data to Write
         /// </summary>
         I2C_SLV2_DO = 0x65,
 
         /// <summary>
-        /// I2C Slave 3 Control Data to Write
+        /// I2C Replica 3 Control Data to Write
         /// </summary>
         I2C_SLV3_DO = 0x66,
 

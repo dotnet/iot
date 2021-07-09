@@ -327,6 +327,20 @@ namespace Iot.Device.Display
             _font.Add((char)location, character);
         }
 
+        /// <summary>
+        /// Add a specific character to the font. It will replace existing embedded font character if it does already exist.
+        /// </summary>
+        /// <remarks>
+        /// Normal font character is a 5 bytes array aligned vertically. If the array is 8 bytes long, it will assume the
+        /// font encoding is then on the lower 5 bits of each bytes.
+        /// </remarks>
+        /// <param name="location">Should be between 0 and <see cref="NumberOfCustomCharactersSupported"/>.</param>
+        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
+        public void CreateCustomCharacter(int location, byte[] characterMap)
+        {
+            CreateCustomCharacter(location, new ReadOnlySpan<byte>(characterMap));
+        }
+
         #endregion
 
         #region Primitive methods
@@ -397,6 +411,24 @@ namespace Iot.Device.Display
         /// </summary>
         /// <param name="text">Text to print</param>
         public void Write(ReadOnlySpan<char> text)
+        {
+            foreach (var c in text)
+            {
+                WriteChar(c);
+            }
+
+            if (_cursorVisible)
+            {
+                DrawCursor();
+            }
+        }
+
+        /// <summary>
+        /// Write a raw byte stream to the display.
+        /// Used if character translation already took place.
+        /// </summary>
+        /// <param name="text">Text to print</param>
+        public void Write(char[] text)
         {
             foreach (var c in text)
             {

@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using System.Threading;
 using System.Threading.Tasks;
 

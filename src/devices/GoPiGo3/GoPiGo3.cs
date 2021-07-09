@@ -392,7 +392,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="power">The power from - 100 to 100, or -128 for float</param>
         public void SetMotorPower(MotorPort port, int power)
         {
-            power = Math.Clamp(power, -128, 127);
+            power = MathExtensions.Clamp(power, -128, 127);
             byte bPower = (byte)(power & 0xFF);
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetMotorPower, (byte)port, bPower };
             var ret = SpiTransferArray(outArray);
@@ -594,7 +594,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="duty">The PWM duty cycle in percent from 0.0 to 100.0, 1 floating point precision</param>
         public void SetGrovePwmDuty(GrovePort port, double duty)
         {
-            duty = Math.Clamp(duty, (byte)0, (byte)100);
+            duty = MathExtensions.Clamp(duty, (byte)0, (byte)100);
 
             var duty_value = (UInt16)(duty * 10.0);
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetGrovePwmDuty, (byte)port, (byte)((duty_value >> 8) & 0xFF), (byte)(duty_value & 0xFF) };
@@ -608,7 +608,7 @@ namespace Iot.Device.GoPiGo3
         /// <param name="freq">The PWM frequency.Range is 3 through 48000Hz.Default is 24000(24kHz). Limit to 48000, which is the highest frequency supported for 0.1% resolution.</param>
         public void GetGrovePwmFrequency(GrovePort port, uint freq = 24000)
         {
-            freq = Math.Clamp(freq, 3, 48000);
+            freq = MathExtensions.Clamp(freq, 3, 48000);
             byte[] outArray = { SpiAddress, (byte)SpiMessageType.SetGrovePwmFrequency, (byte)port, (byte)((freq >> 8) & 0xFF), (byte)(freq & 0xFF) };
             SpiTransferArray(outArray);
         }
@@ -617,7 +617,7 @@ namespace Iot.Device.GoPiGo3
         /// Conduct an I2C transaction
         /// </summary>
         /// <param name="port">The grove port. GROVE_1 or GROVE_2</param>
-        /// <param name="addr">The I2C address of the slave to be addressed.</param>
+        /// <param name="addr">The I2C address of the secondary to be addressed.</param>
         /// <param name="arrayToSend">An array of bytes to send.</param>
         /// <param name="inBytes">The number of bytes to read.</param>
         /// <returns>Returns a byte array with what has been read from the I2C element</returns>
@@ -661,7 +661,7 @@ namespace Iot.Device.GoPiGo3
             // but make sure we wait a minimum of 1 ms
             if (towait > 0)
             {
-                timeout = Math.Clamp(timeout, 1, 32);
+                timeout = MathExtensions.Clamp(timeout, 1, 32);
                 Thread.Sleep((int)timeout);
             }
 
@@ -683,7 +683,7 @@ namespace Iot.Device.GoPiGo3
         /// Start an I2C transaction
         /// </summary>
         /// <param name="port">The Grove Port, one at the time Grove1 or Grove2</param>
-        /// <param name="addr">The I2C address of the slave to be addressed.</param>
+        /// <param name="addr">The I2C address of the secondary to be addressed.</param>
         /// <param name="arrayToSend">An array of bytes to send.</param>
         /// <param name="inBytes">The number of bytes to read.</param>
         public void GroveI2cStart(GrovePort port, byte addr, byte[] arrayToSend, byte inBytes = 0)
