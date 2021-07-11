@@ -110,7 +110,7 @@ namespace Iot.Device.Arduino
             {
                 double deltaTime = result.TimeStamp - _lastFrequencyUpdateClock;
                 double deltaTicks = result.NewTicks - _lastFrequencyUpdateTicks;
-                if (deltaTime > 0 && deltaTicks > 0) // Otherwise, this just wraps around or no time has passed
+                if (deltaTime > 0) // Otherwise, this just wraps around or no time has passed
                 {
                     _currentFrequency = Frequency.FromHertz(deltaTicks / (deltaTime / 1000));
                 }
@@ -124,13 +124,17 @@ namespace Iot.Device.Arduino
 
         private void DisableFrequencyReportingInternal(int pinNumber)
         {
+            // Never send a -1!
+            if (pinNumber < 0)
+            {
+                pinNumber = 0x7F;
+            }
+
             FirmataCommandSequence sequence = new();
             sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
             sequence.WriteByte(0);
             sequence.WriteByte((byte)pinNumber);
             sequence.WriteByte((byte)FrequencyMode.NoChange);
-            sequence.WriteByte(0);
-            sequence.WriteByte(0);
             sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             SendCommand(sequence);
         }
@@ -159,7 +163,7 @@ namespace Iot.Device.Arduino
         {
             if (reply.Length < 13 || reply[0] != (byte)FirmataSysexCommand.FREQUENCY_COMMAND)
             {
-                Logger.LogError("Frequency sensor extension: Incorrect answer received");
+                // Logger.LogError("Frequency sensor extension: Incorrect answer received");
                 return (0, 0, false);
             }
 
