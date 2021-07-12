@@ -22,6 +22,9 @@ namespace Iot.Device.Media
         private static readonly object s_initializationLock = new object();
 
         private int _deviceFileDescriptor = -1;
+        private bool _capturing;
+
+        public override event NewImageBufferReadyEvent? NewImageBufferReady;
 
         /// <summary>
         /// Path to video resources located on the platform.
@@ -32,6 +35,16 @@ namespace Iot.Device.Media
         /// The connection settings of the video device.
         /// </summary>
         public override VideoConnectionSettings Settings { get; }
+
+        /// <summary>
+        /// Returns true if the connection is already open
+        /// </summary>
+        public override bool IsOpen => _deviceFileDescriptor >= 0;
+
+        /// <summary>
+        /// Returns true if the device is already capturing.
+        /// </summary>
+        public override bool IsCapturing => _capturing;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnixVideoDevice"/> class that will use the specified settings to communicate with the video device.
@@ -94,8 +107,9 @@ namespace Iot.Device.Media
             return new MemoryStream(dataBuffer);
         }
 
-        public override unsafe void CaptureContinuousBytes(Action<(byte[] ImageBuffer, int Length)> imageCallBack, CancellationToken token)
+        public override unsafe void CaptureContinuousBytes(CancellationToken token)
         {
+            _capturing = true;
             fixed (V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
             {
                 // Start data stream
@@ -103,15 +117,16 @@ namespace Iot.Device.Media
                 Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
                 while (!token.IsCancellationRequested)
                 {
-                    imageCallBack?.Invoke(GetFrameDataPooled(buffers));
+                    NewImageBufferReady?.Invoke(this, GetFrameDataPooled(buffers));
                 }
 
                 // Close data stream
                 Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
 
                 UnmappingFrameBuffers(buffers);
-
             }
+
+            _capturing = false;
         }
 
         public override void StopCaptureContinuous()
@@ -296,7 +311,7 @@ namespace Iot.Device.Media
             return dataBuffer;
         }
 
-        private unsafe (byte[] ImageBuffer, int Length) GetFrameDataPooled(V4l2FrameBuffer* buffers)
+        private unsafe NewImageBufferReadyEventArgs GetFrameDataPooled(V4l2FrameBuffer* buffers)
         {
             // Get one frame from the buffer
             v4l2_buffer frame = new v4l2_buffer
@@ -315,7 +330,7 @@ namespace Iot.Device.Media
             // Requeue the buffer
             V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
 
-            return (dataBuffer, length);
+            return new NewImageBufferReadyEventArgs(dataBuffer, length);
         }
 
         private unsafe V4l2FrameBuffer[] ApplyFrameBuffers()

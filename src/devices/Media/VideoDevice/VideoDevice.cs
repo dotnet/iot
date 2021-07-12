@@ -9,10 +9,49 @@ using System.Threading;
 namespace Iot.Device.Media
 {
     /// <summary>
+    /// New image buffer ready event argument
+    /// </summary>
+    public class NewImageBufferReadyEventArgs
+    {
+        /// <summary>
+        /// Constructor for a new image ready event argument
+        /// </summary>
+        /// <param name="imageBuffer">The image buffer</param>
+        /// <param name="length">The length of the image inside the buffer</param>
+        public NewImageBufferReadyEventArgs(byte[] imageBuffer, int length)
+        {
+            ImageBuffer = imageBuffer;
+            Length = length;
+        }
+
+        /// <summary>
+        /// Byte array buffer containing the image. The buffer may be larger than the image
+        /// </summary>
+        public byte[] ImageBuffer { get; }
+
+        /// <summary>
+        /// The length of the image inside the buffer
+        /// </summary>
+        public int Length { get; }
+    }
+
+    /// <summary>
     /// The communications channel to a video device.
     /// </summary>
     public abstract partial class VideoDevice : IDisposable
     {
+        /// <summary>
+        /// New image buffer ready event
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The new image ready event argument</param>
+        public delegate void NewImageBufferReadyEvent(object sender, NewImageBufferReadyEventArgs e);
+
+        /// <summary>
+        /// Event for a new image buffer ready
+        /// </summary>
+        public abstract event NewImageBufferReadyEvent? NewImageBufferReady;
+
         /// <summary>
         /// Create a communications channel to a video device running on Unix.
         /// </summary>
@@ -29,6 +68,16 @@ namespace Iot.Device.Media
         /// The connection settings of the video device.
         /// </summary>
         public abstract VideoConnectionSettings Settings { get; }
+
+        /// <summary>
+        /// Returns true if the connection to the device is already open.
+        /// </summary>
+        public abstract bool IsOpen { get; }
+
+        /// <summary>
+        /// Returns true if the device is already capturing.
+        /// </summary>
+        public abstract bool IsCapturing { get; }
 
         /// <summary>
         /// Capture a picture from the video device.
@@ -56,7 +105,7 @@ namespace Iot.Device.Media
         /// <summary>
         /// The continuous capture stream
         /// </summary>
-        public abstract void CaptureContinuousBytes(Action<(byte[] ImageBuffer, int Length)> imageCallback, CancellationToken token);
+        public abstract void CaptureContinuousBytes(CancellationToken token);
 
         /// <summary>
         /// Stop the continuous capture
