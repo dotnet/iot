@@ -47,6 +47,12 @@ namespace Iot.Device.Media
         public override bool IsCapturing => _capturing;
 
         /// <summary>
+        /// true if this VideoDevice should pool the image buffers used.
+        /// when set to true the consumer must return the image buffers to the <see cref="ArrayPool{T}"/> Shared instance
+        /// </summary>
+        public override bool EnablePooling { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="UnixVideoDevice"/> class that will use the specified settings to communicate with the video device.
         /// </summary>
         /// <param name="settings">The connection settings of a video device.</param>
@@ -324,7 +330,16 @@ namespace Iot.Device.Media
             // Get data from pointer
             IntPtr intptr = buffers[frame.index].Start;
             var length = (int)buffers[frame.index].Length;
-            byte[] dataBuffer = ArrayPool<byte>.Shared.Rent(length);
+            byte[] dataBuffer = Array.Empty<byte>();
+            if (EnablePooling)
+            {
+                dataBuffer = ArrayPool<byte>.Shared.Rent(length);
+            }
+            else
+            {
+                dataBuffer = new byte[length];
+            }
+
             Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
 
             // Requeue the buffer

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -78,6 +79,12 @@ namespace Iot.Device.Media
         /// Returns true if the device is already capturing.
         /// </summary>
         public abstract bool IsCapturing { get; }
+
+        /// <summary>
+        /// true if this VideoDevice should pool the image buffers used.
+        /// when set to true the consumer must return the image buffers to the <see cref="ArrayPool{T}"/> Shared instance
+        /// </summary>
+        public abstract bool EnablePooling { get; set; }
 
         /// <summary>
         /// Capture a picture from the video device.
