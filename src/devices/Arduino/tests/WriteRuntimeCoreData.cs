@@ -66,7 +66,7 @@ enum class {name}
 {{
 ");
             string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
-            TextWriter w = new StreamWriter(outputFile, false, Encoding.UTF8);
+            TextWriter w = new StreamWriter(outputFile, false, Encoding.ASCII);
             w.Write(header);
             foreach (var e in Enum.GetValues(typeof(ExecutorCommand)))
             {
@@ -88,7 +88,7 @@ enum class {name}
 {{
 ");
             string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
-            TextWriter w = new StreamWriter(outputFile, false, Encoding.UTF8);
+            TextWriter w = new StreamWriter(outputFile, false, Encoding.ASCII);
             w.Write(header);
             foreach (var e in Enum.GetValues(typeof(VariableKind)))
             {
@@ -110,7 +110,9 @@ enum class {name}
 {{
 ");
             string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
-            TextWriter w = new StreamWriter(outputFile, false, Encoding.UTF8);
+            // Must use ascii encoding, because GCC fails to recognize the UTF-8-BOM header
+            // sometimes. Not sure why it works sometimes only.
+            TextWriter w = new StreamWriter(outputFile, false, Encoding.ASCII);
             w.Write(header);
             foreach (var e in Enum.GetValues(typeof(T)))
             {
