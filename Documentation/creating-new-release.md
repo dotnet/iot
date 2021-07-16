@@ -29,7 +29,7 @@ This is a list of steps which need to happen in order to release new version of 
     - Use i.e.: https://github.com/dotnet/iot/compare/1.1...1.2 to see list of commits.
   - Categorize them by: `System.Gpio`, `Iot.Device.Bindings`, `Other` changes.
   - Rephrase/group them for consistency.
-  - Add the list of contributors ordered by the number of commits or alphabetically.
+  - Add the list of contributors ordered by the number of commits or alphabetically. Command: `git shortlog -s 1.4..1.5` is very helpful but doesn't give github user names
 - Step 7: After package is pushed to Nuget create a PR similar to https://github.com/dotnet/iot/pull/1310 to prepare for next release.
 - Step 8: Update dependencies on old version of the package:
   - Option 1: Wait for `dependabot` to automatically create dependencies update PR (similar to: [System.Device.Gpio](https://github.com/dotnet/iot/pulls?q=is%3Apr+Bump+System.Device.Gpio+is%3Aclosed+author%3Aapp%2Fdependabot); [Iot.Device.Bindings](https://github.com/dotnet/iot/pulls?q=is%3Apr+Bump+Iot.Device.Bindings+is%3Aclosed+author%3Aapp%2Fdependabot))
