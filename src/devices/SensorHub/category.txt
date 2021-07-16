@@ -1,0 +1,5 @@
+thermometer
+barometer
+hygrometer
+light
+multi
