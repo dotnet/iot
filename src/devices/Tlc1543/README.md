@@ -1,4 +1,4 @@
-# Tlc1543
+# TLC1543 - 10-bit ADC with 11 input channels
 
 ## Summary
 
