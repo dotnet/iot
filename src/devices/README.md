@@ -14,11 +14,9 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
-* [Board abstraction](Board/README.md)
 * [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
 * [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
 * [MCP3xxx family of Analog to Digital Converters](Mcp3xxx/README.md)
-* [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
 * [TLC1543 - 10-bit ADC with 11 input channels](Tlc1543/README.md)
 
 ### Digital/Analog converters
@@ -243,14 +241,12 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 ### USB devices
 
-* [Board abstraction](Board/README.md)
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP](StUsb4500/README.md)
 
 ### GPIO or bit operating devices
 
-* [Board abstraction](Board/README.md)
 * [Charlieplex Segment binding](Charlieplex/README.md)
 * [Digital liquid level switch](LiquidLevel/README.md)
 * [Generic shift register](ShiftRegister/README.md)
@@ -259,7 +255,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
 * [Quadrature Rotary Encoder](RotaryEncoder/README.md)
 * [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
-* [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
 
 ### Multi-device or robot kit
 
