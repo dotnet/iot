@@ -12,6 +12,7 @@ using Iot.Tools.DeviceListing;
 string[] categoriesToDisplay = new string[]
 {
     "adc",
+    "dac",
     "accelerometer",
     "gas",
     "liquid",
@@ -53,6 +54,7 @@ string[] categoriesToDisplay = new string[]
 Dictionary<string, string?> categoriesDescriptions = new()
 {
     { "adc", "Analog/Digital converters" },
+    { "dac", "Digital/Analog converters" },
     { "accelerometer", "Accelerometers" },
     { "voc", "Volatile Organic Compound sensors" },
     { "gas", "Gas sensors" },
@@ -95,6 +97,8 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "gpio", "GPIO or bit operating devices" },
     { "power", "Power monitors and related devices" },
     { "multi", "Multi-device or robot kit" },
+    { "lidar", "LIDAR Time of Flight devices" },
+    { "thermocouple", "Thermocouple devices" },
     // Bucket for stuff we want mentioned but there is no clear category
     // In other words: anything allowing a way to create PWM channel, SPI/I2C/... device
     { "protocol", "Protocols providers/libraries" },

@@ -1,4 +1,4 @@
-# SPI, GPIO and I2C drivers for Arduino with Firmata.
+# SPI, GPIO and I2C drivers for Arduino with Firmata
 
 This binding supports GPIO, PWM, SPI and I2C access from a normal Desktop environment (Windows, Linux) trough an Arduino board. This is done trough an Arduino program called "Firmata" developed for this particular purpose. 
 
