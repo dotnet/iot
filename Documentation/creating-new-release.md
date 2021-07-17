@@ -19,7 +19,7 @@ This is a list of steps which need to happen in order to release new version of 
   - Run and wait for it to finish.
   - Once it is done and passes go to the artifacts section of the build, and find an artifact called 'Built packages' and from there download the two stable packages.
   - Validate the package: double check version, check there are no unintentional changes.
-- Step 4: Manually push package to Nuget - as of writing this document only @joperezr has credentials
+- Step 4: Manually push package to Nuget - people who had access to push in the past: @joperezr @rbhanda
 - Step 5: Add git tag:
   - Use `git tag -a <version> <commit_hash>` to locally create a tag.
   - Use `git push origin <version>` to push it (`<version>` is i.e. `1.3`).
