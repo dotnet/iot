@@ -12,6 +12,7 @@
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <MainLibraryPath>$(MSBuildThisFileDirectory)src/System.Device.Gpio/</MainLibraryPath>
     <Nullable>enable</Nullable>
+    <StrongNameKeyId>Open</StrongNameKeyId>
   </PropertyGroup>
 
   <PropertyGroup>
