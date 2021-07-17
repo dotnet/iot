@@ -9,6 +9,7 @@ using Iot.Device.Arduino;
 using Iot.Device.Mcp23xxx;
 using Iot.Device.CharacterLcd;
 using Iot.Device.CharacterLcd.Samples;
+using Iot.Device.Multiplexing;
 using SixLabors.ImageSharp;
 
 // Choose the right setup for your display:
@@ -16,7 +17,8 @@ using SixLabors.ImageSharp;
 // UsingMcp();
 // UsingGroveRgbDisplay();
 // UsingHd44780OverI2C();
-UsingHd44780OverI2CAndArduino();
+// UsingHd44780OverI2CAndArduino();
+UsingShiftRegister();
 
 void UsingGpioPins()
 {
@@ -82,4 +84,17 @@ void UsingHd44780OverI2CAndArduino()
     LargeValueSample.LargeValueDemo(hd44780);
     LcdConsoleSamples.WriteTest(hd44780);
     ExtendedSample.Test(hd44780);
+}
+
+void UsingShiftRegister()
+{
+    int registerSelectPin = 1;
+    int enablePin = 2;
+    int[] dataPins = new int[] { 6, 5, 4, 3 };
+    int backlightPin = 7;
+    using Sn74hc595 sr = new(Sn74hc595PinMapping.Minimal);
+    using LcdInterface lcdInterface = LcdInterface.CreateSpi(registerSelectPin, enablePin, dataPins, backlightPin, sr);
+    using Lcd1602 lcd = new(lcdInterface);
+    lcd.Clear();
+    lcd.Write("Hello World");
 }

@@ -18,6 +18,7 @@
     <Compile Include="LcdInterface.Gpio.cs" />
     <Compile Include="LcdInterface.I2c.cs" />
     <Compile Include="LcdInterface.I2c4Bit.cs" />
+    <Compile Include="LcdInterface.Spi.cs" />
     <Compile Include="LcdRgb.cs" />
     <Compile Include="LcdValueUnitDisplay.cs" />
     <Compile Include="LineWrapMode.cs" />
@@ -27,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="../Common/CommonHelpers.csproj" />
+    <ProjectReference Include="../Sn74hc595/Sn74hc595.csproj" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
