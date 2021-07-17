@@ -17,7 +17,8 @@ namespace Iot.Device.Arduino
         NoChange = 0,
 
         /// <summary>
-        /// Trigger when the value is low
+        /// Trigger when the value is low.
+        /// Use with care: This triggers an internal interrupt AS LONG AS the value on the pin is low, which may completely lock up the board.
         /// </summary>
         Low = 1,
 
