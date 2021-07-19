@@ -348,10 +348,12 @@ namespace Iot.Device.Arduino.Runtime
             }
         }
 
+#pragma warning disable CS0649
         internal struct SECURITY_ATTRIBUTES
         {
             public int DummyData;
         }
+#pragma warning restore CS0649
 
         [ArduinoReplacement("Interop+Kernel32", "System.IO.FileSystem.dll", true, typeof(System.IO.File), IncludingPrivates = true)]
         internal static class Kernel32FileSystem

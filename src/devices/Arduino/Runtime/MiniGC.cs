@@ -228,6 +228,7 @@ namespace Iot.Device.Arduino.Runtime
 
         }
 
+#pragma warning disable CS0649 // Member is unused
         internal class MiniGcMemoryInfoData
         {
             internal long _highMemoryLoadThresholdBytes;
