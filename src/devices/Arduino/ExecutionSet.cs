@@ -36,7 +36,11 @@ namespace Iot.Device.Arduino
         private readonly Dictionary<FieldInfo, (int Token, byte[]? InitializerData)> _patchedFieldTokens;
         private readonly Dictionary<int, FieldInfo> _inversePatchedFieldTokens;
         private readonly HashSet<(Type Original, Type Replacement, bool Subclasses)> _classesReplaced;
-        private readonly List<(MethodBase, MethodBase?)> _methodsReplaced;
+
+        /// <summary>
+        /// For each method name, the list of replacements. The outer dictionary is to speed up lookups
+        /// </summary>
+        private readonly Dictionary<string, List<(MethodBase, MethodBase?)>> _methodsReplaced;
         // These classes (and any of their methods) will not be loaded, even if they seem in use. This should speed up testing
         private readonly List<Type> _classesToSuppress;
         // String data, already UTF-8 encoded. The StringData value is actually only used for debugging purposes
@@ -66,7 +70,7 @@ namespace Iot.Device.Arduino
             _inversePatchedTypeTokens = new Dictionary<int, TypeInfo>();
             _inversePatchedFieldTokens = new Dictionary<int, FieldInfo>();
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
-            _methodsReplaced = new List<(MethodBase, MethodBase?)>();
+            _methodsReplaced = new();
             _classesToSuppress = new List<Type>();
             _arrayListImpl = new();
             _strings = new();
@@ -103,7 +107,7 @@ namespace Iot.Device.Arduino
             _inversePatchedTypeTokens = new Dictionary<int, TypeInfo>(setToClone._inversePatchedTypeTokens);
             _inversePatchedFieldTokens = new Dictionary<int, FieldInfo>(setToClone._inversePatchedFieldTokens);
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>(setToClone._classesReplaced);
-            _methodsReplaced = new List<(MethodBase, MethodBase?)>(setToClone._methodsReplaced);
+            _methodsReplaced = new(setToClone._methodsReplaced);
             _classesToSuppress = new List<Type>(setToClone._classesToSuppress);
             _strings = new(setToClone._strings);
             _arrayListImpl = new Dictionary<Type, MethodInfo>(setToClone._arrayListImpl);
@@ -471,6 +475,9 @@ namespace Iot.Device.Arduino
             return token;
         }
 
+        /// <summary>
+        /// Returns non-null when the whole method should be removed, because it's assumed that it's never going to be called
+        /// </summary>
         private static MethodInfo? GetNotSupportedExceptionMethod(Type classReplacement)
         {
             var dummyMethod = classReplacement.GetMethod(nameof(MiniX86Intrinsics.NotSupportedException), BindingFlags.Public | BindingFlags.Static);
@@ -839,14 +846,19 @@ namespace Iot.Device.Arduino
                 return false;
             }
 
-            if (_methodsReplaced.Any(x => AreMethodsIdentical(x.Item1, method.MethodBase)))
+            if (_methodsReplaced.TryGetValue(method.Name, out var list))
             {
-                throw new InvalidOperationException($"Method {method} should have been replaced by its replacement");
-            }
+                if (list.Any(x => AreMethodsIdentical(x.Item1, method.MethodBase)))
+                {
+                    throw new InvalidOperationException(
+                        $"Method {method} should have been replaced by its replacement");
+                }
 
-            if (_methodsReplaced.Any(x => AreMethodsIdentical(x.Item1, method.MethodBase) && x.Item2 == null))
-            {
-                throw new InvalidOperationException($"The method {method} should be replaced, but has no new implementation. This program will not execute");
+                if (list.Any(x => AreMethodsIdentical(x.Item1, method.MethodBase) && x.Item2 == null))
+                {
+                    throw new InvalidOperationException(
+                        $"The method {method} should be replaced, but has no new implementation. This program will not execute");
+                }
             }
 
             _methods.Add(method);
@@ -1031,7 +1043,12 @@ namespace Iot.Device.Arduino
         internal MethodBase? GetReplacement(MethodBase original, MethodBase callingMethod)
         {
             // Odd: I'm pretty sure that previously equality on MethodBase instances worked, but for some reason not all instances pointing to the same method are Equal().
-            var elem = _methodsReplaced.FirstOrDefault(x =>
+            if (!_methodsReplaced.TryGetValue(original.Name, out var methodsToConsider))
+            {
+                return null;
+            }
+
+            var elem = methodsToConsider.FirstOrDefault(x =>
             {
                 if (x.Item2 != null && ArduinoCsCompiler.HasArduinoImplementationAttribute(x.Item2, out var attrib) && attrib.IgnoreGenericTypes)
                 {
@@ -1045,11 +1062,6 @@ namespace Iot.Device.Arduino
 
                 return AreMethodsIdentical(x.Item1, original);
             });
-            ////var elemTest = _methodsReplaced.FirstOrDefault(x => ReferenceEquals(x.Item1, original));
-            ////if (!ReferenceEquals(elem.Item1, elemTest.Item1))
-            ////{
-            ////    throw new NotSupportedException();
-            ////}
 
             if (elem.Item1 == default)
             {
@@ -1118,7 +1130,16 @@ namespace Iot.Device.Arduino
             }
 
             string name = toReplace.Name;
-            _methodsReplaced.Add((toReplace, replacement));
+            if (_methodsReplaced.TryGetValue(toReplace.Name, out var list))
+            {
+                list.Add((toReplace, replacement));
+            }
+            else
+            {
+                list = new List<(MethodBase, MethodBase?)>();
+                list.Add((toReplace, replacement));
+                _methodsReplaced.Add(toReplace.Name, list);
+            }
         }
 
         internal int GetOrAddString(string data)

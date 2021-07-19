@@ -72,6 +72,12 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Fact]
+        public void ExpectCustomException()
+        {
+            ExecuteComplexProgramCausesException<Func<int, int>, NotImplementedException>(typeof(ArduinoNativeLibraryTest), NotImplemented, 10);
+        }
+
+        [Fact]
         public void ExpectDivideByZero()
         {
             ExecuteComplexProgramCausesException<Func<int, int>, DivideByZeroException>(typeof(ArduinoNativeLibraryTest), DivideByZero, 0);
@@ -87,6 +93,11 @@ namespace Iot.Device.Arduino.Tests
         {
             int[] array = new int[2];
             return array[index];
+        }
+
+        private static int NotImplemented(int index)
+        {
+            throw new NotImplementedException("This method is not implemented on purpose");
         }
 
         private static int DivideByZero(int zero)
