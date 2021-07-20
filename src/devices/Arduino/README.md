@@ -1,6 +1,6 @@
 # SPI, GPIO and I2C drivers for Arduino with Firmata
 
-This binding supports GPIO, PWM, SPI and I2C access from a normal Desktop environment (Windows, Linux) trough an Arduino board. This is done trough an Arduino program called "Firmata" developed for this particular purpose. 
+This binding supports GPIO, PWM, SPI and I2C access from a normal Desktop environment (Windows, Linux) through an Arduino board. This is done through an Arduino program called "Firmata" developed for this particular purpose. 
 
 ## Device family
 
@@ -8,7 +8,7 @@ This binding remotely controls Arduino boards directly from PC Software. It prov
 
 ## Desktop Requirements
 
-In order to get an Arduino board working with the PC, you need to Install the Arduino IDE together with the drivers for your board type. If you get a simple sketch uploaded and running (such as the blinking LED example) you are fine to start. If you're new to the Arduino world, read the introductions at https://www.arduino.cc/en/Guide for a quick start. The explanations below assume you have the Arduino board connected trough an USB cable with your PC and you know how to upload a sketch. Once the sketch has been uploaded, the IDE is no longer required.
+In order to get an Arduino board working with the PC, you need to Install the Arduino IDE together with the drivers for your board type. If you get a simple sketch uploaded and running (such as the blinking LED example) you are fine to start. If you're new to the Arduino world, read the introductions at https://www.arduino.cc/en/Guide for a quick start. The explanations below assume you have the Arduino board connected through an USB cable with your PC and you know how to upload a sketch. Once the sketch has been uploaded, the IDE is no longer required.
 
 ## Preparing your Arduino
 ### Quick start
@@ -62,7 +62,7 @@ On Windows, only one application can use the serial port at a time, therefore yo
 
 ## Known limitations
 
-All communication is routed trough the USB cable immitating a serial port with a limited bandwith. Therefore, some not insignificant delays are to be expected when sending commands or retrieving data. Communicating with sensors which have time-critical behavior will most likely not work reliably for this reason and the standard bindings provided for these won't work. This includes sensors like the DHT11, DHT22 or HCSR-04. For some of these, special Firmata modules are available to execute the time-critical part directly on the Arduino. This problem does not exist for sensors using I2C or SPI protocols. 
+All communication is routed through the USB cable immitating a serial port with a limited bandwith. Therefore, some not insignificant delays are to be expected when sending commands or retrieving data. Communicating with sensors which have time-critical behavior will most likely not work reliably for this reason and the standard bindings provided for these won't work. This includes sensors like the DHT11, DHT22 or HCSR-04. For some of these, special Firmata modules are available to execute the time-critical part directly on the Arduino. This problem does not exist for sensors using I2C or SPI protocols. 
 
 For the moment this binding supports GPIO, Analog In, SPI, I2C and DHT on all platforms. 
 
