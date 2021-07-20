@@ -26,6 +26,18 @@ namespace Iot.Device.CharacterLcd
             private Sn74hc595 _shiftRegister;
             private bool _backlightOn;
 
+            /// <summary>
+            /// Creates an LCD interface based on the SN74HC595 shift register.
+            /// </summary>
+            /// <remarks>
+            /// Pin parameters should be set according to which output pin of the shift register they are connected to (0 to 7).
+            /// </remarks>
+            /// <param name="registerSelectPin">The pin that controls the register select.</param>
+            /// <param name="enablePin">The pin that controls the enable switch.</param>
+            /// <param name="dataPins">Collection of pins holding the data that will be printed on the screen.</param>
+            /// <param name="backlightPin">The optional pin that controls the backlight of the display.</param>
+            /// <param name="shiftRegister">The shift register that drives the LCD.</param>
+            /// <param name="shouldDispose">True to dispose the shift register.</param>
             public Spi(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, Sn74hc595? shiftRegister = null, bool shouldDispose = true)
             {
                 _registerSelectPin = (byte)(1 << registerSelectPin);
@@ -165,9 +177,9 @@ namespace Iot.Device.CharacterLcd
                 if (_shouldDispose)
                 {
                     _shiftRegister?.Dispose();
-                    _shiftRegister = null!;
                 }
 
+                _shiftRegister = null!;
                 base.Dispose(disposing);
             }
         }
