@@ -1,10 +1,8 @@
 # TCS3472x Sensors
 
-## Summary
+TCS3472x sensors are color I2C sensors.
 
-Those sensors are color I2C sensors.
-
-## Device Family
+## Documentation
 
 Device Family contains TCS34721, TCS34723, TCS34725 and TCS34727.
 

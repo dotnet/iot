@@ -6,7 +6,11 @@
 
 The [binding](Sn74hc595.cs) abstracts the interaction with the data register, the register clock and other shift register capabilities. The binding enables interaction via GPIO or SPI.
 
-The [SN74HC595 sample](samples/README.md) demonstrates how to use the shift register. The [generic shift register sample](../ShiftRegister/samples/README.md) is more extensive and is compatible with the SN74HC595.
+## Documentation
+
+* Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
+* Adafruit: https://www.adafruit.com/product/450
+* Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
 
 ## Usage
 
@@ -71,9 +75,3 @@ The following [diagram](sn74hc595-led-bar-graph.fzz) demonstrates the required w
 ![SN74HC595 Minimal pin mapping](sn74hc595-led-bar-graph_bb.png)
 
 If you want to use SPI, see the [`ShiftRegister`](../ShiftRegister/README.md) binding, which includes more information on SPI.
-
-## Resources
-
-* Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
-* Adafruit: https://www.adafruit.com/product/450
-* Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU

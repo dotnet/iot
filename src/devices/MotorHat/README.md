@@ -1,23 +1,21 @@
 ﻿# MotorHat
 
-## Summary
-
 Motor HAT is an add-on board for Raspberry Pi.
 
 It consists of a pca9685 PWM driver and two motor controller chips, that together support up to 4 DC motors, or 2 Stepper motors.
 It also provides 4 extra PWM Outputs, that can be used for anything that requires PWM, (controlling a LED, a ServoMotor, etc)
 
-You can find in depth documentation on the hat in [Adafruit website](https://www.adafruit.com/product/2348)
-Or you can also get it at [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
+## Documentation
 
-### Currently supported devices:
-- Up to 4 DC Motors
-- And Up to 4 PWM Xtra channels OR up to 4 [ServoMotors](../ServoMotor/README.md)
+- [Adafruit](https://www.adafruit.com/product/2348)
+- [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
 
-## Notes
+
+## Usage
 
 ### DC Motors
-   The following example show how to create a DCMotor.
+
+The following example show how to create a DCMotor.
 
 ```C#   
 using (var motorHat = new MotorHat())
@@ -29,7 +27,8 @@ using (var motorHat = new MotorHat())
 ```
 
 ### ServoMotor
-   The following example show how to create a ServoMotor.
+
+The following example show how to create a ServoMotor.
 
 ```C#   
 using (var motorHat = new MotorHat())
@@ -39,4 +38,10 @@ using (var motorHat = new MotorHat())
     ...
 }
 ```
+
 Check the [ServoMotor documentation](../ServoMotor/README.md) for examples on how to use the ServoMotor class
+
+## Support
+
+- Up to 4 DC Motors
+- And Up to 4 PWM Xtra channels OR up to 4 [ServoMotors](../ServoMotor/README.md)
