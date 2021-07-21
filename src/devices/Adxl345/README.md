@@ -2,7 +2,6 @@
 
 ADXL345 is a small, thin, low power, 3-axis accelerometer with high resolution (13-bit) measurement at up to ±16g.
 
-
 ## Documentation
 
 In [Chinese](http://wenku.baidu.com/view/87a1cf5c312b3169a451a47e.html)

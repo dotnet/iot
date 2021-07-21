@@ -50,7 +50,7 @@ SDA, SCL need pull-up resistance.
 
 ### Code
 
-```C#
+```Csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Ags01db.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

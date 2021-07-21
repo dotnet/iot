@@ -1,7 +1,5 @@
 ﻿# Bh1745 - RGB Sensor
 
-## Summary
-
 The Bh1745 is a digital color sensor able to detect 3 distinct channels of light (red, green, blue) and is most
 suitable to obtain the illuminance and color temperature of ambient light. The device can detect light intensity
 in a range of 0.005 to 40 000 lux.
