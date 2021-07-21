@@ -11,10 +11,13 @@ This binding remotely controls Arduino boards directly from PC Software. It prov
 In order to get an Arduino board working with the PC, you need to Install the Arduino IDE together with the drivers for your board type. If you get a simple sketch uploaded and running (such as the blinking LED example) you are fine to start. If you're new to the Arduino world, read the introductions at https://www.arduino.cc/en/Guide for a quick start. The explanations below assume you have the Arduino board connected through an USB cable with your PC and you know how to upload a sketch. Once the sketch has been uploaded, the IDE is no longer required.
 
 ## Preparing your Arduino
-### Quick start
-You need to upload a special sketch to the Arduino. This sketch implements the "Firmata-Protocol", a communication protocol that allows to remotely control all the inputs and outputs of the board. See https://github.com/firmata/protocol/blob/master/protocol.md for details. We call this sketch (or variants of it, see below) the Firmata firmware.
 
-The binding requires Firmata Version 2.6, which is implemented i.e. by the ConfigurableFirmata project. 
+### Quick start
+
+You need to upload a special sketch to the Arduino. This sketch implements the "Firmata-Protocol", a communication protocol that allows to remotely control all the inputs and outputs of the board. See [Firmata Protocol](https://github.com/firmata/protocol/blob/master/protocol.md) for details. We call this sketch (or variants of it, see below) the Firmata firmware.
+
+The binding requires Firmata Version 2.6, which is implemented i.e. by the ConfigurableFirmata project.
+ 
 - Open the Arduino IDE
 - Go to the library manager and check that you have the "ConfigurableFirmata" library installed
 - Open "ConfigurableFirmata.ino" from the [device binding folder](./ConfigurableFirmata/ConfigurableFirmata.ino) or go to http://firmatabuilder.com/ to create your own custom firmata firmware. Make sure you have at least the features checked that you will need.
@@ -25,14 +28,16 @@ After these steps, you can start coding with Iot.Devices.Arduino and make your A
 When the firmware starts, the on-board-LED flashes a few times, indicating the loaded firmware version (currently 2 + 11 blinks). After that, the board will enter idle state and wait for connections. 
 
 ### Advanced features
+
 Some of the features of this binding require extended features in the Arduino firmware. These include SPI support and DHT sensor support. These features didn't make it into the main Firmata branch yet, therefore these additional steps are required:
-- Go to C:\users\<username>\documents\arduino\libraries and delete the "ConfigurableFirmata" folder (save any work if you've changed anything there)
-- Replace it with a clone of https://github.com/pgrawehr/ConfigurableFirmata and switch to branch "develop". 
+- Go to `C:\users\<username>\documents\arduino\libraries` and delete the "ConfigurableFirmata" folder (save any work if you've changed anything there)
+- Replace it with a clone of [Configurable Firmata](https://github.com/pgrawehr/ConfigurableFirmata) and switch to branch "develop". 
 - Make sure you have the "DHT Sensor Library" from Adafruit installed (use the library manager for that).
-- You can now enable the DHT and SPI features at the beginning of the ConfigurableFirmata.ino file. Because the new firmware will have additional features, it is recommended to use the .ino file from the examples folder of the repository. So the best start is to open the file that now lies in C:\users\<username>\documents\arduino\libraries\ConfigurableFirmata\examples\ConfigurableFirmata\ConfigurableFirmata.ino. The file has some comments at the top to enable or disable certain modules.
+- You can now enable the DHT and SPI features at the beginning of the ConfigurableFirmata.ino file. Because the new firmware will have additional features, it is recommended to use the .ino file from the examples folder of the repository. So the best start is to open the file that now lies in `C:\users\<username>\documents\arduino\libraries\ConfigurableFirmata\examples\ConfigurableFirmata\ConfigurableFirmata.ino`. The file has some comments at the top to enable or disable certain modules.
 - Compile and re-upload the sketch. 
 
 ## Usage
+
 See the examples for some advanced use cases. 
 
 Basic start:
@@ -72,10 +77,12 @@ The samples were mostly tested using an Arduino Nano, but they will certainly al
 
 The image below shows the required hardware to run all the tests combined on a breadboard. 
 
-![select branch](./samples/ArduinoSample_Monitor.png)
+![select branch](ArduinoSample_Monitor.png)
 
 ### Test code
+
 The project "Arduino.sample" contains a console application that allows testing individual features, such as digital output (blinking LED), digital input (button), analog input or I2C communication.
 
 ### Monitor
+
 The project "Arduino.Monitor" is a simple real-world example. The program can run in the background and shows current environment temperature, CPU usage, CPU temperature and many other data sets on an external display. With this, you can keep an eye on your CPU temperature or the current time while the screen is off or while you're running full-screen games. The prerequisites from the [Hardware Monitor](../HardwareMonitor/README.md) need to be installed as well. 
