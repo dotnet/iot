@@ -152,3 +152,7 @@ while (!Console.KeyAvailable)
 
 Console.CursorTop += 5;
 ```
+
+Once you have GrovePi on a Raspberry Pi, it looks like this:
+
+![sample](sample.jpg)
