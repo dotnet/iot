@@ -4,7 +4,7 @@ An M×N key matrix driver.
 
 (M is number of output pins and N is number of input pins.)
 
-## Summary
+## Documentation
 
 These key matrices look like this:
 
@@ -15,6 +15,9 @@ This is a 4×4 matrix. And [here is the schematic](https://www.waveshare.com/w/u
 You can connect any M×N key matrix, theoretically, by using M+N GPIO pins.
 
 You can also use any compatible GPIO controller like [Mcp23xxx](../Mcp23xxx) instead of native controller.
+
+- [How Key Matrices works](http://pcbheaven.com/wikipages/How_Key_Matrices_Works/)
+- [4x4 Keypad](https://www.waveshare.com/wiki/4x4_Keypad)
 
 ## Usage
 
@@ -75,7 +78,16 @@ void KeyMatrixEventReceived(object sender, KeyMatrixEvent keyMatrixEvent)
 - Input pins need pull-down resistors connect to ground if your MCU doesn't have it. So you need to have a pull-down on a Raspberry Pi for example.
 - If your key matrix doesn't work well, try to swap output and input pins. Some includes diodes and if they are used the reverse way won't work properly.
 
-## References
+## Key Matrix Samples
 
-- http://pcbheaven.com/wikipages/How_Key_Matrices_Works/
-- https://www.waveshare.com/wiki/4x4_Keypad
+This shows how to connect the matrix.
+
+**Important**: Please make you don't forget to place a pull down on the input matrix.
+
+## Connection using on-board GPIO
+
+![Connection using Raspberry Pi](4x4kb.png)
+
+## Connection using MCP23017
+
+![Connection using a MCP23017](4x4kb_via_mcp23017.png)
