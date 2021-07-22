@@ -4,6 +4,7 @@
 using System;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Device.Spi;
 using CharacterLcd.Samples;
 using Iot.Device.Arduino;
 using Iot.Device.Mcp23xxx;
@@ -92,8 +93,14 @@ void UsingShiftRegister()
     int enablePin = 2;
     int[] dataPins = new int[] { 6, 5, 4, 3 };
     int backlightPin = 7;
-    using Sn74hc595 sr = new(Sn74hc595PinMapping.Minimal);
-    using LcdInterface lcdInterface = LcdInterface.CreateSpi(registerSelectPin, enablePin, dataPins, backlightPin, sr);
+
+    // Gpio
+    using ShiftRegister sr = new(ShiftRegisterPinMapping.Minimal, 8);
+
+    // Spi
+    // using SpiDevice spiDevice = SpiDevice.Create(new(0, 0));
+    // using ShiftRegister sr = new(spiDevice, 8);
+    using LcdInterface lcdInterface = LcdInterface.CreateShiftRegister(registerSelectPin, enablePin, dataPins, backlightPin, sr);
     using Lcd1602 lcd = new(lcdInterface);
     lcd.Clear();
     lcd.Write("Hello World");

@@ -9,21 +9,21 @@ namespace Iot.Device.CharacterLcd
     public abstract partial class LcdInterface : IDisposable
     {
         /// <summary>
-        /// This interface allows the control of a character display using SPI protocol.
-        /// The display is controlled using SN74HC595 shift register. This shift register can be controlled
-        /// using a minimum of three pins so this method saves pins on the microcontroller compared to direct GPIO
-        /// connection. This interface adds support for existing products that allow connect to an HD44780 display
+        /// This interface allows the control of a character lcd using a shift register.
+        /// The shift register can be controlled using a minimum of three pins so using this method
+        /// saves pins on the microcontroller compared to direct GPIO connection.
+        /// This interface adds support for I/O expanders that allow connection to an HD44780 display
         /// through a shift register e.g. https://www.adafruit.com/product/292
         /// </summary>
-        private class Spi : LcdInterface
+        private class ShiftRegisterLcdInterface : LcdInterface
         {
-            private readonly byte _registerSelectPin;
-            private readonly byte _enablePin;
-            private readonly byte[] _dataPins;
-            private readonly byte _backlightPin;
+            private readonly long _registerSelectPin;
+            private readonly long _enablePin;
+            private readonly long[] _dataPins;
+            private readonly long _backlightPin;
 
             private readonly bool _shouldDispose;
-            private Sn74hc595 _shiftRegister;
+            private ShiftRegister _shiftRegister;
             private bool _backlightOn;
 
             /// <summary>
@@ -38,10 +38,10 @@ namespace Iot.Device.CharacterLcd
             /// <param name="backlightPin">The optional pin that controls the backlight of the display.</param>
             /// <param name="shiftRegister">The shift register that drives the LCD.</param>
             /// <param name="shouldDispose">True to dispose the shift register.</param>
-            public Spi(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, Sn74hc595? shiftRegister = null, bool shouldDispose = true)
+            public ShiftRegisterLcdInterface(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, ShiftRegister? shiftRegister = null, bool shouldDispose = true)
             {
-                _registerSelectPin = (byte)(1 << registerSelectPin);
-                _enablePin = (byte)(1 << enablePin);
+                _registerSelectPin = 1 << registerSelectPin;
+                _enablePin = 1 << enablePin;
 
                 // Right now only 4bit mode is supported. 8bit mode would require 16bit shift register or 2x 8bit
                 // because we would need more than 8 output pins to support 8bit mode. This could be implemented in the future.
@@ -50,20 +50,20 @@ namespace Iot.Device.CharacterLcd
                     throw new ArgumentException("The length of the array must be 4.", nameof(dataPins));
                 }
 
-                _dataPins = new byte[dataPins.Length];
+                _dataPins = new long[dataPins.Length];
 
                 for (var i = 0; i < dataPins.Length; i++)
                 {
-                    _dataPins[i] = (byte)(1 << dataPins[i]);
+                    _dataPins[i] = 1 << dataPins[i];
                 }
 
                 if (backlightPin != -1)
                 {
-                    _backlightPin = (byte)(1 << backlightPin);
+                    _backlightPin = 1 << backlightPin;
                 }
 
                 _shouldDispose = shouldDispose || _shiftRegister is null;
-                _shiftRegister = shiftRegister ?? new Sn74hc595(Sn74hc595PinMapping.Minimal);
+                _shiftRegister = shiftRegister ?? new ShiftRegister(ShiftRegisterPinMapping.Minimal, 8);
 
                 _backlightOn = true;
                 Initialize();
@@ -86,7 +86,7 @@ namespace Iot.Device.CharacterLcd
                 }
             }
 
-            private byte BacklightFlag
+            private long BacklightFlag
             {
                 get
                 {
@@ -113,8 +113,8 @@ namespace Iot.Device.CharacterLcd
 
             public override void SendCommand(byte command)
             {
-                Write4Bits((byte)(0x0 | MapCommandToDataPins((byte)(command >> 4))));
-                Write4Bits((byte)(0x0 | MapCommandToDataPins(command)));
+                WriteBits(0x0 | MapCommandToDataPins((byte)(command >> 4)));
+                WriteBits(0x0 | MapCommandToDataPins(command));
             }
 
             public override void SendCommands(ReadOnlySpan<byte> commands)
@@ -127,8 +127,8 @@ namespace Iot.Device.CharacterLcd
 
             public override void SendData(byte value)
             {
-                Write4Bits((byte)(_registerSelectPin | MapCommandToDataPins((byte)(value >> 4))));
-                Write4Bits((byte)(_registerSelectPin | MapCommandToDataPins(value)));
+                WriteBits(_registerSelectPin | MapCommandToDataPins((byte)(value >> 4)));
+                WriteBits(_registerSelectPin | MapCommandToDataPins(value));
             }
 
             public override void SendData(ReadOnlySpan<byte> values)
@@ -147,17 +147,17 @@ namespace Iot.Device.CharacterLcd
                 }
             }
 
-            private void Write4Bits(byte command)
+            private void WriteBits(long command)
             {
-                _shiftRegister.ShiftByte((byte)(command | _enablePin | BacklightFlag));
-                _shiftRegister.ShiftByte((byte)((command & ~_enablePin) | BacklightFlag));
+                ShiftLong(command | _enablePin | BacklightFlag);
+                ShiftLong((command & ~_enablePin) | BacklightFlag);
             }
 
             // This method iterates through the bits of the 'original' command and sets them to the
             // appropriate position so that they are shifted out to the correct pins.
-            private byte MapCommandToDataPins(byte command)
+            private long MapCommandToDataPins(byte command)
             {
-                byte bits = 0x0;
+                long bits = 0x0;
 
                 for (var i = 0; i < _dataPins.Length; i++)
                 {
@@ -165,11 +165,23 @@ namespace Iot.Device.CharacterLcd
 
                     if (bit == 1)
                     {
-                        bits = (byte)(bits | _dataPins[i]);
+                        bits |= _dataPins[i];
                     }
                 }
 
                 return bits;
+            }
+
+            private void ShiftLong(long value)
+            {
+                for (int i = (_shiftRegister.BitLength / 8) - 1; i > 0; i--)
+                {
+                    int shift = i * 8;
+                    long downShiftedValue = value >> shift;
+                    _shiftRegister.ShiftByte((byte)downShiftedValue, false);
+                }
+
+                _shiftRegister.ShiftByte((byte)value);
             }
 
             protected override void Dispose(bool disposing)

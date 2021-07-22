@@ -45,9 +45,9 @@ namespace Iot.Device.CharacterLcd
         /// <param name="backlightPin">The optional pin that controls the backlight of the display.</param>
         /// <param name="shiftRegister">The shift register that drives the LCD.</param>
         /// <param name="shouldDispose">True to dispose the shift register.</param>
-        public static LcdInterface CreateSpi(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, Sn74hc595? shiftRegister = null, bool shouldDispose = true)
+        public static LcdInterface CreateShiftRegister(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, ShiftRegister? shiftRegister = null, bool shouldDispose = true)
         {
-            return new Spi(registerSelectPin, enablePin, dataPins, backlightPin, shiftRegister, shouldDispose);
+            return new ShiftRegisterLcdInterface(registerSelectPin, enablePin, dataPins, backlightPin, shiftRegister, shouldDispose);
         }
 
         /// <summary>
