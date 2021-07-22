@@ -44,10 +44,13 @@ namespace Iot.Device.CharacterLcd
                 _registerSelectPin = 1 << registerSelectPin;
                 _enablePin = 1 << enablePin;
 
-                // Right now only 4bit mode is supported. 8bit mode could be implemented in the future.
-                if (dataPins.Length != 4)
+                if (dataPins.Length == 8)
                 {
-                    throw new ArgumentException("The length of the array must be 4.", nameof(dataPins));
+                    EightBitMode = true;
+                }
+                else if (dataPins.Length != 4)
+                {
+                    throw new ArgumentException("The length of the array must be 4 or 8.", nameof(dataPins));
                 }
 
                 _dataPins = new long[dataPins.Length];
@@ -69,7 +72,7 @@ namespace Iot.Device.CharacterLcd
                 Initialize();
             }
 
-            public override bool EightBitMode => false;
+            public override bool EightBitMode { get; }
 
             /// <summary>
             /// This Display supports enabling/disabling the backlight.
@@ -103,18 +106,38 @@ namespace Iot.Device.CharacterLcd
 
             private void Initialize()
             {
-                // This sequence (copied from a python example) completely resets the display (if it was
-                // previously erroneously used with 8 bit access, it may not return to normal operation otherwise)
-                SendCommandAndWait(0x3);
-                SendCommandAndWait(0x3);
-                SendCommandAndWait(0x3);
-                SendCommandAndWait(0x2);
+                // It is possible that the initialization will fail if the power is not provided
+                // within specific tolerances. As such, we'll always perform the software based
+                // initialization as described on pages 45/46 of the HD44780 data sheet.
+                if (_dataPins.Length == 8)
+                {
+                    // Init to 8 bit mode (this is the default, but other drivers
+                    // may set the controller to 4 bit mode, so reset to be safe.)
+                    SendCommandAndWait(0x30);
+                    SendCommandAndWait(0x30);
+                    SendCommandAndWait(0x30);
+                }
+                else
+                {
+                    // Init to 4 bit mode
+                    SendCommandAndWait(0x3);
+                    SendCommandAndWait(0x3);
+                    SendCommandAndWait(0x3);
+                    SendCommandAndWait(0x2);
+                }
             }
 
             public override void SendCommand(byte command)
             {
-                WriteBits(0x0 | MapCommandToDataPins((byte)(command >> 4)));
-                WriteBits(0x0 | MapCommandToDataPins(command));
+                if (_dataPins.Length == 8)
+                {
+                    WriteBits(0x0 | MapCommandToDataPins(command));
+                }
+                else
+                {
+                    WriteBits(0x0 | MapCommandToDataPins((byte)(command >> 4)));
+                    WriteBits(0x0 | MapCommandToDataPins(command));
+                }
             }
 
             public override void SendCommands(ReadOnlySpan<byte> commands)
@@ -127,8 +150,15 @@ namespace Iot.Device.CharacterLcd
 
             public override void SendData(byte value)
             {
-                WriteBits(_registerSelectPin | MapCommandToDataPins((byte)(value >> 4)));
-                WriteBits(_registerSelectPin | MapCommandToDataPins(value));
+                if (_dataPins.Length == 8)
+                {
+                    WriteBits(_registerSelectPin | MapCommandToDataPins(value));
+                }
+                else
+                {
+                    WriteBits(_registerSelectPin | MapCommandToDataPins((byte)(value >> 4)));
+                    WriteBits(_registerSelectPin | MapCommandToDataPins(value));
+                }
             }
 
             public override void SendData(ReadOnlySpan<byte> values)
