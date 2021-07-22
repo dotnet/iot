@@ -14,8 +14,6 @@ The implementation supports the following devices:
 
 ## Usage
 
-3 examples on how to use this device binding are available in the [samples](samples) folder.
-
 ### BME280
 
 ```csharp
@@ -91,6 +89,8 @@ Console.WriteLine($"Temperature: {readResult.Temperature?.DegreesCelsius:0.#}\u0
 Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
 ```
 
+You also have 3 examples on how to use this device binding are available in the [samples](samples) folder.
+
 The following fritzing diagram illustrates one way to wire up the BMP280 with a Raspberry Pi using I2C:
 
 ![Raspberry Pi Breadboard diagram](samples/rpi-bmp280_i2c.png)
@@ -115,4 +115,3 @@ The following connection types are supported by this binding.
 
 - [X] I2C
 - [ ] SPI
-

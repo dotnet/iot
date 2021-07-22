@@ -158,7 +158,7 @@ Some sensors are already sold with the 10K resistor. Connect the GPIO26 to the *
 
 #### I2C Protocol
 
-![](DHT12_circuit_bb.png)
+![schematics](DHT12_circuit_bb.png)
 
 * SCL - SCL
 * SDA - SDA
@@ -196,7 +196,7 @@ using (Dht11 dht = new Dht11(26))
 
 This sample application allows you to select either a DHT10 through I2C either any other supported DHT through GPIO:
 
-```texy
+```text
 Select the DHT sensor you want to use:
  1. DHT10 on I2C
  2. DHT11 on GPIO

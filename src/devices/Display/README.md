@@ -35,7 +35,7 @@ Thread.Sleep(5000);
 // Turn on buffering
 display.BufferingEnabled = true;
 
-// Write -42�C to display using "decimal point" between 3rd and 4th digit as the � character
+// Write -42°C to display using "decimal point" between 3rd and 4th digit as the ° character
 display.Write("-42C");
 display.Dots = Dot.DecimalPoint;
 
