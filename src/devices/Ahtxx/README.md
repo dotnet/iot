@@ -51,7 +51,7 @@ public Temperature GetTemperature()
 public Ratio GetHumidity()
 ```
 
-Refer to the [sample application](./samples) for a complete example.
+Refer to the [sample application](https://github.com/dotnet/iot/tree/main/src/devices/Ahtxx/samples) for a complete example.
 
 ## Wiring
 

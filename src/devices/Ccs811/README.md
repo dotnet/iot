@@ -76,7 +76,7 @@ sudo reboot
 
 ## Usage
 
-You'll find below how to use the sensor. A full example covering in details all the usage can be found in the [samples directory](./samples).
+You'll find below how to use the sensor. A full example covering in details all the usage can be found in the [samples directory](https://github.com/dotnet/iot/tree/main/src/devices/Ccs811/samples).
 
 ### Create the device
 
@@ -197,7 +197,7 @@ Console.WriteLine($"Baseline calculation value: {ccs811.BaselineAlgorithmCalcula
 
 ## CCS811 Samples
 
-This [sample application](./samples) contains flow and menus allowing you to test easily all the feature of the CSS811 and also show how to implement properly all readings.
+This [sample application](https://github.com/dotnet/iot/tree/main/src/devices/Ccs811/samples) contains flow and menus allowing you to test easily all the feature of the CSS811 and also show how to implement properly all readings.
 
 You can test it thru:
 

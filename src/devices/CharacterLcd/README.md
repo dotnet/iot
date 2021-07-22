@@ -58,7 +58,7 @@ For PCF8574T i2c addresses can be between 0x27 and 0x20 depending on bridged sol
 
 ## Character LCD display Samples
 
-[Different samples](./samples) are provided. The main method will use the Board's Gpio pins to drive the LCD display. The second example will instead use an MCP Gpio extender backpack to drive the LCD display. Also the second example can use Grove RGB LCD Backlight via i2c bus. This second example has been tested on a CrowPi device and Grove LCD RGB Backlight device.
+[Different samples](https://github.com/dotnet/iot/tree/main/src/devices/CharacterLcd/samples) are provided. The main method will use the Board's Gpio pins to drive the LCD display. The second example will instead use an MCP Gpio extender backpack to drive the LCD display. Also the second example can use Grove RGB LCD Backlight via i2c bus. This second example has been tested on a CrowPi device and Grove LCD RGB Backlight device.
 
 ### Build configuration
 

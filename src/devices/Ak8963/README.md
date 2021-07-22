@@ -8,7 +8,7 @@ Documentation for the AK8963 can be found [here](https://www.akm.com/akm/en/file
 
 ## Usage
 
-You can find an example in the [sample](./samples/ak8963.sample.cs) directory. Usage is straight forward including the possibility to have a calibration.
+You can find an example in the [sample](https://github.com/dotnet/iot/tree/main/src/devices/Ak8963/samples/ak8963.sample.cs) directory. Usage is straight forward including the possibility to have a calibration.
 
 ```csharp
 var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Ak8963.Ak8963.DefaultI2cAddress);

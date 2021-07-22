@@ -19,7 +19,7 @@ using(Hcsr501 sensor = new Hcsr501(hcsr501Pin, PinNumberingScheme.Logical))
 }
 ```
 
-From the [HC-SR501 sample](./samples), we can do comething more complete:
+From the [HC-SR501 sample](https://github.com/dotnet/iot/tree/main/src/devices/Hcsr501/samples), we can do comething more complete:
 
 ```C#
 GpioController ledController = new GpioController();

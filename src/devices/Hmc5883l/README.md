@@ -26,7 +26,7 @@ using (Hmc5883l sensor = new Hmc5883l(device))
 
 ```
 
-From the [HMC5883L sample](./samples), you can go further with the following:
+From the [HMC5883L sample](https://github.com/dotnet/iot/tree/main/src/devices/Hmc5883l/samples), you can go further with the following:
 
 ```C#
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Hmc5883l.DefaultI2cAddress);

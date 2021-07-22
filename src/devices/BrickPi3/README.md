@@ -44,7 +44,7 @@ For I2C sensors, the code has been tested very little. Color sensors may return 
 
 ## How to use the driver
 
-The main [BrickPi3.samples](./samples) contains a series of test showing how to use every elements of the driver.
+The main [BrickPi3.samples](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples) contains a series of test showing how to use every elements of the driver.
 
 Create a ```Brick``` class.
 
@@ -309,11 +309,11 @@ The only supported sensors in the GrovePi port present on BrickPi3 are I2C senso
 
 ## Tests
 
-A series of hardware tests for motors and sensors are available in [BrickPi3.samples](./samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
+A series of hardware tests for motors and sensors are available in [BrickPi3.samples](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
 
 ## Example
 
-Refer to the [sample code](./samples) to understand on which port you'll need to plug motors and sensors. The available tests are the following:
+Refer to the [sample code](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples) to understand on which port you'll need to plug motors and sensors. The available tests are the following:
 
 ```
 ./BrickPiHardwareTest -arg1 - arg2

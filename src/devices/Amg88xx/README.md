@@ -203,7 +203,7 @@ Interrupt levels and hysteresis
 
 ### Overview
 
-The [sample application](./samples) demonstrates the key functions of the sensor and the binding:
+The [sample application](https://github.com/dotnet/iot/tree/main/src/devices/Amg88xx/samples) demonstrates the key functions of the sensor and the binding:
 
 * thermal image readout
 * interrupt triggering based on temperature levels incl. hysteresis
