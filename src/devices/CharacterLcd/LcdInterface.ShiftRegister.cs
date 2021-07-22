@@ -27,10 +27,11 @@ namespace Iot.Device.CharacterLcd
             private bool _backlightOn;
 
             /// <summary>
-            /// Creates an LCD interface based on the SN74HC595 shift register.
+            /// ShiftRegister based interface for the LCD.
             /// </summary>
             /// <remarks>
-            /// Pin parameters should be set according to which output pin of the shift register they are connected to (0 to 7).
+            /// Pin parameters should be set according to which output pin of the shift register they are connected to
+            /// (e.g. 0 to 7 for 8bit shift register).
             /// </remarks>
             /// <param name="registerSelectPin">The pin that controls the register select.</param>
             /// <param name="enablePin">The pin that controls the enable switch.</param>
@@ -43,8 +44,7 @@ namespace Iot.Device.CharacterLcd
                 _registerSelectPin = 1 << registerSelectPin;
                 _enablePin = 1 << enablePin;
 
-                // Right now only 4bit mode is supported. 8bit mode would require 16bit shift register or 2x 8bit
-                // because we would need more than 8 output pins to support 8bit mode. This could be implemented in the future.
+                // Right now only 4bit mode is supported. 8bit mode could be implemented in the future.
                 if (dataPins.Length != 4)
                 {
                     throw new ArgumentException("The length of the array must be 4.", nameof(dataPins));
