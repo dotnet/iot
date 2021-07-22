@@ -62,7 +62,7 @@ switch (connectionChoice.KeyChar)
         {
             int i2cAddress = Convert.ToInt32(i2cAddChoice);
             I2cDevice i2c = hardchoice.KeyChar == '1' ? I2cDevice.Create(new I2cConnectionSettings(1, i2cAddress)) : FtCommon.GetDevices()[0].CreateI2cBus().CreateDevice(i2cAddress);
-            mfrc522 = new(i2c, 2, gpioController, false);
+            mfrc522 = new(i2c, pinReset, gpioController, false);
         }
         catch (Exception)
         {
@@ -80,7 +80,7 @@ switch (connectionChoice.KeyChar)
             return;
         }
 
-        mfrc522 = new(serialNameChoice, 2, gpioController, false);
+        mfrc522 = new(serialNameChoice, pinReset, gpioController, false);
         break;
 }
 
