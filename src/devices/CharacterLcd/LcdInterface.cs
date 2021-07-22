@@ -34,10 +34,11 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
-        /// Creates an LCD interface based on the SN74HC595 shift register.
+        /// Creates a ShiftRegister based interface for the LCD.
         /// </summary>
         /// <remarks>
-        /// Pin parameters should be set according to which output pin of the shift register they are connected to (0 to 7).
+        /// Pin parameters should be set according to which output pin of the shift register they are connected to
+        /// (e.g. 0 to 7 for 8bit shift register).
         /// </remarks>
         /// <param name="registerSelectPin">The pin that controls the register select.</param>
         /// <param name="enablePin">The pin that controls the enable switch.</param>
