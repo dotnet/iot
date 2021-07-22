@@ -84,7 +84,7 @@ namespace Iot.Device.Media
         /// true if this VideoDevice should pool the image buffers used.
         /// when set to true the consumer must return the image buffers to the <see cref="ArrayPool{T}"/> Shared instance
         /// </summary>
-        public abstract bool EnablePooling { get; set; }
+        public abstract bool ImageBufferPoolingEnabled { get; set; }
 
         /// <summary>
         /// Capture a picture from the video device.
@@ -95,8 +95,8 @@ namespace Iot.Device.Media
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
-        /// <returns>Picture stream.</returns>
-        public abstract Stream Capture();
+        /// <returns>Picture byte[].</returns>
+        public abstract byte[] Capture();
 
         /// <summary>
         /// Start continuous capture
@@ -106,13 +106,7 @@ namespace Iot.Device.Media
         /// <summary>
         /// The continuous capture stream
         /// </summary>
-        /// <returns></returns>
-        public abstract Stream CaptureContinuous();
-
-        /// <summary>
-        /// The continuous capture stream
-        /// </summary>
-        public abstract void CaptureContinuousBytes(CancellationToken token);
+        public abstract void CaptureContinuous(CancellationToken token);
 
         /// <summary>
         /// Stop the continuous capture

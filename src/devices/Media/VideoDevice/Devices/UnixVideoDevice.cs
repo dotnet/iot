@@ -50,7 +50,7 @@ namespace Iot.Device.Media
         /// true if this VideoDevice should pool the image buffers used.
         /// when set to true the consumer must return the image buffers to the <see cref="ArrayPool{T}"/> Shared instance
         /// </summary>
-        public override bool EnablePooling { get; set; }
+        public override bool ImageBufferPoolingEnabled { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnixVideoDevice"/> class that will use the specified settings to communicate with the video device.
@@ -77,6 +77,11 @@ namespace Iot.Device.Media
         /// <param name="path">Picture save path.</param>
         public override void Capture(string path)
         {
+            if (IsCapturing)
+            {
+                throw new IOException($"The {nameof(VideoDevice)} is already in use.");
+            }
+
             Initialize();
             SetVideoConnectionSettings();
             byte[] dataBuffer = ProcessCaptureData();
@@ -91,14 +96,21 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream.</returns>
-        public override Stream Capture()
+        public override byte[] Capture()
         {
+            if (IsCapturing)
+            {
+                throw new IOException($"The {nameof(VideoDevice)} is already in use.");
+            }
+
             Initialize();
             SetVideoConnectionSettings();
-            byte[] dataBuffer = ProcessCaptureData();
+
+            var dataBuffer = ProcessCaptureData();
+
             Close();
 
-            return new MemoryStream(dataBuffer);
+            return dataBuffer;
         }
 
         public override void StartCaptureContinuous()
@@ -107,13 +119,7 @@ namespace Iot.Device.Media
             SetVideoConnectionSettings();
         }
 
-        public override Stream CaptureContinuous()
-        {
-            byte[] dataBuffer = ProcessCaptureData();
-            return new MemoryStream(dataBuffer);
-        }
-
-        public override unsafe void CaptureContinuousBytes(CancellationToken token)
+        public override unsafe void CaptureContinuous(CancellationToken token)
         {
             _capturing = true;
             fixed (V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
@@ -331,7 +337,7 @@ namespace Iot.Device.Media
             IntPtr intptr = buffers[frame.index].Start;
             var length = (int)buffers[frame.index].Length;
             byte[] dataBuffer = Array.Empty<byte>();
-            if (EnablePooling)
+            if (ImageBufferPoolingEnabled)
             {
                 dataBuffer = ArrayPool<byte>.Shared.Rent(length);
             }
