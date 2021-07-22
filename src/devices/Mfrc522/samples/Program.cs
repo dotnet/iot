@@ -53,7 +53,7 @@ switch (connectionChoice.KeyChar)
         // Anything lower will work as well
         connection.ClockFrequency = 5_000_000;
         SpiDevice spi = hardchoice.KeyChar == '1' ? SpiDevice.Create(connection) : new Ft4222Spi(connection);
-        mfrc522 = new(spi, 2, gpioController, false);
+        mfrc522 = new(spi, pinReset, gpioController, false);
         break;
     case '2':
         Console.WriteLine("Enter the I2C address in decimal so 16 for 0x10");
