@@ -11,7 +11,7 @@ using UnitsNet;
 namespace Iot.Device.Ags01db
 {
     /// <summary>
-    /// MEMS VOC Gas Sensor ASG01DB
+    /// MEMS VOC Gas Sensor ASG01DB -- a good one
     /// </summary>
     [Interface("MEMS VOC Gas Sensor ASG01DB")]
     public class Ags01db : IDisposable
