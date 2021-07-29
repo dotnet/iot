@@ -44,7 +44,7 @@ For I2C sensors, the code has been tested very little. Color sensors may return 
 
 ## How to use the driver
 
-The main [BrickPi3.samples](./samples) contains a series of test showing how to use every elements of the driver.
+The main [BrickPi3.samples](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples) contains a series of test showing how to use every elements of the driver.
 
 Create a ```Brick``` class.
 
@@ -309,5 +309,49 @@ The only supported sensors in the GrovePi port present on BrickPi3 are I2C senso
 
 ## Tests
 
-A series of hardware tests for motors and sensors are available in [BrickPi3.samples](./samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
+A series of hardware tests for motors and sensors are available in [BrickPi3.samples](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
 
+## Example
+
+Refer to the [sample code](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples) to understand on which port you'll need to plug motors and sensors. The available tests are the following:
+
+```
+./BrickPiHardwareTest -arg1 - arg2
+where -arg1, arg2, etc are one of the following:
+-nobrick: don't run the basic BrickPi tests.
+-motor: run basic motor tests, motors need to be on port A and D.
+-vehicle: run a vehicle test, motors need to be on port A and D.
+-multi: run a multi sensor test
+   EV3TouchSensor on port 1
+   NXTTouchSensor on port 2
+   NXTColorSensor on port 3
+   NXTSoundSensor on port 4
+   Press the EV3TouchSensor sensor to finish
+-color: run an EV3 color test
+   EV3TouchSensor on port 1
+   EV3ColorSensor on port 2
+-touch: run touch sensor test
+   EV3TouchSensor on port 1
+-nxtlight: run the NXT light sensor tests
+   NXTLightSensor on port 4
+-nxtus: run NXT Ultrasonic test on port 4
+-nxtcolor: run NXT Color sensor test
+   EV3TouchSensor on port 1
+   NXTColorSensor on port 4
+-irsensor: run EV3 IR sensor test on port 4
+```
+
+You always have to create a brick and initialize it. Then you can run your code. In this example, reading a Touch sensor.
+```csharp
+Brick _brick = new Brick();
+Console.WriteLine("Running 100 reads on EV3 touch sensor on port 1.");
+EV3TouchSensor touch = new EV3TouchSensor(_brick, BrickPortSensor.PortS1);
+// Alternative to test NXT touch sensor
+// NXTTouchSensor touch = new NXTTouchSensor(brick, BrickPortSensor.PORT_S2);
+int count = 0;
+while (count < 100)
+{
+    Console.WriteLine($"NXT Touch, IsPRessed: {touch.IsPressed()}, ReadAsString: {touch.ReadAsString()}, Selected mode: {touch.SelectedMode()}");
+    Task.Delay(300).Wait(); ;
+}
+```
