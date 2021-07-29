@@ -10,12 +10,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Iot.Device.Common
+namespace Iot.Device.Rtc
 {
     /// <summary>
     /// Contains methods to access and update the system real time clock ("Bios clock")
     /// </summary>
-    public static class SystemRealTimeClock
+    public static class SystemClock
     {
         private static readonly DateTime UnixEpochStart = new DateTime(1970, 1, 1);
 

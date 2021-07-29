@@ -8,7 +8,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Interop\Windows\Kernel32.cs" Link="Kernel32.cs" />
     <Compile Include="MathExtensions.cs" />
     <Compile Include="Iot/Device/Common/*.cs" />
     <Compile Include="Iot/Device/Graphics/*.cs" />

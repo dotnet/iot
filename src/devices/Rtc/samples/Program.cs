@@ -3,6 +3,21 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Rtc;
 
+static void TestSystemTime()
+{
+    DateTime dt = SystemClock.GetSystemTimeUtc();
+    Console.WriteLine($"The system time is now {dt}");
+
+    DateTime newTime = new DateTime(2019, 4, 3, 20, 10, 10);
+    Console.WriteLine($"Do you want to set the time to {newTime}?");
+    if (Console.ReadLine()!.StartsWith("y"))
+    {
+        SystemClock.SetSystemTimeUtc(newTime);
+    }
+}
+
+TestSystemTime();
+
 // This project contains DS1307, DS3231, PCF8563
 I2cConnectionSettings settings = new(1, Ds3231.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
