@@ -42,7 +42,7 @@ For I2C sensors, the code has been tested very little. And no high level classes
 
 ## How to use the driver
 
-The main [GoPiGo3.samples](./samples) contains a series of test showing how to use every elements of the driver.
+The main [GoPiGo3.samples](https://github.com/dotnet/iot/tree/main/src/devices/GoPiGo3/samples) contains a series of test showing how to use every elements of the driver.
 
 Create a ```GoPiGo``` class.
 
@@ -300,7 +300,7 @@ The ```Vehicle``` class offers functions with timeout allowing to drive for a ce
 
 ## Tests
 
-A series of hardware tests for motors and sensors are available in [GoPiGo3.samples](./samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
+A series of hardware tests for motors and sensors are available in [GoPiGo3.samples](https://github.com/dotnet/iot/tree/main/src/devices/GoPiGo3/samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
 
 You can select the tests you want to run:
 
