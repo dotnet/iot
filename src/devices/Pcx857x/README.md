@@ -6,10 +6,10 @@ The PCX857X device family provides 8/16-bit, general purpose parallel I/O expans
 
 PCX857X devices contain different markings to distinguish features like packaging, bus speed support, and address space.  Please review specific datasheet for more information.
 
-**PCF8574**: https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf
-**PCF8575**: https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf
-**PCA8574**: https://www.nxp.com/docs/en/data-sheet/PCA8574_PCA8574A.pdf
-**PCA8575**: https://www.nxp.com/docs/en/data-sheet/PCA8575.pdf
+* PCF8574 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCF8574_PCF8574A.pdf)
+* PCF8575 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCF8575.pdf)
+* PCA8574 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA8574_PCA8574A.pdf)
+* PCA8575 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA8575.pdf)
 
 #### Usage
 

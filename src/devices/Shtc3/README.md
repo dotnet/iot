@@ -5,15 +5,17 @@ To reduce power cosumption this project use capability of sensor to allow measur
 
 ## Documentation
 
-- https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/2_Humidity_Sensors/Datasheets/Sensirion_Humidity_Sensors_SHTC3_Datasheet.pdf
+- SHTC3 [datasheet](https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/2_Humidity_Sensors/Datasheets/Sensirion_Humidity_Sensors_SHTC3_Datasheet.pdf)
 
 ## Usage
 
 ### Hardware Required
+
 * SHTC3
 * Male/Female Jumper Wires
 
 ### Circuit
+
 * SCL - SCL
 * SDA - SDA
 * VCC - 3.3V
@@ -50,4 +52,5 @@ using (Shtc3 sensor = new Shtc3(device))
 ```
 
 ### Result
+
 ![Sample result](RunningResult.JPG)

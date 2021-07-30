@@ -4,7 +4,7 @@ The Si7021 device provides temperature and humidity sensor readings with an I2C 
 
 ## Documentation
 
-- https://cdn.sparkfun.com/datasheets/Sensors/Weather/Si7021.pdf
+- Si7021 [datasheet](https://cdn.sparkfun.com/datasheets/Sensors/Weather/Si7021.pdf)
 
 ## Board
 
@@ -14,6 +14,7 @@ The Si7021 device provides temperature and humidity sensor readings with an I2C 
 ## Usage
 
 ### Hardware Required
+
 * Si7021
 * Male/Female Jumper Wires
 
@@ -51,4 +52,5 @@ using (Si7021 sensor = new Si7021(device, Resolution.Resolution1))
 ```
 
 ### Result
+
 ![Sample result](RunningResult.jpg)

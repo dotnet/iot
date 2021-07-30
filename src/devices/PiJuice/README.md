@@ -8,7 +8,7 @@ PiJuice is a fully uninterruptable / uninterupted power supply that will always 
 
 ## Documentation
 
-- https://github.com/PiSupply/PiJuice/blob/master/Software/README.md
+- PiJuice documentation can be found [here](https://github.com/PiSupply/PiJuice/blob/master/Software/README.md)
 
 ## Board
 

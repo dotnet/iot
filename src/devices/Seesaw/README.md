@@ -4,7 +4,7 @@ Adafruit Seesaw is a near-universal converter framework which allows you to add 
 
 This binding provides an Api which is close to the one provided by Adafruit themselves but also implements IGpioController so that available Gpio pins can be used in place of any 'on board' ones but using the standard IoT API.
 
-This binding was developed using the Adafruit Seesaw breakout board which uses the ATSAMD09 and the default firmware exposes the following capabilities
+This binding was developed using the Adafruit Seesaw breakout board which uses the ATSAMD09 and the default firmware exposes the following capabilities:
 
 * 3 x 12-bit ADC inputs
 * 3 x 8-bit PWM outputs
@@ -27,6 +27,7 @@ These samples connect to a Raspberry Pi via the first I2C interface. Issues were
 
 This sample simply connects to an Adafruit Seesaw breakout board, reads and then displays the capabilities of the board firmware
 
+```csharp
     const byte Adafruit_Seesaw_SoilSensor_I2cAddress = 0x36;
     const byte Adafruit_Seesaw_SoilSensor_I2cBus = 0x1;
 
@@ -41,6 +42,7 @@ This sample simply connects to an Adafruit Seesaw breakout board, reads and then
             System.Threading.Tasks.Task.Delay(1000).Wait();
         }
     }
+```
 
 ![Seesaw capabilities](SeesawSampleCapabilities_bb.png)
 
@@ -48,21 +50,23 @@ This sample simply connects to an Adafruit Seesaw breakout board, reads and then
 
 This sample connects a Raspberry Pi to an Adafruit capacitive soil sensor
 
-    const byte Adafruit_Seesaw_Breakout_I2cAddress = 0x49;
-    const byte Adafruit_Seesaw_Breakout_I2cBus = 0x1;
+```csharp
+const byte Adafruit_Seesaw_Breakout_I2cAddress = 0x49;
+const byte Adafruit_Seesaw_Breakout_I2cBus = 0x1;
 
-    using (I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(Adafruit_Seesaw_Breakout_I2cBus, Adafruit_Seesaw_Breakout_I2cAddress)))
-    using (Seesaw ssDevice = new Seesaw(i2cDevice))
+using (I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(Adafruit_Seesaw_Breakout_I2cBus, Adafruit_Seesaw_Breakout_I2cAddress)))
+using (Seesaw ssDevice = new Seesaw(i2cDevice))
+{
+    Console.WriteLine();
+    Console.WriteLine($"Seesaw Version: {ssDevice.Version}");
+    Console.WriteLine();
+    foreach (Seesaw.Seesaw_Module module in Enum.GetValues(typeof(Seesaw.Seesaw_Module)))
     {
-        Console.WriteLine();
-        Console.WriteLine($"Seesaw Version: {ssDevice.Version}");
-        Console.WriteLine();
-        foreach (Seesaw.Seesaw_Module module in Enum.GetValues(typeof(Seesaw.Seesaw_Module)))
-        {
-            Console.WriteLine($"Module: {Enum.GetName(typeof(Seesaw.Seesaw_Module), module)} - {(ssDevice.HasModule(module) ? "available" : "not-available")}");
-        }
-        Console.WriteLine();
+        Console.WriteLine($"Module: {Enum.GetName(typeof(Seesaw.Seesaw_Module), module)} - {(ssDevice.HasModule(module) ? "available" : "not-available")}");
     }
+    Console.WriteLine();
+}
+```
 
 ![Seesaw sample soil sensor](SeesawSampleSoilSensor_bb.png)
 
@@ -70,7 +74,7 @@ This sample connects a Raspberry Pi to an Adafruit capacitive soil sensor
 
 This sample duplicates the functionality of the rpi-more-blinking-lights sample but instead of using the raspberry pi Gpio it uses the Seesaw breakout board for all inputs
 
-![](SeesawSampleBlinkingLights_bb.png)
+![eesaw Sample Blinking Lights](SeesawSampleBlinkingLights_bb.png)
 
 ## Binding Notes
 

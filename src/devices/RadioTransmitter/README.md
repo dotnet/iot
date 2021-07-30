@@ -4,11 +4,12 @@ The radio transmitter devices supported by the project include KT0803.
 
 ## Documentation
 
-- https://cdn.datasheetspdf.com/pdf-down/K/T/0/KT0803L-KTMicro.pdf
+- KT0803 radio transmitter [datasheet](https://cdn.datasheetspdf.com/pdf-down/K/T/0/KT0803L-KTMicro.pdf)
 
 ## Usage
 
 ### Hardware Required
+
 * KT0803
 * Male/Female Jumper Wires
 

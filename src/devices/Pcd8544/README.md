@@ -4,7 +4,7 @@ This is the famous screen that Nokia 5110 used. It's a SPI based device. This No
 
 ## Documentation
 
-- https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
+- Nokia5110 [datasheet](https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf)
 
 ## Usage
 

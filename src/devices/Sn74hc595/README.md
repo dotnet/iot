@@ -8,9 +8,9 @@ The [binding](Sn74hc595.cs) abstracts the interaction with the data register, th
 
 ## Documentation
 
-* Datasheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
-* Adafruit: https://www.adafruit.com/product/450
-* Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
+* [Datasheet](https://www.ti.com/lit/ds/symlink/sn74hc595.pdf)
+* [Adafruit](https://www.adafruit.com/product/450)
+* [Tutorial](https://www.youtube.com/watch?v=6fVbJbNPrEU)
 
 ## Usage
 

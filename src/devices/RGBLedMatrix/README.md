@@ -5,35 +5,35 @@ RGB LED Matrix interface protocol is sometimes referred as `HUB75`.
 
 ## Documentation
 
-- https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/
-- http://www.ti.com/lit/ds/symlink/tlc59283.pdf
-- https://datasheet4u.com/datasheet-parts/FM6124-datasheet.php?id=1309677 (diagram on page 3)
+- 32x16 32x32 RGB led matrix [documentation](https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/)
+- TLC59283 [datasheet](http://www.ti.com/lit/ds/symlink/tlc59283.pdf)
+- FM6124 [datasheet](https://datasheet4u.com/datasheet-parts/FM6124-datasheet.php?id=1309677) (diagram on page 3)
 
 ## Usage
 
 The RGBLedMatrix is the class which handle drawing on the RGB LED Matrices.
 
 ```csharp
-    //
-    // The companion sample has more code demonstrating different functionality of RGBLedMatrix
-    //
+//
+// The companion sample has more code demonstrating different functionality of RGBLedMatrix
+//
 
-    PinMapping mapping = PinMapping.MatrixBonnetMapping32;
+PinMapping mapping = PinMapping.MatrixBonnetMapping32;
 
-    // Create RGBLedMatrix object to draw on 32x32 panel
-    using (RGBLedMatrix matrix = new RGBLedMatrix(mapping, 32, 32))
-    {
-        matrix.StartRendering();
+// Create RGBLedMatrix object to draw on 32x32 panel
+using (RGBLedMatrix matrix = new RGBLedMatrix(mapping, 32, 32))
+{
+    matrix.StartRendering();
 
-        // Loop here to do the drawing on the matrix
-        // something like matrix.FillRectangle(0, 0, 10, 10, 255, 0, 0) to draw red color rectangle
-    }
+    // Loop here to do the drawing on the matrix
+    // something like matrix.FillRectangle(0, 0, 10, 10, 255, 0, 0) to draw red color rectangle
+}
 ```
 
 RGBLedMatrix has a constructor which can be used to instantiate the object to control the matrix panel. The parameters of the constructor can be used to decide which matrix panel is used and if there is any chaining.
 
 ```csharp
-        public RGBLedMatrix(PinMapping mapping, int width, int height, int chainRows = 1, int chainColumns = 1)
+public RGBLedMatrix(PinMapping mapping, int width, int height, int chainRows = 1, int chainColumns = 1)
 ```
 
 mapping is the way to express how the GPIO pins mapped to the matrix pins.
@@ -49,7 +49,7 @@ chainColumns is a default parameter to specify the number of panels in every row
 It is possible to not pass the chainRows and chainColumns values in case of chaining multiple panels in just one row. here is example:
 
 ```csharp
-    RGBLedMatrix matrix = new RGBLedMatrix(mapping, 128, 32);
+RGBLedMatrix matrix = new RGBLedMatrix(mapping, 128, 32);
 ```
 
 This can be used if chaining 4 32x32 panels in one row.
@@ -63,7 +63,7 @@ This sample has multiple demos showing the RGBLedMatrix capability, e.g. Setting
 In the beginning of the Main method, RGBLedMatrix object is get instantiated by the line
 
 ```csharp
-    RGBLedMatrix matrix = new RGBLedMatrix(mapping, 32, 32);
+RGBLedMatrix matrix = new RGBLedMatrix(mapping, 32, 32);
 ```
 
 The created object is going to handle 32x32 matrix panel. If having different panel or doing chaining, the constructor parameter values need to be changed to match the used panels.

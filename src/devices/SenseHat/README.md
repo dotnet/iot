@@ -229,7 +229,7 @@ Note: There are more than 1 temperature sensors on SenseHat board
 
 When using SysFs implementation please make sure to enable Sense HAT in `/boot/config.txt` before using by adding following line:
 
-```
+```text
 dtoverlay=rpi-sense
 ```
 

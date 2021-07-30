@@ -4,7 +4,7 @@ The STUSB4500 is an autonomous USB-C PD controller for Power Sinks which enables
 
 ## Documentation 
 
-- https://github.com/usb-c/STUSB4500
+- STUSB4500 [datasheet](https://github.com/usb-c/STUSB4500)
 
 ## Usage
 

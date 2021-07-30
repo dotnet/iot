@@ -10,7 +10,7 @@ clears it.
 
 ## Documentation
 
-- https://cdn-shop.adafruit.com/datasheets/TSL2561.pdf
+- TSL256x [datasheet](https://cdn-shop.adafruit.com/datasheets/TSL2561.pdf)
 
 ## Usage
 

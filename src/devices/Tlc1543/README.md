@@ -4,11 +4,11 @@ High-speed 10-bit switched-capacitor successive-approximation A/D Converter with
 
 ## Documentation
 
-**[TLC1542/3]**: [Datasheet](https://www.ti.com/lit/ds/symlink/tlc1543.pdf)
+- TLC1542/3 [Datasheet](https://www.ti.com/lit/ds/symlink/tlc1543.pdf)
 
 ## Usage
 
-# Simple Line finding algorithm with ADC usage
+### Simple Line finding algorithm with ADC usage
 
 This sample shows how to calculate position of line under matrix of 5 IR sensors with the help of TLC1543 ADC. In this case it's AlphaBot2 Pi from WaveShare with ITR-20001 IR sensors.
 
@@ -26,11 +26,8 @@ Tlc1543 adc = new Tlc1543(spi);
 ```
 
 - 24 is our address pin, 
-
 - 5 chip select, 
-
 - 23 data out pin 
-
 - and 25 is input output clock.
 
 ### Changing Charge Channel
@@ -65,9 +62,7 @@ for (int i = 0; i < values.Count; i++)
 To find where under our matrix is line we need to check values given out from sensors depending on where they are pointing. 
 
 - Pointing at sky gives us values ranging from 0 to 50
-
 - Keeping it close to white paper gives values bigger than 600
-
 - Placing it pointed at black tape - taped on white paper(for contrast) gives values ranging from 150 to 250 on sensor exactly above line
 
 So to simplfy things we assume that when we run this program we won't be pointing our sensor matrix at the sky and we will keep it at a flat surface.
@@ -77,7 +72,6 @@ Next thing is to calculate average from sensors for when there are more than one
 For example when first and second sensor sees line values will be
 
 - on first loop `lineAverage = -2` and `onLine = 1`;
-
 - on second loop `lineAverage = -3` and `onLine = 2`;
 
 And now with this data we can calculate linePosition

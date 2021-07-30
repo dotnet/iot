@@ -16,11 +16,11 @@ The following image is of the larger MBI5027 16-bit shift register:
 
 ## Documentation
 
-- SN74HC595 data sheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
-- MBI5027 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
-- MBI5168 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
-- Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
-- Tutorial: https://www.youtube.com/watch?v=G1SzTGZ2l1c
+- SN74HC595 [datasheet](https://www.ti.com/lit/ds/symlink/sn74hc595.pdf)
+- MBI5027 [datasheet](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf)
+- MBI5168 [datasheet](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf)
+- Tutorial[datasheet](https://www.youtube.com/watch?v=6fVbJbNPrEU)
+- Tutorial[datasheet](https://www.youtube.com/watch?v=G1SzTGZ2l1c)
 
 ## Usage
 
