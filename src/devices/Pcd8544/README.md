@@ -128,7 +128,7 @@ var bitmap3 = BitmapToByteArray(bitmapLarge);
 
 Note: you may want to reverse the colors first depending on what you want.
 
-### Advance functions
+### Advanced functions
 
 You can adjust couple of factors like `Bias`,  `Temperature`, `Contrast` and `Brightness`. The [samples](./samples/Program.cs) will run thru all of them so you can understand the impact of each of them. The `Bias` will increase the voltage and darken the screen.
 

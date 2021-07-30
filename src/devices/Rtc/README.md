@@ -10,7 +10,7 @@ The RTC devices supported by the project include DS1307, DS3231, PCF8563.
 
 ## Board
 
-![](Circuit_DS1307_bb.png)
+![Circuit DS1307](Circuit_DS1307_bb.png)
 
 ## Usage
 
