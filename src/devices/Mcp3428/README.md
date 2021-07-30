@@ -8,7 +8,7 @@ The library implements the Microchip MCP3428 16 bit A/D converter with I2C inter
 
 The  3 devices differ only in addressing capability and channel number. The library implements all of them.
 
-**[MCP3428]**: <http://ww1.microchip.com/downloads/en/DeviceDoc/22226a.pdf>
+* MCP3428 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/22226a.pdf)
 
 ## Board
 

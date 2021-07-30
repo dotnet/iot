@@ -5,7 +5,7 @@ DS3231 is a low-cost, extremely accurate I2C realtime clock (RTC) with an integr
 ![](sensor.jpg)
 
 ## Usage
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds3231.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

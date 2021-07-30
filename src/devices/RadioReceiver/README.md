@@ -13,7 +13,7 @@ The radio receiver devices supported by the project include TEA5767.
 * TEA5767
 * Male/Female Jumper Wires
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Tea5767.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

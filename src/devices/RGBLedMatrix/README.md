@@ -13,7 +13,7 @@ RGB LED Matrix interface protocol is sometimes referred as `HUB75`.
 
 The RGBLedMatrix is the class which handle drawing on the RGB LED Matrices.
 
-```C#
+```csharp
     //
     // The companion sample has more code demonstrating different functionality of RGBLedMatrix
     //
@@ -32,7 +32,7 @@ The RGBLedMatrix is the class which handle drawing on the RGB LED Matrices.
 
 RGBLedMatrix has a constructor which can be used to instantiate the object to control the matrix panel. The parameters of the constructor can be used to decide which matrix panel is used and if there is any chaining.
 
-```C#
+```csharp
         public RGBLedMatrix(PinMapping mapping, int width, int height, int chainRows = 1, int chainColumns = 1)
 ```
 
@@ -48,7 +48,7 @@ chainColumns is a default parameter to specify the number of panels in every row
 
 It is possible to not pass the chainRows and chainColumns values in case of chaining multiple panels in just one row. here is example:
 
-```C#
+```csharp
     RGBLedMatrix matrix = new RGBLedMatrix(mapping, 128, 32);
 ```
 
@@ -62,7 +62,7 @@ This sample has multiple demos showing the RGBLedMatrix capability, e.g. Setting
 
 In the beginning of the Main method, RGBLedMatrix object is get instantiated by the line
 
-```C#
+```csharp
     RGBLedMatrix matrix = new RGBLedMatrix(mapping, 32, 32);
 ```
 

@@ -4,7 +4,7 @@ MFRC522 is a very cheap RFID/NFC reader for Iso 14443 Type A cards. Part of thos
 
 ## Documentation
 
-- MFRC5222 Datasheet: https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf
+- MFRC5222 [Datasheet](https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf)
 
 ## Usage
 

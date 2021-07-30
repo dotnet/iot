@@ -4,17 +4,17 @@ The MCP23XXX device family provides 8/16-bit, general purpose parallel I/O expan
 
 ## Documentation
 
-- https://www.adafruit.com/product/732
-- https://learn.adafruit.com/using-mcp23008-mcp23017-with-circuitpython/overview
+- The docuementation from [Adafruit](https://www.adafruit.com/product/732)
+- [Learn how to use MCP23008 and MCP23017 with Python](https://learn.adafruit.com/using-mcp23008-mcp23017-with-circuitpython/overview) from the Adafruit learn courses used to create this binding.
 
 ### Device Family
 
 MCP23XXX devices contain different markings to distinguish features like interfacing, packaging, and temperature ratings.  For example, MCP23017 contains an I2C interface and MCP23S17 contains a SPI interface.  Please review specific datasheet for more information.
 
-**MCP23X08**: http://ww1.microchip.com/downloads/en/DeviceDoc/21919e.pdf
-**MCP23X09**: http://ww1.microchip.com/downloads/en/DeviceDoc/20002121C.pdf
-**MCP23X17**: http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf
-**MCP23X18**: http://ww1.microchip.com/downloads/en/DeviceDoc/22103a.pdf
+* MCP23X08 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/21919e.pdf)
+* MCP23X09 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/20002121C.pdf)
+* MCP23X17 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf)
+* MCP23X18 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/22103a.pdf)
 
 **NOTE**: MCP23X16 contains different internal circuitry and is not compatible with this binding.
 
@@ -102,5 +102,3 @@ PinValue interruptB = mcp23S17.ReadInterruptB();
 ## Binding Notes
 
 This binding includes an `Mcp23xxx` abstract class and derived abstract classes for 8-bit `Mcp23x0x` and 16-bit `Mcp23x1x` variants.
-
-

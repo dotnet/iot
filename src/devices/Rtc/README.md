@@ -19,7 +19,7 @@ Hardware Required:
 - DS1307/DS3231/PCF8563
 - Male/Female Jumper Wires
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds1307.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

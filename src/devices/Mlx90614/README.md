@@ -4,7 +4,7 @@ The MLX90614 is an Infra Red thermometer for noncontact temperature measurements
 
 ## Documentation
 
-- https://cdn.datasheetspdf.com/pdf-down/M/L/X/MLX90614-Melexis.pdf
+- You can find the datasheet [here](https://cdn.datasheetspdf.com/pdf-down/M/L/X/MLX90614-Melexis.pdf)
 
 ## Board
 
@@ -13,11 +13,13 @@ The MLX90614 is an Infra Red thermometer for noncontact temperature measurements
 ## Usage
 
 ### Hardware Required
+
 * MLX90614
 * Male/Female Jumper Wires
 
 ### Circuit
-![](MLX90614_circuit_bb.jpg)
+
+![MLX90614 circuit](MLX90614_circuit_bb.jpg)
 
 * SCL - SCL (GPIO 3)
 * SDA - SDA (GPIO 2)
@@ -28,7 +30,7 @@ The MLX90614 is an Infra Red thermometer for noncontact temperature measurements
 
 ### Code
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Mlx90614.DefaultI2cAddress);
 I2cDevice i2cDevice = I2cDevice.Create(settings);
 
@@ -46,4 +48,5 @@ using (Mlx90614 sensor = new Mlx90614(i2cDevice))
 ```
 
 ### Result
+
 ![Sample result](RunningResult.jpg)

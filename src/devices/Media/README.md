@@ -2,28 +2,58 @@
 
 The project currently includes `VideoDevice`.
 
+## Prerequisites
+
+### VideoDevice
+
+- Install `v4l-utils`.
+
+```shell
+sudo apt-get install v4l-utils
+```
+
+- Install `System.Drawing` native dependencies.
+
+```shell
+sudo apt-get install libc6-dev libgdiplus libx11-dev
+```
+
+### SoundDevice
+
+- Install `libasound2-dev`.
+
+```shell
+sudo apt-get install libasound2-dev
+```
+
 ## Usage
 
 ### SoundDevice
 
+- Create a `SoundConnectionSettings` and set the parameters for recording (Optional).
 
-1. Create a `SoundConnectionSettings` and set the parameters for recording (Optional).
-    ```C#
-    SoundConnectionSettings settings = new SoundConnectionSettings();
-    ```
-2. Create a communications channel to a sound device.
-    ```C#
-    using SoundDevice device = SoundDevice.Create(settings);
-    ```
-3. Play a WAV file
-    ```C#
-    device.Play("/home/pi/music.wav");
-    ```
-4. Record some sounds
-    ```C#
-    // Record for 10 seconds and save in "/home/pi/record.wav"
-    device.Record(10, "/home/pi/record.wav");
-    ```
+```csharp
+SoundConnectionSettings settings = new SoundConnectionSettings();
+```
+
+- Create a communications channel to a sound device.
+
+```csharp
+using SoundDevice device = SoundDevice.Create(settings);
+```
+
+- Play a WAV file
+
+```csharp
+device.Play("/home/pi/music.wav");
+```
+
+- Record some sounds
+
+```csharp
+// Record for 10 seconds and save in "/home/pi/record.wav"
+device.Record(10, "/home/pi/record.wav");
+```
 
 #### Using continuous recording
 
@@ -44,54 +74,41 @@ device.Play("recording.wav");
 
 ### VideoDevice
 
-1. Create a `VideoConnectionSettings` and set the parameters for capture.
-    ```C#
-    VideoConnectionSettings settings = new VideoConnectionSettings(busId: 0, captureSize: (2560, 1920), pixelFormat: PixelFormat.YUYV);
-    ```
-2. Create a communications channel to a video device.
-    ```C#
-    using VideoDevice device = VideoDevice.Create(settings);
-    ```
-3. Capture static image
-    ```C#
-    // Capture static image
-    device.Capture("/home/pi/jpg_direct_output.jpg");
+- Create a `VideoConnectionSettings` and set the parameters for capture.
 
-    // Change capture setting
-    device.Settings.PixelFormat = PixelFormat.YUV420;
+```csharp
+VideoConnectionSettings settings = new VideoConnectionSettings(busId: 0, captureSize: (2560, 1920), pixelFormat: PixelFormat.YUYV);
+```
 
-    // Get image stream, convert pixel format and save to file
-    MemoryStream ms = device.Capture();
-    Color[] colors = VideoDevice.Yv12ToRgb(ms, settings.CaptureSize);
-    Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
-    bitmap.Save("/home/pi/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
-    ```
-4. Other methods
-    ```C#
-    // Get the supported formats of the device
-    IEnumerable<PixelFormat> formats = device.GetSupportedPixelFormats();
-    // Get the resolutions of the format
-    IEnumerable<(uint Width, uint Height)> resolutions = device.GetPixelFormatResolutions(PixelFormat.YUYV));
-    // Query v4l2 controls default and current value
-    VideoDeviceValue value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
-    ```
+- Create a communications channel to a video device.
 
-## Prerequisites
+```csharp
+using VideoDevice device = VideoDevice.Create(settings);
+```
 
-### VideoDevice
+- Capture static image
 
-1. Install `v4l-utils`.
-    ```
-    sudo apt-get install v4l-utils
-    ```
-2. Install `System.Drawing` native dependencies.
-    ```
-    sudo apt-get install libc6-dev libgdiplus libx11-dev
-    ```
+```csharp
+// Capture static image
+device.Capture("/home/pi/jpg_direct_output.jpg");
 
-### SoundDevice
+// Change capture setting
+device.Settings.PixelFormat = PixelFormat.YUV420;
 
-1. Install `libasound2-dev`.
-    ```
-    sudo apt-get install libasound2-dev
-    ```
+// Get image stream, convert pixel format and save to file
+MemoryStream ms = device.Capture();
+Color[] colors = VideoDevice.Yv12ToRgb(ms, settings.CaptureSize);
+Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
+bitmap.Save("/home/pi/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+```
+
+- Other methods
+
+```csharp
+// Get the supported formats of the device
+IEnumerable<PixelFormat> formats = device.GetSupportedPixelFormats();
+// Get the resolutions of the format
+IEnumerable<(uint Width, uint Height)> resolutions = device.GetPixelFormatResolutions(PixelFormat.YUYV));
+// Query v4l2 controls default and current value
+VideoDeviceValue value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
+```

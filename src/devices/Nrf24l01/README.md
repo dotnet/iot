@@ -3,16 +3,19 @@
 The nRF24L01 is a single chip radio transceiver for the world wide 2.4 - 2.5 GHz ISM band.
 
 ## Documentation
-- https://cdn.datasheetspdf.com/pdf-down/N/R/F/NRF24L01-Nordic.pdf
+
+- The bindging datasheet can be found [here](https://cdn.datasheetspdf.com/pdf-down/N/R/F/NRF24L01-Nordic.pdf)
 
 ## Board
 
 ![Sensor picture](sensor.jpg)
+
 ![Connection Diagram](NRF_circuit_bb.jpg)
 
 ## Usage
 
 ### Hardware Required
+
 - nRF24L01 × 2
 - Male/Female Jumper Wires
 
@@ -43,7 +46,7 @@ The nRF24L01 is a single chip radio transceiver for the world wide 2.4 - 2.5 GHz
 This example needs to enable SPI1 on Raspberry Pi running Raspbian.
 
 1. Open **/boot/config.txt** using editor, like
-    ```
+    ```shell
     sudo nano /boot/config.txt
     ```
 2. Add the line **dtoverlay=spi1-3cs** and save
@@ -53,7 +56,7 @@ When you using SPI1, you need to pass **ID = 1, CS = 2** into SpiConnectionSetti
 
 ### Code
 
-```C#
+```csharp
 // SPI0 CS0
 SpiConnectionSettings senderSettings = new SpiConnectionSettings(0, 0)
 {

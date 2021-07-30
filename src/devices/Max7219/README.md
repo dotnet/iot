@@ -1,10 +1,10 @@
 # Max7219 (LED Matrix driver)
 
- You can use [Max7219.cs](Max7219.cs) in your project to drive a Max7219 based Dot Matrix Module. [Write to a 8x8 Dot Matrix Module](samples/README.md) demonstrates a concrete example using this class.
+ You can use [Max7219.cs](Max7219.cs) in your project to drive a Max7219 based Dot Matrix Module. Write to a 8x8 Dot Matrix Module demonstrates a concrete example using this class.
 
  The following fritzing diagram illustrates one way to wire up the Max7219, with a Raspberry Pi.
 
-![Raspberry Pi Breadboard diagram](samples/Schema_bb.png)
+![Raspberry Pi Breadboard diagram](./Schema_bb.png)
 
 ## Usage
 
@@ -90,16 +90,21 @@ This example can also be cross-compiled on another machine and then executed on 
 
 * Publish project on the development machine
 
-        cd ~/Projects/iot/src/devices/Max7219/samples
-        dotnet publish -c Release -r linux-arm
+```shell
+cd ~/Projects/iot/src/devices/Max7219/samples
+dotnet publish -c Release -r linux-arm
+```
 
 * Synchronize published folder to the RaspPi via rsync over ssh
 
-        rsync -avz -e 'ssh' bin/Release/netcoreapp3.1/linux-arm/publish/  pi@192.168.1.192:/home/pi/max-sample/
+```shell
+rsync -avz -e 'ssh' bin/Release/netcoreapp3.1/linux-arm/publish/  pi@192.168.1.192:/home/pi/max-sample/
+```
 
 * Execute the program on the RaspPi or remote via SSH
 
-        ssh pi@192.168.1.192
-        cd /home/pi/max-sample/
-        ./Max7219.sample
-
+```shell
+ssh pi@192.168.1.192
+cd /home/pi/max-sample/
+./Max7219.sample
+```

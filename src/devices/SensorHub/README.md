@@ -10,7 +10,7 @@ SensorHub for reading Temperature, Pressure, Illuminance and Humidity. I2C can b
 
 ## Usage
 
-```C#
+```csharp
     const int I2cBusId = 1;
     I2cConnectionSettings connectionSettings = new(I2cBusId, SensorHub.DefaultI2cAddress);
     SensorHub sh = new(I2cDevice.Create(connectionSettings));

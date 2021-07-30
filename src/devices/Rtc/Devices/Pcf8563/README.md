@@ -5,7 +5,7 @@ The PCF8563 is a CMOS1 Real-Time Clock (RTC) and calendar optimized for low powe
 ![](sensor.jpg)
 
 ## Usage
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Pcf8563.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

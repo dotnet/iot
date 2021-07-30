@@ -4,7 +4,7 @@ The 12-channels I2C proximity capacitive touch sensor controller.
 
 ## Documentation
 
-**MPR121**: https://www.sparkfun.com/datasheets/Components/MPR121.pdf
+* MPR121 [datasheet](https://www.sparkfun.com/datasheets/Components/MPR121.pdf)
 
 ## Usage
 
@@ -60,8 +60,6 @@ var config = new Mpr121Configuration
 
 var mpr121 = new Mpr121(device: i2cDevice, configuration: config);
 ```
-
-
 
 This sample demonstrates how to read channel statuses using auto-refresh configuration.
 

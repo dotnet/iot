@@ -19,7 +19,7 @@ On schematics ULN2003APG driver is being used. You can use  external power (9V a
 
 ## Usage
 
-```C#
+```csharp
 // Pinout for Raspberry Pi 3
 const int bluePin = 4;
 const int pinkPin = 17;

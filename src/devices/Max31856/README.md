@@ -8,9 +8,10 @@ The Max31856 device is a SPI interface cold-junction compensated thermocouple to
 
 ## Documentation 
 
-**Max31856** [datasheet](https://datasheets.maximintegrated.com/en/ds/Max31856.pdf)
+* Max31856 [datasheet](https://datasheets.maximintegrated.com/en/ds/Max31856.pdf)
 
 ## Usage
+
 The Max31856.samples file contains a sample usage of the device. Note that this reads two temperatures. One is a connected thermocouple reading which can be read using the  ```TryGetTemperature``` command and the other is the temperature of the device itself which can be read using the ```GetColdJunctionTemperature``` command. The Cold Junction Temperature is used internally to increase the accuracy of the thermocouple but can also be read if you find a use for it.
 
 Create a new ```SpiConnectionSettings``` Class if using a Raspberry Pi do not change these settings.

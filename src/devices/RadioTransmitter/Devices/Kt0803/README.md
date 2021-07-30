@@ -5,7 +5,7 @@ KT0803, a new generation of low cost Monolithic Digital FM Transmitter, is desig
 ![](sensor.jpg)
 
 ## Usage
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Kt0803.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

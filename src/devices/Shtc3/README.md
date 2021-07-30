@@ -21,7 +21,7 @@ To reduce power cosumption this project use capability of sensor to allow measur
 
 ### Code
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Shtc3.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

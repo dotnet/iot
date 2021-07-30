@@ -71,4 +71,3 @@ All temperature devices with family id of 0x10, 0x28, 0x3B, or 0x42 supported.
 
 * [MAX31820](https://datasheets.maximintegrated.com/en/ds/MAX31820.pdf)
 * [DS18B20](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
-

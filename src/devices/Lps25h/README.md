@@ -1,6 +1,7 @@
 ﻿# LPS25H - Piezoresistive pressure and thermometer sensor
 
 Some of the applications mentioned by the datasheet:
+
 - Altimeter and barometer for portable devices
 - GPS applications
 - Weather station equipment
@@ -8,7 +9,7 @@ Some of the applications mentioned by the datasheet:
 
 ## Documentation
 
-- https://www.st.com/resource/en/datasheet/lps25h.pdf
+- You can find the datasheet [here](https://www.st.com/resource/en/datasheet/lps25h.pdf)
 
 ## Usage
 

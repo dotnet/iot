@@ -8,7 +8,7 @@ The STUSB4500 is an autonomous USB-C PD controller for Power Sinks which enables
 
 ## Usage
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, StUsb4500.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

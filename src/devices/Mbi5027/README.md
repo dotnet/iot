@@ -19,7 +19,7 @@ The [MBI5027 sample](samples/README.md) demonstrates how to use the shift regist
 
 ## Documentation
 
-- Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
+- You can find the datasheet [here](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf)
 - Purchase: Not widely available. [aliexpress.com/](https://www.aliexpress.com/) was used to purchase the unit used to write this binding.
 
 ## Usage

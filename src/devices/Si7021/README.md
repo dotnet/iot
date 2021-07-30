@@ -26,7 +26,7 @@ The Si7021 device provides temperature and humidity sensor readings with an I2C 
 
 ### Code
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Si7021.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

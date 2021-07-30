@@ -5,7 +5,7 @@ The DS1307 serial real-time clock (RTC) is a lowpower, full binary-coded decimal
 ![](sensor.jpg)
 
 ## Usage
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Ds1307.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

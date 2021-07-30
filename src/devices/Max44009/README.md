@@ -6,11 +6,25 @@ The MAX44009 ambient light sensor features an I2C digital output that is ideal f
 
 ## Documentation
 
-- https://cdn.datasheetspdf.com/pdf-down/M/A/X/MAX44009_MaximIntegratedProducts.pdf
+- You can find the datasheet [here](https://cdn.datasheetspdf.com/pdf-down/M/A/X/MAX44009_MaximIntegratedProducts.pdf)
 
 ## Usage
 
-```C#
+### Hardware Required
+
+* MAX44009
+* Male/Female Jumper Wires
+
+### Circuit
+
+![MAX44009 circuit](MAX44009_circuit_bb.png)
+
+* SCL - SCL
+* SDA - SDA
+* VCC - 5V
+* GND - GND
+
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Max44009.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 
@@ -31,15 +45,3 @@ using (Max44009 sensor = new Max44009(device, IntegrationTime.Time100))
 ### Result
 
 ![Sample Result](RunningResult.jpg)
-
-## Hardware Required
-* MAX44009
-* Male/Female Jumper Wires
-
-## Circuit
-![](MAX44009_circuit_bb.png)
-
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND

@@ -14,7 +14,7 @@ This sample shows how to calculate position of line under matrix of 5 IR sensors
 
 ### Initialization
 
-```c#
+```csharp
 SoftwareSpi spi = new SoftwareSpi(
     clk: 25,
     sdi: 23,
@@ -35,7 +35,7 @@ Tlc1543 adc = new Tlc1543(spi);
 
 ### Changing Charge Channel
 
-```c#
+```csharp
 adc.ReadPreviousAndChargeChannel(channels[0]);
 ```
 
@@ -43,7 +43,7 @@ You can set ChargeChannel to one of the Self Test channels (if you really know w
 
 ### Getting data
 
-```c#
+```csharp
 int values = adc.ReadPreviousAndChargeChannel(channels[0]);
 ```
 
@@ -51,7 +51,7 @@ Simple way of reading values into just made list.
 
 ### Calculating position
 
-```c#
+```csharp
 for (int i = 0; i < values.Count; i++)
 {
     if (values[i] < 300)
@@ -82,7 +82,7 @@ For example when first and second sensor sees line values will be
 
 And now with this data we can calculate linePosition
 
-```c#
+```csharp
 double linePosition = ((double)lineAverage / (double)onLine);
 ```
 
@@ -97,7 +97,7 @@ Respective timing diagram can be seen on figure 9 in datasheet.
 
 It is possible to change ADC charge channel.
 
-```c#
+```csharp
 adc.ReadPreviousAndChargeChannel(channels[0]);
 ```
 

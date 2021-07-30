@@ -4,7 +4,7 @@ Microchip Technology Inc.’s MCP9808 digital temperature sensor converts temper
 
 ## Documentation
 
-- http://ww1.microchip.com/downloads/en/DeviceDoc/25095A.pdf
+- You can find the datasheet [here](http://ww1.microchip.com/downloads/en/DeviceDoc/25095A.pdf)
 
 ## Usage
 
@@ -22,7 +22,7 @@ Microchip Technology Inc.’s MCP9808 digital temperature sensor converts temper
 
 ### Code
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Mcp9808.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

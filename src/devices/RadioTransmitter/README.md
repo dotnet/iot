@@ -13,7 +13,7 @@ The radio transmitter devices supported by the project include KT0803.
 * Male/Female Jumper Wires
 
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Kt0803.DefaultI2cAddress);
 I2cDevice device = I2cDevice.Create(settings);
 

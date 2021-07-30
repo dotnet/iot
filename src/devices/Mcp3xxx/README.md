@@ -33,7 +33,7 @@ The following elements are used in this sample:
 
 The Raspberry Pi has support for SPI. You need to [enable the SPI interface on the Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/) since it is not enabled by default.
 
-You can use the following code to [access the MCP3008 via hardware SPI](Mcp3008.Sample.cs):
+You can use the following code to [access the MCP3008 via hardware SPI](samples/Mcp3008.Sample.cs):
 
 ```csharp
 var hardwareSpiSettings = new SpiConnectionSettings(0, 0)
@@ -73,7 +73,7 @@ The following pin layout can be used (also shown in a [fritzing diagram](rpi-tri
 
 You can also access the MCP3008 via GPIO pins, implementing SPI manually. This method is referred to as [bit-banging](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface#Example_of_bit-banging_the_master_protocol).
 
-You can use the following code to [access the MCP3008 via GPIO](Mcp3008.Sample.cs):
+You can use the following code to [access the MCP3008 via GPIO](samples/Mcp3008.Sample.cs):
 
 ```csharp
 using (SpiDevice spi = new SoftwareSpi(clk: 18, miso: 23, mosi: 24, cs: 25))
@@ -120,25 +120,22 @@ while (true)
 
 The chip is 10-bit, which means that it will generate values from 0-1023 (recall that 2^10 is 1024). We can transform the value to a more familiar 0-100 scale by dividing the 10-bit value by 10.24.
 
-
-
 ## Remarks
 
 These bindings support the following ADC's
 
-- [Mcp3001](http://ww1.microchip.com/downloads/en/DeviceDoc/21293C.pdf)  10 bit resolution with a single pseudo-differential input.
-- [Mcp3002](http://ww1.microchip.com/downloads/en/DeviceDoc/21294E.pdf)  10 bit resolution with two single ended inputs or a single pseudo-differential input.
-- [Mcp3004](http://ww1.microchip.com/downloads/en/devicedoc/21295c.pdf)  10 bit resolution with four single ended inputs or two single pseudo-differential inputs.
-- [Mcp3008](http://ww1.microchip.com/downloads/en/devicedoc/21295c.pdf)  10 bit resolution with eight single ended inputs or four single pseudo-differential inputs.
+- [Mcp3001](http://ww1.microchip.com/downloads/en/DeviceDoc/21293C.pdf) 10 bit resolution with a single pseudo-differential input.
+- [Mcp3002](http://ww1.microchip.com/downloads/en/DeviceDoc/21294E.pdf) 10 bit resolution with two single ended inputs or a single pseudo-differential input.
+- [Mcp3004](http://ww1.microchip.com/downloads/en/devicedoc/21295c.pdf) 10 bit resolution with four single ended inputs or two single pseudo-differential inputs.
+- [Mcp3008](http://ww1.microchip.com/downloads/en/devicedoc/21295c.pdf) 10 bit resolution with eight single ended inputs or four single pseudo-differential inputs.
 
-- [Mcp3201](http://ww1.microchip.com/downloads/en/devicedoc/21290d.pdf)  12 bit resolution with a single pseudo-differential input.
-- [Mcp3202](http://ww1.microchip.com/downloads/en/devicedoc/21034d.pdf)  12 bit resolution with two single ended inputs or a single pseudo-differential input.
-- [Mcp3204](http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf)  12 bit resolution with four single ended inputs or two single pseudo-differential inputs.
-- [Mcp3208](http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf)  12 bit resolution with eight single ended inputs or four single pseudo-differential inputs.
+- [Mcp3201](http://ww1.microchip.com/downloads/en/devicedoc/21290d.pdf) 12 bit resolution with a single pseudo-differential input.
+- [Mcp3202](http://ww1.microchip.com/downloads/en/devicedoc/21034d.pdf) 12 bit resolution with two single ended inputs or a single pseudo-differential input.
+- [Mcp3204](http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf) 12 bit resolution with four single ended inputs or two single pseudo-differential inputs.
+- [Mcp3208](http://ww1.microchip.com/downloads/en/DeviceDoc/21298c.pdf) 12 bit resolution with eight single ended inputs or four single pseudo-differential inputs.
 
-- [Mcp3301](http://ww1.microchip.com/downloads/en/devicedoc/21700d.pdf)  13 bit signed resolution with a single true differential input.
-- [Mcp3202](http://ww1.microchip.com/downloads/en/DeviceDoc/21697F.pdf)  12 bit resolution with four single ended inputs or 13 bit signed resolution with two true differential inputs.
-- [Mcp3304](http://ww1.microchip.com/downloads/en/DeviceDoc/21697F.pdf)  12 bit resolution with eight single ended inputs or 13 bit signed resolution with four true differential inputs.
-
+- [Mcp3301](http://ww1.microchip.com/downloads/en/devicedoc/21700d.pdf) 13 bit signed resolution with a single true differential input.
+- [Mcp3202](http://ww1.microchip.com/downloads/en/DeviceDoc/21697F.pdf) 12 bit resolution with four single ended inputs or 13 bit signed resolution with two true differential inputs.
+- [Mcp3304](http://ww1.microchip.com/downloads/en/DeviceDoc/21697F.pdf) 12 bit resolution with eight single ended inputs or 13 bit signed resolution with four true differential inputs.
 
 Note: Currently untested on the Mcp33xx family.

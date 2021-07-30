@@ -26,7 +26,7 @@ SHT3x is the next generation of Sensirion’s temperature and humidity sensors. 
 
 ### Code
 
-```C#
+```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, (byte)I2cAddress.AddrLow);
 I2cDevice device = I2cDevice.Create(settings);
 
