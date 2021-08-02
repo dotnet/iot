@@ -2,11 +2,15 @@
 
 This is the famous screen that Nokia 5110 used. It's a SPI based device. This Nokia 5110 was very popular and many of us used to have it in their hands and that young generation have seen it in pictures. This LCD is quite cheap and easy to use.
 
+## Documentation
+
+- Nokia5110 [datasheet](https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf)
+
 ## Usage
 
 The screen is most of the time presented like this:
 
-![Nokia 5110 screen](./samples/Nokia-5110-LCD-Pinout.png)
+![Nokia 5110 screen](./Nokia-5110-LCD-Pinout.png)
 
 It uses SPI and you can add PWM to control the 4 leds brightness which are around the screen. The pin have various names like  BL or LED.
 
@@ -35,7 +39,7 @@ lcd = new(27, spi, -1, null);
 
 Not that there is as well the possibility to pass a normal pin number for the backlight. In this case, the light will be on once the `BacklightBrightness` property if more then 0.5, otherwise off.
 
-## Displaying text
+### Displaying text
 
 Like for other screen bindings in this repository you have `Write` and `SetCursorPosition` to write text and set the cursor position.
 
@@ -53,7 +57,7 @@ The position of the cursor moves with the text you write. The screen has 6 lines
 
 You can as well provide your own character using the `Write(ReadOnlySpan<byte> text)` function.
 
-## Drawing lines, rectangles and points
+### Drawing lines, rectangles and points
 
 Point, line and rectangle primitives are available:
 
@@ -70,7 +74,7 @@ Each can take `Point`, `Size` and `Rectangle` as well as input. You have to deci
 
 Also you should `Refresh` the screen once you'll finish your drawing. All drawing are in the memory and needs to be pushed to the screen.
 
-## Displaying raw images
+### Displaying raw images
 
 The function SetByteMap allows you to draw anything, you'll just need to provide the raw buffer. Size is 504 bytes representing from the top left part columns of 8 pixels up to the right up to the next raw. A total of 6 raws are available with 84 columns each.
 
@@ -124,7 +128,7 @@ var bitmap3 = BitmapToByteArray(bitmapLarge);
 
 Note: you may want to reverse the colors first depending on what you want.
 
-## Advance functions
+### Advanced functions
 
 You can adjust couple of factors like `Bias`,  `Temperature`, `Contrast` and `Brightness`. The [samples](./samples/Program.cs) will run thru all of them so you can understand the impact of each of them. The `Bias` will increase the voltage and darken the screen.
 
@@ -134,7 +138,7 @@ Then you can use the Contrast property to properly adjust the contrast. A value 
 
 But you may have to adjust those depending on the conditions of lights, temperature you are in.
 
-### Brightness
+#### Brightness
 
 The brightness is controlling the PWM. If you have not passed any PWM controller, this has no effect on the screen.
 Brightness goes from 0.0 to 0.1f.
@@ -143,7 +147,7 @@ Brightness goes from 0.0 to 0.1f.
 lcd.BacklightBrightness = 0.2f;
 ```
 
-### InvertedColors
+#### InvertedColors
 
 An invert mode is available, it just revert the screen colors. So white pixels become black and vice versa
 
@@ -151,14 +155,10 @@ An invert mode is available, it just revert the screen colors. So white pixels b
 lcd.InvertedColors = true;
 ```
 
-### Enabled
+#### Enabled
 
 You can switch on or off the screen fully with the `Enabled` property:
 
 ```csharp
 lcd.Enabled = true;
 ```
-
-## Reference
-
-- Data sheet: https://www.sparkfun.com/datasheets/LCD/Monochrome/Nokia5110.pdf
