@@ -304,4 +304,3 @@ PN5180 as a Target (acting like a card)
 - [ ] Initialization as target
 - [ ] Handling communication with another reader as a target
 - [ ] Support for transceive data
-
