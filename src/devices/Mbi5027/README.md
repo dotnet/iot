@@ -17,6 +17,11 @@ Note: The [MBI5168](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf) is a
 
 The [MBI5027 sample](samples/README.md) demonstrates how to use the shift register. The [generic shift register sample](../ShiftRegister/samples/README.md) is more extensive and is compatible with the MBI5027.
 
+## Documentation
+
+- You can find the datasheet [here](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf)
+- Purchase: Not widely available. [aliexpress.com/](https://www.aliexpress.com/) was used to purchase the unit used to write this binding.
+
 ## Usage
 
 The following example code demonstrates how to use the MBI5027 with its most basic functions.
@@ -112,8 +117,3 @@ Bit 0: High
 ```
 
 Note: Error detection was found to work only with 5v power. When 3.3v power was used, error detection did not work correctly.
-
-## Resources
-
-* Datasheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
-* Purchase: Not widely available. [aliexpress.com/](https://www.aliexpress.com/) was used to purchase the unit used to write this binding.

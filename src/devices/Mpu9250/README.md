@@ -6,6 +6,13 @@ MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Tem
 
 The Magnetometer used is an [AK8963](../Ak8963/README.md). In general, it is managed thru the main MPU9250 and setup as a replica I2C. All operations go thru the MPU9250. In some cases, the AK8963 is exposed and the operations are not going thru the MPU9250 but directly.
 
+## Documentation
+
+* Registers [documentation](http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf)
+* [Product specifications](http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf)
+
+## Usage
+
 General case with AK8963 is not exposed (where you can't find it on the I2C bus at the address 0x0C)
 
 ```csharp
@@ -19,8 +26,6 @@ In case the AK8963 is exposed, so you can reach it directly, you can then use th
 var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
 using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus), i2CDeviceAk8963: I2cDevice.Create(new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress)));
 ```
-
-## Usage
 
 You can find an example in the [sample](./samples/Mpu9250.sample.cs) directory. Usage is straightforward including the possibility to have a calibration for all sub sensors.
 
@@ -161,6 +166,7 @@ while (!Console.KeyAvailable)
 The Fifo mode allows you to get the data by batch. You can select the mode thru ```FifoModes```, then read the ```FifoCount``` property. You can then read the data thru ```ReadFifo``` Make sure you'll size the ```Span<byte>``` with ```FifoCount``` length.
 
 Data are in the order of the Register from 0x3B to 0x60 so you'll get your data in this order:
+
 * ACCEL_XOUT_H and ACCEL_XOUT_L
 * ACCEL_YOUT_H and ACCEL_YOUT_L
 * ACCEL_ZOUT_H and ACCEL_ZOUT_L
@@ -191,9 +197,4 @@ It is then up to you to transform them into the correct data. You can multiply y
 
 The following fritzing diagram illustrates one way to wire up the MPU9250 with a Raspberry Pi using I2C.
 
-![Raspberry Pi Breadboard diagram](./samples/Mpu9250_bb.png)
-
-## Reference
-
-* Registers: http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf
-* Product specifications: http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf
+![Raspberry Pi Breadboard diagram](Mpu9250_bb.png)

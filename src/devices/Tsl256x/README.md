@@ -8,7 +8,13 @@ Two integrating ADCs convert the photodiode currents to a digital output that re
 The TSL2560 device permits an SMB-Alert style interrupt, and the TSL2561 device supports a traditional level style interrupt that remains asserted until the firmware
 clears it.
 
-## Basic usage
+## Documentation
+
+- TSL256x [datasheet](https://cdn-shop.adafruit.com/datasheets/TSL2561.pdf)
+
+## Usage
+
+### Basic usage
 
 TSL2560 and TSL2561 are designed to have an integration time and a gain for measuring the 2 ADC. The defaults are 402 milliseconds and a normal gain of x1.
 
@@ -31,7 +37,7 @@ Console.WriteLine($"Illuminance is {lux.Lux} Lux");
   - SecondI2cAddress = 0x29: When address pin is floating
   - ThirdI2cAddress = 0x49: When address pin is to VDD
 
-## Check the version
+### Check the version
 
 You can determine if you have a TSL2560 or TSL2561 version:
 
@@ -41,7 +47,7 @@ string msg = ver.Major & 0x01 == 0x01 ? $"This is a TSL2561, version {ver}" : $"
 Console.WriteLine(msg);
 ```
 
-## Using interruptions
+### Using interruptions
 
 You can set interruptions, you have different possible ones you can set thru the `InterruptLevel`:
 
@@ -92,7 +98,7 @@ tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
 ```
 
-## Manual integration
+### Manual integration
 
 You can set a manual integration as well. Be aware that you won't be able to easily calculate an illuminance equivalent. You need to use the manual integration functions offered:
 
@@ -104,7 +110,3 @@ tsl256X.StopManualIntegration();
 tsl256X.GetRawChannels(out ch0, out ch1);
 Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
 ```
-
-## References
-
-- Documentation: https://cdn-shop.adafruit.com/datasheets/TSL2561.pdf

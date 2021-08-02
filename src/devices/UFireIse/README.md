@@ -1,13 +1,15 @@
 ﻿# μFire ISE Probe - pH, ORP and temperature sensor
 
-## Summary
-
 The μFire ISE Probe Interface is an I²C sensor that can read a pH probe. Attach a waterproof temperature sensor for temperature compensation with the attached connector.
+
+## Documentation
+
+- https://www.ufire.co/docs/uFireIse/#connections
+- https://www.ufire.co/docs/uFireIse/api.html#class-functions
 
 ## Usage
 
 You can find an example in the [sample](./samples/uFireIse.Sample.cs) directory. 
-
 
 ### Basic
 It is possible to read the basic value (Electric Potential) from the probe.
@@ -67,12 +69,3 @@ using (UFirePh uFire_pH = new UFirePh(device))
 	}
 }
 ```
-
-## Data Sheets from uFire
-
-https://www.ufire.co/docs/uFireIse/#connections
-
-## References 
-
-https://www.ufire.co/docs/uFireIse/api.html#class-functions
-
