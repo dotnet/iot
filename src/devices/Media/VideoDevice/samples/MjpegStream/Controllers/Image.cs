@@ -151,6 +151,8 @@ namespace CameraIoT.Controllers
         {
             try
             {
+                // using System.Drawing has serious performance implications in the context of video streaming from low powered devices,
+                // here is a 'simple' example of modifying the image, which will not be fast enough in most use cases.
                 using var stream = new MemoryStream(e.ImageBuffer.AsMemory().Slice(0, e.Length).ToArray());
                 Bitmap myBitmap = new Bitmap(stream);
                 Graphics g = Graphics.FromImage(myBitmap);
