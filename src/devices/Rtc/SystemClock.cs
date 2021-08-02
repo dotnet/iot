@@ -15,9 +15,30 @@ namespace Iot.Device.Rtc
     /// <summary>
     /// Contains methods to access and update the system real time clock ("Bios clock")
     /// </summary>
-    public static class SystemClock
+    public class SystemClock : RtcBase
     {
         private static readonly DateTime UnixEpochStart = new DateTime(1970, 1, 1);
+
+        /// <summary>
+        /// We always use UTC when reading/writing the system clock, makes things easier.
+        /// Technically, the BIOS RTC is configured in local time by default on Windows, but in UTC on Linux (causing
+        /// weird effects when dual-booting). Both systems allow changing this setting, though.
+        /// </summary>
+        public override TimeZoneInfo TimeZone
+        {
+            get
+            {
+                return TimeZoneInfo.Utc;
+            }
+            set
+            {
+                if (!value.Equals(TimeZoneInfo.Utc))
+                {
+                    throw new NotSupportedException(
+                        "The time zone configuration for the system clock cannot be changed");
+                }
+            }
+        }
 
         /// <summary>
         /// Set the system time to the given date/time.
@@ -171,6 +192,19 @@ namespace Iot.Device.Rtc
             }
 
             return outputData;
+        }
+
+        /// <inheritdoc />
+        protected override void SetTime(DateTime time)
+        {
+            SetSystemTimeUtc(time);
+        }
+
+        /// <inheritdoc />
+        protected override DateTime ReadTime()
+        {
+            var dt = GetSystemTimeUtc();
+            return dt;
         }
     }
 }

@@ -30,7 +30,7 @@ rtc.DateTime = DateTime.Now;
 while (true)
 {
     // read time
-    DateTime dt = rtc.DateTime;
+    DateTimeOffset dt = rtc.DateTime;
 
     Console.WriteLine($"Time: {dt.ToString("yyyy/MM/dd HH:mm:ss")}");
     Console.WriteLine($"Temperature: {rtc.Temperature.DegreesCelsius} ℃");
