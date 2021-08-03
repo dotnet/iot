@@ -1,6 +1,7 @@
 # Credit Card - Credit Card
 
 This CreditCard class allows to read thru a standard Near Field Communication (NFC) or Smart Card (PC/SC) reader. Be aware that to read the data stored in the card, you need a compatible reader:
+
 - An ISO 14443-4 Type B for NFC. Keep in mind as well that the antenna and the gain of your NFC reader need to be strong enough to read all kind of cards. Most of the popular PN532 NFC readers that you can find online does not allow to read all kind of card due to this issue
 - A smart card reader compatible to read secured card
 
@@ -8,7 +9,7 @@ Your credit card needs to be compatible with wireless payments for NFC reading. 
 
 You will need a reader with an implementation of a WriteRead function from the class CardWriteRead. You will find an example with the PN532 below.
 
-This class has been tested with various American Express, Visa and Mastercard, mainly from Europe. 
+This class has been tested with various American Express, Visa and Mastercard, mainly from Europe.
 
 ## Documentation
 
@@ -61,7 +62,7 @@ static void ReadCreditCard(Pn532 pn532)
 
         Console.WriteLine("All Tags for the Credit Card:");
         DisplayTags(creditCard.Tags, 0);
-		// Display Log Entries
+        // Display Log Entries
         var format = Tag.SearchTag(creditCard.Tags, 0x9F4F).FirstOrDefault();
         if (format is object)
             DisplayLogEntries(creditCard.LogEntries, format.Tags);
@@ -148,7 +149,6 @@ creditCard.FillCreditCardInformation();
 The Credit Card stores data in Tags. Those Tags have a specific number and data. The data format, the description of those tags are available in the TagList class. You can use it to display those data.
 
 Note as well that a ```ToString()``` converter has been implemented. The function in the example above ```DisplayTags``` gives an example on how you can display all the Tags and their data.
-
 
 ## Limitations
 

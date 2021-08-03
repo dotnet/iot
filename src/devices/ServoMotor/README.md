@@ -47,6 +47,7 @@ servoMotor.Stop(); // Disable control signal.
 The position of servo motor can also be adjusted by the angle.  The `ServoMotor` constructor's optional arguments must be set according to device's specs.  NOTE: These are usually an approximation, so you may need to manually tweak to determine exact values.
 
 For example, the [Hitec HS-300BB](https://servodatabase.com/servo/hitec/hs-300bb) servo has the following specifications:
+
 - MaximumAngle = 180
 - MinimumPulseWidthMicroseconds = 900
 - MaximumPulseWidthMicroseconds = 2100
@@ -75,4 +76,4 @@ servoMotor.Stop(); // Disable control signal.
 Calibration or finding minimum and maximum pulse width and angle range `WritePulseWidth` method should be used.
 To make it easier to write applications which allow calibration method `Calibrate` can be used to change calibration parameters.
 
-You can refer to [servo sample](../Pca9685/samples/Pca9685.Sample.cs) for example usage (i.e. `CalibrateServo` utility).
+You can refer to [servo sample](../Pca9685/samples/Program.cs) for example usage (i.e. `CalibrateServo` utility).

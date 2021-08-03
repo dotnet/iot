@@ -8,16 +8,16 @@ The PCA95x4 provides 8 bits of General Purpose parallel Input/Output (GPIO) expa
 
 ### NXP
 
-* PCA9534 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA9534.pdf)
-* PCA9534A [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA9534.pdf)
-* PCA9554/PCA9554A [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA9554_9554A.pdf)
+- PCA9534 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA9534.pdf)
+- PCA9534A [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA9534.pdf)
+- PCA9554/PCA9554A [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA9554_9554A.pdf)
 
 ### Texas Instruments
 
-* PCA9534 [datasheet](http://www.ti.com/lit/ds/symlink/pca9534.pdf)
-* PCA9534A [datasheet](http://www.ti.com/lit/ds/symlink/pca9534a.pdf) 
-* PCA9554 [datasheet](http://www.ti.com/lit/ds/symlink/pca9554.pdf)
-* PCA9554A [datasheet](http://www.ti.com/lit/ds/symlink/pca9554a.pdf)
+- PCA9534 [datasheet](http://www.ti.com/lit/ds/symlink/pca9534.pdf)
+- PCA9534A [datasheet](http://www.ti.com/lit/ds/symlink/pca9534a.pdf)
+- PCA9554 [datasheet](http://www.ti.com/lit/ds/symlink/pca9554.pdf)
+- PCA9554A [datasheet](http://www.ti.com/lit/ds/symlink/pca9554a.pdf)
 
 ## Board
 
@@ -73,5 +73,5 @@ Console.WriteLine($"Input Register: 0x{data:X2}");
 
 PCA9534/PCA9554 and PCA9534A/PCA9554A are identical except for a few differences.
 
-* The removal of the internal I/O pull-up resistor which greatly reduces power consumption when the I/Os are held LOW.
-* Each has a fixed I2C address. This allows for up to 16 of these devices (8 of each) on the same I2C bus.
+- The removal of the internal I/O pull-up resistor which greatly reduces power consumption when the I/Os are held LOW.
+- Each has a fixed I2C address. This allows for up to 16 of these devices (8 of each) on the same I2C bus.

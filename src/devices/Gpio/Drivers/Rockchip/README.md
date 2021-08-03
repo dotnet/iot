@@ -37,16 +37,21 @@ PinValue value = gpio.Read(pinNumber);
 ### For SoCs
 
 1. Inheriting `RockchipDriver` Class.
+
     ```C#
     public class Rk3328Driver : RockchipDriver { }
     ```
+
 2. Overriding the GPIO register addresses and adding GRF, CRU addresses.
+
     ```C#
     protected override uint[] GpioRegisterAddresses => new[] { 0xFF21_0000, 0xFF22_0000, 0xFF23_0000, 0xFF24_8000 };
     protected uint GeneralRegisterFiles => 0xFF10_0000;
     protected uint ClockResetUnit => 0xFF44_0000;        
     ```
+
 3. Overriding `SetPinMode` method.
+
     ```C#
     protected override void SetPinMode(int pinNumber, PinMode mode)
     {
@@ -61,11 +66,14 @@ PinValue value = gpio.Read(pinNumber);
 ### For Boards
 
 1. Inherit the corresponding SoC class.
+
     ```C#
     // For NanoPi R2S
     public class NanoPiR2sDriver : Rk3328Driver { }
     ```
+
 2. Overriding the mapping method for converting a board pin number to the driver's logical numbering scheme.
+
     ```C#
     // Mapping from board pins to logic pins.
     private static readonly int[] _pinNumberConverter = new int[]
@@ -86,4 +94,4 @@ PinValue value = gpio.Read(pinNumber);
 
 ## References
 
-Rockchip open source documents: http://opensource.rock-chips.com/wiki_Main_Page
+Rockchip open source documents: <http://opensource.rock-chips.com/wiki_Main_Page>

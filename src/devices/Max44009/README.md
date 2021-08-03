@@ -12,17 +12,17 @@ The MAX44009 ambient light sensor features an I2C digital output that is ideal f
 
 ### Hardware Required
 
-* MAX44009
-* Male/Female Jumper Wires
+- MAX44009
+- Male/Female Jumper Wires
 
 ### Circuit
 
 ![MAX44009 circuit](MAX44009_circuit_bb.png)
 
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND
+- SCL - SCL
+- SDA - SDA
+- VCC - 5V
+- GND - GND
 
 ```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Max44009.DefaultI2cAddress);

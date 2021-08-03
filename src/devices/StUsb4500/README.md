@@ -2,7 +2,7 @@
 
 The STUSB4500 is an autonomous USB-C PD controller for Power Sinks which enables you to configure the required/available power for your device from a USB-C PD Power Source. The STUSB4500 is configurable via I2C interface.
 
-## Documentation 
+## Documentation
 
 - STUSB4500 [datasheet](https://github.com/usb-c/STUSB4500)
 
@@ -33,4 +33,4 @@ For instance, if the Power brick can provide 4 power profiles (5V, 9V, 15V and 2
 Another example, if the Power brick can provide 4 power profiles (5V, 9V, 15V and 20V) but the Application needs 9V to boot, then the STUSB4500 can be programmed to always request 9V.
 This part can be easily implemented in a battery charger with USB-C input in the application.
 
-The device doesn't need any software to run (it is automous). But it is possible to connect to this device by I2C to take control over the default device behavior, or to get the power information (Voltage/Current) of the attached power source at the other side of the cable. 
+The device doesn't need any software to run (it is automous). But it is possible to connect to this device by I2C to take control over the default device behavior, or to get the power information (Voltage/Current) of the attached power source at the other side of the cable.

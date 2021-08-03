@@ -5,7 +5,7 @@ This is a generic class to control any DC motor.
 DC motors are controlled by simply providing voltage on the inputs (inverted voltage inverts the direction).
 
 DC motors can be controlled with 1, 2 or 3 pins.
-Please refer to the [sample](samples/README.md) to see how to connect it.
+Please refer to the [sample](./samples/Program.cs) to see how to connect it.
 
 **Never connect DC motor directly to your board, instead use i.e. H-bridge**
 
@@ -17,7 +17,7 @@ It may also cause increased energy consumption due to energy being converted int
 
 ## Usage
 
-[See full sample](Program.cs) for more details.
+[See full sample](./samples/Program.cs) for more details.
 
 ```csharp
 static void Main(string[] args)
@@ -66,11 +66,6 @@ static void Main(string[] args)
 }
 ```
 
-![schematics](dcmotor_bb.png)
+![schematics](./dcmotor_bb.png)
 
-![BiDirectional Pin schematics](DCMotor2pinWithBiDirectionalPin_bb.png)
-
-Additional elements:
-
-- [Fritzing diagram](dcmotor.fzz)
-- [BiDirectional Pin Fritzing diagram](DCMotor2pinWithBiDirectionalPin.fzz)
+![BiDirectional Pin schematics](./DCMotor2pinWithBiDirectionalPin_bb.png)

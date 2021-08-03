@@ -99,48 +99,51 @@ while(!Console.KeyAvailable)
 ## Information regarding sensors and units
 
 * *Orientation*:
-    * Absolute Orientation (Euler Vector, 100Hz)
-    * Three axis orientation data based on a 360° sphere
-    * Heading = Vector3.X; Roll = Vector3.Y; Pitch = Vector3.Z
-    * Units availabel are Degrees (default) or Radians, you can change with
+  * Absolute Orientation (Euler Vector, 100Hz)
+  * Three axis orientation data based on a 360° sphere
+  * Heading = Vector3.X; Roll = Vector3.Y; Pitch = Vector3.Z
+  * Units availabel are Degrees (default) or Radians, you can change with
+
     ```csharp
     bno055Sensor.Units = bno055Sensor.Units | Units.EulerAnglesRadians;
     ```
+
 * *Quaternion*
-    * Absolute Orientation (Quaterion, 100Hz)
-    * Four point quaternion output for more accurate data manipulation
-    * Unit is 1 Quaternion = 2^14 returned data
+  * Absolute Orientation (Quaterion, 100Hz)
+  * Four point quaternion output for more accurate data manipulation
+  * Unit is 1 Quaternion = 2^14 returned data
 
 * *Magnetometer*
-    * Magnetic Field Strength Vector (20Hz)
-    * Three axis of magnetic field sensing in micro Tesla (uT)
+  * Magnetic Field Strength Vector (20Hz)
+  * Three axis of magnetic field sensing in micro Tesla (uT)
 
 * *Acceleration*
-    * Acceleration Vector (100Hz)
-    * Three axis of acceleration (gravity + linear motion)
-    * Default unit in m/s^2, can be changed for mg
+  * Acceleration Vector (100Hz)
+  * Three axis of acceleration (gravity + linear motion)
+  * Default unit in m/s^2, can be changed for mg
 
 * *LinearAcceleration*
-    * Linear Acceleration Vector (100Hz)
-    * Three axis of linear acceleration data (acceleration minus gravity)
-    * Default unit in m/s^2, can be changed for mg
+  * Linear Acceleration Vector (100Hz)
+  * Three axis of linear acceleration data (acceleration minus gravity)
+  * Default unit in m/s^2, can be changed for mg
 
 * *Gravity*
-    * Gravity Vector (100Hz)
-    * Three axis of gravitational acceleration (minus any movement)
-    * Default unit in m/s^2, can be changed for mg
+  * Gravity Vector (100Hz)
+  * Three axis of gravitational acceleration (minus any movement)
+  * Default unit in m/s^2, can be changed for mg
 
 * *Gyroscope*
-    * Angular Velocity Vector (100Hz)
-    * Three axis of 'rotation speed'
-    * Default unit is Degree per second but can be changed to Radian per second
+  * Angular Velocity Vector (100Hz)
+  * Three axis of 'rotation speed'
+  * Default unit is Degree per second but can be changed to Radian per second
 
 * *Temperature*
-    * Temperature (1Hz)
-    * Ambient temperature in degrees celsius
-    * Default can be changed for Farenheit
-    * Temperature can be measured thru the Gyroscope or the Accelerometer
-    * Precision seems better with the Gyroscope, so it is set by default. You can change the source like this:
+  * Temperature (1Hz)
+  * Ambient temperature in degrees celsius
+  * Default can be changed for Farenheit
+  * Temperature can be measured thru the Gyroscope or the Accelerometer
+  * Precision seems better with the Gyroscope, so it is set by default. You can change the source like this:
+
     ```csharp
     bno055Sensor.TemperatureSource = TemperatureSource.Accelerometer;
     ```
