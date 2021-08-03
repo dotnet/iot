@@ -14,19 +14,19 @@ namespace GenerateDocFxStructure
         /// Gets or sets the destination folder.
         /// </summary>
         [Option('d', "destination", Required = true, HelpText = "Folder containing the destination folder..")]
-        public string? DestinationFolder { get; set; }
-        
+        public string DestinationFolder { get; set; } = string.Empty;
+
         /// <summary>
         /// Gets or sets the source folder.
         /// </summary>
         [Option('s', "source", Required = true, HelpText = "Folder containing the source folder.")]
-        public string? SourceFolder { get; set; }
-                
+        public string SourceFolder { get; set; } = string.Empty;
+
         /// <summary>
         /// Gets or sets the destination media folder.
         /// </summary>
         [Option('m', "media", Required = true, HelpText = "Folder containing the destination media folder.")]
-        public string? MediaFolder { get; set; }
+        public string MediaFolder { get; set; } = string.Empty;
 
         /// <summary>
         /// Gets or sets the main repository.

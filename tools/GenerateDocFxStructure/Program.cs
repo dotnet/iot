@@ -14,16 +14,17 @@ namespace GenerateDocFxStructure
 {
     class Program
     {
-        private static readonly string[] _mediaExtentions = new string[] { ".png", ".jpg", ".jpeg", ".mpg", ".mpeg", ".mov", ".mp4", ".bmp", ".gif", ".fzz" };
+        private static readonly string[] _mediaExtentions = new string[] { ".png", ".jpg", ".mpg", ".mpeg", ".mov", ".mp4", ".bmp", ".gif", ".fzz" };
         private static CommandlineOptions? _options;
         private static int _returnvalue;
         private static MessageHelper? _message;
+        private static Regex _rxContent = new Regex(@"(\[{1}.*\]{1}\({1}.*\){1}?)", RegexOptions.Compiled);
 
         private static List<string> allFiles = new List<string>();
 
         private static int Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("DocFX markdown structure preparation");
             try
             {
                 Parser.Default.ParseArguments<CommandlineOptions>(args)
@@ -85,11 +86,11 @@ namespace GenerateDocFxStructure
             // We will start to get all the files
             foreach (string file in Directory.EnumerateFiles(_options.SourceFolder, "*.*", SearchOption.AllDirectories))
             {
-                allFiles.Add(file.ToLowerInvariant());
+                allFiles.Add(file);
             }
 
 
-            // we start at the root to generate the TOC items
+            // we start at the root to generate the items
             DirectoryInfo rootDir = new DirectoryInfo(_options.SourceFolder);
             WalkDirectoryTree(rootDir);
         }
@@ -122,9 +123,9 @@ namespace GenerateDocFxStructure
             _message!.Verbose($"Process {folder.FullName} for files.");
 
             List<FileInfo> files = folder.GetFiles("*.md").OrderBy(f => f.Name).ToList();
-            if (files == null)
+            if (files.Count == 0)
             {
-                _message.Verbose($"No MD files found in {folder.FullName}.");
+                _message.Verbose($"  No MD files found in {folder.FullName}.");
                 return;
             }
 
@@ -133,11 +134,10 @@ namespace GenerateDocFxStructure
                 _message.Verbose($"Processing {fi.FullName}");
                 string content = File.ReadAllText(fi.FullName);
 
-                // first see if there are links in this file
-                Regex rxContent = new Regex(@"(\[{1}.*\]{1}\({1}.*\){1}?)");
-                if (rxContent.Matches(content).Any())
+                // first see if there are links in this file                
+                if (_rxContent.Matches(content).Any())
                 {
-                    _message.Verbose($"- Links detected.");
+                    _message.Verbose($"  Links detected.");
 
                     // it has references, so check in detail
                     ProcessFile(folder, fi.FullName);
@@ -145,8 +145,8 @@ namespace GenerateDocFxStructure
                 else
                 {
                     // Create the destination file
-                    var relativeDestinationFilePath = fi.FullName.Substring(_options!.SourceFolder!.Length + 1);
-                    var newFileDestination = Path.Combine(_options.DestinationFolder!, relativeDestinationFilePath);
+                    var relativeDestinationFilePath = fi.FullName.Substring(_options!.SourceFolder.Length + 1);
+                    var newFileDestination = Path.Combine(_options.DestinationFolder, relativeDestinationFilePath);
                     // Ensure the path exists and is created
                     var dir = Path.GetDirectoryName(newFileDestination);
                     if (!Directory.Exists(dir))
@@ -168,15 +168,15 @@ namespace GenerateDocFxStructure
         /// <param name="filepath">Complete path of the file to check.</param>
         private static void ProcessFile(DirectoryInfo folder, string filepath)
         {
-            if ((_options == null) ||(_message == null))
+            if ((_options == null) || (_message == null))
             {
                 throw new ArgumentNullException($"Options or message can't be null, something went wrong");
             }
 
             string[] lines = File.ReadAllLines(filepath);
             // Create the destination file
-            var relativeDestinationFilePath = filepath.Substring(_options.SourceFolder!.Length + 1);
-            var newFileDestination = Path.Combine(_options.DestinationFolder!, relativeDestinationFilePath);
+            var relativeDestinationFilePath = filepath.Substring(_options.SourceFolder.Length + 1);
+            var newFileDestination = Path.Combine(_options.DestinationFolder, relativeDestinationFilePath);
             // Ensure the path exists and is created
             var dir = Path.GetDirectoryName(newFileDestination);
             if (!Directory.Exists(dir))
@@ -191,8 +191,7 @@ namespace GenerateDocFxStructure
             foreach (string line in lines)
             {
                 string lineToWrite = line;
-                Regex rxLine = new Regex(@"(\[[^\]]+\]{1}\({1}[^\)]+\){1})");
-                MatchCollection matches = rxLine.Matches(line);
+                MatchCollection matches = _rxContent.Matches(line);
                 if (matches.Any())
                 {
                     // process all matches
@@ -262,30 +261,34 @@ namespace GenerateDocFxStructure
                                     {
                                         // Case 1: it's a link on a media
                                         // Copy the file to the right destination
-                                        var relativeMediaPath = absolute.Substring(_options.SourceFolder!.Length + 1);
+                                        var relativeMediaPath = absolute.Substring(_options.SourceFolder.Length + 1);
                                         var nameOfMediaFolder = Path.GetFileName(_options.MediaFolder);
-                                        var newMediaDestination = Path.Combine(_options.MediaFolder!, relativeMediaPath);
+                                        var newMediaDestination = Path.Combine(_options.MediaFolder, relativeMediaPath);
                                         var dirMedia = Path.GetDirectoryName(newMediaDestination);
                                         if (!Directory.Exists(dirMedia))
                                         {
                                             Directory.CreateDirectory(dirMedia!);
                                         }
 
-                                        File.Copy(absolute, newMediaDestination);
+                                        if (!File.Exists(newMediaDestination))
+                                        {
+                                            File.Copy(absolute, newMediaDestination);
+                                        }
+
                                         // Adjust the link: ~/ + nameOfMediaFolder + / + relativeMediaPath
                                         // For web links, it has to be a /
                                         string newRelative = $"~/{nameOfMediaFolder}/{relativeMediaPath.Replace('\\', '/')}";
-                                        _message.Verbose($"Replacing {initialReletive} by {newRelative}");
+                                        _message.Verbose($"  Replacing {initialReletive} by {newRelative}");
                                         lineToWrite = line.Replace(initialReletive, newRelative);
                                     }
-                                    else 
+                                    else
                                     {
                                         // Case 2: it's a link on a directory in the repo or a file
                                         // Adjust the link
-                                        var relativeLinkPath = absolute.Substring(_options.SourceFolder!.Length + 1).Replace('\\','/');
+                                        var relativeLinkPath = absolute.Substring(_options.SourceFolder.Length + 1).Replace('\\', '/');
                                         string newRelative = $"{_options.Repo}/{relativeLinkPath}";
-                                        _message.Verbose($"Replacing {initialReletive} by {newRelative}");
-                                        lineToWrite = line.Replace(initialReletive, newRelative);                                        
+                                        _message.Verbose($"  Replacing {initialReletive} by {newRelative}");
+                                        lineToWrite = line.Replace(initialReletive, newRelative);
                                     }
                                 }
                             }
