@@ -466,6 +466,42 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Sets the internal pin mode to the given value, if supported.
+        /// </summary>
+        /// <param name="pin">The pin to configure</param>
+        /// <param name="arduinoMode">The mode to set</param>
+        /// <exception cref="TimeoutException">The mode was not updated, either because the command was not understood or
+        /// the mode is unknown by the firmware</exception>
+        /// <remarks>This method is intended for use by <see cref="ExtendedCommandHandler"/> instances. Users should not
+        /// call this method directly. It is the responsibility of the command handler to use the capabilities table to check
+        /// that the mode is actually supported</remarks>
+        public void SetPinMode(int pin, SupportedMode arduinoMode)
+        {
+            Firmata.SetPinMode(pin, arduinoMode.Value);
+        }
+
+        /// <summary>
+        /// Returns the current assignment of the given pin
+        /// </summary>
+        /// <param name="pinNumber">Pin number to query</param>
+        /// <returns>An instance of <see cref="SupportedMode"/> from the list of known modes (or a new instance for an unknown mode)</returns>
+        /// <remarks>Thi is the opposite of <see cref="SetPinMode"/>. See there for usage limitations.</remarks>
+        public SupportedMode GetPinMode(int pinNumber)
+        {
+            byte mode = Firmata.GetPinMode(pinNumber);
+            lock (_knownSupportedModes)
+            {
+                var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
+                if (m == null)
+                {
+                    return new SupportedMode(mode, $"Unknown mode {mode}");
+                }
+
+                return m;
+            }
+        }
+
+        /// <summary>
         /// Creates a GPIO Controller instance for the board. This allows working with digital input/output pins.
         /// </summary>
         /// <returns>An instance of GpioController, using an Arduino-Enabled driver</returns>

@@ -56,7 +56,7 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException($"Pin {pinNumber} does not support mode {HandlesMode}");
             }
 
-            Board.Firmata.SetPinMode(pinNumber, SupportedMode.Frequency.Value);
+            Board.SetPinMode(pinNumber, SupportedMode.Frequency);
 
             var firstQuery = EnableFrequencyReportingInternal(pinNumber, mode, reportDelay);
             _lastFrequencyUpdateClock = firstQuery.TimeStamp;

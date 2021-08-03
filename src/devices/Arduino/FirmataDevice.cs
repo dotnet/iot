@@ -803,7 +803,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            throw new TimeoutException($"Unable to set Pin mode to {firmataMode}. Looks like a communication problem.");
+            throw new TimeoutException($"Unable to set Pin mode to {firmataMode}.");
         }
 
         internal byte GetPinMode(int pinNumber)
