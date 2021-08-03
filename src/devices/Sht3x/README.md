@@ -16,16 +16,16 @@ SHT3x is the next generation of Sensirion’s temperature and humidity sensors. 
 
 ### Hardware Required
 
-* SHT3x
-* Male/Female Jumper Wires
+- SHT3x
+- Male/Female Jumper Wires
 
 ### Circuit
 
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND
-* ADR - GND
+- SCL - SCL
+- SDA - SDA
+- VCC - 5V
+- GND - GND
+- ADR - GND
 
 ### Code
 

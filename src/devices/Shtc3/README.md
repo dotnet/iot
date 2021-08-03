@@ -11,15 +11,15 @@ To reduce power cosumption this project use capability of sensor to allow measur
 
 ### Hardware Required
 
-* SHTC3
-* Male/Female Jumper Wires
+- SHTC3
+- Male/Female Jumper Wires
 
 ### Circuit
 
-* SCL - SCL
-* SDA - SDA
-* VCC - 3.3V
-* GND - GND
+- SCL - SCL
+- SDA - SDA
+- VCC - 3.3V
+- GND - GND
 
 ### Code
 

@@ -157,5 +157,3 @@ else
     Console.WriteLine("Error writing NDEF data on card");
 }
  ```
-
-

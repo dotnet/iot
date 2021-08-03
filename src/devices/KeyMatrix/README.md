@@ -21,7 +21,7 @@ You can also use any compatible GPIO controller like [Mcp23xxx](../Mcp23xxx) ins
 
 ## Usage
 
-You need to create 2 lists of int, one for the input and one for the output. 
+You need to create 2 lists of int, one for the input and one for the output.
 
 ```csharp
 IEnumerable<int> outputs = new int[] { 26, 19, 13, 6 };
@@ -49,7 +49,7 @@ To read a key, just the `ReadKey` function:
 KeyMatrixEvent? key = mk.ReadKey();
 ```
 
-KeyMatrixEvent contains the event that happened. Please note that ReadKey is blocked up to the moment an event is detected. 
+KeyMatrixEvent contains the event that happened. Please note that ReadKey is blocked up to the moment an event is detected.
 
 ## Event based approach
 

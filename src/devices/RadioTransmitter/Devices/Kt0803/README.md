@@ -1,6 +1,6 @@
 # KT0803 - Radio Transmitter
 
-KT0803, a new generation of low cost Monolithic Digital FM Transmitter, is designed to process high-fidelity stereo audio signal and transmit modulated FM signal over a short range. 
+KT0803, a new generation of low cost Monolithic Digital FM Transmitter, is designed to process high-fidelity stereo audio signal and transmit modulated FM signal over a short range.
 
 ## Sensor Image
 

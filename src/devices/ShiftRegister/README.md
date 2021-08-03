@@ -48,7 +48,7 @@ Thread.Sleep(1000);
 sr.ShiftByte(0b_1000_1101);
 ```
 
-The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph.fzz) demonstrates the required wiring for using the SN74HC595 with minimal mapping. Other shift registers will be similar.
+The following diagram demonstrates the required wiring for using the SN74HC595 with minimal mapping. Other shift registers will be similar.
 
 ![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-minimal-led-bar-graph_bb.png)
 
@@ -75,7 +75,7 @@ sr.ShiftClear();
 sr.ShiftByte(0b_1010_1010);
 ```
 
-The following [diagram](../Sn74hc595/sn74hc595-led-bar-graph-spi.fzz) demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
+The following diagram demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
 
 ![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-led-bar-graph-spi_bb.png)
 
@@ -131,6 +131,6 @@ foreach (var b in bytes)
 }
 ```
 
-The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph-double-up.fzz) demonstrates the required wiring for using the SN74HC595 with daisy-chaining. Other shift registers will be similar. This diagram uses the `Minimal` mapping. The `Complete` mapping will differ.
+The following diagram demonstrates the required wiring for using the SN74HC595 with daisy-chaining. Other shift registers will be similar. This diagram uses the `Minimal` mapping. The `Complete` mapping will differ.
 
 ![sn74hc595-minimal-led-bar-graph-double-up_bb](../Sn74hc595/sn74hc595-minimal-led-bar-graph-double-up_bb.png)

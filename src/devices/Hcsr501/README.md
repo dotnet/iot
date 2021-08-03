@@ -1,6 +1,6 @@
 # HC-SR501 - PIR Motion Sensor
 
-HC-SR501 is used to detect motion based on the infrared heat in the surrounding area. 
+HC-SR501 is used to detect motion based on the infrared heat in the surrounding area.
 
 ## Documentation
 
@@ -51,10 +51,10 @@ using (Iot.Device.Hcsr501.Hcsr501 sensor =
 
 ### Hardware Required
 
-* PIR Motion Sensor - HC-SR501
-* LED
-* 220 Ω resistor
-* Male/Female Jumper Wires
+- PIR Motion Sensor - HC-SR501
+- LED
+- 220 Ω resistor
+- Male/Female Jumper Wires
 
 ### Circuit
 
@@ -64,14 +64,14 @@ using (Iot.Device.Hcsr501.Hcsr501 sensor =
 
 ![settings](Hcsr501Setting.png)
 
-* VCC - 5V
-* GND - GND
-* OUT - GPIO 17
+- VCC - 5V
+- GND - GND
+- OUT - GPIO 17
 
 ### LED
 
-* VCC & 220 Ω resistor - GPIO 27
-* GND - GND
+- VCC & 220 Ω resistor - GPIO 27
+- GND - GND
 
 ### Result
 

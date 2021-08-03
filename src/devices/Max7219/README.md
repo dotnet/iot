@@ -12,11 +12,9 @@ You can use .NET Core to drive MAX7219 based Dot Matrix Modules.
 
 These Modules can be cascaded to get a bigger matrix.
 
-
 ### Accessing the MAX7219 via SPI
 
 The Raspberry Pi has support for SPI. You need to [enable the SPI interface on the Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/) since it is not enabled by default.
-
 
 ```csharp
 var connectionSettings = new SpiConnectionSettings(0, 0)
@@ -28,7 +26,7 @@ var spi = SpiDevice.Create(connectionSettings);
 var devices = new Max7219(spi, cascadedDevices: 4);
 ```
 
-The following pin layout can be used (also shown in a [fritzing diagram](Schema.fzz)):
+The following pin layout:
 
 * MAX7219 VCC to RPi 5V, Pin 2
 * MAX7219 GND to RPi GND, Pin 6
@@ -82,7 +80,7 @@ foreach (var font in new[]{Fonts.CP437, Fonts.LCD, Fonts.Sinclair, Fonts.Tiny, F
     writer.Font = font;
     writer.ShowMessage("Hello World from MAX7219!", alwaysScroll: true);
 }
-```                
+```
 
 ## How to Cross Compile and Run this sample
 

@@ -7,8 +7,6 @@ Additionally an interrupt pin can raise an event when any individual pixel goes 
 
 ![Illustration of thermophile pixel array and heat map](./AMG88xx.png)
 
-*Illustration of thermophile pixel array and heat map*
-
 ## Documentation
 
 - Product [homepage](https://industry.panasonic.eu/components/sensors/grid-eye)
@@ -76,15 +74,16 @@ Property:
 public Temperature SensorTemperature
 ```
 
-**Note**: the thermistor temperature is <u>not</u> equivalent to the
+**Note**: the thermistor temperature is **not** equivalent to the
 
 ### Operating Mode / Power Control
 
 The sensor supports four operating modes to control power consumption:
-* Normal
-* Sleep Mode
-* Stand-by with 60 seconds intermittence
-* Stand-by with 10 seconds intermittence
+
+- Normal
+- Sleep Mode
+- Stand-by with 60 seconds intermittence
+- Stand-by with 10 seconds intermittence
 
 Property:
 
@@ -97,8 +96,9 @@ public OperatingMode OperatingMode
 ### Reset
 
 The sensor supports two types of resets.
-* **Reset:** Resets all flags and registers to default values
-* **Resetting all flags:** Resets all flags (status register, interrupt flag, interrupt table)
+
+- **Reset:** Resets all flags and registers to default values
+- **Resetting all flags:** Resets all flags (status register, interrupt flag, interrupt table)
 
 ```csharp
 public void Reset()
@@ -108,6 +108,7 @@ public void ResetAllFlags()
 **Note**: resetting the interrupt related flags is only required if you want to clear flags while the readings are still within the hysteresis span. See interrupts section for further details on interrupt behavior.
 
 ### Sensor Status
+
 The sensor status indicates if any pixel or the chip internal thermistor overran the upper or lower operating range limit. It also flags on the occurrence of an interrupt. The status can be read out and reset per flag:
 
 ```csharp
@@ -146,13 +147,12 @@ public FrameRate FrameRate
 **Default:** off
 
 The sensor supports a moving average mode. In this mode it builds the twice moving average for each pixel.
-* If the frame rate is set to 10fps the sensor takes the average of the readings *n* and *n+1* and yields their average as output.
-* If the frame rate is set to 1fps the sensor takes the readings of 10 frames (as the sensor runs internally always at 10fps) and builds the average.
+
+- If the frame rate is set to 10fps the sensor takes the average of the readings *n* and *n+1* and yields their average as output.
+- If the frame rate is set to 1fps the sensor takes the readings of 10 frames (as the sensor runs internally always at 10fps) and builds the average.
 The average of two averages of 10 readings is the resulting output.
 
 ![Moving average principle](./AMG88xxAvgMode.svg)
-
-*Moving Average*
 
 The noise per pixel will decrease to 1/sqrt2 when using the moving average mode.
 
@@ -165,6 +165,7 @@ public bool UseMovingAverageMode
 ***Important***: the reference specification states that the current mode can be read, but it doesn't seem to work at the time being. In this case the property is always read as ```false```.
 
 ### Interrupt control, levels and pixel flags
+
 The sensor can raise an interrupt if any pixel passes a given value. The event is signaled by the interrupt flag of the status register. Additionally the INT pin of the sensor can be pulled low.
 
 Properties:
@@ -194,10 +195,11 @@ public bool[,] GetInterruptFlagTable()
 
 Interrupt levels and hysteresis
 
-**Note**
-* be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is <u>not</u> required to reset the flag manually.
-* any flag in the interrupt flag table is automatically reset if the corresponding pixel is no long exceed the lower or upper threshold.
-* if a hysteresis is applied and the reading of a pixel is not passing the threshold anymore, while at the same time the reading is still within the hysteresis span, the interrupt flag can be cleared by using the ```ResetAllFlags``` method.
+Note:
+
+- be aware that the interrupt flag in the status register is reset automatically if no pixel temperature exceeds the lower or upper threshold. It is **not** required to reset the flag manually.
+- any flag in the interrupt flag table is automatically reset if the corresponding pixel is no long exceed the lower or upper threshold.
+- if a hysteresis is applied and the reading of a pixel is not passing the threshold anymore, while at the same time the reading is still within the hysteresis span, the interrupt flag can be cleared by using the ```ResetAllFlags``` method.
 
 ## Example
 
@@ -205,10 +207,10 @@ Interrupt levels and hysteresis
 
 The [sample application](https://github.com/dotnet/iot/tree/main/src/devices/Amg88xx/samples) demonstrates the key functions of the sensor and the binding:
 
-* thermal image readout
-* interrupt triggering based on temperature levels incl. hysteresis
-* sensor states
-* noise reduction by using the sensor's moving average function
+- thermal image readout
+- interrupt triggering based on temperature levels incl. hysteresis
+- sensor states
+- noise reduction by using the sensor's moving average function
 
 There are AMG88xx breakout boards available from a variety of vendors. You can use any of them as long as it provides access to the I2C interface of the sensor.
 

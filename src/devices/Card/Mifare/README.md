@@ -71,5 +71,3 @@ if (decrypted is object)
     }
 }
 ```
-
-
