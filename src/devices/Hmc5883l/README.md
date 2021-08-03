@@ -49,18 +49,18 @@ using (Hmc5883l sensor = new Hmc5883l(device))
 
 ### Hardware Required
 
-* HMC5883L
-* Male/Female Jumper Wires
+- HMC5883L
+- Male/Female Jumper Wires
 
 ### Circuit
 
-![circuit](HMC5883L_circuit_bb.png)
+![circuit](./HMC5883L_circuit_bb.png)
 
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND
+- SCL - SCL
+- SDA - SDA
+- VCC - 5V
+- GND - GND
 
 ### Result
 
-![running result](RunningResult.jpg)
+![running result](./RunningResult.jpg)

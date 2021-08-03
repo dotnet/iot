@@ -20,7 +20,6 @@ The binding supports the following sensor functions:
 * reading status
 * issueing calibration and reset commands
 
-
 ### Sensor classes
 
 You need to choose the class depending on the sensor type.

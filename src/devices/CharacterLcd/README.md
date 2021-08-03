@@ -8,7 +8,7 @@ Please make sure you are using the [latest Bindings nuget](https://github.com/do
 
 This binding has been tested with a variety of 16x2 and 20x4 displays both in 4bit and 8bit mode and via i2C adapters (such as on the CrowPi). It should work with any character LCD with a 5x8 size character. Common names are 1602LCD and 2004LCD. Also supports [Grove - LCD RGB Backlight](http://wiki.seeedstudio.com/Grove-LCD_RGB_Backlight/).
 
-- [Very complete tutorial]https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview() on how to connect and work with one of these displays.
+- [Very complete tutorial]<https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview>() on how to connect and work with one of these displays.
 - [Good guide](http://www.site2241.net/november2014.htm) explaining how the device works internally
 - Seeedstudio, Grove - [LCD RGB Backlight library](https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight)
 - [PCF8574T information](https://alselectro.wordpress.com/2016/05/12/serial-lcd-i2c-module-pcf8574/)

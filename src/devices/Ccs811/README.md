@@ -1,6 +1,6 @@
 # CCS811 Gas sensor
 
-CCS811 is an ultra-low power digital gas sensor solution for monitoring indoor air quality. 
+CCS811 is an ultra-low power digital gas sensor solution for monitoring indoor air quality.
 CCS811 integrates a gas sensor solution for detecting low levels of Volatile Organic Compounds typically found indoors, with a microcontroller unit (MCU) and an Analog-to-Digital converter to monitor the local environment and provide an indication of the indoor air quality via an equivalent CO2 or Total Volatile Organic Compounds output over a standard I2C digital interface.
 
 ## Documentation
@@ -10,7 +10,7 @@ CCS811 integrates a gas sensor solution for detecting low levels of Volatile Org
 
 ## Device information
 
-*Important*: 
+*Important*:
 
 - CCS811 needs 20 minutes to warm up before giving any accurate measurement. Once, you'll select a mode and the internal resistor will start heating, keep in mind that accurate results will show up after 20 minutes approximately
 - When you'll receive it, the device needs to be put on reading mode every second for about 48h as it needs time to get a a stable internal resistor
@@ -18,7 +18,7 @@ CCS811 integrates a gas sensor solution for detecting low levels of Volatile Org
 
 CCS811 exposes 3 pins, here is a short information on every one:
 
-- The Address pins allows you to select the first of second I2C address. Place it to the ground to select the first one (0x5A) or to VCC to select the second one (0x5B). 
+- The Address pins allows you to select the first of second I2C address. Place it to the ground to select the first one (0x5A) or to VCC to select the second one (0x5B).
 - The Reset pin is sometime present. If present and you want to use it, this will perform a full hard reset.
 - The Wake pin is used to select the chip and wake it up. If you don't want to use it, just put it to the ground.
 - The Interrupt pin allows interruption, if used, the interrupt mode and events will be activated. This needs to be activated to be able to use the embedded Threshold feature.
@@ -28,7 +28,7 @@ Understanding the measurement:
 - CCS811 provides equivalent CO2 in part per millions as well as Total Volatile Organic Compounds in part per billion. Those equivalents are calculated based on the own internal mechanism
 - You have as well the raw data reading from the current gas sensor in micro Ampere and the raw voltage ADC. The ADC voltage is 1.65 V for a reading 1023 in a linear mode.
 
-**Important**
+**Important** to understand:
 
 In order to have this sensor working on a Raspberry Pi, you need to lower the bus speed. This sensor uses a mode called I2C stretching and it is not supported natively on Raspberry Pi. So you **must** lower the I2C clock to the minimum to make it working properly or use a software I2C with a low clock as well.
 
@@ -48,7 +48,7 @@ Reboot:
 sudo reboot
 ```
 
-*Notes*
+*Notes*:
 
 - This has an impact on the all bus! So if you are using other sensors, this will decrease the speed of all other sensors.
 - Even with the bus speed reduced, you may have issues.
@@ -57,7 +57,7 @@ sudo reboot
 
 Add the following line to use GPIO 17 for SCA and GPIO 27 for SCL:
 
-```
+```text
 dtoverlay=i2c-gpio,i2c_gpio_sda=17,i2c_gpio_scl=27,bus=3,i2c_gpio_delay_us=20
 ```
 
@@ -69,7 +69,7 @@ Reboot:
 sudo reboot
 ```
 
-*Notes*
+Notes:
 
 - This uses 2 extra GPIO
 - This is the best solution especially if you are using extra I2C devices
@@ -221,7 +221,7 @@ You can log the date an nicely import them later on in Excel. The following exam
 
 ### Sample wiring
 
-**Important**
+**Important** to understand:
 
 In order to have this sensor working on a Raspberry Pi, you need to lower the bus speed. This sensor uses a mode called I2C stretching and it is not supported natively on Raspberry Pi. So you **must** lower the I2C clock to the minimum to make it working properly or use a software I2C with a low clock as well. See the section above.
 

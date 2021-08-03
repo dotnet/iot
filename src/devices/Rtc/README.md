@@ -14,7 +14,7 @@ The RTC devices supported by the project include DS1307, DS3231, PCF8563.
 
 ## Usage
 
-### Hardware Required:
+### Hardware Required
 
 - DS1307/DS3231/PCF8563
 - Male/Female Jumper Wires

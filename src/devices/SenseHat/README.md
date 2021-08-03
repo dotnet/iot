@@ -73,9 +73,10 @@ using (var ledMatrix = new SenseHatLedMatrixI2c())
 }
 ```
 
-Please see [sample](LedMatrix.Sample.cs) for more advanced example (also includes above).
+Please see [sample](./samples/Program.cs) for more advanced example (also includes above).
 
 There are currently two implementations of SenseHatLedMatrix:
+
 - SenseHatLedMatrixSysFs - uses native driver - requires installing a driver but colors look (arguably) more vivid (also a bit faster).
 - SenseHatLedMatrixI2c - does not require any drivers - allows using brighter colors but colors are more pale by default.
 

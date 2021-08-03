@@ -4,7 +4,7 @@ The project currently includes `VideoDevice`.
 
 ## Prerequisites
 
-### VideoDevice
+### VideoDevice Prerequisites
 
 - Install `v4l-utils`.
 
@@ -18,7 +18,7 @@ sudo apt-get install v4l-utils
 sudo apt-get install libc6-dev libgdiplus libx11-dev
 ```
 
-### SoundDevice
+### SoundDevice Prerequisites
 
 - Install `libasound2-dev`.
 
@@ -57,7 +57,7 @@ device.Record(10, "/home/pi/record.wav");
 
 #### Using continuous recording
 
-You can start recording and record chunks of 1 second continuously. This can be used in scenarios when you need to record a duration that is not know in advance. 
+You can start recording and record chunks of 1 second continuously. This can be used in scenarios when you need to record a duration that is not know in advance.
 
 ```csharp
 SoundConnectionSettings settings = new SoundConnectionSettings();

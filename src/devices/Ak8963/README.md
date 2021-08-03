@@ -43,7 +43,7 @@ Console.WriteLine($"Mag Y = {ak8963.MagnometerBias.Y}");
 Console.WriteLine($"Mag Z = {ak8963.MagnometerBias.Z}");
 ```
 
-You will find a full example on how to extract raw data without calibration on the [MPU9250 sample](../Mpu9250/samples/Mpu9250.sample.cs).
+You will find a full example on how to extract raw data without calibration on the [MPU9250 sample](../Mpu9250/samples/Program.cs).
 
 If no calibration is performed, you will get a raw data cloud which looks like this:
 
@@ -53,7 +53,7 @@ Running the calibration properly require to **move the sensor in all the possibl
 
 ![raw data](./corrcalib.png)
 
-To create those cloud point graphs, every cloud is a coordinate of X-Y, Y-Z and Z-X. 
+To create those cloud point graphs, every cloud is a coordinate of X-Y, Y-Z and Z-X.
 
 Once the calibration is done, you will be able to read the data with the bias corrected using the ```ReadMagnetometer``` function. You will still be able to read the data without any calibration using the ```ReadMagnetometerWithoutCalibration``` function.
 
@@ -129,4 +129,4 @@ Only I2C is supported in this version.
 * VCC - 3.3V
 * GND - GND
 
-Depending on the version you have, you may have to select I2C over SPI. This is done in different way depending on the board you'll have. 
+Depending on the version you have, you may have to select I2C over SPI. This is done in different way depending on the board you'll have.

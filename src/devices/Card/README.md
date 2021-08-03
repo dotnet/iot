@@ -1,6 +1,6 @@
 # RFID shared elements
 
-Common elements of all RFID and NFC readers like the type of cards 14443 Type A, Type B, Innovision Jewel. 
+Common elements of all RFID and NFC readers like the type of cards 14443 Type A, Type B, Innovision Jewel.
 
 This contains as well an abstract class that has to be implemented by readers to have a transparent way of managing Mifare cards and other high level cards.
 

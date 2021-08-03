@@ -8,9 +8,9 @@ There are other models like APA107, HD107s, SK9822, etc. The controls are exactl
 
 Model  | SCLK   | PWM
 -------|--------|--------
-APA102 | 20 MHz | 20 kHz 
+APA102 | 20 MHz | 20 kHz
 APA107 | 30 MHz | 9 kHz  
-HD107s | 40 MHz | 27 kHz 
+HD107s | 40 MHz | 27 kHz
 SK9822 | 15 MHz | 4.7 kHz
 
 ## Documentation

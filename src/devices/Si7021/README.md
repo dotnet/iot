@@ -15,15 +15,15 @@ The Si7021 device provides temperature and humidity sensor readings with an I2C 
 
 ### Hardware Required
 
-* Si7021
-* Male/Female Jumper Wires
+- Si7021
+- Male/Female Jumper Wires
 
 ### Circuit
 
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND
+- SCL - SCL
+- SDA - SDA
+- VCC - 5V
+- GND - GND
 
 ### Code
 

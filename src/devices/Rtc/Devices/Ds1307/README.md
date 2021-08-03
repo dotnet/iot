@@ -3,6 +3,7 @@
 The DS1307 serial real-time clock (RTC) is a lowpower, full binary-coded decimal (BCD) clock/calendar plus 56 bytes of NV SRAM. Address and data are transferred serially through an I2C, bidirectional bus.
 
 ## Sensor Image
+
 ![sensor](sensor.jpg)
 
 ## Usage

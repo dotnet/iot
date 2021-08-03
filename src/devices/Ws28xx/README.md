@@ -2,7 +2,7 @@
 
 This binding allows you to update the RGB LEDs on Ws28xx and based strips and matrices.
 
-To see how to use the binding in code, see the [sample](samples/README.md).
+To see how to use the binding in code, see the [sample](samples/Program.cs).
 
 ## Documentation
 
@@ -71,9 +71,15 @@ void Rainbow(Ws28xx neo, int count, int iterations = 1)
 
 ### Raspberry Pi setup (/boot/config.txt)
 
-* Make sure spi is enabled<br>
-  `dtparam=spi=on`
+* Make sure spi is enabled
 
-* Make sure SPI don't change speed fix the core clock<br>
-  `core_freq=250`<br>
-  `core_freq_min=250`
+```text
+dtparam=spi=on
+```
+
+* Make sure SPI don't change speed fix the core clock:
+
+```text
+core_freq=250
+core_freq_min=250
+```

@@ -8,7 +8,6 @@ In [Chinese](http://wenku.baidu.com/view/87a1cf5c312b3169a451a47e.html)
 
 In [English](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)
 
-
 ## Sensor Image
 
 ![sensor](sensor.jpg)

@@ -4,7 +4,7 @@ The SSD1351 is a single-chip CMOS OLED driver with controller for organic/polyme
 
 ## Documentation
 
-[Adafruit SSD1351 Arduino Library](https://github.com/adafruit/Adafruit-SSD1351-library) 
+[Adafruit SSD1351 Arduino Library](https://github.com/adafruit/Adafruit-SSD1351-library)
 
 ### Device Family
 
