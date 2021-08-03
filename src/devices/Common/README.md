@@ -25,8 +25,8 @@ Logging is disabled by default. To enable logging to the console in an applicati
 ```csharp
 using var loggerFactory = LoggerFactory.Create(builder =>
 {
- builder
-  .AddConsole();
+    builder
+      .AddConsole();
 });
 
 // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.

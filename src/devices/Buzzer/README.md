@@ -23,7 +23,7 @@ Here's an example how you could use `Buzzer`.
 ```csharp
 using (Buzzer buzzer = new Buzzer(21)); // Initialize buzzer with software PWM connected to pin 21.
 {
- buzzer.PlayTone(440, 1000); // Play tone with frequency 440 hertz for one second.
+    buzzer.PlayTone(440, 1000); // Play tone with frequency 440 hertz for one second.
 }
 ```
 
@@ -33,9 +33,9 @@ Or you could start tone playing, perform some operation and then stop tone playi
 ```csharp
 using (Buzzer buzzer = new Buzzer(21));
 {
- buzzer.StartPlaying(440);
- Thread.Sleep(1000);
- buzzer.StopPlaying();
+    buzzer.StartPlaying(440);
+    Thread.Sleep(1000);
+    buzzer.StopPlaying();
 }
 ```
 
@@ -46,11 +46,11 @@ The result will be the same as in previous example.
 ```csharp
 using (Buzzer buzzer = new Buzzer(21)); // Initialize buzzer with software PWM connected to pin 21.
 {
- buzzer.StartPlaying(440);
- Thread.Sleep(1000);
- buzzer.StartPlaying(880);
- Thread.Sleep(1000);
- buzzer.StopPlaying();
+    buzzer.StartPlaying(440);
+    Thread.Sleep(1000);
+    buzzer.StartPlaying(880);
+    Thread.Sleep(1000);
+    buzzer.StopPlaying();
 }
 ```
 
@@ -76,7 +76,7 @@ This sample contains a wrapper on a Buzzer called `MelodyPlayer`.
 To create an instance of a MelodyPlayer use following line:
 
 ```csharp
-MelodyPlayer player  =  new  MelodyPlayer(new  Buzzer(26));
+MelodyPlayer player = new MelodyPlayer(new  Buzzer(26));
 ```
 
 Constructor takes a single parameter type of `Buzzer`.
@@ -92,16 +92,16 @@ MelodyElement is a base class for two types of elements:
 Following example demonstrates how to create MelodyElement sequence and how to play it using MelodyPlayer:
 
 ```csharp
-IList<MelodyElement> sequence =  new  List<MelodyElement>()
+IList<MelodyElement> sequence = new List<MelodyElement>()
 {
- new  NoteElement(Note.C, Octave.Fourth, Duration.Quarter),
- new  PauseElement(Duration.Quarter),
- new  NoteElement(Note.C, Octave.Fourth, Duration.Quarter)
+    new NoteElement(Note.C, Octave.Fourth, Duration.Quarter),
+    new PauseElement(Duration.Quarter),
+    new NoteElement(Note.C, Octave.Fourth, Duration.Quarter)
 };
 
-using (var  player  =  new  MelodyPlayer(new  Buzzer(21)))
+using (var player = new MelodyPlayer(new Buzzer(21)))
 {
- player.Play(sequence, 100);
+    player.Play(sequence, 100);
 }
 ```
 
@@ -119,12 +119,12 @@ player.Play(sequence, 100, -12);
 As far as `MelodyPlayer.Play` method is not asynchronous, calls of this method are wrapped by task like this:
 
 ```csharp
-using (var  player1  =  new  MelodyPlayer(new  Buzzer(21)))
-using (var  player2  =  new  MelodyPlayer(new  Buzzer(26)))
+using (var player1 = new MelodyPlayer(new Buzzer(21)))
+using (var player2 = new MelodyPlayer(new Buzzer(26)))
 {
- Task.WaitAll(
-  Task.Run(() =>  player1.Play(AlphabetSong, 100, -12)),
-  Task.Run(() =>  player2.Play(AlphabetSong, 100)));
+    Task.WaitAll(
+        Task.Run(() => player1.Play(AlphabetSong, 100, -12)),
+        Task.Run(() => player2.Play(AlphabetSong, 100)));
 }
 ```
 

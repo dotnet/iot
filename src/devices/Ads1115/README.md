@@ -12,7 +12,7 @@ Prodcut datasheet can be found [here](https://cdn-shop.adafruit.com/datasheets/a
 
 ## Usage
 
-```C#
+```csharp
 // set I2C bus ID: 1
 // ADS1115 Addr Pin connect to GND
 I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)I2cAddress.GND);
@@ -65,7 +65,7 @@ Rotary Potentiometer
 
 ### Code
 
-```C#
+```csharp
 // set I2C bus ID: 1
 // ADS1115 Addr Pin connect to GND
 I2cConnectionSettings settings = new I2cConnectionSettings(1, (int)I2cAddress.GND);

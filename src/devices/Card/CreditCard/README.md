@@ -62,7 +62,7 @@ static void ReadCreditCard(Pn532 pn532)
 
         Console.WriteLine("All Tags for the Credit Card:");
         DisplayTags(creditCard.Tags, 0);
-  // Display Log Entries
+        // Display Log Entries
         var format = Tag.SearchTag(creditCard.Tags, 0x9F4F).FirstOrDefault();
         if (format is object)
             DisplayLogEntries(creditCard.LogEntries, format.Tags);

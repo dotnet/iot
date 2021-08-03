@@ -49,18 +49,18 @@ Console.WriteLine($"Connecting to Arduino on {portName}");
 ArduinoBoard board = new ArduinoBoard("COM3", 115200);
 try
 {
- board.LogMessages += BoardOnLogMessages; // Get log messages
- Console.WriteLine($"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
- // Add code that uses the board here.
+    board.LogMessages += BoardOnLogMessages; // Get log messages
+    Console.WriteLine($"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
+    // Add code that uses the board here.
 }
 catch (TimeoutException x)
 {
- Console.WriteLine($"No answer from board: {x.Message} ");
+    Console.WriteLine($"No answer from board: {x.Message} ");
 }
 finally
 {
- port.Close();
- board?.Dispose();
+    port.Close();
+    board?.Dispose();
 }
 
 ```
