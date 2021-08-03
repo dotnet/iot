@@ -27,11 +27,11 @@ device.StopCaptureContinuous();
 
 This simple ASP.NET Core MJPEG streaming server uses this ability of continuous capturing. The VideoDevice is encapsulated into a Camera class which provides events once a picture is available.
 
-This sample shows how to timestamp the picture with a specific timezone. In order to set the time zone you can use the REST API like this http://url/image/settimezone?timezone=1 to set the timezone to +1 (for example for Paris in GMT+1). By default the timezone used is GMT (timezone = 0).
+This sample shows how to timestamp the picture with a specific timezone. In order to set the time zone you can use the REST API like this <http://url/image/settimezone?timezone=1> to set the timezone to +1 (for example for Paris in GMT+1). By default the timezone used is GMT (timezone = 0).
 
-To access a single image use the REST API http://url/image
+To access a single image use the REST API <http://url/image>
 
-To get an MJPEG stream, use the REST API http://url/image/stream
+To get an MJPEG stream, use the REST API <http://url/image/stream>
 
 Note this sample will work on a Raspberry Pi running Raspbian or more generally any Linux based device with a webcam attached. Note as well that the default capture settings are set to JPEG and 640x480 which allow almost any webcam even very old one to work with this sample. You can of course adjust the capture mode and the of the picture.
 

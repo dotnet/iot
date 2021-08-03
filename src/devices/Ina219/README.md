@@ -13,7 +13,7 @@ The INA219 is a current shunt and power monitor with an I2C- or SMBUS-compatible
 
 This binding is intended to support both the A and B grades of the INA219. The grades differ only in the accuracy and precision specifications.
 
-- [INA219 Datasheet](http://www.ti.com/lit/ds/symlink/ina219.pdf)
+* [INA219 Datasheet](http://www.ti.com/lit/ds/symlink/ina219.pdf)
 
 ## Usage
 

@@ -2,7 +2,6 @@
 
 RGB LED Matrix interface protocol is sometimes referred as `HUB75`.
 
-
 ## Documentation
 
 - 32x16 32x32 RGB led matrix [documentation](https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/)
@@ -74,7 +73,7 @@ It is recommended to run this sample as a root user because RGBLedMatrix directl
 
 If compiling on one machine and then copy the bits to the pi, maybe consider do publishing to include the whole needed .NET Core dependencies if didn't install the SDK on the pi. the command to do that is ```dotnet publish -r linux-arm```. Also, after copying the bits to the pi, will need to mark RGBLedMatrix.sample as executable by ```chmod +x RGBLedMatrix.sample```
 
-There is some demos using http://api.openweathermap.org service which require a key to use it. if want to have these demos work, will need to request a free key from openweathermap website and then use the key in the demo by setting the key to the static field s_weatherKey in the code.
+There is some demos using <http://api.openweathermap.org> service which require a key to use it. if want to have these demos work, will need to request a free key from openweathermap website and then use the key in the demo by setting the key to the static field s_weatherKey in the code.
 
 As RGBLedMatrix and the sample depends on System.Drawing, it is important to install the needed dependencies on the pi. To do that, please follow the instructions in the blog [How do you use System.Drawing in .NET Core?](https://www.hanselman.com/blog/HowDoYouUseSystemDrawingInNETCore.aspx).
 

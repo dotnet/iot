@@ -10,9 +10,8 @@ The radio transmitter devices supported by the project include KT0803.
 
 ### Hardware Required
 
-* KT0803
-* Male/Female Jumper Wires
-
+- KT0803
+- Male/Female Jumper Wires
 
 ```csharp
 I2cConnectionSettings settings = new I2cConnectionSettings(1, Kt0803.DefaultI2cAddress);

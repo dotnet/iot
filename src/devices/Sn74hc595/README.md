@@ -34,7 +34,7 @@ Thread.Sleep(1000);
 sr.ShiftByte(0b_1000_1101);
 ```
 
-The following [diagram](sn74hc595-minimal-led-bar-graph.fzz) demonstrates the required wiring for the `Minimal` pin mapping. In particular, `OE` must be wired to ground, and `SRCLR` must be wired high.
+The following diagram demonstrates the required wiring for the `Minimal` pin mapping. In particular, `OE` must be wired to ground, and `SRCLR` must be wired high.
 
 ![SN74HC595 Minimal pin mapping](sn74hc595-minimal-led-bar-graph_bb.png)
 
@@ -70,7 +70,7 @@ sr.ShiftBit(1);
 sr.Latch();
 ```
 
-The following [diagram](sn74hc595-led-bar-graph.fzz) demonstrates the required wiring for the `Complete` pin mapping.
+The following diagram demonstrates the required wiring for the `Complete` pin mapping.
 
 ![SN74HC595 Minimal pin mapping](sn74hc595-led-bar-graph_bb.png)
 

@@ -6,7 +6,7 @@ The Max31856 device is a SPI interface cold-junction compensated thermocouple to
 
 **Note:** _ThermocoupleType.K is configured for a K type thermocouple if you want to use a B,E,J,K,N,R,S, or T simply change the K to the thermocouple type of your choosing._
 
-## Documentation 
+## Documentation
 
 * Max31856 [datasheet](https://datasheets.maximintegrated.com/en/ds/Max31856.pdf)
 
@@ -26,6 +26,7 @@ SpiConnectionSettings settings = new(0, 0)
 ```
 
 Create a new ```SpiDevice``` with the settings from above. Then create a new Max31856 device with the ```SpiDevice``` as well as the correct ```ThermocoupleType``` (see note below)
+
 ```csharp
 using SpiDevice device = SpiDevice.Create(settings);
 using Max31856 sensor = new(device, ThermocoupleType.K);

@@ -87,4 +87,4 @@ class Program
 
 ## Performance Considerations
 
-The high precision software PWM is resource intensive and is using a high priority thread. You may have CPU performance issues if you are using multiple high precision software PWM outputs. Always prefer hardware PWM to software PWM when possible. 
+The high precision software PWM is resource intensive and is using a high priority thread. You may have CPU performance issues if you are using multiple high precision software PWM outputs. Always prefer hardware PWM to software PWM when possible.

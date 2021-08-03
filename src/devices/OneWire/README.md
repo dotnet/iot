@@ -1,6 +1,6 @@
 ﻿# 1-wire
 
-Allows using 1-wire devices such as digital thermometers (i.e. MAX31820, DS18B20). See [sample](samples/README.md) for how to use.
+Allows using 1-wire devices such as digital thermometers (i.e. MAX31820, DS18B20). See [sample](./samples/Program.cs) for how to use.
 
 ## Documentation
 
@@ -8,9 +8,9 @@ Allows using 1-wire devices such as digital thermometers (i.e. MAX31820, DS18B20
 
 ## Board
 
-The following [fritzing diagram](onewire-temp.fzz) demonstrates how you should wire your device in order to run the program. It uses the GND, 5V and GPIO4 pins on the Raspberry Pi.
+The following diagram demonstrates how you should wire your device in order to run the program. It uses the GND, 5V and GPIO4 pins on the Raspberry Pi.
 
-![Raspberry Pi Breadboard diagram](onewire-temp_bb.png)
+![Raspberry Pi Breadboard diagram](./onewire-temp_bb.png)
 
 ## Usage
 
@@ -59,15 +59,19 @@ else
 
 Add the following to `/boot/config.txt` to enable 1-wire protocol. The default gpio is 4 (pin 7).
 
-    dtoverlay=w1-gpio
+```text
+dtoverlay=w1-gpio
+```
 
 Add this to specify gpio 17 (pin 11).
 
-    dtoverlay=w1-gpio,gpiopin=17
+```text
+dtoverlay=w1-gpio,gpiopin=17
+```
 
 ## Supported devices
 
 All temperature devices with family id of 0x10, 0x28, 0x3B, or 0x42 supported.
 
-* [MAX31820](https://datasheets.maximintegrated.com/en/ds/MAX31820.pdf)
-* [DS18B20](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)
+- [MAX31820](https://datasheets.maximintegrated.com/en/ds/MAX31820.pdf)
+- [DS18B20](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf)

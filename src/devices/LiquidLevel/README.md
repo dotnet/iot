@@ -8,7 +8,6 @@ The implementation supports any single pin output digital liquid level switch.
 
 - LLC200D3SH sensor [datasheet](https://cdn-shop.adafruit.com/product-files/3397/3397_datasheet_actual.pdf)
 
-
 ## Usage
 
 Define the LLC200D3SH sensor using the LiquidLevelSwitch class.
