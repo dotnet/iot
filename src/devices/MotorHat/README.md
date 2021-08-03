@@ -16,7 +16,7 @@ It also provides 4 extra PWM Outputs, that can be used for anything that require
 
 The following example show how to create a DCMotor.
 
-```csharp   
+```csharp
 using (var motorHat = new MotorHat())
 {
     var motor = motorHat.CreateDCMotor(1); // MotorNumber can be 1, 2, 3 or 4, following the labbelling in the board: M1, M2, M3 or M4
@@ -29,7 +29,7 @@ using (var motorHat = new MotorHat())
 
 The following example show how to create a ServoMotor.
 
-```csharp   
+```csharp
 using (var motorHat = new MotorHat())
 {
     var servoMotor = motorHat.CreateServoMotor(0); // channelNumber can be 0, 1, 14 or 15, depending on wich of those xtra channels you connected your servo

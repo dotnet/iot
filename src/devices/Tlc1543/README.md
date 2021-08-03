@@ -25,9 +25,9 @@ SoftwareSpi spi = new SoftwareSpi(
 Tlc1543 adc = new Tlc1543(spi);
 ```
 
-- 24 is our address pin, 
-- 5 chip select, 
-- 23 data out pin 
+- 24 is our address pin,
+- 5 chip select,
+- 23 data out pin
 - and 25 is input output clock.
 
 ### Changing Charge Channel
@@ -44,7 +44,7 @@ You can set ChargeChannel to one of the Self Test channels (if you really know w
 int values = adc.ReadPreviousAndChargeChannel(channels[0]);
 ```
 
-Simple way of reading values into just made list. 
+Simple way of reading values into just made list.
 
 ### Calculating position
 
@@ -59,7 +59,7 @@ for (int i = 0; i < values.Count; i++)
 }
 ```
 
-To find where under our matrix is line we need to check values given out from sensors depending on where they are pointing. 
+To find where under our matrix is line we need to check values given out from sensors depending on where they are pointing.
 
 - Pointing at sky gives us values ranging from 0 to 50
 - Keeping it close to white paper gives values bigger than 600
@@ -86,7 +86,7 @@ and we now know that the line is somewhere between first and second sensor. By u
 
 ## Binding Notes
 
-Only mode implemented is Fast Mode 1 (10 clocks and !ChipSelect high between conversion cycles). 
+Only mode implemented is Fast Mode 1 (10 clocks and !ChipSelect high between conversion cycles).
 Respective timing diagram can be seen on figure 9 in datasheet.
 
 It is possible to change ADC charge channel.

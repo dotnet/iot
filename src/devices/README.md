@@ -297,7 +297,7 @@ Bindings must:
 * include a .NET Core project file for the main library.
 * include a descriptive README, with a fritzing diagram.
   * Best if you include the coverage of the binding. If you did not implement all features, mention what has been implemented and what is not. It is ok not to implement every features but it's important to know what is missing
-  * Refer to multiple manufacturer and add links where the binding can be found. Sometimes, they have different names depending on where you can find them while it's the same chipset used or compatible ones 
+  * Refer to multiple manufacturer and add links where the binding can be found. Sometimes, they have different names depending on where you can find them while it's the same chipset used or compatible ones
 * include a buildable sample (layout will be described below).
   * Best if you include a sample that covers usage of all available functions and properties
   * Best if you create mutliple paths to show what the sensor can do
@@ -306,7 +306,7 @@ Bindings must:
 
 Here is an example of a layout of a new Binding *Foo* from the top level of the repo:
 
-```
+```text
 iot/
   src/
     devices/

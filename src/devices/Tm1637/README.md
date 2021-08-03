@@ -1,6 +1,6 @@
 # TM1637 - Segment Display
 
-TM1637 is a segments display with 6 characters Led controler. It used a 2 wire implementation, one for the clock (CLK), one for the data (DIO). This chip can act as well as a key reader. This part has not been implemented. Only the Led display has been implemented. Most of its modern usages are for 4 to 6 segment displays. 
+TM1637 is a segments display with 6 characters Led controler. It used a 2 wire implementation, one for the clock (CLK), one for the data (DIO). This chip can act as well as a key reader. This part has not been implemented. Only the Led display has been implemented. Most of its modern usages are for 4 to 6 segment displays.
 
 ## Documentation
 
@@ -8,11 +8,11 @@ TM1637 is a segments display with 6 characters Led controler. It used a 2 wire i
 
 ### Device family
 
-You can find this display as [Grove](http://wiki.seeedstudio.com/Grove-4-Digit_Display/) elements as well as very cheap with no brand. A search on your favorite online shop will give you lots of options. Those simple displays are used a lot for simple clock for example. 
+You can find this display as [Grove](http://wiki.seeedstudio.com/Grove-4-Digit_Display/) elements as well as very cheap with no brand. A search on your favorite online shop will give you lots of options. Those simple displays are used a lot for simple clock for example.
 
 ## Usage
 
-You need to create a ```Tm1637``` class with 2 pins, the clock one and the data one. 
+You need to create a ```Tm1637``` class with 2 pins, the clock one and the data one.
 
 ```csharp
 Tm1637 tm1637 = new Tm1637(21, 20);

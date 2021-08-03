@@ -15,7 +15,7 @@ This binding was developed using the Adafruit Seesaw breakout board which uses t
 
 ## Documentation
 
-- https://cdn-learn.adafruit.com/downloads/pdf/adafruit-seesaw-atsamd09-breakout.pdf?timestamp=1564230162
+* <https://cdn-learn.adafruit.com/downloads/pdf/adafruit-seesaw-atsamd09-breakout.pdf?timestamp=1564230162>
 
 ## Usage
 
@@ -70,7 +70,7 @@ using (Seesaw ssDevice = new Seesaw(i2cDevice))
 
 ![Seesaw sample soil sensor](SeesawSampleSoilSensor_bb.png)
 
-### Blinking Lights sample.
+### Blinking Lights sample
 
 This sample duplicates the functionality of the rpi-more-blinking-lights sample but instead of using the raspberry pi Gpio it uses the Seesaw breakout board for all inputs
 
@@ -86,14 +86,14 @@ It has been found that the Raspberry Pi 4 works correctly with this binding when
 
 In general the Seesaw technology allows user the embedding of the following types of modules into firmware and the modules ticked are the ones that have been covered by this binding.
 
-- [X] Status - providing overall feedback on the availability of modules and control of the expander
-- [X] Gpio
-- [ ] Serial Communications
-- [ ] Timers
-- [X] Analog Input
-- [ ] Analog Output
-- [ ] DAP
-- [X] EEPROM (although untested)
-- [X] Capacitive Touch
-- [ ] Keypad
-- [ ] Rotary Encoder
+* [X] Status - providing overall feedback on the availability of modules and control of the expander
+* [X] Gpio
+* [ ] Serial Communications
+* [ ] Timers
+* [X] Analog Input
+* [ ] Analog Output
+* [ ] DAP
+* [X] EEPROM (although untested)
+* [X] Capacitive Touch
+* [ ] Keypad
+* [ ] Rotary Encoder

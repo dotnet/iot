@@ -8,14 +8,13 @@ In [Chinese](http://wenku.baidu.com/view/87a1cf5c312b3169a451a47e.html)
 
 In [English](https://www.analog.com/media/en/technical-documentation/data-sheets/ADXL345.pdf)
 
-
 ## Sensor Image
 
 ![sensor](sensor.jpg)
 
 ## Usage
 
-```C#
+```csharp
 SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
 {
     ClockFrequency = Adxl345.SpiClockFrequency,
@@ -54,7 +53,7 @@ using (Adxl345 sensor = new Adxl345(device, GravityRange.Range04))
 
 ### Code
 
-```C#
+```csharp
 SpiConnectionSettings settings = new SpiConnectionSettings(0, 0)
 {
     ClockFrequency = Adxl345.SpiClockFrequency,

@@ -12,7 +12,7 @@ The following fritzing diagram illustrates one way to wire up the Mcp3008, with 
 
 The sample is based on following resources:
 
-- [Analog Inputs for Raspberry Pi Using the MCP3008](https://learn.adafruit.com/reading-a-analog-in-and-controlling-audio-volume-with-the-raspberry-pi) 
+- [Analog Inputs for Raspberry Pi Using the MCP3008](https://learn.adafruit.com/reading-a-analog-in-and-controlling-audio-volume-with-the-raspberry-pi)
 - [Raspberry Pi Analog to Digital Converters](https://learn.adafruit.com/raspberry-pi-analog-to-digital-converters).
 - [Raspbery Pi Analog Input with MCP3008](https://gist.github.com/ladyada/3151375)
 - [MCP3008.py](https://github.com/adafruit/Adafruit_Python_MCP3008/blob/master/Adafruit_MCP3008/MCP3008.py)
@@ -25,15 +25,14 @@ Major thanks to [Adafruit](https://adafruit.com) for providing python implementa
 
 The following elements are used in this sample:
 
-* [Potentiometer](https://www.adafruit.com/product/356)
-* [MCP3008](https://www.adafruit.com/product/856)
-
+- [Potentiometer](https://www.adafruit.com/product/356)
+- [MCP3008](https://www.adafruit.com/product/856)
 
 ### Accessing the MCP3008 via SPI
 
 The Raspberry Pi has support for SPI. You need to [enable the SPI interface on the Raspberry Pi](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/) since it is not enabled by default.
 
-You can use the following code to [access the MCP3008 via hardware SPI](samples/Mcp3008.Sample.cs):
+You can use the following code to [access the MCP3008 via hardware SPI](./samples/Program.cs):
 
 ```csharp
 var hardwareSpiSettings = new SpiConnectionSettings(0, 0)
@@ -55,25 +54,24 @@ using (Mcp3008 mcp = new Mcp3008(spi))
 }
 ```
 
-The following pin layout can be used (also shown in a [fritzing diagram](rpi-trimpot-spi.fzz)):
+The following pin layout can be used:
 
-* MCP3008 VDD to RPi 3.3V
-* MCP3008 VREF to RPi 3.3V
-* MCP3008 AGND to RPi GND
-* MCP3008 DGND to RPi GND
-* MCP3008 CLK to RPi SCLK
-* MCP3008 DOUT to RPi MISO
-* MCP3008 DIN to RPi MOSI
-* MCP3008 CS/SHDN to RPi CE0
+- MCP3008 VDD to RPi 3.3V
+- MCP3008 VREF to RPi 3.3V
+- MCP3008 AGND to RPi GND
+- MCP3008 DGND to RPi GND
+- MCP3008 CLK to RPi SCLK
+- MCP3008 DOUT to RPi MISO
+- MCP3008 DIN to RPi MOSI
+- MCP3008 CS/SHDN to RPi CE0
 
-![Raspberry Pi Breadboard diagram](rpi-trimpot_spi.png)
-
+![Raspberry Pi Breadboard diagram](./rpi-trimpot_spi.png)
 
 ### Accessing the MCP3008 via GPIO
 
 You can also access the MCP3008 via GPIO pins, implementing SPI manually. This method is referred to as [bit-banging](https://en.wikipedia.org/wiki/Serial_Peripheral_Interface#Example_of_bit-banging_the_master_protocol).
 
-You can use the following code to [access the MCP3008 via GPIO](samples/Mcp3008.Sample.cs):
+You can use the following code to [access the MCP3008 via GPIO](./samples/Program.cs):
 
 ```csharp
 using (SpiDevice spi = new SoftwareSpi(clk: 18, miso: 23, mosi: 24, cs: 25))
@@ -90,18 +88,18 @@ using (Mcp3008 mcp = new Mcp3008(spi))
 }
 ```
 
-The following pin layout can be used (also shown in a [fritzing diagram](rpi-trimpot-gpio.fzz)):
+The following pin layout can be used:
 
-* MCP3008 VDD to RPi 3.3V
-* MCP3008 VREF to RPi 3.3V
-* MCP3008 AGND to RPi GND
-* MCP3008 DGND to RPi GND
-* MCP3008 CLK to RPi pin 18
-* MCP3008 DOUT to RPi pin 23
-* MCP3008 DIN to RPi pin 24
-* MCP3008 CS/SHDN to RPi pin 25
+- MCP3008 VDD to RPi 3.3V
+- MCP3008 VREF to RPi 3.3V
+- MCP3008 AGND to RPi GND
+- MCP3008 DGND to RPi GND
+- MCP3008 CLK to RPi pin 18
+- MCP3008 DOUT to RPi pin 23
+- MCP3008 DIN to RPi pin 24
+- MCP3008 CS/SHDN to RPi pin 25
 
-![Raspberry Pi Breadboard diagram](rpi-trimpot_gpio.png)
+![Raspberry Pi Breadboard diagram](./rpi-trimpot_gpio.png)
 
 ### Processing the data
 

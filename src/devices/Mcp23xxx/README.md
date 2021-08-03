@@ -11,10 +11,10 @@ The MCP23XXX device family provides 8/16-bit, general purpose parallel I/O expan
 
 MCP23XXX devices contain different markings to distinguish features like interfacing, packaging, and temperature ratings.  For example, MCP23017 contains an I2C interface and MCP23S17 contains a SPI interface.  Please review specific datasheet for more information.
 
-* MCP23X08 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/21919e.pdf)
-* MCP23X09 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/20002121C.pdf)
-* MCP23X17 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf)
-* MCP23X18 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/22103a.pdf)
+- MCP23X08 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/21919e.pdf)
+- MCP23X09 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/20002121C.pdf)
+- MCP23X17 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/20001952C.pdf)
+- MCP23X18 [datasheet](http://ww1.microchip.com/downloads/en/DeviceDoc/22103a.pdf)
 
 **NOTE**: MCP23X16 contains different internal circuitry and is not compatible with this binding.
 
@@ -62,7 +62,9 @@ The internal circuitry has a banking concept to group by port registers or by re
 // Read Port B's Input Polarity Port Register (IPOL).
 byte data = mcp23S17.Read(Register.IPOL, Port.PortB);
 ```
+
 #### Example for 8-bit device
+
 The MCP23X08 only contains 1 port so there is not a choice for port when addressing the register.
 
 ``` csharp
@@ -93,6 +95,7 @@ mcp23S17.Disable();
 ```
 
 **TODO**: Interrupt pins can only be read for now.  Events are coming in a future PR.
+
 ```csharp
 var mcp23S17 = new Mcp23S17(spiDevice, 0x20, 10, 25, 17);
 PinValue interruptA = mcp23S17.ReadInterruptA();

@@ -15,7 +15,7 @@ The MBI5027 is similar to the commonly used [SN74HC595](../Sn74hc595/README.md) 
 
 Note: The [MBI5168](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf) is an 8-bit constant current sink without error detection, making it a more direct comparison to the SN74HC595.
 
-The [MBI5027 sample](samples/README.md) demonstrates how to use the shift register. The [generic shift register sample](../ShiftRegister/samples/README.md) is more extensive and is compatible with the MBI5027.
+The [MBI5027 sample](./samples/Program.cs) demonstrates how to use the shift register. The [generic shift register sample](../ShiftRegister/samples/Program.cs) is more extensive and is compatible with the MBI5027.
 
 ## Documentation
 

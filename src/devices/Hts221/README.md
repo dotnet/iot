@@ -13,10 +13,9 @@ Some of the applications mentioned by the datasheet:
 
 ## Documentation
 
-- https://www.st.com/resource/en/datasheet/hts221.pdf
+- <https://www.st.com/resource/en/datasheet/hts221.pdf>
 
 ## Usage
-
 
 ```csharp
 using System;

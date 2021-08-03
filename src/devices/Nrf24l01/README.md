@@ -46,9 +46,11 @@ The nRF24L01 is a single chip radio transceiver for the world wide 2.4 - 2.5 GHz
 This example needs to enable SPI1 on Raspberry Pi running Raspbian.
 
 1. Open **/boot/config.txt** using editor, like
+
     ```shell
     sudo nano /boot/config.txt
     ```
+
 2. Add the line **dtoverlay=spi1-3cs** and save
 3. Reboot
 

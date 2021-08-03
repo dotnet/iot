@@ -10,15 +10,15 @@ Microchip Technology Inc.’s MCP9808 digital temperature sensor converts temper
 
 ### Hardware Required
 
-* MCP9808
-* Male/Female Jumper Wires
+- MCP9808
+- Male/Female Jumper Wires
 
 ### Circuit
 
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND
+- SCL - SCL
+- SDA - SDA
+- VCC - 5V
+- GND - GND
 
 ### Code
 

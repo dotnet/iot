@@ -4,7 +4,7 @@ The MAX31865 device is a SPI interface Resistance Temperature Detector to Digita
 
 ![MAX31865](sensor.jpg)
 
-## Documentation 
+## Documentation
 
 * MAX31865 [datasheet](https://datasheets.maximintegrated.com/en/ds/MAX31865.pdf)
 

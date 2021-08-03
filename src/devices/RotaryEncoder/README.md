@@ -36,7 +36,7 @@ encoder.ValueChanged += (o, e) =>
 
 ## Binding Notes
 
-This binding also features 
+This binding also features
 
 - Debounce functionality on the clock signal.
 - Acceleration so that rotating the encoder moves it further the faster the rotation.

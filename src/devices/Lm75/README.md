@@ -26,10 +26,10 @@ using(Lm75 sensor = new Lm75(device))
 
 ![circuit](LM75_circuit_bb.png)
 
-* SCL - SCL
-* SDA - SDA
-* VCC - 5V
-* GND - GND
+- SCL - SCL
+- SDA - SDA
+- VCC - 5V
+- GND - GND
 
 ### Code
 
