@@ -14,7 +14,7 @@ namespace GenerateDocFxStructure
 {
     class Program
     {
-        private static readonly string[] _mediaExtentions = new string[] { ".png", ".jpg", ".mpg", ".mpeg", ".mov", ".mp4", ".bmp", ".gif", ".fzz" };
+        private static readonly string[] _mediaExtentions = new string[] { ".png", ".jpg", ".mpg", ".mpeg", ".mov", ".mp4", ".bmp", ".gif", ".svg" };
         private static CommandlineOptions? _options;
         private static int _returnvalue;
         private static MessageHelper? _message;
@@ -256,6 +256,8 @@ namespace GenerateDocFxStructure
                                 else
                                 {
                                     // This is where we'll have to adjust the file reference
+                                    bool needAbsoluteLink = true;
+                                    string newRelative = string.Empty;
                                     var extention = Path.GetExtension(absolute).ToLowerInvariant();
                                     if (_mediaExtentions.Contains(extention))
                                     {
@@ -277,19 +279,37 @@ namespace GenerateDocFxStructure
 
                                         // Adjust the link: ~/ + nameOfMediaFolder + / + relativeMediaPath
                                         // For web links, it has to be a /
-                                        string newRelative = $"~/{nameOfMediaFolder}/{relativeMediaPath.Replace('\\', '/')}";
-                                        _message.Verbose($"  Replacing {initialReletive} by {newRelative}");
-                                        lineToWrite = line.Replace(initialReletive, newRelative);
+                                        newRelative = $"~/{nameOfMediaFolder}/{relativeMediaPath.Replace('\\', '/')}";
+                                        needAbsoluteLink = false;
                                     }
-                                    else
+                                    else if(extention == ".md")
+                                    {
+                                        // Case 2: it's a Markdown file in what's been moved
+                                        // we will do a relative link on it
+                                        // if not an absolute link on the repo
+                                        if((_options.SourceFolder.Length + 1)  >= absolute.Length)
+                                        {
+                                            needAbsoluteLink = true;
+                                        }
+                                        else
+                                        {
+                                            var relativeIncludesPath = absolute.Substring(_options.SourceFolder.Length + 1);
+                                            var nameOfIncludesFolder = Path.GetFileName(_options.DestinationFolder);
+                                            newRelative = $"~/{nameOfIncludesFolder}/{relativeIncludesPath.Replace('\\', '/')}";
+                                            needAbsoluteLink = false;
+                                        }
+                                    }
+                                    
+                                    if(needAbsoluteLink)
                                     {
                                         // Case 2: it's a link on a directory in the repo or a file
                                         // Adjust the link
                                         var relativeLinkPath = absolute.Substring(_options.SourceFolder.Length + 1).Replace('\\', '/');
-                                        string newRelative = $"{_options.Repo}/{relativeLinkPath}";
-                                        _message.Verbose($"  Replacing {initialReletive} by {newRelative}");
-                                        lineToWrite = line.Replace(initialReletive, newRelative);
+                                        newRelative = $"{_options.Repo}/{relativeLinkPath}";
                                     }
+
+                                    _message.Verbose($"  Replacing {initialReletive} by {newRelative}");
+                                    lineToWrite = line.Replace(initialReletive, newRelative);
                                 }
                             }
                         }
