@@ -100,7 +100,7 @@ void UsingShiftRegister()
     // Spi
     // using SpiDevice spiDevice = SpiDevice.Create(new(0, 0));
     // using ShiftRegister sr = new(spiDevice, 8);
-    using LcdInterface lcdInterface = LcdInterface.CreateShiftRegister(registerSelectPin, enablePin, dataPins, backlightPin, sr);
+    using LcdInterface lcdInterface = LcdInterface.CreateFromShiftRegister(registerSelectPin, enablePin, dataPins, backlightPin, sr);
     using Lcd1602 lcd = new(lcdInterface);
     lcd.Clear();
     lcd.Write("Hello World");
