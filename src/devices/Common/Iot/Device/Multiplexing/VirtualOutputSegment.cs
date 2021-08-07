@@ -81,7 +81,8 @@ namespace Iot.Device.Multiplexing.Utility
 
             for (int i = 0; i < value.Length; i++)
             {
-                WriteByteAsValues(value[i], offset + (i * 8));
+                int index = value.Length - i - 1;
+                WriteByteAsValues(value[index], offset + (i * 8));
             }
         }
 
