@@ -58,29 +58,29 @@ void TestGpio(List<FtDevice> devices)
     // Should transform it into 5
     // It's possible to use this function to convert the board names you find in various
     // implementation into the pin number
-    int Gpio5 = Ft232HDevice.GetPinNumberFromString("D5");
+    int gpio5 = Ft232HDevice.GetPinNumberFromString("D5");
     var gpio = ft232h.CreateGpioDriver();
-    GpioController controller = new(PinNumberingScheme.Board, gpio);
+    GpioController gpioController = new(PinNumberingScheme.Board, gpio);
 
     // Opening GPIO2
-    gpioController.OpenPin(Gpio5);
-    gpioController.SetPinMode(Gpio5, PinMode.Output);
+    gpioController.OpenPin(gpio5);
+    gpioController.SetPinMode(gpio5, PinMode.Output);
 
     Console.WriteLine("Blinking GPIO2");
     while (!Console.KeyAvailable)
     {
-        gpioController.Write(Gpio5, PinValue.High);
+        gpioController.Write(gpio5, PinValue.High);
         Thread.Sleep(500);
-        gpioController.Write(Gpio5, PinValue.Low);
+        gpioController.Write(gpio5, PinValue.Low);
         Thread.Sleep(500);
     }
 
     Console.ReadKey();
     Console.WriteLine("Reading GPIO2 state");
-    gpioController.SetPinMode(Gpio5, PinMode.Input);
+    gpioController.SetPinMode(gpio5, PinMode.Input);
     while (!Console.KeyAvailable)
     {
-        Console.Write($"State: {gpioController.Read(Gpio5)} ");
+        Console.Write($"State: {gpioController.Read(gpio5)} ");
         Console.CursorLeft = 0;
         Thread.Sleep(50);
     }
