@@ -60,7 +60,7 @@ void TestGpio(List<FtDevice> devices)
     // implementation into the pin number
     int Gpio5 = Ft232HDevice.GetPinNumberFromString("D5");
     var gpio = ft232h.CreateGpioDriver();
-    GpioController controller = new(new(PinNumberingScheme.Board, gpio);
+    GpioController controller = new(PinNumberingScheme.Board, gpio);
 
     // Opening GPIO2
     gpioController.OpenPin(Gpio5);

@@ -49,52 +49,6 @@ namespace Iot.Device.Ft232H
         internal List<SpiConnectionSettings> _connectionSettings = new List<SpiConnectionSettings>();
 
         /// <summary>
-        /// Instantiates a FT232H device object.
-        /// </summary>
-        /// <param name="flags">Indicates device state.</param>
-        /// <param name="type">Indicates the device type.</param>
-        /// <param name="id">The Vendor ID and Product ID of the device.</param>
-        /// <param name="locId">The physical location identifier of the device.</param>
-        /// <param name="serialNumber">The device serial number.</param>
-        /// <param name="description">The device description.</param>
-        public Ft232HDevice(FtFlag flags, FtDeviceType type, uint id, uint locId, string serialNumber, string description)
-        : base(flags, type, id, locId, serialNumber, description)
-        {
-        }
-
-        /// <summary>
-        /// Instantiates a FT232H device object.
-        /// </summary>
-        /// <param name="ftDevice">a FT Device</param>
-        public Ft232HDevice(FtDevice ftDevice)
-            : base(ftDevice.Flags, ftDevice.Type, ftDevice.Id, ftDevice.LocId, ftDevice.SerialNumber, ftDevice.Description)
-        {
-        }
-
-        /// <summary>
-        /// Creates I2C bus related to this device
-        /// </summary>
-        /// <returns>I2cBus instance</returns>
-        /// <remarks>You can create either an I2C, either an SPI device.</remarks>
-        public I2cBus CreateI2cBus() => new Ft232HI2cBus(this);
-
-        /// <summary>
-        /// Creates SPI device related to this device
-        /// </summary>
-        /// <param name="settings">The SPI settings</param>
-        /// <returns>a SPI device</returns>
-        /// <remarks>You can create either an I2C, either an SPI device.
-        /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
-        /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
-        public SpiDevice CreateSpiDevice(SpiConnectionSettings settings) => new Ft232HSpi(settings, this);
-
-        /// <summary>
-        /// Creates GPIO driver related to this device
-        /// </summary>
-        /// <returns>A GPIO Driver</returns>
-        public GpioDriver CreateGpioDriver() => new Ft232HGpio(this);
-
-        /// <summary>
         /// Gets the pin number from a string
         /// </summary>
         /// <param name="pin">A string</param>
@@ -184,6 +138,52 @@ namespace Iot.Device.Ft232H
                     return -1;
             }
         }
+
+        /// <summary>
+        /// Instantiates a FT232H device object.
+        /// </summary>
+        /// <param name="flags">Indicates device state.</param>
+        /// <param name="type">Indicates the device type.</param>
+        /// <param name="id">The Vendor ID and Product ID of the device.</param>
+        /// <param name="locId">The physical location identifier of the device.</param>
+        /// <param name="serialNumber">The device serial number.</param>
+        /// <param name="description">The device description.</param>
+        public Ft232HDevice(FtFlag flags, FtDeviceType type, uint id, uint locId, string serialNumber, string description)
+        : base(flags, type, id, locId, serialNumber, description)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a FT232H device object.
+        /// </summary>
+        /// <param name="ftDevice">a FT Device</param>
+        public Ft232HDevice(FtDevice ftDevice)
+            : base(ftDevice.Flags, ftDevice.Type, ftDevice.Id, ftDevice.LocId, ftDevice.SerialNumber, ftDevice.Description)
+        {
+        }
+
+        /// <summary>
+        /// Creates I2C bus related to this device
+        /// </summary>
+        /// <returns>I2cBus instance</returns>
+        /// <remarks>You can create either an I2C, either an SPI device.</remarks>
+        public I2cBus CreateI2cBus() => new Ft232HI2cBus(this);
+
+        /// <summary>
+        /// Creates SPI device related to this device
+        /// </summary>
+        /// <param name="settings">The SPI settings</param>
+        /// <returns>a SPI device</returns>
+        /// <remarks>You can create either an I2C, either an SPI device.
+        /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
+        /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
+        public SpiDevice CreateSpiDevice(SpiConnectionSettings settings) => new Ft232HSpi(settings, this);
+
+        /// <summary>
+        /// Creates GPIO driver related to this device
+        /// </summary>
+        /// <returns>A GPIO Driver</returns>
+        public GpioDriver CreateGpioDriver() => new Ft232HGpio(this);
 
         internal bool IsI2cMode { get; set; }
 

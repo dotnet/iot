@@ -93,7 +93,7 @@ Let's assume your device is the first one, you'll be able to create a GPIO Contr
 ```csharp
 var ft232h = new Ft232HDevice(devices[0]);
 var gpio = ft232h.CreateGpioDriver();
-GpioController controller = new(new(PinNumberingScheme.Board, gpio);
+GpioController controller = new(PinNumberingScheme.Board, gpio);
 ```
 
 Note that then you can open any pin that hasn't been open or used by the SPI Device or I2C. In other words, you can use all the 16 pins if you're not using SPI or I2C.
