@@ -5,12 +5,12 @@ using System;
 using System.Device.I2c;
 using UnitsNet;
 
-namespace Iot.Device.MCP960X
+namespace Iot.Device.Mcp960x
 {
     /// <summary>
     /// MCP960X - cold-junction compensated thermocouple to digital converter
     /// </summary>
-    public class MCP960X : IDisposable
+    public class Mcp960x : IDisposable
     {
         private readonly byte _adcMeasurementResolutionType;
         private readonly byte _burstModeTemperatureSamplesType;
@@ -143,7 +143,7 @@ namespace Iot.Device.MCP960X
         /// <remarks>
         /// alerts are disabled
         /// </remarks>
-        public MCP960X(I2cDevice i2cDevice,
+        public Mcp960x(I2cDevice i2cDevice,
             ADCMeasurementResolutionType adcMeasurementResolutionType = ADCMeasurementResolutionType.R18,
             BurstModeTemperatureSamplesType burstModeTemperatureSamplesType = BurstModeTemperatureSamplesType.S1,
             ColdJunctionResolutionType coldJunctionResolutionType = ColdJunctionResolutionType.N_0_0625,
@@ -167,8 +167,6 @@ namespace Iot.Device.MCP960X
 
             Initialize();
         }
-
-        #region private and internal
 
         /// <summary>
         /// Standard initialization routine for Sensore Configuration Register, Device Configuration Register and Alert 1,2,3,4 Configuration Register
@@ -235,10 +233,6 @@ namespace Iot.Device.MCP960X
             return temperatureOut;
         }
 
-        #endregion
-
-        #region read and write operations
-
         /// <summary>
         /// Writes the Data to the Spi Device
         /// </summary>
@@ -300,8 +294,6 @@ namespace Iot.Device.MCP960X
             _i2cDevice.WriteByte((byte)register);
             _i2cDevice.Read(readBytes);
         }
-
-        #endregion
 
         /// <inheritdoc/>
         public void Dispose()
