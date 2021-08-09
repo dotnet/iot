@@ -12,18 +12,18 @@ Console.WriteLine("Write I2C MCP960X - ADR 0x67 - Read ambient and hot junction 
 // 0x67 is the device address
 I2cConnectionSettings settings = new I2cConnectionSettings(1, 0x67);
 I2cDevice i2cDevice = I2cDevice.Create(settings);
-Mcp960x mcp960X = new Mcp960x(i2cDevice, coldJunctionResolutionType: ColdJunctionResolutionType.N_0_25);
+Mcp960x mcp960x = new Mcp960x(i2cDevice, coldJunctionResolutionType: ColdJunctionResolutionType.N_0_25);
 
 DeviceIDType deviceIDType;
 byte major;
 byte minor;
-mcp960X.ReadDeviceID(out deviceIDType, out major, out minor);
+mcp960x.ReadDeviceID(out deviceIDType, out major, out minor);
 Console.WriteLine($"device id: {(byte)deviceIDType} - major: {major} - minor: {minor}");
 
 while (true)
 {
-    Console.WriteLine($"ambient temperture: {mcp960X.GetColdJunctionTemperature()}");
-    Console.WriteLine($"hot junction temperture: {mcp960X.GetTemperature()}");
+    Console.WriteLine($"ambient temperture: {mcp960x.GetColdJunctionTemperature()}");
+    Console.WriteLine($"hot junction temperture: {mcp960x.GetTemperature()}");
 
     Thread.Sleep(1000);
 }
