@@ -7,12 +7,15 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Card;
 using Iot.Device.Card.CreditCardProcessing;
 using Iot.Device.Card.Mifare;
+using Iot.Device.Card.Ultralight;
 using Iot.Device.Common;
+using Iot.Device.Ndef;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.ListPassive;
 using Microsoft.Extensions.Logging;
@@ -88,7 +91,8 @@ if (pn532.FirmwareVersion is FirmwareVersion version)
 
     // To run tests, uncomment the next line
     // RunTests(pn532);
-    ReadMiFare(pn532);
+    ProcessUltralight(pn532);
+    // ReadMiFare(pn532);
     // TestGPIO(pn532);
 
     // To read Credit Cards, uncomment the next line
@@ -369,5 +373,183 @@ void DisplayTags(List<Tag> tagToDisplay, int levels)
             TagDetails tg = new TagDetails(tagparent);
             Console.WriteLine($": {tg.ToString()}");
         }
+    }
+}
+
+void ProcessUltralight(Pn532 pn532)
+{
+    byte[]? retData = null;
+    while ((!Console.KeyAvailable))
+    {
+        retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
+        if (retData is object)
+        {
+            break;
+        }
+
+        // Give time to PN532 to process
+        Thread.Sleep(200);
+    }
+
+    if (retData is null)
+    {
+        return;
+    }
+
+    for (int i = 0; i < retData.Length; i++)
+    {
+        Console.Write($"{retData[i]:X2} ");
+    }
+
+    Console.WriteLine();
+
+    var card = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
+    if (card is not object)
+    {
+        Console.WriteLine("Not a valid card, please try again.");
+        return;
+    }
+
+    var ultralight = new UltralightCard(pn532!, card.TargetNumber);
+    ultralight.SerialNumber = card.NfcId;
+    Console.WriteLine($"Type: {ultralight.UltralightCardType}, Ndef capacity: {ultralight.NdefCapacity}");
+
+    var version = ultralight.GetVersion();
+    if ((version != null) && (version.Length > 0))
+    {
+        Console.WriteLine("Get Version details: ");
+        for (int i = 0; i < version.Length; i++)
+        {
+            Console.Write($"{version[i]:X2} ");
+        }
+
+        Console.WriteLine();
+    }
+    else
+    {
+        Console.WriteLine("Can't read the version.");
+    }
+
+    var sign = ultralight.GetSignature();
+    if (sign != null)
+    {
+        Console.WriteLine("Signature: ");
+        for (int i = 0; i < sign.Length; i++)
+        {
+            Console.Write($"{sign[i]:X2} ");
+        }
+
+        Console.WriteLine();
+    }
+
+    // The ReadFast feature can be used as well, note that the PN532 has a limited buffer out of 262 bytes
+    // So maximum 64 pages can be read as once.
+    Console.WriteLine("Fast read example:");
+    var buff = ultralight.ReadFast(0, (byte)(ultralight.NumberBlocks > 64 ? 64 : ultralight.NumberBlocks - 1));
+    if (buff != null)
+    {
+        for (int i = 0; i < buff.Length / 4; i++)
+        {
+            Console.WriteLine($"  Block {i} - {buff[i * 4]:X2} {buff[i * 4 + 1]:X2} {buff[i * 4 + 2]:X2} {buff[i * 4 + 3]:X2}");
+        }
+    }
+
+    Console.WriteLine("Dump of all the card:");
+    for (int block = 0; block < ultralight.NumberBlocks; block++)
+    {
+        ultralight.BlockNumber = (byte)block; // Safe cast, can't be more than 255
+        ultralight.Command = UltralightCommand.Read16Bytes;
+        var ret = ultralight.RunUltralightCommand();
+        if (ret > 0)
+        {
+            Console.Write($"  Block: {ultralight.BlockNumber:X2} - ");
+            for (int i = 0; i < 4; i++)
+            {
+                Console.Write($"{ultralight.Data[i]:X2} ");
+            }
+
+            var isReadOnly = ultralight.IsPageReadOnly(ultralight.BlockNumber);
+            Console.Write($"- Read only: {isReadOnly} ");
+
+            Console.WriteLine();
+        }
+        else
+        {
+            Console.WriteLine("Can't read card");
+            break;
+        }
+    }
+
+    Console.WriteLine("Configuration of the card");
+    // Get the Configuration
+    var res = ultralight.TryGetConfiguration(out Configuration configuration);
+    if (res)
+    {
+        Console.WriteLine("  Mirror:");
+        Console.WriteLine($"    {configuration.Mirror.MirrorType}, page: {configuration.Mirror.Page}, position: {configuration.Mirror.Position}");
+        Console.WriteLine("  Authentication:");
+        Console.WriteLine($"    Page req auth: {configuration.Authentication.AuthenticationPageRequirement}, Is auth req for read and write: {configuration.Authentication.IsReadWriteAuthenticationRequired}");
+        Console.WriteLine($"    Is write lock: {configuration.Authentication.IsWritingLocked}, Max num tries: {configuration.Authentication.MaximumNumberOfPossibleTries}");
+        Console.WriteLine("  NFC Counter:");
+        Console.WriteLine($"    Enabled: {configuration.NfcCounter.IsEnabled}, Password protected: {configuration.NfcCounter.IsPasswordProtected}");
+        Console.WriteLine($"  Is strong modulation: {configuration.IsStrongModulation}");
+    }
+    else
+    {
+        Console.WriteLine("Error getting the configuration");
+    }
+
+    NdefMessage message;
+    res = ultralight.TryReadNdefMessage(out message);
+    if (res && message.Length != 0)
+    {
+        foreach (var record in message.Records)
+        {
+            Console.WriteLine($"Record length: {record.Length}");
+            if (TextRecord.IsTextRecord(record))
+            {
+                var text = new TextRecord(record);
+                Console.WriteLine(text.Text);
+            }
+        }
+    }
+    else
+    {
+        Console.WriteLine("No NDEF message in this ");
+    }
+
+    res = ultralight.IsFormattedNdef();
+    if (!res)
+    {
+        Console.WriteLine("Card is not NDEF formated, we will try to format it");
+        res = ultralight.FormatNdef();
+        if (!res)
+        {
+            Console.WriteLine("Impossible to format in NDEF, we will still try to write NDEF content.");
+        }
+        else
+        {
+            res = ultralight.IsFormattedNdef();
+            if (res)
+            {
+                Console.WriteLine("Formating successful");
+            }
+            else
+            {
+                Console.WriteLine("Card is not NDEF formated.");
+            }
+        }
+    }
+
+    NdefMessage newMessage = new NdefMessage();
+    newMessage.Records.Add(new TextRecord("I ❤ .NET IoT", "en", Encoding.UTF8));
+    res = ultralight.WriteNdefMessage(newMessage);
+    if (res)
+    {
+        Console.WriteLine("NDEF data successfully written on the card.");
+    }
+    else
+    {
+        Console.WriteLine("Error writing NDEF data on card");
     }
 }

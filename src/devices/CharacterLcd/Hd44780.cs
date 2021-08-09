@@ -83,7 +83,7 @@ namespace Iot.Device.CharacterLcd
 
         /// <summary>
         /// Returns the number of custom characters for this display.
-        /// A custom character is one that can be user-defined and assigned to a slot using <see cref="CreateCustomCharacter"/>
+        /// A custom character is one that can be user-defined and assigned to a slot using <see cref="CreateCustomCharacter(int,System.ReadOnlySpan{byte})"/>
         /// </summary>
         public virtual int NumberOfCustomCharactersSupported => 8;
 
@@ -385,6 +385,17 @@ namespace Iot.Device.CharacterLcd
         }
 
         /// <summary>
+        /// Fill one of the 8 CGRAM locations (character codes 0 - 7) with custom characters.
+        /// See <see cref="CreateCustomCharacter(int,System.ReadOnlySpan{byte})"/> for details.
+        /// </summary>
+        /// <param name="location">Should be between 0 and 7</param>
+        /// <param name="characterMap">Provide an array of 8 bytes containing the pattern</param>
+        public void CreateCustomCharacter(int location, byte[] characterMap)
+        {
+            CreateCustomCharacter(location, new ReadOnlySpan<byte>(characterMap));
+        }
+
+        /// <summary>
         /// Write text to display.
         /// </summary>
         /// <param name="text">Text to be displayed.</param>
@@ -411,6 +422,13 @@ namespace Iot.Device.CharacterLcd
         /// </summary>
         /// <param name="text">Text to print</param>
         public void Write(ReadOnlySpan<char> text) => SendData(text);
+
+        /// <summary>
+        /// Write a raw byte stream to the display.
+        /// Used if character translation already took place
+        /// </summary>
+        /// <param name="text">Text to print</param>
+        public void Write(char[] text) => SendData(text);
 
         /// <summary>
         /// Releases unmanaged resources used by Hd44780

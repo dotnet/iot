@@ -3,6 +3,7 @@
 
 using System.Device.Gpio.Drivers;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
@@ -27,6 +28,20 @@ namespace System.Device.Gpio.Tests
 
         protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 
+        private bool IsRaspi4()
+        {
+            if (File.Exists("/proc/device-tree/model"))
+            {
+                string model = File.ReadAllText("/proc/device-tree/model", Text.Encoding.ASCII);
+                if (model.Contains("Raspberry Pi 4"))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Tests for setting the pull up/pull down resistors on the Raspberry Pi (supported on Pi3 and Pi4, but with different techniques)
         /// </summary>
@@ -50,6 +65,27 @@ namespace System.Device.Gpio.Tests
                 // change one more time so that when running test in a loop we start with the inverted option
                 controller.SetPinMode(OpenPin, PinMode.InputPullDown);
                 Assert.Equal(PinValue.Low, controller.Read(OpenPin));
+            }
+        }
+
+        [Fact]
+        public void OpenPinDefaultsModeToLastModeIncludingPulls()
+        {
+            // This is only fully supported on the Pi4
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                controller.OpenPin(OutputPin);
+                controller.SetPinMode(OutputPin, PinMode.InputPullDown);
+                controller.ClosePin(OutputPin);
+                controller.OpenPin(OutputPin);
+                if (IsRaspi4())
+                {
+                    Assert.Equal(PinMode.InputPullDown, controller.GetPinMode(OutputPin));
+                }
+                else
+                {
+                    Assert.Equal(PinMode.Input, controller.GetPinMode(OutputPin));
+                }
             }
         }
 

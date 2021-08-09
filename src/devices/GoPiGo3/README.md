@@ -42,7 +42,7 @@ For I2C sensors, the code has been tested very little. And no high level classes
 
 ## How to use the driver
 
-The main [GoPiGo3.samples](./samples) contains a series of test showing how to use every elements of the driver.
+The main [GoPiGo3.samples](https://github.com/dotnet/iot/tree/main/src/devices/GoPiGo3/samples) contains a series of test showing how to use every elements of the driver.
 
 Create a ```GoPiGo``` class.
 
@@ -142,7 +142,7 @@ There are many ways you can use motors, either by setting the power, either by r
 
 In this example, the motor on port D is used to set the position of the motor A. A simple NXT touch sensor is used to end the sequence when it is pressed.
 
-You can see as well the ```MotorStatus``` classes containing all information on the motor. Flags are useful to understand if you have issues with the power or an overload of the motors. 
+You can see as well the ```MotorStatus``` classes containing all information on the motor. Flags are useful to understand if you have issues with the power or an overload of the motors.
 
 To reinitialize the encoder, simply set the offset to the current version like shown in the first 2 lines.
 
@@ -214,7 +214,7 @@ for (int i = 0; i < 100; i++)
 
 #### Setting motor speed with degree per seconds
 
-Another way to pilot the motors is to set a specific speed in degree per seconds. In the below example, no limit has been set but it's possible to setup a limit like in the motor position example. Setting up limits reduces the risk of overheat on the motors. 
+Another way to pilot the motors is to set a specific speed in degree per seconds. In the below example, no limit has been set but it's possible to setup a limit like in the motor position example. Setting up limits reduces the risk of overheat on the motors.
 
 ```csharp
 _goPiGo.OffsetMotorEncoder(MotorPort.MotorLeft, _goPiGo.GetMotorEncoder(MotorPort.MotorLeft));
@@ -240,7 +240,7 @@ There are high level classes to handle directly sensors like analogic sensors, b
 
 ### Using the Sensor classes
 
-Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties which are common to all sensors, ```Value``` and ```ToString()```. 
+Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties which are common to all sensors, ```Value``` and ```ToString()```.
 
 Example creating an Ultrasonic sensor on Grove1 port:
 
@@ -257,9 +257,9 @@ while (!Console.KeyAvailable)
 
 ### Using Motors
 
-Motors are as well really easy to use. You have functions ```Start()```, ```Stop()```, ```SetSpeed(speed) ``` and ```GetSpeed()``` which as you can expect will start, stop, change the speed and give you the current speed. A speed property is available as well and will change the speed. 
+Motors are as well really easy to use. You have functions ```Start()```, ```Stop()```, ```SetSpeed(speed)``` and ```GetSpeed()``` which as you can expect will start, stop, change the speed and give you the current speed. A speed property is available as well and will change the speed.
 
-The motors have an encoder which gives you the position the precision can be found in the property ```EncoderTicksPerRotation``` (degree precision). You can get access thru function ```GetTachoCount()```. As the numbers can get big quite fast, you can reset this counter by using ```SetTachoCount(newnumber) ```. A ```TachoCount``` property is available as well. This property like for sensors can raise an event on a minimum time base you can setup.
+The motors have an encoder which gives you the position the precision can be found in the property ```EncoderTicksPerRotation``` (degree precision). You can get access thru function ```GetTachoCount()```. As the numbers can get big quite fast, you can reset this counter by using ```SetTachoCount(newnumber)```. A ```TachoCount``` property is available as well. This property like for sensors can raise an event on a minimum time base you can setup.
 
 ```csharp
 GoPiGo _goPiGo = new GoPiGo();
@@ -276,7 +276,7 @@ motor.SetPolarity(Polarity.OppositeDirection); // change the direction
 motor.Stop();
 ```
 
-Here is an example of the ```Vehicle``` class: 
+Here is an example of the ```Vehicle``` class:
 
 ```csharp
 Console.WriteLine("Vehicle drive test using Motor A for left, MotorLeft for right, not inverted direction");
@@ -300,11 +300,11 @@ The ```Vehicle``` class offers functions with timeout allowing to drive for a ce
 
 ## Tests
 
-A series of hardware tests for motors and sensors are available in [GoPiGo3.samples](./samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
+A series of hardware tests for motors and sensors are available in [GoPiGo3.samples](https://github.com/dotnet/iot/tree/main/src/devices/GoPiGo3/samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
 
 You can select the tests you want to run:
 
-```
+```text
 Choose a test by entering the number and press enter:
   1. Basic GoPiGo3 info and embedded led test
   2. Control left motor from motor right position
@@ -320,5 +320,3 @@ Choose a test by entering the number and press enter:
  12. Test MotorLeft speed based on encoder
  13. Test driving the vehicle
 ```
-
-

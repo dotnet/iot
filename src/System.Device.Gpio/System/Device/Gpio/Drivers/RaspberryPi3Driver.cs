@@ -154,50 +154,63 @@ namespace System.Device.Gpio.Drivers
             return new Windows10Driver();
         }
 
-        /// <inheritdoc/>
-        protected internal override int PinCount => _internalDriver.PinCount;
+        private GpioDriver InternalDriver
+        {
+            get
+            {
+                if (_internalDriver == null)
+                {
+                    throw new ObjectDisposedException("Driver is disposed");
+                }
+
+                return _internalDriver;
+            }
+        }
 
         /// <inheritdoc/>
-        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => _internalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+        protected internal override int PinCount => InternalDriver.PinCount;
 
         /// <inheritdoc/>
-        protected internal override void ClosePin(int pinNumber) => _internalDriver.ClosePin(pinNumber);
+        protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback) => InternalDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+
+        /// <inheritdoc/>
+        protected internal override void ClosePin(int pinNumber) => InternalDriver.ClosePin(pinNumber);
 
         /// <inheritdoc/>
         protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
-            return _internalDriver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+            return InternalDriver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
         }
 
         /// <inheritdoc/>
-        protected internal override PinMode GetPinMode(int pinNumber) => _internalDriver.GetPinMode(pinNumber);
+        protected internal override PinMode GetPinMode(int pinNumber) => InternalDriver.GetPinMode(pinNumber);
 
         /// <inheritdoc/>
-        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => _internalDriver.IsPinModeSupported(pinNumber, mode);
+        protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode) => InternalDriver.IsPinModeSupported(pinNumber, mode);
 
         /// <inheritdoc/>
-        protected internal override void OpenPin(int pinNumber) => _internalDriver.OpenPin(pinNumber);
+        protected internal override void OpenPin(int pinNumber) => InternalDriver.OpenPin(pinNumber);
 
         /// <inheritdoc/>
-        protected internal override PinValue Read(int pinNumber) => _internalDriver.Read(pinNumber);
+        protected internal override PinValue Read(int pinNumber) => InternalDriver.Read(pinNumber);
 
         /// <inheritdoc/>
-        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => _internalDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+        protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => InternalDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
 
         /// <inheritdoc/>
-        protected internal override void SetPinMode(int pinNumber, PinMode mode) => _internalDriver.SetPinMode(pinNumber, mode);
+        protected internal override void SetPinMode(int pinNumber, PinMode mode) => InternalDriver.SetPinMode(pinNumber, mode);
 
         /// <inheritdoc/>
-        protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue) => _internalDriver.SetPinMode(pinNumber, mode, initialValue);
+        protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue) => InternalDriver.SetPinMode(pinNumber, mode, initialValue);
 
         /// <inheritdoc/>
-        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => _internalDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+        protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => InternalDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
 
         /// <inheritdoc/>
-        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => _internalDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
+        protected internal override ValueTask<WaitForEventResult> WaitForEventAsync(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken) => InternalDriver.WaitForEventAsync(pinNumber, eventTypes, cancellationToken);
 
         /// <inheritdoc/>
-        protected internal override void Write(int pinNumber, PinValue value) => _internalDriver.Write(pinNumber, value);
+        protected internal override void Write(int pinNumber, PinValue value) => InternalDriver.Write(pinNumber, value);
 
         /// <summary>
         /// Retrieve the current alternate pin mode for a given logical pin.

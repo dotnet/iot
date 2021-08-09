@@ -27,9 +27,9 @@ namespace Iot.Device.Card.Mifare
         private static readonly byte[] StaticDefaultBlocksNdefKeyA = new byte[6] { 0xD3, 0xF7, 0xD3, 0xF7, 0xD3, 0xF7 };
 
         // This is the actual RFID reader
-        private CardTransceiver _rfid;
+        private readonly CardTransceiver _rfid;
 
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Default Key A
@@ -91,7 +91,7 @@ namespace Iot.Device.Card.Mifare
         /// <summary>
         /// The Data which has been read or to write for the specific block
         /// </summary>
-        public byte[]? Data { get; set; }
+        public byte[] Data { get; set; } = new byte[0];
 
         /// <summary>
         /// Constructor for Mifarecard
@@ -491,7 +491,7 @@ namespace Iot.Device.Card.Mifare
         {
             if (accessTypes.Length != 3)
             {
-                throw new ArgumentException(nameof(accessTypes), "Array must have 3 elements.");
+                throw new ArgumentException("Array must have 3 elements.", nameof(accessTypes));
             }
 
             var tupleRes = EncodeSectorTailer(accessSector);
@@ -536,12 +536,9 @@ namespace Iot.Device.Card.Mifare
                     Capacity = MifareCardCapacity.Mifare300;
                 }
             }
-            else if (ATAQ == 0x0002)
+            else if ((ATAQ == 0x0002) && (SAK == 0x18))
             {
-                if (SAK == 0x18)
-                {
-                    Capacity = MifareCardCapacity.Mifare4K;
-                }
+                Capacity = MifareCardCapacity.Mifare4K;
             }
         }
 
@@ -620,7 +617,7 @@ namespace Iot.Device.Card.Mifare
                 case MifareCardCommand.AuthenticationA:
                     if (KeyA is null || SerialNumber is null)
                     {
-                        throw new Exception($"Card is not configured for {nameof(MifareCardCommand.AuthenticationA)}.");
+                        throw new ArgumentException($"Card is not configured for {nameof(MifareCardCommand.AuthenticationA)}.");
                     }
 
                     ser = new byte[2 + KeyA.Length + SerialNumber.Length];
@@ -640,7 +637,7 @@ namespace Iot.Device.Card.Mifare
                 case MifareCardCommand.AuthenticationB:
                     if (KeyB is null || SerialNumber is null)
                     {
-                        throw new Exception($"Card is not configured for {nameof(MifareCardCommand.AuthenticationB)}.");
+                        throw new ArgumentException($"Card is not configured for {nameof(MifareCardCommand.AuthenticationB)}.");
                     }
 
                     ser = new byte[2 + KeyB.Length + SerialNumber.Length];
@@ -661,7 +658,7 @@ namespace Iot.Device.Card.Mifare
                 case MifareCardCommand.Write4Bytes:
                     if (Data is null)
                     {
-                        throw new Exception($"Card is not configured for {nameof(MifareCardCommand.Write4Bytes)}.");
+                        throw new ArgumentException($"Card is not configured for {nameof(MifareCardCommand.Write4Bytes)}.");
                     }
 
                     ser = new byte[2 + Data.Length];
@@ -678,11 +675,12 @@ namespace Iot.Device.Card.Mifare
                 case MifareCardCommand.Transfer:
                 case MifareCardCommand.Restore:
                 case MifareCardCommand.Read16Bytes:
-                default:
                     ser = new byte[2];
                     ser[0] = (byte)Command;
                     ser[1] = BlockNumber;
                     return ser;
+                default:
+                    return new byte[0];
             }
         }
 
@@ -1090,7 +1088,6 @@ namespace Iot.Device.Card.Mifare
                                     case MifareCardCapacity.Unknown:
                                     case MifareCardCapacity.Mifare300:
                                     case MifareCardCapacity.Mifare1K:
-                                    default:
                                         gpb = 0xC1;
                                         break;
                                 }
@@ -1158,11 +1155,11 @@ namespace Iot.Device.Card.Mifare
                     // 62 sectors, 3 blocks, 16 bytes
                     cardSize = 2976;
                     break;
+                /* We don't support those
                 case MifareCardCapacity.Mifare300:
-                case MifareCardCapacity.Unknown:
+                case MifareCardCapacity.Unknown */
                 default:
-                    message = new NdefMessage();
-                    return false;
+                    throw new NotSupportedException();
             }
 
             if (KeyB is not object or { Length: not 6 })
@@ -1179,7 +1176,7 @@ namespace Iot.Device.Card.Mifare
                 return false;
             }
 
-            var (start, size) = GetStartSizeNdef(Data.AsSpan());
+            var (start, size) = NdefMessage.GetStartSizeNdef(Data.AsSpan());
 
             if ((start < 0) || (size < 0))
             {
@@ -1195,7 +1192,7 @@ namespace Iot.Device.Card.Mifare
                 return false;
             }
 
-            Span<byte> card = new byte[blocksToRead * 16];
+            Span<byte> card = new byte[blocksToRead * BlockSize];
             Data.CopyTo(card);
 
             byte idxCard = 1;
@@ -1233,7 +1230,7 @@ namespace Iot.Device.Card.Mifare
                 block++;
             }
 
-            var ndef = ExtractMessage(card);
+            var ndef = NdefMessage.ExtractMessage(card);
 
             try
             {
@@ -1288,60 +1285,6 @@ namespace Iot.Device.Card.Mifare
             oldKeyB.CopyTo(KeyB, 0);
 
             return ret >= 0;
-        }
-
-        private (int Start, int Size) GetStartSizeNdef(Span<byte> toExtract)
-        {
-            int idx = 0;
-            // Check if we have 0x03 so it's a possible, NDEF Entry
-            while (idx < toExtract.Length)
-            {
-                if (toExtract[idx++] == 0x03)
-                {
-                    break;
-                }
-            }
-
-            if (idx == toExtract.Length)
-            {
-                return (-1, -1);
-            }
-
-            // Now check the size. If 0xFF then encoding is on 3 bytes otherwise just one
-            int size = toExtract[idx++];
-            if (idx == toExtract.Length)
-            {
-                return (idx, -1);
-            }
-
-            if (size == 0xFF)
-            {
-                if (idx + 2 >= toExtract.Length)
-                {
-                    return (idx, -1);
-                }
-
-                size = (toExtract[idx++] << 8) + toExtract[idx++];
-            }
-
-            return (idx, size);
-        }
-
-        private byte[]? ExtractMessage(Span<byte> toExtract)
-        {
-            var (idx, size) = GetStartSizeNdef(toExtract);
-            // Finally check that the end terminator TLV is 0xFE
-            var isRealEnd = toExtract[idx + size] == 0xFE;
-            if (!isRealEnd)
-            {
-                return null;
-            }
-
-            // Now we have the real size and we can extract the real buffer
-            byte[] toReturn = new byte[size];
-            toExtract.Slice(idx, size).CopyTo(toReturn);
-
-            return toReturn;
         }
     }
 }

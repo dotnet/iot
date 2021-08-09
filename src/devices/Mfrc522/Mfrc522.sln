@@ -11,6 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mifare", "..\Card\Mifare\Mi
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CardRfid", "..\Card\CardRfid.csproj", "{AFDE2C7B-F7FA-4316-A73D-DED45A04FF2D}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ultralight", "..\Card\Ultralight\Ultralight.csproj", "{C3A12E41-5076-44E7-BF36-709AEC5B41E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ndef", "..\Card\Ndef\Ndef.csproj", "{5F9632D3-F322-47DC-A264-5BA7A19CD993}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Card Projects", "Card Projects", "{E039A720-3B6F-405D-A6E3-256E21501AA0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,9 +39,23 @@ Global
 		{AFDE2C7B-F7FA-4316-A73D-DED45A04FF2D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AFDE2C7B-F7FA-4316-A73D-DED45A04FF2D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AFDE2C7B-F7FA-4316-A73D-DED45A04FF2D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C3A12E41-5076-44E7-BF36-709AEC5B41E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C3A12E41-5076-44E7-BF36-709AEC5B41E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C3A12E41-5076-44E7-BF36-709AEC5B41E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C3A12E41-5076-44E7-BF36-709AEC5B41E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F9632D3-F322-47DC-A264-5BA7A19CD993}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F9632D3-F322-47DC-A264-5BA7A19CD993}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F9632D3-F322-47DC-A264-5BA7A19CD993}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F9632D3-F322-47DC-A264-5BA7A19CD993}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{59219E01-A521-425B-A28D-25C34F7FF1C5} = {E039A720-3B6F-405D-A6E3-256E21501AA0}
+		{AFDE2C7B-F7FA-4316-A73D-DED45A04FF2D} = {E039A720-3B6F-405D-A6E3-256E21501AA0}
+		{C3A12E41-5076-44E7-BF36-709AEC5B41E0} = {E039A720-3B6F-405D-A6E3-256E21501AA0}
+		{5F9632D3-F322-47DC-A264-5BA7A19CD993} = {E039A720-3B6F-405D-A6E3-256E21501AA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B96E4DBE-0783-4379-AE43-2E3148A6034F}

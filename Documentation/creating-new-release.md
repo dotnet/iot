@@ -19,7 +19,7 @@ This is a list of steps which need to happen in order to release new version of 
   - Run and wait for it to finish.
   - Once it is done and passes go to the artifacts section of the build, and find an artifact called 'Built packages' and from there download the two stable packages.
   - Validate the package: double check version, check there are no unintentional changes.
-- Step 4: Manually push package to Nuget - as of writing this document only @joperezr has credentials
+- Step 4: Manually push package to Nuget - people who had access to push in the past: @joperezr @rbhanda
 - Step 5: Add git tag:
   - Use `git tag -a <version> <commit_hash>` to locally create a tag.
   - Use `git push origin <version>` to push it (`<version>` is i.e. `1.3`).
@@ -29,7 +29,7 @@ This is a list of steps which need to happen in order to release new version of 
     - Use i.e.: https://github.com/dotnet/iot/compare/1.1...1.2 to see list of commits.
   - Categorize them by: `System.Gpio`, `Iot.Device.Bindings`, `Other` changes.
   - Rephrase/group them for consistency.
-  - Add the list of contributors ordered by the number of commits or alphabetically.
+  - Add the list of contributors ordered by the number of commits or alphabetically. Command: `git shortlog -s 1.4..1.5` is very helpful but doesn't give github user names
 - Step 7: After package is pushed to Nuget create a PR similar to https://github.com/dotnet/iot/pull/1310 to prepare for next release.
 - Step 8: Update dependencies on old version of the package:
   - Option 1: Wait for `dependabot` to automatically create dependencies update PR (similar to: [System.Device.Gpio](https://github.com/dotnet/iot/pulls?q=is%3Apr+Bump+System.Device.Gpio+is%3Aclosed+author%3Aapp%2Fdependabot); [Iot.Device.Bindings](https://github.com/dotnet/iot/pulls?q=is%3Apr+Bump+Iot.Device.Bindings+is%3Aclosed+author%3Aapp%2Fdependabot))

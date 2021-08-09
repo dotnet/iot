@@ -12,7 +12,7 @@ using ShiftRegister sr = new ShiftRegister(ShiftRegisterPinMapping.Complete, 8);
 // Uncomment this code to use SPI (and comment the line above)
 // SpiConnectionSettings settings = new(0, 0);
 // using var spiDevice = SpiDevice.Create(settings);
-// var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
+// using ShiftRegister sr = new(spiDevice, 8);
 CancellationTokenSource cancellationSource = new();
 Console.CancelKeyPress += (s, e) =>
 {

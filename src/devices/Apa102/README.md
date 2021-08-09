@@ -8,19 +8,47 @@ There are other models like APA107, HD107s, SK9822, etc. The controls are exactl
 
 Model  | SCLK   | PWM
 -------|--------|--------
-APA102 | 20 MHz | 20 kHz 
+APA102 | 20 MHz | 20 kHz
 APA107 | 30 MHz | 9 kHz  
-HD107s | 40 MHz | 27 kHz 
+HD107s | 40 MHz | 27 kHz
 SK9822 | 15 MHz | 4.7 kHz
 
-# Datasheet
+## Documentation
 
-[APA102](https://cdn.instructables.com/ORIG/FC0/UYH5/IOA9KN8K/FC0UYH5IOA9KN8K.pdf)
+- [APA102](https://cdn.instructables.com/ORIG/FC0/UYH5/IOA9KN8K/FC0UYH5IOA9KN8K.pdf)
+- [SK9822](https://cdn.instructables.com/ORIG/F66/Q8GE/IOA9KN8U/F66Q8GEIOA9KN8U.pdf)
+- [Compare](https://www.instructables.com/id/Compare-SK6822-WS2813-APA102-SK9822/) SK6822 WS2813 APA102 SK9822 LED
+- [Difference](https://www.rose-lighting.com/the-difference-of-hd107s-apa107-sk9822led/) between APA102, APA107,HD107s and SK9822
 
-[SK9822](https://cdn.instructables.com/ORIG/F66/Q8GE/IOA9KN8U/F66Q8GEIOA9KN8U.pdf)
+## Usage
 
-# References
+Here is an example how to use the APA102:
 
-https://www.instructables.com/id/Compare-SK6822-WS2813-APA102-SK9822/
+```csharp
+using System;
+using System.Device.Spi;
+using System.Drawing;
+using System.Threading;
+using Iot.Device.Apa102;
 
-https://www.rose-lighting.com/the-difference-of-hd107s-apa107-sk9822led/
+var random = new Random();
+
+using SpiDevice spiDevice = SpiDevice.Create(new SpiConnectionSettings(0, 0)
+{
+    ClockFrequency = 20_000_000,
+    DataFlow = DataFlow.MsbFirst,
+    Mode = SpiMode.Mode0 // ensure data is ready at clock rising edge
+});
+using Apa102 apa102 = new Apa102(spiDevice, 16);
+
+while (true)
+{
+    for (var i = 0; i < apa102.Pixels.Length; i++)
+    {
+        apa102.Pixels[i] = Color.FromArgb(255, random.Next(256), random.Next(256), random.Next(256));
+    }
+
+    apa102.Flush();
+    Thread.Sleep(1000);
+}
+```

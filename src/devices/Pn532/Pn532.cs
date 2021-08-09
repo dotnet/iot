@@ -734,7 +734,7 @@ namespace Iot.Device.Pn532
         /// <param name="dataToSend">The data to write to the card</param>
         /// <param name="dataFromCard">The potential data to receive</param>
         /// <returns>The number of bytes read</returns>
-        public int WriteReadDirect(Span<byte> dataToSend, Span<byte> dataFromCard)
+        public int WriteReadDirect(ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
             var ret = WriteCommand(CommandSet.InCommunicateThru, dataToSend);
             if (ret < 0)
@@ -742,15 +742,22 @@ namespace Iot.Device.Pn532
                 return -1;
             }
 
-            Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
-            ret = ReadResponse(CommandSet.InCommunicateThru, toReceive);
-            toReceive.Slice(1).CopyTo(dataFromCard);
-            if ((toReceive[0] == (byte)ErrorCode.None) & (ret >= 0))
+            if (dataFromCard.Length > 0)
             {
-                return ret;
-            }
+                Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
+                ret = ReadResponse(CommandSet.InCommunicateThru, toReceive);
+                toReceive.Slice(1).CopyTo(dataFromCard);
+                if ((toReceive[0] == (byte)ErrorCode.None) && (ret > 0))
+                {
+                    return ret - 1;
+                }
 
-            return -1;
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         /// <summary>
@@ -761,6 +768,28 @@ namespace Iot.Device.Pn532
         /// <param name="dataFromCard">The potential data to receive</param>
         /// <returns>The number of bytes read</returns>
         public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        {
+            // We need to add some logic here to understand what the command is and the size of the needed buffer.
+            // For Mifare card, the authentications needs to use the native part.
+            // For non Mifare card, it should not.
+            if (((dataToSend[0] == 0x60) || (dataToSend[0] == 0x61)) && (dataFromCard.Length == 0))
+            {
+                return TransceiveAdvance(targetNumber, dataToSend, dataFromCard);
+            }
+            else
+            {
+                return WriteReadDirect(dataToSend, dataFromCard);
+            }
+        }
+
+        /// <summary>
+        /// Use the build in feature to transceive the data to the card. This add specific logic for some cards.
+        /// </summary>
+        /// <param name="targetNumber">The card target number</param>
+        /// <param name="dataToSend">The data to write to the card</param>
+        /// <param name="dataFromCard">The potential data to receive</param>
+        /// <returns>The number of bytes read</returns>
+        public int TransceiveAdvance(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
             Span<byte> toSend = stackalloc byte[1 + dataToSend.Length];
             toSend[0] = targetNumber;
@@ -778,9 +807,9 @@ namespace Iot.Device.Pn532
             Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
             ret = ReadResponse(CommandSet.InDataExchange, toReceive);
             toReceive.Slice(1).CopyTo(dataFromCard);
-            if ((toReceive[0] == (byte)ErrorCode.None) & (ret >= 0))
+            if ((toReceive[0] == (byte)ErrorCode.None) && (ret > 0))
             {
-                return ret;
+                return ret - 1;
             }
 
             return -1;

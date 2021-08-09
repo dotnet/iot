@@ -85,6 +85,7 @@ namespace System.Device.Gpio
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.
+        /// The driver attempts to open the pin without changing its mode or value.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         public void OpenPin(int pinNumber)
@@ -137,6 +138,7 @@ namespace System.Device.Gpio
 
         /// <summary>
         /// Closes an open pin.
+        /// If allowed by the driver, the state of the pin is not changed.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         public void ClosePin(int pinNumber)

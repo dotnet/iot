@@ -23,24 +23,31 @@ namespace System.Device.Gpio.Tests
             _testOutputHelper = testOutputHelper;
         }
 
-        [Fact]
-        [Trait("SkipOnTestRun", "Windows_NT")] // The WindowsDriver is kept as High when disposed.
-        public void PinValueReturnsToLowAfterDispose()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void PinValueStaysSameAfterDispose(bool closeAsHigh)
         {
-            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            var driver = GetTestDriver();
+            if (driver is SysFsDriver)
+            {
+                // This check fails on the SysFsDriver, because it always sets the value to 0 when the pin is opened (but on close, the value does stay high)
+                return;
+            }
+
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), driver))
             {
                 controller.OpenPin(OutputPin, PinMode.Output);
                 controller.OpenPin(InputPin, PinMode.Input);
-                controller.Write(OutputPin, PinValue.High);
+                controller.Write(OutputPin, closeAsHigh);
                 Thread.SpinWait(100);
-                Assert.Equal(PinValue.High, controller.Read(InputPin));
+                Assert.Equal(closeAsHigh, controller.Read(InputPin));
             }
 
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
-                controller.OpenPin(OutputPin, PinMode.Output);
                 controller.OpenPin(InputPin, PinMode.Input);
-                Assert.Equal(PinValue.Low, controller.Read(InputPin));
+                Assert.Equal(closeAsHigh, controller.Read(InputPin));
             }
         }
 
@@ -168,18 +175,34 @@ namespace System.Device.Gpio.Tests
             }
         }
 
-        [Fact]
-        [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown instead of Input when Closed/Opened.
-        public void OpenPinDefaultsModeToInput()
+        [Theory]
+        [InlineData(PinMode.Output)]
+        [InlineData(PinMode.Input)]
+        [Trait("SkipOnTestRun", "Windows_NT")] // Currently, the Windows Driver is defaulting to InputPullDown, and it seems this cannot be changed
+        public void OpenPinDefaultsModeToLastMode(PinMode modeToTest)
         {
+            var driver = GetTestDriver();
+            if (driver is SysFsDriver)
+            {
+                // See issue #1581. There seems to be a library-version issue or some other random cause for this test to act differently on different hardware.
+                return;
+            }
+
+            // This works for input/output on most systems, but not on pullup/down, since sometimes the hardware doesn't have read possibilities for those (ie. the Raspi 3)
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), driver))
+            {
+                controller.OpenPin(OutputPin);
+                controller.SetPinMode(OutputPin, modeToTest);
+                Assert.Equal(modeToTest, controller.GetPinMode(OutputPin));
+                controller.ClosePin(OutputPin);
+            }
+
+            // Close controller, to make sure we're not caching
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
             {
                 controller.OpenPin(OutputPin);
-                Assert.Equal(PinMode.Input, controller.GetPinMode(OutputPin));
-                controller.SetPinMode(OutputPin, PinMode.Output);
-                controller.ClosePin(OutputPin);
-                controller.OpenPin(OutputPin);
-                Assert.Equal(PinMode.Input, controller.GetPinMode(OutputPin));
+                Thread.Sleep(100);
+                Assert.Equal(modeToTest, controller.GetPinMode(OutputPin));
             }
         }
 

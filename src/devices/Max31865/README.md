@@ -2,13 +2,11 @@
 
 The MAX31865 device is a SPI interface Resistance Temperature Detector to Digital Converter.
 
-## Sensor Image
-
 ![MAX31865](sensor.jpg)
 
-## Known limitations
+## Documentation
 
-This version only performs the one shot temperature conversion and not the continuous temperature conversion.
+* MAX31865 [datasheet](https://datasheets.maximintegrated.com/en/ds/MAX31865.pdf)
 
 ## Usage
 
@@ -34,8 +32,24 @@ while (true)
 
 **Note:** _You can use any PT100 or PT1000 temperature sensor which has 2/3/4 wires._
 
-An example on how to use the specific MAX31865 device binding is available in the [samples](samples) folder.
+## Hardware Required
 
-## References 
+* MAX31865
+* Male/Female Jumper Wires
 
-**MAX31865** [datasheet](https://datasheets.maximintegrated.com/en/ds/MAX31865.pdf)
+## Circuit
+
+The following fritzing diagram illustrates one way to wire up the MAX31865 Resistance Temperature Detector to Digital Converter with a Raspberry Pi
+
+![Raspberry Pi circuit diagram](MAX31865_circuit_bb.png)
+
+* SDI - MOSI
+* SDO - MISO
+* CLK - SCLK
+* CS  - CE0
+* VIN - 3V
+* GND - GND
+
+## Known limitations
+
+This version only performs the one shot temperature conversion and not the continuous temperature conversion.
