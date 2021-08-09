@@ -65,7 +65,7 @@ foreach (var device in devices)
     Console.WriteLine($"Device type: {device.Type}");
 }
 
-var (chip, dll) = FtCommon.GetVersions();
+var (chip, dll) = Ft4222Common.GetVersions();
 Console.WriteLine($"Chip version: {chip}");
 Console.WriteLine($"Dll version: {dll}");
 ```
@@ -77,7 +77,7 @@ Console.WriteLine($"Dll version: {dll}");
 The example below shows how to create the I2C devices and pass them to a BNO055 sensor and BME280 sensors.
 
 ```csharp
-using I2cBus ftI2c = FtCommon.GetDevices()[0].CreateI2cBus();
+using I2cBus ftI2c = new Ft4222Device(FtCommon.GetDevices()[0]).CreateI2cBus();
 using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
 using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
 bme280.SetPowerMode(Bmx280PowerMode.Normal);

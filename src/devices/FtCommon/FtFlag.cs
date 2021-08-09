@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Iot.Device.Ft4222
+namespace Iot.Device.FtCommon
 {
     /// <summary>
     /// Flags for the device status

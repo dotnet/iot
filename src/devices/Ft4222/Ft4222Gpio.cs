@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft4222
 {
@@ -29,7 +30,7 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public FtDevice DeviceInformation { get; internal set; }
+        public Ft4222Device DeviceInformation { get; internal set; }
 
         /// <summary>
         /// Create a FT4222 GPIO driver
@@ -38,7 +39,7 @@ namespace Iot.Device.Ft4222
         public Ft4222Gpio(int deviceNumber = 0)
         {
             // Check device
-            var devInfos = FtCommon.GetDevices();
+            var devInfos = FtCommon.FtCommon.GetDevices();
             if (devInfos.Count == 0)
             {
                 throw new IOException("No FTDI device available");
@@ -54,7 +55,7 @@ namespace Iot.Device.Ft4222
                 throw new IOException($"Can't find a device to open GPIO on index {deviceNumber}");
             }
 
-            DeviceInformation = devInfo[deviceNumber];
+            DeviceInformation = new(devInfo[deviceNumber]);
             // Open device
             var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, out _ftHandle);
 

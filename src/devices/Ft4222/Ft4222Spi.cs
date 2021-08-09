@@ -6,6 +6,7 @@ using System.Device.Spi;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft4222
 {
@@ -23,7 +24,7 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public FtDevice DeviceInformation { get; internal set; }
+        public Ft4222Device DeviceInformation { get; internal set; }
 
         /// <summary>
         /// Create an SPI FT4222 class
@@ -33,7 +34,7 @@ namespace Iot.Device.Ft4222
         {
             _settings = settings;
             // Check device
-            var devInfos = FtCommon.GetDevices();
+            var devInfos = Device.FtCommon.FtCommon.GetDevices();
             if (devInfos.Count == 0)
             {
                 throw new IOException("No FTDI device available");
@@ -47,7 +48,7 @@ namespace Iot.Device.Ft4222
                 throw new IOException($"Can't find a device to open SPI on index {_settings.BusId}");
             }
 
-            DeviceInformation = devInfo[_settings.BusId];
+            DeviceInformation = new(devInfo[_settings.BusId]);
             // Open device
             var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, out _ftHandle);
 

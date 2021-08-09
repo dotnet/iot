@@ -1,10 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Device.I2c;
-
-namespace Iot.Device.Ft4222
+namespace Iot.Device.FtCommon
 {
     /// <summary>
     /// FT4222 device information
@@ -59,14 +56,5 @@ namespace Iot.Device.Ft4222
         /// The device description.
         /// </summary>
         public string Description { get; set; }
-
-        /// <summary>
-        /// Creates I2C bus related to this device
-        /// </summary>
-        /// <returns>I2cBus instance</returns>
-        public I2cBus CreateI2cBus()
-        {
-            return new Ft4222I2cBus(this);
-        }
     }
 }

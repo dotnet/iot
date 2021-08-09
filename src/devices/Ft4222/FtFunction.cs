@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft4222
 {

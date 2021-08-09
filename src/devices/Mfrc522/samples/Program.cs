@@ -10,6 +10,7 @@ using System.Threading;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Card.Ultralight;
 using Iot.Device.Ft4222;
+using Iot.Device.FtCommon;
 using Iot.Device.Mfrc522;
 using Iot.Device.Ndef;
 using Iot.Device.Rfid;
@@ -61,7 +62,7 @@ switch (connectionChoice.KeyChar)
         try
         {
             int i2cAddress = Convert.ToInt32(i2cAddChoice);
-            I2cDevice i2c = hardchoice.KeyChar == '1' ? I2cDevice.Create(new I2cConnectionSettings(1, i2cAddress)) : FtCommon.GetDevices()[0].CreateI2cBus().CreateDevice(i2cAddress);
+            I2cDevice i2c = hardchoice.KeyChar == '1' ? I2cDevice.Create(new I2cConnectionSettings(1, i2cAddress)) : new Ft4222Device(FtCommon.GetDevices()[0]).CreateI2cBus().CreateDevice(i2cAddress);
             mfrc522 = new(i2c, pinReset, gpioController, false);
         }
         catch (Exception)
