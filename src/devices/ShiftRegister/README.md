@@ -14,9 +14,17 @@ The following image is of the larger MBI5027 16-bit shift register:
 
 ![MBI5027](https://user-images.githubusercontent.com/2608468/89208974-4216cd00-d572-11ea-98eb-14a9a9b4614f.png)
 
-The [sample](samples/README.md) demonstrates how to use the shift register in some basic ways.
+## Documentation
 
-## Using GPIO
+- SN74HC595 [datasheet](https://www.ti.com/lit/ds/symlink/sn74hc595.pdf)
+- MBI5027 [datasheet](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf)
+- MBI5168 [datasheet](http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf)
+- Tutorial[datasheet](https://www.youtube.com/watch?v=6fVbJbNPrEU)
+- Tutorial[datasheet](https://www.youtube.com/watch?v=G1SzTGZ2l1c)
+
+## Usage
+
+### GPIO
 
 The binding can use `GpioController` pins to control the shift register. It uses [ShiftRegisterPinMapping](ShiftRegisterPinMapping.cs) to describe the pins that will be used.
 
@@ -40,11 +48,11 @@ Thread.Sleep(1000);
 sr.ShiftByte(0b_1000_1101);
 ```
 
-The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph.fzz) demonstrates the required wiring for using the SN74HC595 with minimal mapping. Other shift registers will be similar.
+The following diagram demonstrates the required wiring for using the SN74HC595 with minimal mapping. Other shift registers will be similar.
 
 ![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-minimal-led-bar-graph_bb.png)
 
-## Using SPI
+### SPI
 
 The bindings can use a `SpiDevice` to control the shift register. The shift register timing maps to the SPI protocol, enabling SPI to be used. The wiring from is straightforward, from [SPI pins](https://pinout.xyz/pinout/spi) to the shift register: SDI (MOSI) -> SDI; SCLK -> CLK; CEO -> LE.
 
@@ -67,13 +75,13 @@ sr.ShiftClear();
 sr.ShiftByte(0b_1010_1010);
 ```
 
-The following [diagram](../Sn74hc595/sn74hc595-led-bar-graph-spi.fzz) demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
+The following diagram demonstrates the required wiring for using the SN74HC595 with SPI. Other shift registers will be similar.
 
 ![sn74hc595-led-bar-graph-spi_bb](../Sn74hc595/sn74hc595-led-bar-graph-spi_bb.png)
 
 Note: You need to [enable SPI on the Raspberry Pi](https://www.raspberrypi.org/documentation/configuration/raspi-config.md) in order to use it.
 
-## Daisy-chaining
+### Daisy-chaining
 
 The binding supports daisy chaining, using either GPIO or SPI. The GPIO-based example below demonstrates how to instantiate the binding for controlling/addressing two -- daisy-chained -- 8-bit shift registers. This is specified by the integer value in the constructor.
 
@@ -123,14 +131,6 @@ foreach (var b in bytes)
 }
 ```
 
-The following [diagram](../Sn74hc595/sn74hc595-minimal-led-bar-graph-double-up.fzz) demonstrates the required wiring for using the SN74HC595 with daisy-chaining. Other shift registers will be similar. This diagram uses the `Minimal` mapping. The `Complete` mapping will differ.
+The following diagram demonstrates the required wiring for using the SN74HC595 with daisy-chaining. Other shift registers will be similar. This diagram uses the `Minimal` mapping. The `Complete` mapping will differ.
 
 ![sn74hc595-minimal-led-bar-graph-double-up_bb](../Sn74hc595/sn74hc595-minimal-led-bar-graph-double-up_bb.png)
-
-## Resources
-
-* SN74HC595 data sheet: https://www.ti.com/lit/ds/symlink/sn74hc595.pdf
-* MBI5027 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5027.pdf
-* MBI5168 data sheet: http://archive.fairchip.com/pdf/MACROBLOCK/MBI5168.pdf
-* Tutorial: https://www.youtube.com/watch?v=6fVbJbNPrEU
-* Tutorial: https://www.youtube.com/watch?v=G1SzTGZ2l1c

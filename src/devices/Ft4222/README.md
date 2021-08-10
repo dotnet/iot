@@ -2,11 +2,11 @@
 
 This project support SPI, GPIO and I2C into a normal Windows 64 bits or Windows 32 bits environment thru FT4222 chipset. MacOS and Linux 64 bits can be added as well.
 
-## Device family
+## Documentation
 
 This device supports multiple SPI as well as GPIO and I2C. It is a [FT4222](https://www.ftdichip.com/Products/ICs/FT4222H.html) from FTDI Chip.
 
-You can find boards implementing this chip like on [bitWizard](http://bitwizard.nl/shop/FT4222h-Breakout-Board?search=ft4222). This is the board which has been used to develop this project. The pins are described [here](http://bitwizard.nl/wiki/FT4222h). Note that for I2C there is no pull up implemented. 
+You can find boards implementing this chip like on [bitWizard](http://bitwizard.nl/shop/FT4222h-Breakout-Board?search=ft4222). This is the board which has been used to develop this project. The pins are described [here](http://bitwizard.nl/wiki/FT4222h). Note that for I2C there is no pull up implemented.
 
 ## Windows Requirements
 
@@ -33,11 +33,12 @@ Alternately, you can copy your platform library into the same directory of your 
 
 ## Mac OS Requirement
 
-For Mac OS, you'll need to download both the ```libft4222.dylib``` and the ```libftd2xx.dylib```. You can find the latest version of ```libft4222.dylib``` [here](https://www.ftdichip.com/Products/ICs/FT4222H.html), direct link on a known minimal working version [here](https://www.ftdichip.com/Support/SoftwareExamples/LibFT4222-mac-v1.4.4.14.zip). You can find the latest version of ```libftd2xx.dylib``` [here]https://www.ftdichip.com/Drivers/D2XX.htm.
+For Mac OS, you'll need to download both the ```libft4222.dylib``` and the ```libftd2xx.dylib```. You can find the latest version of ```libft4222.dylib``` [here](https://www.ftdichip.com/Products/ICs/FT4222H.html), direct link on a known minimal working version [here](https://www.ftdichip.com/Support/SoftwareExamples/LibFT4222-mac-v1.4.4.14.zip). You can find the latest version of ```libftd2xx.dylib``` [here]<https://www.ftdichip.com/Drivers/D2XX.htm>.
 
 First install ```libftd2xx.dylib``` by follwing the instructions. To install ```libft4222.dylib``` you will need to follow the following steps. they are similar to the one installing ```libftd2xx.dylib```:
 
 From the path where you'll find the libft4222.x.x.x.x.dylib like for example: libfT4222.1.4.4.14.dylib
+
 ```bash
 sudo cp libfT4222.1.4.4.14.dylib /usr/local/lib/libfT4222.1.4.4.14.dylib
 sudo ln -sf /usr/local/lib/libfT4222.1.4.4.14.dylib /usr/local/lib/libfT4222.dylib
@@ -151,7 +152,7 @@ The example below shows how to blink a led on GPIO2 and then read the value. It'
 
 4 FTDI modes are available and offer different interfaces. This is setup by the DCNF0 and DCNF1 pins. Those pins need to be set before the board is powered. You need to reset the power of the board if you make changes to the modes for them to be taking into consideration. You can see how to select the modes for the [BitWizard implementation here](http://bitwizard.nl/wiki/FT4222h).
 
-The table below whose the modes and the interface available. 
+The table below whose the modes and the interface available.
 
 |Functions|Mode 0|Mode 1|Mode 2|Mode 3|
 |---|---|---|---|---|
@@ -161,7 +162,6 @@ The table below whose the modes and the interface available.
 Note that for example in mode 0, you can open I2C and GPIO at the same time. In this case, for example, you'll have only GPIO2 and GPIO3 available. GPIO0 and GPIO1 will be used by I2C. You can as well open GPIO and SPI at the same time. In this case, you'll get the 4 GPIO available.
 
 If you have multiple FTDI, you'll see more interfaces and you'll be able to select thru the index the one you'd like to initiate.
-
 
 ## Known limitations
 
@@ -173,7 +173,7 @@ For the moment this project supports only SPI and I2C in a Windows environement.
 - [x] I2C master support for Windows 64/32
 - [x] Basic GPIO support for Windows 64/32
 - [x] Advanced GPIO support for Windows 64/32
-- [X] SPI support for MacOS 
+- [X] SPI support for MacOS
 - [X] I2C support for MacOS
 - [X] GPIO support for MacOS
 - [x] SPI support for Linux 64

@@ -38,13 +38,13 @@ If you have a previous version, you can find the code on for Windows 10 IoT Core
 
 ## Known limitations
 
-This version include a pure driver so you can directly access to the raw results. High level classes has been created and most of the NXT and EV3 sensors has been tested. Please open a GitHub issue if you have any issue with any sensor. 
+This version include a pure driver so you can directly access to the raw results. High level classes has been created and most of the NXT and EV3 sensors has been tested. Please open a GitHub issue if you have any issue with any sensor.
 
 For I2C sensors, the code has been tested very little. Color sensors may return incorrect data, you need to allow time when measuring and not calling a refresh of the sensor too often. This is a limitation of the sensor itself.
 
 ## How to use the driver
 
-The main [BrickPi3.samples](./samples) contains a series of test showing how to use every elements of the driver.
+The main [BrickPi3.samples](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples) contains a series of test showing how to use every elements of the driver.
 
 Create a ```Brick``` class.
 
@@ -129,7 +129,7 @@ while (count < 100)
 
 Please note that the function ```Brick.GetSensor``` returns an array of byte, it's up to you to interpret correctly the data out of this function. Please read the [documentation](https://www.dexterindustries.com/BrickPi/brickpi3-technical-design-details/brickpi3-communication-protocol/) to have the full details of what every sensor return.
 
-It is **strongly recommended** to use the high level classes implementing the logic to decode correctly the raw values of sensor like in the previous example. 
+It is **strongly recommended** to use the high level classes implementing the logic to decode correctly the raw values of sensor like in the previous example.
 
 ### Using motors
 
@@ -139,7 +139,7 @@ There are many ways you can use motors, either by setting the power, either by r
 
 In this example, the motor on port D is used to set the position of the motor A. A simple NXT touch sensor is used to end the sequence when it is pressed.
 
-You can see as well the MotorStatus classes containing all information on the motor. Flags are useful to understand if you have issues with the power or an overload of the motors. 
+You can see as well the MotorStatus classes containing all information on the motor. Flags are useful to understand if you have issues with the power or an overload of the motors.
 
 To reinitialize the encoder, simply set the offset to the current version like shown in the first 2 lines.
 
@@ -209,7 +209,7 @@ for (int i = 0; i < 100; i++)
 
 #### Setting motor speed with degree per seconds
 
-Another way to pilot the motors is to set a specific speed in degree per seconds. In the below example, no limit has been set but it's possible to setup a limit like in the motor position example. Setting up limits reduces the risk of overheat on the motors. 
+Another way to pilot the motors is to set a specific speed in degree per seconds. In the below example, no limit has been set but it's possible to setup a limit like in the motor position example. Setting up limits reduces the risk of overheat on the motors.
 
 ```csharp
 brick.OffsetMotorEncoder((byte)MotorPort.PortD, brick.GetMotorEncoder((byte)MotorPort.PortD));
@@ -238,7 +238,7 @@ There are high level classes to handle directly objects like NXT Touch sensors o
 
 ### Using the Sensor classes
 
-Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties and function. The ```ReadRaw()```, ```ReadAsString()``` functions are common to all sensors, ```Value``` and ```ValueAsString``` properties as well. 
+Using the sensor classes is straight forward. Just reference a class and initialized it. Access properties and function. The ```ReadRaw()```, ```ReadAsString()``` functions are common to all sensors, ```Value``` and ```ValueAsString``` properties as well.
 A changed property event on the properties is raised with a minimum period you can determined when creating the class (or later).
 
 Example creating a NXT Touch Sensor on port S2:
@@ -262,9 +262,9 @@ All sensors will return a ```int.MaxValue``` in case of error when reading the d
 
 ### Using Motors
 
-Motors are as well really easy to use. You have functions ```Start()```, ```Stop()```, ```SetSpeed(speed) ``` and ```GetSpeed()``` which as you can expect will start, stop, change the speed and give you the current speed. A speed property is available as well and will change the speed. 
+Motors are as well really easy to use. You have functions ```Start()```, ```Stop()```, ```SetSpeed(speed)``` and ```GetSpeed()``` which as you can expect will start, stop, change the speed and give you the current speed. A speed property is available as well and will change the speed.
 
-Lego motors have an encoder which gives you the position in 0.5 degree precision. You can get access thru function ```GetTachoCount()```. As the numbers can get big quite fast, you can reset this counter by using ```SetTachoCount(newnumber) ```. A ```TachoCount``` property is available as well. This property like for sensors can raise an event on a minimum time base you can setup.
+Lego motors have an encoder which gives you the position in 0.5 degree precision. You can get access thru function ```GetTachoCount()```. As the numbers can get big quite fast, you can reset this counter by using ```SetTachoCount(newnumber)```. A ```TachoCount``` property is available as well. This property like for sensors can raise an event on a minimum time base you can setup.
 
 ```csharp
 Brick brick = new Brick();
@@ -281,7 +281,7 @@ motor.SetPolarity(Polarity.OppositeDirection); // change the direction
 motor.Stop();
 ```
 
-Here is an example of the ```Vehicle``` class: 
+Here is an example of the ```Vehicle``` class:
 
 ```csharp
 Console.WriteLine("Vehicle drive test using Motor A for left, Motor D for right, not inverted direction");
@@ -309,5 +309,50 @@ The only supported sensors in the GrovePi port present on BrickPi3 are I2C senso
 
 ## Tests
 
-A series of hardware tests for motors and sensors are available in [BrickPi3.samples](./samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
+A series of hardware tests for motors and sensors are available in [BrickPi3.samples](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples). Those hardware tests offers a variety of low level access to the Brick class as well as high level thru the Motor and Sensor classes.
 
+## Example
+
+Refer to the [sample code](https://github.com/dotnet/iot/tree/main/src/devices/BrickPi3/samples) to understand on which port you'll need to plug motors and sensors. The available tests are the following:
+
+```shell
+./BrickPiHardwareTest -arg1 - arg2
+where -arg1, arg2, etc are one of the following:
+-nobrick: don't run the basic BrickPi tests.
+-motor: run basic motor tests, motors need to be on port A and D.
+-vehicle: run a vehicle test, motors need to be on port A and D.
+-multi: run a multi sensor test
+   EV3TouchSensor on port 1
+   NXTTouchSensor on port 2
+   NXTColorSensor on port 3
+   NXTSoundSensor on port 4
+   Press the EV3TouchSensor sensor to finish
+-color: run an EV3 color test
+   EV3TouchSensor on port 1
+   EV3ColorSensor on port 2
+-touch: run touch sensor test
+   EV3TouchSensor on port 1
+-nxtlight: run the NXT light sensor tests
+   NXTLightSensor on port 4
+-nxtus: run NXT Ultrasonic test on port 4
+-nxtcolor: run NXT Color sensor test
+   EV3TouchSensor on port 1
+   NXTColorSensor on port 4
+-irsensor: run EV3 IR sensor test on port 4
+```
+
+You always have to create a brick and initialize it. Then you can run your code. In this example, reading a Touch sensor.
+
+```csharp
+Brick _brick = new Brick();
+Console.WriteLine("Running 100 reads on EV3 touch sensor on port 1.");
+EV3TouchSensor touch = new EV3TouchSensor(_brick, BrickPortSensor.PortS1);
+// Alternative to test NXT touch sensor
+// NXTTouchSensor touch = new NXTTouchSensor(brick, BrickPortSensor.PORT_S2);
+int count = 0;
+while (count < 100)
+{
+    Console.WriteLine($"NXT Touch, IsPRessed: {touch.IsPressed()}, ReadAsString: {touch.ReadAsString()}, Selected mode: {touch.SelectedMode()}");
+    Task.Delay(300).Wait(); ;
+}
+```

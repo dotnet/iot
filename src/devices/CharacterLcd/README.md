@@ -1,18 +1,19 @@
 # Character LCD (Liquid Crystal Display)
 
-## Summary
-
 This device binding is meant to work with character LCD displays which use a HD44780 compatible controller. Almost all character LCDs fall into this category. Simple wrappers for 16x2 and 20x4 variants are included.
 
 Please make sure you are using the [latest Bindings nuget](https://github.com/dotnet/iot#how-to-install).
 
-## Device Family
+## Documentation
 
-This binding has been tested with a variety of 16x2 and 20x4 displays both in 4bit and 8bit mode and via i2C adapters (such as on the CrowPi). It should work with any character LCD with a 5x8 size character. Common names are 1602LCD and 2004LCD.
+This binding has been tested with a variety of 16x2 and 20x4 displays both in 4bit and 8bit mode and via i2C adapters (such as on the CrowPi). It should work with any character LCD with a 5x8 size character. Common names are 1602LCD and 2004LCD. Also supports [Grove - LCD RGB Backlight](http://wiki.seeedstudio.com/Grove-LCD_RGB_Backlight/).
 
-Also supports [Grove - LCD RGB Backlight](http://wiki.seeedstudio.com/Grove-LCD_RGB_Backlight/).
+- [Very complete tutorial](https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview) on how to connect and work with one of these displays.
+- [Good guide](http://www.site2241.net/november2014.htm) explaining how the device works internally
+- Seeedstudio, Grove - [LCD RGB Backlight library](https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight)
+- [PCF8574T information](https://alselectro.wordpress.com/2016/05/12/serial-lcd-i2c-module-pcf8574/)
 
-## Binding Notes
+## Usage
 
 These devices are controlled purely by GPIO (except Grove LCD RGB Backlight). There are two different types of GPIO pins that are used, the control pins, and the data pins. The data pins are the ones that will send out the text that should be printed out on the LCD screen. This binding supports two different configurations for the data pins: using 4 data pins, and using 8 data pins. When using only 4 data pins, we will require two send two messages to the controller, each sending half of the byte that should be printed.
 
@@ -55,9 +56,32 @@ var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 
 there is a full working example in the samples directory called Pcf8574tSample.cs
 For PCF8574T i2c addresses can be between 0x27 and 0x20 depending on bridged solder jumpers and for PCF8574AT i2c addresses can be between 0x3f and 0x38 depending on bridged solder jumpers
 
-## References
+## Character LCD display Samples
 
-- Very complete tutorial on how to connect and work with one of these displays: https://learn.adafruit.com/drive-a-16x2-lcd-directly-with-a-raspberry-pi/overview
-- Good guide explaining how the device works internally: http://www.site2241.net/november2014.htm
-- Seeedstudio, Grove - LCD RGB Backlight library: https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight
-- PCF8574T information https://alselectro.wordpress.com/2016/05/12/serial-lcd-i2c-module-pcf8574/
+[Different samples](https://github.com/dotnet/iot/tree/main/src/devices/CharacterLcd/samples) are provided. The main method will use the Board's Gpio pins to drive the LCD display. The second example will instead use an MCP Gpio extender backpack to drive the LCD display. Also the second example can use Grove RGB LCD Backlight via i2c bus. This second example has been tested on a CrowPi device and Grove LCD RGB Backlight device.
+
+### Build configuration
+
+Please build the samples project with configuration key depending on connected devices:
+
+- For GPIO connection you don't have to use any configuration keys. Example:
+
+```shell
+dotnet publish -o C:\DeviceApiTester -r linux-arm
+```
+
+- For MCP GPIO extender backpack please use *USEI2C* key. Example:
+
+```shell
+dotnet publish -c USEI2C -o C:\DeviceApiTester -r linux-arm
+```
+
+- For Grove RGB LCD Backlight please use *USERGB* key. Example:
+
+```shell
+dotnet publish -c USERGB -o C:\DeviceApiTester -r linux-arm
+```
+
+### Sample wiring
+
+![wiring](lcmWiringExample.jpg)

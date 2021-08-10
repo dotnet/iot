@@ -38,11 +38,14 @@ gpio.Write(pinNumber, PinValue.High);
 ### For SoCs
 
 1. Inheriting `SunxiDriver` Class.
+
     ```C#
     // For Allwinner H2+/H3
     public class Sun8iw7p1Driver : SunxiDriver { }
     ```
+
 2. Overriding the GPIO base addresses.
+
     ```C#
     protected override int CpuxPortBaseAddress => 0x01C20800;
     protected override int CpusPortBaseAddress => 0x01F02C00;
@@ -51,10 +54,13 @@ gpio.Write(pinNumber, PinValue.High);
 ### For Boards
 
 1. Inherit the corresponding SoC class.
+
     ```C#
     public class OrangePiZeroDriver : Sun8iw7p1Driver { }
     ```
+
 2. Overriding the mapping method for converting a board pin number to the driver's logical numbering scheme.
+
     ```C#
     // Mapping from board pins to logic pins.
     private static readonly int[] _pinNumberConverter = new int[27]
@@ -77,4 +83,4 @@ gpio.Write(pinNumber, PinValue.High);
 
 ## References
 
-The wiki of the linux-sunxi community: https://linux-sunxi.org/Main_Page
+The wiki of the linux-sunxi community: <https://linux-sunxi.org/Main_Page>

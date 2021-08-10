@@ -1,7 +1,5 @@
 ﻿# Servo Motor
 
-## Summary
-
 This is a generic binding to control many servo motors using a hardware or software `PwmChannel`.  Servo motors are usually based on a signal frequency of 50Hz.  They also require a minimum/maximum pulse width to determine the position.  The pulse width is generally between 1 and 2 milliseconds, where 1ms is approximately 0 degrees, 1.5ms is the rest position, and 2ms is 180 degrees.  This information can be found in each servo motor's datasheet.  
 
 One thing to be aware of is the wiring as the servo motor connector is usually a 3-pin connector.  The pinout is shown below where colors can vary.
@@ -12,14 +10,24 @@ One thing to be aware of is the wiring as the servo motor connector is usually a
 | 2          | Power Supply   | Brown or Red              |
 | 3          | Control Signal | Orange or White or Yellow |
 
-## Device Family
+## Documentation
+
+- [Wikipedia Servo Motor](https://en.wikipedia.org/wiki/Servomotor)
+- [Hobby Servo Tutorial](https://learn.sparkfun.com/tutorials/hobby-servo-tutorial/all)
+- [How Servo Motors Work & How To Control Servos Using Arduino](https://howtomechatronics.com/how-it-works/how-servo-motors-work-how-to-control-servos-using-arduino/)
+- [Arduino Servo Library](https://www.arduino.cc/en/Reference/Servo)
+- [Raspberry Pi Lesson 28: Controlling a Servo on Raspberry Pi with Python](http://www.toptechboy.com/raspberry-pi/raspberry-pi-lesson-28-controlling-a-servo-on-raspberry-pi-with-python/)
 
 There are many servo motor sizes available that offer both standard and continuous rotation.  Below are a few links where to purchase servo motors.
 
-[Adafruit Servo Motor Accessories](https://www.adafruit.com/?q=servo)  
-[Sparkfun Servo Motor Accessories](https://www.sparkfun.com/categories/245)  
+- [Adafruit Servo Motor Accessories](https://www.adafruit.com/?q=servo)  
+- [Sparkfun Servo Motor Accessories](https://www.sparkfun.com/categories/245)  
 
-## Binding Notes
+## Board
+
+![schema](./servomotor.png)
+
+## Usage
 
 The `ServoMotor` binding offers an easy way to begin controlling a servo motor.  The quickest approach is to provide the `ServoMotor` object a `PwmChannel` using the default values for other optional arguments.
 
@@ -39,6 +47,7 @@ servoMotor.Stop(); // Disable control signal.
 The position of servo motor can also be adjusted by the angle.  The `ServoMotor` constructor's optional arguments must be set according to device's specs.  NOTE: These are usually an approximation, so you may need to manually tweak to determine exact values.
 
 For example, the [Hitec HS-300BB](https://servodatabase.com/servo/hitec/hs-300bb) servo has the following specifications:
+
 - MaximumAngle = 180
 - MinimumPulseWidthMicroseconds = 900
 - MaximumPulseWidthMicroseconds = 2100
@@ -67,12 +76,4 @@ servoMotor.Stop(); // Disable control signal.
 Calibration or finding minimum and maximum pulse width and angle range `WritePulseWidth` method should be used.
 To make it easier to write applications which allow calibration method `Calibrate` can be used to change calibration parameters.
 
-You can refer to [servo sample](../Pca9685/samples/Pca9685.Sample.cs) for example usage (i.e. `CalibrateServo` utility).
-
-## References
-
-[Wikipedia Servo Motor](https://en.wikipedia.org/wiki/Servomotor)  
-[Hobby Servo Tutorial](https://learn.sparkfun.com/tutorials/hobby-servo-tutorial/all)  
-[How Servo Motors Work & How To Control Servos Using Arduino](https://howtomechatronics.com/how-it-works/how-servo-motors-work-how-to-control-servos-using-arduino/)  
-[Arduino Servo Library](https://www.arduino.cc/en/Reference/Servo)  
-[Raspberry Pi Lesson 28: Controlling a Servo on Raspberry Pi with Python](http://www.toptechboy.com/raspberry-pi/raspberry-pi-lesson-28-controlling-a-servo-on-raspberry-pi-with-python/)  
+You can refer to [servo sample](../Pca9685/samples/Program.cs) for example usage (i.e. `CalibrateServo` utility).

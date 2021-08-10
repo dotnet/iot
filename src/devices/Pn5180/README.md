@@ -12,11 +12,11 @@ Application note on how to operate PN5180 without a [library](https://www.nxp.co
 
 You will find different implementation of this board. All boards should have full SPI pins plus the reset and busy ones and additionnaly 5V and or 3.3V plus ground. This pictures shows an example of one of the implementation connected with a [FT4222](../FT4222/README.md) chipset to provide the necessary GPIO and SPI features:
 
-![PN5180](./samples/pn8150_ft4222.png)
+![PN5180](./pn5180_ft4222.png)
 
 ## Usage
 
-You will find a full example in the [samples directory](./samples/Pn5180sample.cs). This example covers the usage of most of the public functions and properties. This example shows as well how to use the [FT4222](../FT4222/README.md) as a SPI and GPIO controller. Note that the development for the PN5180 has been done fully on a Windows 10 64 bit machine using this FT42222 to add the IoT capabilities.
+You will find a full example in the [samples directory](./samples/Program.cs). This example covers the usage of most of the public functions and properties. This example shows as well how to use the [FT4222](../FT4222/README.md) as a SPI and GPIO controller. Note that the development for the PN5180 has been done fully on a Windows 10 64 bit machine using this FT42222 to add the IoT capabilities.
 
 PN5180 is operated thru SPI and GPIO. GPIO is used to control the SPI behavior as the PN5180 is using SPI in specific way. This does then require to manually manage the pin selection for SPI. And another pin called pin busy is used to understand when the PN5180 is available to receive and send information.
 
@@ -38,7 +38,7 @@ var pn5180 = new Pn5180(spi, 2, 3);
 
 You will note that the SPI maximum clock frenquency is preset with ```Pn5180.MaximumSpiClockFrequency```, the maximum operation frequency is 7MHz. Same for the mode thru ```Pn5180.DefaultSpiMode```. Data Flow has to be ```DataFlow.MsbFirst```.
 
-In the previous example the pin 2 is used for busy and the pin 3 for the SPI selection. Note that you have to use a specific pin selection and cannot use the one which is associate with the SPI channel you create. 
+In the previous example the pin 2 is used for busy and the pin 3 for the SPI selection. Note that you have to use a specific pin selection and cannot use the one which is associate with the SPI channel you create.
 
 Reset is done thru pin 4. It is recommended to reset the board before creating the class.
 
@@ -112,7 +112,7 @@ Please note that the ```ListenToCardIso14443TypeA``` and ```ListenToCardIso14443
 
 A card will be continuously tried to be detected during the duration on your polling. If nothing is detected or if any issue, the function will return false.
 
-Specific for type B cards, they have a target number. This target number is needed to transcieve any information with the card. The PN5180 can support up to 14 cards at the same time. But you can only select 1 card at a time, so if you have a need for multiple card selected at the same time, it is recommended to chain this card detection with the number of cards you need to select and operate at the same time. Note that depending on the card, they may not been seen as still selected by the reader.
+Specific for type B cards, they have a target number. This target number is needed to transceive any information with the card. The PN5180 can support up to 14 cards at the same time. But you can only select 1 card at a time, so if you have a need for multiple card selected at the same time, it is recommended to chain this card detection with the number of cards you need to select and operate at the same time. Note that depending on the card, they may not been seen as still selected by the reader.
 
 You should deselect the Type B card at the end to release the target number. If not done, during the next poll, this implementation will test if the card is still present, keep it in this case.
 
@@ -164,15 +164,15 @@ Console.WriteLine($"Product: {product.ToString()}, Firmware: {firmware.ToString(
 
 You should see something like this:
 
-```
+```text
 Product: 3.5, Firmware: 3.5, EEPROM: 145.0
 ```
 
-Current firmware versions are 3.12 (3.C) and 4.0. That said, this implementation supports older firmware. Newer firmware have better support for auto callibration, fixes bugs and added specific EMVco (payment) low level features. Note that the product version is the original firmware version installed. so if you've done firmware upgrade, the product version will always remain the one from the original firmware.
+Current firmware versions are 3.12 (3.C) and 4.0. That said, this implementation supports older firmware. Newer firmware have better support for auto calibration, fixes bugs and added specific EMVco (payment) low level features. Note that the product version is the original firmware version installed. so if you've done firmware upgrade, the product version will always remain the one from the original firmware.
 
-Note that this implementation does not support firmware update. You should use NXP tools if you want to update the firmare
+Note that this implementation does not support firmware update. You should use NXP tools if you want to update the firmware
 
-## Radio Frenquence Configuration
+## Radio Frequency Configuration
 
 The PN5180 offers the possibility to set a lot of configurations. The good news is that those configurations are stored and can be loaded. You can adjust them as well. The following code shows an example on how to load, extract the configuration and with the same way, you can write back a configuration if you need. Please refer to the documentation in this case to understand the changes you want to make:
 
@@ -265,15 +265,17 @@ else
 }
 ```
 
-The [example](./samples/Pn5180sample.cs) contains as well an implementation to fully dump the content of a credit card.
+The [example](./samples/Program.cs) contains as well an implementation to fully dump the content of a credit card.
 
 ## Current implementation
 
 Communication support:
+
 - [X] Hardware SPI Controller fully supported
 - [X] GPIO Controller fully supported
 
 Miscellaneous
+
 - [X] Read fully EEPROM
 - [X] Write fully EEPROM
 - [X] Read any part of EEPROM
@@ -284,11 +286,13 @@ Miscellaneous
 - [ ] Own board GPIO access
 
 RF communication commands:
+
 - [X] Load a specific configuration
 - [X] Read a specific configuration
 - [X] Write a specific configuration
 
 PN5180 as an initiator (reader) commands:
+
 - [X] Auto poll ISO 14443 type A cards
 - [X] Auto poll ISO 14443 type B cards
 - [X] Deselect ISO 14443 type B cards
@@ -301,7 +305,7 @@ PN5180 as an initiator (reader) commands:
 - [ ] Fast 212, 424, 848 kbtis communication: partial
 
 PN5180 as a Target (acting like a card)
+
 - [ ] Initialization as target
 - [ ] Handling communication with another reader as a target
 - [ ] Support for transceive data
-

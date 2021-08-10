@@ -2,7 +2,7 @@
 
 This class supports Mifare cards. They are RFID cards responding to ISO 14443 type A. You need a specific card reader like PN532, PN5180 to read, write those kind of cards.
 
-## Creating a card and reading it
+## Usage
 
 You'll need first to get the card from an RFID reader. The example below shows how to do it with a PN532 and read all the sectors and print all the sector data information.
 
@@ -71,5 +71,3 @@ if (decrypted is object)
     }
 }
 ```
-
-

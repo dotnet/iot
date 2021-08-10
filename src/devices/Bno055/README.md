@@ -1,16 +1,14 @@
 # BNO055 - inertial measurement unit
 
-## Summary
-
 Those sensors are intelligent 9-axis absolute orientation sensors. Most of the implementations are using I2C sensors but the sensor supports as well HID over I2C and serial port communication. This class only supports I2C.
 
 All operations for a current usage has been developed. The individual interruption level settings for each sensor has not been implemented. If needed, they are quite straight forward to implement.
 
-## Device Family
+## Documentation
 
 ![BNO055](./BNO055.jpg)
 
-**BNO055** [datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BNO055-DS000.pdf)
+BNO055 [datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BNO055-DS000.pdf)
 
 You will find this device as ["Inertial Measurement Unit"](https://www.dexterindustries.com/product/imu-sensor/) or ["Adafruit BNO055 Absolute Orientation Sensor"](https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/overview)
 
@@ -27,13 +25,13 @@ Console.WriteLine($"Temperature source: {bno055Sensor.TemperatureSource}, Operat
 Console.WriteLine($"Powermode: {bno055Sensor.PowerMode}");
 ```
 
-You can easilly access the sensor information and settings thru the properties.
+You can easily access the sensor information and settings thru the properties.
 
 ## Calibration
 
-To get accurate measurement, it is better to wait for the Magnetometer to calibrate. As in your phone, when the calibration is needed, it is necessary to move the sensor in the air to help for the qualibration.
+To get accurate measurement, it is better to wait for the Magnetometer to calibrate. As in your phone, when the calibration is needed, it is necessary to move the sensor in the air to help for the calibration.
 
-The following code shows how to check the qualibration:
+The following code shows how to check the calibration:
 
 ```csharp
 Console.WriteLine("Checking the magnetometer calibration, move the sensor up to the calibration will be complete if needed");
@@ -49,18 +47,18 @@ Console.WriteLine();
 Console.WriteLine("Calibration completed");
 ```
 
-Please note that it is not really necessary to check the qualibration of the other senosors and the system. The qualibraiton is done all the time. The important one is the Magnetometer.
+Please note that it is not really necessary to check the calibration of the other sensors and the system. The qualibraiton is done all the time. The important one is the Magnetometer.
 
 ## Accessing sensor data
 
-Simply access the various sensor data thru their properties. Note that it is better to read at once the data and then display them, or manipulate them rather than acccessing the sub element everytime. The reason is because in the first case, you'll do 1 measurement and the data will be consistent, in the second case, you'll do 1 measurement every time you access 1 sub property which means, the data will be inconsistent.
+Simply access the various sensor data thru their properties. Note that it is better to read at once the data and then display them, or manipulate them rather than accessing the sub element every time. The reason is because in the first case, you'll do 1 measurement and the data will be consistent, in the second case, you'll do 1 measurement every time you access 1 sub property which means, the data will be inconsistent.
 
 *Wrong way:*
 
 ```csharp
 // Data will be inconsistent in this case!
 // Do not access the data like this
-Console.WriteLine($"Magnetomer X: {bno055Sensor.Magnetometer.X} Y: {bno055Sensor.Magnetometer.Y} Z: {bno055Sensor.Magnetometer.Z}");
+Console.WriteLine($"Magnetometer X: {bno055Sensor.Magnetometer.X} Y: {bno055Sensor.Magnetometer.Y} Z: {bno055Sensor.Magnetometer.Z}");
 ```
 
 **Good way:**
@@ -69,7 +67,7 @@ Console.WriteLine($"Magnetomer X: {bno055Sensor.Magnetometer.X} Y: {bno055Sensor
 // First read and store the data
 var magneto = bno055Sensor.Magnetometer;
 // Then manipulate the data
-Console.WriteLine($"Magnetomer X: {magneto.X} Y: {magneto.Y} Z: {magneto.Z}");
+Console.WriteLine($"Magnetometer X: {magneto.X} Y: {magneto.Y} Z: {magneto.Z}");
 ```
 
 The sensor offers 9-axis measurement. Here is an example showing all the sensor properties you can access:
@@ -79,7 +77,7 @@ while(!Console.KeyAvailable)
 {
     Console.Clear();
     var magneto = bno055Sensor.Magnetometer;
-    Console.WriteLine($"Magnetomer X: {magneto.X} Y: {magneto.Y} Z: {magneto.Z}");
+    Console.WriteLine($"Magnetometer X: {magneto.X} Y: {magneto.Y} Z: {magneto.Z}");
     var gyro = bno055Sensor.Gyroscope;
     Console.WriteLine($"Gyroscope X: {gyro.X} Y: {gyro.Y} Z: {gyro.Z}");
     var accele = bno055Sensor.Accelerometer;
@@ -101,48 +99,51 @@ while(!Console.KeyAvailable)
 ## Information regarding sensors and units
 
 * *Orientation*:
-    * Absolute Orientation (Euler Vector, 100Hz)
-    * Three axis orientation data based on a 360° sphere
-    * Heading = Vector3.X; Roll = Vector3.Y; Pitch = Vector3.Z
-    * Units availabel are Degrees (default) or Radians, you can change with
+  * Absolute Orientation (Euler Vector, 100Hz)
+  * Three axis orientation data based on a 360° sphere
+  * Heading = Vector3.X; Roll = Vector3.Y; Pitch = Vector3.Z
+  * Units availabel are Degrees (default) or Radians, you can change with
+
     ```csharp
     bno055Sensor.Units = bno055Sensor.Units | Units.EulerAnglesRadians;
     ```
+
 * *Quaternion*
-    * Absolute Orientation (Quaterion, 100Hz)
-    * Four point quaternion output for more accurate data manipulation
-    * Unit is 1 Quaternion = 2^14 returned data
+  * Absolute Orientation (Quaterion, 100Hz)
+  * Four point quaternion output for more accurate data manipulation
+  * Unit is 1 Quaternion = 2^14 returned data
 
 * *Magnetometer*
-    * Magnetic Field Strength Vector (20Hz)
-    * Three axis of magnetic field sensing in micro Tesla (uT)
+  * Magnetic Field Strength Vector (20Hz)
+  * Three axis of magnetic field sensing in micro Tesla (uT)
 
 * *Acceleration*
-    * Acceleration Vector (100Hz)
-    * Three axis of acceleration (gravity + linear motion)
-    * Default unit in m/s^2, can be changed for mg
+  * Acceleration Vector (100Hz)
+  * Three axis of acceleration (gravity + linear motion)
+  * Default unit in m/s^2, can be changed for mg
 
 * *LinearAcceleration*
-    * Linear Acceleration Vector (100Hz)
-    * Three axis of linear acceleration data (acceleration minus gravity)
-    * Default unit in m/s^2, can be changed for mg
+  * Linear Acceleration Vector (100Hz)
+  * Three axis of linear acceleration data (acceleration minus gravity)
+  * Default unit in m/s^2, can be changed for mg
 
 * *Gravity*
-    * Gravity Vector (100Hz)
-    * Three axis of gravitational acceleration (minus any movement)
-    * Default unit in m/s^2, can be changed for mg
+  * Gravity Vector (100Hz)
+  * Three axis of gravitational acceleration (minus any movement)
+  * Default unit in m/s^2, can be changed for mg
 
 * *Gyroscope*
-    * Angular Velocity Vector (100Hz)
-    * Three axis of 'rotation speed'
-    * Default unit is Degree per second but can be changed to Radian per second
+  * Angular Velocity Vector (100Hz)
+  * Three axis of 'rotation speed'
+  * Default unit is Degree per second but can be changed to Radian per second
 
 * *Temperature*
-    * Temperature (1Hz)
-    * Ambient temperature in degrees celsius
-    * Default can be changed for Farenheit
-    * Temperature can be measured thru the Gyroscope or the Accelerometer
-    * Precision seems better with the Gyroscope, so it is set by default. You can change the source like this:
+  * Temperature (1Hz)
+  * Ambient temperature in degrees celsius
+  * Default can be changed for Farenheit
+  * Temperature can be measured thru the Gyroscope or the Accelerometer
+  * Precision seems better with the Gyroscope, so it is set by default. You can change the source like this:
+
     ```csharp
     bno055Sensor.TemperatureSource = TemperatureSource.Accelerometer;
     ```

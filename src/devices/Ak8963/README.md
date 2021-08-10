@@ -2,9 +2,13 @@
 
 The AK8963 is a magnetometer that can be controlled either thru I2C either thru SPI. It is present in other sensors like the [MPU9250](../Mpu9250/README.md). This implementation fully supports the I2C mode and the usage thru the MPU9250. It does not support SPI.
 
+## Documentation
+
+Documentation for the AK8963 can be found [here](https://www.akm.com/akm/en/file/datasheet/AK8963C.pdf)
+
 ## Usage
 
-You can find an example in the [sample](./samples/ak8963.sample.cs) directory. Usage is straight forward including the possibility to have a calibration.
+You can find an example in the [sample](https://github.com/dotnet/iot/tree/main/src/devices/Ak8963/samples/ak8963.sample.cs) directory. Usage is straight forward including the possibility to have a calibration.
 
 ```csharp
 var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Ak8963.Ak8963.DefaultI2cAddress);
@@ -39,7 +43,7 @@ Console.WriteLine($"Mag Y = {ak8963.MagnometerBias.Y}");
 Console.WriteLine($"Mag Z = {ak8963.MagnometerBias.Z}");
 ```
 
-You will find a full example on how to extract raw data without calibration on the [MPU9250 sample](../Mpu9250/samples/Mpu9250.sample.cs).
+You will find a full example on how to extract raw data without calibration on the [MPU9250 sample](../Mpu9250/samples/Program.cs).
 
 If no calibration is performed, you will get a raw data cloud which looks like this:
 
@@ -49,7 +53,7 @@ Running the calibration properly require to **move the sensor in all the possibl
 
 ![raw data](./corrcalib.png)
 
-To create those cloud point graphs, every cloud is a coordinate of X-Y, Y-Z and Z-X. 
+To create those cloud point graphs, every cloud is a coordinate of X-Y, Y-Z and Z-X.
 
 Once the calibration is done, you will be able to read the data with the bias corrected using the ```ReadMagnetometer``` function. You will still be able to read the data without any calibration using the ```ReadMagnetometerWithoutCalibration``` function.
 
@@ -125,8 +129,4 @@ Only I2C is supported in this version.
 * VCC - 3.3V
 * GND - GND
 
-Depending on the version you have, you may have to select I2C over SPI. This is done in different way depending on the board you'll have. 
-
-## Reference
-
-Documentation for the AK8963 can be found here: https://www.akm.com/akm/en/file/datasheet/AK8963C.pdf
+Depending on the version you have, you may have to select I2C over SPI. This is done in different way depending on the board you'll have.

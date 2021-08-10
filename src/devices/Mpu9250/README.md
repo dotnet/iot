@@ -6,6 +6,13 @@ MPU9250 is a 3 axis Gyroscope, 3 axis Accelerometer, 3 axis Magnetometer and Tem
 
 The Magnetometer used is an [AK8963](../Ak8963/README.md). In general, it is managed thru the main MPU9250 and setup as a replica I2C. All operations go thru the MPU9250. In some cases, the AK8963 is exposed and the operations are not going thru the MPU9250 but directly.
 
+## Documentation
+
+* Registers [documentation](http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf)
+* [Product specifications](http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf)
+
+## Usage
+
 General case with AK8963 is not exposed (where you can't find it on the I2C bus at the address 0x0C)
 
 ```csharp
@@ -20,9 +27,7 @@ var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2
 using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus), i2CDeviceAk8963: I2cDevice.Create(new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress)));
 ```
 
-## Usage
-
-You can find an example in the [sample](./samples/Mpu9250.sample.cs) directory. Usage is straightforward including the possibility to have a calibration for all sub sensors.
+You can find an example in the [sample](./samples/Program.cs) directory. Usage is straightforward including the possibility to have a calibration for all sub sensors.
 
 ```csharp
 var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
@@ -91,7 +96,7 @@ Console.WriteLine($"Mag Z = {mpu9250.MagnometerBias.Z}");
 
 See [AK8963](../Ak8963/README.md#Calibration_and_bias) calibration for more information on how Magnetometer calibration is working. Please note that you have a full code sample to read and save data in a file to go deeper into the Magnetometer calibration.
 
-**Note: AK8963 calibration must be performed before other calibrations and before using any other part of the sensors**
+**Note**: AK8963 calibration must be performed before other calibrations and before using any other part of the sensors.
 
 ## Units
 
@@ -125,14 +130,14 @@ The Temperature is a normalized Units.Temperature which can provide Celsius, Kel
 
 The MPU9250 offers a large variety of measurement modes. They can be changed and adjusted thru the properties like:
 
-- ```MagnetometerMeasurementMode``` to adjust the type of measurement for the magnetometer
-- ```MagnetometerOutputBitMode``` to select between 14 and 16 bits precision of the magnetometer
-- ```AccelerometerRange``` to adjust the range of the accelerometer between 2, 4, 8 or 16 G
-- ```AccelerometionScale``` to adjust the frequency of measurement from 5 Hz to 1130 Hz
-- ```GyroscopeRange``` to adjust the range of the gyroscope from 250, 500, 1000 and 2000 degrees per second
-- ```GyroscopeScale``` to adjust the frequency of measurement from 5 Hz to 8800 Hz
-- ```SampleRateDivider``` allows you to reduce the number of samples for the gyroscope and the accelerometer. This feature is only available for some of the bandwidth modes.
-- ```DisableModes``` allows you to disable any of the gyroscope and accelerometer axis
+* ```MagnetometerMeasurementMode``` to adjust the type of measurement for the magnetometer
+* ```MagnetometerOutputBitMode``` to select between 14 and 16 bits precision of the magnetometer
+* ```AccelerometerRange``` to adjust the range of the accelerometer between 2, 4, 8 or 16 G
+* ```AccelerometionScale``` to adjust the frequency of measurement from 5 Hz to 1130 Hz
+* ```GyroscopeRange``` to adjust the range of the gyroscope from 250, 500, 1000 and 2000 degrees per second
+* ```GyroscopeScale``` to adjust the frequency of measurement from 5 Hz to 8800 Hz
+* ```SampleRateDivider``` allows you to reduce the number of samples for the gyroscope and the accelerometer. This feature is only available for some of the bandwidth modes.
+* ```DisableModes``` allows you to disable any of the gyroscope and accelerometer axis
 
 ### Wake on motion
 
@@ -161,6 +166,7 @@ while (!Console.KeyAvailable)
 The Fifo mode allows you to get the data by batch. You can select the mode thru ```FifoModes```, then read the ```FifoCount``` property. You can then read the data thru ```ReadFifo``` Make sure you'll size the ```Span<byte>``` with ```FifoCount``` length.
 
 Data are in the order of the Register from 0x3B to 0x60 so you'll get your data in this order:
+
 * ACCEL_XOUT_H and ACCEL_XOUT_L
 * ACCEL_YOUT_H and ACCEL_YOUT_L
 * ACCEL_ZOUT_H and ACCEL_ZOUT_L
@@ -177,23 +183,18 @@ It is then up to you to transform them into the correct data. You can multiply y
 2 primitive functions allow to read and write any register in any of the replica devices.
 
 * ```I2cWrite(I2cChannel i2cChannel, byte address, byte register, byte data)```
-    * i2cChannel: The replica channel to attached to the I2C device
-    * address: The I2C address of the replica I2C element
-    * register: The register to write to the replica I2C element
-    * data: The byte data to write to the replica I2C element
+  * i2cChannel: The replica channel to attached to the I2C device
+  * address: The I2C address of the replica I2C element
+  * register: The register to write to the replica I2C element
+  * data: The byte data to write to the replica I2C element
 * ```I2cRead(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)```
-    * i2cChannel: The replica channel to attached to the I2C device
-    * address: The I2C address of the replica I2C element
-    * register: The register to write to the replica I2C element
-    * readBytes: The read data
+  * i2cChannel: The replica channel to attached to the I2C device
+  * address: The I2C address of the replica I2C element
+  * register: The register to write to the replica I2C element
+  * readBytes: The read data
 
 ## Circuit
 
 The following fritzing diagram illustrates one way to wire up the MPU9250 with a Raspberry Pi using I2C.
 
-![Raspberry Pi Breadboard diagram](./samples/Mpu9250_bb.png)
-
-## Reference
-
-* Registers: http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf
-* Product specifications: http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf
+![Raspberry Pi Breadboard diagram](./Mpu9250_bb.png)

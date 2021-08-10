@@ -1,18 +1,14 @@
 ﻿# MPR121 - Proximity Capacitive Touch Sensor Controller
 
-## Summary
 The 12-channels I2C proximity capacitive touch sensor controller.
 
-## Device Family
+## Documentation
 
-**MPR121**: https://www.sparkfun.com/datasheets/Components/MPR121.pdf
+* MPR121 [datasheet](https://www.sparkfun.com/datasheets/Components/MPR121.pdf)
 
+## Usage
 
-## Binding Notes
-
-The binding provides different options of device configuration. The device can be configured to update the channel statuses periodically. Also it supports custom configuration of controller registers.
-
-#### Default configuration with manually updating of channel statuses
+### Default configuration with manually updating of channel statuses
 
 ```csharp
 var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
@@ -26,7 +22,7 @@ var status = statuses[Channels.Channel01]
 Console.WriteLine($"The 1st channel is {status}");
 ```
 
-#### Channel statuses auto refresh
+### Channel statuses auto refresh
 
 ```csharp
 var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
@@ -42,7 +38,7 @@ mpr121.ChannelStatusesChanged += (object sender, ChannelStatusesChangedEventArgs
     };
 ```
 
-#### Custom MPR121 registers configuration
+### Custom MPR121 registers configuration
 
 ```csharp
 var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, deviceAddress: Mpr121.DefaultI2cAddress));
@@ -64,3 +60,19 @@ var config = new Mpr121Configuration
 
 var mpr121 = new Mpr121(device: i2cDevice, configuration: config);
 ```
+
+This sample demonstrates how to read channel statuses using auto-refresh configuration.
+
+### Handling the channel statuses changes
+
+```csharp
+mpr121.ChannelStatusesChanged += (object sender, ChannelStatusesChangedEventArgs e) =>
+    {
+        var channelStatuses = e.ChannelStatuses;
+        // do something.
+    };
+```
+
+## Binding Notes
+
+The binding provides different options of device configuration. The device can be configured to update the channel statuses periodically. Also it supports custom configuration of controller registers.
