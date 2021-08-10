@@ -1,6 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Device.Gpio;
+using System.Device.I2c;
+using System.Device.Spi;
+
 namespace Iot.Device.FtCommon
 {
     /// <summary>
@@ -56,5 +61,28 @@ namespace Iot.Device.FtCommon
         /// The device description.
         /// </summary>
         public string Description { get; set; }
+
+        /// <summary>
+        /// Creates I2C bus related to this device
+        /// </summary>
+        /// <returns>I2cBus instance</returns>
+        /// <remarks>You can create either an I2C, either an SPI device.</remarks>
+        public virtual I2cBus CreateI2cBus() => throw new NotImplementedException();
+
+        /// <summary>
+        /// Creates SPI device related to this device
+        /// </summary>
+        /// <param name="settings">The SPI settings</param>
+        /// <returns>a SPI device</returns>
+        /// <remarks>You can create either an I2C, either an SPI device.
+        /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
+        /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
+        public virtual SpiDevice CreateSpiDevice(SpiConnectionSettings settings) => throw new NotImplementedException();
+
+        /// <summary>
+        /// Creates GPIO driver related to this device
+        /// </summary>
+        /// <returns>A GPIO Driver</returns>
+        public virtual GpioDriver CreateGpioDriver() => throw new NotImplementedException();
     }
 }

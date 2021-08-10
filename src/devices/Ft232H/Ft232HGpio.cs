@@ -43,30 +43,32 @@ namespace Iot.Device.Ft232H
                 throw new ArgumentException($"Pin number can only be between 0 and {PinCount - 1}");
             }
 
-            if (DeviceInformation.IsI2cMode && (
+            // Pin 0, 1 and 2 are used by I2C
+            if (DeviceInformation.IsI2cModeEnabled && (
                 (pinNumber >= 0) && (pinNumber <= 2)))
             {
                 throw new ArgumentException($"Can't open pin 0, 1 or 2 while I2C mode is on");
             }
 
-            if (DeviceInformation.IsSpiMode && (
+            // Pin 0, 1 and 2 are used by SPI
+            if (DeviceInformation.IsSpiModeEnabled && (
                 (pinNumber >= 0) && (pinNumber <= 2)))
             {
                 throw new ArgumentException($"Can't open pin 0, 1 or 2 while SPI mode is on");
             }
 
-            if (DeviceInformation._connectionSettings.Where(m => m.ChipSelectLine == pinNumber).Any())
+            if (DeviceInformation.ConnectionSettings.Where(m => m.ChipSelectLine == pinNumber).Any())
             {
                 throw new ArgumentException($"Pin already open or used as Chip Select");
             }
 
-            DeviceInformation._PinOpen[pinNumber] = true;
+            DeviceInformation.PinOpen[pinNumber] = true;
         }
 
         /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
         {
-            DeviceInformation._PinOpen[pinNumber] = false;
+            DeviceInformation.PinOpen[pinNumber] = false;
         }
 
         /// <inheritdoc/>
@@ -78,11 +80,11 @@ namespace Iot.Device.Ft232H
                 {
                     byte mask = 0xFF;
                     mask &= (byte)(~(1 << pinNumber));
-                    DeviceInformation._gpioLowDir &= mask;
+                    DeviceInformation.GpioLowDir &= mask;
                 }
                 else
                 {
-                    DeviceInformation._gpioLowDir |= (byte)(1 << pinNumber);
+                    DeviceInformation.GpioLowDir |= (byte)(1 << pinNumber);
                 }
 
                 DeviceInformation.SetGpioValuesLow();
@@ -93,11 +95,11 @@ namespace Iot.Device.Ft232H
                 {
                     byte mask = 0xFF;
                     mask &= (byte)(~(1 << (pinNumber - 8)));
-                    DeviceInformation._gpioHighDir &= mask;
+                    DeviceInformation.GpioHighDir &= mask;
                 }
                 else
                 {
-                    DeviceInformation._gpioHighDir |= (byte)(1 << (pinNumber - 8));
+                    DeviceInformation.GpioHighDir |= (byte)(1 << (pinNumber - 8));
                 }
 
                 DeviceInformation.SetGpioValuesHigh();
@@ -109,21 +111,16 @@ namespace Iot.Device.Ft232H
         {
             if (pinNumber < 8)
             {
-                return ((DeviceInformation._gpioLowDir >> pinNumber) & 0x01) == 0x01 ? PinMode.Output : PinMode.Input;
+                return ((DeviceInformation.GpioLowDir >> pinNumber) & 0x01) == 0x01 ? PinMode.Output : PinMode.Input;
             }
 
-            return ((DeviceInformation._gpioHighDir >> (pinNumber - 8)) & 0x01) == 0x01 ? PinMode.Output : PinMode.Input;
+            return ((DeviceInformation.GpioHighDir >> (pinNumber - 8)) & 0x01) == 0x01 ? PinMode.Output : PinMode.Input;
         }
 
         /// <inheritdoc/>
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
-            if ((mode == PinMode.InputPullDown) || (mode == PinMode.InputPullUp))
-            {
-                return false;
-            }
-
-            return true;
+            return mode == PinMode.Input || mode == PinMode.Output;
         }
 
         /// <inheritdoc/>
@@ -148,13 +145,13 @@ namespace Iot.Device.Ft232H
             {
                 if (value == PinValue.High)
                 {
-                    DeviceInformation._gpioLowData |= (byte)(1 << pinNumber);
+                    DeviceInformation.GpioLowData |= (byte)(1 << pinNumber);
                 }
                 else
                 {
                     byte mask = 0xFF;
                     mask &= (byte)(~(1 << pinNumber));
-                    DeviceInformation._gpioLowData &= mask;
+                    DeviceInformation.GpioLowData &= mask;
                 }
 
                 DeviceInformation.SetGpioValuesLow();
@@ -163,13 +160,13 @@ namespace Iot.Device.Ft232H
             {
                 if (value == PinValue.High)
                 {
-                    DeviceInformation._gpioHighData |= (byte)(1 << (pinNumber - 8));
+                    DeviceInformation.GpioHighData |= (byte)(1 << (pinNumber - 8));
                 }
                 else
                 {
                     byte mask = 0xFF;
                     mask &= (byte)(~(1 << (pinNumber - 8)));
-                    DeviceInformation._gpioHighData &= mask;
+                    DeviceInformation.GpioHighData &= mask;
                 }
 
                 DeviceInformation.SetGpioValuesHigh();

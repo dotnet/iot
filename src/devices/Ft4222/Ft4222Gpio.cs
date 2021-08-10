@@ -35,8 +35,21 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Create a FT4222 GPIO driver
         /// </summary>
+        /// <param name="device">An FT Device</param>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        internal Ft4222Gpio(Ft4222Device device)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        {
+            InitializeGpio(device);
+        }
+
+        /// <summary>
+        /// Create a FT4222 GPIO driver
+        /// </summary>
         /// <param name="deviceNumber">Number of the device in the device list, default 0</param>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Ft4222Gpio(int deviceNumber = 0)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             // Check device
             var devInfos = FtCommon.FtCommon.GetDevices();
@@ -55,7 +68,12 @@ namespace Iot.Device.Ft4222
                 throw new IOException($"Can't find a device to open GPIO on index {deviceNumber}");
             }
 
-            DeviceInformation = new(devInfo[deviceNumber]);
+            InitializeGpio(new(devInfo[deviceNumber]));
+        }
+
+        private void InitializeGpio(Ft4222Device device)
+        {
+            DeviceInformation = device;
             // Open device
             var ftStatus = FtFunction.FT_OpenEx(DeviceInformation.LocId, FtOpenType.OpenByLocation, out _ftHandle);
 

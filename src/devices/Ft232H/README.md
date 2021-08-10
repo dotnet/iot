@@ -12,6 +12,8 @@ You can find for example this chipset on an [Adafruit board](https://www.adafrui
 
 Once plugged into your Windows, MacOS or Linux machine, the [D2xx drivers](https://ftdichip.com/drivers/d2xx-drivers/) are properly installed. It's all what you need. This implementation uses directly this driver.
 
+This implementation uses the Multi-Protocol Synchronous Serial Engine (MPSSE). The purpose of the MPSSE command processor is to communicate with devices which use synchronous protocols (such as JTAG or SPI) in an efficient manner.
+
 ## Usage
 
 You can get the list of FTDI devices like this:

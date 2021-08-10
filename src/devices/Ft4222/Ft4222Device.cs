@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Device.I2c;
+using System.Device.Spi;
 using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft4222
@@ -12,6 +15,23 @@ namespace Iot.Device.Ft4222
     /// </summary>
     public class Ft4222Device : FtDevice
     {
+        /// <summary>
+        /// Gets all the FT4222 connected
+        /// </summary>
+        /// <returns>A list of FT4222</returns>
+        public static List<Ft4222Device> GetFt4222()
+        {
+            List<Ft4222Device> ft4222s = new List<Ft4222Device>();
+            var devices = FtCommon.FtCommon.GetDevices(
+                new FtDeviceType[] { FtDeviceType.Ft4222HMode0or2With2Interfaces, FtDeviceType.Ft4222HMode1or2With4Interfaces, FtDeviceType.Ft4222HMode3With1Interface, FtDeviceType.Ft4222OtpProgrammerBoard });
+            foreach (var device in devices)
+            {
+                ft4222s.Add(new Ft4222Device(device));
+            }
+
+            return ft4222s;
+        }
+
         /// <summary>
         /// Instantiates a FT4222 Device object.
         /// </summary>
@@ -39,6 +59,22 @@ namespace Iot.Device.Ft4222
         /// Creates an I2C Bus
         /// </summary>
         /// <returns>An I2C bus</returns>
-        public I2cBus CreateI2cBus() => new Ft4222I2cBus(this);
+        public override I2cBus CreateI2cBus() => new Ft4222I2cBus(this);
+
+        /// <summary>
+        /// Creates SPI device related to this device
+        /// </summary>
+        /// <param name="settings">The SPI settings</param>
+        /// <returns>a SPI device</returns>
+        /// <remarks>You can create either an I2C, either an SPI device.
+        /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
+        /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
+        public override SpiDevice CreateSpiDevice(SpiConnectionSettings settings) => new Ft4222Spi(settings);
+
+        /// <summary>
+        /// Creates GPIO driver related to this device
+        /// </summary>
+        /// <returns>A GPIO Driver</returns>
+        public override GpioDriver CreateGpioDriver() => new Ft4222Gpio();
     }
 }

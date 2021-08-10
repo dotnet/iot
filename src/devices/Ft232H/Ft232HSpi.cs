@@ -31,13 +31,13 @@ namespace Iot.Device.Ft232H
                 throw new ArgumentException($"Chip Select line has to be between 3 and {Ft232HDevice.PinCountConst - 1}");
             }
 
-            if (DeviceInformation._connectionSettings.Where(m => m.ChipSelectLine == _settings.ChipSelectLine).Any())
+            if (DeviceInformation.ConnectionSettings.Where(m => m.ChipSelectLine == _settings.ChipSelectLine).Any())
             {
                 throw new ArgumentException("Chip Select already in use");
             }
 
             // Open the device
-            DeviceInformation._connectionSettings.Add(_settings);
+            DeviceInformation.ConnectionSettings.Add(_settings);
             DeviceInformation.SpiInitialize();
         }
 
@@ -76,7 +76,7 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            DeviceInformation._connectionSettings.Remove(_settings);
+            DeviceInformation.ConnectionSettings.Remove(_settings);
             DeviceInformation.SpiDeinitialize();
             base.Dispose(disposing);
         }

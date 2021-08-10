@@ -12,7 +12,7 @@ namespace Iot.Device.FtCommon
     internal class FtFunction
     {
         /// <summary>
-        /// Create Device Information List
+        /// Create Device Information List.
         /// </summary>
         /// <param name="numdevs">number of devices</param>
         /// <returns>The status</returns>
@@ -20,7 +20,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_CreateDeviceInfoList(out uint numdevs);
 
         /// <summary>
-        /// Get Device Information Detail
+        /// Get Device Information Detail.
         /// </summary>
         /// <param name="index">Index of the device</param>
         /// <param name="flags">Flags</param>
@@ -35,7 +35,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_GetDeviceInfoDetail(uint index, out uint flags, out FtDeviceType chiptype, out uint id, out uint locid, in byte serialnumber, in byte description, out IntPtr ftHandle);
 
         /// <summary>
-        /// Open a device
+        /// Open a device.
         /// </summary>
         /// <param name="pvArg1">The device element identifying the device, depends on the flag</param>
         /// <param name="dwFlags">The flag how to open the device</param>
@@ -45,7 +45,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_OpenEx(uint pvArg1, FtOpenType dwFlags, out SafeFtHandle ftHandle);
 
         /// <summary>
-        /// Close the device
+        /// Close the device.
         /// </summary>
         /// <param name="ftHandle">The device handle</param>
         /// <returns>The status</returns>
@@ -53,7 +53,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_Close(IntPtr ftHandle);
 
         /// <summary>
-        /// Sets timeouts
+        /// Sets timeouts.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="dwReadTimeout">Read timeout in milliseconds</param>
@@ -63,7 +63,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_SetTimeouts(SafeFtHandle ftHandle, uint dwReadTimeout, uint dwWriteTimeout);
 
         /// <summary>
-        /// Sets latency timer
+        /// Sets latency timer.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="ucLatency">The latency in milliseconds</param>
@@ -72,7 +72,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_SetLatencyTimer(SafeFtHandle ftHandle, byte ucLatency);
 
         /// <summary>
-        /// Sets flow control
+        /// Sets flow control.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="usFlowControl">The type of flow control</param>
@@ -83,7 +83,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_SetFlowControl(SafeFtHandle ftHandle, ushort usFlowControl, byte uXon, byte uXoff);
 
         /// <summary>
-        /// Set bit more
+        /// Set bit mode.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="ucMask">bit mode mask</param>
@@ -93,7 +93,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_SetBitMode(SafeFtHandle ftHandle, byte ucMask, byte ucMode);
 
         /// <summary>
-        /// Get queued status
+        /// Get queued status, this is used only to read the status of number of bytes to write.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="lpdwAmountInRxQueue">number of available bytes in queue</param>
@@ -102,7 +102,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_GetQueueStatus(SafeFtHandle ftHandle, ref uint lpdwAmountInRxQueue);
 
         /// <summary>
-        /// Read
+        /// Read.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="lpBuffer">The buffer to place the bytes in</param>
@@ -113,7 +113,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_Read(SafeFtHandle ftHandle, in byte lpBuffer, uint dwBytesToRead, ref uint lpdwBytesReturned);
 
         /// <summary>
-        /// Write
+        /// Write.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="lpBuffer">The buffer containing the bytes to send</param>
@@ -124,7 +124,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_Write(SafeFtHandle ftHandle, in byte lpBuffer, uint dwBytesToWrite, ref uint lpdwBytesWritten);
 
         /// <summary>
-        /// Sets chars for interruption
+        /// Sets chars for interruption.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="uEventCh">0 to ignore the event, 1 use it</param>
@@ -136,7 +136,7 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_SetChars(SafeFtHandle ftHandle, byte uEventCh, byte uEventChEn, byte uErrorCh, byte uErrorChEn);
 
         /// <summary>
-        /// Sets the USB transfer parameters
+        /// Sets the USB transfer parameters.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
         /// <param name="dwInTransferSize">Transfer size of the buffer to read</param>

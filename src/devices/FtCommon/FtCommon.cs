@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -61,6 +62,23 @@ namespace Iot.Device.FtCommon
             }
 
             return devInfos;
+        }
+
+        /// <summary>
+        /// Get specific list of devices
+        /// </summary>
+        /// <param name="ftDeviceTypes">The types of devices</param>
+        /// <returns></returns>
+        internal static List<FtDevice> GetDevices(FtDeviceType[] ftDeviceTypes)
+        {
+            List<FtDevice> ftdevices = new List<FtDevice>();
+            var devices = GetDevices();
+            foreach (var deviceType in ftDeviceTypes)
+            {
+                ftdevices.AddRange(devices.Where(m => m.Type == deviceType));
+            }
+
+            return ftdevices;
         }
 
         private static int FindFirstZero(ReadOnlySpan<byte> span)
