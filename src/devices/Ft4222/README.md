@@ -8,6 +8,8 @@ This device supports multiple SPI as well as GPIO and I2C. It is a [FT4222](http
 
 You can find boards implementing this chip like on [bitWizard](http://bitwizard.nl/shop/FT4222h-Breakout-Board?search=ft4222). This is the board which has been used to develop this project. The pins are described [here](http://bitwizard.nl/wiki/FT4222h). Note that for I2C there is no pull up implemented.
 
+[FTDI](https://www.ftdichip.com/) has multiple chip that may look the same. You will find the implementation of 2 of those chip, FT4222 and [FT232H](../Ft232H/README.md).
+
 ## Windows Requirements
 
 In order to have this FTDI board working and getting support for SPI, GPIO and I2C, you need to install in a path the ```LibFT4222.dll``` provided by FTDI Chip. You can find the latest version [here](https://www.ftdichip.com/Products/ICs/FT4222H.html).

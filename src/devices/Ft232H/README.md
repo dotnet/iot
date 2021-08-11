@@ -8,6 +8,8 @@ The product datasheet can be found [here](https://www.ftdichip.com/Support/Docum
 
 You can find for example this chipset on an [Adafruit board](https://www.adafruit.com/product/2264).
 
+[FTDI](https://www.ftdichip.com/) has multiple chip that may look the same. You will find the implementation of 2 of those chip, [FT4222](../Ft4222/README.md) and FT232H.
+
 ## Requirements
 
 Once plugged into your Windows, MacOS or Linux machine, the [D2xx drivers](https://ftdichip.com/drivers/d2xx-drivers/) are properly installed. It's all what you need. This implementation uses directly this driver.

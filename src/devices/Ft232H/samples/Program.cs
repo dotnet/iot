@@ -32,15 +32,16 @@ if (devices.Count == 0)
     return;
 }
 
+Ft232HDevice ft232h = Ft232HDevice.GetFt232H()[0];
 // Un comment the test you want to run
-// TestSpi(devices);
-TestGpio(devices);
-TestI2c(devices);
+// TestSpi(device);
+TestGpio(ft232h);
+TestI2c(ft232h);
 
-void TestSpi(List<FtDevice> devices)
+void TestSpi(Ft232HDevice ft232h)
 {
     SpiConnectionSettings settings = new(0, 3) { ClockFrequency = 1_000_000, DataBitLength = 8, ChipSelectLineActiveState = PinValue.Low };
-    var spi = new Ft232HDevice(devices[0]).CreateSpiDevice(settings);
+    var spi = ft232h.CreateSpiDevice(settings);
     Span<byte> toSend = stackalloc byte[10] { 0x12, 0x42, 0xFF, 0x00, 0x23, 0x98, 0x87, 0x65, 0x21, 0x34 };
     Span<byte> toRead = stackalloc byte[10];
     spi.TransferFullDuplex(toSend, toRead);
@@ -52,9 +53,8 @@ void TestSpi(List<FtDevice> devices)
     Console.WriteLine();
 }
 
-void TestGpio(List<FtDevice> devices)
+void TestGpio(Ft232HDevice ft232h)
 {
-    var ft232h = new Ft232HDevice(devices[0]);
     // Should transform it into 5
     // It's possible to use this function to convert the board names you find in various
     // implementation into the pin number
@@ -86,12 +86,12 @@ void TestGpio(List<FtDevice> devices)
     }
 }
 
-void TestI2c(List<FtDevice> devices)
+void TestI2c(Ft232HDevice ft232h)
 {
     // set this to the current sea level pressure in the area for correct altitude readings
     Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
     Length stationHeight = Length.FromMeters(640); // Elevation of the sensor
-    var ftI2cBus = new Ft232HDevice(devices[0]).CreateI2cBus();
+    var ftI2cBus = ft232h.CreateI2cBus();
     var i2cDevice = ftI2cBus.CreateDevice(Bmp280.SecondaryI2cAddress);
     using var i2CBmp280 = new Bmp280(i2cDevice);
 

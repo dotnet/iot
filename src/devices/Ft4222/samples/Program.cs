@@ -41,7 +41,8 @@ if (devices.Count == 0)
     return;
 }
 
-Ft4222Device firstDevice = new(devices[0]);
+// Assuming the device 0 is the first FT4222
+Ft4222Device firstDevice = Ft4222Device.GetFt4222()[0];
 
 var (chip, dll) = Ft4222Common.GetVersions();
 Console.WriteLine($"Chip version: {chip}");

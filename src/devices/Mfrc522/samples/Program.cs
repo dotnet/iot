@@ -62,7 +62,7 @@ switch (connectionChoice.KeyChar)
         try
         {
             int i2cAddress = Convert.ToInt32(i2cAddChoice);
-            I2cDevice i2c = hardchoice.KeyChar == '1' ? I2cDevice.Create(new I2cConnectionSettings(1, i2cAddress)) : new Ft4222Device(FtCommon.GetDevices()[0]).CreateI2cBus().CreateDevice(i2cAddress);
+            I2cDevice i2c = hardchoice.KeyChar == '1' ? I2cDevice.Create(new I2cConnectionSettings(1, i2cAddress)) : Ft4222Device.GetFt4222()[0].CreateI2cBus().CreateDevice(i2cAddress);
             mfrc522 = new(i2c, pinReset, gpioController, false);
         }
         catch (Exception)
