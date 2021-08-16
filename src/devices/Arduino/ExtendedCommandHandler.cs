@@ -36,6 +36,19 @@ namespace Iot.Device.Arduino
             get;
         }
 
+        /// <summary>
+        /// Returns true if this command handler is registered.
+        /// This might need to be checked in Dispose, to make sure an uninitialized component doesn't attempt
+        /// to send a command.
+        /// </summary>
+        protected bool IsRegistered
+        {
+            get
+            {
+                return _board != null;
+            }
+        }
+
         public ArduinoBoard Board
         {
             get
