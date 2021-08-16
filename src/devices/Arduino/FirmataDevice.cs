@@ -27,7 +27,7 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
-        private static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
+        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
         private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
 
         private byte _firmwareVersionMajor;
@@ -62,6 +62,8 @@ namespace Iot.Device.Arduino
         public event AnalogPinValueUpdated? AnalogPinValueUpdated;
 
         public event Action<string, Exception?>? OnError;
+
+        public event Action<ReplyType, byte[]>? OnSysexReply;
 
         public FirmataDevice()
         {
@@ -171,6 +173,7 @@ namespace Iot.Device.Arduino
                     if (c == '\n')
                     {
                         OnError?.Invoke(_lastRawLine.ToString().Trim(), null);
+                        OnSysexReply?.Invoke(ReplyType.AsciiData, Encoding.Unicode.GetBytes(_lastRawLine.ToString()));
                         _lastRawLine.Clear();
                     }
 
@@ -398,19 +401,25 @@ namespace Iot.Device.Arduino
                                     }
 
                                     int resolution = raw_data[idx++];
-                                    switch ((SupportedMode)mode)
+                                    SupportedMode? sm = ArduinoBoard.KnownModes.FirstOrDefault(x => x.Value == mode);
+                                    if (sm == SupportedMode.AnalogInput)
                                     {
-                                        default:
-                                            currentPin.PinModes.Add((SupportedMode)mode);
-                                            break;
-                                        case SupportedMode.AnalogInput:
-                                            currentPin.PinModes.Add(SupportedMode.AnalogInput);
-                                            currentPin.AnalogInputResolutionBits = resolution;
-                                            break;
-                                        case SupportedMode.Pwm:
-                                            currentPin.PinModes.Add(SupportedMode.Pwm);
-                                            currentPin.PwmResolutionBits = resolution;
-                                            break;
+                                        currentPin.PinModes.Add(SupportedMode.AnalogInput);
+                                        currentPin.AnalogInputResolutionBits = resolution;
+                                    }
+                                    else if (sm == SupportedMode.Pwm)
+                                    {
+                                        currentPin.PinModes.Add(SupportedMode.Pwm);
+                                        currentPin.PwmResolutionBits = resolution;
+                                    }
+                                    else if (sm == null)
+                                    {
+                                        sm = new SupportedMode((byte)mode, $"Unknown mode {mode}");
+                                        currentPin.PinModes.Add(sm);
+                                    }
+                                    else
+                                    {
+                                        currentPin.PinModes.Add(sm);
                                     }
                                 }
 
@@ -459,70 +468,12 @@ namespace Iot.Device.Arduino
                             _dataReceived.Set();
                             break;
 
-                        case FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST:
-                        case FirmataSysexCommand.PIN_STATE_RESPONSE:
+                        default:
+                            // we pass the data forward as-is for any other type of sysex command
                             _lastCommandError = CommandError.None;
                             _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
+                            OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             _dataReceived.Set();
-                            break;
-
-                        case FirmataSysexCommand.SCHEDULER_DATA:
-                            {
-                                if (raw_data.Length == 4 && raw_data[1] == (byte)ExecutorCommand.Ack)
-                                {
-                                    // Just an ack for a programming command.
-                                    _lastCommandError = CommandError.None;
-                                    _dataReceived.Set();
-                                    Thread.Yield();
-                                    return;
-                                }
-
-                                if (raw_data.Length == 4 && raw_data[1] == (byte)ExecutorCommand.Nack)
-                                {
-                                    // This is a Nack
-                                    _lastCommandError = (CommandError)raw_data[3];
-                                    _dataReceived.Set();
-                                    Thread.Yield();
-                                    return;
-                                }
-
-                                // Data from real-time methods
-                                if (raw_data.Length < 7)
-                                {
-                                    _lastCommandError = CommandError.InvalidArguments;
-                                    OnError?.Invoke("Code execution returned invalid result or state", null);
-                                    break;
-                                }
-
-                                MethodState state = (MethodState)raw_data[3];
-                                int numArgs = raw_data[4];
-
-                                if (state == MethodState.Aborted)
-                                {
-                                    int[] results = new int[numArgs];
-                                    // The result set is a set of tokens to build up the exception message
-                                    for (int i = 0; i < numArgs; i++)
-                                    {
-                                        results[i] = DecodeInt32(raw_data, i * 5 + 5);
-                                    }
-
-                                    _lastCommandError = CommandError.Aborted;
-                                    OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], results);
-                                }
-                                else
-                                {
-                                    _lastCommandError = CommandError.None;
-                                    // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
-                                    var result = Decode7BitBytes(raw_data.Skip(5).ToArray(), numArgs);
-                                    OnSchedulerReply?.Invoke(raw_data[1] | (raw_data[2] << 7), (MethodState)raw_data[3], result);
-                                }
-
-                                break;
-                            }
-
-                        default:
-
-                            // we pass the data forward as-is for any other type of sysex command
                             break;
                     }
 
@@ -537,18 +488,6 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <param name="sequence">The command sequence to send</param>
         public void SendCommand(FirmataCommandSequence sequence)
-        {
-            SendCommand(sequence, DefaultReplyTimeout);
-        }
-
-        /// <summary>
-        /// Send a command that does not generate a reply.
-        /// This method must only be used for commands that do not generate a reply. It must not be used if only the caller is not
-        /// interested in the answer.
-        /// </summary>
-        /// <param name="sequence">The command sequence to send</param>
-        /// <param name="timeout">A non-default timeout</param>
-        public void SendCommand(FirmataCommandSequence sequence, TimeSpan timeout)
         {
             if (!sequence.Validate())
             {
@@ -578,7 +517,7 @@ namespace Iot.Device.Arduino
         /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence)
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence)
         {
             return SendCommandAndWait(sequence, DefaultReplyTimeout, out _);
         }
@@ -591,7 +530,7 @@ namespace Iot.Device.Arduino
         /// <param name="commandError">Error code, if the command failed</param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, out CommandError commandError)
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
         {
             if (!sequence.Validate())
             {
@@ -619,8 +558,7 @@ namespace Iot.Device.Arduino
                     throw new TimeoutException("Timeout waiting for command answer");
                 }
 
-                commandError = _lastCommandError;
-                return new List<byte>(_lastResponse);
+                return _lastResponse.ToArray();
             }
         }
 
@@ -749,6 +687,14 @@ namespace Iot.Device.Arduino
                     {
                         // Attempt to send a SYSTEM_RESET command
                         _firmataStream.WriteByte(0xFF);
+                        Thread.Sleep(20);
+                        continue;
+                    }
+
+                    if (_actualFirmataProtocolMajorVersion == 0)
+                    {
+                        // Something went wrong
+                        Thread.Sleep(20);
                         continue;
                     }
 
@@ -855,7 +801,7 @@ namespace Iot.Device.Arduino
             throw new TimeoutException("Timeout waiting for answer. Aborting. ", lastException);
         }
 
-        internal void SetPinMode(int pin, SupportedMode firmataMode)
+        internal void SetPinMode(int pin, byte firmataMode)
         {
             FirmataCommandSequence s = new FirmataCommandSequence(FirmataCommand.SET_PIN_MODE);
             s.WriteByte((byte)pin);
@@ -870,10 +816,10 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            throw new TimeoutException($"Unable to set Pin mode to {firmataMode}. Looks like a communication problem.");
+            throw new TimeoutException($"Unable to set Pin mode to {firmataMode}.");
         }
 
-        internal SupportedMode GetPinMode(int pinNumber)
+        internal byte GetPinMode(int pinNumber)
         {
             FirmataCommandSequence getPinModeSequence = new FirmataCommandSequence(FirmataCommand.START_SYSEX);
             getPinModeSequence.WriteByte((byte)FirmataSysexCommand.PIN_STATE_QUERY);
@@ -885,7 +831,7 @@ namespace Iot.Device.Arduino
                 var response = SendCommandAndWait(getPinModeSequence);
 
                 // The mode is byte 4
-                if (response.Count < 4)
+                if (response.Length < 4)
                 {
                     throw new InvalidOperationException("Not enough data in reply");
                 }
@@ -896,8 +842,7 @@ namespace Iot.Device.Arduino
                         "The reply didn't match the query (another port was indicated)");
                 }
 
-                SupportedMode mode = (SupportedMode)(response[2]);
-                return mode;
+                return (response[2]);
             });
         }
 
@@ -1007,7 +952,7 @@ namespace Iot.Device.Arduino
                 // Bytes 1 & 2: Slave address (the MSB is always 0, since we're only supporting 7-bit addresses)
                 // Bytes 3 & 4: Register. Often 0, and probably not needed
                 // Anything after that: reply data, with 2 bytes for each byte in the data stream
-                int bytesReceived = ReassembleByteString(response, 5, response.Count - 5, replyData);
+                int bytesReceived = ReassembleByteString(response, 5, response.Length - 5, replyData);
 
                 if (replyData.Length != bytesReceived)
                 {
@@ -1166,38 +1111,6 @@ namespace Iot.Device.Arduino
             spiConfigSequence.WriteByte((byte)(connectionSettings.ChipSelectLine));
             spiConfigSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             SendCommand(spiConfigSequence);
-        }
-
-        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
-        {
-            temperature = default;
-            humidity = default;
-
-            FirmataCommandSequence dhtCommandSequence = new();
-            dhtCommandSequence.WriteByte((byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST);
-            dhtCommandSequence.WriteByte((byte)dhtType);
-            dhtCommandSequence.WriteByte((byte)pinNumber);
-            dhtCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            var reply = SendCommandAndWait(dhtCommandSequence);
-
-            // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
-            if (reply.Count < 7)
-            {
-                return false;
-            }
-
-            if (reply[0] != (byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST && reply[1] != 0)
-            {
-                return false;
-            }
-
-            int t = reply[3] | reply[4] << 7;
-            int h = reply[5] | reply[6] << 7;
-
-            temperature = Temperature.FromDegreesCelsius(t / 10.0);
-            humidity = RelativeHumidity.FromPercent(h / 10.0);
-
-            return true;
         }
 
         internal uint GetAnalogRawValue(int pinNumber)

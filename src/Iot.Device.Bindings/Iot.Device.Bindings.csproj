@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net5.0;netcoreapp2.1</TargetFrameworks>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,12 +14,14 @@
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
   
-  <!-- The following ItemGroup is in charge of getting the source files we will compile on each TFM -->
   <ItemGroup>
     <!-- Excluding samples and test projects when getting source files -->
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/samples/**/*.csproj" />
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/tests/**/*.csproj" />
+  </ItemGroup>
 
+  <!-- The following ItemGroup is in charge of getting the source files we will compile on each TFM -->
+  <ItemGroup>
     <ProjectReference Include="$(DeviceRoot)**/*.csproj" Exclude="@(_ExcludeProjectReferences)" ReferenceOutputAssembly="false" BuildReference="false" />
   </ItemGroup>
 
@@ -27,12 +29,12 @@
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="$(SixLaborsImageSharpPackageVersion)" />
   </ItemGroup>
-
+  <ItemGroup>
+    <EmbeddedResource Include="../devices/CharacterLcd/BigFontMap.txt" />
+  </ItemGroup>
   <!-- This target will call into each device binding project to get out the source files for the framework we are building
   and then it will add the results to the Compile item group. -->
   <Target Name="GetCompileItemsFromProjects"

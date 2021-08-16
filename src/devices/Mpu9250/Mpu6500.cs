@@ -845,13 +845,13 @@ namespace Iot.Device.Imu
         #region I2C
 
         /// <summary>
-        /// Write data on any of the I2C slave attached to the MPU9250
+        /// Write data on any of the I2C replica attached to the MPU9250
         /// </summary>
-        /// <param name="i2cChannel">The slave channel to attached to the I2C device</param>
-        /// <param name="address">The I2C address of the slave I2C element</param>
-        /// <param name="register">The register to write to the slave I2C element</param>
-        /// <param name="data">The byte data to write to the slave I2C element</param>
-        public void WriteByteToSlaveDevice(I2cChannel i2cChannel, byte address, byte register, byte data)
+        /// <param name="i2cChannel">The replica channel to attached to the I2C device</param>
+        /// <param name="address">The I2C address of the replica I2C element</param>
+        /// <param name="register">The register to write to the replica I2C element</param>
+        /// <param name="data">The byte data to write to the replica I2C element</param>
+        public void WriteByteToReplicaDevice(I2cChannel i2cChannel, byte address, byte register, byte data)
         {
             // I2C_SLVx_ADDR += 3 * i2cChannel
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);
@@ -866,7 +866,7 @@ namespace Iot.Device.Imu
             _i2cDevice.Write(dataout);
             // I2C_SLVx_D0 =  I2C_SLV0_DO + i2cChannel
             // Except Channel4
-            byte channelData = i2cChannel != I2cChannel.Slave4 ? (byte)((byte)Register.I2C_SLV0_DO + (byte)i2cChannel) : (byte)Register.I2C_SLV4_DO;
+            byte channelData = i2cChannel != I2cChannel.Replica4 ? (byte)((byte)Register.I2C_SLV0_DO + (byte)i2cChannel) : (byte)Register.I2C_SLV4_DO;
             dataout[0] = channelData;
             dataout[1] = data;
             _i2cDevice.Write(dataout);
@@ -877,13 +877,13 @@ namespace Iot.Device.Imu
         }
 
         /// <summary>
-        /// Read data from any of the I2C slave attached to the MPU9250
+        /// Read data from any of the I2C replica attached to the MPU9250
         /// </summary>
-        /// <param name="i2cChannel">The slave channel to attached to the I2C device</param>
-        /// <param name="address">The I2C address of the slave I2C element</param>
-        /// <param name="register">The register to read from the slave I2C element</param>
+        /// <param name="i2cChannel">The replica channel to attached to the I2C device</param>
+        /// <param name="address">The I2C address of the replica I2C element</param>
+        /// <param name="register">The register to read from the replica I2C element</param>
         /// <param name="readBytes">The read data</param>
-        public void ReadByteFromSlaveDevice(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)
+        public void ReadByteFromReplicaDevice(I2cChannel i2cChannel, byte address, byte register, Span<byte> readBytes)
         {
             if (readBytes.Length > 24)
             {

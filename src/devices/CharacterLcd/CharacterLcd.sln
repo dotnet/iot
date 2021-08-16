@@ -9,6 +9,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd.Samples", "sam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd.Tests", "tests\CharacterLcd.Tests.csproj", "{140CDE6E-B425-4693-98CF-A6387225BACC}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino", "..\Arduino\Arduino.csproj", "{D8E49CAD-FFF1-45D5-AE91-4103620635E7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,18 @@ Global
 		{140CDE6E-B425-4693-98CF-A6387225BACC}.Release|x64.Build.0 = Release|Any CPU
 		{140CDE6E-B425-4693-98CF-A6387225BACC}.Release|x86.ActiveCfg = Release|Any CPU
 		{140CDE6E-B425-4693-98CF-A6387225BACC}.Release|x86.Build.0 = Release|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Debug|x64.Build.0 = Debug|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Debug|x86.Build.0 = Debug|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Release|x64.ActiveCfg = Release|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Release|x64.Build.0 = Release|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Release|x86.ActiveCfg = Release|Any CPU
+		{D8E49CAD-FFF1-45D5-AE91-4103620635E7}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

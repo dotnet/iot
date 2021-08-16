@@ -9,6 +9,7 @@
     <ProjectReference Include="../../Mcp23xxx/Mcp23xxx.csproj" />
     <ProjectReference Include="../../Pcx857x/Pcx857x.csproj" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\..\Arduino\Arduino.csproj" />
     <ProjectReference Include="..\CharacterLcd.csproj" />
   </ItemGroup>
 

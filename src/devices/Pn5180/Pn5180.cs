@@ -410,7 +410,7 @@ namespace Iot.Device.Pn5180
         {
             // Check if we have a Mifare Card authentication request
             // Only valid for Type A card so with a target number equal to 0
-            if ((targetNumber == 0) && ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB)))
+            if (((targetNumber == 0) && ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB))) && (dataFromCard.Length == 0))
             {
                 var ret = MifareAuthenticate(dataToSend.Slice(2, 6).ToArray(), (MifareCardCommand)dataToSend[0], dataToSend[1], dataToSend.Slice(8).ToArray());
                 return ret ? 0 : -1;
@@ -953,7 +953,7 @@ namespace Iot.Device.Pn5180
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type A card has been detected</returns>
         public bool ListenToCardIso14443TypeA(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
         [NotNullWhen(true)]
 #endif
         out Data106kbpsTypeA? card, int timeoutPollingMilliseconds)
@@ -1058,7 +1058,7 @@ namespace Iot.Device.Pn5180
                             null);
                         return true;
                     }
-                    else if (((atqa[0] & 0b1100_0000) == 0b01000_0000) && (i == 1))
+                    else if (((atqa[0] & 0b1100_0000) == 0b0100_0000) && (i == 1))
                     {
                         // if bit 7 is 1, then it's a 7 byte
                         uidSak.Slice(2, 4).CopyTo(uid.Slice(numberOfUid));
@@ -1112,7 +1112,7 @@ namespace Iot.Device.Pn5180
         /// <param name="timeoutPollingMilliseconds">The time to poll the card in milliseconds. Card detection will stop once the detection time will be over</param>
         /// <returns>True if a 14443 Type B card has been detected</returns>
         public bool ListenToCardIso14443TypeB(TransmitterRadioFrequencyConfiguration transmitter, ReceiverRadioFrequencyConfiguration receiver,
-#if !NETCOREAPP2_1
+#if NET5_0_OR_GREATER
         [NotNullWhen(true)]
 #endif
         out Data106kbpsTypeB? card, int timeoutPollingMilliseconds)
@@ -1466,9 +1466,9 @@ namespace Iot.Device.Pn5180
 
         private void SpiWrite(ReadOnlySpan<byte> toSend)
         {
-            // Both master and slave devices must operate with the same timing.The master device
+            // Both primary and secondary devices must operate with the same timing.The primary device
             // always places data on the SDO line a half cycle before the clock edge SCK, in order for
-            // the slave device to latch the data.
+            // the secondary device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:
             // 1.Assert NSS to Low
@@ -1504,9 +1504,9 @@ namespace Iot.Device.Pn5180
 
         private void SpiRead(Span<byte> toRead)
         {
-            // Both master and slave devices must operate with the same timing.The master device
+            // Both primary and secondary devices must operate with the same timing.The primary device
             // always places data on the SDI line a half cycle before the clock edge SCK, in order for
-            // the slave device to latch the data.
+            // the secondary device to latch the data.
             // The BUSY line is used to indicate that the system is BUSY and cannot receive any data
             // from a host.Recommendation for the BUSY line handling by the host:
             // 1.Assert NSS to Low

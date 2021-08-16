@@ -69,5 +69,25 @@
         /// The sensor reports electric current
         /// </summary>
         Current,
+
+        /// <summary>
+        /// The sensor delivers a data amount value (i.e free space on a drive)
+        /// </summary>
+        Data,
+
+        /// <summary>
+        /// The sensor reports data throughput (Data per Time)
+        /// </summary>
+        Throughput,
+
+        /// <summary>
+        /// The sensor reports a duration
+        /// </summary>
+        TimeSpan,
+
+        /// <summary>
+        /// The sensor reports an integer
+        /// </summary>
+        RawValue,
     }
 }

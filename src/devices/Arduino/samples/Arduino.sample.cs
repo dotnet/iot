@@ -152,6 +152,7 @@ namespace Arduino.Samples
             Console.WriteLine(" 0 Detect all devices on the I2C bus");
             Console.WriteLine(" H Read DHT11 Humidity sensor on GPIO 3 (experimental)");
             Console.WriteLine(" B Run I2C tests with a BME680");
+            Console.WriteLine(" F Measure frequency on a GPIO Pin (experimental)");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
@@ -196,12 +197,56 @@ namespace Arduino.Samples
                 case 'B':
                     TestI2cBme680(board);
                     break;
+                case 'f':
+                case 'F':
+                    TestFrequency(board);
+                    break;
                 case 'x':
                 case 'X':
                     return false;
             }
 
             return true;
+        }
+
+        private static void TestFrequency(ArduinoBoard board)
+        {
+            Console.Write("Which pin number to use? ");
+            string? input = Console.ReadLine();
+            if (input == null)
+            {
+                return;
+            }
+
+            if (!int.TryParse(input, out int pin))
+            {
+                return;
+            }
+
+            if (!board.TryGetCommandHandler(out FrequencySensor sensor))
+            {
+                Console.WriteLine("Frequency handling software module missing");
+                return;
+            }
+
+            try
+            {
+                sensor.EnableFrequencyReporting(pin, FrequencyMode.Rising, 500);
+
+                while (!Console.KeyAvailable)
+                {
+                    var f = sensor.GetMeasuredFrequency();
+                    Console.Write($"\rFrequency at GPIO{pin}: {f}                       ");
+                    Thread.Sleep(100);
+                }
+            }
+            finally
+            {
+                sensor.DisableFrequencyReporting(pin);
+            }
+
+            Console.ReadKey(true);
+            Console.WriteLine();
         }
 
         private static void TestPwm(ArduinoBoard board)
@@ -565,10 +610,15 @@ namespace Arduino.Samples
         public static void TestDht(ArduinoBoard board)
         {
             Console.WriteLine("Reading DHT11. Any key to quit.");
+            if (!board.TryGetCommandHandler(out DhtSensor handler))
+            {
+                Console.WriteLine("DHT Command handler not available.");
+                return;
+            }
 
             while (!Console.KeyAvailable)
             {
-                if (board.TryReadDht(3, 11, out var temperature, out var humidity))
+                if (handler.TryReadDht(3, 11, out var temperature, out var humidity))
                 {
                     Console.WriteLine($"Temperature: {temperature}, Humidity {humidity}");
                 }

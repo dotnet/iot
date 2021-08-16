@@ -2,7 +2,15 @@
 
 Software PWM is necessary when you cannot use hardware PWM. PWM is used for example to control and pilot servo motors.
 
-## How to Use
+## Board
+
+## Schematic
+
+This example shows how to use the software PWM with a Led. Simply connect the Led with a 100 ohms resistor on GPIO 17 (physical pin 11).
+
+![Board schematics](./pwmled.png)
+
+## Usage
 
 You can then create a software PWM like this:
 
@@ -49,8 +57,34 @@ This example will stop the PWM previously open on GPIO 17.
 softwarePwmChannel.Stop();
 ```
 
+### Full example
+
+```csharp
+using System;
+using System.Device.Pwm.Drivers;
+using System.Threading;
+
+class Program
+{
+
+    static void Main(string[] args)
+    {
+        Console.WriteLine("Hello PWM!");
+
+        using (var pwmChannel = new SoftwarePwmChannel(17, 200, 0))
+        {
+            pwmChannel.Start();
+            for (double fill = 0.0; fill <= 1.0; fill += 0.01)
+            {
+                pwmChannel.DutyCycle = fill;
+                Thread.Sleep(500);
+            }
+        }
+    }
+}
+
+```
+
 ## Performance Considerations
 
-The high precision software PWM is resource intensive and is using a high priority thread. You may have resources issues if you are using multiple high precision software PWM. Always prefer hardware PWM to software PWM when you can have access. 
-
-
+The high precision software PWM is resource intensive and is using a high priority thread. You may have CPU performance issues if you are using multiple high precision software PWM outputs. Always prefer hardware PWM to software PWM when possible.

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
@@ -19,6 +19,7 @@
     <Compile Include="LcdInterface.I2c.cs" />
     <Compile Include="LcdInterface.I2c4Bit.cs" />
     <Compile Include="LcdRgb.cs" />
+    <Compile Include="LcdValueUnitDisplay.cs" />
     <Compile Include="LineWrapMode.cs" />
     <Compile Include="Registers.cs" />
   </ItemGroup>
@@ -27,6 +28,9 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BigFontMap.txt" />
   </ItemGroup>
 
 </Project>

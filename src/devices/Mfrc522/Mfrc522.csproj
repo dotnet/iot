@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
@@ -13,6 +13,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Card\CardRfid.csproj" />
     <ProjectReference Include="..\Card\Mifare\Mifare.csproj" />
+    <ProjectReference Include="..\Card\Ndef\Ndef.csproj" />
+    <ProjectReference Include="..\Card\Ultralight\Ultralight.csproj" />
     <Compile Include="*.cs" />
     <Compile Include="RegisterElement\*.cs" />
     <None Include="README.md" />

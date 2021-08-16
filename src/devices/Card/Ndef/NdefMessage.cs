@@ -19,6 +19,70 @@ namespace Iot.Device.Ndef
         public const byte GeneralPurposeByteNdefVersion = 0b0100_0000;
 
         /// <summary>
+        /// From a raw message, find the start and stop of an NDEF message
+        /// </summary>
+        /// <param name="toExtract">The byte array where the message is</param>
+        /// <returns>The start and end position</returns>
+        public static (int Start, int Size) GetStartSizeNdef(Span<byte> toExtract)
+        {
+            int idx = 0;
+            // Check if we have 0x03 so it's a possible, NDEF Entry
+            while (idx < toExtract.Length)
+            {
+                if (toExtract[idx++] == 0x03)
+                {
+                    break;
+                }
+            }
+
+            if (idx == toExtract.Length)
+            {
+                return (-1, -1);
+            }
+
+            // Now check the size. If 0xFF then encoding is on 3 bytes otherwise just one
+            int size = toExtract[idx++];
+            if (idx == toExtract.Length)
+            {
+                return (idx, -1);
+            }
+
+            if (size == 0xFF)
+            {
+                if (idx + 2 >= toExtract.Length)
+                {
+                    return (idx, -1);
+                }
+
+                size = (toExtract[idx++] << 8) + toExtract[idx++];
+            }
+
+            return (idx, size);
+        }
+
+        /// <summary>
+        /// Extract an NDEF message from a raw byte array
+        /// </summary>
+        /// <param name="toExtract">The byte array where the message is</param>
+        /// <returns>A byte array containing the message itself</returns>
+        public static byte[]? ExtractMessage(Span<byte> toExtract)
+        {
+            var (idx, size) = GetStartSizeNdef(toExtract);
+            // Finally check that the end terminator TLV is 0xFE
+            bool isRealEnd = toExtract[idx + size] == 0xFE;
+            if (!isRealEnd)
+            {
+                return new byte[0];
+            }
+
+            // Now we have the real size and we can extract the real buffer
+            byte[] toReturn = new byte[size];
+            toExtract.Slice(idx, size).CopyTo(toReturn);
+
+            return toReturn;
+        }
+
+        /// <summary>
         /// List of all NDEF Records
         /// </summary>
         public List<NdefRecord> Records { get; set; } = new List<NdefRecord>();

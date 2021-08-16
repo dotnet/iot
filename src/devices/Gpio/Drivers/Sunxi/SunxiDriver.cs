@@ -373,18 +373,5 @@ namespace Iot.Device.Gpio.Drivers
 
             return (portController, port);
         }
-
-        private class PinState
-        {
-            public PinState(PinMode currentMode)
-            {
-                CurrentPinMode = currentMode;
-                InUseByInterruptDriver = false;
-            }
-
-            public PinMode CurrentPinMode { get; set; }
-
-            public bool InUseByInterruptDriver { get; set; }
-        }
     }
 }

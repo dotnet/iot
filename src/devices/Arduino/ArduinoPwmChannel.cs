@@ -102,7 +102,7 @@ namespace Iot.Device.Arduino
         public override void Start()
         {
             _enabled = true;
-            _board.Firmata.SetPinMode(_pin, SupportedMode.Pwm);
+            _board.Firmata.SetPinMode(_pin, SupportedMode.Pwm.Value);
             Update();
         }
 
@@ -110,7 +110,7 @@ namespace Iot.Device.Arduino
         public override void Stop()
         {
             _enabled = false;
-            _board.Firmata.SetPinMode(_pin, SupportedMode.DigitalInput);
+            _board.Firmata.SetPinMode(_pin, SupportedMode.DigitalInput.Value);
             Update();
         }
 

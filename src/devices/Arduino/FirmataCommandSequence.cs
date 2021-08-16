@@ -11,15 +11,25 @@ namespace Iot.Device.Arduino
     /// A firmata command sequence
     /// Intended to be changed to public visibility later
     /// </summary>
-    internal class FirmataCommandSequence
+    public class FirmataCommandSequence
     {
+        /// <summary>
+        /// Start of sysex command byte. Used as start byte for almost all extended commands.
+        /// </summary>
+        public const byte StartSysex = (byte)FirmataCommand.START_SYSEX;
+
+        /// <summary>
+        /// End of sysex command byte. Must end all sysex commands.
+        /// </summary>
+        public const byte EndSysex = (byte)FirmataCommand.END_SYSEX;
+
         private List<byte> _sequence;
 
         /// <summary>
         /// Create a new command sequence
         /// </summary>
         /// <param name="command">The first byte of the command</param>
-        public FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX)
+        internal FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX)
         {
             _sequence = new List<byte>()
             {
@@ -27,10 +37,45 @@ namespace Iot.Device.Arduino
             };
         }
 
-        internal List<byte> Sequence => _sequence;
+        /// <summary>
+        /// Create a new sysex command sequence. The <see cref="StartSysex"/> byte is added automatically.
+        /// </summary>
+        public FirmataCommandSequence()
+            : this(FirmataCommand.START_SYSEX)
+        {
+        }
 
+        /// <summary>
+        /// The current sequence
+        /// </summary>
+        public IReadOnlyList<byte> Sequence => _sequence;
+
+        /// <summary>
+        /// The current length of the sequence
+        /// </summary>
         public int Length => _sequence.Count;
 
+        /// <summary>
+        /// Decode an uint from packed 7-bit data.
+        /// This way of encoding uints is only used in extension modules.
+        /// </summary>
+        /// <param name="data">Data. 5 bytes expected</param>
+        /// <param name="fromOffset">Start offset in data</param>
+        /// <returns></returns>
+        public static UInt32 DecodeUInt32(ReadOnlySpan<byte> data, int fromOffset)
+        {
+            Int32 value = data[fromOffset];
+            value |= data[fromOffset + 1] << 7;
+            value |= data[fromOffset + 2] << 14;
+            value |= data[fromOffset + 3] << 21;
+            value |= data[fromOffset + 4] << 28;
+            return (UInt32)value;
+        }
+
+        /// <summary>
+        /// Add a byte to the command sequence
+        /// </summary>
+        /// <param name="b">The byte to add</param>
         public void WriteByte(byte b)
         {
             _sequence.Add(b);
@@ -64,6 +109,10 @@ namespace Iot.Device.Arduino
             return true;
         }
 
+        /// <summary>
+        /// Encodes a set of bytes with 7 bits and adds them to the sequence. Each input byte is encoded in 2 bytes.
+        /// </summary>
+        /// <param name="values">Binary data to add</param>
         public void AddValuesAsTwo7bitBytes(ReadOnlySpan<byte> values)
         {
             for (int i = 0; i < values.Length; i++)

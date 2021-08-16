@@ -92,9 +92,9 @@ namespace Iot.Device.RotaryEncoder
         public ScaledQuadratureEncoder(int pinA, int pinB, PinEventTypes edges, int pulsesPerRotation, GpioController? controller = null, bool shouldDispose = true)
             : base(pinA, pinB, edges, pulsesPerRotation, controller, shouldDispose)
         {
-            _pulseIncrement = (dynamic)1;
-            _rangeMin = (dynamic)0;
-            _rangeMax = (dynamic)100;
+            _pulseIncrement = 1;
+            _rangeMin = 0;
+            _rangeMax = 100;
 
             Value = _rangeMin;
         }
@@ -131,7 +131,7 @@ namespace Iot.Device.RotaryEncoder
             base.OnPulse(blnUp, milliSecondsSinceLastPulse);
 
             // calculate how much to change the value by
-            dynamic valueChange = (blnUp ? (dynamic)_pulseIncrement : -_pulseIncrement) * Acceleration(milliSecondsSinceLastPulse);
+            double valueChange = (blnUp ? _pulseIncrement : -_pulseIncrement) * Acceleration(milliSecondsSinceLastPulse);
 
             // set the value to the new value clamped by the maximum and minumum of the range.
             Value = Math.Max(Math.Min(Value + valueChange, _rangeMax), _rangeMin);

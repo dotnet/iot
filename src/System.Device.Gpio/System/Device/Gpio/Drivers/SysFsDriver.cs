@@ -102,6 +102,7 @@ namespace System.Device.Gpio.Drivers
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.
+        /// This retains the pin direction, but if it is output, the value will always be low after open.
         /// </summary>
         /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
         protected internal override void OpenPin(int pinNumber)

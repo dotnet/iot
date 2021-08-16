@@ -1,80 +1,113 @@
-# Sunxi GPIO Driver for .NET
+# GpioDriver for other boards
 
-**sunxi** represents the family of ARM SoCs from Allwinner Technology. This project contains a **full function(PULL-UP, PULL-DOWN)** generic GPIO driver `SunxiDriver` for Allwinner SoCs and some special GPIO drivers like `OrangePiZeroDriver`, `OrangePiLiteDriver`, `OrangePiLite2Driver`.
+This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO drivers, and it can provide faster GPIO access.
 
-## Getting started
+## Documentation
 
-### Special GPIO driver: `OrangePiZeroDriver`
+* For Allwinner SoCs: [SunxiDriver](Drivers/Sunxi/README.md)
+* For Rockchip SoCs: [RockchipDriver](Drivers/Rockchip/README.md)
 
-```C#
-// For Orange Pi Zero
-using GpioController gpio = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
+## Benchmarks
 
-// Open the GPIO pin.
-gpio.OpenPin(7);
-// Set the pin mode.
-gpio.SetPinMode(7, PinMode.InputPullUp);
-// Read current value of the pin.
-PinValue value = gpio.Read(7);
-```
+The test uses different GPIO drivers to quickly switch the state of GPIO, and uses an oscilloscope to measure the average frequency of GPIO externally.
 
-### Generic GPIO driver: `SunxiDriver`
+### SunxiDriver
 
-```C#
-// Beacuse this is a generic driver, the pin scheme can only be Logical.
-// The base addresses can be found in the corresponding SoC datasheet.
-using GpioController gpio = new GpioController(PinNumberingScheme.Logical, new SunxiDriver(cpuxPortBaseAddress: 0x01C20800, cpusPortBaseAddress: 0x01F02C00));
+Benchmarking with **Orange Pi Zero**, select GPIO 6 (Logical). The operating system is Armbian buster, Linux kernel version is 5.10.16, and .NET version is 5.0.3.
 
-// Convert pin number to logical scheme.
-int pinNumber = SunxiDriver.MapPinNumber(portController: 'A', port: 10);
-gpio.OpenPin(pinNumber);
-gpio.SetPinMode(pinNumber, PinMode.Output);
-// Write a value to the pin.
-gpio.Write(pinNumber, PinValue.High);
-```
+| Drivers| Language | Library Version | Test Date | Average Frequency |  |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| SunxiDriver | C# | - | 2020-02-20 | 185 KHz | ![sunxi](./imgs/SunxiDriver/sunxi.jpg) |
+| SysFsDriver | C# | System.Device.Gpio 1.3.0 | 2020-02-20 | 692 Hz | ![sysfs](./imgs/SunxiDriver/sysfs.jpg) |
+| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | 2020-02-20 | 81 KHz | ![libgpiod](./imgs/SunxiDriver/libgpiod.jpg) |
+| [wiringOP](https://github.com/orangepi-xunlong/wiringOP) | C | 35de015 | 2020-02-22 | 1.10 MHz | ![wiringOP](./imgs/SunxiDriver/wiringOP.jpg) |
 
-## Adding new drivers
+### RockchipDriver
 
-### For SoCs
+Benchmarking with **Orange Pi 4**, select GPIO 150 (Logical). The operating system is Armbian buster, Linux kernel version is 5.10.16, and .NET version is 5.0.3.
 
-1. Inheriting `SunxiDriver` Class.
-    ```C#
-    // For Allwinner H2+/H3
-    public class Sun8iw7p1Driver : SunxiDriver { }
-    ```
-2. Overriding the GPIO base addresses.
-    ```C#
-    protected override int CpuxPortBaseAddress => 0x01C20800;
-    protected override int CpusPortBaseAddress => 0x01F02C00;
-    ```
+| Drivers| Language | Library Version | Test Date | Average Frequency |  |
+| :-: | :-: | :-: | :-: | :-: | :-: |
+| RockchipDriver | C# | - | 2020-02-22 | 516 KHz | ![rockchip](./imgs/RockchipDriver/rockchip.jpg) |
+| SysFsDriver | C# | System.Device.Gpio 1.3.0 | 2020-02-22 | 4.27 KHz | ![sysfs](./imgs/RockchipDriver/sysfs.jpg) |
+| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | 2020-02-22 | 174 KHz | ![libgpiod](./imgs/RockchipDriver/libgpiod.jpg) |
+| [wiringOP](https://github.com/orangepi-xunlong/wiringOP) | C | 35de015 | 2020-02-22 | 584 KHz | ![wiringgOP](./imgs/RockchipDriver/wiringOP.jpg) |
 
-### For Boards
+## Usage
 
-1. Inherit the corresponding SoC class.
-    ```C#
-    public class OrangePiZeroDriver : Sun8iw7p1Driver { }
-    ```
-2. Overriding the mapping method for converting a board pin number to the driver's logical numbering scheme.
-    ```C#
-    // Mapping from board pins to logic pins.
-    private static readonly int[] _pinNumberConverter = new int[27]
+### Hardware required
+
+* Orange Pi Zero
+* Switch
+* Male/Female Jumper Wires
+
+### Circuit
+
+![circuit](opi_circuit.png)
+
+* Switch 1 - Board Pin7 (GPIO 6)
+* Switch 2 - GND
+
+### Code
+
+```csharp
+using System;
+using System.Device.Gpio;
+using Iot.Device.BoardLed;
+using Iot.Device.Gpio.Drivers;
+
+// Set debounce delay to 5ms
+int debounceDelay = 50000;
+int pin = 7;
+
+Console.WriteLine($"Let's blink an on-board LED!");
+
+using GpioController controller = new GpioController(PinNumberingScheme.Board, new OrangePiZeroDriver());
+using BoardLed led = new BoardLed("orangepi:red:status");
+
+controller.OpenPin(pin, PinMode.InputPullUp);
+led.Trigger = "none";
+Console.WriteLine($"GPIO pin enabled for use: {pin}.");
+Console.WriteLine("Press any key to exit.");
+
+while (!Console.KeyAvailable)
+{
+    if (Debounce())
     {
-        -1, -1, -1, MapPinNumber('A', 12), -1, MapPinNumber('A', 11), -1, MapPinNumber('A', 6), MapPinNumber('G', 6), -1,
-        MapPinNumber('G', 7), MapPinNumber('A', 1), MapPinNumber('A', 7), MapPinNumber('A', 0), -1, MapPinNumber('A', 3),
-        MapPinNumber('A', 19), -1, MapPinNumber('A', 18), MapPinNumber('A', 15), -1, MapPinNumber('A', 16), MapPinNumber('A', 2),
-        MapPinNumber('A', 14), MapPinNumber('A', 13), -1, MapPinNumber('A', 10)
-    };
-
-    protected override int PinCount => 17;
-
-    protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
-    {
-        int num = _pinNumberConverter[pinNumber];
-        return num != -1 ? num : 
-            throw new ArgumentException($"Board (header) pin {pinNumber} is not a GPIO pin on the {GetType().Name} device.", nameof(pinNumber));
+        // Button is pressed
+        led.Brightness = 1;
     }
-    ```
+    else
+    {
+        // Button is unpressed
+        led.Brightness = 0;
+    }
+}
 
-## References
+bool Debounce()
+{
+    long debounceTick = DateTime.Now.Ticks;
+    PinValue buttonState = controller.Read(pin);
 
-The wiki of the linux-sunxi community: https://linux-sunxi.org/Main_Page
+    do
+    {
+        PinValue currentState = controller.Read(pin);
+
+        if (currentState != buttonState)
+        {
+            debounceTick = DateTime.Now.Ticks;
+            buttonState = currentState;
+        }
+    }
+    while (DateTime.Now.Ticks - debounceTick < debounceDelay);
+
+    if (buttonState == PinValue.Low)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+```
