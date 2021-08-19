@@ -16,7 +16,7 @@ namespace Iot.Device.Ssd1351
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         public void SendBitmap(Bitmap bm)
         {
-            SendBitmap(bm, new Point(0, 0), new Rectangle(0, 0, ScreenWidthPx, ScreenWidthPx));
+            SendBitmap(bm, new Point(0, 0), new Rectangle(0, 0, ScreenWidthPx, ScreenHeightPx));
         }
 
         /// <summary>
