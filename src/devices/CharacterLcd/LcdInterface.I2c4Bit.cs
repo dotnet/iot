@@ -21,15 +21,6 @@ namespace Iot.Device.CharacterLcd
             private const byte REGISTERSELECT = 0b0000_0001;
 
             private const byte LCD_BACKLIGHT = 0x08;
-            private const byte LCD_FUNCTIONSET = 0x20;
-            private const byte LCD_DISPLAYCONTROL = 0x08;
-            private const byte LCD_CLEARDISPLAY = 0x01;
-            private const byte LCD_DISPLAYON = 0x04;
-            private const byte LCD_2LINE = 0x08;
-            private const byte LCD_5x8DOTS = 0x00;
-            private const byte LCD_ENTRYMODESET = 0x04;
-            private const byte LCD_ENTRYLEFT = 0x02;
-            private const byte LCD_4BITMODE = 0x00;
 
             private readonly I2cDevice _i2cDevice;
             private bool _backlightOn;
@@ -81,10 +72,6 @@ namespace Iot.Device.CharacterLcd
                 SendCommandAndWait(0x3);
                 SendCommandAndWait(0x3);
                 SendCommandAndWait(0x2);
-                SendCommandAndWait(LCD_FUNCTIONSET | LCD_2LINE | LCD_5x8DOTS | LCD_4BITMODE);
-                SendCommandAndWait(LCD_DISPLAYCONTROL | LCD_DISPLAYON);
-                SendCommandAndWait(LCD_CLEARDISPLAY);
-                SendCommandAndWait(LCD_ENTRYMODESET | LCD_ENTRYLEFT);
             }
 
             public override void SendCommandAndWait(byte command)
