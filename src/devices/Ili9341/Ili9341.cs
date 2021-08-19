@@ -15,6 +15,9 @@ namespace Iot.Device.Ili9341
         private const int ScreenWidthPx = 240;
         private const int ScreenHeightPx = 320;
         private const int DefaultSPIBufferSize = 0x1000;
+        private const byte lcdPortraitConfig = 8 | 0x40;
+        private const byte lcdLandscapeConfig = 44;
+
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _backlitPin;
@@ -24,10 +27,7 @@ namespace Iot.Device.Ili9341
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
 
-        const byte lcdPortraitConfig = 8 | 0x40;
-        const byte lcdLandscapeConfig = 44;
-
-        public Ili9341(SpiDevice spiDevice, int dataCommandPin, int resetPin, int backlightPin = -1, int spiBufferSize = DefaultSPIBufferSize, GpioController gpioController = null, bool shouldDispose = true)
+        public Ili9341(SpiDevice spiDevice, int dataCommandPin, int resetPin, int backlightPin = -1, int spiBufferSize = DefaultSPIBufferSize, GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
@@ -51,13 +51,14 @@ namespace Iot.Device.Ili9341
                 _gpioDevice.OpenPin(_backlitPin, PinMode.Output);
                 TurnBacklightOn();
             }
+
             ResetDisplayAsync().Wait();
 
             SendCommand(Ili9341Command.SoftwareReset);
             SendCommand(Ili9341Command.DisplayOff);
             Thread.Sleep(10);
             SendCommand(Ili9341Command.MemoryAccessControl, lcdPortraitConfig);
-            SendCommand(Ili9341Command.ColModPixelFormatSet, 0x55);//16-bits per pixel
+            SendCommand(Ili9341Command.ColModPixelFormatSet, 0x55); //16-bits per pixel
             SendCommand(Ili9341Command.FrameRateControlInNormalMode, 0x00, 0x1B);
             SendCommand(Ili9341Command.GammaSet, 0x01);
             SendCommand(Ili9341Command.ColumnAddressSet, 0x00, 0x00, 0x00, 0xEF); //width of the screen
@@ -71,7 +72,7 @@ namespace Iot.Device.Ili9341
             SendCommand(Ili9341Command.MemoryWrite);
         }
 
-        // <summary>
+        /// <summary>
         /// Convert a color structure to a byte tuple representing the colour in 565 format.
         /// </summary>
         /// <param name="color">The color to be converted.</param>
@@ -249,7 +250,7 @@ namespace Iot.Device.Ili9341
             }
             
             _spiDevice?.Dispose();
-            _spiDevice = null;
+            _spiDevice = null!;
         }
     }
 }
