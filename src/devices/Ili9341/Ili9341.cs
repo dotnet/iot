@@ -220,9 +220,9 @@ namespace Iot.Device.Ili9341
         /// Send data to the display controller.
         /// </summary>
         /// <param name="data">The data to send to the display controller.</param>
-        private void SendData(Span<byte> buffer)
+        private void SendData(Span<byte> data)
         {
-            SendSPI(buffer, blnIsCommand: false);
+            SendSPI(data, blnIsCommand: false);
         }
 
         /// <summary>
