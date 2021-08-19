@@ -10,6 +10,9 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Ili9341
 {
+    /// <summary>
+    /// The ILI9341 is a QVGA (Quarter VGA) driver integrated circuit that is used to control 240×320 VGA LCD screens.
+    /// </summary>
     public partial class Ili9341 : IDisposable
     {
         private const int ScreenWidthPx = 240;
@@ -69,11 +72,11 @@ namespace Iot.Device.Ili9341
             SendCommand(Ili9341Command.DisplayOff);
             Thread.Sleep(10);
             SendCommand(Ili9341Command.MemoryAccessControl, lcdPortraitConfig);
-            SendCommand(Ili9341Command.ColModPixelFormatSet, 0x55); //16-bits per pixel
+            SendCommand(Ili9341Command.ColModPixelFormatSet, 0x55); // 16-bits per pixel
             SendCommand(Ili9341Command.FrameRateControlInNormalMode, 0x00, 0x1B);
             SendCommand(Ili9341Command.GammaSet, 0x01);
-            SendCommand(Ili9341Command.ColumnAddressSet, 0x00, 0x00, 0x00, 0xEF); //width of the screen
-            SendCommand(Ili9341Command.PageAddressSet, 0x00, 0x00, 0x01, 0x3F); //height of the screen
+            SendCommand(Ili9341Command.ColumnAddressSet, 0x00, 0x00, 0x00, 0xEF); // width of the screen
+            SendCommand(Ili9341Command.PageAddressSet, 0x00, 0x00, 0x01, 0x3F); // height of the screen
             SendCommand(Ili9341Command.EntryModeSet, 0x07);
             SendCommand(Ili9341Command.DisplayFunctionControl, 0x0A, 0x82, 0x27, 0x00);
             SendCommand(Ili9341Command.SleepOut);
@@ -144,7 +147,6 @@ namespace Iot.Device.Ili9341
             SetWindow(x, y, w, h);
 
             // write out the pixel data
-            //SendCommand(Ssd1351Command.WriteRam, displayBytes);
             SendData(displayBytes);
         }
 
