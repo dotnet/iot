@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Iot.Device.Ili9341
 {
-    public partial class Ili9341 
+    public partial class Ili9341
     {
         /// <summary>
         /// Send a bitmap to the ssd1351 display specifying the starting position and destination clipping rectangle.
@@ -92,7 +92,7 @@ namespace Iot.Device.Ili9341
 
             return (outputBuffer);
         }
-        
+
         /// <summary>
         /// Send an array of pixel data to the display.
         /// </summary>

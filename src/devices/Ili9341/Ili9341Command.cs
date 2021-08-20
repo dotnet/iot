@@ -62,7 +62,6 @@ namespace Iot.Device.Ili9341
         ReadId2 = 0xDB,
         ReadId3 = 0xDC,
         // ILI9341_RDID4 = 0xDD,
-
         RgbInterfaceSignalControl = 0xB0,
         FrameRateControlInNormalMode = 0xB1,
         FrameRateControlInIdleMode = 0xB2,
@@ -109,7 +108,10 @@ namespace Iot.Device.Ili9341
         public void TurnBacklightOn()
         {
             if (_backlitPin < 0)
+            {
                 throw new InvalidOperationException("Backlight pin not set");
+            }
+
             _gpioDevice.Write(_backlitPin, PinValue.High);
         }
 
@@ -119,8 +121,11 @@ namespace Iot.Device.Ili9341
         public void TurnBacklightOff()
         {
             if (_backlitPin < 0)
+            {
                 throw new InvalidOperationException("Backlight pin not set");
-            _gpioDevice.Write(_backlitPin, PinValue.Low);
+            }
+
+             _gpioDevice.Write(_backlitPin, PinValue.Low);
         }
 
         private void SetWindow(uint x0 = 0, uint y0 = 0, uint x1 = ScreenWidthPx - 1, uint y1 = ScreenWidthPx - 1)
