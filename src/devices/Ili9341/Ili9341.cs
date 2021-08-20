@@ -18,15 +18,15 @@ namespace Iot.Device.Ili9341
         private const int ScreenWidthPx = 240;
         private const int ScreenHeightPx = 320;
         private const int DefaultSPIBufferSize = 0x1000;
-        private const byte lcdPortraitConfig = 8 | 0x40;
-        private const byte lcdLandscapeConfig = 44;
+        private const byte LcdPortraitConfig = 8 | 0x40;
+        private const byte LcdLandscapeConfig = 44;
 
         private readonly int _dcPinId;
         private readonly int _resetPinId;
         private readonly int _backlitPin;
         private readonly int _spiBufferSize;
         private readonly bool _shouldDispose;
-        
+
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
 
@@ -71,7 +71,7 @@ namespace Iot.Device.Ili9341
             SendCommand(Ili9341Command.SoftwareReset);
             SendCommand(Ili9341Command.DisplayOff);
             Thread.Sleep(10);
-            SendCommand(Ili9341Command.MemoryAccessControl, lcdPortraitConfig);
+            SendCommand(Ili9341Command.MemoryAccessControl, LcdPortraitConfig);
             SendCommand(Ili9341Command.ColModPixelFormatSet, 0x55); // 16-bits per pixel
             SendCommand(Ili9341Command.FrameRateControlInNormalMode, 0x00, 0x1B);
             SendCommand(Ili9341Command.GammaSet, 0x01);
@@ -261,7 +261,7 @@ namespace Iot.Device.Ili9341
                 _gpioDevice?.Dispose();
                 _gpioDevice = null!;
             }
-            
+
             _spiDevice?.Dispose();
             _spiDevice = null!;
         }
