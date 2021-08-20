@@ -125,7 +125,7 @@ namespace Iot.Device.Ili9341
                 throw new InvalidOperationException("Backlight pin not set");
             }
 
-             _gpioDevice.Write(_backlitPin, PinValue.Low);
+            _gpioDevice.Write(_backlitPin, PinValue.Low);
         }
 
         private void SetWindow(uint x0 = 0, uint y0 = 0, uint x1 = ScreenWidthPx - 1, uint y1 = ScreenWidthPx - 1)
