@@ -49,8 +49,8 @@ namespace Iot.Device.Ili9341
 
             // get the pixel data and send it to the display
             SendBitmapPixelData(GetBitmapPixelData(bm, new Rectangle(sourcePoint.X, sourcePoint.Y, destinationRect.Width, destinationRect.Height)), destinationRect);
-
         }
+
         /// <summary>
         /// Convert a bitmap into an array of pixel data suitable for sending to the display
         /// </summary>
@@ -92,6 +92,7 @@ namespace Iot.Device.Ili9341
 
             return (outputBuffer);
         }
+        
         /// <summary>
         /// Send an array of pixel data to the display.
         /// </summary>
