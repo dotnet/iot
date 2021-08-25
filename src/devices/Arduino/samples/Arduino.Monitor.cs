@@ -121,7 +121,8 @@ namespace Arduino.Samples
                 Console.WriteLine("BMP280 not available");
             }
 
-            if (!board.TryGetCommandHandler(out DhtSensor dht))
+            DhtSensor? dht = board.GetCommandHandler<DhtSensor>();
+            if (dht == null)
             {
                 // Note that this is a software error, hardware support is not tested here.
                 Console.WriteLine("DHT Sensor module missing");

@@ -173,7 +173,8 @@ namespace Arduino.Samples
                 return;
             }
 
-            if (!board.TryGetCommandHandler(out FrequencySensor sensor))
+            FrequencySensor? sensor = board.GetCommandHandler<FrequencySensor>();
+            if (sensor == null)
             {
                 Console.WriteLine("Frequency handling software module missing");
                 return;
@@ -532,7 +533,8 @@ namespace Arduino.Samples
         public static void TestDht(ArduinoBoard board)
         {
             Console.WriteLine("Reading DHT11. Any key to quit.");
-            if (!board.TryGetCommandHandler(out DhtSensor handler))
+            DhtSensor? handler = board.GetCommandHandler<DhtSensor>();
+            if (handler == null)
             {
                 Console.WriteLine("DHT Command handler not available.");
                 return;
@@ -540,6 +542,7 @@ namespace Arduino.Samples
 
             while (!Console.KeyAvailable)
             {
+                // Read from DHT11 at pin 3
                 if (handler.TryReadDht(3, 11, out var temperature, out var humidity))
                 {
                     Console.WriteLine($"Temperature: {temperature}, Humidity {humidity}");

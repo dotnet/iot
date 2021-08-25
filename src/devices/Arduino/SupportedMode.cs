@@ -110,7 +110,7 @@ namespace Iot.Device.Arduino
         {
             Value = value;
             Name = name;
-            PinMode = pinUsage;
+            PinUsage = pinUsage;
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Iot.Device.Arduino
         {
             Value = value;
             Name = name;
-            PinMode = PinUsage.Unknown;
+            PinUsage = PinUsage.Unknown;
         }
 
         /// <summary>
@@ -142,9 +142,9 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// The <see cref="PinUsage"/> for this internal mode, if applicable
+        /// The <see cref="Device.Board.PinUsage"/> for this internal mode, if applicable
         /// </summary>
-        public PinUsage PinMode
+        public PinUsage PinUsage
         {
             get;
         }

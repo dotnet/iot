@@ -788,8 +788,9 @@ namespace Iot.Device.Arduino
             throw new TimeoutException("Timeout waiting for answer. Aborting. ", lastException);
         }
 
-        internal void SetPinMode(int pin, byte firmataMode)
+        internal void SetPinMode(int pin, SupportedMode mode)
         {
+            byte firmataMode = mode.Value;
             FirmataCommandSequence s = new FirmataCommandSequence(FirmataCommand.SET_PIN_MODE);
             s.WriteByte((byte)pin);
             s.WriteByte((byte)firmataMode);
@@ -897,7 +898,7 @@ namespace Iot.Device.Arduino
                 i2cSequence.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
                 i2cSequence.WriteByte((byte)slaveAddress);
                 i2cSequence.WriteByte(0); // Write flag is 0, all other bits as well
-                i2cSequence.AddValuesAsTwo7bitBytes(writeData);
+                i2cSequence.WriteBytesAsTwo7bitBytes(writeData);
                 i2cSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             }
 
@@ -1056,7 +1057,7 @@ namespace Iot.Device.Arduino
             spiCommand.WriteByte(requestId);
             spiCommand.WriteByte(1); // Deselect CS after transfer (yes)
             spiCommand.WriteByte((byte)writeBytes.Length);
-            spiCommand.AddValuesAsTwo7bitBytes(writeBytes);
+            spiCommand.WriteBytesAsTwo7bitBytes(writeBytes);
             spiCommand.WriteByte((byte)FirmataCommand.END_SYSEX);
             return spiCommand;
         }
