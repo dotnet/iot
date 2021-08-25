@@ -8,7 +8,7 @@
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/System/Runtime/CompilerServices/IsExternalInit.cs" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
+    <Compile Include="$(MSBuildThisFileDirectory)/../Common/IsExternalInit.cs" Condition="'$(TargetFramework)' == 'netcoreapp2.1' Or '$(TargetFramework)' == 'netstandard2.0'" />
     <Compile Include="*.cs" />
     <Compile Remove="samples\**" />
     <Compile Include="Models\*.cs" />

@@ -9,7 +9,7 @@ namespace Iot.Device
     /// <summary>
     /// .NET Core compatibility helper functions (methods that do not exist in .NET Framework)
     /// </summary>
-    public static class FrameworkCompatibilityExtensions
+    internal static class FrameworkCompatibilityExtensions
     {
         public static bool StartsWith(this Span<char> span, string value)
         {

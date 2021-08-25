@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)/../Common/MathExtensions.cs" />
     <Compile Include="../Common/System/Device/DelayHelper.cs" />
   </ItemGroup>
 

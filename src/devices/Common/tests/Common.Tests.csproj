@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)/../MathExtensions.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)/../FrameworkCompatibilityExtensions.cs" />
     <PackageReference Include="UnitsNet" Version="$(UnitsNetPackageVersion)" />
     <ProjectReference Include="..\CommonHelpers.csproj" />
     
