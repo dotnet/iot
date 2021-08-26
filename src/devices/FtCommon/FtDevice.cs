@@ -4,14 +4,16 @@
 using System;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Device.Pwm;
 using System.Device.Spi;
+using Iot.Device.Board;
 
 namespace Iot.Device.FtCommon
 {
     /// <summary>
     /// FT4222 device information
     /// </summary>
-    public class FtDevice
+    public class FtDevice : Board.Board
     {
         /// <summary>
         /// Instantiates a DeviceInformation object.
@@ -67,22 +69,50 @@ namespace Iot.Device.FtCommon
         /// </summary>
         /// <returns>I2cBus instance</returns>
         /// <remarks>You can create either an I2C, either an SPI device.</remarks>
-        public virtual I2cBus CreateI2cBus() => throw new NotSupportedException();
+        protected override I2cBusManager CreateI2cBusCore(int busNumber, int[]? pins)
+        {
+            throw new NotSupportedException("No I2C bus present on this device");
+        }
+
+        /// <inheritdoc />
+        public override int GetDefaultI2cBusNumber()
+        {
+            return 0;
+        }
+
+        /// <inheritdoc />
+        protected override PwmChannel CreateSimplePwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage)
+        {
+            throw new NotSupportedException("No PWM capable pins present");
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForI2c(int busId)
+        {
+            throw new NotSupportedException("No I2C bus devices present");
+        }
+
+        /// <inheritdoc />
+        public override int GetDefaultPinAssignmentForPwm(int chip, int channel)
+        {
+            throw new NotSupportedException("No PWM devices present");
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
+        {
+            throw new NotSupportedException("No SPI bus devices present");
+        }
 
         /// <summary>
         /// Creates SPI device related to this device
         /// </summary>
         /// <param name="settings">The SPI settings</param>
+        /// <param name="pins">The pins for this SPI instance</param>
         /// <returns>a SPI device</returns>
         /// <remarks>You can create either an I2C, either an SPI device.
         /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
         /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
-        public virtual SpiDevice CreateSpiDevice(SpiConnectionSettings settings) => throw new NotSupportedException();
-
-        /// <summary>
-        /// Creates GPIO driver related to this device
-        /// </summary>
-        /// <returns>A GPIO Driver</returns>
-        public virtual GpioDriver CreateGpioDriver() => throw new NotSupportedException();
+        protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins) => throw new NotSupportedException("No SPI bus present on this device");
     }
 }

@@ -59,8 +59,7 @@ void TestGpio(Ft232HDevice ft232h)
     // It's possible to use this function to convert the board names you find in various
     // implementation into the pin number
     int gpio5 = Ft232HDevice.GetPinNumberFromString("D5");
-    var gpio = ft232h.CreateGpioDriver();
-    GpioController gpioController = new(PinNumberingScheme.Board, gpio);
+    var gpioController = ft232h.CreateGpioController();
 
     // Opening GPIO2
     gpioController.OpenPin(gpio5);
@@ -91,7 +90,7 @@ void TestI2c(Ft232HDevice ft232h)
     // set this to the current sea level pressure in the area for correct altitude readings
     Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
     Length stationHeight = Length.FromMeters(640); // Elevation of the sensor
-    var ftI2cBus = ft232h.CreateI2cBus();
+    var ftI2cBus = ft232h.CreateOrGetI2cBus(ft232h.GetDefaultI2cBusNumber());
     var i2cDevice = ftI2cBus.CreateDevice(Bmp280.SecondaryI2cAddress);
     using var i2CBmp280 = new Bmp280(i2cDevice);
 

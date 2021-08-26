@@ -9,6 +9,7 @@ using System.Device.Spi;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Iot.Device.Board;
 using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft232H
@@ -178,28 +179,49 @@ namespace Iot.Device.Ft232H
         {
         }
 
-        /// <summary>
-        /// Creates I2C bus related to this device
-        /// </summary>
-        /// <returns>I2cBus instance</returns>
-        /// <remarks>You can create either an I2C, either an SPI device.</remarks>
-        public override I2cBus CreateI2cBus() => new Ft232HI2cBus(this);
+        /// <inheritdoc />
+        protected override I2cBusManager CreateI2cBusCore(int busNumber, int[]? pins)
+        {
+            return new I2cBusManager(this, busNumber, pins, new Ft232HI2cBus(this));
+        }
 
         /// <summary>
         /// Creates SPI device related to this device
         /// </summary>
         /// <param name="settings">The SPI settings</param>
+        /// <param name="pins">The pins to use</param>
         /// <returns>a SPI device</returns>
         /// <remarks>You can create either an I2C, either an SPI device.
         /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
         /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
-        public override SpiDevice CreateSpiDevice(SpiConnectionSettings settings) => new Ft232HSpi(settings, this);
+        protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins) => new Ft232HSpi(settings, this);
 
         /// <summary>
-        /// Creates GPIO driver related to this device
+        /// Creates the <see cref="Ft232HGpio"/> controller
         /// </summary>
-        /// <returns>A GPIO Driver</returns>
-        public override GpioDriver CreateGpioDriver() => new Ft232HGpio(this);
+        /// <returns>A new GPIO driver</returns>
+        protected override GpioDriver? TryCreateBestGpioDriver()
+        {
+            return new Ft232HGpio(this);
+        }
+
+        /// <inheritdoc />
+        public override int GetDefaultI2cBusNumber()
+        {
+            return 0;
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForI2c(int busId)
+        {
+            return new[] { 0, 1 };
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
+        {
+            return new[] { 0, 1, 2, 3 };
+        }
 
         internal bool IsI2cModeEnabled { get; set; }
 
@@ -861,10 +883,15 @@ namespace Iot.Device.Ft232H
         /// <summary>
         /// Dispose FT323H
         /// </summary>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
-            _ftHandle.Dispose();
-            _ftHandle = null!;
+            if (disposing)
+            {
+                _ftHandle.Dispose();
+                _ftHandle = null!;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

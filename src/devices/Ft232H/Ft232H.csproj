@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Board\Board.csproj" />
   </ItemGroup>
   <Import Project="..\FtCommon\FtCommon.projitems" Label="Shared" />
 
