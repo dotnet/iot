@@ -32,7 +32,7 @@ variables:
 resources:
   containers:
   - container: LinuxContainer
-    image: microsoft/dotnet-buildtools-prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
 
 stages:
 - stage: build
@@ -198,6 +198,7 @@ stages:
 - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
   - template: eng\common\templates\post-build\post-build.yml
     parameters:
+      publishingInfraVersion: 3
       # Symbol validation isn't being very reliable lately. This should be enabled back
       # once this issue is resolved: https://github.com/dotnet/arcade/issues/2871
       enableSymbolValidation: false

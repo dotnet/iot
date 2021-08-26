@@ -4,7 +4,7 @@ PN532 is a RFID and NFC reader. It does supports various standards: IsoIec14443T
 
 ## Documentation
 
-Official documentation can be fond here: https://www.nxp.com/docs/en/user-guide/141520.pdf
+Official documentation can be fond [here](https://www.nxp.com/docs/en/user-guide/141520.pdf)
 
 ## Usage
 
@@ -175,11 +175,12 @@ static void AsTarget(Pn532 pn532)
 
 Note that this is just the first phase showing how to initialize the process, get the first data and read data. In this specific case, the emulation have to understand the commands sent by the reader and emulate properly a card.
 
-It is possible to emulate any Type A, Type B and Felica cards. 
+It is possible to emulate any Type A, Type B and Felica cards.
 
 ## Current implementation
 
 Communication support:
+
 - [X] HSU serial port: fully supported
 - [X] I2C: supported
 - [X] SPI: supported but using a specific chip select pin
@@ -187,10 +188,11 @@ Communication support:
 - [ ] Hardware reset pin: This can be done with the user code
 
 Miscellaneous commands:
+
 - [X] Diagnose. Note: partial implementation, basics tests implemented only
-- [X] GetFirmwareVersion 
-- [X] GetGeneralStatus 
-- [X] ReadRegister 
+- [X] GetFirmwareVersion
+- [X] GetGeneralStatus
+- [X] ReadRegister
 - [X] WriteRegister
 - [X] ReadGPIO
 - [X] WriteGPIO
@@ -200,10 +202,12 @@ Miscellaneous commands:
 - [X] PowerDown
 
 RF communication commands:
+
 - [X] RFConfiguration
 - [ ] RFRegulationTest
 
 PN532 as an initiator (reader) commands:
+
 - [ ] InJumpForDEP
 - [ ] InJumpForPSL
 - [X] InListPassiveTarget
@@ -214,9 +218,10 @@ PN532 as an initiator (reader) commands:
 - [X] InDeselect
 - [X] InRelease
 - [X] InSelect
-- [X] InAutoPoll 
+- [X] InAutoPoll
   
 PN532 as a Target (acting like a card)
+
 - [X] TgInitAsTarget
 - [ ] TgSetGeneralBytes
 - [X] TgGetData
@@ -224,6 +229,5 @@ PN532 as a Target (acting like a card)
 - [ ] TgSetMetaData
 - [ ] TgGetInitiatorCommand
 - [ ] TgResponseToInitiator
-- [ ] TgGetTargetStatus 
- 
- 
+- [ ] TgGetTargetStatus
+  

@@ -187,6 +187,30 @@ namespace System.Device.Gpio.Drivers
                     throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
                 }
 
+                int mode = Interop.libgpiod.gpiod_line_direction(pinHandle);
+                if (mode == 1)
+                {
+                    pinHandle.PinMode = PinMode.Input;
+                }
+                else if (mode == 2)
+                {
+                    pinHandle.PinMode = PinMode.Output;
+                }
+
+                if (s_isLibgpiodVersion1_5orHigher && pinHandle.PinMode == PinMode.Input)
+                {
+                    int bias = Interop.libgpiod.gpiod_line_bias(pinHandle);
+                    if (bias == (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN)
+                    {
+                        pinHandle.PinMode = PinMode.InputPullDown;
+                    }
+
+                    if (bias == (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP)
+                    {
+                        pinHandle.PinMode = PinMode.InputPullUp;
+                    }
+                }
+
                 _pinNumberToSafeLineHandle.TryAdd(pinNumber, pinHandle);
             }
         }

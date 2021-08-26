@@ -13,6 +13,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Card\CardRfid.csproj" />
     <ProjectReference Include="..\Card\Mifare\Mifare.csproj" />
+    <ProjectReference Include="..\Card\Ndef\Ndef.csproj" />
+    <ProjectReference Include="..\Card\Ultralight\Ultralight.csproj" />
     <Compile Include="*.cs" />
     <Compile Include="RegisterElement\*.cs" />
     <None Include="README.md" />

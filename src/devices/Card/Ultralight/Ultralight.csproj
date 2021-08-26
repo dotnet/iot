@@ -1,0 +1,13 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
+    <ProjectReference Include="..\CardRfid.csproj" />
+    <ProjectReference Include="..\Ndef\Ndef.csproj" />
+  </ItemGroup>
+
+</Project>

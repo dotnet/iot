@@ -115,6 +115,22 @@ internal partial class Interop
         internal static extern void gpiod_line_release(IntPtr lineHandle);
 
         /// <summary>
+        /// Get the direction of the pin (input or output)
+        /// </summary>
+        /// <param name="lineHandle">GPIO line handle</param>
+        /// <returns>1 for input, 2 for output</returns>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern int gpiod_line_direction(SafeLineHandle lineHandle);
+
+        /// <summary>
+        /// Read the GPIO line bias setting.
+        /// </summary>
+        /// <param name="lineHandle">GPIO line handle</param>
+        /// <returns>GPIOD_LINE_BIAS_PULL_UP (3), GPIOD_LINE_BIAS_PULL_DOWN (4), GPIOD_LINE_BIAS_DISABLE (2) or GPIOD_LINE_BIAS_UNKNOWN (1). </returns>
+        [DllImport(LibgpiodLibrary)]
+        internal static extern int gpiod_line_bias(SafeLineHandle lineHandle);
+
+        /// <summary>
         /// Request all event type notifications on a single line.
         /// </summary>
         /// <param name="line">GPIO line handle</param>

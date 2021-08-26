@@ -32,7 +32,9 @@
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
   </ItemGroup>
-
+  <ItemGroup>
+    <EmbeddedResource Include="../devices/CharacterLcd/BigFontMap.txt" />
+  </ItemGroup>
   <!-- This target will call into each device binding project to get out the source files for the framework we are building
   and then it will add the results to the Compile item group. -->
   <Target Name="GetCompileItemsFromProjects"
