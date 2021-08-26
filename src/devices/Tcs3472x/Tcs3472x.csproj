@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/MathExtensions.cs" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />

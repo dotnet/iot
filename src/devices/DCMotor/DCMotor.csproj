@@ -12,7 +12,6 @@
     <Compile Include="DCMotor3Pin.cs" />
     <Compile Include="DCMotor2PinNoEnable.cs" />
     <Compile Include="DCMotor2PinWithBiDirectionalPin.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/MathExtensions.cs" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>

@@ -16,7 +16,6 @@
     <Compile Include="GoPiGo3.cs" />
     <Compile Include="Models\*.cs" />
     <Compile Include="Movements\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/MathExtensions.cs" />
     <Compile Include="Sensors\*.cs" />
   </ItemGroup>
 

@@ -17,8 +17,6 @@
     <Compile Include="Extensions\*.cs" />
     <Compile Include="Movement\*.cs" />
     <Compile Include="Sensors\*.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/MathExtensions.cs" />
-
   </ItemGroup>
 
 </Project>

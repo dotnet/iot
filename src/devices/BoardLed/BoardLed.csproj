@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <Compile Include="BoardLed.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/MathExtensions.cs" />
   </ItemGroup>
 
   <ItemGroup>
