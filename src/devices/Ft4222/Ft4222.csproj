@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="..\Board\Board.csproj" />
     <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
   </ItemGroup>
 

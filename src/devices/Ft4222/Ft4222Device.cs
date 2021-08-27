@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
+using Iot.Device.Board;
 using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft4222
@@ -58,23 +59,58 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Creates an I2C Bus
         /// </summary>
+        /// <param name="busNumber">The I2C bus number to create. Must be 0</param>
+        /// <param name="pins">The pins for I2C (0 and 1)</param>
         /// <returns>An I2C bus</returns>
-        public override I2cBus CreateI2cBus() => new Ft4222I2cBus(this);
+        protected override I2cBusManager CreateI2cBusCore(int busNumber, int[]? pins)
+        {
+            if (busNumber != 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(busNumber));
+            }
+
+            return new I2cBusManager(this, busNumber, pins, new Ft4222I2cBus(this));
+        }
+
+        /// <inheritdoc />
+        public override int GetDefaultI2cBusNumber()
+        {
+            return 0;
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForI2c(int busId)
+        {
+            return new[] { 0, 1 };
+        }
+
+        /// <inheritdoc />
+        public override int[] GetDefaultPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
+        {
+            return new[] { 0, 1, 2, 3 };
+        }
 
         /// <summary>
-        /// Creates SPI device related to this device
-        /// </summary>
-        /// <param name="settings">The SPI settings</param>
-        /// <returns>a SPI device</returns>
-        /// <remarks>You can create either an I2C, either an SPI device.
-        /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
-        /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
-        public override SpiDevice CreateSpiDevice(SpiConnectionSettings settings) => new Ft4222Spi(settings);
+         /// Creates SPI device related to this device
+         /// </summary>
+         /// <param name="settings">The SPI settings</param>
+         /// <param name="pins">The pins used for SPI (0-3)</param>
+         /// <returns>a SPI device</returns>
+         /// <remarks>You can create either an I2C or an SPI device.
+         /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
+         /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
+        protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins)
+        {
+            return new Ft4222Spi(settings);
+        }
 
         /// <summary>
-        /// Creates GPIO driver related to this device
+        /// Creates the <see cref="Ft4222Gpio"/> controller
         /// </summary>
-        /// <returns>A GPIO Driver</returns>
-        public override GpioDriver CreateGpioDriver() => new Ft4222Gpio();
+        /// <returns>A new GPIO driver</returns>
+        protected override GpioDriver? TryCreateBestGpioDriver()
+        {
+            return new Ft4222Gpio(this);
+        }
     }
 }

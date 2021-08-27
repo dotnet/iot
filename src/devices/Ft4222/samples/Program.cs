@@ -70,7 +70,7 @@ if (key.KeyChar == '4')
 
 void TestI2c(Ft4222Device device)
 {
-    using I2cBus ftI2c = device.CreateI2cBus();
+    using I2cBus ftI2c = device.CreateOrGetI2cBus(0);
     using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
     using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
     bme280.SetPowerMode(Bmx280PowerMode.Normal);
