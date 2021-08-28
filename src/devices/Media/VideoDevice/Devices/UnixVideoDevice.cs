@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Iot.Device.Media
 {
@@ -20,6 +22,9 @@ namespace Iot.Device.Media
         private static readonly object s_initializationLock = new object();
 
         private int _deviceFileDescriptor = -1;
+        private bool _capturing;
+
+        public override event NewImageBufferReadyEvent? NewImageBufferReady;
 
         /// <summary>
         /// Path to video resources located on the platform.
@@ -30,6 +35,22 @@ namespace Iot.Device.Media
         /// The connection settings of the video device.
         /// </summary>
         public override VideoConnectionSettings Settings { get; }
+
+        /// <summary>
+        /// Returns true if the connection is already open
+        /// </summary>
+        public override bool IsOpen => _deviceFileDescriptor >= 0;
+
+        /// <summary>
+        /// Returns true if the device is already capturing.
+        /// </summary>
+        public override bool IsCapturing => _capturing;
+
+        /// <summary>
+        /// true if this VideoDevice should pool the image buffers used.
+        /// when set to true the consumer must return the image buffers to the <see cref="ArrayPool{T}"/> Shared instance
+        /// </summary>
+        public override bool ImageBufferPoolingEnabled { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="UnixVideoDevice"/> class that will use the specified settings to communicate with the video device.
@@ -56,6 +77,11 @@ namespace Iot.Device.Media
         /// <param name="path">Picture save path.</param>
         public override void Capture(string path)
         {
+            if (IsCapturing)
+            {
+                throw new IOException($"The {nameof(VideoDevice)} is already in use.");
+            }
+
             Initialize();
             SetVideoConnectionSettings();
             byte[] dataBuffer = ProcessCaptureData();
@@ -70,14 +96,21 @@ namespace Iot.Device.Media
         /// Capture a picture from the video device.
         /// </summary>
         /// <returns>Picture stream.</returns>
-        public override Stream Capture()
+        public override byte[] Capture()
         {
+            if (IsCapturing)
+            {
+                throw new IOException($"The {nameof(VideoDevice)} is already in use.");
+            }
+
             Initialize();
             SetVideoConnectionSettings();
-            byte[] dataBuffer = ProcessCaptureData();
+
+            var dataBuffer = ProcessCaptureData();
+
             Close();
 
-            return new MemoryStream(dataBuffer);
+            return dataBuffer;
         }
 
         public override void StartCaptureContinuous()
@@ -86,10 +119,26 @@ namespace Iot.Device.Media
             SetVideoConnectionSettings();
         }
 
-        public override Stream CaptureContinuous()
+        public override unsafe void CaptureContinuous(CancellationToken token)
         {
-            byte[] dataBuffer = ProcessCaptureData();
-            return new MemoryStream(dataBuffer);
+            _capturing = true;
+            fixed (V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
+            {
+                // Start data stream
+                v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
+                while (!token.IsCancellationRequested)
+                {
+                    NewImageBufferReady?.Invoke(this, GetFrameDataPooled(buffers));
+                }
+
+                // Close data stream
+                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
+
+                UnmappingFrameBuffers(buffers);
+            }
+
+            _capturing = false;
         }
 
         public override void StopCaptureContinuous()
@@ -272,6 +321,37 @@ namespace Iot.Device.Media
             V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
 
             return dataBuffer;
+        }
+
+        private unsafe NewImageBufferReadyEventArgs GetFrameDataPooled(V4l2FrameBuffer* buffers)
+        {
+            // Get one frame from the buffer
+            v4l2_buffer frame = new v4l2_buffer
+            {
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                memory = v4l2_memory.V4L2_MEMORY_MMAP,
+            };
+            V4l2Struct(V4l2Request.VIDIOC_DQBUF, ref frame);
+
+            // Get data from pointer
+            IntPtr intptr = buffers[frame.index].Start;
+            var length = (int)buffers[frame.index].Length;
+            byte[] dataBuffer = Array.Empty<byte>();
+            if (ImageBufferPoolingEnabled)
+            {
+                dataBuffer = ArrayPool<byte>.Shared.Rent(length);
+            }
+            else
+            {
+                dataBuffer = new byte[length];
+            }
+
+            Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
+
+            // Requeue the buffer
+            V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
+
+            return new NewImageBufferReadyEventArgs(dataBuffer, length);
         }
 
         private unsafe V4l2FrameBuffer[] ApplyFrameBuffers()

@@ -3,9 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Media;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -22,26 +27,16 @@ namespace CameraIoT.Controllers
     {
         private readonly ILogger<ImageController> _logger;
         private readonly Camera _camera;
-        private bool _isNewImage;
-        private byte[]? _lastImage;
 
         /// <summary>
         /// Controller creation
         /// </summary>
         /// <param name="logger">Logger</param>
         /// <param name="camera">The camera singleton</param>
-        public ImageController(ILogger<ImageController> logger, ICamera camera)
+        public ImageController(ILogger<ImageController> logger, Camera camera)
         {
             _logger = logger;
-            _camera = (Camera)camera;
-            _isNewImage = false;
-            _camera.NewImageReady += CameraNewImageReady;
-        }
-
-        private void CameraNewImageReady(object sender, NewImageReadyEventArgs e)
-        {
-            _isNewImage = true;
-            _lastImage = e.Image;
+            _camera = camera;
         }
 
         /// <summary>
@@ -53,12 +48,7 @@ namespace CameraIoT.Controllers
         {
             try
             {
-                while (!_isNewImage)
-                {
-                    Thread.Sleep(10);
-                }
-
-                return File(_lastImage, "image/jpeg");
+                return File(_camera.TakePicture(), "image/jpeg");
             }
             catch (Exception ex)
             {
@@ -68,21 +58,10 @@ namespace CameraIoT.Controllers
         }
 
         /// <summary>
-        /// Set the timezone to use on the camera http(s)://url/image/settimezone?timezon=1
-        /// </summary>
-        /// <param name="timezone">The timezone</param>
-        [HttpGet("settimezone")]
-        public void SetTimezone(int timezone)
-        {
-            _camera.Timezone = timezone;
-        }
-
-        /// <summary>
         /// Get an MJPEG stream http(s)://url/image/stream
         /// </summary>
-        /// <returns>MJPEG stream</returns>
         [HttpGet("stream")]
-        public async Task GetStream()
+        public void GetStream()
         {
             var bufferingFeature = HttpContext.Response.HttpContext.Features.Get<IHttpResponseBodyFeature>();
             bufferingFeature?.DisableBuffering();
@@ -91,20 +70,14 @@ namespace CameraIoT.Controllers
             HttpContext.Response.ContentType = "multipart/x-mixed-replace; boundary=--frame";
             HttpContext.Response.Headers.Add("Connection", "Keep-Alive");
             HttpContext.Response.Headers.Add("CacheControl", "no-cache");
+            _camera.NewImageReady += WriteBufferBody;
+
             try
             {
                 _logger.LogWarning($"Entering streaming loop");
-
+                _camera.StartCapture();
                 while (!HttpContext.RequestAborted.IsCancellationRequested)
                 {
-                    while (!_isNewImage)
-                    {
-                        Thread.Sleep(10);
-                    }
-
-                    await HttpContext.Response.BodyWriter.WriteAsync(CreateHeader(_lastImage!.Length));
-                    await HttpContext.Response.BodyWriter.WriteAsync(_lastImage);
-                    await HttpContext.Response.BodyWriter.WriteAsync(CreateFooter());
                 }
             }
             catch (Exception ex)
@@ -117,7 +90,85 @@ namespace CameraIoT.Controllers
                 _logger.LogInformation("End of streaming");
             }
 
-            _logger.LogWarning($"Lets send the content now");
+            _camera.NewImageReady -= WriteBufferBody;
+            _camera.StopCapture();
+        }
+
+        private async void WriteBufferBody(object sender, NewImageBufferReadyEventArgs e)
+        {
+            try
+            {
+                await HttpContext.Response.BodyWriter.WriteAsync(CreateHeader(e.Length));
+                await HttpContext.Response.BodyWriter.WriteAsync(e.ImageBuffer.AsMemory().Slice(0, e.Length));
+                await HttpContext.Response.BodyWriter.WriteAsync(CreateFooter());
+            }
+            catch (ObjectDisposedException)
+            {
+                // ignore this as its thrown when the stream is stopped
+            }
+
+            ArrayPool<byte>.Shared.Return(e.ImageBuffer);
+        }
+
+        /// <summary>
+        /// Get an modified MJPEG stream http(s)://url/image/modified
+        /// </summary>
+        [HttpGet("modified")]
+        public void GetModifiedStream()
+        {
+            var bufferingFeature = HttpContext.Response.HttpContext.Features.Get<IHttpResponseBodyFeature>();
+            bufferingFeature?.DisableBuffering();
+
+            HttpContext.Response.StatusCode = 200;
+            HttpContext.Response.ContentType = "multipart/x-mixed-replace; boundary=--frame";
+            HttpContext.Response.Headers.Add("Connection", "Keep-Alive");
+            HttpContext.Response.Headers.Add("CacheControl", "no-cache");
+            _camera.NewImageReady += WriteModifiedBufferBody;
+
+            try
+            {
+                _logger.LogWarning($"Entering streaming loop");
+                _camera.StartCapture();
+                while (!HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Exception in streaming: {ex}");
+            }
+            finally
+            {
+                HttpContext.Response.Body.Close();
+                _logger.LogInformation("End of streaming");
+            }
+
+            _camera.NewImageReady -= WriteModifiedBufferBody;
+            _camera.StopCapture();
+        }
+
+        private async void WriteModifiedBufferBody(object sender, NewImageBufferReadyEventArgs e)
+        {
+            try
+            {
+                // using System.Drawing has serious performance implications in the context of video streaming from low powered devices,
+                // here is a 'simple' example of modifying the image, which will not be fast enough in most use cases.
+                using var stream = new MemoryStream(e.ImageBuffer.AsMemory().Slice(0, e.Length).ToArray());
+                Bitmap myBitmap = new Bitmap(stream);
+                Graphics g = Graphics.FromImage(myBitmap);
+                g.DrawString(DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), new Font("Tahoma", 20), Brushes.White, new PointF(0, 0));
+                using var ms = new MemoryStream();
+                myBitmap.Save(ms, ImageFormat.Jpeg);
+                await HttpContext.Response.BodyWriter.WriteAsync(CreateHeader(e.Length));
+                await HttpContext.Response.BodyWriter.WriteAsync(ms.ToArray());
+                await HttpContext.Response.BodyWriter.WriteAsync(CreateFooter());
+            }
+            catch (ObjectDisposedException)
+            {
+                // ignore this as its thrown when the stream is stopped
+            }
+
+            ArrayPool<byte>.Shared.Return(e.ImageBuffer);
         }
 
         /// <summary>
