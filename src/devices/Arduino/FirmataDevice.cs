@@ -661,8 +661,9 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
-            // Try 3 times (because we have to make sure the receiver's input queue is properly synchronized)
-            for (int i = 0; i < 3; i++)
+            // Try a few times (because we have to make sure the receiver's input queue is properly synchronized and the device
+            // has properly booted)
+            for (int i = 0; i < 20; i++)
             {
                 lock (_synchronisationLock)
                 {
@@ -680,8 +681,9 @@ namespace Iot.Device.Arduino
 
                     if (_actualFirmataProtocolMajorVersion == 0)
                     {
-                        // Something went wrong
-                        Thread.Sleep(20);
+                        // The device may be resetting itself as part of opening the serial port (this is the typical
+                        // behavior of the Arduino Uno, but not of most newer boards)
+                        Thread.Sleep(100);
                         continue;
                     }
 
@@ -714,8 +716,9 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.REPORT_FIRMWARE);
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     bool result = _dataReceived.WaitOne(TimeSpan.FromSeconds(FIRMATA_INIT_TIMEOUT_SECONDS));
-                    if (result == false)
+                    if (result == false || _firmwareVersionMajor == 0)
                     {
+                        Thread.Sleep(100);
                         continue;
                     }
 
