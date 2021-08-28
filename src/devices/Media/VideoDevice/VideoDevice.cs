@@ -2,16 +2,57 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace Iot.Device.Media
 {
+    /// <summary>
+    /// New image buffer ready event argument
+    /// </summary>
+    public class NewImageBufferReadyEventArgs
+    {
+        /// <summary>
+        /// Constructor for a new image ready event argument
+        /// </summary>
+        /// <param name="imageBuffer">The image buffer</param>
+        /// <param name="length">The length of the image inside the buffer</param>
+        public NewImageBufferReadyEventArgs(byte[] imageBuffer, int length)
+        {
+            ImageBuffer = imageBuffer;
+            Length = length;
+        }
+
+        /// <summary>
+        /// Byte array buffer containing the image. The buffer may be larger than the image
+        /// </summary>
+        public byte[] ImageBuffer { get; }
+
+        /// <summary>
+        /// The length of the image inside the buffer
+        /// </summary>
+        public int Length { get; }
+    }
+
     /// <summary>
     /// The communications channel to a video device.
     /// </summary>
     public abstract partial class VideoDevice : IDisposable
     {
+        /// <summary>
+        /// New image buffer ready event
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="e">The new image ready event argument</param>
+        public delegate void NewImageBufferReadyEvent(object sender, NewImageBufferReadyEventArgs e);
+
+        /// <summary>
+        /// Event for a new image buffer ready
+        /// </summary>
+        public abstract event NewImageBufferReadyEvent? NewImageBufferReady;
+
         /// <summary>
         /// Create a communications channel to a video device running on Unix.
         /// </summary>
@@ -30,6 +71,22 @@ namespace Iot.Device.Media
         public abstract VideoConnectionSettings Settings { get; }
 
         /// <summary>
+        /// Returns true if the connection to the device is already open.
+        /// </summary>
+        public abstract bool IsOpen { get; }
+
+        /// <summary>
+        /// Returns true if the device is already capturing.
+        /// </summary>
+        public abstract bool IsCapturing { get; }
+
+        /// <summary>
+        /// true if this VideoDevice should pool the image buffers used.
+        /// when set to true the consumer must return the image buffers to the <see cref="ArrayPool{T}"/> Shared instance
+        /// </summary>
+        public abstract bool ImageBufferPoolingEnabled { get; set; }
+
+        /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
         /// <param name="path">Picture save path.</param>
@@ -38,8 +95,8 @@ namespace Iot.Device.Media
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
-        /// <returns>Picture stream.</returns>
-        public abstract Stream Capture();
+        /// <returns>Picture byte[].</returns>
+        public abstract byte[] Capture();
 
         /// <summary>
         /// Start continuous capture
@@ -49,8 +106,7 @@ namespace Iot.Device.Media
         /// <summary>
         /// The continuous capture stream
         /// </summary>
-        /// <returns></returns>
-        public abstract Stream CaptureContinuous();
+        public abstract void CaptureContinuous(CancellationToken token);
 
         /// <summary>
         /// Stop the continuous capture

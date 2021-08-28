@@ -38,6 +38,7 @@ device.Capture($"{path}/jpg_direct_output.jpg");
 device.Settings.PixelFormat = PixelFormat.YUV420;
 
 // Convert pixel format
-Color[] colors = VideoDevice.Yv12ToRgb(device.Capture(), settings.CaptureSize);
+using var stream = new MemoryStream(device.Capture());
+Color[] colors = VideoDevice.Yv12ToRgb(stream, settings.CaptureSize);
 Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
 bitmap.Save($"{path}/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
