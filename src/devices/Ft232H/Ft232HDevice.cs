@@ -182,6 +182,11 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc />
         protected override I2cBusManager CreateI2cBusCore(int busNumber, int[]? pins)
         {
+            if (busNumber != 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(busNumber));
+            }
+
             return new I2cBusManager(this, busNumber, pins, new Ft232HI2cBus(this));
         }
 
