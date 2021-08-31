@@ -14,7 +14,7 @@
 
 <ItemGroup>
     <Compile Include="GrovePi.cs" />
-    <Compile Include="Models\*.cs" />    
+    <Compile Include="Models\*.cs" />
     <Compile Include="Sensors\*.cs" />
   </ItemGroup>
 
