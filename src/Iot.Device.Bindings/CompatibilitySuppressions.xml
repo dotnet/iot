@@ -721,4 +721,16 @@
     <Right>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP1002</DiagnosticId>
+    <Target>Windows.Foundation.FoundationContract.dll</Target>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP1002</DiagnosticId>
+    <Target>Windows.Devices.DevicesLowLevelContract.dll</Target>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP1002</DiagnosticId>
+    <Target>Windows.Foundation.UniversalApiContract.dll</Target>
+  </Suppression>
 </Suppressions>
