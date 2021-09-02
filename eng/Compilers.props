@@ -2,7 +2,8 @@
   <PropertyGroup>
     <!-- This is set to false by default when using the compilers' NuGet package. -->
     <UseSharedCompilation>true</UseSharedCompilation>
-
+    <!-- Use the inbox compilers that come with the SDK -->
+    <UseSdkCompilers>true</UseSdkCompilers>
     <CompilerVersion>3.11.0</CompilerVersion>
   </PropertyGroup>
 
