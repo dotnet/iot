@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
+    <!-- Disabling the check for End of live TFMs since we still target netcoreapp 2.1 -->
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
     <MicrosoftDotNetGenAPIPackageVersion>6.0.0-beta.21451.3</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
