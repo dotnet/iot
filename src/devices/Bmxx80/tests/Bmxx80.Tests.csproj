@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
     <TargetFrameworks Condition="'$(OS)' == 'Windows_NT'">$(TargetFrameworks);net48</TargetFrameworks>
@@ -7,11 +6,7 @@
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Bmxx80.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj">
-    </ProjectReference>
   </ItemGroup>
-
 </Project>

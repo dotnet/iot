@@ -1,18 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="Bmp180.cs" />
     <Compile Include="CalibrationData.cs" />
     <Compile Include="Register.cs" />
     <Compile Include="Sampling.cs" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
-    <None Include="README.md"/>
+    <None Include="README.md" />
   </ItemGroup>
-
 </Project>

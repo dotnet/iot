@@ -1,18 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Bh1750fvi.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="I2cAddress.cs" />
     <Compile Include="MeasuringMode.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <None Remove="README.md" />
     <None Remove="sensor.jpg" />

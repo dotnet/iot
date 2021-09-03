@@ -1,19 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Register.cs" />
     <Compile Include="Ags01db.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <None Remove="README.md" />
     <None Remove="sensor.jpg" />
   </ItemGroup>
-
 </Project>

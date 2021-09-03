@@ -1,15 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
-<ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+  <ItemGroup>
     <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <Compile Include="CharlieplexSegment.cs" />
     <Compile Include="CharlieplexSegmentNode.cs" />
-</ItemGroup>
-
+  </ItemGroup>
 </Project>

@@ -1,22 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="Gpio.cs" />
     <Compile Include="PinMapping.cs" />
     <Compile Include="RgbLedMatrix.cs" />
     <Compile Include="../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
-
 </Project>

@@ -1,10 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="Bme280.cs" />
     <Compile Include="Bme680.cs" />
@@ -32,10 +30,8 @@
     <Compile Include="Register\Bme280Register.cs" />
     <Compile Include="Sampling.cs" />
     <Compile Include="StandbyTime.cs" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <None Remove="README.md" />
   </ItemGroup>
