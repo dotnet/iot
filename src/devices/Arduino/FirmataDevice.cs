@@ -61,7 +61,7 @@ namespace Iot.Device.Arduino
 
         public event Action<ReplyType, byte[]>? OnSysexReply;
 
-        public FirmataDevice()
+        public FirmataDevice(List<SupportedMode> supportedModes)
         {
             _firmwareVersionMajor = 0;
             _firmwareVersionMinor = 0;
@@ -79,6 +79,7 @@ namespace Iot.Device.Arduino
             _lastRequestId = 1;
             _firmwareName = string.Empty;
             _lastRawLine = new StringBuilder();
+            SupportedModes = supportedModes;
         }
 
         internal List<SupportedPinConfiguration> PinConfigurations
@@ -88,6 +89,8 @@ namespace Iot.Device.Arduino
                 return _supportedPinConfigurations;
             }
         }
+
+        internal List<SupportedMode> SupportedModes { get; set; }
 
         public void Open(Stream stream)
         {
@@ -392,7 +395,7 @@ namespace Iot.Device.Arduino
                                     }
 
                                     int resolution = raw_data[idx++];
-                                    SupportedMode? sm = ArduinoBoard.KnownModes.FirstOrDefault(x => x.Value == mode);
+                                    SupportedMode? sm = SupportedModes.FirstOrDefault(x => x.Value == mode);
                                     if (sm == SupportedMode.AnalogInput)
                                     {
                                         currentPin.PinModes.Add(SupportedMode.AnalogInput);
