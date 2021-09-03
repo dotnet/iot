@@ -1,15 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Card\CardRfid.csproj" />
     <ProjectReference Include="..\Card\Mifare\Mifare.csproj" />
@@ -19,5 +15,4 @@
     <Compile Include="RegisterElement\*.cs" />
     <None Include="README.md" />
   </ItemGroup>
-
 </Project>

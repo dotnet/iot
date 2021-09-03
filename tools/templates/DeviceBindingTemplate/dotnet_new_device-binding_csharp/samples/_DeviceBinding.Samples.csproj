@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../_DeviceBinding.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

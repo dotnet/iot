@@ -1,22 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="../Interop/Unix/Interop.Libraries.cs" />
     <Compile Include="../Interop/Unix/Libc/Interop.libc.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Remove="samples\**" />
     <EmbeddedResource Remove="samples\**" />
     <None Remove="samples\**" />
   </ItemGroup>
-
 </Project>
