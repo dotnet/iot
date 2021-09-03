@@ -6,9 +6,9 @@ How to Contribute
 ## Recommended Software
 1. (If building on Windows) - **[Visual Studio 2019](https://visualstudio.microsoft.com/vs/preview/)** (Community, Professional, Enterprise) with the latest updates. This is not required for building the repo, but it will help a lot if the intent is to change the code or add new bindings.
 1. **.NET Core SDK** To ensure the install worked, make sure you can call `dotnet` tool from a command prompt. We now require .NET 6 preview versions of the SDKs because of our central infrastructure, you can find the installers per platform here:
- - For Windows: [Link to .NET 6 preview installer for Windows](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-preview.1.21103.13/dotnet-sdk-6.0.100-preview.1.21103.13-win-x64.exe) **This is important as you won't be able to open projects on Visual Studio if you don't install this machine-wide**
- - For Linux: [Link to .NET 6 preview SDK for Linux](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-preview.1.21103.13/dotnet-sdk-6.0.100-preview.1.21103.13-linux-x64.tar.gz)
- - For OSX: [Link to .NET 6 preview SDK for OSX](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-preview.1.21103.13/dotnet-sdk-6.0.100-preview.1.21103.13-osx-x64.tar.gz)
+ - For Windows: [Link to .NET 6 preview installer for Windows](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-rc.1.21430.12/dotnet-sdk-6.0.100-rc.1.21430.12-win-x64.exe) **This is important as you won't be able to open projects on Visual Studio if you don't install this machine-wide**
+ - For Linux: [Link to .NET 6 preview SDK for Linux](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-rc.1.21430.12/dotnet-sdk-6.0.100-rc.1.21430.12-linux-x64.tar.gz)
+ - For OSX: [Link to .NET 6 preview SDK for OSX](https://dotnetcli.azureedge.net/dotnet/Sdk/6.0.100-rc.1.21430.12/dotnet-sdk-6.0.100-rc.1.21430.12-osx-x64.tar.gz)
 
 ## Building from the Command Line
 
