@@ -98,7 +98,8 @@ namespace Iot.Device.Pn532
         /// Create a PN532 using Serial Port
         /// </summary>
         /// <param name="portName">The port name</param>
-        public Pn532(string portName)
+        /// <param name="checkVersion">Check the PN532 version. Some copies do not return a proper number.</param>
+        public Pn532(string portName, bool checkVersion = true)
         {
             _logger = this.GetCurrentClassLogger();
 
@@ -123,7 +124,8 @@ namespace Iot.Device.Pn532
             bool ret = SetSecurityAccessModule();
             _logger.LogInformation($"Setting SAM changed: {ret}");
             // Check the version
-            if (!IsPn532())
+            var ver = IsPn532();
+            if (checkVersion && !ver)
             {
                 throw new Exception("Can't find a PN532");
             }
@@ -140,7 +142,8 @@ namespace Iot.Device.Pn532
         /// <param name="pinChipSelect">The GPIO pin number for the chip select</param>
         /// <param name="controller">A GPIO controller</param>
         /// <param name="shouldDispose">Dispose the GPIO Controller at the end</param>
-        public Pn532(SpiDevice spiDevice, int pinChipSelect, GpioController? controller = null, bool shouldDispose = false)
+        /// /// <param name="checkVersion">Check the PN532 version. Some copies do not return a proper number.</param>
+        public Pn532(SpiDevice spiDevice, int pinChipSelect, GpioController? controller = null, bool shouldDispose = false, bool checkVersion = true)
         {
             _logger = this.GetCurrentClassLogger();
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
@@ -156,7 +159,8 @@ namespace Iot.Device.Pn532
             bool ret = SetSecurityAccessModule();
             _logger.LogInformation($"Setting SAM changed: {ret}");
             // Check the version
-            if (!IsPn532())
+            var ver = IsPn532();
+            if (checkVersion && !ver)
             {
                 throw new Exception("Can't find a PN532");
             }
@@ -172,7 +176,8 @@ namespace Iot.Device.Pn532
         /// Create a PN532 using I2C
         /// </summary>
         /// <param name="i2cDevice">The I2C device</param>
-        public Pn532(I2cDevice i2cDevice)
+        /// /// <param name="checkVersion">Check the PN532 version. Some copies do not return a proper number.</param>
+        public Pn532(I2cDevice i2cDevice, bool checkVersion = true)
         {
             _logger = this.GetCurrentClassLogger();
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
@@ -180,7 +185,8 @@ namespace Iot.Device.Pn532
             bool ret = SetSecurityAccessModule();
             _logger.LogInformation($"Setting SAM changed: {ret}");
             // Check the version
-            if (!IsPn532())
+            var ver = IsPn532();
+            if (checkVersion && !ver)
             {
                 throw new Exception("Can't find a PN532");
             }
