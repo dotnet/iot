@@ -315,7 +315,7 @@ namespace Iot.Device.Ft232H
         /// Multi-Protocol Synchronous Serial Engine (MPSSE). The purpose of the MPSSE command processor is to
         /// communicate with devices which use synchronous protocols (such as JTAG or SPI) in an efficient manner.
         /// </summary>
-        private void SetupMpsseMode()
+        internal void SetupMpsseMode()
         {
             // Seems that we have to send a wrong command to get the MPSSE mode working
             // First with 0xAA
@@ -501,6 +501,28 @@ namespace Iot.Device.Ft232H
         #endregion
 
         #region gpio
+
+        internal void InitializeGpio()
+        {
+            if (IsI2cModeEnabled || IsSpiModeEnabled)
+            {
+                return;
+            }
+
+            // Reset
+            var ftStatus = FtFunction.FT_SetBitMode(_ftHandle, 0x00, 0x00);
+            // Enable MPSSE mode
+            ftStatus = FtFunction.FT_SetBitMode(_ftHandle, 0x00, 0x02);
+            if (ftStatus != FtStatus.Ok)
+            {
+                throw new IOException($"Failed to setup device {Description}, status: {ftStatus} in MPSSE mode");
+            }
+
+            // 50 ms according to thr doc for all USB to complete
+            Thread.Sleep(50);
+            DiscardInput();
+            SetupMpsseMode();
+        }
 
         internal byte GetGpioValuesLow()
         {

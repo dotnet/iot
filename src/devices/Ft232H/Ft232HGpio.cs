@@ -30,6 +30,7 @@ namespace Iot.Device.Ft232H
             DeviceInformation = deviceInformation;
             // Open device
             DeviceInformation.GetHandle();
+            DeviceInformation.InitializeGpio();
         }
 
         /// <inheritdoc/>

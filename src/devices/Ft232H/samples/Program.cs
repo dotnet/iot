@@ -33,8 +33,8 @@ if (devices.Count == 0)
 }
 
 Ft232HDevice ft232h = Ft232HDevice.GetFt232H()[0];
-// Un comment the test you want to run
-// TestSpi(device);
+// Uncomment the test you want to run
+// TestSpi(ft232h);
 TestGpio(ft232h);
 TestI2c(ft232h);
 
@@ -65,7 +65,7 @@ void TestGpio(Ft232HDevice ft232h)
     gpioController.OpenPin(gpio5);
     gpioController.SetPinMode(gpio5, PinMode.Output);
 
-    Console.WriteLine("Blinking GPIO2");
+    Console.WriteLine("Blinking GPIO5 (D5)");
     while (!Console.KeyAvailable)
     {
         gpioController.Write(gpio5, PinValue.High);
@@ -75,7 +75,7 @@ void TestGpio(Ft232HDevice ft232h)
     }
 
     Console.ReadKey();
-    Console.WriteLine("Reading GPIO2 state");
+    Console.WriteLine("Reading GPIO5 (D5) state");
     gpioController.SetPinMode(gpio5, PinMode.Input);
     while (!Console.KeyAvailable)
     {
