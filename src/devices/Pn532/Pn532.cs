@@ -123,9 +123,8 @@ namespace Iot.Device.Pn532
             // Set the SAM
             bool ret = SetSecurityAccessModule();
             _logger.LogInformation($"Setting SAM changed: {ret}");
-            // Check the version
-            var ver = IsPn532();
-            if (checkVersion && !ver)
+            // Check the version first in order to initialize the device
+            if (!IsPn532() && checkVersion)
             {
                 throw new Exception("Can't find a PN532");
             }
@@ -158,9 +157,8 @@ namespace Iot.Device.Pn532
             // returns false, some timeout appear. So we will need to apply a second time
             bool ret = SetSecurityAccessModule();
             _logger.LogInformation($"Setting SAM changed: {ret}");
-            // Check the version
-            var ver = IsPn532();
-            if (checkVersion && !ver)
+            // Check the version first in order to initialize the device
+            if (!IsPn532() && checkVersion)
             {
                 throw new Exception("Can't find a PN532");
             }
@@ -184,9 +182,8 @@ namespace Iot.Device.Pn532
             WakeUp();
             bool ret = SetSecurityAccessModule();
             _logger.LogInformation($"Setting SAM changed: {ret}");
-            // Check the version
-            var ver = IsPn532();
-            if (checkVersion && !ver)
+            // Check the version first in order to initialize the device
+            if (!IsPn532() && checkVersion)
             {
                 throw new Exception("Can't find a PN532");
             }
