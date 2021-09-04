@@ -1,16 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <None Include="README.md" />
   </ItemGroup>
-
   <ItemGroup>
     <Compile Include="BrickPi3.cs" />
     <Compile Include="Models\*.cs" />
@@ -18,5 +14,4 @@
     <Compile Include="Movement\*.cs" />
     <Compile Include="Sensors\*.cs" />
   </ItemGroup>
-
 </Project>

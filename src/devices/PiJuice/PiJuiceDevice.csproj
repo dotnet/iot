@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
-	  <EnableDefaultItems>false</EnableDefaultItems>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <Compile Include="*.cs" />
     <Compile Remove="samples\**" />
@@ -14,5 +11,4 @@
     <None Include="README.md" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" />
   </ItemGroup>
-  
 </Project>

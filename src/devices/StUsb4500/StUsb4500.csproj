@@ -1,11 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="Enumerations\StUsb4500Register.cs" />
@@ -20,7 +18,5 @@
     <Compile Include="Objects\UsbPdMessageHeader.cs" />
     <Compile Include="Objects\VariableSupplyObject.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
-
 </Project>

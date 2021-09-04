@@ -1,17 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <RootNamespace>Iot.Device.Arduino</RootNamespace>
   </PropertyGroup>
-
- <ItemGroup>
+  <ItemGroup>
     <Compile Include="*.cs" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Board\Board.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />

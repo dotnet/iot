@@ -1,18 +1,13 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-	<EnableDefaultItems>false</EnableDefaultItems>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="PiJuiceDevice.sample.cs" />
   </ItemGroup>
-  
-    <ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\PiJuiceDevice.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
-  
 </Project>

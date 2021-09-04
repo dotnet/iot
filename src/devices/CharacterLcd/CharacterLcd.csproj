@@ -1,10 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
     <Compile Include="Flags.cs" />
@@ -23,14 +21,11 @@
     <Compile Include="LineWrapMode.cs" />
     <Compile Include="Registers.cs" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BigFontMap.txt" />
   </ItemGroup>
-
 </Project>

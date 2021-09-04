@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
-    <ProjectReference Include="$(MainLibraryPath)/System.Device.Gpio.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="../Tlc1543.csproj" />
     <ProjectReference Include="../../SoftwareSpi/SoftwareSpi.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
-
 </Project>
