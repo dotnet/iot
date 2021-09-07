@@ -5,10 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Iot.Device.Ft4222
+namespace Iot.Device.FtCommon
 {
     /// <summary>
     /// Common static functions for the FT4222
@@ -16,7 +17,7 @@ namespace Iot.Device.Ft4222
     public class FtCommon
     {
         /// <summary>
-        /// Returns the list of FT4222 connected
+        /// Returns the list of FTDI device connected
         /// </summary>
         /// <returns>A list of devices connected</returns>
         public static List<FtDevice> GetDevices()
@@ -31,7 +32,7 @@ namespace Iot.Device.Ft4222
             Debug.WriteLine($"Number of devices: {numOfDevices}");
             if (numOfDevices == 0)
             {
-                throw new IOException($"No device found");
+                return devInfos;
             }
 
             Span<byte> sernum = stackalloc byte[16];
@@ -63,6 +64,23 @@ namespace Iot.Device.Ft4222
             return devInfos;
         }
 
+        /// <summary>
+        /// Get specific list of devices
+        /// </summary>
+        /// <param name="ftDeviceTypes">The types of devices</param>
+        /// <returns></returns>
+        internal static List<FtDevice> GetDevices(FtDeviceType[] ftDeviceTypes)
+        {
+            List<FtDevice> ftdevices = new List<FtDevice>();
+            var devices = GetDevices();
+            foreach (var deviceType in ftDeviceTypes)
+            {
+                ftdevices.AddRange(devices.Where(m => m.Type == deviceType));
+            }
+
+            return ftdevices;
+        }
+
         private static int FindFirstZero(ReadOnlySpan<byte> span)
         {
             for (int i = 0; i < span.Length; i++)
@@ -74,57 +92,6 @@ namespace Iot.Device.Ft4222
             }
 
             return span.Length;
-        }
-
-        /// <summary>
-        /// Get the versions of the chipset and dll
-        /// </summary>
-        /// <returns>Both the chipset and dll versions</returns>
-        public static (Version? Chip, Version? Dll) GetVersions()
-        {
-            // First, let's find a device
-            var devices = GetDevices();
-            if (devices.Count == 0)
-            {
-                return (null, null);
-            }
-
-            // Check if the first not open device
-            int idx = 0;
-            for (idx = 0; idx < devices.Count; idx++)
-            {
-                if ((devices[idx].Flags & FtFlag.PortOpened) != FtFlag.PortOpened)
-                {
-                    break;
-                }
-            }
-
-            if (idx == devices.Count)
-            {
-                throw new InvalidOperationException($"Can't find any open device to check the versions");
-            }
-
-            var ftStatus = FtFunction.FT_OpenEx(devices[idx].LocId, FtOpenType.OpenByLocation, out SafeFtHandle ftHandle);
-            if (ftStatus != FtStatus.Ok)
-            {
-                throw new IOException($"Can't open the device to check chipset version, status: {ftStatus}");
-            }
-
-            FtVersion ftVersion;
-            ftStatus = FtFunction.FT4222_GetVersion(ftHandle, out ftVersion);
-            if (ftStatus != FtStatus.Ok)
-            {
-                throw new IOException($"Can't find versions of chipset and FT4222, status: {ftStatus}");
-            }
-
-            ftHandle.Dispose();
-
-            Version chip = new Version((int)(ftVersion.ChipVersion >> 24), (int)((ftVersion.ChipVersion >> 16) & 0xFF),
-                (int)((ftVersion.ChipVersion >> 8) & 0xFF), (int)(ftVersion.ChipVersion & 0xFF));
-            Version dll = new Version((int)(ftVersion.DllVersion >> 24), (int)((ftVersion.DllVersion >> 16) & 0xFF),
-                (int)((ftVersion.DllVersion >> 8) & 0xFF), (int)(ftVersion.DllVersion & 0xFF));
-
-            return (chip, dll);
         }
     }
 }

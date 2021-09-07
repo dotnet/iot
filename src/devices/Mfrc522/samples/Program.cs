@@ -7,9 +7,11 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Text;
 using System.Threading;
+using Iot.Device.Board;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Card.Ultralight;
 using Iot.Device.Ft4222;
+using Iot.Device.FtCommon;
 using Iot.Device.Mfrc522;
 using Iot.Device.Ndef;
 using Iot.Device.Rfid;
@@ -28,6 +30,16 @@ if (hardchoice.KeyChar is not ('1' or '2'))
     return;
 }
 
+Board? board = null;
+if (hardchoice.KeyChar == '1')
+{
+    board = Board.Create();
+}
+else
+{
+    board = Ft4222Device.GetFt4222()[0];
+}
+
 Console.WriteLine("How do you want to connect MFRC5222?");
 Console.WriteLine("  1. SPI");
 Console.WriteLine("  2. I2C");
@@ -42,7 +54,7 @@ if (connectionChoice.KeyChar is not ('1' or '2' or '3'))
 
 // Either create a default GPIO controller if running on a Raspberry PI or equivalent
 // Either create an FT4222 one
-GpioController gpioController = hardchoice.KeyChar == '1' ? new GpioController() : new GpioController(PinNumberingScheme.Board, new Ft4222Gpio());
+GpioController gpioController = board.CreateGpioController();
 // Using GPIO4 for Raspberry PI or equivalent or 2 for FT4222;
 int pinReset = hardchoice.KeyChar == '1' ? 4 : 2;
 switch (connectionChoice.KeyChar)
@@ -52,7 +64,7 @@ switch (connectionChoice.KeyChar)
         // Here you can use as well MfRc522.MaximumSpiClockFrequency which is 10_000_000
         // Anything lower will work as well
         connection.ClockFrequency = 5_000_000;
-        SpiDevice spi = hardchoice.KeyChar == '1' ? SpiDevice.Create(connection) : new Ft4222Spi(connection);
+        SpiDevice spi = board.CreateSpiDevice(connection);
         mfrc522 = new(spi, pinReset, gpioController, false);
         break;
     case '2':
@@ -61,7 +73,8 @@ switch (connectionChoice.KeyChar)
         try
         {
             int i2cAddress = Convert.ToInt32(i2cAddChoice);
-            I2cDevice i2c = hardchoice.KeyChar == '1' ? I2cDevice.Create(new I2cConnectionSettings(1, i2cAddress)) : FtCommon.GetDevices()[0].CreateI2cBus().CreateDevice(i2cAddress);
+            I2cConnectionSettings settings = new I2cConnectionSettings(board.GetDefaultI2cBusNumber(), i2cAddress);
+            I2cDevice i2c = board.CreateI2cDevice(settings);
             mfrc522 = new(i2c, pinReset, gpioController, false);
         }
         catch (Exception)
@@ -113,6 +126,8 @@ else
     Console.WriteLine("Mifare card detected, dumping the memory.");
     ProcessMifare();
 }
+
+board.Dispose();
 
 void ProcessMifare()
 {

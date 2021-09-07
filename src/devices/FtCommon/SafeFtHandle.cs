@@ -4,7 +4,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Iot.Device.Ft4222
+namespace Iot.Device.FtCommon
 {
     internal class SafeFtHandle : SafeHandle
     {
@@ -17,8 +17,7 @@ namespace Iot.Device.Ft4222
 
         protected override bool ReleaseHandle()
         {
-            var ftStatus = FtFunction.FT4222_UnInitialize(handle);
-            ftStatus = FtFunction.FT_Close(handle);
+            var ftStatus = FtFunction.FT_Close(handle);
             return ftStatus == FtStatus.Ok;
         }
     }
