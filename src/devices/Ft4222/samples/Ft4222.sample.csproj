@@ -4,7 +4,6 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Board\Board.csproj" />
     <ProjectReference Include="..\Ft4222.csproj" />
     <ProjectReference Include="..\..\Bno055\Bno055.csproj" />

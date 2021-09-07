@@ -11,8 +11,4 @@
     <ProjectReference Include="..\Ft232H.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-  </ItemGroup>
-
 </Project>
