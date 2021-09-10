@@ -24,13 +24,13 @@ namespace System.Device.Gpio.Drivers
 
         private static readonly int s_pinOffset = ReadOffset();
 
-        private readonly CancellationTokenSource _eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
         private int _pollFileDescriptor = -1;
         private Thread? _eventDetectionThread;
         private int _pinsToDetectEventsCount;
+        private CancellationTokenSource? _eventThreadCancellationTokenSource;
 
         private static int ReadOffset()
         {
@@ -69,8 +69,6 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
             }
-
-            _eventThreadCancellationTokenSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -518,7 +516,11 @@ namespace System.Device.Gpio.Drivers
                 {
                     try
                     {
-                        _eventThreadCancellationTokenSource.Cancel();
+                        if (_eventThreadCancellationTokenSource != null)
+                        {
+                            _eventThreadCancellationTokenSource.Cancel();
+                            _eventThreadCancellationTokenSource.Dispose();
+                        }
                     }
                     catch (ObjectDisposedException)
                     {
@@ -543,8 +545,11 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
-                    _eventThreadCancellationTokenSource.Cancel();
-                    _eventThreadCancellationTokenSource.Dispose();
+                    if (_eventThreadCancellationTokenSource != null)
+                    {
+                        _eventThreadCancellationTokenSource.Cancel();
+                        _eventThreadCancellationTokenSource.Dispose();
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -618,12 +623,18 @@ namespace System.Device.Gpio.Drivers
                 {
                     IsBackground = true
                 };
+                _eventThreadCancellationTokenSource = new CancellationTokenSource();
                 _eventDetectionThread.Start();
             }
         }
 
         private void DetectEvents()
         {
+            if (_eventThreadCancellationTokenSource == null)
+            {
+                throw new InvalidOperationException("Cannot start to detect events when CancellationTokenSource is null.");
+            }
+
             while (_pinsToDetectEventsCount > 0)
             {
                 try
