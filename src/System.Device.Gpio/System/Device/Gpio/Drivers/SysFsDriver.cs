@@ -630,7 +630,12 @@ namespace System.Device.Gpio.Drivers
 
         private void DetectEvents()
         {
-            while (_pinsToDetectEventsCount > 0 && _eventThreadCancellationTokenSource != null)
+            if (_eventThreadCancellationTokenSource == null)
+            {
+                throw new InvalidOperationException("Cannot start to detect events when CancellationTokenSource is null.");
+            }
+
+            while (_pinsToDetectEventsCount > 0)
             {
                 try
                 {
