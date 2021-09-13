@@ -107,7 +107,7 @@ namespace Iot.Device.Ili9341
         private (byte Low, byte High) Color565(Color color)
         {
             // get the top 5 MSB of the blue or red value
-            UInt16 retval = (UInt16)(color.B >> 3);
+            UInt16 retval = (UInt16)(color.R >> 3);
             // shift right to make room for the green Value
             retval <<= 6;
             // combine with the 6 MSB if the green value
@@ -115,7 +115,7 @@ namespace Iot.Device.Ili9341
             // shift right to make room for the red or blue Value
             retval <<= 5;
             // combine with the 6 MSB if the red or blue value
-            retval |= (UInt16)(color.R >> 3);
+            retval |= (UInt16)(color.B >> 3);
             return ((byte)(retval >> 8), (byte)(retval & 0xFF));
         }
 
