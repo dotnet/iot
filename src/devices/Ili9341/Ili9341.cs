@@ -190,12 +190,7 @@ namespace Iot.Device.Ili9341
         /// <param name="commandParameters">parameteters for the command to be sent</param>
         private void SendCommand(Ili9341Command command, params byte[] commandParameters)
         {
-            Span<byte> paramSpan = stackalloc byte[commandParameters.Length];
-            for (int i = 0; i < commandParameters.Length; paramSpan[i] = commandParameters[i], i++)
-            {
-            }
-
-            SendCommand(command, paramSpan);
+            SendCommand(command, commandParameters.AsSpan());
         }
 
         /// <summary>

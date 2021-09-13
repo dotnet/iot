@@ -4,7 +4,7 @@
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <!--Disabling default items so samples source won't get built by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
-    <LangVersion>8</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
