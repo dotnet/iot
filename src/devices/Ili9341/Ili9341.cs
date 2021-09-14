@@ -172,6 +172,55 @@ namespace Iot.Device.Ili9341
         }
 
         /// <summary>
+        /// This command turns the backlight panel off.
+        /// </summary>
+        public void TurnBacklightOn()
+        {
+            if (_backlitPin < 0)
+            {
+                throw new InvalidOperationException("Backlight pin not set");
+            }
+
+            _gpioDevice.Write(_backlitPin, PinValue.High);
+        }
+
+        /// <summary>
+        /// This command turns the backlight panel off.
+        /// </summary>
+        public void TurnBacklightOff()
+        {
+            if (_backlitPin < 0)
+            {
+                throw new InvalidOperationException("Backlight pin not set");
+            }
+
+            _gpioDevice.Write(_backlitPin, PinValue.Low);
+        }
+
+        private void SetWindow(uint x0 = 0, uint y0 = 0, uint x1 = ScreenWidthPx - 1, uint y1 = ScreenWidthPx - 1)
+        {
+            SendCommand(Ili9341Command.ColumnAddressSet);
+            Span<byte> data = stackalloc byte[4]
+            {
+                (byte)(x0 >> 8),
+                (byte)x0,
+                (byte)(x1 >> 8),
+                (byte)x1,
+            };
+            SendData(data);
+            SendCommand(Ili9341Command.PageAddressSet);
+            Span<byte> data2 = stackalloc byte[4]
+            {
+                (byte)(y0 >> 8),
+                (byte)y0,
+                (byte)(y1 >> 8),
+                (byte)y1,
+            };
+            SendData(data2);
+            SendCommand(Ili9341Command.MemoryWrite);
+        }
+
+        /// <summary>
         /// Verifies value is within a specific range.
         /// </summary>
         /// <param name="value">Value to check.</param>
