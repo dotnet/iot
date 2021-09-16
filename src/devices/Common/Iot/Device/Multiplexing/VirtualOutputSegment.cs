@@ -56,11 +56,8 @@ namespace Iot.Device.Multiplexing.Utility
         /// Does not display output.
         /// </summary>
         public void Write(byte value)
-        {
             // Write to 8 right-most segment values
-            int offset = _length - 8;
-            WriteByteAsValues(value, offset);
-        }
+            => WriteByteAsValues(value, 0);
 
         /// <summary>
         /// Writes discrete underlying bits to a virtual output.
