@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Scd4x.cs" />
+    <Compile Include="..\Shared\Sensirion.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Remove="README.md" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31710.8
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sht4x", "Sht4x.csproj", "{6F1F02B2-1C0F-4BC1-8354-6C4F5255B6D7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sht4x.Samples", "samples\Sht4x.Samples.csproj", "{DF1C2C6B-71D1-4B40-BD85-79C4AA4A68FA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{D23EB428-8E64-4906-ACAB-48EB63459C45}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6F1F02B2-1C0F-4BC1-8354-6C4F5255B6D7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F1F02B2-1C0F-4BC1-8354-6C4F5255B6D7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F1F02B2-1C0F-4BC1-8354-6C4F5255B6D7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F1F02B2-1C0F-4BC1-8354-6C4F5255B6D7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF1C2C6B-71D1-4B40-BD85-79C4AA4A68FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF1C2C6B-71D1-4B40-BD85-79C4AA4A68FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF1C2C6B-71D1-4B40-BD85-79C4AA4A68FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF1C2C6B-71D1-4B40-BD85-79C4AA4A68FA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DF1C2C6B-71D1-4B40-BD85-79C4AA4A68FA} = {D23EB428-8E64-4906-ACAB-48EB63459C45}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {70971141-EF20-4FED-8937-CC5ACC0CDC26}
+	EndGlobalSection
+EndGlobal

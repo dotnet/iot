@@ -37,7 +37,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [CCS811 Gas sensor](Ccs811/README.md)
-* [MH-Z19B CO2-Sensor](Mhz19b/README.md)
+* [MH-Z19B CO<sub>2</sub> sensor](Mhz19b/README.md)
+* [SCD4x CO<sub>2</sub>, humidity, temperature sensor](Scd4x/README.md)
 
 ### Liquid sensors
 
@@ -85,6 +86,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Sense HAT](SenseHat/README.md)
 * [SensorHub - Environmental sensor](SensorHub/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [SHT4x - Temperature & Humidity Sensor](Sht4x/README.md)
 * [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
 * [μFire ISE Probe - pH, ORP and temperature sensor](UFireIse/README.md)
