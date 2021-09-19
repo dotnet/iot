@@ -1,6 +1,6 @@
 # Raspberry Pi with .NET Core IoT
 
-Raspberry Pi is one of the most popular boards and now .NET Core IoT can be used on top of Raspberry Pi OS to enable the writing of managed code applications.
+Raspberry Pi is one of the most popular boards and now .NET IoT can be used on top of Raspberry Pi OS to enable the writing of managed code applications.
 
 In this sample Raspberry Pi 2 will be used, you can use above Raspberry Pi 2. This sample application includes a scenario: Every 3 seconds application reads temperature value from BMP280 sensor and turns on LED after reading the value. Then this temperature value is pushed to IoT Hub with device name and after every successful push LED will turn off. Data will be handled by IoT Hub message routing and will be pushed to blob storage to store.
 
