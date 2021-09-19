@@ -361,8 +361,11 @@ namespace Iot.Device.Arduino
 
         private void RegisterCommandHandlers()
         {
-            _extendedCommandHandlers.Add(new DhtSensor());
-            _extendedCommandHandlers.Add(new FrequencySensor());
+            lock (_commandHandlersLock)
+            {
+                _extendedCommandHandlers.Add(new DhtSensor());
+                _extendedCommandHandlers.Add(new FrequencySensor());
+            }
         }
 
         /// <summary>
@@ -370,24 +373,27 @@ namespace Iot.Device.Arduino
         /// </summary>
         private void RegisterKnownSupportedModes()
         {
-            // We add all known modes to the list, even though we don't really support them all in the core
-            _knownSupportedModes.Add(SupportedMode.DigitalInput);
-            _knownSupportedModes.Add(SupportedMode.DigitalOutput);
-            _knownSupportedModes.Add(SupportedMode.AnalogInput);
-            _knownSupportedModes.Add(SupportedMode.Pwm);
-            _knownSupportedModes.Add(SupportedMode.Servo);
-            _knownSupportedModes.Add(SupportedMode.Shift);
-            _knownSupportedModes.Add(SupportedMode.I2c);
-            _knownSupportedModes.Add(SupportedMode.OneWire);
-            _knownSupportedModes.Add(SupportedMode.Stepper);
-            _knownSupportedModes.Add(SupportedMode.Encoder);
-            _knownSupportedModes.Add(SupportedMode.Serial);
-            _knownSupportedModes.Add(SupportedMode.InputPullup);
-            _knownSupportedModes.Add(SupportedMode.Spi);
-            _knownSupportedModes.Add(SupportedMode.Sonar);
-            _knownSupportedModes.Add(SupportedMode.Tone);
-            _knownSupportedModes.Add(SupportedMode.Dht);
-            _knownSupportedModes.Add(SupportedMode.Frequency);
+            lock (_commandHandlersLock)
+            {
+                // We add all known modes to the list, even though we don't really support them all in the core
+                _knownSupportedModes.Add(SupportedMode.DigitalInput);
+                _knownSupportedModes.Add(SupportedMode.DigitalOutput);
+                _knownSupportedModes.Add(SupportedMode.AnalogInput);
+                _knownSupportedModes.Add(SupportedMode.Pwm);
+                _knownSupportedModes.Add(SupportedMode.Servo);
+                _knownSupportedModes.Add(SupportedMode.Shift);
+                _knownSupportedModes.Add(SupportedMode.I2c);
+                _knownSupportedModes.Add(SupportedMode.OneWire);
+                _knownSupportedModes.Add(SupportedMode.Stepper);
+                _knownSupportedModes.Add(SupportedMode.Encoder);
+                _knownSupportedModes.Add(SupportedMode.Serial);
+                _knownSupportedModes.Add(SupportedMode.InputPullup);
+                _knownSupportedModes.Add(SupportedMode.Spi);
+                _knownSupportedModes.Add(SupportedMode.Sonar);
+                _knownSupportedModes.Add(SupportedMode.Tone);
+                _knownSupportedModes.Add(SupportedMode.Dht);
+                _knownSupportedModes.Add(SupportedMode.Frequency);
+            }
         }
 
         /// <summary>

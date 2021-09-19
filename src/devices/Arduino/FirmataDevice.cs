@@ -721,6 +721,7 @@ namespace Iot.Device.Arduino
                     bool result = _dataReceived.WaitOne(TimeSpan.FromSeconds(FIRMATA_INIT_TIMEOUT_SECONDS));
                     if (result == false || _firmwareVersionMajor == 0)
                     {
+                        // Wait a bit until we try again.
                         Thread.Sleep(100);
                         continue;
                     }
