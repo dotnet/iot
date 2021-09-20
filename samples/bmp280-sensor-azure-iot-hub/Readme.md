@@ -100,9 +100,9 @@ mkdir DNSensorAzureIoTHub
 sudo chmod 775 ./DNSensorAzureIoTHub
 ```
 
-There are two ways to publish your application to raspberry pi:
+You can deploy and debug your solution or just deploy your solution without debugging.
 
-1. We have [publish.bat](publish.bat) file to publish and push our compiled code to IoT device, make sure you provide your password and ip address of your Raspberry Pi
+1. For deploy and enable debugging: add `publish.bat` file with following commands to the root folder to publish and push compiled code to IoT device, make sure you provide your password and ip address of your Raspberry Pi. This file will be used by `.vscode/tasks.json` during remote debugging.
 
     ```bash
     dotnet publish -r linux-arm /p:ShowLinkerSizeComparison=true 
