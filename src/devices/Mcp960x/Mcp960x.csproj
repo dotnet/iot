@@ -12,6 +12,7 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <None Include="README.md" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>
