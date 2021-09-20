@@ -44,7 +44,7 @@ namespace DNSensorAzureIoTHub
             // Create an X.509 certificate object.
             var cert = new X509Certificate2($"{DeviceID}.pfx", "1234");
             var auth = new DeviceAuthenticationWithX509Certificate(DeviceID, cert);
-            DeviceClient azureIoTClient = DeviceClient.Create(IotBrokerAddress, auth, TransportType.Mqtt);
+            DeviceClient? azureIoTClient = DeviceClient.Create(IotBrokerAddress, auth, TransportType.Mqtt);
 
             if (azureIoTClient == null)
             {
@@ -70,8 +70,8 @@ namespace DNSensorAzureIoTHub
                     Thread.Sleep(lightTime);
 
                     // print out the measured data
-                    string temperature = readResult.Temperature.DegreesCelsius.ToString("F");
-                    string pressure = readResult.Pressure.Hectopascals.ToString("F");
+                    string? temperature = readResult.Temperature?.DegreesCelsius.ToString("F");
+                    string? pressure = readResult.Pressure?.Hectopascals.ToString("F");
                     Console.WriteLine("-----------------------------------------");
                     Console.WriteLine($"Temperature: {temperature}\u00B0C");
                     Console.WriteLine($"Pressure: {pressure}hPa");
@@ -79,7 +79,7 @@ namespace DNSensorAzureIoTHub
                     // send to Iot Hub
                     string message = $"{{\"Temperature\":{temperature},\"Pressure\":{pressure},\"DeviceID\":\"{DeviceID}\"}}";
                     Message eventMessage = new Message(Encoding.UTF8.GetBytes(message));
-                    azureIoTClient.SendEventAsync(eventMessage).Wait();
+                    azureIoTClient?.SendEventAsync(eventMessage).Wait();
                     Console.WriteLine($"Data is pushed to Iot Hub: {message}");
 
                     // blink led after reading value
