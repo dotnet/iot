@@ -44,19 +44,19 @@ namespace DNSensorAzureIoTHub
             // Create an X.509 certificate object.
             var cert = new X509Certificate2($"{DeviceID}.pfx", "1234");
             var auth = new DeviceAuthenticationWithX509Certificate(DeviceID, cert);
-            DeviceClient azureIoT = DeviceClient.Create(IotBrokerAddress, auth, TransportType.Amqp_Tcp_Only);
+            DeviceClient azureIoTClient = DeviceClient.Create(IotBrokerAddress, auth, TransportType.Mqtt);
 
-            if (azureIoT == null)
+            if (azureIoTClient == null)
             {
                 Console.WriteLine("Failed to create DeviceClient!");
             }
             else
             {
                 Console.WriteLine("Successfully created DeviceClient!");
-                Console.WriteLine("Press any key to stop the application.");
+                Console.WriteLine("Press CTRL+D to stop application");
             }
 
-            while (!Console.KeyAvailable)
+            while (true) // while(!Console.KeyAvailable) if you're using the app via external console
             {
                 try
                 {
@@ -79,10 +79,18 @@ namespace DNSensorAzureIoTHub
                     // send to Iot Hub
                     string message = $"{{\"Temperature\":{temperature},\"Pressure\":{pressure},\"DeviceID\":\"{DeviceID}\"}}";
                     Message eventMessage = new Message(Encoding.UTF8.GetBytes(message));
-                    azureIoT.SendEventAsync(eventMessage).Wait();
+                    azureIoTClient.SendEventAsync(eventMessage).Wait();
                     Console.WriteLine($"Data is pushed to Iot Hub: {message}");
 
-                    // led off
+                    // blink led after reading value
+                    led.Write(pin, PinValue.Low);
+                    Thread.Sleep(75);
+                    led.Write(pin, PinValue.High);
+                    Thread.Sleep(75);
+                    led.Write(pin, PinValue.Low);
+                    Thread.Sleep(75);
+                    led.Write(pin, PinValue.High);
+                    Thread.Sleep(75);
                     led.Write(pin, PinValue.Low);
                     Thread.Sleep(dimTime);
                 }

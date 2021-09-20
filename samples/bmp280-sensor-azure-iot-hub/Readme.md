@@ -85,7 +85,7 @@ The next steps depend on whether you just want to deploy the sample or you want 
 
 ## Remote Debugging
 
-To enable remote debugging on Raspberry Pi make sure following below steps.
+If you're using [VS Code](http://code.visualstudio.com) to enable remote debugging on Raspberry Pi make sure following below steps.
 
 * [Remote debugging with VS Code on Windows to a Raspberry Pi using .NET Core on ARM](https://www.hanselman.com/blog/remote-debugging-with-vs-code-on-windows-to-a-raspberry-pi-using-net-core-on-arm)
 
@@ -127,6 +127,8 @@ There are two ways to publish your application to raspberry pi:
     cd DNSensorAzureIoTHub
     ./DNSensorAzureIoTHub
     ```
+
+If you are using [Visual Studio 2019](https://visualstudio.microsoft.com/vs/) you can follow [Debug .NET apps on Raspberry Pi](https://docs.microsoft.com/en-us/dotnet/iot/debugging?tabs=self-contained&pivots=visualstudio) documentation
 
 ## Result
 
