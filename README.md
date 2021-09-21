@@ -1,9 +1,9 @@
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/dotnet/iot)
 [![Discord](https://img.shields.io/discord/755370044946513932?label=Discord)](https://discord.gg/kqWhBbj)
 
-# .NET Core IoT Libraries
+# .NET IoT Libraries
 
-.NET Core can be used to build applications for [IoT](https://en.wikipedia.org/wiki/Internet_of_things) devices and scenarios. IoT applications typically interact with sensors, displays and input devices that require the use of [GPIO pins](https://en.wikipedia.org/wiki/General-purpose_input/output), serial ports or similar hardware.
+.NET can be used to build applications for [IoT](https://en.wikipedia.org/wiki/Internet_of_things) devices and scenarios. IoT applications typically interact with sensors, displays and input devices that require the use of [GPIO pins](https://en.wikipedia.org/wiki/General-purpose_input/output), serial ports or similar hardware.
 
 This repository contains the [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio) library and implementations for various boards like [Raspberry Pi](https://www.raspberrypi.org/) and [Hummingboard](https://www.solid-run.com/nxp-family/hummingboard/).
 
@@ -15,15 +15,15 @@ The repository also contains [Iot.Device.Bindings](https://www.nuget.org/package
 
 While most of the bindings and examples in this project require and are designed to support specific hardware (such as [LCD displays](src/devices/CharacterLcd), [temperature sensors](src/devices/Dhtxx), [single-board computers](src/devices/Board/RaspberryPiBoard.cs), [microcontrollers](src/devices/Arduino), etc.), the library itself tries to be as hardware-independent as possible. Some bindings are even written to showcase the use of IOT interfaces with hardware that is already present in normal desktop computers (such as [keyboards](src/devices/Board/KeyboardGpioDriver.cs) or [CPU temperature sensors](src/devices/HardwareMonitor)). So to get started, you do not need expensive hardware. Or you can start out with cheap stuff, such as an Arduino Uno. 
 
-## .NET Core Versions
+## .NET Versions
 
-Both libraries in this repository are cross-targetting .NET Standard 2.0, .NET Core 2.1 and .NET 5.0. They can be used from any project targeting .NET Core 2.1 or higher, and also from .NET Framework or Mono. 
+Both libraries in this repository are cross-targetting .NET Standard 2.0, .NET Core 2.1 and .NET 5.0. They can be used from any project targeting .NET Core 2.1 or higher, and also from .NET Framework or mono. If you are looking at a Micro Controller Unit (MCU) support, check [.NET nanoFramework](https://github.com/nanoframework/).
 
 The sample projects target the latest stable .NET Version. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
 
 ## How to Install
 
-You can install the latest daily pre-release build of the .NET Core System.Device.Gpio and Iot.Device.Bindings NuGet packages from the blob feed.
+You can install the latest daily pre-release build of the .NET System.Device.Gpio and Iot.Device.Bindings NuGet packages from the blob feed.
   
 ### NuGet.exe
 
