@@ -23,7 +23,7 @@ I2cConnectionSettings settings =
 using I2cDevice device = I2cDevice.Create(settings);
 using Scd4x sensor = new Scd4x(device);
 
-while(true)
+while (true)
 {
     // Reading more than once per measurement
     // period will result in duplicate values.
@@ -47,14 +47,14 @@ I2cConnectionSettings settings =
 using I2cDevice device = I2cDevice.Create(settings);
 using Scd4x sensor = new Scd4x(device);
 
-while(true)
+while (true)
 {
     // Read the measurement.
     // This call will block until the next measurement period.
     (VolumeConcentration? co2, RelativeHumidity? hum, Temperature? temp) =
         sensor.ReadPeriodicMeasurement();
 
-    if(co2 is null || hum is null || temp is null)
+    if (co2 is null || hum is null || temp is null)
     {
         throw new Exception("CRC failure");
     }
@@ -68,6 +68,17 @@ while(true)
 }
 ```
 
+### Calibrating pressure
+
+Giving the device the current barometric pressure will increase accuracy until reset.
+
+```c#
+Scd4x sensor = ...;
+Pressure currentPressure = Pressure.FromKilopascals(100);
+
+sensor.SetPressureCalibration(currentPressure);
+```
+
 ### Code (asynchronous)
 
 ```csharp
@@ -77,14 +88,14 @@ I2cConnectionSettings settings =
 I2cDevice device = I2cDevice.Create(settings);
 Scd4x sensor = new Scd4x(device);
 
-while(true)
+while (true)
 {
     // Read the measurement.
     // This async operation will not finish until the next measurement period.
     (VolumeConcentration? co2, RelativeHumidity? hum, Temperature? temp) =
         await sensor.ReadPeriodicMeasurementAsync();
 
-    if(co2 is null || hum is null || temp is null)
+    if (co2 is null || hum is null || temp is null)
     {
         throw new Exception("CRC failure");
     }
