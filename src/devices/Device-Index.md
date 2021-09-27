@@ -60,7 +60,6 @@
 * [MotorHat](MotorHat/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
-* [MPU6886 - Gyroscope, Accelerometer and Temperature](Mpu6886/README.md)
 * [nRF24L01 - Single Chip 2.4 GHz Transceiver](Nrf24l01/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
 * [On-board LED driver](BoardLed/README.md)

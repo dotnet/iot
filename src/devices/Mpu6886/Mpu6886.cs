@@ -52,6 +52,7 @@ namespace Iot.Device.Mpu6886
             }
 
             // Initialization sequence
+            // Thread.Sleep values according to startup times and delays documented in datasheet.
             _i2c.Write(stackalloc byte[] { (byte)Mpu6886.Register.PowerManagement1, 0b0000_0000 });
             Thread.Sleep(10);
 
@@ -302,7 +303,8 @@ namespace Iot.Device.Mpu6886
                 _i2c.WriteByte((byte)Mpu6886.Register.AccelerometerConfiguration1);
                 _i2c.Read(currentRegisterValues);
 
-                byte newvalue = (byte)((currentRegisterValues[0] & 0b1110_0111) | (byte)value); // apply the new scale, we leave all bits except bit 3 and 4 untouched with mask 0b1110_0111
+                // apply the new scale, we leave all bits except bit 3 and 4 untouched with mask 0b1110_0111
+                byte newvalue = (byte)((currentRegisterValues[0] & 0b1110_0111) | (byte)value);
 
                 // write the new register value
                 _i2c.Write(stackalloc byte[] { (byte)Mpu6886.Register.AccelerometerConfiguration1, newvalue });
@@ -330,7 +332,8 @@ namespace Iot.Device.Mpu6886
                 _i2c.WriteByte((byte)Mpu6886.Register.GyroscopeConfiguration);
                 _i2c.Read(currentRegisterValues);
 
-                byte newvalue = (byte)((currentRegisterValues[0] & 0b1110_0111) | (byte)value); // apply the new scale, we leave all bits except bit 3 and 4 untouched with this mask 0b1110_0111
+                // apply the new scale, we leave all bits except bit 3 and 4 untouched with this mask 0b1110_0111
+                byte newvalue = (byte)((currentRegisterValues[0] & 0b1110_0111) | (byte)value);
 
                 // write the new register value
                 _i2c.Write(stackalloc byte[] { (byte)Mpu6886.Register.GyroscopeConfiguration, newvalue });
@@ -361,7 +364,8 @@ namespace Iot.Device.Mpu6886
                 _i2c.WriteByte((byte)Mpu6886.Register.PowerManagement2);
                 _i2c.Read(currentRegisterValues);
 
-                byte newvalue = (byte)((currentRegisterValues[0] & 0b1100_0000) | (byte)value); // apply the new enabled axes, we leave all bits except bit 7 and 6 untouched with mask 0b1100_0000
+                // apply the new enabled axes, we leave all bits except bit 7 and 6 untouched with mask 0b1100_0000
+                byte newvalue = (byte)((currentRegisterValues[0] & 0b1100_0000) | (byte)value);
 
                 // write the new register value
                 // bit 1 in the register means disabled, so using bitwise not to flip bits.
@@ -382,7 +386,8 @@ namespace Iot.Device.Mpu6886
                 _i2c.WriteByte((byte)Mpu6886.Register.AccelerometerConfiguration2);
                 _i2c.Read(currentRegisterValues);
 
-                byte cleaned = (byte)(currentRegisterValues[0] & 0b0011_0000); // we leave all bits except bit 4 and 5 untouched with this mask
+                // we leave all bits except bit 4 and 5 untouched with this mask
+                byte cleaned = (byte)(currentRegisterValues[0] & 0b0011_0000);
 
                 return (AccelerometerLowPowerMode)cleaned;
             }
@@ -394,7 +399,8 @@ namespace Iot.Device.Mpu6886
                 _i2c.WriteByte((byte)Mpu6886.Register.AccelerometerConfiguration2);
                 _i2c.Read(currentRegisterValues);
 
-                byte newvalue = (byte)((currentRegisterValues[0] & 0b1100_1111) | (byte)value); // apply the new enabled axes, we leave all bits except bit 4 and 5 untouched with mask 0b1100_1111
+                // apply the new enabled axes, we leave all bits except bit 4 and 5 untouched with mask 0b1100_1111
+                byte newvalue = (byte)((currentRegisterValues[0] & 0b1100_1111) | (byte)value);
 
                 // write the new register value
                 _i2c.Write(stackalloc byte[] { (byte)Mpu6886.Register.AccelerometerConfiguration2, newvalue });
@@ -443,14 +449,13 @@ namespace Iot.Device.Mpu6886
                 _i2c.WriteByte((byte)Mpu6886.Register.InteruptEnable);
                 _i2c.Read(currentRegisterValues);
 
-                byte newvalue = (byte)((currentRegisterValues[0] & 0b0011_1111) | (byte)value); // apply the new enabled axes, we leave all bits except bit 4 and 5 untouched with mask 0b0011_1111
+                // apply the new enabled axes, we leave all bits except bit 4 and 5 untouched with mask 0b0011_1111
+                byte newvalue = (byte)((currentRegisterValues[0] & 0b0011_1111) | (byte)value);
 
                 // write the new register value
                 _i2c.Write(stackalloc byte[] { (byte)Mpu6886.Register.InteruptEnable, newvalue });
                 Thread.Sleep(2);
-
             }
         }
-
     }
 }
