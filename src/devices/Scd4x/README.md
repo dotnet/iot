@@ -12,29 +12,47 @@ SCD4x is a CO<sub>2</sub>, temperature & humidity sensor from Sensirion. This pr
 
 - SCD40.
 
-### Code (synchronous)
+### Code (telemetry / properties)
+
+Less efficient, but simple to use and compatible with telemetry system.
 
 ```csharp
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Scd4x.DefaultI2cAddress);
-I2cDevice device = I2cDevice.Create(settings);
-Scd4x sensor = new Scd4x(device);
+I2cConnectionSettings settings =
+    new I2cConnectionSettings(1, Scd4x.DefaultI2cAddress);
 
-sensor.StartPeriodicMeasurements();
+using I2cDevice device = I2cDevice.Create(settings);
+using Scd4x sensor = new Scd4x(device);
 
 while(true)
 {
-    // Only read once per measurement period.
+    // Reading more than once per measurement
+    // period will result in duplicate values.
     Thread.Sleep(Scd4x.MeasurementPeriod);
+    
+    // read co2 (PPM)
+    double co2 = sensor.Co2.PartsPerMillion;
+    // read temperature (℃)
+    double temperature = sensor.Temperature.Celsius;
+    // read humidity (%)
+    double humidity = sensor.RelativeHumidity.Percent;
+}
+```
 
-    // Wait for data to be ready -- this happens once the measurement period ends on the device.
-    while(!sensor.CheckDataReady())
-    {
-        // We're running a little bit ahead of the sensor, so wait only a little bit.
-        Thread.Sleep(100);
-    }
+### Code (synchronous)
 
+```csharp
+I2cConnectionSettings settings =
+    new I2cConnectionSettings(1, Scd4x.DefaultI2cAddress);
+
+using I2cDevice device = I2cDevice.Create(settings);
+using Scd4x sensor = new Scd4x(device);
+
+while(true)
+{
     // Read the measurement.
-    (VolumeConcentration? co2, RelativeHumidity? hum, Temperature? temp) = sensor.ReadPeriodicMeasurement();
+    // This call will block until the next measurement period.
+    (VolumeConcentration? co2, RelativeHumidity? hum, Temperature? temp) =
+        sensor.ReadPeriodicMeasurement();
 
     if(co2 is null || hum is null || temp is null)
     {
@@ -48,53 +66,23 @@ while(true)
     // read humidity (%)
     double humidity = hum.Value.Percent;
 }
-
-sensor.StopPeriodicMeasurements();
 ```
 
 ### Code (asynchronous)
 
 ```csharp
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Scd4x.DefaultI2cAddress);
+I2cConnectionSettings settings =
+    new I2cConnectionSettings(1, Scd4x.DefaultI2cAddress);
+
 I2cDevice device = I2cDevice.Create(settings);
 Scd4x sensor = new Scd4x(device);
 
-sensor.StartPeriodicMeasurements();
-
 while(true)
 {
-    // Only read once per measurement period.
-    Thread.Sleep(Scd4x.MeasurementPeriod);
-
-    // Wait for data to be ready -- this happens once the measurement period ends on the device.
-    TimeSpan delay;
-    while(true)
-    {
-        // Start the check.
-        delay = sensor.BeginCheckDataReady();
-
-        // Perform I/O with other sensors on the same bus in the mean time, or just sleep.
-        Thread.Sleep(delay);
-
-        // Complete the check.
-        if(sensor.EndCheckDataReady())
-        {
-            // Data is ready.
-            break;
-        }
-
-        // We're running a little bit ahead of the sensor, so wait only a little bit.
-        Thread.Sleep(100);
-    }
-
-    // Begin reading the measurement.
-    delay = sensor.BeginReadPeriodicMeasurement();
-
-    // Perform I/O with other sensors on the same bus in the mean time, or just sleep.
-    Thread.Sleep(delay);
-
-    // Complete reading the measurement.
-    (VolumeConcentration? co2, RelativeHumidity? hum, Temperature? temp) = sensor.EndReadPeriodicMeasurement();
+    // Read the measurement.
+    // This async operation will not finish until the next measurement period.
+    (VolumeConcentration? co2, RelativeHumidity? hum, Temperature? temp) =
+        await sensor.ReadPeriodicMeasurementAsync();
 
     if(co2 is null || hum is null || temp is null)
     {
@@ -108,6 +96,4 @@ while(true)
     // read humidity (%)
     double humidity = hum.Value.Percent;
 }
-
-sensor.StopPeriodicMeasurements();
 ```

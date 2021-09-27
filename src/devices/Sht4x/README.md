@@ -15,39 +15,38 @@ SHT4x is a temperature and humidity sensor from Sensirion. This project supports
 ### Code (synchronous)
 
 ```csharp
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Sht4x.DefaultI2cAddress);
-I2cDevice device = I2cDevice.Create(settings);
-Sht4x sensor = new Sht4x(device);
+I2cConnectionSettings settings =
+    new I2cConnectionSettings(1, Sht4x.DefaultI2cAddress);
 
+using I2cDevice device = I2cDevice.Create(settings);
+using Sht4x sensor = new Sht4x(device);
+
+// read humidity (%)
+double humidity = sensor.RelativeHumidity.Percent;
 // read temperature (℃)
 double temperature = sensor.Temperature.Celsius;
-// read humidity (%)
-double humidity = sensor.Humidity.Percent;
 ```
 
 ### Code (asynchronous)
 
 ```csharp
-I2cConnectionSettings settings = new I2cConnectionSettings(1, Sht4x.DefaultI2cAddress);
-I2cDevice device = I2cDevice.Create(settings);
-Sht4x sensor = new Sht4x(device);
+I2cConnectionSettings settings =
+    new I2cConnectionSettings(1, Sht4x.DefaultI2cAddress);
 
-// Start the async read.
-TimeSpan delay = sensor.BeginReadHumidityAndTemperature();
+using I2cDevice device = I2cDevice.Create(settings);
+using Sht4x sensor = new Sht4x(device);
 
-// Perform I/O with other sensors on the same bus in the mean time, or just sleep.
-Thread.Sleep(delay);
-
-// Complete the async read.
-(RelativeHumidity? rh, Temperature? t) = sensor.EndReadHumidityAndTemperature();
+// Read both humidity and temperature.
+(RelativeHumidity? rh, Temperature? t) =
+    await sensor.ReadHumidityAndTemperatureAsync();
 
 if(rh is null || t is null)
 {
     throw new Exception("CRC failure");
 }
 
-// read temperature (℃)
-double temperature = t.Value.Celsius;
 // read humidity (%)
 double humidity = rh.Value.Percent;
+// read temperature (℃)
+double temperature = t.Value.Celsius;
 ```
