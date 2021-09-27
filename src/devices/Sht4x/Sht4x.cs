@@ -5,6 +5,7 @@ using System;
 using System.Device.I2c;
 using System.Device.Model;
 using System.Threading;
+using System.Threading.Tasks;
 using UnitsNet;
 
 namespace Iot.Device.Sht4x
@@ -34,7 +35,7 @@ namespace Iot.Device.Sht4x
         /// The most recent relative humidity measurement.
         /// </summary>
         [Telemetry]
-        public RelativeHumidity Humidity
+        public RelativeHumidity RelativeHumidity
         {
             get
             {
@@ -88,40 +89,34 @@ namespace Iot.Device.Sht4x
         /// </returns>
         public (RelativeHumidity? RelativeHumidity, Temperature? Temperature) ReadHumidityAndTemperature(Sht4xRepeatability repeatability = Sht4xRepeatability.High)
         {
-            TimeSpan delay = BeginReadHumidityAndTemperature(repeatability);
+            int delay = BeginReadHumidityAndTemperature(repeatability);
             Thread.Sleep(delay);
             return EndReadHumidityAndTemperature();
         }
 
-        /// <summary>
-        /// Begins reading relative humidity and temperature.
-        /// </summary>
-        /// <returns>
-        /// The time that the caller must wait before calling <see cref="EndReadHumidityAndTemperature"/> to retrieve the measurement.
-        /// </returns>
-        public TimeSpan BeginReadHumidityAndTemperature(Sht4xRepeatability repeatability = Sht4xRepeatability.High)
+        /// <inheritdoc cref="ReadHumidityAndTemperature(Sht4xRepeatability)"/>
+        public async ValueTask<(RelativeHumidity? RelativeHumidity, Temperature? Temperature)> ReadHumidityAndTemperatureAsync(Sht4xRepeatability repeatability = Sht4xRepeatability.High)
         {
-            (byte cmd, long delayInTicks) = repeatability switch
+            int delay = BeginReadHumidityAndTemperature(repeatability);
+            await Task.Delay(delay);
+            return EndReadHumidityAndTemperature();
+        }
+
+        private int BeginReadHumidityAndTemperature(Sht4xRepeatability repeatability)
+        {
+            (byte cmd, int delayInMs) = repeatability switch
             {
-                Sht4xRepeatability.Low => ((byte)0xE0, TimeSpan.TicksPerMillisecond * 2),
-                Sht4xRepeatability.Medium => ((byte)0xF6, TimeSpan.TicksPerMillisecond * 5),
-                Sht4xRepeatability.High => ((byte)0xFD, TimeSpan.TicksPerMillisecond * 9),
+                Sht4xRepeatability.Low => ((byte)0xE0, 2),
+                Sht4xRepeatability.Medium => ((byte)0xF6, 5),
+                Sht4xRepeatability.High => ((byte)0xFD, 9),
                 _ => throw new ArgumentOutOfRangeException(nameof(repeatability))
             };
 
             _device.WriteByte(cmd);
-            return TimeSpan.FromTicks(delayInTicks);
+            return delayInMs;
         }
 
-        /// <summary>
-        /// Completes reading relative humidity and temperature.
-        /// <see cref="BeginReadHumidityAndTemperature(Sht4xRepeatability)"/> must have been called first.
-        /// </summary>
-        /// <returns>
-        /// A tuple of relative humidity and temperature.
-        /// If a CRC check failed for a measurement, it will be <see langword="null"/>.
-        /// </returns>
-        public (RelativeHumidity? RelativeHumidity, Temperature? Temperature) EndReadHumidityAndTemperature()
+        private (RelativeHumidity? RelativeHumidity, Temperature? Temperature) EndReadHumidityAndTemperature()
         {
             Span<byte> buffer = stackalloc byte[6];
             _device.Read(buffer);
