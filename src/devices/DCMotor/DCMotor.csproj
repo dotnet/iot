@@ -5,10 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)../SoftPwm/SoftwarePwm.csproj" />
-    <Compile Include="DCMotor.cs" />
-    <Compile Include="DCMotor3Pin.cs" />
-    <Compile Include="DCMotor2PinNoEnable.cs" />
-    <Compile Include="DCMotor2PinWithBiDirectionalPin.cs" />
+    <Compile Include="*.cs" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
