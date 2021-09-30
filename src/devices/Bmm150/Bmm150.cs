@@ -101,9 +101,9 @@ namespace Iot.Device.Bmp180
         /// <returns>Trim registers value</returns>
         private Bmm150TrimRegisterData ReadTrimRegisters()
         {
-            Span<Byte> trimX1y1Data = new byte[2];
-            Span<Byte> trimXyzData = new byte[4];
-            Span<Byte> trimXy1xy2Data = new byte[10];
+            Span<Byte> trimX1y1Data = stackalloc byte[2];
+            Span<Byte> trimXyzData = stackalloc byte[4];
+            Span<Byte> trimXy1xy2Data = stackalloc byte[10];
 
             // Read trim extended registers
             ReadBytes(Register.BMM150_DIG_X1, trimX1y1Data);
@@ -220,7 +220,7 @@ namespace Iot.Device.Bmp180
         /// <returns>The data from the magnetometer</returns>
         public Vector3 ReadMagnetometerWithoutCorrection(bool waitForData, TimeSpan timeout)
         {
-            Span<Byte> rawData = new byte[8];
+            Span<Byte> rawData = stackalloc byte[8];
 
             // Wait for a data to be present
             if (waitForData)

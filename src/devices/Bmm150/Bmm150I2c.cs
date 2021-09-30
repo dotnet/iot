@@ -43,7 +43,7 @@ namespace Iot.Device.Bmp180
         /// <param name="data">A byte to write</param>
         public override void WriteRegister(I2cDevice i2cDevice, byte reg, byte data)
         {
-            Span<Byte> dataout = new byte[]
+            Span<Byte> dataout = stackalloc byte[]
             {
                 reg,
                 data

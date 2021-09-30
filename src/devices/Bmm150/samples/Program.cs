@@ -20,7 +20,7 @@ bmm150.CalibrateMagnetometer();
 
 Console.WriteLine($"Calibration completed.");
 
-while(!Console.KeyAvailable)
+while (!Console.KeyAvailable)
 {
     Vector3 magne = bmm150.ReadMagnetometer(true, TimeSpan.FromMilliseconds(11));
 
