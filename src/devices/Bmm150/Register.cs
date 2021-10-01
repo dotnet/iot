@@ -6,7 +6,7 @@ namespace Iot.Device.Bmp180
     /// <summary>
     /// Registers of the Bmm150.
     /// </summary>
-    internal enum Register
+    internal enum Bmp180Register
     {
         /// <summary>
         /// Trim extended register

@@ -106,9 +106,9 @@ namespace Iot.Device.Bmp180
             Span<Byte> trimXy1xy2Data = stackalloc byte[10];
 
             // Read trim extended registers
-            ReadBytes(Register.BMM150_DIG_X1, trimX1y1Data);
-            ReadBytes(Register.BMM150_DIG_Z4_LSB, trimXyzData);
-            ReadBytes(Register.BMM150_DIG_Z2_LSB, trimXy1xy2Data);
+            ReadBytes(Bmp180Register.BMM150_DIG_X1, trimX1y1Data);
+            ReadBytes(Bmp180Register.BMM150_DIG_Z4_LSB, trimXyzData);
+            ReadBytes(Bmp180Register.BMM150_DIG_Z2_LSB, trimXy1xy2Data);
 
             return new Bmm150TrimRegisterData(trimX1y1Data, trimXyzData, trimXy1xy2Data);
         }
@@ -119,7 +119,7 @@ namespace Iot.Device.Bmp180
         private void Initialize()
         {
             // Set Sleep mode
-            WriteRegister(Register.POWER_CONTROL_ADDR, 0x01);
+            WriteRegister(Bmp180Register.POWER_CONTROL_ADDR, 0x01);
             Wait(6);
 
             // Check for a valid chip ID
@@ -129,14 +129,14 @@ namespace Iot.Device.Bmp180
             }
 
             // Set operation mode to: "Normal Mode"
-            WriteRegister(Register.OP_MODE_ADDR, 0x00);
+            WriteRegister(Bmp180Register.OP_MODE_ADDR, 0x00);
         }
 
         /// <summary>
         /// Get the device information
         /// </summary>
         /// <returns>The device information</returns>
-        public byte GetDeviceInfo() => ReadByte(Register.INFO);
+        public byte GetDeviceInfo() => ReadByte(Bmp180Register.INFO);
 
         /// <summary>
         /// Calibrate the magnetometer.
@@ -196,13 +196,13 @@ namespace Iot.Device.Bmp180
         /// <summary>
         /// True if there is a data to read
         /// </summary>
-        public bool HasDataToRead => (ReadByte(Register.DATA_READY_STATUS) & 0x01) == 0x01;
+        public bool HasDataToRead => (ReadByte(Bmp180Register.DATA_READY_STATUS) & 0x01) == 0x01;
 
         /// <summary>
         /// Check if the version is the correct one (0x32). This is fixed for this device
         /// </summary>
         /// <returns>Returns true if the version match</returns>
-        public bool IsVersionCorrect => ReadByte(Register.WIA) == 0x32;
+        public bool IsVersionCorrect => ReadByte(Bmp180Register.WIA) == 0x32;
 
         /// <summary>
         /// Read the magnetometer without Bias correction and can wait for new data to be present
@@ -235,7 +235,7 @@ namespace Iot.Device.Bmp180
                 }
             }
 
-            ReadBytes(Register.HXL, rawData);
+            ReadBytes(Bmp180Register.HXL, rawData);
 
             Vector3 magnetoRaw = new Vector3();
 
@@ -293,11 +293,11 @@ namespace Iot.Device.Bmp180
             return magn;
         }
 
-        private void WriteRegister(Register reg, byte data) => _bmm150Interface.WriteRegister(_i2cDevice, (byte)reg, data);
+        private void WriteRegister(Bmp180Register reg, byte data) => _bmm150Interface.WriteRegister(_i2cDevice, (byte)reg, data);
 
-        private byte ReadByte(Register reg) => _bmm150Interface.ReadByte(_i2cDevice, (byte)reg);
+        private byte ReadByte(Bmp180Register reg) => _bmm150Interface.ReadByte(_i2cDevice, (byte)reg);
 
-        private void ReadBytes(Register reg, Span<Byte> readBytes) => _bmm150Interface.ReadBytes(_i2cDevice, (byte)reg, readBytes);
+        private void ReadBytes(Bmp180Register reg, Span<Byte> readBytes) => _bmm150Interface.ReadBytes(_i2cDevice, (byte)reg, readBytes);
 
         private void Wait(int milisecondsTimeout)
         {
