@@ -7,20 +7,20 @@ namespace Iot.Device.PiJuiceDevice.Models
     /// <summary>
     /// User configurable buttons
     /// </summary>
-    public enum Button
+    public enum ButtonSwitch
     {
         /// <summary>
-        /// Button 1, Power button by default
+        /// ButtonSwitch 1, Power button by default
         /// </summary>
         Switch1 = 0,
 
         /// <summary>
-        /// Button 2, User button by default
+        /// ButtonSwitch 2, User button by default
         /// </summary>
         Switch2,
 
         /// <summary>
-        /// Button 3, user button by default
+        /// ButtonSwitch 3, user button by default
         /// </summary>
         Switch3
     }

@@ -60,7 +60,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         FaultEvent = 0x44,
 
         /// <summary>
-        /// Button event types
+        /// ButtonSwitch event types
         /// </summary>
         ButtonEvent = 0x45,
 
@@ -135,7 +135,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         LedConfig = 0x6A,
 
         /// <summary>
-        /// Button configuration
+        /// ButtonSwitch configuration
         /// </summary>
         ButtonConfig = 0x6E,
 
