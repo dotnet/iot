@@ -5,11 +5,13 @@
 
 .NET can be used to build applications for [IoT](https://en.wikipedia.org/wiki/Internet_of_things) devices and scenarios. IoT applications typically interact with sensors, displays and input devices that require the use of [GPIO pins](https://en.wikipedia.org/wiki/General-purpose_input/output), serial ports or similar hardware.
 
+> **IMPORTANT**: This is the GitHub repo for the libraries. You might want to start with our [official documentation](https://docs.microsoft.com/dotnet/iot/).
+
 This repository contains the [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio) library and implementations for various boards like [Raspberry Pi](https://www.raspberrypi.org/) and [Hummingboard](https://www.solid-run.com/nxp-family/hummingboard/).
 
 The repository also contains [Iot.Device.Bindings](https://www.nuget.org/packages/Iot.Device.Bindings), a growing set of community-maintained [device bindings](src/devices/README.md) for IoT components.
 
-**NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
+> **NOTE**: This repository is still in experimental stage and all APIs are subject to changes.
 
 ## Hardware requirements
 
@@ -58,9 +60,11 @@ Please contribute. We are primarily interested in the following:
 
 After installing, please see the following areas to learn more:
 
+* [Official Documentation](https://docs.microsoft.com/dotnet/iot/) - Concepts, quickstarts, tutorials, and API reference documentation.
+* [API Documentation](https://docs.microsoft.com/dotnet/api/?view=iot-dotnet-1.5) - Direct link to API reference documentation for all public interfaces. Be sure to choose the library version you are using.
+* [Microsoft Learn interactive learning module](https://docs.microsoft.com/learn/modules/create-iot-device-dotnet/)
+* [Let's Learn .NET: IoT livestream (September 2021)](https://www.youtube.com/watch?v=sKaSBh1M4M4)
 * [.NET IoT 101 (Jan 2020)](https://channel9.msdn.com/Series/IoT-101) - An introduction series on how to create .NET IoT applications with a Raspberry Pi.
-* [Introduction](https://docs.microsoft.com/en-us/dotnet/iot/) - Quickstart Guides with a few examples
-* [API Documentation](https://docs.microsoft.com/en-us/dotnet/api/?view=iot-dotnet-1.3) - API documentation for all public interfaces. Be sure to choose the library version you are using. 
 * [Hardware Documentation](Documentation/README.md) - Resources related to electronics, devices, vendors, software and other IoT topics.
 * [Samples](samples/README.md) - Step-by-step instructions on building your first app.
 * [Roadmap](Documentation/roadmap.md) - Areas planned or currently being worked on.
@@ -77,11 +81,11 @@ Once you have selected the right branch, you can browse the repository. The main
 
 * [Web service using SenseHat by Dawid Borycki (Aug 2019)](https://msdn.microsoft.com/magazine/mt833493)
 
-## Community 
+## Community
 
 This project has adopted the code of conduct defined by the [Contributor Covenant](https://contributor-covenant.org/)
 to clarify expected behavior in our community. For more information, see the [.NET Foundation Code of Conduct](https://www.dotnetfoundation.org/code-of-conduct).
 
 ## License
 
-.NET Core (including the iot repo) is licensed under the [MIT license](LICENSE).
+.NET (including the iot repo) is licensed under the [MIT license](LICENSE).
