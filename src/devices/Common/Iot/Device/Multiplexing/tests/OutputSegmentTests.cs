@@ -29,6 +29,24 @@ namespace Iot.Device.Multiplexing
                 segment[2] == 0 &&
                 segment[3] == 1);
         }
+        
+        [Fact]
+        public void SegmentValuesWriteByteOffset()
+        {
+            // segment length > written value
+            VirtualOutputSegment segment = new(12);
+            segment.Write(0b_1001_0110);
+
+            Assert.True(
+                segment[0] == 0 &&
+                segment[1] == 1 &&
+                segment[2] == 1 &&
+                segment[3] == 0 &&
+                segment[4] == 1 &&
+                segment[5] == 0 &&
+                segment[6] == 0 &&
+                segment[7] == 1);
+        }
 
         [Fact]
         public void SegmentValuesWriteByte()
