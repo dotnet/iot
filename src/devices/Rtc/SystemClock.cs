@@ -45,7 +45,7 @@ namespace Iot.Device.Rtc
         /// The time must be given in utc.
         /// The method requires elevated permissions. On Windows, the calling user must either be administrator or the right
         /// "Change the system clock" must have been granted to the "Users" group (in Security policy management).
-        /// On Unix, the current user must be root or it must be able to sudo without password.
+        /// On Unix and MacOs, the current user must be root, must be able to sudo without password or the "date" command must have the setUid bit set.
         /// </summary>
         /// <param name="dt">Date/time to set the system clock to. This must be in UTC</param>
         /// <exception cref="PlatformNotSupportedException">This method is not supported on this platform</exception>
@@ -60,6 +60,10 @@ namespace Iot.Device.Rtc
             else if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 SetDateTimeUtcUnix(dt);
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                SetDateTimeUtcMacOs(dt);
             }
             else
             {
@@ -81,6 +85,10 @@ namespace Iot.Device.Rtc
             else if (Environment.OSVersion.Platform == PlatformID.Unix)
             {
                 return GetDateTimeUtcUnix();
+            }
+            else if (Environment.OSVersion.Platform == PlatformID.MacOSX)
+            {
+                return GetDateTimeUtcMacOs();
             }
             else
             {
@@ -149,7 +157,19 @@ namespace Iot.Device.Rtc
 
         private static DateTime GetDateTimeUtcUnix()
         {
-            string date = RunDateCommandUnix("-u +%s.%N", false); // Floating point seconds since epoch
+            string date = RunDateCommandUnix("-u +%s.%N", false, out _); // Floating point seconds since epoch
+            if (Double.TryParse(date, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
+            {
+                DateTime dt = UnixEpochStart + TimeSpan.FromSeconds(result);
+                return dt;
+            }
+
+            throw new IOException($"The return value of the date command could not be parsed: {date} (seconds since 01/01/1970)");
+        }
+
+        private static DateTime GetDateTimeUtcMacOs()
+        {
+            string date = RunDateCommandUnix("-u +%s", false, out _); // Floating point seconds since epoch
             if (Double.TryParse(date, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
                 DateTime dt = UnixEpochStart + TimeSpan.FromSeconds(result);
@@ -162,10 +182,37 @@ namespace Iot.Device.Rtc
         private static void SetDateTimeUtcUnix(DateTime dt)
         {
             string formattedTime = dt.ToString("yyyy-MM-dd HH:mm:ss.fffff", CultureInfo.InvariantCulture);
-            RunDateCommandUnix($"-u -s \"{formattedTime}\"", true);
+            int exitCode;
+            // Try to run the date command as user first (maybe it has the set-user-id bit set) otherwise, try root.
+            RunDateCommandUnix($"-u -s \"{formattedTime}\"", false, out exitCode);
+            if (exitCode != 0)
+            {
+                var output = RunDateCommandUnix($"-u -s \"{formattedTime}\"", true, out exitCode);
+                if (exitCode != 0)
+                {
+                    throw new UnauthorizedAccessException($"Error running date command as local user and as root. Error {exitCode}: {output}");
+                }
+            }
         }
 
-        private static string RunDateCommandUnix(string commandLine, bool asRoot)
+        private static void SetDateTimeUtcMacOs(DateTime dt)
+        {
+            // The format is "[[[[[cc]yy]mm]dd]hh]mm[.ss]" from https://ss64.com/osx/date.html - pretty weird to do this without delimiters
+            string formattedTime = dt.ToString("yyyyMMddHHmm.ss", CultureInfo.InvariantCulture);
+            int exitCode;
+            // Try to run the date command as user first (maybe it has the set-user-id bit set) otherwise, try root.
+            RunDateCommandUnix($"{formattedTime}", false, out exitCode);
+            if (exitCode != 0)
+            {
+                var output = RunDateCommandUnix($"{formattedTime}", true, out exitCode);
+                if (exitCode != 0)
+                {
+                    throw new UnauthorizedAccessException($"Error running date command as local user and as root. Error {exitCode}: {output}");
+                }
+            }
+        }
+
+        private static string RunDateCommandUnix(string commandLine, bool asRoot, out int exitCode)
         {
             var si = new ProcessStartInfo()
             {
@@ -179,16 +226,16 @@ namespace Iot.Device.Rtc
             using var process = new Process();
             string outputData;
             process.StartInfo = si;
-            {
-                process.Start();
-                outputData = process.StandardOutput.ReadToEnd();
-                var errorData = process.StandardError.ReadToEnd();
-                process.WaitForExit();
 
-                if (process.ExitCode != 0)
-                {
-                    throw new UnauthorizedAccessException($"Error running date command. Error {process.ExitCode}: {errorData}");
-                }
+            process.Start();
+            outputData = process.StandardOutput.ReadToEnd();
+            var errorData = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            exitCode = process.ExitCode;
+            if (exitCode != 0)
+            {
+                outputData += errorData;
             }
 
             return outputData;

@@ -10,8 +10,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Rtc.csproj" />
-    
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>
