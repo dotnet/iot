@@ -47,6 +47,12 @@ namespace Iot.Device.Rtc
         /// "Change the system clock" must have been granted to the "Users" group (in Security policy management).
         /// On Unix and MacOs, the current user must be root, must be able to sudo without password or the "date" command must have the setUid bit set.
         /// </summary>
+        /// <remarks>
+        /// This method is primarily intended for setting the system clock from an external clock source, such as a DS1307 or a GNSS source when no
+        /// internet connection is available. If an internet connection is available, most operating systems will by default automatically sync the
+        /// time to a network server, which might interfere with this operation. So when using this method, the clock synchronization should be disabled,
+        /// or it should only be done if the time difference is large.
+        /// </remarks>
         /// <param name="dt">Date/time to set the system clock to. This must be in UTC</param>
         /// <exception cref="PlatformNotSupportedException">This method is not supported on this platform</exception>
         /// <exception cref="IOException">There was an error executing a system command</exception>
