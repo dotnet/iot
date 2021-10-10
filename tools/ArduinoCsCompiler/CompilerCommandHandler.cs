@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino;
 using Microsoft.Extensions.Logging;
@@ -10,7 +11,28 @@ namespace ArduinoCsCompiler
 {
     internal class CompilerCommandHandler : ExtendedCommandHandler
     {
+        public const int SchedulerData = 0x7B;
+        private readonly Iot.Device.Arduino.MicroCompiler _compiler;
         private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
+
+        public CompilerCommandHandler(Iot.Device.Arduino.MicroCompiler compiler)
+        {
+            _compiler = compiler;
+        }
+
+        protected override void OnErrorMessage(string message, Exception? exception)
+        {
+           _compiler.OnCompilerCallback(0, MethodState.ConnectionError, exception);
+            base.OnErrorMessage(message, exception);
+        }
+
+        protected override void OnSysexData(ReplyType type, byte[] data)
+        {
+            if (type != ReplyType.SysexCommand)
+            {
+                return;
+            }
+        }
 
         private void WaitAndHandleIlCommand(FirmataIlCommandSequence commandSequence)
         {
@@ -22,7 +44,52 @@ namespace ArduinoCsCompiler
             CommandError error;
             try
             {
-                SendCommandAndWait(commandSequence, timeout, out error);
+                var data = SendCommandAndWait(commandSequence, timeout, out error);
+                if (data.Length > 0 && data[0] == SchedulerData)
+                {
+                    if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
+                    {
+                        // Just an ack for a programming command.
+                        return;
+                    }
+
+                    if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
+                    {
+                        // This is a Nack
+                        error = (CommandError)data[3];
+                    }
+                    // Data from real-time methods
+                    else if (data.Length < 7)
+                    {
+                        error = CommandError.InvalidArguments;
+                    }
+                    else
+                    {
+                        MethodState state = (MethodState)data[3];
+                        int numArgs = data[4];
+
+                        if (state == MethodState.Aborted)
+                        {
+                            int[] results = new int[numArgs];
+                            // The result set is a set of tokens to build up the exception message
+                            for (int i = 0; i < numArgs; i++)
+                            {
+                                results[i] = FirmataCommandSequence.DecodeInt32(data, i * 5 + 5);
+                            }
+
+                            error = CommandError.Aborted;
+                            _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, results);
+                        }
+                        else
+                        {
+                            error = CommandError.None;
+                            // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
+                            var result = FirmataIlCommandSequence.Decode7BitBytes(data.Skip(5).ToArray(), numArgs);
+                            _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, result);
+                        }
+
+                    }
+                }
             }
             catch (TimeoutException tx)
             {

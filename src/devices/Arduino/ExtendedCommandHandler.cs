@@ -93,7 +93,7 @@ namespace Iot.Device.Arduino
         {
             _firmata = firmata;
             _board = board;
-            _firmata.OnSysexReply += OnSysexData;
+            _firmata.OnSysexReply += OnSysexDataInternal;
         }
 
         /// <summary>
@@ -203,6 +203,16 @@ namespace Iot.Device.Arduino
 
             _firmata = null;
             _board = null;
+        }
+
+        /// <summary>
+        /// Called by the infrastructure when the parser reports an error or information message.
+        /// The default implementation does nothing.
+        /// </summary>
+        /// <param name="message">The message text</param>
+        /// <param name="exception">The exception observed (may be null)</param>
+        protected internal virtual void OnErrorMessage(string message, Exception? exception)
+        {
         }
 
         /// <inheritdoc />

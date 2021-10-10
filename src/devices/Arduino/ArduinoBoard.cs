@@ -513,6 +513,19 @@ namespace Iot.Device.Arduino
             {
                 Logger.LogInformation(message);
             }
+
+            _commandHandlersLock.EnterReadLock();
+            try
+            {
+                foreach (var handler in _extendedCommandHandlers)
+                {
+                    handler.OnErrorMessage(message, exception);
+                }
+            }
+            finally
+            {
+                _commandHandlersLock.ExitReadLock();
+            }
         }
 
         /// <summary>

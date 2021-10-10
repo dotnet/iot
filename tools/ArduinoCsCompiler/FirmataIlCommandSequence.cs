@@ -1,14 +1,15 @@
 ﻿using System;
+using ArduinoCsCompiler;
 
 namespace Iot.Device.Arduino
 {
     internal class FirmataIlCommandSequence : FirmataCommandSequence
     {
         public FirmataIlCommandSequence(ExecutorCommand ilCommand)
-        : base(FirmataCommand.START_SYSEX)
+        : base()
         {
             Command = ilCommand;
-            WriteByte((byte)FirmataSysexCommand.SCHEDULER_DATA);
+            WriteByte((byte)CompilerCommandHandler.SchedulerData);
             WriteByte((byte)0x7F); // IL data
             WriteByte((byte)ilCommand);
         }
@@ -16,21 +17,6 @@ namespace Iot.Device.Arduino
         public ExecutorCommand Command
         {
             get;
-        }
-
-        /// <summary>
-        /// Send an int32 as 5 x 7 bits. This form of transmitting integers is only supported by extension modules
-        /// </summary>
-        /// <param name="value">The 32-Bit value to transmit</param>
-        public void SendUInt32(UInt32 value)
-        {
-            byte[] data = new byte[5];
-            data[0] = (byte)(value & 0x7F);
-            data[1] = (byte)((value >> 7) & 0x7F);
-            data[2] = (byte)((value >> 14) & 0x7F);
-            data[3] = (byte)((value >> 21) & 0x7F);
-            data[4] = (byte)((value >> 28) & 0x7F);
-            Write(data);
         }
 
         /// <summary>
@@ -44,15 +30,23 @@ namespace Iot.Device.Arduino
             WriteByte((byte)((value >> 7) & 0x7F));
         }
 
-        public void SendInt32(Int32 value)
-        {
-            SendUInt32((uint)value);
-        }
-
         public void SendInt14(int value)
         {
             WriteByte((byte)(value & 0x7F));
             WriteByte((byte)((value >> 7) & 0x7F));
+        }
+
+        public static byte[] Decode7BitBytes(byte[] data, int length)
+        {
+            byte[] retBytes = new byte[length];
+
+            for (int i = 0; i < length / 2; i++)
+            {
+                retBytes[i] = data[i * 2];
+                retBytes[i] += (byte)((data[(i * 2) + 1]) << 7);
+            }
+
+            return retBytes;
         }
     }
 }

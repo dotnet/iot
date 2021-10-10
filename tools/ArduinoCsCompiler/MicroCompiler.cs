@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading;
+using ArduinoCsCompiler;
 using Iot.Device.Arduino.Runtime;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,7 @@ using UnitsNet;
 #pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
-    public sealed class ArduinoCsCompiler : IDisposable
+    public sealed class MicroCompiler : IDisposable
     {
         private const int DataVersion = 1;
         private readonly ArduinoBoard _board;
@@ -31,12 +32,12 @@ namespace Iot.Device.Arduino
         private List<Type> _replacementClasses;
 
         private bool _disposed = false;
+        private readonly CompilerCommandHandler _commandHandler;
 
-        public ArduinoCsCompiler(ArduinoBoard board, bool resetExistingCode = true)
+        public MicroCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
             _logger = this.GetCurrentClassLogger();
             _board = board;
-            _board.SetCompilerCallback(BoardOnCompilerCallback);
 
             _activeTasks = new List<ArduinoTask>();
             _activeExecutionSet = null;
@@ -55,6 +56,9 @@ namespace Iot.Device.Arduino
                     _replacementClasses.Add(type);
                 }
             }
+
+            _commandHandler = new CompilerCommandHandler(this);
+            board.AddCommandHandler(_commandHandler);
         }
 
         private static bool HasStaticFields(Type cls)
@@ -91,11 +95,17 @@ namespace Iot.Device.Arduino
             _activeTasks.Remove(task);
         }
 
-        private void BoardOnCompilerCallback(int taskId, MethodState state, object args)
+        internal void OnCompilerCallback(int taskId, MethodState state, object? args)
         {
             if (_activeExecutionSet == null)
             {
                 _logger.LogError($"Invalid method state message. No code currently active.");
+                return;
+            }
+
+            if (args == null)
+            {
+                _logger.LogError("Invalid method state update: No message received");
                 return;
             }
 
@@ -197,7 +207,7 @@ namespace Iot.Device.Arduino
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+                throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
             void AddMethod(MethodInfo method, NativeMethod nativeMethod)
@@ -347,7 +357,7 @@ namespace Iot.Device.Arduino
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+                throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
             HashSet<Type> baseTypes = new HashSet<Type>();
@@ -506,7 +516,7 @@ namespace Iot.Device.Arduino
                     {
                         // Or if the method is implementing an interface
                         List<MethodInfo> methodsBeingImplemented = new List<MethodInfo>();
-                        ArduinoCsCompiler.CollectBaseImplementations(set, m, methodsBeingImplemented);
+                        MicroCompiler.CollectBaseImplementations(set, m, methodsBeingImplemented);
                         if (methodsBeingImplemented.Any())
                         {
                             PrepareCodeInternal(set, m, null);
@@ -531,7 +541,7 @@ namespace Iot.Device.Arduino
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+                throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
             if (forKernel)
@@ -774,9 +784,9 @@ namespace Iot.Device.Arduino
                 }
 
                 _logger.LogDebug($"Sending class {idx + 1} of {classesToLoad.Count}: Declaration for {cls.MemberInfoSignature()} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes.");
-                _board.Firmata.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members);
+                _commandHandler.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members);
 
-                _board.Firmata.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
+                _commandHandler.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
 
                 if (markAsReadOnly)
                 {
@@ -794,7 +804,7 @@ namespace Iot.Device.Arduino
 
         public void PrepareStringLoad(int constantSize, int stringSize)
         {
-            _board.Firmata.PrepareStringLoad(constantSize, stringSize);
+            _commandHandler.PrepareStringLoad(constantSize, stringSize);
         }
 
         public void SendConstants(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
@@ -812,7 +822,7 @@ namespace Iot.Device.Arduino
                 }
 
                 _logger.LogDebug($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes");
-                _board.Firmata.SendConstant(e.Token, e.InitializerData);
+               _commandHandler.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }
         }
@@ -821,7 +831,7 @@ namespace Iot.Device.Arduino
         {
             // Counting the existing list elements should be enough here.
             var listToLoad = typeList.Skip(fromSnapShot.SpecialTypes.Count).Take(toSnapShot.SpecialTypes.Count - fromSnapShot.SpecialTypes.Count).ToList();
-            _board.Firmata.SendSpecialTypeList(listToLoad);
+            _commandHandler.SendSpecialTypeList(listToLoad);
         }
 
         public void SendStrings(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
@@ -839,7 +849,7 @@ namespace Iot.Device.Arduino
                 }
 
                 _logger.LogDebug($"Sending string {idx}/{cnt}. Size {e.InitializerData.Length} bytes: {e.StringData}");
-                _board.Firmata.SendConstant(e.Token, e.InitializerData);
+                _commandHandler.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }
         }
@@ -1200,7 +1210,7 @@ namespace Iot.Device.Arduino
             }
 
             // Stopwatch w = Stopwatch.StartNew();
-            _board.Firmata.SendMethodDeclaration(declaration.Token, declaration.Flags, (byte)declaration.MaxStack,
+            _commandHandler.SendMethodDeclaration(declaration.Token, declaration.Flags, (byte)declaration.MaxStack,
                 (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
 
             // _board.Log($"Loading took {w.Elapsed}.");
@@ -1506,7 +1516,7 @@ namespace Iot.Device.Arduino
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+                throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
             if (set.HasMethod(methodInfo, methodInfo, out _))
@@ -1526,7 +1536,7 @@ namespace Iot.Device.Arduino
         {
             if (_disposed)
             {
-                throw new ObjectDisposedException(nameof(ArduinoCsCompiler));
+                throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
             if (!mainEntryPoint.IsStatic)
@@ -1578,7 +1588,7 @@ namespace Iot.Device.Arduino
                 exec.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
                 exec.SuppressType(typeof(ArduinoBoard));
-                exec.SuppressType(typeof(ArduinoCsCompiler));
+                exec.SuppressType(typeof(MicroCompiler));
 
                 // We don't currently support threads or tasks
                 // exec.SuppressType(typeof(System.Threading.Tasks.Task));
@@ -1992,10 +2002,10 @@ namespace Iot.Device.Arduino
             SendMethodDeclaration(decl);
             if (decl.HasBody && decl.NativeMethod == NativeMethod.None)
             {
-                _board.Firmata.SendMethodIlCode(decl.Token, decl.Code.IlBytes!);
+                _commandHandler.SendMethodIlCode(decl.Token, decl.Code.IlBytes!);
                 if (decl.Code.ExceptionClauses != null && decl.Code.ExceptionClauses.Any())
                 {
-                    _board.Firmata.SendMethodExceptionClauses(decl.Token, decl.Code.ExceptionClauses);
+                    _commandHandler.SendMethodExceptionClauses(decl.Token, decl.Code.ExceptionClauses);
                 }
             }
         }
@@ -2333,7 +2343,7 @@ namespace Iot.Device.Arduino
 
             var decl = _activeExecutionSet.GetMethod(method);
             _logger.LogInformation($"Starting execution on {decl}...");
-            _board.Firmata.ExecuteIlCode(decl.Token, taskId, arguments);
+            _commandHandler.ExecuteIlCode(decl.Token, taskId, arguments);
         }
 
         public void KillTask(MethodBase methodInfo)
@@ -2345,7 +2355,7 @@ namespace Iot.Device.Arduino
 
             var decl = _activeExecutionSet.GetMethod(methodInfo);
 
-            _board.Firmata.SendKillTask(decl.Token);
+            _commandHandler.SendKillTask(decl.Token);
         }
 
         /// <summary>
@@ -2358,18 +2368,17 @@ namespace Iot.Device.Arduino
             if (includingFlash)
             {
                 _logger.LogDebug("Erasing flash.");
-                _board.Firmata.ClearFlash();
+                _commandHandler.ClearFlash();
             }
 
             _logger.LogDebug("Resetting execution engine.");
-            _board.Firmata.SendIlResetCommand(force);
+            _commandHandler.SendIlResetCommand(force);
             _activeTasks.Clear();
             _activeExecutionSet = null;
         }
 
         public void Dispose()
         {
-            _board.SetCompilerCallback(null!);
         }
 
         public void SetExecutionSetActive(ExecutionSet executionSet)
@@ -2384,7 +2393,7 @@ namespace Iot.Device.Arduino
 
         public void CopyToFlash()
         {
-            _board.Firmata.CopyToFlash();
+            _commandHandler.CopyToFlash();
         }
 
         /// <summary>
@@ -2394,12 +2403,12 @@ namespace Iot.Device.Arduino
         /// <returns>True if the given snapshot is loaded, false if either no kernel is loaded or its checksum doesn't match</returns>
         public bool BoardHasKernelLoaded(ExecutionSet.SnapShot snapShot)
         {
-            return _board.Firmata.IsMatchingFirmwareLoaded(DataVersion, snapShot.GetHashCode());
+            return _commandHandler.IsMatchingFirmwareLoaded(DataVersion, snapShot.GetHashCode());
         }
 
         public void WriteFlashHeader(ExecutionSet.SnapShot snapShot, int startupToken, CodeStartupFlags flags)
         {
-            _board.Firmata.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
+            _commandHandler.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
         }
 
     }

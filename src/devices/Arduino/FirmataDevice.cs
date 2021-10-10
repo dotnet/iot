@@ -54,7 +54,6 @@ namespace Iot.Device.Arduino
 
         // Event used when waiting for answers (i.e. after requesting firmware version)
         private AutoResetEvent _dataReceived;
-        public event Action<int, MethodState, object>? OnSchedulerReply;
 
         public event PinChangeEventHandler? DigitalPortValueUpdated;
 
@@ -677,7 +676,6 @@ namespace Iot.Device.Arduino
                 catch (Exception ex)
                 {
                     OnError?.Invoke($"Firmata protocol error: Parser exception {ex.Message}", ex);
-                    OnSchedulerReply?.Invoke(0, MethodState.ConnectionError, ex);
                 }
             }
         }

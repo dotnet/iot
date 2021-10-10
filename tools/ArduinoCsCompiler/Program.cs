@@ -6,6 +6,7 @@ using System.Net;
 using System.Reflection;
 using CommandLine;
 using Iot.Device.Arduino;
+using Iot.Device.Common;
 using Microsoft.Extensions.Options;
 
 namespace ArduinoCsCompiler
@@ -21,6 +22,8 @@ namespace ArduinoCsCompiler
             }
 
             Console.WriteLine($"ArduinoCsCompiler - Version {version.ToString()}");
+
+            LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory();
             int errorCode = 0;
             var result = Parser.Default.ParseArguments<CommandLineOptions>(args)
                 .WithParsed<CommandLineOptions>(o =>
@@ -90,8 +93,8 @@ namespace ArduinoCsCompiler
             }
 
             Console.WriteLine($"Connected to Board with firmware {board.FirmwareName} version {board.FirmwareVersion}.");
-            CompilerCommandHandler handler = new CompilerCommandHandler();
-            board.AddCommandHandler(handler);
+            MicroCompiler compiler = new MicroCompiler(board, true);
+            
 
             return 0;
         }

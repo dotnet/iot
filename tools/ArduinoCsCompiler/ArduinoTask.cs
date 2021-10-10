@@ -18,7 +18,7 @@ namespace Iot.Device.Arduino
         private ConcurrentQueue<(MethodState, object[])> _collectedValues;
         private AutoResetEvent _dataAdded;
 
-        internal ArduinoTask(ArduinoCsCompiler compiler, ArduinoMethodDeclaration methodInfo, short taskId)
+        internal ArduinoTask(MicroCompiler compiler, ArduinoMethodDeclaration methodInfo, short taskId)
         {
             Compiler = compiler;
             MethodInfo = methodInfo;
@@ -28,7 +28,7 @@ namespace Iot.Device.Arduino
             TaskId = taskId;
         }
 
-        public ArduinoCsCompiler Compiler { get; }
+        public MicroCompiler Compiler { get; }
         internal ArduinoMethodDeclaration MethodInfo { get; }
 
         public short TaskId { get; }

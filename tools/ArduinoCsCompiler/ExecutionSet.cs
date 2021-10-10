@@ -26,7 +26,7 @@ namespace Iot.Device.Arduino
 
         private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>(), new List<int>(), new List<int>());
 
-        private readonly ArduinoCsCompiler _compiler;
+        private readonly MicroCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
         private readonly List<ClassDeclaration> _classes;
         private readonly Dictionary<TypeInfo, int> _patchedTypeTokens;
@@ -57,7 +57,7 @@ namespace Iot.Device.Arduino
         private SnapShot _kernelSnapShot;
         private Dictionary<Type, MethodInfo> _arrayListImpl;
 
-        internal ExecutionSet(ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
+        internal ExecutionSet(MicroCompiler compiler, CompilerSettings compilerSettings)
         {
             _compiler = compiler;
             _logger = this.GetCurrentClassLogger();
@@ -88,7 +88,7 @@ namespace Iot.Device.Arduino
             TokenOfStartupMethod = 0;
         }
 
-        internal ExecutionSet(ExecutionSet setToClone, ArduinoCsCompiler compiler, CompilerSettings compilerSettings)
+        internal ExecutionSet(ExecutionSet setToClone, MicroCompiler compiler, CompilerSettings compilerSettings)
         {
             _compiler = compiler;
             _logger = this.GetCurrentClassLogger();
@@ -156,7 +156,7 @@ namespace Iot.Device.Arduino
 
         /// <summary>
         /// The list of methods that need to be called to start the code (static constructors and the main method)
-        /// The sequence is combined into a startup method if the program is to run directly from flash, otherwise <see cref="ArduinoCsCompiler.ExecuteStaticCtors"/> takes care of the
+        /// The sequence is combined into a startup method if the program is to run directly from flash, otherwise <see cref="MicroCompiler.ExecuteStaticCtors"/> takes care of the
         /// sequencing.
         /// </summary>
         internal List<IlCode>? FirmwareStartupSequence { get; set; }
@@ -494,7 +494,7 @@ namespace Iot.Device.Arduino
 
             // If both the original class and the replacement have fields, match them and define the original as the "correct" ones
             // There shouldn't be a problem if only either one contains a field (but check size calculation!)
-            if (ArduinoCsCompiler.HasReplacementAttribute(field.DeclaringType!, out var attrib))
+            if (MicroCompiler.HasReplacementAttribute(field.DeclaringType!, out var attrib))
             {
                 var replacementType = attrib!.TypeToReplace!;
                 var replacementField = replacementType.GetField(field.Name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance);
@@ -773,7 +773,7 @@ namespace Iot.Device.Arduino
                 return true;
             }
 
-            if (!ArduinoCsCompiler.MethodsHaveSameSignature(a, b))
+            if (!MicroCompiler.MethodsHaveSameSignature(a, b))
             {
                 return false;
             }
@@ -967,7 +967,7 @@ namespace Iot.Device.Arduino
                         continue;
                     }
 
-                    if (ArduinoCsCompiler.MethodsHaveSameSignature(methoda, methodb) || ArduinoCsCompiler.AreSameOperatorMethods(methoda, methodb))
+                    if (MicroCompiler.MethodsHaveSameSignature(methoda, methodb) || MicroCompiler.AreSameOperatorMethods(methoda, methodb))
                     {
                         // Method A shall replace Method B
                         AddReplacementMethod(methodb, methoda);
@@ -998,7 +998,7 @@ namespace Iot.Device.Arduino
                 // Above, we only check the public methods, here we also look at the private ones
                 foreach (var methodb in typeToReplace.GetConstructors(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (ArduinoCsCompiler.MethodsHaveSameSignature(methoda, methodb))
+                    if (MicroCompiler.MethodsHaveSameSignature(methoda, methodb))
                     {
                         // Method A shall replace Method B
                         AddReplacementMethod(methodb, methoda);
@@ -1050,10 +1050,10 @@ namespace Iot.Device.Arduino
 
             var elem = methodsToConsider.FirstOrDefault(x =>
             {
-                if (x.Item2 != null && ArduinoCsCompiler.HasArduinoImplementationAttribute(x.Item2, out var attrib) && attrib.IgnoreGenericTypes)
+                if (x.Item2 != null && MicroCompiler.HasArduinoImplementationAttribute(x.Item2, out var attrib) && attrib.IgnoreGenericTypes)
                 {
                     // There are only very few methods with the IgnoreGenericTypes attribute. Therefore a simple test is enough
-                    if (x.Item1.Name == original.Name && ArduinoCsCompiler.HasReplacementAttribute(x.Item2.DeclaringType!, out var replacementAttribute)
+                    if (x.Item1.Name == original.Name && MicroCompiler.HasReplacementAttribute(x.Item2.DeclaringType!, out var replacementAttribute)
                                                       && replacementAttribute.TypeToReplace == original.DeclaringType)
                     {
                         return true;
@@ -1092,7 +1092,7 @@ namespace Iot.Device.Arduino
         {
             foreach (var replacementMethod in classToSearch.GetMethods(BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic))
             {
-                if (ArduinoCsCompiler.MethodsHaveSameSignature(replacementMethod, methodInfo) || ArduinoCsCompiler.AreSameOperatorMethods(replacementMethod, methodInfo))
+                if (MicroCompiler.MethodsHaveSameSignature(replacementMethod, methodInfo) || MicroCompiler.AreSameOperatorMethods(replacementMethod, methodInfo))
                 {
                     if (!replacementMethod.IsGenericMethodDefinition)
                     {
@@ -1106,7 +1106,7 @@ namespace Iot.Device.Arduino
                 {
                     // The replacement method is likely the correct one, but we need to instantiate it.
                     var repl = replacementMethod.MakeGenericMethod(methodInfo.GetGenericArguments());
-                    if (ArduinoCsCompiler.MethodsHaveSameSignature(repl, methodInfo) || ArduinoCsCompiler.AreSameOperatorMethods(repl, methodInfo))
+                    if (MicroCompiler.MethodsHaveSameSignature(repl, methodInfo) || MicroCompiler.AreSameOperatorMethods(repl, methodInfo))
                     {
                         return repl;
                     }
