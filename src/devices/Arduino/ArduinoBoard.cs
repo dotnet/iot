@@ -35,7 +35,7 @@ namespace Iot.Device.Arduino
         private readonly List<SupportedMode> _knownSupportedModes = new List<SupportedMode>();
         private readonly List<ExtendedCommandHandler> _extendedCommandHandlers = new List<ExtendedCommandHandler>();
         private readonly ReaderWriterLockSlim _commandHandlersLock =
-            new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
+            new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
         private SerialPort? _serialPort;
         private Stream? _dataStream;
