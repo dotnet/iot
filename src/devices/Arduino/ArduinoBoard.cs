@@ -32,8 +32,10 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoBoard : Board.Board, IDisposable
     {
-        private static readonly List<SupportedMode> _knownSupportedModes = new List<SupportedMode>();
+        private readonly List<SupportedMode> _knownSupportedModes = new List<SupportedMode>();
         private readonly List<ExtendedCommandHandler> _extendedCommandHandlers = new List<ExtendedCommandHandler>();
+        private readonly ReaderWriterLockSlim _commandHandlersLock =
+            new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
         private SerialPort? _serialPort;
         private Stream? _dataStream;
@@ -55,28 +57,6 @@ namespace Iot.Device.Arduino
 
         private ILogger _logger;
 
-        static ArduinoBoard()
-        {
-            // We add all known modes to the list, even though we don't really support them all in the core
-            _knownSupportedModes.Add(SupportedMode.DigitalInput);
-            _knownSupportedModes.Add(SupportedMode.DigitalOutput);
-            _knownSupportedModes.Add(SupportedMode.AnalogInput);
-            _knownSupportedModes.Add(SupportedMode.Pwm);
-            _knownSupportedModes.Add(SupportedMode.Servo);
-            _knownSupportedModes.Add(SupportedMode.Shift);
-            _knownSupportedModes.Add(SupportedMode.I2c);
-            _knownSupportedModes.Add(SupportedMode.OneWire);
-            _knownSupportedModes.Add(SupportedMode.Stepper);
-            _knownSupportedModes.Add(SupportedMode.Encoder);
-            _knownSupportedModes.Add(SupportedMode.Serial);
-            _knownSupportedModes.Add(SupportedMode.InputPullup);
-            _knownSupportedModes.Add(SupportedMode.Spi);
-            _knownSupportedModes.Add(SupportedMode.Sonar);
-            _knownSupportedModes.Add(SupportedMode.Tone);
-            _knownSupportedModes.Add(SupportedMode.Dht);
-            _knownSupportedModes.Add(SupportedMode.Frequency);
-        }
-
         /// <summary>
         /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
         /// </summary>
@@ -85,9 +65,9 @@ namespace Iot.Device.Arduino
         /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
-        : this()
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
+            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -98,18 +78,10 @@ namespace Iot.Device.Arduino
         /// On Linux, possible values include "/dev/ttyAMA0", "/dev/serial0", "/dev/ttyUSB1", etc.</param>
         /// <param name="baudRate">Baudrate to use. It is recommended to use at least 115200 Baud.</param>
         public ArduinoBoard(string portName, int baudRate)
-        : this()
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
-        }
-
-        private ArduinoBoard()
-        {
             _logger = this.GetCurrentClassLogger();
-            // Add the extended command handlers that are defined in this library
-            _extendedCommandHandlers.Add(new DhtSensor());
-            _extendedCommandHandlers.Add(new FrequencySensor());
         }
 
         /// <summary>
@@ -121,11 +93,19 @@ namespace Iot.Device.Arduino
         /// The list of supported pin modes.
         /// This list can be extended by adding special modes using <see cref="AddCommandHandler{T}"/>.
         /// </summary>
-        public static IReadOnlyList<SupportedMode> KnownModes
+        public IReadOnlyList<SupportedMode> KnownModes
         {
             get
             {
-                return _knownSupportedModes;
+                _commandHandlersLock.EnterReadLock();
+                try
+                {
+                    return _knownSupportedModes.AsReadOnly();
+                }
+                finally
+                {
+                    _commandHandlersLock.ExitReadLock();
+                }
             }
         }
 
@@ -221,9 +201,10 @@ namespace Iot.Device.Arduino
                 throw new ArgumentNullException(nameof(newCommandHandler));
             }
 
-            if (newCommandHandler.HandlesMode != null)
+            _commandHandlersLock.EnterWriteLock();
+            try
             {
-                lock (_knownSupportedModes)
+                if (newCommandHandler.HandlesMode != null)
                 {
                     // If we already know the mode, replace its configuration with the new one (typically, this will only update the name)
                     var m = _knownSupportedModes.FirstOrDefault(x => x.Value == newCommandHandler.HandlesMode.Value);
@@ -233,10 +214,18 @@ namespace Iot.Device.Arduino
                     }
 
                     _knownSupportedModes.Add(newCommandHandler.HandlesMode);
+
+                    // Update internal list
+                    Firmata.SupportedModes = _knownSupportedModes;
                 }
+
+                _extendedCommandHandlers.Add(newCommandHandler);
+            }
+            finally
+            {
+                _commandHandlersLock.ExitWriteLock();
             }
 
-            _extendedCommandHandlers.Add(newCommandHandler);
             if (_firmata != null)
             {
                 // Only if already initialized
@@ -245,7 +234,7 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Gets the command handler with the provided type.
+        /// Gets the command handler with the provided type. An exact type match is performed.
         /// </summary>
         /// <typeparam name="T">The type to query</typeparam>
         /// <returns>The command handler, or null if none was found</returns>
@@ -260,33 +249,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            throw new NotSupportedException($"No handler of type {typeof(T)} found");
-        }
-
-        /// <summary>
-        /// Gets the command handler with the provided type.
-        /// </summary>
-        /// <typeparam name="T">The type to query</typeparam>
-        /// <param name="handler">The out variable</param>
-        /// <returns>True on success, false otherwise</returns>
-        public bool TryGetCommandHandler<T>(
-#if NET5_0_OR_GREATER
-            [NotNullWhen(true)]
-#endif
-            out T handler)
-            where T : ExtendedCommandHandler
-        {
-            foreach (var cmd in _extendedCommandHandlers)
-            {
-                if (cmd.GetType() == typeof(T))
-                {
-                    handler = (T)cmd;
-                    return true;
-                }
-            }
-
-            handler = null!;
-            return false;
+            return null;
         }
 
         /// <summary>
@@ -297,7 +260,8 @@ namespace Iot.Device.Arduino
         public override PinUsage DetermineCurrentPinUsage(int pinNumber)
         {
             byte mode = Firmata.GetPinMode(pinNumber);
-            lock (_knownSupportedModes)
+            _commandHandlersLock.EnterReadLock();
+            try
             {
                 var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
                 if (m == null)
@@ -305,7 +269,11 @@ namespace Iot.Device.Arduino
                     return PinUsage.Unknown;
                 }
 
-                return m.PinMode;
+                return m.PinUsage;
+            }
+            finally
+            {
+                _commandHandlersLock.ExitReadLock();
             }
         }
 
@@ -341,6 +309,10 @@ namespace Iot.Device.Arduino
                     throw new InvalidOperationException("Board already initialized");
                 }
 
+                RegisterKnownSupportedModes();
+                // Add the extended command handlers that are defined in this library
+                RegisterCommandHandlers();
+
                 if (_serialPort != null)
                 {
                     _serialPort.Open();
@@ -352,7 +324,7 @@ namespace Iot.Device.Arduino
                     throw new InvalidOperationException("Constructor argument error: Neither port nor stream specified");
                 }
 
-                _firmata = new FirmataDevice();
+                _firmata = new FirmataDevice(_knownSupportedModes);
                 _firmata.Open(_dataStream);
                 _firmata.OnError += FirmataOnError;
                 _firmataVersion = _firmata.QueryFirmataVersion();
@@ -387,6 +359,43 @@ namespace Iot.Device.Arduino
                 }
 
                 _initialized = true;
+            }
+        }
+
+        private void RegisterCommandHandlers()
+        {
+            lock (_commandHandlersLock)
+            {
+                _extendedCommandHandlers.Add(new DhtSensor());
+                _extendedCommandHandlers.Add(new FrequencySensor());
+            }
+        }
+
+        /// <summary>
+        /// Registers the known supported modes. Should only be called once from Initialize.
+        /// </summary>
+        private void RegisterKnownSupportedModes()
+        {
+            lock (_commandHandlersLock)
+            {
+                // We add all known modes to the list, even though we don't really support them all in the core
+                _knownSupportedModes.Add(SupportedMode.DigitalInput);
+                _knownSupportedModes.Add(SupportedMode.DigitalOutput);
+                _knownSupportedModes.Add(SupportedMode.AnalogInput);
+                _knownSupportedModes.Add(SupportedMode.Pwm);
+                _knownSupportedModes.Add(SupportedMode.Servo);
+                _knownSupportedModes.Add(SupportedMode.Shift);
+                _knownSupportedModes.Add(SupportedMode.I2c);
+                _knownSupportedModes.Add(SupportedMode.OneWire);
+                _knownSupportedModes.Add(SupportedMode.Stepper);
+                _knownSupportedModes.Add(SupportedMode.Encoder);
+                _knownSupportedModes.Add(SupportedMode.Serial);
+                _knownSupportedModes.Add(SupportedMode.InputPullup);
+                _knownSupportedModes.Add(SupportedMode.Spi);
+                _knownSupportedModes.Add(SupportedMode.Sonar);
+                _knownSupportedModes.Add(SupportedMode.Tone);
+                _knownSupportedModes.Add(SupportedMode.Dht);
+                _knownSupportedModes.Add(SupportedMode.Frequency);
             }
         }
 
@@ -480,7 +489,7 @@ namespace Iot.Device.Arduino
         /// that the mode is actually supported</remarks>
         public void SetPinMode(int pin, SupportedMode arduinoMode)
         {
-            Firmata.SetPinMode(pin, arduinoMode.Value);
+            Firmata.SetPinMode(pin, arduinoMode);
         }
 
         /// <summary>
@@ -492,7 +501,8 @@ namespace Iot.Device.Arduino
         public SupportedMode GetPinMode(int pinNumber)
         {
             byte mode = Firmata.GetPinMode(pinNumber);
-            lock (_knownSupportedModes)
+            _commandHandlersLock.EnterReadLock();
+            try
             {
                 var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
                 if (m == null)
@@ -501,6 +511,10 @@ namespace Iot.Device.Arduino
                 }
 
                 return m;
+            }
+            finally
+            {
+                _commandHandlersLock.ExitReadLock();
             }
         }
 

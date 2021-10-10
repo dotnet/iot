@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -124,23 +127,6 @@ namespace Iot.Device.Arduino
             return true;
         }
 
-        private void DisableFrequencyReportingInternal(int pinNumber)
-        {
-            // Never send a -1!
-            if (pinNumber < 0)
-            {
-                pinNumber = 0x7F;
-            }
-
-            FirmataCommandSequence sequence = new();
-            sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
-            sequence.WriteByte(0);
-            sequence.WriteByte((byte)pinNumber);
-            sequence.WriteByte((byte)FrequencyMode.NoChange);
-            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            SendCommand(sequence);
-        }
-
         private (int TimeStamp, int NewTicks, bool Success) EnableFrequencyReportingInternal(int pinNumber, FrequencyMode mode, int reportDelay)
         {
             if (reportDelay >= (1 << 14))
@@ -180,7 +166,24 @@ namespace Iot.Device.Arduino
         /// <param name="pinNumber">The pin to use</param>
         public void DisableFrequencyReporting(int pinNumber)
         {
-            DisableFrequencyReportingInternal(pinNumber);
+            if (!IsRegistered)
+            {
+                return;
+            }
+
+            // Never send a -1!
+            if (pinNumber < 0)
+            {
+                pinNumber = 0x7F;
+            }
+
+            FirmataCommandSequence sequence = new();
+            sequence.WriteByte((byte)FirmataSysexCommand.FREQUENCY_COMMAND);
+            sequence.WriteByte(0);
+            sequence.WriteByte((byte)pinNumber);
+            sequence.WriteByte((byte)FrequencyMode.NoChange);
+            sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
+            SendCommand(sequence);
             _frequencyReportingPin = -1;
         }
 

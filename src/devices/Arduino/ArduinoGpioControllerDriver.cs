@@ -81,7 +81,7 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException($"Mode {mode} is not supported on Pin {pinNumber}.");
             }
 
-            _arduinoBoard.Firmata.SetPinMode(pinNumber, firmataMode.Value);
+            _arduinoBoard.Firmata.SetPinMode(pinNumber, firmataMode);
 
             // Cache this value. Since the GpioController calls GetPinMode when trying to write a pin (to verify whether it is set to output),
             // that would be very expensive here. And setting output pins should be cheap.
