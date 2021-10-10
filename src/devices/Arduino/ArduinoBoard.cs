@@ -17,6 +17,8 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using Iot.Device.Common;
 using Iot.Device.Board;
 using Microsoft.Extensions.Logging;
@@ -147,6 +149,42 @@ namespace Iot.Device.Arduino
 
             board = null!;
             return false;
+        }
+
+        /// <summary>
+        /// Tries to connect to an arduino over network.
+        /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
+        /// </summary>
+        /// <param name="boardAddress">The IP address of the board</param>
+        /// <param name="port">The network port to use</param>
+        /// <param name="board">Returns the board if successful</param>
+        /// <returns>True on success, false otherwise</returns>
+        public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port,
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out ArduinoBoard? board)
+        {
+            board = null;
+            try
+            {
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socket.Connect(boardAddress, port);
+                socket.NoDelay = true;
+                var networkStream = new NetworkStream(socket, true);
+                board = new ArduinoBoard(networkStream);
+                if (!(board.FirmataVersion > new Version(1, 0)))
+                {
+                    // Actually not expecting to get here (but the above will throw a SocketException if the remote end is not there)
+                    throw new NotSupportedException("Very old firmware found on board");
+                }
+
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
         }
 
         /// <summary>

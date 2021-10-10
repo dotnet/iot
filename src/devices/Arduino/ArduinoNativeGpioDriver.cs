@@ -13,7 +13,6 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoNativeGpioDriver : GpioDriver
     {
-        // This reference stays a null pointer forever. The implementation ignores it.
         private readonly ArduinoHardwareLevelAccess _hardwareLevelAccess;
 
         public ArduinoNativeGpioDriver()
