@@ -330,8 +330,8 @@ namespace Iot.Device.Arduino
 
                 if (c.Flags == ExceptionHandlingClauseOptions.Fault)
                 {
-                    // I don't think the C# compiler ever generates fault clauses
-                    throw new NotSupportedException("Exception fault clauses are not supported");
+                    // I don't think the C# compiler ever generates fault clauses (wrong: This exception currently fails test EnumGetValues1)
+                    throw new NotSupportedException($"Exception fault clauses are not supported in method {method.MethodSignature()}");
                 }
 
                 if (c.Flags == ExceptionHandlingClauseOptions.Clause && c.CatchType != null)

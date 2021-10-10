@@ -32,6 +32,9 @@ namespace ArduinoCsCompiler
             {
                 return;
             }
+
+            CommandError error = CommandError.None;
+            ParseReply(data, ref error);
         }
 
         private void WaitAndHandleIlCommand(FirmataIlCommandSequence commandSequence)
@@ -45,51 +48,7 @@ namespace ArduinoCsCompiler
             try
             {
                 var data = SendCommandAndWait(commandSequence, timeout, out error);
-                if (data.Length > 0 && data[0] == SchedulerData)
-                {
-                    if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
-                    {
-                        // Just an ack for a programming command.
-                        return;
-                    }
-
-                    if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
-                    {
-                        // This is a Nack
-                        error = (CommandError)data[3];
-                    }
-                    // Data from real-time methods
-                    else if (data.Length < 7)
-                    {
-                        error = CommandError.InvalidArguments;
-                    }
-                    else
-                    {
-                        MethodState state = (MethodState)data[3];
-                        int numArgs = data[4];
-
-                        if (state == MethodState.Aborted)
-                        {
-                            int[] results = new int[numArgs];
-                            // The result set is a set of tokens to build up the exception message
-                            for (int i = 0; i < numArgs; i++)
-                            {
-                                results[i] = FirmataCommandSequence.DecodeInt32(data, i * 5 + 5);
-                            }
-
-                            error = CommandError.Aborted;
-                            _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, results);
-                        }
-                        else
-                        {
-                            error = CommandError.None;
-                            // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
-                            var result = FirmataIlCommandSequence.Decode7BitBytes(data.Skip(5).ToArray(), numArgs);
-                            _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, result);
-                        }
-
-                    }
-                }
+                ParseReply(data, ref error);
             }
             catch (TimeoutException tx)
             {
@@ -100,6 +59,58 @@ namespace ArduinoCsCompiler
             {
                 throw new TaskSchedulerException($"Task scheduler method returned state {error}.");
             }
+        }
+
+        private bool ParseReply(byte[] data, ref CommandError error)
+        {
+            if (data.Length > 0 && data[0] == SchedulerData)
+            {
+                if (data.Length == 4 && data[1] == (byte) ExecutorCommand.Ack)
+                {
+                    // Just an ack for a programming command.
+                    return true;
+                }
+
+                if (data.Length == 4 && data[1] == (byte) ExecutorCommand.Nack)
+                {
+                    // This is a Nack
+                    error = (CommandError) data[3];
+                }
+                // Data from real-time methods
+                else if (data.Length < 7)
+                {
+                    error = CommandError.InvalidArguments;
+                }
+                else
+                {
+                    MethodState state = (MethodState) data[3];
+                    int numArgs = data[4];
+
+                    if (state == MethodState.Aborted)
+                    {
+                        int[] results = new int[numArgs];
+                        // The result set is a set of tokens to build up the exception message
+                        for (int i = 0; i < numArgs; i++)
+                        {
+                            results[i] = FirmataCommandSequence.DecodeInt32(data, i * 5 + 5);
+                        }
+
+                        error = CommandError.Aborted;
+                        _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, results);
+                    }
+                    else
+                    {
+                        error = CommandError.None;
+                        // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
+                        var result = FirmataIlCommandSequence.Decode7BitBytes(data.Skip(5).ToArray(), numArgs);
+                        _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, result);
+                    }
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         public void SendMethodIlCode(int methodToken, byte[] byteCode)
@@ -459,14 +470,24 @@ namespace ArduinoCsCompiler
             sequence.SendInt32(dataVersion);
             sequence.SendInt32(hashCode);
             sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-            SendCommandAndWait(sequence, ProgrammingTimeout, out CommandError error);
+            var data = SendCommandAndWait(sequence, ProgrammingTimeout, out CommandError _);
 
-            if (error != 0)
+            if (data.Length > 0 && data[0] == SchedulerData)
             {
-                return false;
+                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
+                {
+                    // Just an ack for a programming command.
+                    return true;
+                }
+
+                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
+                {
+                    // This is a Nack
+                    return false;
+                }
             }
 
-            return true;
+            throw new InvalidOperationException("Unexpected command reply");
         }
 
 

@@ -42,6 +42,9 @@ namespace Iot.Device.Arduino
             _activeTasks = new List<ArduinoTask>();
             _activeExecutionSet = null;
 
+            _commandHandler = new CompilerCommandHandler(this);
+            board.AddCommandHandler(_commandHandler);
+
             if (resetExistingCode)
             {
                 ClearAllData(true, false);
@@ -56,9 +59,6 @@ namespace Iot.Device.Arduino
                     _replacementClasses.Add(type);
                 }
             }
-
-            _commandHandler = new CompilerCommandHandler(this);
-            board.AddCommandHandler(_commandHandler);
         }
 
         private static bool HasStaticFields(Type cls)
@@ -103,9 +103,8 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            if (args == null)
+            if (args  == null)
             {
-                _logger.LogError("Invalid method state update: No message received");
                 return;
             }
 

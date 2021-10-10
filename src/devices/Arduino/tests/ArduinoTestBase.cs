@@ -6,7 +6,7 @@ namespace Iot.Device.Arduino.Tests
     public class ArduinoTestBase : IDisposable, IClassFixture<FirmataTestFixture>
     {
         private readonly FirmataTestFixture _fixture;
-        private readonly ArduinoCsCompiler _compiler;
+        private readonly MicroCompiler _compiler;
         private readonly ArduinoBoard _board;
 
         public ArduinoTestBase(FirmataTestFixture fixture)
@@ -14,10 +14,10 @@ namespace Iot.Device.Arduino.Tests
             _fixture = fixture;
             Assert.NotNull(_fixture.Board);
             _board = _fixture.Board!;
-            _compiler = new ArduinoCsCompiler(_fixture.Board!, true);
+            _compiler = new MicroCompiler(_fixture.Board!, true);
         }
 
-        protected ArduinoCsCompiler Compiler => _compiler;
+        protected MicroCompiler Compiler => _compiler;
 
         protected FirmataTestFixture Fixture => _fixture;
 

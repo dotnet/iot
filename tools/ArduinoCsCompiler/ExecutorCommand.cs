@@ -1,7 +1,7 @@
 ﻿#pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
-    internal enum ExecutorCommand : byte
+    public enum ExecutorCommand : byte
     {
         None = 0,
         DeclareMethod = 1,

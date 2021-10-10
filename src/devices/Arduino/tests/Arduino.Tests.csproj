@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net5.0</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile> 
@@ -20,7 +20,9 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
     
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />    
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    
+    <ProjectReference Include="..\..\..\..\tools\ArduinoCsCompiler\ArduinoCsCompiler.csproj" />    
     <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
     <ProjectReference Include="..\..\CharacterLcd\CharacterLcd.csproj" />
   </ItemGroup>
