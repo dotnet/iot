@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace ArduinoCsCompiler
 {
-    class Program
+    internal class Program
     {
         private static int Main(string[] args)
         {
@@ -36,6 +36,7 @@ namespace ArduinoCsCompiler
                 Console.WriteLine("Command line parsing error");
                 return 1;
             }
+
             return errorCode;
         }
 
@@ -94,7 +95,6 @@ namespace ArduinoCsCompiler
 
             Console.WriteLine($"Connected to Board with firmware {board.FirmwareName} version {board.FirmwareVersion}.");
             MicroCompiler compiler = new MicroCompiler(board, true);
-            
 
             return 0;
         }

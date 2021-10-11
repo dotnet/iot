@@ -18,6 +18,20 @@ namespace Iot.Device.Arduino.Tests
             _compiler = new MicroCompiler(_fixture.Board!, true);
         }
 
+        public CompilerSettings DefaultCompilerSettings
+        {
+            get
+            {
+                return new CompilerSettings()
+                {
+                    CreateKernelForFlashing = true,
+                    UseFlashForKernel = true,
+                    UseFlashForProgram = false,
+                    MaxMemoryUsage = 350_000
+                };
+            }
+        }
+
         protected MicroCompiler Compiler => _compiler;
 
         protected FirmataTestFixture Fixture => _fixture;
@@ -38,7 +52,7 @@ namespace Iot.Device.Arduino.Tests
         protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, params object[] args)
             where T : Delegate
         {
-            ExecuteComplexProgramSuccess<T>(mainEntryPoint, executeLocally, _fixture.DefaultCompilerSettings, args);
+            ExecuteComplexProgramSuccess<T>(mainEntryPoint, executeLocally, DefaultCompilerSettings, args);
         }
 
         protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, CompilerSettings settings, params object[] args)
@@ -74,10 +88,10 @@ namespace Iot.Device.Arduino.Tests
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
             // and derive everything required from there)
             _compiler.ClearAllData(true);
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint, _fixture.DefaultCompilerSettings);
+            var exec = _compiler.CreateExecutionSet(mainEntryPoint, DefaultCompilerSettings);
 
             long memoryUsage = exec.EstimateRequiredMemory();
-            Assert.True(memoryUsage < _fixture.DefaultCompilerSettings.MaxMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
+            Assert.True(memoryUsage < DefaultCompilerSettings.MaxMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
 
             var task = exec.MainEntryPoint;
             task.InvokeAsync(args);

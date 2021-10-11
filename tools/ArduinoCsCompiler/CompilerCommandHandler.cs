@@ -11,9 +11,9 @@ namespace ArduinoCsCompiler
 {
     internal class CompilerCommandHandler : ExtendedCommandHandler
     {
+        private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
         public const int SchedulerData = 0x7B;
         private readonly MicroCompiler _compiler;
-        private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
 
         public CompilerCommandHandler(MicroCompiler compiler)
         {
@@ -22,7 +22,7 @@ namespace ArduinoCsCompiler
 
         protected override void OnErrorMessage(string message, Exception? exception)
         {
-           _compiler.OnCompilerCallback(0, MethodState.ConnectionError, exception);
+            _compiler.OnCompilerCallback(0, MethodState.ConnectionError, exception);
             base.OnErrorMessage(message, exception);
         }
 
@@ -65,25 +65,25 @@ namespace ArduinoCsCompiler
         {
             if (data.Length > 0 && data[0] == SchedulerData)
             {
-                if (data.Length == 4 && data[1] == (byte) ExecutorCommand.Ack)
+                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
                 {
                     // Just an ack for a programming command.
                     return true;
                 }
 
-                if (data.Length == 4 && data[1] == (byte) ExecutorCommand.Nack)
+                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
                 {
                     // This is a Nack
-                    error = (CommandError) data[3];
+                    error = (CommandError)data[3];
                 }
-                // Data from real-time methods
                 else if (data.Length < 7)
                 {
                     error = CommandError.InvalidArguments;
                 }
                 else
                 {
-                    MethodState state = (MethodState) data[3];
+                    // Data from real-time methods
+                    MethodState state = (MethodState)data[3];
                     int numArgs = data[4];
 
                     if (state == MethodState.Aborted)
@@ -489,7 +489,5 @@ namespace ArduinoCsCompiler
 
             throw new InvalidOperationException("Unexpected command reply");
         }
-
-
     }
 }

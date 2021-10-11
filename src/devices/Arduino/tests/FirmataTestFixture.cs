@@ -8,7 +8,6 @@ using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using ArduinoCsCompiler;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
@@ -68,17 +67,6 @@ namespace Iot.Device.Arduino.Tests
         /// <summary>
         /// Default settings for unit tests
         /// </summary>
-        public CompilerSettings DefaultCompilerSettings
-        {
-            get
-            {
-                return new CompilerSettings()
-                {
-                    CreateKernelForFlashing = true, UseFlashForKernel = true, UseFlashForProgram = false, MaxMemoryUsage = 350_000
-                };
-            }
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             Board?.Dispose();

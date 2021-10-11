@@ -19,6 +19,19 @@ namespace ArduinoCsCompiler
             get;
         }
 
+        public static byte[] Decode7BitBytes(byte[] data, int length)
+        {
+            byte[] retBytes = new byte[length];
+
+            for (int i = 0; i < length / 2; i++)
+            {
+                retBytes[i] = data[i * 2];
+                retBytes[i] += (byte)((data[(i * 2) + 1]) << 7);
+            }
+
+            return retBytes;
+        }
+
         /// <summary>
         /// Send a short as 2 bytes.
         /// Note: Only sends 14 bit!
@@ -34,19 +47,6 @@ namespace ArduinoCsCompiler
         {
             WriteByte((byte)(value & 0x7F));
             WriteByte((byte)((value >> 7) & 0x7F));
-        }
-
-        public static byte[] Decode7BitBytes(byte[] data, int length)
-        {
-            byte[] retBytes = new byte[length];
-
-            for (int i = 0; i < length / 2; i++)
-            {
-                retBytes[i] = data[i * 2];
-                retBytes[i] += (byte)((data[(i * 2) + 1]) << 7);
-            }
-
-            return retBytes;
         }
     }
 }

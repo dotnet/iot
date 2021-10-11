@@ -20,6 +20,7 @@ namespace ArduinoCsCompiler
         private readonly ArduinoBoard _board;
         private readonly List<ArduinoTask> _activeTasks;
         private readonly ILogger _logger;
+        private readonly CompilerCommandHandler _commandHandler;
 
         private ExecutionSet? _activeExecutionSet;
 
@@ -28,8 +29,6 @@ namespace ArduinoCsCompiler
         private List<Type> _replacementClasses;
 
         private bool _disposed = false;
-        private readonly CompilerCommandHandler _commandHandler;
-
         public MicroCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
             _logger = this.GetCurrentClassLogger();
@@ -99,7 +98,7 @@ namespace ArduinoCsCompiler
                 return;
             }
 
-            if (args  == null)
+            if (args == null)
             {
                 return;
             }
@@ -817,7 +816,7 @@ namespace ArduinoCsCompiler
                 }
 
                 _logger.LogDebug($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes");
-               _commandHandler.SendConstant(e.Token, e.InitializerData);
+                _commandHandler.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }
         }

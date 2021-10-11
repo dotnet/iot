@@ -288,7 +288,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void EnumsHaveNames()
         {
-            LoadCodeMethod(nameof(TestMethods.EnumsHaveNames), 0, 0, 1, Fixture.DefaultCompilerSettings, false);
+            LoadCodeMethod(nameof(TestMethods.EnumsHaveNames), 0, 0, 1, DefaultCompilerSettings, false);
         }
 
         [Theory]
@@ -296,7 +296,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.DoubleToString2))]
         public void DoubleToStringTest(string name)
         {
-            LoadCodeMethod(name, 20.23, 202.1, 20.23, Fixture.DefaultCompilerSettings);
+            LoadCodeMethod(name, 20.23, 202.1, 20.23, DefaultCompilerSettings);
         }
 
         /// <summary>
@@ -330,7 +330,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.IterateOverArray3), 1)]
         public void IteratorProblems(string methodName, int arg1)
         {
-            LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
+            LoadCodeMethod(methodName, arg1, 0, 1, DefaultCompilerSettings);
         }
 
         [Theory]
@@ -341,7 +341,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.NormalTryFinallyWithReturn), 1)]
         public void ExceptionHandlingSimple(string methodName, int arg1)
         {
-            LoadCodeMethod(methodName, arg1, 0, 1, Fixture.DefaultCompilerSettings);
+            LoadCodeMethod(methodName, arg1, 0, 1, DefaultCompilerSettings);
         }
     }
 }
