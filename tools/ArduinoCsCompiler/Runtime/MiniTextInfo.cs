@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(TextInfo), false, IncludingPrivates = true)]
     internal class MiniTextInfo

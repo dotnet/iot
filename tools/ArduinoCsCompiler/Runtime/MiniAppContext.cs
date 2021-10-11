@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(AppContext), true, IncludingPrivates = true)]
     internal class MiniAppContext

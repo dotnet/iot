@@ -1,6 +1,7 @@
 ﻿using System;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(DateTime), false, IncludingPrivates = true)]
     internal struct MiniDateTime

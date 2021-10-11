@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Buffers;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(System.Runtime.InteropServices.MemoryMarshal), false, IncludingPrivates = true)]
     internal static class MiniMemoryMarshal

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     /// <summary>
     /// Represents a process currently running on the remote microcontroller

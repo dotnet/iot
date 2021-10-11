@@ -1,6 +1,7 @@
 ﻿using System;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     /// <summary>
     /// This class is here for reference. The actual implementation is directly in the runtime.

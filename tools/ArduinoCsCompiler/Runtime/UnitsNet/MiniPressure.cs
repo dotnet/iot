@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Iot.Device.Arduino.Runtime.UnitsNet
+namespace ArduinoCsCompiler.Runtime.UnitsNet
 {
     [ArduinoReplacement(typeof(Pressure), true)]
     internal struct MiniPressure

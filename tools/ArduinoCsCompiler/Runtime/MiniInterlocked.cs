@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     /// <summary>
     /// These functions are implemented in the backend, even though for a single-processor CPU, without interrupts, a simple implementation

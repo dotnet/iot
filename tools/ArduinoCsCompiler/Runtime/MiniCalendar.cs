@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(Calendar), IncludingPrivates = true)]
     internal class MiniCalendar

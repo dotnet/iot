@@ -1,4 +1,6 @@
-﻿namespace Iot.Device.Arduino.Runtime
+﻿using Iot.Device.Arduino;
+
+namespace ArduinoCsCompiler.Runtime
 {
     /// <summary>
     /// This is the method type struct. We just replace it's methods, so that <see cref="MiniRuntimeHelpers.GetMethodTable"/> works.

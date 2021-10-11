@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(Marshal), true)]
     internal class MiniMarshal

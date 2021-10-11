@@ -4,8 +4,9 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Text;
 using System.Threading;
+using ArduinoCsCompiler;
+using ArduinoCsCompiler.Runtime;
 using Iot.Device.Arduino;
-using Iot.Device.Arduino.Runtime;
 using Iot.Device.CharacterLcd;
 using Xunit;
 

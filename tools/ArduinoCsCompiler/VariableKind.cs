@@ -1,7 +1,7 @@
 ﻿using System;
 
 #pragma warning disable CS1591
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     [Flags]
     public enum VariableKind : byte

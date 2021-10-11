@@ -12,10 +12,10 @@ namespace ArduinoCsCompiler
     internal class CompilerCommandHandler : ExtendedCommandHandler
     {
         public const int SchedulerData = 0x7B;
-        private readonly Iot.Device.Arduino.MicroCompiler _compiler;
+        private readonly MicroCompiler _compiler;
         private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
 
-        public CompilerCommandHandler(Iot.Device.Arduino.MicroCompiler compiler)
+        public CompilerCommandHandler(MicroCompiler compiler)
         {
             _compiler = compiler;
         }

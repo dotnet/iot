@@ -1,4 +1,5 @@
 ﻿using System;
+using ArduinoCsCompiler;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests

@@ -1,11 +1,11 @@
 ﻿using System;
-using Unsafe = Iot.Device.Arduino.Runtime.MiniUnsafe;
+using Unsafe = ArduinoCsCompiler.Runtime.MiniUnsafe;
 
 #pragma warning disable SA1405
 #pragma warning disable SA1503
 #pragma warning disable SA1513
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement("System.SpanHelpers", null, true, IncludingPrivates = true)]
     internal static partial class MiniSpanHelpers

@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Unsafe = Iot.Device.Arduino.Runtime.MiniUnsafe;
+using Unsafe = ArduinoCsCompiler.Runtime.MiniUnsafe;
 
 #pragma warning disable SA1405
 #pragma warning disable SA1503
 #pragma warning disable SA1513
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     internal static partial class MiniSpanHelpers // .T
     {

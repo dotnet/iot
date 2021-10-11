@@ -1,7 +1,7 @@
 ﻿using System;
 
 #pragma warning disable CS1591
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     /// <summary>
     /// This class provides simple assertion functions. Unlike the other classes of the Arduino runtime, this one is public

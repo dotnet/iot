@@ -1,5 +1,5 @@
 ﻿#pragma warning disable CS1591
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     public enum ExecutorCommand : byte
     {

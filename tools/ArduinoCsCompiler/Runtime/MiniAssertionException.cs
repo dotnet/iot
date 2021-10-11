@@ -1,7 +1,7 @@
 ﻿using System;
 
 #pragma warning disable CS1591
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     /// <summary>
     /// This exception is thrown by <see cref="MiniAssert"/>

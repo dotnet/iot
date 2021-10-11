@@ -1,6 +1,6 @@
 ﻿#pragma warning disable CS1591
 
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     /// <summary>
     /// Exception types thrown by the remote engine.

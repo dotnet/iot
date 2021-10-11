@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     /// <summary>
     /// These locking primitives are no-ops as long as we're not supporting threads.

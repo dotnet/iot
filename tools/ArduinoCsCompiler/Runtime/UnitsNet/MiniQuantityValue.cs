@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnitsNet;
+﻿using UnitsNet;
 
-namespace Iot.Device.Arduino.Runtime.UnitsNet
+namespace ArduinoCsCompiler.Runtime.UnitsNet
 {
     [ArduinoReplacement(typeof(QuantityValue), true)]
     internal struct MiniQuantityValue

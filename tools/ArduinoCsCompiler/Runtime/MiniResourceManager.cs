@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     // The original implementation of this one is just too bloated. We do not need all that error message lookup stuff
     [ArduinoReplacement(typeof(System.Resources.ResourceManager), true)]

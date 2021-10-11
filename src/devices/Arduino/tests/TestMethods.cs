@@ -7,7 +7,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Iot.Device.Arduino.Runtime;
+using ArduinoCsCompiler.Runtime;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Graphics;
 using UnitsNet;

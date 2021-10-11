@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Threading;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(System.Environment), true)]
     internal static class MiniEnvironment

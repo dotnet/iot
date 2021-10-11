@@ -52,7 +52,9 @@ namespace Iot.Device.Arduino
 
         private CommandError _lastCommandError;
 
-        // Event used when waiting for answers (i.e. after requesting firmware version)
+        /// <summary>
+        /// Event used when waiting for answers (i.e. after requesting firmware version)
+        /// </summary>
         private AutoResetEvent _dataReceived;
 
         public event PinChangeEventHandler? DigitalPortValueUpdated;
@@ -1137,37 +1139,6 @@ namespace Iot.Device.Arduino
             {
                 return _lastAnalogValues[pinNumber];
             }
-        }
-
-        private byte[] Decode7BitBytes(byte[] data, int length)
-        {
-            if (_firmataStream == null)
-            {
-                throw new ObjectDisposedException(nameof(FirmataDevice));
-            }
-
-            byte[] retBytes = new byte[length];
-
-            for (int i = 0; i < length / 2; i++)
-            {
-                retBytes[i] = data[i * 2];
-                retBytes[i] += (byte)((data[(i * 2) + 1]) << 7);
-            }
-
-            return retBytes;
-        }
-
-        /// <summary>
-        /// Inverse of the above
-        /// </summary>
-        private int DecodeInt32(byte[] data, int fromOffset)
-        {
-            int value = data[fromOffset];
-            value |= data[fromOffset + 1] << 7;
-            value |= data[fromOffset + 2] << 14;
-            value |= data[fromOffset + 3] << 21;
-            value |= data[fromOffset + 4] << 28;
-            return value;
         }
 
         /// <summary>

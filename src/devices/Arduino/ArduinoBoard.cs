@@ -46,9 +46,6 @@ namespace Iot.Device.Arduino
         private bool _initialized;
         private bool _isDisposed = false;
 
-        // Only a delegate, not an event, because one board can only have one compiler attached at a time
-        private Action<int, MethodState, object>? _compilerCallback;
-
         // Counts how many spi devices are attached, to make sure we enable/disable the bus only when no devices are attached
         private int _spiEnabled = 0;
         private Version _firmwareVersion = new Version();
@@ -769,22 +766,6 @@ namespace Iot.Device.Arduino
             {
                 Firmata.DisableSpi();
             }
-        }
-
-        internal void SetCompilerCallback(Action<int, MethodState, object>? onCompilerCallback)
-        {
-            if (onCompilerCallback == null)
-            {
-                _compilerCallback = null;
-                return;
-            }
-
-            if (_compilerCallback != null)
-            {
-                throw new InvalidOperationException("Only one compiler can be active for a single board");
-            }
-
-            _compilerCallback = onCompilerCallback;
         }
     }
 }

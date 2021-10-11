@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement("System.Runtime.Intrinsics.X86.X86Base", null, true, IncludingPrivates = true, IncludingSubclasses = true)]
     internal class MiniX86Intrinsics

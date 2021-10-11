@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace Iot.Device.Arduino.Runtime.UnitsNet
+namespace ArduinoCsCompiler.Runtime.UnitsNet
 {
     [ArduinoReplacement(typeof(Duration), true)]
     internal struct MiniDuration

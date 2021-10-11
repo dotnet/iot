@@ -4,8 +4,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     internal enum CalendarId : ushort
     {

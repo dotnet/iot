@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 #pragma warning disable CS1591
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     public sealed class ArduinoTask : IArduinoTask, IDisposable
     {

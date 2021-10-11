@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     /// <summary>
     /// This attribute is applied to classes that contain implementations that should replace original implementations.

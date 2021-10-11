@@ -1,6 +1,7 @@
 ﻿using System;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(BitConverter), true)]
     internal class MiniBitConverter

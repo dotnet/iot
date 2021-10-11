@@ -1,8 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     // We're not replacing the helper methods of this class itself
     [ArduinoReplacement("Interop", "System.Private.CoreLib.dll", false, IncludingPrivates = true)]

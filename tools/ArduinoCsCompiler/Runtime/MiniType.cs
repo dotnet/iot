@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Reflection;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(System.Type), true, IncludingSubclasses = true)]
     internal class MiniType

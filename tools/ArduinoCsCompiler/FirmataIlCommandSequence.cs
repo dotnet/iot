@@ -1,7 +1,7 @@
 ﻿using System;
-using ArduinoCsCompiler;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     internal class FirmataIlCommandSequence : FirmataCommandSequence
     {

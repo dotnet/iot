@@ -8,6 +8,7 @@ using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using ArduinoCsCompiler;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;

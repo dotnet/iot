@@ -5,8 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using ArduinoCsCompiler;
 using Iot.Device.Arduino;
 using Xunit;
+using SystemException = ArduinoCsCompiler.SystemException;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -34,7 +36,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void WriteSystemExceptions()
         {
-            WriteEnumHeaderFile<Arduino.SystemException>();
+            WriteEnumHeaderFile<SystemException>();
         }
 
         [Fact]

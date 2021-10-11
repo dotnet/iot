@@ -2,9 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using Iot.Device.Arduino;
 
 #pragma warning disable SA1204 // Static members should appear before non-static members (justification: Order is from original .NET implementation)
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     /// <summary>
     /// Mini-Implementation for the System.String type. Uses unicode characters (16 bits per char). To avoid including rarely used functions with the kernel, this

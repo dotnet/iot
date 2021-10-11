@@ -4,8 +4,8 @@ using System.Device.Gpio;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ArduinoCsCompiler.Runtime;
 using Iot.Device.Arduino;
-using Iot.Device.Arduino.Runtime;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests

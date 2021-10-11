@@ -1,4 +1,6 @@
-﻿namespace Iot.Device.Arduino.Runtime
+﻿using Iot.Device.Arduino;
+
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement("System.SR", IncludingPrivates = true)]
     internal class MiniSR

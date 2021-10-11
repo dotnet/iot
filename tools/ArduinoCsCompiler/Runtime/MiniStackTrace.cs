@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using Iot.Device.Arduino;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     [ArduinoReplacement(typeof(StackTrace), true, IncludingPrivates = true)]
     internal class MiniStackTrace

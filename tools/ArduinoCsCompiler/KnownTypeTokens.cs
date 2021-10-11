@@ -1,5 +1,5 @@
 ﻿#pragma warning disable CS1591
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     /// <summary>
     /// A set of tokens which is always assigned to these classes, because they need to be identifiable in the firmware, i.e. the token assigned

@@ -3,9 +3,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Iot.Device.Arduino;
 using Microsoft.Win32.SafeHandles;
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     internal partial class MiniInterop
     {

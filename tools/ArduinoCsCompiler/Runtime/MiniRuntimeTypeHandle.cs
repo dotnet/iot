@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Runtime.Serialization;
+using Iot.Device.Arduino;
 
 #pragma warning disable SA1405
 #pragma warning disable SA1503
 #pragma warning disable SA1513
 
-namespace Iot.Device.Arduino.Runtime
+namespace ArduinoCsCompiler.Runtime
 {
     internal enum CorElementType : byte
     {

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Security.Cryptography.X509Certificates;
+using Iot.Device.Arduino;
 
 #pragma warning disable CS1591
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     internal sealed class ArduinoMethodDeclaration
     {
@@ -54,9 +53,9 @@ namespace Iot.Device.Arduino
                 MaxLocals = 0;
                 MaxStack = 0;
                 HasBody = false;
-                NativeMethod = Arduino.NativeMethod.None;
+                NativeMethod = Iot.Device.Arduino.NativeMethod.None;
             }
-            else if (attribs.Any(x => x.MethodNumber != Arduino.NativeMethod.None))
+            else if (attribs.Any(x => x.MethodNumber != Iot.Device.Arduino.NativeMethod.None))
             {
                 MaxLocals = 0;
                 MaxStack = 0;
@@ -75,7 +74,7 @@ namespace Iot.Device.Arduino
                 MaxLocals = body.LocalVariables.Count;
                 MaxStack = body.MaxStackSize;
                 HasBody = true;
-                NativeMethod = Arduino.NativeMethod.None;
+                NativeMethod = Iot.Device.Arduino.NativeMethod.None;
             }
 
             ArgumentCount = methodBase.GetParameters().Length;
