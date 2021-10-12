@@ -26,43 +26,29 @@ namespace Iot.Device.Button
         private Timer? _holdingTimer;
 
         /// <summary>
-        /// Delegate for button pressed.
-        /// </summary>
-        /// <param name="sender">The sender object.</param>
-        /// <param name="e">The event data.</param>
-        public delegate void ButtonPressedDelegate(object sender, EventArgs e);
-
-        /// <summary>
-        /// Delegate for button holding.
-        /// </summary>
-        /// <param name="sender">The sender object</param>
-        /// <param name="e">The event data.</param>
-        public delegate void ButtonHoldingDelegate(object sender, ButtonHoldingEventArgs e);
-
-        /// <summary>
         /// Delegate for button up event.
         /// </summary>
-        public event ButtonPressedDelegate? ButtonUp;
+        public event EventHandler<EventArgs>? ButtonUp;
 
         /// <summary>
         /// Delegate for button down event.
         /// </summary>
-        public event ButtonPressedDelegate? ButtonDown;
+        public event EventHandler<EventArgs>? ButtonDown;
 
         /// <summary>
         /// Delegate for button pressed event.
         /// </summary>
-        public event ButtonPressedDelegate? Press;
+        public event EventHandler<EventArgs>? Press;
 
         /// <summary>
         /// Delegate for button double pressed event.
         /// </summary>
-        public event ButtonPressedDelegate? DoublePress;
+        public event EventHandler<EventArgs>? DoublePress;
 
         /// <summary>
         /// Delegate for button holding event.
         /// </summary>
-        public event ButtonHoldingDelegate? Holding;
+        public event EventHandler<ButtonHoldingEventArgs>? Holding;
 
         /// <summary>
         /// Define if holding event is enabled or disabled on the button.

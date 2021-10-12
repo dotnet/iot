@@ -4,17 +4,17 @@
 namespace Iot.Device.Button
 {
     /// <summary>
-    /// The different button holding states.
+    /// The different states of a button that is being held.
     /// </summary>
     public enum ButtonHoldingState
     {
-        /// <summary>Started</summary>
+        /// <summary>Button holding started.</summary>
         Started,
 
-        /// <summary>Completed</summary>
+        /// <summary>Button holding completed.</summary>
         Completed,
 
-        /// <summary>Canceled</summary>
+        /// <summary>Button holding cancelled.</summary>
         Canceled,
     }
 }
