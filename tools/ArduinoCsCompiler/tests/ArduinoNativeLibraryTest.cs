@@ -22,7 +22,13 @@ namespace Iot.Device.Arduino.Tests
         public ArduinoNativeLibraryTest(FirmataTestFixture fixture)
             : base(fixture)
         {
-            Compiler.ClearAllData(true, false);
+            Compiler.ClearAllData(true, true);
+            CompilerSettings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForKernel = false,
+            };
         }
 
         public class SimpleLedBinding

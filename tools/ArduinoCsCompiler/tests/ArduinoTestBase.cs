@@ -15,21 +15,21 @@ namespace Iot.Device.Arduino.Tests
             _fixture = fixture;
             Assert.NotNull(_fixture.Board);
             _board = _fixture.Board!;
+            CompilerSettings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = true,
+                UseFlashForKernel = true,
+                UseFlashForProgram = false,
+                MaxMemoryUsage = 350_000
+            };
+
             _compiler = new MicroCompiler(_fixture.Board!, true);
         }
 
-        public CompilerSettings DefaultCompilerSettings
+        public CompilerSettings CompilerSettings
         {
-            get
-            {
-                return new CompilerSettings()
-                {
-                    CreateKernelForFlashing = true,
-                    UseFlashForKernel = true,
-                    UseFlashForProgram = false,
-                    MaxMemoryUsage = 350_000
-                };
-            }
+            get;
+            set;
         }
 
         protected MicroCompiler Compiler => _compiler;
@@ -52,7 +52,7 @@ namespace Iot.Device.Arduino.Tests
         protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, params object[] args)
             where T : Delegate
         {
-            ExecuteComplexProgramSuccess<T>(mainEntryPoint, executeLocally, DefaultCompilerSettings, args);
+            ExecuteComplexProgramSuccess<T>(mainEntryPoint, executeLocally, CompilerSettings, args);
         }
 
         protected void ExecuteComplexProgramSuccess<T>(T mainEntryPoint, bool executeLocally, CompilerSettings settings, params object[] args)
@@ -88,10 +88,10 @@ namespace Iot.Device.Arduino.Tests
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
             // and derive everything required from there)
             _compiler.ClearAllData(true);
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint, DefaultCompilerSettings);
+            var exec = _compiler.CreateExecutionSet(mainEntryPoint, CompilerSettings);
 
             long memoryUsage = exec.EstimateRequiredMemory();
-            Assert.True(memoryUsage < DefaultCompilerSettings.MaxMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
+            Assert.True(memoryUsage < CompilerSettings.MaxMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
 
             var task = exec.MainEntryPoint;
             task.InvokeAsync(args);
