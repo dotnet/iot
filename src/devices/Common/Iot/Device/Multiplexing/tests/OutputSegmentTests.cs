@@ -37,15 +37,12 @@ namespace Iot.Device.Multiplexing
             VirtualOutputSegment segment = new(12);
             segment.Write(0b_1001_0110);
 
-            Assert.True(
-                segment[0] == 0 &&
-                segment[1] == 1 &&
-                segment[2] == 1 &&
-                segment[3] == 0 &&
-                segment[4] == 1 &&
-                segment[5] == 0 &&
-                segment[6] == 0 &&
-                segment[7] == 1);
+            var expected = new PinValue[] { 0, 1, 1, 0, 1, 0, 0, 1 };
+
+            for (int i = 0; i<expected.Length; i++)
+            {
+                Assert.Equal(expected[i], segment[i]);
+            }
         }
 
         [Fact]
@@ -54,15 +51,12 @@ namespace Iot.Device.Multiplexing
             VirtualOutputSegment segment = new(8);
             segment.Write(0b_1001_0110);
 
-            Assert.True(
-                segment[0] == 0 &&
-                segment[1] == 1 &&
-                segment[2] == 1 &&
-                segment[3] == 0 &&
-                segment[4] == 1 &&
-                segment[5] == 0 &&
-                segment[6] == 0 &&
-                segment[7] == 1);
+            var expected = new PinValue[] { 0, 1, 1, 0, 1, 0, 0, 1 };
+
+            for (int i = 0; i<expected.Length; i++)
+            {
+                Assert.Equal(expected[i], segment[i]);
+            }
         }
 
         [Fact]
