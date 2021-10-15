@@ -17,16 +17,16 @@ namespace DNSensorAzureIoTHub
     public class Program
     {
         // set up IoT Hub message
-        const string DeviceID = "<replace-with-your-device-id>";
-        const string IotBrokerAddress = "<replace-with-your-iot-hub-name>.azure-devices.net";
+        private const string DeviceID = "<replace-with-your-device-id>";
+        private const string IotBrokerAddress = "<replace-with-your-iot-hub-name>.azure-devices.net";
 
         // LED constraints 
-        const int pin = 18;
-        const int lightTime = 1000;
-        const int dimTime = 2000;
+        private const int Pin = 18;
+        private const int LightTime = 1000;
+        private const int DimTime = 2000;
 
         // busId number for I2C pins
-        const int busId = 1;
+        private const int BusId = 1;
 
         public static void Main()
         {
@@ -34,10 +34,10 @@ namespace DNSensorAzureIoTHub
 
             // set up for LED and pin
             using GpioController led = new();
-            led.OpenPin(pin, PinMode.Output);
+            led.OpenPin(Pin, PinMode.Output);
     
             // setup for BMP280
-            I2cConnectionSettings i2cSettings = new(busId, Bmp280.DefaultI2cAddress);
+            I2cConnectionSettings i2cSettings = new(BusId, Bmp280.DefaultI2cAddress);
             I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
             using var i2CBmp280 = new Bmp280(i2cDevice);
 
@@ -66,8 +66,8 @@ namespace DNSensorAzureIoTHub
                     var readResult = i2CBmp280.Read();
 
                     // led on
-                    led.Write(pin, PinValue.High);
-                    Thread.Sleep(lightTime);
+                    led.Write(Pin, PinValue.High);
+                    Thread.Sleep(LightTime);
 
                     // print out the measured data
                     string? temperature = readResult.Temperature?.DegreesCelsius.ToString("F");
@@ -83,16 +83,16 @@ namespace DNSensorAzureIoTHub
                     Console.WriteLine($"Data is pushed to Iot Hub: {message}");
 
                     // blink led after reading value
-                    led.Write(pin, PinValue.Low);
+                    led.Write(Pin, PinValue.Low);
                     Thread.Sleep(75);
-                    led.Write(pin, PinValue.High);
+                    led.Write(Pin, PinValue.High);
                     Thread.Sleep(75);
-                    led.Write(pin, PinValue.Low);
+                    led.Write(Pin, PinValue.Low);
                     Thread.Sleep(75);
-                    led.Write(pin, PinValue.High);
+                    led.Write(Pin, PinValue.High);
                     Thread.Sleep(75);
-                    led.Write(pin, PinValue.Low);
-                    Thread.Sleep(dimTime);
+                    led.Write(Pin, PinValue.Low);
+                    Thread.Sleep(DimTime);
                 }
                 catch (Exception ex)
                 {
