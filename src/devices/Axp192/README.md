@@ -75,7 +75,7 @@ Console.WriteLine($"  USB Curr  : {power.GetUsbCurrentInput().Milliamperes} mA")
 
 ### Coulomb counter
 
-The AXP192 has a Coulomb counter where the value is in milli Amperes per hour (this one is not yet using UnitsNet). You first have to enable the Counter and then you can read the value. It is recommended to let some time between the moment you enable and read the data. Features to reset, stop the count are available as well
+The AXP192 has a Coulomb counter where the value range is in milli Amperes per hour. You first have to enable the Counter and then you can read the value. It is recommended to let some time between the moment you enable and read the data. Features to reset, stop the count are available as well
 
 ```csharp
 power.EnableCoulombCounter();

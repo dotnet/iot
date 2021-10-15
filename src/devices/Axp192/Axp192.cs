@@ -9,7 +9,7 @@ using UnitsNet.Units;
 namespace Iot.Device.Axp192
 {
     /// <summary>
-    /// AXP192 - Pwer Management
+    /// AXP192 - Enhanced single Cell Li-Battery and Power System Management IC
     /// </summary>
     public class Axp192
     {
@@ -27,7 +27,7 @@ namespace Iot.Device.Axp192
         /// <param name="i2c">An I2C device.</param>
         public Axp192(I2cDevice i2c)
         {
-            _i2c = i2c ?? throw new ArgumentNullException();
+            _i2c = i2c ?? throw new ArgumentNullException(nameof(i2c));
         }
 
         /// <summary>
@@ -135,7 +135,25 @@ namespace Iot.Device.Axp192
 
             // c = 65536 * current_LSB * (coin - coout) / 3600 / ADC rate
             // Adc rate can be read from 84H, change this variable if you change the ADC reate
-            double ccc = (65536 * 0.5 * valueDifferent) / 3600.0 / 200.0;  // Note the ADC has defaulted to be 200 Hz
+            double adcDiv;
+            switch (AdcFrequency)
+            {
+                case AdcFrequency.Frequency25Hz:
+                    adcDiv = 25.0;
+                    break;
+                case AdcFrequency.Frequency50Hz:
+                    adcDiv = 50.0;
+                    break;
+                case AdcFrequency.Frequency100Hz:
+                    adcDiv = 100.0;
+                    break;
+                default:
+                case AdcFrequency.Frequency200Hz:
+                    adcDiv = 200.0;
+                    break;
+            }
+
+            double ccc = (65536 * 0.5 * valueDifferent) / 3600.0 / adcDiv;  // Note the ADC has defaulted to be 200 Hz
 
             if (bIsNegative)
             {
@@ -734,7 +752,7 @@ namespace Iot.Device.Axp192
         {
             if (buffer.Length != 6)
             {
-                throw new ArgumentException();
+                throw new ArgumentException(nameof(buffer));
             }
 
             // Address from 0x06 - 0x0B
@@ -750,7 +768,7 @@ namespace Iot.Device.Axp192
         {
             if (buffer.Length != 6)
             {
-                throw new ArgumentException();
+                throw new ArgumentException(nameof(buffer));
             }
 
             // Address from 0x06 - 0x0B

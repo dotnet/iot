@@ -9,7 +9,7 @@ namespace Iot.Device.Axp192
     public enum AdcPinCurrent
     {
         /// <summary>20 uA</summary>
-        MicroAmpeers20 = 0b0000_0000,
+        MicroAmperes20 = 0b0000_0000,
 
         /// <summary>40 uA</summary>
         MicroAmperes40 = 0b0001_0000,
