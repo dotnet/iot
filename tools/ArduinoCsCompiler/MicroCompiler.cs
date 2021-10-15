@@ -80,6 +80,13 @@ namespace ArduinoCsCompiler
             return ret;
         }
 
+        private static void SwapFields<T>(List<T> fields, int firstIndex, int secondIndex)
+        {
+            T? temp = fields[firstIndex];
+            fields[firstIndex] = fields[secondIndex];
+            fields[secondIndex] = temp;
+        }
+
         private string GetMethodName(ArduinoMethodDeclaration decl)
         {
             return decl.MethodBase.Name;
@@ -396,9 +403,23 @@ namespace ArduinoCsCompiler
                 int idxFirstChar = fields.IndexOf(fields.Single(x => x.Name == "_firstChar"));
                 if (idxLength > idxFirstChar)
                 {
-                    var temp = fields[idxLength];
-                    fields[idxLength] = fields[idxFirstChar];
-                    fields[idxFirstChar] = temp;
+                    SwapFields(fields, idxLength, idxFirstChar);
+                }
+            }
+
+            if (classType == typeof(Exception))
+            {
+                // For exception, we need to make sure the field "_message" is the first, because we directly access it in the EE.
+                int idxMessage = fields.IndexOf(fields.Single(x => x.Name == "_message"));
+                int idxSecond = 0; // swap with the zero'th element (unless it is already there)
+                if (fields.Count < 2)
+                {
+                    throw new InvalidOperationException("System.Exception is expected to have at least two fields");
+                }
+
+                if (idxMessage != 0)
+                {
+                    SwapFields(fields, idxMessage, idxSecond);
                 }
             }
 
