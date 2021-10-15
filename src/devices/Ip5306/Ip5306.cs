@@ -30,7 +30,7 @@ namespace Iot.Device.Ip5306
         /// <param name="i2c">The I2C device.</param>
         public Ip5306(I2cDevice i2c)
         {
-            _i2c = i2c ?? throw new ArgumentNullException();
+            _i2c = i2c ?? throw new ArgumentNullException(nameof(i2c));
         }
 
         /// <summary>
