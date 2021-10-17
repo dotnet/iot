@@ -101,7 +101,6 @@ namespace ArduinoCsCompiler
         {
             if (_activeExecutionSet == null)
             {
-                _logger.LogError($"Invalid method state message. No code currently active.");
                 return;
             }
 

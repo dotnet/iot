@@ -117,6 +117,30 @@ namespace Iot.Device.Arduino.Tests
             return a + b;
         }
 
+        public static int AddCheckedS(int a, int b)
+        {
+            checked
+            {
+                return a + b;
+            }
+        }
+
+        public static int MulCheckedS(int a, int b)
+        {
+            checked
+            {
+                return a * b;
+            }
+        }
+
+        public static UInt32 SubCheckedU(UInt32 a, UInt32 b)
+        {
+            checked
+            {
+                return a - b;
+            }
+        }
+
         public static int SubS(int a, int b)
         {
             return a - b;

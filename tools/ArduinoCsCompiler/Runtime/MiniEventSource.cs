@@ -6,6 +6,10 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Diagnostics.Tracing.EventSource), true, IncludingPrivates = true)]
     internal class MiniEventSource : IDisposable
     {
+        public MiniEventSource()
+        {
+        }
+
         public MiniEventSource(Guid g, string s)
         {
         }

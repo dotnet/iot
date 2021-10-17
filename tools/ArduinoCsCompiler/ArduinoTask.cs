@@ -179,6 +179,9 @@ namespace ArduinoCsCompiler
                             case SystemException.Io:
                                 ex = new IOException($"I/O Exception in {resolved.MemberInfoSignature()} at {textualStackTrace}");
                                 break;
+                            case SystemException.Arithmetic:
+                                ex = new ArithmeticException($"Arithmetic exception in {resolved.MemberInfoSignature()} at {textualStackTrace}");
+                                break;
                             default:
                                 ex = new InvalidOperationException("Unknown exception " + textualStackTrace);
                                 break;

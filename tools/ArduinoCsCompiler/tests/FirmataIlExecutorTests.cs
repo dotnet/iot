@@ -38,7 +38,7 @@ namespace Iot.Device.Arduino.Tests
                 settings.AdditionalSuppressions.Add("System.SR");
             }
 
-            var set = Compiler.CreateExecutionSet(methods[0], settings);
+            var set = Compiler.CreateExecutionSet(method, settings);
 
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
@@ -77,6 +77,36 @@ namespace Iot.Device.Arduino.Tests
             remoteMethod.Dispose();
         }
 
+        private void LoadCodeMethodNoCheck<T1, T2>(string methodName, T1 a, T2 b, CompilerSettings? settings = null)
+        {
+            var methods = typeof(TestMethods).GetMethods().Where(x => x.Name == methodName).ToList();
+            var method = methods.Single();
+
+            if (settings == null)
+            {
+                settings = new CompilerSettings()
+                {
+                    CreateKernelForFlashing = false,
+                    UseFlashForKernel = false
+                };
+                settings.AdditionalSuppressions.Add("System.Number");
+                settings.AdditionalSuppressions.Add("System.SR");
+            }
+
+            var set = Compiler.CreateExecutionSet(method, settings);
+
+            CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+
+            using var remoteMethod = set.MainEntryPoint;
+
+            // This assertion fails on a timeout
+            Assert.True(remoteMethod.Invoke(cs.Token, a!, b!));
+
+            Assert.True(remoteMethod.GetMethodResults(set, out object[] data, out MethodState state));
+
+            // The task has terminated (do this after the above, otherwise the test will not show an exception)
+        }
+
         [Fact]
         public void MainMethodMustBeStatic()
         {
@@ -108,6 +138,8 @@ namespace Iot.Device.Arduino.Tests
 
         [Theory]
         [InlineData(nameof(TestMethods.AddS), 10, 20, 30)]
+        [InlineData(nameof(TestMethods.AddCheckedS), 0x8888, 0x2222, 0xAAAA)]
+        [InlineData(nameof(TestMethods.MulCheckedS), 0x8888, 0x1, 0x8888)]
         [InlineData(nameof(TestMethods.AddS), 10, -5, 5)]
         [InlineData(nameof(TestMethods.AddS), -5, -2, -7)]
         [InlineData(nameof(TestMethods.SubS), 10, 2, 8)]
@@ -137,6 +169,16 @@ namespace Iot.Device.Arduino.Tests
         public void TestArithmeticOperationSigned(string methodName, int argument1, int argument2, int expected)
         {
             LoadCodeMethod(methodName, argument1, argument2, expected);
+        }
+
+        [Theory]
+        [InlineData(nameof(TestMethods.AddCheckedS), 0x7fff_fff0, 0x7f99_9999)]
+        [InlineData(nameof(TestMethods.MulCheckedS), 0x7fff_fff0, 0x7f00_9999)]
+        [InlineData(nameof(TestMethods.SubCheckedU), 10, 20)]
+        public void TestArithmeticOperationSignedWithOverflow(string methodName, int argument1, int argument2)
+        {
+            // Don't execute locally, it's expected to throw there, too.
+            Assert.Throws<OverflowException>(() => LoadCodeMethodNoCheck(methodName, argument1, argument2));
         }
 
         [Theory]
