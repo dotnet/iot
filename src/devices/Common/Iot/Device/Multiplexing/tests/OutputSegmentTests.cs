@@ -92,7 +92,7 @@ namespace Iot.Device.Multiplexing
             byte[] value = new byte[] { 0b_1001_0110, 0b_1111_0000 };
             segment.Write(value);
             var expected = new PinValue[]
-            { 
+            {
                 0, 1, 1, 0, 1, 0, 0, 1,
                 0, 0, 0, 0, 1, 1, 1, 1,
                 0, 0, 0, 0, 0, 0, 0, 0
