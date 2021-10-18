@@ -80,7 +80,6 @@ namespace Iot.Device.Multiplexing.Utility
                 WriteByteAsValues(value[i], offset);
             }
         }
-        }
 
         private void WriteByteAsValues(byte value, int offset)
         {
