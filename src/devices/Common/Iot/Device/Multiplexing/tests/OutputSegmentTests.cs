@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
-using Iot.Device.Multiplexing.Utility;
 using System.Device.Gpio;
+using Iot.Device.Multiplexing.Utility;
 using Xunit;
 
 namespace Iot.Device.Multiplexing
