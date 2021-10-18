@@ -45,7 +45,8 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is -30 to 127 Celsius.</remarks>
         /// <param name="temperature">The temperature if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
+        /// <exception cref="IOException">Thrown when ext. temperature sensor not found.</exception>
         public bool TryReadOffBoardTemperature(out Temperature temperature)
         {
             temperature = Temperature.MaxValue;
@@ -69,7 +70,7 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is -40 to 80 Celsius.</remarks>
         /// <param name="temperature">Temperature if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadBarometerTemperature(out Temperature temperature)
         {
             temperature = Temperature.MaxValue;
@@ -87,7 +88,7 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is 300Pa to 1100hPa</remarks>
         /// <param name="pressure">Pressure if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadBarometerPressure(out Pressure pressure)
         {
             pressure = Pressure.MaxValue;
@@ -113,7 +114,7 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is 0 to 1800 Lux.</remarks>
         /// <param name="illuminance">Illuminance if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadIlluminance(out Illuminance illuminance)
         {
             illuminance = Illuminance.MaxValue;
@@ -140,7 +141,7 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is 25 to 95 percent</remarks>
         /// <param name="humidity">Relative humidity if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadRelativeHumidity(out RelativeHumidity humidity)
         {
             humidity = RelativeHumidity.MaxValue;
@@ -158,7 +159,7 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remakrs>Range is -20 to 60 Celsius</remakrs>
         /// <param name="temperature">Temperature if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadOnBoardTemperature(out Temperature temperature)
         {
             temperature = Temperature.MaxValue;
