@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using Iot.Device.Multiplexing.Utility;
+using System.Device.Gpio;
 using Xunit;
 
 namespace Iot.Device.Multiplexing
@@ -29,7 +30,7 @@ namespace Iot.Device.Multiplexing
                 segment[2] == 0 &&
                 segment[3] == 1);
         }
-        
+
         [Fact]
         public void SegmentValuesWriteByteOffset()
         {
@@ -39,7 +40,7 @@ namespace Iot.Device.Multiplexing
 
             var expected = new PinValue[] { 0, 1, 1, 0, 1, 0, 0, 1 };
 
-            for (int i = 0; i<expected.Length; i++)
+            for (int i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], segment[i]);
             }
@@ -53,7 +54,7 @@ namespace Iot.Device.Multiplexing
 
             var expected = new PinValue[] { 0, 1, 1, 0, 1, 0, 0, 1 };
 
-            for (int i = 0; i<expected.Length; i++)
+            for (int i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], segment[i]);
             }
