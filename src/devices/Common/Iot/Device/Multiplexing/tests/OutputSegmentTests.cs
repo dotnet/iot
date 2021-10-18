@@ -61,28 +61,47 @@ namespace Iot.Device.Multiplexing
         }
 
         [Fact]
-        public void SegmentValuesWriteLongByte()
+        public void SegmentWriteLongByte()
         {
+            // Scenario: values same as byteLength
             VirtualOutputSegment segment = new(16);
-            segment.Write(new byte[] { 0b_1101_0110, 0b_1111_0010 });
+            segment.Write(new byte[] { 0b_1001_0110, 0b_1111_0000 });
+            var expected = new PinValue[] { 0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1 };
 
-            Assert.True(
-                segment[0] == 0 &&
-                segment[1] == 1 &&
-                segment[2] == 0 &&
-                segment[3] == 0 &&
-                segment[4] == 1 &&
-                segment[5] == 1 &&
-                segment[6] == 1 &&
-                segment[7] == 1 &&
-                segment[8] == 0 &&
-                segment[9] == 1 &&
-                segment[10] == 1 &&
-                segment[11] == 0 &&
-                segment[12] == 1 &&
-                segment[13] == 0 &&
-                segment[14] == 1 &&
-                segment[15] == 1);
+            for (int i = 0; i < expected.Length; i++)
+            {
+                Assert.Equal(expected[i], segment[i]);
+            }
+        }
+
+        [Fact]
+        public void SegmentWriteLongByteValueLonger()
+        {
+            // Scenario: values longer than byteLength
+            VirtualOutputSegment segment = new(12);
+            byte[] value = new byte[] { 0b_1001_0110, 0b_1111_0000 };
+
+            Assert.Throws<ArgumentException>(() => segment.Write(value));
+        }
+
+        [Fact]
+        public void SegmentWriteLongByteValueShorter()
+        {
+            // Scenario: values shorter than byteLength
+            VirtualOutputSegment segment = new(24);
+            byte[] value = new byte[] { 0b_1001_0110, 0b_1111_0000 };
+            segment.Write(value);
+            var expected = new PinValue[]
+            { 
+                0, 1, 1, 0, 1, 0, 0, 1,
+                0, 0, 0, 0, 1, 1, 1, 1,
+                0, 0, 0, 0, 0, 0, 0, 0
+            };
+
+            for (int i = 0; i < expected.Length; i++)
+            {
+                Assert.Equal(expected[i], segment[i]);
+            }
         }
 
         [Fact]
