@@ -24,9 +24,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>bfc49945c0bedeffe01bb5d6f3c217dad207d0d8</Sha>
     </Dependency>
-    <Dependency Name="System.Drawing.Common" Version="5.0.2">
+    <Dependency Name="System.Drawing.Common" Version="5.0.3">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>5111aa12cdeb8e8703d475193f78c1848f58f6c6</Sha>
+      <Sha>d1a6945c4ab23b2d621b6e0738d9411409ab8b56</Sha>
     </Dependency>
     <Dependency Name="System.IO.Ports" Version="5.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
