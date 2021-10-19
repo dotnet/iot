@@ -202,7 +202,7 @@ namespace Iot.Device.Bmp180
         /// Check if the version is the correct one (0x32). This is fixed for this device
         /// </summary>
         /// <returns>Returns true if the version match</returns>
-        public bool IsVersionCorrect => ReadByte(Bmp180Register.WIA) == 0x32;
+        private bool IsVersionCorrect => ReadByte(Bmp180Register.WIA) == 0x32;
 
         /// <summary>
         /// Read the magnetometer without Bias correction and can wait for new data to be present
