@@ -11,6 +11,8 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Threading;
@@ -29,6 +31,9 @@ namespace Arduino.Samples
     /// </summary>
     internal class Program
     {
+        private const int LED_PIN = 2;
+        private const int BUTTON_PIN = 4;
+
         public static void Main(string[] args)
         {
             if (args.Length == 0)
@@ -38,8 +43,6 @@ namespace Arduino.Samples
                 return;
             }
 
-            string portName = args[0];
-
             var loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
@@ -47,6 +50,28 @@ namespace Arduino.Samples
 
             // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
             LogDispatcher.LoggerFactory = loggerFactory;
+
+            string portName = args[0];
+            if (args.Length > 0)
+            {
+                portName = args[0];
+            }
+            else
+            {
+                portName = "INET";
+            }
+
+            if (portName == "INET")
+            {
+                IPAddress address = IPAddress.Loopback;
+                if (args.Length > 1)
+                {
+                    address = IPAddress.Parse(args[1]);
+                }
+
+                ConnectToSocket(address);
+                return;
+            }
 
             using (var port = new SerialPort(portName, 115200))
             {
@@ -61,24 +86,40 @@ namespace Arduino.Samples
                     return;
                 }
 
-                ArduinoBoard board = new ArduinoBoard(port.BaseStream);
-                try
+                ConnectWithStream(port.BaseStream);
+            }
+        }
+
+        private static void ConnectWithStream(Stream stream)
+        {
+            ArduinoBoard board = new ArduinoBoard(stream);
+            try
+            {
+                Console.WriteLine(
+                    $"Connection successful. Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
+                while (Menu(board))
                 {
-                    // This implicitly connects
-                    Console.WriteLine($"Connecting... Firmware version: {board.FirmwareVersion}, Builder: {board.FirmwareName}");
-                    while (Menu(board))
-                    {
-                    }
                 }
-                catch (TimeoutException x)
-                {
-                    Console.WriteLine($"No answer from board: {x.Message} ");
-                }
-                finally
-                {
-                    port.Close();
-                    board?.Dispose();
-                }
+            }
+            catch (TimeoutException x)
+            {
+                Console.WriteLine($"No answer from board: {x.Message} ");
+            }
+            finally
+            {
+                stream.Close();
+                board?.Dispose();
+            }
+        }
+
+        private static void ConnectToSocket(IPAddress address)
+        {
+            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            s.Connect(address, 27016);
+            s.NoDelay = true;
+            using (NetworkStream ns = new NetworkStream(s, true))
+            {
+                ConnectWithStream(ns);
             }
         }
 
@@ -96,11 +137,11 @@ namespace Arduino.Samples
             Console.WriteLine("Hello I2C and GPIO on Arduino!");
             Console.WriteLine("Select the test you want to run:");
             Console.WriteLine(" 1 Run I2C tests with a BMP280");
-            Console.WriteLine(" 2 Run GPIO tests with a simple led blinking on GPIO6 port");
-            Console.WriteLine(" 3 Run polling button test on GPIO2");
-            Console.WriteLine(" 4 Run event wait test event on GPIO2 on Falling and Rising");
-            Console.WriteLine(" 5 Run callback event test on GPIO2");
-            Console.WriteLine(" 6 Run PWM test with a LED dimming on GPIO6 port");
+            Console.WriteLine($" 2 Run GPIO tests with a simple led blinking on GPIO{LED_PIN} port");
+            Console.WriteLine($" 3 Run polling button test on GPIO{BUTTON_PIN}");
+            Console.WriteLine($" 4 Run event wait test event on GPIO{BUTTON_PIN} on Falling and Rising");
+            Console.WriteLine($" 5 Run callback event test on GPIO{BUTTON_PIN}");
+            Console.WriteLine($" 6 Run PWM test with a LED dimming on GPIO{LED_PIN} port");
             Console.WriteLine(" 7 Blink the LED according to the input on A1");
             Console.WriteLine(" 8 Read analog channel as fast as possible");
             Console.WriteLine(" 9 Run SPI tests with an MCP3008 (experimental)");
@@ -202,7 +243,7 @@ namespace Arduino.Samples
 
         private static void TestPwm(ArduinoBoard board)
         {
-            int pin = 6;
+            int pin = LED_PIN;
             using (var pwm = board.CreatePwmChannel(0, pin, 100, 0))
             {
                 Console.WriteLine("Now dimming LED. Press any key to exit");
@@ -301,7 +342,7 @@ namespace Arduino.Samples
         public static void TestGpio(ArduinoBoard board)
         {
             // Use Pin 6
-            const int gpio = 6;
+            const int gpio = LED_PIN;
             var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
@@ -324,7 +365,7 @@ namespace Arduino.Samples
         public static void TestAnalogIn(ArduinoBoard board)
         {
             // Use Pin 6
-            const int gpio = 6;
+            const int gpio = LED_PIN;
             int analogPin = GetAnalogPin1(board);
             var gpioController = board.CreateGpioController();
             var analogController = board.CreateAnalogController(0);
@@ -396,7 +437,7 @@ namespace Arduino.Samples
 
         public static void TestInput(ArduinoBoard board)
         {
-            const int gpio = 2;
+            const int gpio = BUTTON_PIN;
             var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
@@ -435,7 +476,7 @@ namespace Arduino.Samples
 
         public static void TestEventsDirectWait(ArduinoBoard board)
         {
-            const int Gpio2 = 2;
+            const int Gpio2 = BUTTON_PIN;
             var gpioController = board.CreateGpioController();
 
             // Opening GPIO2
@@ -468,7 +509,7 @@ namespace Arduino.Samples
 
         public static void TestEventsCallback(ArduinoBoard board)
         {
-            const int Gpio2 = 2;
+            const int Gpio2 = BUTTON_PIN;
             var gpioController = board.CreateGpioController();
 
             // Opening GPIO2

@@ -93,7 +93,7 @@ namespace Iot.Device.Arduino
         {
             _firmata = firmata;
             _board = board;
-            _firmata.OnSysexReply += OnSysexData;
+            _firmata.OnSysexReply += OnSysexDataInternal;
         }
 
         /// <summary>
@@ -125,8 +125,27 @@ namespace Iot.Device.Arduino
         /// <param name="commandSequence">Command to send. This
         /// should normally be a sysex command.</param>
         /// <param name="timeout">Command timeout</param>
+        /// <param name="error">An error code in case of a failure</param>
         /// <exception cref="TimeoutException">The timeout elapsed before a reply was received.</exception>
-        /// <returns></returns>
+        /// <returns>The reply packet</returns>
+        protected byte[] SendCommandAndWait(FirmataCommandSequence commandSequence, TimeSpan timeout, out CommandError error)
+        {
+            if (_firmata == null)
+            {
+                throw new InvalidOperationException("Command handler not registered");
+            }
+
+            return _firmata.SendCommandAndWait(commandSequence, timeout, out error);
+        }
+
+        /// <summary>
+        /// Send a command to the device, expecting a reply.
+        /// </summary>
+        /// <param name="commandSequence">Command to send. This
+        /// should normally be a sysex command.</param>
+        /// <param name="timeout">Command timeout</param>
+        /// <exception cref="TimeoutException">The timeout elapsed before a reply was received.</exception>
+        /// <returns>The reply packet</returns>
         protected byte[] SendCommandAndWait(FirmataCommandSequence commandSequence, TimeSpan timeout)
         {
             if (_firmata == null)
@@ -143,7 +162,7 @@ namespace Iot.Device.Arduino
         /// <param name="commandSequence">Command to send. This
         /// should normally be a sysex command.</param>
         /// <exception cref="TimeoutException">The timeout elapsed before a reply was received.</exception>
-        /// <returns></returns>
+        /// <returns>The reply packet</returns>
         protected byte[] SendCommandAndWait(FirmataCommandSequence commandSequence)
         {
             return SendCommandAndWait(commandSequence, FirmataDevice.DefaultReplyTimeout);

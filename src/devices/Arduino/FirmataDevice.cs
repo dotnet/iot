@@ -50,7 +50,11 @@ namespace Iot.Device.Arduino
         private Queue<byte> _dataQueue;
         private StringBuilder _lastRawLine;
 
-        // Event used when waiting for answers (i.e. after requesting firmware version)
+        private CommandError _lastCommandError;
+
+        /// <summary>
+        /// Event used when waiting for answers (i.e. after requesting firmware version)
+        /// </summary>
         private AutoResetEvent _dataReceived;
 
         public event PinChangeEventHandler? DigitalPortValueUpdated;
@@ -77,6 +81,7 @@ namespace Iot.Device.Arduino
             _dataQueue = new Queue<byte>();
             _lastResponse = new List<byte>();
             _lastRequestId = 1;
+            _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;
             _lastRawLine = new StringBuilder();
             SupportedModes = supportedModes;
@@ -222,6 +227,7 @@ namespace Iot.Device.Arduino
                     if (timeout == 0)
                     {
                         // Synchronisation problem: The remainder of the expected message is missing
+                        _lastCommandError = CommandError.Timeout;
                         return;
                     }
                 }
@@ -236,6 +242,7 @@ namespace Iot.Device.Arduino
 
                     if (elapsed > DefaultReplyTimeout)
                     {
+                        _lastCommandError = CommandError.Timeout;
                         return;
                     }
 
@@ -271,6 +278,7 @@ namespace Iot.Device.Arduino
                     {
                         // Firmata sends this message automatically after a device reset (if you press the reset button on the arduino)
                         // If we know the version already, this is unexpected.
+                        _lastCommandError = CommandError.DeviceReset;
                         OnError?.Invoke("The device was unexpectedly reset. Please restart the communication.", null);
                     }
 
@@ -327,6 +335,7 @@ namespace Iot.Device.Arduino
                     // a sysex message must include at least one extended-command byte
                     if (bytes_read < 1)
                     {
+                        _lastCommandError = CommandError.InvalidArguments;
                         return;
                     }
 
@@ -362,7 +371,7 @@ namespace Iot.Device.Arduino
                                 Span<byte> bytesReceived = stackalloc byte[stringLength];
                                 ReassembleByteString(raw_data, 1, stringLength * 2, bytesReceived);
 
-                                string message1 = Encoding.ASCII.GetString(bytesReceived);
+                                string message1 = Encoding.UTF8.GetString(bytesReceived);
                                 int idxNull = message1.IndexOf('\0');
                                 if (message1.Contains("%") && idxNull > 0) // C style printf formatters
                                 {
@@ -451,18 +460,20 @@ namespace Iot.Device.Arduino
 
                             break;
                         case FirmataSysexCommand.I2C_REPLY:
-
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data;
                             _dataReceived.Set();
                             break;
 
                         case FirmataSysexCommand.SPI_DATA:
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data;
                             _dataReceived.Set();
                             break;
 
                         default:
                             // we pass the data forward as-is for any other type of sysex command
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
                             OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             _dataReceived.Set();
@@ -523,6 +534,19 @@ namespace Iot.Device.Arduino
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
         public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
         {
+            return SendCommandAndWait(sequence, timeout, out _);
+        }
+
+        /// <summary>
+        /// Send a command and wait for a reply
+        /// </summary>
+        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
+        /// <param name="timeout">A non-default timeout</param>
+        /// <param name="error">An error code in case of failure</param>
+        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
+        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, out CommandError error)
+        {
             if (!sequence.Validate())
             {
                 throw new ArgumentException("The command sequence is invalid", nameof(sequence));
@@ -549,6 +573,7 @@ namespace Iot.Device.Arduino
                     throw new TimeoutException("Timeout waiting for command answer");
                 }
 
+                error = _lastCommandError;
                 return _lastResponse.ToArray();
             }
         }

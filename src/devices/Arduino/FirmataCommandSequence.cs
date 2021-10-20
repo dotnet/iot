@@ -128,6 +128,29 @@ namespace Iot.Device.Arduino
             _sequence.Add(b);
         }
 
+        /// <summary>
+        /// Add a sequence of bytes to the command sequence. The bytes must be encoded already.
+        /// </summary>
+        /// <param name="bytesToSend">The raw block to send</param>
+        public void Write(byte[] bytesToSend)
+        {
+            _sequence.AddRange(bytesToSend);
+        }
+
+        /// <summary>
+        /// Add a sequence of bytes to the command sequence. The bytes must be encoded already.
+        /// </summary>
+        /// <param name="bytesToSend">The raw block to send</param>
+        /// <param name="startIndex">Start index</param>
+        /// <param name="length">Number of bytes to send</param>
+        public void Write(byte[] bytesToSend, int startIndex, int length)
+        {
+            for (int i = startIndex; i < startIndex + length; i++)
+            {
+                _sequence.Add(bytesToSend[i]);
+            }
+        }
+
         internal bool Validate()
         {
             if (Length < 2)
