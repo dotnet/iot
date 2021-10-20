@@ -132,7 +132,7 @@ stages:
       - job: Linux
         container: LinuxContainer
         pool:
-          name: Hosted Ubuntu 1604
+          vmImage: 'ubuntu-latest'
         variables:
         - HelixApiAccessToken: ''
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
