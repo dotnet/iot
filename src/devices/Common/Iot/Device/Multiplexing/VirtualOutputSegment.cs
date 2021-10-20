@@ -66,9 +66,9 @@ namespace Iot.Device.Multiplexing.Utility
         public void Write(ReadOnlySpan<byte> value)
         {
             // Scenarios
-            // values can be shorter than byteLength
-            // values can be longer than byteLength
-            // values can be same as byteLength
+            // values can be shorter than byteLength e.g. (1 * 8) - 16 = -8 < 0
+            // values can be longer than byteLength e.g. (3 * 8) - 16 = 8 > 0
+            // values can be same as byteLength e.g. (2 * 8) - 16 = 0
             if (value.Length * 8 > _length)
             {
                 throw new ArgumentException($"The bytes provided exceed the length of the {nameof(IOutputSegment)}.");
