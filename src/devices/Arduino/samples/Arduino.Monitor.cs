@@ -121,6 +121,14 @@ namespace Arduino.Samples
                 Console.WriteLine("BMP280 not available");
             }
 
+            DhtSensor? dht = board.GetCommandHandler<DhtSensor>();
+            if (dht == null)
+            {
+                // Note that this is a software error, hardware support is not tested here.
+                Console.WriteLine("DHT Sensor module missing");
+                return;
+            }
+
             OpenHardwareMonitor hardwareMonitor = new OpenHardwareMonitor();
             hardwareMonitor.EnableDerivedSensors();
             TimeSpan sleeptime = TimeSpan.FromMilliseconds(500);
@@ -174,7 +182,7 @@ namespace Arduino.Samples
                         break;
                     case 4:
                         modeName = "Temperature / Humidity";
-                        if (board.TryReadDht(3, 11, out temp, out var humidity))
+                        if (dht.TryReadDht(3, 11, out temp, out var humidity))
                         {
                             disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s0}", temp, humidity));
                         }
@@ -187,7 +195,7 @@ namespace Arduino.Samples
 
                     case 5:
                         modeName = "Dew point";
-                        if (bmp != null && bmp.TryReadPressure(out p2) && board.TryReadDht(3, 11, out temp, out humidity))
+                        if (bmp != null && bmp.TryReadPressure(out p2) && dht.TryReadDht(3, 11, out temp, out humidity))
                         {
                             Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
                             disp.Output.ReplaceLine(1, dewPoint.ToString("s1", CultureInfo.CurrentCulture));
