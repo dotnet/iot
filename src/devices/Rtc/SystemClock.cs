@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace Iot.Device.Rtc
 {
@@ -59,15 +60,15 @@ namespace Iot.Device.Rtc
         /// <exception cref="UnauthorizedAccessException">The user does not have permissions to set the system clock</exception>
         public static void SetSystemTimeUtc(DateTime dt)
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 SetSystemTimeUtcWindows(dt);
             }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 SetDateTimeUtcUnix(dt);
             }
-            else if (Environment.OSVersion.Platform == PlatformID.MacOSX)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 SetDateTimeUtcMacOs(dt);
             }
@@ -84,15 +85,15 @@ namespace Iot.Device.Rtc
         /// <returns>The current system time</returns>
         public static DateTime GetSystemTimeUtc()
         {
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 return GetSystemTimeUtcWindows();
             }
-            else if (Environment.OSVersion.Platform == PlatformID.Unix)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
                 return GetDateTimeUtcUnix();
             }
-            else if (Environment.OSVersion.Platform == PlatformID.MacOSX)
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 return GetDateTimeUtcMacOs();
             }
