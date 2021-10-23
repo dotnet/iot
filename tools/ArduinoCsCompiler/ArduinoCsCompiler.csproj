@@ -19,6 +19,7 @@
    <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="Runtime\*.cs" />
+    <Compile Include="Runtime\UnitsNet\*.cs" />
   </ItemGroup>
 
   <ItemGroup>
