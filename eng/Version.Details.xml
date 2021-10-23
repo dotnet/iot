@@ -26,7 +26,7 @@
     </Dependency>
     <Dependency Name="System.Drawing.Common" Version="5.0.3">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>d1a6945c4ab23b2d621b6e0738d9411409ab8b56</Sha>
+      <Sha>65fdc453d54fd172d60e4b7f1aa30f2ee9df8a44</Sha>
     </Dependency>
     <Dependency Name="System.IO.Ports" Version="5.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>
