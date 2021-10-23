@@ -7,6 +7,7 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Model;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using UnitsNet;
 
@@ -49,6 +50,7 @@ namespace Iot.Device.DHTxx
         private readonly uint _loopCount = 10000;
         private readonly Stopwatch _stopwatch = new Stopwatch();
         private int _lastMeasurement = 0;
+        private TimeSpan _minTimeBetweenReads;
 
         /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
@@ -88,6 +90,27 @@ namespace Iot.Device.DHTxx
         }
 
         /// <summary>
+        /// Gets or sets the minimum time between sensor reads.
+        /// When querying the sensor faster than this, the last values will be returned (whether valid or not)
+        /// </summary>
+        public TimeSpan MinTimeBetweenReads
+        {
+            get
+            {
+                return _minTimeBetweenReads;
+            }
+            set
+            {
+                if (value <= TimeSpan.Zero)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "Minimum time between reads must be larger than zero");
+                }
+
+                _minTimeBetweenReads = value;
+            }
+        }
+
+        /// <summary>
         /// Create a DHT sensor
         /// </summary>
         /// <param name="pin">The pin number (GPIO number)</param>
@@ -101,6 +124,8 @@ namespace Iot.Device.DHTxx
             _controller = gpioController ?? new GpioController(pinNumberingScheme);
             _pin = pin;
 
+            // These sensors typically require 2.5 seconds between read attempts, or the result will be garbage
+            MinTimeBetweenReads = TimeSpan.FromSeconds(2.5);
             _controller.OpenPin(_pin);
             // delay 1s to make sure DHT stable
             Thread.Sleep(1000);
@@ -122,7 +147,7 @@ namespace Iot.Device.DHTxx
         internal virtual void ReadData()
         {
             // The time of two measurements should be more than 1s.
-            if (Environment.TickCount - _lastMeasurement < 1000)
+            if (Environment.TickCount - _lastMeasurement < MinTimeBetweenReads.Milliseconds)
             {
                 return;
             }
@@ -272,6 +297,50 @@ namespace Iot.Device.DHTxx
             {
                 IsLastReadSuccessful = false;
             }
+        }
+
+        /// <summary>
+        /// Returns the current temperature
+        /// </summary>
+        /// <param name="temperature">[Out] The current temperature on success</param>
+        /// <returns>True on success, false if reading failed</returns>
+        public bool TryReadTemperature(
+#if NET5_0_OR_GREATER
+        [NotNullWhen(true)]
+#endif
+        out Temperature temperature)
+        {
+            temperature = default;
+            ReadData();
+            if (IsLastReadSuccessful)
+            {
+                temperature = GetTemperature(_readBuff);
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Returns the current relative humidity
+        /// </summary>
+        /// <param name="humidity">[Out] The current relative humidity on success</param>
+        /// <returns>True on success, false if reading failed</returns>
+        public bool TryReadHumidity(
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out RelativeHumidity humidity)
+        {
+            humidity = default;
+            ReadData();
+            if (IsLastReadSuccessful)
+            {
+                humidity = GetHumidity(_readBuff);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

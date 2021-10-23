@@ -8,6 +8,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
-    <None Include="README.md" />
   </ItemGroup>
 </Project>
