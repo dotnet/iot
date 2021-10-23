@@ -10,7 +10,7 @@ namespace ArduinoCsCompiler.Runtime
         /// This method just unsafely casts object to T. The underlying implementation just does a "return this" without any type test.
         /// The implementation of the following two methods is identical, therefore it doesn't really matter which one we match.
         /// </summary>
-        [ArduinoImplementation("UnsafeAs2")]
+        [ArduinoImplementation("UnsafeAs2", 0x20)]
         public static T As<T>(object? value)
             where T : class?
         {
@@ -20,7 +20,7 @@ namespace ArduinoCsCompiler.Runtime
             // ret
         }
 
-        [ArduinoImplementation("UnsafeAs2")]
+        [ArduinoImplementation("UnsafeAs2", 0x20)]
         public static ref TTo As<TFrom, TTo>(ref TFrom source)
         {
             throw new PlatformNotSupportedException();
@@ -29,7 +29,7 @@ namespace ArduinoCsCompiler.Runtime
             // ret
         }
 
-        [ArduinoImplementation("UnsafeAsPointer")]
+        [ArduinoImplementation("UnsafeAsPointer", 0x21)]
         public static void* AsPointer<T>(ref T value)
         {
             throw new PlatformNotSupportedException();
@@ -42,13 +42,13 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// Determines the byte offset from origin to target from the given references.
         /// </summary>
-        [ArduinoImplementation("UnsafeByteOffset", CompareByParameterNames = true)]
+        [ArduinoImplementation("UnsafeByteOffset", 0x22, CompareByParameterNames = true)]
         public static IntPtr ByteOffset<T>(ref T origin, ref T target)
         {
             throw new PlatformNotSupportedException();
         }
 
-        [ArduinoImplementation("UnsafeAreSame", CompareByParameterNames = true)]
+        [ArduinoImplementation("UnsafeAreSame", 0x23, CompareByParameterNames = true)]
         public static bool AreSame<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();
@@ -90,7 +90,7 @@ namespace ArduinoCsCompiler.Runtime
             return ref AddByteOffset(ref source, (IntPtr)((uint)elementOffset * (uint)SizeOf<T>()));
         }
 
-        [ArduinoImplementation("UnsafeAddByteOffset")]
+        [ArduinoImplementation("UnsafeAddByteOffset", 0x24)]
         public static ref T AddByteOffset<T>(ref T source, IntPtr byteOffset)
         {
             // This method is implemented by the toolchain
@@ -115,7 +115,7 @@ namespace ArduinoCsCompiler.Runtime
             // ret
         }
 
-        [ArduinoImplementation("UnsafeSizeOfType")]
+        [ArduinoImplementation("UnsafeSizeOfType", 0x25)]
         private static int SizeOfType(Type t)
         {
             throw new NotImplementedException();
@@ -132,7 +132,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new PlatformNotSupportedException();
         }
 
-        [ArduinoImplementation("UnsafeNullRef")]
+        [ArduinoImplementation("UnsafeNullRef", 0x26)]
         public static ref T NullRef<T>()
         {
             return ref AsRef<T>(null);
@@ -161,7 +161,7 @@ namespace ArduinoCsCompiler.Runtime
         /// <remarks>
         /// This check is conceptually similar to "(void*)(&amp;left) &gt; (void*)(&amp;right)".
         /// </remarks>
-        [ArduinoImplementation("UnsafeIsAddressGreaterThan", CompareByParameterNames = true)]
+        [ArduinoImplementation("UnsafeIsAddressGreaterThan", 0x18, CompareByParameterNames = true)]
         public static bool IsAddressGreaterThan<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();
@@ -179,7 +179,7 @@ namespace ArduinoCsCompiler.Runtime
         /// <remarks>
         /// This check is conceptually similar to "(void*)(&amp;left) &lt; (void*)(&amp;right)".
         /// </remarks>
-        [ArduinoImplementation("UnsafeIsAddressLessThan", CompareByParameterNames = true)]
+        [ArduinoImplementation("UnsafeIsAddressLessThan", 0x27, CompareByParameterNames = true)]
         public static bool IsAddressLessThan<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();
@@ -222,7 +222,7 @@ namespace ArduinoCsCompiler.Runtime
             return As<byte, T>(ref source);
         }
 
-        [ArduinoImplementation("UnsafeSkipInit")]
+        [ArduinoImplementation("UnsafeSkipInit", 0x28)]
         public static void SkipInit<T>(out T value)
         {
             throw new PlatformNotSupportedException();

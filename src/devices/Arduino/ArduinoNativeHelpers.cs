@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
     /// <summary>
@@ -13,13 +12,22 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoNativeHelpers
     {
-        [ArduinoImplementation("ArduinoNativeHelpersGetMicroseconds")]
+        /// <summary>
+        /// Gets the number of microseconds since board was switched on.
+        /// This wraps around every about 71 minutes
+        /// </summary>
+        /// <returns>The current number of microseconds</returns>
+        [ArduinoImplementation("ArduinoNativeHelpersGetMicroseconds", 0x110)]
         public static UInt32 GetMicroseconds()
         {
             throw new PlatformNotSupportedException("This method works on the Arduino only");
         }
 
-        [ArduinoImplementation("ArduinoNativeHelpersSleepMicroseconds")]
+        /// <summary>
+        /// Sleeps the given number of microseconds
+        /// </summary>
+        /// <param name="micros">Number of microseconds to sleep</param>
+        [ArduinoImplementation("ArduinoNativeHelpersSleepMicroseconds", 0x111)]
         public static void SleepMicroseconds(UInt32 micros)
         {
             throw new PlatformNotSupportedException("This method works on the Arduino only");

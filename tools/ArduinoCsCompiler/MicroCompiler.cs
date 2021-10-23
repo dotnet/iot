@@ -231,6 +231,11 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            void AddMethodByName(MethodInfo method, string nativeMethod)
+            {
+                AddMethod(method, ArduinoImplementationAttribute.GetStaticHashCode(nativeMethod));
+            }
+
             Type lowLevelInterface = typeof(ArduinoHardwareLevelAccess);
             foreach (var method in lowLevelInterface.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
@@ -340,11 +345,11 @@ namespace ArduinoCsCompiler
             // them in the runtime
             type = typeof(System.Object);
             replacementMethodInfo = type.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance)!; // Not the static one
-            AddMethod(replacementMethodInfo, "ObjectEquals".GetHashCode());
+            AddMethodByName(replacementMethodInfo, "ObjectEquals");
             replacementMethodInfo = type.GetMethod("ToString")!;
-            AddMethod(replacementMethodInfo, "ObjectToString".GetHashCode());
+            AddMethodByName(replacementMethodInfo, "ObjectToString");
             replacementMethodInfo = type.GetMethod("GetHashCode")!;
-            AddMethod(replacementMethodInfo, "ObjectGetHashCode".GetHashCode());
+            AddMethodByName(replacementMethodInfo, "ObjectGetHashCode");
 
             if (set.CompilerSettings.CreateKernelForFlashing)
             {
@@ -1754,7 +1759,7 @@ namespace ArduinoCsCompiler
                 if (methodInfo.Name == ".ctor" && methodInfo.DeclaringType!.Name == "ByReference`1")
                 {
                     int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
-                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, "ByReferenceCtor".GetHashCode());
+                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, ArduinoImplementationAttribute.GetStaticHashCode("ByReferenceCtor"));
                     set.AddMethod(newInfo1);
                     return;
                 }
@@ -1762,7 +1767,7 @@ namespace ArduinoCsCompiler
                 if (methodInfo.Name == "get_Value" && methodInfo.DeclaringType!.Name == "ByReference`1")
                 {
                     int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
-                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, "ByReferenceValue".GetHashCode());
+                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, ArduinoImplementationAttribute.GetStaticHashCode("ByReferenceValue"));
                     set.AddMethod(newInfo1);
                     return;
                 }

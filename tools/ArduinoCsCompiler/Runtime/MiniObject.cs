@@ -9,37 +9,37 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(Object), IncludingPrivates = true)]
     internal abstract class MiniObject
     {
-        [ArduinoImplementation("ObjectReferenceEquals")]
+        [ArduinoImplementation("ObjectReferenceEquals", 1)]
         public static new bool ReferenceEquals(object? a, object? b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("ObjectEquals")]
+        [ArduinoImplementation("ObjectEquals", 2)]
         public override bool Equals(Object? other)
         {
             return ReferenceEquals(this, other);
         }
 
-        [ArduinoImplementation("ObjectGetHashCode")]
+        [ArduinoImplementation("ObjectGetHashCode", 3)]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("ObjectToString")]
+        [ArduinoImplementation("ObjectToString", 4)]
         public override string ToString()
         {
            throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("ObjectGetType")]
+        [ArduinoImplementation("ObjectGetType", 5)]
         public new Type GetType()
         {
             throw new NotImplementedException(); // This implementation never executes
         }
 
-        [ArduinoImplementation("ObjectMemberwiseClone")]
+        [ArduinoImplementation("ObjectMemberwiseClone", 6)]
         public new object MemberwiseClone()
         {
             throw new NotImplementedException();

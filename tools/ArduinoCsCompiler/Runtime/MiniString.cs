@@ -29,19 +29,19 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// This needs support in the backend as well, because the size of the allocated object must be determined beforehand
         /// </summary>
-        [ArduinoImplementation("StringCtorSpan")]
+        [ArduinoImplementation("StringCtorSpan", 7)]
         public MiniString(ReadOnlySpan<char> value)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringCtorCharCount")]
+        [ArduinoImplementation("StringCtorCharCount", 8)]
         public MiniString(char c, int count)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringCtorCharArray")]
+        [ArduinoImplementation("StringCtorCharArray", 9)]
         public MiniString(char[] value, int startIndex, int length)
         {
             throw new NotImplementedException();
@@ -125,7 +125,7 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        [ArduinoImplementation("StringCompareTo")]
+        [ArduinoImplementation("StringCompareTo", 10)]
         public int CompareTo(string? other)
         {
             throw new NotImplementedException();
@@ -137,7 +137,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringEquals")]
+        [ArduinoImplementation("StringEquals", 11)]
         public override bool Equals(object? obj)
         {
             throw new NotImplementedException();
@@ -149,19 +149,19 @@ namespace ArduinoCsCompiler.Runtime
             return Equals((object?)other);
         }
 
-        [ArduinoImplementation("StringEqualsStringComparison")]
+        [ArduinoImplementation("StringEqualsStringComparison", 12)]
         public bool Equals(string value, StringComparison comparisonType)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringGetHashCode")]
+        [ArduinoImplementation("StringGetHashCode", 13)]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringToString")]
+        [ArduinoImplementation("StringToString", 14)]
         public override string ToString()
         {
             // This should simply do a "return this", but we can't do that here, because the types don't match
@@ -190,7 +190,7 @@ namespace ArduinoCsCompiler.Runtime
             return this; // String is immutable
         }
 
-        [ArduinoImplementation("StringSetElem")]
+        [ArduinoImplementation("StringSetElem", 15)]
         private void SetElem(int idx, char c)
         {
             throw new NotImplementedException();
@@ -204,31 +204,31 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringGetElem")]
+        [ArduinoImplementation("StringGetElem", 16)]
         private char GetElem(int idx)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringGetPinnableReference")]
+        [ArduinoImplementation("StringGetPinnableReference", 17)]
         public ref char GetPinnableReference()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringEqualsStatic")]
+        [ArduinoImplementation("StringEqualsStatic", 18)]
         public static bool Equals(string? a, string? b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringEqualsStatic")]
+        [ArduinoImplementation("StringEqualsStatic", 18)]
         public static bool operator ==(MiniString? a, MiniString? b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringUnEqualsStatic")]
+        [ArduinoImplementation("StringUnEqualsStatic", 20)]
         public static bool operator !=(MiniString? a, MiniString? b)
         {
             throw new NotImplementedException();
@@ -320,7 +320,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringFastAllocateString")]
+        [ArduinoImplementation("StringFastAllocateString", 21)]
         public static String FastAllocateString(int length)
         {
             throw new NotImplementedException();
@@ -345,7 +345,7 @@ namespace ArduinoCsCompiler.Runtime
         /// Allocates memory for the internal _data pointer
         /// </summary>
         /// <param name="length">Length, in chars</param>
-        [ArduinoImplementation("StringInternalAllocateString")]
+        [ArduinoImplementation("StringInternalAllocateString", 22)]
         private void InternalAllocateString(int length)
         {
             throw new NotImplementedException();

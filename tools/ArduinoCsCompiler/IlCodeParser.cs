@@ -329,7 +329,11 @@ namespace ArduinoCsCompiler
                 if (c.Flags == ExceptionHandlingClauseOptions.Fault)
                 {
                     // I don't think the C# compiler ever generates fault clauses (wrong: This exception currently fails test EnumGetValues1)
-                    throw new NotSupportedException($"Exception fault clauses are not supported in method {method.MethodSignature()}");
+                    // throw new NotSupportedException($"Exception fault clauses are not supported in method {method.MethodSignature()}");
+
+                    // There are very few compiler generated methods that internally use a fault clause to call a Dispose method,
+                    // but none of that seems to really do something important
+                    continue;
                 }
 
                 if (c.Flags == ExceptionHandlingClauseOptions.Clause && c.CatchType != null)

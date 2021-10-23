@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace Iot.Device.Arduino
@@ -10,6 +12,8 @@ namespace Iot.Device.Arduino
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor)]
     public class ArduinoImplementationAttribute : Attribute
     {
+        private static HashAlgorithm _algorithm = MD5.Create();
+
         /// <summary>
         /// Default ctor. Use to indicate that a method is implemented in C#
         /// </summary>
@@ -29,7 +33,7 @@ namespace Iot.Device.Arduino
         {
             if (!string.IsNullOrWhiteSpace(methodName))
             {
-                MethodNumber = methodName.GetHashCode();
+                MethodNumber = GetStaticHashCode(methodName);
             }
             else
             {
@@ -88,6 +92,31 @@ namespace Iot.Device.Arduino
         {
             get;
             set;
+        }
+
+        /// <summary>
+        /// Computes a hash code for a string that stays consistent over different architectures and between program runs.
+        /// </summary>
+        /// <param name="text">Text to calculate hash code from</param>
+        /// <returns>A number</returns>
+        public static int GetStaticHashCode(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return 0;
+            }
+
+            // The number of bytes returned here is expected to be a multiple of 4
+            byte[] data = _algorithm.ComputeHash(Encoding.ASCII.GetBytes(text));
+            UInt32 result = 0;
+            // Combine the above array into a single int by overlapping sequences
+            for (int i = 0; i < data.Length; i += 4)
+            {
+                int sliceAsInt = BitConverter.ToInt32(data, i);
+                result = result ^ (UInt32)(sliceAsInt >> (i % 7));
+            }
+
+            return (int)result;
         }
     }
 }

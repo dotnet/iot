@@ -51,6 +51,15 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
+        public int ManagedThreadId
+        {
+            [ArduinoImplementation]
+            get
+            {
+                return 1;
+            }
+        }
+
         [ArduinoImplementation]
         public static void Sleep(TimeSpan delay)
         {
@@ -64,7 +73,7 @@ namespace ArduinoCsCompiler.Runtime
             return false;
         }
 
-        [ArduinoImplementation("ArduinoNativeHelpersGetMicroseconds")]
+        [ArduinoImplementation("ArduinoNativeHelpersGetMicroseconds", 0x110)]
         public static void SpinWait(int micros)
         {
             throw new NotImplementedException();

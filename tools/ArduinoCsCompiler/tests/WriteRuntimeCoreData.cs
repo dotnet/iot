@@ -49,7 +49,7 @@ namespace Iot.Device.Arduino.Tests
 
             foreach (var s in specials)
             {
-                entries.Add(s, s.GetHashCode());
+                entries.Add(s, ArduinoImplementationAttribute.GetStaticHashCode(s));
             }
 
             // The loop below will throw on duplicate entries. This is expected.
@@ -80,14 +80,17 @@ namespace Iot.Device.Arduino.Tests
             }
 
             var hashCodes = entries.Select(x => x.Value).ToList();
-            if (hashCodes.Distinct().Count() != hashCodes.Count())
+            IEnumerable<int> duplicates = entries.GroupBy(x => x.Value)
+                .Where(g => g.Count() > 1)
+                .Select(x => x.Key).ToList();
+            if (duplicates.Any())
             {
-                // Let's hope it doesn't happen, otherwise we would have to extend this code to give a better error message.
-                throw new InvalidOperationException("Duplicate method key found");
+                throw new InvalidOperationException($"Duplicate method keys found: {duplicates.First()}");
             }
 
             var list = entries.OrderBy(x => x.Key).Select(y => (y.Key, y.Value));
-            WriteNativeMethodList(list);
+            var reverseLookupList = entries.OrderBy(x => x.Value).Select(y => (y.Value, y.Key));
+            WriteNativeMethodList(list, reverseLookupList);
         }
 
         private void TryAddEntry(Dictionary<string, int> entries, ArduinoImplementationAttribute attrib)
@@ -106,12 +109,13 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
-        private void WriteNativeMethodList(IEnumerable<(string Key, int Value)> entries)
+        private void WriteNativeMethodList(IEnumerable<(string Key, int Value)> entries, IEnumerable<(int Value, string Key)> reverseLookupList)
         {
             string name = "NativeMethod";
             string header = FormattableString.Invariant($@"
 #pragma once
 
+// Native method numbers, ordered by method name
 enum class {name}
 {{
     None = 0,
@@ -125,6 +129,14 @@ enum class {name}
             }
 
             w.WriteLine("};"); // Tail
+
+            w.WriteLine("/* Reverse lookup list (ordered by value)");
+            foreach (var e in reverseLookupList)
+            {
+                w.WriteLine($"{e.Value} -> {e.Key}");
+            }
+
+            w.WriteLine("*/");
             w.Close();
         }
 
