@@ -6,7 +6,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Buffer), true, IncludingPrivates = true)]
     internal static class MiniBuffer
     {
-        [ArduinoImplementation(NativeMethod.BufferMemmove)]
+        [ArduinoImplementation("BufferMemmove")]
         public static unsafe void Memmove(byte* dest, byte* src, uint len)
         {
             throw new NotImplementedException();
@@ -57,19 +57,19 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        [ArduinoImplementation(NativeMethod.BufferZeroMemory)]
+        [ArduinoImplementation("BufferZeroMemory")]
         public static unsafe void ZeroMemory(void* b, uint byteLength)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public static unsafe void ZeroMemory(void* b, UIntPtr length)
         {
             ZeroMemory(b, (uint)length);
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public static unsafe void ZeroMemory(byte* b, UIntPtr length)
         {
             ZeroMemory((void*)b, (uint)length);

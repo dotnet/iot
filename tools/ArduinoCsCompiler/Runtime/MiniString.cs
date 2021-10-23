@@ -29,19 +29,19 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// This needs support in the backend as well, because the size of the allocated object must be determined beforehand
         /// </summary>
-        [ArduinoImplementation(NativeMethod.StringCtorSpan)]
+        [ArduinoImplementation("StringCtorSpan")]
         public MiniString(ReadOnlySpan<char> value)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringCtorCharCount)]
+        [ArduinoImplementation("StringCtorCharCount")]
         public MiniString(char c, int count)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringCtorCharArray)]
+        [ArduinoImplementation("StringCtorCharArray")]
         public MiniString(char[] value, int startIndex, int length)
         {
             throw new NotImplementedException();
@@ -49,14 +49,14 @@ namespace ArduinoCsCompiler.Runtime
 
         // This is a bit odd: All of these default constructors on System::String are never actually called, because the runtime handles string construction specially.
         /*
-        [ArduinoImplementation(NativeMethod.StringCtor0)]
+        [ArduinoImplementation("StringCtor0")]
         public MiniString()
         {
             _stringLength = 0;
             _firstChar = '\0';
         }
 
-        [ArduinoImplementation(NativeMethod.StringCtor1)]
+        [ArduinoImplementation("StringCtor1")]
         public unsafe MiniString(char* buf)
         {
             throw new NotImplementedException();
@@ -80,7 +80,7 @@ namespace ArduinoCsCompiler.Runtime
         /////// <summary>
         /////// The purpose of this operator is to syntactically correctly perform a conversion from String to MiniString. The Implementation is a no-op.
         /////// </summary>
-        ////[ArduinoImplementation(NativeMethod.StringImplicitConversion)]
+        ////[ArduinoImplementation("StringImplicitConversion")]
         ////public static implicit operator MiniString(string other)
         ////{
         ////    throw new NotImplementedException();
@@ -108,7 +108,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public int Length
         {
-            [ArduinoImplementation(NativeMethod.None)]
+            [ArduinoImplementation]
             get
             {
                 return _stringLength;
@@ -125,7 +125,7 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        [ArduinoImplementation(NativeMethod.StringCompareTo)]
+        [ArduinoImplementation("StringCompareTo")]
         public int CompareTo(string? other)
         {
             throw new NotImplementedException();
@@ -137,31 +137,31 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringEquals)]
+        [ArduinoImplementation("StringEquals")]
         public override bool Equals(object? obj)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public bool Equals(string? other)
         {
             return Equals((object?)other);
         }
 
-        [ArduinoImplementation(NativeMethod.StringEqualsStringComparison)]
+        [ArduinoImplementation("StringEqualsStringComparison")]
         public bool Equals(string value, StringComparison comparisonType)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringGetHashCode)]
+        [ArduinoImplementation("StringGetHashCode")]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringToString)]
+        [ArduinoImplementation("StringToString")]
         public override string ToString()
         {
             // This should simply do a "return this", but we can't do that here, because the types don't match
@@ -190,7 +190,7 @@ namespace ArduinoCsCompiler.Runtime
             return this; // String is immutable
         }
 
-        [ArduinoImplementation(NativeMethod.StringSetElem)]
+        [ArduinoImplementation("StringSetElem")]
         private void SetElem(int idx, char c)
         {
             throw new NotImplementedException();
@@ -204,37 +204,37 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringGetElem)]
+        [ArduinoImplementation("StringGetElem")]
         private char GetElem(int idx)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringGetPinnableReference)]
+        [ArduinoImplementation("StringGetPinnableReference")]
         public ref char GetPinnableReference()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringEqualsStatic)]
+        [ArduinoImplementation("StringEqualsStatic")]
         public static bool Equals(string? a, string? b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringEqualsStatic)]
+        [ArduinoImplementation("StringEqualsStatic")]
         public static bool operator ==(MiniString? a, MiniString? b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringUnEqualsStatic)]
+        [ArduinoImplementation("StringUnEqualsStatic")]
         public static bool operator !=(MiniString? a, MiniString? b)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public TypeCode GetTypeCode()
         {
             return TypeCode.String;
@@ -320,7 +320,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.StringFastAllocateString)]
+        [ArduinoImplementation("StringFastAllocateString")]
         public static String FastAllocateString(int length)
         {
             throw new NotImplementedException();
@@ -345,7 +345,7 @@ namespace ArduinoCsCompiler.Runtime
         /// Allocates memory for the internal _data pointer
         /// </summary>
         /// <param name="length">Length, in chars</param>
-        [ArduinoImplementation(NativeMethod.StringInternalAllocateString)]
+        [ArduinoImplementation("StringInternalAllocateString")]
         private void InternalAllocateString(int length)
         {
             throw new NotImplementedException();

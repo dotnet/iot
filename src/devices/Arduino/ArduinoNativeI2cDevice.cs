@@ -22,19 +22,19 @@ namespace Iot.Device.Arduino
 
         public override I2cConnectionSettings ConnectionSettings { get; }
 
-        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceInit)]
+        [ArduinoImplementation("ArduinoNativeI2cDeviceInit")]
         private void Init(int busId, int deviceAddress)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceReadByte)]
+        [ArduinoImplementation("ArduinoNativeI2cDeviceReadByte")]
         public override byte ReadByte()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceReadSpan)]
+        [ArduinoImplementation("ArduinoNativeI2cDeviceReadSpan")]
         public override void Read(Span<byte> buffer)
         {
             // Todo: implement as backend function
@@ -44,19 +44,19 @@ namespace Iot.Device.Arduino
             }
         }
 
-        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceWriteByte)]
+        [ArduinoImplementation("ArduinoNativeI2cDeviceWriteByte")]
         public override void WriteByte(byte value)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceWriteSpan)]
+        [ArduinoImplementation("ArduinoNativeI2cDeviceWriteSpan")]
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.ArduinoNativeI2cDeviceWriteRead)]
+        [ArduinoImplementation("ArduinoNativeI2cDeviceWriteRead")]
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             throw new NotImplementedException();

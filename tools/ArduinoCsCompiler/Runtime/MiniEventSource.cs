@@ -24,7 +24,7 @@ namespace ArduinoCsCompiler.Runtime
             return false;
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         protected unsafe void WriteEventWithRelatedActivityIdCore(System.Int32 eventId, System.Guid* relatedActivityId, System.Int32 eventDataCount, void* data)
         {
         }

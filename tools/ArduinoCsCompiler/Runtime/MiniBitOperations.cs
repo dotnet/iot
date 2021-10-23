@@ -79,7 +79,7 @@ namespace ArduinoCsCompiler.Runtime
         /// Does not directly use any hardware intrinsics, nor does it incur branching.
         /// </summary>
         /// <param name="value">The value.</param>
-        [ArduinoImplementation(NativeMethod.BitOperationsLog2SoftwareFallback)]
+        [ArduinoImplementation("BitOperationsLog2SoftwareFallback")]
         private static int Log2SoftwareFallback(uint value)
         {
             throw new NotImplementedException();
@@ -146,7 +146,7 @@ namespace ArduinoCsCompiler.Runtime
         /// Similar in behavior to the x86 instruction TZCNT.
         /// </summary>
         /// <param name="value">The value.</param>
-        [ArduinoImplementation(NativeMethod.BitOperationsTrailingZeroCount)]
+        [ArduinoImplementation("BitOperationsTrailingZeroCount")]
         public static int TrailingZeroCount(uint value)
         {
             throw new NotImplementedException();

@@ -6,7 +6,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Enum), IncludingPrivates = true)]
     internal class MiniEnum
     {
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         public static string? InternalFormat(Type enumType, ulong value)
         {
             return value.ToString();
@@ -57,44 +57,44 @@ namespace ArduinoCsCompiler.Runtime
             return MiniUnsafe.As<MiniType>(enumType);
         }
 
-        [ArduinoImplementation(NativeMethod.EnumInternalBoxEnum, CompareByParameterNames = true)]
+        [ArduinoImplementation("EnumInternalBoxEnum", CompareByParameterNames = true)]
         public static object InternalBoxEnum(MiniType enumType, long value)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.EnumInternalGetValues, CompareByParameterNames = true)]
+        [ArduinoImplementation("EnumInternalGetValues", CompareByParameterNames = true)]
         public static ulong[] InternalGetValues(MiniType enumType)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public override string ToString()
         {
             // We don't have the metadata to print the enums as strings, so use their underlying value instead.
             return ToUInt64().ToString();
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public string ToString(string? format)
         {
             return ToUInt64().ToString();
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public string? ToString(string format, IFormatProvider provider)
         {
             return ToUInt64().ToString();
         }
 
-        [ArduinoImplementation(NativeMethod.EnumGetHashCode)]
+        [ArduinoImplementation("EnumGetHashCode")]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.EnumToUInt64)]
+        [ArduinoImplementation("EnumToUInt64")]
         public ulong ToUInt64()
         {
             throw new NotImplementedException();

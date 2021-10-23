@@ -10,19 +10,19 @@ namespace ArduinoCsCompiler.Runtime
         {
         }
 
-        [ArduinoImplementation(NativeMethod.ValueTypeEquals)]
+        [ArduinoImplementation("ValueTypeEquals")]
         public override bool Equals(object? other)
         {
             return true;
         }
 
-        [ArduinoImplementation(NativeMethod.ValueTypeGetHashCode)]
+        [ArduinoImplementation("ValueTypeGetHashCode")]
         public override int GetHashCode()
         {
             return 0;
         }
 
-        [ArduinoImplementation(NativeMethod.ValueTypeToString)]
+        [ArduinoImplementation("ValueTypeToString")]
         public override string ToString()
         {
             return string.Empty;

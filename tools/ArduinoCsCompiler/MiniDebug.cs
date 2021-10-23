@@ -7,7 +7,7 @@ namespace ArduinoCsCompiler
     [ArduinoReplacement(typeof(Debug), true, IncludingPrivates = true)]
     internal class MiniDebug
     {
-        [ArduinoImplementation(NativeMethod.DebugWriteLine)]
+        [ArduinoImplementation("DebugWriteLine")]
         public static void WriteLine(string? message)
         {
             throw new NotImplementedException();

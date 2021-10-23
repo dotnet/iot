@@ -796,19 +796,19 @@ namespace ArduinoCsCompiler.Runtime
 
             public string TimeSeparator => ":";
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             public string DateSeparator(int calendarId)
             {
                 return "/";
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             public string[] LongDates(CalendarId calendarId)
             {
                 return _saLongDates;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             public string[] ShortDates(CalendarId calendarId)
             {
                 return _saShortDates;
@@ -836,7 +836,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             public string[] YearMonths(CalendarId calendarId)
             {
                 return _saYearMonths;
@@ -853,73 +853,73 @@ namespace ArduinoCsCompiler.Runtime
                 }
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal string MonthDay(CalendarId calendarId)
             {
                 return "MMMM dd";
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal MiniCultureData GetCalendar(CalendarId calendarId)
             {
                 return this;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] EraNames(CalendarId calendarId)
             {
                 return _saEraNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] AbbrevEraNames(CalendarId calendarId)
             {
                 return _saEraNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] AbbreviatedEnglishEraNames(CalendarId calendarId)
             {
                 return _saEraNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] AbbreviatedDayNames(CalendarId calendarId)
             {
                 return _saAbbreviatedDayNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] DayNames(CalendarId calendarId)
             {
                 return _saDayNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] AbbreviatedGenitiveMonthNames(CalendarId calendarId)
             {
                 return _saAbbreviatedMonthNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] AbbreviatedMonthNames(CalendarId calendarId)
             {
                 return _saAbbreviatedMonthNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] MonthNames(CalendarId calendarId)
             {
                 return _saMonthNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal String[] GenitiveMonthNames(CalendarId calendarId)
             {
                 return _saMonthNames;
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             internal string[] LeapYearMonthNames(CalendarId calendarId)
             {
                 // Only used in hebrew

@@ -64,13 +64,13 @@ namespace ArduinoCsCompiler.Runtime
             return false;
         }
 
-        [ArduinoImplementation(NativeMethod.ArduinoNativeHelpersGetMicroseconds)]
+        [ArduinoImplementation("ArduinoNativeHelpersGetMicroseconds")]
         public static void SpinWait(int micros)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public static int GetCurrentProcessorId()
         {
             return 0;
@@ -82,13 +82,13 @@ namespace ArduinoCsCompiler.Runtime
             return 0;
         }
 
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public static Thread GetCurrentThreadNative()
         {
             return MiniUnsafe.As<Thread>(new MiniThread());
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         public static DeserializationTracker GetThreadDeserializationTracker(ref int stackMark)
         {
             stackMark = 0;

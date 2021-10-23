@@ -6,7 +6,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(DateTime), false, IncludingPrivates = true)]
     internal struct MiniDateTime
     {
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public static bool SystemSupportsLeapSeconds()
         {
             return false;
@@ -14,14 +14,14 @@ namespace ArduinoCsCompiler.Runtime
 
         public static DateTime UtcNow
         {
-            [ArduinoImplementation(NativeMethod.DateTimeUtcNow)]
+            [ArduinoImplementation("DateTimeUtcNow")]
             get
             {
                 throw new NotImplementedException();
             }
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         public static unsafe bool ValidateSystemTime(byte* time, bool localTime)
         {
             return true;

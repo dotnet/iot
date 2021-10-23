@@ -186,7 +186,7 @@ namespace ArduinoCsCompiler
         }
 
         public void SendMethodDeclaration(int declarationToken, MethodFlags methodFlags, byte maxStack, byte argCount,
-            NativeMethod nativeMethod, ClassMember[] localTypes, ClassMember[] argTypes)
+            int nativeMethod, ClassMember[] localTypes, ClassMember[] argTypes)
         {
             FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.DeclareMethod);
             sequence.SendInt32(declarationToken);

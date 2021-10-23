@@ -86,7 +86,7 @@ namespace ArduinoCsCompiler.Runtime
             return type;
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeTypeHandleGetCorElementType)]
+        [ArduinoImplementation("RuntimeTypeHandleGetCorElementType")]
         internal static CorElementType GetCorElementType(Type type)
         {
             throw new NotImplementedException();
@@ -158,7 +158,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public IntPtr Value
         {
-            [ArduinoImplementation(NativeMethod.RuntimeTypeHandleValue)]
+            [ArduinoImplementation("RuntimeTypeHandleValue")]
             get
             {
                 throw new NotImplementedException();
@@ -270,13 +270,13 @@ namespace ArduinoCsCompiler.Runtime
             return outHandles;
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         internal static object Allocate(Type type)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.TypeCreateInstanceForAnotherGenericParameter, CompareByParameterNames = true)]
+        [ArduinoImplementation("TypeCreateInstanceForAnotherGenericParameter", CompareByParameterNames = true)]
         internal static object CreateInstanceForAnotherGenericParameter(Type type, Type genericParameter)
         {
             throw new NotImplementedException();

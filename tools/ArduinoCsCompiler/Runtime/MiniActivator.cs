@@ -8,7 +8,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Activator), IncludingPrivates = true)]
     internal static class MiniActivator
     {
-        [ArduinoImplementation(NativeMethod.ActivatorCreateInstance)]
+        [ArduinoImplementation("ActivatorCreateInstance")]
         public static object? CreateInstance(Type type, BindingFlags bindingAttr, Binder? binder, object?[]? args, CultureInfo? culture, object?[]? activationAttributes)
         {
             throw new NotImplementedException();

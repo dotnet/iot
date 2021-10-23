@@ -11,19 +11,19 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Threading.Interlocked), IncludingPrivates = true)]
     internal class MiniInterlocked
     {
-        [ArduinoImplementation(NativeMethod.InterlockedCompareExchange_Object)]
+        [ArduinoImplementation("InterlockedCompareExchange_Object")]
         public static object? CompareExchange(ref object? location1, object? value, object? comparand)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.InterlockedExchangeAdd)]
+        [ArduinoImplementation("InterlockedExchangeAdd")]
         public static int ExchangeAdd(ref int location1, int value)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.InterlockedCompareExchange_Int32)]
+        [ArduinoImplementation("InterlockedCompareExchange_Int32")]
         public static System.Int32 CompareExchange(ref System.Int32 location1, System.Int32 value, System.Int32 comparand)
         {
             return Interlocked.CompareExchange(ref location1, value, comparand);

@@ -10,7 +10,7 @@ namespace ArduinoCsCompiler.Runtime
     {
         public int Length
         {
-            [ArduinoImplementation(NativeMethod.ArrayGetLength)]
+            [ArduinoImplementation("ArrayGetLength")]
             get
             {
                 throw new NotImplementedException();
@@ -118,13 +118,13 @@ namespace ArduinoCsCompiler.Runtime
             Copy(sourceArray, isourceIndex, destinationArray, idestinationIndex, ilength);
         }
 
-        [ArduinoImplementation(NativeMethod.ArrayCopyCore)]
+        [ArduinoImplementation("ArrayCopyCore")]
         private static void CopyCore(Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.ArrayClear)]
+        [ArduinoImplementation("ArrayClear")]
         public static void Clear(Array array, int index, int length)
         {
             throw new NotImplementedException();
@@ -282,7 +282,7 @@ namespace ArduinoCsCompiler.Runtime
             //    return InternalCreate((void*)t.TypeHandle.Value, lengths.Length, pLengths, pLowerBounds);
         }
 
-        [ArduinoImplementation(NativeMethod.ArrayInternalCreate)]
+        [ArduinoImplementation("ArrayInternalCreate")]
         private static unsafe Array InternalCreate(Type elementType, int rank, int* pLengths, int* pLowerBounds)
         {
             throw new NotImplementedException();
@@ -296,13 +296,13 @@ namespace ArduinoCsCompiler.Runtime
             return new ArrayIterator<T>(array);
         }
 
-        [ArduinoImplementation(NativeMethod.ArraySetValue1)]
+        [ArduinoImplementation("ArraySetValue1")]
         public void SetValue(object? value, int index)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.ArrayGetValue1)]
+        [ArduinoImplementation("ArrayGetValue1")]
         public object GetValue(int index)
         {
             throw new NotImplementedException();

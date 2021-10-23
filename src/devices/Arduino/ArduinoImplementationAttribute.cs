@@ -15,22 +15,58 @@ namespace Iot.Device.Arduino
         /// </summary>
         public ArduinoImplementationAttribute()
         {
-            MethodNumber = NativeMethod.None;
+            MethodNumber = 0;
+            Name = string.Empty;
         }
 
         /// <summary>
         /// This method is implemented in native C++ code. The visible body of the method is not executed.
         /// </summary>
-        /// <param name="methodNo">Number of the implementation method. Must match the firmata code.</param>
-        public ArduinoImplementationAttribute(NativeMethod methodNo)
+        /// <param name="methodName">Name of the implementation method. The internal code is the hash code of this. No two methods must have names with colliding hash codes.
+        /// This is verified when writing the C++ header</param>
+        /// <remarks>See comments on <see cref="ArduinoImplementationAttribute(string,int)"/></remarks>
+        public ArduinoImplementationAttribute(string methodName)
         {
-            MethodNumber = methodNo;
+            if (!string.IsNullOrWhiteSpace(methodName))
+            {
+                MethodNumber = methodName.GetHashCode();
+            }
+            else
+            {
+                MethodNumber = 0;
+            }
+
+            Name = methodName;
+        }
+
+        /// <summary>
+        /// This method is implemented in native C++ code. The visible body of the method is not executed.
+        /// </summary>
+        /// <param name="methodName">Name of the implementation method.</param>
+        /// <param name="methodNumber">Internal number of the method. Must be unique across as implementations and not collide with hash codes. It is recommended
+        /// to manually set that to consecutive numbers for consecutive functions, because that reduces code size and increases performance</param>
+        /// <remarks>
+        /// Auto-assigned numbers have the downside that they're spread over the whole range of int, which makes it almost impossible for the compiler to generate
+        /// efficient jump tables in the switch statements.
+        /// </remarks>
+        public ArduinoImplementationAttribute(string methodName, int methodNumber)
+        {
+            MethodNumber = methodNumber;
+            Name = methodName;
+        }
+
+        /// <summary>
+        /// Name used when constructing this instance
+        /// </summary>
+        public string Name
+        {
+            get;
         }
 
         /// <summary>
         /// The implementation number
         /// </summary>
-        public NativeMethod MethodNumber
+        public int MethodNumber
         {
             get;
         }

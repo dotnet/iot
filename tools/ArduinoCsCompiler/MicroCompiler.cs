@@ -210,7 +210,7 @@ namespace ArduinoCsCompiler
                 throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
-            void AddMethod(MethodInfo method, NativeMethod nativeMethod)
+            void AddMethod(MethodInfo method, int nativeMethod)
             {
                 if (!set.HasMethod(method, method, out _))
                 {
@@ -340,11 +340,11 @@ namespace ArduinoCsCompiler
             // them in the runtime
             type = typeof(System.Object);
             replacementMethodInfo = type.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance)!; // Not the static one
-            AddMethod(replacementMethodInfo, NativeMethod.ObjectEquals);
+            AddMethod(replacementMethodInfo, "ObjectEquals".GetHashCode());
             replacementMethodInfo = type.GetMethod("ToString")!;
-            AddMethod(replacementMethodInfo, NativeMethod.ObjectToString);
+            AddMethod(replacementMethodInfo, "ObjectToString".GetHashCode());
             replacementMethodInfo = type.GetMethod("GetHashCode")!;
-            AddMethod(replacementMethodInfo, NativeMethod.ObjectGetHashCode);
+            AddMethod(replacementMethodInfo, "ObjectGetHashCode".GetHashCode());
 
             if (set.CompilerSettings.CreateKernelForFlashing)
             {
@@ -1466,7 +1466,7 @@ namespace ArduinoCsCompiler
             }
 
             // If this is true, we don't have to parse the implementation
-            if (HasArduinoImplementationAttribute(methodInfo, out var attrib) && attrib!.MethodNumber != NativeMethod.None)
+            if (HasArduinoImplementationAttribute(methodInfo, out var attrib) && attrib!.MethodNumber != 0)
             {
                 return;
             }
@@ -1739,7 +1739,7 @@ namespace ArduinoCsCompiler
                 throw new InvalidOperationException($"Internal error: The class {classReplacement} should fully replace {methodInfo.DeclaringType}, however method {methodInfo} has no replacement (and no error either)");
             }
 
-            if (HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != NativeMethod.None)
+            if (HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != 0)
             {
                 int tk1 = set.GetOrAddMethodToken(methodInfo, parentMethod);
                 var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
@@ -1754,7 +1754,7 @@ namespace ArduinoCsCompiler
                 if (methodInfo.Name == ".ctor" && methodInfo.DeclaringType!.Name == "ByReference`1")
                 {
                     int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
-                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, NativeMethod.ByReferenceCtor);
+                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, "ByReferenceCtor".GetHashCode());
                     set.AddMethod(newInfo1);
                     return;
                 }
@@ -1762,7 +1762,7 @@ namespace ArduinoCsCompiler
                 if (methodInfo.Name == "get_Value" && methodInfo.DeclaringType!.Name == "ByReference`1")
                 {
                     int tk1 = set.GetOrAddMethodToken(methodInfo, methodInfo);
-                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, NativeMethod.ByReferenceValue);
+                    var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, "ByReferenceValue".GetHashCode());
                     set.AddMethod(newInfo1);
                     return;
                 }
@@ -2014,7 +2014,7 @@ namespace ArduinoCsCompiler
         private void SendMethod(ExecutionSet set, ArduinoMethodDeclaration decl)
         {
             SendMethodDeclaration(decl);
-            if (decl.HasBody && decl.NativeMethod == NativeMethod.None)
+            if (decl.HasBody && decl.NativeMethod == 0)
             {
                 _commandHandler.SendMethodIlCode(decl.Token, decl.Code.IlBytes!);
                 if (decl.Code.ExceptionClauses != null && decl.Code.ExceptionClauses.Any())

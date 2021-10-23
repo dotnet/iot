@@ -11,7 +11,7 @@ namespace ArduinoCsCompiler.Runtime
     {
         public bool IsMultiDimensionalArray
         {
-            [ArduinoImplementation(NativeMethod.None)]
+            [ArduinoImplementation]
             get
             {
                 return false; // TODO

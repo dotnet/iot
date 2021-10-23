@@ -10,7 +10,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(Monitor), true)]
     internal class MiniMonitor
     {
-        [ArduinoImplementation(NativeMethod.MonitorEnter)]
+        [ArduinoImplementation("MonitorEnter")]
         public static void Enter(Object o)
         {
         }
@@ -22,7 +22,7 @@ namespace ArduinoCsCompiler.Runtime
             lockTaken = true;
         }
 
-        [ArduinoImplementation(NativeMethod.MonitorExit)]
+        [ArduinoImplementation("MonitorExit")]
         public static void Exit(Object o)
         {
         }
@@ -37,7 +37,7 @@ namespace ArduinoCsCompiler.Runtime
             // No op
         }
 
-        [ArduinoImplementation(NativeMethod.MonitorWait)]
+        [ArduinoImplementation("MonitorWait")]
         public static bool Wait(Object obj, Int32 millisecondsTimeout)
         {
             throw new NotImplementedException();

@@ -21,7 +21,7 @@ namespace ArduinoCsCompiler
             MaxLocals = maxLocals;
             MaxStack = maxStack;
             HasBody = code.IlBytes != null;
-            NativeMethod = NativeMethod.None;
+            NativeMethod = 0;
             Code = code;
             ArgumentCount = methodBase.GetParameters().Length;
             if (methodBase.CallingConvention.HasFlag(CallingConventions.HasThis))
@@ -53,9 +53,9 @@ namespace ArduinoCsCompiler
                 MaxLocals = 0;
                 MaxStack = 0;
                 HasBody = false;
-                NativeMethod = Iot.Device.Arduino.NativeMethod.None;
+                NativeMethod = 0;
             }
-            else if (attribs.Any(x => x.MethodNumber != Iot.Device.Arduino.NativeMethod.None))
+            else if (attribs.Any(x => x.MethodNumber != 0))
             {
                 MaxLocals = 0;
                 MaxStack = 0;
@@ -74,7 +74,7 @@ namespace ArduinoCsCompiler
                 MaxLocals = body.LocalVariables.Count;
                 MaxStack = body.MaxStackSize;
                 HasBody = true;
-                NativeMethod = Iot.Device.Arduino.NativeMethod.None;
+                NativeMethod = 0;
             }
 
             ArgumentCount = methodBase.GetParameters().Length;
@@ -123,7 +123,7 @@ namespace ArduinoCsCompiler
             Name = $"{MethodBase.MethodSignature()} (Token 0x{Token:X})";
         }
 
-        public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, MethodFlags flags, NativeMethod nativeMethod)
+        public ArduinoMethodDeclaration(int token, MethodBase methodBase, ArduinoMethodDeclaration? requestedBy, MethodFlags flags, int nativeMethod)
         {
             Index = -1;
             Token = token;
@@ -211,7 +211,7 @@ namespace ArduinoCsCompiler
             get;
         }
 
-        public NativeMethod NativeMethod { get; }
+        public int NativeMethod { get; }
 
         public int MaxLocals
         {

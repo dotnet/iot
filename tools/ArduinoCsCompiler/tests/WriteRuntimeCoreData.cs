@@ -30,7 +30,102 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void WriteNativeMethodDefinitions()
         {
-            WriteEnumHeaderFile<NativeMethod>();
+            // WriteEnumHeaderFile<NativeMethod>();
+            // Collect all methods that have an ArduinoImplementation attribute attached to them.
+            // Must scan all functions, including internals.
+            Assembly[] typesWhereToLook = new Assembly[]
+            {
+                Assembly.GetAssembly(typeof(MicroCompiler))!,
+                Assembly.GetAssembly(typeof(ArduinoBoard))!
+            };
+
+            string[] specials = new string[]
+            {
+                "ByReferenceCtor",
+                "ByReferenceValue",
+            };
+
+            Dictionary<string, int> entries = new();
+
+            foreach (var s in specials)
+            {
+                entries.Add(s, s.GetHashCode());
+            }
+
+            // The loop below will throw on duplicate entries. This is expected.
+            foreach (var a in typesWhereToLook)
+            {
+                foreach (var type in a.GetTypes())
+                {
+                    foreach (var method in type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+                    {
+                        var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).Cast<ArduinoImplementationAttribute>();
+                        var attrib = attribs.FirstOrDefault();
+                        if (attrib != null && attrib.MethodNumber != 0)
+                        {
+                            TryAddEntry(entries, attrib);
+                        }
+                    }
+
+                    foreach (var method in type.GetConstructors(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public))
+                    {
+                        var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).Cast<ArduinoImplementationAttribute>();
+                        var attrib = attribs.FirstOrDefault();
+                        if (attrib != null && attrib.MethodNumber != 0)
+                        {
+                            TryAddEntry(entries, attrib);
+                        }
+                    }
+                }
+            }
+
+            var hashCodes = entries.Select(x => x.Value).ToList();
+            if (hashCodes.Distinct().Count() != hashCodes.Count())
+            {
+                // Let's hope it doesn't happen, otherwise we would have to extend this code to give a better error message.
+                throw new InvalidOperationException("Duplicate method key found");
+            }
+
+            var list = entries.OrderBy(x => x.Key).Select(y => (y.Key, y.Value));
+            WriteNativeMethodList(list);
+        }
+
+        private void TryAddEntry(Dictionary<string, int> entries, ArduinoImplementationAttribute attrib)
+        {
+            if (!entries.ContainsKey(attrib.Name))
+            {
+                entries.Add(attrib.Name, attrib.MethodNumber);
+            }
+            else if (entries[attrib.Name] == attrib.MethodNumber)
+            {
+                // Nothing to do
+            }
+            else
+            {
+                throw new InvalidOperationException($"Method {attrib.Name} was already declared with a different hash code");
+            }
+        }
+
+        private void WriteNativeMethodList(IEnumerable<(string Key, int Value)> entries)
+        {
+            string name = "NativeMethod";
+            string header = FormattableString.Invariant($@"
+#pragma once
+
+enum class {name}
+{{
+    None = 0,
+");
+            string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
+            TextWriter w = new StreamWriter(outputFile, false, Encoding.ASCII);
+            w.Write(header);
+            foreach (var e in entries)
+            {
+                w.WriteLine(FormattableString.Invariant($"    {e.Key} = {e.Value},"));
+            }
+
+            w.WriteLine("};"); // Tail
+            w.Close();
         }
 
         [Fact]

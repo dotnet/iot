@@ -15,7 +15,7 @@ namespace Iot.Device.Arduino
     public class ArduinoHardwareLevelAccess
     {
         /// <inheritdoc cref="GpioDriver.SetPinMode(int, PinMode)"/>
-        [ArduinoImplementation(NativeMethod.HardwareLevelAccessSetPinMode)]
+        [ArduinoImplementation("HardwareLevelAccessSetPinMode")]
         public void SetPinMode(int pin, PinMode mode)
         {
             throw new NotImplementedException();
@@ -24,7 +24,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Write a value to a pin
         /// </summary>
-        [ArduinoImplementation(NativeMethod.HardwareLevelAccessWritePin)]
+        [ArduinoImplementation("HardwareLevelAccessWritePin")]
         public void WritePin(int pin, int value)
         {
             throw new NotImplementedException();
@@ -33,7 +33,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Read the value of a pin
         /// </summary>
-        [ArduinoImplementation(NativeMethod.HardwareLevelAccessReadPin)]
+        [ArduinoImplementation("HardwareLevelAccessReadPin")]
         public int ReadPin(int pin)
         {
             throw new NotImplementedException();
@@ -42,7 +42,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Get the mode of a pin
         /// </summary>
-        [ArduinoImplementation(NativeMethod.HardwareLevelAccessGetPinMode)]
+        [ArduinoImplementation("HardwareLevelAccessGetPinMode")]
         public PinMode GetPinMode(int pinNumber)
         {
             throw new NotImplementedException();
@@ -51,7 +51,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Pin mode support
         /// </summary>
-        [ArduinoImplementation(NativeMethod.HardwareLevelAccessIsPinModeSupported)]
+        [ArduinoImplementation("HardwareLevelAccessIsPinModeSupported")]
         public bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             throw new NotImplementedException();
@@ -60,7 +60,7 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Get number of pins
         /// </summary>
-        [ArduinoImplementation(NativeMethod.HardwareLevelAccessGetPinCount)]
+        [ArduinoImplementation("HardwareLevelAccessGetPinCount")]
         public int GetPinCount()
         {
             throw new NotImplementedException();

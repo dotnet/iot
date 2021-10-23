@@ -6,7 +6,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.TimeZoneInfo), false, IncludingPrivates = true)]
     internal class MiniTimeZoneInfo
     {
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         public static TimeZoneInfo GetLocalTimeZone(int cachedData)
         {
             // Don't access the argument here, it has a different type

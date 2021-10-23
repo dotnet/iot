@@ -60,7 +60,7 @@ namespace ArduinoCsCompiler.Runtime
             PerMilleSymbol = 0x00000077
         }
 
-        [ArduinoImplementation(NativeMethod.InteropGetRandomBytes)]
+        [ArduinoImplementation("InteropGetRandomBytes")]
         public static unsafe void GetRandomBytes(byte* buffer, int length)
         {
             throw new NotImplementedException();
@@ -79,7 +79,7 @@ namespace ArduinoCsCompiler.Runtime
         [ArduinoReplacement("Interop+Globalization", "System.Private.CoreLib.dll", false, IncludingSubclasses = true, IncludingPrivates = true)]
         internal static class Globalization
         {
-            [ArduinoImplementation(NativeMethod.None)]
+            [ArduinoImplementation]
             public static int LoadICU()
             {
                 return 1; // returning a non-zero value means false, which results in UseNLS to become false, which is probably what we want
@@ -91,7 +91,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation(NativeMethod.None)]
+            [ArduinoImplementation]
             internal static bool GetLocaleInfoInt(string localeName, uint localeNumberData, ref int value)
             {
                 // See pal_localeNumberData.c for the original implementation of this. We just use some invariant defaults
@@ -160,7 +160,7 @@ namespace ArduinoCsCompiler.Runtime
                 return true;
             }
 
-            [ArduinoImplementation(NativeMethod.None)]
+            [ArduinoImplementation]
             internal static unsafe bool GetLocaleInfoString(string localeName, uint localeStringData, char* value, int valueLength)
             {
                 LocaleString data = (LocaleString)localeStringData;
@@ -231,7 +231,7 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
-            [ArduinoImplementation(NativeMethod.None)]
+            [ArduinoImplementation]
             internal static unsafe bool GetLocaleTimeFormat(string localeName, bool shortFormat, char* value, int valueLength)
             {
                 if (shortFormat)
@@ -244,7 +244,7 @@ namespace ArduinoCsCompiler.Runtime
                 }
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_GlobalizationGetCalendarInfo, CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_GlobalizationGetCalendarInfo", CompareByParameterNames = true)]
             internal static unsafe int GetCalendarInfo(string localeName, int calendarId, int calendarDataType, char* result, int resultCapacity)
             {
                 return 0;

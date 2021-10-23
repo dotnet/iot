@@ -5,7 +5,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement("System.SR", IncludingPrivates = true)]
     internal class MiniSR
     {
-        [ArduinoImplementation(NativeMethod.None)]
+        [ArduinoImplementation]
         public static string GetResourceString(string resourceKey, string? defaultString)
         {
             if (ReferenceEquals(defaultString, null))

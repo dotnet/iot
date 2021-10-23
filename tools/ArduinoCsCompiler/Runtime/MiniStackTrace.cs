@@ -31,13 +31,13 @@ namespace ArduinoCsCompiler.Runtime
             return null;
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         public string ToString(int traceFormat)
         {
             return "Stack Trace with exception " + _exception.Message;
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         internal void ToString(int traceFormat, System.Text.StringBuilder sb)
         {
             sb.AppendLine(ToString());

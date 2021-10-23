@@ -57,14 +57,14 @@ namespace ArduinoCsCompiler.Runtime
             return ret;
         }
 
-        [ArduinoImplementation(NativeMethod.GcTotalAvailableMemoryBytes)]
+        [ArduinoImplementation("GcTotalAvailableMemoryBytes")]
         private static long GetTotalAvailableMemoryBytes()
         {
             throw new NotImplementedException();
         }
 #endif
 
-        [ArduinoImplementation(NativeMethod.GcGetTotalAllocatedBytes)]
+        [ArduinoImplementation("GcGetTotalAllocatedBytes")]
         public static long GetTotalAllocatedBytes(bool precise = false)
         {
             throw new NotImplementedException();
@@ -90,7 +90,7 @@ namespace ArduinoCsCompiler.Runtime
             Collect(generation, mode, blocking, false);
         }
 
-        [ArduinoImplementation(NativeMethod.GcCollect)]
+        [ArduinoImplementation("GcCollect")]
         public static void Collect(int generation, GCCollectionMode mode, bool blocking, bool compacting)
         {
             throw new NotImplementedException();
@@ -102,7 +102,7 @@ namespace ArduinoCsCompiler.Runtime
             return 0;
         }
 
-        [ArduinoImplementation(NativeMethod.GcGetTotalMemory)]
+        [ArduinoImplementation("GcGetTotalMemory")]
         public static long GetTotalMemory(bool forceFullCollection)
         {
             throw new NotImplementedException();

@@ -167,13 +167,13 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation(NativeMethod.InteropQueryPerformanceFrequency)]
+            [ArduinoImplementation("InteropQueryPerformanceFrequency")]
             internal static unsafe bool QueryPerformanceFrequency(long* lpFrequency)
             {
                 return true;
             }
 
-            [ArduinoImplementation(NativeMethod.InteropQueryPerformanceCounter)]
+            [ArduinoImplementation("InteropQueryPerformanceCounter")]
             internal static unsafe bool QueryPerformanceCounter(long* lpCounter)
             {
                 return true;
@@ -196,7 +196,7 @@ namespace ArduinoCsCompiler.Runtime
                 return 4; // the return value is the number of chars copied, not including the 0
             }
 
-            [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+            [ArduinoImplementation(CompareByParameterNames = true)]
             public static unsafe Microsoft.Win32.SafeHandles.SafeFileHandle CreateFile(System.String lpFileName, System.Int32 dwDesiredAccess,
                 System.IO.FileShare dwShareMode, SECURITY_ATTRIBUTES* lpSecurityAttributes, System.IO.FileMode dwCreationDisposition, System.Int32 dwFlagsAndAttributes, System.IntPtr hTemplateFile)
             {
@@ -209,14 +209,14 @@ namespace ArduinoCsCompiler.Runtime
                 return new SafeFileHandle(file, true);
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32CreateFile, CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32CreateFile", CompareByParameterNames = true)]
             internal static unsafe IntPtr CreateFileInternal(System.String lpFileName, System.Int32 dwDesiredAccess,
                 System.IO.FileShare dwShareMode, SECURITY_ATTRIBUTES* lpSecurityAttributes, System.IO.FileMode dwCreationDisposition, System.Int32 dwFlagsAndAttributes, System.IntPtr hTemplateFile)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32SetFilePointerEx)]
+            [ArduinoImplementation("Interop_Kernel32SetFilePointerEx")]
             internal static System.Boolean SetFilePointerEx(Microsoft.Win32.SafeHandles.SafeFileHandle hFile, System.Int64 liDistanceToMove, ref System.Int64 lpNewFilePointer, System.UInt32 dwMoveMethod)
             {
                 throw new NotImplementedException();
@@ -227,7 +227,7 @@ namespace ArduinoCsCompiler.Runtime
                 return true;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32CloseHandle)]
+            [ArduinoImplementation("Interop_Kernel32CloseHandle")]
             internal static System.Boolean CloseHandle(System.IntPtr handle)
             {
                 throw new NotImplementedException();
@@ -246,13 +246,13 @@ namespace ArduinoCsCompiler.Runtime
                 return string.Format("OS error (0x{0:x})", errorCode);
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32SetLastError)]
+            [ArduinoImplementation("Interop_Kernel32SetLastError")]
             internal static void SetLastError(uint errorCode)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32GetLastError)]
+            [ArduinoImplementation("Interop_Kernel32GetLastError")]
             internal static uint GetLastError()
             {
                 throw new NotImplementedException();
@@ -269,13 +269,13 @@ namespace ArduinoCsCompiler.Runtime
                 return true;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32SetEndOfFile)]
+            [ArduinoImplementation("Interop_Kernel32SetEndOfFile")]
             internal static Boolean SetEndOfFile(Microsoft.Win32.SafeHandles.SafeFileHandle hFile)
             {
                 return true;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32WriteFile)]
+            [ArduinoImplementation("Interop_Kernel32WriteFile")]
             internal static unsafe Int32 WriteFileInternal(IntPtr fileHandle, Byte* bytes, Int32 numBytesToWrite)
             {
                 return 0;
@@ -294,13 +294,13 @@ namespace ArduinoCsCompiler.Runtime
                 return 1;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32WriteFileOverlapped)]
+            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped")]
             internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, System.IntPtr numBytesWritten_mustBeZero, NativeOverlapped* lpOverlapped)
             {
                 return 0;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32ReadFile)]
+            [ArduinoImplementation("Interop_Kernel32ReadFile")]
             internal static unsafe Int32 ReadFileInternal(IntPtr fileHandle, Byte* bytes, System.Int32 numBytesToRead)
             {
                 return 0;
@@ -318,31 +318,31 @@ namespace ArduinoCsCompiler.Runtime
                 return 1;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32CancelIoEx)]
+            [ArduinoImplementation("Interop_Kernel32CancelIoEx")]
             internal static unsafe Boolean CancelIoEx(System.Runtime.InteropServices.SafeHandle handle, System.Threading.NativeOverlapped* lpOverlapped)
             {
                 return false;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32ReadFileOverlapped)]
+            [ArduinoImplementation("Interop_Kernel32ReadFileOverlapped")]
             internal static unsafe System.Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, System.Byte* bytes, System.Int32 numBytesToRead, System.IntPtr numBytesRead_mustBeZero, System.Threading.NativeOverlapped* overlapped)
             {
                 return 0;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32FlushFileBuffers)]
+            [ArduinoImplementation("Interop_Kernel32FlushFileBuffers")]
             internal static Boolean FlushFileBuffers(System.Runtime.InteropServices.SafeHandle hHandle)
             {
                 return false;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32GetFileInformationByHandleEx)]
+            [ArduinoImplementation("Interop_Kernel32GetFileInformationByHandleEx")]
             internal static unsafe Boolean GetFileInformationByHandleEx(Microsoft.Win32.SafeHandles.SafeFileHandle hFile, System.Int32 FileInformationClass, void* lpFileInformation, System.UInt32 dwBufferSize)
             {
                 return false;
             }
 
-            [ArduinoImplementation(NativeMethod.Interop_Kernel32QueryUnbiasedInterruptTime)]
+            [ArduinoImplementation("Interop_Kernel32QueryUnbiasedInterruptTime")]
             internal static System.Boolean QueryUnbiasedInterruptTime(ref System.UInt64 UnbiasedTime)
             {
                 throw new NotImplementedException();

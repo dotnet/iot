@@ -11,7 +11,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public static int TickCount
         {
-            [ArduinoImplementation(NativeMethod.EnvironmentTickCount)]
+            [ArduinoImplementation("EnvironmentTickCount")]
             get
             {
                 throw new NotImplementedException();
@@ -20,7 +20,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public static int TickCount64
         {
-            [ArduinoImplementation(NativeMethod.EnvironmentTickCount64)]
+            [ArduinoImplementation("EnvironmentTickCount64")]
             get
             {
                 throw new NotImplementedException();
@@ -29,7 +29,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public static int ProcessorCount
         {
-            [ArduinoImplementation(NativeMethod.EnvironmentProcessorCount)]
+            [ArduinoImplementation("EnvironmentProcessorCount")]
             get
             {
                 return 1;
@@ -86,13 +86,13 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        [ArduinoImplementation(NativeMethod.EnvironmentFailFast1)]
+        [ArduinoImplementation("EnvironmentFailFast1")]
         public static void FailFast(string message)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.EnvironmentFailFast2)]
+        [ArduinoImplementation("EnvironmentFailFast2")]
         public static void FailFast(string message, Exception exception)
         {
             throw new NotImplementedException();

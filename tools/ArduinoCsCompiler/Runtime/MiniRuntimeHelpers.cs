@@ -6,13 +6,13 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Runtime.CompilerServices.RuntimeHelpers), true)]
     internal static class MiniRuntimeHelpers
     {
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersInitializeArray)]
+        [ArduinoImplementation("RuntimeHelpersInitializeArray")]
         public static void InitializeArray(Array array, RuntimeFieldHandle fldHandle)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersRunClassConstructor)]
+        [ArduinoImplementation("RuntimeHelpersRunClassConstructor")]
         public static void RunClassConstructor(RuntimeTypeHandle rtHandle)
         {
             throw new NotImplementedException();
@@ -27,13 +27,13 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetHashCode)]
+        [ArduinoImplementation("RuntimeHelpersGetHashCode")]
         public static int GetHashCode(object? obj)
         {
             return 0;
         }
 
-        [ArduinoImplementation(NativeMethod.None, CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true)]
         public static bool IsPrimitiveType(CorElementType et)
         {
             // COR_ELEMENT_TYPE_I1,I2,I4,I8,U1,U2,U4,U8,R4,R8,I,U,CHAR,BOOLEAN
@@ -45,7 +45,7 @@ namespace ArduinoCsCompiler.Runtime
             return IsReferenceOrContainsReferencesCore(typeof(T));
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersIsReferenceOrContainsReferencesCore)]
+        [ArduinoImplementation("RuntimeHelpersIsReferenceOrContainsReferencesCore")]
         private static bool IsReferenceOrContainsReferencesCore(Type t)
         {
             throw new NotImplementedException();
@@ -54,7 +54,7 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// This uses an implementation in the EE to get rid of all type tests (and all possible casts)
         /// </summary>
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersEnumEquals)]
+        [ArduinoImplementation("RuntimeHelpersEnumEquals")]
         public static bool EnumEquals<T>(T x, T y)
             where T : struct, Enum
         {
@@ -66,13 +66,13 @@ namespace ArduinoCsCompiler.Runtime
             return IsBitwiseEquatableCore(typeof(T));
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersIsBitwiseEquatable)]
+        [ArduinoImplementation("RuntimeHelpersIsBitwiseEquatable")]
         private static bool IsBitwiseEquatableCore(Type t)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetMethodTable)]
+        [ArduinoImplementation("RuntimeHelpersGetMethodTable")]
         public static unsafe void* GetMethodTable(object obj)
         {
             throw new NotImplementedException();
@@ -82,20 +82,20 @@ namespace ArduinoCsCompiler.Runtime
         /// This is expected to return a specific structure describing the array bounds - our implementation works differently,
         /// so we might eventually keep this without implementation and make sure it's not called
         /// </summary>
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetMultiDimensionalArrayBounds)]
+        [ArduinoImplementation("RuntimeHelpersGetMultiDimensionalArrayBounds")]
         internal static unsafe ref int GetMultiDimensionalArrayBounds(Array array)
         {
             throw new NotImplementedException();
         }
 
-        // [ArduinoImplementation(NativeMethod.RuntimeHelpersGetMultiDimensionalArrayRank)]
+        // [ArduinoImplementation("RuntimeHelpersGetMultiDimensionalArrayRank")]
         internal static int GetMultiDimensionalArrayRank(Array array)
         {
             // We don't support the GetLowerBounds/GetUpperBounds methods for multi-dimensional arrays
             return 0;
         }
 
-        [ArduinoImplementation(NativeMethod.RuntimeHelpersGetRawArrayData)]
+        [ArduinoImplementation("RuntimeHelpersGetRawArrayData")]
         internal static unsafe ref byte GetRawArrayData(this Array array)
         {
             throw new NotImplementedException();
