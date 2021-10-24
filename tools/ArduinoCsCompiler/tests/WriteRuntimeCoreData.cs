@@ -165,6 +165,12 @@ enum class {name}
         }
 
         [Fact]
+        public void WriteRuntimeState()
+        {
+            WriteEnumHeaderFile<RuntimeState>();
+        }
+
+        [Fact]
         public void WriteExecutorCommands()
         {
             string name = nameof(ExecutorCommand);

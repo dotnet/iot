@@ -901,6 +901,61 @@ namespace Iot.Device.Arduino.Tests
             }
         }
 
+        public static int NormalTryFinallyWithCodeAfterFinally(int arg1, int arg2)
+        {
+            var m = new MyDisposable();
+            try
+            {
+                MiniAssert.False(m.IsDisposed);
+            }
+            finally
+            {
+                m.Dispose();
+                MiniAssert.That(m.IsDisposed);
+            }
+
+            MiniAssert.That(m.IsDisposed);
+            return arg1 / 2;
+        }
+
+        private static void InternalThrowWithFinally(int arg1, out int result)
+        {
+            result = 10;
+            try
+            {
+                result = 11;
+                if (arg1 == 0)
+                {
+                    throw new InvalidOperationException($"This is an exception");
+                }
+            }
+            finally
+            {
+                result = 12;
+            }
+
+            // This should not be executed if the exception was thrown
+            result = 13;
+        }
+
+        public static int NormalTryFinallyWithException(int arg1, int arg2)
+        {
+            int test = 0;
+            try
+            {
+                InternalThrowWithFinally(0, out test);
+            }
+            catch (InvalidOperationException x)
+            {
+                MiniAssert.IsNotNull(x);
+            }
+
+            // The code after finally should NOT have been executed
+            MiniAssert.That(test == 12, $"The method returned {test}");
+
+            return 1;
+        }
+
         public static int NormalTryCatchWithException(int arg1, int arg2)
         {
             int a = 2;

@@ -80,37 +80,53 @@ namespace ArduinoCsCompiler
                 {
                     error = CommandError.InvalidArguments;
                 }
+                else if (data[1] == (byte)ExecutorCommand.Reply && data[2] == (byte)RuntimeState.TaskTermination)
+                {
+                    ParseTaskTerminationResult(data, out error);
+                }
                 else
                 {
-                    // Data from real-time methods
-                    MethodState state = (MethodState)data[3];
-                    int numArgs = data[4];
-
-                    if (state == MethodState.Aborted)
-                    {
-                        int[] results = new int[numArgs];
-                        // The result set is a set of tokens to build up the exception message
-                        for (int i = 0; i < numArgs; i++)
-                        {
-                            results[i] = FirmataCommandSequence.DecodeInt32(data, i * 5 + 5);
-                        }
-
-                        error = CommandError.Aborted;
-                        _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, results);
-                    }
-                    else
-                    {
-                        error = CommandError.None;
-                        // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
-                        var result = FirmataIlCommandSequence.Decode7BitBytes(data.Skip(5).ToArray(), numArgs);
-                        _compiler.OnCompilerCallback(data[1] | (data[2] << 7), state, result);
-                    }
+                    return false;
                 }
 
                 return true;
             }
 
             return false;
+        }
+
+        private void ParseTaskTerminationResult(byte[] data, out CommandError error)
+        {
+            // Data from real-time methods
+            // Index 0 = SCHEDULER_DATA
+            // 1 = ExecutorCommand.Reply
+            // 2 = RuntimeState.Termination
+            // 3 + 4 = Task reference
+            // 5 = Execution result (0 = success, 1 = Exception happened)
+            // 6 = Number of remaining bytes in message
+            int startIndex = 2;
+            MethodState state = (MethodState)data[startIndex + 3];
+            int numArgs = data[startIndex + 4];
+
+            if (state == MethodState.Aborted)
+            {
+                int[] results = new int[numArgs];
+                // The result set is a set of tokens to build up the exception message
+                for (int i = 0; i < numArgs; i++)
+                {
+                    results[i] = FirmataCommandSequence.DecodeInt32(data, i * 5 + startIndex + 5);
+                }
+
+                error = CommandError.Aborted;
+                _compiler.OnCompilerCallback(data[startIndex + 1] | (data[startIndex + 2] << 7), state, results);
+            }
+            else
+            {
+                error = CommandError.None;
+                // The result is a set of arbitrary values, 7-bit encoded (typically one 32 bit or one 64 bit value)
+                var result = FirmataIlCommandSequence.Decode7BitBytes(data.Skip(startIndex + 5).ToArray(), numArgs);
+                _compiler.OnCompilerCallback(data[startIndex + 1] | (data[startIndex + 2] << 7), state, result);
+            }
         }
 
         public void SendMethodIlCode(int methodToken, byte[] byteCode)
@@ -488,6 +504,22 @@ namespace ArduinoCsCompiler
             }
 
             throw new InvalidOperationException("Unexpected command reply");
+        }
+
+        public void QueryCapabilities(ref byte[]? data)
+        {
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.QueryHardware);
+            sequence.SendUInt32(0);
+            sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
+            try
+            {
+                data = SendCommandAndWait(sequence, TimeSpan.FromSeconds(1));
+            }
+            catch (TimeoutException)
+            {
+                data = null;
+                return;
+            }
         }
     }
 }

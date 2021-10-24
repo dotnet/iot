@@ -2430,5 +2430,27 @@ namespace ArduinoCsCompiler
             _commandHandler.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
         }
 
+        public bool QueryBoardCapabilities(
+            [NotNullWhen(true)]
+            out IlCapabilities ilCapabilities)
+        {
+            ilCapabilities = null!;
+            byte[]? data = null;
+            _commandHandler.QueryCapabilities(ref data);
+            if (data == null || data.Length == 0)
+            {
+                return false;
+            }
+
+            ilCapabilities = new IlCapabilities()
+            {
+                FlashSize = FirmataIlCommandSequence.DecodeInt32(data, 8),
+                IntSize = data[6],
+                PointerSize = data[7],
+                RamSize = FirmataIlCommandSequence.DecodeInt32(data, 8 + 5),
+            };
+
+            return true;
+        }
     }
 }

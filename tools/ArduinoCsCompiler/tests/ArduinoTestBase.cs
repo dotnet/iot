@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using ArduinoCsCompiler;
 using Xunit;
 
@@ -24,6 +25,13 @@ namespace Iot.Device.Arduino.Tests
             };
 
             _compiler = new MicroCompiler(_fixture.Board!, true);
+
+            if (!_compiler.QueryBoardCapabilities(out IlCapabilities data))
+            {
+                throw new NotSupportedException("No valid IL execution firmware found on board");
+            }
+
+            Debug.WriteLine(data.ToString());
         }
 
         public CompilerSettings CompilerSettings

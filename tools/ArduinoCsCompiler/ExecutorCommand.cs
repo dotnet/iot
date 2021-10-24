@@ -25,7 +25,9 @@ namespace ArduinoCsCompiler
         ExceptionClauses = 18,
 
         ArrayOperations = 19,
+        QueryHardware = 20,
 
+        Reply = 0x7d,
         Nack = 0x7e,
         Ack = 0x7f,
     }

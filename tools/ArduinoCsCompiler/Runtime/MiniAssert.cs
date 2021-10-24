@@ -72,5 +72,13 @@ namespace ArduinoCsCompiler.Runtime
             double effectiveDelta = Math.Abs(expected - actual);
             That(effectiveDelta <= delta, $"Expected {expected}, actual {actual} +/- {delta}");
         }
+
+        public static void IsNotNull(object obj)
+        {
+            if (obj == null)
+            {
+                throw new MiniAssertionException("Object was null");
+            }
+        }
     }
 }
