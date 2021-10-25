@@ -10,6 +10,7 @@ using ArduinoCsCompiler.Runtime;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
+using UnitsNet;
 
 #pragma warning disable CS1591
 namespace ArduinoCsCompiler
@@ -2444,10 +2445,10 @@ namespace ArduinoCsCompiler
 
             ilCapabilities = new IlCapabilities()
             {
-                FlashSize = FirmataIlCommandSequence.DecodeInt32(data, 8),
-                IntSize = data[6],
-                PointerSize = data[7],
-                RamSize = FirmataIlCommandSequence.DecodeInt32(data, 8 + 5),
+                FlashSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8)),
+                IntSize = Information.FromBytes(data[6]),
+                PointerSize = Information.FromBytes(data[7]),
+                RamSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8 + 5)),
             };
 
             return true;

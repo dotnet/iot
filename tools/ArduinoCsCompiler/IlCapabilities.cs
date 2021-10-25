@@ -1,26 +1,28 @@
-﻿namespace ArduinoCsCompiler
+﻿using UnitsNet;
+
+namespace ArduinoCsCompiler
 {
     public record IlCapabilities
     {
-        public int IntSize
+        public Information IntSize
         {
             get;
             init;
         }
 
-        public int PointerSize
+        public Information PointerSize
         {
             get;
             init;
         }
 
-        public long FlashSize
+        public Information FlashSize
         {
             get;
             init;
         }
 
-        public int RamSize
+        public Information RamSize
         {
             get;
             init;

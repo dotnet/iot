@@ -691,7 +691,7 @@ namespace Iot.Device.Arduino
 
             // Try a few times (because we have to make sure the receiver's input queue is properly synchronized and the device
             // has properly booted)
-            for (int i = 0; i < 50; i++)
+            for (int i = 0; i < 20; i++)
             {
                 lock (_synchronisationLock)
                 {
