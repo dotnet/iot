@@ -359,7 +359,7 @@ namespace ArduinoCsCompiler
             }
         }
 
-        public void PrepareClass(ExecutionSet set, Type classType)
+        internal void PrepareClass(ExecutionSet set, Type classType)
         {
             if (_disposed)
             {
@@ -822,12 +822,12 @@ namespace ArduinoCsCompiler
             }
         }
 
-        public void PrepareStringLoad(int constantSize, int stringSize)
+        internal void PrepareStringLoad(int constantSize, int stringSize)
         {
             _commandHandler.PrepareStringLoad(constantSize, stringSize);
         }
 
-        public void SendConstants(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
+        internal void SendConstants(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
             ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
             var list = constElements.Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
@@ -847,14 +847,14 @@ namespace ArduinoCsCompiler
             }
         }
 
-        public void SendSpecialTypeList(IList<int> typeList, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool forKernel)
+        internal void SendSpecialTypeList(IList<int> typeList, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool forKernel)
         {
             // Counting the existing list elements should be enough here.
             var listToLoad = typeList.Skip(fromSnapShot.SpecialTypes.Count).Take(toSnapShot.SpecialTypes.Count - fromSnapShot.SpecialTypes.Count).ToList();
             _commandHandler.SendSpecialTypeList(listToLoad);
         }
 
-        public void SendStrings(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
+        internal void SendStrings(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
             ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
             var list = constElements.Where(x => !fromSnapShot.AlreadyAssignedStringTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedStringTokens.Contains(x.Token));
@@ -1552,7 +1552,7 @@ namespace ArduinoCsCompiler
             throw new InvalidOperationException($"Method {methodInfo} not loaded");
         }
 
-        private ExecutionSet PrepareProgram(MethodInfo mainEntryPoint, CompilerSettings compilerSettings)
+        public ExecutionSet PrepareProgram(MethodInfo mainEntryPoint, CompilerSettings compilerSettings)
         {
             if (_disposed)
             {
@@ -1662,10 +1662,10 @@ namespace ArduinoCsCompiler
         /// <param name="mainEntryPoint">The main entry method for the program</param>
         /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
         /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
-        public ExecutionSet CreateExecutionSet<T>(T mainEntryPoint)
+        public ExecutionSet PrepareAndRunExecutionSet<T>(T mainEntryPoint)
             where T : Delegate
         {
-            return CreateExecutionSet(mainEntryPoint, new CompilerSettings());
+            return PrepareAndRunExecutionSet(mainEntryPoint, new CompilerSettings());
         }
 
         /// <summary>
@@ -1676,13 +1676,13 @@ namespace ArduinoCsCompiler
         /// <param name="settings">Custom compiler settings</param>
         /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
         /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
-        public ExecutionSet CreateExecutionSet<T>(T mainEntryPoint, CompilerSettings? settings)
+        public ExecutionSet PrepareAndRunExecutionSet<T>(T mainEntryPoint, CompilerSettings? settings)
         where T : Delegate
         {
             var exec = PrepareProgram(mainEntryPoint.Method, settings ?? new CompilerSettings());
             try
             {
-                exec.Load();
+                exec.Load(true);
             }
             catch (Exception)
             {
@@ -1700,12 +1700,12 @@ namespace ArduinoCsCompiler
         /// <param name="settings">Custom compiler settings</param>
         /// <returns>The execution set. Use it's <see cref="ExecutionSet.MainEntryPoint"/> property to get a callable reference to the remote code.</returns>
         /// <exception cref="Exception">This may throw exceptions in case the execution of some required static constructors (type initializers) fails.</exception>
-        public ExecutionSet CreateExecutionSet(MethodInfo mainEntryPoint, CompilerSettings settings)
+        public ExecutionSet PrepareAndRunExecutionSet(MethodInfo mainEntryPoint, CompilerSettings settings)
         {
             var exec = PrepareProgram(mainEntryPoint, settings);
             try
             {
-                exec.Load();
+                exec.Load(true);
             }
             catch (Exception)
             {
@@ -2071,7 +2071,7 @@ namespace ArduinoCsCompiler
             set.FirmwareStartupSequence = codeSequences;
         }
 
-        internal void ExecuteStaticCtors(ExecutionSet set)
+        public void ExecuteStaticCtors(ExecutionSet set)
         {
             var codeSequences = set.FirmwareStartupSequence;
             if (codeSequences == null)
@@ -2426,7 +2426,7 @@ namespace ArduinoCsCompiler
             return _commandHandler.IsMatchingFirmwareLoaded(DataVersion, snapShot.GetHashCode());
         }
 
-        public void WriteFlashHeader(ExecutionSet.SnapShot snapShot, int startupToken, CodeStartupFlags flags)
+        internal void WriteFlashHeader(ExecutionSet.SnapShot snapShot, int startupToken, CodeStartupFlags flags)
         {
             _commandHandler.WriteFlashHeader(DataVersion, snapShot.GetHashCode(), startupToken, flags);
         }

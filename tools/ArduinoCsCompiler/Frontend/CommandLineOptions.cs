@@ -53,5 +53,8 @@ namespace ArduinoCsCompiler
 
         [Option("compileonly", Default = false, HelpText = "Only compile the code, don't upload. Check whether the code could be used on the microcontroller, but don't attempt an actual upload")]
         public bool CompileOnly { get; set; }
+
+        [Option("run", Default = true, HelpText = "Run the program after uploading. The compiler will switch to execution mode after upload and run the program, printing any log output to the console")]
+        public bool Run { get; set; }
     }
 }

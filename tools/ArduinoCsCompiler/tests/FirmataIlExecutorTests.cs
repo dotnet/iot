@@ -38,7 +38,7 @@ namespace Iot.Device.Arduino.Tests
                 settings.AdditionalSuppressions.Add("System.SR");
             }
 
-            var set = Compiler.CreateExecutionSet(method, settings);
+            var set = Compiler.PrepareAndRunExecutionSet(method, settings);
 
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
@@ -93,7 +93,7 @@ namespace Iot.Device.Arduino.Tests
                 settings.AdditionalSuppressions.Add("System.SR");
             }
 
-            var set = Compiler.CreateExecutionSet(method, settings);
+            var set = Compiler.PrepareAndRunExecutionSet(method, settings);
 
             CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
 
@@ -110,7 +110,7 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void MainMethodMustBeStatic()
         {
-            Assert.Throws<InvalidOperationException>(() => Compiler.CreateExecutionSet<Action>(MainMethodMustBeStatic, new CompilerSettings()));
+            Assert.Throws<InvalidOperationException>(() => Compiler.PrepareAndRunExecutionSet<Action>(MainMethodMustBeStatic, new CompilerSettings()));
         }
 
         [Theory]

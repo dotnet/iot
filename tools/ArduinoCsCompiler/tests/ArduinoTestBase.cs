@@ -74,7 +74,7 @@ namespace Iot.Device.Arduino.Tests
                 Assert.Equal(1, returnValue);
             }
 
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint, settings);
+            var exec = _compiler.PrepareAndRunExecutionSet(mainEntryPoint, settings);
 
             // long memoryUsage = exec.EstimateRequiredMemory();
             // Assert.True(memoryUsage < settings.MaxMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");
@@ -96,7 +96,7 @@ namespace Iot.Device.Arduino.Tests
             // These operations should be combined into one, to simplify usage (just provide the main entry point,
             // and derive everything required from there)
             _compiler.ClearAllData(true);
-            var exec = _compiler.CreateExecutionSet(mainEntryPoint, CompilerSettings);
+            var exec = _compiler.PrepareAndRunExecutionSet(mainEntryPoint, CompilerSettings);
 
             long memoryUsage = exec.EstimateRequiredMemory();
             Assert.True(memoryUsage < CompilerSettings.MaxMemoryUsage, $"Expected memory usage: {memoryUsage} bytes");

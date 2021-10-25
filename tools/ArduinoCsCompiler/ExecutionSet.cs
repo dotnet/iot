@@ -171,7 +171,7 @@ namespace ArduinoCsCompiler
             return totalSize;
         }
 
-        public void Load()
+        public void Load(bool runStaticCtors)
         {
             if (CompilerSettings.ForceFlashWrite)
             {
@@ -215,10 +215,10 @@ namespace ArduinoCsCompiler
                 _compiler.ClearAllData(true, true);
             }
 
-            Load(_kernelSnapShot, CreateSnapShot());
+            Load(_kernelSnapShot, CreateSnapShot(), runStaticCtors);
         }
 
-        private void Load(SnapShot from, SnapShot to)
+        private void Load(SnapShot from, SnapShot to, bool runStaticCtos)
         {
             if (MainEntryPointInternal == null)
             {
@@ -271,8 +271,11 @@ namespace ArduinoCsCompiler
 
             MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
 
-            // Execute all static ctors
-            _compiler.ExecuteStaticCtors(this);
+            if (runStaticCtos)
+            {
+                // Execute all static ctors
+                _compiler.ExecuteStaticCtors(this);
+            }
         }
 
         public ArduinoTask GetTaskForMethod<T>(T mainEntryPoint)

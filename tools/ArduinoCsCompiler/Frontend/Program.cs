@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
 using CommandLine;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
@@ -20,7 +22,7 @@ namespace ArduinoCsCompiler
     {
         private readonly CommandLineOptions _commandLineOptions;
         private ILogger _logger;
-        private MicroCompiler _compiler;
+        private MicroCompiler? _compiler;
 
         private Program(CommandLineOptions commandLineOptions)
         {
@@ -31,7 +33,7 @@ namespace ArduinoCsCompiler
         private static int Main(string[] args)
         {
             Assembly? entry = Assembly.GetEntryAssembly();
-            var version = (AssemblyFileVersionAttribute)Attribute.GetCustomAttribute(entry, typeof(AssemblyFileVersionAttribute));
+            var version = (AssemblyFileVersionAttribute?)Attribute.GetCustomAttribute(entry!, typeof(AssemblyFileVersionAttribute));
             if (version == null)
             {
                 throw new InvalidProgramException("Invalid program state - no version attribute");
@@ -180,6 +182,11 @@ namespace ArduinoCsCompiler
 
         private void RunCompiler(FileInfo inputInfo)
         {
+            if (_compiler == null)
+            {
+                throw new InvalidProgramException("Internal error - compiler not ready");
+            }
+
             var assemblyUnderTest = Assembly.LoadFrom(inputInfo.FullName);
             MethodInfo startup = LocateStartupMethod(assemblyUnderTest);
             _logger.LogDebug($"Startup method is {startup.MethodSignature(true)}");
@@ -193,20 +200,49 @@ namespace ArduinoCsCompiler
             };
 
             _logger.LogInformation("Collecting method information and metadata...");
-            ExecutionSet set = _compiler.CreateExecutionSet(startup, settings);
+            ExecutionSet set = _compiler.PrepareProgram(startup, settings);
 
             long estimatedSize = set.EstimateRequiredMemory(out var stats);
 
             _logger.LogInformation($"Estimated program size in flash is {estimatedSize}. The actual size will be known after upload only");
 
-            foreach (var stat in stats)
+            foreach (var stat in stats.Take(10))
             {
                 _logger.LogDebug($"Class {stat.Key.FullName}: {stat.Value.TotalBytes} Bytes");
             }
 
             if (!_commandLineOptions.CompileOnly)
             {
-                set.Load();
+                set.Load(false);
+
+                try
+                {
+                    _compiler.ExecuteStaticCtors(set);
+                    var remoteMethod = set.MainEntryPoint;
+
+                    // This assertion fails on a timeout
+                    remoteMethod.Invoke(CancellationToken.None);
+                    if (!remoteMethod.GetMethodResults(set, out object[] data, out MethodState state))
+                    {
+                        _logger.LogError("Remote execution seems to have ended, but returned an inconsistent result");
+                    }
+
+                    // A main method returning void actually returns 0
+                    if (data.Length == 0)
+                    {
+                        data = new object[]
+                        {
+                            (int)0
+                        };
+                    }
+
+                    _logger.LogInformation($"Code execution has ended normally, return code was {data[0]}.");
+                }
+                catch (Exception x)
+                {
+                    _logger.LogError($"Code execution caused an exception of type {x.GetType().FullName} on the microcontroller.");
+                    _logger.LogError(x.Message);
+                }
             }
         }
 
@@ -244,12 +280,14 @@ namespace ArduinoCsCompiler
             return null!;
         }
 
+        [DoesNotReturn]
         private void Abort()
         {
             throw new InvalidOperationException("Error compiling code, see previous messages");
         }
 
         private bool TryFindBoard(IEnumerable<string> comPorts, IEnumerable<int> baudRates,
+            [NotNullWhen(true)]
             out ArduinoBoard? board)
         {
             // We do the iteration here ourselves, so we can write out progress, because it may be very slow in auto-detect mode.
