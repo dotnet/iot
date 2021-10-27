@@ -232,11 +232,6 @@ namespace ArduinoCsCompiler
                 }
             }
 
-            void AddMethodByName(MethodInfo method, string nativeMethod)
-            {
-                AddMethod(method, ArduinoImplementationAttribute.GetStaticHashCode(nativeMethod));
-            }
-
             Type lowLevelInterface = typeof(ArduinoHardwareLevelAccess);
             foreach (var method in lowLevelInterface.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
@@ -346,11 +341,12 @@ namespace ArduinoCsCompiler
             // them in the runtime
             type = typeof(System.Object);
             replacementMethodInfo = type.GetMethod("Equals", BindingFlags.Public | BindingFlags.Instance)!; // Not the static one
-            AddMethodByName(replacementMethodInfo, "ObjectEquals");
+            // Method numbers are hardcoded in attribute ctors!
+            AddMethod(replacementMethodInfo, 2);
             replacementMethodInfo = type.GetMethod("ToString")!;
-            AddMethodByName(replacementMethodInfo, "ObjectToString");
+            AddMethod(replacementMethodInfo, 4);
             replacementMethodInfo = type.GetMethod("GetHashCode")!;
-            AddMethodByName(replacementMethodInfo, "ObjectGetHashCode");
+            AddMethod(replacementMethodInfo, 3);
 
             if (set.CompilerSettings.CreateKernelForFlashing)
             {

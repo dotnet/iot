@@ -9,6 +9,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(Object), IncludingPrivates = true)]
     internal abstract class MiniObject
     {
+        // The method numbers might be used elsewhere, so be careful when changing them!
         [ArduinoImplementation("ObjectReferenceEquals", 1)]
         public static new bool ReferenceEquals(object? a, object? b)
         {
