@@ -41,12 +41,26 @@ namespace ArduinoCsCompiler
 
             Console.WriteLine($"ArduinoCsCompiler - Version {version.Version}");
 
-            LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory();
+            var loggerFactory = new SimpleConsoleLoggerFactory();
+            LogDispatcher.LoggerFactory = loggerFactory;
             int errorCode = 0;
 
             var result = Parser.Default.ParseArguments<CommandLineOptions>(args)
                 .WithParsed<CommandLineOptions>(o =>
                 {
+                    if (o.Verbose)
+                    {
+                        loggerFactory.MinLogLevel = LogLevel.Trace;
+                    }
+                    else if (o.Quiet)
+                    {
+                        loggerFactory.MinLogLevel = LogLevel.Error;
+                    }
+                    else
+                    {
+                        loggerFactory.MinLogLevel = LogLevel.Information;
+                    }
+
                     using var program = new Program(o);
                     errorCode = program.ConnectToBoard(o);
                 });
@@ -242,6 +256,7 @@ namespace ArduinoCsCompiler
                 {
                     _logger.LogError($"Code execution caused an exception of type {x.GetType().FullName} on the microcontroller.");
                     _logger.LogError(x.Message);
+                    Abort();
                 }
             }
         }

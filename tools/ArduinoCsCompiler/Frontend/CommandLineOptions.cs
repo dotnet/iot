@@ -36,6 +36,9 @@ namespace ArduinoCsCompiler
         [Option('v', "verbose", Required = false, HelpText = "Output verbose messages.")]
         public bool Verbose { get; set; }
 
+        [Option('q', "quiet", Required = false, Default = false, HelpText = "Minimal output only. This is ignored if -v is specified")]
+        public bool Quiet { get; set; }
+
         [Option('p', "port", HelpText = "The serial port where the microcontroller is connected. Defaults to auto-detect", SetName = "ConnectionType")]
         public string Port { get; set; }
 
