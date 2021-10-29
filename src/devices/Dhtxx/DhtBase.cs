@@ -63,7 +63,6 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successful, it returns <code>default(Temperature)</code>
         /// </remarks>
-        [Telemetry]
         public virtual Temperature Temperature
         {
             get
@@ -79,7 +78,6 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successful, it returns <code>default(RelativeHumidity)</code>
         /// </remarks>
-        [Telemetry]
         public virtual RelativeHumidity Humidity
         {
             get
@@ -304,6 +302,7 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="temperature">[Out] The current temperature on success</param>
         /// <returns>True on success, false if reading failed</returns>
+        [Telemetry("Temperature")]
         public bool TryReadTemperature(
 #if NET5_0_OR_GREATER
         [NotNullWhen(true)]
@@ -326,6 +325,7 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="humidity">[Out] The current relative humidity on success</param>
         /// <returns>True on success, false if reading failed</returns>
+        [Telemetry("Humidity")]
         public bool TryReadHumidity(
 #if NET5_0_OR_GREATER
             [NotNullWhen(true)]
