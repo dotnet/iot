@@ -9,6 +9,7 @@ using System.Device.Model;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using Iot.Device.Common;
 using UnitsNet;
 
 namespace Iot.Device.DHTxx
@@ -19,12 +20,12 @@ namespace Iot.Device.DHTxx
     [Interface("Temperature and Humidity Sensor DHTxx")]
     public abstract class DhtBase : IDisposable
     {
+        private readonly CommunicationProtocol _protocol;
+
         /// <summary>
         /// Read buffer
         /// </summary>
-        protected byte[] _readBuff = new byte[5];
-
-        private readonly CommunicationProtocol _protocol;
+        private ValueArray<byte> _readBuff = new ValueArray<byte>(5);
 
         /// <summary>
         /// GPIO pin
@@ -53,9 +54,18 @@ namespace Iot.Device.DHTxx
         private TimeSpan _minTimeBetweenReads;
 
         /// <summary>
+        /// True when the last read values are valid
+        /// </summary>
+        protected bool _isLastReadSuccessful;
+
+        /// <summary>
         /// How last read went, <c>true</c> for success, <c>false</c> for failure
         /// </summary>
-        public bool IsLastReadSuccessful { get; internal set; }
+        [Obsolete("This property will be removed in a future release.")]
+        public bool IsLastReadSuccessful
+        {
+            get => _isLastReadSuccessful;
+        }
 
         /// <summary>
         /// Get the last read temperature
@@ -63,12 +73,13 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successful, it returns <code>default(Temperature)</code>
         /// </remarks>
+        [Obsolete("This property will be removed in the a future release. Use TryGetTemperature instead.")]
         public virtual Temperature Temperature
         {
             get
             {
-                ReadData();
-                return IsLastReadSuccessful ? GetTemperature(_readBuff) : default(Temperature);
+                var buf = ReadData();
+                return IsLastReadSuccessful ? GetTemperature(buf.AsSpan()) : default(Temperature);
             }
         }
 
@@ -78,12 +89,13 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successful, it returns <code>default(RelativeHumidity)</code>
         /// </remarks>
+        [Obsolete("This property will be removed in a future release. Use TryGetHumidity instead.")]
         public virtual RelativeHumidity Humidity
         {
             get
             {
-                ReadData();
-                return IsLastReadSuccessful ? GetHumidity(_readBuff) : default(RelativeHumidity);
+                var buf = ReadData();
+                return IsLastReadSuccessful ? GetHumidity(buf.AsSpan()) : default(RelativeHumidity);
             }
         }
 
@@ -142,28 +154,28 @@ namespace Iot.Device.DHTxx
         /// <summary>
         /// Start a reading
         /// </summary>
-        internal virtual void ReadData()
+        internal virtual ValueArray<byte> ReadData()
         {
             // The time of two measurements should be more than 1s.
             if (Environment.TickCount - _lastMeasurement < MinTimeBetweenReads.Milliseconds)
             {
-                return;
+                return _readBuff;
             }
 
             if (_protocol == CommunicationProtocol.OneWire)
             {
-                ReadThroughOneWire();
+                return ReadThroughOneWire();
             }
             else
             {
-                ReadThroughI2c();
+                return ReadThroughI2c();
             }
         }
 
         /// <summary>
         /// Read through One-Wire
         /// </summary>
-        internal virtual void ReadThroughOneWire()
+        internal virtual ValueArray<byte> ReadThroughOneWire()
         {
             if (_controller is null)
             {
@@ -198,8 +210,8 @@ namespace Iot.Device.DHTxx
             {
                 if (count-- == 0)
                 {
-                    IsLastReadSuccessful = false;
-                    return;
+                    _isLastReadSuccessful = false;
+                    return default;
                 }
             }
 
@@ -209,8 +221,8 @@ namespace Iot.Device.DHTxx
             {
                 if (count-- == 0)
                 {
-                    IsLastReadSuccessful = false;
-                    return;
+                    _isLastReadSuccessful = false;
+                    return default;
                 }
             }
 
@@ -223,8 +235,8 @@ namespace Iot.Device.DHTxx
                 {
                     if (count-- == 0)
                     {
-                        IsLastReadSuccessful = false;
-                        return;
+                        _isLastReadSuccessful = false;
+                        return default;
                     }
                 }
 
@@ -236,8 +248,8 @@ namespace Iot.Device.DHTxx
                 {
                     if (count-- == 0)
                     {
-                        IsLastReadSuccessful = false;
-                        return;
+                        _isLastReadSuccessful = false;
+                        return default;
                     }
                 }
 
@@ -262,18 +274,21 @@ namespace Iot.Device.DHTxx
 
             if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
             {
-                IsLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
+                _isLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
             }
             else
             {
-                IsLastReadSuccessful = false;
+                _isLastReadSuccessful = false;
+                return default;
             }
+
+            return _readBuff;
         }
 
         /// <summary>
         /// Read through I2C
         /// </summary>
-        internal virtual void ReadThroughI2c()
+        internal virtual ValueArray<byte> ReadThroughI2c()
         {
             if (_i2cDevice is null)
             {
@@ -283,18 +298,21 @@ namespace Iot.Device.DHTxx
             // DHT12 Humidity Register
             _i2cDevice.WriteByte(0x00);
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum
-            _i2cDevice.Read(_readBuff);
+            _i2cDevice.Read(_readBuff.AsSpan());
 
             _lastMeasurement = Environment.TickCount;
 
             if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
             {
-                IsLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
+                _isLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
             }
             else
             {
-                IsLastReadSuccessful = false;
+                _isLastReadSuccessful = false;
+                return default;
             }
+
+            return _readBuff;
         }
 
         /// <summary>
@@ -310,10 +328,10 @@ namespace Iot.Device.DHTxx
         out Temperature temperature)
         {
             temperature = default;
-            ReadData();
-            if (IsLastReadSuccessful)
+            var buf = ReadData();
+            if (_isLastReadSuccessful)
             {
-                temperature = GetTemperature(_readBuff);
+                temperature = GetTemperature(buf.AsSpan());
                 return true;
             }
 
@@ -333,10 +351,10 @@ namespace Iot.Device.DHTxx
             out RelativeHumidity humidity)
         {
             humidity = default;
-            ReadData();
-            if (IsLastReadSuccessful)
+            var buf = ReadData();
+            if (_isLastReadSuccessful)
             {
-                humidity = GetHumidity(_readBuff);
+                humidity = GetHumidity(buf.AsSpan());
                 return true;
             }
 
@@ -348,14 +366,14 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Humidity</returns>
-        internal abstract RelativeHumidity GetHumidity(byte[] readBuff);
+        internal abstract RelativeHumidity GetHumidity(Span<byte> readBuff);
 
         /// <summary>
         /// Converting data to Temperature
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Temperature</returns>
-        internal abstract Temperature GetTemperature(byte[] readBuff);
+        internal abstract Temperature GetTemperature(Span<byte> readBuff);
 
         /// <inheritdoc/>
         public void Dispose()
