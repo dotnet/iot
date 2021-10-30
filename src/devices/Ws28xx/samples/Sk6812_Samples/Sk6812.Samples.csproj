@@ -4,6 +4,6 @@
     <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Ws28xx.csproj" />
+    <ProjectReference Include="../../Ws28xx.csproj" />
   </ItemGroup>
 </Project>

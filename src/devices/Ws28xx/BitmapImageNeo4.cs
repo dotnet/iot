@@ -1,0 +1,60 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Iot.Device.Graphics;
+
+namespace Iot.Device.Ws28xx
+{
+    internal class BitmapImageNeo4 : BitmapImage
+    {
+        private const int BytesPerComponent = 3;
+        private const int BytesPerPixel = BytesPerComponent * 4;
+        // The Neo Pixels require a 50us delay (all zeros) after. Since Spi freq is not exactly
+        // as requested 100us is used here with good practical results. 100us @ 2.4Mbps and 8bit
+        // data means we have to add 30 bytes of zero padding.
+        private const int ResetDelayInBytes = 30;
+
+        public BitmapImageNeo4(int width, int height)
+            : base(new byte[width * height * BytesPerPixel + ResetDelayInBytes], width, height, width * BytesPerPixel)
+        {
+        }
+
+        public override void SetPixel(int x, int y, Color c)
+        {
+            // Alpha is used as white.
+            var offset = y * Stride + x * BytesPerPixel;
+            Data[offset++] = _lookup[c.G * BytesPerComponent + 0];
+            Data[offset++] = _lookup[c.G * BytesPerComponent + 1];
+            Data[offset++] = _lookup[c.G * BytesPerComponent + 2];
+            Data[offset++] = _lookup[c.R * BytesPerComponent + 0];
+            Data[offset++] = _lookup[c.R * BytesPerComponent + 1];
+            Data[offset++] = _lookup[c.R * BytesPerComponent + 2];
+            Data[offset++] = _lookup[c.B * BytesPerComponent + 0];
+            Data[offset++] = _lookup[c.B * BytesPerComponent + 1];
+            Data[offset++] = _lookup[c.B * BytesPerComponent + 2];
+            Data[offset++] = _lookup[c.A * BytesPerComponent + 0];
+            Data[offset++] = _lookup[c.A * BytesPerComponent + 1];
+            Data[offset++] = _lookup[c.A * BytesPerComponent + 2];
+        }
+
+        private static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
+        static BitmapImageNeo4()
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                int data = 0;
+                for (int j = 7; j >= 0; j--)
+                {
+                    data = (data << 3) | 0b100 | ((i >> j) << 1) & 2;
+                }
+
+                _lookup[i * BytesPerComponent + 0] = unchecked((byte)(data >> 16));
+                _lookup[i * BytesPerComponent + 1] = unchecked((byte)(data >> 8));
+                _lookup[i * BytesPerComponent + 2] = unchecked((byte)(data >> 0));
+            }
+        }
+    }
+}

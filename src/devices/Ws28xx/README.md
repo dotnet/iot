@@ -1,19 +1,20 @@
-﻿# Ws28xx LED drivers
+﻿﻿# Ws28xx/SK7812 LED drivers
 
-This binding allows you to update the RGB LEDs on Ws28xx and based strips and matrices.
+This binding allows you to update the RGB LEDs on Ws28xx/SK6812 and based strips and matrices.
 
-To see how to use the binding in code, see the [sample](samples/Program.cs).
+To see how to use the binding in code, see the [sample](samples/Ws28xx_Samples/Program.cs).
 
 ## Documentation
 
 * WS2812B: [Datasheet](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
 * WS2808: [Datasheet](https://datasheetspdf.com/pdf-file/806051/Worldsemi/WS2801/1)
+* SK6812: [Datasheet](https://cdn-shop.adafruit.com/product-files/2757/p2757_SK6812RGBW_REV01.pdf)
 * [Neo pixels guide](https://learn.adafruit.com/adafruit-neopixel-uberguide)
 * [Neo pixels x8 stick](https://www.adafruit.com/product/1426)
 
 ## Board
 
-### Neo pixels
+### Neo pixels/SK6812
 
 ![Raspberry Pi Breadboard diagram](rpi-neo-pixels_bb.png)
 
@@ -66,7 +67,8 @@ void Rainbow(Ws28xx neo, int count, int iterations = 1)
     }
 }
 ```
-
+#### Note: 
+Using the SK6812 is almost the same, but the alpha channel of the color is used for the white LED. This means that the predefined color definitions (like ```System.Drawing.Color.Red``` will not work correctly as they have the alpha channel set to 255 (0xFF). That will turn the white LED always on. See the [sample](samples/SK6812_Samples/Programs.cs) for the main differences to the above code.
 ## Binding Notes
 
 ### Raspberry Pi setup (/boot/config.txt)
