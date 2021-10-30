@@ -84,6 +84,10 @@ namespace ArduinoCsCompiler
                 {
                     ParseTaskTerminationResult(data, out error);
                 }
+                else if (data[1] == (byte)ExecutorCommand.BreakpointHit)
+                {
+                    _compiler.OnCompilerCallback(data[2] | (data[3] << 7), MethodState.Debugging, data);
+                }
                 else
                 {
                     return false;

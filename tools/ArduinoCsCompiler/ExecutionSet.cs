@@ -229,14 +229,19 @@ namespace ArduinoCsCompiler
 
             if (!_compiler.BoardHasKernelLoaded(to))
             {
-                if (from == EmptySnapShot)
+                if (from == EmptySnapShot || doWriteProgramToFlash)
                 {
                     _compiler.ClearAllData(true, true);
                 }
+                else
+                {
+                    _compiler.ClearAllData(true, false);
+                }
 
-                _compiler.ClearAllData(true, doWriteProgramToFlash);
                 _compiler.SetExecutionSetActive(this);
+                _logger.LogInformation("1/5 Uploading class declarations...");
                 _compiler.SendClassDeclarations(this, from, to, false);
+                _logger.LogInformation("2/5 Uploading methods..");
                 _compiler.SendMethods(this, from, to, false);
                 List<(int Token, byte[] Data, string NoData)> converted = new();
                 // Need to do this manually, due to stupid nullability conversion restrictions
@@ -248,6 +253,7 @@ namespace ArduinoCsCompiler
                     }
                 }
 
+                _logger.LogInformation("3/5 Uploading constants...");
                 _compiler.SendConstants(converted, from, to, false);
                 if (doWriteProgramToFlash)
                 {
@@ -256,12 +262,17 @@ namespace ArduinoCsCompiler
 
                 int totalStringSize = CalculateTotalStringSize(_strings, from, to);
                 _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
+                _logger.LogInformation("4/5 Uploading strings...");
                 _compiler.SendStrings(_strings.ToList(), from, to, false);
+                _logger.LogInformation("5/5 Uploading special types...");
                 _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), from, to, false);
+                _logger.LogInformation("Finalizing...");
                 if (doWriteProgramToFlash)
                 {
                     _compiler.WriteFlashHeader(to, TokenOfStartupMethod, CompilerSettings.AutoRestartProgram ? CodeStartupFlags.AutoRestartAfterCrash : CodeStartupFlags.None);
                 }
+
+                _logger.LogInformation("Upload successfully completed");
             }
             else
             {

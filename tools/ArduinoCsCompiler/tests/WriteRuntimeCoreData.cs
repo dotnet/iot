@@ -15,7 +15,7 @@ namespace Iot.Device.Arduino.Tests
     /// <summary>
     /// This class is used to copy some information to the Arduino code, so that it stays in sync with the C# part
     /// </summary>
-    public class WriteRuntimeCoreData
+    public partial class WriteRuntimeCoreData
     {
         /// <summary>
         /// Returns the path where the runtime sources are

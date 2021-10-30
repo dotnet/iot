@@ -27,6 +27,13 @@ namespace ArduinoCsCompiler
         ArrayOperations = 19,
         QueryHardware = 20,
 
+        ConditionalBreakpointHit = 30,
+        BreakpointHit = 31,
+        AddConditionalBreakpoint = 32,
+        DeleteConditionalBreakpoint = 33,
+        DeleteAllBreakpoints = 34,
+        DebuggerCommand = 35,
+
         Reply = 0x7d,
         Nack = 0x7e,
         Ack = 0x7f,

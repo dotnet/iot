@@ -30,10 +30,13 @@ namespace ArduinoCsCompiler
         private List<Type> _replacementClasses;
 
         private bool _disposed = false;
+        private Debugger? _debugger;
+
         public MicroCompiler(ArduinoBoard board, bool resetExistingCode = true)
         {
             _logger = this.GetCurrentClassLogger();
             _board = board;
+            _debugger = null;
 
             _activeTasks = new List<ArduinoTask>();
             _activeExecutionSet = null;
@@ -119,6 +122,19 @@ namespace ArduinoCsCompiler
             }
 
             var codeRef = task.MethodInfo;
+
+            if (state == MethodState.Debugging)
+            {
+                _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
+                if (_debugger != null)
+                {
+                    _debugger.ProcessExecutionState((byte[])args);
+                }
+                else
+                {
+                    _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
+                }
+            }
 
             if (state == MethodState.Aborted)
             {
@@ -2395,6 +2411,7 @@ namespace ArduinoCsCompiler
 
         public void Dispose()
         {
+            _debugger = null;
         }
 
         public void SetExecutionSetActive(ExecutionSet executionSet)
@@ -2448,6 +2465,17 @@ namespace ArduinoCsCompiler
             };
 
             return true;
+        }
+
+        public Debugger CreateDebugger()
+        {
+            if (_activeExecutionSet == null)
+            {
+                throw new InvalidOperationException("Cannot create a debugger without a loaded execution set");
+            }
+
+            _debugger = new Debugger(this, _activeExecutionSet);
+            return _debugger;
         }
     }
 }

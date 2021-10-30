@@ -23,6 +23,7 @@ namespace ArduinoCsCompiler
         private readonly CommandLineOptions _commandLineOptions;
         private ILogger _logger;
         private MicroCompiler? _compiler;
+        private Debugger? _debugger;
 
         private Program(CommandLineOptions commandLineOptions)
         {
@@ -234,11 +235,40 @@ namespace ArduinoCsCompiler
                     _compiler.ExecuteStaticCtors(set);
                     var remoteMethod = set.MainEntryPoint;
 
-                    // This assertion fails on a timeout
-                    remoteMethod.Invoke(CancellationToken.None);
-                    if (!remoteMethod.GetMethodResults(set, out object[] data, out MethodState state))
+                    remoteMethod.InvokeAsync();
+
+                    _debugger = _compiler.CreateDebugger();
+
+                    object[] data;
+                    string currentInput = string.Empty;
+                    _debugger.WriteCurrentState();
+                    while (!remoteMethod.GetMethodResults(set, out data, out MethodState state))
                     {
-                        _logger.LogError("Remote execution seems to have ended, but returned an inconsistent result");
+                        if (Console.KeyAvailable)
+                        {
+                            var key = Console.ReadKey(false);
+                            if (key.Key == ConsoleKey.Enter)
+                            {
+                                Console.WriteLine();
+                                _debugger.ProcessCommandLine(currentInput);
+                                currentInput = string.Empty;
+                                _debugger.WriteCurrentState();
+                            }
+                            else if (key.Key == ConsoleKey.Escape)
+                            {
+                                // TODO:
+                                // _debugger.ClearAllBreakpoints();
+                                // _debugger.Continue();
+                                _logger.LogInformation($"Code is still running, but debugger exits now");
+                                return;
+                            }
+                            else
+                            {
+                                currentInput += key.KeyChar;
+                            }
+                        }
+
+                        Thread.Sleep(50);
                     }
 
                     // A main method returning void actually returns 0
@@ -271,6 +301,13 @@ namespace ArduinoCsCompiler
                 className = _commandLineOptions.EntryPoint.Substring(0, idx);
                 string methodName = _commandLineOptions.EntryPoint.Substring(idx + 1);
                 startupType = assemblyUnderTest.GetType(className, true);
+
+                if (startupType == null)
+                {
+                    _logger.LogError($"Unable to locate startup class {className}");
+                    Abort();
+                }
+
                 var mi = startupType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Static);
                 if (mi == null)
                 {

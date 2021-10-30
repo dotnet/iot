@@ -7,6 +7,7 @@ namespace ArduinoCsCompiler
         Aborted = 1,
         Running = 2,
         Killed = 3,
-        ConnectionError
+        ConnectionError = 4,
+        Debugging = 5,
     }
 }
