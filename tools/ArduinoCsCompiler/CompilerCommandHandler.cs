@@ -84,9 +84,9 @@ namespace ArduinoCsCompiler
                 {
                     ParseTaskTerminationResult(data, out error);
                 }
-                else if (data[1] == (byte)ExecutorCommand.BreakpointHit)
+                else if ((data[1] == (byte)ExecutorCommand.Reply) && (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit))
                 {
-                    _compiler.OnCompilerCallback(data[2] | (data[3] << 7), MethodState.Debugging, data);
+                    _compiler.OnCompilerCallback(data[3] | (data[4] << 7), MethodState.Debugging, data);
                 }
                 else
                 {
@@ -524,6 +524,14 @@ namespace ArduinoCsCompiler
                 data = null;
                 return;
             }
+        }
+
+        public void SendDebuggerCommand(DebuggerCommand command)
+        {
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.DebuggerCommand);
+            sequence.SendInt32((int)command);
+            sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
+            SendCommandAndWait(sequence);
         }
     }
 }

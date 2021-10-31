@@ -171,6 +171,12 @@ enum class {name}
         }
 
         [Fact]
+        public void WriteDebuggerCommands()
+        {
+            WriteEnumHeaderFile<DebuggerCommand>();
+        }
+
+        [Fact]
         public void WriteExecutorCommands()
         {
             string name = nameof(ExecutorCommand);

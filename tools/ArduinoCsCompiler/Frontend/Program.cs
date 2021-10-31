@@ -232,16 +232,20 @@ namespace ArduinoCsCompiler
 
                 try
                 {
+                    _debugger = _compiler.CreateDebugger();
+
+                    // TODO: This setup doesn't allow debugging static ctors. We should fix that.
                     _compiler.ExecuteStaticCtors(set);
                     var remoteMethod = set.MainEntryPoint;
 
+                    _debugger.StartDebugging();
                     remoteMethod.InvokeAsync();
-
-                    _debugger = _compiler.CreateDebugger();
 
                     object[] data;
                     string currentInput = string.Empty;
-                    _debugger.WriteCurrentState();
+
+                    bool quitting = false;
+
                     while (!remoteMethod.GetMethodResults(set, out data, out MethodState state))
                     {
                         if (Console.KeyAvailable)
@@ -250,17 +254,18 @@ namespace ArduinoCsCompiler
                             if (key.Key == ConsoleKey.Enter)
                             {
                                 Console.WriteLine();
-                                _debugger.ProcessCommandLine(currentInput);
+                                if (_debugger.ProcessCommandLine(currentInput) == false)
+                                {
+                                    quitting = true;
+                                    break;
+                                }
+
                                 currentInput = string.Empty;
-                                _debugger.WriteCurrentState();
                             }
                             else if (key.Key == ConsoleKey.Escape)
                             {
-                                // TODO:
-                                // _debugger.ClearAllBreakpoints();
-                                // _debugger.Continue();
-                                _logger.LogInformation($"Code is still running, but debugger exits now");
-                                return;
+                                quitting = true;
+                                break;
                             }
                             else
                             {
@@ -269,6 +274,13 @@ namespace ArduinoCsCompiler
                         }
 
                         Thread.Sleep(50);
+                    }
+
+                    if (quitting)
+                    {
+                        _debugger.StopDebugging();
+                        _logger.LogInformation($"Code is still running, but debugger exits now");
+                        return;
                     }
 
                     // A main method returning void actually returns 0

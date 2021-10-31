@@ -60,6 +60,8 @@ namespace ArduinoCsCompiler
             }
         }
 
+        internal CompilerCommandHandler CommandHandler => _commandHandler;
+
         private static bool HasStaticFields(Type cls)
         {
             foreach (var fld in cls.GetFields())
@@ -128,12 +130,14 @@ namespace ArduinoCsCompiler
                 _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
                 if (_debugger != null)
                 {
-                    _debugger.ProcessExecutionState((byte[])args);
+                    _debugger.SaveLastExecutionState((byte[])args);
                 }
                 else
                 {
                     _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
                 }
+
+                return; // Don't update the task state - for an outside observer, debugging does not affect the task state.
             }
 
             if (state == MethodState.Aborted)
@@ -2475,6 +2479,9 @@ namespace ArduinoCsCompiler
             }
 
             _debugger = new Debugger(this, _activeExecutionSet);
+
+            // Always start with debugging disabled
+            _commandHandler.SendDebuggerCommand(DebuggerCommand.DisableDebugging);
             return _debugger;
         }
     }

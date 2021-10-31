@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 namespace ArduinoCsCompiler
 {
-    internal enum DebuggerCommand
+    public enum DebuggerCommand
     {
         None,
         Continue,
         StepInto,
         StepOver,
         QueryStatus,
+        EnableDebugging,
+        DisableDebugging,
     }
 }

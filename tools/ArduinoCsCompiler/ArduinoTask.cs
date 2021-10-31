@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -101,19 +102,10 @@ namespace ArduinoCsCompiler
                     if (idx > 0)
                     {
                         stackTrace.RemoveRange(0, idx + 1);
-                        stackTrace.Reverse();
-                        for (var index = 0; index < stackTrace.Count - 1; index += 2)
-                        {
-                            var methodToken = stackTrace[index + 1]; // Because of the above reversal, the token is second
-                            var pc = stackTrace[index];
-                            // this can be the same as above (if the error is within the given method), but not
-                            // necessarily, since the outer token can point to whatever did not work
-                            var resolved2 = set.InverseResolveToken(methodToken);
-                            if (resolved2 != null)
-                            {
-                                textualStackTrace += $" at {resolved2.MemberInfoSignature()} Instruction 0x{pc:X4}\r\n";
-                            }
-                        }
+                        // The first entry can be the same as above (if the error is within the given method), but not
+                        // necessarily, since the outer token can point to whatever did not work
+                        var stack = Debugger.DecodeStackTrace(set, stackTrace);
+                        textualStackTrace = Debugger.PrintStack(stack);
                     }
 
                     if (sysEx == SystemException.InvalidOpCode)
