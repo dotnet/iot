@@ -128,7 +128,12 @@ stages:
             artifactName: BuiltPackageOutputs
             artifactType: container
           condition: eq(variables['_BuildConfig'], 'Release')
-      
+        # Scan markdown files on style consistency
+        - powershell: |
+            npm install -g markdownlint-cli
+            markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)/content
+          displayName: 'Execute Markdownlint'
+
       - job: Linux
         container: LinuxContainer
         pool:

@@ -95,4 +95,3 @@ power.LightDutyShutdownTime = LightDutyShutdownTime.S32;
 power.ChargingCutOffCurrent = ChargingCutOffCurrent.C500mA;
 power.ChargingCuttOffVoltage = ChargingCutOffVoltage.V4_2;
  ```
- 

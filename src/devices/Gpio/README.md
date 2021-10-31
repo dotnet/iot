@@ -19,7 +19,7 @@ Benchmarking with **Orange Pi Zero**, select GPIO 6 (Logical). The operating sys
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | SunxiDriver | C# | - | 2020-02-20 | 185 KHz | ![sunxi](./imgs/SunxiDriver/sunxi.jpg) |
 | SysFsDriver | C# | System.Device.Gpio 1.3.0 | 2020-02-20 | 692 Hz | ![sysfs](./imgs/SunxiDriver/sysfs.jpg) |
-| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | 2020-02-20 | 81 KHz | ![libgpiod](./imgs/SunxiDriver/libgpiod.jpg) |
+| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 - libgpiod 1.2-3 | 2020-02-20 | 81 KHz | ![libgpiod](./imgs/SunxiDriver/libgpiod.jpg) |
 | [wiringOP](https://github.com/orangepi-xunlong/wiringOP) | C | 35de015 | 2020-02-22 | 1.10 MHz | ![wiringOP](./imgs/SunxiDriver/wiringOP.jpg) |
 
 ### RockchipDriver
@@ -30,7 +30,7 @@ Benchmarking with **Orange Pi 4**, select GPIO 150 (Logical). The operating syst
 | :-: | :-: | :-: | :-: | :-: | :-: |
 | RockchipDriver | C# | - | 2020-02-22 | 516 KHz | ![rockchip](./imgs/RockchipDriver/rockchip.jpg) |
 | SysFsDriver | C# | System.Device.Gpio 1.3.0 | 2020-02-22 | 4.27 KHz | ![sysfs](./imgs/RockchipDriver/sysfs.jpg) |
-| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 <br/> libgpiod 1.2-3 | 2020-02-22 | 174 KHz | ![libgpiod](./imgs/RockchipDriver/libgpiod.jpg) |
+| LibGpiodDriver | C# | System.Device.Gpio 1.3.0 - libgpiod 1.2-3 | 2020-02-22 | 174 KHz | ![libgpiod](./imgs/RockchipDriver/libgpiod.jpg) |
 | [wiringOP](https://github.com/orangepi-xunlong/wiringOP) | C | 35de015 | 2020-02-22 | 584 KHz | ![wiringgOP](./imgs/RockchipDriver/wiringOP.jpg) |
 
 ## Usage
