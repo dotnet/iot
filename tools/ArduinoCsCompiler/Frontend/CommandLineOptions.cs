@@ -59,5 +59,8 @@ namespace ArduinoCsCompiler
 
         [Option("run", Default = true, HelpText = "Run the program after uploading. The compiler will switch to execution mode after upload and run the program, printing any log output to the console")]
         public bool Run { get; set; }
+
+        [Option("keepifcurrent", Default = false, HelpText = "If specified, the program will not be transmitted if it is already loaded. Defaults to false, because not all changes might be caught.")]
+        public bool DoNotWriteFlashIfAlreadyCurrent { get; set; }
     }
 }

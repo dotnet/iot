@@ -20,6 +20,7 @@ namespace ArduinoCsCompiler
         private const int DataVersion = 1;
         private readonly ArduinoBoard _board;
         private readonly List<ArduinoTask> _activeTasks;
+        private readonly object _activeTasksLock;
         private readonly ILogger _logger;
         private readonly CompilerCommandHandler _commandHandler;
 
@@ -38,6 +39,7 @@ namespace ArduinoCsCompiler
             _board = board;
             _debugger = null;
 
+            _activeTasksLock = new object();
             _activeTasks = new List<ArduinoTask>();
             _activeExecutionSet = null;
 
@@ -100,7 +102,10 @@ namespace ArduinoCsCompiler
 
         internal void TaskDone(ArduinoTask task)
         {
-            _activeTasks.Remove(task);
+            lock (_activeTasksLock)
+            {
+                _activeTasks.Remove(task);
+            }
         }
 
         internal void OnCompilerCallback(int taskId, MethodState state, object? args)
@@ -115,108 +120,118 @@ namespace ArduinoCsCompiler
                 return;
             }
 
-            var task = _activeTasks.FirstOrDefault(x => x.TaskId == taskId && x.State == MethodState.Running);
-
-            if (task == null)
+            lock (_activeTasksLock)
             {
-                _logger.LogError($"Invalid method state update. {taskId} does not denote an active task.");
-                return;
-            }
+                var task = _activeTasks.FirstOrDefault(x => x.TaskId == taskId);
 
-            var codeRef = task.MethodInfo;
-
-            if (state == MethodState.Debugging)
-            {
-                _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
-                if (_debugger != null)
+                if (task == null)
                 {
-                    _debugger.SaveLastExecutionState((byte[])args);
-                }
-                else
-                {
-                    _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
+                    // Because two threads run here, we might already have parsed this result
+                    _logger.LogError($"Invalid method state update. {taskId} does not denote an active task.");
+                    return;
                 }
 
-                return; // Don't update the task state - for an outside observer, debugging does not affect the task state.
-            }
-
-            if (state == MethodState.Aborted)
-            {
-                _logger.LogError($"Execution of method {GetMethodName(codeRef)} caused an exception. Check previous messages.");
-                // In this case, the data contains the exception tokens and the call stack tokens
-                task.AddData(state, ((int[])args).Cast<object>().ToArray());
-                return;
-            }
-
-            if (state == MethodState.Killed)
-            {
-                _logger.LogError($"Execution of method {GetMethodName(codeRef)} was forcibly terminated.");
-                // Still update the task state, this will prevent a deadlock if somebody is waiting for this task to end
-                task.AddData(state, new object[0]);
-                return;
-            }
-
-            object[] outObjects = new object[1];
-            if (state == MethodState.Stopped)
-            {
-                object retVal;
-                byte[] data = (byte[])args;
-
-                // The method ended, therefore we know that the only element of args is the return value and can derive its correct type
-                Type returnType;
-                // We sometimes also execute ctors directly, but they return void
-                if (codeRef.MethodBase.MemberType == MemberTypes.Constructor)
+                if (task.State != MethodState.Running && task.HasResult)
                 {
-                    returnType = typeof(void);
-                }
-                else
-                {
-                    returnType = codeRef.MethodInfo!.ReturnType;
+                    // Result already known
+                    return;
                 }
 
-                if (returnType == typeof(void))
+                var codeRef = task.MethodInfo;
+
+                if (state == MethodState.Debugging)
                 {
-                    // Empty return set
+                    _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
+                    if (_debugger != null)
+                    {
+                        _debugger.SaveLastExecutionState((byte[])args);
+                    }
+                    else
+                    {
+                        _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
+                    }
+
+                    return; // Don't update the task state - for an outside observer, debugging does not affect the task state.
+                }
+
+                if (state == MethodState.Aborted)
+                {
+                    _logger.LogError($"Execution of method {GetMethodName(codeRef)} caused an exception. Check previous messages.");
+                    // In this case, the data contains the exception tokens and the call stack tokens
+                    task.AddData(state, ((int[])args).Cast<object>().ToArray());
+                    return;
+                }
+
+                if (state == MethodState.Killed)
+                {
+                    _logger.LogError($"Execution of method {GetMethodName(codeRef)} was forcibly terminated.");
+                    // Still update the task state, this will prevent a deadlock if somebody is waiting for this task to end
                     task.AddData(state, new object[0]);
                     return;
                 }
-                else if (returnType == typeof(bool))
+
+                object[] outObjects = new object[1];
+                if (state == MethodState.Stopped)
                 {
-                    retVal = data[0] != 0;
-                }
-                else if (returnType == typeof(UInt32))
-                {
-                    retVal = BitConverter.ToUInt32(data);
-                }
-                else if (returnType == typeof(Int32))
-                {
-                    retVal = BitConverter.ToInt32(data);
-                }
-                else if (returnType == typeof(float))
-                {
-                    retVal = BitConverter.ToSingle(data);
-                }
-                else if (returnType == typeof(double))
-                {
-                    retVal = BitConverter.ToDouble(data);
-                }
-                else if (returnType == typeof(Int64))
-                {
-                    retVal = BitConverter.ToInt64(data);
-                }
-                else if (returnType == typeof(UInt64))
-                {
-                    retVal = BitConverter.ToUInt64(data);
-                }
-                else
-                {
-                    throw new NotSupportedException("Unsupported return type");
+                    object retVal;
+                    byte[] data = (byte[])args;
+
+                    // The method ended, therefore we know that the only element of args is the return value and can derive its correct type
+                    Type returnType;
+                    // We sometimes also execute ctors directly, but they return void
+                    if (codeRef.MethodBase.MemberType == MemberTypes.Constructor)
+                    {
+                        returnType = typeof(void);
+                    }
+                    else
+                    {
+                        returnType = codeRef.MethodInfo!.ReturnType;
+                    }
+
+                    if (returnType == typeof(void))
+                    {
+                        // Empty return set
+                        task.AddData(state, new object[0]);
+                        return;
+                    }
+                    else if (returnType == typeof(bool))
+                    {
+                        retVal = data[0] != 0;
+                    }
+                    else if (returnType == typeof(UInt32))
+                    {
+                        retVal = BitConverter.ToUInt32(data);
+                    }
+                    else if (returnType == typeof(Int32))
+                    {
+                        retVal = BitConverter.ToInt32(data);
+                    }
+                    else if (returnType == typeof(float))
+                    {
+                        retVal = BitConverter.ToSingle(data);
+                    }
+                    else if (returnType == typeof(double))
+                    {
+                        retVal = BitConverter.ToDouble(data);
+                    }
+                    else if (returnType == typeof(Int64))
+                    {
+                        retVal = BitConverter.ToInt64(data);
+                    }
+                    else if (returnType == typeof(UInt64))
+                    {
+                        retVal = BitConverter.ToUInt64(data);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException("Unsupported return type");
+                    }
+
+                    outObjects[0] = retVal;
                 }
 
-                outObjects[0] = retVal;
+                task.AddData(state, outObjects);
             }
-
-            task.AddData(state, outObjects);
         }
 
         /// <summary>
@@ -1560,7 +1575,11 @@ namespace ArduinoCsCompiler
                 unchecked
                 {
                     var tsk = new ArduinoTask(this, set.GetMethod(methodInfo), (short)_activeTasks.Count);
-                    _activeTasks.Add(tsk);
+                    lock (_activeTasksLock)
+                    {
+                        _activeTasks.Add(tsk);
+                    }
+
                     return tsk;
                 }
             }
@@ -2409,7 +2428,11 @@ namespace ArduinoCsCompiler
 
             _logger.LogDebug("Resetting execution engine.");
             _commandHandler.SendIlResetCommand(force);
-            _activeTasks.Clear();
+            lock (_activeTasksLock)
+            {
+                _activeTasks.Clear();
+            }
+
             _activeExecutionSet = null;
         }
 
@@ -2453,22 +2476,22 @@ namespace ArduinoCsCompiler
             out IlCapabilities ilCapabilities)
         {
             ilCapabilities = null!;
-            byte[]? data = null;
-            _commandHandler.QueryCapabilities(ref data);
-            if (data == null || data.Length == 0)
+            _commandHandler.QueryCapabilities();
+
+            int loops = 10;
+            while (loops-- > 0)
             {
-                return false;
+                // wait for result on receiver thread instead of synchronously waiting for a reply, since that one may be intermixed with other callback informations
+                if (_commandHandler.IlCapabilities != null)
+                {
+                    ilCapabilities = _commandHandler.IlCapabilities;
+                    return true;
+                }
+
+                Thread.Sleep(50);
             }
 
-            ilCapabilities = new IlCapabilities()
-            {
-                FlashSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8)),
-                IntSize = Information.FromBytes(data[6]),
-                PointerSize = Information.FromBytes(data[7]),
-                RamSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8 + 5)),
-            };
-
-            return true;
+            return false;
         }
 
         public Debugger CreateDebugger()

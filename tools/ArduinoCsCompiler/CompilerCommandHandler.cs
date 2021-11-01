@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino;
 using Microsoft.Extensions.Logging;
+using UnitsNet;
 
 namespace ArduinoCsCompiler
 {
@@ -14,11 +15,14 @@ namespace ArduinoCsCompiler
         private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
         public const int SchedulerData = 0x7B;
         private readonly MicroCompiler _compiler;
+        private IlCapabilities? _ilCapabilities;
 
         public CompilerCommandHandler(MicroCompiler compiler)
         {
             _compiler = compiler;
         }
+
+        public IlCapabilities? IlCapabilities => _ilCapabilities;
 
         protected override void OnErrorMessage(string message, Exception? exception)
         {
@@ -28,13 +32,21 @@ namespace ArduinoCsCompiler
 
         protected override void OnSysexData(ReplyType type, byte[] data)
         {
+            if (type == ReplyType.AsciiData)
+            {
+                // This could be a core dump from the CPU.
+                string rawMessage = Encoding.Unicode.GetString(data);
+                Logger.LogInformation(rawMessage);
+            }
+
             if (type != ReplyType.SysexCommand)
             {
                 return;
             }
 
             CommandError error = CommandError.None;
-            ParseReply(data, ref error);
+            // We're not expecting ACK or NACK messages here (or can ignore them)
+            ParseReply(data, ExecutorCommand.None, ref error);
         }
 
         private void WaitAndHandleIlCommand(FirmataIlCommandSequence commandSequence)
@@ -44,11 +56,25 @@ namespace ArduinoCsCompiler
 
         private void WaitAndHandleIlCommand(FirmataIlCommandSequence commandSequence, TimeSpan timeout)
         {
-            CommandError error;
+            CommandError error = CommandError.None;
             try
             {
-                var data = SendCommandAndWait(commandSequence, timeout, out error);
-                ParseReply(data, ref error);
+                while (timeout >= TimeSpan.Zero)
+                {
+                    var data = SendCommandAndWait(commandSequence, timeout, out error);
+                    if (ExpectAck(data, commandSequence.Command, ref error))
+                    {
+                        break;
+                    }
+
+                    // We did get a reply, but seemingly for the wrong command
+                    timeout -= TimeSpan.FromMilliseconds(20);
+                }
+
+                if (timeout <= TimeSpan.Zero)
+                {
+                    error = CommandError.Timeout;
+                }
             }
             catch (TimeoutException tx)
             {
@@ -61,14 +87,44 @@ namespace ArduinoCsCompiler
             }
         }
 
-        private bool ParseReply(byte[] data, ref CommandError error)
+        /// <summary>
+        /// This returns true if the command blob contains an ack or a nack for the given command
+        /// </summary>
+        private bool ExpectAck(byte[] data, ExecutorCommand expectedCommand, ref CommandError error)
+        {
+            if (data.Length >= 4 && data[0] == SchedulerData && data[2] == (byte)expectedCommand)
+            {
+                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
+                {
+                    // Just an ack for a programming command.
+                    return true;
+                }
+
+                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
+                {
+                    // This is a Nack
+                    error = (CommandError)data[3];
+                    return true;
+                }
+
+            }
+
+            return false;
+        }
+
+        private bool ParseReply(byte[] data, ExecutorCommand expectedCommand, ref CommandError error)
         {
             if (data.Length > 0 && data[0] == SchedulerData)
             {
                 if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
                 {
                     // Just an ack for a programming command.
-                    return true;
+                    if (data[2] == (byte)expectedCommand)
+                    {
+                        return true;
+                    }
+
+                    return false;
                 }
 
                 if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
@@ -84,9 +140,25 @@ namespace ArduinoCsCompiler
                 {
                     ParseTaskTerminationResult(data, out error);
                 }
-                else if ((data[1] == (byte)ExecutorCommand.Reply) && (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit))
+                else if (data[1] == (byte)ExecutorCommand.Reply)
                 {
-                    _compiler.OnCompilerCallback(data[3] | (data[4] << 7), MethodState.Debugging, data);
+                    // Careful: Two different enums in byte 2: make sure the relevant commands don't overlap
+                    if (data[2] == (byte)ExecutorCommand.QueryHardware)
+                    {
+                        var ilCapabilities = new IlCapabilities()
+                        {
+                            FlashSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8)),
+                            IntSize = Information.FromBytes(data[6]),
+                            PointerSize = Information.FromBytes(data[7]),
+                            RamSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8 + 5)),
+                        };
+
+                        _ilCapabilities = ilCapabilities;
+                    }
+                    else if (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit)
+                    {
+                        _compiler.OnCompilerCallback(data[3] | (data[4] << 7), MethodState.Debugging, data);
+                    }
                 }
                 else
                 {
@@ -510,20 +582,12 @@ namespace ArduinoCsCompiler
             throw new InvalidOperationException("Unexpected command reply");
         }
 
-        public void QueryCapabilities(ref byte[]? data)
+        public void QueryCapabilities()
         {
             FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.QueryHardware);
             sequence.SendUInt32(0);
             sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-            try
-            {
-                data = SendCommandAndWait(sequence, TimeSpan.FromSeconds(1));
-            }
-            catch (TimeoutException)
-            {
-                data = null;
-                return;
-            }
+            SendCommand(sequence);
         }
 
         public void SendDebuggerCommand(DebuggerCommand command)

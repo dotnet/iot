@@ -209,7 +209,7 @@ namespace ArduinoCsCompiler
             {
                 AutoRestartProgram = true,
                 CreateKernelForFlashing = false,
-                ForceFlashWrite = true,
+                ForceFlashWrite = !_commandLineOptions.DoNotWriteFlashIfAlreadyCurrent,
                 LaunchProgramFromFlash = true,
                 UseFlashForProgram = true
             };
@@ -238,7 +238,7 @@ namespace ArduinoCsCompiler
                     _compiler.ExecuteStaticCtors(set);
                     var remoteMethod = set.MainEntryPoint;
 
-                    _debugger.StartDebugging();
+                    _debugger.StartDebugging(true);
                     remoteMethod.InvokeAsync();
 
                     object[] data;
@@ -273,7 +273,7 @@ namespace ArduinoCsCompiler
                             }
                         }
 
-                        Thread.Sleep(50);
+                        _debugger.ExecuteAfterDataReceived(TimeSpan.FromMilliseconds(50), () => _debugger.WriteCurrentState());
                     }
 
                     if (quitting)

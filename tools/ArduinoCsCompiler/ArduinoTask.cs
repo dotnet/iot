@@ -39,6 +39,14 @@ namespace ArduinoCsCompiler
             private set;
         }
 
+        public bool HasResult
+        {
+            get
+            {
+                return _collectedValues.Any();
+            }
+        }
+
         public void AddData(MethodState state, object[] args)
         {
             _collectedValues.Enqueue((state, args));

@@ -23,8 +23,8 @@ namespace WeatherStation
 
         public static int Main()
         {
-            const int redLed = 6;
-            const int button = 2;
+            const int redLed = 16;
+            const int button = 17;
             using GpioController gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
             gpioController.OpenPin(redLed, PinMode.Output);
             gpioController.Write(redLed, PinValue.High);

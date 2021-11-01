@@ -15,5 +15,6 @@ namespace ArduinoCsCompiler
         QueryStatus,
         EnableDebugging,
         DisableDebugging,
+        Break,
     }
 }

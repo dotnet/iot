@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino;
 
@@ -14,6 +15,7 @@ namespace ArduinoCsCompiler
         private readonly MicroCompiler _compiler;
         private readonly ExecutionSet _set;
         private readonly CompilerCommandHandler _commandHandler;
+        private readonly AutoResetEvent _debugDataReceived;
         private byte[] _lastData;
 
         internal Debugger(MicroCompiler compiler, ExecutionSet set)
@@ -22,6 +24,7 @@ namespace ArduinoCsCompiler
             _commandHandler = _compiler.CommandHandler;
             _set = set ?? throw new ArgumentNullException(nameof(set));
             _lastData = new byte[0];
+            _debugDataReceived = new AutoResetEvent(false);
         }
 
         public static List<RemoteStackFrame> DecodeStackTrace(ExecutionSet set, List<int> stackTrace)
@@ -78,20 +81,26 @@ namespace ArduinoCsCompiler
             {
                 switch (currentInput.ToLowerInvariant()[0])
                 {
+                    case 'b':
+                        _commandHandler.SendDebuggerCommand(DebuggerCommand.Break);
+                        break;
+                    case 's':
+                        WriteCurrentState();
+                        break;
                     case 'c':
                         Continue();
                         break;
+                    case 'k':
+                        _compiler.KillTask(_set.MainEntryPointInternal);
+                        break;
                     case 'q':
                         return false;
-                    default:
                     case 'h':
                         PrintHelp();
                         break;
                 }
-            }
-            else
-            {
-                PrintHelp();
+
+                return true;
             }
 
             WriteCurrentState();
@@ -103,9 +112,12 @@ namespace ArduinoCsCompiler
         {
             Console.WriteLine("Debugger command help (abbreviations are allowed, as long as they're unique):");
             Console.WriteLine();
+            Console.WriteLine("Break    - Break execution");
             Console.WriteLine("Continue - Continue execution");
             Console.WriteLine("Help     - Show this help");
+            Console.WriteLine("Kill     - Terminate remote task");
             Console.WriteLine("Quit     - Exit debugger (but keep code running)");
+            Console.WriteLine("Stack    - Show current stack frames (default command)");
             Console.WriteLine();
         }
 
@@ -120,6 +132,20 @@ namespace ArduinoCsCompiler
             // This gets the whole data block from the execution engine
             // Lets start decoding where we are.
             _lastData = (byte[])data.Clone();
+            _debugDataReceived.Set();
+        }
+
+        /// <summary>
+        /// Executes the given action when new debug data has been received
+        /// </summary>
+        /// <param name="waitTime">The time to wait for data</param>
+        /// <param name="action">The action to execute</param>
+        public void ExecuteAfterDataReceived(TimeSpan waitTime, Action action)
+        {
+            if (_debugDataReceived.WaitOne(waitTime))
+            {
+                action();
+            }
         }
 
         public void ProcessExecutionState(byte[] data)
@@ -148,9 +174,13 @@ namespace ArduinoCsCompiler
             Console.WriteLine(printable);
         }
 
-        public void StartDebugging()
+        public void StartDebugging(bool stopImmediately)
         {
             _commandHandler.SendDebuggerCommand(DebuggerCommand.EnableDebugging);
+            if (stopImmediately)
+            {
+                _commandHandler.SendDebuggerCommand(DebuggerCommand.Break); // And stop at first possibility
+            }
         }
 
         public void StopDebugging()
