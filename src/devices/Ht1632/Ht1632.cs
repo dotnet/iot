@@ -138,6 +138,12 @@ namespace Iot.Device.Ht1632
                 _controller?.Dispose();
                 _controller = null;
             }
+            else
+            {
+                _controller?.ClosePin(_cs);
+                _controller?.ClosePin(_wr);
+                _controller?.ClosePin(_data);
+            }
         }
 
         private void SetupPins()
