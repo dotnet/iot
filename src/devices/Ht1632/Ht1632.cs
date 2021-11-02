@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
@@ -73,7 +71,7 @@ namespace Iot.Device.Ht1632
         private readonly int _data;
         private readonly bool _shouldDispose;
 
-        private GpioController _controller;
+        private GpioController? _controller;
 
         /// <summary>
         /// HT1632C 32x8 and 24x16 LED Driver
@@ -81,7 +79,7 @@ namespace Iot.Device.Ht1632
         /// <param name="pinMapping">The pin mapping to use by the binding.</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public Ht1632(Ht1632PinMapping pinMapping, GpioController gpioController = null, bool shouldDispose = true)
+        public Ht1632(Ht1632PinMapping pinMapping, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController();
