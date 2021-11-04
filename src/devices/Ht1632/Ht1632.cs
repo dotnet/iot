@@ -18,17 +18,17 @@ namespace Iot.Device.Ht1632
         /// <summary>
         /// Set if system oscillator is on. (default is off)
         /// </summary>
-        public bool Enabled { set => WriteCommand(value ? Command.SYS_EN : Command.SYS_DIS); }
+        public bool Enabled { set => WriteCommand(value ? Command.SystemEnabled : Command.SystemDisabled); }
 
         /// <summary>
         /// Set if LED duty cycle generator is on (default is off)
         /// </summary>
-        public bool LedOn { set => WriteCommand(value ? Command.LED_On : Command.LED_Off); }
+        public bool LedOn { set => WriteCommand(value ? Command.LedOn : Command.LedOff); }
 
         /// <summary>
         /// Set if blinking function is on (default is off)
         /// </summary>
-        public bool Blink { set => WriteCommand(value ? Command.BLINK_On : Command.BLINK_Off); }
+        public bool Blink { set => WriteCommand(value ? Command.BlinkOn : Command.BlinkOff); }
 
         /// <summary>
         /// Set clock mode (default is RC-Master)
@@ -43,26 +43,26 @@ namespace Iot.Device.Ht1632
         /// <summary>
         /// Set row PWM duty (1/16 to 16/16, default is 16)
         /// </summary>
-        public byte PwmDuty { set => WriteCommand(s_pwmCommandMap[value]); }
+        public byte PwmDuty { set => WriteCommand(s_pwmCommandMap[value - 1]); }
 
-        private static readonly Dictionary<byte, Command> s_pwmCommandMap = new Dictionary<byte, Command>()
+        private static readonly Command[] s_pwmCommandMap = new[]
         {
-            { 1, Command.PWM_Duty_1 },
-            { 2, Command.PWM_Duty_2 },
-            { 3, Command.PWM_Duty_3 },
-            { 4, Command.PWM_Duty_4 },
-            { 5, Command.PWM_Duty_5 },
-            { 6, Command.PWM_Duty_6 },
-            { 7, Command.PWM_Duty_7 },
-            { 8, Command.PWM_Duty_8 },
-            { 9, Command.PWM_Duty_9 },
-            { 10, Command.PWM_Duty_10 },
-            { 11, Command.PWM_Duty_11 },
-            { 12, Command.PWM_Duty_12 },
-            { 13, Command.PWM_Duty_13 },
-            { 14, Command.PWM_Duty_14 },
-            { 15, Command.PWM_Duty_15 },
-            { 16, Command.PWM_Duty_16 },
+            Command.PwmDuty1,
+            Command.PwmDuty2,
+            Command.PwmDuty3,
+            Command.PwmDuty4,
+            Command.PwmDuty5,
+            Command.PwmDuty6,
+            Command.PwmDuty7,
+            Command.PwmDuty8,
+            Command.PwmDuty9,
+            Command.PwmDuty10,
+            Command.PwmDuty11,
+            Command.PwmDuty12,
+            Command.PwmDuty13,
+            Command.PwmDuty14,
+            Command.PwmDuty15,
+            Command.PwmDuty16,
         };
 
         private readonly Ht1632PinMapping _pinMapping;
@@ -84,9 +84,9 @@ namespace Iot.Device.Ht1632
             _shouldDispose = shouldDispose || gpioController is null;
             _controller = gpioController ?? new GpioController();
             _pinMapping = pinMapping;
-            _cs = _pinMapping.CS;
-            _wr = _pinMapping.WR;
-            _data = _pinMapping.DATA;
+            _cs = _pinMapping.ChipSelect;
+            _wr = _pinMapping.WriteClock;
+            _data = _pinMapping.SerialData;
 
             SetupPins();
         }
@@ -160,7 +160,7 @@ namespace Iot.Device.Ht1632
             }
             else
             {
-                throw new Exception($"{nameof(Ht1632)} -- {nameof(Ht1632PinMapping)} values must be non-zero; Values: {nameof(Ht1632PinMapping.CS)}: {_cs}; {nameof(Ht1632PinMapping.WR)}: {_wr}; {nameof(Ht1632PinMapping.DATA)}: {_data};.");
+                throw new Exception($"{nameof(Ht1632)} -- {nameof(Ht1632PinMapping)} values must be non-zero; Values: {nameof(Ht1632PinMapping.ChipSelect)}: {_cs}; {nameof(Ht1632PinMapping.WriteClock)}: {_wr}; {nameof(Ht1632PinMapping.SerialData)}: {_data};.");
             }
         }
 

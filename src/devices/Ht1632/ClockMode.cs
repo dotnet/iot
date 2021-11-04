@@ -11,16 +11,16 @@ namespace Iot.Device.Ht1632
         /// <summary>
         /// Set slave mode and clock source from external clock, the system clock input from OSC pin and synchronous signal input from SYN pin
         /// </summary>
-        Slave = Command.SLAVE_Mode,
+        Slave = Command.Slave,
 
         /// <summary>
         /// Set master mode and clock source from on-chip RC oscillator, the system clock output to OSC pin and synchronous signal output to SYN pin (default)
         /// </summary>
-        RcMaster = Command.RC_Master_Mode,
+        RcMaster = Command.RcMaster,
 
         /// <summary>
         /// Set master mode and clock source from external clock, the system clock input from OSC pin and synchronous signal output to SYN pin
         /// </summary>
-        ExternalClockMaster = Command.EXT_CLK_Master_Mode,
+        ExternalClockMaster = Command.ExternalClockMaster,
     }
 }

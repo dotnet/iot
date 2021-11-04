@@ -11,21 +11,21 @@ namespace Iot.Device.Ht1632
         /// <summary>
         /// N-MOS open drain output and 8 COM option (default)
         /// </summary>
-        NMos8Com = Command.COM_Option_N8,
+        NMos8Com = Command.NMos8Com,
 
         /// <summary>
         /// N-MOS open drain output and 16 COM option
         /// </summary>
-        NMos16Com = Command.COM_Option_N16,
+        NMos16Com = Command.NMos16Com,
 
         /// <summary>
         /// P-MOS open drain output and 8 COM option
         /// </summary>
-        PMos8Com = Command.COM_Option_P8,
+        PMos8Com = Command.PMos8Com,
 
         /// <summary>
         /// P-MOS open drain output and 16 COM option
         /// </summary>
-        PMos16Com = Command.COM_Option_P16,
+        PMos16Com = Command.PMos16Com,
     }
 }

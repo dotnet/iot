@@ -13,24 +13,24 @@ namespace Iot.Device.Ht1632
         /// <param name="data">Serial data input or output with pull-high resistor</param>
         public Ht1632PinMapping(int cs, int wr, int data)
         {
-            CS = cs;
-            WR = wr;
-            DATA = data;
+            ChipSelect = cs;
+            WriteClock = wr;
+            SerialData = data;
         }
 
         /// <summary>
         /// Chip select input with pull-high resistor
         /// </summary>
-        public int CS { get; set; }
+        public int ChipSelect { get; set; }
 
         /// <summary>
         /// WRITE clock input with pull-high resistor
         /// </summary>
-        public int WR { get; set; }
+        public int WriteClock { get; set; }
 
         /// <summary>
         /// Serial data input or output with pull-high resistor
         /// </summary>
-        public int DATA { get; set; }
+        public int SerialData { get; set; }
     }
 }
