@@ -17,8 +17,6 @@ This binding currently only supports writing commands and raw data with GPIO.
 - [ ] READ Mode
 - [ ] READ-MODIFY-WRITE Mode
 
-You can find out in the [sample](./samples) how to send images to the device.
-
 ## Usage
 
 Initialization
