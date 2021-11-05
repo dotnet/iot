@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Device.Spi;
 using System.Drawing;
 using System.Threading;
@@ -15,9 +14,7 @@ Console.Clear();
 
 SpiConnectionSettings settings = new(0, 0)
 {
-    // This frequency defines how fast the data will be put on the line. The SK6812-strip requires a speed of 1.25 kHz.
-    // A single byte takes 1.2 µs for the transfer, the value for a single LED of 32 bit amounts to 38.4 µs.
-    ClockFrequency = 2_400_000,
+    ClockFrequency = Sk6812.DefaultSpiClockFrequency,
     Mode = SpiMode.Mode0,
     DataBitLength = 8
 };
