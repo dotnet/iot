@@ -6,4 +6,4 @@
 
 ![Random dots](random.jpg)
 
-![.NET bot](dotnet-bot.bmp)
+![.NET bot](bot.jpg)
