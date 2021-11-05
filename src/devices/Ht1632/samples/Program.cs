@@ -53,10 +53,10 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
         {
             var index = (x + 16 * y) / 4;
             var value = (byte)(
-                (image[x + 0, y].R > 127 ? 0b00000001 << 3 : 0) |
-                (image[x + 1, y].R > 127 ? 0b00000001 << 2 : 0) |
-                (image[x + 2, y].R > 127 ? 0b00000001 << 1 : 0) |
-                (image[x + 3, y].R > 127 ? 0b00000001 << 0 : 0));
+                (image[x + 0, y].R > 127 ? 0b_1000 : 0) |
+                (image[x + 1, y].R > 127 ? 0b_0100 : 0) |
+                (image[x + 2, y].R > 127 ? 0b_0010 : 0) |
+                (image[x + 3, y].R > 127 ? 0b_0001 : 0));
             data[index] = value;
         }
     }
