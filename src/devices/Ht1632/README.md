@@ -18,3 +18,42 @@ This binding currently only supports writing commands and raw data with GPIO.
 - [ ] READ-MODIFY-WRITE Mode
 
 You can find out in the [sample](./samples) how to send images to the device.
+
+## Usage
+
+Initialization
+
+```csharp
+using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), new GpioController())
+{
+    ComOption = ComOption.NMos16Com,
+    ClockMode = ClockMode.RcMaster,
+    Enabled = true,
+    PwmDuty = 1,
+    Blink = false,
+    LedOn = true
+};
+```
+
+Show image
+
+```csharp
+var image = Image.Load<Rgba32>("./dotnet-bot.bmp");
+var data = new byte[24 * 16 / 4];
+
+for (var y = 0; y < 24; y++)
+{
+    for (var x = 0; x < 16; x += 4)
+    {
+        var index = (x + 16 * y) / 4;
+        var value = (byte)(
+            (image[x + 0, y].R > 127 ? 0b00000001 << 3 : 0) |
+            (image[x + 1, y].R > 127 ? 0b00000001 << 2 : 0) |
+            (image[x + 2, y].R > 127 ? 0b00000001 << 1 : 0) |
+            (image[x + 3, y].R > 127 ? 0b00000001 << 0 : 0));
+        data[index] = value;
+    }
+}
+
+ht1632.WriteData(0, data);
+```

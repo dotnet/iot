@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="bot.jpg" />
-    <None Remove="random.jpg" />
-    <None Remove="Schematic_HT1632Ctest.png" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
   </ItemGroup>
 

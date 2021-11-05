@@ -44,8 +44,8 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
 {
     Console.WriteLine("Show image");
 
-    var data = new byte[24 * 16 / 4];
     var image = Image.Load<Rgba32>("./dotnet-bot.bmp");
+    var data = new byte[24 * 16 / 4];
 
     for (var y = 0; y < 24; y++)
     {
