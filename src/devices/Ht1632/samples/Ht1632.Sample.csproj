@@ -9,6 +9,7 @@
   <ItemGroup>
     <None Remove="bot.jpg" />
     <None Remove="random.jpg" />
+    <None Remove="Schematic_HT1632Ctest.png" />
   </ItemGroup>
 
   <ItemGroup>
