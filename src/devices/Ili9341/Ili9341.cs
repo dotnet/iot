@@ -15,6 +15,16 @@ namespace Iot.Device.Ili9341
     /// </summary>
     public partial class Ili9341 : IDisposable
     {
+        /// <summary>
+        /// Default frequency for SPI
+        /// </summary>
+        public const int DefaultSpiClockFrequency = 12_000_000;
+
+        /// <summary>
+        /// Default mode for SPI
+        /// </summary>
+        public const SpiMode DefaultSpiMode = SpiMode.Mode3;
+
         private const int ScreenWidthPx = 240;
         private const int ScreenHeightPx = 320;
         private const int DefaultSPIBufferSize = 0x1000;
@@ -23,7 +33,7 @@ namespace Iot.Device.Ili9341
 
         private readonly int _dcPinId;
         private readonly int _resetPinId;
-        private readonly int _backlitPin;
+        private readonly int _backlightPin;
         private readonly int _spiBufferSize;
         private readonly bool _shouldDispose;
 
@@ -51,7 +61,7 @@ namespace Iot.Device.Ili9341
             _spiDevice = spiDevice;
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
-            _backlitPin = backlightPin;
+            _backlightPin = backlightPin;
             _gpioDevice = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
 
@@ -60,9 +70,9 @@ namespace Iot.Device.Ili9341
 
             _spiBufferSize = spiBufferSize;
 
-            if (_backlitPin >= 0)
+            if (_backlightPin != -1)
             {
-                _gpioDevice.OpenPin(_backlitPin, PinMode.Output);
+                _gpioDevice.OpenPin(_backlightPin, PinMode.Output);
                 TurnBacklightOn();
             }
 
@@ -144,7 +154,7 @@ namespace Iot.Device.Ili9341
             }
 
             // specify a location for the rows and columns on the display where the data is to be written
-            SetWindow(x, y, w, h);
+            SetWindow(x, y, x + w - 1, y + h - 1);
 
             // write out the pixel data
             SendData(displayBytes);
@@ -155,7 +165,7 @@ namespace Iot.Device.Ili9341
         /// </summary>
         public void ClearScreen()
         {
-            FillRect(Color.Black, 0, 0, 320, 240);
+            FillRect(Color.Black, 0, 0, ScreenWidthPx, ScreenHeightPx);
         }
 
         /// <summary>
@@ -176,12 +186,12 @@ namespace Iot.Device.Ili9341
         /// </summary>
         public void TurnBacklightOn()
         {
-            if (_backlitPin < 0)
+            if (_backlightPin == -1)
             {
                 throw new InvalidOperationException("Backlight pin not set");
             }
 
-            _gpioDevice.Write(_backlitPin, PinValue.High);
+            _gpioDevice.Write(_backlightPin, PinValue.High);
         }
 
         /// <summary>
@@ -189,12 +199,12 @@ namespace Iot.Device.Ili9341
         /// </summary>
         public void TurnBacklightOff()
         {
-            if (_backlitPin < 0)
+            if (_backlightPin == -1)
             {
                 throw new InvalidOperationException("Backlight pin not set");
             }
 
-            _gpioDevice.Write(_backlitPin, PinValue.Low);
+            _gpioDevice.Write(_backlightPin, PinValue.Low);
         }
 
         private void SetWindow(uint x0 = 0, uint y0 = 0, uint x1 = ScreenWidthPx - 1, uint y1 = ScreenWidthPx - 1)

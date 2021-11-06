@@ -11,6 +11,7 @@
 
   <ItemGroup>
   	<ProjectReference Include="../Ili9341.csproj" />
+    <ProjectReference Include="../../Ft4222/Ft4222.csproj" />
   </ItemGroup>
 
   <ItemGroup>

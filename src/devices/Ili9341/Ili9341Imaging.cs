@@ -11,7 +11,7 @@ namespace Iot.Device.Ili9341
     public partial class Ili9341
     {
         /// <summary>
-        /// Send a bitmap to the ssd1351 display specifying the starting position and destination clipping rectangle.
+        /// Send a bitmap to the Ili9341 display specifying the starting position and destination clipping rectangle.
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         public void SendBitmap(Bitmap bm)
@@ -20,7 +20,7 @@ namespace Iot.Device.Ili9341
         }
 
         /// <summary>
-        /// Send a bitmap to the ssd1351 display specifying the starting position and destination clipping rectangle.
+        /// Send a bitmap to the Ili9341 display specifying the starting position and destination clipping rectangle.
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         /// <param name="updateRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
@@ -30,7 +30,7 @@ namespace Iot.Device.Ili9341
         }
 
         /// <summary>
-        /// Send a bitmap to the ssd1351 display specifying the starting position and destination clipping rectangle.
+        /// Send a bitmap to the Ili9341 display specifying the starting position and destination clipping rectangle.
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         /// <param name="sourcePoint">A coordinate point in the source bitmap where copying starts from.</param>
