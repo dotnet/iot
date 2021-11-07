@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
@@ -41,7 +42,7 @@ namespace Iot.Device.Arduino
         private Thread? _inputThread;
         private bool _inputThreadShouldExit;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
-        private IList<byte> _lastResponse;
+        private ConcurrentQueue<byte[]> _lastResponse;
         private List<PinValue> _lastPinValues;
         private Dictionary<int, uint> _lastAnalogValues;
         private object _lastPinValueLock;
@@ -79,7 +80,7 @@ namespace Iot.Device.Arduino
             _lastAnalogValues = new Dictionary<int, uint>();
             _lastAnalogValueLock = new object();
             _dataQueue = new Queue<byte>();
-            _lastResponse = new List<byte>();
+            _lastResponse = new();
             _lastRequestId = 1;
             _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;
@@ -461,20 +462,20 @@ namespace Iot.Device.Arduino
                             break;
                         case FirmataSysexCommand.I2C_REPLY:
                             _lastCommandError = CommandError.None;
-                            _lastResponse = raw_data;
+                            _lastResponse.Enqueue(raw_data);
                             _dataReceived.Set();
                             break;
 
                         case FirmataSysexCommand.SPI_DATA:
                             _lastCommandError = CommandError.None;
-                            _lastResponse = raw_data;
+                            _lastResponse.Enqueue(raw_data);
                             _dataReceived.Set();
                             break;
 
                         default:
                             // we pass the data forward as-is for any other type of sysex command
                             _lastCommandError = CommandError.None;
-                            _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
+                            _lastResponse.Enqueue(raw_data); // the instance is constant, so we can just remember the pointer
                             OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             _dataReceived.Set();
                             break;
@@ -534,7 +535,7 @@ namespace Iot.Device.Arduino
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
         public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
         {
-            return SendCommandAndWait(sequence, timeout, out _);
+            return SendCommandAndWait(sequence, timeout, null, out _);
         }
 
         /// <summary>
@@ -546,6 +547,21 @@ namespace Iot.Device.Arduino
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
         public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, out CommandError error)
+        {
+            return SendCommandAndWait(sequence, timeout, null, out error);
+        }
+
+        /// <summary>
+        /// Send a command and wait for a reply
+        /// </summary>
+        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
+        /// <param name="timeout">A non-default timeout</param>
+        /// <param name="isMatchingAck">A callback function that should return true if the given reply is the one this command should wait for. The default is true, because asynchronous replies
+        /// are rather the exception than the rule</param>
+        /// <param name="error">An error code in case of failure</param>
+        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
+        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, Func<FirmataCommandSequence, byte[], bool>? isMatchingAck, out CommandError error)
         {
             if (!sequence.Validate())
             {
@@ -567,14 +583,29 @@ namespace Iot.Device.Arduino
                 }
 
                 _firmataStream.Flush();
-                bool result = _dataReceived.WaitOne(timeout);
-                if (result == false)
+
+                byte[]? response;
+                do
                 {
-                    throw new TimeoutException("Timeout waiting for command answer");
+                    if (!_lastResponse.TryDequeue(out response))
+                    {
+                        bool result = _dataReceived.WaitOne(timeout);
+                        if (result == false)
+                        {
+                            throw new TimeoutException("Timeout waiting for command answer");
+                        }
+
+                        // We're sure this works now
+                        if (!_lastResponse.TryDequeue(out response))
+                        {
+                            throw new InvalidOperationException("Queue received an element but is empty - this must not happen");
+                        }
+                    }
                 }
+                while (isMatchingAck != null && !isMatchingAck(sequence, response));
 
                 error = _lastCommandError;
-                return _lastResponse.ToArray();
+                return response;
             }
         }
 

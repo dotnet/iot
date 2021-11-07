@@ -62,9 +62,9 @@ namespace ArduinoCsCompiler
             CommandError error = CommandError.None;
             try
             {
-                var data = SendCommandAndWait(commandSequence, timeout, out error);
                 while (timeout >= TimeSpan.Zero)
                 {
+                    var data = SendCommandAndWait(commandSequence, timeout, out error);
                     if (ExpectAck(data, commandSequence.Command, ref error))
                     {
                         break;
@@ -88,6 +88,18 @@ namespace ArduinoCsCompiler
             {
                 throw new TaskSchedulerException($"Task scheduler method returned state {error}.");
             }
+        }
+
+        protected override bool IsMatchingAck(FirmataCommandSequence sequence, byte[] reply)
+        {
+            // Could test byte 1 as well (should be ExecutorCommand.Ack or ExecutorCommand.Nack), but we have no message that uses
+            // something else that is also 4 bytes long
+            if (reply.Length != 4 || reply[0] != SchedulerData)
+            {
+                return false;
+            }
+
+            return base.IsMatchingAck(sequence, reply);
         }
 
         /// <summary>

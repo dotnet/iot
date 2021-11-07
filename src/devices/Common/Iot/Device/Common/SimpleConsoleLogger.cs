@@ -64,6 +64,11 @@ namespace Iot.Device.Common
                 case LogLevel.Information:
                     Console.ForegroundColor = ConsoleColor.Blue;
                     break;
+                case LogLevel.Trace:
+                case LogLevel.Debug:
+                default:
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
+                    break;
             }
 
             string msg = formatter(state, exception);

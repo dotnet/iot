@@ -135,7 +135,7 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException("Command handler not registered");
             }
 
-            return _firmata.SendCommandAndWait(commandSequence, timeout, out error);
+            return _firmata.SendCommandAndWait(commandSequence, timeout, IsMatchingAck, out error);
         }
 
         /// <summary>
@@ -148,12 +148,7 @@ namespace Iot.Device.Arduino
         /// <returns>The reply packet</returns>
         protected byte[] SendCommandAndWait(FirmataCommandSequence commandSequence, TimeSpan timeout)
         {
-            if (_firmata == null)
-            {
-                throw new InvalidOperationException("Command handler not registered");
-            }
-
-            return _firmata.SendCommandAndWait(commandSequence, timeout);
+            return SendCommandAndWait(commandSequence, timeout, out _);
         }
 
         /// <summary>
@@ -179,6 +174,19 @@ namespace Iot.Device.Arduino
         /// <remarks>The implementation needs to check whether the data is for itself. The messages are not filtered by requester!</remarks>
         protected virtual void OnSysexData(ReplyType type, byte[] data)
         {
+        }
+
+        /// <summary>
+        /// This method is called to check whether the reply is a valid ACK/NOACK for the given command sequence.
+        /// Can be used to avoid accepting something as command reply that is completely unrelated (such as an asynchronous callback).
+        /// In different words, this should return false if the given reply is not something that is an answer to a synchronous command.
+        /// </summary>
+        /// <param name="sequence">The sequence that was sent</param>
+        /// <param name="reply">The reply</param>
+        /// <returns>True if this reply matches the sequence. True is the default, for backwards compatibility</returns>
+        protected virtual bool IsMatchingAck(FirmataCommandSequence sequence, byte[] reply)
+        {
+            return true;
         }
 
         private void OnSysexDataInternal(ReplyType type, byte[] data)
