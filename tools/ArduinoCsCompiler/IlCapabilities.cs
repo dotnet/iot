@@ -28,9 +28,15 @@ namespace ArduinoCsCompiler
             init;
         }
 
+        public Information FlashUsed
+        {
+            get;
+            init;
+        }
+
         public override string ToString()
         {
-            return $"{nameof(IntSize)}: {IntSize}, {nameof(PointerSize)}: {PointerSize}, {nameof(FlashSize)}: {FlashSize}, {nameof(RamSize)}: {RamSize}";
+            return $"{nameof(IntSize)}: {IntSize}, {nameof(PointerSize)}: {PointerSize}, {nameof(FlashSize)}: {FlashSize}, {nameof(FlashUsed)}: {FlashUsed}, {nameof(RamSize)}: {RamSize}";
         }
     }
 }

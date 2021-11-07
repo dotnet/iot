@@ -134,6 +134,8 @@ namespace ArduinoCsCompiler
                 if (task.State != MethodState.Running && task.HasResult)
                 {
                     // Result already known
+                    _logger.LogDebug($"Task {taskId} reported a result but had already ended.");
+
                     return;
                 }
 
@@ -175,6 +177,8 @@ namespace ArduinoCsCompiler
                 {
                     object retVal;
                     byte[] data = (byte[])args;
+
+                    _logger.LogDebug($"Task {taskId} has ended normally.");
 
                     // The method ended, therefore we know that the only element of args is the return value and can derive its correct type
                     Type returnType;
@@ -2118,8 +2122,8 @@ namespace ArduinoCsCompiler
             for (var index2 = 0; index2 < codeSequences.Count; index2++)
             {
                 var initializer = codeSequences[index2].Method;
-                _logger.LogDebug($"Running static initializer of {initializer.DeclaringType!.MemberInfoSignature()}. Step {index2 + 1}/{codeSequences.Count}...");
                 var task = GetTask(set, initializer);
+                _logger.LogDebug($"Task {task.TaskId}: Running static initializer of {initializer.DeclaringType!.MemberInfoSignature()}. Step {index2 + 1}/{codeSequences.Count}...");
                 task.Invoke(CancellationToken.None);
                 task.WaitForResult();
                 if (task.GetMethodResults(set, out _, out var state) == false || state != MethodState.Stopped)
@@ -2127,6 +2131,7 @@ namespace ArduinoCsCompiler
                     throw new InvalidProgramException($"Error executing static ctor of class {initializer.DeclaringType}");
                 }
 
+                _logger.LogDebug($"Task {task.TaskId}: Static initializer of {initializer.DeclaringType!.MemberInfoSignature()} done.");
             }
         }
 
@@ -2401,16 +2406,23 @@ namespace ArduinoCsCompiler
             _commandHandler.ExecuteIlCode(decl.Token, taskId, arguments);
         }
 
-        public void KillTask(MethodBase methodInfo)
+        public void KillTask(MethodBase? methodInfo)
         {
             if (_activeExecutionSet == null)
             {
                 throw new InvalidOperationException("No execution set loaded");
             }
 
-            var decl = _activeExecutionSet.GetMethod(methodInfo);
+            if (methodInfo != null)
+            {
+                var decl = _activeExecutionSet.GetMethod(methodInfo);
 
-            _commandHandler.SendKillTask(decl.Token);
+                _commandHandler.SendKillTask(decl.Token);
+            }
+            else
+            {
+                _commandHandler.SendKillTask(0);
+            }
         }
 
         /// <summary>

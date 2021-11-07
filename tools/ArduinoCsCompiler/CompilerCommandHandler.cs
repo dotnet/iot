@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino;
+using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
 
@@ -15,11 +16,13 @@ namespace ArduinoCsCompiler
         private static readonly TimeSpan ProgrammingTimeout = TimeSpan.FromMinutes(2);
         public const int SchedulerData = 0x7B;
         private readonly MicroCompiler _compiler;
+        private readonly ILogger _logger;
         private IlCapabilities? _ilCapabilities;
 
         public CompilerCommandHandler(MicroCompiler compiler)
         {
             _compiler = compiler;
+            _logger = this.GetCurrentClassLogger();
         }
 
         public IlCapabilities? IlCapabilities => _ilCapabilities;
@@ -59,9 +62,9 @@ namespace ArduinoCsCompiler
             CommandError error = CommandError.None;
             try
             {
+                var data = SendCommandAndWait(commandSequence, timeout, out error);
                 while (timeout >= TimeSpan.Zero)
                 {
-                    var data = SendCommandAndWait(commandSequence, timeout, out error);
                     if (ExpectAck(data, commandSequence.Command, ref error))
                     {
                         break;
@@ -104,6 +107,7 @@ namespace ArduinoCsCompiler
                 {
                     // This is a Nack
                     error = (CommandError)data[3];
+                    _logger.LogWarning($"Received NoACK for command {expectedCommand}");
                     return true;
                 }
 
@@ -148,12 +152,14 @@ namespace ArduinoCsCompiler
                         var ilCapabilities = new IlCapabilities()
                         {
                             FlashSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8)),
+                            FlashUsed = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8 + 5)),
                             IntSize = Information.FromBytes(data[6]),
                             PointerSize = Information.FromBytes(data[7]),
-                            RamSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8 + 5)),
+                            RamSize = Information.FromBytes(FirmataIlCommandSequence.DecodeInt32(data, 8 + 10)),
                         };
 
                         _ilCapabilities = ilCapabilities;
+                        _logger.LogInformation(_ilCapabilities.ToString());
                     }
                     else if (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit)
                     {
