@@ -36,22 +36,6 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
 Show image
 
 ```csharp
-var image = Image.Load<Rgba32>("./dotnet-bot.bmp");
-var data = new byte[24 * 16 / 4];
-
-for (var y = 0; y < 24; y++)
-{
-    for (var x = 0; x < 16; x += 4)
-    {
-        var index = (x + 16 * y) / 4;
-        var value = (byte)(
-            (image[x + 0, y].R > 127 ? 0b_1000 : 0) |
-            (image[x + 1, y].R > 127 ? 0b_0100 : 0) |
-            (image[x + 2, y].R > 127 ? 0b_0010 : 0) |
-            (image[x + 3, y].R > 127 ? 0b_0001 : 0));
-        data[index] = value;
-    }
-}
-
-ht1632.WriteData(0, data);
+var image = Image.Load<Rgb24>("./dotnet-bot.bmp");
+ht1632.ShowImageWith16Com(image);
 ```
