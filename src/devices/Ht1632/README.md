@@ -19,7 +19,7 @@ This binding currently only supports writing commands and raw data with GPIO.
 
 ## Usage
 
-Initialization
+### Initialization
 
 ```csharp
 using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), new GpioController())
@@ -33,7 +33,22 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
 };
 ```
 
-Show image
+### Send data
+
+4-bit RAM, one byte corresponds to one address. Only lower 4 bits are valid.
+
+```csharp
+var data = new byte[24 * 16 / 4];
+var random = new Random();
+for (var i = 0; i < data.Length; i++)
+{
+    data[i] = (byte)random.Next();
+}
+
+ht1632.WriteData(0, data);
+```
+
+### Show image
 
 ```csharp
 var image = Image.Load<Rgb24>("./dotnet-bot.bmp");
