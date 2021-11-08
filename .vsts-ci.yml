@@ -134,7 +134,7 @@ stages:
             artifactName: BuiltPackageOutputs
             artifactType: container
           condition: eq(variables['_BuildConfig'], 'Release')
-        
+
       - job: Linux
         container: LinuxContainer
         pool:
