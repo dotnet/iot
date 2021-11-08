@@ -34,7 +34,7 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
     var random = new Random();
     for (var i = 0; i < data.Length; i++)
     {
-        data[i] = (byte)(random.Next());
+        data[i] = (byte)random.Next();
     }
 
     ht1632.WriteData(0, data);

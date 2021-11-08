@@ -169,9 +169,9 @@ namespace Iot.Device.Ht1632
 
         private void WriteBits(byte bits, int count = 8)
         {
-            for (int i = count - 1; i >= 0; i--)
+            for (var i = count - 1; i >= 0; i--)
             {
-                int bit = bits >> i & 1;
+                var bit = bits >> i & 1;
 
                 _controller?.Write(_wr, 0);
                 _controller?.Write(_data, bit);
