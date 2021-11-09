@@ -45,13 +45,14 @@ namespace WeatherStation
             LcdConsole console = new LcdConsole(hd44780, "A00", false);
             LcdCharacterEncoding encoding = LcdConsole.CreateEncoding(CultureInfo.CreateSpecificCulture("de-CH"), "A00", '?', 8);
             console.LoadEncoding(encoding);
-            I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
+            console.LineFeedMode = LineWrapMode.Truncate;
+            console.ReplaceLine(0, "Startup!");
+            console.ReplaceLine(1, "Initializing BME680...");
+            I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.SecondaryI2cAddress));
             using Bme680 bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
             bme680.Reset();
             bme680.GasConversionIsEnabled = false;
             bme680.HeaterIsEnabled = false;
-            console.Clear();
-            console.LineFeedMode = LineWrapMode.Truncate;
             gpioController.Write(redLed, PinValue.Low);
             while (gpioController.Read(button) == PinValue.Low)
             {

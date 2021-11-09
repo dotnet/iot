@@ -476,8 +476,8 @@ namespace Iot.Device.Arduino
                             // we pass the data forward as-is for any other type of sysex command
                             _lastCommandError = CommandError.None;
                             _lastResponse.Enqueue(raw_data); // the instance is constant, so we can just remember the pointer
-                            OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             _dataReceived.Set();
+                            OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             break;
                     }
 
