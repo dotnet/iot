@@ -104,7 +104,7 @@ This repository mainly contains two different components:
 * [Autodesk EAGLE PCB Designing Software](https://www.autodesk.com/products/eagle/free-download)
 * [FreeCAD](https://www.freecadweb.org/downloads.php)
 * [Fritzing](http://fritzing.org/home/)
-* [KiCad EDA](http://kicad-pcb.org/)
+* [KiCad EDA](http://kicad.org/)
 
 ### Social
 * [Hackaday.io](https://hackaday.io/)
