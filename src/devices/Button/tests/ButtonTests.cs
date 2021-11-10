@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Threading;
+
 using Xunit;
 
 namespace Iot.Device.Button.Tests
@@ -245,5 +247,46 @@ namespace Iot.Device.Button.Tests
 
             Assert.False(pressed);
         }
+
+        [Fact]
+        public void If_Button_Is_Pressed_Too_Fast_Debouncing_Removes_Events()
+        {
+            bool holding = false;
+            bool doublePressed = false;
+            int pressedCounter = 0;
+
+            TestButton button = new TestButton(TimeSpan.FromMilliseconds(100));
+
+            button.Press += (sender, e) =>
+            {
+                pressedCounter++;
+            };
+
+            button.Holding += (sender, e) =>
+            {
+                holding = true;
+            };
+
+            button.DoublePress += (sender, e) =>
+            {
+                doublePressed = true;
+            };
+
+            button.PressButton();
+            button.ReleaseButton();
+            button.PressButton();
+            button.ReleaseButton();
+            button.PressButton();
+            button.ReleaseButton();
+            button.PressButton();
+            button.ReleaseButton();
+            button.PressButton();
+            button.ReleaseButton();
+
+            Assert.Equal(1, pressedCounter);
+            Assert.False(holding);
+            Assert.False(doublePressed);
+        }
+
     }
 }
