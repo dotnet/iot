@@ -71,7 +71,7 @@ namespace WeatherStation
                 }
 
                 var time = DateTime.Now;
-                console.ReplaceLine(2, time.ToString("ddd dd. MMMM yyyy"));
+                console.ReplaceLine(2, time.ToString("ddd dd. MMM yyyy"));
                 console.SetCursorPosition(0, 3);
                 console.ReplaceLine(3, time.ToLongTimeString());
                 gpioController.Write(redLed, PinValue.High);
