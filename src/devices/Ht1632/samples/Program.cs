@@ -22,7 +22,7 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
     Console.WriteLine();
     Console.WriteLine("Clear");
 
-    // 4-bit RAM, one byte corresponds to one address
+    // HT1632 has 4-bit RAM, one byte corresponds to one address
     // Only lower 4 bits are valid
     var data = new byte[24 * 16 / 4];
     ht1632.WriteData(0, data);

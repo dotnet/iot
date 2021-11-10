@@ -35,7 +35,7 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
 
 ### Send data
 
-4-bit RAM, one byte corresponds to one address. Only lower 4 bits are valid.
+HT1632 has 4-bit RAM, one byte corresponds to one address. Only lower 4 bits are valid.
 
 ```csharp
 var data = new byte[24 * 16 / 4];
