@@ -4,7 +4,7 @@
     <UseSharedCompilation>true</UseSharedCompilation>
     <!-- Use the inbox compilers that come with the SDK -->
     <UseSdkCompilers>true</UseSdkCompilers>
-    <CompilerVersion>3.11.0</CompilerVersion>
+    <CompilerVersion>4.0.1</CompilerVersion>
   </PropertyGroup>
 
   <PropertyGroup>
