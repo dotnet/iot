@@ -19,6 +19,8 @@ namespace Iot.Device.SensorHub
         /// </summary>
         public const int DefaultI2cAddress = 0x17;
 
+        internal const byte NO_ERROR = 0x0;
+
         private readonly I2cDevice _i2cDevice;
 
         /// <summary>
@@ -43,23 +45,24 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is -30 to 127 Celsius.</remarks>
         /// <param name="temperature">The temperature if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
+        /// <exception cref="IOException">Thrown when ext. temperature sensor not found.</exception>
         public bool TryReadOffBoardTemperature(out Temperature temperature)
         {
             temperature = Temperature.MaxValue;
+
             var status = ReadRegister(Register.STATUS_REG);
-            if (status.Equals((byte)RegisterStatusErrors.OFFBOARD_TEMPERATURE_SENSOR_NOT_FOUND))
+            if (IsStatusRegError(status, StatusFunctionError.TEMP_NOT_FOUND))
             {
                 throw new IOException("No offboard temperature sensor found");
             }
-
-            if (status.Equals((byte)RegisterStatusErrors.NO_ERROR))
+            else if (IsStatusRegError(status, StatusFunctionError.TEMP_OVERFLOW))
             {
-                temperature = Temperature.FromDegreesCelsius(ReadRegister(Register.TEMP_REG));
-                return true;
+                return false;
             }
 
-            return false;
+            temperature = Temperature.FromDegreesCelsius(ReadRegister(Register.TEMP_REG));
+            return true;
         }
 
         /// <summary>
@@ -67,11 +70,11 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is -40 to 80 Celsius.</remarks>
         /// <param name="temperature">Temperature if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadBarometerTemperature(out Temperature temperature)
         {
             temperature = Temperature.MaxValue;
-            if (ReadRegister(Register.BMP280_STATUS).Equals((byte)RegisterStatusErrors.NO_ERROR))
+            if (ReadRegister(Register.BMP280_STATUS).Equals(NO_ERROR))
             {
                 temperature = Temperature.FromDegreesCelsius(ReadRegister(Register.BMP280_TEMP_REG));
                 return true;
@@ -85,11 +88,11 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is 300Pa to 1100hPa</remarks>
         /// <param name="pressure">Pressure if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadBarometerPressure(out Pressure pressure)
         {
             pressure = Pressure.MaxValue;
-            if (ReadRegister(Register.BMP280_STATUS).Equals((byte)RegisterStatusErrors.NO_ERROR))
+            if (ReadRegister(Register.BMP280_STATUS).Equals(NO_ERROR))
             {
                 Span<byte> bytes = stackalloc byte[4]
                 {
@@ -111,23 +114,26 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is 0 to 1800 Lux.</remarks>
         /// <param name="illuminance">Illuminance if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadIlluminance(out Illuminance illuminance)
         {
             illuminance = Illuminance.MaxValue;
-            if (ReadRegister(Register.STATUS_REG).Equals((byte)RegisterStatusErrors.NO_ERROR))
-            {
-                Span<byte> bytes = stackalloc byte[2]
-                {
-                    ReadRegister(Register.LIGHT_REG_H),
-                    ReadRegister(Register.LIGHT_REG_L)
-                };
 
-                illuminance = new(BinaryPrimitives.ReadInt16BigEndian(bytes), UnitsNet.Units.IlluminanceUnit.Lux);
-                return true;
+            var status = ReadRegister(Register.STATUS_REG);
+            if (IsStatusRegError(status, StatusFunctionError.LIGHT_BRIGHTNESS_NOT_FOUND)
+                || IsStatusRegError(status, StatusFunctionError.LIGHT_BRIGHTNESS_OVERFLOW))
+            {
+                return false;
             }
 
-            return false;
+            Span<byte> bytes = stackalloc byte[2]
+            {
+                ReadRegister(Register.LIGHT_REG_H),
+                ReadRegister(Register.LIGHT_REG_L)
+            };
+
+            illuminance = new(BinaryPrimitives.ReadInt16BigEndian(bytes), UnitsNet.Units.IlluminanceUnit.Lux);
+            return true;
         }
 
         /// <summary>
@@ -135,11 +141,11 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remarks>Range is 25 to 95 percent</remarks>
         /// <param name="humidity">Relative humidity if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadRelativeHumidity(out RelativeHumidity humidity)
         {
             humidity = RelativeHumidity.MaxValue;
-            if (ReadRegister(Register.ON_BOARD_SENSOR_ERROR).Equals((byte)RegisterStatusErrors.NO_ERROR))
+            if (ReadRegister(Register.ON_BOARD_SENSOR_ERROR).Equals(NO_ERROR))
             {
                 humidity = RelativeHumidity.FromPercent(ReadRegister(Register.ON_BOARD_HUMIDITY_REG));
                 return true;
@@ -153,11 +159,11 @@ namespace Iot.Device.SensorHub
         /// </summary>
         /// <remakrs>Range is -20 to 60 Celsius</remakrs>
         /// <param name="temperature">Temperature if successful</param>
-        /// <returns></returns>
+        /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadOnBoardTemperature(out Temperature temperature)
         {
             temperature = Temperature.MaxValue;
-            if (ReadRegister(Register.ON_BOARD_SENSOR_ERROR).Equals((byte)RegisterStatusErrors.NO_ERROR))
+            if (ReadRegister(Register.ON_BOARD_SENSOR_ERROR).Equals(NO_ERROR))
             {
                 temperature = Temperature.FromDegreesCelsius(ReadRegister(Register.ON_BOARD_TEMP_REG));
                 return true;
@@ -170,6 +176,8 @@ namespace Iot.Device.SensorHub
         /// Is motion detected by the on board sensor
         /// </summary>
         public bool IsMotionDetected => ReadRegister(Register.MOTION_DETECTED) == 1;
+
+        private static bool IsStatusRegError(byte status, StatusFunctionError error) => (status & (byte)error) != 0;
 
         private byte ReadRegister(Register register)
         {
@@ -194,10 +202,12 @@ namespace Iot.Device.SensorHub
             MOTION_DETECTED = 0x0D,          // 0(No Active Body) - 1(Active Body)
         }
 
-        internal enum RegisterStatusErrors : byte
+        internal enum StatusFunctionError : byte
         {
-            NO_ERROR = 0x0,                                     // No error reported
-            OFFBOARD_TEMPERATURE_SENSOR_NOT_FOUND = 0x02,       // Offboard temperature sensor not found
+            TEMP_OVERFLOW = 0x01,               // Ext. Temperature Overflow
+            TEMP_NOT_FOUND = 0x02,              // Ext. Temperature Not Found
+            LIGHT_BRIGHTNESS_OVERFLOW = 0x04,   // Light Brightness Overflow
+            LIGHT_BRIGHTNESS_NOT_FOUND = 0x08,  // Light Brightness Not Found
         }
     }
 }
