@@ -13,7 +13,7 @@ namespace Iot.Device.Button.Tests
         }
 
         public TestButton(TimeSpan debounceTime)
-            : base(TimeSpan.FromTicks(15000000), TimeSpan.FromMilliseconds(2000), debounceTime)
+            : base(TimeSpan.FromSeconds(5), TimeSpan.FromMilliseconds(2000), debounceTime)
         {
         }
 
