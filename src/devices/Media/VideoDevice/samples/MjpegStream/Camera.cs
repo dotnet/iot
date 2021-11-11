@@ -29,7 +29,10 @@ namespace CameraIoT
             remove { _device.NewImageBufferReady -= value; }
         }
 
-        private Camera()
+        /// <summary>
+        /// Initiate the camera
+        /// </summary>
+        public Camera()
         {
             // You can select other size and other format, this is a very basic one supported by all types of webcams including old ones
             VideoConnectionSettings settings = new VideoConnectionSettings(0, (640, 480), Iot.Device.Media.PixelFormat.JPEG);
