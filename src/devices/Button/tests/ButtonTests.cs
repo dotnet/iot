@@ -255,7 +255,7 @@ namespace Iot.Device.Button.Tests
             bool doublePressed = false;
             int pressedCounter = 0;
 
-            TestButton button = new TestButton(TimeSpan.FromMilliseconds(100));
+            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000));
 
             button.Press += (sender, e) =>
             {
