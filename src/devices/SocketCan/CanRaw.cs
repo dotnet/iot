@@ -4,12 +4,10 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace Iot.Device.SocketCan
 {
@@ -18,7 +16,7 @@ namespace Iot.Device.SocketCan
     /// </summary>
     public class CanRaw : IDisposable
     {
-        private SafeCanRawSocketHandle _handle;
+        private Socket _socket;
 
         /// <summary>
         /// Constructs CanRaw instance
@@ -26,7 +24,10 @@ namespace Iot.Device.SocketCan
         /// <param name="networkInterface">Name of the network interface</param>
         public CanRaw(string networkInterface = "can0")
         {
-            _handle = new SafeCanRawSocketHandle(networkInterface);
+            _socket = new Socket(AddressFamily.ControllerAreaNetwork, SocketType.Raw, ProtocolType.Raw);
+
+            var endpoint = new CanEndPoint(_socket, networkInterface);
+            _socket.Bind(endpoint);
         }
 
         /// <summary>
@@ -56,9 +57,17 @@ namespace Iot.Device.SocketCan
             {
                 Span<byte> frameData = new Span<byte>(frame.Data, data.Length);
                 data.CopyTo(frameData);
+            }
 
-                byte* buff = (byte*)&frame;
-                Interop.Write(_handle, buff, Marshal.SizeOf<CanFrame>());
+            ReadOnlySpan<CanFrame> frameSpan = MemoryMarshal.CreateReadOnlySpan(ref frame, 1);
+            ReadOnlySpan<byte> buff = MemoryMarshal.AsBytes(frameSpan);
+            try
+            {
+                _socket.Send(buff);
+            }
+            catch (SocketException ex)
+            {
+                throw new IOException("Socket write operation failed.", ex);
             }
         }
 
@@ -78,14 +87,26 @@ namespace Iot.Device.SocketCan
 
             CanFrame frame = new CanFrame();
 
-            int remainingBytes = Marshal.SizeOf<CanFrame>();
-            unsafe
+            Span<CanFrame> frameSpan = MemoryMarshal.CreateSpan(ref frame, 1);
+            Span<byte> buff = MemoryMarshal.AsBytes(frameSpan);
+            try
             {
-                while (remainingBytes > 0)
+                while (buff.Length > 0)
                 {
-                    int read = Interop.Read(_handle, (byte*)&frame, remainingBytes);
-                    remainingBytes -= read;
+                    int read = _socket.Receive(buff);
+                    buff = buff.Slice(read);
                 }
+            }
+            catch (SocketException ex)
+            {
+                if ((ex.SocketErrorCode == SocketError.WouldBlock) && !_socket.Blocking)
+                {
+                    id = frame.Id;
+                    frameLength = 0;
+                    return false;
+                }
+
+                throw new IOException("Socket read operation failed.", ex);
             }
 
             id = frame.Id;
@@ -132,7 +153,7 @@ namespace Iot.Device.SocketCan
             filters[0].can_id = id.Raw;
             filters[0].can_mask = id.Value | (uint)CanFlags.ExtendedFrameFormat | (uint)CanFlags.RemoteTransmissionRequest;
 
-            Interop.SetCanRawSocketOption<Interop.CanFilter>(_handle, Interop.CanSocketOption.CAN_RAW_FILTER, filters);
+            Interop.SetCanRawSocketOption<Interop.CanFilter>(_socket, Interop.CanSocketOption.CAN_RAW_FILTER, filters);
         }
 
         private static bool IsEff(uint address)
@@ -145,7 +166,16 @@ namespace Iot.Device.SocketCan
         /// <inheritdoc/>
         public void Dispose()
         {
-            _handle.Dispose();
+            _socket.Dispose();
+        }
+
+        /// <summary>
+        /// Enables or disables blocking operation
+        /// </summary>
+        public bool Blocking
+        {
+            get => _socket.Blocking;
+            set => _socket.Blocking = value;
         }
     }
 }

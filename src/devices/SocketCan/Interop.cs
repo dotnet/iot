@@ -8,6 +8,7 @@
 
 using System;
 using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -18,7 +19,7 @@ namespace Iot.Device.SocketCan
 {
     internal class Interop
     {
-        private const int PF_CAN = 29;
+        private const int AF_CAN = 29;
 
         // SFF = Standard Frame Format - 11 bit
         public const uint CAN_SFF_MASK = 0x000007FF;
@@ -30,100 +31,54 @@ namespace Iot.Device.SocketCan
         public const int SOL_CAN_BASE = 100;
         public const int SOL_CAN_RAW = SOL_CAN_BASE + (int)CanProtocol.CAN_RAW;
 
-        [DllImport("libc", EntryPoint = "socket", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int CreateNativeSocket(int domain, int type, CanProtocol protocol);
-
         [DllImport("libc", EntryPoint = "ioctl", CallingConvention = CallingConvention.Cdecl)]
         private static extern int Ioctl3(int fd, uint request, ref ifreq ifr);
-
-        [DllImport("libc", EntryPoint = "bind", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int BindSocket(int fd, ref CanSocketAddress addr, uint addrlen);
-
-        [DllImport("libc", EntryPoint = "close", CallingConvention = CallingConvention.Cdecl)]
-        private static extern int CloseSocket(int fd);
-
-        [DllImport("libc", EntryPoint = "write", CallingConvention = CallingConvention.Cdecl)]
-        private static unsafe extern int SocketWrite(int fd, byte* buffer, int size);
-
-        [DllImport("libc", EntryPoint = "read", CallingConvention = CallingConvention.Cdecl)]
-        private static unsafe extern int SocketRead(int fd, byte* buffer, int size);
 
         [DllImport("libc", EntryPoint = "setsockopt", CallingConvention = CallingConvention.Cdecl)]
         private static unsafe extern int SetSocketOpt(int fd, int level, int optName, byte* optVal, int optlen);
 
-        public static unsafe void Write(SafeHandle handle, byte* buffer, int length)
-        {
-            int totalBytesWritten = 0;
-            while (totalBytesWritten < length)
-            {
-                int bytesWritten = Interop.SocketWrite((int)handle.DangerousGetHandle(), buffer, length);
-                if (bytesWritten < 0)
-                {
-                    throw new IOException("`write` operation failed");
-                }
-
-                totalBytesWritten += bytesWritten;
-            }
-        }
-
-        public static unsafe int Read(SafeHandle handle, byte* buffer, int length)
-        {
-            int bytesRead = Interop.SocketRead((int)handle.DangerousGetHandle(), buffer, length);
-            if (bytesRead < 0)
-            {
-                throw new IOException("`read` operation failed");
-            }
-
-            return bytesRead;
-        }
-
-        public static void CloseSocket(IntPtr fd) =>
-            CloseSocket((int)fd);
-
-        public static IntPtr CreateCanRawSocket(string networkInterface)
-        {
-            const int SOCK_RAW = 3;
-            int socket = CreateNativeSocket(PF_CAN, SOCK_RAW, CanProtocol.CAN_RAW);
-
-            if (socket == -1)
-            {
-                throw new IOException("CAN socket could not be created");
-            }
-
-            BindToInterface(socket, networkInterface);
-
-            return new IntPtr(socket);
-        }
-
-        public static bool SetCanRawSocketOption<T>(SafeHandle handle, CanSocketOption optName, ReadOnlySpan<T> data)
+        public static bool SetCanRawSocketOption<T>(Socket socket, CanSocketOption optName, ReadOnlySpan<T> data)
             where T : struct =>
-            SetSocketOption(handle, SOL_CAN_RAW, optName, data);
+            SetSocketOption(socket.Handle, SOL_CAN_RAW, optName, data);
 
-        private static unsafe bool SetSocketOption<T>(SafeHandle handle, int level, CanSocketOption optName, ReadOnlySpan<T> data)
+        private static unsafe bool SetSocketOption<T>(IntPtr fd, int level, CanSocketOption optName, ReadOnlySpan<T> data)
             where T : struct
         {
-            int fd = (int)handle.DangerousGetHandle();
             ReadOnlySpan<byte> buf = MemoryMarshal.AsBytes(data);
             fixed (byte* pinned = buf)
             {
-                return SetSocketOpt(fd, level, (int)optName, pinned, buf.Length) == 0;
+                return SetSocketOpt((int)fd, level, (int)optName, pinned, buf.Length) == 0;
             }
         }
 
-        private static unsafe void BindToInterface(int fd, string interfaceName)
+        public static SocketAddress GetCanSocketAddress(Socket socket, string name)
         {
-            int idx = GetInterfaceIndex(fd, interfaceName);
-            CanSocketAddress addr = new CanSocketAddress();
-            addr.can_family = PF_CAN;
-            addr.can_ifindex = idx;
-
-            if (-1 == BindSocket(fd, ref addr, (uint)Marshal.SizeOf<CanSocketAddress>()))
+            var canSockAddr = new CanSocketAddress()
             {
-                throw new IOException($"Cannot bind to socket to `{interfaceName}`");
+                can_family = AF_CAN,
+                can_ifindex = Interop.GetInterfaceIndex(socket.Handle, name),
+                tx_id = 0,
+                rx_id = 0
+            };
+
+            var size = Marshal.SizeOf(canSockAddr);
+            byte[] buffer = new byte[size];
+
+            IntPtr ptr = Marshal.AllocHGlobal(size);
+            Marshal.StructureToPtr(canSockAddr, ptr, true);
+            Marshal.Copy(ptr, buffer, 0, size);
+            Marshal.FreeHGlobal(ptr);
+
+            var sockAddr = new SocketAddress(AddressFamily.ControllerAreaNetwork, Marshal.SizeOf(typeof(CanSocketAddress)));
+            for (int i = 0; i < size; i++)
+            {
+                sockAddr[i] = buffer[i];
             }
+
+            return sockAddr;
         }
 
-        private static unsafe int GetInterfaceIndex(int fd, string name)
+        private static unsafe int GetInterfaceIndex(IntPtr fd, string name)
         {
             const uint SIOCGIFINDEX = 0x8933;
             const int MaxLen = ifreq.IFNAMSIZ - 1;
@@ -140,7 +95,7 @@ namespace Iot.Device.SocketCan
                 ifr.ifr_name[written] = 0;
             }
 
-            int ret = Ioctl3(fd, SIOCGIFINDEX, ref ifr);
+            int ret = Ioctl3(fd.ToInt32(), SIOCGIFINDEX, ref ifr);
             if (ret == -1)
             {
                 throw new IOException($"Could not get interface index for `{name}`");
