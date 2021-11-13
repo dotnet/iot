@@ -178,5 +178,24 @@ namespace Iot.Device.Arduino
                 _sequence.Add((byte)(values[i] >> 7 & sbyte.MaxValue));
             }
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            StringBuilder b = new StringBuilder();
+
+            int maxBytes = Math.Min(_sequence.Count, 32);
+            for (int i = 0; i < maxBytes; i++)
+            {
+                b.Append($"{_sequence[i]:X2} ");
+            }
+
+            if (maxBytes < _sequence.Count)
+            {
+                b.Append("...");
+            }
+
+            return b.ToString();
+        }
     }
 }

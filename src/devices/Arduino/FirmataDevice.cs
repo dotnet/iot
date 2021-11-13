@@ -734,7 +734,7 @@ namespace Iot.Device.Arduino
                     {
                         // Attempt to send a SYSTEM_RESET command
                         _firmataStream.WriteByte(0xFF);
-                        Thread.Sleep(20);
+                        Thread.Sleep(1000);
                         continue;
                     }
 
@@ -879,9 +879,12 @@ namespace Iot.Device.Arduino
 
             return PerformRetries(3, () =>
             {
-                var response = SendCommandAndWait(getPinModeSequence);
+                var response = SendCommandAndWait(getPinModeSequence, DefaultReplyTimeout, (sequence, bytes) =>
+                {
+                    return bytes.Length >= 4 && bytes[1] == pinNumber;
+                }, out _);
 
-                // The mode is byte 4
+                // The mode is byte 2
                 if (response.Length < 4)
                 {
                     throw new InvalidOperationException("Not enough data in reply");
