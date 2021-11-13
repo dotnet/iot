@@ -40,16 +40,9 @@ namespace Iot.Device.Arduino
 
             ConnectionSettings = connectionSettings;
 
-            // Ensure the corresponding pins are set to I2C (not strictly necessary, but consistent)
-            foreach (SupportedPinConfiguration supportedPinConfiguration in _board.SupportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2c)))
-            {
-                _board.Firmata.SetPinMode(supportedPinConfiguration.Pin, SupportedMode.I2c);
-            }
-
-            _board.Firmata.SendI2cConfigCommand();
-
-            // Sometimes, the very first I2C command fails (nothing happens), so try reading a byte
-            int retries = 3;
+            // Sometimes, the very first I2C command fails (nothing happens), so try reading a byte.
+            // Note that this delays the bus scan, because this also happens if we are well aware that we might not get a reply.
+            int retries = 2;
             while (retries-- > 0)
             {
                 try
