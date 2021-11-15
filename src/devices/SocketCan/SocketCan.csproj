@@ -1,11 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net5.0;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net5.0;netcoreapp3.1;netstandard2.1</TargetFrameworks>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <Compile Include="*.cs" />
+    <Compile Remove="CanFlags.cs" />
+    <Compile Remove="CanFrame.cs" />
+    <Compile Remove="CanId.cs" />
+    <Compile Remove="CanRaw.cs" />
+    <Compile Remove="CanEndpoint.cs" />
+    <Compile Remove="Interop.cs" />
+    <Compile Include="netstandard2.1/*.cs" />
+    <None Include="README.md" />
+    <!-- sources for 2.1 only here -->
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' != 'netstandard2.1'">
     <Compile Include="*.cs" />
     <None Include="README.md" />
   </ItemGroup>
