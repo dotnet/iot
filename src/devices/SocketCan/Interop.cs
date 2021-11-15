@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 // Disable these StyleCop rules for this file, as we are using native names here.
+// ReSharper disable InconsistentNaming
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 #pragma warning disable SA1307 // Field should begin with upper-case letter
 #pragma warning disable SX1309 // Field should begin with an underscore
@@ -10,9 +11,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using System.Text;
 
 namespace Iot.Device.SocketCan
@@ -107,10 +106,13 @@ namespace Iot.Device.SocketCan
         internal unsafe struct ifreq
         {
             internal const int IFNAMSIZ = 16;
+#pragma warning disable 649
+#pragma warning disable 169
             public fixed byte ifr_name[IFNAMSIZ];
             public int ifr_ifindex;
             private fixed byte _padding[IFNAMSIZ - sizeof(int)];
-
+#pragma warning restore 169
+#pragma warning restore 649
         }
 
         internal struct CanSocketAddress
@@ -140,7 +142,7 @@ namespace Iot.Device.SocketCan
             public fixed byte data[CANFD_MAX_DLEN];
         }
 
-        internal enum CanProtocol : int
+        internal enum CanProtocol
         {
             CAN_RAW = 1,
             // Broadcast Manager
@@ -156,7 +158,7 @@ namespace Iot.Device.SocketCan
             CAN_NPROTO = 7,
         }
 
-        internal enum CanSocketOption : int
+        internal enum CanSocketOption
         {
             // set 0 .. n can_filter(s)
             CAN_RAW_FILTER = 1,
