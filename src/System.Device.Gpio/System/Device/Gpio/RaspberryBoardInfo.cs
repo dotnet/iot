@@ -68,6 +68,11 @@ namespace System.Device.Gpio
             RaspberryPiZeroW,
 
             /// <summary>
+            /// Pi Zero 2 W.
+            /// </summary>
+            RaspberryPiZero2W,
+
+            /// <summary>
             /// Pi 3 Model B.
             /// </summary>
             RaspberryPi3B,
@@ -148,6 +153,7 @@ namespace System.Device.Gpio
             0x1040 or 0x1041 or 0x2042 => Model.RaspberryPi2B,
             0x0092 or 0x0093 => Model.RaspberryPiZero,
             0x00C1 => Model.RaspberryPiZeroW,
+            0x2120 => Model.RaspberryPiZero2W,
             0x2082 or 0x2083 => Model.RaspberryPi3B,
             0x20D3 => Model.RaspberryPi3BPlus,
             0x20E0 => Model.RaspberryPi3APlus,
