@@ -14,10 +14,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Iot.Device.Adc;
 using Iot.Device.Arduino;
+using Iot.Device.Arduino.Sample;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using Iot.Device.Common;
@@ -154,6 +156,7 @@ namespace Arduino.Samples
             Console.WriteLine(" H Read DHT11 Humidity sensor on GPIO 3 (experimental)");
             Console.WriteLine(" B Run I2C tests with a BME680");
             Console.WriteLine(" F Measure frequency on a GPIO Pin (experimental)");
+            Console.WriteLine(" C Color fade an RGB led on 3 PWM channels");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
@@ -201,6 +204,14 @@ namespace Arduino.Samples
                 case 'f':
                 case 'F':
                     TestFrequency(board);
+                    break;
+                case 'c':
+                case 'C':
+                    {
+                        var test = new RgbLedTest(board);
+                        test.DoTest();
+                    }
+
                     break;
                 case 'x':
                 case 'X':
@@ -264,8 +275,8 @@ namespace Arduino.Samples
                     {
                         // sets the value (range from 0 to 255):
                         pwm.DutyCycle = fadeValue;
-                        // wait for 30 milliseconds to see the dimming effect
-                        Thread.Sleep(30);
+                        // wait for 80 milliseconds to see the dimming effect
+                        Thread.Sleep(80);
                     }
 
                     // fade out from max to min in increments of 5 points:
@@ -273,8 +284,8 @@ namespace Arduino.Samples
                     {
                         // sets the value (range from 0 to 255):
                         pwm.DutyCycle = fadeValue;
-                        // wait for 30 milliseconds to see the dimming effect
-                        Thread.Sleep(30);
+                        // wait for 80 milliseconds to see the dimming effect
+                        Thread.Sleep(80);
                     }
 
                 }

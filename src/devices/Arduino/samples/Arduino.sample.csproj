@@ -15,6 +15,7 @@
   
   <ItemGroup>
     <Compile Include="Arduino.sample.cs" />
+    <Compile Include="RgbLedTest.cs" />
   </ItemGroup>
 
   <ItemGroup>
