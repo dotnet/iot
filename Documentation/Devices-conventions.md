@@ -28,11 +28,11 @@ There is no specific guidelines what simple and main scenario is but you should 
 - Integer values (i.e. pin number) should use `-1` as invalid/unassigned value (as opposed to `null` and `Nullable<int>`)
 - If your device has internal register create an enum for the addresses (i.e. `enum Register : byte`)
 
-`*` -  Vector3 is currently backed by float, this may be changed in the future: https://github.com/dotnet/corefx/issues/25334
+`*` -  Vector3 is currently backed by float, this may be changed in the future: <https://github.com/dotnet/corefx/issues/25334>
 
 ## Units
 
-Use [UnitsNet](https://github.com/angularsen/UnitsNet) whenever it is possible on any public functions, event or properties. This supports a lot of different types of units. 
+Use [UnitsNet](https://github.com/angularsen/UnitsNet) whenever it is possible on any public functions, event or properties. This supports a lot of different types of units.
 
 If your sensor/binding unit is not present in UnitsNet, then most common case units should match [International System of Units (aka. SI)](https://en.wikipedia.org/wiki/International_System_of_Units).
 

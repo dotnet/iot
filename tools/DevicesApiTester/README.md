@@ -20,20 +20,25 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
 
 ## Examples
 
-1. See a list of all commands:<br/>
-`DeviceApiTester help`
+1. See a list of all commands:
 
-2. Show the `gpio-button-event` command's syntax:<br/>
-`DeviceApiTester help gpio-button-event`
+    `DeviceApiTester help`
 
-3. Run the command with required parameters:<br/>
-`DeviceApiTester gpio-button-event --button-pin 5 --led-pin 6`
+2. Show the `gpio-button-event` command's syntax:
 
-4. Run the command with many optional parameters:<br/>
-`DeviceApiTester gpio-button-event --scheme Board --button-pin 29 --pressed-value Falling --led-pin 31 --on-value Low --driver RPi3`
+    `DeviceApiTester help gpio-button-event`
 
-5. Run the command with many optional parameters using single-characters options:<br/>
-`DeviceApiTester gpio-button-event -s Board -b 29 -p Falling -l 31 --on-value Low -d RPi3`
+3. Run the command with required parameters:
+
+    `DeviceApiTester gpio-button-event --button-pin 5 --led-pin 6`
+
+4. Run the command with many optional parameters:
+
+    `DeviceApiTester gpio-button-event --scheme Board --button-pin 29 --pressed-value Falling --led-pin 31 --on-value Low --driver RPi3`
+
+5. Run the command with many optional parameters using single-characters options:
+
+    `DeviceApiTester gpio-button-event -s Board -b 29 -p Falling -l 31 --on-value Low -d RPi3`
 
 ## Adding Additional Commands
 
@@ -47,18 +52,22 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
         }
     }
     ```
-    
+
     - It's easiest to begin by copying one of the existing commands.
-    - Keep the new command class within the folder for connection type:<br/>
+    - Keep the new command class within the folder for connection type:
+
       `Commands/Gpio`, `Commands/I2c`, `Commands/Spi`.
 
 2. Add or modify the `Verb` attribute to describe the command:
+
     ```csharp
     [Verb("i2c-my-command", HelpText = "This command does something with an I2C connection.")]
     ```
+
     - Prefix the command's verb with its connection type: `gpio-`, `i2c-`, `spi-`  
 
 3. Implement either the `ICommandVerb` or `ICommandVerbAsync` interface on your command class:
+
     ```csharp
     public class MyCommand : I2cCommand, ICommandVerb
     {
@@ -69,7 +78,9 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
         }
     }
     ```
+
     or
+
     ```csharp
     public class MyCommand : I2cCommand, ICommandVerbAsync
     {
@@ -83,12 +94,14 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
     ```
 
 4. Add automatic properties for command options:
+
     ```csharp
     [Option('c', "cool-option", HelpText = "A cool option argument", Required = false, Default = 0)]
     public int CoolOption { get; set; }
     ```
 
 5. Use the properties in your execution:
+
     ```csharp
     public int Execute()
     {
@@ -98,7 +111,8 @@ Each of the commands has an `ExecuteAsync` or `Execute` method at the top of the
     ```
 
 6. Deploy and run:
-    ```
+
+    ```shell
     DeviceApiTester help
     DeviceApiTester help i2c-my-command
     DeviceApiTester i2c-my-command --cool-option 42

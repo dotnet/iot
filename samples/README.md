@@ -1,6 +1,6 @@
 # Using .NET for IoT Scenarios
 
-.NET can be used to build [IoT](https://en.wikipedia.org/wiki/Internet_of_things) applications, using sensors, displays and input devices. Most ARM64 and ARM32 (hard float required) single board computers can be used, incuding [Raspberry Pi](https://www.raspberrypi.org/). 
+.NET can be used to build [IoT](https://en.wikipedia.org/wiki/Internet_of_things) applications, using sensors, displays and input devices. Most ARM64 and ARM32 (hard float required) single board computers can be used, incuding [Raspberry Pi](https://www.raspberrypi.org/).
 
 ## APIs
 
@@ -8,7 +8,7 @@ The [System.Device.Gpio](https://www.nuget.org/packages/System.Device.Gpio) pack
 
 ## Samples
 
-The following samples demonstrate various scenarios: 
+The following samples demonstrate various scenarios:
 
 * [Blinking LED](led-blink/README.md)
 * [More blinking lights](led-more-blinking-lights/README.md)

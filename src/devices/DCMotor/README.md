@@ -7,7 +7,7 @@ DC motors are controlled by simply providing voltage on the inputs (inverted vol
 DC motors can be controlled with 1, 2 or 3 pins.
 Please refer to the [sample](./samples/Program.cs) to see how to connect it.
 
-**Never connect DC motor directly to your board, instead use i.e. H-bridge**
+> **Important**: Never connect DC motor directly to your board, instead use i.e. H-bridge
 
 ## 3- vs 1/2-pin mode
 

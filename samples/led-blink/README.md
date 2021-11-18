@@ -42,7 +42,7 @@ $ docker run --rm --device /dev/gpiomem led-blink
 Alternatively, you can run the container by mounting sysfs as a privileged container, but that's less secure and is a slower way to interact with GPIO pins.
 
 ```console
-$ docker run --rm -v /sys:/sys --privileged led-blink
+docker run --rm -v /sys:/sys --privileged led-blink
 ```
 
 ## Resources
@@ -50,5 +50,5 @@ $ docker run --rm -v /sys:/sys --privileged led-blink
 * [.NET IoT Docs](https://docs.microsoft.com/dotnet/iot/)
 * [Diffused LEDs](https://www.adafruit.com/product/4203)
 * [All about LEDs](https://learn.adafruit.com/all-about-leds)
-- [Blinking an LED with Arduino](https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/blinking-the-led)
-- [Blinking an LED with Python](https://learn.adafruit.com/blinking-an-led-with-beaglebone-black/writing-a-program)
+* [Blinking an LED with Arduino](https://learn.adafruit.com/adafruit-arduino-lesson-2-leds/blinking-the-led)
+* [Blinking an LED with Python](https://learn.adafruit.com/blinking-an-led-with-beaglebone-black/writing-a-program)
