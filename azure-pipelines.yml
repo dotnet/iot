@@ -29,6 +29,7 @@ stages:
 - stage: Build
   jobs:
   - job: Windows_NT
+    displayName: Windows Build
     pool:
       vmImage: windows-latest
 
@@ -41,9 +42,10 @@ stages:
         -prepareMachine
         -publish
         /p:BuildPackages=true
-    displayName: Windows Build
+      displayName: Build
 
   - job: Linux
+    displayName: Linux Build
     container: LinuxContainer
     pool:
       vmImage: ubuntu-latest
@@ -55,4 +57,4 @@ stages:
     - script: ./build.sh --ci
         --configuration $(BuildConfiguration)
         --prepareMachine
-    displayName: Linux Build
+      displayName: Build
