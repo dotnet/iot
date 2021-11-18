@@ -101,10 +101,11 @@ stages:
         - checkout: self
           clean: true
         # Scan markdown files on style consistency
-        - powershell: |
-            npm install -g markdownlint-cli
-            markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
-          displayName: 'Execute Markdownlint'
+        - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          - powershell: |
+              npm install -g markdownlint-cli
+              markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
+            displayName: 'Execute Markdownlint'
         
         # Use utility script to run script command dependent on agent OS.
         - script: build.cmd -ci -sign
