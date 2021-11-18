@@ -1,0 +1,44 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - release/3.0
+    
+pr:
+  branches:
+    include:
+    - main
+    - release/3.0
+
+variables:
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - name: OfficialBuildId
+      value: $(Build.BuildNumber)
+    - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
+      value: 1
+    - name: DOTNET_MULTILEVEL_LOOKUP
+      value: 0
+
+resources:
+  containers:
+  - container: LinuxContainer
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+
+stages:
+- stage: Build
+  jobs:
+  - job: Windows_NT
+    pool:
+      vmImage: windows-latest
+
+    variables:
+      BuildConfiguration: Release
+
+    steps:
+    - script: build.cmd -ci -sign
+        -configuration $(BuildConfiguration)
+        -prepareMachine
+        -publish
+        /p:BuildPackages=true
+      displayName: Windows Build
