@@ -41,4 +41,18 @@ stages:
         -prepareMachine
         -publish
         /p:BuildPackages=true
-      displayName: Windows Build
+    displayName: Windows Build
+
+  - job: Linux
+    container: LinuxContainer
+    pool:
+      vmImage: ubuntu-latest
+
+    variables:
+      BuildConfiguration: Release
+
+    steps:
+    - script: ./build.sh --ci
+        --configuration $(BuildConfiguration)
+        --prepareMachine
+    displayName: Linux Build
