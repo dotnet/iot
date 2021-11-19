@@ -45,7 +45,8 @@ stages:
       displayName: Build
 
     - task: PublishBuildArtifacts@1
-      displayName: Publish Windows package assets
+      displayName: Publish Build logs
+      condition: always()
       inputs:
         pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
         artifactName: BuildLogs
