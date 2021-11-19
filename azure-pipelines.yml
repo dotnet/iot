@@ -44,6 +44,13 @@ stages:
         /p:BuildPackages=true
       displayName: Build
 
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Windows package assets
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
+        artifactName: BuildLogs
+        artifactType: container
+
     - task: CopyFiles@2
       inputs:
         sourceFolder: $(Build.SourcesDirectory)/artifacts/packages/$(BuildConfiguration)/Shipping
