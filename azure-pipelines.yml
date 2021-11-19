@@ -40,7 +40,6 @@ stages:
     - script: build.cmd -ci
         -configuration $(BuildConfiguration)
         -prepareMachine
-        -publish
         /p:BuildPackages=true
       displayName: Build
 
@@ -75,3 +74,11 @@ stages:
         --configuration $(BuildConfiguration)
         --prepareMachine
       displayName: Build
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Build logs
+      condition: always()
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
+        artifactName: BuildLogs
+        artifactType: container
