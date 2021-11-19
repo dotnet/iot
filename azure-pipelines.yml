@@ -89,7 +89,8 @@ stages:
   - deployment: CodeSign
     displayName: Code Signing
     pool:
-      vmImage: windows-latest    
+      vmImage: windows-latest
+    environment: Dotnet Iot
     variables:
     - group: SignClient
     strategy:
