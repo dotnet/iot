@@ -9,18 +9,18 @@ namespace Iot.Device.Ht1632
     public enum ClockMode : byte
     {
         /// <summary>
-        /// Set slave mode and clock source from external clock, the system clock input from OSC pin and synchronous signal input from SYN pin
+        /// Set secondary mode and clock source from external clock, the system clock input from OSC pin and synchronous signal input from SYN pin
         /// </summary>
-        Slave = Command.Slave,
+        Secondary = Command.Secondary,
 
         /// <summary>
-        /// Set master mode and clock source from on-chip RC oscillator, the system clock output to OSC pin and synchronous signal output to SYN pin (default)
+        /// Set primary mode and clock source from on-chip RC oscillator, the system clock output to OSC pin and synchronous signal output to SYN pin (default)
         /// </summary>
-        RcMaster = Command.RcMaster,
+        RcPrimary = Command.RcPrimary,
 
         /// <summary>
-        /// Set master mode and clock source from external clock, the system clock input from OSC pin and synchronous signal output to SYN pin
+        /// Set primary mode and clock source from external clock, the system clock input from OSC pin and synchronous signal output to SYN pin
         /// </summary>
-        ExternalClockMaster = Command.ExternalClockMaster,
+        ExternalClockPrimary = Command.ExternalClockPrimary,
     }
 }

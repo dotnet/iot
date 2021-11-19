@@ -30,7 +30,7 @@ namespace Iot.Device.Ht1632
         public bool Blink { set => WriteCommand(value ? Command.BlinkOn : Command.BlinkOff); }
 
         /// <summary>
-        /// Set clock mode (default is RC-Master)
+        /// Set clock mode (default is RC-Primary)
         /// </summary>
         public ClockMode ClockMode { set => WriteCommand((Command)value); }
 

@@ -7,12 +7,12 @@ using Iot.Device.Ht1632;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 
-Console.WriteLine("Initialize HT1632 with 24-ROW x 16-COM, RC-master, PWM 1/16 duty.");
+Console.WriteLine("Initialize HT1632 with 24-ROW x 16-COM, RC-primary, PWM 1/16 duty.");
 Console.WriteLine("cs: 27, wr: 22, data: 17");
 using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), new GpioController())
 {
     ComOption = ComOption.NMos16Com,
-    ClockMode = ClockMode.RcMaster,
+    ClockMode = ClockMode.RcPrimary,
     Enabled = true,
     PwmDuty = 1,
     Blink = false,

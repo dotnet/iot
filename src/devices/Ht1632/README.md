@@ -25,7 +25,7 @@ This binding currently only supports writing commands and raw data with GPIO.
 using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), new GpioController())
 {
     ComOption = ComOption.NMos16Com,
-    ClockMode = ClockMode.RcMaster,
+    ClockMode = ClockMode.RcPrimary,
     Enabled = true,
     PwmDuty = 1,
     Blink = false,

@@ -43,19 +43,19 @@ namespace Iot.Device.Ht1632
         BlinkOn = 0b_0000_1001,
 
         /// <summary>
-        /// Set slave mode and clock source from external clock, the system clock input from OSC pin and synchronous signal input from SYN pin
+        /// Set secondary mode and clock source from external clock, the system clock input from OSC pin and synchronous signal input from SYN pin
         /// </summary>
-        Slave = 0b_0001_0000,
+        Secondary = 0b_0001_0000,
 
         /// <summary>
-        /// Set master mode and clock source from on-chip RC oscillator, the system clock output to OSC pin and synchronous signal output to SYN pin (default)
+        /// Set primary mode and clock source from on-chip RC oscillator, the system clock output to OSC pin and synchronous signal output to SYN pin (default)
         /// </summary>
-        RcMaster = 0b_0001_1000,
+        RcPrimary = 0b_0001_1000,
 
         /// <summary>
-        /// Set master mode and clock source from external clock, the system clock input from OSC pin and synchronous signal output to SYN pin
+        /// Set primary mode and clock source from external clock, the system clock input from OSC pin and synchronous signal output to SYN pin
         /// </summary>
-        ExternalClockMaster = 0b_0001_1100,
+        ExternalClockPrimary = 0b_0001_1100,
 
         /// <summary>
         /// N-MOS open drain output and 8 COM option (default)
