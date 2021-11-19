@@ -29,14 +29,14 @@ To read the ORP (OxidationReductionPotential) value use this example
 ```csharp
 using (UFireOrp uFireOrp = new UFireOrp(device))
 {
-	if (uFireOrp.TryMeasureOxidationReductionPotential(out ElectricPotential orp))
-	{
-		Console.WriteLine("Eh:" + orp.Millivolts);
-	}
-	else
-	{
-		Console.WriteLine("Not possible to measure pH");
-	}
+    if (uFireOrp.TryMeasureOxidationReductionPotential(out ElectricPotential orp))
+    {
+        Console.WriteLine("Eh:" + orp.Millivolts);
+    }
+    else
+    {
+        Console.WriteLine("Not possible to measure pH");
+    }
 }
 ```
 
@@ -61,15 +61,15 @@ To read the Ph (Power of Hydrogen) value use this example
 ```csharp
 using (UFirePh uFire_pH = new UFirePh(device))
 {
-	Console.WriteLine("mV:" + uFire_pH.Measure().Millivolts);
-	
-	if (uFire_pH.TryMeasurepH(out float pH))
-	{
-		Console.WriteLine("pH:" + pH);
-	}
-	else
-	{
-		Console.WriteLine("Not possible to measure pH");
-	}
+    Console.WriteLine("mV:" + uFire_pH.Measure().Millivolts);
+
+    if (uFire_pH.TryMeasurepH(out float pH))
+    {
+        Console.WriteLine("pH:" + pH);
+    }
+    else
+    {
+        Console.WriteLine("Not possible to measure pH");
+    }
 }
 ```

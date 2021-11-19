@@ -1,15 +1,16 @@
-﻿# MCP960X - device family of cold-junction compensated thermocouple to digital converter 
+﻿# MCP960X - device family of cold-junction compensated thermocouple to digital converter
 
 The MCP960X device family is an I2C interface cold-junction compensated thermocouple to digital converter.
 Supported thermocouple types (designated by NIST ITS-90) are: K, J, T, N, S, E, B and R.
-The MCP9600/01 converts the thermocouple EMF to degree Celsius with integrated cold-junction compensation. 
+The MCP9600/01 converts the thermocouple EMF to degree Celsius with integrated cold-junction compensation.
 
 **Note:** _Default thermocouple type is K_
 
 ## Sensor Image
+
 ![Illustration of wiring from a Raspberry Pi device](device.png)
 
-## Documentation 
+## Documentation
 
 **MCP960X** [datasheet](https://www.microchip.com/en-us/product/MCP9600)
 
