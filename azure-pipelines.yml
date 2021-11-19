@@ -60,6 +60,10 @@ stages:
       displayName: Publish Build Artifacts
       artifact: BuildPackages
 
+    - publish: config
+      displayName: Publish Signing Scripts
+      artifact: config
+
   - job: Linux
     displayName: Linux Build
     container: LinuxContainer
