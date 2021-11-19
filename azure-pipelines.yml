@@ -44,6 +44,15 @@ stages:
         /p:BuildPackages=true
       displayName: Build
 
+    - task: CopyFiles@2
+      inputs:
+        sourceFolder: $(Build.SourcesDirectory)/artifacts/packages/$(BuildConfiguration)/Shipping
+        targetFolder: $(Build.ArtifactStagingDirectory)/Packages
+
+    - publish: $(Build.ArtifactStagingDirectory)/Packages
+      displayName: Publish Build Artifacts
+      artifact: BuildPackages
+
   - job: Linux
     displayName: Linux Build
     container: LinuxContainer
