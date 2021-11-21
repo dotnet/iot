@@ -33,7 +33,7 @@ namespace System.Device.Gpio.Tests
             if (File.Exists("/proc/device-tree/model"))
             {
                 string model = File.ReadAllText("/proc/device-tree/model", Text.Encoding.ASCII);
-                if (model.Contains("Raspberry Pi 4"))
+                if (model.Contains("Raspberry Pi 4") || model.Contains("Raspberry Pi Compute Module 4"))
                 {
                     return true;
                 }

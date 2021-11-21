@@ -101,6 +101,11 @@ namespace System.Device.Gpio
             /// Pi 400
             /// </summary>
             RaspberryPi400,
+
+            /// <summary>
+            /// Compute module 4.
+            /// </summary>
+            RaspberryPiComputeModule4,
         }
 
         #region Fields
@@ -159,6 +164,7 @@ namespace System.Device.Gpio
             0x20E0 => Model.RaspberryPi3APlus,
             0x20A0 or 0x2100 => Model.RaspberryPiComputeModule3,
             0x3111 or 0x3112 or 0x3114 => Model.RaspberryPi4,
+            0x3140 => Model.RaspberryPiComputeModule4,
             0x3130 => Model.RaspberryPi400,
             _ => Model.Unknown,
         };
