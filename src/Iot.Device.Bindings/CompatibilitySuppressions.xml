@@ -733,4 +733,11 @@
     <DiagnosticId>CP1002</DiagnosticId>
     <Target>Windows.Foundation.UniversalApiContract.dll</Target>
   </Suppression>
+  <!--We are changing public key token being used, so the following are baselined:-->
+  <Suppression>
+    <DiagnosticId>CP0003</DiagnosticId>
+    <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
 </Suppressions>
