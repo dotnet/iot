@@ -37,6 +37,12 @@ stages:
       BuildConfiguration: Release
 
     steps:
+    - powershell: |
+        npm install -g markdownlint-cli
+        markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
+      displayName: 'Execute Markdownlint'
+      condition: eq(variables['build.reason'], 'PullRequest')
+
     - script: build.cmd -ci
         -configuration $(BuildConfiguration)
         -prepareMachine
