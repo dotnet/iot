@@ -33,8 +33,12 @@ stages:
     pool:
       vmImage: windows-latest
 
-    variables:
-      BuildConfiguration: Release
+    strategy:
+      matrix:
+        Build_Release:
+          BuildConfiguration: Release
+        Build_Debug:
+          BuildConfiguration: Debug
 
     steps:
     - powershell: |
@@ -70,6 +74,7 @@ stages:
         artifactType: container
 
     - task: CopyFiles@2
+      condition: eq(variables['BuildConfiguration'], 'Release')
       inputs:
         sourceFolder: $(Build.SourcesDirectory)/artifacts/packages/$(BuildConfiguration)/Shipping
         targetFolder: $(Build.ArtifactStagingDirectory)/Packages
@@ -77,10 +82,12 @@ stages:
     - publish: $(Build.ArtifactStagingDirectory)/Packages
       displayName: Publish Build Artifacts
       artifact: BuildPackages
+      condition: eq(variables['BuildConfiguration'], 'Release')
 
     - publish: config
       displayName: Publish Signing Scripts
       artifact: config
+      condition: eq(variables['BuildConfiguration'], 'Release')
 
   - job: Linux
     displayName: Linux Build
@@ -88,8 +95,12 @@ stages:
     pool:
       vmImage: ubuntu-latest
 
-    variables:
-      BuildConfiguration: Release
+    strategy:
+      matrix:
+        Build_Release:
+          BuildConfiguration: Release
+        Build_Debug:
+          BuildConfiguration: Debug
 
     steps:
     - script: ./build.sh --ci
