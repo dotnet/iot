@@ -166,3 +166,25 @@ stages:
           - publish: $(Pipeline.Workspace)/BuildPackages
             displayName: Publish Signed Packages
             artifact: SignedPackages
+
+- stage: Publish
+  condition: and(succeeded('Build'), succeeded('CodeSign'), not(eq(variables['build.reason'], 'PullRequest')))
+  jobs:
+  - deployment: Publish
+    displayName: Publish signed packages
+    pool:
+      vmImage: windows-latest
+    environment: Dotnet Iot
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: NuGetAuthenticate@0
+            displayName: 'NuGet Authenticate'
+
+          - task: NuGetCommand@2
+            displayName: 'Publish to feed'
+            inputs:
+              command: push
+              publishVstsFeed: 'IoT/nightly_iot_builds'
+              packagesToPush: '$(Pipeline.Workspace)/SignedPackages/*nupkg'
