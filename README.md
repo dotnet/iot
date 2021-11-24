@@ -26,24 +26,24 @@ The sample projects target the latest stable .NET Version. This applies to the s
 
 ## How to Install
 
-You can install the latest daily pre-release build of the .NET System.Device.Gpio and Iot.Device.Bindings NuGet packages from the blob feed.
+You can install the latest daily pre-release build of the .NET System.Device.Gpio and Iot.Device.Bindings NuGet packages from the Azure artifacts feed.
   
 ### NuGet.exe
 
 ```shell
-nuget install System.Device.Gpio -PreRelease -Source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet6/nuget/v3/index.json
-nuget install Iot.Device.Bindings -PreRelease -Source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet6/nuget/v3/index.json
+nuget install System.Device.Gpio -PreRelease -Source https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json
+nuget install Iot.Device.Bindings -PreRelease -Source https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json
 ```
 
 ### Official Build Status
 
-[![Build Status](https://dev.azure.com/dnceng/public/_apis/build/status/dotnet/iot/dotnet.iot.github?branchName=main)](https://dev.azure.com/dnceng/public/_build/latest?definitionId=268&branchName=main)
+[![Build Status](https://dev.azure.com/dotnet/IoT/_apis/build/status/dotnet.iot?branchName=main)](https://dev.azure.com/dotnet/IoT/_build/latest?definitionId=179&branchName=main)
 
 ### .NET CLI
 
 ```shell
-dotnet add package System.Device.Gpio --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet6/nuget/v3/index.json
-dotnet add package Iot.Device.Bindings --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet6/nuget/v3/index.json
+dotnet add package System.Device.Gpio --source https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json
+dotnet add package Iot.Device.Bindings --source https://pkgs.dev.azure.com/dotnet/IoT/_packaging/nightly_iot_builds/nuget/v3/index.json
 ```
 
 ## Contributing
