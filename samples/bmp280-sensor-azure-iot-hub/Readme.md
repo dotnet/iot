@@ -106,7 +106,7 @@ You can deploy and debug your solution or just deploy your solution without debu
 
     ```bash
     dotnet publish -r linux-arm /p:ShowLinkerSizeComparison=true 
-    pushd .\bin\Debug\net5.0\linux-arm\publish
+    pushd .\bin\Debug\net6.0\linux-arm\publish
     pscp -pw 1234 -v -r .\* pi@192.168.1.147:DNSensorAzureIoTHub
     popd
     ```
@@ -117,7 +117,7 @@ You can deploy and debug your solution or just deploy your solution without debu
 
     ```bash
     dotnet publish -r linux-arm   
-    cd .\bin\Debug\net5.0\linux-arm\
+    cd .\bin\Debug\net6.0\linux-arm\
     scp publish\* pi@192.168.1.109:BlinkTutorial
     ```
 
