@@ -15,6 +15,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnitsNet;
+using Iot.Device;
 
 namespace Iot.Device.Arduino
 {
@@ -505,11 +506,7 @@ namespace Iot.Device.Arduino
                     throw new ObjectDisposedException(nameof(FirmataDevice));
                 }
 
-                // Use an explicit iteration, avoids a memory allocation here
-                for (int i = 0; i < sequence.Sequence.Count; i++)
-                {
-                    _firmataStream.WriteByte(sequence.Sequence[i]);
-                }
+                _firmataStream.Write(sequence.AsSpan());
 
                 _firmataStream.Flush();
             }
@@ -576,11 +573,7 @@ namespace Iot.Device.Arduino
                 }
 
                 _dataReceived.Reset();
-                // Use an explicit iteration, avoids a memory allocation here
-                for (int i = 0; i < sequence.Sequence.Count; i++)
-                {
-                    _firmataStream.WriteByte(sequence.Sequence[i]);
-                }
+                _firmataStream.Write(sequence.AsSpan());
 
                 _firmataStream.Flush();
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Iot.Device.Arduino
@@ -14,6 +15,8 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class FirmataCommandSequence
     {
+        private const int InitialCommandLength = 32;
+
         /// <summary>
         /// Start of sysex command byte. Used as start byte for almost all extended commands.
         /// </summary>
@@ -24,18 +27,25 @@ namespace Iot.Device.Arduino
         /// </summary>
         public const byte EndSysex = (byte)FirmataCommand.END_SYSEX;
 
-        private List<byte> _sequence;
+        private byte[] _sequence;
+
+        private int _sequenceLength;
 
         /// <summary>
         /// Create a new command sequence
         /// </summary>
         /// <param name="command">The first byte of the command</param>
-        internal FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX)
+        /// <param name="initialSize">Initial size of the underlying list. Should ideally be equal to the expected size of the command</param>
+        internal FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX, int initialSize = InitialCommandLength)
         {
-            _sequence = new List<byte>()
+            if (initialSize <= 0)
             {
-                (byte)command
-            };
+                initialSize = InitialCommandLength;
+            }
+
+            _sequence = new byte[initialSize];
+            _sequence[0] = (byte)command;
+            _sequenceLength = 1;
         }
 
         /// <summary>
@@ -49,12 +59,20 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// The current sequence
         /// </summary>
-        public IReadOnlyList<byte> Sequence => _sequence;
+        public IReadOnlyList<byte> Sequence
+        {
+            get
+            {
+                var ret = new List<byte>();
+                ret.AddRange(_sequence.Take(_sequenceLength));
+                return ret;
+            }
+        }
 
         /// <summary>
         /// The current length of the sequence
         /// </summary>
-        public int Length => _sequence.Count;
+        public int Length => _sequenceLength;
 
         /// <summary>
         /// Decode an uint from packed 7-bit data.
@@ -107,7 +125,7 @@ namespace Iot.Device.Arduino
             data[2] = (byte)((value >> 14) & 0x7F);
             data[3] = (byte)((value >> 21) & 0x7F);
             data[4] = (byte)((value >> 28) & 0x7F);
-            _sequence.AddRange(data);
+            AddRange(data);
         }
 
         /// <summary>
@@ -125,7 +143,7 @@ namespace Iot.Device.Arduino
         /// <param name="b">The byte to add</param>
         public void WriteByte(byte b)
         {
-            _sequence.Add(b);
+            Add(b);
         }
 
         /// <summary>
@@ -134,7 +152,7 @@ namespace Iot.Device.Arduino
         /// <param name="bytesToSend">The raw block to send</param>
         public void Write(byte[] bytesToSend)
         {
-            _sequence.AddRange(bytesToSend);
+            AddRange(bytesToSend);
         }
 
         /// <summary>
@@ -147,7 +165,7 @@ namespace Iot.Device.Arduino
         {
             for (int i = startIndex; i < startIndex + length; i++)
             {
-                _sequence.Add(bytesToSend[i]);
+                Add(bytesToSend[i]);
             }
         }
 
@@ -174,9 +192,43 @@ namespace Iot.Device.Arduino
         {
             for (int i = 0; i < values.Length; i++)
             {
-                _sequence.Add((byte)(values[i] & (uint)sbyte.MaxValue));
-                _sequence.Add((byte)(values[i] >> 7 & sbyte.MaxValue));
+                Add((byte)(values[i] & (uint)sbyte.MaxValue));
+                Add((byte)(values[i] >> 7 & sbyte.MaxValue));
             }
+        }
+
+        /// <summary>
+        /// Adds one byte to the list
+        /// </summary>
+        /// <param name="elem">The byte to add</param>
+        private void Add(byte elem)
+        {
+            if (_sequenceLength < _sequence.Length)
+            {
+                _sequence[_sequenceLength++] = elem;
+                return;
+            }
+
+            Array.Resize(ref _sequence, _sequenceLength + InitialCommandLength);
+            _sequence[_sequenceLength++] = elem;
+        }
+
+        private void AddRange(byte[] data)
+        {
+            if (_sequenceLength + data.Length < _sequence.Length)
+            {
+                Array.Copy(data, 0, _sequence, _sequenceLength, data.Length);
+                _sequenceLength += data.Length;
+                return;
+            }
+
+            Array.Resize(ref _sequence, _sequenceLength + Math.Max(data.Length, _sequenceLength + InitialCommandLength));
+            AddRange(data);
+        }
+
+        internal ReadOnlySpan<byte> AsSpan()
+        {
+            return _sequence.AsSpan();
         }
 
         /// <inheritdoc/>
@@ -184,13 +236,13 @@ namespace Iot.Device.Arduino
         {
             StringBuilder b = new StringBuilder();
 
-            int maxBytes = Math.Min(_sequence.Count, 32);
+            int maxBytes = Math.Min((int)_sequenceLength, 32);
             for (int i = 0; i < maxBytes; i++)
             {
                 b.Append($"{_sequence[i]:X2} ");
             }
 
-            if (maxBytes < _sequence.Count)
+            if (maxBytes < _sequenceLength)
             {
                 b.Append("...");
             }
