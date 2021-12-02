@@ -12,7 +12,7 @@
 
     <IncludeDotNetCli>true</IncludeDotNetCli>
     <DotNetCliPackageType>sdk</DotNetCliPackageType>
-    <DotNetCliVersion>2.2.300</DotNetCliVersion>
+    <DotNetCliVersion>3.1.405</DotNetCliVersion>
 
     <EnableAzurePipelinesReporter Condition="'$(SYSTEM_ACCESSTOKEN)' != ''">true</EnableAzurePipelinesReporter>
     <TestRunNamePrefix>$(AGENT_JOBNAME)</TestRunNamePrefix>
