@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net5.0</TargetFrameworks>
-    <TargetFrameworks Condition="$(NETCoreSdkRuntimeIdentifier.StartsWith('win'))">$(TargetFrameworks);net5.0-windows10.0.17763.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(NETCoreSdkRuntimeIdentifier.StartsWith('win'))">$(TargetFrameworks);net6.0-windows10.0.17763.0</TargetFrameworks>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -39,7 +39,7 @@
     </Reference>
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' != 'net5.0'">
+  <ItemGroup Condition="'$(TargetFramework)' != 'net6.0'">
     <!--Remove the Linux-specific code-->
     <Compile Remove="System\Device\Gpio\Drivers\Windows10Driver.notSupported.cs" />
     <Compile Remove="System\Device\I2c\I2cDevice.nonWindows.cs" />
@@ -49,7 +49,7 @@
     <Compile Remove="System\Device\CommonHelpers.cs" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <!--Remove Windows Code-->
     <Compile Remove="Interop\Windows\WinRT\*.cs" />
     <Compile Remove="System\Device\Gpio\Drivers\Windows10DriverPin.cs" />

@@ -35,7 +35,7 @@ namespace Iot.Device.Board.Tests
             var board = Board.Create();
             Assert.NotNull(board);
             var property = board.GetType().GetProperty("Initialized", BindingFlags.Instance | BindingFlags.NonPublic)!;
-            Assert.True((bool)property.GetValue(board));
+            Assert.True((bool)property.GetValue(board)!);
             Assert.Equal(PinNumberingScheme.Logical, board.DefaultPinNumberingScheme);
             board.Dispose();
         }
