@@ -83,7 +83,7 @@ namespace Iot.Device.Board
                         addresses.Add(addr);
                     }
                 }
-                catch (Exception x) when (x is IOException || x is UnauthorizedAccessException)
+                catch (Exception x) when (x is IOException || x is UnauthorizedAccessException || x is TimeoutException)
                 {
                     // Ignore and continue
                 }

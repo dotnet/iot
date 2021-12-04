@@ -319,7 +319,7 @@ namespace Arduino.Samples
 
         private static void TestI2cBme680(ArduinoBoard board)
         {
-            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bme680.DefaultI2cAddress));
+            var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bme680.SecondaryI2cAddress));
 
             var bme = new Bme680(device, Temperature.FromDegreesCelsius(20));
             bme.Reset();

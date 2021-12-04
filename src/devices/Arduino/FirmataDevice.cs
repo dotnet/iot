@@ -29,7 +29,7 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
-        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
+        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(3000);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
@@ -80,7 +80,7 @@ namespace Iot.Device.Arduino
             _lastPinValueLock = new object();
             _lastAnalogValues = new Dictionary<int, uint>();
             _lastAnalogValueLock = new object();
-            _dataQueue = new Queue<byte>();
+            _dataQueue = new Queue<byte>(1024);
             _lastResponse = new();
             _lastRequestId = 1;
             _lastCommandError = CommandError.None;
