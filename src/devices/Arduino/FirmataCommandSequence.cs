@@ -209,7 +209,7 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            Array.Resize(ref _sequence, _sequenceLength + InitialCommandLength);
+            Array.Resize(ref _sequence, _sequence.Length + InitialCommandLength);
             _sequence[_sequenceLength++] = elem;
         }
 
@@ -222,7 +222,7 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            Array.Resize(ref _sequence, _sequenceLength + Math.Max(data.Length, _sequenceLength + InitialCommandLength));
+            Array.Resize(ref _sequence, _sequence.Length + Math.Max(data.Length, _sequence.Length + InitialCommandLength));
             AddRange(data);
         }
 
