@@ -1,20 +1,31 @@
 ﻿using System;
+using System.Threading;
 using Iot.Device.Arduino;
 
 namespace ArduinoCsCompiler
 {
     internal class FirmataIlCommandSequence : FirmataCommandSequence
     {
+        private static int s_sequenceCount = 1;
+
         public FirmataIlCommandSequence(ExecutorCommand ilCommand)
         : base()
         {
             Command = ilCommand;
             WriteByte((byte)CompilerCommandHandler.SchedulerData);
             WriteByte((byte)0x7F); // IL data
+            byte seq = (byte)(Interlocked.Increment(ref s_sequenceCount) & 0x7F);
+            SequenceNumber = seq;
+            WriteByte(seq);
             WriteByte((byte)ilCommand);
         }
 
         public ExecutorCommand Command
+        {
+            get;
+        }
+
+        public int SequenceNumber
         {
             get;
         }

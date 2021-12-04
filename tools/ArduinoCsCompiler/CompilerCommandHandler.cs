@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,6 +19,7 @@ namespace ArduinoCsCompiler
         private readonly MicroCompiler _compiler;
         private readonly ILogger _logger;
         private IlCapabilities? _ilCapabilities;
+        private int _maxBytesPerMessage = 64; // Default from ConfigurableFirmata
 
         public CompilerCommandHandler(MicroCompiler compiler)
         {
@@ -65,7 +67,7 @@ namespace ArduinoCsCompiler
                 while (timeout >= TimeSpan.Zero)
                 {
                     var data = SendCommandAndWait(commandSequence, timeout, out error);
-                    if (ExpectAck(data, commandSequence.Command, ref error))
+                    if (ExpectAck(data, commandSequence.Command, commandSequence.SequenceNumber, ref error))
                     {
                         break;
                     }
@@ -92,11 +94,14 @@ namespace ArduinoCsCompiler
 
         protected override bool IsMatchingAck(FirmataCommandSequence sequence, byte[] reply)
         {
-            // Could test byte 1 as well (should be ExecutorCommand.Ack or ExecutorCommand.Nack), but we have no message that uses
-            // something else that is also 4 bytes long
-            if (reply.Length != 4 || reply[0] != SchedulerData)
+            if (sequence is FirmataIlCommandSequence ilCommand)
             {
-                return false;
+                // Could test byte 1 as well (should be ExecutorCommand.Ack or ExecutorCommand.Nack), but we have no message that uses
+                // something else that is also 5 bytes long
+                if (reply.Length != 5 || reply[0] != SchedulerData || reply[4] != ilCommand.SequenceNumber)
+                {
+                    return false;
+                }
             }
 
             return base.IsMatchingAck(sequence, reply);
@@ -105,17 +110,17 @@ namespace ArduinoCsCompiler
         /// <summary>
         /// This returns true if the command blob contains an ack or a nack for the given command
         /// </summary>
-        private bool ExpectAck(byte[] data, ExecutorCommand expectedCommand, ref CommandError error)
+        private bool ExpectAck(byte[] data, ExecutorCommand expectedCommand, int expectedSequenceNo, ref CommandError error)
         {
-            if (data.Length >= 4 && data[0] == SchedulerData && data[2] == (byte)expectedCommand)
+            if (data.Length >= 5 && data[0] == SchedulerData && data[2] == (byte)expectedCommand)
             {
-                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
+                if (data.Length == 5 && data[1] == (byte)ExecutorCommand.Ack && data[4] == expectedSequenceNo)
                 {
                     // Just an ack for a programming command.
                     return true;
                 }
 
-                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
+                if (data.Length == 5 && data[1] == (byte)ExecutorCommand.Nack && data[4] == expectedSequenceNo)
                 {
                     // This is a Nack
                     error = (CommandError)data[3];
@@ -171,6 +176,7 @@ namespace ArduinoCsCompiler
                         };
 
                         _ilCapabilities = ilCapabilities;
+                        _maxBytesPerMessage = Math.Min(FirmataCommandSequence.DecodeInt32(data, 8 + 15), 64);
                         _logger.LogInformation(_ilCapabilities.ToString());
                     }
                     else if (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit)
@@ -225,10 +231,11 @@ namespace ArduinoCsCompiler
 
         public void SendMethodIlCode(int methodToken, byte[] byteCode)
         {
-            const int BYTES_PER_PACKET = 32;
+            int bytesPerPacket = (_maxBytesPerMessage - 14) * 7 / 8;
             int codeIndex = 0;
             while (codeIndex < byteCode.Length)
             {
+                // Header is 3+5+4 bytes, one byte tail = 13 bytes overhead per command
                 FirmataIlCommandSequence sequence = new(ExecutorCommand.LoadIl);
                 sequence.SendInt32(methodToken);
                 ushort len = (ushort)byteCode.Length;
@@ -237,13 +244,13 @@ namespace ArduinoCsCompiler
                 sequence.WriteByte((byte)(len >> 7));
                 sequence.WriteByte((byte)(codeIndex & 0x7f));
                 sequence.WriteByte((byte)(codeIndex >> 7));
-                int bytesThisPacket = Math.Min(BYTES_PER_PACKET, byteCode.Length - codeIndex);
+                int bytesThisPacket = Math.Min(bytesPerPacket, byteCode.Length - codeIndex);
                 var bytesToSend = Encoder7Bit.Encode(byteCode, codeIndex, bytesThisPacket);
                 sequence.Write(bytesToSend);
                 codeIndex += bytesThisPacket;
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-
+                Debug.Assert(sequence.Length <= _maxBytesPerMessage, "Message is to long");
                 WaitAndHandleIlCommand(sequence);
             }
         }
@@ -584,13 +591,13 @@ namespace ArduinoCsCompiler
 
             if (data.Length > 0 && data[0] == SchedulerData)
             {
-                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Ack)
+                if (data.Length == 5 && data[1] == (byte)ExecutorCommand.Ack)
                 {
                     // Just an ack for a programming command.
                     return true;
                 }
 
-                if (data.Length == 4 && data[1] == (byte)ExecutorCommand.Nack)
+                if (data.Length == 5 && data[1] == (byte)ExecutorCommand.Nack)
                 {
                     // This is a Nack
                     return false;
