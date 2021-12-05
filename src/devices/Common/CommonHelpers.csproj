@@ -5,6 +5,7 @@
     <RootNamespace>
     </RootNamespace>
     <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="MathExtensions.cs" />

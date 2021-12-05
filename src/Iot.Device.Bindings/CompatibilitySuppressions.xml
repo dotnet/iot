@@ -727,4 +727,11 @@
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.DHTxx.DhtBase._readBuff</Target>
+    <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
 </Suppressions>

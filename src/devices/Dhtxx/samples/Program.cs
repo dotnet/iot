@@ -6,6 +6,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.DHTxx;
+using UnitsNet;
 
 Console.WriteLine("Hello DHT!");
 Console.WriteLine("Select the DHT sensor you want to use:");
@@ -86,19 +87,20 @@ void Dht(DhtBase dht)
 {
     while (!Console.KeyAvailable)
     {
-        var temp = dht.Temperature;
-        var hum = dht.Humidity;
+        Temperature temperature = default;
+        RelativeHumidity humidity = default;
+        bool success = dht.TryReadHumidity(out humidity) && dht.TryReadTemperature(out temperature);
         // You can only display temperature and humidity if the read is successful otherwise, this will raise an exception as
         // both temperature and humidity are NAN
-        if (dht.IsLastReadSuccessful)
+        if (success)
         {
-            Console.WriteLine($"Temperature: {temp.DegreesCelsius}\u00B0C, Relative humidity: {hum.Percent}%");
+            Console.WriteLine($"Temperature: {temperature.DegreesCelsius:F1}\u00B0C, Relative humidity: {humidity.Percent:F1}%");
 
             // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
             Console.WriteLine(
-                $"Heat index: {WeatherHelper.CalculateHeatIndex(temp, hum).DegreesCelsius:0.#}\u00B0C");
+                $"Heat index: {WeatherHelper.CalculateHeatIndex(temperature, humidity).DegreesCelsius:F1}\u00B0C");
             Console.WriteLine(
-                $"Dew point: {WeatherHelper.CalculateDewPoint(temp, hum).DegreesCelsius:0.#}\u00B0C");
+                $"Dew point: {WeatherHelper.CalculateDewPoint(temperature, humidity).DegreesCelsius:F1}\u00B0C");
         }
         else
         {
