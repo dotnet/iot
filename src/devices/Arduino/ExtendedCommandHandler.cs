@@ -141,6 +141,25 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// Send a command to the device, expecting a reply.
         /// </summary>
+        /// <param name="commandSequences">Commands to send. This
+        /// should normally be a sysex command.</param>
+        /// <param name="timeout">Command timeout</param>
+        /// <param name="error">An error code in case of a failure</param>
+        /// <exception cref="TimeoutException">The timeout elapsed before a reply was received.</exception>
+        /// <returns>True if all packets where send and properly acknowledged</returns>
+        protected bool SendCommandsAndWait(IList<FirmataCommandSequence> commandSequences, TimeSpan timeout, out CommandError error)
+        {
+            if (_firmata == null)
+            {
+                throw new InvalidOperationException("Command handler not registered");
+            }
+
+            return _firmata.SendCommandsAndWait(commandSequences, timeout, IsMatchingAck, HasCommandError, out error);
+        }
+
+        /// <summary>
+        /// Send a command to the device, expecting a reply.
+        /// </summary>
         /// <param name="commandSequence">Command to send. This
         /// should normally be a sysex command.</param>
         /// <param name="timeout">Command timeout</param>
@@ -187,6 +206,17 @@ namespace Iot.Device.Arduino
         protected virtual bool IsMatchingAck(FirmataCommandSequence sequence, byte[] reply)
         {
             return true;
+        }
+
+        /// <summary>
+        /// Callback function that returns whether the given reply indicates an error
+        /// </summary>
+        /// <param name="sequence">The original sequence</param>
+        /// <param name="reply">The reply. <see cref="IsMatchingAck"/> is already tested to be true for this reply</param>
+        /// <returns>A command error code, in case this reply indicates a no-acknowledge</returns>
+        protected virtual CommandError HasCommandError(FirmataCommandSequence sequence, byte[] reply)
+        {
+            return CommandError.None;
         }
 
         private void OnSysexDataInternal(ReplyType type, byte[] data)

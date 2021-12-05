@@ -839,9 +839,7 @@ namespace ArduinoCsCompiler
                 }
 
                 _logger.LogDebug($"Sending class {idx + 1} of {classesToLoad.Count}: Declaration for {cls.MemberInfoSignature()} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes.");
-                _commandHandler.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members);
-
-                _commandHandler.SendInterfaceImplementations(token, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
+                _commandHandler.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
 
                 if (markAsReadOnly)
                 {
@@ -1225,50 +1223,6 @@ namespace ArduinoCsCompiler
             }
 
             return minSizeOfMember;
-        }
-
-        private void SendMethodDeclaration(ArduinoMethodDeclaration declaration)
-        {
-            ClassMember[] localTypes = new ClassMember[declaration.MaxLocals];
-            var body = declaration.MethodBase.GetMethodBody();
-            int i;
-            // This is null in case of a method without implementation (an interface or abstract method). In this case, there are no locals, either
-            if (body != null)
-            {
-                for (i = 0; i < declaration.MaxLocals; i++)
-                {
-                    var classType = body.LocalVariables[i].LocalType;
-                    // This also needs alignment, because "classType" might be a long value type
-                    var type = GetVariableType(classType, SizeOfVoidPointer(), out int size);
-                    ClassMember local = new ClassMember($"Local #{i}", type, 0, (ushort)size);
-                    localTypes[i] = local;
-                }
-            }
-
-            ClassMember[] argTypes = new ClassMember[declaration.ArgumentCount];
-            int startOffset = 0;
-            // If the method is not static, the fist argument is the "this" pointer, which is not explicitly mentioned in the parameter list. It is of type object
-            // for reference types and usually of type reference for value types (but depends whether the method is virtual or not, analyzation of these cases is underway)
-            if ((declaration.MethodBase.CallingConvention & CallingConventions.HasThis) != 0)
-            {
-                startOffset = 1;
-                argTypes[0] = new ClassMember($"Argument 0: this", VariableKind.Object, 0, 4);
-            }
-
-            var parameters = declaration.MethodBase.GetParameters();
-            for (i = startOffset; i < declaration.ArgumentCount; i++)
-            {
-                var classType = parameters[i - startOffset].ParameterType;
-                var type = GetVariableType(classType, SizeOfVoidPointer(), out var size);
-                ClassMember arg = new ClassMember($"Argument {i}", type, 0, size);
-                argTypes[i] = arg;
-            }
-
-            // Stopwatch w = Stopwatch.StartNew();
-            _commandHandler.SendMethodDeclaration(declaration.Token, declaration.Flags, (byte)declaration.MaxStack,
-                (byte)declaration.ArgumentCount, declaration.NativeMethod, localTypes, argTypes);
-
-            // _board.Log($"Loading took {w.Elapsed}.");
         }
 
         /// <summary>
@@ -2058,15 +2012,42 @@ namespace ArduinoCsCompiler
 
         private void SendMethod(ExecutionSet set, ArduinoMethodDeclaration decl)
         {
-            SendMethodDeclaration(decl);
-            if (decl.HasBody && decl.NativeMethod == 0)
+            ClassMember[] localTypes = new ClassMember[decl.MaxLocals];
+            var body = decl.MethodBase.GetMethodBody();
+            int i;
+            // This is null in case of a method without implementation (an interface or abstract method). In this case, there are no locals, either
+            if (body != null)
             {
-                _commandHandler.SendMethodIlCode(decl.Token, decl.Code.IlBytes!);
-                if (decl.Code.ExceptionClauses != null && decl.Code.ExceptionClauses.Any())
+                for (i = 0; i < decl.MaxLocals; i++)
                 {
-                    _commandHandler.SendMethodExceptionClauses(decl.Token, decl.Code.ExceptionClauses);
+                    var classType = body.LocalVariables[i].LocalType;
+                    // This also needs alignment, because "classType" might be a long value type
+                    var type = GetVariableType(classType, SizeOfVoidPointer(), out int size);
+                    ClassMember local = new ClassMember($"Local #{i}", type, 0, (ushort)size);
+                    localTypes[i] = local;
                 }
             }
+
+            ClassMember[] argTypes = new ClassMember[decl.ArgumentCount];
+            int startOffset = 0;
+            // If the method is not static, the fist argument is the "this" pointer, which is not explicitly mentioned in the parameter list. It is of type object
+            // for reference types and usually of type reference for value types (but depends whether the method is virtual or not, analyzation of these cases is underway)
+            if ((decl.MethodBase.CallingConvention & CallingConventions.HasThis) != 0)
+            {
+                startOffset = 1;
+                argTypes[0] = new ClassMember($"Argument 0: this", VariableKind.Object, 0, 4);
+            }
+
+            var parameters = decl.MethodBase.GetParameters();
+            for (i = startOffset; i < decl.ArgumentCount; i++)
+            {
+                var classType = parameters[i - startOffset].ParameterType;
+                var type = GetVariableType(classType, SizeOfVoidPointer(), out var size);
+                ClassMember arg = new ClassMember($"Argument {i}", type, 0, size);
+                argTypes[i] = arg;
+            }
+
+            _commandHandler.SendMethod(decl, localTypes, argTypes);
         }
 
         internal void PrepareStaticCtors(ExecutionSet set)

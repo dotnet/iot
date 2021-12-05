@@ -572,6 +572,7 @@ namespace Iot.Device.Arduino
                     throw new ObjectDisposedException(nameof(FirmataDevice));
                 }
 
+                Stopwatch sw = Stopwatch.StartNew();
                 _dataReceived.Reset();
                 _firmataStream.Write(sequence.AsSpan());
 
@@ -598,7 +599,99 @@ namespace Iot.Device.Arduino
                 while (isMatchingAck != null && !isMatchingAck(sequence, response));
 
                 error = _lastCommandError;
+                OnError?.Invoke($"Command took {sw.Elapsed.TotalMilliseconds}ms", null);
                 return response;
+            }
+        }
+
+        /// <summary>
+        /// Send a command and wait for a reply
+        /// </summary>
+        /// <param name="sequences">The command sequences to send, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
+        /// <param name="timeout">A non-default timeout</param>
+        /// <param name="isMatchingAck">A callback function that should return true if the given reply is the one this command should wait for. The default is true, because asynchronous replies
+        /// are rather the exception than the rule</param>
+        /// <param name="errorFunc">A callback that determines a possible error in the reply message</param>
+        /// <param name="error">An error code in case of failure</param>
+        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
+        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
+        public bool SendCommandsAndWait(IList<FirmataCommandSequence> sequences, TimeSpan timeout, Func<FirmataCommandSequence, byte[], bool> isMatchingAck,
+            Func<FirmataCommandSequence, byte[], CommandError> errorFunc, out CommandError error)
+        {
+            if (sequences.Any(s => s.Validate() == false))
+            {
+                throw new ArgumentException("At least one command sequence is invalid", nameof(sequences));
+            }
+
+            if (sequences.Count > 127)
+            {
+                // Because we only have 7 bits for the sequence counter.
+                throw new ArgumentException("At most 127 sequences can be chained together", nameof(sequences));
+            }
+
+            if (isMatchingAck == null)
+            {
+                throw new ArgumentNullException(nameof(isMatchingAck));
+            }
+
+            error = CommandError.None;
+            lock (_synchronisationLock)
+            {
+                if (_firmataStream == null)
+                {
+                    throw new ObjectDisposedException(nameof(FirmataDevice));
+                }
+
+                Stopwatch sw = Stopwatch.StartNew();
+
+                Dictionary<FirmataCommandSequence, bool> sequencesWithAck = new();
+                _dataReceived.Reset();
+                foreach (var s in sequences)
+                {
+                    sequencesWithAck.Add(s, false);
+                    _firmataStream.Write(s.AsSpan());
+                }
+
+                _firmataStream.Flush();
+
+                byte[]? response;
+                do
+                {
+                    if (!_lastResponse.TryDequeue(out response))
+                    {
+                        bool result = _dataReceived.WaitOne(timeout);
+                        if (result == false)
+                        {
+                            throw new TimeoutException("Timeout waiting for command answer");
+                        }
+                    }
+
+                    if (response != null) // It's possible that we're already done
+                    {
+                        foreach (var s2 in sequencesWithAck)
+                        {
+                            if (isMatchingAck(s2.Key, response))
+                            {
+                                CommandError e = CommandError.None;
+                                if (_lastCommandError != CommandError.None)
+                                {
+                                    error = _lastCommandError;
+                                }
+                                else if ((e = errorFunc(s2.Key, response)) != CommandError.None)
+                                {
+                                    error = e;
+                                }
+
+                                sequencesWithAck[s2.Key] = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                while (sequencesWithAck.Any(x => x.Value == false));
+
+                OnError?.Invoke($"Command took {sw.Elapsed.TotalMilliseconds}ms for {sequences.Count} sequences", null);
+                return sequencesWithAck.All(x => x.Value);
             }
         }
 

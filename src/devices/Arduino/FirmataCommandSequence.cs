@@ -13,7 +13,7 @@ namespace Iot.Device.Arduino
     /// A firmata command sequence
     /// Intended to be changed to public visibility later
     /// </summary>
-    public class FirmataCommandSequence
+    public class FirmataCommandSequence : IEquatable<FirmataCommandSequence>
     {
         private const int InitialCommandLength = 32;
 
@@ -248,6 +248,52 @@ namespace Iot.Device.Arduino
             }
 
             return b.ToString();
+        }
+
+        /// <inheritdoc />
+        public bool Equals(FirmataCommandSequence? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return _sequence.Equals(other._sequence) && _sequenceLength == other._sequenceLength;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((FirmataCommandSequence)obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (_sequence.GetHashCode() * 397) ^ _sequenceLength;
+            }
         }
     }
 }

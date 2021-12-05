@@ -107,6 +107,18 @@ namespace ArduinoCsCompiler
             return base.IsMatchingAck(sequence, reply);
         }
 
+        protected override CommandError HasCommandError(FirmataCommandSequence sequence, byte[] reply)
+        {
+            if (sequence is FirmataIlCommandSequence ilCommand)
+            {
+                CommandError error = CommandError.None;
+                ExpectAck(reply, ilCommand.Command, ilCommand.SequenceNumber, ref error);
+                return error;
+            }
+
+            return base.HasCommandError(sequence, reply);
+        }
+
         /// <summary>
         /// This returns true if the command blob contains an ack or a nack for the given command
         /// </summary>
@@ -229,9 +241,9 @@ namespace ArduinoCsCompiler
             }
         }
 
-        public void SendMethodIlCode(int methodToken, byte[] byteCode)
+        public void AddMethodIlCode(List<FirmataCommandSequence> sequences, int methodToken, byte[] byteCode)
         {
-            int bytesPerPacket = (_maxBytesPerMessage - 14) * 7 / 8;
+            int bytesPerPacket = (_maxBytesPerMessage - 15) * 7 / 8;
             int codeIndex = 0;
             while (codeIndex < byteCode.Length)
             {
@@ -251,7 +263,7 @@ namespace ArduinoCsCompiler
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
                 Debug.Assert(sequence.Length <= _maxBytesPerMessage, "Message is to long");
-                WaitAndHandleIlCommand(sequence);
+                sequences.Add(sequence);
             }
         }
 
@@ -302,7 +314,29 @@ namespace ArduinoCsCompiler
             WaitAndHandleIlCommand(sequence);
         }
 
-        public void SendMethodDeclaration(int declarationToken, MethodFlags methodFlags, byte maxStack, byte argCount,
+        public void SendMethod(ArduinoMethodDeclaration decl, ClassMember[] localTypes, ClassMember[] argTypes)
+        {
+            List<FirmataCommandSequence> sequences = new();
+            AddMethodDeclarations(sequences, decl.Token, decl.Flags, (byte)decl.MaxStack,
+                (byte)decl.ArgumentCount, decl.NativeMethod, localTypes, argTypes);
+
+            if (decl.HasBody && decl.NativeMethod == 0)
+            {
+                AddMethodIlCode(sequences, decl.Token, decl.Code.IlBytes!);
+                if (decl.Code.ExceptionClauses != null && decl.Code.ExceptionClauses.Any())
+                {
+                    AddMethodExceptionClauses(sequences, decl.Token, decl.Code.ExceptionClauses);
+                }
+            }
+
+            SendCommandsAndWait(sequences, ProgrammingTimeout, out var error);
+            if (error != CommandError.None)
+            {
+                throw new TaskSchedulerException($"Command sequence returned error {error}");
+            }
+        }
+
+        public void AddMethodDeclarations(IList<FirmataCommandSequence> sequences, int declarationToken, MethodFlags methodFlags, byte maxStack, byte argCount,
             int nativeMethod, ClassMember[] localTypes, ClassMember[] argTypes)
         {
             FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.DeclareMethod);
@@ -314,7 +348,7 @@ namespace ArduinoCsCompiler
 
             sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
 
-            WaitAndHandleIlCommand(sequence);
+            sequences.Add(sequence);
 
             // Types of locals first
             int startIndex = 0;
@@ -334,7 +368,7 @@ namespace ArduinoCsCompiler
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
 
-                WaitAndHandleIlCommand(sequence);
+                sequences.Add(sequence);
                 totalLocals -= 16;
                 startIndex += 16;
                 localsToSend = Math.Min(totalLocals, 16);
@@ -358,14 +392,14 @@ namespace ArduinoCsCompiler
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
 
-                WaitAndHandleIlCommand(sequence);
+                sequences.Add(sequence);
                 totalLocals -= 16;
                 startIndex += 16;
                 localsToSend = Math.Min(totalLocals, 16);
             }
         }
 
-        public void SendMethodExceptionClauses(int token, List<ExceptionClause> exceptionClauses)
+        public void AddMethodExceptionClauses(IList<FirmataCommandSequence> sequences, int token, List<ExceptionClause> exceptionClauses)
         {
             foreach (var c in exceptionClauses)
             {
@@ -378,36 +412,14 @@ namespace ArduinoCsCompiler
                 sequence.SendInt32(c.HandlerLength);
                 sequence.SendInt32(c.ExceptionFilterToken);
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-                WaitAndHandleIlCommand(sequence);
+                sequences.Add(sequence);
             }
         }
 
-        public void SendInterfaceImplementations(int classToken, int[] data)
+        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, short classFlags, IList<ClassMember> members, int[] interfaceImplementationData)
         {
-            // Send eight at a time, otherwise the maximum length of the message may be exceeded
-            for (int idx = 0; idx < data.Length;)
-            {
-                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.Interfaces);
-                sequence.SendInt32(classToken);
-                int remaining = data.Length - idx;
-                if (remaining > 8)
-                {
-                    remaining = 8;
-                }
+            List<FirmataCommandSequence> sequences = new();
 
-                for (int i = idx; i < idx + remaining; i++)
-                {
-                    sequence.SendInt32(data[i]);
-                }
-
-                sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-                WaitAndHandleIlCommand(sequence);
-                idx = idx + remaining;
-            }
-        }
-
-        public void SendClassDeclaration(Int32 classToken, Int32 parentToken, (int Dynamic, int Statics) sizeOfClass, short classFlags, IList<ClassMember> members)
-        {
             if (members.Count == 0)
             {
                 FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.ClassDeclarationEnd);
@@ -430,51 +442,78 @@ namespace ArduinoCsCompiler
                 sequence.SendInt14(0);
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-                WaitAndHandleIlCommand(sequence);
-                return;
+                sequences.Add(sequence);
             }
-
-            for (short member = 0; member < members.Count; member++)
+            else
             {
-                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(member == members.Count - 1 ? ExecutorCommand.ClassDeclarationEnd : ExecutorCommand.ClassDeclaration);
-                sequence.SendInt32(classToken);
-                sequence.SendInt32(parentToken);
-                // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
-                // Value types, on the other hand, are not expected to be larger than 14 bits.
-                if ((classFlags & 1) == 1)
+                for (short member = 0; member < members.Count; member++)
                 {
-                    sequence.SendInt14(sizeOfClass.Dynamic);
-                }
-                else
-                {
-                    sequence.SendInt14(sizeOfClass.Dynamic >> 2);
-                }
-
-                sequence.SendInt14(sizeOfClass.Statics >> 2);
-                sequence.SendInt14(classFlags);
-                sequence.SendInt14(member);
-
-                sequence.WriteByte((byte)members[member].VariableType);
-                sequence.SendInt32(members[member].Token);
-                if (members[member].VariableType != VariableKind.Method)
-                {
-                    // If it is a field, transmit its size.
-                    sequence.SendInt14(members[member].SizeOfField);
-                }
-                else
-                {
-                    var tokenList = members[member].BaseTokens;
-                    if (tokenList != null)
+                    FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(member == members.Count - 1 ? ExecutorCommand.ClassDeclarationEnd : ExecutorCommand.ClassDeclaration);
+                    sequence.SendInt32(classToken);
+                    sequence.SendInt32(parentToken);
+                    // For reference types, we omit the last two bits, because the size is always a multiple of 4 (or 8).
+                    // Value types, on the other hand, are not expected to be larger than 14 bits.
+                    if ((classFlags & 1) == 1)
                     {
-                        foreach (int bdt in tokenList)
+                        sequence.SendInt14(sizeOfClass.Dynamic);
+                    }
+                    else
+                    {
+                        sequence.SendInt14(sizeOfClass.Dynamic >> 2);
+                    }
+
+                    sequence.SendInt14(sizeOfClass.Statics >> 2);
+                    sequence.SendInt14(classFlags);
+                    sequence.SendInt14(member);
+
+                    sequence.WriteByte((byte)members[member].VariableType);
+                    sequence.SendInt32(members[member].Token);
+                    if (members[member].VariableType != VariableKind.Method)
+                    {
+                        // If it is a field, transmit its size.
+                        sequence.SendInt14(members[member].SizeOfField);
+                    }
+                    else
+                    {
+                        var tokenList = members[member].BaseTokens;
+                        if (tokenList != null)
                         {
-                            sequence.SendInt32(bdt);
+                            foreach (int bdt in tokenList)
+                            {
+                                sequence.SendInt32(bdt);
+                            }
                         }
                     }
+
+                    sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
+                    sequences.Add(sequence);
+                }
+            }
+
+            for (int idx = 0; idx < interfaceImplementationData.Length;)
+            {
+                FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.Interfaces);
+                sequence.SendInt32(classToken);
+                int remaining = interfaceImplementationData.Length - idx;
+                if (remaining > 8)
+                {
+                    remaining = 8;
+                }
+
+                for (int i = idx; i < idx + remaining; i++)
+                {
+                    sequence.SendInt32(interfaceImplementationData[i]);
                 }
 
                 sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-                WaitAndHandleIlCommand(sequence);
+                idx = idx + remaining;
+                sequences.Add(sequence);
+            }
+
+            SendCommandsAndWait(sequences, ProgrammingTimeout, out var error);
+            if (error != CommandError.None)
+            {
+                throw new TaskSchedulerException($"Command sequence returned error {error}");
             }
         }
 
