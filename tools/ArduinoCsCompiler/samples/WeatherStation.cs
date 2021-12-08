@@ -57,20 +57,19 @@ namespace WeatherStation
             while (gpioController.Read(button) == PinValue.Low)
             {
                 bme680.SetPowerMode(Bme680PowerMode.Forced);
+                var time = DateTime.Now;
                 if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure) && bme680.TryReadHumidity(out RelativeHumidity humidity))
                 {
-                    // Debug.WriteLine($"Raw data: {pressure.Hectopascals:F2} hPa, {temp.DegreesCelsius:F1} °C {stationAltitude.Meters:F1} müM");
                     Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
-                    string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
-                    // Debug.WriteLine(temperatureLine);
-                    console.ReplaceLine(0, temperatureLine);
-
                     Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
+
+                    string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
                     string humidityLine = humidity.Percent.ToString("F1") + "% RH, DP: " + dewPoint.DegreesCelsius.ToString("F1") + " °C";
+
+                    console.ReplaceLine(0, temperatureLine);
                     console.ReplaceLine(1, humidityLine);
                 }
 
-                var time = DateTime.Now;
                 console.ReplaceLine(2, time.ToString("ddd dd. MMM yyyy"));
                 console.SetCursorPosition(0, 3);
                 console.ReplaceLine(3, time.ToLongTimeString());

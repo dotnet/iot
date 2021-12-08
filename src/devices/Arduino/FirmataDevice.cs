@@ -572,7 +572,6 @@ namespace Iot.Device.Arduino
                     throw new ObjectDisposedException(nameof(FirmataDevice));
                 }
 
-                Stopwatch sw = Stopwatch.StartNew();
                 _dataReceived.Reset();
                 _firmataStream.Write(sequence.AsSpan());
 
@@ -599,7 +598,6 @@ namespace Iot.Device.Arduino
                 while (isMatchingAck != null && !isMatchingAck(sequence, response));
 
                 error = _lastCommandError;
-                OnError?.Invoke($"Command took {sw.Elapsed.TotalMilliseconds}ms", null);
                 return response;
             }
         }
@@ -641,8 +639,6 @@ namespace Iot.Device.Arduino
                 {
                     throw new ObjectDisposedException(nameof(FirmataDevice));
                 }
-
-                Stopwatch sw = Stopwatch.StartNew();
 
                 Dictionary<FirmataCommandSequence, bool> sequencesWithAck = new();
                 _dataReceived.Reset();
@@ -690,7 +686,6 @@ namespace Iot.Device.Arduino
                 }
                 while (sequencesWithAck.Any(x => x.Value == false));
 
-                OnError?.Invoke($"Command took {sw.Elapsed.TotalMilliseconds}ms for {sequences.Count} sequences", null);
                 return sequencesWithAck.All(x => x.Value);
             }
         }

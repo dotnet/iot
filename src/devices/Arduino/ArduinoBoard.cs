@@ -167,7 +167,10 @@ namespace Iot.Device.Arduino
             {
                 var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 socket.Connect(boardAddress, port);
-                socket.NoDelay = true;
+
+                // Since we're sending lots of very small packets, the nagle algorithm is just the wrong thing to do here. Setting
+                // this to true significantly increases round-trip time.
+                socket.NoDelay = false;
                 var networkStream = new NetworkStream(socket, true);
                 board = new ArduinoBoard(networkStream);
                 if (!(board.FirmataVersion > new Version(1, 0)))
