@@ -665,7 +665,7 @@ namespace Iot.Device.Arduino.Tests
         {
             int[] array = new int[]
             {
-               3, 4, 5, 6
+                3, 4, 5, 6
             };
 
             IEnumerable<int> enumerable = array;
@@ -682,9 +682,7 @@ namespace Iot.Device.Arduino.Tests
         {
             Span<byte> span = stackalloc byte[]
             {
-                (byte)a,
-                (byte)b,
-                (byte)(a + 1),
+                (byte)a, (byte)b, (byte)(a + 1),
             };
 
             MiniAssert.That(span.Length == 3);
@@ -982,6 +980,38 @@ namespace Iot.Device.Arduino.Tests
             {
                 MiniAssert.NotNull(x.Message);
                 return x.NativeErrorCode;
+            }
+        }
+
+        private static void WithDisposable()
+        {
+            using var s = new StuffThatNeedsDisposing(10);
+            MiniAssert.That(StuffThatNeedsDisposing.Value == 10);
+        }
+
+        public static int UsingHandlers(int arg1, int arg2)
+        {
+            WithDisposable();
+            MiniAssert.That(StuffThatNeedsDisposing.Value == 0);
+            return 1;
+        }
+
+        private class StuffThatNeedsDisposing : IDisposable
+        {
+            public StuffThatNeedsDisposing(int initialValue)
+            {
+                Value = initialValue;
+            }
+
+            public static int Value
+            {
+                get;
+                set;
+            }
+
+            public void Dispose()
+            {
+                Value = 0;
             }
         }
 

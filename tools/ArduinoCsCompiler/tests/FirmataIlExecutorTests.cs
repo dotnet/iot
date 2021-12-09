@@ -383,6 +383,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.NormalTryFinallyWithReturn), 1)]
         [InlineData(nameof(TestMethods.NormalTryFinallyWithCodeAfterFinally), 2)]
         [InlineData(nameof(TestMethods.NormalTryFinallyWithException), 2)]
+        [InlineData(nameof(TestMethods.UsingHandlers), 2)]
         public void ExceptionHandlingSimple(string methodName, int arg1)
         {
             LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
