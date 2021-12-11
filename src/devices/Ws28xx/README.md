@@ -1,6 +1,6 @@
-﻿﻿# Ws28xx/SK7812 LED drivers
+﻿﻿# Ws28xx / SK6812 LED drivers
 
-This binding allows you to update the RGB LEDs on Ws28xx/SK6812 and based strips and matrices.
+This binding allows you to update the RGB LEDs on Ws28xx / SK6812 and based strips and matrices.
 
 To see how to use the binding in code, see the [sample](samples/Ws28xx_Samples/Program.cs).
 
@@ -14,7 +14,7 @@ To see how to use the binding in code, see the [sample](samples/Ws28xx_Samples/P
 
 ## Board
 
-### Neo pixels/SK6812
+### Neo pixels / SK6812
 
 ![Raspberry Pi Breadboard diagram](rpi-neo-pixels_bb.png)
 
