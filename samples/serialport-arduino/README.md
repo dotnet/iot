@@ -1,14 +1,15 @@
 # Controlling Arduino with .NET using Raspberry Pi
 
-https://www.youtube.com/watch?v=TW4K64hfa5U
+[Watch the video](https://www.youtube.com/watch?v=TW4K64hfa5U) for this setup:
 
-<img src="setup-close.jpg" width="400px" />
+![setup](setup-close.jpg)
 
 ## Overview
 
 This sample shows how to control Arduino with .NET using serial port.
 
 Sample consists of two parts:
+
 - Arduino Playground Express app lighting 2 RGB LEDs in a circle (there are 10 LEDS in a shape of circle, consecutive LEDs are being lighted making effect of spinning - see diagram below for reference)
   - project has couple of parameters which can be controlled: rate of spinning, LED color, direction and also pausing the spinning
 - .NET app using System.IO.Ports to communicate with Arduino - in this example we will use Raspberry Pi 3 model B.
@@ -23,7 +24,7 @@ Note: If you're planning to connect UART with i.e. RS232 you will need converter
 
 [Fritzing Diagram](arduino-pi-sp.fzz) - `Arduino Playground Express` part is missing by default in Fritzing - it can be downloaded [here](https://github.com/adafruit/Fritzing-Library/blob/master/parts/Adafruit%20Circuit%20Playground%20Express.fzpz)
 
-<img src="arduino-pi-sp_bb.png" width="300px" />
+![arduino setup](arduino-pi-sp_bb.png)
 
 ## Communication protocol
 
@@ -44,7 +45,7 @@ Essential piece which transmit the data is just `sp.WriteLine("<command>")`
 
 To setup such app from the scratch (assumes your folder name is `arduino-demo` and that UART on Raspberry Pi is `/dev/ttyS0`):
 
-```
+```shell
 dotnet new console
 dotnet add package System.IO.Ports -v 4.6.0-preview.18571.3
 ```
@@ -57,14 +58,14 @@ add runtime identifier in the property group to make it easier to publish (you c
 
 edit the app and then to publish it (note: in many cases it might be easier to publish app elsewhere than Raspbery Pi and then copy it over to Raspberry Pi through i.e. SSH - if copying from Windows you might need to also add executable permission to your executable)
 
-```
+```shell
 dotnet publish
 ```
 
 publish command will produce binaries in `bin/Debug/netcoreapp3.1/linux-arm/publish`
 To run your app simply call it while in that directory
 
-```
+```shell
 ./arduino-demo /dev/ttyS0
 ```
 
@@ -78,4 +79,4 @@ The example was built using [Arduino IDE](https://www.arduino.cc/en/Main/Softwar
 
 [See Arduino sketch file](uart-demo.ino)
 
-<img src="setup-full.jpg" width="400px" />
+![setup](setup-full.jpg)

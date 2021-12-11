@@ -1,8 +1,11 @@
+# Roadmap
+
 Our goal is to create a set of world-class APIs and tooling that will support a rich .NET IoT ecosystem.  Below shows a structure of components as part of our roadmap.
 
 ## Deliverables for vNext/Future
 
 The following deliverables are not in any particular order:
+
 * [ ] Add bindings for more devices
 * [ ] Add/Test support on more boards
 * [ ] Onboard more customers and work on making them successful
@@ -41,6 +44,6 @@ The following deliverables are not in any particular order:
 * Stabilize Iot.Device.Bindings APIs for Device Bindings
 * Publish [Iot.Device.Bindings to NuGet.org](https://www.nuget.org/packages/Iot.Device.Bindings)
 
-![](images/DotNetIotRoadmapComponents.png)
+![dotnet iot rodmap](images/DotNetIotRoadmapComponents.png)
   
 More libraries and features are coming soon. Stay tuned!

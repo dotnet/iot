@@ -1,0 +1,190 @@
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+    - release/3.0
+    
+pr:
+  branches:
+    include:
+    - main
+    - release/3.0
+
+variables:
+  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
+    - name: OfficialBuildId
+      value: $(Build.BuildNumber)
+    - name: DOTNET_SKIP_FIRST_TIME_EXPERIENCE
+      value: 1
+    - name: DOTNET_MULTILEVEL_LOOKUP
+      value: 0
+
+resources:
+  containers:
+  - container: LinuxContainer
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-14.04-cross-0cd4667-20170319080304
+
+stages:
+- stage: Build
+  jobs:
+  - job: Windows_NT
+    displayName: Windows Build
+    pool:
+      vmImage: windows-latest
+
+    strategy:
+      matrix:
+        Build_Release:
+          BuildConfiguration: Release
+        Build_Debug:
+          BuildConfiguration: Debug
+
+    steps:
+    - powershell: |
+        npm install -g markdownlint-cli
+        markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
+      displayName: 'Execute Markdownlint'
+      condition: eq(variables['build.reason'], 'PullRequest')
+
+    - script: build.cmd -ci
+        -configuration $(BuildConfiguration)
+        -prepareMachine
+        /p:BuildPackages=true
+      displayName: Build
+
+    - script: powershell -ExecutionPolicy ByPass -NoProfile eng\common\msbuild.ps1 -warnaserror:0 -ci
+        eng/sendToHelix.proj
+        /t:Test
+        /p:TestOS=Windows_NT
+        /p:Configuration=$(BuildConfiguration)
+        /p:HelixBuild=$(Build.BuildNumber)
+        /bl:$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/SendToHelix.binlog
+      displayName: Run Helix Tests
+      condition: eq(variables['build.reason'], 'PullRequest')
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Build logs
+      condition: always()
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
+        artifactName: BuildLogs
+        artifactType: container
+
+    - task: CopyFiles@2
+      condition: eq(variables['BuildConfiguration'], 'Release')
+      inputs:
+        sourceFolder: $(Build.SourcesDirectory)/artifacts/packages/$(BuildConfiguration)/Shipping
+        targetFolder: $(Build.ArtifactStagingDirectory)/Packages
+
+    - publish: $(Build.ArtifactStagingDirectory)/Packages
+      displayName: Publish Build Artifacts
+      artifact: BuildPackages
+      condition: eq(variables['BuildConfiguration'], 'Release')
+
+    - publish: config
+      displayName: Publish Signing Scripts
+      artifact: config
+      condition: eq(variables['BuildConfiguration'], 'Release')
+
+  - job: Linux
+    displayName: Linux Build
+    container: LinuxContainer
+    pool:
+      vmImage: ubuntu-latest
+
+    strategy:
+      matrix:
+        Build_Release:
+          BuildConfiguration: Release
+        Build_Debug:
+          BuildConfiguration: Debug
+
+    steps:
+    - script: ./build.sh --ci
+        --configuration $(BuildConfiguration)
+        --prepareMachine
+      displayName: Build
+
+    - script: ./eng/common/msbuild.sh --warnaserror false --ci
+        eng/sendToHelix.proj
+        /t:Test
+        /p:TestOS=Unix
+        /p:Configuration=$(_BuildConfig)
+        /p:HelixBuild=$(Build.BuildNumber)
+        /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
+        /p:HelixAccessToken=$(HelixApiAccessToken)
+      displayName: Run Helix Tests
+      condition: eq(variables['build.reason'], 'PullRequest')
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Build logs
+      condition: always()
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
+        artifactName: BuildLogs
+        artifactType: container
+
+- stage: CodeSign
+  condition: and(succeeded('Build'), not(eq(variables['build.reason'], 'PullRequest')))
+  jobs:
+  - deployment: CodeSign
+    displayName: Code Signing
+    pool:
+      vmImage: windows-latest
+    environment: Dotnet Iot
+    variables:
+    - group: SignClient
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: custom
+              custom: tool
+              arguments: install --tool-path . SignClient
+            displayName: Install SignTool tool
+
+          - pwsh: |
+              .\SignClient "Sign" `
+              --baseDirectory "$(Pipeline.Workspace)\BuildPackages" `
+              --input "**/*.nupkg" `
+              --config "$(Pipeline.Workspace)\config\SignClient.json" `
+              --filelist "$(Pipeline.Workspace)\config\filelist.txt" `
+              --user "$(SignClientUser)" `
+              --secret '$(SignClientSecret)' `
+              --name "DotnetIoT" `
+              --description "dotnet/iot" `
+              --descriptionUrl "https://github.com/dotnet/iot"
+            displayName: Sign packages
+              
+          - publish: $(Pipeline.Workspace)/BuildPackages
+            displayName: Publish Signed Packages
+            artifact: SignedPackages
+
+- stage: Publish
+  condition: and(succeeded('Build'), succeeded('CodeSign'), not(eq(variables['build.reason'], 'PullRequest')))
+  jobs:
+  - deployment: Publish
+    displayName: Publish signed packages
+    pool:
+      vmImage: windows-latest
+    environment: Dotnet Iot
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: NuGetAuthenticate@0
+            displayName: 'NuGet Authenticate'
+
+          - task: NuGetCommand@2
+            displayName: 'Publish to feed'
+            inputs:
+              command: push
+              publishVstsFeed: 'IoT/nightly_iot_builds'
+              packagesToPush: '$(Pipeline.Workspace)/SignedPackages/*nupkg'

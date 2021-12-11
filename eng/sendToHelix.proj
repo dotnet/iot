@@ -12,7 +12,7 @@
 
     <IncludeDotNetCli>true</IncludeDotNetCli>
     <DotNetCliPackageType>sdk</DotNetCliPackageType>
-    <DotNetCliVersion>2.2.300</DotNetCliVersion>
+    <DotNetCliVersion>3.1.405</DotNetCliVersion>
 
     <EnableAzurePipelinesReporter Condition="'$(SYSTEM_ACCESSTOKEN)' != ''">true</EnableAzurePipelinesReporter>
     <TestRunNamePrefix>$(AGENT_JOBNAME)</TestRunNamePrefix>
@@ -34,7 +34,7 @@
   <ItemGroup Condition="'$(TestOS)' == 'Windows_NT'">
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
-      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <TargetFramework>netcoreapp3.1</TargetFramework>
       <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
     </XUnitProject>
     <!-- Target queues -->
@@ -53,7 +53,7 @@
   <ItemGroup Condition="'$(TestOS)' == 'Unix'">
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
-      <TargetFramework>netcoreapp2.1</TargetFramework>
+      <TargetFramework>netcoreapp3.1</TargetFramework>
       <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
     </XUnitProject>
     <!-- Target queues -->

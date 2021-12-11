@@ -4,7 +4,7 @@
 
 For the purpose of this document let's assume you have deployed your app under:
 
-```
+```shell
 /home/pi/myiotapp/myiotapp
 ```
 
@@ -16,7 +16,7 @@ Example script. `myiotapp` will be used everywhere. Please replace accordingly w
 
 File path should be `/etc/init.d/myiotapp` (note no extension - it may be used but it will become part of the name)
 
-**Please make sure to read comments in the code below**
+> **Important**: Please make sure to read comments in the code below
 
 ```shell
 #! /bin/sh
@@ -42,20 +42,20 @@ case "$1" in
 
         # If you really need console capabilities you may also start your app under tmux
         # and connect to the app later using tmux attach
-	    # tmux new-session -d -s myiotapp
-	    # tmux send-keys '/home/pi/myiotapp/myiotapp' 'C-m'
+     # tmux new-session -d -s myiotapp
+     # tmux send-keys '/home/pi/myiotapp/myiotapp' 'C-m'
 
         # You may run multiple apps here
-	;;
+ ;;
     stop)
         # This is not strictly required - can be commented out or removed
         # You may also provide more sophisticated way of disabling your app
-	    killall myiotapp
-	;;
+     killall myiotapp
+ ;;
     *)
-	echo "Usage: /etc/init.d/myiotapp {start|stop}"
-	exit 1
-	;;
+ echo "Usage: /etc/init.d/myiotapp {start|stop}"
+ exit 1
+ ;;
 esac
 
 exit 0

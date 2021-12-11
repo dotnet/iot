@@ -12,7 +12,4 @@
   <ItemGroup>
     <ProjectReference Include="..\Ak8963\Ak8963.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1'">
-    <Reference Include="System.Numerics.Vectors" />
-  </ItemGroup>
 </Project>

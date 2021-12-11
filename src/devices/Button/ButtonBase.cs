@@ -19,6 +19,8 @@ namespace Iot.Device.Button
 
         private long _doublePressTicks;
         private long _holdingMs;
+        private TimeSpan _debounceTime;
+        private long _debounceStartTicks;
 
         private ButtonHoldingState _holdingState = ButtonHoldingState.Completed;
 
@@ -78,10 +80,17 @@ namespace Iot.Device.Button
         /// </summary>
         /// <param name="doublePress">Max ticks between button presses to count as doublepress.</param>
         /// <param name="holding">Min ms a button is pressed to count as holding.</param>
-        public ButtonBase(TimeSpan doublePress, TimeSpan holding)
+        /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
+        public ButtonBase(TimeSpan doublePress, TimeSpan holding, TimeSpan debounceTime = default(TimeSpan))
         {
+            if (debounceTime.TotalMilliseconds * 3 > doublePress.TotalMilliseconds)
+            {
+                throw new ArgumentException($"The parameter {nameof(doublePress)} should be at least three times {nameof(debounceTime)}");
+            }
+
             _doublePressTicks = doublePress.Ticks;
             _holdingMs = (long)holding.TotalMilliseconds;
+            _debounceTime = debounceTime;
         }
 
         /// <summary>
@@ -89,6 +98,11 @@ namespace Iot.Device.Button
         /// </summary>
         protected void HandleButtonPressed()
         {
+            if (DateTime.UtcNow.Ticks - _debounceStartTicks < _debounceTime.Ticks)
+            {
+                return;
+            }
+
             IsPressed = true;
 
             ButtonDown?.Invoke(this, new EventArgs());
@@ -104,6 +118,12 @@ namespace Iot.Device.Button
         /// </summary>
         protected void HandleButtonReleased()
         {
+            if (_debounceTime.Ticks > 0 && !IsPressed)
+            {
+                return;
+            }
+
+            _debounceStartTicks = DateTime.UtcNow.Ticks;
             _holdingTimer?.Dispose();
             _holdingTimer = null;
 

@@ -2,7 +2,7 @@
 
 In order to reuse the README for each binding and reference them from the source comments (triple slash), the files need to be moved into a specific directory.
 
-This directory cannot include the images and other medias, they need to be moved in another folder. 
+This directory cannot include the images and other medias, they need to be moved in another folder.
 
 The links to those media files need to be adjusted as well.
 

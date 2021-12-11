@@ -1,10 +1,21 @@
 # SPI, GPIO and I2C drivers for Arduino with Firmata
 
-This binding supports GPIO, PWM, SPI and I2C access from a normal Desktop environment (Windows, Linux) through an Arduino board. This is done through an Arduino program called "Firmata" developed for this particular purpose.
+This binding supports GPIO, PWM, SPI and I2C access from a normal Desktop environment (Windows, Linux) through an Arduino board or a variety of other microcontroller boards. This is done through an Arduino program called "Firmata" developed for this particular purpose.
 
 ## Device family
 
 This binding remotely controls Arduino boards directly from PC Software. It provides support for accessing GPIO ports as well as I2C devices, SPI devices, PWM output and analog input. The Arduino is remote controlled by individual commands from the PC, the C# program will run on the PC, and not on the Arduino, so the connection cannot be removed while the device is being used.
+
+**Supported Board Types**
+The following board types are known to work with this binding. Many others may work as well.
+
+- Arduino AVR based boards: Arduino UNO, Arduino Nano, Arduino Pro Mini
+- 32 Bit Arduino Boards: Arduino Due
+- ESP32 (over serial and Wifi)
+
+Known problems:
+
+- The Arduino Pro Mini (and possibly a few other boards with a similarly slow clock rate) require that the baud rate be set to 57600 or less to work reliably.
 
 ## Desktop Requirements
 
@@ -29,10 +40,25 @@ When the firmware starts, the on-board-LED flashes a few times, indicating the l
 
 ### Advanced features
 
-Some of the features of this binding require extended features in the Arduino firmware. These include SPI support and DHT sensor support. These features didn't make it into the main Firmata branch yet, therefore these additional steps are required:
+Some of the features of this binding require extended features in the Arduino firmware. These include SPI support and DHT sensor support. These features are only available in the main development branch
+
+#### Download for Windows
 
 - Go to `C:\users\<username>\documents\arduino\libraries` and delete the "ConfigurableFirmata" folder (save any work if you've changed anything there)
-- Replace it with a clone of [Configurable Firmata](https://github.com/pgrawehr/ConfigurableFirmata) and switch to branch "develop".
+- Replace it with a clone of [Configurable Firmata](https://github.com/firmata/ConfigurableFirmata).
+
+#### Download for Linux
+
+To install the current development version of ConfigurableFirmata on linux, perform these steps in a shell:
+
+```sh
+cd ~/Arduino/libraries
+rm -rd ConfigurableFirmata
+git clone https://github.com/firmata/ConfigurableFirmata
+```
+
+#### Final steps
+
 - Make sure you have the "DHT Sensor Library" from Adafruit installed (use the library manager for that).
 - You can now enable the DHT and SPI features at the beginning of the ConfigurableFirmata.ino file. Because the new firmware will have additional features, it is recommended to use the .ino file from the examples folder of the repository. So the best start is to open the file that now lies in `C:\users\<username>\documents\arduino\libraries\ConfigurableFirmata\examples\ConfigurableFirmata\ConfigurableFirmata.ino`. The file has some comments at the top to enable or disable certain modules.
 - Compile and re-upload the sketch.

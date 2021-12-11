@@ -27,8 +27,8 @@ In this sample Raspberry Pi 2 will be used, you can use above Raspberry Pi 2. Th
 
 ## Prerequisite Packages
 
-* dotnet add package Iot.Device.Bindings --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
-* dotnet add package System.Device.Gpio --source https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json
+* dotnet add package Iot.Device.Bindings --source <https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json>
+* dotnet add package System.Device.Gpio --source <https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet5/nuget/v3/index.json>
 * dotnet add package Microsoft.Azure.Devices.Client --version 1.38.0
 
 ## Prepare the hardware
@@ -106,7 +106,7 @@ You can deploy and debug your solution or just deploy your solution without debu
 
     ```bash
     dotnet publish -r linux-arm /p:ShowLinkerSizeComparison=true 
-    pushd .\bin\Debug\net5.0\linux-arm\publish
+    pushd .\bin\Debug\net6.0\linux-arm\publish
     pscp -pw 1234 -v -r .\* pi@192.168.1.147:DNSensorAzureIoTHub
     popd
     ```
@@ -117,7 +117,7 @@ You can deploy and debug your solution or just deploy your solution without debu
 
     ```bash
     dotnet publish -r linux-arm   
-    cd .\bin\Debug\net5.0\linux-arm\
+    cd .\bin\Debug\net6.0\linux-arm\
     scp publish\* pi@192.168.1.109:BlinkTutorial
     ```
 
