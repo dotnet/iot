@@ -25,7 +25,7 @@ namespace Iot.Device.Rtc
         /// Technically, the BIOS RTC is configured in local time by default on Windows, but in UTC on Linux (causing
         /// weird effects when dual-booting). Both systems allow changing this setting, though.
         /// </summary>
-        public override TimeZoneInfo TimeZone
+        public override TimeZoneInfo LocalTimeZone
         {
             get
             {

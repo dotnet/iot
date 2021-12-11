@@ -25,29 +25,29 @@ namespace Iot.Device.Rtc
 
         /// <summary>
         /// Set or retrieves the current date/time. This property returns a <see cref="DateTimeOffset"/> and
-        /// is therefore correct regardless of the current time zone (when <see cref="TimeZone"/> is set correctly).
+        /// is therefore correct regardless of the current time zone (when <see cref="LocalTimeZone"/> is set correctly).
         /// </summary>
         public DateTimeOffset DateTime
         {
             get
             {
                 var now = RtcDateTime;
-                return new DateTimeOffset(now.Ticks, TimeZone.GetUtcOffset(now));
+                return new DateTimeOffset(now.Ticks, LocalTimeZone.GetUtcOffset(now));
             }
             set
             {
-                var clockNow = new DateTime((value.UtcDateTime + TimeZone.GetUtcOffset(value)).Ticks, DateTimeKind.Local);
+                var clockNow = new DateTime((value.UtcDateTime + LocalTimeZone.GetUtcOffset(value)).Ticks, DateTimeKind.Local);
                 RtcDateTime = clockNow;
             }
         }
 
         /// <summary>
-        /// Gets or sets the time zone this clock operates in.
-        /// Defaults to the local time zone.
+        /// Gets or sets the time zone this instance will operate in.
+        /// Defaults to the local time zone from the system.
         /// Changing this property will not change the time on the real time clock,
         /// but instead affect the return value of <see cref="DateTime"/>
         /// </summary>
-        public virtual TimeZoneInfo TimeZone
+        public virtual TimeZoneInfo LocalTimeZone
         {
             get => _timeZone;
             set => _timeZone = value;

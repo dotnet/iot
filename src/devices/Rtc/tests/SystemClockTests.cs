@@ -20,7 +20,7 @@ namespace Iot.Device.Rtc.Tests
         public void TimeZoneConversionWorks()
         {
             DummyRtc rtc = new DummyRtc();
-            Assert.True(rtc.TimeZone.Equals(TimeZoneInfo.Local));
+            Assert.True(rtc.LocalTimeZone.Equals(TimeZoneInfo.Local));
 
             DateTime initialTimeOfClock = new DateTime(2018, 1, 1, 12, 9, 1);
             rtc.RtcDateTime = initialTimeOfClock;
