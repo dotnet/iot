@@ -996,6 +996,96 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public static void ThrowAlways()
+        {
+            throw new InvalidOperationException();
+        }
+
+        public static void ThrowAlways(string message)
+        {
+            throw new InvalidOperationException(message);
+        }
+
+        public static int FinallyInDifferentMethod(int arg1, int arg2)
+        {
+            int a = arg1;
+            try
+            {
+                try
+                {
+                    ThrowAlways();
+                }
+                finally
+                {
+                    a = 10;
+                }
+            }
+            catch (InvalidOperationException x)
+            {
+                MiniAssert.IsNotNull(x);
+            }
+
+            MiniAssert.AreEqual(10, a);
+            return 1;
+        }
+
+        public static int TryBlockInCatch(int arg1, int arg2)
+        {
+            int a = 0;
+            try
+            {
+                ThrowAlways();
+                a = 1;
+            }
+            catch (InvalidOperationException x)
+            {
+                MiniAssert.AreEqual(0, a);
+                a = 2;
+                try
+                {
+                    MiniAssert.AreEqual(2, a);
+                    ThrowAlways();
+                    a = 3;
+                }
+                catch (InvalidOperationException y)
+                {
+                    MiniAssert.AreEqual(2, a);
+                    a = 4;
+                }
+            }
+
+            MiniAssert.AreEqual(4, a);
+            return 1;
+        }
+
+        public static int TryBlockInFinally(int arg1, int arg2)
+        {
+            int a = 0;
+            try
+            {
+                a = 1;
+            }
+            finally
+            {
+                MiniAssert.AreEqual(1, a);
+                a = 2;
+                try
+                {
+                    MiniAssert.AreEqual(2, a);
+                    ThrowAlways("In finally-try");
+                    a = 3;
+                }
+                catch (InvalidOperationException y)
+                {
+                    MiniAssert.AreEqual(2, a);
+                    a = 4;
+                }
+            }
+
+            MiniAssert.AreEqual(4, a);
+            return 1;
+        }
+
         private class StuffThatNeedsDisposing : IDisposable
         {
             public StuffThatNeedsDisposing(int initialValue)

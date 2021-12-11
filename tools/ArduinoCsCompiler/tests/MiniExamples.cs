@@ -49,6 +49,7 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Fact]
+        [Trait("explicit", "true")]
         public void FileSystemCheck()
         {
             CompilerSettings s = new CompilerSettings()
