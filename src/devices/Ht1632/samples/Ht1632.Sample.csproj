@@ -6,11 +6,7 @@
     <RootNamespace>Iot.Device.Ht1632.Sample</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="SixLabors.ImageSharp" Version="1.0.4" />
-  </ItemGroup>
-
-  <ItemGroup>
+<ItemGroup>
     <ProjectReference Include="..\Ht1632.csproj" />
   </ItemGroup>
 
