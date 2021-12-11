@@ -40,26 +40,22 @@ void Clear()
 
 void RandomDots()
 {
+    Console.WriteLine("Random dots");
+
+    var data = new byte[24 * 16 / 4];
+    var random = new Random();
+    for (var i = 0; i < data.Length; i++)
     {
-        Console.WriteLine("Random dots");
-
-        var data = new byte[24 * 16 / 4];
-        var random = new Random();
-        for (var i = 0; i < data.Length; i++)
-        {
-            data[i] = (byte)random.Next();
-        }
-
-        ht1632.WriteData(0, data);
+        data[i] = (byte)random.Next();
     }
+
+    ht1632.WriteData(0, data);
 }
 
 void ShowImage()
 {
-    {
-        Console.WriteLine("Show image");
+    Console.WriteLine("Show image");
 
-        var image = Image.Load<Rgb24>("./dotnet-bot.bmp");
-        ht1632.ShowImageWith16Com(image);
-    }
+    var image = Image.Load<Rgb24>("./dotnet-bot.bmp");
+    ht1632.ShowImageWith16Com(image);
 }
