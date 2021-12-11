@@ -18,6 +18,16 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
     Blink = false,
     LedOn = true
 };
+
+Clear();
+Console.ReadLine();
+
+RandomDots();
+Console.ReadLine();
+
+ShowImage();
+
+void Clear()
 {
     Console.WriteLine();
     Console.WriteLine("Clear");
@@ -26,30 +36,30 @@ using var ht1632 = new Ht1632(new Ht1632PinMapping(cs: 27, wr: 22, data: 17), ne
     // Only lower 4 bits are valid
     var data = new byte[24 * 16 / 4];
     ht1632.WriteData(0, data);
-    Console.ReadLine();
 }
 
+void RandomDots()
 {
-    Console.WriteLine("Random dots");
-
-    var data = new byte[24 * 16 / 4];
-    var random = new Random();
-    for (var i = 0; i < data.Length; i++)
     {
-        data[i] = (byte)random.Next();
+        Console.WriteLine("Random dots");
+
+        var data = new byte[24 * 16 / 4];
+        var random = new Random();
+        for (var i = 0; i < data.Length; i++)
+        {
+            data[i] = (byte)random.Next();
+        }
+
+        ht1632.WriteData(0, data);
     }
-
-    ht1632.WriteData(0, data);
-    Console.ReadLine();
 }
 
+void ShowImage()
 {
-    Console.WriteLine("Show image");
+    {
+        Console.WriteLine("Show image");
 
-    var image = Image.Load<Rgb24>("./dotnet-bot.bmp");
-    ht1632.ShowImageWith16Com(image);
-
-    Console.ReadLine();
+        var image = Image.Load<Rgb24>("./dotnet-bot.bmp");
+        ht1632.ShowImageWith16Com(image);
+    }
 }
-
-Console.WriteLine("All end");
