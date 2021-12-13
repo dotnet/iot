@@ -376,6 +376,10 @@ namespace ArduinoCsCompiler
 
             PrepareClass(set, typeof(System.Object));
 
+            // These are referenced by the system
+            PrepareClass(set, typeof(System.Exception));
+            PrepareClass(set, typeof(System.DivideByZeroException));
+
             // We'll always need to provide these methods, or we'll get into trouble because they're not explicitly used before anything that depends on
             // them in the runtime
             type = typeof(System.Object);

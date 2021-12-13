@@ -12,6 +12,7 @@ using ArduinoCsCompiler;
 using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 using Xunit.Sdk;
+using TestMethodStarting = Xunit.TestMethodStarting;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -352,7 +353,9 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.DictionaryTest2), 0)]
         [InlineData(nameof(TestMethods.LcdCharacterEncodingTest1), 0)]
         [InlineData(nameof(TestMethods.LcdCharacterEncodingTest2), 0)]
+        [InlineData(nameof(TestMethods.StringInterpolation), 0)]
         [InlineData(nameof(TestMethods.UnitsNetTemperatureTest), 0)]
+        [InlineData(nameof(TestMethods.StringEncoding), 0)]
         public void BrokenImplementationBehaviorValidation(string methodName, int arg1)
         {
             var compilerSettings = new CompilerSettings()
@@ -388,6 +391,14 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.TryBlockInCatch), 0)]
         [InlineData(nameof(TestMethods.TryBlockInFinally), 0)]
         public void ExceptionHandling(string methodName, int arg1)
+        {
+            LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
+        }
+
+        [Theory]
+        [InlineData(nameof(TestMethods.TryCatchDivideByZeroException), 0)]
+        [InlineData(nameof(TestMethods.TryCatchIndexOutOfRangeException), 10)]
+        public void ExceptionHandlingForBuiltinErrors(string methodName, int arg1)
         {
             LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
         }

@@ -113,7 +113,7 @@ namespace ArduinoCsCompiler
                         // The first entry can be the same as above (if the error is within the given method), but not
                         // necessarily, since the outer token can point to whatever did not work
                         var stack = Debugger.DecodeStackTrace(set, stackTrace);
-                        textualStackTrace = Debugger.PrintStack(stack);
+                        textualStackTrace = Environment.NewLine + Debugger.PrintStack(stack);
                     }
 
                     if (sysEx == SystemException.InvalidOpCode)

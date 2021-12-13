@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -20,6 +21,8 @@ namespace ArduinoCsCompiler
         public static ExecutionSet? CompiledKernel = null;
 
         private static readonly SnapShot EmptySnapShot = new SnapShot(null, new List<int>(), new List<int>(), new List<int>());
+
+        private static readonly Dictionary<Type, KnownTypeTokens> KnownTypeTokensMap;
 
         private readonly MicroCompiler _compiler;
         private readonly List<ArduinoMethodDeclaration> _methods;
@@ -51,6 +54,40 @@ namespace ArduinoCsCompiler
         private int _nextStringToken;
         private SnapShot _kernelSnapShot;
         private Dictionary<Type, MethodInfo> _arrayListImpl;
+
+        static ExecutionSet()
+        {
+            KnownTypeTokensMap = new Dictionary<Type, KnownTypeTokens>();
+            KnownTypeTokensMap.Add(typeof(Object), KnownTypeTokens.Object);
+            KnownTypeTokensMap.Add(typeof(UInt32), KnownTypeTokens.Uint32);
+            KnownTypeTokensMap.Add(typeof(Int32), KnownTypeTokens.Int32);
+            KnownTypeTokensMap.Add(typeof(UInt64), KnownTypeTokens.Uint64);
+            KnownTypeTokensMap.Add(typeof(Int64), KnownTypeTokens.Int64);
+            KnownTypeTokensMap.Add(typeof(byte), KnownTypeTokens.Byte);
+            KnownTypeTokensMap.Add(typeof(System.Delegate), KnownTypeTokens.Delegate);
+            KnownTypeTokensMap.Add(typeof(System.MulticastDelegate), KnownTypeTokens.MulticastDelegate);
+            KnownTypeTokensMap.Add(typeof(TypeInfo), KnownTypeTokens.TypeInfo);
+            KnownTypeTokensMap.Add(typeof(String), KnownTypeTokens.String);
+            KnownTypeTokensMap.Add(Type.GetType("System.RuntimeType", true), KnownTypeTokens.RuntimeType);
+            KnownTypeTokensMap.Add(typeof(Type), KnownTypeTokens.Type);
+            KnownTypeTokensMap.Add(typeof(MiniType), KnownTypeTokens.Type); // Same value for different keys is ok
+            KnownTypeTokensMap.Add(typeof(Array), KnownTypeTokens.Array);
+            KnownTypeTokensMap.Add(typeof(MiniArray), KnownTypeTokens.Array);
+            KnownTypeTokensMap.Add(typeof(Exception), KnownTypeTokens.Exception);
+            KnownTypeTokensMap.Add(typeof(ArithmeticException), KnownTypeTokens.ArithmeticException);
+            KnownTypeTokensMap.Add(typeof(DivideByZeroException), KnownTypeTokens.DivideByZeroException);
+            KnownTypeTokensMap.Add(typeof(NullReferenceException), KnownTypeTokens.NullReferenceException);
+            KnownTypeTokensMap.Add(typeof(MissingMethodException), KnownTypeTokens.MissingMethodException);
+            KnownTypeTokensMap.Add(typeof(IndexOutOfRangeException), KnownTypeTokens.IndexOutOfRangeException);
+            KnownTypeTokensMap.Add(typeof(ArrayTypeMismatchException), KnownTypeTokens.ArrayTypeMismatchException);
+            KnownTypeTokensMap.Add(typeof(InvalidOperationException), KnownTypeTokens.InvalidOperationException);
+            KnownTypeTokensMap.Add(typeof(TypeInitializationException), KnownTypeTokens.ClassNotFoundException);
+            KnownTypeTokensMap.Add(typeof(InvalidCastException), KnownTypeTokens.InvalidCastException);
+            KnownTypeTokensMap.Add(typeof(NotSupportedException), KnownTypeTokens.NotSupportedException);
+            KnownTypeTokensMap.Add(typeof(FieldAccessException), KnownTypeTokens.FieldAccessException);
+            KnownTypeTokensMap.Add(typeof(OverflowException), KnownTypeTokens.OverflowException);
+            KnownTypeTokensMap.Add(typeof(IOException), KnownTypeTokens.IoException);
+        }
 
         internal ExecutionSet(MicroCompiler compiler, CompilerSettings compilerSettings)
         {
@@ -567,62 +604,14 @@ namespace ArduinoCsCompiler
                 return GetOrAddClassToken(replacement.GetTypeInfo());
             }
 
-            if (typeInfo == typeof(object))
+            if (KnownTypeTokensMap.TryGetValue(typeInfo, out var knownToken))
             {
-                token = (int)KnownTypeTokens.Object;
-            }
-            else if (typeInfo == typeof(UInt32))
-            {
-                token = (int)KnownTypeTokens.Uint32;
-            }
-            else if (typeInfo == typeof(Int32))
-            {
-                token = (int)KnownTypeTokens.Int32;
-            }
-            else if (typeInfo == typeof(UInt64))
-            {
-                token = (int)KnownTypeTokens.Uint64;
-            }
-            else if (typeInfo == typeof(Int64))
-            {
-                token = (int)KnownTypeTokens.Int64;
-            }
-            else if (typeInfo == typeof(byte))
-            {
-                token = (int)KnownTypeTokens.Byte;
-            }
-            else if (typeInfo == typeof(System.Delegate))
-            {
-                token = (int)KnownTypeTokens.Delegate;
-            }
-            else if (typeInfo == typeof(System.MulticastDelegate))
-            {
-                token = (int)KnownTypeTokens.MulticastDelegate;
+                token = (int)knownToken;
             }
             else if (typeInfo.FullName == "System.Enum")
             {
                 // Note that enums are value types, but "System.Enum" itself is not.
                 token = (int)KnownTypeTokens.Enum;
-            }
-            else if (typeInfo == typeof(TypeInfo))
-            {
-                token = (int)KnownTypeTokens.TypeInfo;
-            }
-            else if (typeInfo == typeof(string) || typeInfo == typeof(MiniString))
-            {
-                token = (int)KnownTypeTokens.String;
-            }
-            else if (typeInfo.FullName == "System.RuntimeType")
-            {
-                token = (int)KnownTypeTokens.RuntimeType;
-            }
-            else if (typeInfo == typeof(Type) || typeInfo == typeof(MiniType))
-            {
-                token = (int)KnownTypeTokens.Type;
-            }
-            else if (typeInfo == typeof(Array) || typeInfo == typeof(MiniArray))
-            {
-                token = (int)KnownTypeTokens.Array;
             }
             else if (typeInfo.FullName != null &&
                      typeInfo.FullName.StartsWith("System.ByReference`1[[System.Byte, System.Private.CoreLib,", StringComparison.Ordinal)) // Ignore version of library
@@ -1151,9 +1140,70 @@ namespace ArduinoCsCompiler
             }
         }
 
+        // Same implementation as on the C++ side, to make sure our encoding is correctly reversible
+        private char Utf8ToUnicode(byte[] data, ref int index)
+        {
+            int charcode = 0;
+            int t = data[index];
+            index++;
+            if (t < 128)
+            {
+                return (char)t;
+            }
+
+            int high_bit_mask = (1 << 6) - 1;
+            int high_bit_shift = 0;
+            int total_bits = 0;
+            const int other_bits = 6;
+            while ((t & 0xC0) == 0xC0)
+            {
+                t <<= 1;
+                t &= 0xff;
+                total_bits += 6;
+                high_bit_mask >>= 1;
+                high_bit_shift++;
+                charcode <<= other_bits;
+                charcode |= data[index] & ((1 << other_bits) - 1);
+                index++;
+            }
+
+            charcode |= ((t >> high_bit_shift) & high_bit_mask) << total_bits;
+            if (charcode > 0xFFFF)
+            {
+                charcode = 0x3F; // The Question Mark
+            }
+
+            return (char)charcode;
+        }
+
+        /// <summary>
+        /// Decodes an UTF8 string to unicode, using the same algorithm the C++ code uses, to verify our data integrity.
+        /// Idealy, this should be equivalent to Encoding.UTF8.FromBytes();
+        /// </summary>
+        /// <param name="data">Input array, UTF8</param>
+        /// <returns>A .NET string instance (unicode)</returns>
+        private string DecodeUtf8(byte[] data)
+        {
+            int index = 0;
+            StringBuilder b = new StringBuilder();
+            while (index < data.Length)
+            {
+                b.Append(Utf8ToUnicode(data, ref index));
+            }
+
+            return b.ToString();
+        }
+
         internal int GetOrAddString(string data)
         {
-            var encoded = Encoding.UTF8.GetBytes(data);
+            byte[] encoded = Encoding.UTF8.GetBytes(data);
+
+            string decoded = DecodeUtf8(encoded);
+            if (decoded != data)
+            {
+                throw new NotSupportedException($"Unable to properly encode string {data} for transmission");
+            }
+
             var existing = _strings.FirstOrDefault(x => x.EncodedString.SequenceEqual(encoded));
             if (existing.Token != 0)
             {

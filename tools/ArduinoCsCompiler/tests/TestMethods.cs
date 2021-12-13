@@ -1037,7 +1037,7 @@ namespace Iot.Device.Arduino.Tests
                 ThrowAlways();
                 a = 1;
             }
-            catch (InvalidOperationException x)
+            catch (InvalidOperationException)
             {
                 MiniAssert.AreEqual(0, a);
                 a = 2;
@@ -1047,7 +1047,7 @@ namespace Iot.Device.Arduino.Tests
                     ThrowAlways();
                     a = 3;
                 }
-                catch (InvalidOperationException y)
+                catch (InvalidOperationException)
                 {
                     MiniAssert.AreEqual(2, a);
                     a = 4;
@@ -1075,7 +1075,7 @@ namespace Iot.Device.Arduino.Tests
                     ThrowAlways("In finally-try");
                     a = 3;
                 }
-                catch (InvalidOperationException y)
+                catch (InvalidOperationException)
                 {
                     MiniAssert.AreEqual(2, a);
                     a = 4;
@@ -1083,6 +1083,62 @@ namespace Iot.Device.Arduino.Tests
             }
 
             MiniAssert.AreEqual(4, a);
+            return 1;
+        }
+
+        public static int TryCatchDivideByZeroException(int arg1, int arg2)
+        {
+            int a = 10;
+            int b = 5;
+            try
+            {
+                b = a / arg1;
+            }
+            catch (DivideByZeroException x)
+            {
+                MiniAssert.NotNull(x);
+                MiniAssert.AreEqual("Attempted to divide by zero.", x.Message);
+            }
+
+            return b == 5 ? 1 : 0;
+        }
+
+        public static int TryCatchIndexOutOfRangeException(int arg1, int arg2)
+        {
+            int[] array = new int[5];
+            int b = 5;
+            try
+            {
+                b = array[arg1]; // arg1 is 10, so this is expected to throw
+            }
+            catch (IndexOutOfRangeException x)
+            {
+                MiniAssert.NotNull(x);
+                MiniAssert.That(x.Message.Contains("Index")); // The error message of the desktop runtime is textually different from ours
+            }
+
+            return b == 5 ? 1 : 0;
+        }
+
+        public static int StringEncoding(int arg1, int arg2)
+        {
+            string s = "Éæ";
+            MiniAssert.AreEqual(s[0], 'É');
+            MiniAssert.AreEqual(s[1], 'æ');
+            return 1;
+        }
+
+        public static int StringInterpolation(int arg1, int arg2)
+        {
+            string param = string.Empty;
+            if (arg1 == 0)
+            {
+                param = "B";
+            }
+
+            string result = $"A{param}C";
+
+            MiniAssert.AreEqual("ABC", result);
             return 1;
         }
 
