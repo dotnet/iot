@@ -15,6 +15,7 @@ namespace Iot.Device.Arduino.Tests
     /// <summary>
     /// Tests native library functions for the IL Executor
     /// </summary>
+    [Collection("SingleClientOnly")]
     public class ArduinoNativeLibraryTest : ArduinoTestBase, IClassFixture<FirmataTestFixture>
     {
         private const int MaxTestMemoryUsage = 400000;

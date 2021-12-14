@@ -16,6 +16,7 @@ using TestMethodStarting = Xunit.TestMethodStarting;
 
 namespace Iot.Device.Arduino.Tests
 {
+    [Collection("SingleClientOnly")]
     public sealed class FirmataIlExecutorTests : ArduinoTestBase, IClassFixture<FirmataTestFixture>, IDisposable
     {
         public FirmataIlExecutorTests(FirmataTestFixture fixture)
@@ -390,6 +391,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.FinallyInDifferentMethod), 2)]
         [InlineData(nameof(TestMethods.TryBlockInCatch), 0)]
         [InlineData(nameof(TestMethods.TryBlockInFinally), 0)]
+        [InlineData(nameof(TestMethods.FinallyInDifferentBlock), 0)]
         public void ExceptionHandling(string methodName, int arg1)
         {
             LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);

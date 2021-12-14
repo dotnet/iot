@@ -10,6 +10,7 @@ using Xunit;
 
 namespace Iot.Device.Arduino.Tests
 {
+    [Collection("SingleClientOnly")]
     public class GarbageCollectorTests : ArduinoTestBase, IClassFixture<FirmataTestFixture>, IDisposable
     {
         public GarbageCollectorTests(FirmataTestFixture fixture)

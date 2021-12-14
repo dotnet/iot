@@ -25,6 +25,7 @@ namespace Iot.Device.Arduino.Tests
     /// <summary>
     /// This class contains some larger examples for the Arduino compiler
     /// </summary>
+    [Collection("SingleClientOnly")]
     public class MiniExamples : ArduinoTestBase, IClassFixture<FirmataTestFixture>
     {
         public MiniExamples(FirmataTestFixture fixture)
@@ -49,9 +50,14 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Fact]
-        [Trait("explicit", "true")]
         public void FileSystemCheck()
         {
+            // The File System access methods are currently not implemented for the simulator
+            if (Board.FirmwareName.Contains("Simulator", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return;
+            }
+
             CompilerSettings s = new CompilerSettings()
             {
                 CreateKernelForFlashing = false,

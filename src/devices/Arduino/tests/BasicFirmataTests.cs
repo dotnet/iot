@@ -18,6 +18,7 @@ namespace Iot.Device.Arduino.Tests
     /// Basic firmata tests. These tests require functional hardware, that is an Arduino, loaded with a matching firmata firmware. It can also
     /// run against the *ExtendedConfigurableFirmata" simulator
     /// </summary>
+    [Collection("SingleClientOnly")]
     public sealed class BasicFirmataTests : IClassFixture<FirmataTestFixture>
     {
         private readonly FirmataTestFixture _fixture;
