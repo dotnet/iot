@@ -1086,6 +1086,48 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public static int NotMuchToDo(int a1, int a2, out int test)
+        {
+            test = 1;
+            int result = 0;
+            try
+            {
+                 result = a1 + a2;
+                 test = 2;
+            }
+            catch (OverflowException)
+            {
+                return 0;
+            }
+
+            test = 3;
+            return result;
+        }
+
+        /// <summary>
+        /// This tests that the above method is properly ended (the "test = 3" is executed) when reaching the leave instruction inside the try without
+        /// an exception. I had an error that was looking for finally blocks up the stack even if there was no exception.
+        /// </summary>
+        public static int FinallyInDifferentBlock(int arg1, int arg2)
+        {
+            int a = 1;
+            int b = 2;
+            int test = 0;
+            try
+            {
+                a = NotMuchToDo(10, 20, out test);
+            }
+            finally
+            {
+                b = 3;
+            }
+
+            MiniAssert.AreEqual(a, 30);
+            MiniAssert.AreEqual(b, 3);
+            MiniAssert.AreEqual(3, test);
+            return 1;
+        }
+
         public static int TryCatchDivideByZeroException(int arg1, int arg2)
         {
             int a = 10;
