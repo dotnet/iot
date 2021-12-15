@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="..\Common\Iot\Device\Common\NumberHelper.cs" />
     <Compile Include="Devices\Ds1307\Ds1307.cs" />
     <Compile Include="Devices\Ds1307\Ds1307Register.cs" />
@@ -21,5 +18,4 @@
     <Compile Include="Devices\Pcf8563\Pcf8563Register.cs" />
     <Compile Include="RtcBase.cs" />
   </ItemGroup>
-  
 </Project>

@@ -8,124 +8,77 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using Iot.Device.Media;
+using static Iot.Device.Media.VideoDevice;
 
 namespace CameraIoT
 {
     /// <summary>
-    /// New image ready event argument
-    /// </summary>
-    public class NewImageReadyEventArgs
-    {
-        /// <summary>
-        /// Constructor for a new image ready event argument
-        /// </summary>
-        /// <param name="image">The image</param>
-        public NewImageReadyEventArgs(byte[] image)
-        {
-            Image = image;
-        }
-
-        /// <summary>
-        /// Byte array containing the image
-        /// </summary>
-        public byte[] Image { get; }
-    }
-
-    /// <summary>
     /// An image class
     /// </summary>
-    public class Camera : ICamera
+    public class Camera
     {
-        private static readonly Camera _instance = new Camera();
-
-        /// <summary>
-        /// A Video Device
-        /// </summary>
-        public readonly VideoDevice Device;
-
-        /// <summary>
-        /// New image ready event
-        /// </summary>
-        /// <param name="sender">The sender</param>
-        /// <param name="e">The new image ready event argument</param>
-        public delegate void NewImageReadyEvent(object sender, NewImageReadyEventArgs e);
+        private readonly VideoDevice _device;
+        private CancellationTokenSource _tokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// Event for a new image ready
         /// </summary>
-        public event NewImageReadyEvent? NewImageReady;
+        public event NewImageBufferReadyEvent NewImageReady
+        {
+            add { _device.NewImageBufferReady += value; }
+            remove { _device.NewImageBufferReady -= value; }
+        }
 
         /// <summary>
-        /// True if the camera is running
+        /// Initiate the camera
         /// </summary>
-        public bool IsRunning { get; set; }
-
-        private Camera()
+        public Camera()
         {
             // You can select other size and other format, this is a very basic one supported by all types of webcams including old ones
             VideoConnectionSettings settings = new VideoConnectionSettings(0, (640, 480), Iot.Device.Media.PixelFormat.JPEG);
-            Device = VideoDevice.Create(settings);
-            IsRunning = true;
-            new Thread(() => { TakePictures(); }).Start();
+            _device = VideoDevice.Create(settings);
+            // if the device has sufficent ram, enabling pooling significantly improves frames per second by preventing GC.
+            _device.ImageBufferPoolingEnabled = true;
         }
 
         /// <summary>
-        /// Get the camera instance
+        /// Take a single picture
         /// </summary>
-        public static Camera Instance => _instance;
-
-        /// <summary>
-        /// Timezone to use for the time stamp
-        /// </summary>
-        public int Timezone { get; set; } = 0;
-
-        /// <summary>
-        /// The last image
-        /// </summary>
-        public byte[]? LastImage { get; internal set; }
-
-        /// <summary>
-        /// Take a picture
-        /// </summary>
-        public void TakePictures()
+        /// <returns></returns>
+        public byte[] TakePicture()
         {
-            Stream video;
-            Device.StartCaptureContinuous();
-            while (IsRunning)
-            {
-                try
-                {
-                    video = Device.CaptureContinuous();
-                    Bitmap myBitmap = new Bitmap(video);
-                    Graphics g = Graphics.FromImage(myBitmap);
-                    g.DrawString(DateTime.Now.AddHours(Timezone).ToString("yyyy-MM-dd HH:mm:ss"), new Font("Tahoma", 20), Brushes.White, new PointF(0, 0));
-                    using (var ms = new MemoryStream())
-                    {
-                        myBitmap.Save(ms, ImageFormat.Jpeg);
-                        LastImage = ms.ToArray();
-                    }
+            return _device.Capture();
+        }
 
-                    NewImageReady?.Invoke(this, new NewImageReadyEventArgs(LastImage));
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"{ex}");
-                    Thread.Sleep(1000);
-                }
+        /// <summary>
+        /// Stop the device capturing and reset
+        /// </summary>
+        public void StopCapture()
+        {
+            if (_device.IsCapturing)
+            {
+                _tokenSource.Cancel();
+                _tokenSource = new CancellationTokenSource();
+                _device.StopCaptureContinuous();
+            }
+        }
+
+        /// <summary>
+        /// Open device connection and start capturing if it is not already.
+        /// </summary>
+        public void StartCapture()
+        {
+            // check if the connection is already open, multiple connections to the same video device are not supported.
+            if (!_device.IsOpen)
+            {
+                _device.StartCaptureContinuous();
             }
 
-            Device.StopCaptureContinuous();
+            // check if the device is already capturing, multiple captures on the same video device are not supported.
+            if (!_device.IsCapturing)
+            {
+                new Thread(() => { _device.CaptureContinuous(_tokenSource.Token); }).Start();
+            }
         }
-    }
-
-    /// <summary>
-    /// Simple Camera interface
-    /// </summary>
-    public interface ICamera
-    {
-        /// <summary>
-        /// Take a picture
-        /// </summary>
-        public void TakePictures();
     }
 }

@@ -1,5 +1,4 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
@@ -7,25 +6,21 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <AssemblyName>Arduino.Monitor</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
   </ItemGroup>
-  
   <ItemGroup>
     <Compile Include="CharacterDisplay.cs" />
     <Compile Include="Arduino.Monitor.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <!--Cases used when running in VS, with the solution config either Windows-Debug or Linux-Debug (or -Release) -->
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\Button\Button.csproj" />
     <ProjectReference Include="..\..\CharacterLcd\CharacterLcd.csproj" />
     <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
     <ProjectReference Include="..\..\HardwareMonitor\HardwareMonitor.csproj" />
     <ProjectReference Include="..\..\Mcp3xxx\Mcp3xxx.csproj" />
     <ProjectReference Include="..\Arduino.csproj" />
   </ItemGroup>
-
 </Project>

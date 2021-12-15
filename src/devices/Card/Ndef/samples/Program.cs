@@ -11,6 +11,7 @@ using Iot.Device.Card;
 using Iot.Device.Card.Mifare;
 using Iot.Device.Common;
 using Iot.Device.Ft4222;
+using Iot.Device.FtCommon;
 using Iot.Device.Ndef;
 using Iot.Device.Pn5180;
 using Iot.Device.Pn532;
@@ -411,7 +412,7 @@ Pn5180 Ft4222Pn5180()
         Console.WriteLine();
     }
 
-    var (chip, dll) = FtCommon.GetVersions();
+    var (chip, dll) = Ft4222Common.GetVersions();
     Console.WriteLine($"Chip version: {chip}");
     Console.WriteLine($"Dll version: {dll}");
 

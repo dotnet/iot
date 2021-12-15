@@ -371,6 +371,46 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
+        public void AddCallbackRemoveAllCallbackAndAddCallbackAgainTest()
+        {
+            int callback1FiredTimes = 0, callback2FiredTimes = 0;
+            using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+            {
+                controller.OpenPin(InputPin, PinMode.Input);
+                controller.OpenPin(OutputPin, PinMode.Output);
+                controller.Write(OutputPin, PinValue.Low);
+                Thread.Sleep(WaitMilliseconds);
+
+                for (int i = 1; i < 3; i++)
+                {
+                    controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising, Callback1Rising);
+                    controller.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling, Callback2Falling);
+
+                    controller.Write(OutputPin, PinValue.High);
+                    Thread.Sleep(WaitMilliseconds);
+                    controller.Write(OutputPin, PinValue.Low);
+                    Thread.Sleep(WaitMilliseconds);
+
+                    controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback1Rising);
+                    controller.UnregisterCallbackForPinValueChangedEvent(InputPin, Callback2Falling);
+
+                    Assert.Equal(i, callback1FiredTimes);
+                    Assert.Equal(i, callback2FiredTimes);
+                }
+
+                void Callback1Rising(object sender, PinValueChangedEventArgs e)
+                {
+                    callback1FiredTimes++;
+                }
+
+                void Callback2Falling(object sender, PinValueChangedEventArgs e)
+                {
+                    callback2FiredTimes++;
+                }
+            }
+        }
+
+        [Fact]
         public void WaitForEventCancelAfter10MillisecondsTest()
         {
             using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))

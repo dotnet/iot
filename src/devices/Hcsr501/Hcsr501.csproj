@@ -1,14 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Hcsr501.cs" />
     <Compile Include="Hcsr501ValueChangedEventArgs.cs" />
   </ItemGroup>
-
 </Project>

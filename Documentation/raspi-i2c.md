@@ -115,7 +115,7 @@ Following are only available on BCM2711. You can as well add `,baudrate=10000` f
 
 ### Adding your user to the right permission group
 
-If you're running, or just upgraded to a version published after August 2020, this should be already done. 
+If you're running, or just upgraded to a version published after August 2020, this should be already done.
 But in case, you can always check that there are the right permissions on I2C:
 
 ```bash

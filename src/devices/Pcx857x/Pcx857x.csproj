@@ -1,13 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <RootNamespace>Iot.Device.Pcx857x</RootNamespace>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="..\Common\System\Device\Gpio\PinVector32.cs" Link="PinVector32.cs" />
     <Compile Include="..\Common\System\Device\Gpio\PinVector64.cs" Link="PinVector64.cs" />
     <Compile Include="Pca8574.cs" />
@@ -18,9 +15,7 @@
     <Compile Include="Pcx8575.cs" />
     <Compile Include="Pcx857x.cs" />
   </ItemGroup>
-
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
-
 </Project>

@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Ft232HDevice.cs" />
+    <Compile Include="Ft232HGpio.cs" />
+    <Compile Include="Ft232HI2c.cs" />
+    <Compile Include="Ft232HI2cBus.cs" />
+    <Compile Include="Ft232HSpi.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Board\Board.csproj" />
+  </ItemGroup>
+  <Import Project="..\FtCommon\FtCommon.projitems" Label="Shared" />
+
+</Project>

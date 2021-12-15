@@ -37,8 +37,7 @@ namespace Iot.Device.Board
         private Dictionary<int, PinUsage> _knownUsages;
 
         /// <summary>
-        /// Constructs a board instance with the given default numbering scheme.
-        /// All methods will use the given numbering scheme, unless another scheme is explicitly given in a call.
+        /// Constructs a board instance with the default numbering scheme.
         /// </summary>
         /// <remarks>
         /// The constructor will never throw an exception. Call any other method to initialize the hardware and check

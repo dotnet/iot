@@ -1,10 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="CommunicationProtocol.cs" />
     <Compile Include="Devices\Dht10.cs" />
@@ -15,10 +13,10 @@
     <Compile Include="DhtBase.cs" />
     <Compile Include="..\Common\System\Device\DelayHelper.cs" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <None Include="README.md" />
   </ItemGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
+  </ItemGroup>
 </Project>

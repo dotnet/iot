@@ -1,12 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <Compile Include="Gain.cs" />
     <Compile Include="MeasurementConfiguration.cs" />
     <Compile Include="MeasuringMode.cs" />
@@ -15,12 +12,9 @@
     <Compile Include="Hmc5883l.cs" />
     <Compile Include="SamplesAmount.cs" />
     <Compile Include="Status.cs" />
-
   </ItemGroup>
-
   <ItemGroup>
     <None Remove="README.md" />
     <None Remove="sensor.jpg" />
   </ItemGroup>
-
 </Project>

@@ -5,7 +5,8 @@
   <Import Project="../../eng/Versions.external.props" />
   <PropertyGroup>
     <!-- Most projects should use this value to build for all possible target frameworks -->
-    <DefaultBindingTfms>net5.0;netcoreapp2.1;netstandard2.0;</DefaultBindingTfms>
+    <DefaultBindingTfms>net6.0;netcoreapp3.1;netstandard2.0;</DefaultBindingTfms>
+    <DefaultSampleTfms>net6.0</DefaultSampleTfms>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
@@ -18,7 +19,7 @@
 
   <ItemGroup>
     <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
-    <ProjectReference Include="$(MainLibraryPath)/System.Device.Gpio.csproj" />
+    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 
 </Project>

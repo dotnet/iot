@@ -1,19 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="*.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <ProjectReference Include="..\Pca9685\Pca9685.csproj" />
     <ProjectReference Include="..\ServoMotor\ServoMotor.csproj" />
     <ProjectReference Include="..\DCMotor\DCMotor.csproj" />
   </ItemGroup>
-
 </Project>

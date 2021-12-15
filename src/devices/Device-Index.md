@@ -1,3 +1,5 @@
+<!-- markdownlint-disable -->
+
 # Alphabetical Device Index
 
 <devices>

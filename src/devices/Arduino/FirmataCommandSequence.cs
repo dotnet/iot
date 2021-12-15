@@ -47,7 +47,6 @@ namespace Iot.Device.Arduino
             _sequence[0] = (byte)command;
             _sequenceLength = 1;
         }
-
         /// <summary>
         /// Create a new sysex command sequence. The <see cref="StartSysex"/> byte is added automatically.
         /// </summary>

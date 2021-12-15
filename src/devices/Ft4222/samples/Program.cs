@@ -12,6 +12,7 @@ using Iot.Device.Ft4222;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using UnitsNet;
+using Iot.Device.FtCommon;
 
 Console.WriteLine("Hello I2C, SPI and GPIO FTFI! FT4222");
 Console.WriteLine("Select the test you want to run:");
@@ -40,9 +41,10 @@ if (devices.Count == 0)
     return;
 }
 
-FtDevice firstDevice = devices[0];
+// Assuming the device 0 is the first FT4222
+Ft4222Device firstDevice = Ft4222Device.GetFt4222()[0];
 
-var (chip, dll) = FtCommon.GetVersions();
+var (chip, dll) = Ft4222Common.GetVersions();
 Console.WriteLine($"Chip version: {chip}");
 Console.WriteLine($"Dll version: {dll}");
 
@@ -66,9 +68,9 @@ if (key.KeyChar == '4')
     TestEvents();
 }
 
-void TestI2c(FtDevice device)
+void TestI2c(Ft4222Device device)
 {
-    using I2cBus ftI2c = device.CreateI2cBus();
+    using I2cBus ftI2c = device.CreateOrGetI2cBus(0);
     using Bno055Sensor bno055 = new(ftI2c.CreateDevice(Bno055Sensor.DefaultI2cAddress));
     using Bme280 bme280 = new(ftI2c.CreateDevice(Bme280.DefaultI2cAddress));
     bme280.SetPowerMode(Bmx280PowerMode.Normal);

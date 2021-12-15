@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>9</LangVersion>
     <Configurations>Debug;Release</Configurations>
     <Copyright>The .NET Foundation</Copyright>
@@ -16,7 +16,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.0.1" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 

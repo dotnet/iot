@@ -13,8 +13,8 @@ namespace System.Device.I2c
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static I2cBus CreateWindows10I2cBus(int busId)
         {
-            // If we land in this method it means the console application is running on Windows and targetting net5.0 (without specifying Windows platform)
-            // In order to call WinRT code in net5.0 it is required for the application to target the specific platform
+            // If we land in this method it means the console application is running on Windows and targetting net6.0 (without specifying Windows platform)
+            // In order to call WinRT code in net6.0 it is required for the application to target the specific platform
             // so we throw the bellow exception with a detailed message in order to instruct the consumer on how to move forward.
             throw new PlatformNotSupportedException(CommonHelpers.GetFormattedWindowsPlatformTargetingErrorMessage(nameof(I2cDevice)));
         }

@@ -56,6 +56,24 @@ var lcd = new Lcd1602(registerSelectPin: 0, enablePin: 2, dataPins: new int[] { 
 there is a full working example in the samples directory called Pcf8574tSample.cs
 For PCF8574T i2c addresses can be between 0x27 and 0x20 depending on bridged solder jumpers and for PCF8574AT i2c addresses can be between 0x3f and 0x38 depending on bridged solder jumpers
 
+This device binding can be combined with the [ShiftRegister](https://github.com/dotnet/iot/tree/main/src/devices/ShiftRegister/README.md) binding in order to drive an HD44780 display using a shift register. The [ShiftRegister](https://github.com/dotnet/iot/tree/main/src/devices/ShiftRegister/README.md) binding enables interaction via GPIO or SPI. Any shift register can be used as long as it's output length is evenly divisible by 8. Example:
+
+```csharp
+int registerSelectPin = 1;
+int enablePin = 2;
+int[] dataPins = new int[] { 6, 5, 4, 3 };
+int backlightPin = 7;
+// Gpio
+using ShiftRegister sr = new(ShiftRegisterPinMapping.Minimal, 8);
+// Spi
+// using SpiDevice spiDevice = SpiDevice.Create(new(0, 0));
+// using ShiftRegister sr = new(spiDevice, 8);
+using LcdInterface lcdInterface = LcdInterface.CreateFromShiftRegister(registerSelectPin, enablePin, dataPins, backlightPin, sr);
+using Lcd1602 lcd = new(lcdInterface);
+```
+
+The sample code works with Adafruit's [I2C / SPI character LCD backpack](https://learn.adafruit.com/i2c-spi-lcd-backpack) which uses the [Sn74hc595](https://github.com/dotnet/iot/blob/main/src/devices/Sn74hc595/README.md) 8-bit shift register to support SPI communication. The pin parameters are set according to the backpack's [schematic](https://learn.adafruit.com/i2c-spi-lcd-backpack/downloads).
+
 ## Character LCD display Samples
 
 [Different samples](https://github.com/dotnet/iot/tree/main/src/devices/CharacterLcd/samples) are provided. The main method will use the Board's Gpio pins to drive the LCD display. The second example will instead use an MCP Gpio extender backpack to drive the LCD display. Also the second example can use Grove RGB LCD Backlight via i2c bus. This second example has been tested on a CrowPi device and Grove LCD RGB Backlight device.

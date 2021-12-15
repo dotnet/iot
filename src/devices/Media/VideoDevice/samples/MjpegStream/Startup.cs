@@ -37,8 +37,8 @@ namespace CameraIoT
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-            // This is adding the Camera as a singleton
-            services.AddSingleton<ICamera>(Camera.Instance);
+            // Each video device should be added as a singleton
+            services.AddSingleton<Camera>();
             services.Configure<KestrelServerOptions>(options =>
             {
                 options.AllowSynchronousIO = true;

@@ -11,7 +11,7 @@ PCX857X devices contain different markings to distinguish features like packagin
 * PCA8574 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA8574_PCA8574A.pdf)
 * PCA8575 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCA8575.pdf)
 
-#### Usage
+## Usage
 
 ```csharp
  // 0x20 is the device address in this example.

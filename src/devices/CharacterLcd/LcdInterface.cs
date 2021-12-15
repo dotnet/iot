@@ -6,6 +6,7 @@ using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
+using Iot.Device.Multiplexing;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -30,6 +31,24 @@ namespace Iot.Device.CharacterLcd
         public static LcdInterface CreateGpio(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, float backlightBrightness = 1.0f, int readWritePin = -1, GpioController? controller = null, bool shouldDispose = true)
         {
             return new Gpio(registerSelectPin, enablePin, dataPins, backlightPin, backlightBrightness, readWritePin, controller, shouldDispose);
+        }
+
+        /// <summary>
+        /// Creates a ShiftRegister based interface for the LCD.
+        /// </summary>
+        /// <remarks>
+        /// Pin parameters should be set according to which output pin of the shift register they are connected to
+        /// (e.g. 0 to 7 for 8bit shift register).
+        /// </remarks>
+        /// <param name="registerSelectPin">The pin that controls the register select.</param>
+        /// <param name="enablePin">The pin that controls the enable switch.</param>
+        /// <param name="dataPins">Collection of pins holding the data that will be printed on the screen.</param>
+        /// <param name="backlightPin">The optional pin that controls the backlight of the display.</param>
+        /// <param name="shiftRegister">The shift register that drives the LCD.</param>
+        /// <param name="shouldDispose">True to dispose the shift register.</param>
+        public static LcdInterface CreateFromShiftRegister(int registerSelectPin, int enablePin, int[] dataPins, int backlightPin = -1, ShiftRegister? shiftRegister = null, bool shouldDispose = true)
+        {
+            return new ShiftRegisterLcdInterface(registerSelectPin, enablePin, dataPins, backlightPin, shiftRegister, shouldDispose);
         }
 
         /// <summary>

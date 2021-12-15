@@ -1,21 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Sht3x.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
   </ItemGroup>
-
-  <ItemGroup> 
+  <ItemGroup>
     <None Remove="SHT3x_circuit.fzz" />
     <None Remove="SHT3x_circuit_bb.jpg" />
     <None Remove="README.md" />
     <None Remove="RunningResult.jpg" />
   </ItemGroup>
-
 </Project>

@@ -1,15 +1,10 @@
-﻿
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-      <ProjectReference Include="../Hts221.csproj" />
-      <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
+    <ProjectReference Include="../Hts221.csproj" />
     <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
   </ItemGroup>
-
 </Project>

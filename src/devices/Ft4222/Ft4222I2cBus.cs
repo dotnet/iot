@@ -7,6 +7,7 @@ using System.Device.I2c;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft4222
 {
@@ -23,13 +24,13 @@ namespace Iot.Device.Ft4222
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public FtDevice DeviceInformation { get; private set; }
+        public Ft4222Device DeviceInformation { get; private set; }
 
         /// <summary>
         /// Create a FT4222 I2C Device
         /// </summary>
         /// <param name="deviceInformation">Device information. Use FtCommon.GetDevices to get it.</param>
-        public Ft4222I2cBus(FtDevice deviceInformation)
+        public Ft4222I2cBus(Ft4222Device deviceInformation)
         {
             switch (deviceInformation.Type)
             {

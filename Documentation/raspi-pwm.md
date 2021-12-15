@@ -31,7 +31,7 @@ When you run the code, if you attached a simple led and a resistor on the physic
 
 If you get an error message like this one, it means the hardware PWM has not been properly enabled:
 
-```
+```text
 Hello PWM!
 Unhandled exception. System.ArgumentException: The chip number 0 is invalid or is not enabled.
    at System.Device.Pwm.Channels.UnixPwmChannel.Validate()
@@ -43,7 +43,7 @@ Aborted
 
 If you get an error message like the following one, it means that you don't have the permission, see the specific section below for this as well:
 
-```
+```text
 Unhandled exception. System.UnauthorizedAccessException: Access to the path '/sys/class/pwm/pwmchip0/export' is denied.
  ---> System.IO.IOException: Permission denied
 ```
@@ -126,7 +126,7 @@ You are all setup, the basic example should now work with the PWM and channel yo
 
 When running the basic code, you may have a lack of permissions:
 
-```
+```text
 Unhandled exception. System.UnauthorizedAccessException: Access to the path '/sys/class/pwm/pwmchip0/export' is denied.
  ---> System.IO.IOException: Permission denied
    --- End of inner exception stack trace ---
@@ -156,7 +156,7 @@ sudo ./yourapplication
 
 ### Adding your user to the right permission group
 
-If you're running, or just upgraded to a version published after August 2020, this should be already done. 
+If you're running, or just upgraded to a version published after August 2020, this should be already done.
 You will have to create a [specific group in udev](https://raspberrypi.stackexchange.com/questions/66890/accessing-pwm-module-without-root-permissions).
 
 ```bash
@@ -165,7 +165,7 @@ sudo nano /etc/udev/rules.d/99-com.rules
 
 Add the following lines:
 
-```
+```text
 SUBSYSTEM=="pwm*", PROGRAM="/bin/sh -c '\
         chown -R root:gpio /sys/class/pwm && chmod -R 770 /sys/class/pwm;\
         chown -R root:gpio /sys/devices/platform/soc/*.pwm/pwm/pwmchip* && chmod -R 770 /sys/devices/platform/soc/*.pwm/pwm/pwmchip*\

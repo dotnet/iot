@@ -1,10 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
     <Compile Include="Flags.cs" />
@@ -18,19 +16,18 @@
     <Compile Include="LcdInterface.Gpio.cs" />
     <Compile Include="LcdInterface.I2c.cs" />
     <Compile Include="LcdInterface.I2c4Bit.cs" />
+    <Compile Include="LcdInterface.ShiftRegister.cs" />
     <Compile Include="LcdRgb.cs" />
     <Compile Include="LcdValueUnitDisplay.cs" />
     <Compile Include="LineWrapMode.cs" />
     <Compile Include="Registers.cs" />
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="../Common/CommonHelpers.csproj" />
+    <ProjectReference Include="../ShiftRegister/ShiftRegister.csproj" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="BigFontMap.txt" />
   </ItemGroup>
-
 </Project>

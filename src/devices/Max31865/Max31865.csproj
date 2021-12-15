@@ -1,18 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
-    <Compile Include="$(MSBuildThisFileDirectory)/../Common/System/Runtime/CompilerServices/IsExternalInit.cs" Condition="'$(TargetFramework)' == 'netcoreapp2.1'" />
     <Compile Include="*.cs" />
     <None Include="README.md" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
-
 </Project>
