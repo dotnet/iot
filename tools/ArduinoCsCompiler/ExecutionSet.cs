@@ -68,7 +68,7 @@ namespace ArduinoCsCompiler
             KnownTypeTokensMap.Add(typeof(System.MulticastDelegate), KnownTypeTokens.MulticastDelegate);
             KnownTypeTokensMap.Add(typeof(TypeInfo), KnownTypeTokens.TypeInfo);
             KnownTypeTokensMap.Add(typeof(String), KnownTypeTokens.String);
-            KnownTypeTokensMap.Add(Type.GetType("System.RuntimeType", true), KnownTypeTokens.RuntimeType);
+            KnownTypeTokensMap.Add(Type.GetType("System.RuntimeType", true)!, KnownTypeTokens.RuntimeType);
             KnownTypeTokensMap.Add(typeof(Type), KnownTypeTokens.Type);
             KnownTypeTokensMap.Add(typeof(MiniType), KnownTypeTokens.Type); // Same value for different keys is ok
             KnownTypeTokensMap.Add(typeof(Array), KnownTypeTokens.Array);

@@ -17,6 +17,7 @@
     <!--Cases used when running in VS, with the solution config either Windows-Debug or Linux-Debug (or -Release) -->
     <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
     <ProjectReference Include="..\..\Button\Button.csproj" />
+	<ProjectReference Include="..\..\Board\Board.csproj" />
     <ProjectReference Include="..\..\CharacterLcd\CharacterLcd.csproj" />
     <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
     <ProjectReference Include="..\..\HardwareMonitor\HardwareMonitor.csproj" />
