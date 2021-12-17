@@ -153,7 +153,7 @@ namespace Iot.Device.Arduino
         /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
         /// </summary>
         /// <param name="boardAddress">The IP address of the board</param>
-        /// <param name="port">The network port to use</param>
+        /// <param name="port">The network port to use. The default port is 27016</param>
         /// <param name="board">Returns the board if successful</param>
         /// <returns>True on success, false otherwise</returns>
         public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port,
@@ -165,10 +165,15 @@ namespace Iot.Device.Arduino
             board = null;
             try
             {
-                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(boardAddress, port);
-                socket.NoDelay = true;
-                var networkStream = new NetworkStream(socket, true);
+                var networkStream = new ReconnectingNetworkStream(() =>
+                {
+                    var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    socket.Connect(boardAddress, port);
+                    socket.NoDelay = true;
+                    Stream socketStream = new NetworkStream(socket, true);
+                    return socketStream;
+                });
+
                 board = new ArduinoBoard(networkStream);
                 if (!(board.FirmataVersion > new Version(1, 0)))
                 {

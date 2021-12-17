@@ -3,7 +3,10 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Globalization;
+using System.IO;
+using System.IO.Ports;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,20 +22,102 @@ namespace WeatherStation
 {
     internal class WeatherStation
     {
+        private const int RedLed = 16;
+        private const int Button = 17;
+
         private const int StationAltitude = 650;
 
-        public static int Main()
+        private readonly ArduinoBoard _board;
+        private Bme680? _bme680;
+
+        private WeatherStation(ArduinoBoard board)
         {
-            const int redLed = 16;
-            const int button = 17;
-            using GpioController gpioController = new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
-            gpioController.OpenPin(redLed, PinMode.Output);
-            gpioController.Write(redLed, PinValue.High);
-            gpioController.OpenPin(button, PinMode.Input);
+            _board = board;
+        }
+
+        public static int Main(string[] args)
+        {
+            ArduinoBoard? board;
+            string portName;
+            Console.WriteLine("Connecting...");
+            if (args.Length > 0)
+            {
+                portName = args[0];
+            }
+            else
+            {
+                portName = string.Empty;
+            }
+
+            if (portName == "INET")
+            {
+                IPAddress address = IPAddress.Loopback;
+                if (args.Length > 1)
+                {
+                    address = IPAddress.Parse(args[1]);
+                }
+
+                if (!ArduinoBoard.TryConnectToNetworkedBoard(address, 27016, out board))
+                {
+                    Console.WriteLine($"Unable to connect to board at address {address}");
+                    return 1;
+                }
+            }
+            else
+            {
+                string[] boards = SerialPort.GetPortNames();
+                if (portName != string.Empty)
+                {
+                    boards = new string[]
+                    {
+                        portName
+                    };
+                }
+
+                if (!ArduinoBoard.TryFindBoard(boards, new List<int>() { 115200 }, out board))
+                {
+                    Console.WriteLine($"Unable to connect to board at any of {String.Join(", ", boards)}");
+                    return 1;
+                }
+            }
+
+            try
+            {
+                Console.WriteLine("Successfully connected");
+                WeatherStation ws = new(board);
+                return ws.Run();
+            }
+            finally
+            {
+                board.Dispose();
+            }
+        }
+
+        private void InitBme()
+        {
+            I2cDevice bme680Device = _board.CreateI2cDevice(new I2cConnectionSettings(0, Bme680.SecondaryI2cAddress));
+            if (_bme680 != null)
+            {
+                _bme680.Dispose();
+                _bme680 = null;
+            }
+
+            _bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
+            _bme680.Reset();
+            _bme680.GasConversionIsEnabled = false;
+            _bme680.HeaterIsEnabled = false;
+        }
+
+        public int Run()
+        {
+            GpioController gpioController = _board.CreateGpioController();
+            gpioController.OpenPin(RedLed, PinMode.Output);
+            gpioController.Write(RedLed, PinValue.High);
+            gpioController.OpenPin(Button, PinMode.Input);
             // This Sleep is just because the display sometimes needs a bit of time to properly initialize -
             // otherwise it just doesn't properly accept commands
             Thread.Sleep(1000);
-            using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
+            using I2cDevice i2cDevice = _board.CreateI2cDevice(new I2cConnectionSettings(0, 0x27));
             using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
             using Hd44780 hd44780 = new Lcd2004(lcdInterface);
             hd44780.UnderlineCursorVisible = false;
@@ -48,37 +133,48 @@ namespace WeatherStation
             console.LineFeedMode = LineWrapMode.Truncate;
             console.ReplaceLine(0, "Startup!");
             console.ReplaceLine(1, "Initializing BME680...");
-            I2cDevice bme680Device = new ArduinoNativeI2cDevice(new I2cConnectionSettings(0, Bme680.SecondaryI2cAddress));
-            using Bme680 bme680 = new Bme680(bme680Device, Temperature.FromDegreesCelsius(20));
-            bme680.Reset();
-            bme680.GasConversionIsEnabled = false;
-            bme680.HeaterIsEnabled = false;
-            gpioController.Write(redLed, PinValue.Low);
-            while (gpioController.Read(button) == PinValue.Low)
+            InitBme();
+            gpioController.Write(RedLed, PinValue.Low);
+            while (gpioController.Read(Button) == PinValue.Low)
             {
-                bme680.SetPowerMode(Bme680PowerMode.Forced);
-                var time = DateTime.Now;
-                if (bme680.TryReadTemperature(out Temperature temp) && bme680.TryReadPressure(out Pressure pressure) && bme680.TryReadHumidity(out RelativeHumidity humidity))
+                try
                 {
-                    Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
-                    Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
+                    _bme680.SetPowerMode(Bme680PowerMode.Forced);
+                    var time = DateTime.Now;
+                    if (_bme680.TryReadTemperature(out Temperature temp) && _bme680.TryReadPressure(out Pressure pressure) && _bme680.TryReadHumidity(out RelativeHumidity humidity))
+                    {
+                        Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
+                        Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
 
-                    string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
-                    string humidityLine = humidity.Percent.ToString("F1") + "% RH, DP: " + dewPoint.DegreesCelsius.ToString("F1") + " °C";
+                        string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
+                        string humidityLine = humidity.Percent.ToString("F1") + "% RH, DP: " + dewPoint.DegreesCelsius.ToString("F1") + " °C";
 
-                    console.ReplaceLine(0, temperatureLine);
-                    console.ReplaceLine(1, humidityLine);
+                        console.ReplaceLine(0, temperatureLine);
+                        console.ReplaceLine(1, humidityLine);
+                    }
+
+                    console.ReplaceLine(2, time.ToString("ddd dd. MMM yyyy"));
+                    console.SetCursorPosition(0, 3);
+                    console.ReplaceLine(3, time.ToLongTimeString());
+                }
+                catch (TimeoutException x)
+                {
+                    console.ReplaceLine(0, $"ERR: {x.Message}");
+                    Console.WriteLine($"TimeoutException: {x.Message}");
+                }
+                catch (IOException y)
+                {
+                    console.ReplaceLine(0, $"ERR: {y.Message}");
+                    Console.WriteLine($"IOException: {y.Message}");
+                    InitBme(); // reinit, something is fishy
                 }
 
-                console.ReplaceLine(2, time.ToString("ddd dd. MMM yyyy"));
-                console.SetCursorPosition(0, 3);
-                console.ReplaceLine(3, time.ToLongTimeString());
-                gpioController.Write(redLed, PinValue.High);
+                gpioController.Write(RedLed, PinValue.High);
                 Thread.Sleep(100);
-                gpioController.Write(redLed, PinValue.Low);
+                gpioController.Write(RedLed, PinValue.Low);
             }
 
-            return 1;
+            return 0;
         }
     }
 }

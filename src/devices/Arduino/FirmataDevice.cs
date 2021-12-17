@@ -54,6 +54,8 @@ namespace Iot.Device.Arduino
 
         private CommandError _lastCommandError;
 
+        private int _i2cSequence;
+
         /// <summary>
         /// Event used when waiting for answers (i.e. after requesting firmware version)
         /// </summary>
@@ -87,6 +89,7 @@ namespace Iot.Device.Arduino
             _firmwareName = string.Empty;
             _lastRawLine = new StringBuilder();
             SupportedModes = supportedModes;
+            _i2cSequence = 0;
         }
 
         internal List<SupportedPinConfiguration> PinConfigurations
@@ -135,6 +138,7 @@ namespace Iot.Device.Arduino
             _inputThreadShouldExit = false;
 
             _inputThread = new Thread(InputThread);
+            _inputThread.Name = "Firmata input thread";
             _inputThread.Start();
 
             // Reset device, in case it is still sending data from an aborted process
@@ -1044,10 +1048,13 @@ namespace Iot.Device.Arduino
             {
                 i2cSequence.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
                 i2cSequence.WriteByte((byte)slaveAddress);
-                i2cSequence.WriteByte(0); // Write flag is 0, all other bits as well
+                // Write flag is 0, all other bits normally, too.
+                i2cSequence.WriteByte(0);
                 i2cSequence.WriteBytesAsTwo7bitBytes(writeData);
                 i2cSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             }
+
+            int sequenceNo = (_i2cSequence++) & 0b111;
 
             if (replyData != null && replyData.Length > 0)
             {
@@ -1060,7 +1067,9 @@ namespace Iot.Device.Arduino
 
                 i2cSequence.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
                 i2cSequence.WriteByte((byte)slaveAddress);
-                i2cSequence.WriteByte(0b1000); // Read flag is 1, all other bits are 0
+
+                // Read flag is 1, all other bits are 0. We use bits 0-2  (slave address MSB, unused in 7 bit mode) as sequence id.
+                i2cSequence.WriteByte((byte)(0b1000 | sequenceNo));
                 byte length = (byte)replyData.Length;
                 // Only write the length of the expected data.
                 // We could insert the register to read here, but we assume that has been written already (the client is responsible for that)
@@ -1071,7 +1080,25 @@ namespace Iot.Device.Arduino
 
             if (doWait)
             {
-                var response = SendCommandAndWait(i2cSequence);
+                var response = SendCommandAndWait(i2cSequence, TimeSpan.FromSeconds(3), (sequence, bytes) =>
+                {
+                    if (bytes.Length < 5)
+                    {
+                        return false;
+                    }
+
+                    if (bytes[0] != (byte)FirmataSysexCommand.I2C_REPLY)
+                    {
+                        return false;
+                    }
+
+                    if ((bytes[2] & 0b111) != sequenceNo)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }, out _);
 
                 if (response[0] != (byte)FirmataSysexCommand.I2C_REPLY)
                 {

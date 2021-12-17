@@ -42,7 +42,7 @@ namespace ArduinoCsCompiler
         [Option('p', "port", HelpText = "The serial port where the microcontroller is connected. Defaults to auto-detect", SetName = "ConnectionType")]
         public string Port { get; set; }
 
-        [Option('b', "baudrate", HelpText = "The baudrate to program the microcontroller. Defaults to auto-detect")]
+        [Option('b', "baudrate", HelpText = "The baudrate to program the microcontroller.", Default = 115200)]
         public int Baudrate { get; set; }
 
         [Option('n', "network", HelpText = "An IP address to connect to (with optional port number)", SetName = "ConnectionType")]
@@ -59,6 +59,9 @@ namespace ArduinoCsCompiler
 
         [Option("run", Default = true, HelpText = "Run the program after uploading. The compiler will switch to execution mode after upload and run the program, printing any log output to the console")]
         public bool Run { get; set; }
+
+        [Option('d', "debug", HelpText = "Start the interactive remote debugger after the program has started.")]
+        public bool Debug { get; set; }
 
         [Option("keepifcurrent", Default = false, HelpText = "If specified, the program will not be transmitted if it is already loaded. Defaults to false, because not all changes might be caught.")]
         public bool DoNotWriteFlashIfAlreadyCurrent { get; set; }

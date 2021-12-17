@@ -92,11 +92,14 @@ namespace ArduinoCsCompiler
             ArduinoBoard? board = null;
             try
             {
-                List<int> usableBaudRates = ArduinoBoard.CommonBaudRates();
-                if (commandLineOptions.Baudrate != 0)
+                List<int> usableBaudRates = new List<int>();
+                if (commandLineOptions.Baudrate > 0)
                 {
-                    usableBaudRates.Clear();
                     usableBaudRates.Add(commandLineOptions.Baudrate);
+                }
+                else
+                {
+                    usableBaudRates.Add(115200);
                 }
 
                 List<string> usablePorts = SerialPort.GetPortNames().ToList();
@@ -230,8 +233,24 @@ namespace ArduinoCsCompiler
             {
                 set.Load(false);
 
+                if (_commandLineOptions.Run == false)
+                {
+                    _logger.LogInformation("Program uploaded successfully. Execution not started. Reset the board to start execution.");
+                    return;
+                }
+
                 try
                 {
+                    _logger.LogInformation("Starting code execution...");
+                    if (_commandLineOptions.Debug == false)
+                    {
+                        _compiler.ExecuteStaticCtors(set);
+                        var remoteMain = set.MainEntryPoint;
+                        remoteMain.InvokeAsync();
+                        _logger.LogInformation("Program upload successful. Main method invoked. The program is now running.");
+                        return;
+                    }
+
                     _debugger = _compiler.CreateDebugger();
 
                     // TODO: This setup doesn't allow debugging static ctors. We should fix that.
