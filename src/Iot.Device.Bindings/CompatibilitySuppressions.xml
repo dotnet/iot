@@ -1,12 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
-    <DiagnosticId>CP0003</DiagnosticId>
-    <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:System.Device.Pwm.Drivers.SoftwarePwmChannel.#ctor(System.Int32,System.Int32,System.Double,System.Boolean,System.Device.Gpio.GpioController)</Target>
     <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
@@ -345,6 +339,13 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.DHTxx.Dht22.#ctor(System.Int32,System.Device.Gpio.PinNumberingScheme)</Target>
+    <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.DHTxx.DhtBase._readBuff</Target>
     <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -723,13 +724,6 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Ads1115.Ads1115.#ctor(System.Device.I2c.I2cDevice,Iot.Device.Ads1115.InputMultiplexer,Iot.Device.Ads1115.MeasuringRange,Iot.Device.Ads1115.DataRate)</Target>
-    <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Iot.Device.DHTxx.DhtBase._readBuff</Target>
     <Left>lib/netcoreapp2.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
