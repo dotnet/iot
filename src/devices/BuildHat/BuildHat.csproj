@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+
+   <ItemGroup>
+     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+     <Compile Include="Brick.cs" />
+     <Compile Include="Models\BuildHatInformation.cs" />
+     <Compile Include="Models\CombiModes.cs" />
+     <Compile Include="Models\LedMode.cs" />
+     <Compile Include="Models\MinimumMaximumValues.cs" />
+     <Compile Include="Models\ModeDetail.cs" />
+     <Compile Include="Models\PositionWay.cs" />
+     <Compile Include="Models\RecommendedPid.cs" />
+     <Compile Include="Models\SensorPort.cs" />
+     <Compile Include="Models\SensorType.cs" />
+     <Compile Include="Models\TypeValues.cs" />
+     <Compile Include="Motors\ActiveMotor.cs" />
+     <Compile Include="Motors\IMotor.cs" />
+     <Compile Include="Motors\PassiveMotor.cs" />
+     <Compile Include="Sensors\ActiveSensor.cs" />
+     <Compile Include="Sensors\Sensor.cs" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <None Include="data\firmware.bin">
+       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     </None>
+     <None Include="data\signature.bin">
+       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     </None>
+     <None Include="data\version">
+       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+     </None>
+   </ItemGroup>
+
+</Project>
