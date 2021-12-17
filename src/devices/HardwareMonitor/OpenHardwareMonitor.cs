@@ -36,15 +36,20 @@ namespace Iot.Device.HardwareMonitor
 
         private readonly OhmTransport _transport;
 
-        private delegate IQuantity UnitCreator(float value);
+        /// <summary>
+        /// A delegate that crates an instance of a quantity from a value
+        /// </summary>
+        /// <param name="value">Value to convert</param>
+        /// <returns>A Quantity instance</returns>
+        public delegate IQuantity UnitCreator(double value);
 
         /// <summary>
         /// Event that gets invoked when a value is updated
         /// </summary>
-        /// <param name="sensor">Sensor that has an updated value</param>
+        /// <param name="sensorToMonitor">Sensor that has an updated value</param>
         /// <param name="value">New value for the sensor</param>
         /// <param name="timeSinceUpdate">Time since the last update of this sensor</param>
-        public delegate void OnNewValue(Sensor sensor, IQuantity value, TimeSpan timeSinceUpdate);
+        public delegate void OnNewValue(Sensor sensorToMonitor, IQuantity value, TimeSpan timeSinceUpdate);
 
         private static Dictionary<SensorType, (Type Type, UnitCreator Creator)> _typeMap;
         private Hardware? _cpu;
@@ -562,15 +567,15 @@ namespace Iot.Device.HardwareMonitor
                 if (sensor.SensorType == SensorType.Power)
                 {
                     // Energy usage (integration of power over time)
-                    var managementInstance = new EnergyManagementInstance();
-                    Sensor newSensor = new Sensor(managementInstance, sensor.Name + " Energy", sensor.Identifier + "/energy", sensor.Identifier, SensorType.Energy);
+                    Sensor newSensor = new Sensor(sensor.Name + " Energy", sensor.Identifier + "/energy", sensor.Identifier, SensorType.Energy);
+                    // This lambda is a bit confusing: But we add a monitoring for the sensor we derive from and update the new
                     newSensor.Job = StartMonitoring(sensor, interval, (s, value, timeSinceUpdate) =>
                     {
-                        double previousEnergy = managementInstance.Value;
+                        double previousEnergy = newSensor.Value;
                         // Value is in watts, so increment is in watts-hours, which is an unit we can later convert from
                         double increment = value.Value * timeSinceUpdate.TotalHours;
                         double newEnergy = previousEnergy + increment;
-                        managementInstance.Value = newEnergy;
+                        newSensor.Value = newEnergy;
                     });
                     _derivedSensors.Add(newSensor);
                 }
@@ -578,13 +583,12 @@ namespace Iot.Device.HardwareMonitor
                 // For CPU package, calculate heat flux
                 if (sensor.SensorType == SensorType.Power && sensor.Name != null && sensor.Name.IndexOf("CPU Package", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
-                    var managementInstance = new EnergyManagementInstance();
-                    var newSensor = new Sensor(managementInstance, sensor.Name + " HeatFlux", sensor.Identifier + "/heatflux", sensor.Identifier, SensorType.HeatFlux);
+                    var newSensor = new Sensor(sensor.Name + " HeatFlux", sensor.Identifier + "/heatflux", sensor.Identifier, SensorType.HeatFlux);
                     newSensor.Job = StartMonitoring(sensor, interval, (s, value, timeSinceUpdate) =>
                     {
                         Power p = Power.FromWatts(value.Value); // Current power usage in Watts
                         HeatFlux hf = p / cpuDieSize;
-                        managementInstance.Value = hf.KilowattsPerSquareMeter;
+                        newSensor.Value = hf.KilowattsPerSquareMeter;
                     });
                     _derivedSensors.Add(newSensor);
                     cpuPower = sensor;
@@ -595,8 +599,7 @@ namespace Iot.Device.HardwareMonitor
             // From VCore and CPU package power calculate amperes into CPU
             if (cpuPower != null && vcore != null)
             {
-                var managementInstance = new EnergyManagementInstance();
-                var newSensor = new Sensor(managementInstance, vcore.Name + " Current", vcore.Identifier + "/current", vcore.Identifier, SensorType.Current);
+                var newSensor = new Sensor(vcore.Name + " Current", vcore.Identifier + "/current", vcore.Identifier, SensorType.Current);
                 newSensor.Job = StartMonitoring(vcore, interval, (s, value, timeSinceUpdate) =>
                 {
                     if (cpuPower.TryGetValue(out Power power))
@@ -605,11 +608,11 @@ namespace Iot.Device.HardwareMonitor
                         if (potential.Volts > 0)
                         {
                             ElectricCurrent current = power / potential;
-                            managementInstance.Value = current.Amperes;
+                            s.Value = current.Amperes;
                         }
                         else
                         {
-                            managementInstance.Value = 0;
+                            s.Value = 0;
                         }
                     }
                 });
@@ -639,6 +642,12 @@ namespace Iot.Device.HardwareMonitor
         public void Dispose()
         {
             StopAllMonitoring();
+            if (_openHardwareMonitorInternal != null)
+            {
+                _openHardwareMonitorInternal.Dispose();
+                _openHardwareMonitorInternal = null;
+            }
+
             _gpu = null;
             _cpu = null;
         }
@@ -646,32 +655,19 @@ namespace Iot.Device.HardwareMonitor
         /// <summary>
         /// Represents a single sensor
         /// </summary>
-        public sealed class Sensor : IDisposable
+        public class Sensor : IDisposable
         {
-            private readonly ManagementObject _instance;
-            private bool _valueRead;
+            private double _value;
 
             /// <summary>
             /// Creates a sensor instance
             /// </summary>
-            public Sensor(ManagementObject instance, string name, string identifier, string? parent, SensorType typeEnum)
+            public Sensor(string name, string identifier, string? parent, SensorType typeEnum)
             {
-                _instance = instance;
                 Name = name;
                 Identifier = identifier;
                 Parent = parent;
                 SensorType = typeEnum;
-                InstanceId = 0;
-                _valueRead = false;
-                if (!string.IsNullOrWhiteSpace(instance.Path.RelativePath))
-                {
-                    int instanceBegin = instance.Path.RelativePath.IndexOf("InstanceId=\"", StringComparison.OrdinalIgnoreCase) + 12;
-                    int instanceEnd = instance.Path.RelativePath.IndexOf('\"', instanceBegin);
-                    if (Int32.TryParse(instance.Path.RelativePath.Substring(instanceBegin, instanceEnd - instanceBegin), out int id))
-                    {
-                        InstanceId = id;
-                    }
-                }
             }
 
             /// <summary>
@@ -690,25 +686,35 @@ namespace Iot.Device.HardwareMonitor
             public string? Parent { get; }
 
             /// <summary>
+            /// Returns the current value of this sensor. If the data cannot be read, the last value is returned, or 0 if no value was ever read.
+            /// This never throws an exception.
+            /// </summary>
+            public double Value
+            {
+                get
+                {
+                    if (TryGetValue(out var value) && value != null)
+                    {
+                        _value = value.Value;
+                    }
+
+                    return _value;
+                }
+                set
+                {
+                    _value = value;
+                }
+            }
+
+            /// <summary>
             /// Kind of sensor
             /// </summary>
             public SensorType SensorType { get; }
 
             /// <summary>
-            /// The instance ID. Used to retrieve a new value for the same sensor (repeatedly obtaining the same value from a sensor instance returns the same value)
-            /// </summary>
-            internal int InstanceId { get; }
-
-            /// <summary>
             /// Job associated with updating this value
             /// </summary>
             internal MonitoringJob? Job
-            {
-                get;
-                set;
-            }
-
-            private ManagementObjectSearcher? ActiveCollection
             {
                 get;
                 set;
@@ -739,29 +745,13 @@ namespace Iot.Device.HardwareMonitor
                 return true;
             }
 
-            private void InternalGetValue(out float value, (Type Type, UnitCreator Creator) elem)
+            /// <summary>
+            /// Read the value from the underlying transport. This is expected to be overridden by derived classes, unless they use
+            /// <see cref="Value"/> to set the content.
+            /// </summary>
+            protected virtual void InternalGetValue(out double value, (Type Type, UnitCreator Creator) elem)
             {
-                if (_valueRead && InstanceId != 0)
-                {
-                    // Cache the searcher. We have to re-query the instances each time, or the value stays the same.
-                    ActiveCollection = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", $"SELECT Value FROM Sensor WHERE InstanceId='{InstanceId}'");
-                }
-
-                if (_valueRead && InstanceId != 0 && ActiveCollection != null)
-                {
-                    value = 0;
-                    // We expect exactly one instance, but unfortunately, the returned ManagementObjectCollection doesn't implement IEnumerable or IList
-                    foreach (var inst in ActiveCollection.Get())
-                    {
-                        value = Convert.ToSingle(inst.GetPropertyValue("Value"));
-                    }
-                }
-                else
-                {
-                    // The artificial instances auto-update. And if the object is new, we also don't need a refresh
-                    value = Convert.ToSingle(_instance.GetPropertyValue("Value"));
-                    _valueRead = true;
-                }
+                value = _value;
             }
 
             /// <summary>
@@ -789,7 +779,7 @@ namespace Iot.Device.HardwareMonitor
                     return false;
                 }
 
-                InternalGetValue(out float newValue, elem);
+                InternalGetValue(out double newValue, elem);
                 object newValueAsUnitInstance = elem.Creator(newValue);
 
                 value = (T)newValueAsUnitInstance;
@@ -802,15 +792,19 @@ namespace Iot.Device.HardwareMonitor
                 return Name ?? base.ToString();
             }
 
+            /// <summary>
+            /// Disposes this instance
+            /// </summary>
+            protected virtual void Dispose(bool disposing)
+            {
+                // nothing to do
+            }
+
             /// <inheritdoc/>
             public void Dispose()
             {
-                _instance.Dispose();
-                if (ActiveCollection != null)
-                {
-                    ActiveCollection.Dispose();
-                    ActiveCollection = null;
-                }
+                Dispose(true);
+                GC.SuppressFinalize(this);
             }
         }
 

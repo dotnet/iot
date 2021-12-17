@@ -102,7 +102,7 @@ namespace Iot.Device.HardwareMonitor
                     typeEnum = SensorType.Unknown;
                 }
 
-                ret.Add(new OpenHardwareMonitor.Sensor(sensor, name, identifier, parent, typeEnum));
+                ret.Add(new SensorWmi(sensor, name, identifier, parent, typeEnum));
             }
 
             return ret;
@@ -154,6 +154,79 @@ namespace Iot.Device.HardwareMonitor
         public void Dispose()
         {
             _cpu = null;
+        }
+
+        /// <summary>
+        /// Represents a single Wmi sensor
+        /// </summary>
+        public class SensorWmi : OpenHardwareMonitor.Sensor, IDisposable
+        {
+            private readonly ManagementObject _instance;
+            private bool _valueRead;
+
+            /// <summary>
+            /// Creates a sensor instance
+            /// </summary>
+            public SensorWmi(ManagementObject instance, string name, string identifier, string? parent, SensorType typeEnum)
+            : base(name, identifier, parent, typeEnum)
+            {
+                _instance = instance;
+                InstanceId = 0;
+                _valueRead = false;
+                if (!string.IsNullOrWhiteSpace(instance.Path.RelativePath))
+                {
+                    int instanceBegin = instance.Path.RelativePath.IndexOf("InstanceId=\"", StringComparison.OrdinalIgnoreCase) + 12;
+                    int instanceEnd = instance.Path.RelativePath.IndexOf('\"', instanceBegin);
+                    if (Int32.TryParse(instance.Path.RelativePath.Substring(instanceBegin, instanceEnd - instanceBegin), out int id))
+                    {
+                        InstanceId = id;
+                    }
+                }
+            }
+
+            public int InstanceId { get; private set; }
+
+            private ManagementObjectSearcher? ActiveCollection
+            {
+                get;
+                set;
+            }
+
+            protected override void InternalGetValue(out double value, (Type Type, OpenHardwareMonitor.UnitCreator Creator) elem)
+            {
+                if (_valueRead && InstanceId != 0)
+                {
+                    // Cache the searcher. We have to re-query the instances each time, or the value stays the same.
+                    ActiveCollection = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", $"SELECT Value FROM Sensor WHERE InstanceId='{InstanceId}'");
+                }
+
+                if (_valueRead && InstanceId != 0 && ActiveCollection != null)
+                {
+                    value = 0;
+                    // We expect exactly one instance, but unfortunately, the returned ManagementObjectCollection doesn't implement IEnumerable or IList
+                    foreach (var inst in ActiveCollection.Get())
+                    {
+                        value = Convert.ToSingle(inst.GetPropertyValue("Value"));
+                    }
+                }
+                else
+                {
+                    // The artificial instances auto-update. And if the object is new, we also don't need a refresh
+                    value = Convert.ToSingle(_instance.GetPropertyValue("Value"));
+                    _valueRead = true;
+                }
+            }
+
+            /// <inheritdoc/>
+            protected override void Dispose(bool disposing)
+            {
+                _instance.Dispose();
+                if (ActiveCollection != null)
+                {
+                    ActiveCollection.Dispose();
+                    ActiveCollection = null;
+                }
+            }
         }
     }
 }

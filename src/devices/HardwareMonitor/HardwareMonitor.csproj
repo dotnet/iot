@@ -7,16 +7,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="IOpenHardwareMonitorInternal.cs" />
-    <Compile Include="OhmTransport.cs" />
-    <Compile Include="OpenHardwareMonitorWmi.cs" />
-    <Compile Include="OpenHardwareMonitor.cs" />
-    <Compile Include="SensorType.cs" />
+    <Compile Include="*.cs" />
     <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>
