@@ -47,6 +47,12 @@ namespace Iot.Device.HardwareMonitor
             InitHardwareMonitor();
         }
 
+        public void Reset()
+        {
+            _cpu = null;
+            InitHardwareMonitor();
+        }
+
         public bool HasHardware()
         {
             return _cpu != null;

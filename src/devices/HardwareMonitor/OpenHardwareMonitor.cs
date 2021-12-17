@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using HardwareMonitor;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -35,6 +36,8 @@ namespace Iot.Device.HardwareMonitor
         private static readonly TimeSpan DefaultDerivedSensorsInterval = TimeSpan.FromMilliseconds(500);
 
         private readonly OhmTransport _transport;
+        private readonly string _host;
+        private readonly int _port;
 
         /// <summary>
         /// A delegate that crates an instance of a quantity from a value
@@ -107,6 +110,8 @@ namespace Iot.Device.HardwareMonitor
         public OpenHardwareMonitor(OhmTransport transport, string host = "localhost", int port = 8086)
         {
             _transport = transport;
+            _host = host;
+            _port = port;
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 throw new PlatformNotSupportedException("This class is only supported on Windows operating systems");
@@ -122,6 +127,21 @@ namespace Iot.Device.HardwareMonitor
             TryConnectToOhm();
         }
 
+        /// <summary>
+        /// Resets all  internal caches, making sure that the next iteration queries the full sensor set.
+        /// You should invalidate all cached <see cref="Sensor"/> and <see cref="Hardware"/> instances after this.
+        /// </summary>
+        public void Reset()
+        {
+            if (_openHardwareMonitorInternal != null)
+            {
+                _cpu = null;
+                _gpu = null;
+                _openHardwareMonitorInternal.Reset();
+                ExtractCpuNode(_openHardwareMonitorInternal);
+            }
+        }
+
         private bool TryConnectToOhm()
         {
             if (_openHardwareMonitorInternal != null)
@@ -134,9 +154,20 @@ namespace Iot.Device.HardwareMonitor
             {
                 monitor = new OpenHardwareMonitorWmi();
             }
+            else if (_transport == OhmTransport.Http)
+            {
+                monitor = new OpenHardwareMonitorHttp(_host, _port);
+            }
             else if (_transport == OhmTransport.Auto)
             {
                 monitor = new OpenHardwareMonitorWmi();
+                if (!monitor.HasHardware())
+                {
+                    monitor.Dispose();
+                    monitor = null;
+                }
+
+                monitor = new OpenHardwareMonitorHttp(_host, _port);
                 if (!monitor.HasHardware())
                 {
                     monitor.Dispose();
@@ -150,17 +181,7 @@ namespace Iot.Device.HardwareMonitor
 
             if (monitor != null)
             {
-                foreach (var hardware in monitor.GetHardwareComponents())
-                {
-                    if (hardware.Type != null && hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _cpu = hardware;
-                    }
-                    else if (hardware.Type != null && hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _gpu = hardware;
-                    }
-                }
+                ExtractCpuNode(monitor);
 
                 if (_cpu == null && _gpu == null)
                 {
@@ -171,6 +192,21 @@ namespace Iot.Device.HardwareMonitor
 
             _openHardwareMonitorInternal = monitor;
             return _openHardwareMonitorInternal != null;
+        }
+
+        private void ExtractCpuNode(IOpenHardwareMonitorInternal monitor)
+        {
+            foreach (var hardware in monitor.GetHardwareComponents())
+            {
+                if (hardware.Type != null && hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
+                {
+                    _cpu = hardware;
+                }
+                else if (hardware.Type != null && hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
+                {
+                    _gpu = hardware;
+                }
+            }
         }
 
         /// <summary>
