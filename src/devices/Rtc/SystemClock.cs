@@ -115,7 +115,11 @@ namespace Iot.Device.Rtc
             }
             catch (System.Security.SecurityException x)
             {
-                throw new UnauthorizedAccessException("Permission denied for setting the clock", x);
+                // Let's be exhaustive here, because without google, it's next to impossible to find this setting.
+                throw new UnauthorizedAccessException("Permission denied for setting the clock. Either run this program with elevated permissions or make sure " +
+                                                      "the current user has permission to change the clock. Open 'gpedit.msc' and go to Computer Configuration > Windows Settings > " +
+                                                      "Security Settings > Local Policies > User Rights Assignments and add the user or his group to the setting " +
+                                                      "'Change System Time'.", x);
             }
         }
 
@@ -164,7 +168,7 @@ namespace Iot.Device.Rtc
 
         private static DateTime GetDateTimeUtcUnix()
         {
-            string date = RunDateCommandUnix("-u +%s.%N", false, out _); // Floating point seconds since epoch
+            string date = RunDateCommandUnix("-u +%s.%N", out _); // Floating point seconds since epoch
             if (Double.TryParse(date, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
                 DateTime dt = UnixEpochStart + TimeSpan.FromSeconds(result);
@@ -176,7 +180,7 @@ namespace Iot.Device.Rtc
 
         private static DateTime GetDateTimeUtcMacOs()
         {
-            string date = RunDateCommandUnix("-u +%s", false, out _); // Floating point seconds since epoch
+            string date = RunDateCommandUnix("-u +%s", out _); // Floating point seconds since epoch
             if (Double.TryParse(date, NumberStyles.Any, CultureInfo.InvariantCulture, out var result))
             {
                 DateTime dt = UnixEpochStart + TimeSpan.FromSeconds(result);
@@ -191,14 +195,10 @@ namespace Iot.Device.Rtc
             string formattedTime = dt.ToString("yyyy-MM-dd HH:mm:ss.fffff", CultureInfo.InvariantCulture);
             int exitCode;
             // Try to run the date command as user first (maybe it has the set-user-id bit set) otherwise, try root.
-            RunDateCommandUnix($"-u -s \"{formattedTime}\"", false, out exitCode);
+            string output = RunDateCommandUnix($"-u -s \"{formattedTime}\"", out exitCode);
             if (exitCode != 0)
             {
-                var output = RunDateCommandUnix($"-u -s \"{formattedTime}\"", true, out exitCode);
-                if (exitCode != 0)
-                {
-                    throw new UnauthorizedAccessException($"Error running date command as local user and as root. Error {exitCode}: {output}");
-                }
+                throw new UnauthorizedAccessException($"Error running date command. Error {exitCode}: {output}");
             }
         }
 
@@ -208,23 +208,20 @@ namespace Iot.Device.Rtc
             string formattedTime = dt.ToString("yyyyMMddHHmm.ss", CultureInfo.InvariantCulture);
             int exitCode;
             // Try to run the date command as user first (maybe it has the set-user-id bit set) otherwise, try root.
-            RunDateCommandUnix($"{formattedTime}", false, out exitCode);
+            string output = RunDateCommandUnix($"{formattedTime}", out exitCode);
             if (exitCode != 0)
             {
-                var output = RunDateCommandUnix($"{formattedTime}", true, out exitCode);
-                if (exitCode != 0)
-                {
-                    throw new UnauthorizedAccessException($"Error running date command as local user and as root. Error {exitCode}: {output}");
-                }
+                throw new UnauthorizedAccessException($"Error running date command. Error {exitCode}: {output}. Either run this program as root or ensure " +
+                                                      $"/bin/date has the setuid bit set (execute 'chmod +s /bin/date' once as root)");
             }
         }
 
-        private static string RunDateCommandUnix(string commandLine, bool asRoot, out int exitCode)
+        private static string RunDateCommandUnix(string commandLine, out int exitCode)
         {
             var si = new ProcessStartInfo()
             {
-                FileName = asRoot ? "sudo" : "date",
-                Arguments = asRoot ? "-n date " + commandLine : commandLine,
+                FileName = "date",
+                Arguments = commandLine,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
