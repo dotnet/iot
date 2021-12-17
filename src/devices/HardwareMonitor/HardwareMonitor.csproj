@@ -3,9 +3,13 @@
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <DefaultNamespace>Iot.Device.HardwareMonitor</DefaultNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="IOpenHardwareMonitorInternal.cs" />
+    <Compile Include="OhmTransport.cs" />
+    <Compile Include="OpenHardwareMonitorWmi.cs" />
     <Compile Include="OpenHardwareMonitor.cs" />
     <Compile Include="SensorType.cs" />
     <None Include="README.md" />

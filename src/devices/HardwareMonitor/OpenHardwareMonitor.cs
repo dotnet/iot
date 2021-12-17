@@ -34,6 +34,8 @@ namespace Iot.Device.HardwareMonitor
         private static readonly TimeSpan DefaultMonitorInterval = TimeSpan.FromMilliseconds(100);
         private static readonly TimeSpan DefaultDerivedSensorsInterval = TimeSpan.FromMilliseconds(500);
 
+        private readonly OhmTransport _transport;
+
         private delegate IQuantity UnitCreator(float value);
 
         /// <summary>
@@ -54,6 +56,8 @@ namespace Iot.Device.HardwareMonitor
         private List<Sensor> _derivedSensors;
         private DateTimeOffset _lastMonitorLoop;
         private TimeSpan _monitoringInterval;
+
+        private IOpenHardwareMonitorInternal? _openHardwareMonitorInternal;
 
         static OpenHardwareMonitor()
         {
@@ -82,13 +86,26 @@ namespace Iot.Device.HardwareMonitor
         /// </summary>
         /// <exception cref="PlatformNotSupportedException">The operating system is not Windows.</exception>
         public OpenHardwareMonitor()
+        : this(OhmTransport.Auto)
         {
+        }
+
+        /// <summary>
+        /// Constructs a new instance of this class using a specific transport protocol
+        /// The class can be constructed even if no sensors are available or OpenHardwareMonitor is not running (yet).
+        /// </summary>
+        /// <param name="transport">The transport protocol to use. WMI is for OpenHardwareMonitor 0.9 and below, from OpenHardwareMonitor 0.10 and above,
+        /// HTTP is used.</param>
+        /// <param name="host">Optional host name for connection</param>
+        /// <param name="port">Network port</param>
+        /// <exception cref="PlatformNotSupportedException"></exception>
+        public OpenHardwareMonitor(OhmTransport transport, string host = "localhost", int port = 8086)
+        {
+            _transport = transport;
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 throw new PlatformNotSupportedException("This class is only supported on Windows operating systems");
             }
-
-            InitHardwareMonitor();
 
             _derivedSensors = new List<Sensor>();
 
@@ -97,6 +114,58 @@ namespace Iot.Device.HardwareMonitor
             _monitoredElements = new List<MonitoringJob>();
             _lastMonitorLoop = DateTimeOffset.UtcNow;
             MonitoringInterval = DefaultMonitorInterval;
+            TryConnectToOhm();
+        }
+
+        private bool TryConnectToOhm()
+        {
+            if (_openHardwareMonitorInternal != null)
+            {
+                return true;
+            }
+
+            IOpenHardwareMonitorInternal? monitor = null;
+            if (_transport == OhmTransport.Wmi)
+            {
+                monitor = new OpenHardwareMonitorWmi();
+            }
+            else if (_transport == OhmTransport.Auto)
+            {
+                monitor = new OpenHardwareMonitorWmi();
+                if (!monitor.HasHardware())
+                {
+                    monitor.Dispose();
+                    monitor = null;
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Unsupported transport protocol selected");
+            }
+
+            if (monitor != null)
+            {
+                foreach (var hardware in monitor.GetHardwareComponents())
+                {
+                    if (hardware.Type != null && hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _cpu = hardware;
+                    }
+                    else if (hardware.Type != null && hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _gpu = hardware;
+                    }
+                }
+
+                if (_cpu == null && _gpu == null)
+                {
+                    monitor.Dispose();
+                    monitor = null;
+                }
+            }
+
+            _openHardwareMonitorInternal = monitor;
+            return _openHardwareMonitorInternal != null;
         }
 
         /// <summary>
@@ -125,32 +194,6 @@ namespace Iot.Device.HardwareMonitor
             }
         }
 
-        private void InitHardwareMonitor()
-        {
-            try
-            {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT * FROM Sensor");
-                foreach (var hardware in GetHardwareComponents())
-                {
-                    if (hardware.Type != null && hardware.Type.Equals("CPU", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _cpu = hardware;
-                    }
-                    else if (hardware.Type != null && hardware.Type.StartsWith("GPU", StringComparison.OrdinalIgnoreCase))
-                    {
-                        _gpu = hardware;
-                    }
-                }
-
-                searcher.Dispose();
-            }
-            catch (Exception x) when (x is IOException || x is UnauthorizedAccessException || x is ManagementException)
-            {
-                // Nothing to do - WMI not available for this element or missing permissions.
-                // WMI enumeration may require elevated rights.
-            }
-        }
-
         /// <summary>
         /// Number of logical processors in the system
         /// </summary>
@@ -169,28 +212,11 @@ namespace Iot.Device.HardwareMonitor
         /// <exception cref="ManagementException">The WMI objects required are not available. Is OpenHardwareMonitor running?</exception>
         public IList<Sensor> GetSensorList()
         {
+            TryConnectToOhm();
             List<Sensor> ret = new List<Sensor>();
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT * FROM Sensor");
-            foreach (ManagementObject sensor in searcher.Get())
+            if (_openHardwareMonitorInternal != null)
             {
-                string? name = Convert.ToString(sensor["Name"]);
-                string? identifier = Convert.ToString(sensor["Identifier"]);
-
-                // This is not expected to really happen
-                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(identifier))
-                {
-                    continue;
-                }
-
-                string? parent = Convert.ToString(sensor["Parent"]);
-                string? type = Convert.ToString(sensor["SensorType"]);
-                SensorType typeEnum;
-                if (!Enum.TryParse(type, true, out typeEnum))
-                {
-                    typeEnum = SensorType.Unknown;
-                }
-
-                ret.Add(new Sensor(sensor, name, identifier, parent, typeEnum));
+                ret.AddRange(_openHardwareMonitorInternal.GetSensorList());
             }
 
             ret.AddRange(_derivedSensors);
@@ -203,26 +229,13 @@ namespace Iot.Device.HardwareMonitor
         /// </summary>
         public IList<Hardware> GetHardwareComponents()
         {
-            IList<Hardware> ret = new List<Hardware>();
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher(@"root\OpenHardwareMonitor", "SELECT * FROM Hardware");
-            if (searcher.Get().Count > 0)
+            TryConnectToOhm();
+            if (_openHardwareMonitorInternal != null)
             {
-                foreach (ManagementObject sensor in searcher.Get())
-                {
-                    string? name = Convert.ToString(sensor["Name"]);
-                    string? identifier = Convert.ToString(sensor["Identifier"]);
-                    if (name == null || identifier == null)
-                    {
-                        continue;
-                    }
-
-                    string? parent = Convert.ToString(sensor["Parent"]);
-                    string? type = Convert.ToString(sensor["HardwareType"]);
-                    ret.Add(new Hardware(name, identifier, parent, type));
-                }
+                return _openHardwareMonitorInternal.GetHardwareComponents();
             }
 
-            return ret;
+            return new List<Hardware>();
         }
 
         /// <summary>
@@ -237,6 +250,8 @@ namespace Iot.Device.HardwareMonitor
                 throw new ArgumentNullException(nameof(forHardware));
             }
 
+            TryConnectToOhm();
+
             return GetSensorList().Where(x => x.Identifier != null && x.Identifier.StartsWith(forHardware.Identifier ?? string.Empty)).OrderBy(y => y.Identifier);
         }
 
@@ -247,14 +262,14 @@ namespace Iot.Device.HardwareMonitor
         /// </summary>
         public bool TryGetAverageCpuTemperature(out Temperature temperature)
         {
-            if (_cpu == null)
+            temperature = default;
+            if (TryConnectToOhm() == false)
             {
-                InitHardwareMonitor();
+                return false;
             }
 
             if (_cpu == null)
             {
-                temperature = default;
                 return false;
             }
 
@@ -272,14 +287,14 @@ namespace Iot.Device.HardwareMonitor
         /// <param name="temperature">The average GPU temperature</param>
         public bool TryGetAverageGpuTemperature(out Temperature temperature)
         {
-            if (_gpu == null)
+            temperature = default;
+            if (TryConnectToOhm() == false)
             {
-                InitHardwareMonitor();
+                return false;
             }
 
             if (_gpu == null)
             {
-                temperature = default;
                 return false;
             }
 
