@@ -39,13 +39,18 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation("UInt64BitsToDouble")]
+        public static double UInt64BitsToDouble(UInt64 value)
+        {
+            throw new NotImplementedException();
+        }
+
         [ArduinoImplementation("BitConverterInt32BitsToSingle")]
         public static float Int32BitsToSingle(Int32 value)
         {
             throw new NotImplementedException();
         }
 
-#if NET5_0_OR_GREATER
         [ArduinoImplementation("BitConverterHalfToInt16Bits")]
         public static Int16 HalfToInt16Bits(Half value)
         {
@@ -57,6 +62,17 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
-#endif
+
+        [ArduinoImplementation("BitConverterHalfToUInt16Bits")]
+        public static UInt16 HalfToUInt16Bits(Half value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("BitConverterUInt16BitsToHalf")]
+        public static Half UInt16BitsToHalf(UInt16 value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

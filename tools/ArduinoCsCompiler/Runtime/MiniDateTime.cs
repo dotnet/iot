@@ -32,5 +32,11 @@ namespace ArduinoCsCompiler.Runtime
         {
             return true;
         }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public static IntPtr GetGetSystemTimeAsFileTimeFnPtr()
+        {
+            return IntPtr.Zero; // The returned function pointer(!) should not be used, because we have overriden UtcNow
+        }
     }
 }

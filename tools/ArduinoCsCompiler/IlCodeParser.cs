@@ -162,6 +162,7 @@ namespace ArduinoCsCompiler
                     case OpCode.CEE_CALLVIRT:
                     case OpCode.CEE_NEWOBJ:
                     case OpCode.CEE_LDFTN:
+                    case OpCode.CEE_LDVIRTFTN:
                     {
                         // These opcodes are followed by a method token
                         var methodTarget = ResolveMember(method, token)!;

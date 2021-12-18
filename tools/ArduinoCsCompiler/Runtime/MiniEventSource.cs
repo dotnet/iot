@@ -20,6 +20,14 @@ namespace ArduinoCsCompiler.Runtime
             get { return false; }
         }
 
+        public virtual ReadOnlySpan<byte> ProviderMetadata
+        {
+            get
+            {
+                return ReadOnlySpan<byte>.Empty;
+            }
+        }
+
         public bool IsEnabled()
         {
             return false;
@@ -79,6 +87,11 @@ namespace ArduinoCsCompiler.Runtime
 
         public void Dispose()
         {
+        }
+
+        public override string ToString()
+        {
+            return "UnsupportedEventSource";
         }
     }
 }

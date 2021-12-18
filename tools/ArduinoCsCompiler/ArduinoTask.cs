@@ -159,7 +159,7 @@ namespace ArduinoCsCompiler
                                 ex = new InvalidOperationException($"An invalid operation was attempted in {resolved.MemberInfoSignature()}.");
                                 break;
                             case SystemException.ClassNotFound:
-                                ex = new TypeInitializationException($"{resolved.MemberInfoSignature()}", new MissingMethodException());
+                                ex = new TypeInitializationException($"{resolved.MemberInfoSignature()}", new MissingMethodException(textualStackTrace));
                                 break;
                             case SystemException.InvalidCast:
                                 ex = new InvalidCastException($"Cast to {resolved.MemberInfoSignature()} is not possible. " + textualStackTrace);

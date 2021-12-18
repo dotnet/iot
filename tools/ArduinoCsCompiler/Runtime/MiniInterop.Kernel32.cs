@@ -269,6 +269,11 @@ namespace ArduinoCsCompiler.Runtime
                 return true;
             }
 
+            internal static Boolean ResetEvent(Microsoft.Win32.SafeHandles.SafeWaitHandle handle)
+            {
+                return true;
+            }
+
             [ArduinoImplementation("Interop_Kernel32SetEndOfFile", 0x207)]
             internal static Boolean SetEndOfFile(Microsoft.Win32.SafeHandles.SafeFileHandle hFile)
             {
@@ -306,7 +311,7 @@ namespace ArduinoCsCompiler.Runtime
                 return 0;
             }
 
-            [ArduinoImplementation("Interop_Kernel32ReadFileOverlapped")]
+            [ArduinoImplementation("Interop_Kernel32ReadFileOverlapped2")]
             internal static unsafe Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToReade, ref Int32 numBytesRead, NativeOverlapped* lpOverlapped)
             {
                 return 0;
@@ -323,13 +328,60 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             [ArduinoImplementation("Interop_Kernel32CreateEventEx")]
+            internal static IntPtr CreateEventExInternal(string name, uint flags, uint desiredAccess)
+            {
+                throw new NotImplementedException();
+            }
+
             internal static SafeWaitHandle CreateEventEx(
                 IntPtr lpSecurityAttributes,
                 string name,
                 uint flags,
                 uint desiredAccess)
             {
+                return new SafeWaitHandle(CreateEventExInternal(name, flags, desiredAccess), true);
+            }
+
+            [ArduinoImplementation("Interop_Kernel32CreateIoCompletionPort")]
+            internal static IntPtr CreateIoCompletionPort(
+                IntPtr FileHandle,
+                IntPtr ExistingCompletionPort,
+                UIntPtr CompletionKey,
+                int NumberOfConcurrentThreads)
+            {
                 throw new NotImplementedException();
+            }
+
+            internal static SafeWaitHandle OpenMutex(
+                uint desiredAccess,
+                bool inheritHandle,
+                string name)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal static SafeWaitHandle CreateMutexEx(
+                IntPtr lpMutexAttributes,
+                string name,
+                uint flags,
+                uint desiredAccess)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal static bool ReleaseMutex(SafeWaitHandle handle)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal static IntPtr LoadLibraryEx(String libFileName, IntPtr reserved, Int32 flags)
+            {
+                return IntPtr.Zero;
+            }
+
+            internal static bool FreeLibrary(IntPtr hModule)
+            {
+                return true;
             }
 
             [ArduinoImplementation("Interop_Kernel32ReadFile", 0x20A)]

@@ -7,6 +7,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Type), true, IncludingSubclasses = true)]
     internal class MiniType
     {
+        public static readonly Type[] EmptyTypes;
 #pragma warning disable 414, SX1309
         // This is used by firmware code directly. Do not reorder the members without checking the firmware
         // The member contains the token of the class declaration
@@ -174,6 +175,11 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             return !a.Equals(b);
+        }
+
+        public static Type GetType(string typeName, bool throwOnError)
+        {
+            throw new NotSupportedException($"Cannot get type {typeName} by name");
         }
 
         internal virtual RuntimeTypeHandle GetTypeHandleInternal()

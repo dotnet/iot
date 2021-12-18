@@ -375,6 +375,7 @@ namespace ArduinoCsCompiler
             PrepareClass(set, typeof(System.Array));
 
             PrepareClass(set, typeof(System.Object));
+            PrepareClass(set, typeof(System.IComparable<object>));
 
             // These are referenced by the system
             PrepareClass(set, typeof(System.Exception));
@@ -583,8 +584,10 @@ namespace ArduinoCsCompiler
                     {
                         try
                         {
-                            // This throws if the given types violate a constraint for the type
+                            // This throws if the given types violate a constraint for the comparer
                             var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericComparer`1")!.MakeGenericType(typeArgs);
                             PrepareClassDeclaration(set, alsoRequired);
                         }
                         catch (ArgumentException x)
@@ -592,6 +595,15 @@ namespace ArduinoCsCompiler
                             _logger.LogWarning(x, x.Message);
                         }
                     }
+                }
+
+                if (openType == typeof(Comparer<>))
+                {
+                    var typeArgs = classType.GetGenericArguments();
+                    var requiredInterface = typeof(IComparable<>).MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, requiredInterface);
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectComparer`1")!.MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, alsoRequired);
                 }
             }
         }
@@ -1277,6 +1289,14 @@ namespace ArduinoCsCompiler
         /// <returns></returns>
         internal static VariableKind GetVariableType(Type t, int minSizeOfMember, out int sizeOfMember)
         {
+            string name = t.Name;
+
+            if (t.IsPointer)
+            {
+                sizeOfMember = SizeOfVoidPointer();
+                return VariableKind.AddressOfVariable;
+            }
+
             if (t == typeof(sbyte))
             {
                 sizeOfMember = Math.Max(minSizeOfMember, 1);
@@ -1627,6 +1647,8 @@ namespace ArduinoCsCompiler
                 exec.SuppressType("System.Reflection.Assembly");
                 exec.SuppressType("System.Reflection.RuntimeAssembly");
                 exec.SuppressType("System.Globalization.HebrewNumber");
+                exec.SuppressType("System.Resources.RuntimeResourceSet");
+                exec.SuppressType("System.Resources.ResourceReader");
                 // exec.SuppressNamespace("System.Runtime.Intrinsics", true);
 #if NET5_0_OR_GREATER
                 // Native libraries are not supported
@@ -1719,9 +1741,15 @@ namespace ArduinoCsCompiler
             {
                 exec.Load(true);
             }
-            catch (Exception)
+            catch (Exception x)
             {
                 ClearAllData(true);
+                _logger.LogError(x, $"Error loading program: {x.Message}");
+                if (x.InnerException != null)
+                {
+                    _logger.LogError(x.InnerException, $"Inner exception: {x.InnerException.Message}");
+                }
+
                 throw;
             }
 

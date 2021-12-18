@@ -61,6 +61,13 @@ namespace ArduinoCsCompiler.Runtime
             return x.Equals(y);
         }
 
+        [ArduinoImplementation("RuntimeHelpersEnumCompareTo")]
+        internal static int EnumCompareTo<T>(T x, T y)
+            where T : struct, Enum
+        {
+            return x.CompareTo((object)y);
+        }
+
         internal static bool IsBitwiseEquatable<T>()
         {
             return IsBitwiseEquatableCore(typeof(T));

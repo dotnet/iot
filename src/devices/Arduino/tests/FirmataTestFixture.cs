@@ -26,7 +26,7 @@ namespace Iot.Device.Arduino.Tests
             {
                 var loggerFactory = LoggerFactory.Create(builder =>
                 {
-                    builder.AddConsole().AddProvider(new DebuggerOutputLoggerProvider())
+                    builder.AddProvider(new DebuggerOutputLoggerProvider())
                         .SetMinimumLevel(LogLevel.Trace);
                 });
 

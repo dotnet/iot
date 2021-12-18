@@ -7,6 +7,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Resources.ResourceManager), true)]
     internal class MiniResourceManager
     {
+        private static readonly int MagicNumber;
         public string GetString(string resourceName)
         {
             return resourceName;
@@ -19,6 +20,11 @@ namespace ArduinoCsCompiler.Runtime
 
         public MiniResourceManager(Type resourceSource)
         {
+        }
+
+        internal static bool IsDefaultType(string asmTypeName, string typeName)
+        {
+            return true;
         }
     }
 }

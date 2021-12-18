@@ -220,5 +220,33 @@ namespace ArduinoCsCompiler.Runtime
         /// <returns>The rotated value.</returns>
         public static ulong RotateRight(ulong value, int offset)
             => (value >> offset) | (value << (64 - offset));
+
+        public static uint RoundUpToPowerOf2(uint value)
+        {
+            return (uint)(4294967296UL >> LeadingZeroCount(value - 1U));
+        }
+
+        public static int Log2Ceiling(uint value)
+        {
+            int num = Log2(value);
+            if (PopCount(value) != 1)
+            {
+                ++num;
+            }
+
+            return num;
+        }
+
+        internal static int Log2Ceiling(ulong value)
+        {
+            int num = Log2(value);
+            if (PopCount(value) != 1)
+            {
+                ++num;
+            }
+
+            return num;
+        }
+
     }
 }
