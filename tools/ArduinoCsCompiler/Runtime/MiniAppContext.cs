@@ -17,6 +17,16 @@ namespace ArduinoCsCompiler.Runtime
             return false;
         }
 
+        public static void SetSwitch(string switchName, bool isEnabled)
+        {
+            // Ignore?
+        }
+
+        public static void SetData(string name, object data)
+        {
+            // Ignore?
+        }
+
         public static object? GetData(string name)
         {
             if (name == null)

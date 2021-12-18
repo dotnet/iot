@@ -34,7 +34,7 @@ namespace ArduinoCsCompiler.Runtime
             // No op, like above
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         public static GCMemoryInfo GetGCMemoryInfo()
         {
             return GetGCMemoryInfo(GCKind.Any);
@@ -108,7 +108,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [ArduinoReplacement(typeof(System.GCMemoryInfo), true, IncludingPrivates = true)]
         internal struct MiniGcMemoryInfo
         {

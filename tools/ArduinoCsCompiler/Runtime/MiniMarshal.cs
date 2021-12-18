@@ -18,9 +18,24 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
+        public static int GetLastPInvokeError()
+        {
+            throw new NotImplementedException();
+        }
+
+        public static void SetLastPInvokeError(int error)
+        {
+            throw new NotImplementedException();
+        }
+
         public static bool IsPinnable(object obj)
         {
             return false;
+        }
+
+        public static void FreeHGlobal(IntPtr hGlobal)
+        {
+            // Nothing to do (we have only managed memory)
         }
     }
 }

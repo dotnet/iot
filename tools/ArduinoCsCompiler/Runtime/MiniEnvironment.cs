@@ -86,6 +86,14 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
+        public static int SystemPageSize
+        {
+            get
+            {
+                return 0x1000; // 4kb typical
+            }
+        }
+
         [ArduinoImplementation("EnvironmentFailFast1")]
         public static void FailFast(string message)
         {

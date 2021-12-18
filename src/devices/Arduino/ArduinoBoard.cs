@@ -162,17 +162,46 @@ namespace Iot.Device.Arduino
 #endif
             out ArduinoBoard? board)
         {
+            return TryConnectToNetworkedBoard(boardAddress, port, true, out board);
+        }
+
+        /// <summary>
+        /// Tries to connect to an arduino over network.
+        /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
+        /// </summary>
+        /// <param name="boardAddress">The IP address of the board</param>
+        /// <param name="port">The network port to use. The default port is 27016</param>
+        /// <param name="useAutoReconnect">True to use an auto-reconnecting stream. Helpful when using an unreliable connection.</param>
+        /// <param name="board">Returns the board if successful</param>
+        /// <returns>True on success, false otherwise</returns>
+        public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port, bool useAutoReconnect,
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out ArduinoBoard? board)
+        {
             board = null;
             try
             {
-                var networkStream = new ReconnectingNetworkStream(() =>
+                Stream networkStream;
+                if (useAutoReconnect)
+                {
+                    networkStream = new ReconnectingNetworkStream(() =>
+                    {
+                        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        socket.Connect(boardAddress, port);
+                        socket.NoDelay = true;
+                        Stream socketStream = new NetworkStream(socket, true);
+                        return socketStream;
+                    });
+                }
+                else
                 {
                     var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                     socket.Connect(boardAddress, port);
                     socket.NoDelay = true;
-                    Stream socketStream = new NetworkStream(socket, true);
-                    return socketStream;
-                });
+                    networkStream = new NetworkStream(socket, true);
+                }
 
                 board = new ArduinoBoard(networkStream);
                 if (!(board.FirmataVersion > new Version(1, 0)))

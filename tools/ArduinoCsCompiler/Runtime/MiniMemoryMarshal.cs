@@ -11,5 +11,11 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation("MemoryMarshalGetArrayDataReferenceByte", CompareByParameterNames = true, IgnoreGenericTypes = true)]
+        public static unsafe ref byte GetArrayDataReference(Array array)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

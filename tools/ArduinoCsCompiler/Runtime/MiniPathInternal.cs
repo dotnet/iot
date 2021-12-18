@@ -228,15 +228,9 @@ namespace ArduinoCsCompiler.Runtime
         }
     }
 
-    [ArduinoReplacement("System.IO.PathInternal", "System.IO.FileSystem.dll", false, typeof(System.IO.File), IncludingPrivates = true)]
+    [ArduinoReplacement("System.IO.PathInternal", "System.Private.Corelib.dll", false, typeof(System.IO.File), IncludingPrivates = true)]
     internal sealed class MiniPathInternal_File
     {
-        [ArduinoImplementation]
-        public static bool GetIsCaseSensitive()
-        {
-            return true;
-        }
-
         [ArduinoImplementation]
         public static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
         {

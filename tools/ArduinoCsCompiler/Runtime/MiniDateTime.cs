@@ -21,8 +21,14 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        [ArduinoImplementation(CompareByParameterNames = true)]
-        public static unsafe bool ValidateSystemTime(byte* time, bool localTime)
+        [ArduinoImplementation]
+        public static bool IsValidTimeWithLeapSeconds(
+            int year,
+            int month,
+            int day,
+            int hour,
+            int minute,
+            DateTimeKind kind)
         {
             return true;
         }

@@ -130,7 +130,7 @@ namespace ArduinoCsCompiler
                         return 1;
                     }
 
-                    if (!ArduinoBoard.TryConnectToNetworkedBoard(ip, networkPort, out board))
+                    if (!ArduinoBoard.TryConnectToNetworkedBoard(ip, networkPort, false, out board))
                     {
                         _logger.LogError($"Couldn't connect to board at {commandLineOptions.NetworkAddress}");
                         return 1;

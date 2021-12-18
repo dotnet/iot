@@ -932,12 +932,7 @@ namespace ArduinoCsCompiler
                 return;
             }
 
-            BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
-
-            if (!includingSubclasses)
-            {
-                flags |= BindingFlags.DeclaredOnly;
-            }
+            BindingFlags flags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly;
 
             List<MethodInfo> methodsNeedingReplacement = typeToReplace.GetMethods(flags).ToList();
 
@@ -947,7 +942,7 @@ namespace ArduinoCsCompiler
                 methodsNeedingReplacement = methodsNeedingReplacement.Where(x => !x.IsPrivate).ToList();
             }
 
-            foreach (var methoda in replacement.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance))
+            foreach (var methoda in replacement.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly))
             {
                 // Above, we only check the public methods, here we also look at the private ones
                 BindingFlags otherFlags = BindingFlags.Public | BindingFlags.Static | BindingFlags.Instance | BindingFlags.NonPublic;
@@ -1128,7 +1123,7 @@ namespace ArduinoCsCompiler
             }
 
             string name = toReplace.Name;
-            if (_methodsReplaced.TryGetValue(toReplace.Name, out var list))
+            if (_methodsReplaced.TryGetValue(name, out var list))
             {
                 list.Add((toReplace, replacement));
             }
@@ -1136,7 +1131,7 @@ namespace ArduinoCsCompiler
             {
                 list = new List<(MethodBase, MethodBase?)>();
                 list.Add((toReplace, replacement));
-                _methodsReplaced.Add(toReplace.Name, list);
+                _methodsReplaced.Add(name, list);
             }
         }
 

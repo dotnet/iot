@@ -139,7 +139,7 @@ namespace WeatherStation
             {
                 try
                 {
-                    _bme680.SetPowerMode(Bme680PowerMode.Forced);
+                    _bme680!.SetPowerMode(Bme680PowerMode.Forced);
                     var time = DateTime.Now;
                     if (_bme680.TryReadTemperature(out Temperature temp) && _bme680.TryReadPressure(out Pressure pressure) && _bme680.TryReadHumidity(out RelativeHumidity humidity))
                     {

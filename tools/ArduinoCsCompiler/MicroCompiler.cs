@@ -487,14 +487,51 @@ namespace ArduinoCsCompiler
                 if (field.IsLiteral && classType.IsEnum)
                 {
                     // This is a constant field (typically an enum value) - provide the value instead of the token
-                    var v = Convert.ToUInt64(field.GetValue(null));
-                    if (v <= UInt32.MaxValue)
+                    object fieldValue = field.GetValue(null)!;
+                    Type underlyingType = Enum.GetUnderlyingType(classType);
+                    if (underlyingType == typeof(int))
                     {
-                        token = (int)v;
+                        unchecked
+                        {
+                            int v = (int)fieldValue;
+                            token = v;
+                        }
+                    }
+                    else if (underlyingType == typeof(UInt32))
+                    {
+                        unchecked
+                        {
+                            uint v = (UInt32)fieldValue;
+                            token = (int)v;
+                        }
+                    }
+                    else if (underlyingType == typeof(byte))
+                    {
+                        unchecked
+                        {
+                            byte v = (byte)fieldValue;
+                            token = v;
+                        }
+                    }
+                    else if (underlyingType == typeof(UInt16))
+                    {
+                        unchecked
+                        {
+                            UInt16 v = (UInt16)fieldValue;
+                            token = v;
+                        }
+                    }
+                    else if (underlyingType == typeof(Int16))
+                    {
+                        unchecked
+                        {
+                            Int16 v = (Int16)fieldValue;
+                            token = v;
+                        }
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        throw new NotSupportedException($"Unable to cast {fieldValue} to a constant, when trying to read constant {field.Name} of {classType.MemberInfoSignature()}");
                     }
                 }
                 else
@@ -546,6 +583,7 @@ namespace ArduinoCsCompiler
                     {
                         try
                         {
+                            // This throws if the given types violate a constraint for the type
                             var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
                             PrepareClassDeclaration(set, alsoRequired);
                         }
@@ -1414,7 +1452,7 @@ namespace ArduinoCsCompiler
         /// Returns true if the given method shall be internalized (has a native implementation on the arduino)
         /// </summary>
         internal static bool HasArduinoImplementationAttribute(MethodBase method,
-#if NET5_0
+#if NET5_0_OR_GREATER
         [NotNullWhen(true)]
 #endif
         out ArduinoImplementationAttribute attribute)
@@ -1439,7 +1477,7 @@ namespace ArduinoCsCompiler
         }
 
         internal static bool HasReplacementAttribute(Type type,
-#if NET5_0
+#if NET5_0_OR_GREATER
             [NotNullWhen(true)]
 #endif
             out ArduinoReplacementAttribute attribute)
@@ -1590,7 +1628,7 @@ namespace ArduinoCsCompiler
                 exec.SuppressType("System.Reflection.RuntimeAssembly");
                 exec.SuppressType("System.Globalization.HebrewNumber");
                 // exec.SuppressNamespace("System.Runtime.Intrinsics", true);
-#if NET5_0
+#if NET5_0_OR_GREATER
                 // Native libraries are not supported
                 exec.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));
 #endif
@@ -1796,7 +1834,9 @@ namespace ArduinoCsCompiler
 
                         // Make sure this stub method is in memory
                         PrepareCodeInternal(set, baseCtor, parent);
-                        int token = baseCtor.MetadataToken;
+                        // Directly use the new token (the baseCtor.Token cannot be resolved further down, because it belongs to another assembly)
+                        int token = set.GetOrAddMethodToken(baseCtor, methodInfo);
+                        needsParsing = false;
 
                         // the code we need to generate is
                         // LDARG.0
@@ -2271,6 +2311,12 @@ namespace ArduinoCsCompiler
             if ((HasArduinoImplementationAttribute(a, out var attrib) && attrib!.CompareByParameterNames) ||
                 (HasArduinoImplementationAttribute(b, out attrib) && attrib!.CompareByParameterNames))
             {
+                // Even if we only compare by name, the number of generic arguments must match
+                if (a.GetGenericArguments().Length != b.GetGenericArguments().Length)
+                {
+                    return false;
+                }
+
                 for (int i = 0; i < argsa.Length; i++)
                 {
                     if (argsa[i].Name != argsb[i].Name)

@@ -12,5 +12,10 @@ namespace ArduinoCsCompiler
         {
             throw new NotImplementedException();
         }
+
+        public static void Fail(string? message)
+        {
+            throw new NotImplementedException(message);
+        }
     }
 }

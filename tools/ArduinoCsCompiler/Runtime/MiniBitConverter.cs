@@ -6,7 +6,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(BitConverter), true)]
     internal class MiniBitConverter
     {
-        // This must be set to the endianess of the target platform, but currently all Arduinos seem to use little endian
+        // This must be set to the endianess of the target platform, but currently all Microcontrollers that are supported seem to use little endian
         public static readonly bool IsLittleEndian = true;
 
         [ArduinoImplementation("BitConverterSingleToInt32Bits")]
@@ -17,6 +17,18 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation("BitConverterDoubleToInt64Bits")]
         public static Int64 DoubleToInt64Bits(double value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("BitConverterDoubleToUInt64Bits")]
+        public static Int64 DoubleToUInt64Bits(double value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("BitConverterSingleToUInt32Bits")]
+        public static UInt32 SingleToUInt32Bits(float value)
         {
             throw new NotImplementedException();
         }
@@ -33,7 +45,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-#if NET5_0
+#if NET5_0_OR_GREATER
         [ArduinoImplementation("BitConverterHalfToInt16Bits")]
         public static Int16 HalfToInt16Bits(Half value)
         {

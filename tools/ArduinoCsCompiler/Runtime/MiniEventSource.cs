@@ -14,6 +14,12 @@ namespace ArduinoCsCompiler.Runtime
         {
         }
 
+        public static bool IsSupported
+        {
+            [ArduinoImplementation]
+            get { return false; }
+        }
+
         public bool IsEnabled()
         {
             return false;

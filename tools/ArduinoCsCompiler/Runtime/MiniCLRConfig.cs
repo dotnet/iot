@@ -2,7 +2,8 @@
 
 namespace ArduinoCsCompiler.Runtime
 {
-    [ArduinoReplacement("System.CLRConfig", null, true, IncludingPrivates = true)]
+    // This type appears to no longer exist in net6.0
+    // [ArduinoReplacement("System.CLRConfig", "System.Private.Corelib.dll", true, IncludingPrivates = true)]
     internal static class MiniCLRConfig
     {
         [ArduinoImplementation]

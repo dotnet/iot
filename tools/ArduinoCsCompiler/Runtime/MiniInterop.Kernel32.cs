@@ -294,10 +294,42 @@ namespace ArduinoCsCompiler.Runtime
                 return 1;
             }
 
+            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2")]
+            internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, NativeOverlapped* lpOverlapped)
+            {
+                return 0;
+            }
+
             [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped", 0x209)]
             internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, System.IntPtr numBytesWritten_mustBeZero, NativeOverlapped* lpOverlapped)
             {
                 return 0;
+            }
+
+            [ArduinoImplementation("Interop_Kernel32ReadFileOverlapped")]
+            internal static unsafe Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToReade, ref Int32 numBytesRead, NativeOverlapped* lpOverlapped)
+            {
+                return 0;
+            }
+
+            [ArduinoImplementation("Interop_Kernel32GetOverlappedResult")]
+            internal static unsafe bool GetOverlappedResult(
+                SafeFileHandle hFile,
+                NativeOverlapped* lpOverlapped,
+                ref int lpNumberOfBytesTransferred,
+                bool bWait)
+            {
+                return false;
+            }
+
+            [ArduinoImplementation("Interop_Kernel32CreateEventEx")]
+            internal static SafeWaitHandle CreateEventEx(
+                IntPtr lpSecurityAttributes,
+                string name,
+                uint flags,
+                uint desiredAccess)
+            {
+                throw new NotImplementedException();
             }
 
             [ArduinoImplementation("Interop_Kernel32ReadFile", 0x20A)]
@@ -347,6 +379,131 @@ namespace ArduinoCsCompiler.Runtime
             {
                 throw new NotImplementedException();
             }
+
+            [ArduinoImplementation("Interop_Kernel32FindStringOrdinal", CompareByParameterNames = true)]
+            internal static unsafe int FindStringOrdinal(
+                uint dwFindStringOrdinalFlags,
+                char* lpStringSource,
+                int cchSource,
+                char* lpStringValue,
+                int cchValue,
+                bool bIgnoreCase)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32SetFileInformationByHandle")]
+            internal static unsafe bool SetFileInformationByHandle(
+                SafeFileHandle hFile,
+                int FileInformationClass,
+                void* lpFileInformation,
+                uint dwBufferSize)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32DeleteFile")]
+            internal static bool DeleteFile(string path)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32InitializeCriticalSection", CompareByParameterNames = true)]
+            internal static unsafe void InitializeCriticalSection(
+                CRITICAL_SECTION* lpCriticalSection)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32EnterCriticalSection", CompareByParameterNames = true)]
+            internal static unsafe void EnterCriticalSection(
+                CRITICAL_SECTION* lpCriticalSection)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32LeaveCriticalSection", CompareByParameterNames = true)]
+            internal static unsafe void LeaveCriticalSection(
+                CRITICAL_SECTION* lpCriticalSection)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32DeleteCriticalSection", CompareByParameterNames = true)]
+            internal static unsafe void DeleteCriticalSection(
+                CRITICAL_SECTION* lpCriticalSection)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32SleepConditionVariableCS", CompareByParameterNames = true)]
+            internal static unsafe bool SleepConditionVariableCS(
+                CONDITION_VARIABLE* ConditionVariable,
+                CRITICAL_SECTION* CriticalSection,
+                int dwMilliseconds)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32InitializeConditionVariable", CompareByParameterNames = true)]
+            internal static unsafe void InitializeConditionVariable(
+                CONDITION_VARIABLE* ConditionVariable)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32WakeConditionVariable", CompareByParameterNames = true)]
+            internal static unsafe void WakeConditionVariable(
+                CONDITION_VARIABLE* ConditionVariable)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation]
+            internal static bool GetSystemTimes(out long idle, out long kernel, out long user)
+            {
+                idle = 0;
+                kernel = 0;
+                user = 0;
+                return true;
+            }
+
+            internal static bool PostQueuedCompletionStatus(
+                IntPtr CompletionPort,
+                int dwNumberOfBytesTransferred,
+                UIntPtr CompletionKey,
+                IntPtr lpOverlapped)
+            {
+                throw new NotImplementedException();
+            }
+
+            internal static bool GetQueuedCompletionStatus(
+                IntPtr CompletionPort,
+                out int lpNumberOfBytes,
+                out UIntPtr CompletionKey,
+                out IntPtr lpOverlapped,
+                int dwMilliseconds)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+#pragma warning disable CS0169
+#pragma warning disable SA1306
+#pragma warning disable SX1309
+        internal struct CRITICAL_SECTION
+        {
+            public IntPtr DebugInfo;
+            public int LockCount;
+            public int RecursionCount;
+            public IntPtr OwningThread;
+            public IntPtr LockSemaphore;
+            public UIntPtr SpinCount;
+        }
+
+        internal struct CONDITION_VARIABLE
+        {
+            public IntPtr Ptr;
         }
 
 #pragma warning disable CS0649

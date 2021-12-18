@@ -96,22 +96,5 @@ namespace ArduinoCsCompiler.Runtime
         {
             return MiniUnsafe.As<Thread>(new MiniThread());
         }
-
-        [ArduinoImplementation(CompareByParameterNames = true)]
-        public static DeserializationTracker GetThreadDeserializationTracker(ref int stackMark)
-        {
-            stackMark = 0;
-            return new DeserializationTracker();
-        }
-
-        [ArduinoReplacement("System.Runtime.Serialization.DeserializationTracker", null, true)]
-        internal sealed class DeserializationTracker
-        {
-            public bool DeserializationInProgress
-            {
-                get;
-                set;
-            }
-        }
     }
 }

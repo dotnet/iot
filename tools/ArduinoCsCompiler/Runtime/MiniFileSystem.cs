@@ -17,5 +17,11 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation("FileSystemDirectoryExists")]
+        public static bool DirectoryExists(string fullPath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

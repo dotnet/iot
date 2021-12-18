@@ -20,5 +20,11 @@ namespace ArduinoCsCompiler.Runtime
             return CreateInstance(type, nonPublic ? BindingFlags.CreateInstance | BindingFlags.NonPublic | BindingFlags.Public : BindingFlags.CreateInstance | BindingFlags.Public,
                 null, new object?[0], CultureInfo.CurrentCulture, null);
         }
+
+        [ArduinoImplementation(IgnoreGenericTypes = true)]
+        public static T? CreateInstance<T>()
+        {
+            return (T)CreateInstance(typeof(T), BindingFlags.Default, null, new object?[0], CultureInfo.CurrentCulture, null);
+        }
     }
 }
