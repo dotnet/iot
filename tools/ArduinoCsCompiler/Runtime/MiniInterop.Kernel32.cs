@@ -543,6 +543,7 @@ namespace ArduinoCsCompiler.Runtime
 #pragma warning disable CS0169
 #pragma warning disable SA1306
 #pragma warning disable SX1309
+#pragma warning disable CS0649
         internal struct CRITICAL_SECTION
         {
             public IntPtr DebugInfo;
@@ -558,7 +559,6 @@ namespace ArduinoCsCompiler.Runtime
             public IntPtr Ptr;
         }
 
-#pragma warning disable CS0649
         internal struct SECURITY_ATTRIBUTES
         {
             public int DummyData;

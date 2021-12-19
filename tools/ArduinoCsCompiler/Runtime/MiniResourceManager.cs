@@ -7,7 +7,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Resources.ResourceManager), true)]
     internal class MiniResourceManager
     {
-        private static readonly int MagicNumber;
+        public static readonly int MagicNumber = -1091581234;
         public string GetString(string resourceName)
         {
             return resourceName;

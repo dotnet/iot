@@ -7,7 +7,7 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Type), true, IncludingSubclasses = true)]
     internal class MiniType
     {
-        public static readonly Type[] EmptyTypes;
+        public static readonly Type[] EmptyTypes = new Type[0];
 #pragma warning disable 414, SX1309
         // This is used by firmware code directly. Do not reorder the members without checking the firmware
         // The member contains the token of the class declaration

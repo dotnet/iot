@@ -116,6 +116,16 @@ namespace ArduinoCsCompiler
             return b.ToString();
         }
 
+        public static string MethodSignature(this EquatableMethod em, bool useFullNamespaces = true)
+        {
+            return MethodSignature(em.Method, useFullNamespaces);
+        }
+
+        public static string MemberInfoSignature(this EquatableMethod em, bool useFullNamespaces = true)
+        {
+            return MemberInfoSignature((MemberInfo)em.Method, useFullNamespaces);
+        }
+
         /// <summary>
         /// Prints the signature of an arbitrary member
         /// </summary>

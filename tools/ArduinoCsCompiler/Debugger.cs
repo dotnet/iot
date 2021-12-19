@@ -91,8 +91,20 @@ namespace ArduinoCsCompiler
                         Continue();
                         break;
                     case 'k':
-                        _compiler.KillTask(_set.MainEntryPointInternal);
+                    {
+                        var task = _set.MainEntryPointInternal;
+                        if (task == null)
+                        {
+                            _compiler.KillTask(null);
+                        }
+                        else
+                        {
+                            _compiler.KillTask(task);
+                        }
+
                         break;
+                    }
+
                     case 'q':
                         return false;
                     case 'h':

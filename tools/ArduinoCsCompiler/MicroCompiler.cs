@@ -250,12 +250,12 @@ namespace ArduinoCsCompiler
                 throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
-            void AddMethod(MethodInfo method, int nativeMethod)
+            void AddMethod(EquatableMethod method, int nativeMethod)
             {
                 if (!set.HasMethod(method, method, out _))
                 {
                     set.GetReplacement(method.DeclaringType);
-                    MethodInfo? replacement = (MethodInfo?)set.GetReplacement(method, method);
+                    var replacement = set.GetReplacement(method, method);
                     if (replacement != null)
                     {
                         method = replacement;
@@ -275,7 +275,7 @@ namespace ArduinoCsCompiler
             foreach (var method in lowLevelInterface.GetMethods(BindingFlags.Public | BindingFlags.DeclaredOnly))
             {
                 var attr = (ArduinoImplementationAttribute)method.GetCustomAttributes(typeof(ArduinoImplementationAttribute)).First();
-                AddMethod(method, attr.MethodNumber);
+                AddMethod(new EquatableMethod(method), attr.MethodNumber);
             }
 
             MethodInfo? methodToReplace;
@@ -306,7 +306,7 @@ namespace ArduinoCsCompiler
                                 flags |= BindingFlags.NonPublic;
                             }
 
-                            methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => MethodsHaveSameSignature(x, m) || AreSameOperatorMethods(x, m));
+                            methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => EquatableMethod.MethodsHaveSameSignature(x, m) || EquatableMethod.AreSameOperatorMethods(x, m));
                             if (methodToReplace == null)
                             {
                                 // That may be ok if it is our own internal implementation, but for now we abort, since we currently have no such case
@@ -334,7 +334,7 @@ namespace ArduinoCsCompiler
                                 flags |= BindingFlags.NonPublic;
                             }
 
-                            var ctor = ia.TypeToReplace!.GetConstructors(flags).SingleOrDefault(x => MethodsHaveSameSignature(x, m) || AreSameOperatorMethods(x, m));
+                            var ctor = ia.TypeToReplace!.GetConstructors(flags).SingleOrDefault(x => EquatableMethod.MethodsHaveSameSignature(x, m) || EquatableMethod.AreSameOperatorMethods(x, m));
                             if (ctor == null)
                             {
                                 // That may be ok if it is our own internal implementation, but for now we abort, since we currently have no such case
@@ -624,7 +624,7 @@ namespace ArduinoCsCompiler
                     else
                     {
                         // Or if the method is implementing an interface
-                        List<MethodInfo> methodsBeingImplemented = new List<MethodInfo>();
+                        List<EquatableMethod> methodsBeingImplemented = new List<EquatableMethod>();
                         MicroCompiler.CollectBaseImplementations(set, m, methodsBeingImplemented);
                         if (methodsBeingImplemented.Any())
                         {
@@ -979,7 +979,7 @@ namespace ArduinoCsCompiler
             int idx = 0;
             foreach (var me in uploadList)
             {
-                MethodBase methodInfo = me.MethodBase;
+                MethodBase methodInfo = me.MethodBase.Method;
                 _logger.LogDebug($"Loading Method {idx + 1} of {cnt} (NewToken 0x{me.Token:X}), named {methodInfo.MethodSignature(false)}.");
                 SendMethod(set, me);
                 idx++;
@@ -999,9 +999,9 @@ namespace ArduinoCsCompiler
         /// <param name="method">The method instance</param>
         /// <param name="methodsBeingImplemented">Returns the list of methods (from interfaces or base classes) that this method implements</param>
         /// <returns>True if the method shall be part of the class declaration</returns>
-        private static bool MemberLinkRequired(ExecutionSet set, MemberInfo method, out List<MethodInfo> methodsBeingImplemented)
+        private static bool MemberLinkRequired(ExecutionSet set, MemberInfo method, out List<EquatableMethod> methodsBeingImplemented)
         {
-            methodsBeingImplemented = new List<MethodInfo>();
+            methodsBeingImplemented = new List<EquatableMethod>();
 
             if (method is MethodInfo m)
             {
@@ -1019,7 +1019,7 @@ namespace ArduinoCsCompiler
                     return false;
                 }
 
-                CollectBaseImplementations(set, m, methodsBeingImplemented);
+                CollectBaseImplementations(set, new EquatableMethod(m), methodsBeingImplemented);
 
                 // We need the implementation if at least one base implementation is being called and is used
                 return methodsBeingImplemented.Count > 0 && methodsBeingImplemented.Any(x => set.HasMethod(x, m, out _));
@@ -1028,63 +1028,17 @@ namespace ArduinoCsCompiler
             return false;
         }
 
-        private static bool IsOverriddenImplementation(MethodInfo candidate, MethodInfo self, bool candidateIsFromInterface)
-        {
-            var interf = candidate.DeclaringType;
-            if (interf != null && interf.IsInterface && self.DeclaringType != null && self.DeclaringType.IsArray == false)
-            {
-                // The interface map can be used to check whether a method (self) implements a method from an interface. For this
-                // the names need not match (and will eventually not, if the method is implemented explicitly)
-                var map = self.DeclaringType.GetInterfaceMap(interf);
-                for (int i = 0; i < map.InterfaceMethods.Length; i++)
-                {
-                    if (map.InterfaceMethods[i] == candidate && map.TargetMethods[i] == self)
-                    {
-                        return true;
-                    }
-                }
-
-                // If we can use the interface map, don't try further, or we'll end up with wrong associations when there are multiple overloads for the same method (i.e. List<T>.GetEnumerator())
-                return false;
-            }
-
-            if (candidate.Name != self.Name)
-            {
-                return false;
-            }
-
-            // If we're declared new, we're not overriding anything (that does not apply for interfaces, though)
-            if (self.Attributes.HasFlag(MethodAttributes.NewSlot) && !candidateIsFromInterface)
-            {
-                return false;
-            }
-
-            // if the base is neither virtual nor abstract, we're not overriding
-            if (!candidate.IsVirtual && !candidate.IsAbstract)
-            {
-                return false;
-            }
-
-            // private methods cannot be virtual
-            // TODO: Check how explicitly interface implementations are handled in IL
-            if (self.IsPrivate || candidate.IsPrivate)
-            {
-                return false;
-            }
-
-            return MethodsHaveSameSignature(self, candidate);
-        }
-
-        internal static void CollectBaseImplementations(ExecutionSet set, MethodInfo method, List<MethodInfo> methodsBeingImplemented)
+        internal static void CollectBaseImplementations(ExecutionSet set, EquatableMethod method, List<EquatableMethod> methodsBeingImplemented)
         {
             Type? cls = method.DeclaringType?.BaseType;
             while (cls != null)
             {
                 foreach (var candidate in cls.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (IsOverriddenImplementation(candidate, method, false))
+                    EquatableMethod equatableCandidate = new EquatableMethod(candidate);
+                    if (EquatableMethod.IsOverriddenImplementation(equatableCandidate, method, false))
                     {
-                        methodsBeingImplemented.Add(candidate);
+                        methodsBeingImplemented.Add(equatableCandidate);
                     }
                 }
 
@@ -1107,9 +1061,10 @@ namespace ArduinoCsCompiler
 
                 foreach (var candidate in interf.GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
                 {
-                    if (IsOverriddenImplementation(candidate, method, true))
+                    EquatableMethod equatableCandidate = new EquatableMethod(candidate);
+                    if (EquatableMethod.IsOverriddenImplementation(equatableCandidate, method, true))
                     {
-                        methodsBeingImplemented.Add(candidate);
+                        methodsBeingImplemented.Add(equatableCandidate);
                     }
                 }
             }
@@ -1468,28 +1423,7 @@ namespace ArduinoCsCompiler
             return VariableKind.Object;
         }
 
-        /// <summary>
-        /// Returns true if the given method shall be internalized (has a native implementation on the arduino)
-        /// </summary>
-        internal static bool HasArduinoImplementationAttribute(MethodBase method,
-#if NET5_0_OR_GREATER
-        [NotNullWhen(true)]
-#endif
-        out ArduinoImplementationAttribute attribute)
-        {
-            var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
-            ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
-            if (iaMethod != null)
-            {
-                attribute = iaMethod;
-                return true;
-            }
-
-            attribute = null!;
-            return false;
-        }
-
-        internal static bool HasIntrinsicAttribute(MethodBase method)
+        internal static bool HasIntrinsicAttribute(EquatableMethod method)
         {
             var attribute = Type.GetType("System.Runtime.CompilerServices.IntrinsicAttribute", true)!;
             var attribs = method.GetCustomAttributes(attribute);
@@ -1513,7 +1447,7 @@ namespace ArduinoCsCompiler
             return false;
         }
 
-        internal void CollectDependendentMethods(ExecutionSet set, MethodBase methodInfo, IlCode? code, HashSet<MethodBase> newMethods)
+        internal void CollectDependendentMethods(ExecutionSet set, EquatableMethod methodInfo, IlCode? code, HashSet<EquatableMethod> newMethods)
         {
             if (methodInfo.IsAbstract)
             {
@@ -1523,14 +1457,14 @@ namespace ArduinoCsCompiler
             }
 
             // If this is true, we don't have to parse the implementation
-            if (HasArduinoImplementationAttribute(methodInfo, out var attrib) && attrib!.MethodNumber != 0)
+            if (EquatableMethod.HasArduinoImplementationAttribute(methodInfo, out var attrib) && attrib!.MethodNumber != 0)
             {
                 return;
             }
 
             if (code == null)
             {
-                code = IlCodeParser.FindAndPatchTokens(set, methodInfo);
+                code = IlCodeParser.FindAndPatchTokens(set, methodInfo.Method);
             }
 
             foreach (var method in code.DependentMethods)
@@ -1543,7 +1477,7 @@ namespace ArduinoCsCompiler
                     finalMethod = method;
                 }
 
-                if (finalMethod is MethodInfo me)
+                if (finalMethod.Method is MethodInfo me)
                 {
                     // Ensure we're not scanning the same implementation twice, as this would result
                     // in a stack overflow when a method is recursive (even indirect)
@@ -1552,7 +1486,7 @@ namespace ArduinoCsCompiler
                         CollectDependendentMethods(set, me, code1, newMethods);
                     }
                 }
-                else if (finalMethod is ConstructorInfo co)
+                else if (finalMethod.Method is ConstructorInfo co)
                 {
                     if (!set.HasMethod(co, methodInfo, out var code2) && newMethods.Add(co))
                     {
@@ -1583,7 +1517,7 @@ namespace ArduinoCsCompiler
             */
         }
 
-        public ArduinoTask GetTask(ExecutionSet set, MethodBase methodInfo)
+        public ArduinoTask GetTask(ExecutionSet set, EquatableMethod methodInfo)
         {
             if (_disposed)
             {
@@ -1779,16 +1713,16 @@ namespace ArduinoCsCompiler
             return exec;
         }
 
-        internal void PrepareCodeInternal(ExecutionSet set, MethodBase methodInfo, ArduinoMethodDeclaration? parent)
+        internal void PrepareCodeInternal(ExecutionSet set, EquatableMethod methodInfo, ArduinoMethodDeclaration? parent)
         {
             // Ensure the class is known, if it needs replacement
             var classReplacement = set.GetReplacement(methodInfo.DeclaringType);
-            MethodBase? replacement = set.GetReplacement(methodInfo, methodInfo);
-            MethodBase parentMethod = parent == null ? methodInfo : parent.MethodBase;
+            EquatableMethod? replacement = set.GetReplacement(methodInfo, methodInfo);
+            EquatableMethod parentMethod = parent == null ? methodInfo : parent.MethodBase;
             if (classReplacement != null && replacement == null)
             {
                 // See below, this is the fix for it
-                replacement = set.GetReplacement(methodInfo, parentMethod, classReplacement);
+                replacement = set.GetReplacement(methodInfo, parentMethod.Method, classReplacement);
             }
 
             if (replacement != null)
@@ -1808,7 +1742,7 @@ namespace ArduinoCsCompiler
                 throw new InvalidOperationException($"Internal error: The class {classReplacement} should fully replace {methodInfo.DeclaringType}, however method {methodInfo} has no replacement (and no error either)");
             }
 
-            if (HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != 0)
+            if (EquatableMethod.HasArduinoImplementationAttribute(methodInfo, out var implementation) && implementation!.MethodNumber != 0)
             {
                 int tk1 = set.GetOrAddMethodToken(methodInfo, parentMethod);
                 var newInfo1 = new ArduinoMethodDeclaration(tk1, methodInfo, parent, MethodFlags.SpecialMethod, implementation!.MethodNumber);
@@ -1892,7 +1826,7 @@ namespace ArduinoCsCompiler
                     {
                         var args = methodInfo.GetParameters();
                         Type t = methodInfo.DeclaringType!;
-                        var methodDetail = (MethodInfo)methodInfo;
+                        var methodDetail = (MethodInfo)methodInfo.Method;
                         var targetField = t.GetField("_target", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
                         var methodPtrField = t.GetField("_methodPtr", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
                         List<byte> code = new List<byte>();
@@ -1996,7 +1930,7 @@ namespace ArduinoCsCompiler
             }
             else if (hasBody)
             {
-                parserResult = IlCodeParser.FindAndPatchTokens(set, methodInfo, ilBytes!);
+                parserResult = IlCodeParser.FindAndPatchTokens(set, methodInfo.Method, ilBytes!);
 
                 foreach (var type in parserResult.DependentTypes)
                 {
@@ -2033,8 +1967,7 @@ namespace ArduinoCsCompiler
                 }
 
                 // TODO: Change to dictionary and transfer IlCode object to correct place (it's evaluated inside, but discarded there)
-                HashSet<MethodBase> methods = new HashSet<MethodBase>();
-
+                HashSet<EquatableMethod> methods = new HashSet<EquatableMethod>();
                 CollectDependendentMethods(set, methodInfo, parserResult, methods);
 
                 var list = methods.ToList();
@@ -2308,152 +2241,13 @@ namespace ArduinoCsCompiler
         }
 
         /// <summary>
-        /// The two methods have the same name and signature (that means one can be replaced with another or one can override another)
-        /// </summary>
-        public static bool MethodsHaveSameSignature(MethodBase a, MethodBase b)
-        {
-            // A ctor can never match an ordinary method or the other way round
-            if (a.GetType() != b.GetType())
-            {
-                return false;
-            }
-
-            if (a.IsStatic != b.IsStatic)
-            {
-                return false;
-            }
-
-            if (a.Name != b.Name)
-            {
-                return false;
-            }
-
-            var argsa = a.GetParameters();
-            var argsb = b.GetParameters();
-
-            if (argsa.Length != argsb.Length)
-            {
-                return false;
-            }
-
-            if ((HasArduinoImplementationAttribute(a, out var attrib) && attrib!.CompareByParameterNames) ||
-                (HasArduinoImplementationAttribute(b, out attrib) && attrib!.CompareByParameterNames))
-            {
-                // Even if we only compare by name, the number of generic arguments must match
-                if (a.GetGenericArguments().Length != b.GetGenericArguments().Length)
-                {
-                    return false;
-                }
-
-                for (int i = 0; i < argsa.Length; i++)
-                {
-                    if (argsa[i].Name != argsb[i].Name)
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-
-            for (int i = 0; i < argsa.Length; i++)
-            {
-                if (!AreSameParameterTypes(argsa[i].ParameterType, argsb[i].ParameterType))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        private static bool AreSameParameterTypes(Type parameterA, Type parameterB)
-        {
-            if (parameterA == parameterB)
-            {
-                return true;
-            }
-
-            // FullName is null for generic type arguments, since they have no namespace
-            if (parameterA.FullName == parameterB.FullName && parameterA.Name == parameterB.Name)
-            {
-                return true;
-            }
-
-            // UintPtr/IntPtr have a platform specific width, that means they're different whether we run in 32 bit or in 64 bit mode on the local(!) computer.
-            // But since we know that the target platform is 32 bit, we can assume them to be equal
-            if (parameterA == typeof(UIntPtr) && parameterB == typeof(uint))
-            {
-                return true;
-            }
-
-            if (parameterA == typeof(IntPtr) && parameterB == typeof(int))
-            {
-                return true;
-            }
-
-            if (parameterA == typeof(uint) && parameterB == typeof(UIntPtr))
-            {
-                return true;
-            }
-
-            if (parameterA == typeof(int) && parameterB == typeof(IntPtr))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Returns true if the two methods denote the same operator.
-        /// We need to handle this a bit special because it is not possible to declare i.e. operator==(Type a, Type b) outside "Type" if we want to replace it.
-        /// </summary>
-        public static bool AreSameOperatorMethods(MethodBase a, MethodBase b)
-        {
-            // A ctor can never match an ordinary method or the other way round
-            if (a.GetType() != b.GetType())
-            {
-                return false;
-            }
-
-            if (a.Name != b.Name)
-            {
-                return false;
-            }
-
-            if (a.IsStatic != b.IsStatic)
-            {
-                return false;
-            }
-
-            var argsa = a.GetParameters();
-            var argsb = b.GetParameters();
-
-            if (argsa.Length != argsb.Length)
-            {
-                return false;
-            }
-
-            // Same name and named "op_*". These are both operators, so we decide they're equal.
-            // Note that this is not necessarily true, because it is possible to define two op_equality members with different argument sets,
-            // but this is very discouraged and is hopefully not the case in the System libs.
-            if (a.Name.StartsWith("op_"))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Executes the given method with the provided arguments asynchronously
         /// </summary>
         /// <remarks>Argument count/type not checked yet</remarks>
         /// <param name="method">Handle to method to invoke.</param>
         /// <param name="taskId">An id identifying the started task (a counter usually does)</param>
         /// <param name="arguments">Argument list</param>
-        internal void Invoke(MethodBase method, short taskId, params object[] arguments)
+        internal void Invoke(EquatableMethod method, short taskId, params object[] arguments)
         {
             if (_activeExecutionSet == null)
             {
@@ -2465,7 +2259,7 @@ namespace ArduinoCsCompiler
             _commandHandler.ExecuteIlCode(decl.Token, taskId, arguments);
         }
 
-        public void KillTask(MethodBase? methodInfo)
+        public void KillTask(EquatableMethod? methodInfo)
         {
             if (_activeExecutionSet == null)
             {

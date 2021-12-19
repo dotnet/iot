@@ -5,7 +5,7 @@ namespace ArduinoCsCompiler
 {
     internal class IlCode
     {
-        public IlCode(MethodBase method, byte[]? ilBytes)
+        public IlCode(EquatableMethod method, byte[]? ilBytes)
         {
             Method = method;
             IlBytes = ilBytes;
@@ -26,7 +26,7 @@ namespace ArduinoCsCompiler
             Name = $"{method.MethodSignature()}";
         }
 
-        public MethodBase Method
+        public EquatableMethod Method
         {
             get;
         }
