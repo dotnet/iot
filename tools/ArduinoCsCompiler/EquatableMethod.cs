@@ -72,17 +72,17 @@ namespace ArduinoCsCompiler
         {
             if (ReferenceEquals(a, b))
             {
-                return true;
+                return false;
             }
 
             if (ReferenceEquals(b, null))
             {
-                return false;
+                return true;
             }
 
             if (ReferenceEquals(a, null))
             {
-                return false;
+                return true;
             }
 
             return !AreMethodsIdentical(a.Method, b.Method);
@@ -112,20 +112,20 @@ namespace ArduinoCsCompiler
         {
             if (ReferenceEquals(a, b))
             {
-                return true;
+                return false;
             }
 
             if (ReferenceEquals(b, null))
             {
-                return false;
+                return true;
             }
 
             if (ReferenceEquals(a, null))
             {
-                return false;
+                return true;
             }
 
-            return AreMethodsIdentical(a.Method, b);
+            return !AreMethodsIdentical(a.Method, b);
         }
 
         public static implicit operator EquatableMethod(MethodBase a)
@@ -491,6 +491,11 @@ namespace ArduinoCsCompiler
         public override int GetHashCode()
         {
             return ArduinoImplementationAttribute.GetStaticHashCode(this.MethodSignature(true));
+        }
+
+        public override string ToString()
+        {
+            return this.MethodSignature(false);
         }
     }
 }

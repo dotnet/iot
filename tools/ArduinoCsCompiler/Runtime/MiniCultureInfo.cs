@@ -776,15 +776,15 @@ namespace ArduinoCsCompiler.Runtime
                 }
             }
 
-            public string NativeName => "Invariant";
+            public string NativeName => "English";
 
-            public string EnglishName => "Invariant";
+            public string EnglishName => "English";
 
-            public string ThreeLetterWindowsLanguageName => "INV";
+            public string ThreeLetterWindowsLanguageName => "eng";
 
-            public string TwoLetterISOLanguageName => "IN";
+            public string TwoLetterISOLanguageName => "en";
 
-            public string ThreeLetterISOLanguageName => "INV";
+            public string ThreeLetterISOLanguageName => "eng";
 
             public int FirstDayOfWeek => 0;
 

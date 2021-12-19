@@ -1584,10 +1584,9 @@ namespace ArduinoCsCompiler
                 exec.SuppressType("System.Resources.RuntimeResourceSet");
                 exec.SuppressType("System.Resources.ResourceReader");
                 // exec.SuppressNamespace("System.Runtime.Intrinsics", true);
-#if NET5_0_OR_GREATER
                 // Native libraries are not supported
                 exec.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));
-#endif
+
                 // Only the invariant culture is supported (we might later change this to "only one culture is supported", and
                 // upload the strings matching a specific culture)
                 exec.SuppressType(typeof(System.Globalization.HebrewCalendar));
@@ -1597,8 +1596,9 @@ namespace ArduinoCsCompiler
                 exec.SuppressType(typeof(IDeserializationCallback));
                 exec.SuppressType(typeof(IConvertible)); // Remove support for this rarely used interface which links many methods (i.e. on String)
                 exec.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
+                exec.SuppressType(typeof(Microsoft.Win32.Registry));
+                exec.SuppressType(typeof(Microsoft.Win32.RegistryKey));
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
-                exec.SuppressType(typeof(ArduinoBoard));
                 exec.SuppressType(typeof(MicroCompiler));
 
                 // We don't currently support threads or tasks
@@ -2079,7 +2079,7 @@ namespace ArduinoCsCompiler
             // Todo: The above doesn't work reliably yet, therefore do a bit of manual mangling.
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
-            // The last of the BringToFront elements below will be after the first
+            // The last of the BringToFront elements below will be the first cctor that gets executed
             BringToFront(codeSequences, typeof(System.Text.UTF8Encoding));
             BringToFront(codeSequences, typeof(System.Text.Encoding));
             BringToFront(codeSequences, typeof(System.Text.EncoderFallback));
@@ -2092,6 +2092,7 @@ namespace ArduinoCsCompiler
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(codeSequences, typeof(System.DateTime));
             SendToBack(codeSequences, GetSystemPrivateType("System.DateTimeFormat"));
+            SendToBack(codeSequences, typeof(System.TimeZoneInfo));
 
             set.FirmwareStartupSequence = codeSequences;
         }

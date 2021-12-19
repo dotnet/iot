@@ -20,5 +20,10 @@ namespace ArduinoCsCompiler.Runtime
             return TimeSpan.Zero;
         }
 
+        [ArduinoImplementation]
+        public static string GetUtcStandardDisplayName()
+        {
+            return "Coordinated Universal Time";
+        }
     }
 }
