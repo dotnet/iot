@@ -62,6 +62,7 @@ namespace Iot.Device.BuildHat.Sensors
         internal DistanceSensor(Brick brick, SensorPort port)
             : base(brick, port, SensorType.SpikePrimeUltrasonicDistanceSensor)
         {
+            Brick.SendRawCommand($"port {(byte)Port} ; plimit 1 ; set -1\r");
         }
 
         /// <summary>
@@ -96,5 +97,8 @@ namespace Iot.Device.BuildHat.Sensors
                 Brick.SelectModeAndRead(Port, 1, _continuous);
             }
         }
+
+        /// <inheritdoc/>
+        public override string GetSensorName() => "SPIKE ultrasonic distance sensor";
     }
 }

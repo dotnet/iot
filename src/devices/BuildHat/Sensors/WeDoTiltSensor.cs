@@ -81,5 +81,8 @@ namespace Iot.Device.BuildHat.Sensors
 
             throw new IOException("Can't measure the tilt.");
         }
+
+        /// <inheritdoc/>
+        public override string GetSensorName() => "WeDo tilt sensor";
     }
 }

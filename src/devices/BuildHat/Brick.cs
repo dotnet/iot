@@ -950,9 +950,11 @@ namespace Iot.Device.BuildHat
                                     _elements[port] = new ColorSensor(this, (SensorPort)port, _sensorType[port]);
                                     break;
                                 case SensorType.SpikePrimeUltrasonicDistanceSensor:
-                                // TODO break;
+                                    _elements[port] = new DistanceSensor(this, (SensorPort)port);
+                                    break;
                                 case SensorType.SpikePrimeForceSensor:
-                                // TODO break;
+                                    _elements[port] = new ForceSensor(this, (SensorPort)port);
+                                    break;
                                 case SensorType.SpikeEssential3x3ColorLightMatrix:
                                 // TODO break;
                                 default:
@@ -1055,7 +1057,7 @@ namespace Iot.Device.BuildHat
                                             var weDoTilt = (WeDoTiltSensor)_elements[port];
                                             Point pt = new Point(Convert.ToInt32(elements[inc++]), Convert.ToInt32(elements[inc++]));
                                             weDoTilt.Tilt = pt;
-                                            break; 
+                                            break;
                                         case SensorType.WeDoDistanceSensor:
                                             // Only 1 mode and 2 values
                                             var weDoDistance = (WeDoDistanceSensor)_elements[port];
@@ -1139,9 +1141,14 @@ namespace Iot.Device.BuildHat
 
                                             break;
                                         case SensorType.SpikePrimeUltrasonicDistanceSensor:
-                                        // TODO break;
+                                            var dist = (DistanceSensor)_elements[port];
+                                            dist.Distance = Convert.ToInt32(elements[inc++]);
+                                            break;
                                         case SensorType.SpikePrimeForceSensor:
-                                        // TODO break;
+                                            var force = (ForceSensor)_elements[port];
+                                            force.Force = Convert.ToInt32(elements[inc++]);
+                                            force.IsPressed = elements[inc++] == "1";
+                                            break;
                                         case SensorType.SpikeEssential3x3ColorLightMatrix:
                                         // TODO break;
                                         default:

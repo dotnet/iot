@@ -77,5 +77,8 @@ namespace Iot.Device.BuildHat.Sensors
 
             throw new IOException("Can't measure the distance.");
         }
+
+        /// <inheritdoc/>
+        public override string GetSensorName() => "WeDo distance sensor";
     }
 }
