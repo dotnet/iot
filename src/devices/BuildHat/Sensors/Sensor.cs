@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
+using System.ComponentModel;
 using Iot.Device.BuildHat.Models;
 
 namespace Iot.Device.BuildHat.Sensors
@@ -47,5 +47,19 @@ namespace Iot.Device.BuildHat.Sensors
         /// Gets the sensor type
         /// </summary>
         public SensorType SensorType { get; internal set; }
+
+        /// <summary>
+        /// To notify a property has changed.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        /// <summary>
+        /// To notify a property has changed.
+        /// </summary>
+        public event PropertyChangedEventHandler? PropertyUpdated;
+
+        internal void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+
+        internal void OnPropertyUpdated(string name) => PropertyUpdated?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

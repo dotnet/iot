@@ -1,10 +1,8 @@
-﻿using System;
-using System.Diagnostics.SymbolStore;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.IO;
-using System.Linq;
-using System.Threading;
 using Iot.Device.BuildHat.Models;
-using Microsoft.VisualBasic;
 using SixLabors.ImageSharp;
 
 namespace Iot.Device.BuildHat.Sensors
@@ -97,6 +95,9 @@ namespace Iot.Device.BuildHat.Sensors
             }
         }
 
+        /// <inheritdoc/>
+        public override string SensorName => "Color sensor";
+
         /// <summary>
         /// Creates a color sensor.
         /// </summary>
@@ -158,8 +159,5 @@ namespace Iot.Device.BuildHat.Sensors
 
             throw new IOException("Can't measure the ambiant light.");
         }
-
-        /// <inheritdoc/>
-        public override string SensorName => "Color sensor";
     }
 }

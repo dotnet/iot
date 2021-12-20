@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Iot.Device.BuildHat.Models;
 
 namespace Iot.Device.BuildHat.Sensors
@@ -57,6 +54,9 @@ namespace Iot.Device.BuildHat.Sensors
             }
         }
 
+        /// <inheritdoc/>
+        public override string SensorName => "Color and distance sensor";
+
         /// <summary>
         /// Creates a color and distance sensor.
         /// </summary>
@@ -94,8 +94,5 @@ namespace Iot.Device.BuildHat.Sensors
 
             throw new IOException("Can't update the counter.");
         }
-
-        /// <inheritdoc/>
-        public override string SensorName => "Color and distance sensor";
     }
 }

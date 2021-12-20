@@ -40,6 +40,9 @@ namespace Iot.Device.BuildHat.Motors
         };
 
         /// <inheritdoc/>
+        public override string SensorName => GetMotorName();
+
+        /// <inheritdoc/>
         public int GetSpeed() => Speed;
 
         /// <inheritdoc/>

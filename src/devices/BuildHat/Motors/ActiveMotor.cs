@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.ComponentModel;
 using Iot.Device.BuildHat.Models;
 using Iot.Device.BuildHat.Sensors;
 
@@ -75,6 +74,9 @@ namespace Iot.Device.BuildHat.Motors
             }
         }
 
+        /// <inheritdoc/>
+        public override string SensorName => GetMotorName();
+
         /// <summary>
         /// Creates an active motor.
         /// </summary>
@@ -103,9 +105,6 @@ namespace Iot.Device.BuildHat.Motors
             SensorType.TechnicMotor => "Technical motor",
             _ => string.Empty,
         };
-
-        /// <inheritdoc/>
-        public override string SensorName => GetMotorName();
 
         /// <inheritdoc/>
         public int GetSpeed() => Speed;

@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using Iot.Device.BuildHat.Models;
@@ -101,20 +100,6 @@ namespace Iot.Device.BuildHat.Sensors
             ModeDetailsInternal = new List<ModeDetail>();
             CombiModesInternal = new List<CombiModes>();
         }
-
-        /// <summary>
-        /// To notify a property has changed.
-        /// </summary>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        /// <summary>
-        /// To notify a property has changed.
-        /// </summary>
-        public event PropertyChangedEventHandler? PropertyUpdated;
-
-        internal void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
-        internal void OnPropertyUpdated(string name) => PropertyUpdated?.Invoke(this, new PropertyChangedEventArgs(name));
 
         /// <summary>
         /// Returned the name of the selectd mode

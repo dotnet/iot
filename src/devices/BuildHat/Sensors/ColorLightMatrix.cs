@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Text;
-using System.Threading.Tasks;
 using Iot.Device.BuildHat.Models;
 
 namespace Iot.Device.BuildHat.Sensors
@@ -10,9 +10,12 @@ namespace Iot.Device.BuildHat.Sensors
     /// <summary>
     /// SPIKE 3x3 color light matrix.
     /// </summary>
-    public class ColorLightMatrixSensor : ActiveSensor
+    public class ColorLightMatrix : ActiveSensor
     {
-        internal ColorLightMatrixSensor(Brick brick, SensorPort port)
+        /// <inheritdoc/>
+        public override string SensorName => "SPIKE 3x3 color light matrix";
+
+        internal ColorLightMatrix(Brick brick, SensorPort port)
             : base(brick, port, SensorType.SpikeEssential3x3ColorLightMatrix)
         {
             Brick.SendRawCommand($"port {(byte)Port} ; plimit 1 ; set -1\r");
@@ -67,8 +70,5 @@ namespace Iot.Device.BuildHat.Sensors
             command.Append("\r");
             Brick.SendRawCommand(command.ToString());
         }
-
-        /// <inheritdoc/>
-        public override string SensorName => "SPIKE 3x3 color light matrix sensor";
     }
 }

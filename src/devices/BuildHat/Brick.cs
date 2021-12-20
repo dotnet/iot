@@ -29,6 +29,9 @@ namespace Iot.Device.BuildHat
         private const string FirmwareVersion = "Firmware version: ";
         private const string FirmwareSignature = "Firmware signature: ";
         private const string GetFirmwareVersion = "version\r";
+        private const string ButtonReleased = ": button released";
+        private const string ButtonPressed = ": button pressed";
+        private const string PowerFaultError = "power fault";
 
         private SerialPort _port;
         private GpioController? _gpio;
@@ -93,6 +96,11 @@ namespace Iot.Device.BuildHat
             SensorType.TechnicMotor => true,
             _ => false,
         };
+
+        /// <summary>
+        /// Events raised in case of power fault.
+        /// </summary>
+        public event EventHandler? PowerFault;
 
         /// <summary>
         /// Creates a Brick with a serial port
@@ -659,6 +667,14 @@ namespace Iot.Device.BuildHat
             }
         }
 
+        /// <summary>
+        /// Clears any fault.
+        /// </summary>
+        public void ClearFaults()
+        {
+            PortWrite("clear_faults\r");
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -960,7 +976,7 @@ namespace Iot.Device.BuildHat
                                     _elements[port] = new ForceSensor(this, (SensorPort)port);
                                     break;
                                 case SensorType.SpikeEssential3x3ColorLightMatrix:
-                                    _elements[port] = new ColorLightMatrixSensor(this, (SensorPort)port);
+                                    _elements[port] = new ColorLightMatrix(this, (SensorPort)port);
                                     break;
                                 default:
                                     _elements[port] = new ActiveSensor(this, (SensorPort)port, _sensorType[port]);
@@ -971,8 +987,19 @@ namespace Iot.Device.BuildHat
                         }
                         else
                         {
-                            // TODO: the button and equivalent
-                            _elements[port] = new Sensor(this, (SensorPort)port, _sensorType[port]);
+                            // PAssive sensors
+                            if (_sensorType[port] == SensorType.SimpleLights)
+                            {
+                                _elements[port] = new SimpleLight(this, (SensorPort)port);
+                            }
+                            else if (_sensorType[port] == SensorType.ButtonOrTouchSensor)
+                            {
+                                _elements[port] = new ButtonSensor(this, (SensorPort)port);
+                            }
+                            else
+                            {
+                                _elements[port] = new Sensor(this, (SensorPort)port, _sensorType[port]);
+                            }
                         }
                     }
 
@@ -1169,6 +1196,33 @@ namespace Iot.Device.BuildHat
                         }
                     }
                 }
+            }
+            else if (line.Contains(ButtonReleased))
+            {
+                var port = Convert.ToInt32(line[1] - '0');
+                if ((port >= 0) && (port < 4))
+                {
+                    if (_elements[port] != null)
+                    {
+                        ((ButtonSensor)_elements[port]).IsPressed = false;
+                    }
+                }
+            }
+            else if (line.Contains(ButtonPressed))
+            {
+                var port = Convert.ToInt32(line[1] - '0');
+                if ((port >= 0) && (port < 4))
+                {
+                    if (_elements[port] != null)
+                    {
+                        ((ButtonSensor)_elements[port]).IsPressed = true;
+                    }
+                }
+            }
+            else if (line.Contains(PowerFaultError))
+            {
+                // Raises the error in case of power fault.
+                PowerFault?.Invoke(this, new EventArgs());
             }
         }
 

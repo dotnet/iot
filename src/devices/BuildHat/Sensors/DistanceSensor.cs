@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Iot.Device.BuildHat.Models;
 
 namespace Iot.Device.BuildHat.Sensors
@@ -59,6 +58,9 @@ namespace Iot.Device.BuildHat.Sensors
             }
         }
 
+        /// <inheritdoc/>
+        public override string SensorName => "SPIKE ultrasonic distance sensor";
+
         internal DistanceSensor(Brick brick, SensorPort port)
             : base(brick, port, SensorType.SpikePrimeUltrasonicDistanceSensor)
         {
@@ -97,8 +99,5 @@ namespace Iot.Device.BuildHat.Sensors
                 Brick.SelectModeAndRead(Port, 1, _continuous);
             }
         }
-
-        /// <inheritdoc/>
-        public override string SensorName => "SPIKE ultrasonic distance sensor";
     }
 }
