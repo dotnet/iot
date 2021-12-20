@@ -9,6 +9,7 @@
      <Compile Include="Brick.cs" />
      <Compile Include="Models\BuildHatInformation.cs" />
      <Compile Include="Models\CombiModes.cs" />
+     <Compile Include="Models\LedColor.cs" />
      <Compile Include="Models\LedMode.cs" />
      <Compile Include="Models\MinimumMaximumValues.cs" />
      <Compile Include="Models\ModeDetail.cs" />
@@ -22,6 +23,7 @@
      <Compile Include="Motors\PassiveMotor.cs" />
      <Compile Include="Sensors\ActiveSensor.cs" />
      <Compile Include="Sensors\ColorAndDistanceSensor.cs" />
+     <Compile Include="Sensors\ColorLightMatrixSensor.cs" />
      <Compile Include="Sensors\ColorSensor.cs" />
      <Compile Include="Sensors\DistanceSensor.cs" />
      <Compile Include="Sensors\ForceSensor.cs" />

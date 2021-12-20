@@ -47,9 +47,13 @@ namespace Iot.Device.BuildHat
             { -1, Color.Black },
             { 0, Color.Black },
             { 1, Color.Brown },
+            { 2, Color.Magenta },
             { 3, Color.Blue },
-            { 5, Color.Green },
+            { 4, Color.Cyan },
+            { 5, Color.PaleGreen },
+            { 6, Color.Green },
             { 7, Color.Yellow },
+            { 8, Color.Yellow },
             { 9, Color.Red },
             { 10, Color.White }
         };
@@ -956,7 +960,8 @@ namespace Iot.Device.BuildHat
                                     _elements[port] = new ForceSensor(this, (SensorPort)port);
                                     break;
                                 case SensorType.SpikeEssential3x3ColorLightMatrix:
-                                // TODO break;
+                                    _elements[port] = new ColorLightMatrixSensor(this, (SensorPort)port);
+                                    break;
                                 default:
                                     _elements[port] = new ActiveSensor(this, (SensorPort)port, _sensorType[port]);
                                     break;
@@ -1150,7 +1155,7 @@ namespace Iot.Device.BuildHat
                                             force.IsPressed = elements[inc++] == "1";
                                             break;
                                         case SensorType.SpikeEssential3x3ColorLightMatrix:
-                                        // TODO break;
+                                        // nothing to report
                                         default:
                                             break;
                                     }
