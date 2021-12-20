@@ -150,13 +150,15 @@ namespace Iot.Device.HardwareMonitor
 
         /// <summary>
         /// Re-reads the sensor tree. Updates all values and the list of sensors.
-        /// You should invalidate all cached <see cref="Sensor"/> and <see cref="Hardware"/> instances after this.
+        /// You should invalidate all cached <see cref="Sensor"/> and <see cref="Hardware"/> instances after using this with <paramref name="refreshSensorList"/>=true
         /// </summary>
-        public void UpdateSensors()
+        /// <paramref name="refreshSensorList">True to also update the list of sensors. False to only update the values. If false, new sensors will not be visible
+        /// (e.g. after inserting a thumb drive)</paramref>
+        public void UpdateSensors(bool refreshSensorList)
         {
             if (_openHardwareMonitorInternal != null)
             {
-                _openHardwareMonitorInternal.UpdateSensors();
+                _openHardwareMonitorInternal.UpdateSensors(refreshSensorList);
                 ExtractCpuNode(_openHardwareMonitorInternal);
             }
         }

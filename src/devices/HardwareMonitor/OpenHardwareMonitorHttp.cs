@@ -17,6 +17,7 @@ namespace HardwareMonitor
         private readonly int _port;
         private readonly Uri _uri;
         private readonly ILogger _logger;
+        private readonly object _lock = new object();
 
         private HttpClient _httpClient;
         private string? _version;
@@ -51,9 +52,9 @@ namespace HardwareMonitor
             set;
         }
 
-        public void UpdateSensors()
+        public void UpdateSensors(bool refreshSensorList)
         {
-            GetFullDataAndDecode();
+            GetFullDataAndDecode(refreshSensorList);
         }
 
         public bool TryConnectToApi()
@@ -82,7 +83,7 @@ namespace HardwareMonitor
             return !string.IsNullOrEmpty(_version);
         }
 
-        private void GetFullDataAndDecode()
+        private void GetFullDataAndDecode(bool refreshSensorList)
         {
             if (!TryConnectToApi())
             {
@@ -92,7 +93,7 @@ namespace HardwareMonitor
             try
             {
                 string fullJson = _httpClient.GetStringAsync(_uri + "api/rootnode").Result;
-                lock (_jsonParser)
+                lock (_lock)
                 {
                     ComputerJson? rootNode = _jsonParser.FromJson<ComputerJson>(fullJson);
                     if (rootNode == null)
@@ -100,41 +101,75 @@ namespace HardwareMonitor
                         return;
                     }
 
-                    var newHardware = new List<OpenHardwareMonitor.Hardware>();
-                    var newSensors = new List<SensorHttp>();
-
-                    foreach (var hardware in rootNode.Hardware)
+                    if (_hardware.Count == 0 || _sensors.Count == 0 || refreshSensorList)
                     {
-                        var hw = new OpenHardwareMonitor.Hardware(hardware.Name, hardware.NodeId, hardware.Parent, hardware.HardwareType);
-                        newHardware.Add(hw);
-
-                        foreach (var sensor in hardware.Sensors)
+                        var (newHardware, newSensors) = CreateSensorTree(rootNode);
+                        _hardware = newHardware;
+                        _sensors = newSensors;
+                    }
+                    else
+                    {
+                        // Instead of updating the sensor list, update only the values for each sensor
+                        List<SensorJson> sensorsFromJson = new();
+                        foreach (var hw in rootNode.Hardware)
                         {
-                            SensorType sensorType;
-                            if (Enum.TryParse<SensorType>(sensor.Type, true, out sensorType))
+                            sensorsFromJson.AddRange(hw.Sensors);
+                        }
+
+                        foreach (var sensor in sensorsFromJson)
+                        {
+                            var sensorToUpdate = _sensors.FirstOrDefault(x => x.Identifier == sensor.NodeId);
+                            if (sensorToUpdate != null)
                             {
-                                var s = new SensorHttp(this, sensor.Name, sensor.NodeId, sensor.Parent, sensorType, sensor.Value);
-                                newSensors.Add(s);
+                                sensorToUpdate.Value = sensor.Value;
                             }
                         }
                     }
 
-                    _hardware = newHardware;
-                    _sensors = newSensors;
                     _lastUpdateTime = DateTime.UtcNow;
                 }
             }
             catch (AggregateException ex)
             {
                 _logger.LogWarning(ex, $"Unable to read /api/rootnode: {ex.Message}");
+                // If we failed to retrieve updates for some time, reset the fields.
+                if ((DateTime.UtcNow - _lastUpdateTime).Duration().TotalSeconds > UpdateInterval.TotalSeconds * 10) // (netstandard doesn't support operator* on TimeSpan)
+                {
+                    _hardware = new List<OpenHardwareMonitor.Hardware>();
+                    _sensors = new List<SensorHttp>();
+                }
             }
+        }
+
+        private (List<OpenHardwareMonitor.Hardware> Hardware, List<SensorHttp> Sensors) CreateSensorTree(ComputerJson rootNode)
+        {
+            var newHardware = new List<OpenHardwareMonitor.Hardware>();
+            var newSensors = new List<SensorHttp>();
+
+            foreach (var hardware in rootNode.Hardware)
+            {
+                var hw = new OpenHardwareMonitor.Hardware(hardware.Name, hardware.NodeId, hardware.Parent, hardware.HardwareType);
+                newHardware.Add(hw);
+
+                foreach (var sensor in hardware.Sensors)
+                {
+                    SensorType sensorType;
+                    if (Enum.TryParse<SensorType>(sensor.Type, true, out sensorType))
+                    {
+                        var s = new SensorHttp(this, sensor.Name, sensor.NodeId, sensor.Parent, sensorType, sensor.Value);
+                        newSensors.Add(s);
+                    }
+                }
+            }
+
+            return (newHardware, newSensors);
         }
 
         public IList<OpenHardwareMonitor.Sensor> GetSensorList()
         {
             if (!_sensors.Any())
             {
-                GetFullDataAndDecode();
+                GetFullDataAndDecode(false);
             }
 
             return _sensors.Cast<OpenHardwareMonitor.Sensor>().ToList();
@@ -144,7 +179,7 @@ namespace HardwareMonitor
         {
             if (!_hardware.Any())
             {
-                GetFullDataAndDecode();
+                GetFullDataAndDecode(false);
             }
 
             return _hardware;
@@ -197,7 +232,7 @@ namespace HardwareMonitor
                 {
                     string apiUrl = _uri + UnixPathJoin("api/nodes/", sensor.Identifier);
                     string fullJson = _httpClient.GetStringAsync(apiUrl).Result;
-                    lock (_jsonParser)
+                    lock (_lock)
                     {
                         SensorJson? rootNode = _jsonParser.FromJson<SensorJson>(fullJson);
                         if (rootNode == null)
@@ -218,7 +253,7 @@ namespace HardwareMonitor
             }
             else if (UpdateStrategy == SensorUpdateStrategy.SynchronousAfterTimeout && (DateTime.UtcNow - _lastUpdateTime).Duration() > UpdateInterval)
             {
-                UpdateSensors();
+                UpdateSensors(false);
             }
 
             value = sensor.Value;

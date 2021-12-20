@@ -14,6 +14,6 @@ namespace Iot.Device.HardwareMonitor
         bool HasHardware();
         IList<OpenHardwareMonitor.Sensor> GetSensorList();
         IList<OpenHardwareMonitor.Hardware> GetHardwareComponents();
-        void UpdateSensors();
+        void UpdateSensors(bool refreshSensorList);
     }
 }

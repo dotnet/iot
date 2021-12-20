@@ -52,10 +52,13 @@ namespace Iot.Device.HardwareMonitor
 
         public TimeSpan UpdateInterval { get; set; }
 
-        public void UpdateSensors()
+        public void UpdateSensors(bool refreshSensorList)
         {
-            _cpu = null;
-            InitHardwareMonitor();
+            if (refreshSensorList)
+            {
+                _cpu = null;
+                InitHardwareMonitor();
+            }
         }
 
         public bool HasHardware()
