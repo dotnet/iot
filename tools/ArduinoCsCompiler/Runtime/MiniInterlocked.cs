@@ -23,6 +23,12 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation("InterlockedExchangeInt")]
+        public static int Exchange(ref Int32 location, Int32 value)
+        {
+            throw new NotImplementedException();
+        }
+
         [ArduinoImplementation("InterlockedCompareExchange_Int32")]
         public static System.Int32 CompareExchange(ref System.Int32 location1, System.Int32 value, System.Int32 comparand)
         {

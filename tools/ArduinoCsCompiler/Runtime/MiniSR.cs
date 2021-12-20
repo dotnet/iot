@@ -15,5 +15,11 @@ namespace ArduinoCsCompiler.Runtime
 
             return defaultString;
         }
+
+        [ArduinoImplementation]
+        public static string GetResourceString(string resourceKey)
+        {
+            return resourceKey;
+        }
     }
 }
