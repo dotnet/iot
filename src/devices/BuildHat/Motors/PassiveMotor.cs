@@ -11,8 +11,11 @@ namespace Iot.Device.BuildHat.Motors
     /// </summary>
     public class PassiveMotor : Sensor, IMotor
     {
+        private bool _isRunning;
+        private int _speed;
+
         /// <inheritdoc/>
-        public int Speed { get; set; }
+        public int Speed { get => _speed; set => SetSpeed(value); }
 
         /// <summary>
         /// Creates a passive motor.
@@ -20,7 +23,7 @@ namespace Iot.Device.BuildHat.Motors
         /// <param name="brick">The brick.</param>
         /// <param name="port">The port.</param>
         /// <param name="motorType">The active motor type.</param>
-        public PassiveMotor(Brick brick, SensorPort port, SensorType motorType)
+        internal PassiveMotor(Brick brick, SensorPort port, SensorType motorType)
             : base(brick, port, motorType)
         {
         }
@@ -46,12 +49,20 @@ namespace Iot.Device.BuildHat.Motors
         public void SetPowerLimit(double plimit) => Brick.SetMotorLimits(Port, plimit);
 
         /// <inheritdoc/>
-        public void SetSpeed(int speed) => Speed = speed;
+        public void SetSpeed(int speed)
+        {
+            _speed = speed;
+            if (_isRunning)
+            {
+                Start();
+            }
+        }
 
         /// <inheritdoc/>
         public void Start()
         {
             Brick.SetMotorPower(Port, Speed);
+            _isRunning = true;
         }
 
         /// <inheritdoc/>
@@ -65,6 +76,7 @@ namespace Iot.Device.BuildHat.Motors
         public void Stop()
         {
             SetSpeed(0);
+            _isRunning = false;
         }
     }
 }

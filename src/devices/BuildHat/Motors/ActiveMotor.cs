@@ -75,7 +75,7 @@ namespace Iot.Device.BuildHat.Motors
         /// <param name="brick">The brick.</param>
         /// <param name="port">The port.</param>
         /// <param name="motorType">The active motor type.</param>
-        public ActiveMotor(Brick brick, SensorPort port, SensorType motorType)
+        internal ActiveMotor(Brick brick, SensorPort port, SensorType motorType)
             : base(brick, port, motorType)
         {
             // Set a defautl plimit and bias, the default ones are too small especially

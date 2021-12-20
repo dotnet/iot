@@ -28,6 +28,7 @@ namespace Iot.Device.BuildHat
     {
         private const string FirmwareVersion = "Firmware version: ";
         private const string FirmwareSignature = "Firmware signature: ";
+        private const string GetFirmwareVersion = "version\r";
 
         private SerialPort _port;
         private GpioController? _gpio;
@@ -188,16 +189,15 @@ namespace Iot.Device.BuildHat
             }
 
             powerPercent = powerPercent < -100 ? -100 : powerPercent > 100 ? 100 : powerPercent;
-            Debug.WriteLine($"powerPercent: {powerPercent}");
             if (IsActiveSensor(_sensorType[(byte)port]))
             {
                 // Set continuous reading
                 SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
-                _port.Write($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set {powerPercent}\r");
+                PortWrite($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set {powerPercent}\r");
             }
             else
             {
-                _port.Write($"port {(byte)port} ; pwm ; set {powerPercent}\r");
+                PortWrite($"port {(byte)port} ; pwm ; set {(powerPercent / 100.0).ToString(CultureInfo.InvariantCulture)}\r");
             }
         }
 
@@ -214,7 +214,7 @@ namespace Iot.Device.BuildHat
             }
 
             powerLimit = powerLimit < 0 ? 0 : powerLimit > 1 ? 1 : powerLimit;
-            _port.Write($"port {(byte)port} ; plimit {powerLimit.ToString(CultureInfo.InvariantCulture)}\r");
+            PortWrite($"port {(byte)port} ; plimit {powerLimit.ToString(CultureInfo.InvariantCulture)}\r");
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace Iot.Device.BuildHat
             }
 
             bias = bias < 0 ? 0 : bias > 1 ? 1 : bias;
-            _port.Write($"port {(byte)port} ; bias {bias.ToString(CultureInfo.InvariantCulture)}\r");
+            PortWrite($"port {(byte)port} ; bias {bias.ToString(CultureInfo.InvariantCulture)}\r");
         }
 
         /// <summary>
@@ -267,7 +267,7 @@ namespace Iot.Device.BuildHat
             ActiveMotor motor = (ActiveMotor)_elements[(byte)port];
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
-            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set pulse {speed} 0.0 {seconds.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set pulse {speed} 0.0 {seconds.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 Thread.Sleep((int)(seconds * 1000));
@@ -356,7 +356,7 @@ namespace Iot.Device.BuildHat
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 Thread.Sleep((int)(duration * 1000));
@@ -398,7 +398,7 @@ namespace Iot.Device.BuildHat
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 while (!((motor.Position / 360.0 < newPosition + 2.028) && (motor.Position / 360.0 > newPosition - 2.028)))
@@ -444,7 +444,7 @@ namespace Iot.Device.BuildHat
             // Set continuous reading
             SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 while (!((motor.Position / 360.0 < newPosition + 2.028) && (motor.Position / 360.0 > newPosition - 2.028)))
@@ -491,7 +491,7 @@ namespace Iot.Device.BuildHat
             }
 
             command.Append("\r");
-            _port.Write(command.ToString());
+            PortWrite(command.ToString());
         }
 
         /// <summary>
@@ -532,7 +532,7 @@ namespace Iot.Device.BuildHat
             sensor.CombiReadingModes = modes;
 
             command.Append("\r");
-            _port.Write(command.ToString());
+            PortWrite(command.ToString());
         }
 
         /// <summary>
@@ -546,7 +546,7 @@ namespace Iot.Device.BuildHat
                 throw new Exception("Mode can be changed only on active sensors.");
             }
 
-            _port.Write($"port {(byte)port} ; select");
+            PortWrite($"port {(byte)port} ; select");
         }
 
         /// <summary>
@@ -556,7 +556,7 @@ namespace Iot.Device.BuildHat
         /// <remarks>In case of a motor, this will switch the motor on full speed.</remarks>
         public void SwitchSensorOn(SensorPort port)
         {
-            _port.Write($"port {(byte)port} ; plimit 1 ; on\r");
+            PortWrite($"port {(byte)port} ; plimit 1 ; on\r");
         }
 
         /// <summary>
@@ -566,7 +566,7 @@ namespace Iot.Device.BuildHat
         /// <remarks>In case of a motor, this will switch off the motor.</remarks>
         public void SwitchSensorOff(SensorPort port)
         {
-            _port.Write($"port {(byte)port} ; plimit 1 ; off\r");
+            PortWrite($"port {(byte)port} ; plimit 1 ; off\r");
         }
 
         /// <summary>
@@ -577,11 +577,6 @@ namespace Iot.Device.BuildHat
         /// <exception cref="Exception">A motor or no sensor is connected</exception>
         public Sensor GetSensor(SensorPort port)
         {
-            if (IsMotor(_sensorType[(byte)port]))
-            {
-                throw new Exception("A motor or no sensor is connected");
-            }
-
             return (Sensor)_elements[(byte)port];
         }
 
@@ -614,7 +609,7 @@ namespace Iot.Device.BuildHat
             command.Append(singleHeader ? "write1 " : "write2 ");
             command.Append(string.Join(" ", data.ToArray().Select(m => string.Format("{0:X2} ", m))));
             command.Append("\r");
-            _port.Write(command.ToString());
+            PortWrite(command.ToString());
         }
 
         #endregion
@@ -635,7 +630,7 @@ namespace Iot.Device.BuildHat
                 command += "\r";
             }
 
-            _port.Write(command);
+            PortWrite(command);
         }
 
         /// <summary>
@@ -678,17 +673,17 @@ namespace Iot.Device.BuildHat
                 // stop all possible motors
                 if (_sensorType[i] != SensorType.SpikeEssential3x3ColorLightMatrix)
                 {
-                    _port.Write($"port {i} ; pwm ; coast ; off \r");
+                    PortWrite($"port {i} ; pwm ; coast ; off \r");
                 }
                 else
                 {
                     // Special case for the matrix, swith everything off
-                    _port.Write($"port {i} ; write1 C2 00 00 00 00 00 00 00 00 00\r");
+                    PortWrite($"port {i} ; write1 C2 00 00 00 00 00 00 00 00 00\r");
                 }
             }
 
             // Deselect all ports
-            _port.Write("port 0 ; select ; port 1 ; select ; port 2 ; select ; port 3 ; select ; echo 0\r");
+            PortWrite("port 0 ; select ; port 1 ; select ; port 2 ; select ; port 3 ; select ; echo 0\r");
             // Depending on the serial port, disposing too fast won't all the message to be send
             // Wiating to see of the bytes has been sent does not properly work for some serial port
             // So waiting seems to be the best option here.
@@ -707,6 +702,8 @@ namespace Iot.Device.BuildHat
 
             _isDisposed = true;
         }
+
+        #region Setup and flashing
 
         private void SetupGpioAndReset(GpioController? controller, int reset, bool shouldDispose)
         {
@@ -728,7 +725,7 @@ namespace Iot.Device.BuildHat
             const string BootloaderSignature = "BuildHAT bootloader version";
             // Let's clear the port first
             PortReadExisting();
-            _port.Write("version\r");
+            PortWrite(GetFirmwareVersion);
             // Wait enough to get the version if any
             Thread.Sleep(50);
             var prompt = PortReadExisting();
@@ -736,7 +733,7 @@ namespace Iot.Device.BuildHat
             // In this case, we'll need to uploadthe firmware
             if (prompt.Contains(BootloaderSignature))
             {
-                _port.Write("\r");
+                PortWrite("\r");
                 prompt = PortReadLine();
                 prompt = PortReadExisting();
 
@@ -757,12 +754,12 @@ namespace Iot.Device.BuildHat
                 byte[] firmware = File.ReadAllBytes(firmwareFile);
                 byte[] signature = File.ReadAllBytes(firmwareSignature);
                 // Step 1: clear and get the prompt
-                _port.Write("clear\r");
+                PortWrite("clear\r");
                 prompt = PortReadLine();
                 prompt = PortReadExisting();
 
                 // Step 2: load the firmware
-                _port.Write($"load {firmware.Length} {GetFirmwareCheckSum(firmware)}\r");
+                PortWrite($"load {firmware.Length} {GetFirmwareCheckSum(firmware)}\r");
                 prompt = PortReadExisting();
                 // STX = 0x02, ETX = 0x03
                 _port.Write("\x02");
@@ -775,7 +772,7 @@ namespace Iot.Device.BuildHat
                 prompt = PortReadExisting();
                 Console.WriteLine(prompt);
                 // STX = 0x02, ETX = 0x03
-                _port.Write($"signature {signature.Length}\r");
+                PortWrite($"signature {signature.Length}\r");
                 _port.Write("\x02");
                 // Write the byte data of the signature between the STX and ETX
                 _port.Write(signature, 0, signature.Length);
@@ -784,7 +781,7 @@ namespace Iot.Device.BuildHat
                 Console.WriteLine(PortReadExisting());
 
                 // Step 4: reboot
-                _port.Write("reboot\r");
+                PortWrite("reboot\r");
                 prompt = PortReadLine();
                 prompt = PortReadExisting();
                 // this time seems suffisant to have it booted
@@ -823,7 +820,7 @@ namespace Iot.Device.BuildHat
             string line;
             int inc = 0;
         retryVersion:
-            _port.Write("version\r");
+            PortWrite(GetFirmwareVersion);
             while (_port.BytesToRead <= 0)
             {
                 Thread.Sleep(10);
@@ -876,11 +873,13 @@ namespace Iot.Device.BuildHat
             _runing.Start();
         }
 
+        #endregion
+
         private void Running(CancellationToken token)
         {
             string line;
             // Force an update
-            _port.Write("list\r");
+            PortWrite("list\r");
             while (!token.IsCancellationRequested)
             {
                 while (_port.BytesToRead > 0)
@@ -1054,9 +1053,11 @@ namespace Iot.Device.BuildHat
                                                 case 5:
                                                     if (_sensorType[port] == SensorType.SpikePrimeColorSensor)
                                                     {
-                                                        color.Color = Color.FromRgb((byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
+                                                        color.Color = Color.FromRgba((byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
+                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
                                                             (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
                                                             (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024));
+                                                        color.IsColorDetected = true;
                                                     }
                                                     else
                                                     {
@@ -1076,9 +1077,46 @@ namespace Iot.Device.BuildHat
                                                     break;
 
                                                 case 6:
-                                                    color.Color = Color.FromRgb((byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
-                                                        (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
-                                                        (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400));
+                                                    // Normal color mode
+                                                    if (!isCombi)
+                                                    {
+                                                        color.Color = Color.FromRgb((byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
+                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
+                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400));
+                                                        color.IsColorDetected = true;
+                                                    }
+                                                    else
+                                                    {
+                                                        // In combi mode, we only get 1 component (the first one), so skipping it
+                                                        inc++;
+                                                    }
+
+                                                    break;
+                                                case 1:
+                                                    // Proximity mode
+                                                    if (_sensorType[port] == SensorType.ColourAndDistanceSensor)
+                                                    {
+                                                        ((ColorAndDistanceSensor)_elements[port]).Distance = Convert.ToInt32(elements[inc++]);
+                                                    }
+
+                                                    break;
+                                                case 2:
+                                                    // Counter mode
+                                                    if (_sensorType[port] == SensorType.ColourAndDistanceSensor)
+                                                    {
+                                                        ((ColorAndDistanceSensor)_elements[port]).Counter = Convert.ToInt32(elements[inc++]);
+                                                    }
+
+                                                    break;
+                                                case 3:
+                                                    // reflection mode
+                                                    color.ReflectedLight = Convert.ToInt32(elements[inc++]);
+
+                                                    break;
+                                                case 4:
+                                                    // Ambiant mode
+                                                    color.AmbiantLight = Convert.ToInt32(elements[inc++]);
+
                                                     break;
                                             }
 
@@ -1384,47 +1422,53 @@ namespace Iot.Device.BuildHat
         // To send a new line, only \r is required
         private string GetRawVersion()
         {
-            _port.Write("version\r");
+            PortWrite(GetFirmwareVersion);
             PortReadLine();
             return PortReadExisting();
         }
 
         private string GetRawSignature()
         {
-            _port.Write("signature\r");
+            PortWrite("signature\r");
             PortReadLine();
             return PortReadLine();
         }
 
         private string GetRawVoltage()
         {
-            _port.Write("vin\r");
+            PortWrite("vin\r");
             PortReadLine();
             return PortReadLine();
         }
 
         private void SetLedMode(LedMode mode)
         {
-            _port.Write($"ledmode {(int)mode}\r");
+            PortWrite($"ledmode {(int)mode}\r");
         }
 
         private void SetEcho(bool on)
         {
-            _port.Write($"echo {(on ? "1" : "0")}\r");
+            PortWrite($"echo {(on ? "1" : "0")}\r");
             PortReadLine();
         }
 
         private string PortReadLine()
         {
             var ret = _port.ReadLine();
-            Debug.WriteLine(ret);
+            Debug.WriteLine($"RCV:{ret}");
             return ret;
+        }
+
+        private void PortWrite(string str)
+        {
+            _port.Write(str);
+            Debug.Write($"SND:{str}");
         }
 
         private string PortReadExisting()
         {
             var ret = _port.ReadExisting();
-            Debug.WriteLine(ret);
+            Debug.WriteLine($"RCV:{ret}");
             return ret;
         }
 

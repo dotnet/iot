@@ -24,7 +24,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// <param name="brick">The brick.</param>
         /// <param name="port">The port.</param>
         /// <param name="type">The sensor type.</param>
-        public Sensor(Brick brick, SensorPort port, SensorType type)
+        internal Sensor(Brick brick, SensorPort port, SensorType type)
         {
             Brick = brick;
             Port = port;

@@ -19,24 +19,43 @@ var info = brick.BuildHatInformation;
 Console.WriteLine($"version: {info.Version}, firmware date: {info.FirmwareDate}, signature:");
 Console.WriteLine($"{BitConverter.ToString(info.Signature)}");
 Console.WriteLine($"Vin = {brick.InputVoltage.Volts} V");
-Console.WriteLine("Press a key to continue");
+Console.WriteLine("Select what you want to test:");
+Console.WriteLine(" 1. Display elements detials");
+Console.WriteLine(" 2. Display connection/disconnecions");
+Console.WriteLine(" 3. Move Motors on port A and D");
+Console.WriteLine(" 4. PID with motors on port A");
+Console.WriteLine(" 5. Read color sensor on Port C");
+Console.WriteLine(" 6. Run train motor on Port B");
 
 while (!Console.KeyAvailable)
 {
     Thread.Sleep(100);
 }
 
-Console.ReadKey();
-Console.Clear();
+var choice = Console.ReadKey();
 
-brick.WaitForSensorToConnect(SensorPort.PortC);
-
-var colorSensor = (ColorAndDistanceSensor)brick.GetActiveSensor(SensorPort.PortC);
-while (!Console.KeyAvailable)
+switch (choice.KeyChar)
 {
-    var colorRead = colorSensor.GetColor();
-    Console.WriteLine($"{colorRead}");
-    Thread.Sleep(200);
+    case '1':
+        DisplayElementDetails();
+        break;
+    case '2':
+        DisplayConnectionDisconnection();
+        break;
+    case '3':
+        MoveMotorsAndBackToPosition();
+        break;
+    case '4':
+        DriveMotors();
+        break;
+    case '5':
+        ReadColorDistance();
+        break;
+    case '6':
+        RunTrainMotor();
+        break;
+    default:
+        break;
 }
 
 brick.Dispose();
@@ -140,7 +159,8 @@ void MoveMotorsAndBackToPosition()
 {
     Console.Clear();
     Console.WriteLine("Press a key to continue");
-
+    brick.WaitForSensorToConnect(SensorPort.PortA);
+    brick.WaitForSensorToConnect(SensorPort.PortD);
     var active = (ActiveMotor)brick.GetMotor(SensorPort.PortA);
     var active2 = (ActiveMotor)brick.GetMotor(SensorPort.PortD);
     active.Start(50);
@@ -176,6 +196,7 @@ void MoveMotorsAndBackToPosition()
 void DriveMotors()
 {
     // MAke sure you have an active motor on port A
+    brick.WaitForSensorToConnect(SensorPort.PortA);
     var active = (ActiveMotor)brick.GetMotor(SensorPort.PortA);
     active.TargetSpeed = 70;
     Console.WriteLine("Moving motor to position 0");
@@ -192,4 +213,51 @@ void DriveMotors()
     active.MoveToAbsolutePosition(179, PositionWay.Shortest, true);
     Console.WriteLine("Moving motor to position -180");
     active.MoveToAbsolutePosition(-180, PositionWay.Shortest, true);
+}
+
+void ReadColorDistance()
+{
+    brick.WaitForSensorToConnect(SensorPort.PortC);
+
+    var colorSensor = (ColorAndDistanceSensor)brick.GetActiveSensor(SensorPort.PortC);
+    while (!Console.KeyAvailable)
+    {
+        var colorRead = colorSensor.GetColor();
+        Console.WriteLine($"Color:     {colorRead}");
+        var relected = colorSensor.GetReflectedLight();
+        Console.WriteLine($"Reflected: {relected}");
+        var ambiant = colorSensor.GetAmbiantLight();
+        Console.WriteLine($"Ambiant:   {ambiant}");
+        var distance = colorSensor.GetDistance();
+        Console.WriteLine($"Distance: {distance}");
+        var counter = colorSensor.GetCounter();
+        Console.WriteLine($"Counter:  {counter}");
+        Thread.Sleep(200);
+    }
+}
+
+void RunTrainMotor()
+{
+    brick.WaitForSensorToConnect(SensorPort.PortB);
+    var train = (PassiveMotor)brick.GetMotor(SensorPort.PortB);
+    Console.WriteLine("This will run the motor for 20 secondes incrementing the PWM");
+    train.SetPowerLimit(1.0);
+    train.Start();
+    for (int i = 0; i < 100; i++)
+    {
+        train.SetSpeed(i);
+        Thread.Sleep(250);
+    }
+
+    Console.WriteLine("Stop the train for 2 seconds");
+    train.Stop();
+    Thread.Sleep(2000);
+    Console.WriteLine("Full speed backward for 2 seconds");
+    train.Start(-100);
+    Thread.Sleep(2000);
+    Console.WriteLine("Full speed foreward for 2 seconds");
+    train.Start(100);
+    Thread.Sleep(2000);
+    Console.WriteLine("Stop the train");
+    train.Stop();
 }

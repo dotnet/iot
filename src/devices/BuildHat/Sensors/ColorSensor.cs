@@ -17,6 +17,10 @@ namespace Iot.Device.BuildHat.Sensors
         internal Color _color;
         internal bool _isColorDetected;
         internal bool _hasColorUpdated;
+        private int _reflected;
+        private bool _hasReflectedUpdated;
+        private int _ambiant;
+        private bool _hasAmbiantUpdated;
 
         /// <summary>
         /// Gets the last measured Color
@@ -56,12 +60,50 @@ namespace Iot.Device.BuildHat.Sensors
         }
 
         /// <summary>
+        /// Gets the reflected light.
+        /// </summary>
+        public int ReflectedLight
+        {
+            get => _reflected;
+            internal set
+            {
+                if (_reflected != value)
+                {
+                    _reflected = value;
+                    OnPropertyChanged(nameof(ReflectedLight));
+                }
+
+                _hasReflectedUpdated = true;
+                OnPropertyUpdated(nameof(ReflectedLight));
+            }
+        }
+
+        /// <summary>
+        /// Gets the ambiant light.
+        /// </summary>
+        public int AmbiantLight
+        {
+            get => _ambiant;
+            internal set
+            {
+                if (_ambiant != value)
+                {
+                    _ambiant = value;
+                    OnPropertyChanged(nameof(AmbiantLight));
+                }
+
+                _hasAmbiantUpdated = true;
+                OnPropertyUpdated(nameof(AmbiantLight));
+            }
+        }
+
+        /// <summary>
         /// Creates a color sensor.
         /// </summary>
         /// <param name="brick">The brick.</param>
         /// <param name="port">The port.</param>
         /// <param name="type">The sensor type</param>
-        public ColorSensor(Brick brick, SensorPort port, SensorType type)
+        internal ColorSensor(Brick brick, SensorPort port, SensorType type)
             : base(brick, port, type)
         {
             if (SensorType == SensorType.SpikePrimeColorSensor)
@@ -81,17 +123,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// <returns>The color.</returns>
         public Color GetColor()
         {
-            _hasColorUpdated = false;
-            DateTime dt = DateTime.Now.AddSeconds(TimeoutMeasuresSeconds);
-            Brick.SelectModeAndRead(Port, 6, true);
-
-            ////while (!_hasColorUpdated && (dt < DateTime.Now))
-            while (!_hasColorUpdated)
-            {
-                Thread.Sleep(10);
-            }
-
-            if (_hasColorUpdated)
+            if (SetupModeAndRead(6, ref _hasColorUpdated))
             {
                 return Color;
             }
@@ -105,21 +137,26 @@ namespace Iot.Device.BuildHat.Sensors
         /// <returns>The reflected component.</returns>
         public int GetReflectedLight()
         {
-            _hasValueAsStringUpdated = false;
-            DateTime dt = DateTime.Now.AddSeconds(TimeoutMeasuresSeconds);
-            Brick.SelectModeAndRead(Port, 3, true);
-            while (!_hasColorUpdated && (dt < DateTime.Now))
+            if (SetupModeAndRead(3, ref _hasReflectedUpdated))
             {
-                Thread.Sleep(10);
-            }
-
-            var val = ValuesAsString.ToArray();
-            if (_hasColorUpdated && (val != null) && (val.Length == 2))
-            {
-                return Convert.ToInt32(val[1]);
+                return ReflectedLight;
             }
 
             throw new IOException("Can't measure the reflected light.");
+        }
+
+        /// <summary>
+        /// Gets the ambiant light.
+        /// </summary>
+        /// <returns>The ambiant light.</returns>
+        public int GetAmbiantLight()
+        {
+            if (SetupModeAndRead(4, ref _hasAmbiantUpdated))
+            {
+                return AmbiantLight;
+            }
+
+            throw new IOException("Can't measure the ambiant light.");
         }
 
         /// <inheritdoc/>

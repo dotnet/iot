@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using Iot.Device.BuildHat.Models;
 
 namespace Iot.Device.BuildHat.Sensors
@@ -16,7 +17,7 @@ namespace Iot.Device.BuildHat.Sensors
     {
         // This is used when measuring internal sensors, that's the maximum time
         // any sensor will respond according to tsts and reading various sources
-        internal const int TimeoutMeasuresSeconds = 10;
+        internal const int TimeoutMeasuresSeconds = 4;
         // Thoss fields is populated by the birck once it is enumerated.
         internal List<ModeDetail> ModeDetailsInternal;
         internal List<CombiModes> CombiModesInternal;
@@ -94,7 +95,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// <param name="brick">The brick.</param>
         /// <param name="port">The port.</param>
         /// <param name="type">The sensor type.</param>
-        public ActiveSensor(Brick brick, SensorPort port, SensorType type)
+        internal ActiveSensor(Brick brick, SensorPort port, SensorType type)
             : base(brick, port, type)
         {
             ModeDetailsInternal = new List<ModeDetail>();
@@ -149,5 +150,19 @@ namespace Iot.Device.BuildHat.Sensors
         /// <param name="data">The buffer to send.</param>
         /// <param name="singleHeader">True for single header byte.</param>
         public void WriteBytes(ReadOnlySpan<byte> data, bool singleHeader) => Brick.WriteBytesToSensor(Port, data, singleHeader);
+
+        internal bool SetupModeAndRead(int mode, ref bool trigger)
+        {
+            trigger = false;
+            DateTime dt = DateTime.Now.AddSeconds(TimeoutMeasuresSeconds);
+            Brick.SelectModeAndRead(Port, mode, true);
+
+            while (!trigger && (dt > DateTime.Now))
+            {
+                Thread.Sleep(10);
+            }
+
+            return trigger;
+        }
     }
 }
