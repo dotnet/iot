@@ -55,6 +55,7 @@ namespace Iot.Device.Common
         /// <param name="json">The input string</param>
         /// <returns>An instance of T or null in case of an error</returns>
         /// <exception cref="Exception">In case there's a problem with constructing instances of T</exception>
+        /// <remarks>This method is not thread safe for the same parser instance!</remarks>
         public T? FromJson<T>(string json)
         {
             // Remove all whitespace not within strings to make parsing simpler

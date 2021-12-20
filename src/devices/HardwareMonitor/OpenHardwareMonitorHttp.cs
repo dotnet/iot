@@ -23,11 +23,13 @@ namespace HardwareMonitor
         private JsonParser _jsonParser;
         private List<OpenHardwareMonitor.Hardware> _hardware;
         private List<SensorHttp> _sensors;
+        private DateTime _lastUpdateTime;
 
         public OpenHardwareMonitorHttp(string host, int port)
         {
             _host = host;
             _port = port;
+            _lastUpdateTime = DateTime.MinValue;
             _hardware = new List<OpenHardwareMonitor.Hardware>();
             _sensors = new List<SensorHttp>();
             _jsonParser = new JsonParser();
@@ -37,9 +39,21 @@ namespace HardwareMonitor
             TryConnectToApi();
         }
 
-        public void Reset()
+        public SensorUpdateStrategy UpdateStrategy
         {
-            _version = string.Empty;
+            get;
+            set;
+        }
+
+        public TimeSpan UpdateInterval
+        {
+            get;
+            set;
+        }
+
+        public void UpdateSensors()
+        {
+            GetFullDataAndDecode();
         }
 
         public bool TryConnectToApi()
@@ -78,35 +92,39 @@ namespace HardwareMonitor
             try
             {
                 string fullJson = _httpClient.GetStringAsync(_uri + "api/rootnode").Result;
-                ComputerJson? rootNode = _jsonParser.FromJson<ComputerJson>(fullJson);
-                if (rootNode == null)
+                lock (_jsonParser)
                 {
-                    return;
-                }
-
-                var newHardware = new List<OpenHardwareMonitor.Hardware>();
-                var newSensors = new List<SensorHttp>();
-
-                foreach (var hardware in rootNode.Hardware)
-                {
-                    var hw = new OpenHardwareMonitor.Hardware(hardware.Name, hardware.NodeId, hardware.Parent, hardware.HardwareType);
-                    newHardware.Add(hw);
-
-                    foreach (var sensor in hardware.Sensors)
+                    ComputerJson? rootNode = _jsonParser.FromJson<ComputerJson>(fullJson);
+                    if (rootNode == null)
                     {
-                        SensorType sensorType;
-                        if (Enum.TryParse<SensorType>(sensor.Type, true, out sensorType))
+                        return;
+                    }
+
+                    var newHardware = new List<OpenHardwareMonitor.Hardware>();
+                    var newSensors = new List<SensorHttp>();
+
+                    foreach (var hardware in rootNode.Hardware)
+                    {
+                        var hw = new OpenHardwareMonitor.Hardware(hardware.Name, hardware.NodeId, hardware.Parent, hardware.HardwareType);
+                        newHardware.Add(hw);
+
+                        foreach (var sensor in hardware.Sensors)
                         {
-                            var s = new SensorHttp(sensor.Name, sensor.NodeId, sensor.Parent, sensorType);
-                            newSensors.Add(s);
+                            SensorType sensorType;
+                            if (Enum.TryParse<SensorType>(sensor.Type, true, out sensorType))
+                            {
+                                var s = new SensorHttp(this, sensor.Name, sensor.NodeId, sensor.Parent, sensorType, sensor.Value);
+                                newSensors.Add(s);
+                            }
                         }
                     }
-                }
 
-                _hardware = newHardware;
-                _sensors = newSensors;
+                    _hardware = newHardware;
+                    _sensors = newSensors;
+                    _lastUpdateTime = DateTime.UtcNow;
+                }
             }
-            catch (IOException ex)
+            catch (AggregateException ex)
             {
                 _logger.LogWarning(ex, $"Unable to read /api/rootnode: {ex.Message}");
             }
@@ -114,13 +132,20 @@ namespace HardwareMonitor
 
         public IList<OpenHardwareMonitor.Sensor> GetSensorList()
         {
-            GetFullDataAndDecode();
+            if (!_sensors.Any())
+            {
+                GetFullDataAndDecode();
+            }
+
             return _sensors.Cast<OpenHardwareMonitor.Sensor>().ToList();
         }
 
         public IList<OpenHardwareMonitor.Hardware> GetHardwareComponents()
         {
-            GetFullDataAndDecode();
+            if (!_hardware.Any())
+            {
+                GetFullDataAndDecode();
+            }
 
             return _hardware;
         }
@@ -131,11 +156,89 @@ namespace HardwareMonitor
             _httpClient.Dispose();
         }
 
+        /// <summary>
+        /// Returns a non-rooted path combined from the input paths that uses forward slashes (for web apis)
+        /// </summary>
+        private string UnixPathJoin(string a, string b)
+        {
+            string ret;
+            if (string.IsNullOrEmpty(a))
+            {
+                ret = b;
+            }
+            else
+            {
+                if (a.EndsWith("/"))
+                {
+                    ret = a + b;
+                }
+                else
+                {
+                    ret = a + "/" + b;
+                }
+            }
+
+            ret = ret.Replace("\\", "/");
+            ret = ret.Replace("//", "/");
+            if (ret.StartsWith("/"))
+            {
+                ret = ret.Substring(1);
+            }
+
+            return ret;
+        }
+
+        private bool UpdateSensor(SensorHttp sensor, out double value)
+        {
+            value = 0;
+            if (UpdateStrategy == SensorUpdateStrategy.PerSensor || UpdateStrategy == SensorUpdateStrategy.Unspecified)
+            {
+                try
+                {
+                    string apiUrl = _uri + UnixPathJoin("api/nodes/", sensor.Identifier);
+                    string fullJson = _httpClient.GetStringAsync(apiUrl).Result;
+                    lock (_jsonParser)
+                    {
+                        SensorJson? rootNode = _jsonParser.FromJson<SensorJson>(fullJson);
+                        if (rootNode == null)
+                        {
+                            _logger.LogWarning($"Unable to parse json: {fullJson}");
+                            return false;
+                        }
+
+                        value = rootNode.Value;
+                        return true;
+                    }
+                }
+                catch (AggregateException ex)
+                {
+                    _logger.LogWarning(ex, $"Unable to read update value for node {sensor.Identifier}: {ex.Message}");
+                    return false;
+                }
+            }
+            else if (UpdateStrategy == SensorUpdateStrategy.SynchronousAfterTimeout && (DateTime.UtcNow - _lastUpdateTime).Duration() > UpdateInterval)
+            {
+                UpdateSensors();
+            }
+
+            value = sensor.Value;
+            return true;
+        }
+
         private sealed class SensorHttp : OpenHardwareMonitor.Sensor
         {
-            public SensorHttp(string name, string identifier, string? parent, SensorType typeEnum)
+            private readonly OpenHardwareMonitorHttp _monitor;
+
+            public SensorHttp(OpenHardwareMonitorHttp monitor, string name, string identifier, string? parent, SensorType typeEnum, double initialValue)
                 : base(name, identifier, parent, typeEnum)
             {
+                _monitor = monitor;
+                Value = initialValue;
+            }
+
+            protected override bool UpdateValue(out double value)
+            {
+                return _monitor.UpdateSensor(this, out value);
             }
         }
     }

@@ -13,6 +13,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using HardwareMonitor;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -47,7 +48,11 @@ namespace Iot.Device.HardwareMonitor
             InitHardwareMonitor();
         }
 
-        public void Reset()
+        public SensorUpdateStrategy UpdateStrategy { get; set; }
+
+        public TimeSpan UpdateInterval { get; set; }
+
+        public void UpdateSensors()
         {
             _cpu = null;
             InitHardwareMonitor();
@@ -198,7 +203,7 @@ namespace Iot.Device.HardwareMonitor
                 set;
             }
 
-            protected override void InternalGetValue(out double value, (Type Type, OpenHardwareMonitor.UnitCreator Creator) elem)
+            protected override bool UpdateValue(out double value)
             {
                 if (_valueRead && InstanceId != 0)
                 {
@@ -221,6 +226,8 @@ namespace Iot.Device.HardwareMonitor
                     value = Convert.ToSingle(_instance.GetPropertyValue("Value"));
                     _valueRead = true;
                 }
+
+                return true;
             }
 
             /// <inheritdoc/>

@@ -4,12 +4,15 @@
 using System;
 using System.Globalization;
 using System.Threading;
+using HardwareMonitor;
 using Iot.Device.HardwareMonitor;
 using UnitsNet;
 
 Console.WriteLine("Press any key to quit");
 
 OpenHardwareMonitor hw = new OpenHardwareMonitor();
+hw.UpdateStrategy = SensorUpdateStrategy.SynchronousExplicit;
+
 if (hw.GetSensorList().Count == 0)
 {
     Console.WriteLine("OpenHardwareMonitor is not running");
@@ -22,6 +25,7 @@ while (!Console.KeyAvailable)
 {
     Console.Clear();
     Console.WriteLine("Showing all available sensors (press any key to quit)");
+    hw.UpdateSensors();
     var components = hw.GetHardwareComponents();
     foreach (var component in components)
     {
