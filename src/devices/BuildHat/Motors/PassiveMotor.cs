@@ -2,27 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Iot.Device.BuildHat.Models;
+using Iot.Device.BuildHat.Sensors;
 
 namespace Iot.Device.BuildHat.Motors
 {
     /// <summary>
     /// Creates a passive motor
     /// </summary>
-    public class PassiveMotor : IMotor
+    public class PassiveMotor : Sensor, IMotor
     {
-        private Brick _brick;
-
         /// <inheritdoc/>
         public int Speed { get; set; }
-
-        /// <inheritdoc/>
-        public SensorPort Port { get; internal set; }
-
-        /// <inheritdoc/>
-        public SensorType SensorType { get; internal set; }
-
-        /// <inheritdoc/>
-        public bool IsConnected { get; internal set; }
 
         /// <summary>
         /// Creates a passive motor.
@@ -31,10 +21,8 @@ namespace Iot.Device.BuildHat.Motors
         /// <param name="port">The port.</param>
         /// <param name="motorType">The active motor type.</param>
         public PassiveMotor(Brick brick, SensorPort port, SensorType motorType)
+            : base(brick, port, motorType)
         {
-            _brick = brick;
-            Port = port;
-            SensorType = motorType;
         }
 
         /// <inheritdoc/>
@@ -52,10 +40,10 @@ namespace Iot.Device.BuildHat.Motors
         public int GetSpeed() => Speed;
 
         /// <inheritdoc/>
-        public void SetBias(double bias) => _brick.SetMotorBias(Port, bias);
+        public void SetBias(double bias) => Brick.SetMotorBias(Port, bias);
 
         /// <inheritdoc/>
-        public void SetPowerLimit(double plimit) => _brick.SetMotorLimits(Port, plimit);
+        public void SetPowerLimit(double plimit) => Brick.SetMotorLimits(Port, plimit);
 
         /// <inheritdoc/>
         public void SetSpeed(int speed) => Speed = speed;
@@ -63,7 +51,7 @@ namespace Iot.Device.BuildHat.Motors
         /// <inheritdoc/>
         public void Start()
         {
-            _brick.SetMotorPower(Port, Speed);
+            Brick.SetMotorPower(Port, Speed);
         }
 
         /// <inheritdoc/>

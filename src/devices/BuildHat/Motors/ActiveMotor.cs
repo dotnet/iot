@@ -14,6 +14,7 @@ namespace Iot.Device.BuildHat.Motors
     {
         private int _tacho;
         private int _absoluteTacho;
+        private int _speed;
 
         internal double PowerLimit;
 
@@ -23,7 +24,18 @@ namespace Iot.Device.BuildHat.Motors
         public int TargetSpeed { get; set; }
 
         /// <inheritdoc/>
-        public int Speed { get; set; }
+        public int Speed
+        {
+            get => _speed;
+            internal set
+            {
+                if (_speed != value)
+                {
+                    _speed = value;
+                    OnPropertyChanged(nameof(Speed));
+                }
+            }
+        }
 
         /// <summary>
         /// Gets the current tachometer count.
@@ -72,12 +84,6 @@ namespace Iot.Device.BuildHat.Motors
             SetPowerLimit(0.7);
         }
 
-        /// <summary>
-        /// To notify a property has changed. The minimum time can be set up
-        /// with timeout property
-        /// </summary>
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         /// <inheritdoc/>
         public string GetMotorName() => SensorType switch
         {
@@ -91,6 +97,9 @@ namespace Iot.Device.BuildHat.Motors
             SensorType.TechnicMotor => "Technical motor",
             _ => string.Empty,
         };
+
+        /// <inheritdoc/>
+        public override string GetSensorName() => GetMotorName();
 
         /// <inheritdoc/>
         public int GetSpeed() => Speed;
@@ -130,8 +139,6 @@ namespace Iot.Device.BuildHat.Motors
             Brick.SetMotorPower(Port, TargetSpeed);
         }
 
-        private void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-
         /// <inheritdoc/>
         public void SetBias(double bias) => Brick.SetMotorBias(Port, bias);
 
@@ -148,20 +155,27 @@ namespace Iot.Device.BuildHat.Motors
         /// <param name="targetPosition">The target angle from -180 to +180.</param>
         /// <param name="way">The way to go to the position.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
-        public void RunMotorToAbsolutePosition(int targetPosition, PositionWay way, bool blocking = false) => Brick.RunMotorToAbsolutePosition(Port, targetPosition, way, TargetSpeed, blocking);
+        public void MoveToAbsolutePosition(int targetPosition, PositionWay way, bool blocking = false) => Brick.MoveMotorToAbsolutePosition(Port, targetPosition, way, TargetSpeed, blocking);
 
         /// <summary>
         /// Run the specified motors for an amount of seconds.
         /// </summary>
         /// <param name="seconds">The amount of seconds.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
-        public void RunMotorForSeconds(double seconds, bool blocking = false) => Brick.RunMotorForSeconds(Port, seconds, TargetSpeed, blocking);
+        public void MoveForSeconds(double seconds, bool blocking = false) => Brick.MoveMotorForSeconds(Port, seconds, TargetSpeed, blocking);
 
         /// <summary>
         /// Run the motor to an absolute position.
         /// </summary>
         /// <param name="targetPosition">The target angle from -180 to +180.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
-        public void RunMotorToPosition(int targetPosition, bool blocking = false) => Brick.RunMotorToPosition(Port, targetPosition, TargetSpeed, blocking);
+        public void MoveToPosition(int targetPosition, bool blocking = false) => Brick.MoveMotorToPosition(Port, targetPosition, TargetSpeed, blocking);
+
+        /// <summary>
+        /// Run the motor for a specific number of degrees.
+        /// </summary>
+        /// <param name="targetPosition">The target angle in degrees.</param>
+        /// <param name="blocking">True to block the function and wait for the execution.</param>
+        public void MoveForDegrees(int targetPosition, bool blocking = false) => Brick.MoveMotorForDegrees(Port, targetPosition, TargetSpeed, blocking);
     }
 }

@@ -21,6 +21,8 @@
      <Compile Include="Motors\IMotor.cs" />
      <Compile Include="Motors\PassiveMotor.cs" />
      <Compile Include="Sensors\ActiveSensor.cs" />
+     <Compile Include="Sensors\ColorAndDistanceSensor.cs" />
+     <Compile Include="Sensors\ColorSensor.cs" />
      <Compile Include="Sensors\Sensor.cs" />
    </ItemGroup>
 

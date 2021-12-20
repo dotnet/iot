@@ -51,10 +51,10 @@ namespace Iot.Device.BuildHat.Motors
         void SetPowerLimit(double plimit);
 
         /// <summary>
-        /// Gets or sets the speed of the motor
+        /// Gets the speed of the motor
         /// speed is between -100 and +100
         /// </summary>
-        int Speed { get; set; }
+        int Speed { get; }
 
         /// <summary>
         /// Motor port

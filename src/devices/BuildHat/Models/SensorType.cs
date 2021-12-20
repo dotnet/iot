@@ -67,7 +67,7 @@ namespace Iot.Device.BuildHat.Models
         SpikePrimeLargeMotor = 0x31,
 
         /// <summary>SPIKE Prime colour sensor</summary>
-        SpikePrimeColourSensor = 0x3D,
+        SpikePrimeColorSensor = 0x3D,
 
         /// <summary>SPIKE Prime ultrasonic distance sensor</summary>
         SpikePrimeUltrasonicDistanceSensor = 0x3E,
@@ -76,7 +76,7 @@ namespace Iot.Device.BuildHat.Models
         SpikePrimeForceSensor = 0x3F,
 
         /// <summary>SPIKE Essential 3x3 colour light matrix</summary>
-        SpikeEssential3x3ColourLightMatrix = 0x40,
+        SpikeEssential3x3ColorLightMatrix = 0x40,
 
         /// <summary>SPIKE Essential small angular motor</summary>
         SpikeEssentialSmallAngularMotor = 0x41,

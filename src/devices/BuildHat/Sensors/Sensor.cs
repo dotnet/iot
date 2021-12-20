@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using Iot.Device.BuildHat.Models;
 
 namespace Iot.Device.BuildHat.Sensors
@@ -11,16 +12,6 @@ namespace Iot.Device.BuildHat.Sensors
     public class Sensor
     {
         internal Brick Brick;
-
-        /// <summary>
-        /// Property to return the raw value of the sensor as an int
-        /// </summary>
-        public int Value { get; internal set; }
-
-        /// <summary>
-        /// Property to return the raw value of the sensort as a string
-        /// </summary>
-        public string ValueAsString { get; internal set; } = string.Empty;
 
         /// <summary>
         /// Gets true if the motor is connected.
@@ -41,30 +32,10 @@ namespace Iot.Device.BuildHat.Sensors
         }
 
         /// <summary>
-        /// Reads the sensor value as a string.
-        /// </summary>
-        /// <returns>
-        /// The value as a string
-        /// </returns>
-        public string ReadAsString()
-        {
-            return string.Empty;
-        }
-
-        /// <summary>
-        /// Reads the sensor values as a raw int value
-        /// </summary>
-        /// <returns>The value as a int</returns>
-        public int ReadRaw()
-        {
-            return -1;
-        }
-
-        /// <summary>
         /// Gets the name of the sensor.
         /// </summary>
         /// <returns>The sensor name.</returns>
-        public string GetSensorName() => "Generic sensor";
+        public virtual string GetSensorName() => "Generic sensor";
 
         /// <summary>
         /// Gets the Sensor port

@@ -29,22 +29,15 @@ while (!Console.KeyAvailable)
 Console.ReadKey();
 Console.Clear();
 
-var active = (ActiveMotor)brick.GetMotor(SensorPort.PortA);
-active.TargetSpeed = 70;
-Console.WriteLine("Moving motor to position 0");
-active.RunMotorToPosition(0, true);
-Console.WriteLine("Moving motor to position 3600 (10 turns)");
-active.RunMotorToPosition(3600, true);
-Console.WriteLine("Moving motor to position -3600 (so 20 turns the other way");
-active.RunMotorToPosition(-3600, true);
-Console.WriteLine("Moving motor to absolute position 0, should rotate by 90°");
-active.RunMotorToAbsolutePosition(0, PositionWay.Shortest, true);
-Console.WriteLine("Moving motor to position 90");
-active.RunMotorToAbsolutePosition(90, PositionWay.Shortest, true);
-Console.WriteLine("Moving motor to position 179");
-active.RunMotorToAbsolutePosition(179, PositionWay.Shortest, true);
-Console.WriteLine("Moving motor to position -180");
-active.RunMotorToAbsolutePosition(-180, PositionWay.Shortest, true);
+brick.WaitForSensorToConnect(SensorPort.PortC);
+
+var colorSensor = (ColorAndDistanceSensor)brick.GetActiveSensor(SensorPort.PortC);
+while (!Console.KeyAvailable)
+{
+    var colorRead = colorSensor.GetColor();
+    Console.WriteLine($"{colorRead}");
+    Thread.Sleep(200);
+}
 
 brick.Dispose();
 
@@ -176,6 +169,27 @@ void MoveMotorsAndBackToPosition()
 
     active.TargetSpeed = 100;
     active2.TargetSpeed = 100;
-    active.RunMotorToPosition(0, true);
-    active2.RunMotorToPosition(0, true);
+    active.MoveToPosition(0, true);
+    active2.MoveToPosition(0, true);
+}
+
+void DriveMotors()
+{
+    // MAke sure you have an active motor on port A
+    var active = (ActiveMotor)brick.GetMotor(SensorPort.PortA);
+    active.TargetSpeed = 70;
+    Console.WriteLine("Moving motor to position 0");
+    active.MoveToPosition(0, true);
+    Console.WriteLine("Moving motor to position 3600 (10 turns)");
+    active.MoveToPosition(3600, true);
+    Console.WriteLine("Moving motor to position -3600 (so 20 turns the other way");
+    active.MoveToPosition(-3600, true);
+    Console.WriteLine("Moving motor to absolute position 0, should rotate by 90°");
+    active.MoveToAbsolutePosition(0, PositionWay.Shortest, true);
+    Console.WriteLine("Moving motor to position 90");
+    active.MoveToAbsolutePosition(90, PositionWay.Shortest, true);
+    Console.WriteLine("Moving motor to position 179");
+    active.MoveToAbsolutePosition(179, PositionWay.Shortest, true);
+    Console.WriteLine("Moving motor to position -180");
+    active.MoveToAbsolutePosition(-180, PositionWay.Shortest, true);
 }

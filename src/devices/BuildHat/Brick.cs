@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Device.Gpio;
 using System.Diagnostics;
@@ -15,6 +16,7 @@ using BuildHat.Models;
 using Iot.Device.BuildHat.Models;
 using Iot.Device.BuildHat.Motors;
 using Iot.Device.BuildHat.Sensors;
+using SixLabors.ImageSharp;
 using UnitsNet;
 
 namespace Iot.Device.BuildHat
@@ -37,6 +39,19 @@ namespace Iot.Device.BuildHat
         private Thread? _runing;
         private CancellationTokenSource? _cancellationTokenSource;
         private ElectricPotential _vin;
+
+        // Those are the colors
+        private Dictionary<int, Color> _colors = new Dictionary<int, Color>()
+        {
+            { -1, Color.Black },
+            { 0, Color.Black },
+            { 1, Color.Brown },
+            { 3, Color.Blue },
+            { 5, Color.Green },
+            { 7, Color.Yellow },
+            { 9, Color.Red },
+            { 10, Color.White }
+        };
 
         // To store the Sensor types
         private SensorType[] _sensorType = { SensorType.None, SensorType.None, SensorType.None, SensorType.None };
@@ -176,7 +191,9 @@ namespace Iot.Device.BuildHat
             Debug.WriteLine($"powerPercent: {powerPercent}");
             if (IsActiveSensor(_sensorType[(byte)port]))
             {
-                _port.Write($"port {(byte)port} ; combi 0 1 0 2 0 3 0 ; select 0 ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set {powerPercent}\r");
+                // Set continuous reading
+                SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
+                _port.Write($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set {powerPercent}\r");
             }
             else
             {
@@ -197,7 +214,6 @@ namespace Iot.Device.BuildHat
             }
 
             powerLimit = powerLimit < 0 ? 0 : powerLimit > 1 ? 1 : powerLimit;
-            Debug.WriteLine($"Bias: {powerLimit.ToString(CultureInfo.InvariantCulture)}");
             _port.Write($"port {(byte)port} ; plimit {powerLimit.ToString(CultureInfo.InvariantCulture)}\r");
         }
 
@@ -214,7 +230,6 @@ namespace Iot.Device.BuildHat
             }
 
             bias = bias < 0 ? 0 : bias > 1 ? 1 : bias;
-            Debug.WriteLine($"Bias: {bias.ToString(CultureInfo.InvariantCulture)}");
             _port.Write($"port {(byte)port} ; bias {bias.ToString(CultureInfo.InvariantCulture)}\r");
         }
 
@@ -225,15 +240,34 @@ namespace Iot.Device.BuildHat
         /// <param name="seconds">The amount of seconds.</param>
         /// <param name="speed">>The speed from - 100 to 100.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
-        public void RunMotorForSeconds(SensorPort port, double seconds, int speed, bool blocking = false)
+        public void MoveMotorForSeconds(SensorPort port, double seconds, int speed, bool blocking = false)
         {
-            if (seconds < 0)
+            if (seconds <= 0)
             {
+                // No need to move!
                 return;
             }
 
+            if (!IsMotor(_sensorType[(byte)port]))
+            {
+                throw new ArgumentException("Not a motor connected");
+            }
+
+            if (!IsActiveSensor(_sensorType[(byte)port]))
+            {
+                throw new ArgumentException("Not an active motor connected");
+            }
+
+            if (speed == 0)
+            {
+                throw new ArgumentException("Speed can't be 0");
+            }
+
             speed = speed < -100 ? -100 : speed > 100 ? 100 : speed;
-            _port.Write($"port {(byte)port} ; combi 0 1 0 2 0 3 0 ; select 0 ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set pulse {speed} 0.0 {seconds.ToString(CultureInfo.InvariantCulture)} 0\r");
+            ActiveMotor motor = (ActiveMotor)_elements[(byte)port];
+            // Set continuous reading
+            SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
+            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set pulse {speed} 0.0 {seconds.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 Thread.Sleep((int)(seconds * 1000));
@@ -249,7 +283,7 @@ namespace Iot.Device.BuildHat
         /// <param name="speed">The speed from - 100 to 100.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
         /// <exception cref="ArgumentException">Not a motor or not an active motor.</exception>
-        public void RunMotorToAbsolutePosition(SensorPort port, int targetPosition, PositionWay way, int speed, bool blocking = false)
+        public void MoveMotorToAbsolutePosition(SensorPort port, int targetPosition, PositionWay way, int speed, bool blocking = false)
         {
             if (!IsMotor(_sensorType[(byte)port]))
             {
@@ -318,12 +352,13 @@ namespace Iot.Device.BuildHat
                     break;
             }
 
-            double duration = Math.Abs(newPosition - actualPositionDouble) / (speed * 0.05 / motor.PowerLimit);
+            double duration = Math.Abs(newPosition - actualPositionDouble) / (speed * 0.05 * motor.PowerLimit);
+            // Set continuous reading
+            SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            _port.Write($"port {(byte)port} ; combi 0 1 0 2 0 3 0 ; select 0 ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
-                // This is precise enougth
                 Thread.Sleep((int)(duration * 1000));
             }
         }
@@ -336,7 +371,7 @@ namespace Iot.Device.BuildHat
         /// <param name="speed">The speed from - 100 to 100.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
         /// <exception cref="ArgumentException">Not a motor or not an active motor.</exception>
-        public void RunMotorToPosition(SensorPort port, int targetPosition, int speed, bool blocking = false)
+        public void MoveMotorToPosition(SensorPort port, int targetPosition, int speed, bool blocking = false)
         {
             if (!IsMotor(_sensorType[(byte)port]))
             {
@@ -360,8 +395,56 @@ namespace Iot.Device.BuildHat
             double actualPositionDouble = actualPosition / 360.0;
             double newPosition = (targetPosition - actualPositionDouble) / 360.0;
             double duration = Math.Abs(newPosition - actualPositionDouble) / (speed * 0.05 / motor.PowerLimit);
+            // Set continuous reading
+            SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
             // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            _port.Write($"port {(byte)port} ; combi 0 1 0 2 0 3 0 ; select 0 ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            if (blocking)
+            {
+                while (!((motor.Position / 360.0 < newPosition + 2.028) && (motor.Position / 360.0 > newPosition - 2.028)))
+                {
+                    Thread.Sleep(5);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Run the motor for a specific number of degrees.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        /// <param name="targetPosition">The target angle in degrees.</param>
+        /// <param name="speed">The speed from - 100 to 100.</param>
+        /// <param name="blocking">True to block the function and wait for the execution.</param>
+        /// <exception cref="ArgumentException">Not a motor or not an active motor.</exception>
+        public void MoveMotorForDegrees(SensorPort port, int targetPosition, int speed, bool blocking = false)
+        {
+            if (!IsMotor(_sensorType[(byte)port]))
+            {
+                throw new ArgumentException("Not a motor connected");
+            }
+
+            if (!IsActiveSensor(_sensorType[(byte)port]))
+            {
+                throw new ArgumentException("Not an active motor connected");
+            }
+
+            if (speed == 0)
+            {
+                throw new ArgumentException("Speed can't be 0");
+            }
+
+            speed = speed < -100 ? -100 : speed > 100 ? 100 : speed;
+            ActiveMotor motor = (ActiveMotor)_elements[(byte)port];
+            // We need both the relative
+            int actualPosition = motor.Position;
+            double actualPositionDouble = actualPosition / 360.0;
+            targetPosition = speed < 0 ? -targetPosition : targetPosition;
+            double newPosition = targetPosition - actualPositionDouble / 360.0;
+            double duration = Math.Abs(newPosition - actualPositionDouble) / (speed * 0.05 / motor.PowerLimit);
+            // Set continuous reading
+            SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
+            // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
+            _port.Write($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
                 while (!((motor.Position / 360.0 < newPosition + 2.028) && (motor.Position / 360.0 > newPosition - 2.028)))
@@ -379,8 +462,45 @@ namespace Iot.Device.BuildHat
         /// Select modes on a specific port. This is only possible on active sensors and motors.
         /// </summary>
         /// <param name="port">The port.</param>
+        /// <param name="mode">The modes.</param>
+        /// <param name="readOnce">True to read the sensor once or false to have continuous reading enabled.</param>
+        public void SelectModeAndRead(SensorPort port, int mode, bool readOnce)
+        {
+            if (!IsActiveSensor(_sensorType[(byte)port]))
+            {
+                throw new Exception("Mode can be changed only on active sensors.");
+            }
+
+            var sensor = (ActiveSensor)_elements[(byte)port];
+
+            if ((mode > sensor.ModeDetails.Count() - 1) || (mode < 0))
+            {
+                throw new ArgumentException("Mode must exist");
+            }
+
+            StringBuilder command = new($"port {(byte)port} ; combi {mode} ");
+
+            if (readOnce)
+            {
+                command.Append($"; selonce {mode}");
+            }
+            else
+            {
+                sensor.CombiReadingModes = new int[] { mode };
+                command.Append($"; select {mode}");
+            }
+
+            command.Append("\r");
+            _port.Write(command.ToString());
+        }
+
+        /// <summary>
+        /// Select modes on a specific port. This is only possible on active sensors and motors.
+        /// </summary>
+        /// <param name="port">The port.</param>
         /// <param name="modes">The modes.</param>
-        public void SelectModes(SensorPort port, int[] modes)
+        /// <param name="readOnce">True to read the sensor once or false to have continuous reading enabled.</param>
+        public void SelectCombiModesAndRead(SensorPort port, int[] modes, bool readOnce)
         {
             if ((modes == null) || (modes.Length == 0))
             {
@@ -408,8 +528,45 @@ namespace Iot.Device.BuildHat
                 command.Append($"{modes[i]} 0 ");
             }
 
-            command.Append("; select 0");
+            command.Append($"; {(readOnce ? "selonce" : "select")} 0");
+            sensor.CombiReadingModes = modes;
+
+            command.Append("\r");
             _port.Write(command.ToString());
+        }
+
+        /// <summary>
+        /// Stop reading continuous data from a specific sensor.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        public void StopContinuousReadingSensor(SensorPort port)
+        {
+            if (!IsActiveSensor(_sensorType[(byte)port]))
+            {
+                throw new Exception("Mode can be changed only on active sensors.");
+            }
+
+            _port.Write($"port {(byte)port} ; select");
+        }
+
+        /// <summary>
+        /// Switches a sensor on.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        /// <remarks>In case of a motor, this will switch the motor on full speed.</remarks>
+        public void SwitchSensorOn(SensorPort port)
+        {
+            _port.Write($"port {(byte)port} ; plimit 1 ; on\r");
+        }
+
+        /// <summary>
+        /// Switches a sensor off.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        /// <remarks>In case of a motor, this will switch off the motor.</remarks>
+        public void SwitchSensorOff(SensorPort port)
+        {
+            _port.Write($"port {(byte)port} ; plimit 1 ; off\r");
         }
 
         /// <summary>
@@ -444,7 +601,64 @@ namespace Iot.Device.BuildHat
             return (ActiveSensor)_elements[(byte)port];
         }
 
+        /// <summary>
+        /// Writes directly to the sensor. The bytes to the current port, the first one or two bytes being header bytes. The message is padded if
+        /// necessary, and length and checksum fields are automatically populated.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        /// <param name="data">The buffer to send.</param>
+        /// <param name="singleHeader">True for single header byte.</param>
+        public void WriteBytesToSensor(SensorPort port, ReadOnlySpan<byte> data, bool singleHeader)
+        {
+            StringBuilder command = new StringBuilder();
+            command.Append(singleHeader ? "write1 " : "write2 ");
+            command.Append(string.Join(" ", data.ToArray().Select(m => string.Format("{0:X2} ", m))));
+            command.Append("\r");
+            _port.Write(command.ToString());
+        }
+
         #endregion
+
+        /// <summary>
+        /// Send a raw command. This can be used for specific sensors or setup sensors.
+        /// </summary>
+        /// <param name="command">The command.</param>
+        public void SendRawCommand(string command)
+        {
+            if (string.IsNullOrEmpty(command))
+            {
+                return;
+            }
+
+            if (!command.EndsWith("\r"))
+            {
+                command += "\r";
+            }
+
+            _port.Write(command);
+        }
+
+        /// <summary>
+        /// Wait to get a sensor connected on a specific port.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        /// <param name="token">A cancellatin token</param>
+        public void WaitForSensorToConnect(SensorPort port, CancellationToken token = default)
+        {
+            // Test sensor, plug a RGB distance one on port C
+            while (GetSensor(port) == null)
+            {
+                token.WaitHandle.WaitOne(50);
+            }
+
+            if (!token.IsCancellationRequested)
+            {
+                while (!((Sensor)GetSensor(port)).IsConnected)
+                {
+                    token.WaitHandle.WaitOne(50);
+                }
+            }
+        }
 
         /// <inheritdoc/>
         public void Dispose()
@@ -462,7 +676,7 @@ namespace Iot.Device.BuildHat
             for (int i = 0; i < _sensorType.Length; i++)
             {
                 // stop all possible motors
-                if (_sensorType[i] != SensorType.SpikeEssential3x3ColourLightMatrix)
+                if (_sensorType[i] != SensorType.SpikeEssential3x3ColorLightMatrix)
                 {
                     _port.Write($"port {i} ; pwm ; coast ; off \r");
                 }
@@ -513,17 +727,18 @@ namespace Iot.Device.BuildHat
             // const string Prompt = "BHBL>";
             const string BootloaderSignature = "BuildHAT bootloader version";
             // Let's clear the port first
-            _port.ReadExisting();
+            PortReadExisting();
             _port.Write("version\r");
-            Thread.Sleep(10);
-            var prompt = _port.ReadExisting();
+            // Wait enough to get the version if any
+            Thread.Sleep(50);
+            var prompt = PortReadExisting();
 
             // In this case, we'll need to uploadthe firmware
             if (prompt.Contains(BootloaderSignature))
             {
                 _port.Write("\r");
-                prompt = _port.ReadLine();
-                prompt = _port.ReadExisting();
+                prompt = PortReadLine();
+                prompt = PortReadExisting();
 
                 // Chack if the 2 files are present
                 var firmwareFile = Path.Combine(DataPath, FirmwareFile);
@@ -543,12 +758,12 @@ namespace Iot.Device.BuildHat
                 byte[] signature = File.ReadAllBytes(firmwareSignature);
                 // Step 1: clear and get the prompt
                 _port.Write("clear\r");
-                prompt = _port.ReadLine();
-                prompt = _port.ReadExisting();
+                prompt = PortReadLine();
+                prompt = PortReadExisting();
 
                 // Step 2: load the firmware
                 _port.Write($"load {firmware.Length} {GetFirmwareCheckSum(firmware)}\r");
-                prompt = _port.ReadExisting();
+                prompt = PortReadExisting();
                 // STX = 0x02, ETX = 0x03
                 _port.Write("\x02");
                 // Write the byte data of the firmware between the STX and ETX
@@ -557,7 +772,7 @@ namespace Iot.Device.BuildHat
                 Thread.Sleep(10);
 
                 // Step 3: load the signature
-                prompt = _port.ReadExisting();
+                prompt = PortReadExisting();
                 Console.WriteLine(prompt);
                 // STX = 0x02, ETX = 0x03
                 _port.Write($"signature {signature.Length}\r");
@@ -566,12 +781,12 @@ namespace Iot.Device.BuildHat
                 _port.Write(signature, 0, signature.Length);
                 _port.Write("\x03\r");
                 Thread.Sleep(10);
-                Console.WriteLine(_port.ReadExisting());
+                Console.WriteLine(PortReadExisting());
 
                 // Step 4: reboot
                 _port.Write("reboot\r");
-                prompt = _port.ReadLine();
-                prompt = _port.ReadExisting();
+                prompt = PortReadLine();
+                prompt = PortReadExisting();
                 // this time seems suffisant to have it booted
                 Thread.Sleep(1500);
             }
@@ -600,10 +815,10 @@ namespace Iot.Device.BuildHat
         private void Initialize()
         {
             // Let's clear the port first
-            _port.ReadExisting();
+            PortReadExisting();
             // Check if there is a firmware, if not, upload one
             CheckForFirmwareAndUpload();
-            _port.ReadExisting();
+            PortReadExisting();
             // Clear the output and find the version
             string line;
             int inc = 0;
@@ -614,7 +829,7 @@ namespace Iot.Device.BuildHat
                 Thread.Sleep(10);
             }
 
-            line = _port.ReadExisting();
+            line = PortReadExisting();
             if (!line.Contains(FirmwareVersion))
             {
                 inc++;
@@ -628,13 +843,13 @@ namespace Iot.Device.BuildHat
                 throw new IOException("Can't read the version");
             }
 
-            _port.ReadExisting();
+            PortReadExisting();
             // No echo and read the voltage
             SetEcho(false);
             inc = 0;
         retryVoltage:
             SetLedMode(LedMode.VoltageDependant);
-            _port.ReadLine();
+            PortReadLine();
             var rawV = GetRawVoltage().Split(' ');
             try
             {
@@ -643,7 +858,7 @@ namespace Iot.Device.BuildHat
             catch (Exception ex)
             {
                 inc++;
-                _port.ReadExisting();
+                PortReadExisting();
                 if (inc < 10)
                 {
                     goto retryVoltage;
@@ -670,7 +885,7 @@ namespace Iot.Device.BuildHat
             {
                 while (_port.BytesToRead > 0)
                 {
-                    line = _port.ReadLine();
+                    line = PortReadLine();
                     ProcessOutput(line);
                 }
             }
@@ -683,6 +898,7 @@ namespace Iot.Device.BuildHat
             const string Disonnected = ": disconnected";
             const string TimeoutDisconnecting = ": timeout during data phase: disconnecting";
             const string NotConnected = ": no device detected";
+
             // The flow is the following when something is disconnected or connected
             // P0: timeout during data phase: disconnecting
             // P0: disconnected
@@ -707,33 +923,48 @@ namespace Iot.Device.BuildHat
                         if (IsActiveSensor(_sensorType[port]))
                         {
                             _elements[port] = new ActiveMotor(this, (SensorPort)port, _sensorType[port]);
-                            ((ActiveMotor)_elements[port]).IsConnected = true;
                             PopulateModelDetails(port);
                             // Forces 1 read of the data
-                            _port.Write($"port {port} ; combi 0 1 0 2 0 3 0 ; selonce 0\r");
+                            SelectCombiModesAndRead((SensorPort)port, new int[] { 1, 2, 3 }, true);
                         }
                         else
                         {
                             _elements[port] = new PassiveMotor(this, (SensorPort)port, _sensorType[port]);
-                            ((PassiveMotor)_elements[port]).IsConnected = true;
                         }
                     }
                     else
                     {
                         if (IsActiveSensor(_sensorType[port]))
                         {
-                            // TODO: adjust the creation based on the type of sensor
-                            // TODO: forces one read of the mode
-                            _elements[port] = new ActiveSensor(this, (SensorPort)port, _sensorType[port]);
-                            ((ActiveSensor)_elements[port]).IsConnected = true;
+                            switch (_sensorType[port])
+                            {
+                                case SensorType.ColourAndDistanceSensor:
+                                    _elements[port] = new ColorAndDistanceSensor(this, (SensorPort)port);
+                                    break;
+                                case SensorType.SpikePrimeColorSensor:
+                                    _elements[port] = new ColorSensor(this, (SensorPort)port, _sensorType[port]);
+                                    break;
+                                case SensorType.SpikePrimeUltrasonicDistanceSensor:
+                                // TODO break;
+                                case SensorType.SpikePrimeForceSensor:
+                                // TODO break;
+                                case SensorType.SpikeEssential3x3ColorLightMatrix:
+                                // TODO break;
+                                default:
+                                    _elements[port] = new ActiveSensor(this, (SensorPort)port, _sensorType[port]);
+                                    break;
+                            }
+
                             PopulateModelDetails(port);
                         }
                         else
                         {
+                            // TODO: the button and equivalent
                             _elements[port] = new Sensor(this, (SensorPort)port, _sensorType[port]);
-                            ((Sensor)_elements[port]).IsConnected = true;
                         }
                     }
+
+                    ((Sensor)_elements[port]).IsConnected = true;
                 }
             }
             else if (line.Contains(Disonnected) || line.Contains(TimeoutDisconnecting) || line.Contains(NotConnected))
@@ -742,47 +973,132 @@ namespace Iot.Device.BuildHat
                 var port = Convert.ToInt32(line[1] - '0');
                 if ((port >= 0) && (port < 4))
                 {
-                    if (IsMotor(_sensorType[port]))
+                    if (_elements[port] != null)
                     {
-                        if (IsActiveSensor(_sensorType[port]))
-                        {
-                            ((ActiveMotor)_elements[port]).IsConnected = false;
-                        }
-                        else
-                        {
-                            ((PassiveMotor)_elements[port]).IsConnected = false;
-                        }
+                        ((Sensor)_elements[port]).IsConnected = false;
+                        _sensorType[port] = SensorType.None;
                     }
-
-                    _sensorType[port] = SensorType.None;
                 }
             }
             else if ((line[0] == 'P') && (((line[2] == 'C')) || ((line[2] == 'M'))))
             {
+                // Note: lines are always longer than 3 chars
                 // Will look like this for motores
                 // P0C0: +18 +5489 +12
-                var port = Convert.ToInt32(line[1] - '0');
-                if (IsMotor(_sensorType[port]))
+                var port = line[1] - '0';
+                bool isCombi = line[2] == 'C';
+                int modeType = line[3] - '0';
+                var elements = line.Split(' ').Where(m => !string.IsNullOrEmpty(m)).ToArray();
+                if (IsActiveSensor(_sensorType[port]))
                 {
-                    if (IsActiveSensor(_sensorType[port]))
+                    if (IsMotor(_sensorType[port]))
                     {
                         try
                         {
                             // As we always select the same modes 1, 2 and 3, we do then read
-                            // speed position in degeres and absolute position in degrees
-                            var elements = line.Split(' ');
+                            // speed position in degeres and absolute position in degrees. Note: sometimes the split does give empty elements.
+                            // empty elements are when a value is 0 otherwise there is a sign
                             var active = ((ActiveMotor)_elements[port]);
-                            if ((active != null) && (elements.Length == 4))
+                            active.ValuesAsString = elements;
+
+                            if (active != null)
                             {
-                                active.Speed = Convert.ToInt32(elements[1]);
-                                active.Position = Convert.ToInt32(elements[2]);
-                                active.AbsolutePosition = Convert.ToInt32(elements[3]);
+                                int inc = 1;
+                                foreach (int mode in isCombi ? active.CombiReadingModes : new int[] { modeType })
+                                {
+                                    switch (mode)
+                                    {
+                                        case 1:
+                                            active.Speed = Convert.ToInt32(elements[inc++]);
+                                            break;
+                                        case 2:
+                                            active.Position = Convert.ToInt32(elements[inc++]);
+                                            break;
+                                        case 3:
+                                            active.AbsolutePosition = Convert.ToInt32(elements[inc++]);
+                                            break;
+                                        default:
+                                            inc++;
+                                            break;
+                                    }
+                                }
                             }
 
                         }
                         catch (Exception)
                         {
                             // Just skip, it can be malformed
+                        }
+                    }
+                    else
+                    {
+                        // As we always select the same modes 1, 2 and 3, we do then read
+                        // speed position in degeres and absolute position in degrees
+                        var active = ((ActiveSensor)_elements[port]);
+                        if (active != null)
+                        {
+                            try
+                            {
+                                active.ValuesAsString = elements;
+                                int inc = 1;
+                                foreach (int mode in isCombi ? active.CombiReadingModes : new int[] { modeType })
+                                {
+                                    switch (_sensorType[port])
+                                    {
+                                        case SensorType.ColourAndDistanceSensor:
+                                        case SensorType.SpikePrimeColorSensor:
+                                            var color = (ColorSensor)_elements[port];
+                                            int cl;
+                                            switch (mode)
+                                            {
+                                                case 5:
+                                                    if (_sensorType[port] == SensorType.SpikePrimeColorSensor)
+                                                    {
+                                                        color.Color = Color.FromRgb((byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
+                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
+                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024));
+                                                    }
+                                                    else
+                                                    {
+                                                        // It's the mode with the green light
+                                                        cl = Convert.ToInt32(elements[inc++]);
+                                                        color.Color = _colors[cl];
+                                                        color.IsColorDetected = cl != -1;
+                                                    }
+
+                                                    break;
+
+                                                case 0:
+                                                    // it's the case with the normal light
+                                                    cl = Convert.ToInt32(elements[inc++]);
+                                                    color.Color = _colors[cl];
+                                                    color.IsColorDetected = cl != -1;
+                                                    break;
+
+                                                case 6:
+                                                    color.Color = Color.FromRgb((byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
+                                                        (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
+                                                        (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400));
+                                                    break;
+                                            }
+
+                                            break;
+                                        case SensorType.SpikePrimeUltrasonicDistanceSensor:
+                                        // TODO break;
+                                        case SensorType.SpikePrimeForceSensor:
+                                        // TODO break;
+                                        case SensorType.SpikeEssential3x3ColorLightMatrix:
+                                        // TODO break;
+                                        default:
+                                            break;
+                                    }
+                                }
+
+                            }
+                            catch (Exception)
+                            {
+                                // Just skip, it can be malformed
+                            }
                         }
                     }
                 }
@@ -828,10 +1144,10 @@ namespace Iot.Device.BuildHat
             // P0: established serial communication with active ID 4B
             // We will have a predictable way to read all this.
             // expect: type 4B
-            string line = _port.ReadLine();
+            string line = PortReadLine();
             if (!line.Contains(TypeActive))
             {
-                _port.ReadExisting();
+                PortReadExisting();
                 return;
             }
 
@@ -841,21 +1157,21 @@ namespace Iot.Device.BuildHat
             try
             {
                 // expect: nmodes =5
-                line = _port.ReadLine();
+                line = PortReadLine();
                 int num = int.Parse(line.Substring(Nmodes.Length));
                 details = new ModeDetail[num + 1];
                 // expect: nview  =3
-                line = _port.ReadLine();
+                line = PortReadLine();
                 // expect: baud   =115200
-                line = _port.ReadLine();
+                line = PortReadLine();
                 num = int.Parse(line.Substring(Baud.Length));
                 sensor.BaudRate = num;
                 // expect: hwver  =00000004
-                line = _port.ReadLine();
+                line = PortReadLine();
                 uint unum = Convert.ToUInt32(line.Substring(Hwver.Length), 16);
                 sensor.HardwareVersion = unum;
                 // expect: swver  =10000000
-                line = _port.ReadLine();
+                line = PortReadLine();
                 unum = Convert.ToUInt32(line.Substring(Swver.Length), 16);
                 sensor.SoftwareVersion = unum;
                 string[] data;
@@ -866,12 +1182,12 @@ namespace Iot.Device.BuildHat
                     // expect:   M0 POWER SI = PCT
                     // or:  M5 COL O SI = IDX
                     // Mi mode_name SI = unit
-                    line = _port.ReadLine();
+                    line = PortReadLine();
                     // 5 is the number of characters before the name
                     mode.Name = line.Substring(5, line.IndexOf(Signal) - 5);
                     mode.Unit = line.Substring(line.IndexOf(Signal) + Signal.Length);
                     // expect: format count=1 type=0 chars=4 dp=0
-                    line = _port.ReadLine().Substring(FormatCount.Length);
+                    line = PortReadLine().Substring(FormatCount.Length);
                     data = line.TrimStart(' ').Split(' ');
                     // Now data is a collectin of something=number
                     string[] modeData;
@@ -915,7 +1231,7 @@ namespace Iot.Device.BuildHat
                     }
 
                     // expect: RAW: 00000000 00000064    PCT: 00000000 00000064    SI: 00000000 00000064
-                    line = _port.ReadLine();
+                    line = PortReadLine();
                     MinimumMaximumValues[] values = new MinimumMaximumValues[3];
                     values[0] = new MinimumMaximumValues();
                     values[0].TypeValues = TypeValues.Raw;
@@ -940,7 +1256,7 @@ namespace Iot.Device.BuildHat
                 int combiNum = 0;
                 do
                 {
-                    line = _port.ReadLine();
+                    line = PortReadLine();
                     hasCombi = line.Contains($"C{combiNum}: ");
                     if (hasCombi)
                     {
@@ -969,7 +1285,7 @@ namespace Iot.Device.BuildHat
                 recoSpeed.Pid3 = Convert.ToInt32(data[2], 16);
                 recoSpeed.Pid4 = Convert.ToInt32(data[3], 16);
                 sensor.SpeedPid = recoSpeed;
-                line = _port.ReadLine();
+                line = PortReadLine();
                 line = line.Substring(line.LastIndexOf(':') + 2);
                 data = line.Split(' ');
                 RecommendedPid recoPos = new();
@@ -1069,22 +1385,22 @@ namespace Iot.Device.BuildHat
         private string GetRawVersion()
         {
             _port.Write("version\r");
-            _port.ReadLine();
-            return _port.ReadExisting();
+            PortReadLine();
+            return PortReadExisting();
         }
 
         private string GetRawSignature()
         {
             _port.Write("signature\r");
-            _port.ReadLine();
-            return _port.ReadLine();
+            PortReadLine();
+            return PortReadLine();
         }
 
         private string GetRawVoltage()
         {
             _port.Write("vin\r");
-            _port.ReadLine();
-            return _port.ReadLine();
+            PortReadLine();
+            return PortReadLine();
         }
 
         private void SetLedMode(LedMode mode)
@@ -1095,7 +1411,21 @@ namespace Iot.Device.BuildHat
         private void SetEcho(bool on)
         {
             _port.Write($"echo {(on ? "1" : "0")}\r");
-            _port.ReadLine();
+            PortReadLine();
+        }
+
+        private string PortReadLine()
+        {
+            var ret = _port.ReadLine();
+            Debug.WriteLine(ret);
+            return ret;
+        }
+
+        private string PortReadExisting()
+        {
+            var ret = _port.ReadExisting();
+            Debug.WriteLine(ret);
+            return ret;
         }
 
         #endregion
