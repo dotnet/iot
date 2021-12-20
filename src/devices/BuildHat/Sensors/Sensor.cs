@@ -35,7 +35,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// Gets the name of the sensor.
         /// </summary>
         /// <returns>The sensor name.</returns>
-        public virtual string GetSensorName() => "Generic sensor";
+        public virtual string SensorName { get => "Generic sensor"; }
 
         /// <summary>
         /// Gets the Sensor port

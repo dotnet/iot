@@ -160,6 +160,6 @@ namespace Iot.Device.BuildHat.Sensors
         }
 
         /// <inheritdoc/>
-        public override string GetSensorName() => "Color sensor";
+        public override string SensorName => "Color sensor";
     }
 }

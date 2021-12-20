@@ -67,5 +67,8 @@ namespace Iot.Device.BuildHat.Sensors
             command.Append("\r");
             Brick.SendRawCommand(command.ToString());
         }
+
+        /// <inheritdoc/>
+        public override string SensorName => "SPIKE 3x3 color light matrix sensor";
     }
 }

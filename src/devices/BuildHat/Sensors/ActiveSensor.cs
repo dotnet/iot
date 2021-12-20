@@ -124,7 +124,7 @@ namespace Iot.Device.BuildHat.Sensors
         public void SelectModesAndRead(int[] modes, bool once) => Brick.SelectCombiModesAndRead(Port, modes, once);
 
         /// <inheritdoc/>
-        public override string GetSensorName() => "Active sensor";
+        public override string SensorName => "Active sensor";
 
         /// <summary>
         /// Stop reading continuous data from a specific sensor.

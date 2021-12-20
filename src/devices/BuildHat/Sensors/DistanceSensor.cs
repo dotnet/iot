@@ -99,6 +99,6 @@ namespace Iot.Device.BuildHat.Sensors
         }
 
         /// <inheritdoc/>
-        public override string GetSensorName() => "SPIKE ultrasonic distance sensor";
+        public override string SensorName => "SPIKE ultrasonic distance sensor";
     }
 }

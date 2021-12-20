@@ -83,6 +83,6 @@ namespace Iot.Device.BuildHat.Sensors
         }
 
         /// <inheritdoc/>
-        public override string GetSensorName() => "WeDo tilt sensor";
+        public override string SensorName => "WeDo tilt sensor";
     }
 }
