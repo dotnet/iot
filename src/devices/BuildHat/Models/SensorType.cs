@@ -48,6 +48,12 @@ namespace Iot.Device.BuildHat.Models
 
         // Following ones are active
 
+        /// <summary>WeDo tilt sensor</summary>
+        WeDoTiltSensor = 0x22,
+
+        /// <summary>Wido motion sensor</summary>
+        WeDoDistanceSensor = 0x23,
+
         /// <summary>Colour and distance sensor</summary>
         ColourAndDistanceSensor = 0x25,
 

@@ -937,6 +937,12 @@ namespace Iot.Device.BuildHat
                         {
                             switch (_sensorType[port])
                             {
+                                case SensorType.WeDoTiltSensor:
+                                    _elements[port] = new WeDoTiltSensor(this, (SensorPort)port);
+                                    break;
+                                case SensorType.WeDoDistanceSensor:
+                                    _elements[port] = new WeDoDistanceSensor(this, (SensorPort)port);
+                                    break;
                                 case SensorType.ColourAndDistanceSensor:
                                     _elements[port] = new ColorAndDistanceSensor(this, (SensorPort)port);
                                     break;
@@ -1044,6 +1050,17 @@ namespace Iot.Device.BuildHat
                                 {
                                     switch (_sensorType[port])
                                     {
+                                        case SensorType.WeDoTiltSensor:
+                                            // Only 1 mode and 2 values
+                                            var weDoTilt = (WeDoTiltSensor)_elements[port];
+                                            Point pt = new Point(Convert.ToInt32(elements[inc++]), Convert.ToInt32(elements[inc++]));
+                                            weDoTilt.Tilt = pt;
+                                            break; 
+                                        case SensorType.WeDoDistanceSensor:
+                                            // Only 1 mode and 2 values
+                                            var weDoDistance = (WeDoDistanceSensor)_elements[port];
+                                            weDoDistance.Distance = Convert.ToInt32(elements[inc++]);
+                                            break;
                                         case SensorType.ColourAndDistanceSensor:
                                         case SensorType.SpikePrimeColorSensor:
                                             var color = (ColorSensor)_elements[port];
@@ -1455,20 +1472,26 @@ namespace Iot.Device.BuildHat
         private string PortReadLine()
         {
             var ret = _port.ReadLine();
+#if DEBUG
             Debug.WriteLine($"RCV:{ret}");
+#endif
             return ret;
         }
 
         private void PortWrite(string str)
         {
             _port.Write(str);
+#if DEBUG
             Debug.Write($"SND:{str}");
+#endif
         }
 
         private string PortReadExisting()
         {
             var ret = _port.ReadExisting();
+#if DEBUG
             Debug.WriteLine($"RCV:{ret}");
+#endif
             return ret;
         }
 

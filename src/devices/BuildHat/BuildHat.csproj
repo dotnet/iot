@@ -23,7 +23,10 @@
      <Compile Include="Sensors\ActiveSensor.cs" />
      <Compile Include="Sensors\ColorAndDistanceSensor.cs" />
      <Compile Include="Sensors\ColorSensor.cs" />
+     <Compile Include="Sensors\DistanceSensor.cs" />
      <Compile Include="Sensors\Sensor.cs" />
+     <Compile Include="Sensors\WeDoDistanceSensor.cs" />
+     <Compile Include="Sensors\WeDoTiltSensor.cs" />
    </ItemGroup>
 
    <ItemGroup>

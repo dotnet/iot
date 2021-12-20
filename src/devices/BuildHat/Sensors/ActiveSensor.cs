@@ -151,11 +151,11 @@ namespace Iot.Device.BuildHat.Sensors
         /// <param name="singleHeader">True for single header byte.</param>
         public void WriteBytes(ReadOnlySpan<byte> data, bool singleHeader) => Brick.WriteBytesToSensor(Port, data, singleHeader);
 
-        internal bool SetupModeAndRead(int mode, ref bool trigger)
+        internal bool SetupModeAndRead(int mode, ref bool trigger, bool once = true)
         {
             trigger = false;
             DateTime dt = DateTime.Now.AddSeconds(TimeoutMeasuresSeconds);
-            Brick.SelectModeAndRead(Port, mode, true);
+            Brick.SelectModeAndRead(Port, mode, once);
 
             while (!trigger && (dt > DateTime.Now))
             {

@@ -34,6 +34,8 @@ namespace Iot.Device.BuildHat.Motors
                     _speed = value;
                     OnPropertyChanged(nameof(Speed));
                 }
+
+                OnPropertyUpdated(nameof(Speed));
             }
         }
 
@@ -50,6 +52,8 @@ namespace Iot.Device.BuildHat.Motors
                     _tacho = value;
                     OnPropertyChanged(nameof(Position));
                 }
+
+                OnPropertyUpdated(nameof(Position));
             }
         }
 
@@ -66,6 +70,8 @@ namespace Iot.Device.BuildHat.Motors
                     _absoluteTacho = value;
                     OnPropertyChanged(nameof(AbsolutePosition));
                 }
+
+                OnPropertyUpdated(nameof(AbsolutePosition));
             }
         }
 
