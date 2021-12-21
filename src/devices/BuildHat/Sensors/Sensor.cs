@@ -14,7 +14,7 @@ namespace Iot.Device.BuildHat.Sensors
         internal Brick Brick;
 
         /// <summary>
-        /// Gets true if the motor is connected.
+        /// Gets true if the sensor is connected.
         /// </summary>
         public bool IsConnected { get; internal set; }
 

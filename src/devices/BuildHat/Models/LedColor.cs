@@ -4,7 +4,7 @@
 namespace Iot.Device.BuildHat.Models
 {
     /// <summary>
-    /// The led colors
+    /// The led colors used with any of the color elements.
     /// </summary>
     public enum LedColor
     {

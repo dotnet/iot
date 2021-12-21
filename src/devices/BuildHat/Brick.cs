@@ -752,9 +752,6 @@ namespace Iot.Device.BuildHat
 
         private void CheckForFirmwareAndUpload()
         {
-            const string FirmwareFile = "firmware.bin";
-            const string FirmwareSignature = "signature.bin";
-            const string DataPath = "data";
             // const string Prompt = "BHBL>";
             const string BootloaderSignature = "BuildHAT bootloader version";
             // Let's clear the port first
@@ -771,22 +768,9 @@ namespace Iot.Device.BuildHat
                 prompt = PortReadLine();
                 prompt = PortReadExisting();
 
-                // Chack if the 2 files are present
-                var firmwareFile = Path.Combine(DataPath, FirmwareFile);
-                var firmwareSignature = Path.Combine(DataPath, FirmwareSignature);
-                if (!File.Exists(firmwareFile))
-                {
-                    throw new Exception("Firmware file does not exist");
-                }
-
-                if (!File.Exists(firmwareSignature))
-                {
-                    throw new Exception("Signature file does not exist");
-                }
-
                 // Load both files
-                byte[] firmware = File.ReadAllBytes(firmwareFile);
-                byte[] signature = File.ReadAllBytes(firmwareSignature);
+                byte[] firmware = Resource.firmware;
+                byte[] signature = Resource.signature;
                 // Step 1: clear and get the prompt
                 PortWrite("clear\r");
                 prompt = PortReadLine();

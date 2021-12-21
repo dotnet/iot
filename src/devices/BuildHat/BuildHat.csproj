@@ -2,47 +2,38 @@
    <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
    <ItemGroup>
      <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
      <Compile Include="Brick.cs" />
-     <Compile Include="Models\BuildHatInformation.cs" />
-     <Compile Include="Models\CombiModes.cs" />
-     <Compile Include="Models\LedColor.cs" />
-     <Compile Include="Models\LedMode.cs" />
-     <Compile Include="Models\MinimumMaximumValues.cs" />
-     <Compile Include="Models\ModeDetail.cs" />
-     <Compile Include="Models\PositionWay.cs" />
-     <Compile Include="Models\RecommendedPid.cs" />
-     <Compile Include="Models\SensorPort.cs" />
-     <Compile Include="Models\SensorType.cs" />
-     <Compile Include="Models\TypeValues.cs" />
-     <Compile Include="Motors\ActiveMotor.cs" />
-     <Compile Include="Motors\IMotor.cs" />
-     <Compile Include="Motors\PassiveMotor.cs" />
-     <Compile Include="Sensors\ActiveSensor.cs" />
-     <Compile Include="Sensors\ButtonSensor.cs" />
-     <Compile Include="Sensors\ColorAndDistanceSensor.cs" />
-     <Compile Include="Sensors\ColorLightMatrix.cs" />
-     <Compile Include="Sensors\ColorSensor.cs" />
-     <Compile Include="Sensors\UltrasonicDistanceSensor.cs" />
-     <Compile Include="Sensors\ForceSensor.cs" />
-     <Compile Include="Sensors\Sensor.cs" />
-     <Compile Include="Sensors\PassiveLight.cs" />
-     <Compile Include="Sensors\WeDoDistanceSensor.cs" />
-     <Compile Include="Sensors\WeDoTiltSensor.cs" />
+     <Compile Include="Resource.Designer.cs">
+       <DesignTime>True</DesignTime>
+       <AutoGen>True</AutoGen>
+       <DependentUpon>Resource.resx</DependentUpon>
+     </Compile>
+     <Compile Include="Models\*.cs" />     
+     <Compile Include="Motors\*.cs" />
+     <Compile Include="Sensors\*.cs" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <EmbeddedResource Include="Resource.resx">
+       <Generator>ResXFileCodeGenerator</Generator>
+       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+     </EmbeddedResource>
    </ItemGroup>
 
    <ItemGroup>
      <None Include="data\firmware.bin">
-       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
      </None>
      <None Include="data\signature.bin">
-       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
      </None>
      <None Include="data\version">
-       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
      </None>
    </ItemGroup>
 

@@ -4,7 +4,7 @@
 namespace BuildHat.Models
 {
     /// <summary>
-    /// Led mode
+    /// Led mode for the leds on the Build HAT.
     /// </summary>
     public enum LedMode
     {
