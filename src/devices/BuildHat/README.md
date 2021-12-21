@@ -411,7 +411,7 @@ Color and distance sensor:
 
 [![Color distance sensor](color-distance.png)](https://www.bricklink.com/v2/catalog/catalogitem.page?P=bb0891c01&name=Electric%20Sensor,%20Color%20and%20Distance%20-%20Boost&category=%5BElectric%5D#T=C&C=1)
 
-Those color sensor has multiple properties and functions. You can get the `Color`, the `ReflectedLight` and the `AmbiantLight`. 
+Those color sensor has multiple properties and functions. You can get the `Color`, the `ReflectedLight` and the `AmbiantLight`.
 
 On top of this, the Color and Distance sensor can measure the `Distance` and has an object `Counter`. It will count automatically the number of objects which will go in and out of the range. This does allow to count objects passing in front of the sensor. The distance is limited from 0 to 10 centimeters.
 
