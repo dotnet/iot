@@ -22,19 +22,8 @@
 
     <!--We are reusing arcade targets for strongname signing the assembly. Due to this, we must set the strongnamekeyid property
     in order to ensure that the values for publickey and publickeytoken won't be overwritten by arcade later in the evaluation.-->
-    <StrongNameKeyId>DotnetIot</StrongNameKeyId>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-
-  <Choose>
-    <When Condition="'$(StrongNameKeyId)' == 'DotnetIot'">
-      <PropertyGroup>
-        <AssemblyOriginatorKeyFile>$(MSBuildThisFileDirectory)config/DotnetIoT.snk</AssemblyOriginatorKeyFile>
-        <PublicKey>00240000048000009400000006020000002400005253413100040000010001006535ddf81eb69ab2fa653a01bb31e5c54ac3935f86b2a5a325da43c6fd6e6e6df9ad5e56eb066524c9f80709b5377c6f1a86640bb9c690797836440c31accb04f81734bc7b717b18fc520452acd99aa9f6224a0ffff65a9617ced97f8accdbbea433db509ba8351b5af58ab60e35b584bff1baec4a41b3bdea31cc690fcf4dda</PublicKey>
-        <PublicKeyToken>ca48e82f56eaea9f</PublicKeyToken>
-      </PropertyGroup>
-    </When>
-  </Choose>
 
   <ItemGroup>
     <!-- Include license and third party files to packages -->
