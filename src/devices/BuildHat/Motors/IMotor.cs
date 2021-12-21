@@ -76,5 +76,10 @@ namespace Iot.Device.BuildHat.Motors
         /// Gets true if the motor is connected.
         /// </summary>
         bool IsConnected { get; }
+
+        /// <summary>
+        /// Floats the motor and stop all constraints on it.
+        /// </summary>
+        void Float();
     }
 }

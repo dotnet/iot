@@ -9,7 +9,7 @@ namespace Iot.Device.BuildHat.Sensors
     /// <summary>
     /// A simple light like the train ones.
     /// </summary>
-    public class SimpleLight : Sensor
+    public class PassiveLight : Sensor
     {
         private bool _isOn;
         private int _brightness;
@@ -17,15 +17,15 @@ namespace Iot.Device.BuildHat.Sensors
         /// <summary>
         /// Sets the brightness from 0 to 100.
         /// </summary>
-        public int Speed { get => _brightness; set => SetBrightness(value); }
+        public int Brightness { get => _brightness; set => SetBrightness(value); }
 
         /// <summary>
         /// Gets the name of the sensor.
         /// </summary>
         /// <returns>The sensor name.</returns>
-        public override string SensorName { get => "Light"; }
+        public override string SensorName { get => "Passive light"; }
 
-        internal SimpleLight(Brick brick, SensorPort port)
+        internal PassiveLight(Brick brick, SensorPort port)
                 : base(brick, port, SensorType.SimpleLights)
         {
         }
@@ -53,7 +53,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// </summary>
         public void On()
         {
-            Brick.SetMotorPower(Port, Speed);
+            Brick.SetMotorPower(Port, Brightness);
             _isOn = true;
         }
 
@@ -61,7 +61,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// Switches on the light with a specific brightness.
         /// </summary>
         /// <param name="brightness">The brightness from 0 to 100.</param>
-        public void Start(int brightness)
+        public void On(int brightness)
         {
             SetBrightness(brightness);
             On();

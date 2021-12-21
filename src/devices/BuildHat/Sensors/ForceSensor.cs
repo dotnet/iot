@@ -90,7 +90,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// Gets the force in N
         /// </summary>
         /// <returns></returns>
-        public int GetDistance()
+        public int GetForce()
         {
             if (SetupModeAndRead(0, ref _hasForceUpdated, ContinousMeasurement))
             {
@@ -101,7 +101,7 @@ namespace Iot.Device.BuildHat.Sensors
         }
 
         /// <summary>
-        /// Gets the force in N
+        /// Gets if the sensor is pressed
         /// </summary>
         /// <returns></returns>
         public bool GetPressed()

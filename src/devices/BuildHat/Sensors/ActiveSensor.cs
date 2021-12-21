@@ -106,7 +106,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// </summary>
         /// <param name="modes">The mode to select</param>
         /// <param name="once">True to read only once, false to set the continuous reading</param>
-        public void SelectModesAndRead(int[] modes, bool once) => Brick.SelectCombiModesAndRead(Port, modes, once);
+        public void SelectCombiModesAndRead(int[] modes, bool once) => Brick.SelectCombiModesAndRead(Port, modes, once);
 
         /// <inheritdoc/>
         public override string SensorName => "Active sensor";

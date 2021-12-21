@@ -26,6 +26,10 @@ namespace Iot.Device.BuildHat.Motors
         internal PassiveMotor(Brick brick, SensorPort port, SensorType motorType)
             : base(brick, port, motorType)
         {
+            // Set a defautl plimit and bias, the default ones are too small especially
+            // the plimit one
+            SetBias(0.3);
+            SetPowerLimit(0.7);
         }
 
         /// <inheritdoc/>
@@ -81,5 +85,8 @@ namespace Iot.Device.BuildHat.Motors
             SetSpeed(0);
             _isRunning = false;
         }
+
+        /// <inheritdoc/>
+        public void Float() => Brick.FloatMotor(Port);
     }
 }

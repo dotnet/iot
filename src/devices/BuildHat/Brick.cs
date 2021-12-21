@@ -466,6 +466,20 @@ namespace Iot.Device.BuildHat
             }
         }
 
+        /// <summary>
+        /// Floats the motors and stop all constrains on it.
+        /// </summary>
+        /// <param name="port">The port.</param>
+        public void FloatMotor(SensorPort port)
+        {
+            if (!IsMotor(_sensorType[(byte)port]))
+            {
+                throw new ArgumentException("Not a motor connected");
+            }
+
+            PortWrite("coast\r");
+        }
+
         #endregion
 
         #region sensors
@@ -943,8 +957,8 @@ namespace Iot.Device.BuildHat
                         {
                             _elements[port] = new ActiveMotor(this, (SensorPort)port, _sensorType[port]);
                             PopulateModelDetails(port);
-                            // Forces 1 read of the data
-                            SelectCombiModesAndRead((SensorPort)port, new int[] { 1, 2, 3 }, true);
+                            // Set continuous mode for active motors
+                            SelectCombiModesAndRead((SensorPort)port, new int[] { 1, 2, 3 }, false);
                         }
                         else
                         {
@@ -990,7 +1004,7 @@ namespace Iot.Device.BuildHat
                             // PAssive sensors
                             if (_sensorType[port] == SensorType.SimpleLights)
                             {
-                                _elements[port] = new SimpleLight(this, (SensorPort)port);
+                                _elements[port] = new PassiveLight(this, (SensorPort)port);
                             }
                             else if (_sensorType[port] == SensorType.ButtonOrTouchSensor)
                             {

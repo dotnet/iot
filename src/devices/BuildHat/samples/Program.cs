@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Runtime.CompilerServices;
+using System.ComponentModel;
 using System.Threading;
 using Iot.Device.BuildHat;
 using Iot.Device.BuildHat.Models;
@@ -10,11 +10,12 @@ using Iot.Device.BuildHat.Motors;
 using Iot.Device.BuildHat.Sensors;
 
 Console.WriteLine("Hello, BuildHat!");
+bool continueToRun = true;
 
 // On Windows, connected through a serial dongle:
-Brick brick = new("COM3");
+using Brick brick = new("COM3");
 // On a Raspberry PI, you'll use:
-// Brick brick = new("/dev/serial0");
+// using Brick brick = new("/dev/serial0");
 var info = brick.BuildHatInformation;
 Console.WriteLine($"version: {info.Version}, firmware date: {info.FirmwareDate}, signature:");
 Console.WriteLine($"{BitConverter.ToString(info.Signature)}");
@@ -26,6 +27,8 @@ Console.WriteLine(" 3. Move Motors on port A and D");
 Console.WriteLine(" 4. PID with motors on port A");
 Console.WriteLine(" 5. Read color sensor on Port C");
 Console.WriteLine(" 6. Run train motor on Port B");
+Console.WriteLine(" 7. Events with motor properties");
+Console.WriteLine(" 8. Display matrix 3x3 on Port A");
 
 while (!Console.KeyAvailable)
 {
@@ -54,11 +57,15 @@ switch (choice.KeyChar)
     case '6':
         RunTrainMotor();
         break;
+    case '7':
+        MotorPropertyEventExample();
+        break;
+    case '8':
+        DisplayMatrix3x3();
+        break;
     default:
         break;
 }
-
-brick.Dispose();
 
 void DisplayElementDetails()
 {
@@ -99,8 +106,8 @@ void DisplayElementDetails()
         }
         else
         {
-            var motor = (PassiveMotor)brick.GetMotor((SensorPort)i);
-            Console.WriteLine(motor.IsConnected);
+            var passive = (Sensor)brick.GetSensor((SensorPort)i);
+            Console.WriteLine(passive.IsConnected);
         }
     }
 
@@ -195,7 +202,7 @@ void MoveMotorsAndBackToPosition()
 
 void DriveMotors()
 {
-    // MAke sure you have an active motor on port A
+    // Make sure you have an active motor on port A
     brick.WaitForSensorToConnect(SensorPort.PortA);
     var active = (ActiveMotor)brick.GetMotor(SensorPort.PortA);
     active.TargetSpeed = 70;
@@ -255,9 +262,79 @@ void RunTrainMotor()
     Console.WriteLine("Full speed backward for 2 seconds");
     train.Start(-100);
     Thread.Sleep(2000);
-    Console.WriteLine("Full speed foreward for 2 seconds");
+    Console.WriteLine("Full speed forward for 2 seconds");
     train.Start(100);
     Thread.Sleep(2000);
     Console.WriteLine("Stop the train");
     train.Stop();
+}
+
+void SimpleButton()
+{
+    brick.WaitForSensorToConnect(SensorPort.PortB);
+    var button = (ButtonSensor)brick.GetSensor(SensorPort.PortB);
+}
+
+void MotorPropertyEventExample()
+{
+    Console.WriteLine("Move motor on Port A to more than position 100 to stop this test.");
+    brick.WaitForSensorToConnect(SensorPort.PortA);
+    var active = (ActiveMotor)brick.GetMotor(SensorPort.PortA);
+    continueToRun = true;
+    active.PropertyChanged += MotorPropertyEvent;
+    while (continueToRun)
+    {
+        Thread.Sleep(50);
+    }
+
+    active.PropertyChanged -= MotorPropertyEvent;
+    Console.WriteLine($"Current position: {active.Position}, eventing stopped.");
+}
+
+void MotorPropertyEvent(object? sender, PropertyChangedEventArgs e)
+{
+    Console.WriteLine($"Property changed: {e.PropertyName}");
+    if (e.PropertyName == nameof(ActiveMotor.Position))
+    {
+        if (((ActiveMotor)brick.GetMotor(SensorPort.PortA)).Position > 100)
+        {
+            continueToRun = false;
+        }
+    }
+}
+
+void DisplayMatrix3x3()
+{
+    brick.WaitForSensorToConnect(SensorPort.PortA);
+    var matrix = (ColorLightMatrix)brick.GetSensor(SensorPort.PortA);
+    for (byte i = 0; i < 10; i++)
+    {
+        // Will light every led one after the other like a progress bar
+        matrix.DisplayProgressBar(i);
+        Thread.Sleep(1000);
+    }
+
+    for (byte i = 0; i < 11; i++)
+    {
+        // Will display the matrix with the same color and go through all of them
+        matrix.DisplayColor((LedColor)i);
+        Thread.Sleep(1000);
+    }
+
+    Span<byte> brg = stackalloc byte[9] { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+    Span<LedColor> col = stackalloc LedColor[9]
+    {
+        LedColor.White,
+        LedColor.White,
+        LedColor.White,
+        LedColor.White,
+        LedColor.White,
+        LedColor.White,
+        LedColor.White,
+        LedColor.White,
+        LedColor.White
+    };
+
+    // Shades of grey
+    matrix.DisplayColorPerPixel(brg, col);
 }

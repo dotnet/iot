@@ -182,5 +182,8 @@ namespace Iot.Device.BuildHat.Motors
         /// <param name="targetPosition">The target angle in degrees.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
         public void MoveForDegrees(int targetPosition, bool blocking = false) => Brick.MoveMotorForDegrees(Port, targetPosition, TargetSpeed, blocking);
+
+        /// <inheritdoc/>
+        public void Float() => Brick.FloatMotor(Port);
     }
 }
