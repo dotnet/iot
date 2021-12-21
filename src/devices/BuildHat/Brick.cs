@@ -984,7 +984,7 @@ namespace Iot.Device.BuildHat
                                     _elements[port] = new ColorSensor(this, (SensorPort)port, _sensorType[port]);
                                     break;
                                 case SensorType.SpikePrimeUltrasonicDistanceSensor:
-                                    _elements[port] = new DistanceSensor(this, (SensorPort)port);
+                                    _elements[port] = new UltrasonicDistanceSensor(this, (SensorPort)port);
                                     break;
                                 case SensorType.SpikePrimeForceSensor:
                                     _elements[port] = new ForceSensor(this, (SensorPort)port);
@@ -1187,7 +1187,7 @@ namespace Iot.Device.BuildHat
 
                                             break;
                                         case SensorType.SpikePrimeUltrasonicDistanceSensor:
-                                            var dist = (DistanceSensor)_elements[port];
+                                            var dist = (UltrasonicDistanceSensor)_elements[port];
                                             dist.Distance = Convert.ToInt32(elements[inc++]);
                                             break;
                                         case SensorType.SpikePrimeForceSensor:

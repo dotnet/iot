@@ -10,7 +10,7 @@ namespace Iot.Device.BuildHat.Sensors
     /// <summary>
     /// Spike distance sensor.
     /// </summary>
-    public class DistanceSensor : ActiveSensor
+    public class UltrasonicDistanceSensor : ActiveSensor
     {
         private int _distance;
         private bool _hasDistanceUpdated;
@@ -61,7 +61,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// <inheritdoc/>
         public override string SensorName => "SPIKE ultrasonic distance sensor";
 
-        internal DistanceSensor(Brick brick, SensorPort port)
+        internal UltrasonicDistanceSensor(Brick brick, SensorPort port)
             : base(brick, port, SensorType.SpikePrimeUltrasonicDistanceSensor)
         {
             Brick.SendRawCommand($"port {(byte)Port} ; plimit 1 ; set -1\r");
