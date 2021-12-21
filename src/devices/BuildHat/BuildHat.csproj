@@ -26,7 +26,7 @@
      <Compile Include="Sensors\ColorAndDistanceSensor.cs" />
      <Compile Include="Sensors\ColorLightMatrix.cs" />
      <Compile Include="Sensors\ColorSensor.cs" />
-     <Compile Include="Sensors\DistanceSensor.cs" />
+     <Compile Include="Sensors\UltrasonicDistanceSensor.cs" />
      <Compile Include="Sensors\ForceSensor.cs" />
      <Compile Include="Sensors\Sensor.cs" />
      <Compile Include="Sensors\PassiveLight.cs" />

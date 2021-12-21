@@ -445,7 +445,7 @@ This is a distance sensor and it does implement a `Distance` property that will 
 
 ```csharp
 brick.WaitForSensorToConnect(SensorPort.PortA);
-var distance = (DistanceSensor)brick.GetSensor(SensorPort.PortA);
+var distance = (UltrasonicDistanceSensor)brick.GetSensor(SensorPort.PortA);
 distance.ContinuousMeasurement = true;
 while(!console.KeyAvailable)
 {    
