@@ -12,6 +12,8 @@ using UnitsNet;
 Console.WriteLine("Press any key to quit");
 
 OpenHardwareMonitor hw = new OpenHardwareMonitor();
+
+// Explicit update - exactly one data set is read for each iteration
 hw.UpdateStrategy = SensorUpdateStrategy.SynchronousExplicit;
 
 hw.EnableDerivedSensors();
