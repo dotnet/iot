@@ -14,7 +14,7 @@ namespace Iot.Device.BuildHat.Models
         /// <summary>Clockwise way</summary>
         Clockwise,
 
-        /// <summary>Anto clockwise way</summary>
-        AntoClockwise,
+        /// <summary>Anti clockwise way</summary>
+        AntiClockwise,
     }
 }

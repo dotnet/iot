@@ -339,7 +339,7 @@ namespace Iot.Device.BuildHat
                     }
 
                     break;
-                case PositionWay.AntoClockwise:
+                case PositionWay.AntiClockwise:
                     if (difference < 0)
                     {
                         newPosition = (actualPosition + difference) / 360.0;
@@ -667,14 +667,14 @@ namespace Iot.Device.BuildHat
         public void WaitForSensorToConnect(SensorPort port, CancellationToken token = default)
         {
             // Test sensor, plug a RGB distance one on port C
-            while (GetSensor(port) == null)
+            while ((GetSensor(port) == null) && !token.IsCancellationRequested)
             {
                 token.WaitHandle.WaitOne(50);
             }
 
             if (!token.IsCancellationRequested)
             {
-                while (!((Sensor)GetSensor(port)).IsConnected)
+                while ((!((Sensor)GetSensor(port)).IsConnected) && !token.IsCancellationRequested)
                 {
                     token.WaitHandle.WaitOne(50);
                 }
@@ -1187,8 +1187,14 @@ namespace Iot.Device.BuildHat
                                 }
 
                             }
+#if DEBUG
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine($"Exception: {ex}");
+#else
                             catch (Exception)
                             {
+#endif
                                 // Just skip, it can be malformed
                             }
                         }
@@ -1414,8 +1420,14 @@ namespace Iot.Device.BuildHat
                 recoPos.Pid4 = Convert.ToInt32(data[3], 16);
                 sensor.PositionPid = recoPos;
             }
+#if DEBUG
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Exception: {ex}");
+#else
             catch (Exception)
             {
+#endif
                 // We are catching anything bad that can happen and just continue
                 // Something may be malformed
                 if ((details != null) && (sensor.ModeDetailsInternal.Count == 0))
