@@ -33,7 +33,12 @@ namespace Iot.Device.BuildHat.Sensors
         /// <inheritdoc/>
         public override string SensorName => "Button sensor";
 
-        internal ButtonSensor(Brick brick, SensorPort port)
+        /// <summary>
+        /// Button sensor.
+        /// </summary>
+        /// <param name="brick">The brick.</param>
+        /// <param name="port">The port.</param>
+        protected internal ButtonSensor(Brick brick, SensorPort port)
                     : base(brick, port, SensorType.ButtonOrTouchSensor)
         {
         }

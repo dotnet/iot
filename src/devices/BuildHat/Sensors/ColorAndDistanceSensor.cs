@@ -62,7 +62,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// </summary>
         /// <param name="brick">The brick.</param>
         /// <param name="port">The port.</param>
-        internal ColorAndDistanceSensor(Brick brick, SensorPort port)
+        protected internal ColorAndDistanceSensor(Brick brick, SensorPort port)
             : base(brick, port, SensorType.ColourAndDistanceSensor)
         {
         }

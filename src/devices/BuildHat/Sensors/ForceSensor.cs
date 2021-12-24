@@ -81,7 +81,12 @@ namespace Iot.Device.BuildHat.Sensors
         /// <inheritdoc/>
         public override string SensorName => "SPIKE force sensor sensor";
 
-        internal ForceSensor(Brick brick, SensorPort port)
+        /// <summary>
+        /// Force sensor.
+        /// </summary>
+        /// <param name="brick">The brick.</param>
+        /// <param name="port">The port.</param>
+        protected internal ForceSensor(Brick brick, SensorPort port)
             : base(brick, port, SensorType.SpikePrimeForceSensor)
         {
         }

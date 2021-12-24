@@ -49,17 +49,25 @@ namespace Iot.Device.BuildHat.Sensors
         public SensorType SensorType { get; internal set; }
 
         /// <summary>
-        /// To notify a property has changed.
+        /// To notify a property has changed. It means the value has changed.
         /// </summary>
         public event PropertyChangedEventHandler? PropertyChanged;
 
         /// <summary>
-        /// To notify a property has changed.
+        /// To notify a property has been updated. It means the property has been updated regardeless of a change in its value.
         /// </summary>
         public event PropertyChangedEventHandler? PropertyUpdated;
 
-        internal void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        /// <summary>
+        /// Raises the on property changed event.
+        /// </summary>
+        /// <param name="name">The property name.</param>
+        protected internal void OnPropertyChanged(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
 
-        internal void OnPropertyUpdated(string name) => PropertyUpdated?.Invoke(this, new PropertyChangedEventArgs(name));
+        /// <summary>
+        /// Raises the on property updated event.
+        /// </summary>
+        /// <param name="name">The property name.</param>
+        protected internal void OnPropertyUpdated(string name) => PropertyUpdated?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

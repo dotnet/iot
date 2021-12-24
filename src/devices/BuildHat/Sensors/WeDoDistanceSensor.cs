@@ -60,7 +60,12 @@ namespace Iot.Device.BuildHat.Sensors
         /// <inheritdoc/>
         public override string SensorName => "WeDo distance sensor";
 
-        internal WeDoDistanceSensor(Brick brick, SensorPort port)
+        /// <summary>
+        /// WeDo ditance sensor.
+        /// </summary>
+        /// <param name="brick">The brick.</param>
+        /// <param name="port">The port.</param>
+        protected internal WeDoDistanceSensor(Brick brick, SensorPort port)
             : base(brick, port, SensorType.WeDoDistanceSensor)
         {
         }

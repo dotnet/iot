@@ -61,7 +61,12 @@ namespace Iot.Device.BuildHat.Sensors
         /// <inheritdoc/>
         public override string SensorName => "WeDo tilt sensor";
 
-        internal WeDoTiltSensor(Brick brick, SensorPort port)
+        /// <summary>
+        /// WeDo tilt sensor.
+        /// </summary>
+        /// <param name="brick">The brick.</param>
+        /// <param name="port">The port.</param>
+        protected internal WeDoTiltSensor(Brick brick, SensorPort port)
             : base(brick, port, SensorType.WeDoTiltSensor)
         {
         }

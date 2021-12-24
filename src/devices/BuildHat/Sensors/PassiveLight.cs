@@ -25,7 +25,12 @@ namespace Iot.Device.BuildHat.Sensors
         /// <returns>The sensor name.</returns>
         public override string SensorName { get => "Passive light"; }
 
-        internal PassiveLight(Brick brick, SensorPort port)
+        /// <summary>
+        /// PAssive light.
+        /// </summary>
+        /// <param name="brick">The brick.</param>
+        /// <param name="port">The port.</param>
+        protected internal PassiveLight(Brick brick, SensorPort port)
                 : base(brick, port, SensorType.SimpleLights)
         {
         }

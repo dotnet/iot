@@ -15,7 +15,12 @@ namespace Iot.Device.BuildHat.Sensors
         /// <inheritdoc/>
         public override string SensorName => "SPIKE 3x3 color light matrix";
 
-        internal ColorLightMatrix(Brick brick, SensorPort port)
+        /// <summary>
+        /// Color light matrix.
+        /// </summary>
+        /// <param name="brick">The brick.</param>
+        /// <param name="port">The port.</param>
+        protected internal ColorLightMatrix(Brick brick, SensorPort port)
             : base(brick, port, SensorType.SpikeEssential3x3ColorLightMatrix)
         {
             Brick.SendRawCommand($"port {(byte)Port} ; plimit 1 ; set -1\r");

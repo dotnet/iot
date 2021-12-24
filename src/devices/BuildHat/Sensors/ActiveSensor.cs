@@ -94,7 +94,7 @@ namespace Iot.Device.BuildHat.Sensors
         /// <param name="brick">The brick.</param>
         /// <param name="port">The port.</param>
         /// <param name="type">The sensor type.</param>
-        internal ActiveSensor(Brick brick, SensorPort port, SensorType type)
+        protected internal ActiveSensor(Brick brick, SensorPort port, SensorType type)
             : base(brick, port, type)
         {
             ModeDetailsInternal = new List<ModeDetail>();
