@@ -74,5 +74,39 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
+
+        public static short ToInt16(ReadOnlySpan<byte> value)
+        {
+            if (value.Length < sizeof(short))
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+
+            return (short)(value[0] | value[1] << 8);
+        }
+
+        public static Int32 ToInt32(System.Byte[] value, System.Int32 startIndex)
+        {
+            return (value[startIndex] | (value[1 + startIndex] << 8) | (value[2 + startIndex] << 16) | (value[3 + startIndex] << 24));
+        }
+
+        public static Int16 ToInt16(System.Byte[] value, System.Int32 startIndex)
+        {
+            return (Int16)(value[startIndex] | (value[1 + startIndex] << 8));
+        }
+
+        public static bool TryWriteBytes(Span<byte> destination, uint value)
+        {
+            if (destination.Length < sizeof(uint))
+            {
+                return false;
+            }
+
+            destination[0] = (byte)value;
+            destination[1] = (byte)(value >> 8);
+            destination[2] = (byte)(value >> 16);
+            destination[3] = (byte)(value >> 24);
+            return true;
+        }
     }
 }

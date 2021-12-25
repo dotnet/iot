@@ -1840,7 +1840,8 @@ namespace ArduinoCsCompiler
 
                         // Leaves the target object on the stack (null for static methods). We'll have to decide in the EE whether we need it or not (meaning whether
                         // the actual target is static or not)
-                        AddCallWithToken(code, OpCode.CEE_LDFLD, targetField.MetadataToken);
+                        int fieldToken = set.GetOrAddFieldToken(targetField);
+                        AddCallWithToken(code, OpCode.CEE_LDFLD, fieldToken);
 
                         // Push all remaining arguments to the stack -> they'll be the arguments to the method
                         for (int i = 0; i < numargs; i++)
@@ -1852,7 +1853,8 @@ namespace ArduinoCsCompiler
                         code.Add((byte)OpCode.CEE_LDARG_0);
 
                         // Leaves the target (of type method ptr) on the stack. This shall be the final argument to the calli instruction
-                        AddCallWithToken(code, OpCode.CEE_LDFLD, methodPtrField.MetadataToken);
+                        int methodFieldToken = set.GetOrAddFieldToken(methodPtrField);
+                        AddCallWithToken(code, OpCode.CEE_LDFLD, methodFieldToken);
 
                         AddCallWithToken(code, OpCode.CEE_CALLI, 0); // The argument is irrelevant, the EE knows the calling convention to the target method, and we hope it matches
 
@@ -1864,6 +1866,8 @@ namespace ArduinoCsCompiler
                         {
                             constructedFlags |= MethodFlags.Void;
                         }
+
+                        needsParsing = false; // We have already translated the tokens
                     }
                 }
                 else

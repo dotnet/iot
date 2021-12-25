@@ -84,7 +84,22 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation("NoOp")]
+        protected void WriteEvent(System.Int32 EventId, System.String arg1, System.String arg2)
+        {
+        }
+
+        [ArduinoImplementation("NoOp")]
+        protected void WriteEvent(System.Int32 EventId, System.Int32 arg1, System.String arg2)
+        {
+        }
+
+        [ArduinoImplementation("NoOp")]
         protected void WriteEvent(System.Int32 eventId, System.String arg1, System.String arg2, System.String arg3)
+        {
+        }
+
+        [ArduinoImplementation("NoOp")]
+        protected void WriteEvent(System.Int32 EventId)
         {
         }
 

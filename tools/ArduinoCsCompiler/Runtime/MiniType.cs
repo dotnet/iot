@@ -274,6 +274,11 @@ namespace ArduinoCsCompiler.Runtime
             return true;
         }
 
+        public virtual bool IsEquivalentTo(Type other)
+        {
+            return Equals(other);
+        }
+
         public virtual Array GetEnumValues()
         {
             if (!IsEnum)
