@@ -38,40 +38,57 @@ namespace ArduinoCsCompiler.Runtime
             return false;
         }
 
-        [ArduinoImplementation(CompareByParameterNames = true)]
+        [ArduinoImplementation("NoOp", CompareByParameterNames = true)]
         protected unsafe void WriteEventWithRelatedActivityIdCore(System.Int32 eventId, System.Guid* relatedActivityId, System.Int32 eventDataCount, void* data)
         {
         }
 
+        [ArduinoImplementation("NoOp")]
         protected virtual void OnEventCommand(System.Diagnostics.Tracing.EventCommandEventArgs command)
         {
         }
 
-        [ArduinoImplementation(CompareByParameterNames = true)]
+        [ArduinoImplementation("NoOp", CompareByParameterNames = true)]
         protected unsafe void WriteEventCore(int eventId, int eventDataCount, void* data)
         {
         }
 
+        [ArduinoImplementation("NoOp")]
         protected void WriteEvent(int eventId, int arg1, int arg2)
         {
         }
 
+        [ArduinoImplementation("NoOp")]
         protected void WriteEvent(int eventId, int arg1, int arg2, int arg3)
         {
         }
 
+        [ArduinoImplementation("NoOp")]
         protected void WriteEvent(Int32 eventId, Int32 arg1)
         {
         }
 
+        [ArduinoImplementation("NoOp")]
         protected void WriteEvent(System.Int32 eventId, System.Int64 arg1)
         {
         }
 
+        [ArduinoImplementation("NoOp")]
         protected void WriteEvent(System.Int32 eventId, System.Int64 arg1, System.Int64 arg2, System.Int64 arg3)
         {
         }
 
+        [ArduinoImplementation("NoOp")]
+        protected void WriteEvent(System.Int32 EventId, System.String arg1)
+        {
+        }
+
+        [ArduinoImplementation("NoOp")]
+        protected void WriteEvent(System.Int32 eventId, System.String arg1, System.String arg2, System.String arg3)
+        {
+        }
+
+        [ArduinoImplementation("NoOp")]
         public static void SetCurrentThreadActivityId(Guid activityId)
         {
         }

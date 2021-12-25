@@ -990,8 +990,9 @@ namespace ArduinoCsCompiler
                 if (x.Item2 != null && EquatableMethod.HasArduinoImplementationAttribute(x.Item2, out var attrib) && attrib.IgnoreGenericTypes)
                 {
                     // There are only very few methods with the IgnoreGenericTypes attribute. Therefore a simple test is enough
-                    if (x.Item1.Name == original.Name && MicroCompiler.HasReplacementAttribute(x.Item2.DeclaringType!, out var replacementAttribute)
-                                                      && replacementAttribute.TypeToReplace == original.DeclaringType)
+                    if (x.Item1.Name == original.Name && x.Item1.GetParameters().Length == original.GetParameters().Length
+                        && MicroCompiler.HasReplacementAttribute(x.Item2.DeclaringType!, out var replacementAttribute)
+                        && replacementAttribute.TypeToReplace == original.DeclaringType)
                     {
                         return true;
                     }

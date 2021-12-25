@@ -740,6 +740,8 @@ namespace Iot.Device.Arduino.Tests
             MiniAssert.That(typedArray.Count() == 4);
             MiniAssert.That(typedArray[0] == TestEnum.None);
             MiniAssert.That(typedArray[1] == TestEnum.One);
+            MiniAssert.That(typedArray[2] == TestEnum.Two);
+            MiniAssert.That(typedArray[3] == TestEnum.Three);
             return 1;
         }
 

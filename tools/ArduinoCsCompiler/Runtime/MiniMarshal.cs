@@ -63,5 +63,30 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
+
+        public static unsafe string? PtrToStringUni(IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            return new string((char*)ptr);
+        }
+
+        public static unsafe string PtrToStringUni(IntPtr ptr, int len)
+        {
+            if (ptr == IntPtr.Zero)
+            {
+                throw new ArgumentNullException(nameof(ptr));
+            }
+
+            if (len < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(len));
+            }
+
+            return new string((char*)ptr, 0, len);
+        }
     }
 }

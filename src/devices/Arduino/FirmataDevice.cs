@@ -16,6 +16,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnitsNet;
 using Iot.Device;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Arduino
 {
@@ -61,6 +63,8 @@ namespace Iot.Device.Arduino
         /// </summary>
         private AutoResetEvent _dataReceived;
 
+        private ILogger _logger;
+
         public event PinChangeEventHandler? DigitalPortValueUpdated;
 
         public event AnalogPinValueUpdated? AnalogPinValueUpdated;
@@ -90,6 +94,7 @@ namespace Iot.Device.Arduino
             _lastRawLine = new StringBuilder();
             SupportedModes = supportedModes;
             _i2cSequence = 0;
+            _logger = this.GetCurrentClassLogger();
         }
 
         internal List<SupportedPinConfiguration> PinConfigurations
@@ -290,6 +295,7 @@ namespace Iot.Device.Arduino
 
                     _actualFirmataProtocolMajorVersion = message[0];
                     _actualFirmataProtocolMinorVersion = message[1];
+                    _logger.LogInformation($"Received protocol version: {_actualFirmataProtocolMajorVersion}.{_actualFirmataProtocolMinorVersion}.");
                     _dataReceived.Set();
 
                     return;
@@ -365,6 +371,7 @@ namespace Iot.Device.Arduino
                                 ReassembleByteString(raw_data, 3, stringLength * 2, bytesReceived);
 
                                 _firmwareName = Encoding.ASCII.GetString(bytesReceived);
+                                _logger.LogDebug($"Received Firmware name {_firmwareName}");
                                 _dataReceived.Set();
                             }
 
@@ -434,6 +441,7 @@ namespace Iot.Device.Arduino
 
                                 // Add 8 entries, so that later we do not need to check whether a port (bank) is complete
                                 _lastPinValues = new PinValue[_supportedPinConfigurations.Count + 8].ToList();
+                                _logger.LogDebug("Received capability response");
                                 _dataReceived.Set();
                                 // Do not add the last instance, should also be terminated by 0xF7
                             }
@@ -461,6 +469,7 @@ namespace Iot.Device.Arduino
                                     pin++;
                                 }
 
+                                _logger.LogDebug("Received analog mapping response");
                                 _dataReceived.Set();
                             }
 
@@ -793,6 +802,7 @@ namespace Iot.Device.Arduino
                 }
                 catch (Exception ex)
                 {
+                    _logger.LogError(ex, $"Error in parser: {ex.Message}");
                     OnError?.Invoke($"Firmata protocol error: Parser exception {ex.Message}", ex);
                 }
             }

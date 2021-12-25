@@ -5,7 +5,7 @@ using Iot.Device.Arduino;
 
 namespace ArduinoCsCompiler.Runtime
 {
-    [ArduinoReplacement(typeof(System.Array), false)]
+    [ArduinoReplacement(typeof(System.Array), false, IncludingPrivates = true)]
     internal class MiniArray
     {
         public int Length
@@ -18,6 +18,16 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         public long LongLength => Length;
+
+        public nuint NativeLength
+        {
+            [ArduinoImplementation]
+            get
+            {
+                return (nuint)Length;
+            }
+        }
+
         [ArduinoImplementation]
         public static void Copy(Array sourceArray, Array destinationArray, long length)
         {
@@ -304,6 +314,12 @@ namespace ArduinoCsCompiler.Runtime
 
         [ArduinoImplementation("ArrayGetValue1")]
         public object GetValue(int index)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("ArrayGetValue1")]
+        public object InternalGetValue(int index)
         {
             throw new NotImplementedException();
         }
