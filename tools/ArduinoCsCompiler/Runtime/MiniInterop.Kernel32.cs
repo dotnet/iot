@@ -216,6 +216,17 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
+            [ArduinoImplementation]
+            internal static unsafe IntPtr CreateFile_IntPtr(
+                string lpFileName,
+                int dwDesiredAccess,
+                FileShare dwShareMode,
+                FileMode dwCreationDisposition,
+                int dwFlagsAndAttributes)
+            {
+                return CreateFileInternal(lpFileName, dwDesiredAccess, dwShareMode, null, dwCreationDisposition, dwFlagsAndAttributes, IntPtr.Zero);
+            }
+
             [ArduinoImplementation("Interop_Kernel32SetFilePointerEx", 0x203)]
             internal static System.Boolean SetFilePointerEx(Microsoft.Win32.SafeHandles.SafeFileHandle hFile, System.Int64 liDistanceToMove, ref System.Int64 lpNewFilePointer, System.UInt32 dwMoveMethod)
             {

@@ -88,5 +88,25 @@ namespace ArduinoCsCompiler.Runtime
 
             return new string((char*)ptr, 0, len);
         }
+
+        public static unsafe string PtrToStringAnsi(IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero)
+            {
+                throw new ArgumentNullException(nameof(ptr));
+            }
+
+            return new string((sbyte*)ptr);
+        }
+
+        public static Int32 SizeOf<T>()
+        {
+            return MiniUnsafe.SizeOf<T>();
+        }
+
+        public static int SizeOf(Type t)
+        {
+            return MiniUnsafe.SizeOfType(t);
+        }
     }
 }

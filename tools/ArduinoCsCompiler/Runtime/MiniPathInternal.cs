@@ -16,6 +16,15 @@ namespace ArduinoCsCompiler.Runtime
         internal const string DirectorySeparatorCharAsString = "/";
         internal const string ParentDirectoryPrefix = @"../";
 
+        public static bool IsCaseSensitive
+        {
+            [ArduinoImplementation]
+            get
+            {
+                return true; // We use the unix path model and VFAT is case-preserving
+            }
+        }
+
         internal static int GetRootLength(ReadOnlySpan<char> path)
         {
             return path.Length > 0 && IsDirectorySeparator(path[0]) ? 1 : 0;
@@ -225,6 +234,38 @@ namespace ArduinoCsCompiler.Runtime
         {
             // Extended paths are windows-only
             return false;
+        }
+
+        [ArduinoImplementation]
+        public static bool IsEffectivelyEmpty(ReadOnlySpan<char> path)
+        {
+            return path.IsEmpty;
+        }
+
+        /// <summary>
+        /// Returns true if the path starts in a directory separator.
+        /// </summary>
+        [ArduinoImplementation]
+        internal static bool StartsWithDirectorySeparator(ReadOnlySpan<char> path) => path.Length > 0 && IsDirectorySeparator(path[0]);
+
+        [ArduinoImplementation]
+        public static bool EndsInDirectorySeparator(ReadOnlySpan<char> path)
+            => path.Length > 0 && IsDirectorySeparator(path[path.Length - 1]);
+
+        [ArduinoImplementation]
+        public static bool IsRoot(ReadOnlySpan<char> path)
+            => path.Length == GetRootLength(path);
+
+        public static bool IsPartiallyQualified(string path)
+        {
+            // This is much simpler than Windows where paths can be rooted, but not fully qualified (such as Drive Relative)
+            // As long as the path is rooted in Unix it doesn't use the current directory and therefore is fully qualified.
+            return string.IsNullOrEmpty(path) || path[0] != Path.DirectorySeparatorChar;
+        }
+
+        public static string EnsureExtendedPrefixIfNeeded(string lpFileName)
+        {
+            return lpFileName;
         }
     }
 

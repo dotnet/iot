@@ -23,5 +23,11 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation("FileSystemDeleteFile")]
+        public static void DeleteFile(string fullPath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

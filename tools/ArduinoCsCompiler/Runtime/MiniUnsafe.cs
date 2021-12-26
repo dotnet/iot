@@ -116,7 +116,7 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation("UnsafeSizeOfType", 0x25)]
-        private static int SizeOfType(Type t)
+        public static int SizeOfType(Type t)
         {
             throw new NotImplementedException();
         }
