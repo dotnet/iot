@@ -246,6 +246,10 @@ namespace ArduinoCsCompiler
                             {
                                 len = 4;
                             }
+                            else if (length == "Int64")
+                            {
+                                len = 8;
+                            }
                             else
                             {
                                 len = int.Parse(length);

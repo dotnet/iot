@@ -99,6 +99,12 @@ namespace ArduinoCsCompiler.Runtime
             return new string((sbyte*)ptr);
         }
 
+        [ArduinoImplementation("MarshalCopy4")]
+        public static void Copy(System.IntPtr source, System.Byte[] destination, System.Int32 startIndex, System.Int32 length)
+        {
+            throw new NotImplementedException();
+        }
+
         public static Int32 SizeOf<T>()
         {
             return MiniUnsafe.SizeOf<T>();
@@ -107,6 +113,18 @@ namespace ArduinoCsCompiler.Runtime
         public static int SizeOf(Type t)
         {
             return MiniUnsafe.SizeOfType(t);
+        }
+
+        [ArduinoImplementation(IgnoreGenericTypes = true)]
+        public static T GetDelegateForFunctionPointer<T>(System.IntPtr ptr)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("MarshalUnsafeAddrOfPinnedArrayElement", IgnoreGenericTypes = true)]
+        public static IntPtr UnsafeAddrOfPinnedArrayElement<T>(T[] arr, System.Int32 index)
+        {
+            throw new NotImplementedException();
         }
     }
 }
