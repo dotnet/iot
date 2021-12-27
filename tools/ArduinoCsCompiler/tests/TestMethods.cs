@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using ArduinoCsCompiler.Runtime;
@@ -1411,6 +1412,30 @@ namespace Iot.Device.Arduino.Tests
             {
                 IsDisposed = true;
             }
+        }
+
+        public static int UnsafeAsCanBeMerged(int arg1, int arg2)
+        {
+            List<string> first = new List<string>();
+            IList<string> casted = first;
+            List<string> second = Unsafe.As<List<string>>(casted);
+
+            object obj = Unsafe.As<object>(casted);
+
+            MiniAssert.That(ReferenceEquals(first, second));
+            MiniAssert.That(ReferenceEquals(first, obj));
+            return 1;
+        }
+
+        public static int UnsafeSizeOf(int arg1, int arg2)
+        {
+            // The Is64BitProcess tests are required because the EE runs in 64 bit mode locally, but our Firmata EE is only 32 bit
+            MiniAssert.AreEqual(4, Unsafe.SizeOf<Int32>());
+            MiniAssert.AreEqual(Environment.Is64BitProcess ? 8 : 4, Unsafe.SizeOf<object>());
+            MiniAssert.AreEqual(8, Unsafe.SizeOf<Int64>());
+            MiniAssert.AreEqual(Environment.Is64BitProcess ? 16 : 12, Unsafe.SizeOf<DateTimeOffset>());
+            MiniAssert.AreEqual(Environment.Is64BitProcess ? 8 : 4, Unsafe.SizeOf<List<string>>());
+            return 1;
         }
 
     }

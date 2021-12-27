@@ -94,6 +94,14 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
+        public static bool Is64BitProcess
+        {
+            get
+            {
+                return false;
+            }
+        }
+
         [ArduinoImplementation("EnvironmentFailFast1")]
         public static void FailFast(string message)
         {

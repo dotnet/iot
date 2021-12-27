@@ -379,6 +379,18 @@ namespace Iot.Device.Arduino.Tests
             LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
         }
 
+        /// <summary>
+        /// Tests how merging similar generic methods can safe memory. The byte code for the implementation of List{object} and List{string}
+        /// should be equivalent
+        /// </summary>
+        [Theory]
+        [InlineData(nameof(TestMethods.UnsafeAsCanBeMerged), 1)]
+        [InlineData(nameof(TestMethods.UnsafeSizeOf), 1)]
+        public void CanMergeSimilarGenericMethods(string methodName, int arg1)
+        {
+            LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
+        }
+
         [Theory]
         [InlineData(nameof(TestMethods.NormalTryCatchNoException), 1)]
         [InlineData(nameof(TestMethods.NormalTryFinallyNoException), 1)]

@@ -376,6 +376,7 @@ namespace ArduinoCsCompiler
         {
             const int MethodBodyMinSize = 40;
             Dictionary<Type, ClassStatistics> classSizes = new Dictionary<Type, ClassStatistics>();
+            List<byte[]> methodBodies = new List<byte[]>();
             long bytesUsed = 0;
             foreach (var cls in Classes)
             {
@@ -403,7 +404,11 @@ namespace ArduinoCsCompiler
                 methodBytes += method.ArgumentCount * 4;
                 methodBytes += method.MaxLocals * 4;
 
-                methodBytes += method.Code.IlBytes != null ? method.Code.IlBytes.Length : 0;
+                if (method.Code.IlBytes != null)
+                {
+                    methodBytes += method.Code.IlBytes.Length;
+                    methodBodies.Add(method.Code.IlBytes);
+                }
 
                 var type = method.MethodBase.DeclaringType!;
                 if (classSizes.TryGetValue(type, out _))
@@ -433,7 +438,58 @@ namespace ArduinoCsCompiler
                 bytesUsed += constant.EncodedString.Length + 4;
             }
 
+            long totalBodyLength = methodBodies.Sum(x => x.Length);
+            var compressedBodies = methodBodies.Distinct(new ByteArrayEqualityComparer());
+            long compressedBodyLength = compressedBodies.Sum(x => x.Length);
+
             return bytesUsed;
+        }
+
+        public class ByteArrayEqualityComparer : IEqualityComparer<byte[]>
+        {
+            public bool Equals(byte[]? x, byte[]? y)
+            {
+                if (ReferenceEquals(x, y))
+                {
+                    return true;
+                }
+
+                if (ReferenceEquals(x, null))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(y, null))
+                {
+                    return false;
+                }
+
+                if (x.Length != y.Length)
+                {
+                    return false;
+                }
+
+                for (int i = 0; i < x.Length; i++)
+                {
+                    if (x[i] != y[i])
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            public int GetHashCode(byte[] obj)
+            {
+                int ret = 0;
+                for (int i = 0; i < Math.Min(obj.Length, 6); i++)
+                {
+                    ret = obj[i] | ret << 6;
+                }
+
+                return ret;
+            }
         }
 
         public sealed class ClassStatistics

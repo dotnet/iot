@@ -10,7 +10,7 @@ namespace ArduinoCsCompiler.Runtime
         /// This method just unsafely casts object to T. The underlying implementation just does a "return this" without any type test.
         /// The implementation of the following two methods is identical, therefore it doesn't really matter which one we match.
         /// </summary>
-        [ArduinoImplementation("UnsafeAs2", 0x20)]
+        [ArduinoImplementation("UnsafeAs2", 0x20, IgnoreGenericTypes = true)]
         public static T As<T>(object? value)
             where T : class?
         {
