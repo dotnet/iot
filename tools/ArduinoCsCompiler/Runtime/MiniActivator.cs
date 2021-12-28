@@ -21,7 +21,7 @@ namespace ArduinoCsCompiler.Runtime
                 null, new object?[0], CultureInfo.CurrentCulture, null);
         }
 
-        [ArduinoImplementation(IgnoreGenericTypes = true)]
+        [ArduinoImplementation]
         public static T? CreateInstance<T>()
         {
             return (T?)CreateInstance(typeof(T), BindingFlags.Default, null, new object?[0], CultureInfo.CurrentCulture, null);

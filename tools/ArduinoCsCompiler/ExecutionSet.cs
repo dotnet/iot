@@ -1102,6 +1102,12 @@ namespace ArduinoCsCompiler
                     var repl = replacementMethod.MakeGenericMethod(methodInfo.GetGenericArguments());
                     if (EquatableMethod.MethodsHaveSameSignature(repl, methodInfo) || EquatableMethod.AreSameOperatorMethods(repl, methodInfo))
                     {
+                        if (EquatableMethod.HasArduinoImplementationAttribute(replacementMethod, out var attr) && attr.MergeGenericImplementations)
+                        {
+                            // If we don't care about the types of the generic arguments, return the generic method signature instead
+                            return replacementMethod;
+                        }
+
                         return repl;
                     }
                 }

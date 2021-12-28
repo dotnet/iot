@@ -86,9 +86,19 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// If this is set, the type of the generic arguments is ignored, meaning that all implementations use the same method.
+        /// If this is set, the type of the generic arguments is ignored, meaning that all implementations use the same method. This will
+        /// still create one method declaration for each actual type used.
         /// </summary>
         public bool IgnoreGenericTypes
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// If this is set, all implementations of this generic method will use the same implementation
+        /// </summary>
+        public bool MergeGenericImplementations
         {
             get;
             set;

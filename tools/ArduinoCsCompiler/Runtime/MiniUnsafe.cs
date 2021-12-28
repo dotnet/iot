@@ -10,7 +10,7 @@ namespace ArduinoCsCompiler.Runtime
         /// This method just unsafely casts object to T. The underlying implementation just does a "return this" without any type test.
         /// The implementation of the following two methods is identical, therefore it doesn't really matter which one we match.
         /// </summary>
-        [ArduinoImplementation("UnsafeAs2", 0x20, IgnoreGenericTypes = true)]
+        [ArduinoImplementation("UnsafeAs2", 0x20, IgnoreGenericTypes = true, MergeGenericImplementations = true)]
         public static T As<T>(object? value)
             where T : class?
         {
@@ -20,7 +20,7 @@ namespace ArduinoCsCompiler.Runtime
             // ret
         }
 
-        [ArduinoImplementation("UnsafeAs2", 0x20)]
+        [ArduinoImplementation("UnsafeAs2", 0x20, MergeGenericImplementations = true)]
         public static ref TTo As<TFrom, TTo>(ref TFrom source)
         {
             throw new PlatformNotSupportedException();
@@ -29,7 +29,7 @@ namespace ArduinoCsCompiler.Runtime
             // ret
         }
 
-        [ArduinoImplementation("UnsafeAsPointer", 0x21)]
+        [ArduinoImplementation("UnsafeAsPointer", 0x21, MergeGenericImplementations = true)]
         public static void* AsPointer<T>(ref T value)
         {
             throw new PlatformNotSupportedException();
@@ -59,7 +59,7 @@ namespace ArduinoCsCompiler.Runtime
             // ret
         }
 
-        [ArduinoImplementation(CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true, MergeGenericImplementations = true)]
         public static bool IsNullRef<T>(ref T source)
         {
             return AsPointer(ref source) == null;
@@ -108,6 +108,7 @@ namespace ArduinoCsCompiler.Runtime
             return ref AddByteOffset(ref source, (IntPtr)(void*)byteOffset);
         }
 
+        [ArduinoImplementation]
         public static int SizeOf<T>()
         {
             return SizeOfType(typeof(T));
@@ -132,7 +133,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new PlatformNotSupportedException();
         }
 
-        [ArduinoImplementation("UnsafeNullRef", 0x26)]
+        [ArduinoImplementation("UnsafeNullRef", 0x26, MergeGenericImplementations = true)]
         public static ref T NullRef<T>()
         {
             return ref AsRef<T>(null);

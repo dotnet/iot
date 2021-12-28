@@ -23,9 +23,13 @@ namespace ArduinoCsCompiler
             }
 
             Method = method;
+            Name = method.Name; // Evaluate here, so that the name is stored as a string (can't evaluate MethodInfo.Name during debugging)
         }
 
-        public string Name => Method.Name;
+        public string Name
+        {
+            get;
+        }
 
         public MethodBase Method { get; }
 

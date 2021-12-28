@@ -15,7 +15,7 @@ namespace ArduinoCsCompiler
             Name = $"{method.MethodSignature()}";
         }
 
-        public IlCode(MethodBase method, byte[]? ilBytes, List<MethodBase> methods, List<FieldInfo> fields, List<TypeInfo> types, List<ExceptionClause>? exceptionClauses)
+        public IlCode(EquatableMethod method, byte[]? ilBytes, List<MethodBase> methods, List<FieldInfo> fields, List<TypeInfo> types, List<ExceptionClause>? exceptionClauses)
         {
             Method = method;
             IlBytes = ilBytes;

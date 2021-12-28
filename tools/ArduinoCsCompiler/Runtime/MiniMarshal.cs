@@ -115,7 +115,7 @@ namespace ArduinoCsCompiler.Runtime
             return MiniUnsafe.SizeOfType(t);
         }
 
-        [ArduinoImplementation(IgnoreGenericTypes = true)]
+        [ArduinoImplementation("MarshalGetDelegateForFunctionPointer", IgnoreGenericTypes = true)]
         public static T GetDelegateForFunctionPointer<T>(System.IntPtr ptr)
         {
             throw new NotImplementedException();

@@ -1427,6 +1427,9 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        /// <summary>
+        /// Here, merging is actually not so easy, because the T must be encoded somewhere
+        /// </summary>
         public static int UnsafeSizeOf(int arg1, int arg2)
         {
             // The Is64BitProcess tests are required because the EE runs in 64 bit mode locally, but our Firmata EE is only 32 bit
