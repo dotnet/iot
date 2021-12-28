@@ -4,7 +4,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     /// <summary>
     /// Declares a method as being implemented natively on the Arduino

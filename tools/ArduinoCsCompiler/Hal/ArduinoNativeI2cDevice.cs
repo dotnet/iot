@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 #pragma warning disable CS1591
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     public class ArduinoNativeI2cDevice : I2cDevice
     {

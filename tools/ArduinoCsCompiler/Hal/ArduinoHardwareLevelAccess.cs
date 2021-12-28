@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Text;
 
-namespace Iot.Device.Arduino
+namespace ArduinoCsCompiler
 {
     /// <summary>
     /// Internal use only: Abstraction level for Arduino support.
