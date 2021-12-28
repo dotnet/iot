@@ -1780,6 +1780,7 @@ namespace ArduinoCsCompiler
             bool constructedCode = false;
             bool needsParsing = true;
             MethodFlags constructedFlags = MethodFlags.None;
+            List<FieldInfo> manuallyReferencedFields = new List<FieldInfo>();
             if (body == null && !methodInfo.IsAbstract)
             {
                 Type multicastType = typeof(MulticastDelegate);
@@ -1829,6 +1830,10 @@ namespace ArduinoCsCompiler
                         var methodDetail = (MethodInfo)methodInfo.Method;
                         var targetField = t.GetField("_target", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
                         var methodPtrField = t.GetField("_methodPtr", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)!;
+
+                        manuallyReferencedFields.Add(targetField);
+                        manuallyReferencedFields.Add(methodPtrField);
+
                         List<byte> code = new List<byte>();
                         int numargs = args.Length;
                         if (methodInfo.IsStatic)
@@ -1868,6 +1873,14 @@ namespace ArduinoCsCompiler
                         }
 
                         needsParsing = false; // We have already translated the tokens
+
+                        if (t.BaseType != null) // Should not really be the case here, ever.
+                        {
+                            if (!set.HasDefinition(t.BaseType))
+                            {
+                                PrepareClass(set, t.BaseType);
+                            }
+                        }
                     }
                 }
                 else
@@ -1930,7 +1943,7 @@ namespace ArduinoCsCompiler
 
             if (needsParsing == false)
             {
-                parserResult = new IlCode(methodInfo, ilBytes);
+                parserResult = new IlCode(methodInfo, ilBytes, new List<MethodBase>(), manuallyReferencedFields, new List<TypeInfo>(), new List<ExceptionClause>());
             }
             else if (hasBody)
             {

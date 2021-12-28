@@ -31,8 +31,8 @@ namespace ArduinoCsCompiler
         private readonly Dictionary<int, TypeInfo> _inversePatchedTypeTokens;
         private readonly Dictionary<EquatableMethod, int> _patchedMethodTokens;
         private readonly Dictionary<int, EquatableMethod> _inversePatchedMethodTokens; // Same as the above, but the other way round
-        private readonly Dictionary<FieldInfo, (int Token, byte[]? InitializerData)> _patchedFieldTokens;
-        private readonly Dictionary<int, FieldInfo> _inversePatchedFieldTokens;
+        private readonly Dictionary<EquatableField, (int Token, byte[]? InitializerData)> _patchedFieldTokens;
+        private readonly Dictionary<int, EquatableField> _inversePatchedFieldTokens;
         private readonly HashSet<(Type Original, Type Replacement, bool Subclasses)> _classesReplaced;
 
         /// <summary>
@@ -97,10 +97,10 @@ namespace ArduinoCsCompiler
             _classes = new List<ClassDeclaration>();
             _patchedTypeTokens = new Dictionary<TypeInfo, int>();
             _patchedMethodTokens = new Dictionary<EquatableMethod, int>();
-            _patchedFieldTokens = new Dictionary<FieldInfo, (int Token, byte[]? InitializerData)>();
+            _patchedFieldTokens = new Dictionary<EquatableField, (int Token, byte[]? InitializerData)>();
             _inversePatchedMethodTokens = new Dictionary<int, EquatableMethod>();
             _inversePatchedTypeTokens = new Dictionary<int, TypeInfo>();
-            _inversePatchedFieldTokens = new Dictionary<int, FieldInfo>();
+            _inversePatchedFieldTokens = new Dictionary<int, EquatableField>();
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>();
             _methodsReplaced = new();
             _classesToSuppress = new List<Type>();
@@ -134,10 +134,10 @@ namespace ArduinoCsCompiler
 
             _patchedTypeTokens = new Dictionary<TypeInfo, int>(setToClone._patchedTypeTokens);
             _patchedMethodTokens = new Dictionary<EquatableMethod, int>(setToClone._patchedMethodTokens);
-            _patchedFieldTokens = new Dictionary<FieldInfo, (int Token, byte[]? InitializerData)>(setToClone._patchedFieldTokens);
+            _patchedFieldTokens = new Dictionary<EquatableField, (int Token, byte[]? InitializerData)>(setToClone._patchedFieldTokens);
             _inversePatchedMethodTokens = new Dictionary<int, EquatableMethod>(setToClone._inversePatchedMethodTokens);
             _inversePatchedTypeTokens = new Dictionary<int, TypeInfo>(setToClone._inversePatchedTypeTokens);
-            _inversePatchedFieldTokens = new Dictionary<int, FieldInfo>(setToClone._inversePatchedFieldTokens);
+            _inversePatchedFieldTokens = new Dictionary<int, EquatableField>(setToClone._inversePatchedFieldTokens);
             _classesReplaced = new HashSet<(Type Original, Type Replacement, bool Subclasses)>(setToClone._classesReplaced);
             _methodsReplaced = new(setToClone._methodsReplaced);
             _classesToSuppress = new List<Type>(setToClone._classesToSuppress);
@@ -385,7 +385,7 @@ namespace ArduinoCsCompiler
                 classBytes += cls.Members.Count * 8; // Assuming 32 bit target system for now
                 foreach (var field in cls.Members)
                 {
-                    if (_inversePatchedFieldTokens.TryGetValue(field.Token, out FieldInfo? value))
+                    if (_inversePatchedFieldTokens.TryGetValue(field.Token, out EquatableField? value))
                     {
                         if (_patchedFieldTokens.TryGetValue(value, out var data))
                         {
@@ -586,7 +586,7 @@ namespace ArduinoCsCompiler
             return dummyMethod;
         }
 
-        internal int GetOrAddFieldToken(FieldInfo field)
+        internal int GetOrAddFieldToken(EquatableField field)
         {
             string temp = field.Name;
             if (_patchedFieldTokens.TryGetValue(field, out var token))
@@ -890,7 +890,7 @@ namespace ArduinoCsCompiler
 
             if (_inversePatchedFieldTokens.TryGetValue(token, out var field))
             {
-                return field;
+                return field.Field;
             }
 
             if (_inversePatchedTypeTokens.TryGetValue(token, out var t))
