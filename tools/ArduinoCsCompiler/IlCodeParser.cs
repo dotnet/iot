@@ -40,7 +40,7 @@ namespace ArduinoCsCompiler
             return opcode;
         }
 
-        public static IlCode FindAndPatchTokens(ExecutionSet set, MethodBase method)
+        public static IlCode FindAndPatchTokens(ExecutionSet set, EquatableMethod method)
         {
             // We need to copy the code, because we're going to patch it
             var body = method.GetMethodBody();
@@ -59,7 +59,7 @@ namespace ArduinoCsCompiler
         /// method depends on (fields, classes and other methods). Then we do a lookup and patch the token with a replacement token that
         /// is unique within our program. So we do not have to care about module boundaries.
         /// </summary>
-        public static IlCode FindAndPatchTokens(ExecutionSet set, MethodBase method, byte[] byteCode)
+        public static IlCode FindAndPatchTokens(ExecutionSet set, EquatableMethod method, byte[] byteCode)
         {
             // We need to copy the code, because we're going to patch it
             if (byteCode == null)
@@ -80,6 +80,7 @@ namespace ArduinoCsCompiler
             int idx = 0;
             IlInstruction? methodStart = null;
             IlInstruction? current = null;
+            var m = method.Method;
             while (idx < byteCode.Length - 5) // If less than 5 byte remain, there can't be a token within it
             {
                 int codeLocation = idx;
@@ -153,7 +154,7 @@ namespace ArduinoCsCompiler
                 {
                     case OpCode.CEE_LDSTR:
                     {
-                        String data = method.Module.ResolveString(token);
+                        String data = m.Module.ResolveString(token);
                         patchValue = set.GetOrAddString(data);
                         break;
                     }
@@ -165,7 +166,7 @@ namespace ArduinoCsCompiler
                     case OpCode.CEE_LDVIRTFTN:
                     {
                         // These opcodes are followed by a method token
-                        var methodTarget = ResolveMember(method, token)!;
+                        var methodTarget = ResolveMember(m, token)!;
                         MethodBase mb = (MethodBase)methodTarget; // This must work, or we're trying to call a field(?)
                         patchValue = set.GetOrAddMethodToken(mb, method);
                         // Do an inverse lookup again - might have changed due to replacement
@@ -181,7 +182,7 @@ namespace ArduinoCsCompiler
                     case OpCode.CEE_LDFLDA:
                     case OpCode.CEE_LDSFLDA:
                     {
-                        var fieldTarget = ResolveMember(method, token)!;
+                        var fieldTarget = ResolveMember(m, token)!;
                         FieldInfo mb = (FieldInfo)fieldTarget; // This must work, or the IL is invalid
                         var replacementClassForField = set.GetReplacement(mb.DeclaringType);
                         if (replacementClassForField != null)
@@ -209,7 +210,7 @@ namespace ArduinoCsCompiler
 
                     case OpCode.CEE_NEWARR:
                     {
-                        var typeTarget = ResolveMember(method, token)!;
+                        var typeTarget = ResolveMember(m, token)!;
                         TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
 
                         // If we create an array instance, we also need to provide this special iterator
@@ -225,7 +226,7 @@ namespace ArduinoCsCompiler
                     case OpCode.CEE_LDTOKEN:
                     case OpCode.CEE_CASTCLASS:
                     {
-                        var resolved = ResolveMember(method, token);
+                        var resolved = ResolveMember(m, token);
                         if (resolved is TypeInfo ti)
                         {
                             bool isEnum = ti.IsEnum;
@@ -281,7 +282,7 @@ namespace ArduinoCsCompiler
                     case OpCode.CEE_SIZEOF:
                     {
                         // These take a type as argument
-                        var typeTarget = ResolveMember(method, token)!;
+                        var typeTarget = ResolveMember(m, token)!;
                         TypeInfo mb = (TypeInfo)typeTarget; // This must work, or the IL is invalid
                         patchValue = set.GetOrAddClassToken(mb);
                         typesUsed.Add((TypeInfo)set.InverseResolveToken(patchValue)!);
@@ -302,7 +303,7 @@ namespace ArduinoCsCompiler
 
             typesUsed = typesUsed.Distinct().ToList();
 
-            var exceptions = AnalyzeExceptionClauses(set, method);
+            var exceptions = AnalyzeExceptionClauses(set, m);
             return new IlCode(method, byteCode, methodsUsed, fieldsUsed, typesUsed, exceptions);
         }
 

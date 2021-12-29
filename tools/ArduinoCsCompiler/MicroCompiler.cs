@@ -1947,7 +1947,7 @@ namespace ArduinoCsCompiler
             }
             else if (hasBody)
             {
-                parserResult = IlCodeParser.FindAndPatchTokens(set, methodInfo.Method, ilBytes!);
+                parserResult = IlCodeParser.FindAndPatchTokens(set, methodInfo, ilBytes!);
 
                 foreach (var type in parserResult.DependentTypes)
                 {

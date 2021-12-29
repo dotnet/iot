@@ -90,7 +90,7 @@ namespace ArduinoCsCompiler.Runtime
             return ref AddByteOffset(ref source, (IntPtr)((uint)elementOffset * (uint)SizeOf<T>()));
         }
 
-        [ArduinoImplementation("UnsafeAddByteOffset", 0x24)]
+        [ArduinoImplementation("UnsafeAddByteOffset", 0x24, MergeGenericImplementations = true)]
         public static ref T AddByteOffset<T>(ref T source, IntPtr byteOffset)
         {
             // This method is implemented by the toolchain
@@ -102,7 +102,7 @@ namespace ArduinoCsCompiler.Runtime
             // ret
         }
 
-        [ArduinoImplementation]
+        [ArduinoImplementation(MergeGenericImplementations = true)]
         public static ref T AddByteOffset<T>(ref T source, uint byteOffset)
         {
             return ref AddByteOffset(ref source, (IntPtr)(void*)byteOffset);
@@ -122,7 +122,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation(CompareByParameterNames = true)]
+        [ArduinoImplementation(CompareByParameterNames = true, MergeGenericImplementations = true)]
         public static ref T AsRef<T>(void* source)
         {
             return ref As<byte, T>(ref *(byte*)source);
@@ -162,7 +162,7 @@ namespace ArduinoCsCompiler.Runtime
         /// <remarks>
         /// This check is conceptually similar to "(void*)(&amp;left) &gt; (void*)(&amp;right)".
         /// </remarks>
-        [ArduinoImplementation("UnsafeIsAddressGreaterThan", 0x18, CompareByParameterNames = true)]
+        [ArduinoImplementation("UnsafeIsAddressGreaterThan", 0x18, CompareByParameterNames = true, MergeGenericImplementations = true)]
         public static bool IsAddressGreaterThan<T>(ref T left, ref T right)
         {
             throw new PlatformNotSupportedException();

@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 #pragma warning disable CS1591
 namespace ArduinoCsCompiler
 {
-    public class ArduinoNativeI2cDevice : I2cDevice
+    internal class ArduinoNativeI2cDevice : I2cDevice
     {
         // easier to access from the firmware here than in the structure
         private int _deviceAddress; // do not remove. Used in runtime.
 
-        public ArduinoNativeI2cDevice(I2cConnectionSettings connectionSettings)
+        public ArduinoNativeI2cDevice(ArduinoNativeBoard board, ArduinoNativeI2cBus bus, I2cConnectionSettings connectionSettings)
         {
             ConnectionSettings = connectionSettings;
             _deviceAddress = connectionSettings.DeviceAddress;

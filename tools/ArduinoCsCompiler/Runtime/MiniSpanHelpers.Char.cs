@@ -61,22 +61,6 @@ namespace ArduinoCsCompiler.Runtime
 
             if (minLength >= (uint)(sizeof(uint) / sizeof(char)))
             {
-                if (Vector.IsHardwareAccelerated && minLength >= (uint)Vector<ushort>.Count)
-                {
-                    uint nLength = minLength - (uint)Vector<ushort>.Count;
-                    do
-                    {
-                        if (Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, (int)i))) !=
-                            Unsafe.ReadUnaligned<Vector<ushort>>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref second, (int)i))))
-                        {
-                            break;
-                        }
-
-                        i += (uint)Vector<ushort>.Count;
-                    }
-                    while (nLength >= i);
-                }
-
                 while (minLength >= (i + (uint)(sizeof(uint) / sizeof(char))))
                 {
                     if (Unsafe.ReadUnaligned<uint>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, (int)i))) !=
@@ -88,17 +72,6 @@ namespace ArduinoCsCompiler.Runtime
                     i += (uint)(sizeof(uint) / sizeof(char));
                 }
             }
-
-#if TARGET_64BIT
-            if (minLength >= (i + sizeof(int) / sizeof(char)))
-            {
-                if (Unsafe.ReadUnaligned<int>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref first, (int)i))) ==
-                    Unsafe.ReadUnaligned<int>(ref Unsafe.As<char, byte>(ref Unsafe.Add(ref second, (int)i))))
-                {
-                    i += sizeof(int) / sizeof(char);
-                }
-            }
-#endif
 
             while (i < minLength)
             {
@@ -412,15 +385,6 @@ namespace ArduinoCsCompiler.Runtime
                 char* pCh = pChars + length;
                 char* pEndCh = pChars;
 
-                if (Vector.IsHardwareAccelerated && length >= Vector<ushort>.Count * 2)
-                {
-                    // Figure out how many characters to read sequentially from the end until we are vector aligned
-                    // This is equivalent to: length = ((int)pCh % Unsafe.SizeOf<Vector<ushort>>()) / elementsPerByte
-                    const int elementsPerByte = sizeof(ushort) / sizeof(byte);
-                    length = ((int)pCh & (Unsafe.SizeOf<Vector<ushort>>() - 1)) / elementsPerByte;
-                }
-
-                SequentialScan:
                 while (length >= 4)
                 {
                     length -= 4;
@@ -443,41 +407,6 @@ namespace ArduinoCsCompiler.Runtime
 
                     if (*pCh == value)
                         goto Found;
-                }
-
-                // We get past SequentialScan only if IsHardwareAccelerated is true. However, we still have the redundant check to allow
-                // the JIT to see that the code is unreachable and eliminate it when the platform does not have hardware accelerated.
-                if (Vector.IsHardwareAccelerated && pCh > pEndCh)
-                {
-                    // Get the highest multiple of Vector<ushort>.Count that is within the search space.
-                    // That will be how many times we iterate in the loop below.
-                    // This is equivalent to: length = Vector<ushort>.Count * ((int)(pCh - pEndCh) / Vector<ushort>.Count)
-                    length = (int)((pCh - pEndCh) & ~(Vector<ushort>.Count - 1));
-
-                    // Get comparison Vector
-                    Vector<ushort> vComparison = new Vector<ushort>(value);
-
-                    while (length > 0)
-                    {
-                        char* pStart = pCh - Vector<ushort>.Count;
-                        // Using Unsafe.Read instead of ReadUnaligned since the search space is pinned and pCh (and hence pSart) is always vector aligned
-                        Vector<ushort> vMatches = Vector.Equals(vComparison, Unsafe.Read<Vector<ushort>>(pStart));
-                        if (Vector<ushort>.Zero.Equals(vMatches))
-                        {
-                            pCh -= Vector<ushort>.Count;
-                            length -= Vector<ushort>.Count;
-                            continue;
-                        }
-
-                        // Find offset of last match
-                        return (int)(pStart - pEndCh) + LocateLastFoundChar(vMatches);
-                    }
-
-                    if (pCh > pEndCh)
-                    {
-                        length = (int)(pCh - pEndCh);
-                        goto SequentialScan;
-                    }
                 }
 
                 return -1;

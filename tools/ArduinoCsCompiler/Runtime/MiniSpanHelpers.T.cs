@@ -52,40 +52,6 @@ namespace ArduinoCsCompiler.Runtime
 
             if (default(T) != null || (object)value != null)
             {
-                while (length >= 8)
-                {
-                    length -= 8;
-
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 0)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 1)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 2)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 3)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 4)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 5)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 6)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 7)))
-                    {
-                        goto Found;
-                    }
-
-                    index += 8;
-                }
-
-                if (length >= 4)
-                {
-                    length -= 4;
-
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 0)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 1)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 2)) ||
-                        value.Equals(Unsafe.Add(ref searchSpace, index + 3)))
-                    {
-                        goto Found;
-                    }
-
-                    index += 4;
-                }
-
                 while (length > 0)
                 {
                     length--;
@@ -119,46 +85,6 @@ namespace ArduinoCsCompiler.Runtime
             int index = 0;
             if (default(T) != null || (object)value != null)
             {
-                while (length >= 8)
-                {
-                    length -= 8;
-
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index)))
-                        goto Found;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 1)))
-                        goto Found1;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 2)))
-                        goto Found2;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 3)))
-                        goto Found3;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 4)))
-                        goto Found4;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 5)))
-                        goto Found5;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 6)))
-                        goto Found6;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 7)))
-                        goto Found7;
-
-                    index += 8;
-                }
-
-                if (length >= 4)
-                {
-                    length -= 4;
-
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index)))
-                        goto Found;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 1)))
-                        goto Found1;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 2)))
-                        goto Found2;
-                    if (value.Equals(Unsafe.Add(ref searchSpace, index + 3)))
-                        goto Found3;
-
-                    index += 4;
-                }
-
                 while (length > 0)
                 {
                     if (value.Equals(Unsafe.Add(ref searchSpace, index)))
@@ -182,20 +108,6 @@ namespace ArduinoCsCompiler.Runtime
 
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return (int)(byte*)index;
-        Found1:
-            return (int)(byte*)(index + 1);
-        Found2:
-            return (int)(byte*)(index + 2);
-        Found3:
-            return (int)(byte*)(index + 3);
-        Found4:
-            return (int)(byte*)(index + 4);
-        Found5:
-            return (int)(byte*)(index + 5);
-        Found6:
-            return (int)(byte*)(index + 6);
-        Found7:
-            return (int)(byte*)(index + 7);
         }
 
         public static int IndexOfAny<T>(ref T searchSpace, T value0, T value1, int length)
@@ -205,54 +117,6 @@ namespace ArduinoCsCompiler.Runtime
             int index = 0;
             if (default(T) != null || ((object)value0 != null && (object)value1 != null))
             {
-                while ((length - index) >= 8)
-                {
-                    lookUp = Unsafe.Add(ref searchSpace, index);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 1);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found1;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 2);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found2;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 3);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found3;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 4);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found4;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 5);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found5;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 6);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found6;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 7);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found7;
-
-                    index += 8;
-                }
-
-                if ((length - index) >= 4)
-                {
-                    lookUp = Unsafe.Add(ref searchSpace, index);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 1);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found1;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 2);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found2;
-                    lookUp = Unsafe.Add(ref searchSpace, index + 3);
-                    if (value0.Equals(lookUp) || value1.Equals(lookUp))
-                        goto Found3;
-
-                    index += 4;
-                }
-
                 while (index < length)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, index);
@@ -285,20 +149,6 @@ namespace ArduinoCsCompiler.Runtime
 
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return index;
-        Found1:
-            return index + 1;
-        Found2:
-            return index + 2;
-        Found3:
-            return index + 3;
-        Found4:
-            return index + 4;
-        Found5:
-            return index + 5;
-        Found6:
-            return index + 6;
-        Found7:
-            return index + 7;
         }
 
         public static int IndexOfAny<T>(ref T searchSpace, T value0, T value1, T value2, int length)

@@ -76,7 +76,8 @@ namespace Iot.Device.Arduino.Tests
             private const int StationAltitude = 650;
             public static int Run()
             {
-                using I2cDevice i2cDevice = new ArduinoNativeI2cDevice(new I2cConnectionSettings(1, 0x27));
+                using var board = new ArduinoNativeBoard();
+                using I2cDevice i2cDevice = board.CreateI2cDevice(new I2cConnectionSettings(0, 0x27));
                 using LcdInterface lcdInterface = LcdInterface.CreateI2c(i2cDevice, false);
                 using Hd44780 hd44780 = new Lcd2004(lcdInterface);
                 hd44780.UnderlineCursorVisible = false;

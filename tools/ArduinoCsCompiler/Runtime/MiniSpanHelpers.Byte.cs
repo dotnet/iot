@@ -90,46 +90,6 @@ namespace ArduinoCsCompiler.Runtime
             uint offset = 0; // Use uint for arithmetic to avoid unnecessary 64->32->64 truncations
             uint lengthToExamine = (uint)(uint)length;
 
-            if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
-            {
-                lengthToExamine = UnalignedCountVector(ref searchSpace);
-            }
-
-        SequentialScan:
-            while (lengthToExamine >= 8)
-            {
-                lengthToExamine -= 8;
-
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 0) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 1) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 2) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 3) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 4) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 5) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 6) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 7))
-                {
-                    goto Found;
-                }
-
-                offset += 8;
-            }
-
-            if (lengthToExamine >= 4)
-            {
-                lengthToExamine -= 4;
-
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 0) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 1) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 2) ||
-                    uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 3))
-                {
-                    goto Found;
-                }
-
-                offset += 4;
-            }
-
             while (lengthToExamine > 0)
             {
                 lengthToExamine -= 1;
@@ -138,31 +98,6 @@ namespace ArduinoCsCompiler.Runtime
                     goto Found;
 
                 offset += 1;
-            }
-
-            if (Vector.IsHardwareAccelerated && (offset < (uint)(uint)length))
-            {
-                lengthToExamine = (((uint)(uint)length - offset) & (uint)~(Vector<byte>.Count - 1));
-
-                Vector<byte> values = new Vector<byte>(value);
-
-                while (lengthToExamine > offset)
-                {
-                    var matches = Vector.Equals(values, LoadVector(ref searchSpace, offset));
-                    if (Vector<byte>.Zero.Equals(matches))
-                    {
-                        offset += (uint)Vector<byte>.Count;
-                        continue;
-                    }
-
-                    goto Found;
-                }
-
-                if (offset < (uint)(uint)length)
-                {
-                    lengthToExamine = ((uint)(uint)length - offset);
-                    goto SequentialScan;
-                }
             }
 
             return false;
@@ -177,46 +112,6 @@ namespace ArduinoCsCompiler.Runtime
             uint offset = 0; // Use uint for arithmetic to avoid unnecessary 64->32->64 truncations
             uint lengthToExamine = (uint)(uint)length;
 
-            while (lengthToExamine >= 8)
-            {
-                lengthToExamine -= 8;
-
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset))
-                    goto Found;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 1))
-                    goto Found1;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 2))
-                    goto Found2;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 3))
-                    goto Found3;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 4))
-                    goto Found4;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 5))
-                    goto Found5;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 6))
-                    goto Found6;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 7))
-                    goto Found7;
-
-                offset += 8;
-            }
-
-            if (lengthToExamine >= 4)
-            {
-                lengthToExamine -= 4;
-
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset))
-                    goto Found;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 1))
-                    goto Found1;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 2))
-                    goto Found2;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 3))
-                    goto Found3;
-
-                offset += 4;
-            }
-
             while (lengthToExamine > 0)
             {
                 lengthToExamine -= 1;
@@ -230,20 +125,6 @@ namespace ArduinoCsCompiler.Runtime
             return -1;
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return (int)offset;
-        Found1:
-            return (int)(offset + 1);
-        Found2:
-            return (int)(offset + 2);
-        Found3:
-            return (int)(offset + 3);
-        Found4:
-            return (int)(offset + 4);
-        Found5:
-            return (int)(offset + 5);
-        Found6:
-            return (int)(offset + 6);
-        Found7:
-            return (int)(offset + 7);
         }
 
         public static int LastIndexOf(ref byte searchSpace, int searchSpaceLength, ref byte value, int valueLength)
@@ -282,49 +163,6 @@ namespace ArduinoCsCompiler.Runtime
             uint offset = (uint)(uint)length; // Use uint for arithmetic to avoid unnecessary 64->32->64 truncations
             uint lengthToExamine = (uint)(uint)length;
 
-            if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
-            {
-                lengthToExamine = UnalignedCountVectorFromEnd(ref searchSpace, length);
-            }
-        SequentialScan:
-            while (lengthToExamine >= 8)
-            {
-                lengthToExamine -= 8;
-                offset -= 8;
-
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 7))
-                    goto Found7;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 6))
-                    goto Found6;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 5))
-                    goto Found5;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 4))
-                    goto Found4;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 3))
-                    goto Found3;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 2))
-                    goto Found2;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 1))
-                    goto Found1;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset))
-                    goto Found;
-            }
-
-            if (lengthToExamine >= 4)
-            {
-                lengthToExamine -= 4;
-                offset -= 4;
-
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 3))
-                    goto Found3;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 2))
-                    goto Found2;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset + 1))
-                    goto Found1;
-                if (uValue == Unsafe.AddByteOffset(ref searchSpace, offset))
-                    goto Found;
-            }
-
             while (lengthToExamine > 0)
             {
                 lengthToExamine -= 1;
@@ -334,48 +172,9 @@ namespace ArduinoCsCompiler.Runtime
                     goto Found;
             }
 
-            if (Vector.IsHardwareAccelerated && (offset > 0))
-            {
-                lengthToExamine = (offset & (uint)~(Vector<byte>.Count - 1));
-
-                Vector<byte> values = new Vector<byte>(value);
-
-                while (lengthToExamine > (uint)(Vector<byte>.Count - 1))
-                {
-                    var matches = Vector.Equals(values, LoadVector(ref searchSpace, offset - (uint)Vector<byte>.Count));
-                    if (Vector<byte>.Zero.Equals(matches))
-                    {
-                        offset -= (uint)Vector<byte>.Count;
-                        lengthToExamine -= (uint)Vector<byte>.Count;
-                        continue;
-                    }
-
-                    // Find offset of first match and add to current offset
-                    return (int)(offset) - Vector<byte>.Count + LocateLastFoundByte(matches);
-                }
-                if (offset > 0)
-                {
-                    lengthToExamine = offset;
-                    goto SequentialScan;
-                }
-            }
             return -1;
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return (int)offset;
-        Found1:
-            return (int)(offset + 1);
-        Found2:
-            return (int)(offset + 2);
-        Found3:
-            return (int)(offset + 3);
-        Found4:
-            return (int)(offset + 4);
-        Found5:
-            return (int)(offset + 5);
-        Found6:
-            return (int)(offset + 6);
-        Found7:
-            return (int)(offset + 7);
         }
 
         public static int IndexOfAny(ref byte searchSpace, byte value0, byte value1, int length)
@@ -386,58 +185,6 @@ namespace ArduinoCsCompiler.Runtime
             uint lengthToExamine = (uint)(uint)length;
 
             uint lookUp;
-            while (lengthToExamine >= 8)
-            {
-                lengthToExamine -= 8;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found3;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 4);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found4;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 5);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found5;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 6);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found6;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 7);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found7;
-
-                offset += 8;
-            }
-
-            if (lengthToExamine >= 4)
-            {
-                lengthToExamine -= 4;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found3;
-
-                offset += 4;
-            }
-
             while (lengthToExamine > 0)
             {
                 lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
@@ -451,20 +198,6 @@ namespace ArduinoCsCompiler.Runtime
             return -1;
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return (int)offset;
-        Found1:
-            return (int)(offset + 1);
-        Found2:
-            return (int)(offset + 2);
-        Found3:
-            return (int)(offset + 3);
-        Found4:
-            return (int)(offset + 4);
-        Found5:
-            return (int)(offset + 5);
-        Found6:
-            return (int)(offset + 6);
-        Found7:
-            return (int)(offset + 7);
 
         }
 
@@ -477,58 +210,6 @@ namespace ArduinoCsCompiler.Runtime
             uint lengthToExamine = (uint)(uint)length;
 
             uint lookUp;
-            while (lengthToExamine >= 8)
-            {
-                lengthToExamine -= 8;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found3;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 4);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found4;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 5);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found5;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 6);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found6;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 7);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found7;
-
-                offset += 8;
-            }
-
-            if (lengthToExamine >= 4)
-            {
-                lengthToExamine -= 4;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found3;
-
-                offset += 4;
-            }
-
             while (lengthToExamine > 0)
             {
                 lengthToExamine -= 1;
@@ -543,20 +224,6 @@ namespace ArduinoCsCompiler.Runtime
             return -1;
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return (int)offset;
-        Found1:
-            return (int)(offset + 1);
-        Found2:
-            return (int)(offset + 2);
-        Found3:
-            return (int)(offset + 3);
-        Found4:
-            return (int)(offset + 4);
-        Found5:
-            return (int)(offset + 5);
-        Found6:
-            return (int)(offset + 6);
-        Found7:
-            return (int)(offset + 7);
         }
 
         public static int LastIndexOfAny(ref byte searchSpace, byte value0, byte value1, int length)
@@ -570,57 +237,8 @@ namespace ArduinoCsCompiler.Runtime
             {
                 lengthToExamine = UnalignedCountVectorFromEnd(ref searchSpace, length);
             }
-        SequentialScan:
+
             uint lookUp;
-            while (lengthToExamine >= 8)
-            {
-                lengthToExamine -= 8;
-                offset -= 8;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 7);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found7;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 6);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found6;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 5);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found5;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 4);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found4;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found3;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found;
-            }
-
-            if (lengthToExamine >= 4)
-            {
-                lengthToExamine -= 4;
-                offset -= 4;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found3;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp)
-                    goto Found;
-            }
 
             while (lengthToExamine > 0)
             {
@@ -632,53 +250,9 @@ namespace ArduinoCsCompiler.Runtime
                     goto Found;
             }
 
-            if (Vector.IsHardwareAccelerated && (offset > 0))
-            {
-                lengthToExamine = (offset & (uint)~(Vector<byte>.Count - 1));
-
-                Vector<byte> values0 = new Vector<byte>(value0);
-                Vector<byte> values1 = new Vector<byte>(value1);
-
-                while (lengthToExamine > (uint)(Vector<byte>.Count - 1))
-                {
-                    Vector<byte> search = LoadVector(ref searchSpace, offset - (uint)Vector<byte>.Count);
-                    var matches = Vector.BitwiseOr(
-                                    Vector.Equals(search, values0),
-                                    Vector.Equals(search, values1));
-                    if (Vector<byte>.Zero.Equals(matches))
-                    {
-                        offset -= (uint)Vector<byte>.Count;
-                        lengthToExamine -= (uint)Vector<byte>.Count;
-                        continue;
-                    }
-
-                    // Find offset of first match and add to current offset
-                    return (int)(offset) - Vector<byte>.Count + LocateLastFoundByte(matches);
-                }
-
-                if (offset > 0)
-                {
-                    lengthToExamine = offset;
-                    goto SequentialScan;
-                }
-            }
             return -1;
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return (int)offset;
-        Found1:
-            return (int)(offset + 1);
-        Found2:
-            return (int)(offset + 2);
-        Found3:
-            return (int)(offset + 3);
-        Found4:
-            return (int)(offset + 4);
-        Found5:
-            return (int)(offset + 5);
-        Found6:
-            return (int)(offset + 6);
-        Found7:
-            return (int)(offset + 7);
         }
 
         public static int LastIndexOfAny(ref byte searchSpace, byte value0, byte value1, byte value2, int length)
@@ -689,62 +263,7 @@ namespace ArduinoCsCompiler.Runtime
             uint offset = (uint)(uint)length; // Use uint for arithmetic to avoid unnecessary 64->32->64 truncations
             uint lengthToExamine = (uint)(uint)length;
 
-            if (Vector.IsHardwareAccelerated && length >= Vector<byte>.Count * 2)
-            {
-                lengthToExamine = UnalignedCountVectorFromEnd(ref searchSpace, length);
-            }
-        SequentialScan:
             uint lookUp;
-            while (lengthToExamine >= 8)
-            {
-                lengthToExamine -= 8;
-                offset -= 8;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 7);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found7;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 6);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found6;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 5);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found5;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 4);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found4;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found3;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found;
-            }
-
-            if (lengthToExamine >= 4)
-            {
-                lengthToExamine -= 4;
-                offset -= 4;
-
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 3);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found3;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 2);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found2;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset + 1);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found1;
-                lookUp = Unsafe.AddByteOffset(ref searchSpace, offset);
-                if (uValue0 == lookUp || uValue1 == lookUp || uValue2 == lookUp)
-                    goto Found;
-            }
-
             while (lengthToExamine > 0)
             {
                 lengthToExamine -= 1;
@@ -755,58 +274,9 @@ namespace ArduinoCsCompiler.Runtime
                     goto Found;
             }
 
-            if (Vector.IsHardwareAccelerated && (offset > 0))
-            {
-                lengthToExamine = (offset & (uint)~(Vector<byte>.Count - 1));
-
-                Vector<byte> values0 = new Vector<byte>(value0);
-                Vector<byte> values1 = new Vector<byte>(value1);
-                Vector<byte> values2 = new Vector<byte>(value2);
-
-                while (lengthToExamine > (uint)(Vector<byte>.Count - 1))
-                {
-                    Vector<byte> search = LoadVector(ref searchSpace, offset - (uint)Vector<byte>.Count);
-
-                    var matches = Vector.BitwiseOr(
-                                    Vector.BitwiseOr(
-                                        Vector.Equals(search, values0),
-                                        Vector.Equals(search, values1)),
-                                    Vector.Equals(search, values2));
-
-                    if (Vector<byte>.Zero.Equals(matches))
-                    {
-                        offset -= (uint)Vector<byte>.Count;
-                        lengthToExamine -= (uint)Vector<byte>.Count;
-                        continue;
-                    }
-
-                    // Find offset of first match and add to current offset
-                    return (int)(offset) - Vector<byte>.Count + LocateLastFoundByte(matches);
-                }
-
-                if (offset > 0)
-                {
-                    lengthToExamine = offset;
-                    goto SequentialScan;
-                }
-            }
             return -1;
         Found: // Workaround for https://github.com/dotnet/runtime/issues/8795
             return (int)offset;
-        Found1:
-            return (int)(offset + 1);
-        Found2:
-            return (int)(offset + 2);
-        Found3:
-            return (int)(offset + 3);
-        Found4:
-            return (int)(offset + 4);
-        Found5:
-            return (int)(offset + 5);
-        Found6:
-            return (int)(offset + 6);
-        Found7:
-            return (int)(offset + 7);
         }
 
         // Optimized byte-based SequenceEquals. The "length" parameter for this one is declared a uint rather than int as we also use it for types other than byte
