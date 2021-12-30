@@ -229,6 +229,11 @@ namespace ArduinoCsCompiler
                 _logger.LogDebug($"Class {stat.Key.FullName}: {stat.Value.TotalBytes} Bytes");
             }
 
+            if (!string.IsNullOrEmpty(_commandLineOptions.TokenMapFile))
+            {
+                set.WriteMapFile(_commandLineOptions.TokenMapFile);
+            }
+
             if (!_commandLineOptions.CompileOnly)
             {
                 set.Load(false);

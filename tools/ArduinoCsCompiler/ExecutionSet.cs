@@ -438,9 +438,9 @@ namespace ArduinoCsCompiler
                 bytesUsed += constant.EncodedString.Length + 4;
             }
 
-            long totalBodyLength = methodBodies.Sum(x => x.Length);
-            var compressedBodies = methodBodies.Distinct(new ByteArrayEqualityComparer());
-            long compressedBodyLength = compressedBodies.Sum(x => x.Length);
+            ////long totalBodyLength = methodBodies.Sum(x => x.Length);
+            ////var compressedBodies = methodBodies.Distinct(new ByteArrayEqualityComparer());
+            ////long compressedBodyLength = compressedBodies.Sum(x => x.Length);
 
             return bytesUsed;
         }
@@ -771,7 +771,7 @@ namespace ArduinoCsCompiler
                 return false;
             }
 
-            if (_classesReplaced.Any(x => x.Original == type.TheType))
+            if (_classesReplaced.Any(x => x.Original.AssemblyQualifiedName == type.TheType.AssemblyQualifiedName))
             {
                 throw new InvalidOperationException($"Class {type} should have been replaced by its replacement");
             }
@@ -1017,7 +1017,8 @@ namespace ArduinoCsCompiler
 
             foreach (var x in _classesReplaced)
             {
-                if (x.Original == original)
+                // Only exact matches, including assembly (there is a type named Interop.Kernel32 in several assemblies)
+                if (x.Original.AssemblyQualifiedName == original.AssemblyQualifiedName)
                 {
                     return x.Replacement;
                 }
@@ -1311,6 +1312,96 @@ namespace ArduinoCsCompiler
                     }
                 }
             }
+        }
+
+        public void WriteMapFile(string tokenMapFile)
+        {
+            using StreamWriter w = new StreamWriter(tokenMapFile);
+
+            w.WriteLine("Token map file, ordered by token number");
+            w.WriteLine();
+            List<uint> tokens = new List<uint>();
+            tokens.AddRange(_patchedMethodTokens.Select(x => (uint)x.Value));
+            tokens.AddRange(_patchedTypeTokens.Select(x => (uint)x.Value));
+            tokens.AddRange(_patchedFieldTokens.Select(x => (uint)x.Value.Token));
+
+            tokens.Sort();
+
+            foreach (var token in tokens)
+            {
+                var c = _classes.FirstOrDefault(x => (uint)x.NewToken == token);
+                if (c != null)
+                {
+                    w.WriteLine($"0x{c.NewToken:X8} (Class) {c.Name}");
+                    continue;
+                }
+
+                var m = _methods.FirstOrDefault(x => (uint)x.Token == token);
+                if (m != null)
+                {
+                    w.WriteLine($"0x{m.Token:X8} (Method) {m.ToString()}");
+                    continue;
+                }
+
+                var pc = _patchedTypeTokens.FirstOrDefault(x => (uint)x.Value == token);
+                if (pc.Value != 0)
+                {
+                    w.WriteLine($"0x{token:X8} (Class, not loaded) {pc.Key.FullName}");
+                    continue;
+                }
+
+                var pm = _patchedMethodTokens.FirstOrDefault(x => (uint)x.Value == token);
+                if (pm.Value != 0)
+                {
+                    w.WriteLine($"0x{token:X8} (Method, not loaded or no implementation present) {pm.Key.Name}");
+                    continue;
+                }
+
+                var fld = _patchedFieldTokens.FirstOrDefault(x => (uint)x.Value.Token == token);
+                if (fld.Value.Token != 0)
+                {
+                    w.WriteLine($"0x{token:X8} (Field) {fld.Key.Name} of {fld.Key.DeclaringType!.Name}");
+                }
+            }
+
+            long size = EstimateRequiredMemory(out var details);
+            w.WriteLine($"Total estimated flash space required: {size} bytes ({size / 1024} kb)");
+            w.WriteLine($"Total number of classes in execution set: {_classes.Count}.");
+            w.WriteLine($"Total number of methods in execution set: {_methods.Count}.");
+
+            long stringBytesUsed = 0;
+            foreach (var constant in _strings)
+            {
+                stringBytesUsed += constant.EncodedString.Length + 4;
+            }
+
+            w.WriteLine($"Total number of string constants in execution set: {_strings.Count} with a total size of {stringBytesUsed} bytes ({stringBytesUsed / 1024} kb)");
+
+            List<(int Token, byte[] Data, string NoData)> converted = new();
+            // Need to do this manually, due to stupid nullability conversion restrictions
+            long constDataUsed = 0;
+            foreach (var elem in _patchedFieldTokens.Values)
+            {
+                if (elem.InitializerData != null)
+                {
+                    converted.Add((elem.Token, elem.InitializerData, string.Empty));
+                    constDataUsed += elem.InitializerData.Length;
+                }
+            }
+
+            w.WriteLine($"Total number of data blobs in execution set: {converted.Count} with a total size of {constDataUsed} bytes ({constDataUsed / 1024} kb)");
+            w.WriteLine();
+            w.WriteLine("Classes, sorted by size");
+            w.WriteLine();
+
+            foreach (var stat in details)
+            {
+                var value = stat.Value;
+                w.WriteLine($"Class {value.Type.Name}: Total {value.TotalBytes} Bytes, {value.MethodBytes} for methods and {value.ClassBytes} for member metadata");
+            }
+
+            w.WriteLine();
+            w.Close();
         }
     }
 }

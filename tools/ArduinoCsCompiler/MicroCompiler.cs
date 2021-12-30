@@ -1470,8 +1470,17 @@ namespace ArduinoCsCompiler
             foreach (var method in code.DependentMethods)
             {
                 // Do we need to replace this method?
-                set.GetReplacement(method.DeclaringType);
-                var finalMethod = set.GetReplacement(method, methodInfo);
+                var replacementType = set.GetReplacement(method.DeclaringType);
+                EquatableMethod? finalMethod = null;
+                if (replacementType != null)
+                {
+                    finalMethod = set.GetReplacement(method, methodInfo, replacementType);
+                }
+                else
+                {
+                    finalMethod = set.GetReplacement(method, methodInfo);
+                }
+
                 if (finalMethod == null)
                 {
                     finalMethod = method;
@@ -1600,6 +1609,10 @@ namespace ArduinoCsCompiler
                 exec.SuppressType(typeof(Microsoft.Win32.RegistryKey));
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
                 exec.SuppressType(typeof(MicroCompiler));
+                exec.SuppressType(typeof(System.Device.Gpio.Drivers.LibGpiodDriver));
+                exec.SuppressType(typeof(System.Device.Gpio.Drivers.RaspberryPi3Driver));
+                exec.SuppressType(typeof(System.Device.Gpio.Drivers.UnixDriver));
+                exec.SuppressType(typeof(System.Device.Gpio.Drivers.Windows10Driver));
 
                 // We don't currently support threads or tasks
                 // exec.SuppressType(typeof(System.Threading.Tasks.Task));
@@ -2097,6 +2110,7 @@ namespace ArduinoCsCompiler
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
             // The last of the BringToFront elements below will be the first cctor that gets executed
+            BringToFront(codeSequences, GetSystemPrivateType("System.Collections.HashHelpers"));
             BringToFront(codeSequences, typeof(System.Text.UTF8Encoding));
             BringToFront(codeSequences, typeof(System.Text.Encoding));
             BringToFront(codeSequences, typeof(System.Text.EncoderFallback));
@@ -2108,6 +2122,7 @@ namespace ArduinoCsCompiler
             BringToFront(codeSequences, typeof(Stopwatch));
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(codeSequences, typeof(System.DateTime));
+            BringToFront(codeSequences, typeof(MiniString)); // Initializes String.Empty
             SendToBack(codeSequences, GetSystemPrivateType("System.DateTimeFormat"));
             SendToBack(codeSequences, typeof(System.TimeZoneInfo));
 

@@ -802,8 +802,12 @@ namespace Iot.Device.Arduino
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, $"Error in parser: {ex.Message}");
-                    OnError?.Invoke($"Firmata protocol error: Parser exception {ex.Message}", ex);
+                    // If the exception happens because the stream was closed, don't print an error
+                    if (!_inputThreadShouldExit)
+                    {
+                        _logger.LogError(ex, $"Error in parser: {ex.Message}");
+                        OnError?.Invoke($"Firmata protocol error: Parser exception {ex.Message}", ex);
+                    }
                 }
             }
         }

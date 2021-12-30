@@ -63,6 +63,9 @@ namespace ArduinoCsCompiler
         [Option('d', "debug", HelpText = "Start the interactive remote debugger after the program has started.")]
         public bool Debug { get; set; }
 
+        [Option("mapfile", HelpText = "File to store the token map into.")]
+        public string TokenMapFile { get; set; }
+
         [Option("keepifcurrent", Default = false, HelpText = "If specified, the program will not be transmitted if it is already loaded. Defaults to false, because not all changes might be caught.")]
         public bool DoNotWriteFlashIfAlreadyCurrent { get; set; }
     }
