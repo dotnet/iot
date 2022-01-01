@@ -150,7 +150,21 @@ namespace Iot.Device.Ina226
         /// </summary>
         /// <returns>The shunt potential difference</returns>
         [Telemetry("ShuntVoltage")]
-        public ElectricPotential ReadShuntVoltage() => ElectricPotential.FromMicrovolts(ReadRegister(Ina226Register.ShuntVoltage, s_readDelaysForShunt[(Ina226ShuntConvTime)_shuntConvTime]) * 10.0);
+        public ElectricPotential ReadShuntVoltage()
+        {
+            ushort regValue = ReadRegister(Ina226Register.ShuntVoltage, s_readDelaysForShunt[(Ina226ShuntConvTime)_shuntConvTime]);
+
+            if ((regValue & 0x8000) > 0)
+            {
+                regValue &= 0x7FFF;
+                regValue ^= 0x7FFF;
+                regValue++;
+
+                return ElectricPotential.FromMicrovolts(regValue * -10.0);
+            }
+
+            return ElectricPotential.FromMicrovolts(regValue * 10.0);
+        }
 
         /// <summary>
         /// Read the measured Bus Voltage
@@ -169,7 +183,17 @@ namespace Iot.Device.Ina226
         [Telemetry("Current")]
         public ElectricCurrent ReadCurrent()
         {
-            return ElectricCurrent.FromAmperes(ReadRegister(Ina226Register.Current, s_readDelaysForShunt[(Ina226ShuntConvTime)_shuntConvTime]) * _currentLsb);
+            ushort regValue = ReadRegister(Ina226Register.Current, s_readDelaysForShunt[(Ina226ShuntConvTime)_shuntConvTime]);
+            if ((regValue & 0x8000) > 0)
+            {
+                regValue &= 0x7FFF;
+                regValue ^= 0x7FFF;
+                regValue++;
+
+                return ElectricCurrent.FromAmperes(regValue * -_currentLsb);
+            }
+
+            return ElectricCurrent.FromAmperes(regValue * _currentLsb);
         }
 
         /// <summary>
@@ -323,7 +347,18 @@ namespace Iot.Device.Ina226
             get => ElectricPotential.FromMillivolts((short)ReadRegister(Ina226Register.AlertLimit) * 1.25);
             set
             {
-                ushort voltage = Convert.ToUInt16(value.Volts / 0.00125);
+                var regValue = (value.Volts / 0.00125);
+                if (regValue > 36)
+                {
+                    regValue = 36;
+                }
+
+                if (regValue < 0)
+                {
+                    regValue = 0;
+                }
+
+                ushort voltage = Convert.ToUInt16(regValue);
                 WriteRegister(Ina226Register.AlertLimit, voltage);
             }
         }
@@ -337,7 +372,10 @@ namespace Iot.Device.Ina226
             get => ElectricCurrent.FromMilliamperes((short)ReadRegister(Ina226Register.AlertLimit) * 2.50);
             set
             {
-                ushort current = Convert.ToUInt16(value.Amperes / 0.00250);
+                var regValue = (value.Amperes / 0.00250);
+
+                // Needs input validation here
+                ushort current = Convert.ToUInt16(regValue);
                 WriteRegister(Ina226Register.AlertLimit, current);
             }
         }
@@ -351,7 +389,10 @@ namespace Iot.Device.Ina226
             get => Power.FromWatts((short)ReadRegister(Ina226Register.AlertLimit) * _currentLsb * 25);
             set
             {
-                ushort current = Convert.ToUInt16((value.Watts / 25) / _currentLsb);
+                var regValue = ((value.Watts / 25) / _currentLsb);
+
+                // Needs input validation here
+                ushort current = Convert.ToUInt16(regValue);
                 WriteRegister(Ina226Register.AlertLimit, current);
             }
         }

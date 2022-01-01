@@ -27,11 +27,10 @@ Also, this board has been modified to add a filter circuit, do not assume that a
 
 ## To-Do List
 
-* Needs modification to allow for negative current capability (will get to this soon).
 * Fritzing Diagram
 * SMBUS Alert Response (feature has not been implemented)
 * Alert pin related telemetry for the three different alert flags still needs to be tested.
-* Input validation on properties to prevent out of range exceptions
+* Input validation on current and power properties to prevent out of range exceptions
 
 ## Binding Notes
 
