@@ -35,7 +35,7 @@ namespace Iot.Device.HardwareMonitor
         private static readonly TimeSpan DefaultMonitorInterval = TimeSpan.FromMilliseconds(100);
         private static readonly TimeSpan DefaultDerivedSensorsInterval = TimeSpan.FromMilliseconds(500);
 
-        private readonly OhmTransport _transport;
+        private readonly OpenHardwareMonitorTransport _transport;
         private readonly string _host;
         private readonly int _port;
 
@@ -95,7 +95,7 @@ namespace Iot.Device.HardwareMonitor
         /// </summary>
         /// <exception cref="PlatformNotSupportedException">The operating system is not Windows.</exception>
         public OpenHardwareMonitor()
-        : this(OhmTransport.Auto)
+        : this(OpenHardwareMonitorTransport.Auto)
         {
         }
 
@@ -108,7 +108,7 @@ namespace Iot.Device.HardwareMonitor
         /// <param name="host">Optional host name for connection</param>
         /// <param name="port">Network port</param>
         /// <exception cref="PlatformNotSupportedException"></exception>
-        public OpenHardwareMonitor(OhmTransport transport, string host = "localhost", int port = 8086)
+        public OpenHardwareMonitor(OpenHardwareMonitorTransport transport, string host = "localhost", int port = 8086)
         {
             _transport = transport;
             _host = host;
@@ -171,17 +171,17 @@ namespace Iot.Device.HardwareMonitor
             }
 
             IOpenHardwareMonitorInternal? monitor = null;
-            if (_transport == OhmTransport.Wmi)
+            if (_transport == OpenHardwareMonitorTransport.Wmi)
             {
                 monitor = new OpenHardwareMonitorWmi();
                 UpdateStrategy = SensorUpdateStrategy.PerSensor;
             }
-            else if (_transport == OhmTransport.Http)
+            else if (_transport == OpenHardwareMonitorTransport.Http)
             {
                 monitor = new OpenHardwareMonitorHttp(_host, _port);
                 UpdateStrategy = SensorUpdateStrategy.SynchronousAfterTimeout;
             }
-            else if (_transport == OhmTransport.Auto)
+            else if (_transport == OpenHardwareMonitorTransport.Auto)
             {
                 monitor = new OpenHardwareMonitorWmi();
                 UpdateStrategy = SensorUpdateStrategy.PerSensor;

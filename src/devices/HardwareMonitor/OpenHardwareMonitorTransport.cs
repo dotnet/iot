@@ -9,7 +9,7 @@ namespace Iot.Device.HardwareMonitor
     /// <summary>
     /// Select the preferred transport protocol for the Hardware monitor
     /// </summary>
-    public enum OhmTransport
+    public enum OpenHardwareMonitorTransport
     {
         /// <summary>
         /// Automatically choose a transport
