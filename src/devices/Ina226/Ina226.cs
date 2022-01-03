@@ -477,7 +477,7 @@ namespace Iot.Device.Ina226
             // Wait for any sampling, average or conversion.
             if (delayMicroSeconds > 0)
             {
-                DelayHelper.DelayMicroseconds(delayMicroSeconds, true);
+                Ina226DelayHelper.DelayMicroseconds(delayMicroSeconds, true);
             }
 
             // Read the register back from the INA226.
