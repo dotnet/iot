@@ -82,17 +82,17 @@ ina226.AlertMode = Ina226AlertMode.****;
 
 #### Alert Trigger Limit
 
-The Alert limit trigger register contains the value which triggers the alert pin depending on how you have configured the alert pin operatin mode.  When configuring this for bus voltage the following line of code will write a bus voltage limit of 14.25 volts.
+The Alert limit trigger register contains the value which triggers the alert pin depending on how you have configured the alert pin operation mode.  When configuring this for bus voltage the following line of code will write a bus voltage limit of 14.25 volts.
 ```csharp
 ina226.AlertLimitVoltage = UnitsNet.ElectricPotential.FromVolts(14.25);
 ```
 
-When using the shunt specific operating mode, this changes a little. I still need to update this once I have a shunt handy of a size I can verify the function is working properly
+When using the shunt specific operating mode, this changes a little.  We are storing the value in the same register but adjusting the value to match the scale of the shunt voltage.
 ```csharp
 ina226.AlertLimitCurrent = UnitsNet.ElectricCurrent.FromAmperes(5);
 ```
 
-When using the power over limit operating mode, this changes a little as well. Here we will set the maximum for 2500 Watts.
+When using the power over limit operating mode, this changes a little as well, in this case to match the power register scaling. Here we will set the maximum for 2500 Watts.
 ```csharp
 ina226.AlertLimitPower = UnitsNet.Power.FromWatts(2500);
 ```
