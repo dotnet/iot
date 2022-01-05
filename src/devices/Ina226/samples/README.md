@@ -1,6 +1,6 @@
 ﻿# Ina226 Sample Project
 
-## Summary
+### Summary
 
 This is a sample project which uses the same example code in the binding readme. This readme will be a further explanation of each of the properties, telemetry, and commands in this binding.
 

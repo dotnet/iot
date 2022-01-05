@@ -3,7 +3,6 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Device;
 using System.Device.I2c;
 using System.Device.Model;

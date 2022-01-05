@@ -220,7 +220,7 @@ namespace Iot.Device.Ina226
         PowerOverLimit = 0b00001000_00000000,
 
         /// <summary>Mode to trigger ConversionReady alert when the current conversion has been finished</summary>
-        ConversionReady = 0b00000100_00000000,
+        ConversionReady = 0b00000100_00000000
     }
 
     /// <summary>
@@ -244,6 +244,6 @@ namespace Iot.Device.Ina226
         AlertConvReadyFlag = 0b00000000_00001000,
 
         /// Mask for alert flag to be read
-        AlertFunctionFlag = 0b00000000_00010000,
+        AlertFunctionFlag = 0b00000000_00010000
     }
 }
