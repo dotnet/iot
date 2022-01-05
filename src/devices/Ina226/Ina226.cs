@@ -23,36 +23,6 @@ namespace Iot.Device.Ina226
     [Interface("INA226 Bidirectional Current/Power monitor")]
     public class Ina226 : IDisposable
     {
-        /// <summary>
-        /// Dictionary to convert from the enum with the register bits to the microsecond values for the delay helper
-        /// </summary>
-        private static readonly Dictionary<Ina226ShuntConvTime, int> s_readDelaysForShunt = new()
-        {
-            { Ina226ShuntConvTime.Time140us, 140 },
-            { Ina226ShuntConvTime.Time204us, 204 },
-            { Ina226ShuntConvTime.Time332us, 332 },
-            { Ina226ShuntConvTime.Time588us, 588 },
-            { Ina226ShuntConvTime.Time1100us, 1100 },
-            { Ina226ShuntConvTime.Time2116us, 2116 },
-            { Ina226ShuntConvTime.Time4156us, 4156 },
-            { Ina226ShuntConvTime.Time8244us, 8244 }
-        };
-
-        /// <summary>
-        /// Dictionary to convert from the enum with the register bits to the microsecond values for the delay helper
-        /// </summary>
-        private static readonly Dictionary<Ina226BusVoltageConvTime, int> s_readDelaysForBus = new()
-        {
-            { Ina226BusVoltageConvTime.Time140us, 140 },
-            { Ina226BusVoltageConvTime.Time204us, 204 },
-            { Ina226BusVoltageConvTime.Time332us, 332 },
-            { Ina226BusVoltageConvTime.Time588us, 588 },
-            { Ina226BusVoltageConvTime.Time1100us, 1100 },
-            { Ina226BusVoltageConvTime.Time2116us, 2116 },
-            { Ina226BusVoltageConvTime.Time4156us, 4156 },
-            { Ina226BusVoltageConvTime.Time8244us, 8244 }
-        };
-
         private I2cDevice _i2cDevice;
         private bool _disposeI2cDevice = false;
 
@@ -152,7 +122,7 @@ namespace Iot.Device.Ina226
         [Telemetry("ShuntVoltage")]
         public ElectricPotential ReadShuntVoltage()
         {
-            ushort regValue = ReadRegister(Ina226Register.ShuntVoltage, s_readDelaysForShunt[(Ina226ShuntConvTime)_shuntConvTime]);
+            ushort regValue = ReadRegister(Ina226Register.ShuntVoltage, int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty)));
 
             if ((regValue & 0x8000) > 0)
             {
@@ -171,7 +141,7 @@ namespace Iot.Device.Ina226
         /// </summary>
         /// <returns>The Bus potential (voltage)</returns>
         [Telemetry("BusVoltage")]
-        public ElectricPotential ReadBusVoltage() => ElectricPotential.FromMillivolts((short)ReadRegister(Ina226Register.BusVoltage, s_readDelaysForBus[(Ina226BusVoltageConvTime)_busConvTime]) * 1.25);
+        public ElectricPotential ReadBusVoltage() => ElectricPotential.FromMillivolts((short)ReadRegister(Ina226Register.BusVoltage, int.Parse(_busConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty))) * 1.25);
 
         /// <summary>
         /// Read the calculated current through the INA226
@@ -183,7 +153,7 @@ namespace Iot.Device.Ina226
         [Telemetry("Current")]
         public ElectricCurrent ReadCurrent()
         {
-            ushort regValue = ReadRegister(Ina226Register.Current, s_readDelaysForShunt[(Ina226ShuntConvTime)_shuntConvTime]);
+            ushort regValue = ReadRegister(Ina226Register.Current, int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty)));
             if ((regValue & 0x8000) > 0)
             {
                 regValue &= 0x7FFF;
@@ -206,7 +176,7 @@ namespace Iot.Device.Ina226
         [Telemetry("Power")]
         public Power ReadPower()
         {
-            return Power.FromWatts(ReadRegister(Ina226Register.Power, s_readDelaysForShunt[(Ina226ShuntConvTime)_shuntConvTime]) * _currentLsb * 25);
+            return Power.FromWatts(ReadRegister(Ina226Register.Power, int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty))) * _currentLsb * 25);
         }
 
         /// <summary>
