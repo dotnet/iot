@@ -84,8 +84,13 @@ namespace Iot.Device.Ina226
 
             // cache the values for the Bus, Shunt, and Samples Averaged settings so that they can be used later without reading them from the INA226 device.
             _samplesAveraged = SamplesAveraged;
+            _samplesAveragedInt = int.Parse(_samplesAveraged.ToString().Replace("Quantity_", string.Empty));
+
             _busConvTime = BusConvTime;
+            _busConvTimeInt = int.Parse(_busConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
+
             _shuntConvTime = ShuntConvTime;
+            _shuntConvTimeInt = int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
         }
 
         /// <summary>
@@ -188,7 +193,7 @@ namespace Iot.Device.Ina226
         /// True if flag is set and false if not
         /// </returns>
         [Telemetry("AlertFunctionFlag")]
-        public Boolean AlertFunctionFlag()
+        public bool AlertFunctionFlag()
         {
             return IsBitSet((byte)(ReadRegister(Ina226Register.AlertEnable) & (ushort)(Ina226AlertMask.AlertFunctionFlag)), 4);
         }
@@ -200,7 +205,7 @@ namespace Iot.Device.Ina226
         /// True if flag is set and false if not
         /// </returns>
         [Telemetry("ConversionReadyFlag")]
-        public Boolean ConversionReadyFlag()
+        public bool ConversionReadyFlag()
         {
             return IsBitSet((byte)(ReadRegister(Ina226Register.AlertEnable) & (ushort)(Ina226AlertMask.AlertConvReadyFlag)), 3);
         }
@@ -212,7 +217,7 @@ namespace Iot.Device.Ina226
         /// True if flag is set and false if not
         /// </returns>
         [Telemetry("MathOverflowFlag")]
-        public Boolean MathOverflowFlag()
+        public bool MathOverflowFlag()
         {
             return IsBitSet((byte)(ReadRegister(Ina226Register.AlertEnable) & (ushort)(Ina226AlertMask.AlertMathOverflowFlag)), 2);
         }
@@ -400,7 +405,7 @@ namespace Iot.Device.Ina226
         /// This property is used to set the Alert Pin polarity, true = inverted (active-high open collector) and false = normal (active-low open collector)(default)
         /// </remarks>
         [Property]
-        public Boolean AlertPolarity
+        public bool AlertPolarity
         {
             get => IsBitSet((byte)(ReadRegister(Ina226Register.AlertEnable) & (ushort)Ina226AlertMask.AlertPolarityMask), 1);
             set
@@ -421,7 +426,7 @@ namespace Iot.Device.Ina226
         /// This property is used to enable alert latching, which will hold the triggered alert until the alert register has been read. Read the datasheet for further details on functionality.
         /// </remarks>
         [Property]
-        public Boolean AlertLatchEnable
+        public bool AlertLatchEnable
         {
             get => IsBitSet((byte)(ReadRegister(Ina226Register.AlertEnable) & (ushort)Ina226AlertMask.AlertLatchMask), 0);
             set
