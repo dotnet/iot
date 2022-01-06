@@ -30,6 +30,9 @@ namespace Iot.Device.Ina226
         private Ina226SamplesAveraged _samplesAveraged;
         private Ina226BusVoltageConvTime _busConvTime;
         private Ina226ShuntConvTime _shuntConvTime;
+        private int _busConvTimeInt;
+        private int _shuntConvTimeInt;
+        private int _samplesAveragedInt;
         private double _currentLsb;
 
         /// <summary>
@@ -121,7 +124,7 @@ namespace Iot.Device.Ina226
         [Telemetry("ShuntVoltage")]
         public ElectricPotential ReadShuntVoltage()
         {
-            ushort regValue = ReadRegister(Ina226Register.ShuntVoltage, int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty)));
+            ushort regValue = ReadRegister(Ina226Register.ShuntVoltage, _shuntConvTimeInt * _samplesAveragedInt);
 
             if ((regValue & 0x8000) > 0)
             {
@@ -140,7 +143,7 @@ namespace Iot.Device.Ina226
         /// </summary>
         /// <returns>The Bus potential (voltage)</returns>
         [Telemetry("BusVoltage")]
-        public ElectricPotential ReadBusVoltage() => ElectricPotential.FromMillivolts((short)ReadRegister(Ina226Register.BusVoltage, int.Parse(_busConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty))) * 1.25);
+        public ElectricPotential ReadBusVoltage() => ElectricPotential.FromMillivolts((short)ReadRegister(Ina226Register.BusVoltage, _busConvTimeInt * _samplesAveragedInt) * 1.25);
 
         /// <summary>
         /// Read the calculated current through the INA226
@@ -152,7 +155,7 @@ namespace Iot.Device.Ina226
         [Telemetry("Current")]
         public ElectricCurrent ReadCurrent()
         {
-            ushort regValue = ReadRegister(Ina226Register.Current, int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty)));
+            ushort regValue = ReadRegister(Ina226Register.Current, _shuntConvTimeInt * _samplesAveragedInt);
             if ((regValue & 0x8000) > 0)
             {
                 regValue &= 0x7FFF;
@@ -175,7 +178,7 @@ namespace Iot.Device.Ina226
         [Telemetry("Power")]
         public Power ReadPower()
         {
-            return Power.FromWatts(ReadRegister(Ina226Register.Power, int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty))) * _currentLsb * 25);
+            return Power.FromWatts(ReadRegister(Ina226Register.Power, _shuntConvTimeInt * _samplesAveragedInt) * _currentLsb * 25);
         }
 
         /// <summary>
@@ -255,6 +258,7 @@ namespace Iot.Device.Ina226
                 WriteRegister(Ina226Register.Configuration, regValue);
 
                 _samplesAveraged = value;
+                _samplesAveragedInt = int.Parse(value.ToString().Replace("Quantity_", string.Empty));
             }
         }
 
@@ -278,6 +282,7 @@ namespace Iot.Device.Ina226
                 WriteRegister(Ina226Register.Configuration, regValue);
 
                 _busConvTime = value;
+                _busConvTimeInt = int.Parse(value.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
             }
         }
 
@@ -301,6 +306,7 @@ namespace Iot.Device.Ina226
                 WriteRegister(Ina226Register.Configuration, regValue);
 
                 _shuntConvTime = value;
+                _shuntConvTimeInt = int.Parse(value.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
             }
         }
 
