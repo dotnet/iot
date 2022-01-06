@@ -12,4 +12,8 @@
     <None Include="README.md" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="UnitsNet" Version="4.83.0" />
+  </ItemGroup>
+
 </Project>

@@ -6,7 +6,15 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Ina226.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="UnitsNet" Version="4.83.0" />
   </ItemGroup>
 
 </Project>
