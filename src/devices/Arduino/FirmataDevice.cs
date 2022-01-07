@@ -323,6 +323,12 @@ namespace Iot.Device.Arduino
                     {
                         int offset = lower_nibble * 8;
                         ushort pinValues = (ushort)(message[0] | (message[1] << 7));
+                        if (offset + 7 >= _lastPinValues.Count)
+                        {
+                            _logger.LogError($"Firmware reported an update for port {lower_nibble}, but there are only {_supportedPinConfigurations.Count} pins");
+                            break;
+                        }
+
                         lock (_lastPinValueLock)
                         {
                             for (int i = 0; i < 8; i++)
