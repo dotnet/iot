@@ -6,7 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="../Common/System/Device/DelayHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

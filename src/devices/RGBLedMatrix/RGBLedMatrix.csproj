@@ -12,6 +12,5 @@
     <Compile Include="Gpio.cs" />
     <Compile Include="PinMapping.cs" />
     <Compile Include="RgbLedMatrix.cs" />
-    <Compile Include="../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
 </Project>

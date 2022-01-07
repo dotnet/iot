@@ -17,7 +17,7 @@ namespace System.Interop
 #endif
     class ThreadHelper
     {
-        internal static bool SetCurrentThreadHighPriority()
+        public static bool SetCurrentThreadHighPriority()
         {
             IntPtr thread = pthread_self();
             sched_param sched = new sched_param();
@@ -26,7 +26,7 @@ namespace System.Interop
             return pthread_setschedparam(thread, SCHED_FIFO, ref sched) == 0;
         }
 
-        internal static void SetCurrentThreadNormalHighPriority()
+        public static void SetCurrentThreadNormalHighPriority()
         {
             nice(19);
         }

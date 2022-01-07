@@ -9,6 +9,5 @@
     <Compile Remove="samples\**" />
     <Compile Include="Models\*.cs" />
     <None Include="README.md" />
-    <Compile Include="..\Common\System\Device\DelayHelper.cs" />
   </ItemGroup>
 </Project>

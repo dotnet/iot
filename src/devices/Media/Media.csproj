@@ -11,11 +11,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="../Interop/**/*.cs" />
     <Compile Include="VideoDevice/*.cs" />
     <Compile Include="VideoDevice/Devices/*.cs" />
     <Compile Include="SoundDevice/*.cs" />
     <Compile Include="SoundDevice/Devices/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 
 </Project>

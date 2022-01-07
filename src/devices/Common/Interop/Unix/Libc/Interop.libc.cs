@@ -9,30 +9,30 @@ using System;
 using System.Runtime.InteropServices;
 
 #if BUILDING_IOT_DEVICE_BINDINGS
-    internal
+internal
 #else
 public
 #endif
-    partial class Interop
+partial class Interop
 {
     [DllImport(LibcLibrary, SetLastError = true)]
-    internal static extern int ioctl(int fd, int request, IntPtr argp);
+    public static extern int ioctl(int fd, int request, IntPtr argp);
 
     [DllImport(LibcLibrary, SetLastError = true)]
-    internal static extern int open([MarshalAs(UnmanagedType.LPStr)] string pathname, FileOpenFlags flags);
+    public static extern int open([MarshalAs(UnmanagedType.LPStr)] string pathname, FileOpenFlags flags);
 
     [DllImport(LibcLibrary)]
-    internal static extern int close(int fd);
+    public static extern int close(int fd);
 
     [DllImport(LibcLibrary, SetLastError = true)]
-    internal static extern IntPtr mmap(IntPtr addr, int length, MemoryMappedProtections prot, MemoryMappedFlags flags, int fd, int offset);
+    public static extern IntPtr mmap(IntPtr addr, int length, MemoryMappedProtections prot, MemoryMappedFlags flags, int fd, int offset);
 
     [DllImport(LibcLibrary)]
-    internal static extern int munmap(IntPtr addr, int length);
+    public static extern int munmap(IntPtr addr, int length);
 }
 
 #if BUILDING_IOT_DEVICE_BINDINGS
-    internal
+internal
 #else
 public
 #endif
@@ -46,7 +46,7 @@ public
 
 [Flags]
 #if BUILDING_IOT_DEVICE_BINDINGS
-    internal
+internal
 #else
 public
 #endif
@@ -61,7 +61,7 @@ public
 [Flags]
 
 #if BUILDING_IOT_DEVICE_BINDINGS
-    internal
+internal
 #else
 public
 #endif

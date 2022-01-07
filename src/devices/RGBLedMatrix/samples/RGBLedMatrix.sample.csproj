@@ -11,10 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="../../Interop/Unix/ThreadHelper.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="fonts\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

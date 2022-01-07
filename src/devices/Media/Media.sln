@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30717.126
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32002.185
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Media", "Media.csproj", "{9FAD0C9D-E8F9-493B-913C-0BAC7C672D38}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoDevice.Samples", "VideoDevice\samples\VideoDevice.Samples.csproj", "{7F1BC11E-092B-4252-B030-C4FBC70C6985}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MjpegStream", "VideoDevice\samples\MjpegStream\MjpegStream.csproj", "{C23AC95D-F162-4378-A02E-F9513D9984D8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,6 +57,18 @@ Global
 		{C23AC95D-F162-4378-A02E-F9513D9984D8}.Release|x64.Build.0 = Release|Any CPU
 		{C23AC95D-F162-4378-A02E-F9513D9984D8}.Release|x86.ActiveCfg = Release|Any CPU
 		{C23AC95D-F162-4378-A02E-F9513D9984D8}.Release|x86.Build.0 = Release|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Debug|x64.Build.0 = Debug|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Debug|x86.Build.0 = Debug|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Release|x64.ActiveCfg = Release|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Release|x64.Build.0 = Release|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Release|x86.ActiveCfg = Release|Any CPU
+		{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
