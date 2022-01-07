@@ -11,7 +11,7 @@ namespace ArduinoCsCompiler.Runtime
     internal partial class MiniInterop
     {
         [ArduinoReplacement("Interop+Kernel32", "System.Private.CoreLib.dll", true, IncludingPrivates = true)]
-        internal static class Kernel32
+        internal static partial class Kernel32
         {
             internal const uint LOCALE_ALLOW_NEUTRAL_NAMES = 0x08000000; // Flag to allow returning neutral names/lcids for name conversion
             internal const uint LOCALE_ILANGUAGE = 0x00000001;
@@ -297,6 +297,12 @@ namespace ArduinoCsCompiler.Runtime
                 return 0;
             }
 
+            internal static unsafe Int32 WriteFile(System.IntPtr handle, System.Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, System.IntPtr mustBeZero)
+            {
+                numBytesWritten = WriteFileInternal(handle, bytes, numBytesToWrite);
+                return numBytesWritten == numBytesToWrite ? 1 : 0; // Return type is int, but the value is actually a bool
+            }
+
             internal static unsafe Int32 WriteFile(SafeHandle handle, Byte* bytes, Int32 numBytesToWrite, ref Int32 numBytesWritten, System.IntPtr mustBeZero)
             {
                 numBytesWritten = WriteFileInternal(handle.DangerousGetHandle(), bytes, numBytesToWrite);
@@ -310,7 +316,7 @@ namespace ArduinoCsCompiler.Runtime
                 return 1;
             }
 
-            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2")]
+            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2", 0x210)]
             internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, NativeOverlapped* lpOverlapped)
             {
                 return 0;
@@ -322,13 +328,13 @@ namespace ArduinoCsCompiler.Runtime
                 return 0;
             }
 
-            [ArduinoImplementation("Interop_Kernel32ReadFileOverlapped2")]
+            [ArduinoImplementation("Interop_Kernel32ReadFileOverlapped2", 0x211)]
             internal static unsafe Int32 ReadFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToReade, ref Int32 numBytesRead, NativeOverlapped* lpOverlapped)
             {
                 return 0;
             }
 
-            [ArduinoImplementation("Interop_Kernel32GetOverlappedResult")]
+            [ArduinoImplementation("Interop_Kernel32GetOverlappedResult", 0x212)]
             internal static unsafe bool GetOverlappedResult(
                 SafeFileHandle hFile,
                 NativeOverlapped* lpOverlapped,
@@ -338,7 +344,7 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
-            [ArduinoImplementation("Interop_Kernel32CreateEventEx")]
+            [ArduinoImplementation("Interop_Kernel32CreateEventEx", 0x213)]
             internal static IntPtr CreateEventExInternal(string name, uint flags, uint desiredAccess)
             {
                 throw new NotImplementedException();
@@ -353,7 +359,7 @@ namespace ArduinoCsCompiler.Runtime
                 return new SafeWaitHandle(CreateEventExInternal(name, flags, desiredAccess), true);
             }
 
-            [ArduinoImplementation("Interop_Kernel32CreateIoCompletionPort")]
+            [ArduinoImplementation("Interop_Kernel32CreateIoCompletionPort", 0x214)]
             internal static IntPtr CreateIoCompletionPort(
                 IntPtr FileHandle,
                 IntPtr ExistingCompletionPort,
@@ -443,7 +449,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32FindStringOrdinal", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32FindStringOrdinal", 0x215, CompareByParameterNames = true)]
             internal static unsafe int FindStringOrdinal(
                 uint dwFindStringOrdinalFlags,
                 char* lpStringSource,
@@ -455,7 +461,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32SetFileInformationByHandle")]
+            [ArduinoImplementation("Interop_Kernel32SetFileInformationByHandle", 0x216)]
             internal static unsafe bool SetFileInformationByHandle(
                 SafeFileHandle hFile,
                 int FileInformationClass,
@@ -465,41 +471,41 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32DeleteFile")]
+            [ArduinoImplementation("Interop_Kernel32DeleteFile", 0x217)]
             internal static bool DeleteFile(string path)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32InitializeCriticalSection", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32InitializeCriticalSection", 0x218, CompareByParameterNames = true)]
             internal static unsafe void InitializeCriticalSection(
                 CRITICAL_SECTION* lpCriticalSection)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32EnterCriticalSection", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32EnterCriticalSection", 0x219, CompareByParameterNames = true)]
             internal static unsafe void EnterCriticalSection(
                 CRITICAL_SECTION* lpCriticalSection)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32LeaveCriticalSection", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32LeaveCriticalSection", 0x21A, CompareByParameterNames = true)]
             internal static unsafe void LeaveCriticalSection(
                 CRITICAL_SECTION* lpCriticalSection)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32DeleteCriticalSection", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32DeleteCriticalSection", 0x21B, CompareByParameterNames = true)]
             internal static unsafe void DeleteCriticalSection(
                 CRITICAL_SECTION* lpCriticalSection)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32SleepConditionVariableCS", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32SleepConditionVariableCS", 0x21C, CompareByParameterNames = true)]
             internal static unsafe bool SleepConditionVariableCS(
                 CONDITION_VARIABLE* ConditionVariable,
                 CRITICAL_SECTION* CriticalSection,
@@ -508,16 +514,22 @@ namespace ArduinoCsCompiler.Runtime
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32InitializeConditionVariable", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32InitializeConditionVariable", 0x21D, CompareByParameterNames = true)]
             internal static unsafe void InitializeConditionVariable(
                 CONDITION_VARIABLE* ConditionVariable)
             {
                 throw new NotImplementedException();
             }
 
-            [ArduinoImplementation("Interop_Kernel32WakeConditionVariable", CompareByParameterNames = true)]
+            [ArduinoImplementation("Interop_Kernel32WakeConditionVariable", 0x21E, CompareByParameterNames = true)]
             internal static unsafe void WakeConditionVariable(
                 CONDITION_VARIABLE* ConditionVariable)
+            {
+                throw new NotImplementedException();
+            }
+
+            [ArduinoImplementation("Interop_Kernel32GetFileType", 0x21F)]
+            internal static uint GetFileType(System.IntPtr handle)
             {
                 throw new NotImplementedException();
             }
@@ -573,53 +585,6 @@ namespace ArduinoCsCompiler.Runtime
         internal struct SECURITY_ATTRIBUTES
         {
             public int DummyData;
-        }
-#pragma warning restore CS0649
-
-        [ArduinoReplacement("Interop+Kernel32", "System.IO.FileSystem.dll", true, typeof(System.IO.File), IncludingPrivates = true)]
-        internal static class Kernel32FileSystem
-        {
-            [ArduinoImplementation]
-            public static string GetMessage(Int32 errorCode)
-            {
-                return GetMessage(errorCode, IntPtr.Zero);
-            }
-
-            [ArduinoImplementation]
-            public static string GetMessage(int errorCode, IntPtr moduleHandle)
-            {
-                // Couldn't get a message, so manufacture one.
-                return string.Format("OS error (0x{0:x})", errorCode);
-            }
-
-            [ArduinoImplementation(CompareByParameterNames = true)]
-            public static bool CreateDirectory(string path, ref SECURITY_ATTRIBUTES lpSecurityAttributes)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        [ArduinoReplacement("Interop+Kernel32", "Microsoft.Win32.Primitives.dll", true, typeof(Win32Exception), IncludingPrivates = true)]
-        internal static class Kernel32Win32Primitives
-        {
-            [ArduinoImplementation]
-            public static string GetMessage(Int32 errorCode)
-            {
-                return GetMessage(errorCode, IntPtr.Zero);
-            }
-
-            [ArduinoImplementation]
-            public static string GetMessage(int errorCode, IntPtr moduleHandle)
-            {
-                // Couldn't get a message, so manufacture one.
-                return string.Format("OS error (0x{0:x})", errorCode);
-            }
-
-            [ArduinoImplementation(CompareByParameterNames = true)]
-            public static bool CreateDirectory(string path, ref SECURITY_ATTRIBUTES lpSecurityAttributes)
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

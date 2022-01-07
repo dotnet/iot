@@ -18,6 +18,20 @@ namespace ArduinoCsCompiler
     public sealed class MicroCompiler : IDisposable
     {
         private const int DataVersion = 1;
+
+        /// <summary>
+        /// The list of system assemblies (these may contain kernel interop calls)
+        /// The list contains the name and a public type within that assembly
+        /// </summary>
+        private static readonly List<(string, Type)> SystemAssemblies = new List<(string, Type)>()
+        {
+            // "System.Private.Corelib.dll",
+            ("System.Console", typeof(System.Console)),
+            ("System.Diagnostics.Process", typeof(System.Diagnostics.Process)),
+            // ("System.Net.Primitives", typeof(System.Net.IPAddress)),
+            // ("System.Private.Uri", typeof(System.Uri)),
+        };
+
         private readonly ArduinoBoard _board;
         private readonly List<ArduinoTask> _activeTasks;
         private readonly object _activeTasksLock;
@@ -285,10 +299,32 @@ namespace ArduinoCsCompiler
             {
                 var attribs = replacement.GetCustomAttributes(typeof(ArduinoReplacementAttribute));
                 ArduinoReplacementAttribute ia = (ArduinoReplacementAttribute)attribs.Single();
+                if (ia.TypeToReplace == null)
+                {
+                    throw new NotSupportedException($"Internal error: {replacement.Name} has no class to replace");
+                }
+
                 if (ia.ReplaceEntireType)
                 {
                     PrepareClass(set, replacement);
                     set.AddReplacementType(ia.TypeToReplace, replacement, ia.IncludingSubclasses, ia.IncludingPrivates);
+                    if (ia.TypeToReplace.FullName == "Interop+Kernel32")
+                    {
+                        // The replacement class for Interop+Kernel32 shall replace all instances of this class, which is internal to
+                        // many of the system assemblies, because the P/Invoke call declarations are shared between different parts of the runtime.
+                        foreach (var s in SystemAssemblies)
+                        {
+                            Assembly ass = Assembly.GetAssembly(s.Item2) ?? throw new NotSupportedException($"Assembly containing {s.Item2} not found");
+                            String assemblyName = ass.GetName().Name!;
+                            if (assemblyName != s.Item1)
+                            {
+                                throw new NotSupportedException($"The type {s.Item2} was expected to be found in {s.Item1} but it was in {assemblyName} instead");
+                            }
+
+                            var interopType = ass.GetType("Interop+Kernel32", true, false);
+                            set.AddReplacementType(interopType, replacement, false, true);
+                        }
+                    }
                 }
                 else
                 {
@@ -1946,7 +1982,7 @@ namespace ArduinoCsCompiler
 
             if (ilBytes == null && hasBody)
             {
-                throw new MissingMethodException($"{methodInfo.MethodSignature()} has no visible implementation");
+                throw new MissingMethodException($"{methodInfo.MethodSignature()} has no visible implementation but a body");
             }
 
             if (ilBytes != null && ilBytes.Length > Math.Pow(2, 14) - 1)

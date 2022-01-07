@@ -134,7 +134,7 @@ enum class {name}
             w.WriteLine("/* Reverse lookup list (ordered by value)");
             foreach (var e in reverseLookupList)
             {
-                w.WriteLine($"{e.Value} -> {e.Key}");
+                w.WriteLine($"{e.Value} (0x{e.Value:X}) -> {e.Key}");
             }
 
             w.WriteLine("*/");

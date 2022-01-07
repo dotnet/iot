@@ -1070,7 +1070,8 @@ namespace ArduinoCsCompiler
                     return null;
                 }
 
-                throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}");
+                throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}. " +
+                                                    $"Original implementation is in {original.DeclaringType!.AssemblyQualifiedName}");
             }
 
             return elem.Item2;

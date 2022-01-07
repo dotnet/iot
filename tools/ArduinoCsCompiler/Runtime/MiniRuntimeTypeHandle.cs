@@ -276,7 +276,7 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("TypeCreateInstanceForAnotherGenericParameter", CompareByParameterNames = true)]
+        [ArduinoImplementation("TypeCreateInstanceForAnotherGenericParameter", 0x59, CompareByParameterNames = true)]
         internal static object CreateInstanceForAnotherGenericParameter(Type type, Type genericParameter)
         {
             throw new NotImplementedException();

@@ -14,7 +14,7 @@ namespace ArduinoCsCompiler.Runtime
         private Int32 m_handle;
 #pragma warning restore 414
 
-        [ArduinoImplementation("TypeCtor")]
+        [ArduinoImplementation("TypeCtor", 0x50)]
         protected MiniType()
         {
             // This ctor is never executed - the variable values are pushed directly
@@ -32,7 +32,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public virtual bool IsEnum
         {
-            [ArduinoImplementation("TypeIsEnum")]
+            [ArduinoImplementation("TypeIsEnum", 0x51)]
             get
             {
                 // Needs support in the backend
@@ -42,7 +42,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public virtual bool IsArray
         {
-            [ArduinoImplementation("TypeIsArray")]
+            [ArduinoImplementation("TypeIsArray", 0x52)]
             get
             {
                 return false;
@@ -67,7 +67,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public virtual string Name
         {
-            [ArduinoImplementation("TypeName")]
+            [ArduinoImplementation("TypeName", 0x53)]
             get
             {
                 return string.Empty;
@@ -76,7 +76,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public virtual Type BaseType
         {
-            [ArduinoImplementation("TypeGetBaseType")]
+            [ArduinoImplementation("TypeGetBaseType", 0x54)]
             get
             {
                 return null!;
@@ -122,7 +122,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public bool ContainsGenericParameters
         {
-            [ArduinoImplementation("TypeContainsGenericParameters")]
+            [ArduinoImplementation("TypeContainsGenericParameters", 0x55)]
             get
             {
                 throw new NotImplementedException();
@@ -133,7 +133,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public virtual RuntimeTypeHandle TypeHandle
         {
-            [ArduinoImplementation("TypeTypeHandle")]
+            [ArduinoImplementation("TypeTypeHandle", 0x56)]
             get
             {
                 return default;
@@ -142,7 +142,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public bool IsValueType
         {
-            [ArduinoImplementation("TypeIsValueType")]
+            [ArduinoImplementation("TypeIsValueType", 0x57)]
             get
             {
                 return false;
@@ -187,7 +187,7 @@ namespace ArduinoCsCompiler.Runtime
             return TypeHandle;
         }
 
-        [ArduinoImplementation("TypeGetTypeFromHandle")]
+        [ArduinoImplementation("TypeGetTypeFromHandle", 0x58)]
         public static Type GetTypeFromHandle(RuntimeTypeHandle handle)
         {
             throw new NotImplementedException();
@@ -198,55 +198,55 @@ namespace ArduinoCsCompiler.Runtime
             return TypeCode.Empty;
         }
 
-        [ArduinoImplementation("TypeCreateInstanceForAnotherGenericParameter")]
+        [ArduinoImplementation("TypeCreateInstanceForAnotherGenericParameter", 0x59)]
         public static object? CreateInstanceForAnotherGenericParameter(Type? type1, Type? type2)
         {
             return null;
         }
 
-        [ArduinoImplementation("TypeEquals")]
+        [ArduinoImplementation("TypeEquals", 0x5A)]
         public override bool Equals(object? obj)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("TypeGetHashCode")]
+        [ArduinoImplementation("TypeGetHashCode", 0x5B)]
         public override int GetHashCode()
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("TypeMakeGenericType")]
+        [ArduinoImplementation("TypeMakeGenericType", 0x5C)]
         public virtual Type MakeGenericType(params Type[] types)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("TypeIsAssignableTo")]
+        [ArduinoImplementation("TypeIsAssignableTo", 0x5D)]
         public virtual bool IsAssignableTo(Type otherType)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("TypeIsAssignableFrom")]
+        [ArduinoImplementation("TypeIsAssignableFrom", 0x5E)]
         public virtual bool IsAssignableFrom(Type c)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("TypeIsSubclassOf")]
+        [ArduinoImplementation("TypeIsSubclassOf", 0x5F)]
         public virtual bool IsSubclassOf(Type c)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("TypeGetGenericTypeDefinition")]
+        [ArduinoImplementation("TypeGetGenericTypeDefinition", 0x60)]
         public virtual Type GetGenericTypeDefinition()
         {
             throw new InvalidOperationException();
         }
 
-        [ArduinoImplementation("TypeGetGenericArguments")]
+        [ArduinoImplementation("TypeGetGenericArguments", 0x61)]
         public virtual Type[] GetGenericArguments()
         {
             return new Type[0];
@@ -257,7 +257,7 @@ namespace ArduinoCsCompiler.Runtime
             return typeof(Int32);
         }
 
-        [ArduinoImplementation("TypeGetElementType")]
+        [ArduinoImplementation("TypeGetElementType", 0x62)]
         public virtual Type GetElementType()
         {
             throw new NotImplementedException();
