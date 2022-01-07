@@ -16,6 +16,7 @@
     <Compile Include="System/Device/Gpio/*.cs" />
     <Compile Include="System/Device/Analog/*.cs" />
     <Compile Include="System/Device/Spi/*.cs" />
+    <Compile Include="Interop/**/*.cs" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

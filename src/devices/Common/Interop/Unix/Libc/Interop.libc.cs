@@ -3,11 +3,17 @@
 
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
+#pragma warning disable CS1591 // Public member is not documented - These members are not public in the final package
 
 using System;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+#if BUILDING_IOT_DEVICE_BINDINGS
+    internal
+#else
+public
+#endif
+    partial class Interop
 {
     [DllImport(LibcLibrary, SetLastError = true)]
     internal static extern int ioctl(int fd, int request, IntPtr argp);
@@ -25,7 +31,12 @@ internal partial class Interop
     internal static extern int munmap(IntPtr addr, int length);
 }
 
-internal enum FileOpenFlags
+#if BUILDING_IOT_DEVICE_BINDINGS
+    internal
+#else
+public
+#endif
+    enum FileOpenFlags
 {
     O_RDONLY = 0x00,
     O_RDWR = 0x02,
@@ -34,7 +45,12 @@ internal enum FileOpenFlags
 }
 
 [Flags]
-internal enum MemoryMappedProtections
+#if BUILDING_IOT_DEVICE_BINDINGS
+    internal
+#else
+public
+#endif
+    enum MemoryMappedProtections
 {
     PROT_NONE = 0x0,
     PROT_READ = 0x1,
@@ -43,7 +59,13 @@ internal enum MemoryMappedProtections
 }
 
 [Flags]
-internal enum MemoryMappedFlags
+
+#if BUILDING_IOT_DEVICE_BINDINGS
+    internal
+#else
+public
+#endif
+    enum MemoryMappedFlags
 {
     MAP_SHARED = 0x01,
     MAP_PRIVATE = 0x02,

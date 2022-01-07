@@ -8,7 +8,12 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+#if BUILDING_IOT_DEVICE_BINDINGS
+    internal
+#else
+public
+#endif
+partial class Interop
 {
     private const int _IOC_NRBITS = 8;
     private const int _IOC_TYPEBITS = 8;

@@ -6,7 +6,12 @@ namespace System.Device.Gpio
     /// <summary>
     /// 64-bit vector of pins and values.
     /// </summary>
-    internal struct PinVector64
+    #if BUILDING_IOT_DEVICE_BINDINGS
+    internal
+#else
+    public
+#endif
+    struct PinVector64
     {
         /// <summary>
         /// Bit vector of pin numbers from 0 (bit 0) to 63 (bit 63).
