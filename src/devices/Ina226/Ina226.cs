@@ -27,9 +27,10 @@ namespace Iot.Device.Ina226
 
         // cache for commonly used configuration values
         private ushort _calibrationValue;
-        private Ina226SamplesAveraged _samplesAveraged;
-        private Ina226BusVoltageConvTime _busConvTime;
-        private Ina226ShuntConvTime _shuntConvTime;
+        private Ina226OperatingMode _operatingMode = Ina226OperatingMode.ShuntAndBusContinuous;
+        private Ina226SamplesAveraged _samplesAveraged = Ina226SamplesAveraged.Quantity_1;
+        private Ina226BusVoltageConvTime _busConvTime = Ina226BusVoltageConvTime.Time140us;
+        private Ina226ShuntConvTime _shuntConvTime = Ina226ShuntConvTime.Time140us;
         private int _busConvTimeInt;
         private int _shuntConvTimeInt;
         private int _samplesAveragedInt;
@@ -71,6 +72,96 @@ namespace Iot.Device.Ina226
         }
 
         /// <summary>
+        /// Converts the selected value for the bus voltage conversion time to an int
+        /// </summary>
+        /// <param name="convTimeEnum">Ina226BusVoltageConvTime enum</param>
+        /// <returns>Integer value corresponding to the conversion time enum param</returns>
+        internal static int BusConvTimeEnumToInt(Ina226BusVoltageConvTime convTimeEnum)
+        {
+            switch (convTimeEnum)
+            {
+                case Ina226BusVoltageConvTime.Time140us:
+                    return 140;
+                case Ina226BusVoltageConvTime.Time204us:
+                    return 204;
+                case Ina226BusVoltageConvTime.Time332us:
+                    return 332;
+                case Ina226BusVoltageConvTime.Time588us:
+                    return 588;
+                case Ina226BusVoltageConvTime.Time1100us:
+                    return 1100;
+                case Ina226BusVoltageConvTime.Time2116us:
+                    return 2116;
+                case Ina226BusVoltageConvTime.Time4156us:
+                    return 4156;
+                case Ina226BusVoltageConvTime.Time8244us:
+                    return 8244;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Converts the selected value for the shunt voltage conversion time to an int
+        /// </summary>
+        /// <param name="convTimeEnum">Ina226ShuntVoltageConvTime enum</param>
+        /// <returns>Integer value corresponding to the conversion time enum param</returns>
+        internal static int ShuntConvTimeEnumToInt(Ina226ShuntConvTime convTimeEnum)
+        {
+            switch (convTimeEnum)
+            {
+                case Ina226ShuntConvTime.Time140us:
+                    return 140;
+                case Ina226ShuntConvTime.Time204us:
+                    return 204;
+                case Ina226ShuntConvTime.Time332us:
+                    return 332;
+                case Ina226ShuntConvTime.Time588us:
+                    return 588;
+                case Ina226ShuntConvTime.Time1100us:
+                    return 1100;
+                case Ina226ShuntConvTime.Time2116us:
+                    return 2116;
+                case Ina226ShuntConvTime.Time4156us:
+                    return 4156;
+                case Ina226ShuntConvTime.Time8244us:
+                    return 8244;
+            }
+
+            return 0;
+        }
+
+        /// <summary>
+        /// Takes in a samples averaged enum and returns the integer corresponding with the enum.
+        /// </summary>
+        /// <param name="samplesAveragedEnum">Ina226SamlesAveraged enum used to determine integer to return</param>
+        /// <returns>integer corresponding to the enum received</returns>
+        internal static int SamplesQuantityEnumToInt(Ina226SamplesAveraged samplesAveragedEnum)
+        {
+            switch (samplesAveragedEnum)
+            {
+                case Ina226SamplesAveraged.Quantity_1:
+                    return 1;
+                case Ina226SamplesAveraged.Quantity_4:
+                    return 4;
+                case Ina226SamplesAveraged.Quantity_16:
+                    return 16;
+                case Ina226SamplesAveraged.Quantity_64:
+                    return 64;
+                case Ina226SamplesAveraged.Quantity_128:
+                    return 128;
+                case Ina226SamplesAveraged.Quantity_256:
+                    return 256;
+                case Ina226SamplesAveraged.Quantity_512:
+                    return 512;
+                case Ina226SamplesAveraged.Quantity_1024:
+                    return 1024;
+            }
+
+            return 1;
+        }
+
+        /// <summary>
         /// Reset the INA226 to default values.
         /// </summary>
         [Command]
@@ -82,15 +173,11 @@ namespace Iot.Device.Ina226
             _currentLsb = 1F;
             _calibrationValue = 0;
 
-            // cache the values for the Bus, Shunt, and Samples Averaged settings so that they can be used later without reading them from the INA226 device.
-            _samplesAveraged = SamplesAveraged;
-            _samplesAveragedInt = int.Parse(_samplesAveraged.ToString().Replace("Quantity_", string.Empty));
-
-            _busConvTime = BusConvTime;
-            _busConvTimeInt = int.Parse(_busConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
-
-            _shuntConvTime = ShuntConvTime;
-            _shuntConvTimeInt = int.Parse(_shuntConvTime.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
+            // Make sure Ina226 and this class have the same settings after reset
+            OperatingMode = _operatingMode;
+            SamplesAveraged = _samplesAveraged;
+            BusConvTime = _busConvTime;
+            ShuntConvTime = _shuntConvTime;
         }
 
         /// <summary>
@@ -231,7 +318,7 @@ namespace Iot.Device.Ina226
         [Property]
         public Ina226OperatingMode OperatingMode
         {
-            get => (Ina226OperatingMode)(ReadRegister(Ina226Register.Configuration) & (ushort)Ina226ConfigurationFlags.ModeMask);
+            get => _operatingMode;
             set
             {
                 ushort regValue = ReadRegister(Ina226Register.Configuration);
@@ -240,6 +327,7 @@ namespace Iot.Device.Ina226
                 regValue |= (ushort)value;
 
                 WriteRegister(Ina226Register.Configuration, regValue);
+                _operatingMode = value;
             }
         }
 
@@ -252,7 +340,7 @@ namespace Iot.Device.Ina226
         [Property]
         public Ina226SamplesAveraged SamplesAveraged
         {
-            get => (Ina226SamplesAveraged)(ReadRegister(Ina226Register.Configuration) & (ushort)Ina226ConfigurationFlags.SamplesAvgMask);
+            get => _samplesAveraged;
             set
             {
                 ushort regValue = ReadRegister(Ina226Register.Configuration);
@@ -263,7 +351,7 @@ namespace Iot.Device.Ina226
                 WriteRegister(Ina226Register.Configuration, regValue);
 
                 _samplesAveraged = value;
-                _samplesAveragedInt = int.Parse(value.ToString().Replace("Quantity_", string.Empty));
+                _samplesAveragedInt = SamplesQuantityEnumToInt(value);
             }
         }
 
@@ -276,7 +364,7 @@ namespace Iot.Device.Ina226
         [Property]
         public Ina226BusVoltageConvTime BusConvTime
         {
-            get => (Ina226BusVoltageConvTime)(ReadRegister(Ina226Register.Configuration) & (ushort)Ina226ConfigurationFlags.BusConvMask);
+            get => _busConvTime;
             set
             {
                 ushort regValue = ReadRegister(Ina226Register.Configuration);
@@ -287,7 +375,7 @@ namespace Iot.Device.Ina226
                 WriteRegister(Ina226Register.Configuration, regValue);
 
                 _busConvTime = value;
-                _busConvTimeInt = int.Parse(value.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
+                _busConvTimeInt = BusConvTimeEnumToInt(value);
             }
         }
 
@@ -300,7 +388,7 @@ namespace Iot.Device.Ina226
         [Property]
         public Ina226ShuntConvTime ShuntConvTime
         {
-            get => (Ina226ShuntConvTime)(ReadRegister(Ina226Register.Configuration) & (ushort)Ina226ConfigurationFlags.ShuntConvMask);
+            get => _shuntConvTime;
             set
             {
                 ushort regValue = ReadRegister(Ina226Register.Configuration);
@@ -311,7 +399,7 @@ namespace Iot.Device.Ina226
                 WriteRegister(Ina226Register.Configuration, regValue);
 
                 _shuntConvTime = value;
-                _shuntConvTimeInt = int.Parse(value.ToString().Replace("Time", string.Empty).Replace("us", string.Empty));
+                _shuntConvTimeInt = ShuntConvTimeEnumToInt(value);
             }
         }
 
