@@ -217,17 +217,18 @@ namespace Iot.Device.Ina226
         public ElectricPotential ReadShuntVoltage()
         {
             ushort regValue = ReadRegister(Ina226Register.ShuntVoltage, _shuntConvTimeInt * _samplesAveragedInt);
+            int val;
 
             if ((regValue & 0x8000) > 0)
             {
-                regValue &= 0x7FFF;
-                regValue ^= 0x7FFF;
-                regValue++;
-
-                return ElectricPotential.FromMicrovolts(regValue * -10.0);
+                val = (int)(regValue | 0xFFFF0000);
+            }
+            else
+            {
+                val = regValue;
             }
 
-            return ElectricPotential.FromMicrovolts(regValue * 10.0);
+            return ElectricPotential.FromMicrovolts(val * 10.0);
         }
 
         /// <summary>
@@ -248,16 +249,18 @@ namespace Iot.Device.Ina226
         public ElectricCurrent ReadCurrent()
         {
             ushort regValue = ReadRegister(Ina226Register.Current, _shuntConvTimeInt * _samplesAveragedInt);
+            int val;
+
             if ((regValue & 0x8000) > 0)
             {
-                regValue &= 0x7FFF;
-                regValue ^= 0x7FFF;
-                regValue++;
-
-                return ElectricCurrent.FromAmperes(regValue * -_currentLsb);
+                val = (int)(regValue | 0xFFFF0000);
+            }
+            else
+            {
+                val = regValue;
             }
 
-            return ElectricCurrent.FromAmperes(regValue * _currentLsb);
+            return ElectricCurrent.FromAmperes(val * _currentLsb);
         }
 
         /// <summary>
