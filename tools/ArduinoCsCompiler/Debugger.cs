@@ -177,7 +177,7 @@ namespace ArduinoCsCompiler
 
         private void Kill(string[] args)
         {
-            var task = _set.MainEntryPointInternal;
+            var task = _set.MainEntryPointMethod;
             if (task == null)
             {
                 _compiler.KillTask(null);

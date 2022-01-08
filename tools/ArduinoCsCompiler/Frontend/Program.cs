@@ -263,7 +263,15 @@ namespace ArduinoCsCompiler
                     var remoteMethod = set.MainEntryPoint;
 
                     _debugger.StartDebugging(true);
-                    remoteMethod.InvokeAsync();
+                    if (set.MainEntryPointMethod != null && set.MainEntryPointMethod.GetParameters().Length > 0)
+                    {
+                        // If the main method takes an argument, we have to provide it
+                        remoteMethod.InvokeAsync(new object[] { Array.Empty<string>() });
+                    }
+                    else
+                    {
+                        remoteMethod.InvokeAsync();
+                    }
 
                     object[] data;
                     string currentInput = string.Empty;

@@ -126,7 +126,7 @@ namespace ArduinoCsCompiler
                     if (resolved == null)
                     {
                         // We're probably missing a method - let's at least show the main context
-                        resolved = set.MainEntryPointInternal!;
+                        resolved = set.MainEntryPointMethod!;
                     }
 
                     Exception ex;

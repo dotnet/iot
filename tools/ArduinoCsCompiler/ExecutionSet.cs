@@ -116,7 +116,7 @@ namespace ArduinoCsCompiler
             _entryPoint = null!;
             _kernelSnapShot = EmptySnapShot;
             _compilerSettings = compilerSettings.Clone();
-            MainEntryPointInternal = null;
+            MainEntryPointMethod = null;
             TokenOfStartupMethod = 0;
         }
 
@@ -158,7 +158,7 @@ namespace ArduinoCsCompiler
                 FirmwareStartupSequence = new List<IlCode>(setToClone.FirmwareStartupSequence);
             }
 
-            MainEntryPointInternal = setToClone.MainEntryPointInternal;
+            MainEntryPointMethod = setToClone.MainEntryPointMethod;
             TokenOfStartupMethod = setToClone.TokenOfStartupMethod;
         }
 
@@ -170,7 +170,7 @@ namespace ArduinoCsCompiler
             internal set => _entryPoint = value;
         }
 
-        internal MethodInfo? MainEntryPointInternal
+        public MethodInfo? MainEntryPointMethod
         {
             get;
             set;
@@ -257,7 +257,7 @@ namespace ArduinoCsCompiler
 
         private void Load(SnapShot from, SnapShot to, bool runStaticCtos)
         {
-            if (MainEntryPointInternal == null)
+            if (MainEntryPointMethod == null)
             {
                 throw new InvalidOperationException("Main entry point not defined");
             }
@@ -317,7 +317,7 @@ namespace ArduinoCsCompiler
                 _compiler.SetExecutionSetActive(this);
             }
 
-            MainEntryPoint = _compiler.GetTask(this, MainEntryPointInternal);
+            MainEntryPoint = _compiler.GetTask(this, MainEntryPointMethod);
 
             if (runStaticCtos)
             {

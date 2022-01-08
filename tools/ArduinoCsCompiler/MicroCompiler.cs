@@ -1690,7 +1690,7 @@ namespace ArduinoCsCompiler
 
             PrepareCodeInternal(exec, mainEntryPoint, null);
 
-            exec.MainEntryPointInternal = mainEntryPoint;
+            exec.MainEntryPointMethod = mainEntryPoint;
             FinalizeExecutionSet(exec, false);
             return exec;
         }
@@ -1957,7 +1957,7 @@ namespace ArduinoCsCompiler
                     AddCallWithToken(code, OpCode.CEE_CALL, token);
                 }
 
-                var mainMethod = set.MainEntryPointInternal!;
+                var mainMethod = set.MainEntryPointMethod!;
                 // This method must have 0 or 1 arguments (tested at the very beginning of the compiler run)
                 if (mainMethod.GetParameters().Length == 1)
                 {
@@ -2325,6 +2325,11 @@ namespace ArduinoCsCompiler
 
             var decl = _activeExecutionSet.GetMethod(method);
             _logger.LogInformation($"Starting execution on {decl}...");
+            if (method.GetParameters().Length != arguments.Length)
+            {
+                throw new ArgumentException($"The number of arguments for the method {method.MemberInfoSignature()} does not match. {arguments.Length} arguments were provided");
+            }
+
             _commandHandler.ExecuteIlCode(decl.Token, taskId, arguments);
         }
 
