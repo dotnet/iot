@@ -291,13 +291,25 @@ namespace ArduinoCsCompiler
                                 quitting = true;
                                 break;
                             }
+                            else if (key.Key == ConsoleKey.Backspace)
+                            {
+                                if (currentInput.Length > 0)
+                                {
+                                    currentInput = currentInput.Substring(0, currentInput.Length - 1);
+                                }
+                            }
                             else
                             {
                                 currentInput += key.KeyChar;
                             }
                         }
 
-                        _debugger.ExecuteAfterDataReceived(TimeSpan.FromMilliseconds(50), () => _debugger.WriteCurrentState());
+                        _debugger.ExecuteAfterDataReceived(TimeSpan.FromMilliseconds(50), () =>
+                        {
+                            _debugger.WriteCurrentStack(Array.Empty<string>());
+                            _debugger.WriteCurrentInstructions(new string[] { "5" });
+                            Console.Write("Debugger > ");
+                        });
                     }
 
                     if (quitting)

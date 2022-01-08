@@ -112,7 +112,7 @@ namespace ArduinoCsCompiler
                         stackTrace.RemoveRange(0, idx + 1);
                         // The first entry can be the same as above (if the error is within the given method), but not
                         // necessarily, since the outer token can point to whatever did not work
-                        var stack = Debugger.DecodeStackTrace(set, stackTrace);
+                        var stack = Debugger.DecodeStackTrace(set, 0, stackTrace);
                         textualStackTrace = Environment.NewLine + Debugger.PrintStack(stack);
                     }
 

@@ -18,6 +18,8 @@ namespace ArduinoCsCompiler
         private readonly AutoResetEvent _debugDataReceived;
         private byte[] _lastData;
 
+        private List<(string CommandName, Action<string[]> Operation, string CommandHelp)> _debuggerCommands;
+
         internal Debugger(MicroCompiler compiler, ExecutionSet set)
         {
             _compiler = compiler ?? throw new ArgumentNullException(nameof(compiler));
@@ -25,9 +27,54 @@ namespace ArduinoCsCompiler
             _set = set ?? throw new ArgumentNullException(nameof(set));
             _lastData = new byte[0];
             _debugDataReceived = new AutoResetEvent(false);
+            _debuggerCommands = new()
+            {
+                ("quit", Quit, "Exit debugger(but keep code running"),
+                ("code", WriteCurrentInstructions, "Show code in current method [ARG1] = Number of instructions before and after the current"),
+                ("continue", Continue, "Continue execution"),
+                ("break", DebuggerBreak, "Break execution"),
+                ("help", PrintHelp, "Print Command help"),
+                ("stack", WriteCurrentStack, "Show current stack frames"),
+                ("kill", Kill, "Terminate program"),
+                ("into", (x) => SendDebuggerCommand(DebuggerCommand.StepInto), "Step into current instruction"),
+                ("over", StepOver, "Step over current instruction"),
+                ("leave", (x) => SendDebuggerCommand(DebuggerCommand.StepOut), "Leave current method")
+            };
         }
 
-        public static List<RemoteStackFrame> DecodeStackTrace(ExecutionSet set, List<int> stackTrace)
+        private void StepOver(string[] x)
+        {
+            // Pretty complex, just to test whether the next instruction is a ret instruction. But should be fast enough for now
+            var stack = DecodeStackTrace(_lastData);
+            if (!stack.Any())
+            {
+                Console.WriteLine("No valid stack active. No instructions to decode.");
+                return;
+            }
+
+            var top = stack.First();
+
+            var method = _set.GetMethod(top.Method!);
+            var next = IlCodeParser.GetNextInstruction(method, _set, top.Pc);
+
+            if (next.OpCode == OpCode.CEE_RET)
+            {
+                // If we perform a step into on a ret instruction, this would cause the debugger only to stop if the same method is
+                // called again. Not what the user expects.
+                SendDebuggerCommand(DebuggerCommand.StepInto);
+            }
+            else
+            {
+                SendDebuggerCommand(DebuggerCommand.StepOver);
+            }
+        }
+
+        private void SendDebuggerCommand(DebuggerCommand command)
+        {
+            _commandHandler.SendDebuggerCommand(command);
+        }
+
+        public static List<RemoteStackFrame> DecodeStackTrace(ExecutionSet set, int taskId, List<int> stackTrace)
         {
             stackTrace.Reverse();
 
@@ -46,11 +93,11 @@ namespace ArduinoCsCompiler
                 var resolved2 = set.InverseResolveToken(methodToken);
                 if (resolved2 is MethodBase mb)
                 {
-                    remoteStack.Add(new RemoteStackFrame(mb, pc, methodToken));
+                    remoteStack.Add(new RemoteStackFrame(mb, taskId, pc, methodToken));
                 }
                 else
                 {
-                    remoteStack.Add(new RemoteStackFrame(methodToken));
+                    remoteStack.Add(new RemoteStackFrame(methodToken, taskId));
                 }
             }
 
@@ -69,7 +116,7 @@ namespace ArduinoCsCompiler
             return b.ToString();
         }
 
-        public void Continue()
+        public void Continue(string[] args)
         {
             _commandHandler.SendDebuggerCommand(DebuggerCommand.Continue);
         }
@@ -79,64 +126,114 @@ namespace ArduinoCsCompiler
             currentInput = currentInput.Trim();
             if (currentInput.Length > 0)
             {
-                switch (currentInput.ToLowerInvariant()[0])
+                string[] commandLine = currentInput.Split(' ', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                if (commandLine.Length == 0)
                 {
-                    case 'b':
-                        _commandHandler.SendDebuggerCommand(DebuggerCommand.Break);
-                        break;
-                    case 's':
-                        WriteCurrentState();
-                        break;
-                    case 'c':
-                        Continue();
-                        break;
-                    case 'k':
-                    {
-                        var task = _set.MainEntryPointInternal;
-                        if (task == null)
-                        {
-                            _compiler.KillTask(null);
-                        }
-                        else
-                        {
-                            _compiler.KillTask(task);
-                        }
+                    Console.WriteLine("Error parsing command line - try \"help\"");
+                    return true;
+                }
 
-                        break;
+                string currentCommand = commandLine[0];
+                var entries = _debuggerCommands.Where(x => x.CommandName.StartsWith(currentCommand, StringComparison.InvariantCultureIgnoreCase)).ToList();
+                if (entries.Count > 1)
+                {
+                    Console.WriteLine($"Command \"{currentCommand}\" is ambiguous. You need to specify enough characters for the command to be unique");
+                    return true;
+                }
+                else if (!entries.Any())
+                {
+                    Console.WriteLine($"Command \"{currentCommand}\" is unknown. Try \"help\".");
+                    return true;
+                }
+                else
+                {
+                    // The quit command is handles specially
+                    if (entries.First().CommandName == "quit")
+                    {
+                        return false;
                     }
 
-                    case 'q':
-                        return false;
-                    case 'h':
-                        PrintHelp();
-                        break;
+                    // Execute the command
+                    entries.First().Operation(commandLine);
                 }
 
                 return true;
             }
 
-            WriteCurrentState();
-
+            Console.Write("Debugger > ");
             return true;
         }
 
-        public void PrintHelp()
+        private void DebuggerBreak(string[] args)
+        {
+            _commandHandler.SendDebuggerCommand(DebuggerCommand.Break);
+        }
+
+        private void Quit(string[] args)
+        {
+            // should never be called directly
+            throw new NotSupportedException();
+        }
+
+        private void Kill(string[] args)
+        {
+            var task = _set.MainEntryPointInternal;
+            if (task == null)
+            {
+                _compiler.KillTask(null);
+            }
+            else
+            {
+                _compiler.KillTask(task);
+            }
+        }
+
+        public void PrintHelp(string[] args)
         {
             Console.WriteLine("Debugger command help (abbreviations are allowed, as long as they're unique):");
             Console.WriteLine();
-            Console.WriteLine("Break    - Break execution");
-            Console.WriteLine("Continue - Continue execution");
-            Console.WriteLine("Help     - Show this help");
-            Console.WriteLine("Kill     - Terminate remote task");
-            Console.WriteLine("Quit     - Exit debugger (but keep code running)");
-            Console.WriteLine("Stack    - Show current stack frames (default command)");
+            foreach (var item in _debuggerCommands.OrderBy(x => x.CommandName))
+            {
+                Console.WriteLine($"{item.CommandName.PadRight(15)} - {item.CommandHelp}");
+            }
+
             Console.WriteLine();
         }
 
-        public void WriteCurrentState()
+        public void WriteCurrentInstructions(string[] args)
         {
-            ProcessExecutionState(_lastData);
-            Console.Write("Debugger > ");
+            var stack = DecodeStackTrace(_lastData);
+            if (!stack.Any())
+            {
+                Console.WriteLine("No valid stack active. No instructions to decode.");
+                return;
+            }
+
+            var top = stack.First();
+            var method = _set.GetMethod(top.Method!);
+            if (method.HasBody == false)
+            {
+                Console.WriteLine($"In internal method {method.MethodBase.MethodSignature()}");
+                return;
+            }
+
+            Console.WriteLine($"In method {method.MethodBase.MethodSignature()} at offset {top.Pc:X4}");
+
+            string code = IlCodeParser.DecodedAssembly(method, _set, top.Pc, args.FirstOrDefault("-1"));
+            Console.Write(code);
+        }
+
+        public void WriteCurrentStack(string[] args)
+        {
+            var stack = DecodeStackTrace(_lastData);
+
+            if (stack.Any())
+            {
+                Console.WriteLine($"Stack of Task ID: {stack[0].TaskId}"); // Not really relevant yet, since we have only one task at a time
+            }
+
+            var printable = PrintStack(stack);
+            Console.WriteLine(printable);
         }
 
         public void SaveLastExecutionState(byte[] data)
@@ -160,16 +257,14 @@ namespace ArduinoCsCompiler
             }
         }
 
-        public void ProcessExecutionState(byte[] data)
+        public List<RemoteStackFrame> DecodeStackTrace(byte[] data)
         {
             if (data.Length == 0)
             {
-                return;
+                return new List<RemoteStackFrame>();
             }
 
             int taskId = data[3] << 8 | data[4];
-
-            Console.WriteLine($"Task ID: {taskId}"); // Not really relevant yet, since we have only one task at a time
 
             List<int> stackTokens = new List<int>();
             int idx = 6;
@@ -180,10 +275,7 @@ namespace ArduinoCsCompiler
                 idx += 5;
             }
 
-            var remoteStackFrames = DecodeStackTrace(_set, stackTokens);
-
-            var printable = PrintStack(remoteStackFrames);
-            Console.WriteLine(printable);
+            return DecodeStackTrace(_set, taskId, stackTokens);
         }
 
         public void StartDebugging(bool stopImmediately)

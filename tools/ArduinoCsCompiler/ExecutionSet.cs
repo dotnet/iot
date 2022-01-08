@@ -1220,6 +1220,12 @@ namespace ArduinoCsCompiler
             return token;
         }
 
+        internal String GetString(int token)
+        {
+            var entry = _strings.FirstOrDefault(x => x.Token == token);
+            return entry.StringData;
+        }
+
         internal ArduinoMethodDeclaration GetMethod(EquatableMethod methodInfo)
         {
             return _methods.First(x => EquatableMethod.AreMethodsIdentical(x.MethodBase, methodInfo));

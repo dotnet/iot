@@ -11,7 +11,8 @@ namespace ArduinoCsCompiler
         None = 0,
         StepInto = 1,
         StepOver = 2,
-        CodeLine = 3,
-        Once = 4,
+        StepOut = 3,
+        CodeLine = 4,
+        Once = 5,
     }
 }

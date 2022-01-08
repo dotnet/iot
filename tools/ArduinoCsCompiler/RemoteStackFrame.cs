@@ -9,19 +9,23 @@ namespace ArduinoCsCompiler
 {
     public class RemoteStackFrame
     {
-        public RemoteStackFrame(int unknownToken)
+        public RemoteStackFrame(int taskId, int unknownToken)
         {
             Method = null;
             Pc = 0;
             RemoteToken = unknownToken;
+            TaskId = taskId;
         }
 
-        public RemoteStackFrame(MethodBase method, int pc, int remoteToken)
+        public RemoteStackFrame(MethodBase method, int taskId, int pc, int remoteToken)
         {
             Method = method;
             Pc = pc;
             RemoteToken = remoteToken;
+            TaskId = taskId;
         }
+
+        public int TaskId { get; }
 
         public MethodBase? Method { get; }
 

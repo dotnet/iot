@@ -12,6 +12,7 @@ namespace ArduinoCsCompiler
         Continue,
         StepInto,
         StepOver,
+        StepOut,
         QueryStatus,
         EnableDebugging,
         DisableDebugging,

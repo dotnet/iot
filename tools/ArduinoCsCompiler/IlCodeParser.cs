@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace ArduinoCsCompiler
 {
@@ -54,6 +56,149 @@ namespace ArduinoCsCompiler
             return FindAndPatchTokens(set, method, byteCode);
         }
 
+        public static IlInstruction GetNextInstruction(ArduinoMethodDeclaration method, ExecutionSet set, int currentPc)
+        {
+            var instructions = DecodeMethod(method);
+            return instructions.Single(x => x.Pc == currentPc);
+        }
+
+        public static string DecodedAssembly(ArduinoMethodDeclaration method, ExecutionSet set, int currentPc, string rangeArgument)
+        {
+            var instructions = DecodeMethod(method);
+            StringBuilder sb = new StringBuilder();
+
+            int range = 0;
+            if (!int.TryParse(rangeArgument, NumberStyles.Number, CultureInfo.CurrentCulture, out range))
+            {
+                range = -1;
+            }
+
+            int currentInstruction = instructions.FindIndex(x => x.Pc == currentPc);
+
+            List<IlInstruction> instructionsFiltered = instructions;
+            if (range > 0)
+            {
+                int rangeStart = Math.Max(0, currentInstruction - range);
+                int rangeEnd = Math.Min(rangeStart + range * 2, instructions.Count);
+                instructionsFiltered = instructions.GetRange(rangeStart, rangeEnd - rangeStart);
+            }
+
+            foreach (var instruction in instructionsFiltered)
+            {
+                if (instruction.Pc == currentPc)
+                {
+                    sb.Append("-->");
+                }
+                else
+                {
+                    sb.Append("   ");
+                }
+
+                sb.Append($"{instruction.Pc:X4} ");
+
+                var opCode = instruction.OpCode;
+                sb.Append($"{instruction.Name.PadRight(10)} ");
+                if (instruction.ArgumentAddress.Length > 0)
+                {
+                    string? decodedArgument = instruction.DecodeArgument(set);
+                    if (decodedArgument != null)
+                    {
+                        sb.Append(decodedArgument);
+                    }
+                    else
+                    {
+                        sb.Append("(Argument not decoded)");
+                    }
+                }
+
+                sb.AppendLine();
+            }
+
+            return sb.ToString();
+        }
+
+        public static List<IlInstruction> DecodeMethod(ArduinoMethodDeclaration method)
+        {
+            if (!method.HasBody || method.Code.IlBytes == null)
+            {
+                return new List<IlInstruction>();
+            }
+
+            byte[] byteCode = method.Code.IlBytes;
+            var length = byteCode.Length;
+            int idx = 0;
+            List<IlInstruction> instructionOffsets = new();
+            while (idx < length)
+            {
+                int codeLocation = idx;
+                OpCode opCode = DecodeOpcode(byteCode, ref idx);
+                OpCodeType type = OpCodeDefinitions.OpcodeDef[(int)opCode].Type;
+                var instruction = new IlInstruction(opCode, codeLocation, idx - codeLocation, byteCode);
+                instructionOffsets.Add(instruction);
+
+                int argumentSize = 0;
+                int tokenOffset = idx;
+                switch (type)
+                {
+                    case OpCodeType.InlineField:
+                    case OpCodeType.InlineMethod:
+                    case OpCodeType.InlineTok:
+                    case OpCodeType.InlineType:
+                        argumentSize = 4;
+                        idx += 4;
+                        break;
+                    case OpCodeType.InlineNone:
+                        break; // No extra bytes in instruction
+                    case OpCodeType.ShortInlineI:
+                    case OpCodeType.ShortInline:
+                    case OpCodeType.ShortInlineVar:
+                    case OpCodeType.ShortInlineBrTarget:
+                        if (opCode == OpCode.CEE_UNALIGNED_)
+                        {
+                            // This one actually has no further argument
+                            break;
+                        }
+
+                        argumentSize = 1;
+                        idx += 1;
+                        break;
+                    case OpCodeType.ShortInlineR:
+                    case OpCodeType.InlineI:
+                    case OpCodeType.InlineBrTarget:
+                        idx += 4;
+                        argumentSize = 4;
+                        break;
+                    case OpCodeType.InlineString:
+                        argumentSize = 4;
+                        idx += 4;
+                        break;
+                    case OpCodeType.InlineSig:
+                        argumentSize = 4;
+                        idx += 4; // CALLI. We don't currently care about the token
+                        break;
+                    case OpCodeType.InlineR:
+                    case OpCodeType.InlineI8:
+                        idx += 8;
+                        argumentSize = 8;
+                        break;
+                    case OpCodeType.InlineSwitch:
+                        // The first integer denotes the number of targets. We can then skip to the index beyond that
+                        int numberOfTargets = byteCode[tokenOffset + 0] | byteCode[tokenOffset + 1] << 8 | byteCode[tokenOffset + 2] << 16 | byteCode[tokenOffset + 3] << 24;
+                        idx = tokenOffset + ((numberOfTargets + 1) * 4);
+                        argumentSize = (numberOfTargets + 1) * 4;
+                        break;
+                    default:
+                        throw new InvalidOperationException($"Not supported opcode type: {type} (from opcode {opCode})");
+                }
+
+                // At this point, instruction.Size is the length of the opcode
+                instruction.SetArgument(codeLocation + instruction.Size, argumentSize);
+                instruction.Size = idx - codeLocation;
+            }
+
+            return instructionOffsets;
+        }
+
         /// <summary>
         /// This method does a static code analysis and finds all tokens that need resolving, so we know what the current
         /// method depends on (fields, classes and other methods). Then we do a lookup and patch the token with a replacement token that
@@ -88,12 +233,12 @@ namespace ArduinoCsCompiler
                 OpCodeType type = OpCodeDefinitions.OpcodeDef[(int)opCode].Type;
                 if (methodStart == null || current == null)
                 {
-                    methodStart = new IlInstruction(opCode, codeLocation);
+                    methodStart = new IlInstruction(opCode, codeLocation, 0, byteCode);
                     current = methodStart;
                 }
                 else
                 {
-                    var temp = new IlInstruction(opCode, codeLocation);
+                    var temp = new IlInstruction(opCode, codeLocation, 0, byteCode);
                     current.NextInstruction = temp;
                     current = temp;
                 }

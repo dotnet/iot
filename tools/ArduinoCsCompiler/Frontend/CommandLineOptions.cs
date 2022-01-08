@@ -18,6 +18,7 @@ namespace ArduinoCsCompiler
             NetworkAddress = string.Empty;
             InputAssembly = string.Empty;
             EntryPoint = string.Empty;
+            TokenMapFile = string.Empty;
         }
 
         [Usage(ApplicationAlias = "acs")]
