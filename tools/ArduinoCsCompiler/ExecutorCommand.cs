@@ -29,6 +29,7 @@ namespace ArduinoCsCompiler
 
         ConditionalBreakpointHit = 30,
         BreakpointHit = 31,
+        Variables = 32,
         DebuggerCommand = 35,
 
         Reply = 0x7d,

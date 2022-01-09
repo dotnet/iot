@@ -17,5 +17,9 @@ namespace ArduinoCsCompiler
         EnableDebugging,
         DisableDebugging,
         Break,
+        SendLocals,
+        SendArguments,
+        SendEvaluationStack,
+        BreakOnExceptions,
     }
 }

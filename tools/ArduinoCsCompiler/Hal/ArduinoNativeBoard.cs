@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Device.Pwm;
 using System.Device.Spi;
 using System.Diagnostics.CodeAnalysis;
@@ -47,6 +48,11 @@ namespace ArduinoCsCompiler
         public override int GetDefaultI2cBusNumber()
         {
             return 0;
+        }
+
+        public override GpioController CreateGpioController()
+        {
+            return new GpioController(PinNumberingScheme.Logical, new ArduinoNativeGpioDriver());
         }
 
         protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins)

@@ -312,10 +312,17 @@ namespace ArduinoCsCompiler
                             }
                         }
 
-                        _debugger.ExecuteAfterDataReceived(TimeSpan.FromMilliseconds(50), () =>
+                        _debugger.ExecuteAfterDataReceived(TimeSpan.FromMilliseconds(50), (x) =>
                         {
-                            _debugger.WriteCurrentStack(Array.Empty<string>());
-                            _debugger.WriteCurrentInstructions(new string[] { "5" });
+                            if (x.Kind == DebuggerDataKind.ExecutionStack)
+                            {
+                                _debugger.WriteCurrentStack(Array.Empty<string>());
+                                _debugger.WriteCurrentInstructions(new string[]
+                                {
+                                    "5"
+                                });
+                            }
+
                             Console.Write("Debugger > ");
                         });
                     }

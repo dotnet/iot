@@ -608,7 +608,7 @@ namespace Iot.Device.Arduino
         {
             Initialize();
 
-            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
+            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(Firmata, _supportedPinConfigurations));
         }
 
         /// <inheritdoc />

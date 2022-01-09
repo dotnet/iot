@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ArduinoCsCompiler;
 using Iot.Device.Arduino;
+using Iot.Device.Board;
 using Xunit;
 using SystemException = ArduinoCsCompiler.SystemException;
 
@@ -181,6 +182,12 @@ enum class {name}
         public void WriteBreakpointTypes()
         {
             WriteEnumHeaderFile<BreakpointType>();
+        }
+
+        [Fact]
+        public void WritePinUsage()
+        {
+            WriteEnumHeaderFile<PinUsage>();
         }
 
         [Fact]

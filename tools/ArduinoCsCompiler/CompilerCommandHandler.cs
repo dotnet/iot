@@ -661,5 +661,15 @@ namespace ArduinoCsCompiler
             sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
             SendCommandAndWait(sequence);
         }
+
+        public void SendDebuggerCommand(DebuggerCommand command, Int32 arg1, Int32 arg2 = 0)
+        {
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.DebuggerCommand);
+            sequence.SendInt32((int)command);
+            sequence.SendInt32(arg1);
+            sequence.SendInt32(arg2);
+            sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
+            SendCommandAndWait(sequence);
+        }
     }
 }

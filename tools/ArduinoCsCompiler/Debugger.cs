@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -15,7 +17,7 @@ namespace ArduinoCsCompiler
         private readonly MicroCompiler _compiler;
         private readonly ExecutionSet _set;
         private readonly CompilerCommandHandler _commandHandler;
-        private readonly AutoResetEvent _debugDataReceived;
+        private readonly BlockingCollection<(DebuggerDataKind Kind, byte[] Data)> _debugDataReceived;
         private byte[] _lastData;
 
         private List<(string CommandName, Action<string[]> Operation, string CommandHelp)> _debuggerCommands;
@@ -26,11 +28,11 @@ namespace ArduinoCsCompiler
             _commandHandler = _compiler.CommandHandler;
             _set = set ?? throw new ArgumentNullException(nameof(set));
             _lastData = new byte[0];
-            _debugDataReceived = new AutoResetEvent(false);
+            _debugDataReceived = new();
             _debuggerCommands = new()
             {
                 ("quit", Quit, "Exit debugger(but keep code running"),
-                ("code", WriteCurrentInstructions, "Show code in current method [ARG1] = Number of instructions before and after the current"),
+                ("code", WriteCurrentInstructions, "Show code in current method. [ARG1] = Number of instructions before and after the current"),
                 ("continue", Continue, "Continue execution"),
                 ("break", DebuggerBreak, "Break execution"),
                 ("help", PrintHelp, "Print Command help"),
@@ -38,11 +40,24 @@ namespace ArduinoCsCompiler
                 ("kill", Kill, "Terminate program"),
                 ("into", (x) => SendDebuggerCommand(DebuggerCommand.StepInto), "Step into current instruction"),
                 ("over", StepOver, "Step over current instruction"),
-                ("leave", (x) => SendDebuggerCommand(DebuggerCommand.StepOut), "Leave current method")
+                ("leave", (x) => SendDebuggerCommand(DebuggerCommand.StepOut), "Leave current method"),
+                ("locals", Locals, "Retrieve values of locals. [ARG1] = Stack frame number (default: current)"),
+                ("exception", x => SendDebuggerCommand(DebuggerCommand.BreakOnExceptions), "Break when an exception occurs"),
             };
         }
 
-        private void StepOver(string[] x)
+        private void Locals(string[] args)
+        {
+            int stackFrame = -1;
+            if (args.Length > 0 && int.TryParse(args[0], NumberStyles.Number, CultureInfo.CurrentCulture, out int temp))
+            {
+                stackFrame = temp;
+            }
+
+            _commandHandler.SendDebuggerCommand(DebuggerCommand.SendLocals, stackFrame);
+        }
+
+        private void StepOver(string[] args)
         {
             // Pretty complex, just to test whether the next instruction is a ret instruction. But should be fast enough for now
             var stack = DecodeStackTrace(_lastData);
@@ -110,7 +125,7 @@ namespace ArduinoCsCompiler
             b.AppendLine("Stack trace, most recent call first:");
             for (int i = 0; i < stack.Count; i++)
             {
-                b.AppendLine($"{i:000}: {stack[i].ToString()}");
+                b.AppendLine($"{stack.Count - i - 1:000}: {stack[i].ToString()}");
             }
 
             return b.ToString();
@@ -241,7 +256,12 @@ namespace ArduinoCsCompiler
             // This gets the whole data block from the execution engine
             // Lets start decoding where we are.
             _lastData = (byte[])data.Clone();
-            _debugDataReceived.Set();
+            _debugDataReceived.Add((DebuggerDataKind.ExecutionStack, _lastData));
+        }
+
+        public void ReceiveVariables(byte[] data)
+        {
+            // TODO
         }
 
         /// <summary>
@@ -249,11 +269,11 @@ namespace ArduinoCsCompiler
         /// </summary>
         /// <param name="waitTime">The time to wait for data</param>
         /// <param name="action">The action to execute</param>
-        public void ExecuteAfterDataReceived(TimeSpan waitTime, Action action)
+        public void ExecuteAfterDataReceived(TimeSpan waitTime, Action<(DebuggerDataKind Kind, byte[] Data)> action)
         {
-            if (_debugDataReceived.WaitOne(waitTime))
+            if (_debugDataReceived.TryTake(out var data, 50))
             {
-                action();
+                action(data);
             }
         }
 

@@ -448,11 +448,11 @@ namespace ArduinoCsCompiler
 
             typesUsed = typesUsed.Distinct().ToList();
 
-            var exceptions = AnalyzeExceptionClauses(set, m);
+            var exceptions = AnalyzeExceptionClauses(set, m, typesUsed);
             return new IlCode(method, byteCode, methodsUsed, fieldsUsed, typesUsed, exceptions);
         }
 
-        private static List<ExceptionClause>? AnalyzeExceptionClauses(ExecutionSet set, MethodBase method)
+        private static List<ExceptionClause>? AnalyzeExceptionClauses(ExecutionSet set, MethodBase method, List<TypeInfo> exceptionTypesUsed)
         {
             var body = method.GetMethodBody();
             if (body == null)
@@ -490,6 +490,7 @@ namespace ArduinoCsCompiler
                 if (c.Flags == ExceptionHandlingClauseOptions.Clause && c.CatchType != null)
                 {
                     token = set.GetOrAddClassToken(c.CatchType.GetTypeInfo());
+                    exceptionTypesUsed.Add((TypeInfo)set.InverseResolveToken(token)!);
                 }
 
                 patchedClauses.Add(new ExceptionClause(c.Flags, (ushort)c.TryOffset, (ushort)c.TryLength, (ushort)c.HandlerOffset, (ushort)c.HandlerLength, token));

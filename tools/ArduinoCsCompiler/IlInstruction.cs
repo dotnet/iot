@@ -151,7 +151,14 @@ namespace ArduinoCsCompiler
                 {
                     int token = DecodeIntegerArgument();
                     var field = set.InverseResolveToken(token);
-                    return $"{token} - {field.Name}";
+                    if (field != null)
+                    {
+                        return $"{token} - {field.Name}";
+                    }
+                    else
+                    {
+                        return $"{token} - (unknown field)";
+                    }
                 }
 
                 case OpCodeType.InlineMethod:
