@@ -4,7 +4,7 @@ using Iot.Device.Arduino;
 
 namespace ArduinoCsCompiler
 {
-    internal class FirmataIlCommandSequence : FirmataCommandSequence
+    public class FirmataIlCommandSequence : FirmataCommandSequence
     {
         private static int s_sequenceCount = 1;
 

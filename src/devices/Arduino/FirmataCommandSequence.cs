@@ -114,6 +114,17 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Decodes a 14-bit integer into a short
+        /// </summary>
+        /// <param name="data">Data array</param>
+        /// <param name="idx">Start offset</param>
+        /// <returns></returns>
+        public static short DecodeInt14(byte[] data, int idx)
+        {
+            return (short)(data[idx] | data[idx + 1] << 7);
+        }
+
+        /// <summary>
         /// Send an Uint32 as 5 x 7 bits. This form of transmitting integers is only supported by extension modules
         /// </summary>
         /// <param name="value">The 32-Bit value to transmit</param>

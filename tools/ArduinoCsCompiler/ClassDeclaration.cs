@@ -71,7 +71,7 @@ namespace ArduinoCsCompiler
         {
             if (ReadOnly)
             {
-                throw new NotSupportedException($"Cannot update class {Name}, is read-only");
+                throw new NotSupportedException($"Cannot update class {Name}, as it is read-only");
             }
 
             _members.Add(member);

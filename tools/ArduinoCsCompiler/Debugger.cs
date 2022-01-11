@@ -42,6 +42,8 @@ namespace ArduinoCsCompiler
                 ("over", StepOver, "Step over current instruction"),
                 ("leave", (x) => SendDebuggerCommand(DebuggerCommand.StepOut), "Leave current method"),
                 ("locals", Locals, "Retrieve values of locals. [ARG1] = Stack frame number (default: current)"),
+                ("arguments", Arguments, "Retrieve values of method arguments. [ARG1] = Stack frame number (default: current)"),
+                ("evalstack", EvaluationStack, "Retrieve values from the current evaluation stack. [ARG1] = Stack frame number (default: current)"),
                 ("exception", x => SendDebuggerCommand(DebuggerCommand.BreakOnExceptions), "Break when an exception occurs"),
             };
         }
@@ -49,12 +51,34 @@ namespace ArduinoCsCompiler
         private void Locals(string[] args)
         {
             int stackFrame = -1;
-            if (args.Length > 0 && int.TryParse(args[0], NumberStyles.Number, CultureInfo.CurrentCulture, out int temp))
+            if (args.Length > 1 && int.TryParse(args[1], NumberStyles.Number, CultureInfo.CurrentCulture, out int temp))
             {
                 stackFrame = temp;
             }
 
             _commandHandler.SendDebuggerCommand(DebuggerCommand.SendLocals, stackFrame);
+        }
+
+        private void Arguments(string[] args)
+        {
+            int stackFrame = -1;
+            if (args.Length > 1 && int.TryParse(args[1], NumberStyles.Number, CultureInfo.CurrentCulture, out int temp))
+            {
+                stackFrame = temp;
+            }
+
+            _commandHandler.SendDebuggerCommand(DebuggerCommand.SendArguments, stackFrame);
+        }
+
+        private void EvaluationStack(string[] args)
+        {
+            int stackFrame = -1;
+            if (args.Length > 1 && int.TryParse(args[1], NumberStyles.Number, CultureInfo.CurrentCulture, out int temp))
+            {
+                stackFrame = temp;
+            }
+
+            _commandHandler.SendDebuggerCommand(DebuggerCommand.SendEvaluationStack, stackFrame);
         }
 
         private void StepOver(string[] args)
@@ -255,13 +279,33 @@ namespace ArduinoCsCompiler
         {
             // This gets the whole data block from the execution engine
             // Lets start decoding where we are.
-            _lastData = (byte[])data.Clone();
-            _debugDataReceived.Add((DebuggerDataKind.ExecutionStack, _lastData));
+            if (data[2] == (byte)ExecutorCommand.Variables)
+            {
+                ReceiveVariables(data);
+            }
+            else
+            {
+                _lastData = (byte[])data.Clone();
+                _debugDataReceived.Add((DebuggerDataKind.ExecutionStack, _lastData));
+            }
         }
 
         public void ReceiveVariables(byte[] data)
         {
-            // TODO
+            int taskId = data[3] << 8 | data[4];
+            int variableType = data[6];
+            if (variableType == 0)
+            {
+                _debugDataReceived.Add((DebuggerDataKind.Locals, data));
+            }
+            else if (variableType == 1)
+            {
+                _debugDataReceived.Add((DebuggerDataKind.Arguments, data));
+            }
+            else if (variableType == 2)
+            {
+                _debugDataReceived.Add((DebuggerDataKind.EvaluationStack, data));
+            }
         }
 
         /// <summary>
@@ -312,5 +356,103 @@ namespace ArduinoCsCompiler
             _commandHandler.SendDebuggerCommand(DebuggerCommand.DisableDebugging);
             _commandHandler.SendDebuggerCommand(DebuggerCommand.Continue);
         }
+
+        public List<DebuggerVariable> DecodeVariables(DebuggerDataKind kind, byte[] data, out MemberInfo? methodCurrentlyExecuting, out int stackFrame)
+        {
+            List<DebuggerVariable> ret = new();
+            int idx = 7;
+            stackFrame = FirmataCommandSequence.DecodeInt32(data, idx);
+            idx = 12;
+            int methodToken = FirmataCommandSequence.DecodeInt32(data, idx);
+            methodCurrentlyExecuting = _set.InverseResolveToken(methodToken);
+            ArduinoMethodDeclaration? methodDeclaration = null;
+            if (methodCurrentlyExecuting is MethodBase mb)
+            {
+                methodDeclaration = _set.GetMethod(mb);
+            }
+
+            idx += 5;
+
+            int localNo = 0;
+            while (idx < data.Length)
+            {
+                ret.Add(ReceiveVariable(kind, localNo, data, methodDeclaration, ref idx));
+                localNo++;
+            }
+
+            return ret;
+        }
+
+        private DebuggerVariable ReceiveVariable(DebuggerDataKind dataKind, int localNo, byte[] data, ArduinoMethodDeclaration? arduinoMethodDeclaration, ref int idx)
+        {
+            int number = FirmataCommandSequence.DecodeInt32(data, idx);
+            idx += 5;
+            if (number != localNo)
+            {
+                throw new InvalidOperationException("Debugger data doesn't match expected sequence");
+            }
+
+            VariableKind kind = (VariableKind)FirmataCommandSequence.DecodeInt14(data, idx);
+            idx += 2;
+            // Decode from the firmata form (10 x 7 bit) to an integer, then put that back into an array
+            Int64 fullValue = FirmataIlCommandSequence.DecodeInt32(data, idx) | FirmataIlCommandSequence.DecodeInt32(data, idx + 5) << 32;
+            byte[] value = BitConverter.GetBytes(fullValue); // So we can repack it
+            idx += 10;
+
+            string name = $"Local variable {localNo}";
+            Type? type = null;
+            if (arduinoMethodDeclaration != null)
+            {
+                var body = arduinoMethodDeclaration.MethodBase.GetMethodBody();
+                if (dataKind == DebuggerDataKind.Locals)
+                {
+                    // Locals in fact do not have a name in metadata, it seems
+                    type = body.LocalVariables[localNo].LocalType;
+                }
+                else if (dataKind == DebuggerDataKind.Arguments)
+                {
+                    var param = arduinoMethodDeclaration.MethodBase.GetParameters()[localNo];
+                    type = param.ParameterType;
+                    name = param.Name ?? "Nameless parameter";
+                }
+                else if (dataKind == DebuggerDataKind.EvaluationStack)
+                {
+                    name = $"Evaluation stack element {localNo}";
+                }
+            }
+
+            var variable = new DebuggerVariable(name, kind, 0, 0);
+            variable.Type = type;
+            switch (kind)
+            {
+                case VariableKind.Boolean:
+                    variable.Value = BitConverter.ToBoolean(value);
+                    break;
+                case VariableKind.Object:
+                case VariableKind.AddressOfVariable:
+                case VariableKind.FunctionPointer:
+                case VariableKind.Int32:
+                    variable.Value = BitConverter.ToInt32(value);
+                    break;
+                case VariableKind.Int64:
+                    variable.Value = fullValue;
+                    break;
+                case VariableKind.Uint64:
+                    variable.Value = BitConverter.ToUInt64(value);
+                    break;
+                case VariableKind.Float:
+                    variable.Value = BitConverter.ToSingle(value);
+                    break;
+                case VariableKind.Double:
+                    variable.Value = BitConverter.ToDouble(value);
+                    break;
+                default:
+                    variable.Value = null;
+                    break;
+            }
+
+            return variable;
+        }
+
     }
 }

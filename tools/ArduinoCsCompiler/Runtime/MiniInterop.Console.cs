@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 
 // Our predefined handles are:
 // 1-0xBFFF File handles
-// 0xCEEE Standard input
-// 0xCEEF Standard and error output
+// 0xCEED Standard input
+// 0xCEED Standard output
+// 0xCEEF Standard error (see also FirmataIlExecutor.h)
 // 0xF000-0xFFFF Network handles
 namespace ArduinoCsCompiler.Runtime
 {
@@ -27,11 +28,16 @@ namespace ArduinoCsCompiler.Runtime
                 if (nStdHandle == -10)
                 {
                     // Standard input
-                    return new IntPtr(0xCEEE); // Some obvious marker handle
+                    return new IntPtr(0xCEED); // Some obvious marker handle
+                }
+                else if (nStdHandle == -11)
+                {
+                    // Standard output
+                    return new IntPtr(0xCEEE);
                 }
                 else
                 {
-                    // Standard error and standard output
+                    // standard error
                     return new IntPtr(0xCEEF);
                 }
             }

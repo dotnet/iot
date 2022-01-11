@@ -158,13 +158,13 @@ namespace ArduinoCsCompiler
                 if (state == MethodState.Debugging)
                 {
                     _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
-                    if (_debugger != null)
+                    if (_debugger == null)
                     {
-                        _debugger.SaveLastExecutionState((byte[])args);
+                        _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
                     }
                     else
                     {
-                        _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
+                        _debugger.SaveLastExecutionState((byte[])args);
                     }
 
                     return; // Don't update the task state - for an outside observer, debugging does not affect the task state.

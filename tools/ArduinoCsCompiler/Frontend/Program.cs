@@ -312,19 +312,7 @@ namespace ArduinoCsCompiler
                             }
                         }
 
-                        _debugger.ExecuteAfterDataReceived(TimeSpan.FromMilliseconds(50), (x) =>
-                        {
-                            if (x.Kind == DebuggerDataKind.ExecutionStack)
-                            {
-                                _debugger.WriteCurrentStack(Array.Empty<string>());
-                                _debugger.WriteCurrentInstructions(new string[]
-                                {
-                                    "5"
-                                });
-                            }
-
-                            Console.Write("Debugger > ");
-                        });
+                        _debugger.ExecuteAfterDataReceived(TimeSpan.FromMilliseconds(50), PrintStateFromDebuggerData);
                     }
 
                     if (quitting)
@@ -352,6 +340,50 @@ namespace ArduinoCsCompiler
                     Abort();
                 }
             }
+        }
+
+        private void PrintStateFromDebuggerData((DebuggerDataKind Kind, byte[] Data) x)
+        {
+            if (x.Kind == DebuggerDataKind.ExecutionStack)
+            {
+                _debugger.WriteCurrentStack(Array.Empty<string>());
+                _debugger.WriteCurrentInstructions(new string[]
+                {
+                    "5"
+                });
+            }
+            else if (x.Kind == DebuggerDataKind.Locals)
+            {
+                var variables = _debugger.DecodeVariables(x.Kind, x.Data, out var method, out int stackFrame);
+                Console.WriteLine($"Method at stackframe number {stackFrame} is {method.MemberInfoSignature(false)}");
+                Console.WriteLine($"Locals:");
+                foreach (var variable in variables)
+                {
+                    Console.WriteLine(variable.ToString());
+                }
+            }
+            else if (x.Kind == DebuggerDataKind.Arguments)
+            {
+                var variables = _debugger.DecodeVariables(x.Kind, x.Data, out var method, out int stackFrame);
+                Console.WriteLine($"Method at stackframe number {stackFrame} is {method.MemberInfoSignature(false)}");
+                Console.WriteLine($"Arguments:");
+                foreach (var variable in variables)
+                {
+                    Console.WriteLine(variable.ToString());
+                }
+            }
+            else if (x.Kind == DebuggerDataKind.EvaluationStack)
+            {
+                var variables = _debugger.DecodeVariables(x.Kind, x.Data, out var method, out int stackFrame);
+                Console.WriteLine($"Method at stackframe number {stackFrame} is {method.MemberInfoSignature(false)}");
+                Console.WriteLine($"Evaluation Stack:");
+                foreach (var variable in variables)
+                {
+                    Console.WriteLine(variable.ToString());
+                }
+            }
+
+            Console.Write("Debugger > ");
         }
 
         private MethodInfo LocateStartupMethod(Assembly assemblyUnderTest)

@@ -191,7 +191,7 @@ namespace ArduinoCsCompiler
                         _maxBytesPerMessage = Math.Min(FirmataCommandSequence.DecodeInt32(data, 8 + 15), 64);
                         _logger.LogInformation(_ilCapabilities.ToString());
                     }
-                    else if (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit)
+                    else if (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit || data[2] == (byte)ExecutorCommand.Variables)
                     {
                         _compiler.OnCompilerCallback(data[3] | (data[4] << 7), MethodState.Debugging, data);
                     }
@@ -659,7 +659,8 @@ namespace ArduinoCsCompiler
             FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.DebuggerCommand);
             sequence.SendInt32((int)command);
             sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-            SendCommandAndWait(sequence);
+            // Long timeout, or the process often terminates when we're debugging the debugger
+            SendCommandAndWait(sequence, TimeSpan.FromMinutes(1));
         }
 
         public void SendDebuggerCommand(DebuggerCommand command, Int32 arg1, Int32 arg2 = 0)
@@ -669,7 +670,7 @@ namespace ArduinoCsCompiler
             sequence.SendInt32(arg1);
             sequence.SendInt32(arg2);
             sequence.WriteByte((byte)FirmataCommandSequence.EndSysex);
-            SendCommandAndWait(sequence);
+            SendCommandAndWait(sequence, TimeSpan.FromMinutes(1));
         }
     }
 }
