@@ -1,6 +1,6 @@
 # Bmm150 - Magnetometer
 
-The Bmm150 is a magnetometer that can be controlled either thru I2C either thru SPI. 
+The Bmm150 is a magnetometer that can be controlled either thru I2C either thru SPI.
 This implementation was tested in a ESP32 platform, specificaly in a  [M5Stack Gray](https://shop.m5stack.com/products/grey-development-core).
 
 ## Documentation
@@ -74,7 +74,7 @@ Running the calibration properly require to **move the sensor in all the possibl
 
 ![raw data](./corrcalib.png)
 
-To create those cloud point graphs, every cloud is a coordinate of X-Y, Y-Z and Z-X. 
+To create those cloud point graphs, every cloud is a coordinate of X-Y, Y-Z and Z-X.
 
 Once the calibration is done, you will be able to read the data with the bias corrected using the ```ReadMagnetometer``` function. You will still be able to read the data without any calibration using the ```ReadMagnetometerWithoutCalibration``` function.
 

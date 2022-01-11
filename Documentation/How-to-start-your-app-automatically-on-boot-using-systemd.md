@@ -19,12 +19,11 @@ Make sure to make your app ```<myiotapp>``` is executable by using the command:
 chmod +x <myiotapp>
 ```
 
-
 ## Create systemd.service unit
 
 For this example a script titled `<myiotapp>.service` will be used.  The folder that this application is ran from is `/home/pi/myiotappfolder` Please replace accordingly with your app name or the location you decide to save your script. Remember to add the `.service`  as the file extension
 
-Here is an example systemd.service file that you can use as a template. Make sure to use a Unix end of line when creating the systemmd.service file. 
+Here is an example systemd.service file that you can use as a template. Make sure to use a Unix end of line when creating the systemmd.service file.
 
 ```shell
 [Unit]
@@ -61,6 +60,7 @@ Restart=always
 WantedBy=multi-user.target
 
 ```
+
 The systemmd service file which we will call `<myiotapp>.service`  must be saved to `/etc/systemd/system`  to be ran on boot.
 
 Note that you must have admin priviliges to save a file to the system etc folder. You can use the following to copy the service in a terminal to this folder:
@@ -78,19 +78,19 @@ chmod +x <myiotapp>.service
 ```
 
 ### Notes
+
 Please use care and refer to the manual when using this code
 You may also look at the other scripts under /etc/systemd/system for reference.
 
-
-
 ## Test your service
 
-This will start the service but will not run it on boot. 
+This will start the service but will not run it on boot.
 
 ```shell
 # Requires root permissions
 systemctl start <myiotapp>.service
 ```
+
 Now you can look at the log file you created to see the output of the terminal. `/home/pi/myiotapp.log`
 
 Or you can check the status of the service by using in a terminal:
@@ -106,7 +106,6 @@ To stop the service run:
 # Requires root permissions
 systemctl stop <myiotapp>.service
 ```
-
 
 ## To make your service automatically run on boot
 
@@ -125,7 +124,6 @@ Run this in terminal to disable the program on boot:
  systemctl daemon-reload
  systemctl disable myscript.service
 ```
-
 
 ## Security considerations
 

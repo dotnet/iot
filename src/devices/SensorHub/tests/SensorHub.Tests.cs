@@ -6,6 +6,7 @@ using System.Device.I2c;
 using System.IO;
 using Moq;
 using Xunit;
+using static Iot.Device.SensorHub.SensorHub;
 
 namespace Iot.Device.SensorHub.Tests
 {
@@ -20,17 +21,6 @@ namespace Iot.Device.SensorHub.Tests
         }
 
         [Fact]
-        public void Should_Throw_When_No_Offboard_Sensor_Found()
-        {
-            SensorHub sh = new(_mockI2cDevice.Object);
-            _mockI2cDevice.SetupSequence(x => x.ReadByte())
-                .Returns((byte)SensorHub.RegisterStatusErrors.OFFBOARD_TEMPERATURE_SENSOR_NOT_FOUND);
-
-            var exception = Assert.Throws<IOException>(() => sh.TryReadOffBoardTemperature(out var t));
-            Assert.Equal("No offboard temperature sensor found", exception.Message);
-        }
-
-        [Fact]
         public void Should_Throw_When_NoDevice_Found()
         {
             Func<SensorHub> sh = () => new(_mockI2cDevice.Object);
@@ -40,11 +30,35 @@ namespace Iot.Device.SensorHub.Tests
         }
 
         [Fact]
-        public void Should_Read_Correct_Offboard_Sensor_Temperature()
+        public void Should_Throw_When_No_Offboard_Temperature_Sensor_Found()
         {
             SensorHub sh = new(_mockI2cDevice.Object);
             _mockI2cDevice.SetupSequence(x => x.ReadByte())
-                .Returns((byte)SensorHub.RegisterStatusErrors.NO_ERROR)
+                .Returns((byte)SensorHub.StatusFunctionError.TEMP_NOT_FOUND);
+
+            var exception = Assert.Throws<IOException>(() => sh.TryReadOffBoardTemperature(out var t));
+            Assert.Equal("No offboard temperature sensor found", exception.Message);
+        }
+
+        [Fact]
+        public void Should_Not_Read_Offboard_Temperature_On_Sensor_Overflow()
+        {
+            SensorHub sh = new(_mockI2cDevice.Object);
+            _mockI2cDevice.SetupSequence(x => x.ReadByte())
+                .Returns((byte)StatusFunctionError.TEMP_OVERFLOW);
+
+            Assert.False(sh.TryReadOffBoardTemperature(out _));
+        }
+
+        [Theory]
+        [InlineData(0x00)] // No Error
+        [InlineData(0x04)] // Light Brightness Overflow
+        [InlineData(0x08)] // Light Brightness Not Found
+        public void Should_Read_Correct_Offboard_Sensor_Temperature(byte statusReg)
+        {
+            SensorHub sh = new(_mockI2cDevice.Object);
+            _mockI2cDevice.SetupSequence(x => x.ReadByte())
+                .Returns(statusReg)
                 .Returns(128);
 
             sh.TryReadOffBoardTemperature(out var t);
@@ -57,7 +71,7 @@ namespace Iot.Device.SensorHub.Tests
         {
             SensorHub sh = new(_mockI2cDevice.Object);
             _mockI2cDevice.SetupSequence(x => x.ReadByte())
-                .Returns((byte)SensorHub.RegisterStatusErrors.NO_ERROR)
+                .Returns(SensorHub.NO_ERROR)
                 .Returns(50);
 
             sh.TryReadBarometerTemperature(out var t);
@@ -70,7 +84,7 @@ namespace Iot.Device.SensorHub.Tests
         {
             SensorHub sh = new(_mockI2cDevice.Object);
             _mockI2cDevice.SetupSequence(x => x.ReadByte())
-                .Returns((byte)SensorHub.RegisterStatusErrors.NO_ERROR)
+                .Returns(SensorHub.NO_ERROR)
                 .Returns(0) // H
                 .Returns(19) // M
                 .Returns(136); // L
@@ -80,12 +94,15 @@ namespace Iot.Device.SensorHub.Tests
             Assert.Equal(p.Pascals, expected);
         }
 
-        [Fact]
-        public void Should_Read_Correct_Illuminance()
+        [Theory]
+        [InlineData(0x00)] // No error
+        [InlineData(0x01)] // Ext. Temperature Overflow
+        [InlineData(0x02)] // Ext. Temperature Not Found
+        public void Should_Read_Correct_Illuminance(byte statusReg)
         {
             SensorHub sh = new(_mockI2cDevice.Object);
             _mockI2cDevice.SetupSequence(x => x.ReadByte())
-                .Returns((byte)SensorHub.RegisterStatusErrors.NO_ERROR)
+                .Returns(statusReg)
                 .Returns(3) // H
                 .Returns(12); // L
 
@@ -94,12 +111,24 @@ namespace Iot.Device.SensorHub.Tests
             Assert.Equal(l.Lux, expected);
         }
 
+        [Theory]
+        [InlineData(0x04)] // Light Brightness Overflow
+        [InlineData(0x08)] // Light Brightness Not Found
+        public void Should_Not_Read_Illuminance(byte statusReg)
+        {
+            SensorHub sh = new(_mockI2cDevice.Object);
+            _mockI2cDevice.SetupSequence(x => x.ReadByte())
+                .Returns(statusReg);
+
+            Assert.False(sh.TryReadIlluminance(out _));
+        }
+
         [Fact]
         public void Should_Read_Correct_Humidity()
         {
             SensorHub sh = new(_mockI2cDevice.Object);
             _mockI2cDevice.SetupSequence(x => x.ReadByte())
-                .Returns((byte)SensorHub.RegisterStatusErrors.NO_ERROR)
+                .Returns(SensorHub.NO_ERROR)
                 .Returns(50);
 
             sh.TryReadRelativeHumidity(out var h);
@@ -112,7 +141,7 @@ namespace Iot.Device.SensorHub.Tests
         {
             SensorHub sh = new(_mockI2cDevice.Object);
             _mockI2cDevice.SetupSequence(x => x.ReadByte())
-                .Returns((byte)SensorHub.RegisterStatusErrors.NO_ERROR)
+                .Returns(SensorHub.NO_ERROR)
                 .Returns(50);
 
             sh.TryReadOnBoardTemperature(out var t);

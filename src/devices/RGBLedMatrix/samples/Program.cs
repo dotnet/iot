@@ -208,6 +208,7 @@ void Demo3(RGBLedMatrix matrix)
             zones[i] = TimeZoneInfo.FindSystemTimeZoneById(citiesData[i].ZoneId);
         }
 
+#pragma warning disable SYSLIB0014 // Type or member is obsolete
         using (WebClient client = new WebClient())
         {
             BdfFont font = BdfFont.Load(@"fonts/6x12.bdf");
@@ -302,6 +303,7 @@ void Demo3(RGBLedMatrix matrix)
                 cityIndex = (cityIndex + 1) % citiesData.Length;
             }
         }
+#pragma warning restore SYSLIB0014 // Type or member is obsolete
     }
     catch (Exception e)
     {
@@ -316,7 +318,9 @@ unsafe void Demo4(RGBLedMatrix matrix)
     byte blue = 0x15;
     matrix.Fill(0, 0, blue);
 
+#pragma warning disable SYSLIB0014 // Type or member is obsolete
     using WebClient client = new WebClient();
+#pragma warning restore SYSLIB0014 // Type or member is obsolete
     int lastMinute = -1;
     string temperature = string.Empty;
 

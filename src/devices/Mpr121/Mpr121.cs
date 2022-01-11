@@ -78,10 +78,12 @@ namespace Iot.Device.Mpr121
             _timer = new Timer(RefreshChannelStatuses, this, Timeout.Infinite, Timeout.Infinite);
 
             _statuses = new Dictionary<Channels, bool>();
+#pragma warning disable CS8605 // Unboxing a possibly null value.
             foreach (Channels channel in Enum.GetValues(typeof(Channels)))
             {
                 _statuses.Add(channel, false);
             }
+#pragma warning restore CS8605 // Unboxing a possibly null value.
 
             InitializeController(configuration);
 

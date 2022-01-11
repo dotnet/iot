@@ -14,6 +14,7 @@ namespace Iot.Device.Button
     {
         private GpioController _gpioController;
         private PinMode _pinMode;
+        private TimeSpan _debounceTime;
 
         private int _buttonPin;
         private bool _shouldDispose;
@@ -27,8 +28,10 @@ namespace Iot.Device.Button
         /// <param name="pinMode">Pin mode of the system.</param>
         /// <param name="gpio">Gpio Controller.</param>
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
-        public GpioButton(int buttonPin, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp)
-            : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), gpio, shouldDispose, pinMode)
+        /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
+        public GpioButton(int buttonPin, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp,
+            TimeSpan debounceTime = default(TimeSpan))
+            : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), gpio, shouldDispose, pinMode, debounceTime)
         {
         }
 
@@ -41,13 +44,15 @@ namespace Iot.Device.Button
         /// <param name="holding">Min ms a button is pressed to count as holding.</param>
         /// <param name="gpio">Gpio Controller.</param>
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
-        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp)
-            : base(doublePress, holding)
+        /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
+        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp, TimeSpan debounceTime = default(TimeSpan))
+            : base(doublePress, holding, debounceTime)
         {
             _gpioController = gpio ?? new GpioController();
             _shouldDispose = shouldDispose;
             _buttonPin = buttonPin;
             _pinMode = pinMode;
+            _debounceTime = debounceTime;
 
             if (_pinMode == PinMode.Input | _pinMode == PinMode.InputPullDown | _pinMode == PinMode.InputPullUp)
             {

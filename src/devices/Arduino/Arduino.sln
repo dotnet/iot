@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HardwareMonitor", "..\Hardw
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board", "..\Board\Board.csproj", "{0413C8F5-20E0-48B2-8C35-AED67219B7C6}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button", "..\Button\Button.csproj", "{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{0413C8F5-20E0-48B2-8C35-AED67219B7C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0413C8F5-20E0-48B2-8C35-AED67219B7C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0413C8F5-20E0-48B2-8C35-AED67219B7C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,13 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{0F15A5D9-51AA-414A-824A-6ADD1E08EDF2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DhtSensor.sample", "samples\DhtSensor.sample.csproj", "{601CB7D6-15A0-4679-A8B3-9E341E89108E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DhtSensor.sample", "samples\DhtSensor.sample.csproj", "{601CB7D6-15A0-4679-A8B3-9E341E89108E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dhtxx", "Dhtxx.csproj", "{3C11F6B3-D4EA-45C5-B213-EF988840BCB4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dhtxx", "Dhtxx.csproj", "{3C11F6B3-D4EA-45C5-B213-EF988840BCB4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{0AA76E77-4A5D-429B-9555-0086DC92BB2B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,9 +19,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{601CB7D6-15A0-4679-A8B3-9E341E89108E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -46,8 +45,26 @@ Global
 		{3C11F6B3-D4EA-45C5-B213-EF988840BCB4}.Release|x64.Build.0 = Release|Any CPU
 		{3C11F6B3-D4EA-45C5-B213-EF988840BCB4}.Release|x86.ActiveCfg = Release|Any CPU
 		{3C11F6B3-D4EA-45C5-B213-EF988840BCB4}.Release|x86.Build.0 = Release|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Debug|x64.Build.0 = Debug|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Debug|x86.Build.0 = Debug|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Release|x64.ActiveCfg = Release|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Release|x64.Build.0 = Release|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Release|x86.ActiveCfg = Release|Any CPU
+		{0AA76E77-4A5D-429B-9555-0086DC92BB2B}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{601CB7D6-15A0-4679-A8B3-9E341E89108E} = {0F15A5D9-51AA-414A-824A-6ADD1E08EDF2}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BBA99E84-E6C3-4629-BAA0-8067449D2091}
 	EndGlobalSection
 EndGlobal

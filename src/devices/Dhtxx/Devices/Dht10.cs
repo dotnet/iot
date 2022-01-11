@@ -4,6 +4,7 @@
 using System;
 using System.Device;
 using System.Device.I2c;
+using Iot.Device.Common;
 using UnitsNet;
 
 namespace Iot.Device.DHTxx
@@ -23,7 +24,7 @@ namespace Iot.Device.DHTxx
         private const byte DHT10_CMD_SOFTRESET = 0b_1011_1010;
 
         // state, humi[20-13], humi[12-5], humi[4-1]temp[20-17], temp[16-9], temp[8-1]
-        private byte[] _dht10ReadBuff = new byte[6];
+        private ValueArray<byte> _dht10ReadBuff = new ValueArray<byte>(6);
 
         /// <summary>
         /// Get the last read of relative humidity in percentage
@@ -31,12 +32,13 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
+        [Obsolete("This property will be removed in a future release. Use TryGetHumidity instead.")]
         public override RelativeHumidity Humidity
         {
             get
             {
                 ReadData();
-                return GetHumidity(_dht10ReadBuff);
+                return GetHumidity(_dht10ReadBuff.AsSpan());
             }
         }
 
@@ -46,12 +48,13 @@ namespace Iot.Device.DHTxx
         /// <remarks>
         /// If last read was not successfull, it returns double.NaN
         /// </remarks>
+        [Obsolete("This property will be removed in a future release. Use TryGetTemperature instead.")]
         public override Temperature Temperature
         {
             get
             {
                 ReadData();
-                return GetTemperature(_dht10ReadBuff);
+                return GetTemperature(_dht10ReadBuff.AsSpan());
             }
         }
 
@@ -68,7 +71,7 @@ namespace Iot.Device.DHTxx
             i2cDevice.WriteByte(DHT10_CMD_INIT);
         }
 
-        internal override void ReadThroughI2c()
+        internal override ValueArray<byte> ReadThroughI2c()
         {
             if (_i2cDevice is null)
             {
@@ -76,23 +79,25 @@ namespace Iot.Device.DHTxx
             }
 
             // DHT10 has no calibration bits
-            IsLastReadSuccessful = true;
+            _isLastReadSuccessful = true;
 
             _i2cDevice.WriteByte(DHT10_CMD_START);
             // make sure DHT10 ends measurement (in the datasheet P7)
             DelayHelper.DelayMilliseconds(75, true);
 
-            _i2cDevice.Read(_dht10ReadBuff);
+            _i2cDevice.Read(_dht10ReadBuff.AsSpan());
+
+            return _dht10ReadBuff;
         }
 
-        internal override RelativeHumidity GetHumidity(byte[] readBuff)
+        internal override RelativeHumidity GetHumidity(Span<byte> readBuff)
         {
             int raw = (((readBuff[1] << 8) | readBuff[2]) << 4) | readBuff[3] >> 4;
 
             return RelativeHumidity.FromPercent(100.0 * raw / Math.Pow(2, 20));
         }
 
-        internal override Temperature GetTemperature(byte[] readBuff)
+        internal override Temperature GetTemperature(Span<byte> readBuff)
         {
             int raw = ((((readBuff[3] & 0b_0000_1111) << 8) | readBuff[4]) << 8) | readBuff[5];
 

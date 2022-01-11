@@ -19,6 +19,10 @@
     <LangVersion>9</LangVersion>
     <!-- Generate snupkg package -->
     <IncludeSymbols>true</IncludeSymbols>
+
+    <!--We are reusing arcade targets for strongname signing the assembly. Due to this, we must set the strongnamekeyid property
+    in order to ensure that the values for publickey and publickeytoken won't be overwritten by arcade later in the evaluation.-->
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
   <ItemGroup>
