@@ -258,4 +258,4 @@ For which options best fit your use case and how to use them, view the datasheet
 
 ## References
 
-An example of this device used in an arduino based circuit with a rather comprehensive (however not in c#) covering of the datasheet and use case by Giovanni Carrera: The [ArduINA226](https://ardupiclab.blogspot.com/2020/03/the-arduina226-power-monitor.html) power monitor 
+An example of this device used in an arduino based circuit with a rather comprehensive (however not in c#) covering of the datasheet and use case by Giovanni Carrera: The [ArduINA226](https://ardupiclab.blogspot.com/2020/03/the-arduina226-power-monitor.html) power monitor
