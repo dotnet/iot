@@ -6,8 +6,13 @@ using System.Drawing;
 
 namespace Iot.Device
 {
-    public abstract class IntegratedLed : IDisposable
+    public abstract class LedStrip : IDisposable
     {
+        public LedStrip(int length)
+        {
+            Pixels = new Color[length];
+        }
+
         /// <summary>
         /// Color correction parameter
         /// </summary>
@@ -16,21 +21,19 @@ namespace Iot.Device
         /// <summary>
         /// Colors of LEDs
         /// </summary>
-        public Span<Color> Pixels => _pixels;
+        public Color[] Pixels { get; private set; }
 
         public abstract void Flush();
 
-        protected Color[] _pixels;
-
-        protected byte FixGamma(byte v)
+        internal byte FixGamma(byte v)
         {
-            return (byte)(Math.Pow(v/255.0, Gamma)*255);
+            return (byte)Math.Round(Math.Pow(v / 255.0, Gamma) * 255);
         }
 
         /// <inheritdoc/>
         public virtual void Dispose()
         {
-            _pixels = null!;
+            Pixels = null!;
         }
     }
 }
