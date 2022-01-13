@@ -21,8 +21,8 @@ Console.WriteLine($"version: {info.Version}, firmware date: {info.FirmwareDate},
 Console.WriteLine($"{BitConverter.ToString(info.Signature)}");
 Console.WriteLine($"Vin = {brick.InputVoltage.Volts} V");
 Console.WriteLine("Select what you want to test:");
-Console.WriteLine(" 1. Display elements detials");
-Console.WriteLine(" 2. Display connection/disconnecions");
+Console.WriteLine(" 1. Display elements details");
+Console.WriteLine(" 2. Display connection/disconnecion");
 Console.WriteLine(" 3. Move Motors on port A and D");
 Console.WriteLine(" 4. PID with motors on port A");
 Console.WriteLine(" 5. Read color sensor on Port C");

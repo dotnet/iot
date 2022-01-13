@@ -16,6 +16,8 @@ using BuildHat.Models;
 using Iot.Device.BuildHat.Models;
 using Iot.Device.BuildHat.Motors;
 using Iot.Device.BuildHat.Sensors;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 using SixLabors.ImageSharp;
 using UnitsNet;
 
@@ -43,6 +45,7 @@ namespace Iot.Device.BuildHat
         private Thread? _runing;
         private CancellationTokenSource? _cancellationTokenSource;
         private ElectricPotential _vin;
+        private ILogger _logger;
 
         // Those are the colors
         private Dictionary<int, Color> _colors = new Dictionary<int, Color>()
@@ -111,6 +114,7 @@ namespace Iot.Device.BuildHat
         /// <param name="shouldDispose">True to dispose the GPIO Controller.</param>
         public Brick(SerialPort port, GpioController? controller = null, int reset = -1, bool shouldDispose = true)
         {
+            _logger = this.GetCurrentClassLogger();
             SetupGpioAndReset(controller, reset, shouldDispose);
 
             _port = port ?? throw new ArgumentNullException(nameof(port));
@@ -128,6 +132,7 @@ namespace Iot.Device.BuildHat
         /// <param name="shouldDispose">True to dispose the GPIO Controller.</param>
         public Brick(string port, GpioController? controller = null, int reset = -1, bool shouldDispose = true)
         {
+            _logger = this.GetCurrentClassLogger();
             SetupGpioAndReset(controller, reset, shouldDispose);
 
             _port = new(port, 115200, Parity.None, 8, StopBits.One);
@@ -139,6 +144,17 @@ namespace Iot.Device.BuildHat
             Initialize();
             BuildHatInformation = GetBuildHatInformation();
             StartRunning();
+        }
+
+        /// <summary>
+        /// This is used in the tests only
+        /// </summary>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        internal Brick()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+        {
+            // Nothing to dispose
+            _isDisposed = true;
         }
 
         /// <summary>
@@ -252,7 +268,8 @@ namespace Iot.Device.BuildHat
         /// <param name="seconds">The amount of seconds.</param>
         /// <param name="speed">>The speed from - 100 to 100.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
-        public void MoveMotorForSeconds(SensorPort port, double seconds, int speed, bool blocking = false)
+        /// <param name="token">A cancellation token.</param>
+        public void MoveMotorForSeconds(SensorPort port, double seconds, int speed, bool blocking = false, CancellationToken token = default)
         {
             if (seconds <= 0)
             {
@@ -282,7 +299,7 @@ namespace Iot.Device.BuildHat
             PortWrite($"port {(byte)port} ; pid {(byte)port} 0 0 s1 1 0 0.003 0.01 0 100; set pulse {speed} 0.0 {seconds.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
-                Thread.Sleep((int)(seconds * 1000));
+                token.WaitHandle.WaitOne((int)(seconds * 1000));
             }
         }
 
@@ -294,8 +311,9 @@ namespace Iot.Device.BuildHat
         /// <param name="way">The way to go to the position.</param>
         /// <param name="speed">The speed from - 100 to 100.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
+        /// <param name="token">A cancellation token.</param>
         /// <exception cref="ArgumentException">Not a motor or not an active motor.</exception>
-        public void MoveMotorToAbsolutePosition(SensorPort port, int targetPosition, PositionWay way, int speed, bool blocking = false)
+        public void MoveMotorToAbsolutePosition(SensorPort port, int targetPosition, PositionWay way, int speed, bool blocking = false, CancellationToken token = default)
         {
             if (!IsMotor(_sensorType[(byte)port]))
             {
@@ -323,6 +341,20 @@ namespace Iot.Device.BuildHat
             int actualPosition = motor.Position;
             int actualAbsolutePosition = motor.AbsolutePosition;
             double actualPositionDouble = actualPosition / 360.0;
+            double newPosition = ToAbsolutePosition(targetPosition, way, actualPosition, actualAbsolutePosition);
+            double duration = Math.Abs(newPosition - actualPositionDouble) / (speed * 0.05 * motor.PowerLimit);
+            // Set continuous reading
+            SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
+            // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
+            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
+            if (blocking)
+            {
+                token.WaitHandle.WaitOne((int)(duration * 1000));
+            }
+        }
+
+        internal double ToAbsolutePosition(int targetPosition, PositionWay way, int actualPosition, int actualAbsolutePosition)
+        {
             int difference = (targetPosition - actualAbsolutePosition + 180) % 360 - 180;
             double newPosition;
 
@@ -342,11 +374,11 @@ namespace Iot.Device.BuildHat
                 case PositionWay.AntiClockwise:
                     if (difference < 0)
                     {
-                        newPosition = (actualPosition + difference) / 360.0;
+                        newPosition = -(actualPosition - difference) / 360.0;
                     }
                     else
                     {
-                        newPosition = (actualPosition + 360 + difference) / 360.0;
+                        newPosition = -(actualPosition + 360 - difference) / 360.0;
                     }
 
                     break;
@@ -364,15 +396,7 @@ namespace Iot.Device.BuildHat
                     break;
             }
 
-            double duration = Math.Abs(newPosition - actualPositionDouble) / (speed * 0.05 * motor.PowerLimit);
-            // Set continuous reading
-            SelectCombiModesAndRead(port, new int[] { 1, 2, 3 }, false);
-            // Ramp uses first param as initial position, second as target, third is how long, foruth is always 0
-            PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
-            if (blocking)
-            {
-                Thread.Sleep((int)(duration * 1000));
-            }
+            return newPosition;
         }
 
         /// <summary>
@@ -382,9 +406,11 @@ namespace Iot.Device.BuildHat
         /// <param name="targetPosition">The target angle from -180 to +180.</param>
         /// <param name="speed">The speed from - 100 to 100.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
+        /// <param name="token">A cancellation token.</param>
         /// <exception cref="ArgumentException">Not a motor or not an active motor.</exception>
-        public void MoveMotorToPosition(SensorPort port, int targetPosition, int speed, bool blocking = false)
+        public void MoveMotorToPosition(SensorPort port, int targetPosition, int speed, bool blocking = false, CancellationToken token = default)
         {
+            const double AngleTolerance = 2.028;
             if (!IsMotor(_sensorType[(byte)port]))
             {
                 throw new ArgumentException("Not a motor connected");
@@ -413,9 +439,11 @@ namespace Iot.Device.BuildHat
             PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
-                while (!((motor.Position / 360.0 < newPosition + 2.028) && (motor.Position / 360.0 > newPosition - 2.028)))
+                int pos = motor.Position;
+                while ((!((pos / 360.0 < newPosition + AngleTolerance) && (pos / 360.0 > newPosition - AngleTolerance))) && !(token.IsCancellationRequested))
                 {
-                    Thread.Sleep(5);
+                    token.WaitHandle.WaitOne(5);
+                    pos = motor.Position;
                 }
             }
         }
@@ -427,9 +455,11 @@ namespace Iot.Device.BuildHat
         /// <param name="targetPosition">The target angle in degrees.</param>
         /// <param name="speed">The speed from - 100 to 100.</param>
         /// <param name="blocking">True to block the function and wait for the execution.</param>
+        /// /// <param name="token">A cancellation token.</param>
         /// <exception cref="ArgumentException">Not a motor or not an active motor.</exception>
-        public void MoveMotorForDegrees(SensorPort port, int targetPosition, int speed, bool blocking = false)
+        public void MoveMotorForDegrees(SensorPort port, int targetPosition, int speed, bool blocking = false, CancellationToken token = default)
         {
+            const double AngleTolerance = 2.028;
             if (!IsMotor(_sensorType[(byte)port]))
             {
                 throw new ArgumentException("Not a motor connected");
@@ -459,9 +489,11 @@ namespace Iot.Device.BuildHat
             PortWrite($"port {(byte)port} ; pid {(byte)port} 0 1 s4 0.0027777778 0 5 0 .1 3 ; set ramp {actualPositionDouble.ToString(CultureInfo.InvariantCulture)} {newPosition.ToString(CultureInfo.InvariantCulture)} {duration.ToString(CultureInfo.InvariantCulture)} 0\r");
             if (blocking)
             {
-                while (!((motor.Position / 360.0 < newPosition + 2.028) && (motor.Position / 360.0 > newPosition - 2.028)))
+                int pos = motor.Position;
+                while ((!((pos / 360.0 < newPosition + AngleTolerance) && (pos / 360.0 > newPosition - AngleTolerance))) && (!token.IsCancellationRequested))
                 {
-                    Thread.Sleep(5);
+                    token.WaitHandle.WaitOne(5);
+                    pos = motor.Position;
                 }
             }
         }
@@ -756,10 +788,15 @@ namespace Iot.Device.BuildHat
             const string BootloaderSignature = "BuildHAT bootloader version";
             // Let's clear the port first
             PortReadExisting();
+            // We have to do it 2 times to make sure, the first time, it may not provide the proper elements.
             PortWrite(GetFirmwareVersion);
             // Wait enough to get the version if any
             Thread.Sleep(50);
             var prompt = PortReadExisting();
+            PortWrite(GetFirmwareVersion);
+            // Wait enough to get the version if any
+            Thread.Sleep(50);
+            prompt = PortReadExisting();
 
             // In this case, we'll need to uploadthe firmware
             if (prompt.Contains(BootloaderSignature))
@@ -1187,14 +1224,9 @@ namespace Iot.Device.BuildHat
                                 }
 
                             }
-#if DEBUG
                             catch (Exception ex)
                             {
-                                Debug.WriteLine($"Exception: {ex}");
-#else
-                            catch (Exception)
-                            {
-#endif
+                                _logger.LogError(ex, $"Exception in {nameof(ProcessOutput)}: {ex}. Line: {line}");
                                 // Just skip, it can be malformed
                             }
                         }
@@ -1420,14 +1452,9 @@ namespace Iot.Device.BuildHat
                 recoPos.Pid4 = Convert.ToInt32(data[3], 16);
                 sensor.PositionPid = recoPos;
             }
-#if DEBUG
             catch (Exception ex)
             {
-                Debug.WriteLine($"Exception: {ex}");
-#else
-            catch (Exception)
-            {
-#endif
+                _logger.LogError(ex, $"Exception in {nameof(PopulateModelDetails)}: {ex}. Line: {line}");
                 // We are catching anything bad that can happen and just continue
                 // Something may be malformed
                 if ((details != null) && (sensor.ModeDetailsInternal.Count == 0))
@@ -1548,26 +1575,20 @@ namespace Iot.Device.BuildHat
         private string PortReadLine()
         {
             var ret = _port.ReadLine();
-#if DEBUG
-            Debug.WriteLine($"RCV:{ret}");
-#endif
+            _logger.LogDebug($"RCV:{ret}");
             return ret;
         }
 
         private void PortWrite(string str)
         {
             _port.Write(str);
-#if DEBUG
-            Debug.Write($"SND:{str}");
-#endif
+            _logger.LogDebug($"SND:{str}");
         }
 
         private string PortReadExisting()
         {
             var ret = _port.ReadExisting();
-#if DEBUG
-            Debug.WriteLine($"RCV:{ret}");
-#endif
+            _logger.LogDebug($"RCV:{ret}");
             return ret;
         }
 
