@@ -9,12 +9,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-#if BUILDING_IOT_DEVICE_BINDINGS
-internal
-#else
-public
-#endif
-    partial class Interop
+partial class Interop
 {
     [DllImport(AlsaLibrary)]
     public static extern IntPtr snd_strerror(int errnum);

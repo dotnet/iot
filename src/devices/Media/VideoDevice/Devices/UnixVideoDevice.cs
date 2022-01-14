@@ -378,7 +378,7 @@ namespace Iot.Device.Media
                 V4l2Struct(V4l2Request.VIDIOC_QUERYBUF, ref buffer);
 
                 buffers[i].Length = buffer.length;
-                buffers[i].Start = Interop.mmap(IntPtr.Zero, (int)buffer.length, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, _deviceFileDescriptor, (int)buffer.m.offset);
+                buffers[i].Start = Interop.mmap(IntPtr.Zero, (int)buffer.length, Interop.MemoryMappedProtections.PROT_READ | Interop.MemoryMappedProtections.PROT_WRITE, Interop.MemoryMappedFlags.MAP_SHARED, _deviceFileDescriptor, (int)buffer.m.offset);
             }
 
             // Put the buffer in the processing queue
@@ -599,7 +599,7 @@ namespace Iot.Device.Media
                     return;
                 }
 
-                _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
+                _deviceFileDescriptor = Interop.open(deviceFileName, Interop.FileOpenFlags.O_RDWR);
 
                 if (_deviceFileDescriptor < 0)
                 {

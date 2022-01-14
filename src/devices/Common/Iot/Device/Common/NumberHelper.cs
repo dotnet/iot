@@ -8,12 +8,7 @@ namespace Iot.Device.Common
     /// <summary>
     /// Helpers for number.
     /// </summary>
-#if BUILDING_IOT_DEVICE_BINDINGS
-    internal
-#else
-    public
-#endif
-    static class NumberHelper
+    static partial class NumberHelper
     {
         /// <summary>
         /// BCD To decimal

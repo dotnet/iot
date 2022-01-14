@@ -8,13 +8,32 @@
 using System;
 using System.Runtime.InteropServices;
 
-#if BUILDING_IOT_DEVICE_BINDINGS
-internal
-#else
-public
-#endif
 partial class Interop
 {
+    public enum FileOpenFlags
+    {
+        O_RDONLY = 0x00,
+        O_RDWR = 0x02,
+        O_NONBLOCK = 0x800,
+        O_SYNC = 0x101000
+    }
+
+    public enum MemoryMappedProtections
+    {
+        PROT_NONE = 0x0,
+        PROT_READ = 0x1,
+        PROT_WRITE = 0x2,
+        PROT_EXEC = 0x4
+    }
+
+    [Flags]
+    public enum MemoryMappedFlags
+    {
+        MAP_SHARED = 0x01,
+        MAP_PRIVATE = 0x02,
+        MAP_FIXED = 0x10
+    }
+
     [DllImport(LibcLibrary, SetLastError = true)]
     public static extern int ioctl(int fd, int request, IntPtr argp);
 
@@ -29,45 +48,4 @@ partial class Interop
 
     [DllImport(LibcLibrary)]
     public static extern int munmap(IntPtr addr, int length);
-}
-
-#if BUILDING_IOT_DEVICE_BINDINGS
-internal
-#else
-public
-#endif
-    enum FileOpenFlags
-{
-    O_RDONLY = 0x00,
-    O_RDWR = 0x02,
-    O_NONBLOCK = 0x800,
-    O_SYNC = 0x101000
-}
-
-[Flags]
-#if BUILDING_IOT_DEVICE_BINDINGS
-internal
-#else
-public
-#endif
-    enum MemoryMappedProtections
-{
-    PROT_NONE = 0x0,
-    PROT_READ = 0x1,
-    PROT_WRITE = 0x2,
-    PROT_EXEC = 0x4
-}
-
-[Flags]
-
-#if BUILDING_IOT_DEVICE_BINDINGS
-internal
-#else
-public
-#endif
-    enum MemoryMappedFlags
-{
-    MAP_SHARED = 0x01,
-    MAP_PRIVATE = 0x02,
-    MAP_FIXED = 0x10
 }

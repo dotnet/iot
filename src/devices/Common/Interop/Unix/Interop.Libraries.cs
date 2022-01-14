@@ -3,12 +3,8 @@
 
 /// <summary>
 /// Interop methods for Windows and Unix (P/Invoke call declarations)
+/// This class is internal by default, but gets promoted to public within the device binding projects
 /// </summary>
-#if BUILDING_IOT_DEVICE_BINDINGS
-    internal
-#else
-public
-#endif
 partial class Interop
 {
     private const string LibcLibrary = "libc";

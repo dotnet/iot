@@ -6,11 +6,7 @@ using System.Runtime.InteropServices;
 
 #pragma warning disable SA1300
 #pragma warning disable CS1591
-#if BUILDING_IOT_DEVICE_BINDINGS
-internal
-#else
-public
-#endif
+
 partial class Interop
 {
     public static int VK_NUMLOCK = 0x90;

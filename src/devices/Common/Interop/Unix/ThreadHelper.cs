@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 #pragma warning disable SA1307 // Field should begin with upper-case letter
@@ -8,14 +10,9 @@
 
 using System.Runtime.InteropServices;
 
-namespace System.Interop
+partial class Interop
 {
-#if BUILDING_IOT_DEVICE_BINDINGS
-    internal
-#else
-    public
-#endif
-    class ThreadHelper
+    public class ThreadHelper
     {
         public static bool SetCurrentThreadHighPriority()
         {
