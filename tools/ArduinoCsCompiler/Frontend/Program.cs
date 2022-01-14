@@ -344,6 +344,11 @@ namespace ArduinoCsCompiler
 
         private void PrintStateFromDebuggerData((DebuggerDataKind Kind, byte[] Data) x)
         {
+            if (_debugger == null)
+            {
+                return;
+            }
+
             if (x.Kind == DebuggerDataKind.ExecutionStack)
             {
                 _debugger.WriteCurrentStack(Array.Empty<string>());

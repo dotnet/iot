@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -357,14 +358,14 @@ namespace ArduinoCsCompiler
             _commandHandler.SendDebuggerCommand(DebuggerCommand.Continue);
         }
 
-        public List<DebuggerVariable> DecodeVariables(DebuggerDataKind kind, byte[] data, out MemberInfo? methodCurrentlyExecuting, out int stackFrame)
+        public List<DebuggerVariable> DecodeVariables(DebuggerDataKind kind, byte[] data, out MemberInfo methodCurrentlyExecuting, out int stackFrame)
         {
             List<DebuggerVariable> ret = new();
             int idx = 7;
             stackFrame = FirmataCommandSequence.DecodeInt32(data, idx);
             idx = 12;
             int methodToken = FirmataCommandSequence.DecodeInt32(data, idx);
-            methodCurrentlyExecuting = _set.InverseResolveToken(methodToken);
+            methodCurrentlyExecuting = _set.InverseResolveToken(methodToken) ?? throw new InvalidDataException($"Internal data inconsistency: No method for token {methodToken}.");
             ArduinoMethodDeclaration? methodDeclaration = null;
             if (methodCurrentlyExecuting is MethodBase mb)
             {
