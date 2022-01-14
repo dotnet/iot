@@ -14,7 +14,4 @@
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
     </AssemblyAttribute>
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
-  </ItemGroup>
 </Project>

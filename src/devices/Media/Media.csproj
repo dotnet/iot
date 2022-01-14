@@ -17,8 +17,4 @@
     <Compile Include="SoundDevice/Devices/*.cs" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
-  </ItemGroup>
-
 </Project>

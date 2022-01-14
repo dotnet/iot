@@ -10,7 +10,4 @@
     <EmbeddedResource Remove="samples\**" />
     <None Remove="samples\**" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
-  </ItemGroup>
 </Project>

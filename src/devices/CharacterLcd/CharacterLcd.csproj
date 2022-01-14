@@ -22,7 +22,6 @@
     <Compile Include="Registers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <ProjectReference Include="../ShiftRegister/ShiftRegister.csproj" />
     <None Include="README.md" />
   </ItemGroup>

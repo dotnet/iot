@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VideoDevice.Samples", "Vide
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MjpegStream", "VideoDevice\samples\MjpegStream\MjpegStream.csproj", "{C23AC95D-F162-4378-A02E-F9513D9984D8}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
