@@ -40,7 +40,6 @@ namespace Iot.Device.Lp55231
         public static byte BlueChannel(byte instance) => (byte)(instance * 2 + 1);
 
         private readonly I2cDevice _device;
-        private readonly byte[] _channelIntensity;
         private readonly IReadOnlyList<RgbLed> _rgbLeds;
 
         /// <summary>
@@ -57,7 +56,6 @@ namespace Iot.Device.Lp55231
             settings ??= new I2cConnectionSettings(1, I2cAddressBase);
 
             _device = I2cDevice.Create(settings);
-            _channelIntensity = new byte[9];
 
             _rgbLeds = new[]
             {
