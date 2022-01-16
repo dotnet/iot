@@ -569,6 +569,15 @@ namespace ArduinoCsCompiler
             }
         }
 
+        public void SendGlobalMetadata(UInt32 staticRootVectorSize)
+        {
+            FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.GlobalMetadata);
+            sequence.SendInt32(4); // Length
+            sequence.SendUInt32(staticRootVectorSize);
+            sequence.WriteByte(FirmataCommandSequence.EndSysex);
+            WaitAndHandleIlCommand(sequence);
+        }
+
         public void ClearFlash()
         {
             FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.EraseFlash);

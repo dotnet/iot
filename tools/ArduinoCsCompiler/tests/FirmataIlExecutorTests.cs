@@ -357,6 +357,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.StringInterpolation), 0)]
         [InlineData(nameof(TestMethods.UnitsNetTemperatureTest), 0)]
         [InlineData(nameof(TestMethods.StringEncoding), 0)]
+        [InlineData(nameof(TestMethods.PrivateImplementationDetailsUsedCorrectly), 0)]
         public void BrokenImplementationBehaviorValidation(string methodName, int arg1)
         {
             var compilerSettings = new CompilerSettings()

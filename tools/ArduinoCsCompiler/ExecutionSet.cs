@@ -176,6 +176,20 @@ namespace ArduinoCsCompiler
             set;
         }
 
+        public long? ExpectedMemoryUsage
+        {
+            get;
+            set;
+        }
+
+        public long? StaticMemberSize { get; set; }
+
+        public List<KeyValuePair<Type, ClassStatistics>>? Statistics
+        {
+            get;
+            set;
+        }
+
         internal Dictionary<Type, MethodInfo> ArrayListImplementation
         {
             get
@@ -219,6 +233,8 @@ namespace ArduinoCsCompiler
             {
                 if (!_compiler.BoardHasKernelLoaded(_kernelSnapShot))
                 {
+                    // Must have been calculated
+                    EstimateRequiredMemory();
                     // Perform a full flash erase (since the above also returns false if a wrong kernel is loaded)
                     _compiler.ClearAllData(true, true);
                     _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
@@ -240,6 +256,7 @@ namespace ArduinoCsCompiler
                     _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
                     _compiler.SendStrings(_strings.ToList(), EmptySnapShot, _kernelSnapShot, true);
                     _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendGlobalMetadata((UInt32)StaticMemberSize.GetValueOrDefault(0));
                     _compiler.CopyToFlash();
 
                     // The kernel contains no startup method, therefore don't use one
@@ -262,6 +279,7 @@ namespace ArduinoCsCompiler
                 throw new InvalidOperationException("Main entry point not defined");
             }
 
+            EstimateRequiredMemory();
             bool doWriteProgramToFlash = CompilerSettings.DoCopyToFlash(false);
 
             if (!_compiler.BoardHasKernelLoaded(to))
@@ -303,6 +321,7 @@ namespace ArduinoCsCompiler
                 _compiler.SendStrings(_strings.ToList(), from, to, false);
                 _logger.LogInformation("5/5 Uploading special types...");
                 _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), from, to, false);
+                _compiler.SendGlobalMetadata((UInt32)StaticMemberSize.GetValueOrDefault(0));
                 _logger.LogInformation("Finalizing...");
                 if (doWriteProgramToFlash)
                 {
@@ -369,19 +388,35 @@ namespace ArduinoCsCompiler
 
         public long EstimateRequiredMemory()
         {
+            if (ExpectedMemoryUsage.HasValue)
+            {
+                return ExpectedMemoryUsage.Value;
+            }
+
             return EstimateRequiredMemory(out _);
         }
 
         public long EstimateRequiredMemory(out List<KeyValuePair<Type, ClassStatistics>> details)
         {
+            if (ExpectedMemoryUsage.HasValue && Statistics != null)
+            {
+                details = Statistics;
+                return ExpectedMemoryUsage.Value;
+            }
+
             const int MethodBodyMinSize = 40;
+            const int StaticsPerFieldMinSize = 8; // In development: 4 bytes for field token, 1 byte variable type, 1 byte marker, 2 bytes length
+
             Dictionary<Type, ClassStatistics> classSizes = new Dictionary<Type, ClassStatistics>();
             List<byte[]> methodBodies = new List<byte[]>();
             long bytesUsed = 0;
+            long staticSize = 0;
+            List<(int, ClassMember)> tempFields = new();
             foreach (var cls in Classes)
             {
                 int classBytes = 40;
                 classBytes += cls.StaticSize;
+
                 classBytes += cls.Members.Count * 8; // Assuming 32 bit target system for now
                 foreach (var field in cls.Members)
                 {
@@ -391,6 +426,15 @@ namespace ArduinoCsCompiler
                         {
                             classBytes += data.InitializerData?.Length ?? 0;
                         }
+                    }
+
+                    if (field.SizeOfField > 0
+                        && (field.VariableType & VariableKind.StaticMember) == VariableKind.StaticMember
+                        && !field.Name.Contains(MicroCompiler.PrivateImplementationDetailsName, StringComparison.Ordinal))
+                    {
+                        staticSize += StaticsPerFieldMinSize;
+                        staticSize += field.StaticFieldSize;
+                        tempFields.Add((field.StaticFieldSize, field));
                     }
                 }
 
@@ -442,6 +486,9 @@ namespace ArduinoCsCompiler
             ////var compressedBodies = methodBodies.Distinct(new ByteArrayEqualityComparer());
             ////long compressedBodyLength = compressedBodies.Sum(x => x.Length);
 
+            ExpectedMemoryUsage = bytesUsed;
+            Statistics = details;
+            StaticMemberSize = staticSize;
             return bytesUsed;
         }
 
@@ -728,6 +775,7 @@ namespace ArduinoCsCompiler
                         entries.Add((token2, info));
                     }
 
+                    ClearStatistics();
                     _specialTypeList.AddRange(entries);
                 }
                 else
@@ -776,6 +824,7 @@ namespace ArduinoCsCompiler
                 throw new InvalidOperationException($"Class {type} should have been replaced by its replacement");
             }
 
+            ClearStatistics();
             _classes.Add(type);
             _logger.LogDebug($"Class {type.TheType.MemberInfoSignature(true)} added to the execution set with token 0x{type.NewToken:X}");
             return true;
@@ -859,6 +908,7 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            ClearStatistics();
             _methods.Add(method);
             method.Index = _numDeclaredMethods;
             _numDeclaredMethods++;
@@ -1214,6 +1264,7 @@ namespace ArduinoCsCompiler
                 return existing.Token;
             }
 
+            ClearStatistics();
             int token = _nextStringToken + encoded.Length;
             _nextStringToken += StringTokenStep;
             _strings.Add((token, encoded, data));
@@ -1409,6 +1460,12 @@ namespace ArduinoCsCompiler
 
             w.WriteLine();
             w.Close();
+        }
+
+        private void ClearStatistics()
+        {
+            ExpectedMemoryUsage = null;
+            Statistics = null;
         }
     }
 }

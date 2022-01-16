@@ -15,12 +15,14 @@ namespace ArduinoCsCompiler
             Name = name;
         }
 
-        public ClassMember(FieldInfo field, VariableKind variableType, int token, int sizeOfField)
+        public ClassMember(FieldInfo field, VariableKind variableType, int token, int sizeOfField, int staticFieldSize)
         {
             VariableType = variableType;
             Token = token;
             BaseTokens = null;
             SizeOfField = sizeOfField;
+            Field = field;
+            StaticFieldSize = staticFieldSize;
             Name = $"Field: {field.MemberInfoSignature()}";
         }
 
@@ -40,6 +42,20 @@ namespace ArduinoCsCompiler
         }
 
         public MethodBase? Method
+        {
+            get;
+        }
+
+        public FieldInfo? Field
+        {
+            get;
+        }
+
+        /// <summary>
+        /// This value is non-zero for static fields. The length is the size of the root field required, so it is
+        /// the type length for value types but 4 (sizeof(void*)) for reference types.
+        /// </summary>
+        public int StaticFieldSize
         {
             get;
         }

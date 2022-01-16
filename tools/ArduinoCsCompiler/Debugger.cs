@@ -407,6 +407,11 @@ namespace ArduinoCsCompiler
                 var body = arduinoMethodDeclaration.MethodBase.GetMethodBody();
                 if (dataKind == DebuggerDataKind.Locals)
                 {
+                    if (body == null)
+                    {
+                        throw new InvalidDataException("No valid body for existing method");
+                    }
+
                     // Locals in fact do not have a name in metadata, it seems
                     type = body.LocalVariables[localNo].LocalType;
                 }

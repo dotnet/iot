@@ -32,6 +32,8 @@ namespace ArduinoCsCompiler
             // ("System.Private.Uri", typeof(System.Uri)),
         };
 
+        internal static readonly string PrivateImplementationDetailsName = "<PrivateImplementationDetails>";
+
         private readonly ArduinoBoard _board;
         private readonly List<ArduinoTask> _activeTasks;
         private readonly object _activeTasksLock;
@@ -505,13 +507,16 @@ namespace ArduinoCsCompiler
             }
 
             List<ClassMember> memberTypes = new List<ClassMember>();
+
             for (var index = 0; index < fields.Count; index++)
             {
+                int staticFieldSize = 0;
                 var field = fields[index];
                 var fieldType = GetVariableType(field.FieldType, StructAlignment(classType, fields), out var size);
                 if (field.IsStatic)
                 {
                     fieldType |= VariableKind.StaticMember;
+                    staticFieldSize = Math.Max(SizeOfVoidPointer(), size);
                 }
 
                 // The only (known) field that can contain a function pointer. Getting the type correct here helps in type tracking and debugging
@@ -521,10 +526,11 @@ namespace ArduinoCsCompiler
                 }
 
                 int token = 0;
+                object? fieldValue;
                 if (field.IsLiteral && classType.IsEnum)
                 {
-                    // This is a constant field (typically an enum value) - provide the value instead of the token
-                    object fieldValue = field.GetValue(null)!;
+                    // This is a constant enum value field - provide the value instead of the token
+                    fieldValue = field.GetValue(null)!;
                     Type underlyingType = Enum.GetUnderlyingType(classType);
                     if (underlyingType == typeof(int))
                     {
@@ -571,12 +577,51 @@ namespace ArduinoCsCompiler
                         throw new NotSupportedException($"Unable to cast {fieldValue} to a constant, when trying to read constant {field.Name} of {classType.MemberInfoSignature()}");
                     }
                 }
+                else if (field.IsLiteral)
+                {
+                    // This is a const field of a class. They're not normally used (unless via reflection), because the compiler directly replaces
+                    // their use with a ldc.i4.XY or a LDSTR instruction.
+                    continue;
+                }
+                else if (field.DeclaringType != null && field.DeclaringType.Name.Contains(PrivateImplementationDetailsName))
+                {
+                    // Now this is a constant field of the PrivateImplementationDetails class. We need its value somewhere
+                    if (field.FieldType.Name.Contains("StaticArrayInitType", StringComparison.Ordinal))
+                    {
+                        // The value is added when an LD_TOKEN instruction is encountered, later in the parser
+                        token = set.GetOrAddFieldToken(field);
+                    }
+                    else
+                    {
+                        fieldValue = field.GetValue(null)!;
+                        byte[] data;
+                        var t = fieldValue.GetType();
+                        if (t == typeof(Int32))
+                        {
+                            data = BitConverter.GetBytes((int)fieldValue);
+                        }
+                        else if (t == typeof(Int64))
+                        {
+                            data = BitConverter.GetBytes((Int64)fieldValue);
+                        }
+                        else if (t == typeof(Int16))
+                        {
+                            data = BitConverter.GetBytes((Int16)fieldValue);
+                        }
+                        else
+                        {
+                            throw new NotSupportedException($"Unable to interpret value {fieldValue} as any known internal type");
+                        }
+
+                        token = set.GetOrAddFieldToken(field, data);
+                    }
+                }
                 else
                 {
                     token = set.GetOrAddFieldToken(field);
                 }
 
-                var newvar = new ClassMember(field, fieldType, token, size);
+                var newvar = new ClassMember(field, fieldType, token, size, staticFieldSize);
                 memberTypes.Add(newvar);
             }
 
@@ -608,11 +653,24 @@ namespace ArduinoCsCompiler
                 var openType = classType.GetGenericTypeDefinition();
                 if (openType == typeof(EqualityComparer<>))
                 {
+                    // The logic here can be refined by reversing the logic in ComparerHelpers.CreateDefaultEqualityComparer
                     var typeArgs = classType.GetGenericArguments();
                     var requiredInterface = typeof(IEquatable<>).MakeGenericType(typeArgs);
                     PrepareClassDeclaration(set, requiredInterface);
                     if (!typeArgs[0].IsValueType)
                     {
+                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                        PrepareClassDeclaration(set, alsoRequired);
+                    }
+                    else if (typeArgs[0].IsGenericType && typeArgs[0].GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        var embeddedType = typeArgs[0].GetGenericArguments()[0];
+                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.NullableEqualityComparer`1")!.MakeGenericType(embeddedType);
+                        PrepareClassDeclaration(set, alsoRequired);
+                    }
+                    else if (!typeArgs[0].IsAssignableTo(requiredInterface))
+                    {
+                        // If the value type being declared does not implement IEquatable<OfItself> we need an ObjectEqualityComparer<T> instead
                         var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
                         PrepareClassDeclaration(set, alsoRequired);
                     }
@@ -964,7 +1022,7 @@ namespace ArduinoCsCompiler
                     continue;
                 }
 
-                _logger.LogDebug($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes");
+                _logger.LogDebug($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes. Token 0x{e.Token:X8}.");
                 _commandHandler.SendConstant(e.Token, e.InitializerData);
                 idx++;
             }
@@ -975,6 +1033,11 @@ namespace ArduinoCsCompiler
             // Counting the existing list elements should be enough here.
             var listToLoad = typeList.Skip(fromSnapShot.SpecialTypes.Count).Take(toSnapShot.SpecialTypes.Count - fromSnapShot.SpecialTypes.Count).ToList();
             _commandHandler.SendSpecialTypeList(listToLoad);
+        }
+
+        internal void SendGlobalMetadata(UInt32 staticRootVectorSize)
+        {
+            _commandHandler.SendGlobalMetadata(staticRootVectorSize);
         }
 
         internal void SendStrings(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,

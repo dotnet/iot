@@ -47,6 +47,12 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation("StringCtorCharPtr", 19)]
+        public unsafe MiniString(char* value, int startIndex, int length)
+        {
+            throw new NotImplementedException();
+        }
+
         // This is a bit odd: All of these default constructors on System::String are never actually called, because the runtime handles string construction specially.
         /*
         [ArduinoImplementation("StringCtor0")]

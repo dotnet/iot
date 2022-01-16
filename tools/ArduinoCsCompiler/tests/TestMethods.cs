@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -1441,5 +1442,14 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        /// <summary>
+        /// The IPAddress class uses class "PrivateImplementationDetails" directly to construct its static fields (IPAddress.Loopback, etc.)
+        /// Not sure when the compiler does this in contrast to using LD_TOKEN together with RuntimeHelpers.InitializeArray
+        /// </summary>
+        public static int PrivateImplementationDetailsUsedCorrectly(int arg1, int arg2)
+        {
+            MiniAssert.AreEqual("127.0.0.1", IPAddress.Loopback.ToString());
+            return 1;
+        }
     }
 }

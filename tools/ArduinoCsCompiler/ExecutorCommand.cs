@@ -23,8 +23,8 @@ namespace ArduinoCsCompiler
         SetConstantMemorySize = 16,
         SpecialTokenList = 17,
         ExceptionClauses = 18,
+        GlobalMetadata = 19,
 
-        ArrayOperations = 19,
         QueryHardware = 20,
 
         ConditionalBreakpointHit = 30,

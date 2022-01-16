@@ -15,7 +15,7 @@ namespace ArduinoCsCompiler
         }
 
         public DebuggerVariable(FieldInfo field, VariableKind variableType, int token, int sizeOfField)
-            : base(field, variableType, token, sizeOfField)
+            : base(field, variableType, token, sizeOfField, 0)
         {
         }
 
