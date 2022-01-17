@@ -46,7 +46,7 @@ namespace Iot.Device.Rtc
         /// The time must be given in utc.
         /// The method requires elevated permissions. On Windows, the calling user must either be administrator or the right
         /// "Change the system clock" must have been granted to the "Users" group (in Security policy management).
-        /// On Unix and MacOs, the current user must be root, must be able to sudo without password or the "date" command must have the setUid bit set.
+        /// On Unix and MacOs, the current user must be root or the "date" command must have the setUid bit set.
         /// </summary>
         /// <remarks>
         /// This method is primarily intended for setting the system clock from an external clock source, such as a DS1307 or a GNSS source when no
