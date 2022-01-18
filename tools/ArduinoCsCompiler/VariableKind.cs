@@ -16,9 +16,11 @@ namespace ArduinoCsCompiler
         ReferenceArray = 7, // The slot contains a reference to an array of reference types
         Float = 8,
         LargeValueType = 9, // The slot contains a large value type
+        // 8 byte types have bit 4 set
         Int64 = 16 + 1,
         Uint64 = 16 + 2,
         Double = 16 + 4,
+
         Reference = 32, // Address of a variable
         RuntimeFieldHandle = 33, // So far this is a pointer to a constant initializer
         RuntimeTypeHandle = 34, // A type handle. The value is a type token

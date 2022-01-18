@@ -77,6 +77,11 @@ namespace ArduinoCsCompiler
             _members.Add(member);
         }
 
+        public void RemoveMemberAt(int index)
+        {
+            _members.RemoveAt(index);
+        }
+
         public override string ToString()
         {
             return Name;

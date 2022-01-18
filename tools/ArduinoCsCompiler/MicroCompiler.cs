@@ -516,6 +516,11 @@ namespace ArduinoCsCompiler
                 if (field.IsStatic)
                 {
                     fieldType |= VariableKind.StaticMember;
+                    if (!field.FieldType.IsValueType)
+                    {
+                        size = SizeOfVoidPointer();
+                    }
+
                     staticFieldSize = Math.Max(SizeOfVoidPointer(), size);
                 }
 
@@ -822,6 +827,8 @@ namespace ArduinoCsCompiler
                     i--;
                 }
             }
+
+            set.RemoveUnusedDataFields();
 
             if (!forKernel)
             {

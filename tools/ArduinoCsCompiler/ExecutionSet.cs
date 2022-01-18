@@ -54,6 +54,7 @@ namespace ArduinoCsCompiler
         private int _nextStringToken;
         private SnapShot _kernelSnapShot;
         private Dictionary<Type, MethodInfo> _arrayListImpl;
+        private List<(int, ClassMember)> _staticFieldsUsed;
 
         static ExecutionSet()
         {
@@ -111,6 +112,7 @@ namespace ArduinoCsCompiler
             _nextToken = (int)KnownTypeTokens.LargestKnownTypeToken + 1;
             _nextGenericToken = GenericTokenStep * 4; // The first entries are reserved (see KnownTypeTokens)
             _nextStringToken = StringTokenStep; // The lower 16 bit are the length
+            _staticFieldsUsed = new List<(int, ClassMember)>();
 
             _numDeclaredMethods = 0;
             _entryPoint = null!;
@@ -153,6 +155,7 @@ namespace ArduinoCsCompiler
             _entryPoint = setToClone._entryPoint;
             _kernelSnapShot = setToClone._kernelSnapShot;
             _compilerSettings = compilerSettings.Clone();
+            _staticFieldsUsed = new List<(int, ClassMember)>(setToClone._staticFieldsUsed);
             if (setToClone.FirmwareStartupSequence != null)
             {
                 FirmwareStartupSequence = new List<IlCode>(setToClone.FirmwareStartupSequence);
@@ -405,14 +408,15 @@ namespace ArduinoCsCompiler
             }
 
             const int MethodBodyMinSize = 40;
-            const int StaticsPerFieldMinSize = 8; // In development: 4 bytes for field token, 1 byte variable type, 1 byte marker, 2 bytes length
+            const int StaticsPerFieldMinSize = 8; // 4 bytes for field token, 1 byte variable type, 1 byte marker, 2 bytes length
 
             Dictionary<Type, ClassStatistics> classSizes = new Dictionary<Type, ClassStatistics>();
             List<byte[]> methodBodies = new List<byte[]>();
             long bytesUsed = 0;
             long staticSize = 0;
             List<(int, ClassMember)> tempFields = new();
-            foreach (var cls in Classes)
+            _staticFieldsUsed = new List<(int, ClassMember)>();
+            foreach (var cls in Classes.OrderBy(x => (uint)x.NewToken))
             {
                 int classBytes = 40;
                 classBytes += cls.StaticSize;
@@ -428,13 +432,37 @@ namespace ArduinoCsCompiler
                         }
                     }
 
-                    if (field.SizeOfField > 0
-                        && (field.VariableType & VariableKind.StaticMember) == VariableKind.StaticMember
-                        && !field.Name.Contains(MicroCompiler.PrivateImplementationDetailsName, StringComparison.Ordinal))
+                    if (field.Field == null || field.Field.DeclaringType!.IsEnum)
                     {
+                        // A constant field or an enum member. Don't count these.
+                        continue;
+                    }
+
+                    if (field.SizeOfField > 0
+                        && (field.VariableType & VariableKind.StaticMember) == VariableKind.StaticMember)
+                    {
+                        // We need room for the initializers, but only for the small ones
+                        if (field.Name.Contains(MicroCompiler.PrivateImplementationDetailsName, StringComparison.Ordinal) && field.StaticFieldSize > 8)
+                        {
+                            continue;
+                        }
+
                         staticSize += StaticsPerFieldMinSize;
-                        staticSize += field.StaticFieldSize;
-                        tempFields.Add((field.StaticFieldSize, field));
+                        int fieldSizeToUse = 4;
+                        // They all still have the static bit set
+                        if (field.VariableType == (VariableKind.Double | VariableKind.StaticMember) ||
+                            field.VariableType == (VariableKind.Int64 | VariableKind.StaticMember) ||
+                            field.VariableType == (VariableKind.Uint64 | VariableKind.StaticMember))
+                        {
+                            fieldSizeToUse = 8;
+                        }
+                        else if (field.VariableType == (VariableKind.LargeValueType | VariableKind.StaticMember))
+                        {
+                            fieldSizeToUse = Math.Max(4, field.StaticFieldSize);
+                        }
+
+                        staticSize += fieldSizeToUse;
+                        _staticFieldsUsed.Add((fieldSizeToUse + StaticsPerFieldMinSize, field));
                     }
                 }
 
@@ -1377,6 +1405,7 @@ namespace ArduinoCsCompiler
             using StreamWriter w = new StreamWriter(tokenMapFile);
 
             w.WriteLine("Token map file, ordered by token number");
+            w.WriteLine("=======================================");
             w.WriteLine();
             List<uint> tokens = new List<uint>();
             tokens.AddRange(_patchedMethodTokens.Select(x => (uint)x.Value));
@@ -1422,6 +1451,7 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            w.WriteLine("================================================");
             long size = EstimateRequiredMemory(out var details);
             w.WriteLine($"Total estimated flash space required: {size} bytes ({size / 1024} kb)");
             w.WriteLine($"Total number of classes in execution set: {_classes.Count}.");
@@ -1450,7 +1480,7 @@ namespace ArduinoCsCompiler
             w.WriteLine($"Total number of data blobs in execution set: {converted.Count} with a total size of {constDataUsed} bytes ({constDataUsed / 1024} kb)");
             w.WriteLine();
             w.WriteLine("Classes, sorted by size");
-            w.WriteLine();
+            w.WriteLine("=======================");
 
             foreach (var stat in details)
             {
@@ -1459,6 +1489,18 @@ namespace ArduinoCsCompiler
             }
 
             w.WriteLine();
+            w.WriteLine("Static root fields");
+            w.WriteLine("==================");
+
+            int offset = 0;
+            foreach (var f in _staticFieldsUsed)
+            {
+                w.WriteLine($"0x{f.Item2.Token:X8}: {f.Item2.Name} reserved {f.Item1} bytes at offset {offset}");
+                offset += f.Item1;
+            }
+
+            w.WriteLine($"Total static root size required {StaticMemberSize} bytes for {_staticFieldsUsed.Count} fields.");
+
             w.Close();
         }
 
@@ -1466,6 +1508,31 @@ namespace ArduinoCsCompiler
         {
             ExpectedMemoryUsage = null;
             Statistics = null;
+        }
+
+        /// <summary>
+        /// Remove initializer fields (in PrivateImplementationDetails) that are unused.
+        /// We initialize the class as a whole, but only in the end we know which fields are actually used.
+        /// </summary>
+        public void RemoveUnusedDataFields()
+        {
+            ClearStatistics();
+            foreach (var c in _classes.Where(x => x.Name.Contains(MicroCompiler.PrivateImplementationDetailsName, StringComparison.Ordinal)))
+            {
+                for (var index = 0; index < c.Members.Count; index++)
+                {
+                    var field = c.Members[index];
+                    var f = field.Field;
+                    if (f != null && (f.IsStatic || f.IsLiteral))
+                    {
+                        if (!_patchedFieldTokens.TryGetValue(f, out var value) || value.InitializerData == null)
+                        {
+                            c.RemoveMemberAt(index);
+                            index--;
+                        }
+                    }
+                }
+            }
         }
     }
 }
