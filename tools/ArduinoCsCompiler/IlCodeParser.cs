@@ -344,8 +344,17 @@ namespace ArduinoCsCompiler
                             mb = (FieldInfo)members.Single();
                         }
 
-                        // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
-                        patchValue = set.GetOrAddFieldToken(mb);
+                        var data = TryReadInitializerData(mb);
+                        if (data != null)
+                        {
+                            patchValue = set.GetOrAddFieldToken(mb, data);
+                        }
+                        else
+                        {
+                            // We're currently expecting that we don't need to patch fields, because system functions don't generally allow public access to them
+                            patchValue = set.GetOrAddFieldToken(mb);
+                        }
+
                         fieldsUsed.Add((FieldInfo)set.InverseResolveToken(patchValue)!);
 
                         // Add the fields' class to the list of used classes, or that one will be missing if the class consists of only fields (rare, but happens)
@@ -380,29 +389,7 @@ namespace ArduinoCsCompiler
                         }
                         else if (resolved is FieldInfo mi)
                         {
-                            // That's a static field initializer. Unfortunately, getting to the data it points to is quite ugly.
-                            // The name is something like "__StaticArrayInitTypeSize=6". We need the length (it is always in bytes, regardless of the data type)
-                            string valueName = mi.FieldType.Name;
-
-                            // This code is not written with safety in mind. If any of this fails, either there's an unhandled case we have to consider or
-                            // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
-                            string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
-                            int len;
-                            if (length == "Int32")
-                            {
-                                len = 4;
-                            }
-                            else if (length == "Int64")
-                            {
-                                len = 8;
-                            }
-                            else
-                            {
-                                len = int.Parse(length);
-                            }
-
-                            byte[] array = new byte[len];
-                            System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(array, mi.FieldHandle);
+                            byte[] array = TryReadInitializerData(mi);
                             patchValue = set.GetOrAddFieldToken(mi, array);
                         }
                         else
@@ -450,6 +437,39 @@ namespace ArduinoCsCompiler
 
             var exceptions = AnalyzeExceptionClauses(set, m, typesUsed);
             return new IlCode(method, byteCode, methodsUsed, fieldsUsed, typesUsed, exceptions);
+        }
+
+        private static byte[]? TryReadInitializerData(FieldInfo mi)
+        {
+            // That's a static field initializer. Unfortunately, getting to the data it points to is quite ugly.
+            // The name is something like "__StaticArrayInitTypeSize=6". We need the length (it is always in bytes, regardless of the data type)
+            string valueName = mi.FieldType.Name;
+
+            // This code is not written with safety in mind. If any of this fails, either there's an unhandled case we have to consider or
+            // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
+            if (!valueName.Contains("=", StringComparison.Ordinal))
+            {
+                return null;
+            }
+
+            string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
+            int len;
+            if (length == "Int32")
+            {
+                len = 4;
+            }
+            else if (length == "Int64")
+            {
+                len = 8;
+            }
+            else
+            {
+                len = int.Parse(length);
+            }
+
+            byte[] array = new byte[len];
+            System.Runtime.CompilerServices.RuntimeHelpers.InitializeArray(array, mi.FieldHandle);
+            return array;
         }
 
         private static List<ExceptionClause>? AnalyzeExceptionClauses(ExecutionSet set, MethodBase method, List<TypeInfo> exceptionTypesUsed)
