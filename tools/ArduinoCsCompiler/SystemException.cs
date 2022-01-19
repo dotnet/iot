@@ -6,7 +6,7 @@ namespace ArduinoCsCompiler
     /// Exception types thrown by the remote engine.
     /// They are rethrown locally as the same type.
     /// </summary>
-    public enum SystemException
+    public enum SystemException : byte
     {
         None = 0,
         StackOverflow = 1,

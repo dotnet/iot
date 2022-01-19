@@ -389,7 +389,12 @@ namespace ArduinoCsCompiler
                         }
                         else if (resolved is FieldInfo mi)
                         {
-                            byte[] array = TryReadInitializerData(mi);
+                            byte[]? array = TryReadInitializerData(mi);
+                            if (array == null)
+                            {
+                                throw new InvalidOperationException($"Field {mi.Name} is expected to have a constant initializer, but it was not found");
+                            }
+
                             patchValue = set.GetOrAddFieldToken(mi, array);
                         }
                         else

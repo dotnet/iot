@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ArduinoCsCompiler
 {
-    public enum BreakpointType
+    public enum BreakpointType : byte
     {
         None = 0,
         StepInto = 1,

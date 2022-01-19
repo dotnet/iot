@@ -4,7 +4,7 @@
 namespace ArduinoCsCompiler
 {
     [Flags]
-    public enum MethodFlags
+    public enum MethodFlags : byte
     {
         None = 0,
         Static = 1,

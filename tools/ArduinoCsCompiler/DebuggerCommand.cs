@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ArduinoCsCompiler
 {
-    public enum DebuggerCommand
+    public enum DebuggerCommand : byte
     {
         None,
         Continue,
