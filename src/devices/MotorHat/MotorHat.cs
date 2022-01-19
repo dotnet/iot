@@ -39,13 +39,28 @@ namespace Iot.Device.MotorHat
         /// </summary>
         /// <param name="settings">The I2C settings of the MotorHat.</param>
         /// <param name="frequency">The frequency in Hz to set the PWM controller.</param>
+        /// <remarks>
+        /// The default i2c address is 0x60, but the HAT can be configured in hardware to any address from 0x60 to 0x7f.
+        /// The PWM hardware used by this HAT is a PCA9685. It has a total possible frequency range of 24 to 1526 Hz.
+        /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
+        /// </remarks>
+        public MotorHat(I2cConnectionSettings settings, double frequency = 1600)
+            : this(settings, frequency, MotorPinProvider.Default)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MotorHat"/> class with the specified I2C settings and PWM frequency.
+        /// </summary>
+        /// <param name="settings">The I2C settings of the MotorHat.</param>
+        /// <param name="frequency">The frequency in Hz to set the PWM controller.</param>
         /// <param name="pinProvider">The <see cref="IMotorPinProvider"/> that provides <see cref="MotorPins"/> for various hats.</param>
         /// <remarks>
         /// The default i2c address is 0x60, but the HAT can be configured in hardware to any address from 0x60 to 0x7f.
         /// The PWM hardware used by this HAT is a PCA9685. It has a total possible frequency range of 24 to 1526 Hz.
         /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
         /// </remarks>
-        public MotorHat(I2cConnectionSettings settings, double frequency = 1600, IMotorPinProvider pinProvider = default!)
+        public MotorHat(I2cConnectionSettings settings, double frequency = 1600, IMotorPinProvider? pinProvider = default)
         {
             I2cDevice device = I2cDevice.Create(settings);
             _pca9685 = new Pca9685(device);
