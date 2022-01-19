@@ -6,7 +6,8 @@
     </RootNamespace>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>$(NoWarn);CS8321;SA1205;</NoWarn>
+    <!-- SA1205: Partial elements should declare access modifier (allows adjusting class visibility in a single source file)-->
+    <NoWarn>$(NoWarn);SA1205;</NoWarn>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ClassVisibility.cs" />

@@ -4,7 +4,7 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 #pragma warning disable SA1307 // Field should begin with upper-case letter
-#pragma warning disable CS1591
+#pragma warning disable CS1591 // Public members must have XML documentation
 
 using System;
 using System.Runtime.InteropServices;
