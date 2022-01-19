@@ -344,7 +344,13 @@ namespace ArduinoCsCompiler
                             mb = (FieldInfo)members.Single();
                         }
 
-                        var data = TryReadInitializerData(mb);
+                        byte[]? data = null;
+
+                        if (opCode == OpCode.CEE_LDSFLDA && mb.DeclaringType != null && mb.DeclaringType.Name.Contains(MicroCompiler.PrivateImplementationDetailsName))
+                        {
+                            data = TryReadInitializerData(mb);
+                        }
+
                         if (data != null)
                         {
                             patchValue = set.GetOrAddFieldToken(mb, data);
@@ -452,11 +458,7 @@ namespace ArduinoCsCompiler
 
             // This code is not written with safety in mind. If any of this fails, either there's an unhandled case we have to consider or
             // the behavior/naming within the runtime has changed. So everything unexpected causes a crash.
-            if (!valueName.Contains("=", StringComparison.Ordinal))
-            {
-                return null;
-            }
-
+            // Note that this returns valueName if there's no equal sign in the string.
             string length = valueName.Substring(valueName.IndexOf("=", StringComparison.Ordinal) + 1);
             int len;
             if (length == "Int32")
@@ -467,9 +469,9 @@ namespace ArduinoCsCompiler
             {
                 len = 8;
             }
-            else
+            else if (!int.TryParse(length, NumberStyles.Any, CultureInfo.CurrentCulture, out len))
             {
-                len = int.Parse(length);
+                return null;
             }
 
             byte[] array = new byte[len];
