@@ -10,9 +10,10 @@ The Lp55231 is a I2C controlled, Nine-Channel RGB, White-LED Driver With Interna
 ## Usage
 
 This driver currently provides just the fundamentals to drive RGB Leds. It does not currently support
-* Individual control of PWM channels
-* Setting LED drive current
-* Programming
+
+- Individual control of PWM channels
+- Setting LED drive current
+- Programming
 
 ### RGB Leds
 
