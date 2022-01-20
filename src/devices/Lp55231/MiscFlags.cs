@@ -14,36 +14,36 @@ namespace Iot.Device.Lp55231
         /// <summary>
         /// Use internal clock
         /// </summary>
-        ClockSourceSelection = 0b00000001,
+        ClockSourceSelection = 0b0000_0001,
 
         /// <summary>
         /// Use external clock
         /// </summary>
-        ExternalClockDetection = 0b00000010,
+        ExternalClockDetection = 0b0000_0010,
 
         /// <summary>
         /// Enable PWM cycle power save
         /// </summary>
-        PWMCyclePowersaveEnable = 0b00000100,
+        PwmCyclePowersaveEnable = 0b0000_0100,
 
         /// <summary>
         /// Charge mode gain low bit
         /// </summary>
-        ChargeModeGainLowBit = 0b00001000,
+        ChargeModeGainLowBit = 0b0000_1000,
 
         /// <summary>
         /// Charge mode gain high bit
         /// </summary>
-        ChargeModeGainHighBit = 0b00010000,
+        ChargeModeGainHighBit = 0b0001_0000,
 
         /// <summary>
         /// Enable power save mode
         /// </summary>
-        PowersaveModeEnable = 0b00100000,
+        PowersaveModeEnable = 0b0010_0000,
 
         /// <summary>
         /// Enable auto address increment
         /// </summary>
-        AddressAutoIncrementEnable = 0b01000000
+        AddressAutoIncrementEnable = 0b0100_0000
     }
 }
