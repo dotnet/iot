@@ -1,4 +1,7 @@
-﻿namespace Iot.Device.Lp55231
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+namespace Iot.Device.Lp55231
 {
     /// <summary>
     /// Registers for the Lp55231 based on this reference: https://www.ti.com/lit/gpn/lp55231
