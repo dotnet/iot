@@ -204,10 +204,10 @@ namespace Iot.Device.Rtc
 
         private static void SetDateTimeUtcMacOs(DateTime dt)
         {
-            // The format is "[[[[[cc]yy]mm]dd]hh]mm[.ss]" from https://ss64.com/osx/date.html - pretty weird to do this without delimiters
-            string formattedTime = dt.ToString("yyyyMMddHHmm.ss", CultureInfo.InvariantCulture);
+            // The format is "[[[mm]dd]HH]MM[[cc]yy][.ss]" from https://www.unix.com/man-page/osx/1/date/ - pretty weird to do this without delimiters
+            string formattedTime = dt.ToString("MMddHHmmyyyy.ss", CultureInfo.InvariantCulture);
             int exitCode;
-            // Try to run the date command as user first (maybe it has the set-user-id bit set) otherwise, try root.
+            // Try to run the date command as user. If user doesn't have permissions, then command will fail and we throw UnauthorizedAccessException
             string output = RunDateCommandUnix($"{formattedTime}", out exitCode);
             if (exitCode != 0)
             {
