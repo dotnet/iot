@@ -1,4 +1,4 @@
-﻿# Lp55231
+﻿# Lp55231 - Nine-Channel RGB, White-LED Driver
 
 The Lp55231 is a I2C controlled, Nine-Channel RGB, White-LED Driver With Internal Program Memory and Integrated Charge Pump.
 

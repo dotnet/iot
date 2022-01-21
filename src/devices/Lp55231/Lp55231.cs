@@ -9,7 +9,7 @@ using System.IO;
 namespace Iot.Device.Lp55231
 {
     /// <summary>
-    /// Raspberry Pi Motor Hat based on PCA9685 PWM controller
+    /// Lp55231 9 channel I2C PWM LED controller
     /// </summary>
     public class Lp55231 : IDisposable
     {
@@ -39,22 +39,19 @@ namespace Iot.Device.Lp55231
         /// <returns>The channel number</returns>
         internal static byte BlueChannel(byte instance) => (byte)(instance * 2 + 1);
 
-        private readonly I2cDevice _device;
         private readonly IReadOnlyList<RgbLed> _rgbLeds;
-        private readonly bool _disposeDevice;
+        private I2cDevice _i2cDevice;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Lp55231"/> class with the specified I2C settings.
+        /// Initializes a new instance of the <see cref="Lp55231"/> class with the specified <see cref="I2cDevice"/>.
         /// </summary>
-        /// <param name="device">The I2C device to communicate with the Lp55231.</param>
+        /// <param name="i2cDevice">The I2C device to use to communicate with the Lp55231.</param>
         /// <remarks>
-        /// The default i2c address is 0x60, but the HAT can be configured in hardware to any address from 0x60 to 0x7f.
-        /// The PWM hardware used by this HAT is a PCA9685. It has a total possible frequency range of 24 to 1526 Hz.
-        /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
+        /// The default i2c address is 0x32.
         /// </remarks>
-        public Lp55231(I2cDevice device)
+        public Lp55231(I2cDevice i2cDevice)
         {
-            _device = device;
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             _rgbLeds = new[]
             {
@@ -64,25 +61,10 @@ namespace Iot.Device.Lp55231
             };
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Lp55231"/> class with the specified I2C settings.
-        /// </summary>
-        /// <param name="settings">The I2C settings of the Lp55231.</param>
-        /// <remarks>
-        /// The default i2c address is 0x60, but the HAT can be configured in hardware to any address from 0x60 to 0x7f.
-        /// The PWM hardware used by this HAT is a PCA9685. It has a total possible frequency range of 24 to 1526 Hz.
-        /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
-        /// </remarks>
-        public Lp55231(I2cConnectionSettings? settings = default)
-            : this(I2cDevice.Create(settings ?? new I2cConnectionSettings(1, DefaultI2cAddress)))
-        {
-            _disposeDevice = true;
-        }
-
         private byte ReadRegister(Register register)
         {
-            _device.WriteByte((byte)register);
-            return _device.ReadByte();
+            _i2cDevice.WriteByte((byte)register);
+            return _i2cDevice.ReadByte();
         }
 
         private void WriteRegister(Register register, byte data)
@@ -90,7 +72,7 @@ namespace Iot.Device.Lp55231
             Span<byte> bytes = stackalloc byte[2];
             bytes[0] = (byte)register;
             bytes[1] = data;
-            _device.Write(bytes);
+            _i2cDevice.Write(bytes);
         }
 
         private void SetIntensity(byte index, byte value)
@@ -101,10 +83,8 @@ namespace Iot.Device.Lp55231
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (_disposeDevice)
-            {
-                _device.Dispose();
-            }
+            _i2cDevice?.Dispose();
+            _i2cDevice = null!;
         }
 
         /// <summary>
@@ -139,6 +119,7 @@ namespace Iot.Device.Lp55231
                 var register = ReadRegister(Register.REG_CNTRL1);
                 return (register & (byte)Control1RegisterFlags.Enabled) > 0;
             }
+
             set
             {
                 byte flags = value
@@ -159,6 +140,7 @@ namespace Iot.Device.Lp55231
                 var flags = ReadRegister(Register.REG_MISC);
                 return (MiscFlags)flags;
             }
+
             set
             {
                 var flags = (byte)value;
