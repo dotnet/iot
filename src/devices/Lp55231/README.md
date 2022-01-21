@@ -20,7 +20,9 @@ This driver currently provides just the fundamentals to drive RGB Leds. It does 
 The following example show how to use the RGB leds on the Sparkfun Lp55231 breakout board.
 
 ```csharp
-using (var device = new Lp55231();)
+var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Lp55231.DefaultI2cAddress));
+
+using (var device = new Lp55231(i2cDevice))
 {
     device.Reset();
 
@@ -33,9 +35,9 @@ using (var device = new Lp55231();)
                 | MiscFlags.ExternalClockDetection
                 | MiscFlags.ChargeModeGainHighBit
                 | MiscFlags.AddressAutoIncrementEnable;
-
-    device.RgbLeds[0].Red = 0xFF; // Make RGBLed 0 show red
-    device.RgbLeds[1].Green = 0xFF; // Make RGBLed 1 show green
-    device.RgbLeds[2].Blue = 0xFF; // Make RGBLed 2 show blue
+                
+    ledDriver[0] = Color.FromArgb(0, 255, 0, 0);
+    ledDriver[1] = Color.FromArgb(0, 0, 255, 0);
+    ledDriver[2] = Color.FromArgb(0, 0, 0, 255);
 }
 ```

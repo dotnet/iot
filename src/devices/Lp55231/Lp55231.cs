@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
+using System.Drawing;
 using System.IO;
 
 namespace Iot.Device.Lp55231
@@ -39,7 +40,7 @@ namespace Iot.Device.Lp55231
         /// <returns>The channel number</returns>
         internal static byte BlueChannel(byte instance) => (byte)(instance * 2 + 1);
 
-        private readonly IReadOnlyList<RgbLed> _rgbLeds;
+        private readonly Color[] _leds;
         private I2cDevice _i2cDevice;
 
         /// <summary>
@@ -53,11 +54,11 @@ namespace Iot.Device.Lp55231
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
-            _rgbLeds = new[]
+            _leds = new[]
             {
-                new RgbLed(0, SetIntensity),
-                new RgbLed(1, SetIntensity),
-                new RgbLed(2, SetIntensity)
+                Color.FromArgb(0, 0, 0, 0),
+                Color.FromArgb(0, 0, 0, 0),
+                Color.FromArgb(0, 0, 0, 0)
             };
         }
 
@@ -149,8 +150,39 @@ namespace Iot.Device.Lp55231
         }
 
         /// <summary>
-        /// Gets a <see cref="IReadOnlyCollection{T}"/> of <see cref="RgbLed"/> instances.
+        /// Gets or sets the <see cref="Color"/> of the LED at the specified <paramref name="index"/>.
         /// </summary>
-        public IReadOnlyList<RgbLed> RgbLeds => _rgbLeds;
+        /// <param name="index">The index of the LED.</param>
+        /// <returns>The current <see cref="Color"/> of the LED.</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Index must be between 0 and 2.</exception>
+        public Color this[byte index]
+        {
+            get
+            {
+                if (index < 0 || index > 2)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                return _leds[index];
+            }
+
+            set
+            {
+                if (index < 0 || index > 2)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index));
+                }
+
+                if (value != _leds[index])
+                {
+                    SetIntensity(RedChannel(index), value.R);
+                    SetIntensity(GreenChannel(index), value.G);
+                    SetIntensity(BlueChannel(index), value.B);
+
+                    _leds[index] = value;
+                }
+            }
+        }
     }
 }
