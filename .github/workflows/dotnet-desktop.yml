@@ -40,9 +40,14 @@ name: .NET Core Desktop
 
 on:
   push:
-    branches: [ save/* ]
+    branches:
+    - main
+    - save/*
   pull_request:
-    branches: [ save/* ]
+    branches:
+    - main
+    - save/*
+  workflow_dispatch:
 
 jobs:
 
