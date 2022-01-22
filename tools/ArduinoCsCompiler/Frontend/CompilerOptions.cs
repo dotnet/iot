@@ -8,14 +8,11 @@ using CommandLine.Text;
 
 namespace ArduinoCsCompiler
 {
-    internal class CommandLineOptions
+    [Verb("compile", HelpText = "Compile and optionally upload code to a microcontroller. Further options allow to debug the uploaded code.")]
+    internal class CompilerOptions : CommonConnectionOptions
     {
-        public CommandLineOptions()
+        public CompilerOptions()
         {
-            Port = string.Empty;
-            Baudrate = 0;
-            Verbose = false;
-            NetworkAddress = string.Empty;
             InputAssembly = string.Empty;
             EntryPoint = string.Empty;
             TokenMapFile = string.Empty;
@@ -28,26 +25,12 @@ namespace ArduinoCsCompiler
             {
                 return new List<Example>()
                 {
-                    new Example("Compile and upload a program to the first attached microcontroller", new CommandLineOptions() { InputAssembly = "MyApp.exe" }),
-                    new Example("Compile and upload a particular function (and it's dependencies) to a board on COM3, using 115200 Baud", new CommandLineOptions() { InputAssembly = "MyAssembly.dll", Port = "COM3", Baudrate = 115200 }),
+                    new Example("Compile and upload a program to the first attached microcontroller", new CompilerOptions() { InputAssembly = "MyApp.exe" }),
+                    new Example("Compile and upload a particular function (and it's dependencies) to a board on COM3, using 115200 Baud", new CompilerOptions() { InputAssembly = "MyAssembly.dll", Port = "COM3", Baudrate = 115200, EntryPoint = "MainFunction" }),
+                    new Example("Compile and upload a program via Network (WiFi) and start a debugging session", new CompilerOptions() { InputAssembly = "WeatherStation.exe", NetworkAddress = "192.168.1.33", Verbose = true, Debug = true }),
                 };
             }
         }
-
-        [Option('v', "verbose", Required = false, HelpText = "Output verbose messages.")]
-        public bool Verbose { get; set; }
-
-        [Option('q', "quiet", Required = false, Default = false, HelpText = "Minimal output only. This is ignored if -v is specified")]
-        public bool Quiet { get; set; }
-
-        [Option('p', "port", HelpText = "The serial port where the microcontroller is connected. Defaults to auto-detect", SetName = "ConnectionType")]
-        public string Port { get; set; }
-
-        [Option('b', "baudrate", HelpText = "The baudrate to program the microcontroller.", Default = 115200)]
-        public int Baudrate { get; set; }
-
-        [Option('n', "network", HelpText = "An IP address to connect to (with optional port number)", SetName = "ConnectionType")]
-        public string NetworkAddress { get; set; }
 
         [Value(0, HelpText = "Input file/assembly. A dll file containing the startup code", Required = true)]
         public string InputAssembly { get; set; }
