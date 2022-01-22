@@ -4,32 +4,73 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using ArduinoCsCompiler;
 using Iot.Device.Arduino;
 using Iot.Device.Board;
-using Xunit;
-using SystemException = ArduinoCsCompiler.SystemException;
 
-namespace Iot.Device.Arduino.Tests
+namespace ArduinoCsCompiler
 {
     /// <summary>
-    /// This class is used to copy some information to the Arduino code, so that it stays in sync with the C# part
+    /// This class helps creating the interface .h files in the runtime. They need to be in sync with the version used by the compiler.
     /// </summary>
-    public partial class WriteRuntimeCoreData
+    public class WriteRuntimeCoreData
     {
+        private string _targetPath;
+
+        /// <summary>
+        /// Write the interface header files required by the runtime to the standard path
+        /// </summary>
+        public WriteRuntimeCoreData()
+        : this(null)
+        {
+        }
+
+        /// <summary>
+        /// Write the interface header files required by the runtime
+        /// </summary>
+        /// <param name="toPath">Destination path. If null, defaults to the value returned by <see cref="GetRuntimePath"/>.</param>
+        public WriteRuntimeCoreData(string? toPath)
+        {
+            if (toPath == null)
+            {
+                _targetPath = GetRuntimePath();
+            }
+            else
+            {
+                _targetPath = toPath;
+            }
+        }
+
+        public string? TargetPath => _targetPath;
+
+        /// <summary>
+        /// Writes the data.
+        /// </summary>
+        public void Write()
+        {
+            WriteBreakpointTypes();
+            WriteNativeMethodDefinitions();
+            WriteDebuggerCommands();
+            WriteExceptionClauseTypes();
+            WriteKnownTypeTokens();
+            WriteMethodFlags();
+            WritePinUsage();
+            WriteRuntimeState();
+            WriteSystemExceptions();
+            WriteExecutorCommands();
+            WriteVariableKind();
+        }
+
         /// <summary>
         /// Returns the path where the runtime sources are
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The default installation location for the runtime, within the arduino libraries (i.e. c:\users\Username\Documents\Arduino\ExtendedConfigurableFirmata)</returns>
         private string GetRuntimePath()
         {
             string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
             return Path.Combine(path, @"Arduino\ExtendedConfigurableFirmata");
         }
 
-        [Fact]
-        public void WriteNativeMethodDefinitions()
+        private void WriteNativeMethodDefinitions()
         {
             // WriteEnumHeaderFile<NativeMethod>();
             // Collect all methods that have an ArduinoImplementation attribute attached to them.
@@ -80,7 +121,6 @@ namespace Iot.Device.Arduino.Tests
                 }
             }
 
-            var hashCodes = entries.Select(x => x.Value).ToList();
             IEnumerable<int> duplicates = entries.GroupBy(x => x.Value)
                 .Where(g => g.Count() > 1)
                 .Select(x => x.Key).ToList();
@@ -122,7 +162,7 @@ enum class {name}
 {{
     None = 0,
 ");
-            string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
+            string outputFile = Path.Combine(_targetPath, name + ".h");
             TextWriter w = new StreamWriter(outputFile, false, Encoding.ASCII);
             w.Write(header);
             foreach (var e in entries)
@@ -142,56 +182,47 @@ enum class {name}
             w.Close();
         }
 
-        [Fact]
-        public void WriteSystemExceptions()
+        private void WriteSystemExceptions()
         {
             WriteEnumHeaderFile<SystemException>();
         }
 
-        [Fact]
-        public void WriteMethodFlags()
+        private void WriteMethodFlags()
         {
             WriteEnumHeaderFile<MethodFlags>();
         }
 
-        [Fact]
-        public void WriteKnownTypeTokens()
+        private void WriteKnownTypeTokens()
         {
             WriteEnumHeaderFile<KnownTypeTokens>();
         }
 
-        [Fact]
-        public void WriteExceptionClauseTypes()
+        private void WriteExceptionClauseTypes()
         {
             WriteEnumHeaderFile<ExceptionHandlingClauseOptions>();
         }
 
-        [Fact]
-        public void WriteRuntimeState()
+        private void WriteRuntimeState()
         {
             WriteEnumHeaderFile<RuntimeState>();
         }
 
-        [Fact]
-        public void WriteDebuggerCommands()
+        private void WriteDebuggerCommands()
         {
             WriteEnumHeaderFile<DebuggerCommand>();
         }
 
-        [Fact]
-        public void WriteBreakpointTypes()
+        private void WriteBreakpointTypes()
         {
             WriteEnumHeaderFile<BreakpointType>();
         }
 
-        [Fact]
-        public void WritePinUsage()
+        private void WritePinUsage()
         {
             WriteEnumHeaderFile<PinUsage>();
         }
 
-        [Fact]
-        public void WriteExecutorCommands()
+        private void WriteExecutorCommands()
         {
             string name = nameof(ExecutorCommand);
             string header = FormattableString.Invariant($@"
@@ -201,7 +232,7 @@ enum class {name}
 enum class {name} : byte
 {{
 ");
-            string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
+            string outputFile = Path.Combine(_targetPath, name + ".h");
             TextWriter w = new StreamWriter(outputFile, false, Encoding.ASCII);
             w.Write(header);
             foreach (var e in Enum.GetValues(typeof(ExecutorCommand)))
@@ -213,8 +244,7 @@ enum class {name} : byte
             w.Close();
         }
 
-        [Fact]
-        public void WriteVariableKind()
+        private void WriteVariableKind()
         {
             WriteEnumHeaderFile<VariableKind>();
         }
@@ -236,14 +266,14 @@ enum class {name} : byte
 enum class {name}{size}
 {{
 ");
-            string outputFile = Path.Combine(GetRuntimePath(), name + ".h");
+            string outputFile = Path.Combine(_targetPath, name + ".h");
             // Must use ascii encoding, because GCC fails to recognize the UTF-8-BOM header
             // sometimes. Not sure why it works sometimes only.
             TextWriter w = new StreamWriter(outputFile, false, Encoding.ASCII);
             w.Write(header);
             foreach (var e in Enum.GetValues<T>())
             {
-                w.WriteLine(FormattableString.Invariant($"    {e.ToString()} = {GetIntValueFromEnum<T>(e)},"));
+                w.WriteLine(FormattableString.Invariant($"    {e.ToString()} = {GetIntValueFromEnum(e)},"));
             }
 
             w.WriteLine("};"); // Tail
@@ -254,31 +284,6 @@ enum class {name}{size}
             where T : Enum
         {
             return Convert.ToInt32(value);
-        }
-
-        [Fact]
-        public void TestEnumConversion()
-        {
-            int value = (int)ByteCounting.One;
-            Assert.Equal(1, value);
-
-            Assert.Equal(1, GetIntValueFromEnum(ByteCounting.One));
-            Assert.Equal(12345, GetIntValueFromEnum(IntegerCounting.Many));
-        }
-
-        public enum ByteCounting : byte
-        {
-            None,
-            One,
-            Two,
-            Three,
-        }
-
-        public enum IntegerCounting
-        {
-            None,
-            Many = 12345,
-            EvenMore = 34567,
         }
     }
 }
