@@ -3,7 +3,7 @@
 The RTC devices supported by the project include DS1307, DS3231, PCF8563.
 
 A class for setting the system clock is also provided, so that for instance the Raspberry Pi's operating system time can be synchronized
-to a hardware RTC clock. 
+to a hardware RTC clock.
 
 ## Documentation
 
@@ -53,7 +53,7 @@ using (Ds1307 rtc = new Ds1307(device))
 ## Setting the operating system clock
 
 The class `SystemClock` contains static methods to set the operating system clock. Since this operation requires elevated permissions,
-some special requirements apply unless the application is run as root (on Linux or MacOs)/administrator (on Windows). 
+some special requirements apply unless the application is run as root (on Linux or MacOs)/administrator (on Windows).
 
 On linux or MacOs, the user calling the `SetSystemTimeUtc` must either be root or the `date` command must have the setUid bit set. To do this, one must execute this command once: `sudo chmod +s /bin/date`. This allows everyone to set the clock.
 
