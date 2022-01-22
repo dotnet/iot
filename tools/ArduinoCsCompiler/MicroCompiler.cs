@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -21,13 +22,16 @@ namespace ArduinoCsCompiler
 
         /// <summary>
         /// The list of system assemblies (these may contain kernel interop calls)
-        /// The list contains the name and a public type within that assembly
+        /// The list contains the name and a public type within that assembly.
+        /// All of these assemblies contain a class named Interop+Kernel32. We want to replace them all, and
+        /// since they're just DllImport declarations, they can be the same everywhere.
         /// </summary>
         private static readonly List<(string, Type)> SystemAssemblies = new List<(string, Type)>()
         {
             // "System.Private.Corelib.dll",
             ("System.Console", typeof(System.Console)),
             ("System.Diagnostics.Process", typeof(System.Diagnostics.Process)),
+            ("Microsoft.Win32.Primitives", typeof(Win32Exception)),
             // ("System.Net.Primitives", typeof(System.Net.IPAddress)),
             // ("System.Private.Uri", typeof(System.Uri)),
         };
