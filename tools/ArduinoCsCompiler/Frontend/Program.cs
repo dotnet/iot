@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
@@ -32,7 +33,17 @@ namespace ArduinoCsCompiler
             Console.WriteLine($"ArduinoCsCompiler - Version {version.Version}");
             bool runResult = false;
 
-            var result = Parser.Default.ParseArguments<CompilerOptions, PrepareOptions>(args)
+            var parser = new Parser(x =>
+            {
+                x.AutoHelp = true;
+                x.AutoVersion = true;
+                x.CaseInsensitiveEnumValues = true;
+                x.ParsingCulture = CultureInfo.InvariantCulture;
+                x.CaseSensitive = false;
+                x.HelpWriter = Console.Out;
+            });
+
+            var result = parser.ParseArguments<CompilerOptions, PrepareOptions, TestOptions>(args)
                 .WithParsed<CompilerOptions>(o =>
                 {
                     using var program = new CompilerRun(o);
@@ -46,12 +57,14 @@ namespace ArduinoCsCompiler
                 })
                 .WithParsed<TestOptions>(o =>
                 {
-                    runResult = true;
+                    using var program = new TestRun(o);
+                    runResult = program.RunCommand();
                 });
 
             if (result.Tag != ParserResultType.Parsed)
             {
                 Console.WriteLine("Command line parsing error");
+
                 return 1;
             }
 

@@ -43,7 +43,7 @@ namespace ArduinoCsCompiler
             try
             {
                 var result = ConnectToBoard(CommandLineOptions, out board);
-                if (!result)
+                if (!result || board == null)
                 {
                     return false;
                 }

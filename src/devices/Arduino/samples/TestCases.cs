@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -39,7 +40,14 @@ namespace Iot.Device.Arduino.Sample
             bool loop = false;
             do
             {
-                loop = t.Menu();
+                try
+                {
+                    loop = t.Menu();
+                }
+                catch (Exception x) when (!(x is NullReferenceException))
+                {
+                    Console.WriteLine($"There was an error processing the command: {x.Message}");
+                }
             }
             while (loop);
         }
@@ -283,6 +291,36 @@ namespace Iot.Device.Arduino.Sample
                     }
 
                     break;
+                case 'c':
+                case 'C':
+                    {
+                        Console.WriteLine();
+                        Console.Write("Which pin to use for the LED? ");
+                        var input = Console.ReadLine();
+                        if (int.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out int led))
+                        {
+                            _ledPin = led;
+                        }
+                        else
+                        {
+                            Console.Write("You did not enter a valid number");
+                        }
+
+                        Console.Write("Which pin to use for the button? ");
+                        input = Console.ReadLine();
+                        if (int.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out int button))
+                        {
+                            _buttonPin = button;
+                        }
+                        else
+                        {
+                            Console.Write("You did not enter a valid number");
+                        }
+
+                        Console.WriteLine($"Led-Pin: {_ledPin}. Button-Pin: {_buttonPin}");
+                    }
+
+                    break;
                 case 'x':
                 case 'X':
                     return false;
@@ -382,7 +420,7 @@ namespace Iot.Device.Arduino.Sample
             gpioController.OpenPin(gpio);
             gpioController.SetPinMode(gpio, PinMode.Output);
 
-            Console.WriteLine("Blinking GPIO6");
+            Console.WriteLine($"Blinking GPIO{_ledPin}");
             while (!Console.KeyAvailable)
             {
                 gpioController.Write(gpio, PinValue.High);

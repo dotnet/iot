@@ -48,6 +48,10 @@ namespace Iot.Device.Arduino
 
         protected override void OpenPin(int pinNumber)
         {
+            if (pinNumber < 0 || pinNumber >= PinCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pinNumber), $"Pin {pinNumber} is not valid");
+            }
         }
 
         protected override void ClosePin(int pinNumber)

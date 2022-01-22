@@ -22,6 +22,7 @@ namespace ArduinoCsCompiler
 
         protected Run(T options)
         {
+            _loggerFactory = new SimpleConsoleLoggerFactory();
             ConfigureLogging(options);
             _commandLineOptions = options;
             _logger = this.GetCurrentClassLogger();
@@ -39,7 +40,6 @@ namespace ArduinoCsCompiler
 
         protected virtual void ConfigureLogging(CommonConnectionOptions options)
         {
-            _loggerFactory = new SimpleConsoleLoggerFactory();
             LogDispatcher.LoggerFactory = _loggerFactory;
             if (options.Verbose)
             {
@@ -61,7 +61,7 @@ namespace ArduinoCsCompiler
             GC.SuppressFinalize(this);
         }
 
-        protected bool ConnectToBoard(CompilerOptions commandLineOptions, [NotNullWhen(true)] out ArduinoBoard? board)
+        protected bool ConnectToBoard(CommonConnectionOptions commandLineOptions, [NotNullWhen(true)] out ArduinoBoard? board)
         {
             List<int> usableBaudRates = new List<int>();
             board = null;
