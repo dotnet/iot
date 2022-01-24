@@ -1,0 +1,51 @@
+﻿using System;
+
+namespace HardwareMonitor
+{
+    internal class HardwareJson
+    {
+        public HardwareJson()
+        {
+            NodeId = String.Empty;
+            Name = String.Empty;
+            Sensors = Array.Empty<SensorJson>();
+            Parent = string.Empty;
+            HardwareType = string.Empty;
+        }
+
+        public string NodeId
+        {
+            get;
+            set;
+        }
+
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public string Parent
+        {
+            get;
+            set;
+        }
+
+        public SensorJson[] Sensors
+        {
+            get;
+            set;
+        }
+
+        public string HardwareType
+        {
+            get;
+            set;
+        }
+
+        public override string ToString()
+        {
+            return Name;
+        }
+    }
+}
