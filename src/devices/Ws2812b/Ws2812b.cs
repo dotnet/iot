@@ -32,10 +32,11 @@ namespace Iot.Device.Ws2812b
         /// </summary>
         /// <param name="spiDevice">The SPI device used for communication.</param>
         /// <param name="length">Number of LEDs</param>
-        public Ws2812b(SpiDevice spiDevice, int length) : base(length)
+        /// <param name="resetSignal">Transmits a reset signal after the data transmission. For some devices, it can be set to false to improve transmission efficiency</param>
+        public Ws2812b(SpiDevice spiDevice, int length, bool resetSignal = true) : base(length)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
-            _buffer = new byte[ResetDelay + length * PixelBitSize];
+            _buffer = new byte[length * PixelBitSize + (resetSignal ? ResetDelay : 0)];
         }
 
         /// <summary>
@@ -47,9 +48,9 @@ namespace Iot.Device.Ws2812b
             {
                 Color pixel = Pixels[i];
 
-                WriteSequence(FixGamma(pixel.G), _buffer.AsSpan(ResetDelay + i * PixelBitSize + ColorBitSize * 0));
-                WriteSequence(FixGamma(pixel.R), _buffer.AsSpan(ResetDelay + i * PixelBitSize + ColorBitSize * 1));
-                WriteSequence(FixGamma(pixel.B), _buffer.AsSpan(ResetDelay + i * PixelBitSize + ColorBitSize * 2));
+                WriteSequence(FixGamma(pixel.G), _buffer.AsSpan(i * PixelBitSize + ColorBitSize * 0));
+                WriteSequence(FixGamma(pixel.R), _buffer.AsSpan(i * PixelBitSize + ColorBitSize * 1));
+                WriteSequence(FixGamma(pixel.B), _buffer.AsSpan(i * PixelBitSize + ColorBitSize * 2));
             }
 
             _spiDevice.Write(_buffer);
