@@ -1,9 +1,13 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Iot.Device.Common;
 using Iot.Device.HardwareMonitor;
@@ -21,7 +25,6 @@ namespace HardwareMonitor
 
         private HttpClient _httpClient;
         private string? _version;
-        private JsonParser _jsonParser;
         private List<OpenHardwareMonitor.Hardware> _hardware;
         private List<SensorHttp> _sensors;
         private DateTime _lastUpdateTime;
@@ -33,7 +36,6 @@ namespace HardwareMonitor
             _lastUpdateTime = DateTime.MinValue;
             _hardware = new List<OpenHardwareMonitor.Hardware>();
             _sensors = new List<SensorHttp>();
-            _jsonParser = new JsonParser();
             _uri = new Uri("http://" + host + ":" + port + "/");
             _httpClient = new HttpClient();
             _logger = this.GetCurrentClassLogger();
@@ -95,7 +97,7 @@ namespace HardwareMonitor
                 string fullJson = _httpClient.GetStringAsync(_uri + "api/rootnode").Result;
                 lock (_lock)
                 {
-                    ComputerJson? rootNode = _jsonParser.FromJson<ComputerJson>(fullJson);
+                    ComputerJson? rootNode = JsonSerializer.Deserialize<ComputerJson>(fullJson);
                     if (rootNode == null)
                     {
                         return;
@@ -234,7 +236,7 @@ namespace HardwareMonitor
                     string fullJson = _httpClient.GetStringAsync(apiUrl).Result;
                     lock (_lock)
                     {
-                        SensorJson? rootNode = _jsonParser.FromJson<SensorJson>(fullJson);
+                        SensorJson? rootNode = JsonSerializer.Deserialize<SensorJson>(fullJson);
                         if (rootNode == null)
                         {
                             _logger.LogWarning($"Unable to parse json: {fullJson}");
