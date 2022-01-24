@@ -193,46 +193,39 @@ namespace HardwareMonitor
             _httpClient.Dispose();
         }
 
-        /// <summary>
-        /// Returns a non-rooted path combined from the input paths that uses forward slashes (for web apis)
-        /// </summary>
-        private string UnixPathJoin(string a, string b)
+        private Uri Combine(Uri root, params String[] moreParts)
         {
-            string ret;
-            if (string.IsNullOrEmpty(a))
+            if (!moreParts.Any())
             {
-                ret = b;
-            }
-            else
-            {
-                if (a.EndsWith("/"))
-                {
-                    ret = a + b;
-                }
-                else
-                {
-                    ret = a + "/" + b;
-                }
+                return root;
             }
 
-            ret = ret.Replace("\\", "/");
-            ret = ret.Replace("//", "/");
-            if (ret.StartsWith("/"))
+            Uri combined = root;
+            foreach (var part in moreParts)
             {
-                ret = ret.Substring(1);
+                Uri? temp;
+                // The second argument to TryCreate must not be rooted, or the newly added part overwrites any existing parts.
+                var trimmed = part.TrimStart('/');
+                if (!Uri.TryCreate(combined, trimmed, out temp))
+                {
+                    throw new InvalidOperationException($"{part} is not a valid URL component");
+                }
+
+                combined = temp;
             }
 
-            return ret;
+            return combined;
         }
 
-        private bool UpdateSensor(SensorHttp sensor, out double value)
+        private bool TryUpdateSensor(SensorHttp sensor, out double value)
         {
             value = 0;
             if (UpdateStrategy == SensorUpdateStrategy.PerSensor || UpdateStrategy == SensorUpdateStrategy.Unspecified)
             {
                 try
                 {
-                    string apiUrl = _uri + UnixPathJoin("api/nodes/", sensor.Identifier);
+                    var apiUrl = Combine(_uri, "/api/nodes/", sensor.Identifier);
+
                     string fullJson = _httpClient.GetStringAsync(apiUrl).Result;
                     lock (_lock)
                     {
@@ -275,7 +268,7 @@ namespace HardwareMonitor
 
             protected override bool UpdateValue(out double value)
             {
-                return _monitor.UpdateSensor(this, out value);
+                return _monitor.TryUpdateSensor(this, out value);
             }
         }
     }

@@ -48,11 +48,15 @@ while (!Console.KeyAvailable)
         }
     }
 
+    // Set update strategy to immediately, to test that receiving individual sensors works as well
+    hw.UpdateStrategy = SensorUpdateStrategy.PerSensor;
     if (hw.TryGetAverageGpuTemperature(out Temperature gpuTemp) &&
         hw.TryGetAverageCpuTemperature(out Temperature cpuTemp))
     {
         Console.WriteLine($"Averages: CPU temp {cpuTemp:s2}, GPU temp {gpuTemp:s2}, CPU Load {hw.GetCpuLoad()}");
     }
 
-    Thread.Sleep(1000);
+    hw.UpdateStrategy = SensorUpdateStrategy.SynchronousExplicit;
+
+    Thread.Sleep(2000);
 }
