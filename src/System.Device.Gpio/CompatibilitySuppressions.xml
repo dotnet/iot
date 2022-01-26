@@ -1,6 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
+    <DiagnosticId>CP1003</DiagnosticId>
+    <Target>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Target>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0008</DiagnosticId>
     <Target>T:System.Device.Spi.DataFlow</Target>
     <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
