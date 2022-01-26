@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using HardwareMonitor;
 using UnitsNet;
 using UnitsNet.Units;
 

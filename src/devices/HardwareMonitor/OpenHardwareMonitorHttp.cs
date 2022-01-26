@@ -11,9 +11,10 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Iot.Device.Common;
 using Iot.Device.HardwareMonitor;
+using Iot.Device.HardwareMonitor.JsonSchema;
 using Microsoft.Extensions.Logging;
 
-namespace HardwareMonitor
+namespace Iot.Device.HardwareMonitor
 {
     internal sealed class OpenHardwareMonitorHttp : IOpenHardwareMonitorInternal
     {

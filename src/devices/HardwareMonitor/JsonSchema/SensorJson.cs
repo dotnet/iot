@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace HardwareMonitor
+namespace Iot.Device.HardwareMonitor.JsonSchema
 {
     internal class SensorJson
     {

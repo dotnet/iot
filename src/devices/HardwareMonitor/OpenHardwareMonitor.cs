@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using HardwareMonitor;
 using UnitsNet;
 using UnitsNet.Units;
 
@@ -95,7 +94,7 @@ namespace Iot.Device.HardwareMonitor
         /// </summary>
         /// <exception cref="PlatformNotSupportedException">The operating system is not Windows.</exception>
         public OpenHardwareMonitor()
-        : this(OpenHardwareMonitorTransport.Auto)
+            : this(OpenHardwareMonitorTransport.Auto)
         {
         }
 

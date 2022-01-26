@@ -8,6 +8,9 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="JsonSchema\ComputerJson.cs" />
+    <Compile Include="JsonSchema\HardwareJson.cs" />
+    <Compile Include="JsonSchema\SensorJson.cs" />
     <None Include="README.md" />
   </ItemGroup>
 

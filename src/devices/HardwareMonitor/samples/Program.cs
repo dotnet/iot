@@ -5,7 +5,6 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
-using HardwareMonitor;
 using Iot.Device.HardwareMonitor;
 using UnitsNet;
 

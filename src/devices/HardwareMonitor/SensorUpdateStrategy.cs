@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.HardwareMonitor;
 
-namespace HardwareMonitor
+namespace Iot.Device.HardwareMonitor
 {
     /// <summary>
     /// Selects when the sensors get updated values

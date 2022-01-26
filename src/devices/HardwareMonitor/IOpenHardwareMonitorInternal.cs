@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using HardwareMonitor;
+using Iot.Device.HardwareMonitor.JsonSchema;
 
 namespace Iot.Device.HardwareMonitor
 {

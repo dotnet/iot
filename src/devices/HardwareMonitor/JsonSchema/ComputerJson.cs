@@ -3,7 +3,7 @@
 
 using System;
 
-namespace HardwareMonitor
+namespace Iot.Device.HardwareMonitor.JsonSchema
 {
     internal class ComputerJson
     {
