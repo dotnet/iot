@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Device.I2c;
-using System.Drawing;
 using System.IO;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 
 namespace Iot.Device.Lp55231
 {
@@ -56,9 +56,9 @@ namespace Iot.Device.Lp55231
 
             _leds = new[]
             {
-                Color.FromArgb(0, 0, 0, 0),
-                Color.FromArgb(0, 0, 0, 0),
-                Color.FromArgb(0, 0, 0, 0)
+                Color.FromRgba(0, 0, 0, byte.MaxValue),
+                Color.FromRgba(0, 0, 0, byte.MaxValue),
+                Color.FromRgba(0, 0, 0, byte.MaxValue)
             };
         }
 
@@ -176,9 +176,11 @@ namespace Iot.Device.Lp55231
 
                 if (value != _leds[index])
                 {
-                    SetIntensity(RedChannel(index), value.R);
-                    SetIntensity(GreenChannel(index), value.G);
-                    SetIntensity(BlueChannel(index), value.B);
+                    var color = value.ToPixel<Rgba32>();
+
+                    SetIntensity(RedChannel(index), color.R);
+                    SetIntensity(GreenChannel(index), color.G);
+                    SetIntensity(BlueChannel(index), color.B);
 
                     _leds[index] = value;
                 }

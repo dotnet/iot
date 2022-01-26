@@ -5,9 +5,6 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />    
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="*.cs" />
     <None Include="README.md" />
     <ProjectReference Include="..\Common\CommonHelpers.csproj" />
