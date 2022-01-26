@@ -235,6 +235,7 @@ namespace Iot.Device.Arduino.Sample
             Console.WriteLine(" F Measure frequency on a GPIO Pin (experimental)");
             Console.WriteLine();
             Console.WriteLine(" C Configure pins for tests");
+            Console.WriteLine(" I Get board information");
             Console.WriteLine(" X Exit");
             var key = Console.ReadKey();
             Console.WriteLine();
@@ -320,6 +321,10 @@ namespace Iot.Device.Arduino.Sample
                         Console.WriteLine($"Led-Pin: {_ledPin}. Button-Pin: {_buttonPin}");
                     }
 
+                    break;
+                case 'i':
+                case 'I':
+                    BoardInformation();
                     break;
                 case 'x':
                 case 'X':
@@ -476,7 +481,7 @@ namespace Iot.Device.Arduino.Sample
                 throw new InvalidOperationException("Couldn't set pin mode");
             }
 
-            Console.WriteLine("Polling input pin 2");
+            Console.WriteLine($"Polling input pin {_buttonPin}");
             var lastState = gpioController.Read(gpio);
             while (!Console.KeyAvailable)
             {
@@ -567,5 +572,27 @@ namespace Iot.Device.Arduino.Sample
             gpioController.UnregisterCallbackForPinValueChangedEvent(gpio2, MyCallback);
             gpioController.Dispose();
         }
+
+        private void BoardInformation()
+        {
+            const int numberOfPings = 4;
+            var results = _board.Ping(numberOfPings);
+            int lostPackets = results.Count(x => x < TimeSpan.Zero);
+            var validPackets = results.Where(x => x >= TimeSpan.Zero).ToList();
+            double average = validPackets.Sum(x => x.TotalMilliseconds) / validPackets.Count();
+
+            Console.WriteLine("Board information");
+            Console.WriteLine($"Firmata Version:              {_board.FirmataVersion}");
+            Console.WriteLine($"Firmware Version:             {_board.FirmwareVersion}");
+            Console.WriteLine($"Firmware Name:                {_board.FirmwareName}");
+            Console.WriteLine($"Round trip time:              {average:F1}ms ({validPackets.Count()} of {numberOfPings} received)");
+            Console.WriteLine($" Pin capabilities: ");
+            foreach (var pin in _board.SupportedPinConfigurations)
+            {
+                Console.Write($"    {pin.Pin}: ");
+                Console.WriteLine(string.Join(", ", pin.PinModes.Select(x => x.Name)));
+            }
+        }
+
     }
 }

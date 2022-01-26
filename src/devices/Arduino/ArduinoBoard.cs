@@ -801,5 +801,43 @@ namespace Iot.Device.Arduino
                 Firmata.DisableSpi();
             }
         }
+
+        /// <summary>
+        /// Pings the device, to get an estimate about the round-trip time.
+        /// With some Wifi setups, the round trip time may be significantly higher than desired.
+        /// </summary>
+        /// <param name="number">The number of pings to send</param>
+        /// <returns>The list of reply times. Contains a negative value for lost packets</returns>
+        public List<TimeSpan> Ping(int number)
+        {
+            Initialize();
+            if (_firmata == null)
+            {
+                throw new ObjectDisposedException("Not connected");
+            }
+
+            List<TimeSpan> ret = new();
+            Stopwatch sw = new Stopwatch();
+            for (int i = 0; i < number; i++)
+            {
+                sw.Restart();
+                try
+                {
+                    _firmata.QueryFirmwareVersion(out _);
+                    var elapsed = sw.Elapsed;
+                    ret.Add(elapsed);
+                    _logger.LogInformation($"Round trip time: {elapsed.TotalMilliseconds}ms");
+                }
+                catch (TimeoutException x)
+                {
+                    _logger.LogError(x, $"Timeout: {x.Message}");
+                    ret.Add(TimeSpan.FromMinutes(-1));
+                }
+
+                sw.Stop();
+            }
+
+            return ret;
+        }
     }
 }
