@@ -735,6 +735,19 @@ namespace Iot.Device.HardwareMonitor
             private double _value;
 
             /// <summary>
+            /// Create a sensor instance from a management object.
+            /// This member is obsolete, use another constructor instead or a derived class.
+            /// </summary>
+            [Obsolete("Use Sensor(string name, string identifier, string? parent, SensorType typeEnum) instead")]
+            public Sensor(ManagementObject dummy, string name, string identifier, string? parent, SensorType typeEnum)
+            {
+                _name = name;
+                _identifier = identifier;
+                _parent = parent;
+                _sensorType = typeEnum;
+            }
+
+            /// <summary>
             /// Creates a sensor instance
             /// </summary>
             public Sensor(string name, string identifier, string? parent, SensorType typeEnum)
