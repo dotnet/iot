@@ -89,6 +89,54 @@ stages:
       artifact: config
       condition: eq(variables['BuildConfiguration'], 'Release')
 
+  - job: Windows_ArduinoIntegration
+    displayName: Arduino Integration Tests
+    pool:
+      vmImage: windows-latest
+
+    strategy:
+      matrix:
+        Build_Release:
+          BuildConfiguration: Release
+        Build_Debug:
+          BuildConfiguration: Debug
+
+    steps:
+    - script: build.cmd -ci
+        -configuration $(BuildConfiguration)
+        -prepareMachine
+      displayName: Build Iot
+      
+    - run: choco install -y arduino-cli
+    
+    - run: |
+       arduino-cli lib install "DHT sensor library"
+       arduino-cli lib install "Servo"
+       
+    - run: |
+       arduino-cli config init
+       arduino-cli config add board_manager.additional_urls https://dl.espressif.com/dl/package_esp32_index.json
+       arduino-cli core update-index
+       
+    - script: dir
+      workingDirectory: $(Agent.BuildDirectory)
+      displayName: List contents of primary build folder
+
+    - script: dir
+      workingDirectory: $(UserProfile)\Arduino
+      displayName: List contents of user documents
+      
+    - run: |
+      git checkout https://github.com/pgrawehr/ConfigurableFirmata $(UserProfile)\Arduino\libraries
+      git checkout https://github.com/pgrawehr/ExtendedConfigurableFirmata $(UserProfile)\Arduino
+
+    - run: |
+       arduino-cli core install esp32:esp32
+
+    - run: |
+      cd $(UserProfile)\Arduino\ExtendedConfigurableFirmata
+      arduino-cli compile --fqbn esp32:esp32:esp32:PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none ./ExtendedConfigurableFirmata.ino --warnings more
+
   - job: Linux
     displayName: Linux Build
     container: LinuxContainer
