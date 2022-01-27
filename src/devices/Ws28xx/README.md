@@ -1,4 +1,4 @@
-﻿﻿# Ws28xx / SK6812 LED drivers
+﻿# Ws28xx / SK6812 LED drivers
 
 This binding allows you to update the RGB LEDs on Ws28xx / SK6812 and based strips and matrices.
 
