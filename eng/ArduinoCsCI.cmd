@@ -1,11 +1,11 @@
 echo on
 
-if %1!=! goto :usage
+if %1!==! goto :usage
 
 choco install -y arduino-cli
 arduino-cli lib install "DHT sensor library"
 arduino-cli lib install "Servo"
-       
+
 arduino-cli config init
 arduino-cli config add board_manager.additional_urls https://dl.espressif.com/dl/package_esp32_index.json
 arduino-cli core update-index
@@ -27,5 +27,5 @@ Echo All done!
 
 :usage
 :error
-echo Usage: ArduinoCsCIcmd [path-to-home-directory]
+echo Usage: ArduinoCsCI.cmd [path-to-home-directory]
 

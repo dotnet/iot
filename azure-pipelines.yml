@@ -31,7 +31,7 @@ stages:
   - job: Windows_NT
     displayName: Windows Build
     pool:
-      vmImage: windows-latest
+      vmImage: windows-2022
 
     strategy:
       matrix:
@@ -107,7 +107,7 @@ stages:
         -prepareMachine
       displayName: Build Iot
       
-    - script: eng/ArduinoCsCIcmd $(UserProfile)
+    - script: eng\ArduinoCsCI.cmd $(UserProfile)
       displayName: Build and run Arduino Integration Tests
 
   - job: Linux
