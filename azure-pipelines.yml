@@ -92,7 +92,7 @@ stages:
   - job: Windows_ArduinoIntegration
     displayName: Arduino Integration Tests
     pool:
-      vmImage: windows-latest
+      vmImage: windows-2022
 
     strategy:
       matrix:
