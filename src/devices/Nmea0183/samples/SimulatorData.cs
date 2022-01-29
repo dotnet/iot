@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Iot.Device.Common;
 using Iot.Device.Nmea0183;
 using UnitsNet;
 

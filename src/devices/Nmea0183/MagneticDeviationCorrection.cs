@@ -344,9 +344,16 @@ namespace Iot.Device.Nmea0183
         public void Save(string file, string shipName, string callSign, string mmsi)
         {
             CompassCalibration topLevel = new CompassCalibration();
+            var calibTimeStamp = DateTime.UtcNow;
+            var lastSentence = _interestingSentences.OrderBy(x => x.DateTime).LastOrDefault();
+            if (lastSentence != null && lastSentence.DateTime.HasValue)
+            {
+                calibTimeStamp = lastSentence.DateTime.Value.DateTime;
+            }
+
             var id = new Identification
             {
-                CalibrationDate = DateTime.Today, ShipName = shipName, Callsign = callSign, MMSI = mmsi
+                CalibrationDate = calibTimeStamp, ShipName = shipName, Callsign = callSign, MMSI = mmsi
             };
             topLevel.CalibrationDataToCompassReading = _deviationPointsToCompassReading;
             topLevel.CalibrationDataFromCompassReading = _deviationPointsFromCompassReading;

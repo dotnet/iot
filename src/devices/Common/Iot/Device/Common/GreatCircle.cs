@@ -77,7 +77,7 @@ namespace Iot.Device.Common
         /// <param name="position2">Input position 2</param>
         /// <param name="distance">Great circle distance between the positions</param>
         /// <param name="directionAtStart">Initial direction to travel, in degrees true</param>
-        /// <param name="directionAtEnd">Direction on which the target is reached</param>
+        /// <param name="directionAtEnd">Angle in which the voyage should start. True angle in which the direction lies when standing at the start position.</param>
         /// <exception cref="ArgumentNullException">Either <paramref name="position1"/> or <paramref name="position2"/> are null.</exception>
         /// <remarks>This path does not follow a constant direction (for large distances)</remarks>
         public static void DistAndDir(GeographicPosition position1, GeographicPosition position2, out Length distance, out Angle directionAtStart, out Angle directionAtEnd)
@@ -99,7 +99,19 @@ namespace Iot.Device.Common
             directionAtEnd = Angle.FromDegrees(dirAtEnd).Normalize(true);
         }
 
-        private static void DistAndDir(double latitude1,  double longitude1, double latitude2, double longitude2, out double distance, out double direction)
+        /// <summary>
+        /// Returns the distance and direction between two points on the globe
+        /// </summary>
+        /// <param name="latitude1">Input latitude 1, in degrees</param>
+        /// <param name="longitude1">Input longitude 1, in degrees</param>
+        /// <param name="latitude2">Input latitude 2, in degrees</param>
+        /// <param name="longitude2">Input longitude 2, in degrees</param>
+        /// <param name="distance">Distance between points, on the great circle, in meters.</param>
+        /// <param name="direction">Angle in which the voyage should start. True angle in which the direction lies when standing at the start position.</param>
+        /// <remarks>This path does not follow a constant direction (for large distances).
+        /// Prefer using the method <see cref="DistAndDir(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,out UnitsNet.Length,out UnitsNet.Angle)"/> instead,
+        /// to avoid errors from exchanged parameters or wrong units</remarks>
+        public static void DistAndDir(double latitude1,  double longitude1, double latitude2, double longitude2, out double distance, out double direction)
         {
             GeoidCalculations.geod_inverse(_geod, latitude1, longitude1, latitude2, longitude2, out distance, out direction, out _);
         }
@@ -183,7 +195,17 @@ namespace Iot.Device.Common
             return new GeographicPosition(resultLatitude, resultLongitude, start.EllipsoidalHeight);
         }
 
-        private static void CalcCoords(double startLatitude, double startLongitude, double direction, double distance, out double resultLatitude, out double resultLongitude)
+        /// <summary>
+        /// Calculate the coordinate one will be when traveling for the given distance in the given direction
+        /// </summary>
+        /// <param name="startLatitude">Starting point latitude</param>
+        /// <param name="startLongitude">Starting point longitude</param>
+        /// <param name="direction">Initial direction</param>
+        /// <param name="distance">Distance to travel</param>
+        /// <param name="resultLatitude">End point latitude</param>
+        /// <param name="resultLongitude">End point longitude</param>
+        /// <remarks>Prefer using <see cref="CalcCoords(Iot.Device.Common.GeographicPosition,UnitsNet.Angle,UnitsNet.Length)"/> to avoid errors from exchanged parameters or wrong units</remarks>
+        public static void CalcCoords(double startLatitude, double startLongitude, double direction, double distance, out double resultLatitude, out double resultLongitude)
         {
             GeoidCalculations.geod_direct(_geod, startLatitude, startLongitude, direction, distance, out resultLatitude, out resultLongitude, out _);
         }

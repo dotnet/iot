@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
 using Moq;
 using UnitsNet;

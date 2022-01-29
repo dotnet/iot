@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
 using UnitsNet;
 using UnitsNet.Units;
@@ -357,8 +358,8 @@ namespace Iot.Device.Nmea0183.Tests
             foreach (var s in nav.Satellites)
             {
                 Assert.True(!string.IsNullOrWhiteSpace(s.Id));
-                Assert.True(s.Elevation > 0 && s.Elevation < 90);
-                Assert.True(s.Azimuth > 0 && s.Azimuth < 360);
+                Assert.True(s.Elevation > Angle.Zero && s.Elevation < Angle.FromDegrees(90));
+                Assert.True(s.Azimuth > Angle.Zero && s.Azimuth < Angle.FromDegrees(360));
             }
         }
 

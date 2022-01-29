@@ -4,7 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Text;
+using System.Text.RegularExpressions;
+using Iot.Device.Common;
 using UnitsNet;
 using Xunit;
 
@@ -19,22 +22,9 @@ namespace Iot.Device.Nmea0183.Tests
             dev.CreateCorrectionTable(
                 "..\\..\\..\\Nmea-2020-07-23-12-02.txt");
 
-            dev.Save("..\\..\\..\\Calibration_Cirrus.xml", "Cirrus", "HBY5127", "269110660");
+            dev.Save("Calibration_Cirrus.xml", "Cirrus", "HBY5127", "269110660");
+            Assert.True(File.Exists("Calibration_Cirrus.xml"));
         }
-
-        /*[Fact]
-        // Files are not usable
-        public void CreateDeviationTable2()
-        {
-            MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
-            dev.CreateCorrectionTable(new string[]
-            {
-                "..\\..\\..\\Nmea-2020-09-23-07-31.txt",
-                "..\\..\\..\\Nmea-2020-09-23-07-53.txt"
-            });
-
-            dev.Save("..\\..\\..\\Calibration_Cirrus_v2_deltas.xml", "Cirrus", "HBY5127", "269110660");
-        }*/
 
         [Fact]
         public void CreateDeviationTable3()
@@ -48,7 +38,16 @@ namespace Iot.Device.Nmea0183.Tests
                 DateTimeOffset.Parse("2021-08-25T18:47:00", CultureInfo.InvariantCulture),
                 DateTimeOffset.Parse("2021-08-25T18:53:00", CultureInfo.InvariantCulture));
 
-            dev.Save("..\\..\\..\\Calibration_Cirrus_v3.xml", "Cirrus", "HBY5127", "269110660");
+            dev.Save("Calibration_Cirrus_v3.xml", "Cirrus", "HBY5127", "269110660");
+
+            var expected = new StreamReader(new FileStream("..\\..\\..\\Calibration_Cirrus_v3.xml", FileMode.Open));
+
+            var actual = new StreamReader(new FileStream("Calibration_Cirrus_v3.xml", FileMode.Open));
+
+            // Compare ignoring whitespace
+            string left = Regex.Replace(expected.ReadToEnd(), @"\s", string.Empty);
+            string right = Regex.Replace(actual.ReadToEnd(), @"\s", string.Empty);
+            Assert.Equal(left, right);
         }
 
         [Fact]
