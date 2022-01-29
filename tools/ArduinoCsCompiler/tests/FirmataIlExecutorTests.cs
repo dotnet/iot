@@ -17,6 +17,8 @@ using TestMethodStarting = Xunit.TestMethodStarting;
 namespace Iot.Device.Arduino.Tests
 {
     [Collection("SingleClientOnly")]
+    [Trait("feature", "firmata")]
+    [Trait("requires", "hardware")]
     public sealed class FirmataIlExecutorTests : ArduinoTestBase, IClassFixture<FirmataTestFixture>, IDisposable
     {
         public FirmataIlExecutorTests(FirmataTestFixture fixture)
