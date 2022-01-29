@@ -64,9 +64,6 @@ namespace Iot.Device.Arduino.Tests
             get;
         }
 
-        /// <summary>
-        /// Default settings for unit tests
-        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             Board?.Dispose();

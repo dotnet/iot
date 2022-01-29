@@ -19,6 +19,8 @@ namespace Iot.Device.Arduino.Tests
     /// run against the *ExtendedConfigurableFirmata" simulator
     /// </summary>
     [Collection("SingleClientOnly")]
+    [Trait("feature", "firmata")]
+    [Trait("requires", "hardware")]
     public sealed class BasicFirmataTests : IClassFixture<FirmataTestFixture>
     {
         private readonly FirmataTestFixture _fixture;
@@ -26,9 +28,7 @@ namespace Iot.Device.Arduino.Tests
         public BasicFirmataTests(FirmataTestFixture fixture)
         {
             _fixture = fixture;
-            Assert.NotNull(_fixture.Board);
-
-            Board = _fixture.Board!;
+            Board = _fixture.Board ?? throw new Exception("Couldn't find the board");
         }
 
         public ArduinoBoard Board

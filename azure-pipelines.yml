@@ -108,6 +108,7 @@ stages:
       displayName: Build Iot
       
     - script: eng/ArduinoCsCIcmd $(UserProfile)
+      displayName: Build and run Arduino Integration Tests
 
   - job: Linux
     displayName: Linux Build
