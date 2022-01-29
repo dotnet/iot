@@ -1,7 +1,7 @@
 <Project>
   <Target Name="EnsureProjectIsTargetingWindowsPlatformIfRequired"
           BeforeTargets="Build"
-          Condition="'($(TargetFramework)' == 'net6.0' Or $(TargetFramework)' == 'net5.0') And
+          Condition="('$(TargetFramework)' == 'net6.0' Or '$(TargetFramework)' == 'net5.0') And
                      '$(SuppressWindowsPlatformTargetingRequiredError)' == '' And
                      ('$(OutputType)' == 'Exe' Or '$(OutputType)'=='WinExe') And
                      $(RuntimeIdentifier.StartsWith('win'))">

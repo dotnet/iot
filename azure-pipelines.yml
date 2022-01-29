@@ -70,7 +70,7 @@ stages:
       condition: always()
       inputs:
         pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
-        artifactName: BuildLogs
+        artifactName: BuildLogs-Windows-$(BuildConfiguration)
         artifactType: container
 
     - task: CopyFiles@2
@@ -146,7 +146,33 @@ stages:
       condition: always()
       inputs:
         pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
-        artifactName: BuildLogs
+        artifactName: BuildLogs-Linux-$(BuildConfiguration)
+        artifactType: container
+
+  - job: MacOS
+    displayName: MacOS Build
+    pool:
+      vmImage: macOS-latest
+
+    strategy:
+      matrix:
+        Build_Release:
+          BuildConfiguration: Release
+        Build_Debug:
+          BuildConfiguration: Debug
+
+    steps:
+    - script: ./build.sh --ci
+        --configuration $(BuildConfiguration)
+        --prepareMachine
+      displayName: Build
+
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Build logs
+      condition: always()
+      inputs:
+        pathToPublish: $(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/
+        artifactName: BuildLogs-MacOS-$(BuildConfiguration)
         artifactType: container
 
 - stage: CodeSign

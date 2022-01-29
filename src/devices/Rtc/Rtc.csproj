@@ -17,5 +17,7 @@
     <Compile Include="Devices\Pcf8563\Pcf8563.cs" />
     <Compile Include="Devices\Pcf8563\Pcf8563Register.cs" />
     <Compile Include="RtcBase.cs" />
+    <Compile Include="..\Interop\Windows\Kernel32.cs" Link="Kernel32.cs" />
+    <Compile Include="SystemClock.cs" />
   </ItemGroup>
 </Project>
