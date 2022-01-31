@@ -26,6 +26,8 @@ rem Write runtime data to ExtendedConfigurableFirmata directory, before building
 %acspath% prepare
 
 rem bring msbuild into the path
+tree /a "C:\Program Files"
+dir "c:\program files\vsdevcmd.bat" /s
 call "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\Tools\VsDevCmd.bat"
 
 pushd %ArduinoRootDir%\ExtendedConfigurableFirmata
