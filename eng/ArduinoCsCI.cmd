@@ -1,5 +1,7 @@
 echo on
 
+REM First argument is the path to the user home directory (typically C:\Users\VssAdministrator)
+REM Second argument is either "Debug" or "Release"
 if %1!==! goto :usage
 
 choco install -y --no-progress arduino-cli
@@ -26,9 +28,7 @@ rem Write runtime data to ExtendedConfigurableFirmata directory, before building
 %acspath% prepare
 
 rem bring msbuild into the path
-tree /a "C:\Program Files"
-dir "c:\program files\vsdevcmd.bat" /s
-call "C:\Program Files\Microsoft Visual Studio\2022\Professional\Common7\Tools\VsDevCmd.bat"
+call "c:\program files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsDevCmd.bat"
 
 pushd %ArduinoRootDir%\ExtendedConfigurableFirmata
 
@@ -38,17 +38,17 @@ arduino-cli compile --fqbn esp32:esp32:esp32:PSRAM=disabled,PartitionScheme=defa
 if errorlevel 1 goto error
 
 REM then build the simulator code as Visual Studio C++ project
-msbuild /p:Configuration=%1 ExtendedConfigurableFirmataSim\ExtendedConfigurableFirmataSim.vcxproj
+msbuild /p:Configuration=%2 ExtendedConfigurableFirmataSim\ExtendedConfigurableFirmataSim.vcxproj
 if errorlevel 1 goto error
 
 REM Start the simulator asynchronously
-start ExtendedConfigurableFirmataSim\%1\ExtendedConfigurableFirmataSim.exe
+start ExtendedConfigurableFirmataSim\%2\ExtendedConfigurableFirmataSim.exe
 
 popd
 pushd %~dp0\..\tools\ArduinoCsCompiler\
 
 REM and finally run the Arduino tests, now including the ones skipped previously
-dotnet test -c %1 --no-build --no-restore --filter feature=firmata -v:n -maxcpucount:1
+dotnet test -c %2 --no-build --no-restore --filter feature=firmata -v:n -maxcpucount:1
 if errorlevel 1 goto error
 
 popd
