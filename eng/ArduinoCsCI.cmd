@@ -14,7 +14,6 @@ arduino-cli core update-index
 
 set ArduinoRootDir=%1\Documents\Arduino
 set acspath=%~dp0\..\tools\ArduinoCsCompiler\Frontend\bin\%2\net6.0\acs.exe
-dir %ArduinoRootDir%
 
 git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\libraries\ConfigurableFirmata
 git clone https://github.com/pgrawehr/ExtendedConfigurableFirmata %ArduinoRootDir%\ExtendedConfigurableFirmata
