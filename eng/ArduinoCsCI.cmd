@@ -46,8 +46,9 @@ start ExtendedConfigurableFirmataSim\%2\ExtendedConfigurableFirmataSim.exe
 popd
 pushd %~dp0\..\tools\ArduinoCsCompiler\
 
-REM and finally run the Arduino tests, now including the ones skipped previously
-dotnet test -c %2 --no-build --no-restore --filter feature=firmata -v:n -maxcpucount:1
+REM and finally run the Arduino tests, now including the ones skipped previously. Set verbosity to normal to see 
+REM information about all tests being executed (as this test run can take 30 mins or more)
+dotnet test -c %2 --no-build --no-restore --filter feature=firmata -l "console;verbosity=normal" -maxcpucount:1
 if errorlevel 1 goto error
 
 popd
