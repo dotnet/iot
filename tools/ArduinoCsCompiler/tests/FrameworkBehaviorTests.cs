@@ -25,14 +25,14 @@ namespace Iot.Device.Tests
         }
 
         [Fact]
-        public void CanGetSizeOfOpenGenericType()
+        public void CanGetSizeOfClosedGenericType()
         {
             // This test fails
             // Assert.Equal(6, Marshal.SizeOf(typeof(GenericStruct<short>)));
         }
 
         [Fact]
-        public void CanGetSizeOfOpenGenericTypeViaInstance()
+        public void CanGetSizeOfClosedGenericTypeViaInstance()
         {
             GenericStruct<short> gs;
             gs._data1 = 2;

@@ -47,7 +47,7 @@ stages:
       displayName: 'Execute Markdownlint'
       condition: eq(variables['build.reason'], 'PullRequest')
 
-    - script: build.cmd -ci
+    - script: build.cmd -ci /maxCpuCount:1
         -configuration $(BuildConfiguration)
         -prepareMachine
         /p:BuildPackages=true
@@ -102,7 +102,7 @@ stages:
           BuildConfiguration: Debug
 
     steps:
-    - script: build.cmd -ci /maxCpuCount:1 
+    - script: build.cmd -ci 
         -configuration $(BuildConfiguration)
         -prepareMachine
       displayName: Build Iot
@@ -124,7 +124,7 @@ stages:
           BuildConfiguration: Debug
 
     steps:
-    - script: ./build.sh --ci
+    - script: ./build.sh --ci /maxCpuCount:1
         --configuration $(BuildConfiguration)
         --prepareMachine
       displayName: Build
