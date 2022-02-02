@@ -45,7 +45,7 @@ namespace Iot.Device.Arduino
         private Thread? _inputThread;
         private bool _inputThreadShouldExit;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
-        private ConcurrentQueue<byte[]> _lastResponse;
+        private BlockingCollection<byte[]> _pendingResponses;
         private List<PinValue> _lastPinValues;
         private Dictionary<int, uint> _lastAnalogValues;
         private object _lastPinValueLock;
@@ -87,7 +87,7 @@ namespace Iot.Device.Arduino
             _lastAnalogValues = new Dictionary<int, uint>();
             _lastAnalogValueLock = new object();
             _dataQueue = new Queue<byte>(1024);
-            _lastResponse = new();
+            _pendingResponses = new(new ConcurrentQueue<byte[]>());
             _lastRequestId = 1;
             _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;
@@ -482,20 +482,20 @@ namespace Iot.Device.Arduino
                             break;
                         case FirmataSysexCommand.I2C_REPLY:
                             _lastCommandError = CommandError.None;
-                            _lastResponse.Enqueue(raw_data);
+                            _pendingResponses.Add(raw_data);
                             _dataReceived.Set();
                             break;
 
                         case FirmataSysexCommand.SPI_DATA:
                             _lastCommandError = CommandError.None;
-                            _lastResponse.Enqueue(raw_data);
+                            _pendingResponses.Add(raw_data);
                             _dataReceived.Set();
                             break;
 
                         default:
                             // we pass the data forward as-is for any other type of sysex command
                             _lastCommandError = CommandError.None;
-                            _lastResponse.Enqueue(raw_data); // the instance is constant, so we can just remember the pointer
+                            _pendingResponses.Add(raw_data); // the instance is constant, so we can just remember the pointer
                             _dataReceived.Set();
                             OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             break;
@@ -599,19 +599,9 @@ namespace Iot.Device.Arduino
                 byte[]? response;
                 do
                 {
-                    if (!_lastResponse.TryDequeue(out response))
+                    if (!_pendingResponses.TryTake(out response, timeout))
                     {
-                        bool result = _dataReceived.WaitOne(timeout);
-                        if (result == false)
-                        {
-                            throw new TimeoutException("Timeout waiting for command answer");
-                        }
-
-                        // We're sure this works now
-                        if (!_lastResponse.TryDequeue(out response))
-                        {
-                            throw new InvalidOperationException("Queue received an element but is empty - this must not happen");
-                        }
+                        throw new TimeoutException("Timeout waiting for command answer");
                     }
                 }
                 while (isMatchingAck != null && !isMatchingAck(sequence, response));
@@ -672,13 +662,9 @@ namespace Iot.Device.Arduino
                 byte[]? response;
                 do
                 {
-                    if (!_lastResponse.TryDequeue(out response))
+                    if (!_pendingResponses.TryTake(out response, timeout))
                     {
-                        bool result = _dataReceived.WaitOne(timeout);
-                        if (result == false)
-                        {
-                            throw new TimeoutException("Timeout waiting for command answer");
-                        }
+                        throw new TimeoutException("Timeout waiting for command answer");
                     }
 
                     if (response != null) // It's possible that we're already done
