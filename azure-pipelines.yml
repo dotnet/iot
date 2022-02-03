@@ -79,6 +79,10 @@ stages:
         sourceFolder: $(Build.SourcesDirectory)/artifacts/packages/$(BuildConfiguration)/Shipping
         targetFolder: $(Build.ArtifactStagingDirectory)/Packages
 
+    - task: PublishTestResults@2
+      inputs:
+        mergeTestResults: true
+
     - publish: $(Build.ArtifactStagingDirectory)/Packages
       displayName: Publish Build Artifacts
       artifact: BuildPackages
@@ -91,6 +95,7 @@ stages:
 
   - job: Windows_ArduinoIntegration
     displayName: Arduino Integration Tests
+    timeoutInMinutes: 90
     pool:
       vmImage: windows-2022
 
