@@ -95,7 +95,7 @@ stages:
 
   - job: Windows_ArduinoIntegration
     displayName: Arduino Integration Tests
-    timeoutInMinutes: 90
+    timeoutInMinutes: 120
     pool:
       vmImage: windows-2022
 
