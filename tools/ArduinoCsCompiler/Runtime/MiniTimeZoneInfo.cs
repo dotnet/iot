@@ -10,20 +10,34 @@ namespace ArduinoCsCompiler.Runtime
         public static TimeZoneInfo GetLocalTimeZone(int cachedData)
         {
             // Don't access the argument here, it has a different type
-            return TimeZoneInfo.Utc;
+            return GetLocalTimeZoneInternal();
         }
 
         [ArduinoImplementation]
         public static TimeSpan GetDateTimeNowUtcOffsetFromUtc(DateTime time, out bool isAmbiguousLocalDst)
         {
             isAmbiguousLocalDst = false;
-            return TimeSpan.Zero;
+            return GetDateTimeNowUtcOffsetFromUtcInternal();
+        }
+
+        [ArduinoCompileTimeConstant]
+        private static TimeSpan GetDateTimeNowUtcOffsetFromUtcInternal()
+        {
+            // TODO: This probably needs to be a bit more complicated, to allow DST changes
+            return TimeZoneInfo.Local.GetUtcOffset(DateTime.Now);
+        }
+
+        [ArduinoCompileTimeConstant]
+        private static TimeZoneInfo GetLocalTimeZoneInternal()
+        {
+            return TimeZoneInfo.Utc;
         }
 
         [ArduinoImplementation]
         public static string GetUtcStandardDisplayName()
         {
-            return "Coordinated Universal Time";
+            var utcTz = TimeZoneInfo.Utc;
+            return utcTz.StandardName;
         }
     }
 }

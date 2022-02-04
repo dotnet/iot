@@ -221,8 +221,20 @@ namespace ArduinoCsCompiler
             [NotNullWhen(true)]
             out ArduinoImplementationAttribute attribute)
         {
-            var attribs = method.GetCustomAttributes(typeof(ArduinoImplementationAttribute));
-            ArduinoImplementationAttribute? iaMethod = (ArduinoImplementationAttribute?)attribs.SingleOrDefault();
+            return HasAttribute(method, out attribute);
+        }
+
+        internal static bool HasAttribute<T>(EquatableMethod method, [NotNullWhen(true)] out T attribute)
+            where T : Attribute
+        {
+            return HasAttribute<T>(method.Method, out attribute);
+        }
+
+        internal static bool HasAttribute<T>(MethodBase method, [NotNullWhen(true)] out T attribute)
+            where T : Attribute
+        {
+            var attribs = method.GetCustomAttributes(typeof(T));
+            T? iaMethod = (T?)attribs.SingleOrDefault();
             if (iaMethod != null)
             {
                 attribute = iaMethod;

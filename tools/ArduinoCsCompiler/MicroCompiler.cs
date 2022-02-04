@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
 using ArduinoCsCompiler.Runtime;
@@ -1969,7 +1970,7 @@ namespace ArduinoCsCompiler
                         // Leaves the target object on the stack (null for static methods). We'll have to decide in the EE whether we need it or not (meaning whether
                         // the actual target is static or not)
                         int fieldToken = set.GetOrAddFieldToken(targetField);
-                        AddCallWithToken(code, OpCode.CEE_LDFLD, fieldToken);
+                        AddCommandWith32BitArgument(code, OpCode.CEE_LDFLD, fieldToken);
 
                         // Push all remaining arguments to the stack -> they'll be the arguments to the method
                         for (int i = 0; i < numargs; i++)
@@ -1982,9 +1983,9 @@ namespace ArduinoCsCompiler
 
                         // Leaves the target (of type method ptr) on the stack. This shall be the final argument to the calli instruction
                         int methodFieldToken = set.GetOrAddFieldToken(methodPtrField);
-                        AddCallWithToken(code, OpCode.CEE_LDFLD, methodFieldToken);
+                        AddCommandWith32BitArgument(code, OpCode.CEE_LDFLD, methodFieldToken);
 
-                        AddCallWithToken(code, OpCode.CEE_CALLI, 0); // The argument is irrelevant, the EE knows the calling convention to the target method, and we hope it matches
+                        AddCommandWith32BitArgument(code, OpCode.CEE_CALLI, 0); // The argument is irrelevant, the EE knows the calling convention to the target method, and we hope it matches
 
                         code.Add((byte)OpCode.CEE_RET);
                         ilBytes = code.ToArray();
@@ -2028,7 +2029,7 @@ namespace ArduinoCsCompiler
                 {
                     // Use patched tokens
                     token = set.GetOrAddMethodToken(m.Method, parentMethod);
-                    AddCallWithToken(code, OpCode.CEE_CALL, token);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_CALL, token);
                 }
 
                 var mainMethod = set.MainEntryPointMethod!;
@@ -2038,11 +2039,11 @@ namespace ArduinoCsCompiler
                     // the only argument is of type string[]. Create an empty array.
                     AddCommand(code, OpCode.CEE_LDC_I4_0);
                     token = set.GetOrAddClassToken(typeof(string[]).GetTypeInfo());
-                    AddCallWithToken(code, OpCode.CEE_NEWARR, token);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_NEWARR, token);
                 }
 
                 token = set.GetOrAddMethodToken(mainMethod, parentMethod);
-                AddCallWithToken(code, OpCode.CEE_CALL, token);
+                AddCommandWith32BitArgument(code, OpCode.CEE_CALL, token);
 
                 if (mainMethod.ReturnType != typeof(void))
                 {
@@ -2052,6 +2053,44 @@ namespace ArduinoCsCompiler
 
                 AddCommand(code, OpCode.CEE_RET);
                 ilBytes = code.ToArray();
+            }
+
+            if (EquatableMethod.HasAttribute(methodInfo, out ArduinoCompileTimeConstantAttribute ca))
+            {
+                if (methodInfo.GetParameters().Length != 0 || methodInfo.IsStatic == false)
+                {
+                    throw new NotSupportedException("Methods marked with [ArduinoCompileTimeConstant] must not take parameters and must be static");
+                }
+
+                MethodInfo? mi = methodInfo.Method as MethodInfo;
+                if (mi == null)
+                {
+                    throw new NotSupportedException("[ArduinoCompileTimeConstant] cannot be applied to constructors");
+                }
+
+                object? result = methodInfo.Method.Invoke(null, Array.Empty<object?>());
+
+                Type t = result.GetType();
+
+                List<byte> code = new List<byte>();
+
+                if (t == typeof(TimeSpan))
+                {
+                    AddCommandWith64BitArgument(code, OpCode.CEE_LDC_I8, ((TimeSpan)result).Ticks);
+                }
+                else if (t == typeof(string))
+                {
+                    int stringToken = set.GetOrAddString((string)result);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_LDSTR, stringToken);
+                }
+                else
+                {
+                    throw new NotSupportedException($"[ArduinoCompileTimeConstant] for type {t} is not implemented");
+                }
+
+                AddCommand(code, OpCode.CEE_RET);
+                ilBytes = code.ToArray();
+                needsParsing = false;
             }
 
             if (ilBytes == null && hasBody)
@@ -2133,13 +2172,23 @@ namespace ArduinoCsCompiler
             }
         }
 
-        private void AddCallWithToken(List<byte> code, OpCode opCode, int token)
+        private void AddCommandWith32BitArgument(List<byte> code, OpCode opCode, int token)
         {
             AddCommand(code, opCode);
             code.Add((byte)(token & 0xFF));
             code.Add((byte)((token >> 8) & 0xFF));
             code.Add((byte)((token >> 16) & 0xFF));
             code.Add((byte)((token >> 24) & 0xFF));
+        }
+
+        private void AddCommandWith64BitArgument(List<byte> code, OpCode opCode, long data)
+        {
+            AddCommand(code, opCode);
+            for (int i = 0; i < 8; i++)
+            {
+                code.Add((byte)(data & 0xFF));
+                data >>= 8;
+            }
         }
 
         private void AddCommand(List<byte> code, OpCode opCode)

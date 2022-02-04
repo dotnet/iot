@@ -153,9 +153,12 @@ namespace WeatherStation
                         console.ReplaceLine(1, humidityLine);
                     }
 
-                    console.ReplaceLine(2, time.ToString("ddd dd. MMM yyyy"));
+                    string line = time.ToString("ddd dd. MMM yyyy");
+                    console.ReplaceLine(2, line);
                     console.SetCursorPosition(0, 3);
-                    console.ReplaceLine(3, time.ToLongTimeString());
+                    line = time.ToLongTimeString();
+                    console.ReplaceLine(3, line);
+                    Console.WriteLine(line);
                 }
                 catch (TimeoutException x)
                 {
