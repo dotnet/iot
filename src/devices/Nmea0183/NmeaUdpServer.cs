@@ -144,6 +144,8 @@ namespace Iot.Device.Nmea0183
             private readonly NmeaUdpServer _parent;
             private readonly Queue<byte> _data;
 
+            private object _disposalLock = new object();
+
             private Stopwatch _lastUnsuccessfulSend;
             private Dictionary<IPAddress, bool> _knownSenders;
 
@@ -256,25 +258,33 @@ namespace Iot.Device.Nmea0183
                     return;
                 }
 
-                byte[] tempBuf = buffer;
-                if (offset != 0)
+                lock (_disposalLock)
                 {
-                    tempBuf = new byte[count];
-                    Array.Copy(buffer, offset, tempBuf, 0, count);
-                }
+                    if (_client == null)
+                    {
+                        throw new ObjectDisposedException("Udp Server is disposed");
+                    }
 
-                try
-                {
-                    IPEndPoint pt = new IPEndPoint(IPAddress.Broadcast, _port);
-                    _client.Send(tempBuf, count, pt);
-                    _lastUnsuccessfulSend.Stop();
-                }
-                catch (SocketException x)
-                {
-                    // This is normal if no network connection is available.
-                    _parent.FireOnParserError($"Udp server send error: {x.Message}", NmeaError.None);
-                    _lastUnsuccessfulSend.Reset();
-                    _lastUnsuccessfulSend.Start();
+                    byte[] tempBuf = buffer;
+                    if (offset != 0)
+                    {
+                        tempBuf = new byte[count];
+                        Array.Copy(buffer, offset, tempBuf, 0, count);
+                    }
+
+                    try
+                    {
+                        IPEndPoint pt = new IPEndPoint(IPAddress.Broadcast, _port);
+                        _client.Send(tempBuf, count, pt);
+                        _lastUnsuccessfulSend.Stop();
+                    }
+                    catch (SocketException x)
+                    {
+                        // This is normal if no network connection is available.
+                        _parent.FireOnParserError($"Udp server send error: {x.Message}", NmeaError.None);
+                        _lastUnsuccessfulSend.Reset();
+                        _lastUnsuccessfulSend.Start();
+                    }
                 }
             }
 
@@ -288,7 +298,10 @@ namespace Iot.Device.Nmea0183
             {
                 if (disposing)
                 {
-                    _client.Dispose();
+                    lock (_disposalLock)
+                    {
+                        _client.Dispose();
+                    }
                 }
 
                 base.Dispose(disposing);
