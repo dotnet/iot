@@ -20,6 +20,7 @@ namespace Iot.Device.Gps.NeoM8Samples
 
         private static void UsingNeoM8Serial()
         {
+            DateTimeOffset lastMessage = DateTimeOffset.UtcNow;
             using (NeoM8 neoM8 = new NeoM8("/dev/ttyS0"))
             {
                 bool gotRmc = false;
@@ -33,7 +34,7 @@ namespace Iot.Device.Gps.NeoM8Samples
                         break;
                     }
 
-                    object? typed = sentence.TryGetTypedValue();
+                    object? typed = sentence.TryGetTypedValue(ref lastMessage);
                     if (typed == null)
                     {
                         Console.WriteLine($"Sentence identifier `{sentence.Id}` is not known.");
