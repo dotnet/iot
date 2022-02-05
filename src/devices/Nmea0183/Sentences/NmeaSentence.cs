@@ -31,7 +31,7 @@ namespace Iot.Device.Nmea0183.Sentences
         protected static Calendar gregorianCalendar = new GregorianCalendar(GregorianCalendarTypes.USEnglish);
 
         private static TalkerId _ownTalkerId = DefaultTalkerId;
-        private DateTimeOffset? _dateTime;
+        private DateTimeOffset _dateTime;
 
         /// <summary>
         /// Our own talker ID (default when we send messages ourselves)
@@ -80,7 +80,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// The time tag on this message
         /// </summary>
-        public DateTimeOffset? DateTime
+        public DateTimeOffset DateTime
         {
             get
             {
@@ -88,15 +88,6 @@ namespace Iot.Device.Nmea0183.Sentences
             }
             protected set
             {
-                if (value.HasValue)
-                {
-                    if (value.Value.Offset != TimeSpan.Zero)
-                    {
-                        // ?????
-                        throw new InvalidOperationException();
-                    }
-                }
-
                 _dateTime = value;
             }
         }
@@ -118,12 +109,12 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             get
             {
-                if (!Valid || !DateTime.HasValue)
+                if (!Valid)
                 {
                     return TimeSpan.Zero;
                 }
 
-                return DateTimeOffset.UtcNow - DateTime.Value;
+                return DateTimeOffset.UtcNow - DateTime;
             }
         }
 

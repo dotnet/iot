@@ -128,9 +128,9 @@ namespace Iot.Device.Nmea0183
             }
             else if (typedSequence is TimeDate td)
             {
-                if (td.Valid && td.DateTime.HasValue)
+                if (td.Valid)
                 {
-                    OnNewTime?.Invoke(td.DateTime.Value);
+                    OnNewTime?.Invoke(td.DateTime);
                 }
             }
         }

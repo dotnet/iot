@@ -122,9 +122,9 @@ namespace Iot.Device.Nmea0183.Sentences
         public override string ToNmeaMessage()
         {
             // seems nullable don't interpolate well
-            if (DateTime.HasValue && Valid)
+            if (Valid)
             {
-                var t = DateTime.Value;
+                var t = DateTime;
                 string time = t.ToString("HHmmss.fff", CultureInfo.InvariantCulture);
                 string year = t.ToString("yyyy", CultureInfo.InvariantCulture);
                 string month = t.ToString("MM", CultureInfo.InvariantCulture);
@@ -159,9 +159,9 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <inheritdoc />
         public override string ToReadableContent()
         {
-            if (DateTime.HasValue)
+            if (Valid)
             {
-                return $"Date/Time: {DateTime.Value:G}";
+                return $"Date/Time: {DateTime:G}";
             }
             else
             {

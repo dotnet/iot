@@ -90,7 +90,7 @@ namespace Iot.Device.Nmea0183
                 if (nmeaSentence is RecommendedMinimumNavigationInformation rmc)
                 {
                     // Track over ground from GPS is useless if not moving
-                    if (rmc.Valid && rmc.SpeedOverGround > Speed.FromKnots(0.3) && rmc.DateTime.HasValue)
+                    if (rmc.Valid && rmc.SpeedOverGround > Speed.FromKnots(0.3))
                     {
                         _interestingSentences.Add(rmc);
                         if (rmc.MagneticVariationInDegrees.HasValue)
@@ -116,14 +116,14 @@ namespace Iot.Device.Nmea0183
 
                         rawTrack.Add(new GnssReading()
                         {
-                            TimeStamp = rmc.DateTime.Value.DateTime,
+                            TimeStamp = rmc.DateTime.DateTime,
                             TrackReading = (float)rmc.TrackMadeGoodInDegreesTrue.Degrees,
                             DeltaToPrevious = delta
                         });
                     }
                 }
 
-                if (nmeaSentence is HeadingMagnetic hdm && hdm.DateTime.HasValue)
+                if (nmeaSentence is HeadingMagnetic hdm)
                 {
                     if (hdm.Valid)
                     {
@@ -145,7 +145,7 @@ namespace Iot.Device.Nmea0183
 
                         rawCompass.Add(new MagneticReading()
                         {
-                            TimeStamp = hdm.DateTime.Value.DateTime, MagneticCompassReading = (float)hdm.Angle.Degrees,
+                            TimeStamp = hdm.DateTime.DateTime, MagneticCompassReading = (float)hdm.Angle.Degrees,
                             DeltaToPrevious = delta
                         });
                     }
@@ -347,9 +347,9 @@ namespace Iot.Device.Nmea0183
             CompassCalibration topLevel = new CompassCalibration();
             var calibTimeStamp = DateTime.UtcNow;
             var lastSentence = _interestingSentences.OrderBy(x => x.DateTime).LastOrDefault();
-            if (lastSentence != null && lastSentence.DateTime.HasValue)
+            if (lastSentence != null)
             {
-                calibTimeStamp = lastSentence.DateTime.Value.DateTime;
+                calibTimeStamp = lastSentence.DateTime.DateTime;
             }
 
             var id = new Identification

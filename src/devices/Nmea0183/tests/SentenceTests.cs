@@ -97,7 +97,8 @@ namespace Iot.Device.Nmea0183.Tests
             var decoded = ts.TryGetTypedValue(ref _lastPacketTime);
             Assert.NotNull(decoded);
             Assert.IsType<RecommendedMinimumNavigationInformation>(decoded);
-            Assert.Equal(21, decoded!.DateTime!.Value.Hour);
+            Assert.Equal(21, decoded!.DateTime.Hour);
+            Assert.Equal(17, decoded!.DateTime.Minute);
         }
 
         [Fact]
@@ -138,8 +139,8 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(GpsQuality.DifferentialFix, nmeaSentence.Status);
             Assert.Equal(12, nmeaSentence.NumberOfSatellites);
             Assert.Equal(0.6, nmeaSentence.Hdop);
-            Assert.Equal(_lastPacketTime.Date, nmeaSentence.DateTime!.Value.Date);
-            Assert.Equal(new TimeSpan(0, 16, 38, 10), nmeaSentence.DateTime!.Value.TimeOfDay);
+            Assert.Equal(_lastPacketTime.Date, nmeaSentence.DateTime.Date);
+            Assert.Equal(new TimeSpan(0, 16, 38, 10), nmeaSentence.DateTime.TimeOfDay);
         }
 
         [Fact]
@@ -330,7 +331,7 @@ namespace Iot.Device.Nmea0183.Tests
 
             Assert.True(zda.Valid);
             Assert.Equal(1.0, zda.LocalTimeOffset.TotalHours);
-            Assert.Equal(new DateTime(2020, 02, 02, 13, 53, 02, 36), zda.DateTime);
+            Assert.Equal(new DateTime(2020, 02, 02, 13, 53, 02, 36, DateTimeKind.Utc), zda.DateTime);
         }
 
         [Fact]
@@ -360,7 +361,7 @@ namespace Iot.Device.Nmea0183.Tests
             string msg = "A,22.200,L,Ostsee,Nordsee,6030.00000,N,02000.00000,E,53.996,270.0,19.4,V,D";
 
             NmeaSentence.OwnTalkerId = TalkerId.GlobalPositioningSystem;
-            var rmb = new RecommendedMinimumNavToDestination(null, Length.FromNauticalMiles(22.2), "Ostsee", "Nordsee", new GeographicPosition(60.5, 20.0, 0),
+            var rmb = new RecommendedMinimumNavToDestination(DateTimeOffset.UtcNow, Length.FromNauticalMiles(22.2), "Ostsee", "Nordsee", new GeographicPosition(60.5, 20.0, 0),
                 Length.FromKilometers(100), Angle.FromDegrees(-90), Speed.FromMetersPerSecond(10), false);
             Assert.True(rmb.Valid);
             Assert.Equal(msg, rmb.ToNmeaMessage());

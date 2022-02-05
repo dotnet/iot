@@ -111,7 +111,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// See <see cref="NmeaSentence"/> for constructor usage
         /// </summary>
         public RecommendedMinimumNavToDestination(
-            DateTimeOffset? dateTime,
+            DateTimeOffset dateTime,
             Length crossTrackError,
             string previousWayPointName,
             string nextWayPointName,
@@ -120,7 +120,7 @@ namespace Iot.Device.Nmea0183.Sentences
             Angle bearingToWayPoint,
             Speed approachSpeedToWayPoint,
             bool arrived)
-        : base(OwnTalkerId, Id, dateTime.GetValueOrDefault(DateTimeOffset.UtcNow))
+        : base(OwnTalkerId, Id, dateTime)
         {
             CrossTrackError = crossTrackError;
             PreviousWayPointName = previousWayPointName;

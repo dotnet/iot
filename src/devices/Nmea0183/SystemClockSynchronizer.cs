@@ -58,20 +58,17 @@ namespace Iot.Device.Nmea0183
         {
             if (sentence is TimeDate zda)
             {
-                if (zda.DateTime.HasValue)
+                // Wait a few seconds, so that we're not looking at messages from the cache
+                _numberOfValidMessagesSeen++;
+                if (_numberOfValidMessagesSeen > 10)
                 {
-                    // Wait a few seconds, so that we're not looking at messages from the cache
-                    _numberOfValidMessagesSeen++;
-                    if (_numberOfValidMessagesSeen > 10)
+                    TimeSpan delta = (zda.DateTime.UtcDateTime - DateTime.UtcNow);
+                    if (Math.Abs(delta.TotalSeconds) > RequiredAccuracy.TotalSeconds)
                     {
-                        TimeSpan delta = (zda.DateTime.Value.UtcDateTime - DateTime.UtcNow);
-                        if (Math.Abs(delta.TotalSeconds) > RequiredAccuracy.TotalSeconds)
-                        {
-                            // The time message seems valid, but it is off by more than 10 seconds from what the system clock
-                            // says. Synchronize.
-                            SetTime(zda.DateTime.Value.UtcDateTime);
-                            _numberOfValidMessagesSeen = -50; // Don't try to often.
-                        }
+                        // The time message seems valid, but it is off by more than 10 seconds from what the system clock
+                        // says. Synchronize.
+                        SetTime(zda.DateTime.UtcDateTime);
+                        _numberOfValidMessagesSeen = -50; // Don't try to often.
                     }
                 }
             }

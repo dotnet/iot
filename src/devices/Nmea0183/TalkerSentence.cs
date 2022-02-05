@@ -293,9 +293,9 @@ namespace Iot.Device.Nmea0183
                 retVal = new RawSentence(TalkerId, Id, Fields, lastMessageTime);
             }
 
-            if (retVal?.DateTime != null)
+            if (retVal.Valid && retVal.DateTime != DateTimeOffset.MinValue)
             {
-                lastMessageTime = retVal.DateTime.Value;
+                lastMessageTime = retVal.DateTime;
             }
 
             return retVal;
