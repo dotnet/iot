@@ -88,7 +88,7 @@ namespace Iot.Device.Nmea0183
             };
             parser.StartDecode();
             ev.WaitOne(); // Wait for end of file
-            parser.StopDecode(true);
+            parser.StopDecode();
             ms.Dispose();
         }
 

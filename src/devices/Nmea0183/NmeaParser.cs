@@ -111,12 +111,11 @@ namespace Iot.Device.Nmea0183
                 _cancellationTokenSource = new CancellationTokenSource();
                 _parserThread = new Thread(Parser);
                 _parserThread.Name = $"Nmea Parser for {InterfaceName}";
+                _parserThread.Start();
 
                 _sendQueueThread = new Thread(Sender);
                 _sendQueueThread.Name = $"Nmea Sender for {InterfaceName}";
                 _sendQueueThread.Start();
-
-                _parserThread.Start();
             }
         }
 
@@ -249,26 +248,13 @@ namespace Iot.Device.Nmea0183
             _outEvent?.Set();
         }
 
-        /// <summary>
-        /// Stop sending or receiving messages from/to this destination
-        /// </summary>
-        /// <param name="waitUntilSendQueueEmpty">True to wait until the send queue is empty (may still get new messages too, so
-        /// this may not work on busy interfaces and is more intended when the input stream is a file)</param>
-        public void StopDecode(bool waitUntilSendQueueEmpty)
+        /// <inheritdoc />
+        public override void StopDecode()
         {
             lock (_lock)
             {
                 if (_parserThread != null && _parserThread.IsAlive && _cancellationTokenSource != null)
                 {
-                    if (waitUntilSendQueueEmpty)
-                    {
-                        while (!_outQueue.IsEmpty)
-                        {
-                            _outEvent.Set();
-                            Thread.Sleep(10);
-                        }
-                    }
-
                     _cancellationTokenSource.Cancel();
                     _dataSource.Dispose();
                     _dataSink?.Dispose();
@@ -287,12 +273,6 @@ namespace Iot.Device.Nmea0183
                     _outEvent = null!;
                 }
             }
-        }
-
-        /// <inheritdoc />
-        public override void StopDecode()
-        {
-            StopDecode(false);
         }
     }
 }
