@@ -13,9 +13,12 @@ namespace Iot.Device.Nmea0183.Tests
 {
     public class SentenceTests : IDisposable
     {
+        private DateTimeOffset _lastPacketTime;
+
         public SentenceTests()
         {
             NmeaSentence.OwnTalkerId = NmeaSentence.DefaultTalkerId;
+            _lastPacketTime = default;
         }
 
         public void Dispose()
@@ -90,7 +93,8 @@ namespace Iot.Device.Nmea0183.Tests
             string sentence = "$GPRMC,211730.997,A,3511.28,S,13823.26,E,7.0,229.0,190120,,,*35";
             var ts = TalkerSentence.FromSentenceString(sentence, out var error)!;
             Assert.NotNull(ts);
-            var decoded = ts.TryGetTypedValue();
+            _lastPacketTime = DateTimeOffset.UtcNow;
+            var decoded = ts.TryGetTypedValue(ref _lastPacketTime);
             Assert.NotNull(decoded);
             Assert.IsType<RecommendedMinimumNavigationInformation>(decoded);
             Assert.Equal(21, decoded!.DateTime!.Value.Hour);
@@ -104,7 +108,7 @@ namespace Iot.Device.Nmea0183.Tests
             var inSentence = TalkerSentence.FromSentenceString(sentence, out var error);
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(inSentence);
-            var decoded = (TransducerMeasurement)inSentence!.TryGetTypedValue()!;
+            var decoded = (TransducerMeasurement)inSentence!.TryGetTypedValue(ref _lastPacketTime)!;
             Assert.NotNull(decoded);
             var roll = decoded.DataSets[0];
             Assert.Equal(4.0, roll.Value);
@@ -122,17 +126,20 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void GgaDecode()
         {
+            _lastPacketTime = DateTimeOffset.UtcNow;
             string msg = "$GPGGA,163810,4728.7027,N,00929.9666,E,2,12,0.6,397.4,M,46.8,M,,*4C";
 
             var inSentence = TalkerSentence.FromSentenceString(msg, out var error);
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(inSentence);
-            GlobalPositioningSystemFixData nmeaSentence = (GlobalPositioningSystemFixData)inSentence!.TryGetTypedValue()!;
+            GlobalPositioningSystemFixData nmeaSentence = (GlobalPositioningSystemFixData)inSentence!.TryGetTypedValue(ref _lastPacketTime)!;
             var expectedPos = new GeographicPosition(47.478378333333332, 9.4994433333333337, 397.4 + 46.8);
             Assert.True(expectedPos.EqualPosition(nmeaSentence.Position));
             Assert.Equal(GpsQuality.DifferentialFix, nmeaSentence.Status);
             Assert.Equal(12, nmeaSentence.NumberOfSatellites);
             Assert.Equal(0.6, nmeaSentence.Hdop);
+            Assert.Equal(_lastPacketTime.Date, nmeaSentence.DateTime!.Value.Date);
+            Assert.Equal(new TimeSpan(0, 16, 38, 10), nmeaSentence.DateTime!.Value.TimeOfDay);
         }
 
         [Fact]
@@ -157,7 +164,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            WindSpeedAndAngle mwv = (WindSpeedAndAngle)decoded!.TryGetTypedValue()!;
+            WindSpeedAndAngle mwv = (WindSpeedAndAngle)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.Equal(AngleUnit.Degree, mwv.Angle.Unit);
             Assert.Equal(Angle.FromDegrees(-10).Degrees, mwv.Angle.Degrees, 3);
@@ -175,7 +182,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            WindSpeedAndAngle mwv = (WindSpeedAndAngle)decoded!.TryGetTypedValue()!;
+            WindSpeedAndAngle mwv = (WindSpeedAndAngle)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.Equal(Angle.FromDegrees(220), mwv.Angle);
             Assert.False(mwv.Relative);
@@ -202,7 +209,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            CrossTrackError xte = (CrossTrackError)decoded!.TryGetTypedValue()!;
+            CrossTrackError xte = (CrossTrackError)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.True(xte.Valid);
             Assert.Equal(Length.Zero, xte.Distance);
@@ -239,7 +246,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            HeadingTrue xte = (HeadingTrue)decoded!.TryGetTypedValue()!;
+            HeadingTrue xte = (HeadingTrue)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.True(xte.Valid);
             Assert.Equal(99.9, xte.Angle.Degrees, 1);
@@ -265,7 +272,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            HeadingMagnetic hdm = (HeadingMagnetic)decoded!.TryGetTypedValue()!;
+            HeadingMagnetic hdm = (HeadingMagnetic)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.True(hdm.Valid);
             Assert.Equal(99.9, hdm.Angle.Degrees, 1);
@@ -302,12 +309,28 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            WindSpeedAndAngle wind = (WindSpeedAndAngle)decoded!.TryGetTypedValue()!;
+            WindSpeedAndAngle wind = (WindSpeedAndAngle)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.True(wind.Valid);
             Assert.True(wind.Relative);
             Assert.Equal(331.6 - 360.0, wind.Angle.Degrees, 1);
             Assert.Equal(0.7, wind.Speed.MetersPerSecond, 1);
+        }
+
+        [Fact]
+        public void ZdaDecode()
+        {
+            _lastPacketTime = DateTimeOffset.UtcNow;
+            string text = "$GPZDA,135302.036,02,02,2020,+01,00*7F";
+            var decoded = TalkerSentence.FromSentenceString(text, out var error);
+            Assert.Equal(NmeaError.None, error);
+            Assert.NotNull(decoded);
+
+            TimeDate zda = (TimeDate)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
+
+            Assert.True(zda.Valid);
+            Assert.Equal(1.0, zda.LocalTimeOffset.TotalHours);
+            Assert.Equal(new DateTime(2020, 02, 02, 13, 53, 02, 36), zda.DateTime);
         }
 
         [Fact]
@@ -318,7 +341,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            RecommendedMinimumNavToDestination nav = (RecommendedMinimumNavToDestination)decoded!.TryGetTypedValue()!;
+            RecommendedMinimumNavToDestination nav = (RecommendedMinimumNavToDestination)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.True(nav.Valid);
             Assert.Equal(-0.02, nav.CrossTrackError.NauticalMiles, 2);
@@ -351,7 +374,7 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(decoded);
 
-            SatellitesInView nav = (SatellitesInView)decoded!.TryGetTypedValue()!;
+            SatellitesInView nav = (SatellitesInView)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
             Assert.False(nav.ReplacesOlderInstance);
             Assert.Equal(4, nav.Satellites.Count);
             Assert.Equal(18, nav.TotalSatellites);
@@ -414,7 +437,7 @@ namespace Iot.Device.Nmea0183.Tests
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(inSentence);
-            var decoded = inSentence!.TryGetTypedValue()!;
+            var decoded = inSentence!.TryGetTypedValue(ref _lastPacketTime)!;
             Assert.NotNull(decoded);
             TalkerSentence outSentence = new TalkerSentence(decoded);
             string output = outSentence.ToString();
@@ -465,7 +488,7 @@ namespace Iot.Device.Nmea0183.Tests
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
             Assert.Equal(NmeaError.None, error);
             Assert.NotNull(inSentence);
-            var decoded = inSentence!.TryGetTypedValue();
+            var decoded = inSentence!.TryGetTypedValue(ref _lastPacketTime);
             Assert.NotNull(decoded);
             Assert.False(decoded is RawSentence);
         }
@@ -497,7 +520,7 @@ namespace Iot.Device.Nmea0183.Tests
                 var inSentence = TalkerSentence.FromSentenceString(input, out var error);
                 Assert.Equal(NmeaError.None, error);
                 Assert.NotNull(inSentence);
-                var decoded = inSentence!.TryGetTypedValue();
+                var decoded = inSentence!.TryGetTypedValue(ref _lastPacketTime);
                 Assert.NotNull(decoded);
                 TalkerSentence outSentence = new TalkerSentence(decoded!);
                 string output = outSentence.ToString();

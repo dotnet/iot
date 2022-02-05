@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183.Sentences;
 using UnitsNet;
 using Xunit;
 
@@ -27,7 +29,7 @@ namespace Iot.Device.Nmea0183.Tests
         }
 
         [Fact]
-        public void CreateDeviationTable3()
+        public void CreateDeviationTable4()
         {
             MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
             dev.CreateCorrectionTable(new string[]
@@ -38,16 +40,27 @@ namespace Iot.Device.Nmea0183.Tests
                 DateTimeOffset.Parse("2021-08-25T18:47:00", CultureInfo.InvariantCulture),
                 DateTimeOffset.Parse("2021-08-25T18:53:00", CultureInfo.InvariantCulture));
 
-            dev.Save("Calibration_Cirrus_v3.xml", "Cirrus", "HBY5127", "269110660");
+            PrintSentences(dev.SentencesUsed);
+
+            dev.Save("Calibration_Cirrus_v4.xml", "Cirrus", "HBY5127", "269110660");
 
             var expected = new StreamReader(new FileStream("..\\..\\..\\Calibration_Cirrus_v3.xml", FileMode.Open));
 
-            var actual = new StreamReader(new FileStream("Calibration_Cirrus_v3.xml", FileMode.Open));
+            var actual = new StreamReader(new FileStream("Calibration_Cirrus_v4.xml", FileMode.Open));
 
             // Compare ignoring whitespace
             string left = Regex.Replace(expected.ReadToEnd(), @"\s", string.Empty);
             string right = Regex.Replace(actual.ReadToEnd(), @"\s", string.Empty);
             Assert.Equal(left, right);
+        }
+
+        private void PrintSentences(List<NmeaSentence> devSentencesUsed)
+        {
+            using TextWriter tw = new StreamWriter("C:\\projects\\iot4\\bad.txt");
+            foreach (var sentence in devSentencesUsed)
+            {
+                tw.WriteLine($"{sentence.DateTime!.Value.TimeOfDay}: ${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaMessage()}");
+            }
         }
 
         [Fact]

@@ -165,12 +165,13 @@ namespace Iot.Device.Nmea0183.Tests
 
         private void ParseSequencesAndAddToCache(IEnumerable<string> inputSequences)
         {
+            DateTimeOffset now = DateTimeOffset.Now;
             foreach (var seq in inputSequences)
             {
                 var decoded = TalkerSentence.FromSentenceString(seq, out var error)!;
                 Assert.Equal(NmeaError.None, error);
                 Assert.NotNull(decoded);
-                var s = decoded.TryGetTypedValue()!;
+                var s = decoded.TryGetTypedValue(ref now)!;
                 _autopilot.SentenceCache.Add(s);
             }
         }

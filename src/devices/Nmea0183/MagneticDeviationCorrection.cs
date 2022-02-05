@@ -49,6 +49,11 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
+        /// BLahafasel
+        /// </summary>
+        public List<NmeaSentence> SentencesUsed => _interestingSentences;
+
+        /// <summary>
         /// Tries to calculate a correction from the given recorded file.
         /// The recorded file should contain a data set where the vessel is turning two slow circles, one with the clock and one against the clock,
         /// in calm conditions and with no current.
@@ -147,14 +152,10 @@ namespace Iot.Device.Nmea0183
                 }
             }
 
-            foreach (var f in fileSet)
-            {
-                NmeaLogDataReader reader = new NmeaLogDataReader("Reader", f);
-                reader.OnNewSequence += MessageFilter;
-                reader.StartDecode();
-                reader.Dispose();
-            }
-
+            NmeaLogDataReader reader = new NmeaLogDataReader("Reader", fileSet);
+            reader.OnNewSequence += MessageFilter;
+            reader.StartDecode();
+            reader.Dispose();
             _rawData.Compass = rawCompass.ToArray();
             _rawData.Track = rawTrack.ToArray();
             DeviationPoint[] circle = new DeviationPoint[360]; // One entry per degree

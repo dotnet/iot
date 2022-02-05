@@ -76,7 +76,8 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Stops receiving messages from this interface
+        /// Stops sending or receiving messages from and to this interface.
+        /// Any pending messages are discarded.
         /// </summary>
         public abstract void StopDecode();
 
@@ -111,9 +112,9 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Triggers events based on the given message
+        /// Forwards the given sentence to listeners, as needed.
         /// </summary>
-        /// <param name="typedSequence">Forwards the given sentence to listeners, as needed</param>
+        /// <param name="typedSequence">The sentences to process</param>
         protected virtual void DispatchSentenceEvents(NmeaSentence? typedSequence)
         {
             if (typedSequence != null)

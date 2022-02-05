@@ -54,17 +54,6 @@ namespace Iot.Device.Nmea0183
         static TalkerSentence()
         {
             s_registeredSentences = GetKnownSentences();
-            LastMessageTime = DateTimeOffset.UtcNow; // In case the messages contain no date, we have to assume the computer is right
-        }
-
-        /// <summary>
-        /// The date/time when the last message was seen.
-        /// Used to assign the incoming messages a timespan if they don't provide their own (or if they only provide the time but not the date)
-        /// </summary>
-        public static DateTimeOffset LastMessageTime
-        {
-            get;
-            private set;
         }
 
         /// <summary>
@@ -212,7 +201,7 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Registers sentence identifier as known. Registered sentences are used by <see cref="TryGetTypedValue()"/>.
+        /// Registers sentence identifier as known. Registered sentences are used by <see cref="TryGetTypedValue"/>.
         /// </summary>
         /// <param name="id">NMEA0183 sentence identifier</param>
         /// <param name="producer">Function which produces typed object given <see cref="TalkerSentence"/>.</param>
@@ -285,26 +274,28 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-         /// Compares sentence identifier with all known identifiers.
-         /// If found returns typed object corresponding to the identifier.
-         /// If not found returns null.
-         /// </summary>
-         /// <returns>Object corresponding to the identifier</returns>
-        public NmeaSentence? TryGetTypedValue()
+        /// Compares sentence identifier with all known identifiers.
+        /// If found returns typed object corresponding to the identifier.
+        /// If not found returns null.
+        /// </summary>
+        /// <param name="lastMessageTime">The date/time the last packet was seen. Used to time-tag packets that do not provide
+        /// their own time or only a time but not a date</param>
+        /// <returns>Object corresponding to the identifier</returns>
+        public NmeaSentence? TryGetTypedValue(ref DateTimeOffset lastMessageTime)
         {
             NmeaSentence? retVal = null;
             if (s_registeredSentences.TryGetValue(Id, out Func<TalkerSentence, DateTimeOffset, NmeaSentence>? producer))
             {
-                retVal = producer(this, LastMessageTime);
+                retVal = producer(this, lastMessageTime);
             }
             else
             {
-                retVal = new RawSentence(TalkerId, Id, Fields, LastMessageTime);
+                retVal = new RawSentence(TalkerId, Id, Fields, lastMessageTime);
             }
 
             if (retVal?.DateTime != null)
             {
-                LastMessageTime = retVal.DateTime.Value;
+                lastMessageTime = retVal.DateTime.Value;
             }
 
             return retVal;
@@ -314,9 +305,9 @@ namespace Iot.Device.Nmea0183
         /// Returns this sentence without parsing its contents
         /// </summary>
         /// <returns>A raw sentence</returns>
-        public RawSentence GetAsRawSentence()
+        public RawSentence GetAsRawSentence(ref DateTimeOffset lastMessageTime)
         {
-            return new RawSentence(TalkerId, Id, Fields, LastMessageTime);
+            return new RawSentence(TalkerId, Id, Fields, lastMessageTime);
         }
     }
 }
