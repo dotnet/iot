@@ -40,8 +40,6 @@ namespace Iot.Device.Nmea0183.Tests
                 DateTimeOffset.Parse("2021-08-25T18:47:00", CultureInfo.InvariantCulture),
                 DateTimeOffset.Parse("2021-08-25T18:53:00", CultureInfo.InvariantCulture));
 
-            PrintSentences(dev.SentencesUsed);
-
             dev.Save("Calibration_Cirrus_v4.xml", "Cirrus", "HBY5127", "269110660");
 
             var expected = new StreamReader(new FileStream("..\\..\\..\\Calibration_Cirrus_v3.xml", FileMode.Open));
@@ -52,15 +50,6 @@ namespace Iot.Device.Nmea0183.Tests
             string left = Regex.Replace(expected.ReadToEnd(), @"\s", string.Empty);
             string right = Regex.Replace(actual.ReadToEnd(), @"\s", string.Empty);
             Assert.Equal(left, right);
-        }
-
-        private void PrintSentences(List<NmeaSentence> devSentencesUsed)
-        {
-            using TextWriter tw = new StreamWriter("C:\\projects\\iot4\\bad.txt");
-            foreach (var sentence in devSentencesUsed)
-            {
-                tw.WriteLine($"{sentence.DateTime.TimeOfDay}: ${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaParameterList()}");
-            }
         }
 
         [Fact]
