@@ -6,14 +6,14 @@ NMEA stands for `National Marine Electronics Associations`.
 
 NMEA 0183 is an industry standard first released in 1983 and has been updated several times since then. It is used as a standard protocol 
 for communication between different sensors and devices on a boat, but has been adapted for other uses as well. Most GNSS receivers
-support some variant of the NMEA protocol as output. Other sensors that support the protocol on boats are wind sensors, depth transducers
+support some variant of the NMEA protocol as output. On a boat, other sensors that support the protocol include wind sensors, depth transducers
 or electronic compasses. The data is interpreted and combined by displays, chart plotters or autopilots.
 
 On the physical layer, NMEA uses a serial protocol on an RS-232 interface. Historically, the baud rate is limited to 4800 baud, however
 most recent devices support configuring higher baud rates. Since RS-232 only supports point-to-point connections, message routers are
-required to combine multiple data sources.
+required to combine multiple data sources. Chart plotters for NMEA 0183 have several inputs for different sensors.
 
-NMEA 0183 has been superseeded by NMEA 2000, which uses a CAN-Bus protocol and can therefore run a large number of sensors on a single cable.
+NMEA 0183 has been superseeded by NMEA 2000, which uses a CAN-Bus protocol and hardware layer and can therefore run a large number of sensors on a single cable.
 Since NMEA 0183 is much simpler to parse and does not require specific electronic components, it is still in wide use. Bi-directional convertes
 from NMEA 0183 to NMEA 2000 are available from different vendors.
 
@@ -24,7 +24,6 @@ In NMEA 0183 a device is either a talker or a listener. There are multiple types
 
 Each message has a talker identifier (see `TalkerIdentifier`), sentence identifier (see `SentenceId`), fields and optional checksum.
 
-An NMEA system typically consists of several devices 
 The following sentence ids are currently supported:
 
 - BOD: Bearing origin to destination
@@ -107,7 +106,7 @@ _router.AddEndPoint(_signalkServer);
 _router.AddEndPoint(_clockSynchronizer);
 _router.AddEndPoint(_udpServer);
 
-// When using the router, only its `OnNewSequence` event should be used for local processing. 
+// When using the router, only the router's `OnNewSequence` event should be used for local processing. 
 // This is known as the "local" sink.
 _router.OnNewSequence += ParserOnNewSequence;
 foreach (var rule in ConstructRules())
