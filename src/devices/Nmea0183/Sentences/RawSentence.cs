@@ -34,7 +34,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Returns the formatted payload
         /// </summary>
-        public override string ToNmeaMessage()
+        public override string ToNmeaParameterList()
         {
             return string.Join(",", _fields);
         }

@@ -102,6 +102,23 @@ namespace Iot.Device.Nmea0183.Tests
         }
 
         [Fact]
+        public void DecodeWithDifferentSequenceIdLength()
+        {
+            string sentence = "$GPPR001,10,20,30,,,";
+            var ts = TalkerSentence.FromSentenceString(sentence, out var error)!;
+            Assert.NotNull(ts);
+            _lastPacketTime = DateTimeOffset.UtcNow;
+            var decoded = ts.TryGetTypedValue(ref _lastPacketTime);
+            Assert.NotNull(decoded);
+            if (decoded != null)
+            {
+                Assert.IsType<RawSentence>(decoded);
+                Assert.Equal(new SentenceId("PR001"), decoded.SentenceId);
+                Assert.Equal(sentence, decoded.ToNmeaMessage());
+            }
+        }
+
+        [Fact]
         public void CorrectlyDecodesXdrEvenIfExtraChars()
         {
             // Seen in one example (the last "A" shouldn't be there)
@@ -197,7 +214,7 @@ namespace Iot.Device.Nmea0183.Tests
             WindSpeedAndAngle mwv = new WindSpeedAndAngle(Angle.FromDegrees(-20), Speed.FromKnots(54), true);
             Assert.True(mwv.Valid);
             Assert.Equal(Angle.FromDegrees(-20), mwv.Angle);
-            Assert.Equal("340.0,R,54.0,N,A", mwv.ToNmeaMessage());
+            Assert.Equal("340.0,R,54.0,N,A", mwv.ToNmeaParameterList());
             Assert.Contains("Apparent", mwv.ToReadableContent());
         }
 
@@ -224,7 +241,7 @@ namespace Iot.Device.Nmea0183.Tests
             NmeaSentence.OwnTalkerId = TalkerId.GlobalPositioningSystem;
             CrossTrackError mwv = new CrossTrackError(Length.FromNauticalMiles(-10.91234));
             Assert.True(mwv.Valid);
-            Assert.Equal(msg, mwv.ToNmeaMessage());
+            Assert.Equal(msg, mwv.ToNmeaParameterList());
         }
 
         [Fact]
@@ -235,7 +252,7 @@ namespace Iot.Device.Nmea0183.Tests
             NmeaSentence.OwnTalkerId = TalkerId.GlobalPositioningSystem;
             CrossTrackError mwv = new CrossTrackError(Length.FromNauticalMiles(10.91234));
             Assert.True(mwv.Valid);
-            Assert.Equal(msg, mwv.ToNmeaMessage());
+            Assert.Equal(msg, mwv.ToNmeaParameterList());
         }
 
         [Fact]
@@ -261,7 +278,7 @@ namespace Iot.Device.Nmea0183.Tests
             NmeaSentence.OwnTalkerId = TalkerId.GlobalPositioningSystem;
             HeadingTrue mwv = new HeadingTrue(99.9);
             Assert.True(mwv.Valid);
-            Assert.Equal(msg, mwv.ToNmeaMessage());
+            Assert.Equal(msg, mwv.ToNmeaParameterList());
         }
 
         [Fact]
@@ -287,7 +304,7 @@ namespace Iot.Device.Nmea0183.Tests
             NmeaSentence.OwnTalkerId = TalkerId.GlobalPositioningSystem;
             HeadingMagnetic hdm = new HeadingMagnetic(99.9);
             Assert.True(hdm.Valid);
-            Assert.Equal(msg, hdm.ToNmeaMessage());
+            Assert.Equal(msg, hdm.ToNmeaParameterList());
         }
 
         [Fact]
@@ -298,7 +315,7 @@ namespace Iot.Device.Nmea0183.Tests
 
             Assert.True(mwv.Valid);
             Assert.Equal(Angle.FromDegrees(220), mwv.Angle);
-            Assert.Equal("220.0,T,5.4,N,A", mwv.ToNmeaMessage());
+            Assert.Equal("220.0,T,5.4,N,A", mwv.ToNmeaParameterList());
             Assert.Contains("Absolute", mwv.ToReadableContent());
         }
 
@@ -335,6 +352,23 @@ namespace Iot.Device.Nmea0183.Tests
         }
 
         [Fact]
+        public void ZdaDecodeNoTime()
+        {
+            _lastPacketTime = DateTimeOffset.UtcNow;
+            DateTimeOffset start = _lastPacketTime;
+            string text = "$GPZDA,,,,,,*48";
+            var decoded = TalkerSentence.FromSentenceString(text, out var error);
+            Assert.Equal(NmeaError.None, error);
+            Assert.NotNull(decoded);
+
+            TimeDate zda = (TimeDate)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
+
+            Assert.False(zda.Valid);
+            Assert.Equal(0, zda.LocalTimeOffset.TotalHours);
+            Assert.Equal(start, _lastPacketTime); // Should not have changed
+        }
+
+        [Fact]
         public void RmbDecode()
         {
             string text = "$GPRMB,A,0.02,R,R3,R4,4728.9218,N,00930.3359,E,0.026,222.0,2.4,V,D";
@@ -364,7 +398,7 @@ namespace Iot.Device.Nmea0183.Tests
             var rmb = new RecommendedMinimumNavToDestination(DateTimeOffset.UtcNow, Length.FromNauticalMiles(22.2), "Ostsee", "Nordsee", new GeographicPosition(60.5, 20.0, 0),
                 Length.FromKilometers(100), Angle.FromDegrees(-90), Speed.FromMetersPerSecond(10), false);
             Assert.True(rmb.Valid);
-            Assert.Equal(msg, rmb.ToNmeaMessage());
+            Assert.Equal(msg, rmb.ToNmeaParameterList());
         }
 
         [Fact]
@@ -527,6 +561,44 @@ namespace Iot.Device.Nmea0183.Tests
                 string output = outSentence.ToString();
                 output = output.Remove(output.IndexOf("*", StringComparison.Ordinal));
                 Assert.Equal(input, output);
+            }
+        }
+
+        [Theory]
+        // Note: No checksums here - not part of this test
+        [InlineData("$GPRMC,211730.997,A,3511.28000,S,13823.26000,E,7.000,229.000,190120,,")]
+        [InlineData("$GPZDA,135302.036,02,02,2020,+01,00")]
+        [InlineData("$WIMWV,350.0,R,16.8,N,A")]
+        [InlineData("$WIMWV,220.0,T,5.0,N,A")]
+        [InlineData("$SDDBS,177.9,f,54.21,M,29.6,F")]
+        [InlineData("$YDDBS,10.3,f,3.14,M,1.7,F")]
+        [InlineData("$IIXDR,P,1.02481,B,Barometer")]
+        [InlineData("$IIXDR,A,4.00,D,ROLL,A,-2.00,D,PITCH")]
+        [InlineData("$GPXTE,A,A,0.000,L,N,D")]
+        [InlineData("$HCHDG,103.2,,,1.9,E")]
+        [InlineData("$GPRTE,1,1,c,Route 008,R1,R2,R3,R4,R5")]
+        [InlineData("$GPGLL,4729.49680,N,00930.39770,E,115611.000,A,D")]
+        [InlineData("$IIXDR,C,18.20,C,ENV_WATER_T,C,28.69,C,ENV_OUTAIR_T,P,101400,P,ENV_ATMOS_P")]
+        [InlineData("$GPRMB,A,2.341,L,R3,R4,4728.92180,N,00930.33590,E,0.009,192.9,2.5,V,D")]
+        [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,")]
+        [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42")]
+        [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M")]
+        public void TwoWaysOfGettingSentenceAreEqual(string input)
+        {
+            // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here
+            using (new SetCultureForTest("de-DE"))
+            {
+                var inSentence = TalkerSentence.FromSentenceString(input, out var error);
+                Assert.Equal(NmeaError.None, error);
+                Assert.NotNull(inSentence);
+                var decoded = inSentence!.TryGetTypedValue(ref _lastPacketTime);
+                Assert.NotNull(decoded);
+                TalkerSentence outSentence = new TalkerSentence(decoded!);
+                string output = outSentence.ToString();
+
+                // For convenience, a sentence can also be directly converted to a nmea string. Check that the result is equal.
+                String alternateToString = decoded!.ToNmeaMessage();
+                Assert.Equal(output, alternateToString);
             }
         }
     }

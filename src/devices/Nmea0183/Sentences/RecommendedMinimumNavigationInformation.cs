@@ -84,7 +84,7 @@ namespace Iot.Device.Nmea0183.Sentences
         public NavigationStatus? Status2 { get; private set; }
 
         /// <inheritdoc />
-        public override string ToNmeaMessage()
+        public override string ToNmeaParameterList()
         {
             // seems nullable don't interpolate well
             StringBuilder b = new StringBuilder();

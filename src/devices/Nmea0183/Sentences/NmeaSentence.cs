@@ -244,12 +244,24 @@ namespace Iot.Device.Nmea0183.Sentences
         /// without <see cref="TalkerId"/>, <see cref="SentenceId"/> and checksum.
         /// </summary>
         /// <returns>The NMEA sentence string for this message</returns>
-        public abstract string ToNmeaMessage();
+        public abstract string ToNmeaParameterList();
 
         /// <summary>
         /// Gets an user-readable string about this message
         /// </summary>
         public abstract string ToReadableContent();
+
+        /// <summary>
+        /// Translates the properties of this instance into an NMEA message
+        /// </summary>
+        /// <returns>A complete NMEA message</returns>
+        public virtual string ToNmeaMessage()
+        {
+            string start = TalkerId == TalkerId.Ais ? "!" : "$";
+            string msg = $"{start}{TalkerId}{SentenceId},{ToNmeaParameterList()}";
+            byte checksum = TalkerSentence.CalculateChecksum(msg);
+            return msg + "*" + checksum.ToString("X2");
+        }
 
         /// <summary>
         /// Generates a readable instance of this string.

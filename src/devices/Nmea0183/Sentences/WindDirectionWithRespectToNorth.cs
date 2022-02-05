@@ -106,7 +106,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Presents this message as output
         /// </summary>
-        public override string ToNmeaMessage()
+        public override string ToNmeaParameterList()
         {
             if (Valid)
             {

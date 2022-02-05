@@ -59,7 +59,7 @@ namespace Iot.Device.Nmea0183.Tests
             using TextWriter tw = new StreamWriter("C:\\projects\\iot4\\bad.txt");
             foreach (var sentence in devSentencesUsed)
             {
-                tw.WriteLine($"{sentence.DateTime.TimeOfDay}: ${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaMessage()}");
+                tw.WriteLine($"{sentence.DateTime.TimeOfDay}: ${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaParameterList()}");
             }
         }
 

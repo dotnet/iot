@@ -203,7 +203,7 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <inheritdoc />
-        public override string ToNmeaMessage()
+        public override string ToNmeaParameterList()
         {
             if (Valid)
             {

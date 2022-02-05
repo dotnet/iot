@@ -105,7 +105,7 @@ namespace Iot.Device.Nmea0183
         {
             TalkerId = sentence.TalkerId;
             Id = sentence.SentenceId;
-            var content = sentence.ToNmeaMessage();
+            var content = sentence.ToNmeaParameterList();
             if (string.IsNullOrWhiteSpace(content) || sentence.Valid == false)
             {
                 throw new InvalidOperationException("Input sentence not valid or cannot be encoded");
@@ -243,6 +243,16 @@ namespace Iot.Device.Nmea0183
             }
 
             return 0xFFFF; // Will later fail with "invalid checksum"
+        }
+
+        /// <summary>
+        /// Calculates the NMEA checksum from a sentence (that includes everything except the checksum)
+        /// </summary>
+        /// <param name="messageWithoutChecksum">The message, including the leading $ letter</param>
+        /// <returns>The checksum as a byte</returns>
+        public static byte CalculateChecksum(string messageWithoutChecksum)
+        {
+            return CalculateChecksum(messageWithoutChecksum.AsSpan(1));
         }
 
         private static byte CalculateChecksumFromSentenceString(ReadOnlySpan<char> sentenceString)

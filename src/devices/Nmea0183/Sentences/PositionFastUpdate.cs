@@ -133,7 +133,7 @@ namespace Iot.Device.Nmea0183.Sentences
         public override bool ReplacesOlderInstance => true;
 
         /// <inheritdoc />
-        public override string ToNmeaMessage()
+        public override string ToNmeaParameterList()
         {
             // seems nullable don't interpolate well
             string lat = _latitude.HasValue ? _latitude.Value.ToString("0000.00000", CultureInfo.InvariantCulture) : String.Empty;

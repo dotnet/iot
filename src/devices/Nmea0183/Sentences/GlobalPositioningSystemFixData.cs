@@ -105,7 +105,7 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <inheritdoc />
-        public override string ToNmeaMessage()
+        public override string ToNmeaParameterList()
         {
             // seems nullable don't interpolate well
             string time = Valid ? DateTime.ToString("HHmmss.fff", CultureInfo.InvariantCulture) : string.Empty;

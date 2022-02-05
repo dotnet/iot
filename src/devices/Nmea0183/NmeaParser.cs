@@ -208,11 +208,6 @@ namespace Iot.Device.Nmea0183
                     string dataToSend = ts.ToString() + "\r\n";
                     byte[] buffer = _encoding.GetBytes(dataToSend);
 
-                    ////if (InterfaceName == "Handheld")
-                    ////{
-                    ////    Console.Write($"--> {InterfaceName} ({_outQueue.Count}): {dataToSend}");
-                    ////}
-
                     try
                     {
                         _dataSink?.Write(buffer, 0, buffer.Length);

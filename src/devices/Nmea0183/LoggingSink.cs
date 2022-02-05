@@ -101,7 +101,7 @@ namespace Iot.Device.Nmea0183
                     if (_lastSentence.SentenceId != sentence.SentenceId && _lastSentence.TalkerId != sentence.TalkerId)
                     {
                         string msg = FormattableString.Invariant(
-                            $"{DateTime.UtcNow:s}|{source.InterfaceName}|${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaMessage()}|{sentence.ToReadableContent()}");
+                            $"{DateTime.UtcNow:s}|{source.InterfaceName}|${sentence.TalkerId}{sentence.SentenceId},{sentence.ToNmeaParameterList()}|{sentence.ToReadableContent()}");
                         _textWriter.WriteLine(msg);
                     }
 

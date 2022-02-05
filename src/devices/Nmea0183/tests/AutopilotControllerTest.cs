@@ -101,7 +101,7 @@ namespace Iot.Device.Nmea0183.Tests
                     int index = 0;
                     foreach (var msg in outputSentence)
                     {
-                        string txt = msg.ToNmeaMessage();
+                        string txt = msg.ToNmeaParameterList();
                         txt = $"${TalkerId.GlobalPositioningSystem}{msg.SentenceId},{txt}";
                         Assert.Equal(expectedOutput[index], txt);
                         index++;
@@ -152,7 +152,7 @@ namespace Iot.Device.Nmea0183.Tests
                     int index = 0;
                     foreach (var msg in outputSentence)
                     {
-                        string txt = msg.ToNmeaMessage();
+                        string txt = msg.ToNmeaParameterList();
                         txt = $"${TalkerId.GlobalPositioningSystem}{msg.SentenceId},{txt}";
                         Assert.Equal(expectedOutput[index], txt);
                         index++;
