@@ -137,8 +137,8 @@ namespace Iot.Device.Nmea0183
         /// <remarks><paramref name="sentence"/> does not include new line characters</remarks>
         public static TalkerSentence? FromSentenceString(string sentence, TalkerId expectedTalkerId, out NmeaError errorCode)
         {
-            // $XXYYY, ...
-            const int SentenceHeaderLength = 7;
+            // $XXY, ...
+            const int sentenceHeaderMinLength = 4;
 
             // http://www.tronico.fi/OH6NT/docs/NMEA0183.pdf page 2
             // defines this as 80 + 1 (for $), but we don't really care if it is something within a reasonable limit.
@@ -149,7 +149,7 @@ namespace Iot.Device.Nmea0183
                 throw new ArgumentNullException(nameof(sentence));
             }
 
-            if (sentence.Length < SentenceHeaderLength)
+            if (sentence.Length < sentenceHeaderMinLength)
             {
                 errorCode = NmeaError.MessageToShort;
                 return null;
@@ -175,9 +175,18 @@ namespace Iot.Device.Nmea0183
                 return null;
             }
 
-            SentenceId sentenceId = new SentenceId(sentence[3], sentence[4], sentence[5]);
+            int firstComma = sentence.IndexOf(',', 1);
+            if (firstComma == -1)
+            {
+                errorCode = NmeaError.MessageToShort;
+                return null;
+            }
 
-            string[] fields = sentence.Substring(SentenceHeaderLength).Split(',');
+            string sentenceIdString = sentence.Substring(3, firstComma - 3);
+
+            SentenceId sentenceId = new SentenceId(sentenceIdString);
+
+            string[] fields = sentence.Substring(firstComma + 1).Split(',');
             int lastFieldIdx = fields.Length - 1;
             // This returns null as the checksum if there was none, or a very big number if the checksum couldn't be parsed
             (int? checksum, string lastField) = GetChecksumAndLastField(fields[lastFieldIdx]);

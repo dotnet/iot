@@ -65,7 +65,18 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         public override int GetHashCode()
         {
-            return Id[0] << 16 ^ Id[1] << 8 ^ Id[2];
+            if (Id.Length == 3)
+            {
+                // Default case
+                return Id[0] << 16 ^ Id[1] << 8 ^ Id[2];
+            }
+            else if (Id.Length > 0)
+            {
+                // Is a rare case, so do something cheap
+                return Id[Id.Length - 1]; // Assume the last character is the one that is usually different.
+            }
+
+            return 0;
         }
 
         /// <summary>

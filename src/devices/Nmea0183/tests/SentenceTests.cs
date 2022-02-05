@@ -101,10 +101,11 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal(17, decoded!.DateTime.Minute);
         }
 
-        [Fact]
-        public void DecodeWithDifferentSequenceIdLength()
+        [Theory]
+        [InlineData("$GPPR001,10,20,30,,,AA*24", "PR001")]
+        [InlineData("$GPPR,10,20,30,,,*15", "PR")]
+        public void DecodeWithDifferentSequenceIdLength(string sentence, string expectedSentenceId)
         {
-            string sentence = "$GPPR001,10,20,30,,,";
             var ts = TalkerSentence.FromSentenceString(sentence, out var error)!;
             Assert.NotNull(ts);
             _lastPacketTime = DateTimeOffset.UtcNow;
@@ -113,7 +114,7 @@ namespace Iot.Device.Nmea0183.Tests
             if (decoded != null)
             {
                 Assert.IsType<RawSentence>(decoded);
-                Assert.Equal(new SentenceId("PR001"), decoded.SentenceId);
+                Assert.Equal(new SentenceId(expectedSentenceId), decoded.SentenceId);
                 Assert.Equal(sentence, decoded.ToNmeaMessage());
             }
         }
