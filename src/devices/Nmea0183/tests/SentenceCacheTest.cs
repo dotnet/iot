@@ -3,10 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
 using Moq;
+using UnitsNet;
 using Xunit;
 
 namespace Iot.Device.Nmea0183.Tests
@@ -171,6 +173,38 @@ namespace Iot.Device.Nmea0183.Tests
             _cache.TryGetCurrentRoute(out var route);
             Assert.Equal(3, route.Count);
             Assert.Equal("RTOld", route[0].RouteName);
+        }
+
+        [Fact]
+        public void FillCacheAndTest()
+        {
+            NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "..\\..\\..\\Nmea-2021-08-25-16-25.txt");
+            reader.OnNewSequence += (source, msg) =>
+            {
+                _cache.Add(msg);
+            };
+            reader.StartDecode();
+            reader.Dispose();
+
+            Assert.True(_cache.TryGetCurrentPosition(out var position, false, out Angle track, out Speed sog, out Angle? heading));
+            Assert.Equal(new GeographicPosition(57.055204999999994, 9.9178983333333335, 0), position);
+            Assert.Equal(84.8, track.Degrees);
+            Assert.Equal(2.7, sog.Knots);
+            Assert.True(heading.HasValue);
+            Assert.Equal(35.9, heading!.Value.Degrees);
+
+            Assert.True(_cache.TryGetLastSentence(MeteorologicalComposite.Id, out MeteorologicalComposite sentence));
+            Assert.NotNull(sentence);
+            Assert.Equal(26.6, sentence.WaterTemperature!.Value.DegreesCelsius);
+
+            var sats = _cache.GetSatellitesInView(out int totalSats);
+            Assert.Equal(16, sats.Count);
+            Assert.Equal(18, totalSats);
+            Assert.DoesNotContain(sats, x => x == null);
+            Assert.Equal("02", sats[0].Id);
+
+            Assert.Null(_cache.GetLastSentence(MeteorologicalComposite.Id, TimeSpan.Zero));
+            Assert.NotNull(_cache.GetLastSentence(MeteorologicalComposite.Id, TimeSpan.FromDays(99999)));
         }
     }
 }

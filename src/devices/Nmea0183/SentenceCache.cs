@@ -196,26 +196,6 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Gets the last sentence for a given type
-        /// </summary>
-        /// <typeparam name="T">The message type</typeparam>
-        /// <returns>A sentence of the given type or null</returns>
-        public T? GetLastSentence<T>()
-            where T : NmeaSentence, new()
-        {
-            lock (_lock)
-            {
-                T sentenceType = new T(); // We need an instance to get the sentence id for the type
-                if (_sentences.TryGetValue(sentenceType.SentenceId, out var sentence))
-                {
-                    return sentence as T;
-                }
-
-                return null;
-            }
-        }
-
-        /// <summary>
         /// Tries to get a sentence of the given type
         /// </summary>
         /// <typeparam name="T">The type of the sentence to query</typeparam>
@@ -227,7 +207,7 @@ namespace Iot.Device.Nmea0183
             [NotNullWhen(true)]
 #endif
             out T sentence)
-        where T : NmeaSentence
+            where T : NmeaSentence
         {
             var s = GetLastSentence(id);
             if (s is T)
