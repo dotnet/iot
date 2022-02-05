@@ -6,60 +6,45 @@ using System;
 namespace Iot.Device.Nmea0183
 {
     /// <summary>
-    /// Represents 3 character NMEA0183 sentence identifier
+    /// Represents a NMEA0183 sentence identifier.
+    /// The standard has only 3-character sentence identifiers, but some receivers use proprietary messages with 2-6 letters, too.
     /// </summary>
     public struct SentenceId : IEquatable<SentenceId>
     {
         /// <summary>
         /// A filter placeholder
         /// </summary>
-        public static SentenceId Any => new SentenceId('*', ' ', ' ');
+        public static SentenceId Any => new SentenceId("*");
 
         /// <summary>
-        /// The first letter of the ID
+        /// The sentence Id, typically a 3-letter code
         /// </summary>
-        public char Id1 { get; private set; }
-
-        /// <summary>
-        /// The second letter of the ID
-        /// </summary>
-        public char Id2 { get; private set; }
-
-        /// <summary>
-        /// The third letter of the ID
-        /// </summary>
-        public char Id3 { get; private set; }
+        public string Id { get; init; }
 
         /// <summary>
         /// Returns the three-letter sentence ID
         /// </summary>
         /// <returns>The three-letter sentence ID</returns>
-        public override string ToString() => $"{Id1}{Id2}{Id3}";
+        public override string ToString() => Id;
 
         /// <summary>
-        /// Constructs NMEA0183 sentence identifier
+        /// Constructs NMEA0183 sentence identifier from three letters
         /// </summary>
         /// <param name="id1">first character identifying the sentence</param>
         /// <param name="id2">second character identifying the sentence</param>
         /// <param name="id3">third character identifying the sentence</param>
         public SentenceId(char id1, char id2, char id3)
         {
-            Id1 = id1;
-            Id2 = id2;
-            Id3 = id3;
+            Id = $"{id1}{id2}{id3}";
         }
 
         /// <summary>
-        /// Constructs NMEA sentence identifier from string. Must be exactly 3 chars long
+        /// Constructs NMEA sentence identifier from string.
         /// </summary>
         /// <param name="identifier">Sentence identifier, i.e. GGA</param>
         public SentenceId(string identifier)
-            : this(identifier[0], identifier[1], identifier[2])
         {
-            if (identifier.Length != 3)
-            {
-                throw new ArgumentException("Identifier must be exactly 3 chars long", nameof(identifier));
-            }
+            Id = identifier;
         }
 
         /// <summary>
@@ -80,7 +65,7 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         public override int GetHashCode()
         {
-            return Id1 << 16 ^ Id2 << 8 ^ Id3;
+            return Id[0] << 16 ^ Id[1] << 8 ^ Id[2];
         }
 
         /// <summary>
@@ -88,7 +73,7 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         public bool Equals(SentenceId other)
         {
-            return Id1 == other.Id1 && Id2 == other.Id2 && Id3 == other.Id3;
+            return Id == other.Id;
         }
 
         /// <summary>
