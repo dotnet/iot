@@ -16,14 +16,16 @@ namespace Iot.Device.Nmea0183
     /// <summary>
     /// Corrects the magnetic deviation of an electronic compass.
     /// This calculates the corrected magnetic heading from the measurement of an actual instrument and vice-versa.
+    /// Neither input nor output of the calculation are true headings! The magnetic heading needs to still be converted to
+    /// a true heading by adding the magnetic declination at the point of observation.
     /// </summary>
-    public class MagneticDeviationCorrection
+    public class MagneticDeviationCorrection : IEquatable<MagneticDeviationCorrection>
     {
         // Only used temporarily during build of the deviation table
         private List<NmeaSentence> _interestingSentences;
         private Angle _magneticVariation;
-        private DeviationPoint[]? _deviationPointsToCompassReading;
-        private DeviationPoint[]? _deviationPointsFromCompassReading;
+        private DeviationPoint[] _deviationPointsToCompassReading;
+        private DeviationPoint[] _deviationPointsFromCompassReading;
         private Identification? _identification;
         private RawData? _rawData;
 
@@ -35,6 +37,18 @@ namespace Iot.Device.Nmea0183
             _interestingSentences = new List<NmeaSentence>();
             _magneticVariation = Angle.Zero;
             _identification = null;
+            _deviationPointsToCompassReading = Array.Empty<DeviationPoint>();
+            _deviationPointsFromCompassReading = Array.Empty<DeviationPoint>();
+        }
+
+        /// <summary>
+        /// Creates a magnetic deviation correction from the given XML file
+        /// </summary>
+        /// <param name="fileName">The file name to parse</param>
+        public MagneticDeviationCorrection(string fileName)
+            : this()
+        {
+            Load(fileName);
         }
 
         /// <summary>
@@ -266,7 +280,7 @@ namespace Iot.Device.Nmea0183
 
             // Now create the inverse of the above map, to get from compass reading back to undisturbed magnetic heading
             _deviationPointsFromCompassReading = circle;
-            _deviationPointsToCompassReading = null;
+            _deviationPointsToCompassReading = Array.Empty<DeviationPoint>();
 
             circle = new DeviationPoint[360];
             for (int i = 0; i < 360; i++)
@@ -435,7 +449,7 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Convert a magnetic heading to a compass reading (to tell the helmsman what he should steer on the compass for the desired course)
+        /// Convert a magnetic heading to a compass reading (to tell the helmsman what he should steer on the compass for the desired magnetic course)
         /// </summary>
         /// <param name="magneticHeading">Magnetic heading input</param>
         /// <returns>The compass reading for the given magnetic heading</returns>
@@ -452,7 +466,7 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
-        /// Convert a compass reading to a magnetic heading
+        /// Convert a compass reading to a magnetic heading.
         /// </summary>
         /// <param name="compassReading">Reading of the compass</param>
         /// <returns>The corrected magnetic heading</returns>
@@ -466,6 +480,74 @@ namespace Iot.Device.Nmea0183
             int ptIndex = (int)(compassReading.Normalize(true).Degrees);
             var ptToUse = _deviationPointsFromCompassReading[ptIndex];
             return (compassReading + Angle.FromDegrees(ptToUse.DeviationSmooth)).Normalize(true);
+        }
+
+        /// <summary>
+        /// Compares two deviation data sets for equality. Minor differences are ignored.
+        /// </summary>
+        /// <param name="other">The other object</param>
+        /// <returns>True on equality, false otherwise</returns>
+        public bool Equals(MagneticDeviationCorrection? other)
+        {
+           return Equals(other, out _);
+        }
+
+        /// <summary>
+        /// Compares two deviation data sets for equality. Minor differences are ignored.
+        /// </summary>
+        /// <param name="other">The other object</param>
+        /// <param name="firstDifference">A short error message where the error is</param>
+        /// <returns>True on equality, false otherwise</returns>
+        public bool Equals(MagneticDeviationCorrection? other, out string firstDifference)
+        {
+            if (other == null)
+            {
+                firstDifference = "Comparing with null";
+                return false;
+            }
+
+            if (!Equals(Identification, other.Identification))
+            {
+                firstDifference = "Identification is not same";
+                return false;
+            }
+
+            if (_deviationPointsFromCompassReading.Length != other._deviationPointsFromCompassReading.Length)
+            {
+                firstDifference = "Calibration has a different number of compass->magnetic points.";
+                return false;
+            }
+
+            if (_deviationPointsToCompassReading.Length != other._deviationPointsToCompassReading.Length)
+            {
+                firstDifference = "Calibration has a different number of magnetic->compass points.";
+                return false;
+            }
+
+            for (int i = 0; i < _deviationPointsFromCompassReading.Length; i++)
+            {
+                DeviationPoint left = _deviationPointsFromCompassReading[i];
+                DeviationPoint right = other._deviationPointsFromCompassReading[i];
+                if (!left.Equals(right))
+                {
+                    firstDifference = $"Points differ at index {i}, Compass reading {left.CompassReading}";
+                    return false;
+                }
+            }
+
+            for (int i = 0; i < _deviationPointsToCompassReading.Length; i++)
+            {
+                DeviationPoint left = _deviationPointsToCompassReading[i];
+                DeviationPoint right = other._deviationPointsToCompassReading[i];
+                if (!left.Equals(right))
+                {
+                    firstDifference = $"Points differ at index {i}, Compass reading {left.CompassReading}";
+                    return false;
+                }
+            }
+
+            firstDifference = string.Empty;
+            return true;
         }
     }
 }

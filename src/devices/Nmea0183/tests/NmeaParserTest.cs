@@ -28,7 +28,7 @@ namespace Iot.Device.Nmea0183.Tests
             MemoryStream memory = new MemoryStream(bytes);
             StreamReader r = new StreamReader(memory, encoding);
 
-            string readString = r.ReadLine();
+            string? readString = r.ReadLine();
             Assert.Equal(sentence.TrimEnd(new char[] { '\r', '\n' }), readString);
         }
     }

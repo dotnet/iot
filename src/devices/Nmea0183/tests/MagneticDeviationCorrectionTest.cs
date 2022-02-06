@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
 using UnitsNet;
@@ -42,14 +43,17 @@ namespace Iot.Device.Nmea0183.Tests
 
             dev.Save("Calibration_Cirrus_v4.xml", "Cirrus", "HBY5127", "269110660");
 
-            var expected = new StreamReader(new FileStream("..\\..\\..\\Calibration_Cirrus_v3.xml", FileMode.Open));
+            var expected = new MagneticDeviationCorrection("..\\..\\..\\Calibration_Cirrus_v3.xml");
+            var actual = new MagneticDeviationCorrection("Calibration_Cirrus_v4.xml");
+            Assert.Equal(expected, actual);
+        }
 
-            var actual = new StreamReader(new FileStream("Calibration_Cirrus_v4.xml", FileMode.Open));
-
-            // Compare ignoring whitespace
-            string left = Regex.Replace(expected.ReadToEnd(), @"\s", string.Empty);
-            string right = Regex.Replace(actual.ReadToEnd(), @"\s", string.Empty);
-            Assert.Equal(left, right);
+        [Fact]
+        public void DifferentCalibrationsAreNotEqual()
+        {
+            var first = new MagneticDeviationCorrection("..\\..\\..\\Calibration_Cirrus_v3.xml");
+            var second = new MagneticDeviationCorrection("..\\..\\..\\Calibration_Cirrus_v1.xml");
+            Assert.NotEqual(first, second);
         }
 
         [Fact]
