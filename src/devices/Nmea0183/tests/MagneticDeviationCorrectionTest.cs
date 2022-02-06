@@ -23,7 +23,7 @@ namespace Iot.Device.Nmea0183.Tests
         {
             MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
             dev.CreateCorrectionTable(
-                "..\\..\\..\\Nmea-2020-07-23-12-02.txt");
+                "../../../Nmea-2020-07-23-12-02.txt");
 
             dev.Save("Calibration_Cirrus.xml", "Cirrus", "HBY5127", "269110660");
             Assert.True(File.Exists("Calibration_Cirrus.xml"));
@@ -35,15 +35,15 @@ namespace Iot.Device.Nmea0183.Tests
             MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
             dev.CreateCorrectionTable(new string[]
             {
-                "..\\..\\..\\Nmea-2021-08-25-16-25.txt",
-                "..\\..\\..\\Nmea-2021-08-25-16-49.txt"
+                "../../../Nmea-2021-08-25-16-25.txt",
+                "../../../Nmea-2021-08-25-16-49.txt"
             },
                 DateTimeOffset.Parse("2021-08-25T18:47:00", CultureInfo.InvariantCulture),
                 DateTimeOffset.Parse("2021-08-25T18:53:00", CultureInfo.InvariantCulture));
 
             dev.Save("Calibration_Cirrus_v4.xml", "Cirrus", "HBY5127", "269110660");
 
-            var expected = new MagneticDeviationCorrection("..\\..\\..\\Calibration_Cirrus_v3.xml");
+            var expected = new MagneticDeviationCorrection("../../../Calibration_Cirrus_v3.xml");
             var actual = new MagneticDeviationCorrection("Calibration_Cirrus_v4.xml");
             Assert.Equal(expected, actual);
         }
@@ -51,8 +51,8 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void DifferentCalibrationsAreNotEqual()
         {
-            var first = new MagneticDeviationCorrection("..\\..\\..\\Calibration_Cirrus_v3.xml");
-            var second = new MagneticDeviationCorrection("..\\..\\..\\Calibration_Cirrus_v1.xml");
+            var first = new MagneticDeviationCorrection("../../../Calibration_Cirrus_v3.xml");
+            var second = new MagneticDeviationCorrection("../../../Calibration_Cirrus_v1.xml");
             Assert.NotEqual(first, second);
         }
 
@@ -60,7 +60,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void ReadAndUseDeviationTable()
         {
             MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
-            dev.Load("..\\..\\..\\Calibration_Cirrus_v3.xml");
+            dev.Load("../../../Calibration_Cirrus_v3.xml");
 
             Assert.True(dev.Identification != null);
             Assert.Equal("Cirrus", dev.Identification!.ShipName);

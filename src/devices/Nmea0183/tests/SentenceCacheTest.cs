@@ -178,7 +178,7 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void FillCacheAndTest()
         {
-            NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "..\\..\\..\\Nmea-2021-08-25-16-25.txt");
+            NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "../../../Nmea-2021-08-25-16-25.txt");
             reader.OnNewSequence += (source, msg) =>
             {
                 _cache.Add(msg);
