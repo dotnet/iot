@@ -157,7 +157,7 @@ Simply connect your DHTxx data pin to GPIO26 (physical pin 37), the ground to th
 
 ![schema](./dht22.png)
 
-Some sensors are already sold with the 10K resistor. Connect the GPIO26 to the *data* pin, its position can vary depending on the integrator.
+Some sensors are already sold with the 10K resistor. Connect the GPIO26 to the _data_ pin, its position can vary depending on the integrator.
 
 #### I2C Protocol Circuit
 

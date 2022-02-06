@@ -2,12 +2,12 @@
 
 ## Summary
 
-u-blox M8 is Global Navigation Satellite System (GNSS).
+u-blox M8 is Global Navigation Satellite System (GNSS) receiver.
 It is using NMEA0183 protocol for communication.
 
 ## Binding Notes
 
-This device uses UART and therefore regular PC with RS232 to TTL converter can be used (i.e. Raspberry PI is not required).
+This device uses UART and therefore regular PC with RS232 to TTL converter can be used (i.e. Raspberry Pi is not required).
 When using Raspberry PI use `raspi-config` to disable login shell and enable serial port (interfacing options).
 
 ### Communication methods
@@ -26,8 +26,8 @@ Further information about supported NMEA sentences as well as advanced parsing m
 ## Notes
 
 Serial port name will need to be adjusted for this to work correctly.
-You can find list of your ports using `System.IO.Ports.SerialPort.GetPortNames()` in `System.IO.Ports` package.
-Serial port in the sample below is a default UART on Raspberry PI.
+You can find the list of your ports using `System.IO.Ports.SerialPort.GetPortNames()` in `System.IO.Ports` package.
+Serial port in the sample below is the default UART on Raspberry PI.
 
 ## Example code
 
@@ -79,6 +79,6 @@ namespace Iot.Device.Gps.NeoM8Samples
 }
 ```
 
-## References 
+## References
 
-- https://www.u-blox.com/sites/default/files/NEO-M8_DataSheet_%28UBX-13003366%29.pdf
+- [NEO-M8 Data Sheet](https://www.u-blox.com/sites/default/files/NEO-M8_DataSheet_%28UBX-13003366%29.pdf)
