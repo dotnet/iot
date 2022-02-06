@@ -13,7 +13,7 @@ namespace Iot.Device.Gpio.Drivers
     /// </remarks>
     public class OrangePiZero2Driver : Sun50iw9p1Driver
     {
-        public static readonly int[] _pinNumberConverter = new int[]
+        private static readonly int[] _pinNumberConverter = new int[]
         {
             -1, -1, -1, MapPinNumber('H', 5), -1, MapPinNumber('H', 4), -1, MapPinNumber('C', 9), MapPinNumber('H', 2), -1,
             MapPinNumber('H', 3), MapPinNumber('C', 6), MapPinNumber('C', 11), MapPinNumber('C', 5), -1, MapPinNumber('C', 8),
