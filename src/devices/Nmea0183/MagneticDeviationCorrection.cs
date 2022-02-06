@@ -226,7 +226,7 @@ namespace Iot.Device.Nmea0183
                     numberOfConsecutiveGaps++;
                     if (numberOfConsecutiveGaps > maxConsecutiveGaps)
                     {
-                        throw new InvalidDataException($"Not enough data points. There is not enough data near heading {i} degrees");
+                        throw new InvalidDataException($"Not enough data points. There is not enough data near heading {i} degrees. Total number of points {_interestingSentences.Count}");
                     }
                 }
                 else
