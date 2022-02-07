@@ -1,9 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="../Ws28xx.csproj" />
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\BuildHat.csproj" />
   </ItemGroup>
+
 </Project>

@@ -9,6 +9,7 @@ It also provides 4 extra PWM Outputs, that can be used for anything that require
 
 - [Adafruit](https://www.adafruit.com/product/2348)
 - [Aliexpress](http://s.click.aliexpress.com/e/mTB4ZB2s)
+- [Waveshare](https://www.waveshare.com/wiki/Motor_Driver_HAT)
 
 ## Usage
 
