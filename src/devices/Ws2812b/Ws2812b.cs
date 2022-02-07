@@ -33,15 +33,14 @@ namespace Iot.Device.Ws2812b
         /// <param name="spiDevice">The SPI device used for communication.</param>
         /// <param name="length">Number of LEDs</param>
         /// <param name="resetSignal">Transmits a reset signal after the data transmission. For some devices, it can be set to false to improve transmission efficiency</param>
-        public Ws2812b(SpiDevice spiDevice, int length, bool resetSignal = true) : base(length)
+        public Ws2812b(SpiDevice spiDevice, int length, bool resetSignal = true)
+            : base(length)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _buffer = new byte[length * PixelBitSize + (resetSignal ? ResetDelay : 0)];
         }
 
-        /// <summary>
-        /// Update color data to LEDs
-        /// </summary>
+        /// <inheritdoc/>
         public override void Flush()
         {
             for (int i = 0; i < Pixels.Length; i++)

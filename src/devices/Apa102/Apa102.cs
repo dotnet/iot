@@ -20,7 +20,8 @@ namespace Iot.Device.Apa102
         /// </summary>
         /// <param name="spiDevice">The SPI device used for communication.</param>
         /// <param name="length">Number of LEDs</param>
-        public Apa102(SpiDevice spiDevice, int length):base(length)
+        public Apa102(SpiDevice spiDevice, int length)
+            : base(length)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             _buffer = new byte[(length + 2) * 4];
@@ -29,9 +30,7 @@ namespace Iot.Device.Apa102
             _buffer.AsSpan((length + 1) * 4, 4).Fill(0xFF); // end frame
         }
 
-        /// <summary>
-        /// Update color data to LEDs
-        /// </summary>
+        /// <inheritdoc/>
         public override void Flush()
         {
             for (int i = 0; i < Pixels.Length; i++)
