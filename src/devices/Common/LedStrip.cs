@@ -40,7 +40,7 @@ namespace Iot.Device
         /// </summary>
         /// <param name="v">raw value</param>
         /// <returns>corrected value</returns>
-        internal byte FixGamma(byte v)
+        protected byte FixGamma(byte v)
         {
             return (byte)Math.Round(Math.Pow(v / 255.0, Gamma) * 255);
         }
