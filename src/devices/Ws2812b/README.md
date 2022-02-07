@@ -13,11 +13,11 @@ Also include a precision internal oscillator and a voltage programmable constant
 
 ## Typical application circuit
 
-![timing](timing.png)
+![circuit](circuit.png)
 
 ## SPI MOSI Timing
 
-![circuit](circuit.png)
+![timing](timing.png)
 
 ## Usage
 
