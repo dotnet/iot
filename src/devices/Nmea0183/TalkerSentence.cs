@@ -295,7 +295,7 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// Compares sentence identifier with all known identifiers.
         /// If found returns typed object corresponding to the identifier.
-        /// If not found returns null.
+        /// If not found returns a raw sentence instead. Also returns a raw sentence on a parser error (e.g. invalid date/time field)
         /// </summary>
         /// <param name="lastMessageTime">The date/time the last packet was seen. Used to time-tag packets that do not provide
         /// their own time or only a time but not a date</param>
@@ -305,7 +305,14 @@ namespace Iot.Device.Nmea0183
             NmeaSentence? retVal = null;
             if (s_registeredSentences.TryGetValue(Id, out Func<TalkerSentence, DateTimeOffset, NmeaSentence>? producer))
             {
-                retVal = producer(this, lastMessageTime);
+                try
+                {
+                    retVal = producer(this, lastMessageTime);
+                }
+                catch (Exception x) when (x is ArgumentException || x is ArgumentOutOfRangeException || x is FormatException)
+                {
+                    return new RawSentence(TalkerId, Id, Fields, lastMessageTime);
+                }
             }
             else
             {

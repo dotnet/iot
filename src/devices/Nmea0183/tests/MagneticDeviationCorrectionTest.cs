@@ -32,20 +32,22 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void CreateDeviationTable4()
         {
-            MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
-            dev.CreateCorrectionTable(new string[]
+            using (new SetCultureForTest("de-DE"))
             {
-                "../../../Nmea-2021-08-25-16-25.txt",
-                "../../../Nmea-2021-08-25-16-49.txt"
-            },
-                DateTimeOffset.Parse("2021-08-25T18:47:00", CultureInfo.InvariantCulture),
-                DateTimeOffset.Parse("2021-08-25T18:53:00", CultureInfo.InvariantCulture));
+                MagneticDeviationCorrection dev = new MagneticDeviationCorrection();
+                dev.CreateCorrectionTable(new string[]
+                    {
+                        "../../../Nmea-2021-08-25-16-25.txt", "../../../Nmea-2021-08-25-16-49.txt"
+                    },
+                    DateTimeOffset.Parse("2021-08-25T18:47:00", CultureInfo.InvariantCulture),
+                    DateTimeOffset.Parse("2021-08-25T18:53:00", CultureInfo.InvariantCulture));
 
-            dev.Save("Calibration_Cirrus_v4.xml", "Cirrus", "HBY5127", "269110660");
+                dev.Save("Calibration_Cirrus_v4.xml", "Cirrus", "HBY5127", "269110660");
 
-            var expected = new MagneticDeviationCorrection("../../../Calibration_Cirrus_v3.xml");
-            var actual = new MagneticDeviationCorrection("Calibration_Cirrus_v4.xml");
-            Assert.Equal(expected, actual);
+                var expected = new MagneticDeviationCorrection("../../../Calibration_Cirrus_v3.xml");
+                var actual = new MagneticDeviationCorrection("Calibration_Cirrus_v4.xml");
+                Assert.Equal(expected, actual);
+            }
         }
 
         [Fact]

@@ -170,10 +170,10 @@ namespace Iot.Device.Nmea0183.Sentences
 
             if (time.Length != 0)
             {
-                int hour = int.Parse(time.Substring(0, 2));
-                int minute = int.Parse(time.Substring(2, 2));
-                int seconds = int.Parse(time.Substring(4, 2));
-                double millis = double.Parse("0" + time.Substring(6)) * 1000;
+                int hour = int.Parse(time.Substring(0, 2), CultureInfo.InvariantCulture);
+                int minute = int.Parse(time.Substring(2, 2), CultureInfo.InvariantCulture);
+                int seconds = int.Parse(time.Substring(4, 2), CultureInfo.InvariantCulture);
+                double millis = double.Parse("0" + time.Substring(6), CultureInfo.InvariantCulture) * 1000;
                 dateTime = new DateTimeOffset(lastSeenDate.Year, lastSeenDate.Month, lastSeenDate.Day,
                                hour, minute, seconds, (int)millis, gregorianCalendar, TimeSpan.Zero);
             }
