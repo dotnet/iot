@@ -17,7 +17,7 @@ Also include a precision internal oscillator and a voltage programmable constant
 
 ## Usage
 
-Here is an example how to use the APA102:
+Here is an example how to use the WS2812B:
 
 ```csharp
 using System;
