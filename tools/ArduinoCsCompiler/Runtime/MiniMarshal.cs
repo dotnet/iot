@@ -105,6 +105,12 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
+        [ArduinoImplementation("MarshalCopyReverse4")]
+        public static void Copy(byte[] source, int startIndex, IntPtr destination, int length)
+        {
+            throw new NotImplementedException();
+        }
+
         public static Int32 SizeOf<T>()
         {
             return MiniUnsafe.SizeOf<T>();

@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -1905,6 +1906,8 @@ namespace ArduinoCsCompiler
             bool needsParsing = true;
             MethodFlags constructedFlags = MethodFlags.None;
             List<FieldInfo> manuallyReferencedFields = new List<FieldInfo>();
+            List<MethodBase> dependentMethods = new List<MethodBase>();
+
             if (body == null && !methodInfo.IsAbstract)
             {
                 Type multicastType = typeof(MulticastDelegate);
@@ -2057,24 +2060,51 @@ namespace ArduinoCsCompiler
 
             if (EquatableMethod.HasAttribute(methodInfo, out ArduinoCompileTimeConstantAttribute ca))
             {
-                if (methodInfo.GetParameters().Length != 0 || methodInfo.IsStatic == false)
+                string methodName = ca.MethodName;
+                object? result = null;
+                if (string.IsNullOrWhiteSpace(methodName))
                 {
-                    throw new NotSupportedException("Methods marked with [ArduinoCompileTimeConstant] must not take parameters and must be static");
+                    // Only internal methods can have a name. In these cases, no test is done here, as we know what we need to do
+                    if (methodInfo.GetParameters().Length != 0 || methodInfo.IsStatic == false)
+                    {
+                        throw new NotSupportedException("Methods marked with [ArduinoCompileTimeConstant] must not take parameters and must be static");
+                    }
+
+                    MethodInfo? mi = methodInfo.Method as MethodInfo;
+                    if (mi == null)
+                    {
+                        throw new NotSupportedException("[ArduinoCompileTimeConstant] cannot be applied to constructors");
+                    }
+
+                    result = methodInfo.Method.Invoke(null, Array.Empty<object?>());
                 }
 
-                MethodInfo? mi = methodInfo.Method as MethodInfo;
-                if (mi == null)
-                {
-                    throw new NotSupportedException("[ArduinoCompileTimeConstant] cannot be applied to constructors");
-                }
-
-                object? result = methodInfo.Method.Invoke(null, Array.Empty<object?>());
-
-                Type t = result.GetType();
+                Type? t = result?.GetType();
 
                 List<byte> code = new List<byte>();
 
-                if (t == typeof(TimeSpan))
+                if (methodName == nameof(MiniInterop.Kernel32.GetDynamicTimeZoneInformation))
+                {
+                    MiniInterop.TIME_DYNAMIC_ZONE_INFORMATION tdyz = new MiniInterop.TIME_DYNAMIC_ZONE_INFORMATION();
+                    uint res = Interop.GetDynamicTimeZoneInformation(out tdyz);
+
+                    InitStructFromConstant(set, methodInfo, tdyz, code, dependentMethods);
+
+                    AddCommandWith32BitArgument(code, OpCode.CEE_LDC_I4, (int)res);
+                }
+                else if (methodName == nameof(MiniInterop.Kernel32.GetTimeZoneInformation))
+                {
+                    MiniInterop.TIME_ZONE_INFORMATION tz = new MiniInterop.TIME_ZONE_INFORMATION();
+                    uint res = Interop.GetTimeZoneInformation(out tz);
+
+                    InitStructFromConstant(set, methodInfo, tz, code, dependentMethods);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_LDC_I4, (int)res);
+                }
+                else if (t == null || result == null)
+                {
+                    AddCommand(code, OpCode.CEE_LDNULL);
+                }
+                else if (t == typeof(TimeSpan))
                 {
                     AddCommandWith64BitArgument(code, OpCode.CEE_LDC_I8, ((TimeSpan)result).Ticks);
                 }
@@ -2105,7 +2135,7 @@ namespace ArduinoCsCompiler
 
             if (needsParsing == false)
             {
-                parserResult = new IlCode(methodInfo, ilBytes, new List<MethodBase>(), manuallyReferencedFields, new List<TypeInfo>(), new List<ExceptionClause>());
+                parserResult = new IlCode(methodInfo, ilBytes, dependentMethods, manuallyReferencedFields, new List<TypeInfo>(), new List<ExceptionClause>());
             }
             else if (hasBody)
             {
@@ -2170,6 +2200,71 @@ namespace ArduinoCsCompiler
                     PrepareCodeInternal(set, dep, newInfo);
                 }
             }
+        }
+
+        private void InitStructFromConstant<T>(ExecutionSet set, EquatableMethod parentMethod, T information, List<byte> code, List<MethodBase> dependentMethods)
+            where T : struct
+        {
+            var data = GetBytes(information);
+            var field = typeof(MiniInterop.Dummy).GetField(nameof(MiniInterop.Dummy.TimeDynamicZoneInformation))!;
+            int dataToken = set.GetOrAddFieldToken(field, data);
+
+            // Generated code looks as follows:
+            // ldc.i4 sizeof(TIME_DYNAMIC_ZONE_INFORMATION)
+            // newarr byte
+            // dup
+            // ldtoken      field valuetype '<PrivateImplementationDetails>'/'__StaticArrayInitTypeSize=288' '<PrivateImplementationDetails>'::'74BCD6ED20AF2231F2BB1CDE814C5F4FF48E54BAC46029EEF90DDF4A208E2B20'
+            // call         void System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray(class System.Array, valuetype System.RuntimeFieldHandle)
+            // ldc.i4.0     // start index (source array is already on the stack)
+            // ldarg.0
+            // ldc.i4 sizeof(TIME_DYNAMIC_ZONE_INFORMATION)
+            // call         Marshal.Copy(byte[], int, IntPtr, int)
+            // ldc.i4.1
+            // ret
+            AddCommandWith32BitArgument(code, OpCode.CEE_LDC_I4, Marshal.SizeOf(information));
+            AddCommandWith32BitArgument(code, OpCode.CEE_NEWARR, (int)KnownTypeTokens.Byte);
+            AddCommand(code, OpCode.CEE_DUP);
+            AddCommandWith32BitArgument(code, OpCode.CEE_LDTOKEN, dataToken);
+            var method2 = typeof(System.Runtime.CompilerServices.RuntimeHelpers).GetMethod("InitializeArray")!;
+            int initializeFunctionToken = set.GetOrAddMethodToken(method2, parentMethod);
+            AddCommandWith32BitArgument(code, OpCode.CEE_CALL, initializeFunctionToken);
+            AddCommand(code, OpCode.CEE_LDC_I4_0);
+            AddCommand(code, OpCode.CEE_LDARG_0);
+            AddCommandWith32BitArgument(code, OpCode.CEE_LDC_I4, Marshal.SizeOf(information));
+
+            var method3 = typeof(Marshal).GetMethod("Copy", BindingFlags.Static | BindingFlags.Public, new Type[]
+            {
+                typeof(byte[]), typeof(int), typeof(IntPtr), typeof(int)
+            })!;
+            int copyToken = set.GetOrAddMethodToken(method3, parentMethod);
+            dependentMethods.Add(method3);
+            AddCommandWith32BitArgument(code, OpCode.CEE_CALL, copyToken);
+        }
+
+        public static byte[] GetBytes<T>(T data)
+            where T : struct
+        {
+            int size = Marshal.SizeOf(data);
+
+            byte[] arr = new byte[size];
+
+            GCHandle h = default(GCHandle);
+
+            try
+            {
+                h = GCHandle.Alloc(arr, GCHandleType.Pinned);
+
+                Marshal.StructureToPtr<T>(data, h.AddrOfPinnedObject(), false);
+            }
+            finally
+            {
+                if (h.IsAllocated)
+                {
+                    h.Free();
+                }
+            }
+
+            return arr;
         }
 
         private void AddCommandWith32BitArgument(List<byte> code, OpCode opCode, int token)

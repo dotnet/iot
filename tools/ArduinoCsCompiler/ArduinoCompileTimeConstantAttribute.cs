@@ -15,5 +15,20 @@ namespace ArduinoCsCompiler
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = false)]
     public class ArduinoCompileTimeConstantAttribute : Attribute
     {
+        public ArduinoCompileTimeConstantAttribute()
+        {
+            MethodName = string.Empty;
+        }
+
+        internal ArduinoCompileTimeConstantAttribute(string methodName)
+        {
+            MethodName = methodName;
+        }
+
+        public string MethodName
+        {
+            get;
+            set;
+        }
     }
 }

@@ -47,7 +47,13 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("StringCtorCharPtr", 19)]
+        [ArduinoImplementation("StringCtorCharPtr", 23)]
+        public unsafe MiniString(char* value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("StringCtorCharPtr3", 19)]
         public unsafe MiniString(char* value, int startIndex, int length)
         {
             throw new NotImplementedException();
