@@ -1419,7 +1419,13 @@ namespace ArduinoCsCompiler
                 var c = _classes.FirstOrDefault(x => (uint)x.NewToken == token);
                 if (c != null)
                 {
-                    w.WriteLine($"0x{c.NewToken:X8} (Class) {c.Name}");
+                    string type = "(Class)";
+                    if (c.TheType.IsValueType)
+                    {
+                        type = "(Struct)";
+                    }
+
+                    w.WriteLine($"0x{c.NewToken:X8} {type} {c.Name} (Dynamic size: {c.DynamicSize}, static size: {c.StaticSize})");
                     continue;
                 }
 
@@ -1447,7 +1453,30 @@ namespace ArduinoCsCompiler
                 var fld = _patchedFieldTokens.FirstOrDefault(x => (uint)x.Value.Token == token);
                 if (fld.Value.Token != 0)
                 {
-                    w.WriteLine($"0x{token:X8} (Field) {fld.Key.Name} of {fld.Key.DeclaringType!.Name}");
+                    string className;
+                    var cls = _classes.FirstOrDefault(x => x.Members.Any(y => y.Token == token));
+                    string name = "(Field)";
+                    int s;
+                    if (cls != null)
+                    {
+                        var f = cls.Members.First(y => y.Token == token);
+                        s = f.SizeOfField;
+                        name = "(Dynamic field)";
+                        if (f.StaticFieldSize > 0)
+                        {
+                            name = "(Static field)";
+                            s = f.StaticFieldSize;
+                        }
+
+                        className = cls.Name;
+                    }
+                    else
+                    {
+                        className = fld.Key.Name;
+                        s = -1;
+                    }
+
+                    w.WriteLine($"0x{token:X8} {name} {fld.Key.Name} of {className}. Size {s}");
                 }
             }
 
