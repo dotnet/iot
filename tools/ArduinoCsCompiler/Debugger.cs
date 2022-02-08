@@ -417,9 +417,25 @@ namespace ArduinoCsCompiler
                 }
                 else if (dataKind == DebuggerDataKind.Arguments)
                 {
-                    var param = arduinoMethodDeclaration.MethodBase.GetParameters()[localNo];
-                    type = param.ParameterType;
-                    name = param.Name ?? "Nameless parameter";
+                    var parameters = arduinoMethodDeclaration.MethodBase.GetParameters();
+                    if (arduinoMethodDeclaration.MethodBase.IsStatic == false)
+                    {
+                        if (localNo == 0)
+                        {
+                            type = arduinoMethodDeclaration.MethodBase.DeclaringType;
+                            name = "this";
+                        }
+                        else
+                        {
+                            type = parameters[localNo - 1].ParameterType;
+                            name = parameters[localNo - 1].Name ?? "Nameless parameter";
+                        }
+                    }
+                    else
+                    {
+                        type = parameters[localNo].ParameterType;
+                        name = parameters[localNo].Name ?? "Nameless parameter";
+                    }
                 }
                 else if (dataKind == DebuggerDataKind.EvaluationStack)
                 {
@@ -439,6 +455,9 @@ namespace ArduinoCsCompiler
                 case VariableKind.FunctionPointer:
                 case VariableKind.Int32:
                     variable.Value = BitConverter.ToInt32(value);
+                    break;
+                case VariableKind.Uint32:
+                    variable.Value = BitConverter.ToUInt32(value);
                     break;
                 case VariableKind.Int64:
                     variable.Value = fullValue;
