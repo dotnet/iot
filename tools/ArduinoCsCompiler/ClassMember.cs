@@ -15,7 +15,7 @@ namespace ArduinoCsCompiler
             Name = name;
         }
 
-        public ClassMember(FieldInfo field, VariableKind variableType, int token, int sizeOfField, int staticFieldSize)
+        public ClassMember(FieldInfo field, VariableKind variableType, int token, int sizeOfField, int offset, int staticFieldSize)
         {
             VariableType = variableType;
             Token = token;
@@ -78,6 +78,16 @@ namespace ArduinoCsCompiler
         public int SizeOfField
         {
             get;
+            set;
+        }
+
+        /// <summary>
+        /// Field offset. Only for non-static fields.
+        /// </summary>
+        public int Offset
+        {
+            get;
+            set;
         }
 
         public override string ToString()

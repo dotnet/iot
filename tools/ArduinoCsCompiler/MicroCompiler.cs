@@ -518,7 +518,8 @@ namespace ArduinoCsCompiler
             {
                 int staticFieldSize = 0;
                 var field = fields[index];
-                var fieldType = GetVariableType(field.FieldType, StructAlignment(classType, fields), out var size);
+                // For static fields, the minimum size is 4, so exact alignment is not necessary
+                var fieldType = GetVariableType(field.FieldType, StructAlignmentMinRequirement(classType, fields), out var size);
                 if (field.IsStatic)
                 {
                     fieldType |= VariableKind.StaticMember;
@@ -632,7 +633,7 @@ namespace ArduinoCsCompiler
                     token = set.GetOrAddFieldToken(field);
                 }
 
-                var newvar = new ClassMember(field, fieldType, token, size, staticFieldSize);
+                var newvar = new ClassMember(field, fieldType, token, size, -1, staticFieldSize);
                 memberTypes.Add(newvar);
             }
 
@@ -645,9 +646,11 @@ namespace ArduinoCsCompiler
                 }
             }
 
-            var sizeOfClass = GetClassSize(classType);
+            var sizeOfClass = GetClassSize(classType, memberTypes);
 
             var interfaces = classType.GetInterfaces().ToList();
+
+            sizeOfClass.Dynamic = PerformFieldAlignment(classType, sizeOfClass.Dynamic, memberTypes);
 
             // Add this first, so we break the recursion to this class further down
             var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
@@ -711,6 +714,45 @@ namespace ArduinoCsCompiler
                     PrepareClassDeclaration(set, alsoRequired);
                 }
             }
+        }
+
+        private int PerformFieldAlignment(Type classType, int classDynamicSize, List<ClassMember> memberTypes)
+        {
+            // Currently, memberwise alignment is only done for structs
+            int newClassSize = classDynamicSize;
+            var fields = memberTypes.Where(x => x.VariableType != VariableKind.Method).ToList();
+            if (classType.IsValueType && fields.Count > 1)
+            {
+                // We need to align each member so that it starts at an offset dividable by its size,
+                // otherwise there could be unaligned memory access errors.
+                for (var index = 0; index < fields.Count; index++)
+                {
+                    var member = memberTypes[index];
+                    int offset = member.Offset;
+                    if (index < memberTypes.Count - 2)
+                    {
+                        var nextMember = fields[index + 1];
+                        int nextMemberOffset = nextMember.Offset;
+                        // This value is non-zero if the next member is not aligned to its size
+                        int nextAlign = nextMemberOffset % nextMember.SizeOfField;
+                        if (nextAlign > 4)
+                        {
+                            nextAlign = 4; // Don't need to align to more than 32 bits
+                        }
+
+                        if (member.SizeOfField < nextAlign)
+                        {
+                            int diff = nextAlign - member.SizeOfField;
+                            classDynamicSize += diff;
+                            member.SizeOfField = nextAlign;
+                        }
+                    }
+                }
+
+                return newClassSize;
+            }
+
+            return -1;
         }
 
         private void CompleteClasses(ExecutionSet set)
@@ -1211,21 +1253,24 @@ namespace ArduinoCsCompiler
         /// Calculates the size of the class instance in bytes, excluding the management information (such as the vtable)
         /// </summary>
         /// <param name="classType">The class type</param>
+        /// <param name="members">Members of the class, to be updated with offsets. Can be null</param>
         /// <returns>A tuple with the size of an instance and the size of the static part of the class</returns>
-        private (int Dynamic, int Statics) GetClassSize(Type classType)
+        private (int Dynamic, int Statics) GetClassSize(Type classType, List<ClassMember>? members)
         {
             List<FieldInfo> fields = new List<FieldInfo>();
             List<MemberInfo> methods = new List<MemberInfo>();
             GetFields(classType, fields, methods);
-            int minSizeOfMember = StructAlignment(classType, fields);
 
+            int minSizeOfMember = StructAlignmentMinRequirement(classType, fields);
             int sizeDynamic = 0;
             int sizeStatic = 0;
+            int offset = 0;
             int numberOfNonStaticFields = fields.Count(x => x.IsStatic == false);
-            foreach (var f in fields)
+            for (var index = 0; index < fields.Count; index++)
             {
+                var f = fields[index];
                 GetVariableType(f.FieldType, minSizeOfMember, out int sizeOfMember);
-
+                offset = sizeDynamic;
                 if (f.IsStatic)
                 {
                     if (classType.IsValueType)
@@ -1272,12 +1317,23 @@ namespace ArduinoCsCompiler
                     {
                         sizeDynamic += (sizeOfMember <= 4) ? 4 : 8;
                     }
+
+                    if (members != null && classType.IsValueType)
+                    {
+                        var member = members.Single(x => x.Field?.Name == f.Name); // Field names must be unique, so this should work
+                        if (member.SizeOfField != sizeOfMember)
+                        {
+                            throw new InvalidOperationException($"GetClassSize and PrepareClassDeclaration don't agree on the size of field {f.Name} of class {classType.Name}");
+                        }
+
+                        member.Offset = offset;
+                    }
                 }
             }
 
             if (classType.BaseType != null)
             {
-                var baseSizes = GetClassSize(classType.BaseType);
+                var baseSizes = GetClassSize(classType.BaseType, null);
                 // Static sizes are not inherited (but do we need to care about accessing a static field via a derived class?)
                 sizeDynamic += baseSizes.Dynamic;
             }
@@ -1327,18 +1383,14 @@ namespace ArduinoCsCompiler
             ////}
         }
 
-        private int StructAlignment(Type t, List<FieldInfo> fields)
+        /// <summary>
+        /// Calculate the minimum size of this field, based on alignment requirements.
+        /// </summary>
+        private int StructAlignmentMinRequirement(Type t, List<FieldInfo> fields)
         {
             int minSizeOfMember = 1;
             // Structs with reference type need to be aligned for the GC to probe any embedded addresses
             if (t.IsValueType && fields.Any(x => !x.FieldType.IsValueType))
-            {
-                minSizeOfMember = 4;
-            }
-
-            // Structs with multiple fields need to be aligned, too. Or we might do an unaligned memory access.
-            // TODO: This should eventually check for StructAlignmentAttribute, but then unaligned access requires support from the backend
-            else if (t.IsValueType && fields.Count(x => !x.IsStatic) > 1)
             {
                 minSizeOfMember = 4;
             }
@@ -2170,7 +2222,7 @@ namespace ArduinoCsCompiler
             {
                 // If the class containing this method contains statics, we need to send its declaration
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
-                if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType).Statics > 0)
+                if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType, null).Statics > 0)
                 {
                     PrepareClass(set, methodInfo.DeclaringType);
                 }
