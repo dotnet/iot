@@ -39,8 +39,8 @@ namespace Iot.Device.Nmea0183.Tests
                     {
                         "../../../Nmea-2021-08-25-16-25.txt", "../../../Nmea-2021-08-25-16-49.txt"
                     },
-                    DateTimeOffset.Parse("2021-08-25T18:47:00", CultureInfo.InvariantCulture),
-                    DateTimeOffset.Parse("2021-08-25T18:53:00", CultureInfo.InvariantCulture));
+                    DateTimeOffset.Parse("2021-08-25T16:47:00", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal),
+                    DateTimeOffset.Parse("2021-08-25T16:53:00", CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal));
 
                 dev.Save("Calibration_Cirrus_v4.xml", "Cirrus", "HBY5127", "269110660");
 
