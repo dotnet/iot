@@ -12,9 +12,10 @@ namespace Iot.Device.Common
     /// Represents a position in WGS84 coordinates. This is the standard coordinate format for most GNSS receivers currently available.
     /// An instance with Latitude = Longitude = Height = 0 is considered invalid. A real GNSS receiver will never output this exact value
     /// and that position is far out in the ocean.
-    ///
-    /// This object stores ellipsoidal height, depending on the GNSS receiver and the application, this needs to be transformed to geoidal height.
     /// </summary>
+    /// <remarks>
+    /// This object stores ellipsoidal height, depending on the GNSS receiver and the application, this needs to be transformed to geoidal height.
+    /// </remarks>
     [Serializable]
     public sealed class GeographicPosition : ICloneable, IEquatable<GeographicPosition>
     {
@@ -129,6 +130,43 @@ namespace Iot.Device.Common
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Equality operator. See <see cref="Equals(GeographicPosition?)"/>
+        /// </summary>
+        /// <param name="a">First instance to compare</param>
+        /// <param name="b">Second instance to compare</param>
+        /// <returns>True on equality, false otherwise</returns>
+        public static bool operator ==(GeographicPosition? a, GeographicPosition? b)
+        {
+            if (ReferenceEquals(a, b))
+            {
+                return true;
+            }
+
+            if (ReferenceEquals(a, null))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(b, null))
+            {
+                return false;
+            }
+
+            return a.Equals(b);
+        }
+
+        /// <summary>
+        /// Inequality operator. See <see cref="Equals(GeographicPosition?)"/>
+        /// </summary>
+        /// <param name="a">First instance to compare</param>
+        /// <param name="b">Second instance to compare</param>
+        /// <returns>True on inequality, false otherwise</returns>
+        public static bool operator !=(GeographicPosition? a, GeographicPosition? b)
+        {
+            return !(a == b);
         }
 
         private static string GetEastOrWest(double sign)
@@ -316,7 +354,6 @@ namespace Iot.Device.Common
             if (Double.IsInfinity(Latitude) || Double.IsInfinity(Longitude))
             {
                 return "Infinity";
-
             }
 
             var strLatRet = GetLatitudeString(Latitude);
@@ -325,10 +362,10 @@ namespace Iot.Device.Common
             return string.Concat(strLatRet, " / ", strLonRet, " Ellipsoidal Height: ", EllipsoidalHeight.ToString("F0"));
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return Latitude.GetHashCode() ^ Longitude.GetHashCode() ^ EllipsoidalHeight.GetHashCode() ^ 0x7a2b;
+            return (Latitude + Longitude + EllipsoidalHeight).GetHashCode();
         }
     }
 }

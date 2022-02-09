@@ -52,6 +52,15 @@ A `MessageRouter` class is available that can be used to route messages between 
 6 RS-232 interfaces, not including USB-to-Serial adapters).
 Unsupported messages can still be routed around, e.g. AIS data (AIVDM messages)
 
+## References
+
+The NMEA 0183 Standard was never publicly published. The NMEA standard committee makes it available on its website only for a considerable fee.
+However, several websites have information about how to decode the different messages. In some special cases,
+the available documentation is ambiguous or contradictory, though.
+
+- [Official NMEA Website](https://www.nmea.org/)
+- [NMEA Command documentation (one of several available on the web)](http://www.tronico.fi/OH6NT/docs/NMEA0183.pdf)
+
 ## Samples
 
 See [NEO-M8 sample](../NEO-M8/README.md) for a simple parser example using synchronous message decoding.
@@ -181,7 +190,7 @@ dtoverlay=UART3
 
 Pins 0 and 1 are normally reserved for Pi HATs with an EPROM, but you can freely use these two pins if you don't use a HAT.
 
-All of the pins use 3.3V TTL logic. The RS-232 dates back to the 1960ies when much higher voltages were used in communication equipment.
+> Important: All of the pins use 3.3V TTL logic. The RS-232 standard dates back to the 1960ies, when much higher voltages were used in communication equipment.
 The standard uses logic levels between -15 and +15V. While most devices will understand levels around 5V, any input should be able to
 accept at least 15V. Therefore, to avoid frying your Pi, extra electronics is required for level adjustment. There are special breakout
 boards available for the Pi for this purpose, but I have found them to be unreliable and error-prone (e.g. they cause local echo).
@@ -198,12 +207,3 @@ current ratings are observed" under the "Absolute maximum ratings" section.
 
 - Base a new sentence identifier on [RMC sentence](Sentences/RecommendedMinimumNavigationInformation.cs)
 - Modify `GetKnownSentences` in [TalkerSentence.cs](TalkerSentence.cs) or call `TalkerSentence.RegisterSentence` in the beginning of your `Main` method
-
-## References
-
-The NMEA 0183 Standard was never publicly published. The NMEA standard committee makes it available on its website only for a considerable fee.
-However, several websites have information about how to decode the different messages. In some special cases,
-the available documentation is ambiguous or contradictory, though.
-
-- [Official NMEA Website](https://www.nmea.org/)
-- [NMEA Command documentation (one of several available on the web)](http://www.tronico.fi/OH6NT/docs/NMEA0183.pdf)

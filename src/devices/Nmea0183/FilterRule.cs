@@ -93,10 +93,7 @@ namespace Iot.Device.Nmea0183
         /// If it is false (the default), no further filters are tested after the first match (which typically means
         /// that a message is only matching one filter)
         /// </summary>
-        public bool ContinueAfterMatch
-        {
-            get;
-        }
+        public bool ContinueAfterMatch { get; }
 
         /// <summary>
         /// True if this filter matches the given sentence and source

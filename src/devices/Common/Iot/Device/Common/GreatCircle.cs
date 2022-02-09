@@ -19,28 +19,28 @@ namespace Iot.Device.Common
         /// <summary>
         /// Semi-Mayor Axis of the WGS ellipsoid
         /// </summary>
-        public const double WGS84_A = 6378137.0;
+        public const double Wgs84A = 6378137.0;
 
         /// <summary>
         /// Flattening "f" of the WGS84 ellipsoid (1.0 / 298.25722357)
         /// </summary>
-        public const double WGS84_F = 0.00335281066474;
+        public const double Wgs84F = 0.00335281066474;
 
         /// <summary>
         /// m per degree latitude
         /// </summary>
-        public const double METERS_PER_DEGREEE_LATITUDE = 110563.789;
+        public const double MetersPerDegreeeLatitude = 110563.789;
 
         /// <summary>
         /// m per degree longitude on the equator
         /// </summary>
-        public const double METERS_PER_DEGREE_LONGITUDE = 111312.267;
+        public const double MetersPerDegreeLongitude = 111312.267;
 
         private static GeoidCalculations.geod_geodesic _geod;
 
         static GreatCircle()
         {
-            GeoidCalculations.geod_init(out _geod, WGS84_A, WGS84_F);
+            GeoidCalculations.geod_init(out _geod, Wgs84A, Wgs84F);
         }
 
         /// <summary>

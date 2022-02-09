@@ -28,7 +28,6 @@ namespace Iot.Device.Nmea0183
         /// <remarks>
         /// Route and point names should use ASCII characters only. Some devices may understand the extended ASCII code page (values > 127),
         /// but this is rare. Most devices will silently truncate any names longer than 10 chars.
-        ///
         /// </remarks>
         public RoutePoint(string routeName, int indexInRoute, int totalPointsInRoute, string waypointName, GeographicPosition position,
             Angle? bearingToNextWaypoint, Length? distanceToNextWaypoint)

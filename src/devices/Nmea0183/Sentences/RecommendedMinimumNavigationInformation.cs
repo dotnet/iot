@@ -312,21 +312,5 @@ namespace Iot.Device.Nmea0183.Sentences
             double? degreesMinutes = integerDegrees * 100 + minutes;
             return (degreesMinutes, direction);
         }
-
-        /// <summary>
-        /// Navigation status enum
-        /// </summary>
-        public enum NavigationStatus : byte
-        {
-            /// <summary>
-            /// Valid is represented with an "A"
-            /// </summary>
-            Valid = (byte)'A',
-
-            /// <summary>
-            /// A warning is represented by a "V"
-            /// </summary>
-            NavigationReceiverWarning = (byte)'V',
-        }
     }
 }

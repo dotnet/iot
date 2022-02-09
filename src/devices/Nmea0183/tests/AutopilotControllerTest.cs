@@ -220,7 +220,7 @@ namespace Iot.Device.Nmea0183.Tests
 
         private void SetPositionAndTrack(GeographicPosition position, Angle track)
         {
-            _autopilot.SentenceCache.Add(new RecommendedMinimumNavigationInformation(DateTimeOffset.Now, RecommendedMinimumNavigationInformation.NavigationStatus.Valid,
+            _autopilot.SentenceCache.Add(new RecommendedMinimumNavigationInformation(DateTimeOffset.Now, NavigationStatus.Valid,
                 position, Speed.FromMetersPerSecond(10), track, Angle.FromDegrees(-2)));
         }
     }

@@ -175,8 +175,8 @@ namespace Iot.Device.Nmea0183.Tests
         {
             double deltaLat = endPosition.Latitude - startPosition.Latitude;
             double deltaLon = endPosition.Longitude - startPosition.Longitude;
-            double deltaX = deltaLon * GreatCircle.METERS_PER_DEGREE_LONGITUDE * Math.Abs(Math.Cos(startPosition.Latitude * Math.PI / 180.0));
-            double deltaY = deltaLat * GreatCircle.METERS_PER_DEGREEE_LATITUDE;
+            double deltaX = deltaLon * GreatCircle.MetersPerDegreeLongitude * Math.Abs(Math.Cos(startPosition.Latitude * Math.PI / 180.0));
+            double deltaY = deltaLat * GreatCircle.MetersPerDegreeeLatitude;
 
             distance = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
             direction = GreatCircle.RadiansToAviatic(Math.Atan2(deltaY, deltaX));
@@ -190,9 +190,9 @@ namespace Iot.Device.Nmea0183.Tests
             double dl_i;
             double alt, lat, lon;
 
-            db_i = (Math.Cos(Math.PI / 180.0 * dblAngle) * (dblDist)) / GreatCircle.METERS_PER_DEGREEE_LATITUDE;
+            db_i = (Math.Cos(Math.PI / 180.0 * dblAngle) * (dblDist)) / GreatCircle.MetersPerDegreeeLatitude;
             lat = originalPosition.Latitude + db_i;
-            dl_i = (Math.Sin(Math.PI / 180.0 * dblAngle) * (dblDist)) / (GreatCircle.METERS_PER_DEGREE_LONGITUDE * (Math.Abs(Math.Cos(lat * Math.PI / 180.0))));
+            dl_i = (Math.Sin(Math.PI / 180.0 * dblAngle) * (dblDist)) / (GreatCircle.MetersPerDegreeLongitude * (Math.Abs(Math.Cos(lat * Math.PI / 180.0))));
             lon = originalPosition.Longitude + dl_i;
             alt = originalPosition.EllipsoidalHeight;
             return new GeographicPosition(lat, lon, alt);
@@ -280,8 +280,8 @@ namespace Iot.Device.Nmea0183.Tests
 
                     // calculate the endpoint with the previously calculated offsets using the cartesic routine
                     GeographicPosition pCalcEnd = InternalExtrapolatePosition(pStart, distance, direction);
-                    double dblDeltaX = Math.Abs(pCalcEnd.Longitude - pEnd.Longitude) * GreatCircle.METERS_PER_DEGREE_LONGITUDE;
-                    double dblDeltaY = Math.Abs(pCalcEnd.Latitude - pEnd.Latitude) * GreatCircle.METERS_PER_DEGREEE_LATITUDE;
+                    double dblDeltaX = Math.Abs(pCalcEnd.Longitude - pEnd.Longitude) * GreatCircle.MetersPerDegreeLongitude;
+                    double dblDeltaY = Math.Abs(pCalcEnd.Latitude - pEnd.Latitude) * GreatCircle.MetersPerDegreeeLatitude;
                     Assert.True(dblDeltaY < 1.0, "XY latitude accuracy less than 1m");
                     Assert.True(dblDeltaX < 1.0, "XY longitude accuracy less than 1m");
                 }

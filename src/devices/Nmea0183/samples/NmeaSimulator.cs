@@ -91,7 +91,7 @@ namespace Nmea.Simulator
             {
                 var data = _activeData;
                 RecommendedMinimumNavigationInformation rmc = new RecommendedMinimumNavigationInformation(DateTimeOffset.UtcNow,
-                    RecommendedMinimumNavigationInformation.NavigationStatus.Valid, data.Position,
+                    NavigationStatus.Valid, data.Position,
                     data.Speed, data.Course, null);
                 SendSentence(rmc);
 
