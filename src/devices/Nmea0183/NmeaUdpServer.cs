@@ -74,7 +74,16 @@ namespace Iot.Device.Nmea0183
             }
 
             _server = new UdpClient(_port);
-            _server.DontFragment = true;
+            try
+            {
+                _server.DontFragment = true;
+            }
+            catch (NotSupportedException)
+            {
+                // This fails on MacOS (https://github.com/dotnet/runtime/issues/27653), but this shouldn't
+                // hurt, since true is the default.
+            }
+
             _clientStream = new UdpClientStream(_server, _port, this);
             _parser = new NmeaParser($"{InterfaceName} (Port {_port})", _clientStream, _clientStream);
             _parser.OnNewSequence += OnSentenceReceivedFromClient;
