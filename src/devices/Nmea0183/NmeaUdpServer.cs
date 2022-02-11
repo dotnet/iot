@@ -78,7 +78,7 @@ namespace Iot.Device.Nmea0183
             {
                 _server.DontFragment = true;
             }
-            catch (NotSupportedException)
+            catch (Exception x) when (x is NotSupportedException || x is SocketException)
             {
                 // This fails on MacOS (https://github.com/dotnet/runtime/issues/27653), but this shouldn't
                 // hurt, since true is the default.
