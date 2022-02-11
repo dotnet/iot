@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -75,7 +76,7 @@ namespace Iot.Device.Nmea0183
 
             _server = new UdpClient(_port);
 
-            if (!OperatingSystem.IsMacOS())
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
                 try
                 {
