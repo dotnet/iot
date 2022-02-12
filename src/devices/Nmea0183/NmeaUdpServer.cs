@@ -78,15 +78,21 @@ namespace Iot.Device.Nmea0183
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
+                // This is unsupported on MacOS (https://github.com/dotnet/runtime/issues/27653), but this shouldn't
+                // hurt, since true is the default.
                 try
                 {
                     _server.DontFragment = true;
                 }
                 catch (Exception x) when (x is NotSupportedException || x is SocketException)
                 {
-                    // This fails on MacOS (https://github.com/dotnet/runtime/issues/27653), but this shouldn't
-                    // hurt, since true is the default.
+                    // Ignore
                 }
+            }
+            else
+            {
+                // On MacOs, instead we need to set up a timeout, or we end in a deadlock when terminating
+                _server.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
             }
 
             _clientStream = new UdpClientStream(_server, _port, this);
@@ -162,6 +168,7 @@ namespace Iot.Device.Nmea0183
 
             private Stopwatch _lastUnsuccessfulSend;
             private Dictionary<IPAddress, bool> _knownSenders;
+            private bool _running;
 
             public UdpClientStream(UdpClient client, int port, NmeaUdpServer parent)
             {
@@ -171,6 +178,7 @@ namespace Iot.Device.Nmea0183
                 _data = new Queue<byte>();
                 _knownSenders = new();
                 _lastUnsuccessfulSend = new Stopwatch();
+                _running = true;
             }
 
             public override void Flush()
@@ -194,9 +202,9 @@ namespace Iot.Device.Nmea0183
                 }
 
                 IPEndPoint pt;
-                byte[] datagram;
+                byte[]? datagram = null;
                 bool isself;
-                while (true)
+                while (_running)
                 {
                     pt = new IPEndPoint(IPAddress.Any, _port);
                     try
@@ -204,6 +212,16 @@ namespace Iot.Device.Nmea0183
                         datagram = _client.Receive(ref pt);
                     }
                     catch (SocketException x)
+                    {
+                        if (x.SocketErrorCode == SocketError.TimedOut)
+                        {
+                            continue;
+                        }
+
+                        _parent.FireOnParserError($"Udp server error: {x.Message}", NmeaError.PortClosed);
+                        return 0;
+                    }
+                    catch (ObjectDisposedException x)
                     {
                         _parent.FireOnParserError($"Udp server error: {x.Message}", NmeaError.PortClosed);
                         return 0;
@@ -231,6 +249,11 @@ namespace Iot.Device.Nmea0183
                     {
                         _knownSenders.Add(pt.Address, false);
                     }
+                }
+
+                if (!_running || datagram == null)
+                {
+                    return 0;
                 }
 
                 // Does the whole message fit in the buffer?
@@ -314,6 +337,7 @@ namespace Iot.Device.Nmea0183
                 {
                     lock (_disposalLock)
                     {
+                        _running = false;
                         _client.Dispose();
                     }
                 }
