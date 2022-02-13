@@ -35,6 +35,7 @@ namespace ArduinoCsCompiler
                 ("quit", Quit, "Exit debugger(but keep code running"),
                 ("code", WriteCurrentInstructions, "Show code in current method. [ARG1] = Number of instructions before and after the current"),
                 ("continue", Continue, "Continue execution"),
+                ("bp", BreakPoint, "Toggle breakpoints. [ARG1] Method"),
                 ("break", DebuggerBreak, "Break execution"),
                 ("help", PrintHelp, "Print Command help"),
                 ("stack", WriteCurrentStack, "Show current stack frames"),
@@ -80,6 +81,68 @@ namespace ArduinoCsCompiler
             }
 
             _commandHandler.SendDebuggerCommand(DebuggerCommand.SendEvaluationStack, stackFrame);
+        }
+
+        private void BreakPoint(string[] args)
+        {
+            if (args.Length <= 1)
+            {
+                Console.WriteLine("Syntax: bp Method.Name [overload number] [offset]");
+                Console.WriteLine("The method name does not need to be unique. If [overload number] is not specified, a list of matching methods will be printed.");
+                return;
+            }
+
+            var methods = _set.Methods().Where(x => x.Name.Contains(args[1])).ToList();
+            if (methods.Count == 0)
+            {
+                Console.WriteLine($"No method matches the search string {args[1]}");
+                return;
+            }
+
+            int overload = -1;
+            if (args.Length > 2)
+            {
+                if (!int.TryParse(args[2], NumberStyles.Any, CultureInfo.CurrentCulture, out overload) || overload < 0)
+                {
+                    Console.WriteLine($"Could not parse argument {args[1]}. Not a number");
+                    return;
+                }
+            }
+
+            if (methods.Count > 1)
+            {
+                Console.WriteLine("The following methods match your query:");
+                int idx = 0;
+                foreach (var method in methods)
+                {
+                    Console.WriteLine($"{idx}: {method.MethodBase.MethodSignature()}");
+                    idx++;
+                }
+
+                if (overload == -1)
+                {
+                    Console.WriteLine("Please specify an overload number");
+                    return;
+                }
+            }
+            else
+            {
+                overload = 0;
+            }
+
+            int startOffset = 0;
+            if (args.Length > 3)
+            {
+                Int32.TryParse(args[3], NumberStyles.Any, CultureInfo.CurrentCulture, out startOffset);
+            }
+
+            if (overload < methods.Count)
+            {
+                var methodToBreakAt = methods[overload];
+                Console.WriteLine($"Setting breakpoint in method {methodToBreakAt.MethodBase.MethodSignature()} at offset 0x{startOffset:X}");
+                _commandHandler.SendDebuggerCommand(DebuggerCommand.BreakPoint, methodToBreakAt.Token, startOffset);
+            }
+
         }
 
         private void StepOver(string[] args)
@@ -396,7 +459,8 @@ namespace ArduinoCsCompiler
             VariableKind kind = (VariableKind)FirmataCommandSequence.DecodeInt14(data, idx);
             idx += 2;
             // Decode from the firmata form (10 x 7 bit) to an integer, then put that back into an array
-            Int64 fullValue = FirmataIlCommandSequence.DecodeInt32(data, idx) | FirmataIlCommandSequence.DecodeInt32(data, idx + 5) << 32;
+            UInt64 fullValue = (UInt64)FirmataIlCommandSequence.DecodeUInt32(data, idx);
+            fullValue = fullValue | ((UInt64)FirmataIlCommandSequence.DecodeUInt32(data, idx + 5) << 32);
             byte[] value = BitConverter.GetBytes(fullValue); // So we can repack it
             idx += 10;
 

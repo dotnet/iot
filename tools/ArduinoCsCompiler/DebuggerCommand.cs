@@ -21,5 +21,6 @@ namespace ArduinoCsCompiler
         SendArguments,
         SendEvaluationStack,
         BreakOnExceptions,
+        BreakPoint
     }
 }

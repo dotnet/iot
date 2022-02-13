@@ -56,6 +56,50 @@ namespace ArduinoCsCompiler
             {
                 return $"{pre}Function pointer address 0x{Value:X}";
             }
+            else if (Type == typeof(DateTime))
+            {
+                try
+                {
+                    Int64 v = 0;
+                    if (Value is Int64)
+                    {
+                        v = (Int64)Value;
+                    }
+                    else if (Value is UInt64)
+                    {
+                        v = (Int64)((UInt64)Value);
+                    }
+
+                    DateTime dt = new DateTime(v);
+                    return $"{pre}{dt.ToLongTimeString()}";
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    return $"{pre}{Value} (invalid DateTime value)";
+                }
+            }
+            else if (Type == typeof(TimeSpan))
+            {
+                try
+                {
+                    Int64 v = 0;
+                    if (Value is Int64)
+                    {
+                        v = (Int64)Value;
+                    }
+                    else if (Value is UInt64)
+                    {
+                        v = (Int64)((UInt64)Value);
+                    }
+
+                    TimeSpan dt = new TimeSpan(v);
+                    return $"{pre}{dt.ToString()}";
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    return $"{pre}{Value} (invalid TimeSpan value)";
+                }
+            }
             else if (Value != null)
             {
                 return $"{pre}{Value}";

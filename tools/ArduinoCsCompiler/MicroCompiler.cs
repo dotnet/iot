@@ -512,6 +512,13 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            if (classType.IsValueType && fields.Count > 1)
+            {
+                // Order value types by marshalled position. This guarantees correct ordering, which is particularly important
+                // for structs marked with SequentialLayout.
+                fields = fields.OrderBy(x => x.MetadataToken).ToList();
+            }
+
             List<ClassMember> memberTypes = new List<ClassMember>();
 
             for (var index = 0; index < fields.Count; index++)
@@ -720,39 +727,97 @@ namespace ArduinoCsCompiler
         {
             // Currently, memberwise alignment is only done for structs
             int newClassSize = classDynamicSize;
-            var fields = memberTypes.Where(x => x.VariableType != VariableKind.Method).ToList();
-            if (classType.IsValueType && fields.Count > 1)
+            if (!classType.IsValueType)
             {
+                return newClassSize;
+            }
+
+            string name = classType.Name;
+            var layout = classType.GetCustomAttribute<StructLayoutAttribute>();
+            var fields = memberTypes.Where(x => x.VariableType != VariableKind.Method && x.StaticFieldSize == 0).OrderBy(y => y.Field!.MetadataToken).ToList();
+            if (fields.Count > 1)
+            {
+                newClassSize = CalcOffsets(fields);
                 // We need to align each member so that it starts at an offset dividable by its size,
                 // otherwise there could be unaligned memory access errors.
                 for (var index = 0; index < fields.Count; index++)
                 {
-                    var member = memberTypes[index];
-                    int offset = member.Offset;
-                    if (index < memberTypes.Count - 2)
+                    var member = fields[index];
+                    if (index < fields.Count - 1)
                     {
                         var nextMember = fields[index + 1];
-                        int nextMemberOffset = nextMember.Offset;
+                        int thisSize = member.SizeOfField;
+
                         // This value is non-zero if the next member is not aligned to its size
-                        int nextAlign = nextMemberOffset % nextMember.SizeOfField;
-                        if (nextAlign > 4)
+                        int nextOffset = member.Offset + thisSize;
+                        int nextAlign = nextOffset % nextMember.SizeOfField;
+                        // No need to align to more than 32 bit (we're currently only supporting 32 bit CPUs, and 64 bit CPUs would normally also allow 32-bit aligned accesses
+                        bool nextIsAligned = (nextAlign % 4 == 0);
+                        while (!nextIsAligned)
                         {
-                            nextAlign = 4; // Don't need to align to more than 32 bits
+                            thisSize += 1;
+                            nextOffset = member.Offset + thisSize;
+                            nextAlign = nextOffset % nextMember.SizeOfField;
+                            nextIsAligned = (nextAlign % 4 == 0);
                         }
 
-                        if (member.SizeOfField < nextAlign)
+                        if (thisSize != member.SizeOfField)
                         {
-                            int diff = nextAlign - member.SizeOfField;
-                            classDynamicSize += diff;
-                            member.SizeOfField = nextAlign;
+                            // int diff = nextAlign - member.SizeOfField;
+                            member.SizeOfField = thisSize;
+                            newClassSize = CalcOffsets(fields); // need to recalculate after a change
                         }
                     }
                 }
 
+                if (newClassSize > 3 && (newClassSize % 4 != 0))
+                {
+                    // If the struct is larger than 3 bytes, we must align the total size to 4 again.
+                    newClassSize = (newClassSize + 4) & ~3;
+                }
+
+                // Verification
+                /* Does not work, because of some weird behavior of the CLR (e.g. sizeof(System.Char) returns 1)
+                if (layout != null || (classType.Attributes & TypeAttributes.SequentialLayout) != 0 || (classType.Attributes & TypeAttributes.ExplicitLayout) != 0)
+                {
+                    foreach (var field in fields)
+                    {
+                        var f = field.Field;
+                        if (f.FieldType.IsPointer || f.FieldType.IsByRefLike || f.FieldType.IsClass)
+                        {
+                            // If the struct contains pointers, we cannot verify, as they use 64 bit locally. But structs with pointers won't be marshalled anyway
+                            break;
+                        }
+
+                        if (f == null)
+                        {
+                            throw new InvalidOperationException("Internal error: Compiler data error");
+                        }
+
+                        int clrOffset = Marshal.OffsetOf(classType, f.Name).ToInt32();
+                        if (field.Offset != clrOffset)
+                        {
+                            throw new InvalidOperationException("Internal error: Compiler and CLR disagree on struct alignment");
+                        }
+                    }
+                }
+                */
                 return newClassSize;
             }
 
-            return -1;
+            return newClassSize;
+        }
+
+        private int CalcOffsets(List<ClassMember> fields)
+        {
+            int offset = 0;
+            foreach (var field in fields)
+            {
+                field.Offset = offset;
+                offset += field.SizeOfField;
+            }
+
+            return offset;
         }
 
         private void CompleteClasses(ExecutionSet set)

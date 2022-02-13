@@ -1457,10 +1457,12 @@ namespace ArduinoCsCompiler
                     var cls = _classes.FirstOrDefault(x => x.Members.Any(y => y.Token == token));
                     string name = "(Field)";
                     int s;
+                    int o = -1;
                     if (cls != null)
                     {
                         var f = cls.Members.First(y => y.Token == token);
                         s = f.SizeOfField;
+                        o = f.Offset;
                         name = "(Dynamic field)";
                         if (f.StaticFieldSize > 0)
                         {
@@ -1476,7 +1478,14 @@ namespace ArduinoCsCompiler
                         s = -1;
                     }
 
-                    w.WriteLine($"0x{token:X8} {name} {fld.Key.Name} of {className}. Size {s}");
+                    if (o >= 0)
+                    {
+                        w.WriteLine($"0x{token:X8} {name} {fld.Key.Name} of {className}. Size {s} Offset {o}");
+                    }
+                    else
+                    {
+                        w.WriteLine($"0x{token:X8} {name} {fld.Key.Name} of {className}. Size {s}");
+                    }
                 }
             }
 

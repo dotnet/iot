@@ -40,6 +40,43 @@ namespace Iot.Device.Tests
             Assert.Equal(8, Marshal.SizeOf(gs));
         }
 
+        [Fact]
+        public void MarshalOffsetOfBehaviorSimple()
+        {
+            Assert.Equal(2, Marshal.SizeOf(typeof(System.Char)));
+            Assert.Equal(0, Marshal.OffsetOf(typeof(TestAlignment), nameof(TestAlignment._a)).ToInt32());
+            Assert.Equal(4, Marshal.OffsetOf(typeof(TestAlignment), nameof(TestAlignment._b)).ToInt32());
+            Assert.Equal(5, Marshal.OffsetOf(typeof(TestAlignment), nameof(TestAlignment._c)).ToInt32());
+            Assert.Equal(8, Marshal.OffsetOf(typeof(TestAlignment), nameof(TestAlignment._d)).ToInt32());
+        }
+
+        [Fact]
+        public void MarshalOffsetOfBehaviorGenerics()
+        {
+            Assert.Equal(0, Marshal.OffsetOf(typeof(TestAlignmentGenerics<byte>), "_a").ToInt32());
+            Assert.Equal(4, Marshal.OffsetOf(typeof(TestAlignmentGenerics<byte>), "_b").ToInt32());
+            Assert.Equal(5, Marshal.OffsetOf(typeof(TestAlignmentGenerics<byte>), "_c").ToInt32());
+            Assert.Equal(8, Marshal.OffsetOf(typeof(TestAlignmentGenerics<byte>), "_d").ToInt32());
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        private struct TestAlignment
+        {
+            public int _a;
+            public char _b;
+            public byte _c;
+            public int _d;
+        }
+
+        [StructLayout(LayoutKind.Sequential, Pack = 4)]
+        private struct TestAlignmentGenerics<T>
+        {
+            public int _a;
+            public T _b;
+            public byte _c;
+            public int _d;
+        }
+
         /// <summary>
         /// These tests help debugging the Double.ToString() implementation by testing individual methods as seen in the runtime
         /// </summary>
