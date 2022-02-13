@@ -168,7 +168,8 @@ namespace Iot.Device.Nmea0183
 
             private Stopwatch _lastUnsuccessfulSend;
             private Dictionary<IPAddress, bool> _knownSenders;
-            private bool _running;
+            private CancellationTokenSource _cancellationSource;
+            private CancellationToken _cancellationToken;
 
             public UdpClientStream(UdpClient client, int port, NmeaUdpServer parent)
             {
@@ -178,7 +179,8 @@ namespace Iot.Device.Nmea0183
                 _data = new Queue<byte>();
                 _knownSenders = new();
                 _lastUnsuccessfulSend = new Stopwatch();
-                _running = true;
+                _cancellationSource = new CancellationTokenSource();
+                _cancellationToken = _cancellationSource.Token;
             }
 
             public override void Flush()
@@ -204,12 +206,25 @@ namespace Iot.Device.Nmea0183
                 IPEndPoint pt;
                 byte[]? datagram = null;
                 bool isself;
-                while (_running)
+                while (!_cancellationSource.IsCancellationRequested)
                 {
                     pt = new IPEndPoint(IPAddress.Any, _port);
                     try
                     {
-                        datagram = _client.Receive(ref pt);
+                        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                        {
+#if NET6_O_OR_GREATER
+                            var result = _client.ReceiveAsync(_cancellationToken).GetAwaiter().GetResult();
+                            datagram = result.Buffer;
+#else
+                            var result = _client.ReceiveAsync().GetAwaiter().GetResult();
+                            datagram = result.Buffer;
+#endif
+                        }
+                        else
+                        {
+                            datagram = _client.Receive(ref pt);
+                        }
                     }
                     catch (SocketException x)
                     {
@@ -251,7 +266,7 @@ namespace Iot.Device.Nmea0183
                     }
                 }
 
-                if (!_running || datagram == null)
+                if (_cancellationSource.IsCancellationRequested || datagram == null)
                 {
                     return 0;
                 }
@@ -337,8 +352,13 @@ namespace Iot.Device.Nmea0183
                 {
                     lock (_disposalLock)
                     {
-                        _running = false;
+                        if (!_cancellationToken.IsCancellationRequested)
+                        {
+                            _cancellationSource.Cancel();
+                        }
+
                         _client.Dispose();
+                        _cancellationSource.Dispose();
                     }
                 }
 
