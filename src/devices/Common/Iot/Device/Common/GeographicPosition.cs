@@ -104,7 +104,7 @@ namespace Iot.Device.Common
         /// <param name="seconds">Seconds including requested number of digits</param>
         public static void GetDegreesMinutesSeconds(double angle, int secDigits, out double normalizedVal, out double degrees, out double minutes, out double seconds)
         {
-            angle = PositionExtensions.NormalizeAngleTo180(angle);
+            angle = PositionExtensions.NormalizeAngleTo180Degrees(angle);
             normalizedVal = angle;
             angle = Math.Abs(angle);
             degrees = Math.Floor(angle);

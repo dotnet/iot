@@ -84,7 +84,7 @@ namespace Iot.Device.Common
         /// <param name="angleTrue">Course relative to true north</param>
         /// <param name="variation">Variation. Positive for east</param>
         /// <returns>The magnetic course</returns>
-        /// <remarks>From true to false with the wrong sign</remarks>
+        /// <remarks>Remember: From true to false with the wrong sign</remarks>
         public static Angle TrueToMagnetic(this Angle angleTrue, Angle variation)
         {
             return (angleTrue - variation).Normalize(true);

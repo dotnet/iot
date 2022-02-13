@@ -222,7 +222,7 @@ namespace Iot.Device.Nmea0183.Sentences
         : base(OwnTalkerId, Id, dateTime)
         {
             Status = status;
-            position = position.NormalizeAngleTo180();
+            position = position.NormalizeLongitudeTo180Degrees();
             (_latitude, _latitudeTurn) = RecommendedMinimumNavigationInformation.DegreesToNmea0183(position.Latitude, true);
             (_longitude, _longitudeTurn) = RecommendedMinimumNavigationInformation.DegreesToNmea0183(position.Longitude, false);
             EllipsoidAltitude = position.EllipsoidalHeight;

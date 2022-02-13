@@ -120,7 +120,7 @@ namespace Iot.Device.Nmea0183.Sentences
         DateTimeOffset dateTime, GeographicPosition position)
         : base(OwnTalkerId, Id, dateTime)
         {
-            position = position.NormalizeAngleTo180();
+            position = position.NormalizeLongitudeTo180Degrees();
             (_latitude, _latitudeTurn) = RecommendedMinimumNavigationInformation.DegreesToNmea0183(position.Latitude, true);
             (_longitude, _longitudeTurn) = RecommendedMinimumNavigationInformation.DegreesToNmea0183(position.Longitude, false);
             Position = position;
