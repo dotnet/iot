@@ -17,11 +17,14 @@ namespace ArduinoCsCompiler.Runtime
             {
                 TimeDynamicZoneInformation = default;
                 TimeZoneInformation = default;
+                TZI = default;
             }
 
             public TIME_DYNAMIC_ZONE_INFORMATION TimeDynamicZoneInformation;
 
             public TIME_ZONE_INFORMATION TimeZoneInformation;
+
+            public byte[]? TZI;
         }
     }
 }

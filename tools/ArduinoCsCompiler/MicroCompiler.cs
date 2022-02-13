@@ -2230,6 +2230,19 @@ namespace ArduinoCsCompiler
                     int stringToken = set.GetOrAddString((string)result);
                     AddCommandWith32BitArgument(code, OpCode.CEE_LDSTR, stringToken);
                 }
+                else if (t == typeof(byte[]))
+                {
+                    byte[] bytes = (byte[])result;
+                    var field = typeof(MiniInterop.Dummy).GetField(nameof(MiniInterop.Dummy.TZI))!;
+                    int dataToken = set.GetOrAddFieldToken(field, bytes);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_LDC_I4, bytes.Length);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_NEWARR, (int)KnownTypeTokens.Byte);
+                    AddCommand(code, OpCode.CEE_DUP);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_LDTOKEN, dataToken);
+                    var method2 = typeof(System.Runtime.CompilerServices.RuntimeHelpers).GetMethod("InitializeArray")!;
+                    int initializeFunctionToken = set.GetOrAddMethodToken(method2, parentMethod);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_CALL, initializeFunctionToken);
+                }
                 else
                 {
                     throw new NotSupportedException($"[ArduinoCompileTimeConstant] for type {t} is not implemented");
