@@ -70,6 +70,7 @@ namespace ArduinoCsCompiler.Runtime
         // We use the _cultureData to get the data for our object
         // The Invariant culture;
         private static readonly MiniCultureInfo _invariantCultureInfo = new MiniCultureInfo(MiniCultureData.Invariant, isReadOnly: true);
+        private static readonly MiniCultureInfo _localizedCultureInfo = new MiniCultureInfo(new MiniCultureData(false), isReadOnly: true);
 
         // Get the current user default culture. This one is almost always used, so we create it by default.
         private static volatile MiniCultureInfo? s_userDefaultCulture;
@@ -119,13 +120,13 @@ namespace ArduinoCsCompiler.Runtime
 
         private static MiniCultureInfo InitializeUserDefaultCulture()
         {
-            s_userDefaultCulture = _invariantCultureInfo;
+            s_userDefaultCulture = _localizedCultureInfo;
             return s_userDefaultCulture!;
         }
 
         private static MiniCultureInfo InitializeUserDefaultUICulture()
         {
-            s_userDefaultUICulture = _invariantCultureInfo;
+            s_userDefaultUICulture = _localizedCultureInfo;
             return s_userDefaultUICulture!;
         }
 
@@ -142,7 +143,7 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             // Get our data providing record
-            MiniCultureData? cultureData = new MiniCultureData();
+            MiniCultureData? cultureData = new MiniCultureData(string.IsNullOrWhiteSpace(name));
 
             _cultureData = cultureData;
             _name = _cultureData.CultureName;
@@ -169,7 +170,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new ArgumentOutOfRangeException(nameof(culture));
             }
 
-            _cultureData = new MiniCultureData();
+            _cultureData = new MiniCultureData(culture == 0x1000);
             _isInherited = GetType() != typeof(CultureInfo);
             _name = _cultureData.CultureName;
         }
@@ -189,7 +190,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new ArgumentNullException(nameof(cultureName));
             }
 
-            _cultureData = new MiniCultureData();
+            _cultureData = new MiniCultureData(string.IsNullOrWhiteSpace(cultureName));
 
             _name = _cultureData.CultureName;
         }
@@ -334,7 +335,13 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
-        internal static string UserDefaultLocaleName => "Invariant";
+        internal static string UserDefaultLocaleName => UserDefaultLocalNameGetter();
+
+        [ArduinoCompileTimeConstant]
+        internal static string UserDefaultLocalNameGetter()
+        {
+            return CultureInfo.CurrentCulture.Name;
+        }
 
         internal static MiniCultureInfo UserDefaultUICulture => s_userDefaultUICulture ?? InitializeUserDefaultUICulture();
 
@@ -642,7 +649,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new ArgumentOutOfRangeException(nameof(culture));
             }
 
-            return InvariantCulture;
+            return culture == 0x10000 ? InvariantCulture : CurrentCulture;
         }
 
         /// <summary>
@@ -651,7 +658,7 @@ namespace ArduinoCsCompiler.Runtime
         /// </summary>
         public static MiniCultureInfo GetCultureInfo(string name)
         {
-            return InvariantCulture;
+            return CurrentCulture;
         }
 
         /// <summary>
@@ -660,18 +667,18 @@ namespace ArduinoCsCompiler.Runtime
         /// </summary>
         public static MiniCultureInfo GetCultureInfo(string name, string altName)
         {
-            return InvariantCulture;
+            return CurrentCulture;
         }
 
         public static MiniCultureInfo GetCultureInfo(string name, bool predefinedOnly)
         {
-            return InvariantCulture;
+            return CurrentCulture;
         }
 
         public static MiniCultureInfo GetCultureInfoByIetfLanguageTag(string name)
         {
             // Disallow old zh-CHT/zh-CHS names
-            return InvariantCulture;
+            return CurrentCulture;
         }
 
         [ArduinoReplacement("System.Globalization.CultureData", null, true, IncludingPrivates = true)]
@@ -710,16 +717,36 @@ namespace ArduinoCsCompiler.Runtime
                 "Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
             };
 
-            private static readonly string[] _saMonthNames = new string[]
-            {
-                "January", "February", "March", "April", "Mai", "June", "July", "August", "September", "October", "November", "December"
-            };
+            private static readonly string[] _saMonthNames;
 
             private static readonly string _sPositiveSign = "+";
             private static readonly string _sNegativeSign = "-";
-            private static readonly string _sThousandSeparator = "'";
-            private static readonly string _sDecimalSeparator = ".";
-            private static readonly string _sCurrency = "$";
+            private static readonly string _sThousandSeparatorInvariant = "'";
+            private static readonly string _sDecimalSeparatorInvariant = ".";
+            private static readonly string _sCurrencyInvariant = "$";
+
+            private static readonly string _sCurrencyLocal;
+            private static readonly string _sThousandSeparatorLocal;
+            private static readonly string _sDecimalSeparatorLocal;
+
+            private readonly bool _isInvariant;
+
+            static MiniCultureData()
+            {
+                _sCurrencyLocal = GetCurrencySymbol();
+                _sThousandSeparatorLocal = GetThousandSeparator();
+                _sDecimalSeparatorLocal = GetDecimalSeparator();
+
+                _saMonthNames = new string[]
+                {
+                    "January", "Fellow", "March", "April", "Mai", "June", "July", "August", "September", "October", "November", "December"
+                };
+            }
+
+            public MiniCultureData(bool isInvariant)
+            {
+                _isInvariant = isInvariant;
+            }
 
             private static MiniCultureData? _sInvariant; // Initialized on usage, to prevent a static ctor dependency
 
@@ -729,7 +756,7 @@ namespace ArduinoCsCompiler.Runtime
                 {
                     if (_sInvariant == null)
                     {
-                        return _sInvariant = new MiniCultureData();
+                        return _sInvariant = new MiniCultureData(true);
                     }
 
                     return _sInvariant;
@@ -930,7 +957,7 @@ namespace ArduinoCsCompiler.Runtime
 
             internal static MiniCultureData? GetCultureData(string? cultureName, bool useUserOverride)
             {
-                return new MiniCultureData();
+                return new MiniCultureData(false);
             }
 
             internal void GetNFIValues(NumberFormatInfo nfi)
@@ -938,17 +965,41 @@ namespace ArduinoCsCompiler.Runtime
                 nfi.PositiveSign = _sPositiveSign;
                 nfi.NegativeSign = _sNegativeSign;
 
-                nfi.NumberGroupSeparator = _sThousandSeparator!;
-                nfi.NumberDecimalSeparator = _sDecimalSeparator!;
+                nfi.NumberGroupSeparator = _sThousandSeparatorInvariant!;
+                nfi.NumberDecimalSeparator = _sDecimalSeparatorInvariant!;
                 nfi.NumberDecimalDigits = 2;
                 nfi.NumberNegativePattern = 1;
 
-                nfi.CurrencySymbol = _sCurrency!;
-                nfi.CurrencyGroupSeparator = _sThousandSeparator;
-                nfi.CurrencyDecimalSeparator = _sThousandSeparator;
+                nfi.CurrencySymbol = _sCurrencyInvariant!;
+                nfi.CurrencyGroupSeparator = _sThousandSeparatorInvariant;
+                nfi.CurrencyDecimalSeparator = _sThousandSeparatorInvariant;
                 nfi.CurrencyDecimalDigits = 2;
                 nfi.CurrencyNegativePattern = 12;
                 nfi.CurrencyPositivePattern = 2;
+                if (!_isInvariant)
+                {
+                    nfi.CurrencySymbol = _sCurrencyLocal;
+                    nfi.NumberGroupSeparator = _sThousandSeparatorLocal;
+                    nfi.NumberDecimalSeparator = _sDecimalSeparatorLocal;
+                }
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string GetCurrencySymbol()
+            {
+                return CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string GetThousandSeparator()
+            {
+                return CultureInfo.CurrentCulture.NumberFormat.NumberGroupSeparator;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string GetDecimalSeparator()
+            {
+                return CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
             }
         }
 
