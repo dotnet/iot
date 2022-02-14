@@ -542,7 +542,8 @@ namespace Iot.Device.Arduino
             }
             else
             {
-                Logger.LogInformation(message);
+                // If the message contains a line feed, strip that
+                Logger.LogInformation(message.TrimEnd(new char[] { '\r', '\n' }));
             }
 
             _commandHandlersLock.EnterReadLock();
