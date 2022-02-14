@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino;
 using Microsoft.Extensions.Logging;
@@ -84,6 +86,24 @@ namespace ArduinoCsCompiler
                 {
                     Logger.LogError($"Could not find file {inputInfo}.");
                     return false;
+                }
+
+                if (!string.IsNullOrWhiteSpace(CommandLineOptions.CultureName))
+                {
+                    // Let this throw for now if it is invalid
+                    CultureInfo c;
+                    if (CommandLineOptions.CultureName.Equals("Invariant", StringComparison.OrdinalIgnoreCase))
+                    {
+                        c = CultureInfo.InvariantCulture;
+                    }
+                    else
+                    {
+                        c = new CultureInfo(CommandLineOptions.CultureName);
+                    }
+
+                    // We're running single-threaded, so just set the default culture.
+                    Console.WriteLine($"Setting compiler culture to {c.DisplayName}");
+                    Thread.CurrentThread.CurrentCulture = c;
                 }
 
                 RunCompiler(inputInfo);

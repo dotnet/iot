@@ -52,5 +52,9 @@ namespace ArduinoCsCompiler
 
         [Option("keepifcurrent", Default = false, HelpText = "If specified, the program will not be transmitted if it is already loaded. Defaults to false, because not all changes might be caught.")]
         public bool DoNotWriteFlashIfAlreadyCurrent { get; set; }
+
+        [Option('c', "culture", HelpText = "The name of the culture to use for 'CultureInfo.CurrentCulture'. Must be a valid culture name such as 'de-CH' or 'Invariant'." +
+                                           "Defaults to the current culture during compile")]
+        public string CultureName { get; set; }
     }
 }
