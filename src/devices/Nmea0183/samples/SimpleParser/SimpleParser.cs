@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.IO.Ports;
 using System.Net.Sockets;
 using System.Threading;
 using Iot.Device.Nmea0183;
@@ -18,23 +19,30 @@ namespace Iot.Device.Gps.NeoM8Samples
             UsingNetwork();
         }
 
-        private static void UsingNeoM8Serial()
+        private static void UsingSerial()
         {
-            DateTimeOffset lastMessage = DateTimeOffset.UtcNow;
-            using (NeoM8 neoM8 = new NeoM8("/dev/ttyS0"))
+            DateTimeOffset lastMessageTime = DateTimeOffset.UtcNow;
+            using (var sp = new SerialPort("/dev/ttyS0"))
             {
+                sp.NewLine = "\r\n";
+                sp.Open();
+
+                // Device streams continuously and therefore most of the time we would end up in the middle of the line
+                // therefore ignore first line so that we align correctly
+                sp.ReadLine();
+
                 bool gotRmc = false;
                 while (!gotRmc)
                 {
-                    TalkerSentence? sentence = neoM8.Read();
+                    string line = sp.ReadLine();
+                    TalkerSentence? sentence = TalkerSentence.FromSentenceString(line, out _);
 
                     if (sentence == null)
                     {
-                        Console.WriteLine("End of stream or no valid data found");
-                        break;
+                        continue;
                     }
 
-                    object? typed = sentence.TryGetTypedValue(ref lastMessage);
+                    object? typed = sentence.TryGetTypedValue(ref lastMessageTime);
                     if (typed == null)
                     {
                         Console.WriteLine($"Sentence identifier `{sentence.Id}` is not known.");
@@ -43,7 +51,7 @@ namespace Iot.Device.Gps.NeoM8Samples
                     {
                         gotRmc = true;
 
-                        if (rmc.Valid)
+                        if (rmc.Position.ContainsValidPosition())
                         {
                             Console.WriteLine($"Your location: {rmc.Position}");
                         }

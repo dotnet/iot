@@ -6,8 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Neo-M8.csproj" />
-    <ProjectReference Include="../../Nmea0183/Nmea0183.csproj" />
+    <ProjectReference Include="../../Nmea0183.csproj" />
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
   </ItemGroup>
 
 </Project>

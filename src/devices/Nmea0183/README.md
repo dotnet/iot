@@ -63,8 +63,57 @@ the available documentation is ambiguous or contradictory, though.
 
 ## Samples
 
-See [NEO-M8 sample](../NEO-M8/README.md) for a simple parser example using synchronous message decoding.
-See the [samples directory](samples/) for a simple NMEA simulator (generates sentences for a trip along a path)
+This demonstrates a simple, synchronous parser for a simple receiver:
+
+```csharp
+DateTimeOffset lastMessageTime = DateTimeOffset.UtcNow;
+using (var sp = new SerialPort("/dev/ttyS0"))
+{
+    sp.NewLine = "\r\n";
+    sp.Open();
+
+    // Device streams continuously and therefore most of the time we would end up in the middle of the line
+    // therefore ignore first line so that we align correctly
+    sp.ReadLine();
+
+    bool gotRmc = false;
+    while (!gotRmc)
+    {
+        string line = sp.ReadLine();
+        TalkerSentence? sentence = TalkerSentence.FromSentenceString(line, out _);
+
+        if (sentence == null)
+        {
+            continue;
+        }
+
+        object? typed = sentence.TryGetTypedValue(ref lastMessageTime);
+        if (typed == null)
+        {
+            Console.WriteLine($"Sentence identifier `{sentence.Id}` is not known.");
+        }
+        else if (typed is RecommendedMinimumNavigationInformation rmc)
+        {
+            gotRmc = true;
+
+            if (rmc.Position.ContainsValidPosition())
+            {
+                Console.WriteLine($"Your location: {rmc.Position}");
+            }
+            else
+            {
+                Console.WriteLine($"You cannot be located.");
+            }
+        }
+        else
+        {
+            Console.WriteLine($"Sentence of type `{typed.GetType().FullName}` not handled.");
+        }
+    }
+}
+```
+
+See the [samples directory](samples/NmeaSimulator) for a simple NMEA simulator (generates sentences for a trip along a path)
 
 For asynchronous message processing (the recommended use) several "message sources or sinks" are available. The default
 interface is `NmeaParser`. It is used as follows:
