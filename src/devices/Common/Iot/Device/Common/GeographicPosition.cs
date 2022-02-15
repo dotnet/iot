@@ -179,15 +179,7 @@ namespace Iot.Device.Common
             return "W";
         }
 
-        private static string GetNorthOrSouth(double sign)
-        {
-            if (sign >= 0)
-            {
-                return "N";
-            }
-
-            return "S";
-        }
+        private static string GetNorthOrSouth(double sign) => sign >= 0 ? "N" : "S";
 
         private static string GetLongitudeString(double longitude)
         {
