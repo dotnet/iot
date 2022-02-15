@@ -151,11 +151,14 @@ namespace WeatherStation
 
                         console.ReplaceLine(0, temperatureLine);
                         console.ReplaceLine(1, humidityLine);
+                        Console.WriteLine(temperatureLine);
+                        Console.WriteLine(humidityLine);
                     }
 
-                    string line = time.ToString("ddd dd. MMM yyyy");
+                    string line = time.ToLongDateString();
                     console.ReplaceLine(2, line);
                     console.SetCursorPosition(0, 3);
+                    Console.WriteLine(line);
                     line = time.ToLongTimeString();
                     console.ReplaceLine(3, line);
                     Console.WriteLine(line);

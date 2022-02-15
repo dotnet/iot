@@ -2179,12 +2179,18 @@ namespace ArduinoCsCompiler
             {
                 string methodName = ca.MethodName;
                 object? result = null;
+                bool takesThis = false;
                 if (string.IsNullOrWhiteSpace(methodName))
                 {
                     // Only internal methods can have a name. In these cases, no test is done here, as we know what we need to do
-                    if (methodInfo.GetParameters().Length != 0 || methodInfo.IsStatic == false)
+                    if (methodInfo.GetParameters().Length != 0)
                     {
-                        throw new NotSupportedException("Methods marked with [ArduinoCompileTimeConstant] must not take parameters and must be static");
+                        throw new NotSupportedException("Methods marked with [ArduinoCompileTimeConstant] must not take parameters");
+                    }
+
+                    if (!methodInfo.IsStatic)
+                    {
+                        takesThis = true;
                     }
 
                     MethodInfo? mi = methodInfo.Method as MethodInfo;
@@ -2193,7 +2199,13 @@ namespace ArduinoCsCompiler
                         throw new NotSupportedException("[ArduinoCompileTimeConstant] cannot be applied to constructors");
                     }
 
-                    result = methodInfo.Method.Invoke(null, Array.Empty<object?>());
+                    object? instanceToCallOn = null;
+                    if (takesThis)
+                    {
+                        instanceToCallOn = Activator.CreateInstance(methodInfo.DeclaringType!, true);
+                    }
+
+                    result = methodInfo.Method.Invoke(instanceToCallOn, Array.Empty<object?>());
                 }
 
                 Type? t = result?.GetType();
@@ -2242,6 +2254,24 @@ namespace ArduinoCsCompiler
                     var method2 = typeof(System.Runtime.CompilerServices.RuntimeHelpers).GetMethod("InitializeArray")!;
                     int initializeFunctionToken = set.GetOrAddMethodToken(method2, parentMethod);
                     AddCommandWith32BitArgument(code, OpCode.CEE_CALL, initializeFunctionToken);
+                }
+                else if (t == typeof(string[]))
+                {
+                    string[] strings = (string[])result;
+                    // Create an array of strings
+                    AddCommandWith32BitArgument(code, OpCode.CEE_LDC_I4, strings.Length);
+                    AddCommandWith32BitArgument(code, OpCode.CEE_NEWARR, (int)KnownTypeTokens.String);
+                    for (var index = 0; index < strings.Length; index++)
+                    {
+                        // fill the elements of the array, one after the other
+                        var s = strings[index];
+                        AddCommand(code, OpCode.CEE_DUP);
+                        AddCommandWith32BitArgument(code, OpCode.CEE_LDC_I4, index);
+                        int stringToken = set.GetOrAddString(s);
+                        AddCommandWith32BitArgument(code, OpCode.CEE_LDSTR, stringToken);
+                        // Pops three values from the stack, so that the array should remain
+                        AddCommandWith32BitArgument(code, OpCode.CEE_STELEM, (int)KnownTypeTokens.String);
+                    }
                 }
                 else
                 {

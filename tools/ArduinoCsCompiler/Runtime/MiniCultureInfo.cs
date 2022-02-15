@@ -143,7 +143,7 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             // Get our data providing record
-            MiniCultureData? cultureData = new MiniCultureData(string.IsNullOrWhiteSpace(name));
+            MiniCultureData cultureData = new MiniCultureData(string.IsNullOrWhiteSpace(name));
 
             _cultureData = cultureData;
             _name = _cultureData.CultureName;
@@ -540,6 +540,7 @@ namespace ArduinoCsCompiler.Runtime
                 if (_numInfo == null)
                 {
                     _numInfo = new NumberFormatInfo();
+                    _cultureData.GetNFIValues(_numInfo);
                 }
 
                 return _numInfo;
@@ -567,6 +568,7 @@ namespace ArduinoCsCompiler.Runtime
                 if (_dateTimeInfo == null)
                 {
                     _dateTimeInfo = new DateTimeFormatInfo();
+                    _cultureData.GetDateTimeFormat(_dateTimeInfo);
                 }
 
                 return _dateTimeInfo;
@@ -684,10 +686,10 @@ namespace ArduinoCsCompiler.Runtime
         [ArduinoReplacement("System.Globalization.CultureData", null, true, IncludingPrivates = true)]
         private class MiniCultureData
         {
-            private static readonly string[] _saLongTimes = new string[] { "HH:mm:ss" };
+            private static readonly string[] _saLongTimes;
             private static readonly string[] _saShortTimes = new string[] { "HH:mm", "hh:mm tt", "H:mm", "h:mm tt" }; // short time format
             private static readonly string[] _saDurationFormats = new string[] { "HH:mm:ss" };
-            private static readonly string[] _saLongDates = new string[] { "dddd, dd MMMM yyyy" };
+            private static readonly string[] _saLongDates;
 
             private static readonly string[] _saShortDates = new string[]
             {
@@ -700,23 +702,9 @@ namespace ArduinoCsCompiler.Runtime
             };
 
             private static readonly string[] _saEraNames = new string[] { "AD", "BC" };
-            private static readonly string[] _saAbbreviatedDayNames = new string[] { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
-            private static readonly string[] _saDayNames = new string[]
-            {
-                "Sunday",
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday"
-            };
-
-            private static readonly string[] _saAbbreviatedMonthNames = new string[]
-            {
-                "Jan", "Feb", "Mar", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-            };
-
+            private static readonly string[] _saAbbreviatedDayNames;
+            private static readonly string[] _saDayNames;
+            private static readonly string[] _saAbbreviatedMonthNames;
             private static readonly string[] _saMonthNames;
 
             private static readonly string _sPositiveSign = "+";
@@ -737,10 +725,21 @@ namespace ArduinoCsCompiler.Runtime
                 _sThousandSeparatorLocal = GetThousandSeparator();
                 _sDecimalSeparatorLocal = GetDecimalSeparator();
 
-                _saMonthNames = new string[]
-                {
-                    "January", "Fellow", "March", "April", "Mai", "June", "July", "August", "September", "October", "November", "December"
-                };
+                _saMonthNames = GetMonthNames();
+                _saAbbreviatedMonthNames = GetAbbreviatedMonthNames();
+                _saDayNames = GetDayNames();
+                _saAbbreviatedDayNames = GetAbbreviatedDayNames();
+                _saLongDates = new string[1] { GetLongDatePattern() };
+                _saLongTimes = new string[1] { GetLongTimePattern() };
+            }
+
+            /// <summary>
+            /// Required constructor for infrastructure
+            /// Used to create the non-static property values marked with [ArduinoCompileTimeConstant]
+            /// </summary>
+            private MiniCultureData()
+                : this(false)
+            {
             }
 
             public MiniCultureData(bool isInvariant)
@@ -767,23 +766,30 @@ namespace ArduinoCsCompiler.Runtime
             {
                 get
                 {
-                    return "Invariant";
+                    if (_isInvariant)
+                    {
+                        return "Invariant";
+                    }
+
+                    return "Local";
                 }
             }
 
             public string DisplayName
             {
+                [ArduinoCompileTimeConstant]
                 get
                 {
-                    return "en-US";
+                    return CultureInfo.CurrentCulture.DisplayName;
                 }
             }
 
             public string Name
             {
+                [ArduinoCompileTimeConstant]
                 get
                 {
-                    return "en-US";
+                    return CultureInfo.CurrentCulture.Name;
                 }
             }
 
@@ -791,7 +797,7 @@ namespace ArduinoCsCompiler.Runtime
             {
                 get
                 {
-                    return "en-US";
+                    return Name;
                 }
             }
 
@@ -803,25 +809,90 @@ namespace ArduinoCsCompiler.Runtime
                 }
             }
 
-            public string NativeName => "English";
+            public string NativeName
+            {
+                [ArduinoCompileTimeConstant]
+                get
+                {
+                    return CultureInfo.CurrentCulture.NativeName;
+                }
+            }
 
-            public string EnglishName => "English";
+            public string EnglishName
+            {
+                [ArduinoCompileTimeConstant]
+                get
+                {
+                    return CultureInfo.CurrentCulture.EnglishName;
+                }
+            }
 
-            public string ThreeLetterWindowsLanguageName => "eng";
+            public string ThreeLetterWindowsLanguageName
+            {
+                [ArduinoCompileTimeConstant]
+                get
+                {
+                    return CultureInfo.CurrentCulture.ThreeLetterWindowsLanguageName;
+                }
+            }
 
-            public string TwoLetterISOLanguageName => "en";
+            public string TwoLetterISOLanguageName
+            {
+                [ArduinoCompileTimeConstant]
+                get
+                {
+                    return CultureInfo.CurrentCulture.TwoLetterISOLanguageName;
+                }
+            }
 
-            public string ThreeLetterISOLanguageName => "eng";
+            public string ThreeLetterISOLanguageName
+            {
+                [ArduinoCompileTimeConstant]
+                get
+                {
+                    return CultureInfo.CurrentCulture.ThreeLetterISOLanguageName;
+                }
+            }
 
-            public int FirstDayOfWeek => 0;
+            public int FirstDayOfWeek
+            {
+                get
+                {
+                    return 0;
+                }
+            }
 
-            public int CalendarWeekRule => 0;
+            public int CalendarWeekRule
+            {
+                get
+                {
+                    return 0;
+                }
+            }
 
-            public string AMDesignator => "AM";
+            public string AMDesignator
+            {
+                get
+                {
+                    return "AM";
+                }
+            }
 
-            public string PMDesignator => "PM";
+            public string PMDesignator
+            {
+                get
+                {
+                    return "PM";
+                }
+            }
 
-            public string TimeSeparator => ":";
+            public string TimeSeparator
+            {
+                get
+                {
+                    return ":";
+                }
+            }
 
             [ArduinoImplementation(CompareByParameterNames = true)]
             public string DateSeparator(int calendarId)
@@ -950,10 +1021,16 @@ namespace ArduinoCsCompiler.Runtime
             internal string[] LeapYearMonthNames(CalendarId calendarId)
             {
                 // Only used in hebrew
-                return null!;
+                return _saMonthNames;
             }
 
-            internal bool UseUserOverride => false;
+            internal bool UseUserOverride
+            {
+                get
+                {
+                    return false;
+                }
+            }
 
             internal static MiniCultureData? GetCultureData(string? cultureName, bool useUserOverride)
             {
@@ -965,8 +1042,8 @@ namespace ArduinoCsCompiler.Runtime
                 nfi.PositiveSign = _sPositiveSign;
                 nfi.NegativeSign = _sNegativeSign;
 
-                nfi.NumberGroupSeparator = _sThousandSeparatorInvariant!;
-                nfi.NumberDecimalSeparator = _sDecimalSeparatorInvariant!;
+                nfi.NumberGroupSeparator = _sThousandSeparatorInvariant;
+                nfi.NumberDecimalSeparator = _sDecimalSeparatorInvariant;
                 nfi.NumberDecimalDigits = 2;
                 nfi.NumberNegativePattern = 1;
 
@@ -1000,6 +1077,66 @@ namespace ArduinoCsCompiler.Runtime
             private static string GetDecimalSeparator()
             {
                 return CultureInfo.CurrentCulture.NumberFormat.NumberDecimalSeparator;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string[] GetMonthNames()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.MonthNames;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string[] GetDayNames()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.DayNames;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string[] GetAbbreviatedMonthNames()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedMonthNames;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string[] GetAbbreviatedDayNames()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.AbbreviatedDayNames;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string GetFullDateTimePattern()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.FullDateTimePattern;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string GetLongDatePattern()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string GetLongTimePattern()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.LongTimePattern;
+            }
+
+            [ArduinoCompileTimeConstant]
+            private static string GetShortTimePattern()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
+            }
+
+            public void GetDateTimeFormat(DateTimeFormatInfo dateTimeInfo)
+            {
+                dateTimeInfo.MonthNames = _saMonthNames;
+                dateTimeInfo.DayNames = _saDayNames;
+                dateTimeInfo.AbbreviatedMonthNames = _saAbbreviatedMonthNames;
+                dateTimeInfo.AbbreviatedDayNames = _saAbbreviatedDayNames;
+                dateTimeInfo.FullDateTimePattern = GetFullDateTimePattern();
+                dateTimeInfo.LongTimePattern = GetLongTimePattern();
+                dateTimeInfo.ShortTimePattern = GetShortTimePattern();
+                dateTimeInfo.ShortDatePattern = GetShortTimePattern();
             }
         }
 
