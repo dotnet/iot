@@ -268,17 +268,7 @@ namespace Iot.Device.Common
                 return false;
             }
 
-            bool ret;
-            if ((Math.Abs((position.Longitude - Longitude)) < ComparisonEpsilon) && (Math.Abs(position.Latitude - Latitude) < ComparisonEpsilon))
-            {
-                ret = true;
-            }
-            else
-            {
-                ret = false;
-            }
-
-            return ret;
+            return (Math.Abs((position.Longitude - Longitude)) < ComparisonEpsilon) && (Math.Abs(position.Latitude - Latitude) < ComparisonEpsilon);
         }
 
         /// <summary>
