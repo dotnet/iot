@@ -19,20 +19,35 @@ namespace Iot.Device.Ws28xx
         // data means we have to add 30 bytes of zero padding.
         private const int ResetDelayInBytes = 30;
 
+        public BitmapImageNeo3(int width, int height, ColorMode colorMode)
+            : this(width, height)
+        {
+            ColorMode = colorMode;
+        }
+
         public BitmapImageNeo3(int width, int height)
             : base(new byte[width * height * BytesPerPixel + ResetDelayInBytes], width, height, width * BytesPerPixel)
         {
         }
 
+        /// <summary>
+        /// Gets or sets the color mode.
+        /// </summary>
+        /// <remarks>Defines the order in which the colors will be put on the line.</remarks>
+        /// <value>
+        /// The color mode.
+        /// </value>
+        public ColorMode ColorMode { get; set; } = ColorMode.GRB;
+
         public override void SetPixel(int x, int y, Color c)
         {
             var offset = y * Stride + x * BytesPerPixel;
-            Data[offset++] = _lookup[c.G * BytesPerComponent + 0];
-            Data[offset++] = _lookup[c.G * BytesPerComponent + 1];
-            Data[offset++] = _lookup[c.G * BytesPerComponent + 2];
-            Data[offset++] = _lookup[c.R * BytesPerComponent + 0];
-            Data[offset++] = _lookup[c.R * BytesPerComponent + 1];
-            Data[offset++] = _lookup[c.R * BytesPerComponent + 2];
+            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.G : c.R * BytesPerComponent + 0];
+            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.G : c.R * BytesPerComponent + 1];
+            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.G : c.R * BytesPerComponent + 2];
+            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.R : c.G * BytesPerComponent + 0];
+            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.R : c.G * BytesPerComponent + 1];
+            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.R : c.G * BytesPerComponent + 2];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 0];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 1];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 2];
