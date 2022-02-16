@@ -104,7 +104,7 @@ namespace Iot.Device.Common
         /// <param name="seconds">Seconds including requested number of digits</param>
         public static void GetDegreesMinutesSeconds(double angle, int secDigits, out double normalizedVal, out double degrees, out double minutes, out double seconds)
         {
-            angle = PositionExtensions.NormalizeAngleTo180Degrees(angle);
+            angle = GeographicPositionExtensions.NormalizeAngleTo180Degrees(angle);
             normalizedVal = angle;
             angle = Math.Abs(angle);
             degrees = Math.Floor(angle);
@@ -242,15 +242,18 @@ namespace Iot.Device.Common
         /// Returns true if the two positions are (almost) equal. This ignores the altitude.
         /// </summary>
         /// <param name="position">Position to compare with</param>
-        /// <returns>True if the two positions are closer than about 1cm</returns>
-        public bool EqualPosition(GeographicPosition position)
+        /// <param name="delta">Allowed delta, in degrees</param>
+        /// <returns>True if the two positions are closer than the delta. The default value is around 1cm</returns>
+        /// <remarks>This does a simple comparison based on the floating point values, it should not be used with large deltas.
+        /// To get the distance between two positions, use <see cref="GeographicPositionExtensions.DistanceTo"/> instead.</remarks>
+        public bool EqualPosition(GeographicPosition position, double delta = ComparisonEpsilon)
         {
-            if (position == null)
+            if (ReferenceEquals(position, null))
             {
-                return false;
+                throw new ArgumentNullException(nameof(position));
             }
 
-            return (Math.Abs((position.Longitude - Longitude)) < ComparisonEpsilon) && (Math.Abs(position.Latitude - Latitude) < ComparisonEpsilon);
+            return (Math.Abs((position.Longitude - Longitude)) < delta) && (Math.Abs(position.Latitude - Latitude) < delta);
         }
 
         /// <summary>
@@ -262,7 +265,7 @@ namespace Iot.Device.Common
         {
             GeographicPosition? position = obj as GeographicPosition;
 
-            if (position == null)
+            if (ReferenceEquals(position, null))
             {
                 return false;
             }
@@ -286,7 +289,7 @@ namespace Iot.Device.Common
         /// <returns>True if the two positions are almost identical</returns>
         public bool Equals(GeographicPosition? position)
         {
-            if (position == null)
+            if (ReferenceEquals(position, null))
             {
                 return false;
             }
@@ -322,7 +325,7 @@ namespace Iot.Device.Common
             var strLatRet = GetLatitudeString(Latitude);
             var strLonRet = GetLongitudeString(Longitude);
 
-            return $"{strLatRet} / {strLonRet} Ellipsoidal Height: {EllipsoidalHeight:F0}";
+            return $"{strLatRet} / {strLonRet} Ellipsoidal Height {EllipsoidalHeight:F0}m";
         }
 
         /// <inheritdoc/>

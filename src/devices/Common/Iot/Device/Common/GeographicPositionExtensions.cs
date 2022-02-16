@@ -11,7 +11,7 @@ namespace Iot.Device.Common
     /// <summary>
     /// Extensions for positions
     /// </summary>
-    public static partial class PositionExtensions
+    public static partial class GeographicPositionExtensions
     {
         /// <summary>
         /// Normalizes the longitude to +/- 180°
@@ -26,7 +26,7 @@ namespace Iot.Device.Common
         /// <summary>
         /// Normalizes the angle to +/- 180°
         /// </summary>
-        public static double NormalizeAngleTo180Degrees(double angleDegree)
+        internal static double NormalizeAngleTo180Degrees(double angleDegree)
         {
             angleDegree %= 360;
             if (angleDegree <= -180)
@@ -93,7 +93,7 @@ namespace Iot.Device.Common
         /// <summary>
         /// Normalizes an angle to [0..360°)
         /// </summary>
-        public static double NormalizeAngleTo360Degrees(double angleDegree)
+        internal static double NormalizeAngleTo360Degrees(double angleDegree)
         {
             angleDegree %= 360;
             if (angleDegree < 0)
