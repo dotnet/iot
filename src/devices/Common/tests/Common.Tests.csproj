@@ -5,6 +5,7 @@
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Langversion>10</Langversion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommonHelpers.csproj" />

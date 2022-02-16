@@ -183,36 +183,18 @@ namespace Iot.Device.Common
 
         private static string GetLongitudeString(double longitude)
         {
-            object[] args = new object[7];
             GetDegreesMinutesSeconds(longitude, 2, out var normalizedVal, out var deg, out var min, out var sec);
             string strEastOrWest = GetEastOrWest(normalizedVal);
 
-            args[0] = deg;
-            args[1] = DegreesSymbol;
-            args[2] = min;
-            args[3] = MinutesSymbol;
-            args[4] = sec.ToString("00.00");
-            args[5] = SecondsSymbol;
-            args[6] = strEastOrWest;
-            string strLonRet = string.Format(CultureInfo.InvariantCulture, "{0}{1} {2:00}{3} {4}{5}{6}", args);
-            return strLonRet;
+            return FormattableString.Invariant($"{deg}{DegreesSymbol} {min:00}{MinutesSymbol} {sec:00.00}{SecondsSymbol}{strEastOrWest}");
         }
 
         private static string GetLatitudeString(double latitude)
         {
-            object[] args = new object[7];
-
             GetDegreesMinutesSeconds(latitude, 2, out var normalizedVal, out var deg, out var min, out var sec);
             string strNorthOrSouth = GetNorthOrSouth(normalizedVal);
 
-            args[0] = deg;
-            args[1] = DegreesSymbol;
-            args[2] = min;
-            args[3] = MinutesSymbol;
-            args[4] = sec.ToString("00.00");
-            args[5] = SecondsSymbol;
-            args[6] = strNorthOrSouth;
-            string strLatRet = string.Format(CultureInfo.InvariantCulture, "{0}{1} {2:00}{3} {4}{5}{6}", args);
+            string strLatRet = FormattableString.Invariant($"{deg}{DegreesSymbol} {min:00}{MinutesSymbol} {sec:00.00}{SecondsSymbol}{strNorthOrSouth}");
             return strLatRet;
         }
 
@@ -325,7 +307,6 @@ namespace Iot.Device.Common
         /// Returns a string representation of this position.
         /// </summary>
         /// <returns>A string representation in degrees, minutes and seconds for both latitude and longitude</returns>
-        // TODO: Add different formatting options and add parsing feature
         public override string ToString()
         {
             if (Double.IsNaN(Latitude) || Double.IsNaN(Longitude))
@@ -341,7 +322,7 @@ namespace Iot.Device.Common
             var strLatRet = GetLatitudeString(Latitude);
             var strLonRet = GetLongitudeString(Longitude);
 
-            return string.Concat(strLatRet, " / ", strLonRet, " Ellipsoidal Height: ", EllipsoidalHeight.ToString("F0"));
+            return $"{strLatRet} / {strLonRet} Ellipsoidal Height: {EllipsoidalHeight:F0}";
         }
 
         /// <inheritdoc/>

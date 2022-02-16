@@ -36,11 +36,6 @@ namespace Iot.Device.Nmea0183
                 return true;
             }
 
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-
             return Equals((Identification)obj);
         }
 
