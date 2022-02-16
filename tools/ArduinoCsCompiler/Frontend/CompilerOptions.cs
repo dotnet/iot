@@ -55,6 +55,6 @@ namespace ArduinoCsCompiler
 
         [Option('c', "culture", HelpText = "The name of the culture to use for 'CultureInfo.CurrentCulture'. Must be a valid culture name such as 'de-CH' or 'Invariant'." +
                                            "Defaults to the current culture during compile")]
-        public string CultureName { get; set; }
+        public string? CultureName { get; set; }
     }
 }

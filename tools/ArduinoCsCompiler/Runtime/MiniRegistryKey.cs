@@ -23,7 +23,7 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoCompileTimeConstant]
-        public static byte[]? GetTziForCurrentTimeZone()
+        public static byte[] GetTziForCurrentTimeZone()
         {
             string keyName = GetRegistryKeyNameForLocalTz();
             using var key = Registry.LocalMachine.OpenSubKey(keyName, false);
@@ -38,7 +38,7 @@ namespace ArduinoCsCompiler.Runtime
                 throw new InvalidOperationException("Unable to query time zone data for local time zone");
             }
 
-            return value as byte[];
+            return (byte[])value;
         }
 
         [ArduinoCompileTimeConstant]
@@ -49,7 +49,7 @@ namespace ArduinoCsCompiler.Runtime
             return keyName;
         }
 
-        public MiniRegistryKey OpenSubKey(String name, Boolean writable)
+        public MiniRegistryKey OpenSubKey(string name, bool writable)
         {
             return new MiniRegistryKey(name);
         }
