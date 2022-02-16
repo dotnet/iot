@@ -145,8 +145,10 @@ namespace System.Device.Gpio.Drivers
                         _devicePins.Remove(pinNumber);
                     }
 
-                    File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
-                    _exportedPins.Remove(pinNumber);
+                    if (_exportedPins.Remove(pinNumber))
+                    {
+                        File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
+                    }
                 }
                 catch (UnauthorizedAccessException e)
                 {
