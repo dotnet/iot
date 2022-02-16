@@ -15,7 +15,7 @@ namespace Iot.Device.Common
     {
         /// <summary>
         /// Normalizes the longitude to +/- 180°
-        /// This is the common form for displaying longitudes. <see cref="NormalizeAngleTo360Degrees(Iot.Device.Common.GeographicPosition)"/> is used when the area of interest
+        /// This is the common form for displaying longitudes. <see cref="NormalizeLongitudeTo360Degrees(Iot.Device.Common.GeographicPosition)"/> is used when the area of interest
         /// is close to the date border (in the pacific ocean)
         /// </summary>
         public static GeographicPosition NormalizeLongitudeTo180Degrees(this GeographicPosition position)
@@ -85,7 +85,7 @@ namespace Iot.Device.Common
         /// Normalizes the longitude to [0..360°)
         /// This coordinate form is advised if working in an area near the date border in the pacific ocean.
         /// </summary>
-        public static GeographicPosition NormalizeAngleTo360Degrees(this GeographicPosition position)
+        public static GeographicPosition NormalizeLongitudeTo360Degrees(this GeographicPosition position)
         {
             return new GeographicPosition(position.Latitude, NormalizeAngleTo360Degrees(position.Longitude), position.EllipsoidalHeight);
         }
