@@ -135,7 +135,26 @@ namespace Iot.Device.Arduino
                 throw new InvalidOperationException("Command handler not registered");
             }
 
-            return _firmata.SendCommandAndWait(commandSequence, timeout, out error);
+            return _firmata.SendCommandAndWait(commandSequence, timeout, IsMatchingAck, out error);
+        }
+
+        /// <summary>
+        /// Send a command to the device, expecting a reply.
+        /// </summary>
+        /// <param name="commandSequences">Commands to send. This
+        /// should normally be a sysex command.</param>
+        /// <param name="timeout">Command timeout</param>
+        /// <param name="error">An error code in case of a failure</param>
+        /// <exception cref="TimeoutException">The timeout elapsed before a reply was received.</exception>
+        /// <returns>True if all packets where send and properly acknowledged</returns>
+        protected bool SendCommandsAndWait(IList<FirmataCommandSequence> commandSequences, TimeSpan timeout, out CommandError error)
+        {
+            if (_firmata == null)
+            {
+                throw new InvalidOperationException("Command handler not registered");
+            }
+
+            return _firmata.SendCommandsAndWait(commandSequences, timeout, IsMatchingAck, HasCommandError, out error);
         }
 
         /// <summary>
@@ -148,12 +167,7 @@ namespace Iot.Device.Arduino
         /// <returns>The reply packet</returns>
         protected byte[] SendCommandAndWait(FirmataCommandSequence commandSequence, TimeSpan timeout)
         {
-            if (_firmata == null)
-            {
-                throw new InvalidOperationException("Command handler not registered");
-            }
-
-            return _firmata.SendCommandAndWait(commandSequence, timeout);
+            return SendCommandAndWait(commandSequence, timeout, out _);
         }
 
         /// <summary>
@@ -181,6 +195,30 @@ namespace Iot.Device.Arduino
         {
         }
 
+        /// <summary>
+        /// This method is called to check whether the reply is a valid ACK/NOACK for the given command sequence.
+        /// Can be used to avoid accepting something as command reply that is completely unrelated (such as an asynchronous callback).
+        /// In different words, this should return false if the given reply is not something that is an answer to a synchronous command.
+        /// </summary>
+        /// <param name="sequence">The sequence that was sent</param>
+        /// <param name="reply">The reply</param>
+        /// <returns>True if this reply matches the sequence. True is the default, for backwards compatibility</returns>
+        protected virtual bool IsMatchingAck(FirmataCommandSequence sequence, byte[] reply)
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Callback function that returns whether the given reply indicates an error
+        /// </summary>
+        /// <param name="sequence">The original sequence</param>
+        /// <param name="reply">The reply. <see cref="IsMatchingAck"/> is already tested to be true for this reply</param>
+        /// <returns>A command error code, in case this reply indicates a no-acknowledge</returns>
+        protected virtual CommandError HasCommandError(FirmataCommandSequence sequence, byte[] reply)
+        {
+            return CommandError.None;
+        }
+
         private void OnSysexDataInternal(ReplyType type, byte[] data)
         {
             if (_firmata == null)
@@ -203,6 +241,16 @@ namespace Iot.Device.Arduino
 
             _firmata = null;
             _board = null;
+        }
+
+        /// <summary>
+        /// Called by the infrastructure when the parser reports an error or information message.
+        /// The default implementation does nothing.
+        /// </summary>
+        /// <param name="message">The message text</param>
+        /// <param name="exception">The exception observed (may be null)</param>
+        protected internal virtual void OnErrorMessage(string message, Exception? exception)
+        {
         }
 
         /// <inheritdoc />
