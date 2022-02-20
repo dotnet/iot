@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Interop;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
@@ -623,7 +622,7 @@ namespace Iot.Device.LEDMatrix
         private void Render()
         {
             Thread.CurrentThread.Priority = ThreadPriority.Highest;
-            System.Interop.ThreadHelper.SetCurrentThreadHighPriority();
+            Interop.ThreadHelper.SetCurrentThreadHighPriority();
 
             _safeToDispose = false;
 

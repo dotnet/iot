@@ -4,7 +4,9 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal partial class Interop
+#pragma warning disable CS1591 // public members should be documented
+
+partial class Interop
 {
     [DllImport("kernel32.dll")]
     [return: MarshalAs(UnmanagedType.Bool)]

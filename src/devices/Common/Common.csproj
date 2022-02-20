@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
@@ -6,8 +6,11 @@
     </RootNamespace>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- SA1205: Partial elements should declare access modifier (allows adjusting class visibility in a single source file)-->
+    <NoWarn>$(NoWarn);SA1205;</NoWarn>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ClassVisibility.cs" />
     <Compile Include="MathExtensions.cs" />
     <Compile Include="Iot/Device/Common/*.cs" />
     <Compile Include="Iot/Device/Graphics/*.cs" />
@@ -16,6 +19,7 @@
     <Compile Include="System/Device/Gpio/*.cs" />
     <Compile Include="System/Device/Analog/*.cs" />
     <Compile Include="System/Device/Spi/*.cs" />
+    <Compile Include="Interop/**/*.cs" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">

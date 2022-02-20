@@ -85,7 +85,7 @@ Task.Run(() =>
 
 ConsoleKeyInfo cki;
 Console.WriteLine($"Press q to exit.");
-System.Interop.ThreadHelper.SetCurrentThreadHighPriority();
+Interop.ThreadHelper.SetCurrentThreadHighPriority();
 
 do
 {

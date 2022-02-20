@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="..\Interop\Windows\WinUser.cs" Link="WinUser.cs" />
   </ItemGroup>
   <!-- Make the internal classes visible to the unit test assembly -->
   <ItemGroup>
