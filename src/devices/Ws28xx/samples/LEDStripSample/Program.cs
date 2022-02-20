@@ -1,9 +1,7 @@
-﻿// See https://aka.ms/new-console-template for more information
-using System.Device.Spi;
+﻿using System.Device.Spi;
 using System.Drawing;
 using Iot.Device.Ws28xx;
 using LEDStripSample;
-using SK6812Test;
 
 Console.WriteLine("Attach debugger if you want to, press any key to continue");
 Console.ReadKey();

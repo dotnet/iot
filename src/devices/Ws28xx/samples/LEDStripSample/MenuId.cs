@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SK6812Test
+namespace LEDStripSample
 {
     internal enum MenuId
     {
