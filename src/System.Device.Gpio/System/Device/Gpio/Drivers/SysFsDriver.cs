@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.Device.Gpio.Drivers
@@ -15,6 +16,8 @@ namespace System.Device.Gpio.Drivers
     /// </summary>
     public class SysFsDriver : UnixDriver
     {
+        private const int ERROR_CODE_EINTR = 4; // Interrupted system call
+
         private const string GpioBasePath = "/sys/class/gpio";
         private const string GpioChip = "gpiochip";
         private const string GpioLabel = "/label";
@@ -457,6 +460,13 @@ namespace System.Device.Gpio.Drivers
                 int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, PollingTimeout);
                 if (waitResult == -1)
                 {
+                    var errorCode = Marshal.GetLastWin32Error();
+                    if (errorCode == ERROR_CODE_EINTR)
+                    {
+                        // ignore Interrupted system call error and retry
+                        continue;
+                    }
+
                     throw new IOException("Error while waiting for pin interrupts.");
                 }
 
