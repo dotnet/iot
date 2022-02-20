@@ -5,13 +5,11 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Gpio.cs" />
     <Compile Include="PinMapping.cs" />
     <Compile Include="RgbLedMatrix.cs" />
-    <Compile Include="../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
 </Project>

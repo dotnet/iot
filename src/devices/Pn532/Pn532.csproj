@@ -13,6 +13,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Card\CardRfid.csproj" />
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>

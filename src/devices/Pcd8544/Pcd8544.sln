@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd", "..\Characte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd.Samples", "..\CharacterLcd\samples\CharacterLcd.Samples.csproj", "{03985059-6DE5-4BB5-947C-70493DAC1BC9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{85E17B98-0745-407A-894B-214F25BAE20F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{85E17B98-0745-407A-894B-214F25BAE20F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd.Tests", "..\CharacterLcd\tests\CharacterLcd.Tests.csproj", "{9395365B-927A-4E84-9294-AD243BB167D8}"
 EndProject

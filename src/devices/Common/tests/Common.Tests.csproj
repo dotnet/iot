@@ -6,7 +6,4 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\CommonHelpers.csproj" />
-  </ItemGroup>
 </Project>

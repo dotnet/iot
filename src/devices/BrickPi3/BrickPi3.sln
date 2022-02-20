@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrickPi3.samples", "samples
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BrickPi3", "BrickPi3.csproj", "{AFEC6FF8-C770-4F7A-B2A3-7BA82466E91F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{CD70B1FE-53D8-48DB-AEBA-C3995A373144}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{CD70B1FE-53D8-48DB-AEBA-C3995A373144}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

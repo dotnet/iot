@@ -1,17 +1,20 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 #pragma warning disable SA1307 // Field should begin with upper-case letter
+#pragma warning disable CS1591
 
 using System.Runtime.InteropServices;
 
-namespace System.Interop
+partial class Interop
 {
-    internal class ThreadHelper
+    public class ThreadHelper
     {
-        internal static bool SetCurrentThreadHighPriority()
+        public static bool SetCurrentThreadHighPriority()
         {
             IntPtr thread = pthread_self();
             sched_param sched = new sched_param();
@@ -20,7 +23,7 @@ namespace System.Interop
             return pthread_setschedparam(thread, SCHED_FIFO, ref sched) == 0;
         }
 
-        internal static void SetCurrentThreadNormalHighPriority()
+        public static void SetCurrentThreadNormalHighPriority()
         {
             nice(19);
         }

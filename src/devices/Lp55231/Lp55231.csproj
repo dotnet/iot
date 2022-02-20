@@ -7,6 +7,5 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>
