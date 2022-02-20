@@ -2,11 +2,12 @@
 
 This binding allows you to update the RGB LEDs on Ws28xx / SK6812 and based strips and matrices.
 
-To see how to use the binding in code, see the [sample](samples/Ws28xx_Samples/Program.cs).
+To see how to use the binding in code, see the [sample](samples/LEDStripSample/Program.cs).
 
 ## Documentation
 
 * WS2812B: [Datasheet](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
+* WS2815B: [Datasheet](http://www.world-semi.com/DownLoadFile/138)
 * WS2808: [Datasheet](https://datasheetspdf.com/pdf-file/806051/Worldsemi/WS2801/1)
 * SK6812: [Datasheet](https://cdn-shop.adafruit.com/product-files/2757/p2757_SK6812RGBW_REV01.pdf)
 * [Neo pixels guide](https://learn.adafruit.com/adafruit-neopixel-uberguide)
