@@ -1,12 +1,11 @@
 ﻿// See https://aka.ms/new-console-template for more information
+using System.Device.Spi;
+using System.Drawing;
 using Iot.Device.Ws28xx;
 using LEDStripSample;
 using SK6812Test;
-using System.Device.Spi;
-using System.Drawing;
 
-Console.WriteLine("Attach debugger");
-
+Console.WriteLine("Attach debugger if you want to, press any key to continue");
 Console.ReadKey();
 Console.Clear();
 
@@ -21,7 +20,7 @@ using SpiDevice spi = SpiDevice.Create(settings);
 
 var ledCount = -1;
 MenuId menuId = MenuId.Root;
-Animations effects = null;
+Animations? effects = null;
 
 while (ledCount == -1)
 {
@@ -40,10 +39,8 @@ if (ledCount == 0)
 
 while (true)
 {
-    Ws28xx strip = null;
-
     Console.Write($"{Environment.NewLine}1: WS2812b{Environment.NewLine}2: WS2815b{Environment.NewLine}3: SK68012{Environment.NewLine}0: Exit{Environment.NewLine}Type of Strip: ");
-    var ledType = Console.ReadLine().Trim();
+    var ledType = Console.ReadLine()!.Trim();
 
     switch (ledType)
     {
@@ -364,6 +361,7 @@ void RequestPercentage()
             colorPercentage = parsedValue / 100.0f;
         }
     }
+
     Console.WriteLine("Any key to return");
     Console.ReadKey();
 }
@@ -373,7 +371,7 @@ void StartRainbow()
     Console.WriteLine("Any key to stop");
     var cancellationTokenSource = new CancellationTokenSource();
 
-    var rainbowTask = Task.Run(() => effects.Rainbow(ledCount, cancellationTokenSource.Token));
+    var rainbowTask = Task.Run(() => effects.Rainbow(cancellationTokenSource.Token));
     Console.ReadKey();
     cancellationTokenSource.Cancel();
     rainbowTask.Wait();

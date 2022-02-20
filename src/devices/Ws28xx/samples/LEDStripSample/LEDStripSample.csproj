@@ -5,18 +5,11 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="System.Device.Gpio">
-      <HintPath>..\..\iot\src\devices\Ws28xx\bin\Debug\net6.0\System.Device.Gpio.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Device.Model">
-      <HintPath>..\..\iot\src\devices\Ws28xx\bin\Debug\net6.0\System.Device.Model.dll</HintPath>
-    </Reference>
-    <Reference Include="Ws28xx">
-      <HintPath>..\..\dotnet_iot_fork\src\devices\Ws28xx\bin\Debug\net6.0\Ws28xx.dll</HintPath>
-    </Reference>
+   <ProjectReference Include="../../Ws28xx.csproj" />
   </ItemGroup>
 
 </Project>
