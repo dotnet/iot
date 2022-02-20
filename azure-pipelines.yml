@@ -47,7 +47,7 @@ stages:
       displayName: 'Execute Markdownlint'
       condition: eq(variables['build.reason'], 'PullRequest')
 
-    - script: build.cmd -ci /maxCpuCount:1
+    - script: build.cmd -ci
         -configuration $(BuildConfiguration)
         -prepareMachine
         /p:BuildPackages=true
@@ -103,7 +103,7 @@ stages:
           BuildConfiguration: Debug
 
     steps:
-    - script: ./build.sh --ci /maxCpuCount:1
+    - script: ./build.sh --ci
         --configuration $(BuildConfiguration)
         --prepareMachine
       displayName: Build
