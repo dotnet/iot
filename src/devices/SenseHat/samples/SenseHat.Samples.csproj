@@ -5,6 +5,5 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../SenseHat.csproj" />
-    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>

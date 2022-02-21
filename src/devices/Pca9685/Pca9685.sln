@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pca9685.Sample", "samples\P
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pca9685", "Pca9685.csproj", "{16C14C07-8083-4DBC-B03D-683140627AD7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{F29CA42D-2246-4FC7-AC22-58CCCDA6C859}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{F29CA42D-2246-4FC7-AC22-58CCCDA6C859}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Si7021.csproj" />
-    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="Si7021_I2c_Read_Temp_Humidity.fzz" />

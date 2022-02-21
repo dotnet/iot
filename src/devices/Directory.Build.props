@@ -13,12 +13,18 @@
     <MainLibraryPath>$(MSBuildThisFileDirectory)../System.Device.Gpio/</MainLibraryPath>
     <SystemDeviceModelProjectName>System.Device.Model</SystemDeviceModelProjectName>
     <SystemDeviceModelPath>$(MSBuildThisFileDirectory)$(SystemDeviceModelProjectName)/$(SystemDeviceModelProjectName).csproj</SystemDeviceModelPath>
+    <CommonProjectName>Common</CommonProjectName>
+    <CommonProjectPath>$(MSBuildThisFileDirectory)$(CommonProjectName)/$(CommonProjectName).csproj</CommonProjectPath>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(MSBuildProjectName)' != '$(CommonProjectName)' AND '$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'">
+  <!-- These projects are included into every binding. They must not depend on each other, or we get a circular dependency -->
+    <ProjectReference Include="$(SystemDeviceModelPath)" />
+    <ProjectReference Include="$(CommonProjectPath)"  />
+  </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(SystemDeviceModelPath)" Condition="'$(MSBuildProjectName)' != '$(SystemDeviceModelProjectName)'" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
 

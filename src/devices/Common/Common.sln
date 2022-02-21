@@ -7,7 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A15AFC2C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common.Tests", "tests\Common.Tests.csproj", "{BF1A594E-CEE3-4629-9F95-56D40F7F00E4}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "CommonHelpers.csproj", "{1B521F66-CECB-4FA6-9FC4-FA70F24F8C60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "Common.csproj", "{1B521F66-CECB-4FA6-9FC4-FA70F24F8C60}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{CAED1B3A-81A5-419E-86D9-96F8D9EB2F29}"
 EndProject

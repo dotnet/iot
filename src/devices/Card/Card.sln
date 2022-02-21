@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CreditCardProcessing", "Cre
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mifare", "Mifare\Mifare.csproj", "{81A964D2-BA4B-4769-A630-084D8C4BEBDA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{03F9B2A3-4B73-4D39-872B-BB0D81F3593E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{03F9B2A3-4B73-4D39-872B-BB0D81F3593E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

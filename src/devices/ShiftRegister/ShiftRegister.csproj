@@ -4,7 +4,6 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <Compile Include="ShiftRegister.cs" />
     <Compile Include="ShiftRegisterPinMapping.cs" />
   </ItemGroup>

@@ -62,7 +62,7 @@ namespace Iot.Device.Media
             DevicePath = DefaultDevicePath;
         }
 
-        private static unsafe void UnmappingFrameBuffers(V4l2FrameBuffer* buffers)
+        private static unsafe void UnmappingFrameBuffers(InteropVideodev2.V4l2FrameBuffer* buffers)
         {
             // Unmapping the applied buffer to user space
             for (uint i = 0; i < BufferCount; i++)
@@ -122,18 +122,18 @@ namespace Iot.Device.Media
         public override unsafe void CaptureContinuous(CancellationToken token)
         {
             _capturing = true;
-            fixed (V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
+            fixed (InteropVideodev2.V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
             {
                 // Start data stream
-                v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
-                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
+                InteropVideodev2.v4l2_buf_type type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                Interop.ioctl(_deviceFileDescriptor, InteropVideodev2.V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
                 while (!token.IsCancellationRequested)
                 {
                     NewImageBufferReady?.Invoke(this, GetFrameDataPooled(buffers));
                 }
 
                 // Close data stream
-                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
+                Interop.ioctl(_deviceFileDescriptor, InteropVideodev2.V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
 
                 UnmappingFrameBuffers(buffers);
             }
@@ -156,18 +156,18 @@ namespace Iot.Device.Media
             Initialize();
 
             // Get default value
-            v4l2_queryctrl query = new v4l2_queryctrl
+            InteropVideodev2.v4l2_queryctrl query = new InteropVideodev2.v4l2_queryctrl
             {
                 id = type
             };
-            V4l2Struct(V4l2Request.VIDIOC_QUERYCTRL, ref query);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_QUERYCTRL, ref query);
 
             // Get current value
-            v4l2_control ctrl = new v4l2_control
+            InteropVideodev2.v4l2_control ctrl = new InteropVideodev2.v4l2_control
             {
                 id = type,
             };
-            V4l2Struct(V4l2Request.VIDIOC_G_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_G_CTRL, ref ctrl);
 
             return new VideoDeviceValue(
                 type.ToString(),
@@ -186,14 +186,14 @@ namespace Iot.Device.Media
         {
             Initialize();
 
-            v4l2_fmtdesc fmtdesc = new v4l2_fmtdesc
+            InteropVideodev2.v4l2_fmtdesc fmtdesc = new InteropVideodev2.v4l2_fmtdesc
             {
                 index = 0,
-                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
+                type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
             };
 
             List<PixelFormat> result = new List<PixelFormat>();
-            while (V4l2Struct(V4l2Request.VIDIOC_ENUM_FMT, ref fmtdesc) != -1)
+            while (V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_ENUM_FMT, ref fmtdesc) != -1)
             {
                 result.Add(fmtdesc.pixelformat);
                 fmtdesc.index++;
@@ -211,19 +211,19 @@ namespace Iot.Device.Media
         {
             Initialize();
 
-            v4l2_frmsizeenum size = new v4l2_frmsizeenum()
+            InteropVideodev2.v4l2_frmsizeenum size = new InteropVideodev2.v4l2_frmsizeenum()
             {
                 index = 0,
                 pixel_format = format
             };
 
             List<Resolution> result = new List<Resolution>();
-            while (V4l2Struct(V4l2Request.VIDIOC_ENUM_FRAMESIZES, ref size) != -1)
+            while (V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_ENUM_FRAMESIZES, ref size) != -1)
             {
                 Resolution resolution;
                 switch (size.type)
                 {
-                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE:
+                    case InteropVideodev2.v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE:
                         resolution = new Resolution
                         {
                             Type = ResolutionType.Discrete,
@@ -236,7 +236,7 @@ namespace Iot.Device.Media
                         };
                         break;
 
-                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_CONTINUOUS:
+                    case InteropVideodev2.v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_CONTINUOUS:
                         resolution = new Resolution
                         {
                             Type = ResolutionType.Continuous,
@@ -249,7 +249,7 @@ namespace Iot.Device.Media
                         };
                         break;
 
-                    case v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_STEPWISE:
+                    case InteropVideodev2.v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_STEPWISE:
                         resolution = new Resolution
                         {
                             Type = ResolutionType.Stepwise,
@@ -285,16 +285,16 @@ namespace Iot.Device.Media
 
         private unsafe byte[] ProcessCaptureData()
         {
-            fixed (V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
+            fixed (InteropVideodev2.V4l2FrameBuffer* buffers = &ApplyFrameBuffers()[0])
             {
                 // Start data stream
-                v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
-                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
+                InteropVideodev2.v4l2_buf_type type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
+                Interop.ioctl(_deviceFileDescriptor, InteropVideodev2.V4l2Request.VIDIOC_STREAMON, new IntPtr(&type));
 
                 byte[] dataBuffer = GetFrameData(buffers);
 
                 // Close data stream
-                Interop.ioctl(_deviceFileDescriptor, V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
+                Interop.ioctl(_deviceFileDescriptor, InteropVideodev2.V4l2Request.VIDIOC_STREAMOFF, new IntPtr(&type));
 
                 UnmappingFrameBuffers(buffers);
 
@@ -302,15 +302,15 @@ namespace Iot.Device.Media
             }
         }
 
-        private unsafe byte[] GetFrameData(V4l2FrameBuffer* buffers)
+        private unsafe byte[] GetFrameData(InteropVideodev2.V4l2FrameBuffer* buffers)
         {
             // Get one frame from the buffer
-            v4l2_buffer frame = new v4l2_buffer
+            InteropVideodev2.v4l2_buffer frame = new InteropVideodev2.v4l2_buffer
             {
-                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                memory = v4l2_memory.V4L2_MEMORY_MMAP,
+                type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                memory = InteropVideodev2.v4l2_memory.V4L2_MEMORY_MMAP,
             };
-            V4l2Struct(V4l2Request.VIDIOC_DQBUF, ref frame);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_DQBUF, ref frame);
 
             // Get data from pointer
             IntPtr intptr = buffers[frame.index].Start;
@@ -318,20 +318,20 @@ namespace Iot.Device.Media
             Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
 
             // Requeue the buffer
-            V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_QBUF, ref frame);
 
             return dataBuffer;
         }
 
-        private unsafe NewImageBufferReadyEventArgs GetFrameDataPooled(V4l2FrameBuffer* buffers)
+        private unsafe NewImageBufferReadyEventArgs GetFrameDataPooled(InteropVideodev2.V4l2FrameBuffer* buffers)
         {
             // Get one frame from the buffer
-            v4l2_buffer frame = new v4l2_buffer
+            InteropVideodev2.v4l2_buffer frame = new InteropVideodev2.v4l2_buffer
             {
-                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                memory = v4l2_memory.V4L2_MEMORY_MMAP,
+                type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                memory = InteropVideodev2.v4l2_memory.V4L2_MEMORY_MMAP,
             };
-            V4l2Struct(V4l2Request.VIDIOC_DQBUF, ref frame);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_DQBUF, ref frame);
 
             // Get data from pointer
             IntPtr intptr = buffers[frame.index].Start;
@@ -349,48 +349,48 @@ namespace Iot.Device.Media
             Marshal.Copy(source: intptr, destination: dataBuffer, startIndex: 0, length: (int)buffers[frame.index].Length);
 
             // Requeue the buffer
-            V4l2Struct(V4l2Request.VIDIOC_QBUF, ref frame);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_QBUF, ref frame);
 
             return new NewImageBufferReadyEventArgs(dataBuffer, length);
         }
 
-        private unsafe V4l2FrameBuffer[] ApplyFrameBuffers()
+        private unsafe InteropVideodev2.V4l2FrameBuffer[] ApplyFrameBuffers()
         {
             // Apply for buffers, use memory mapping
-            v4l2_requestbuffers req = new v4l2_requestbuffers
+            InteropVideodev2.v4l2_requestbuffers req = new InteropVideodev2.v4l2_requestbuffers
             {
                 count = BufferCount,
-                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                memory = v4l2_memory.V4L2_MEMORY_MMAP
+                type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                memory = InteropVideodev2.v4l2_memory.V4L2_MEMORY_MMAP
             };
-            V4l2Struct(V4l2Request.VIDIOC_REQBUFS, ref req);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_REQBUFS, ref req);
 
             // Mapping the applied buffer to user space
-            V4l2FrameBuffer[] buffers = new V4l2FrameBuffer[BufferCount];
+            InteropVideodev2.V4l2FrameBuffer[] buffers = new InteropVideodev2.V4l2FrameBuffer[BufferCount];
             for (uint i = 0; i < BufferCount; i++)
             {
-                v4l2_buffer buffer = new v4l2_buffer
+                InteropVideodev2.v4l2_buffer buffer = new InteropVideodev2.v4l2_buffer
                 {
                     index = i,
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                    memory = v4l2_memory.V4L2_MEMORY_MMAP
+                    type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                    memory = InteropVideodev2.v4l2_memory.V4L2_MEMORY_MMAP
                 };
-                V4l2Struct(V4l2Request.VIDIOC_QUERYBUF, ref buffer);
+                V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_QUERYBUF, ref buffer);
 
                 buffers[i].Length = buffer.length;
-                buffers[i].Start = Interop.mmap(IntPtr.Zero, (int)buffer.length, MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE, MemoryMappedFlags.MAP_SHARED, _deviceFileDescriptor, (int)buffer.m.offset);
+                buffers[i].Start = Interop.mmap(IntPtr.Zero, (int)buffer.length, Interop.MemoryMappedProtections.PROT_READ | Interop.MemoryMappedProtections.PROT_WRITE, Interop.MemoryMappedFlags.MAP_SHARED, _deviceFileDescriptor, (int)buffer.m.offset);
             }
 
             // Put the buffer in the processing queue
             for (uint i = 0; i < BufferCount; i++)
             {
-                v4l2_buffer buffer = new v4l2_buffer
+                InteropVideodev2.v4l2_buffer buffer = new InteropVideodev2.v4l2_buffer
                 {
                     index = i,
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                    memory = v4l2_memory.V4L2_MEMORY_MMAP
+                    type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                    memory = InteropVideodev2.v4l2_memory.V4L2_MEMORY_MMAP
                 };
-                V4l2Struct(V4l2Request.VIDIOC_QBUF, ref buffer);
+                V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_QBUF, ref buffer);
             }
 
             return buffers;
@@ -401,12 +401,12 @@ namespace Iot.Device.Media
             FillVideoConnectionSettings();
 
             // Set capture format
-            v4l2_format format = new v4l2_format
+            InteropVideodev2.v4l2_format format = new InteropVideodev2.v4l2_format
             {
-                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                fmt = new fmt
+                type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                fmt = new InteropVideodev2.fmt
                 {
-                    pix = new v4l2_pix_format
+                    pix = new InteropVideodev2.v4l2_pix_format
                     {
                         width = Settings.CaptureSize.Width,
                         height = Settings.CaptureSize.Height,
@@ -414,91 +414,91 @@ namespace Iot.Device.Media
                     }
                 }
             };
-            V4l2Struct(V4l2Request.VIDIOC_S_FMT, ref format);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_FMT, ref format);
 
             // Set exposure type
-            v4l2_control ctrl = new v4l2_control
+            InteropVideodev2.v4l2_control ctrl = new InteropVideodev2.v4l2_control
             {
                 id = VideoDeviceValueType.ExposureType,
                 value = (int)Settings.ExposureType
             };
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set exposure time
             // If exposure type is auto, this field is invalid
             ctrl.id = VideoDeviceValueType.ExposureTime;
             ctrl.value = Settings.ExposureTime;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set brightness
             ctrl.id = VideoDeviceValueType.Brightness;
             ctrl.value = Settings.Brightness;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set contrast
             ctrl.id = VideoDeviceValueType.Contrast;
             ctrl.value = Settings.Contrast;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set saturation
             ctrl.id = VideoDeviceValueType.Saturation;
             ctrl.value = Settings.Saturation;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set sharpness
             ctrl.id = VideoDeviceValueType.Sharpness;
             ctrl.value = Settings.Sharpness;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set gain
             ctrl.id = VideoDeviceValueType.Gain;
             ctrl.value = Settings.Gain;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set gamma
             ctrl.id = VideoDeviceValueType.Gamma;
             ctrl.value = Settings.Gamma;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set power line frequency
             ctrl.id = VideoDeviceValueType.PowerLineFrequency;
             ctrl.value = (int)Settings.PowerLineFrequency;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set white balance effect
             ctrl.id = VideoDeviceValueType.WhiteBalanceEffect;
             ctrl.value = (int)Settings.WhiteBalanceEffect;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set white balance temperature
             ctrl.id = VideoDeviceValueType.WhiteBalanceTemperature;
             ctrl.value = Settings.WhiteBalanceTemperature;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set color effect
             ctrl.id = VideoDeviceValueType.ColorEffect;
             ctrl.value = (int)Settings.ColorEffect;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set scene mode
             ctrl.id = VideoDeviceValueType.SceneMode;
             ctrl.value = (int)Settings.SceneMode;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set rotate
             ctrl.id = VideoDeviceValueType.Rotate;
             ctrl.value = Settings.Rotate;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set horizontal flip
             ctrl.id = VideoDeviceValueType.HorizontalFlip;
             ctrl.value = Settings.HorizontalFlip ? 1 : 0;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
 
             // Set vertical flip
             ctrl.id = VideoDeviceValueType.VerticalFlip;
             ctrl.value = Settings.VerticalFlip ? 1 : 0;
-            V4l2Struct(V4l2Request.VIDIOC_S_CTRL, ref ctrl);
+            V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_S_CTRL, ref ctrl);
         }
 
         private void FillVideoConnectionSettings()
@@ -599,7 +599,7 @@ namespace Iot.Device.Media
                     return;
                 }
 
-                _deviceFileDescriptor = Interop.open(deviceFileName, FileOpenFlags.O_RDWR);
+                _deviceFileDescriptor = Interop.open(deviceFileName, Interop.FileOpenFlags.O_RDWR);
 
                 if (_deviceFileDescriptor < 0)
                 {
