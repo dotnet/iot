@@ -467,7 +467,7 @@ namespace System.Device.Gpio.Drivers
                         continue;
                     }
 
-                    throw new IOException("Error while waiting for pin interrupts.");
+                    throw new IOException($"Error while waiting for pin interrupts. (ErrorCode={errorCode})");
                 }
 
                 if (waitResult > 0)
