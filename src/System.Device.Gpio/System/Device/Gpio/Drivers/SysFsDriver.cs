@@ -445,7 +445,15 @@ namespace System.Device.Gpio.Drivers
             }
 
             // Ignore first time because it will always return the current state.
-            Interop.epoll_wait(pollFileDescriptor, out _, 1, 0);
+            while (Interop.epoll_wait(pollFileDescriptor, out _, 1, 0) == -1)
+            {
+                var errorCode = Marshal.GetLastWin32Error();
+                if (errorCode != ERROR_CODE_EINTR)
+                {
+                    // don't retry on unknown error
+                    break;
+                }
+            }
         }
 
         private unsafe bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
