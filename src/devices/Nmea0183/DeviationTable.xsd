@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- Schema for compass calibration data xml. 
+Regenerate the code with
+xsd DeviationTable.xsd /c /namespace:Iot.Device.Nmea0183 /order
+-->
+<xs:schema id="DeviationTable"
+    targetNamespace="http://tempuri.org/DeviationTable.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://tempuri.org/DeviationTable.xsd"
+    xmlns:mstns="http://tempuri.org/DeviationTable.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+    <xs:element name="CompassCalibration" type="CompassCalibration" />
+    <xs:complexType name="Identification">
+			<xs:sequence>
+				<xs:element type="xs:string" name="ShipName" minOccurs="1" maxOccurs="1"/>
+				<xs:element type="xs:string" name="Callsign" minOccurs="0" maxOccurs="1" />
+				<xs:element type="xs:string" name="MMSI" minOccurs="0" maxOccurs="1" />
+				<xs:element type="xs:date" name="CalibrationDate" minOccurs="1" maxOccurs="1" />
+			</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="CalibrationData">
+		<xs:sequence>
+			<xs:element name="Point" type="DeviationPoint" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	<xs:complexType name="DeviationPoint">
+		<xs:sequence>
+            <xs:element type="xs:float" name="CompassReading" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="xs:float" name="CompassReadingSmooth" minOccurs="1" maxOccurs="1" />
+            <xs:element type="xs:float" name="MagneticHeading" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="xs:float" name="Deviation" minOccurs="1" maxOccurs="1" />
+            <xs:element type="xs:float" name="DeviationSmooth" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+	</xs:complexType>
+    <xs:complexType name="MagneticReading">
+        <xs:sequence>
+            <xs:element type="xs:dateTime" name="TimeStamp" minOccurs="1" maxOccurs="1" />
+            <xs:element type="xs:float" name="MagneticCompassReading" minOccurs="1" maxOccurs="1" />
+            <xs:element type="xs:float" name="DeltaToPrevious" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="GnssReading">
+        <xs:sequence>
+            <xs:element type="xs:dateTime" name="TimeStamp" minOccurs="1" maxOccurs="1" />
+            <xs:element type="xs:float" name="TrackReading" minOccurs="1" maxOccurs="1" />
+            <xs:element type="xs:float" name="DeltaToPrevious" minOccurs="1" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+    <!-- This block contains the raw data used for the calibration. That is the magnetic compass readings and the 
+    corresponding tracks from the GNSS receiver. This table can be used to check the quality of the input data (both
+    rows should show more or less an evenly distributed circle)-->
+    <xs:complexType name="RawData">
+        <xs:sequence>
+            <xs:element name="Compass" type="MagneticReading" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="Track" type="GnssReading" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="CompassCalibration">
+        <xs:sequence>
+            <xs:element type="Identification" name="Identification" minOccurs="1" maxOccurs="1" />
+            <xs:element type="CalibrationData" name="CalibrationDataFromCompassReading" minOccurs="1" maxOccurs="1" />
+            <xs:element type="CalibrationData" name="CalibrationDataToCompassReading" minOccurs="1" maxOccurs="1" />
+            <xs:element type="RawData" name ="RawDataReadings" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>
