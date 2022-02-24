@@ -53,6 +53,11 @@ namespace Iot.Device.Ili9341
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Ili9341(SpiDevice spiDevice, int dataCommandPin, int resetPin, int backlightPin = -1, int spiBufferSize = DefaultSPIBufferSize, GpioController? gpioController = null, bool shouldDispose = true)
         {
+            if (spiBufferSize <= 0)
+            {
+                throw new ArgumentException(nameof(spiBufferSize), "Buffer size must be larger than 0.");
+            }
+
             _spiDevice = spiDevice;
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
