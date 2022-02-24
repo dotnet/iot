@@ -8,6 +8,6 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    [DllImport(LibcLibrary)]
+    [DllImport(LibcLibrary, SetLastError = true)]
     internal static extern int epoll_wait(int epfd, out epoll_event events, int maxevents, int timeout);
 }
