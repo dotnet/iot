@@ -148,8 +148,11 @@ namespace System.Device.Gpio.Drivers
                         _devicePins.Remove(pinNumber);
                     }
 
-                    File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
-                    _exportedPins.Remove(pinNumber);
+                    // If this controller wasn't the one that opened the pin, then Remove will return false, so we don't need to close it.
+                    if (_exportedPins.Remove(pinNumber))
+                    {
+                        File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
+                    }
                 }
                 catch (UnauthorizedAccessException e)
                 {
