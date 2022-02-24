@@ -54,7 +54,7 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         public override int GetHashCode()
         {
-            return Id1 << 8 + Id2;
+            return HashCode.Combine(Id1, Id2);
         }
 
         /// <summary>

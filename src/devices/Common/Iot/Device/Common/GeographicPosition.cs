@@ -331,7 +331,7 @@ namespace Iot.Device.Common
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return (Latitude + Longitude + EllipsoidalHeight).GetHashCode();
+            return HashCode.Combine(Latitude, Longitude, EllipsoidalHeight);
         }
     }
 }

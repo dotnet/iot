@@ -42,14 +42,7 @@ namespace Iot.Device.Nmea0183
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = (shipNameField != null ? shipNameField.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (callsignField != null ? callsignField.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ (mMSIField != null ? mMSIField.GetHashCode() : 0);
-                hashCode = (hashCode * 397) ^ calibrationDateField.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(shipNameField, callsignField, mMSIField, calibrationDateField);
         }
 
         /// <summary>

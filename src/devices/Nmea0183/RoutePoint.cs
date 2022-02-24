@@ -134,7 +134,7 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         public override int GetHashCode()
         {
-            return WaypointName.GetHashCode() ^ Position.GetHashCode();
+            return HashCode.Combine(WaypointName, Position);
         }
     }
 }

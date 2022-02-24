@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nmea0183.Tests", "tests\Nme
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NmeaSimulator", "samples\NmeaSimulator\NmeaSimulator.csproj", "{B50647E2-B5A2-46F2-8B45-BD7D26597844}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{9D2E4374-CA97-4B5B-A9D0-213484FCF85E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{9D2E4374-CA97-4B5B-A9D0-213484FCF85E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleParser", "samples\SimpleParser\SimpleParser.csproj", "{C66E7575-9ECA-4329-A145-1DCADE028DDC}"
 EndProject

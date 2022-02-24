@@ -62,15 +62,7 @@ namespace Iot.Device.Nmea0183
         /// <inheritdoc />
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = compassReadingField.GetHashCode();
-                hashCode = (hashCode * 397) ^ compassReadingSmoothField.GetHashCode();
-                hashCode = (hashCode * 397) ^ magneticHeadingField.GetHashCode();
-                hashCode = (hashCode * 397) ^ deviationField.GetHashCode();
-                hashCode = (hashCode * 397) ^ deviationSmoothField.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(compassReadingField, compassReadingSmoothField, magneticHeadingField, deviationField, deviationSmoothField);
         }
 
         /// <summary>
