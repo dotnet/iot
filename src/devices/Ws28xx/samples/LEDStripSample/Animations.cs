@@ -62,7 +62,6 @@ namespace LEDStripSample
         /// <param name="token">The token.</param>
         public async void KnightRider(CancellationToken token)
         {
-            // https://youtu.be/oNyXYPhnUIs
             var img = _ledStrip.Image;
             var downDirection = false;
 
