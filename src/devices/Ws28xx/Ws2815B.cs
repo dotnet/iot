@@ -18,7 +18,7 @@ namespace Iot.Device.Ws28xx
         /// <param name="width">Width of the screen or LED strip</param>
         /// <param name="height">Height of the screen or LED strip. Defaults to 1 (LED strip).</param>
         public Ws2815b(SpiDevice spiDevice, int width, int height = 1)
-            : base(spiDevice, new BitmapImageNeo3(width, height, ColorMode.RGB))
+            : base(spiDevice, new BitmapImageNeo3Rgb(width, height))
         {
         }
     }

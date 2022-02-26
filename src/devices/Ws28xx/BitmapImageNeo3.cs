@@ -7,53 +7,41 @@ using Iot.Device.Graphics;
 namespace Iot.Device.Ws28xx
 {
     /// <summary>
-    /// Special 24bit RGB format for Neo pixel LEDs where each bit is converted to 3 bits.
+    /// Special 24bit GRB format for Neo pixel LEDs where each bit is converted to 3 bits.
     /// A one is converted to 110, a zero is converted to 100.
     /// </summary>
     internal class BitmapImageNeo3 : BitmapImage
     {
-        private const int BytesPerComponent = 3;
-        private const int BytesPerPixel = BytesPerComponent * 3;
         // The Neo Pixels require a 50us delay (all zeros) after. Since Spi freq is not exactly
         // as requested 100us is used here with good practical results. 100us @ 2.4Mbps and 8bit
         // data means we have to add 30 bytes of zero padding.
         private const int ResetDelayInBytes = 30;
-
-        public BitmapImageNeo3(int width, int height, ColorMode colorMode)
-            : this(width, height)
-        {
-            ColorMode = colorMode;
-        }
 
         public BitmapImageNeo3(int width, int height)
             : base(new byte[width * height * BytesPerPixel + ResetDelayInBytes], width, height, width * BytesPerPixel)
         {
         }
 
-        /// <summary>
-        /// Gets or sets the color mode.
-        /// </summary>
-        /// <remarks>Defines the order in which the colors will be put on the line.</remarks>
-        /// <value>
-        /// The color mode.
-        /// </value>
-        public ColorMode ColorMode { get; set; } = ColorMode.GRB;
-
         public override void SetPixel(int x, int y, Color c)
         {
             var offset = y * Stride + x * BytesPerPixel;
-            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.G : c.R * BytesPerComponent + 0];
-            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.G : c.R * BytesPerComponent + 1];
-            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.G : c.R * BytesPerComponent + 2];
-            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.R : c.G * BytesPerComponent + 0];
-            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.R : c.G * BytesPerComponent + 1];
-            Data[offset++] = _lookup[ColorMode == ColorMode.GRB ? c.R : c.G * BytesPerComponent + 2];
+            Data[offset++] = _lookup[c.G * BytesPerComponent + 0];
+            Data[offset++] = _lookup[c.G * BytesPerComponent + 1];
+            Data[offset++] = _lookup[c.G * BytesPerComponent + 2];
+            Data[offset++] = _lookup[c.R * BytesPerComponent + 0];
+            Data[offset++] = _lookup[c.R * BytesPerComponent + 1];
+            Data[offset++] = _lookup[c.R * BytesPerComponent + 2];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 0];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 1];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 2];
         }
 
-        private static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
+        protected static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
+
+        protected static int BytesPerComponent => 3;
+
+        protected static int BytesPerPixel => BytesPerComponent * 3;
+
         static BitmapImageNeo3()
         {
             for (int i = 0; i < 256; i++)
