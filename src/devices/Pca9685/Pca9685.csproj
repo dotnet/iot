@@ -6,12 +6,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <Compile Include="../Common/System/Device/DelayHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseHat.Samples", "samples
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SenseHat", "SenseHat.csproj", "{2FDCADC5-7D89-4D6F-8362-FE59082210BF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{5553DE95-3A5B-4063-ADF0-CA1EFFE51234}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{5553DE95-3A5B-4063-ADF0-CA1EFFE51234}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

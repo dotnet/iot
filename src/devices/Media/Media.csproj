@@ -11,7 +11,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="../Interop/**/*.cs" />
     <Compile Include="VideoDevice/*.cs" />
     <Compile Include="VideoDevice/Devices/*.cs" />
     <Compile Include="SoundDevice/*.cs" />

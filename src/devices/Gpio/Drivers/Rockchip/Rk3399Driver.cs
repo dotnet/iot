@@ -5,6 +5,7 @@ using System;
 using System.Device.Gpio;
 using System.IO;
 using System.Runtime.InteropServices;
+using static Interop;
 
 namespace Iot.Device.Gpio.Drivers
 {

@@ -6,7 +6,6 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <ProjectReference Include="..\Lsm9Ds1\Lsm9Ds1.csproj" />
     <ProjectReference Include="..\Hts221\Hts221.csproj" />
     <ProjectReference Include="..\Lps25h\Lps25h.csproj" />
