@@ -1059,11 +1059,12 @@ namespace ArduinoCsCompiler
         /// <summary>
         /// Send all class declaration from from to to.
         /// </summary>
+        /// <param name="progress">Progress feedback</param>
         /// <param name="set">Execution set</param>
         /// <param name="fromSnapShot">Elements to skip (already loaded)</param>
         /// <param name="toSnapShot">Elements to include (must be a superset of <paramref name="fromSnapShot"/>)</param>
         /// <param name="markAsReadOnly">Mark uploaded classes as readonly</param>
-        internal void SendClassDeclarations(ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
+        internal void SendClassDeclarations(IProgress<double> progress, ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
             if (markAsReadOnly)
             {
@@ -1078,6 +1079,7 @@ namespace ArduinoCsCompiler
             // Include all elements that are not in from but in to. Do not include elements in neither collection.
             var list = set.Classes.Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.NewToken) && toSnapShot.AlreadyAssignedTokens.Contains(x.NewToken));
             var classesToLoad = list.OrderBy(x => (uint)x.NewToken).ToList();
+            progress.Report(0);
             foreach (var c in classesToLoad)
             {
                 var cls = c.TheType;
@@ -1109,6 +1111,7 @@ namespace ArduinoCsCompiler
                 _logger.LogDebug($"Sending class {idx + 1} of {classesToLoad.Count}: Declaration for {cls.MemberInfoSignature()} (Token 0x{token:x8}). Number of members: {c.Members.Count}, Dynamic size {c.DynamicSize} Bytes, Static Size {c.StaticSize} Bytes.");
                 _commandHandler.SendClassDeclaration(token, parentToken, (c.DynamicSize, c.StaticSize), classFlags, c.Members, c.Interfaces.Select(x => set.GetOrAddClassToken(x.GetTypeInfo())).ToArray());
 
+                progress.Report((double)idx / classesToLoad.Count);
                 if (markAsReadOnly)
                 {
                     c.ReadOnly = true;
@@ -1128,13 +1131,14 @@ namespace ArduinoCsCompiler
             _commandHandler.PrepareStringLoad(constantSize, stringSize);
         }
 
-        internal void SendConstants(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
+        internal void SendConstants(IProgress<double> progress, IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
             ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
             var list = constElements.Where(x => !fromSnapShot.AlreadyAssignedTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedTokens.Contains(x.Token));
             var uploadList = list.OrderBy(x => x.Token).ToList();
             int cnt = uploadList.Count;
             int idx = 1;
+            progress.Report(0);
             foreach (var e in uploadList)
             {
                 if (e.InitializerData == null)
@@ -1144,15 +1148,18 @@ namespace ArduinoCsCompiler
 
                 _logger.LogDebug($"Sending constant {idx}/{cnt}. Size {e.InitializerData.Length} bytes. Token 0x{e.Token:X8}.");
                 _commandHandler.SendConstant(e.Token, e.InitializerData);
+                progress.Report((double)idx / uploadList.Count);
                 idx++;
             }
         }
 
-        internal void SendSpecialTypeList(IList<int> typeList, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool forKernel)
+        internal void SendSpecialTypeList(IProgress<double> progress, IList<int> typeList, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool forKernel)
         {
             // Counting the existing list elements should be enough here.
             var listToLoad = typeList.Skip(fromSnapShot.SpecialTypes.Count).Take(toSnapShot.SpecialTypes.Count - fromSnapShot.SpecialTypes.Count).ToList();
+            progress.Report(0);
             _commandHandler.SendSpecialTypeList(listToLoad);
+            progress.Report(1);
         }
 
         internal void SendGlobalMetadata(UInt32 staticRootVectorSize)
@@ -1160,13 +1167,14 @@ namespace ArduinoCsCompiler
             _commandHandler.SendGlobalMetadata(staticRootVectorSize);
         }
 
-        internal void SendStrings(IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
+        internal void SendStrings(IProgress<double> progress, IList<(int Token, byte[] InitializerData, string StringData)> constElements, ExecutionSet.SnapShot fromSnapShot,
             ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
             var list = constElements.Where(x => !fromSnapShot.AlreadyAssignedStringTokens.Contains(x.Token) && toSnapShot.AlreadyAssignedStringTokens.Contains(x.Token));
             var uploadList = list.OrderBy(x => x.Token).ToList();
             int cnt = uploadList.Count;
             int idx = 1;
+            progress.Report(0);
             foreach (var e in uploadList)
             {
                 if (e.InitializerData == null)
@@ -1176,11 +1184,12 @@ namespace ArduinoCsCompiler
 
                 _logger.LogDebug($"Sending string {idx}/{cnt}. Size {e.InitializerData.Length} bytes: {e.StringData}");
                 _commandHandler.SendConstant(e.Token, e.InitializerData);
+                progress.Report((double)idx / uploadList.Count);
                 idx++;
             }
         }
 
-        internal void SendMethods(ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
+        internal void SendMethods(IProgress<double> progress, ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
         {
             // The flag is not currently required for methods, since they don't change
             if (markAsReadOnly)
@@ -1196,6 +1205,7 @@ namespace ArduinoCsCompiler
             var uploadList = list.OrderBy(x => (uint)x.Token).ToList();
             int cnt = uploadList.Count;
             int idx = 0;
+            progress.Report(0);
             foreach (var me in uploadList)
             {
                 MethodBase methodInfo = me.MethodBase.Method;
@@ -1206,6 +1216,8 @@ namespace ArduinoCsCompiler
                 {
                     CopyToFlash();
                 }
+
+                progress.Report((double)idx / uploadList.Count);
             }
         }
 

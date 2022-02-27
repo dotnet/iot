@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
+using UnitsNet.Units;
 
 namespace ArduinoCsCompiler
 {
@@ -21,15 +23,15 @@ namespace ArduinoCsCompiler
             WriteRuntimeCoreData d = new WriteRuntimeCoreData(CommandLineOptions.TargetPath);
             d.Write();
             Logger.LogInformation($"Runtime data written to {d.TargetPath}");
-            return WritePartitionMap();
+            return WritePartitionMap(d.TargetRootPath);
         }
 
         /// <summary>
         /// Writes a partition.csv file that is adjusted to the flash size provided in options
         /// </summary>
-        private bool WritePartitionMap()
+        private bool WritePartitionMap(string targetPath)
         {
-            Information alignment = Information.FromKilobytes(1);
+            Information alignment = Information.FromKibibytes(1);
             if (CommandLineOptions.FlashSize == null)
             {
                 return true;
@@ -39,28 +41,32 @@ namespace ArduinoCsCompiler
             if (!Information.TryParse(CommandLineOptions.FlashSize, CultureInfo.CurrentCulture, out flashSize))
             {
                 Logger.LogError($"Error: Unable to parse {CommandLineOptions.FlashSize} as valid size");
+                PrintSizeValues();
                 return false;
             }
 
-            if (flashSize < Information.FromKilobytes(4))
+            if (flashSize < Information.FromKibibytes(4))
             {
                 Logger.LogError($"Error: Flash size must be at least 4 kb");
+                PrintSizeValues();
                 return false;
             }
 
-            Information firmwareSize = Information.FromMegabytes(1);
+            Information firmwareSize = Information.FromMebibytes(1);
             if (CommandLineOptions.FirmwareSize != null && !Information.TryParse(CommandLineOptions.FirmwareSize, CultureInfo.CurrentCulture, out firmwareSize))
             {
                 Logger.LogError($"Error: Unable to parse {CommandLineOptions.FirmwareSize} as valid size");
+                PrintSizeValues();
                 return false;
             }
 
             RoundUp(ref firmwareSize, alignment);
 
-            Information programSize = Information.FromMegabytes(1);
+            Information programSize = Information.FromMebibytes(1);
             if (CommandLineOptions.FirmwareSize != null && !Information.TryParse(CommandLineOptions.ProgramSize, CultureInfo.CurrentCulture, out programSize))
             {
                 Logger.LogError($"Error: Unable to parse {CommandLineOptions.ProgramSize} as valid size");
+                PrintSizeValues();
                 return false;
             }
 
@@ -73,26 +79,44 @@ namespace ArduinoCsCompiler
             Information startOffset = Information.FromBytes(0x10000);
             partitionMap.AppendLine($"nvs,            data,      nvs,      0x9000,   0x6000,");
             partitionMap.AppendLine($"phy_init,       data,      phy,      0xf000,   0x1000,");
-            string offsetField = $"0x{startOffset.Bytes:x,-11},";
-            string sizeField = $"0x{firmwareSize.Bytes:x}";
-            partitionMap.AppendLine($"factory,        app,       factory,  {offsetField}{sizeField}");
+            string offsetField = $"0x{AsBytes(startOffset):x},";
+            string sizeField = $"0x{AsBytes(firmwareSize):x}";
+            partitionMap.AppendLine($"factory,        app,       factory,  {offsetField} {sizeField}");
 
             startOffset = startOffset + firmwareSize;
-            offsetField = $"0x{startOffset.Bytes:x,-11},";
-            sizeField = $"0x{programSize.Bytes:x}";
-            partitionMap.AppendLine($"ilcode,         data,      ,         {offsetField}{sizeField}");
+            offsetField = $"0x{AsBytes(startOffset):x},";
+            sizeField = $"0x{AsBytes(programSize):x}";
+            partitionMap.AppendLine($"ilcode,         data,      ,         {offsetField} {sizeField}");
             startOffset = startOffset + programSize;
-            offsetField = $"0x{startOffset.Bytes:x,-11},";
+            offsetField = $"0x{AsBytes(startOffset):x},";
             Information fatSize = flashSize - startOffset;
-            sizeField = $"0x{fatSize.Bytes:x}";
+
+            if (fatSize < Information.FromKibibytes(10))
+            {
+                // At this time, we do not support external flash cards as FAT partitions. Would be something useful to add, of course.
+                Logger.LogError("There's not enough space left for the fat data partition. Check your space allocation");
+                return false;
+            }
+
+            sizeField = $"0x{AsBytes(fatSize):x}";
             partitionMap.AppendLine($"ffat,           data,      fat,      {offsetField}{sizeField}");
 
+            partitionMap.AppendLine();
             partitionMap.AppendLine("# Comments:");
             partitionMap.AppendLine("# nvs: Non-Volatile storage. Used to mimic EEPROM");
             partitionMap.AppendLine("# phy_init: Configuration section");
             partitionMap.AppendLine($"# factory: The firmware partition ({firmwareSize.Kilobytes} kb)");
             partitionMap.AppendLine($"# ilcode: The user code partition ({programSize.Kilobytes} kb)");
             partitionMap.AppendLine($"# ffat: The data partition ({fatSize.Kilobytes} kb)");
+
+            using (var file = new StreamWriter(Path.Combine(targetPath, "partitions.csv")))
+            {
+                file.Write(partitionMap);
+            }
+
+            Logger.LogInformation($"Written partition table partitions.csv to {targetPath}");
+            Logger.LogDebug(partitionMap.ToString());
+
             return true;
         }
 
@@ -109,6 +133,21 @@ namespace ArduinoCsCompiler
             offsetBytes += (alignBytes - evenBy);
 
             offset = Information.FromBytes(offsetBytes);
+        }
+
+        private long AsBytes(Information information)
+        {
+            return (long)information.Bytes;
+        }
+
+        private void PrintSizeValues()
+        {
+            Logger.LogInformation("Valid units for sizes: ");
+            foreach (var u in Information.Info.UnitInfos)
+            {
+                double factor = Information.From(1, u.Value) / Information.FromBytes(1);
+                Logger.LogInformation($"Use {Information.GetAbbreviation(u.Value)} for a multiplication by {factor:N0} bytes");
+            }
         }
     }
 }

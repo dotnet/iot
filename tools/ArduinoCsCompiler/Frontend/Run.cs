@@ -26,6 +26,7 @@ namespace ArduinoCsCompiler
             ConfigureLogging(options);
             _commandLineOptions = options;
             _logger = this.GetCurrentClassLogger();
+            ErrorManager.Logger = _logger;
         }
 
         public T CommandLineOptions => _commandLineOptions;

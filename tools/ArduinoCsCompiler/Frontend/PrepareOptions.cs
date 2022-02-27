@@ -21,10 +21,10 @@ namespace ArduinoCsCompiler
         public string? FlashSize { get; set; }
 
         [Option("FirmwareSize", HelpText = "Size of the firmware partition. Set this to a value greater than the reported size by the firmware compiler. " +
-                                          "If this value is to small, the firmware typically won't boot.", Default = "1MB")]
+                                          "If this value is to small, the firmware typically won't boot.", Default = "1MiB")]
         public string? FirmwareSize { get; set; }
 
-        [Option("ProgramSize", HelpText = "Size of the partition for the C# code", Default = "1MB")]
+        [Option("ProgramSize", HelpText = "Size of the partition for the C# code", Default = "1MiB")]
         public string? ProgramSize { get; set; }
     }
 }

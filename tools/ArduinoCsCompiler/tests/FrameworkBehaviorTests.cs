@@ -131,7 +131,7 @@ namespace Iot.Device.Tests
         private long RoundUp(long offset, long align)
         {
             long evenBy = offset % align;
-            if (evenBy == 0)
+            if (evenBy == 0) // Resharper complains on this line with "Expression is always false", which is obviously not true
             {
                 return offset;
             }

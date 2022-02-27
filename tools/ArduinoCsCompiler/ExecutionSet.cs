@@ -238,10 +238,11 @@ namespace ArduinoCsCompiler
                 {
                     // Must have been calculated
                     EstimateRequiredMemory();
+                    Progress<double> dummy = new Progress<double>(); // Not used here, since probably no console available
                     // Perform a full flash erase (since the above also returns false if a wrong kernel is loaded)
                     _compiler.ClearAllData(true, true);
-                    _compiler.SendClassDeclarations(this, EmptySnapShot, _kernelSnapShot, true);
-                    _compiler.SendMethods(this, EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendClassDeclarations(dummy, this, EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendMethods(dummy, this, EmptySnapShot, _kernelSnapShot, true);
                     List<(int Token, byte[] Data, string NoData)> converted = new();
                     // Need to do this manually, due to stupid nullability conversion restrictions
                     foreach (var elem in _patchedFieldTokens.Values)
@@ -252,13 +253,13 @@ namespace ArduinoCsCompiler
                         }
                     }
 
-                    _compiler.SendConstants(converted, EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendConstants(dummy, converted, EmptySnapShot, _kernelSnapShot, true);
                     _compiler.CopyToFlash();
 
                     int totalStringSize = CalculateTotalStringSize(_strings, EmptySnapShot, _kernelSnapShot);
                     _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
-                    _compiler.SendStrings(_strings.ToList(), EmptySnapShot, _kernelSnapShot, true);
-                    _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendStrings(dummy, _strings.ToList(), EmptySnapShot, _kernelSnapShot, true);
+                    _compiler.SendSpecialTypeList(dummy, _specialTypeList.Select(x => x.Token).ToList(), EmptySnapShot, _kernelSnapShot, true);
                     _compiler.SendGlobalMetadata((UInt32)StaticMemberSize.GetValueOrDefault(0));
                     _compiler.CopyToFlash();
 
@@ -283,6 +284,18 @@ namespace ArduinoCsCompiler
             }
 
             EstimateRequiredMemory();
+            Progress<double> progress = new Progress<double>();
+            double previous = 0;
+
+            progress.ProgressChanged += (sender, d) =>
+            {
+                if (d > previous + 0.01)
+                {
+                    Console.Write($"\r{d * 100:F0}%...");
+                    previous = d;
+                }
+            };
+
             bool doWriteProgramToFlash = CompilerSettings.DoCopyToFlash(false);
 
             if (!_compiler.BoardHasKernelLoaded(to))
@@ -298,9 +311,13 @@ namespace ArduinoCsCompiler
 
                 _compiler.SetExecutionSetActive(this);
                 _logger.LogInformation("1/5 Uploading class declarations...");
-                _compiler.SendClassDeclarations(this, from, to, false);
+                _compiler.SendClassDeclarations(progress, this, from, to, false);
+                Console.WriteLine();
+                previous = 0;
                 _logger.LogInformation("2/5 Uploading methods..");
-                _compiler.SendMethods(this, from, to, false);
+                _compiler.SendMethods(progress, this, from, to, false);
+                Console.WriteLine();
+                previous = 0;
                 List<(int Token, byte[] Data, string NoData)> converted = new();
                 // Need to do this manually, due to stupid nullability conversion restrictions
                 foreach (var elem in _patchedFieldTokens.Values)
@@ -312,24 +329,31 @@ namespace ArduinoCsCompiler
                 }
 
                 _logger.LogInformation("3/5 Uploading constants...");
-                _compiler.SendConstants(converted, from, to, false);
+                _compiler.SendConstants(progress, converted, from, to, false);
                 if (doWriteProgramToFlash)
                 {
                     _compiler.CopyToFlash();
                 }
 
+                Console.WriteLine();
+                previous = 0;
                 int totalStringSize = CalculateTotalStringSize(_strings, from, to);
                 _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
                 _logger.LogInformation("4/5 Uploading strings...");
-                _compiler.SendStrings(_strings.ToList(), from, to, false);
+                _compiler.SendStrings(progress, _strings.ToList(), from, to, false);
+                Console.WriteLine();
+                previous = 0;
                 _logger.LogInformation("5/5 Uploading special types...");
-                _compiler.SendSpecialTypeList(_specialTypeList.Select(x => x.Token).ToList(), from, to, false);
+                _compiler.SendSpecialTypeList(progress, _specialTypeList.Select(x => x.Token).ToList(), from, to, false);
                 _compiler.SendGlobalMetadata((UInt32)StaticMemberSize.GetValueOrDefault(0));
                 _logger.LogInformation("Finalizing...");
                 if (doWriteProgramToFlash)
                 {
                     _compiler.WriteFlashHeader(to, TokenOfStartupMethod, CompilerSettings.AutoRestartProgram ? CodeStartupFlags.AutoRestartAfterCrash : CodeStartupFlags.None);
                 }
+
+                Console.WriteLine();
+                previous = 0;
 
                 _logger.LogInformation("Upload successfully completed");
             }

@@ -47,7 +47,9 @@ namespace ArduinoCsCompiler
             _targetPath = Path.Combine(_targetRootPath, "interface");
         }
 
-        public string? TargetPath => _targetPath;
+        public string TargetPath => _targetPath;
+
+        public string TargetRootPath => _targetRootPath;
 
         /// <summary>
         /// Writes the data.

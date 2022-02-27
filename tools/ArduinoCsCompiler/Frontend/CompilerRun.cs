@@ -36,8 +36,8 @@ namespace ArduinoCsCompiler
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                Logger.LogWarning("This compiler is currently supported on Windows only. The target CPU may be anything, but the compiler is only tested on Windows.");
-                Logger.LogWarning("You might experience build or runtime failures otherwise.");
+                ErrorManager.AddWarning("ACS0002", "This compiler is currently supported on Windows only. The target CPU may be anything, but the compiler is only tested on Windows. " +
+                                        "You might experience build or runtime failures otherwise.");
             }
 
             Logger.LogInformation("Connecting to board...");
@@ -72,7 +72,7 @@ namespace ArduinoCsCompiler
                 FileInfo inputInfo = new FileInfo(CommandLineOptions.InputAssembly);
                 if (!inputInfo.Exists)
                 {
-                    Logger.LogError($"Could not find file {CommandLineOptions.InputAssembly}.");
+                    ErrorManager.AddError("ACS0003", $"Could not find file {CommandLineOptions.InputAssembly}. (Looking at absolute path {inputInfo.FullName})");
                     return false;
                 }
 
