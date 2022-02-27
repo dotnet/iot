@@ -1075,7 +1075,7 @@ namespace ArduinoCsCompiler
 
                 if (!replacementFound)
                 {
-                    _logger.LogWarning($"Method {methoda.MemberInfoSignature()} has nothing to replace");
+                    _logger.LogDebug($"Method {methoda.MemberInfoSignature()} has nothing to replace");
                 }
             }
 

@@ -50,7 +50,7 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation("DependentHandle_InternalFree")]
-        private static void InternalFree(IntPtr dependentHandle)
+        public static void InternalFree(IntPtr dependentHandle)
         {
             throw new NotImplementedException();
         }

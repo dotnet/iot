@@ -23,6 +23,28 @@ namespace ArduinoCsCompiler
             set; // Set on startup by Run<T>
         }
 
+        /// <summary>
+        /// Returns the number of errors currently in the list
+        /// </summary>
+        public static int NumErrors
+        {
+            get
+            {
+                return _messages.Count(x => x.Level == LogLevel.Error);
+            }
+        }
+
+        /// <summary>
+        /// Returns the number of warnings currently in the list
+        /// </summary>
+        public static int NumWarnings
+        {
+            get
+            {
+                return _messages.Count(x => x.Level == LogLevel.Warning);
+            }
+        }
+
         public static void Add(CompilerMessage msg)
         {
             Logger.Log(msg.Level, $"{msg.ErrorCode}: {msg.Message}");

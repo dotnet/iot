@@ -158,6 +158,8 @@ namespace ArduinoCsCompiler
                 set.WriteMapFile(CommandLineOptions.TokenMapFile);
             }
 
+            Logger.LogInformation($"Compile successful. {ErrorManager.NumErrors} Errors, {ErrorManager.NumWarnings} Warnings");
+
             if (!CommandLineOptions.CompileOnly)
             {
                 set.Load(false);
