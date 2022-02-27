@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 namespace ArduinoCsCompiler
 {
     internal abstract class Run<T> : IDisposable
-        where T : CommonConnectionOptions
+        where T : OptionsBase
     {
         private readonly T _commandLineOptions;
         private ILogger _logger;
@@ -38,7 +38,7 @@ namespace ArduinoCsCompiler
 
         public abstract bool RunCommand();
 
-        protected virtual void ConfigureLogging(CommonConnectionOptions options)
+        protected virtual void ConfigureLogging(OptionsBase options)
         {
             LogDispatcher.LoggerFactory = _loggerFactory;
             if (options.Verbose)

@@ -52,8 +52,8 @@ namespace ArduinoCsCompiler
                 })
                 .WithParsed<PrepareOptions>(o =>
                 {
-                    Prepare(o);
-                    runResult = true;
+                    var cmd = new PrepareRun(o);
+                    runResult = cmd.RunCommand();
                 })
                 .WithParsed<TestOptions>(o =>
                 {
@@ -69,13 +69,6 @@ namespace ArduinoCsCompiler
             }
 
             return runResult ? 0 : 1;
-        }
-
-        private static void Prepare(PrepareOptions prepareOptions)
-        {
-            WriteRuntimeCoreData d = new WriteRuntimeCoreData(prepareOptions.TargetPath);
-            d.Write();
-            Console.WriteLine($"Runtime data written to {d.TargetPath}");
         }
     }
 }

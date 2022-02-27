@@ -12,9 +12,19 @@ namespace ArduinoCsCompiler
     /// I'm lacking an idea on how to best do that, though.
     /// </summary>
     [Verb("prepare", HelpText = "Prepare the Arduino runtime for uploading")]
-    internal class PrepareOptions
+    internal class PrepareOptions : OptionsBase
     {
         [Option('t', "targetpath", HelpText = "Target path for the generated files. Defaults to the Arduino workspace directory")]
         public string? TargetPath { get; set; }
+
+        [Option("FlashSize", HelpText = "Total flash size available. When specified, a matching partitions.csv file is written. Only relevant for target ESP32")]
+        public string? FlashSize { get; set; }
+
+        [Option("FirmwareSize", HelpText = "Size of the firmware partition. Set this to a value greater than the reported size by the firmware compiler. " +
+                                          "If this value is to small, the firmware typically won't boot.", Default = "1MB")]
+        public string? FirmwareSize { get; set; }
+
+        [Option("ProgramSize", HelpText = "Size of the partition for the C# code", Default = "1MB")]
+        public string? ProgramSize { get; set; }
     }
 }

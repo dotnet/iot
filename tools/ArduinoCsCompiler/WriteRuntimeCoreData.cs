@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Text;
 using Iot.Device.Arduino;
 using Iot.Device.Board;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 namespace ArduinoCsCompiler
 {
@@ -14,7 +16,9 @@ namespace ArduinoCsCompiler
     /// </summary>
     public class WriteRuntimeCoreData
     {
+        private readonly ILogger _logger;
         private string _targetPath;
+        private string _targetRootPath;
 
         /// <summary>
         /// Write the interface header files required by the runtime to the standard path
@@ -30,14 +34,17 @@ namespace ArduinoCsCompiler
         /// <param name="toPath">Destination path. If null, defaults to the value returned by <see cref="GetRuntimePath"/>.</param>
         public WriteRuntimeCoreData(string? toPath)
         {
+            _logger = this.GetCurrentClassLogger();
             if (toPath == null)
             {
-                _targetPath = GetRuntimePath();
+                _targetRootPath = GetRuntimePath();
             }
             else
             {
-                _targetPath = toPath;
+                _targetRootPath = toPath;
             }
+
+            _targetPath = Path.Combine(_targetRootPath, "interface");
         }
 
         public string? TargetPath => _targetPath;
@@ -47,6 +54,12 @@ namespace ArduinoCsCompiler
         /// </summary>
         public void Write()
         {
+            if (!Directory.Exists(_targetRootPath))
+            {
+                _logger.LogWarning($"Warning: {_targetRootPath} does not exist. Please ensure it is correct and make sure the runtime is checked out correctly");
+            }
+
+            Directory.CreateDirectory(_targetPath);
             WriteBreakpointTypes();
             WriteNativeMethodDefinitions();
             WriteDebuggerCommands();
