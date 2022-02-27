@@ -121,6 +121,26 @@ namespace Iot.Device.Tests
             return fraction;
         }
 
+        [Fact]
+        public void TestRounding()
+        {
+            Assert.Equal(1024, RoundUp(1024, 1024));
+            Assert.Equal(1024, RoundUp(100, 1024));
+        }
+
+        private long RoundUp(long offset, long align)
+        {
+            long evenBy = offset % align;
+            if (evenBy == 0)
+            {
+                return offset;
+            }
+
+            offset += (align - evenBy);
+
+            return offset;
+        }
+
         private struct GenericStruct<T>
         {
             public T _data1;
