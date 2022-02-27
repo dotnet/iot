@@ -8,22 +8,23 @@
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
+
   <ItemGroup>
     <Compile Remove="winmd\**" />
     <EmbeddedResource Remove="winmd\**" />
     <None Remove="winmd\**" />
     <None Include="buildTransitive\net5.0\System.Device.Gpio.targets" Pack="true" PackagePath="\buildTransitive\net5.0" />
-    <PackageReference Include="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryPackageVersion)" /> <!-- This is Windows specific -->
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryPackageVersion)" /> <!-- This is Windows specific -->
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <PackageReference Include="System.Runtime.WindowsRuntime" Version="$(SystemRuntimeWindowsRuntimePackageVersion)" />
     <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="$(SystemRuntimeInteropServicesWindowsRuntimePackageVersion)" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
 
     <Reference Include="Windows.Devices.DevicesLowLevelContract">
       <HintPath>winmd\Windows.Devices.DevicesLowLevelContract.winmd</HintPath>

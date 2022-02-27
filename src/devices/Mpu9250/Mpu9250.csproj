@@ -7,8 +7,7 @@
     <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
     <Compile Include="*.cs" />
     <None Include="README.md" />
-    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
-  </ItemGroup>
+    </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Ak8963\Ak8963.csproj" />
   </ItemGroup>

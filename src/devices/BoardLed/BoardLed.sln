@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardLed.Sample", "samples\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardLed", "BoardLed.csproj", "{3A4798D1-FC49-46C0-8774-0519EB7987C2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{FF04E59C-5C7E-44C7-B322-D11DFDEBC769}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{FF04E59C-5C7E-44C7-B322-D11DFDEBC769}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

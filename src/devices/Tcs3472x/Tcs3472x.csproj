@@ -5,7 +5,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
     <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
   </ItemGroup>
 </Project>

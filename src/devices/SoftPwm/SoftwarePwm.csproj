@@ -6,8 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SoftwarePwmChannel.cs" />
-    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
-  </ItemGroup>
+    </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>

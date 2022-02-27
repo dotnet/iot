@@ -1,6 +1,6 @@
 # DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module
 
-The DHT temperature and humidity sensors are very popular. This projects support DHT10, DHT11, DHT12, DHT21(AM2301), DHT22(AM2302).
+The DHT temperature and humidity sensors are very popular. This projects supports DHT10, DHT11, DHT12, DHT21(AM2301), DHT22(AM2302). The main difference between the sensor models is the measurement range and accuracy.
 
 ## Documentation
 
@@ -48,7 +48,7 @@ using (Dht11 dht = new Dht11(26))
 }
 ```
 
-**Note:** _On the RPi with any of the DHT sensor, 1-Wire works using Raspian but not with Windows 10 IoT Core. The device has to switch the 1-wire pin between input and output and vice versa. It seems that Windows IoT Core OS can't switch the pin direction quick enough. There have been suggestions for using two pins; one for input and one for output. This solution has not been implemented here, but these are some handy links that may help setting that up:_
+**Note:** _On the RPi with any of the DHT sensor, 1-Wire works using Raspian but not with Windows 10 IoT Core. The device has to switch the 1-wire pin between input and output and vice versa. It seems that Windows IoT Core OS can't switch the pin direction fast enough. There have been suggestions for using two pins; one for input and one for output. This solution has not been implemented here, but these are some handy links that may help setting that up:_
 
 * <https://github.com/ms-iot/samples/tree/develop/GpioOneWire>
 * And on Hackster.io: <https://www.hackster.io/porrey/go-native-c-with-the-dht22-a8e8eb>
@@ -96,9 +96,9 @@ The DHT sensors are very sensitive, avoid too long cables, electromagnetic pertu
 
 ### I always get wrong measurements, what's happening?
 
-Please check that the sensor is plugged correctly, make sure you are using the correct pin.
+Please check that the sensor is plugged in correctly, make sure you are using the correct pin.
 
-Please check you are using the correct sensor, only DHT10 and DHT12 supports I2C. All others support only GPIO with 1 wire protocol. DHT12 supports both.
+Please check you are using the correct sensor, only DHT10 and DHT12 supports I2C. All others support only GPIO with 1 wire protocol. DHT12 supports both. The data blocks from the different sensors are not compatible, so that using a wrong sensor type results in incorrect readings.
 
 ### The data I measure are not correct, humidity seems ok but temperature is always weird, what's the problem?
 
@@ -124,7 +124,7 @@ if (dht.IsLastReadSuccessful)
 
 ### I have a Raspberry Pi 4 and I get an exception when creating the DHT sensor
 
-See this [issue 1145](https://github.com/dotnet/iot/issues/1145). We're actively trying to fix it automatically. You will have to force using either the Raspberry Pi 3 driver, either the LibGpiodDriver. This is how you can force using a specific drive, in this case the Raspberry Pi 3 one which will work:
+See this [issue 1145](https://github.com/dotnet/iot/issues/1145). We're actively trying to fix it automatically. You will have to force using either the Raspberry Pi 3 driver, or the LibGpiodDriver. This is how you can force using a specific drive, in this case the Raspberry Pi 3 one which will work:
 
 ```csharp
 GpioDriver driver = new RaspberryPi3Driver();
@@ -157,7 +157,7 @@ Simply connect your DHTxx data pin to GPIO26 (physical pin 37), the ground to th
 
 ![schema](./dht22.png)
 
-Some sensors are already sold with the 10K resistor. Connect the GPIO26 to the *data* pin, its position can vary depending on the integrator.
+Some sensors are already sold with the 10K resistor. Connect the GPIO26 to the _data_ pin, its position can vary depending on the integrator.
 
 #### I2C Protocol Circuit
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Threading;
 using Iot.Device.HardwareMonitor;
 using UnitsNet;
@@ -10,11 +11,9 @@ using UnitsNet;
 Console.WriteLine("Press any key to quit");
 
 OpenHardwareMonitor hw = new OpenHardwareMonitor();
-if (hw.GetSensorList().Count == 0)
-{
-    Console.WriteLine("OpenHardwareMonitor is not running");
-    return;
-}
+
+// Explicit update - exactly one data set is read for each iteration
+hw.UpdateStrategy = SensorUpdateStrategy.SynchronousExplicit;
 
 hw.EnableDerivedSensors();
 
@@ -22,7 +21,13 @@ while (!Console.KeyAvailable)
 {
     Console.Clear();
     Console.WriteLine("Showing all available sensors (press any key to quit)");
+    hw.UpdateSensors(false);
     var components = hw.GetHardwareComponents();
+    if (!components.Any())
+    {
+        Console.WriteLine("Waiting for connection to OpenHardwareMonitor. Is it running?");
+    }
+
     foreach (var component in components)
     {
         Console.WriteLine("--------------------------------------------------------------------");
@@ -42,11 +47,15 @@ while (!Console.KeyAvailable)
         }
     }
 
+    // Set update strategy to immediately, to test that receiving individual sensors works as well
+    hw.UpdateStrategy = SensorUpdateStrategy.PerSensor;
     if (hw.TryGetAverageGpuTemperature(out Temperature gpuTemp) &&
         hw.TryGetAverageCpuTemperature(out Temperature cpuTemp))
     {
         Console.WriteLine($"Averages: CPU temp {cpuTemp:s2}, GPU temp {gpuTemp:s2}, CPU Load {hw.GetCpuLoad()}");
     }
 
-    Thread.Sleep(1000);
+    hw.UpdateStrategy = SensorUpdateStrategy.SynchronousExplicit;
+
+    Thread.Sleep(2000);
 }
