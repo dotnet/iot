@@ -213,4 +213,4 @@ stages:
             inputs:
               command: push
               publishVstsFeed: 'IoT/nightly_iot_builds'
-              packagesToPush: '$(Pipeline.Workspace)/SignedPackages/*nupkg'
+              packagesToPush: '$(Pipeline.Workspace)/SignedPackages/*.nupkg'
