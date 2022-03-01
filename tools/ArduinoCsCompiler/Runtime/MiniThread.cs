@@ -51,6 +51,15 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
+        public static int OptimalMaxSpinWaitsPerSpinIteration
+        {
+            [ArduinoImplementation]
+            get
+            {
+                return 1;
+            }
+        }
+
         public int ManagedThreadId
         {
             [ArduinoImplementation]
@@ -73,10 +82,10 @@ namespace ArduinoCsCompiler.Runtime
             return false;
         }
 
-        [ArduinoImplementation("ArduinoNativeHelpersGetMicroseconds", 0x110)]
+        [ArduinoImplementation]
         public static void SpinWait(int micros)
         {
-            throw new NotImplementedException();
+            // No op, we're not fast enough
         }
 
         [ArduinoImplementation]

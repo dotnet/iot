@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace ArduinoCsCompiler
 {
@@ -14,13 +15,13 @@ namespace ArduinoCsCompiler
 
         static ErrorManager()
         {
-            Logger = null!;
+            Logger = NullLogger.Instance;
         }
 
         public static ILogger Logger
         {
             get;
-            set; // Set on startup by Run<T>
+            set; // Set to something usable on startup by Run<T>
         }
 
         /// <summary>
@@ -47,6 +48,12 @@ namespace ArduinoCsCompiler
 
         public static void Add(CompilerMessage msg)
         {
+            // Avoid exact duplicates
+            if (_messages.Contains(msg))
+            {
+                return;
+            }
+
             Logger.Log(msg.Level, $"{msg.ErrorCode}: {msg.Message}");
             _messages.Add(msg);
         }

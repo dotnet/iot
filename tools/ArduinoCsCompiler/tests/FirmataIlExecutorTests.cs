@@ -419,5 +419,13 @@ namespace Iot.Device.Arduino.Tests
         {
             LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
         }
+
+        [Theory]
+        [InlineData(nameof(TestMethods.StringContains), 1)]
+        [InlineData(nameof(TestMethods.StringStartsWith), 1)]
+        public void StringTest(string methodName, Int32 expected)
+        {
+            LoadCodeMethod(methodName, 0, 0, expected);
+        }
     }
 }

@@ -1451,5 +1451,21 @@ namespace Iot.Device.Arduino.Tests
             MiniAssert.AreEqual("127.0.0.1", IPAddress.Loopback.ToString());
             return 1;
         }
+
+        public static int StringContains(int arg1, int arg2)
+        {
+            MiniAssert.That("abcd".Contains("bc", StringComparison.CurrentCulture));
+            MiniAssert.False("abcd".Contains("BC", StringComparison.CurrentCulture));
+            MiniAssert.That("abcd".Contains("AB", StringComparison.InvariantCultureIgnoreCase));
+            return 1;
+        }
+
+        public static int StringStartsWith(int arg1, int arg2)
+        {
+            MiniAssert.That("abcd".StartsWith("ab", StringComparison.CurrentCulture));
+            MiniAssert.False("abcd".StartsWith("AB", StringComparison.CurrentCulture));
+            MiniAssert.That("abcd".StartsWith("AB", StringComparison.InvariantCultureIgnoreCase));
+            return 1;
+        }
     }
 }

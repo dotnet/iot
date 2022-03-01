@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ArduinoCsCompiler
 {
-    public class CompilerMessage
+    public class CompilerMessage : IEquatable<CompilerMessage>
     {
         public CompilerMessage(LogLevel level, string errorCode, string message)
         {
@@ -35,6 +35,41 @@ namespace ArduinoCsCompiler
             };
 
             return $"{level} {ErrorCode}: {Message}";
+        }
+
+        public bool Equals(CompilerMessage? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Message == other.Message && Level == other.Level && ErrorCode == other.ErrorCode;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return ReferenceEquals(this, obj) || (obj is CompilerMessage other && Equals(other));
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Message, (int)Level, ErrorCode);
+        }
+
+        public static bool operator ==(CompilerMessage? left, CompilerMessage? right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(CompilerMessage? left, CompilerMessage? right)
+        {
+            return !Equals(left, right);
         }
     }
 }
