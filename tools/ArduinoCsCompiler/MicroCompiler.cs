@@ -496,6 +496,30 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            if (classType == typeof(Delegate))
+            {
+                fields = fields.OrderBy(x =>
+                {
+                    // make sure the order is given
+                    if (x.Name == "_target")
+                    {
+                        return 0;
+                    }
+
+                    if (x.Name == "_methodBase")
+                    {
+                        return 1;
+                    }
+
+                    if (x.Name == "_methodPtr")
+                    {
+                        return 2;
+                    }
+
+                    return 10;
+                }).ToList();
+            }
+
             if (classType == typeof(Exception))
             {
                 // For exception, we need to make sure the field "_message" is the first, because we directly access it in the EE.
@@ -1854,6 +1878,8 @@ namespace ArduinoCsCompiler
                 exec.SuppressType(typeof(System.Device.Gpio.Drivers.RaspberryPi3Driver));
                 exec.SuppressType(typeof(System.Device.Gpio.Drivers.UnixDriver));
                 exec.SuppressType(typeof(System.Device.Gpio.Drivers.Windows10Driver));
+                exec.SuppressType(typeof(Iot.Device.Board.DummyGpioDriver));
+                exec.SuppressType(typeof(Iot.Device.Board.KeyboardGpioDriver));
 
                 // We don't currently support threads or tasks
                 // exec.SuppressType(typeof(System.Threading.Tasks.Task));
