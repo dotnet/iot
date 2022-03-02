@@ -6,9 +6,39 @@ namespace ArduinoCsCompiler.Runtime
     internal class MiniException
     {
         [ArduinoImplementation]
+        public static void GetStackTracesDeepCopy(System.Exception exception, ref System.Byte[] currentStackTrace, ref System.Object[] dynamicMethodArray)
+        {
+            dynamicMethodArray = new object[0];
+            currentStackTrace = new byte[0];
+        }
+
+        [ArduinoImplementation]
+        public static bool IsImmutableAgileException(System.Exception e)
+        {
+            return false;
+        }
+
+        [ArduinoImplementation]
+        public static void SaveStackTracesFromDeepCopy(System.Exception exception, System.Byte[] currentStackTrace, System.Object[] dynamicMethodArray)
+        {
+            // We currently don't generate runtime stack traces
+        }
+
+        [ArduinoImplementation]
+        public static void PrepareForForeignExceptionRaise()
+        {
+        }
+
+        [ArduinoImplementation]
         public string CreateSourceName()
         {
             return "Source";
+        }
+
+        [ArduinoImplementation(CompareByParameterNames = true)]
+        public void RestoreDispatchState(int dispatchState) // Argument is a struct
+        {
+            // Nothing to do, ExceptionDispatchInfo.Throw is not really supported (and probably not useful in our EE)
         }
     }
 }

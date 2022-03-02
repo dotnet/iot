@@ -1,4 +1,5 @@
 ﻿using UnitsNet;
+using UnitsNet.Units;
 
 namespace ArduinoCsCompiler
 {
@@ -36,7 +37,12 @@ namespace ArduinoCsCompiler
 
         public override string ToString()
         {
-            return $"{nameof(IntSize)}: {IntSize}, {nameof(PointerSize)}: {PointerSize}, {nameof(FlashSize)}: {FlashSize}, {nameof(FlashUsed)}: {FlashUsed}, {nameof(RamSize)}: {RamSize}";
+            return @$"
+sizeof(int)  : {IntSize}
+sizeof(void*): {PointerSize}
+Flash Size   : {FlashSize.ToUnit(InformationUnit.Kibibyte)}
+Flash Used   : {FlashUsed.ToUnit(InformationUnit.Kibibyte)}
+Ram Size     : {RamSize.ToUnit(InformationUnit.Kibibyte)}";
         }
     }
 }

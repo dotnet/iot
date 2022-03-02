@@ -2167,7 +2167,6 @@ namespace ArduinoCsCompiler
                 }
                 else
                 {
-                    // TODO: There are a bunch of methods currently getting here because they're not implemented
                     ErrorManager.AddWarning("ACS0004", $"{methodInfo.MethodSignature()} has no visible implementation");
                     return;
                 }
