@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Device.Gpio;
+using System.Threading;
 
 namespace Iot.Device.VirtualGpio
 {
@@ -25,16 +27,16 @@ namespace Iot.Device.VirtualGpio
         /// </summary>
         /// <param name="pinNumber">Pin number</param>
         /// <returns>Pin value</returns>
-        public PinValue this[int pinNumber] => pinValues[pinNumber];
+        public PinValue this[int pinNumber] => _pinValues[pinNumber];
 
         /// <summary>
         /// Number of pins.
         /// </summary>
         protected override int PinCount { get; }
 
-        private readonly bool[] openStatus;
-        private readonly PinMode[] pinModes;
-        private readonly PinValue[] pinValues;
+        private readonly bool[] _openStatus;
+        private readonly PinMode[] _pinModes;
+        private readonly PinValue[] _pinValues;
 
         /// <summary>
         /// Initialize a virtual GPIO driver with a specific number of pins.
@@ -44,30 +46,30 @@ namespace Iot.Device.VirtualGpio
         {
             PinCount = pinCount;
 
-            openStatus = new bool[PinCount];
-            pinModes = new PinMode[PinCount];
-            pinValues = new PinValue[PinCount];
+            _openStatus = new bool[PinCount];
+            _pinModes = new PinMode[PinCount];
+            _pinValues = new PinValue[PinCount];
         }
 
         /// <summary>
         /// Simulates input value for a pin.
         /// </summary>
         /// <param name="pinNumber">Pin number that accepts input</param>
-        /// <param name="value">Input value</param>
+        /// <param name="value">Input value. Null represents a Hi-Z state</param>
         /// <exception cref="SystemException">Throws when the pin is in output mode and try to set a different pin value.</exception>
         public void Input(int pinNumber, PinValue? value)
         {
-            if (pinModes[pinNumber] == PinMode.Output && pinValues[pinNumber] != value)
+            if (_pinModes[pinNumber] == PinMode.Output && _pinValues[pinNumber] != value)
             {
                 throw new SystemException("The pin is shorted.");
             }
 
-            var lastPinValue = pinValues[pinNumber];
+            PinValue lastPinValue = _pinValues[pinNumber];
 
-            var actualValue = value ?? (pinModes[pinNumber] == PinMode.InputPullUp ? PinValue.High : pinModes[pinNumber] == PinMode.InputPullDown ? PinValue.Low : pinValues[pinNumber]);
+            PinValue actualValue = value ?? (_pinModes[pinNumber] == PinMode.InputPullUp ? PinValue.High : _pinModes[pinNumber] == PinMode.InputPullDown ? PinValue.Low : _pinValues[pinNumber]);
             if (actualValue != lastPinValue)
             {
-                pinValues[pinNumber] = actualValue;
+                _pinValues[pinNumber] = actualValue;
                 InputPinValueChanged?.Invoke(this, new PinValueChangedEventArgs(value == PinValue.Low ? PinEventTypes.Falling : PinEventTypes.Rising, pinNumber));
             }
         }
@@ -81,9 +83,9 @@ namespace Iot.Device.VirtualGpio
         /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
         {
-            if (openStatus[pinNumber])
+            if (_openStatus[pinNumber])
             {
-                openStatus[pinNumber] = false;
+                _openStatus[pinNumber] = false;
             }
             else
             {
@@ -100,7 +102,7 @@ namespace Iot.Device.VirtualGpio
         /// <inheritdoc/>
         protected override PinMode GetPinMode(int pinNumber)
         {
-            return pinModes[pinNumber];
+            return _pinModes[pinNumber];
         }
 
         /// <inheritdoc/>
@@ -112,22 +114,22 @@ namespace Iot.Device.VirtualGpio
         /// <inheritdoc/>
         protected override void OpenPin(int pinNumber)
         {
-            if (openStatus[pinNumber])
+            if (_openStatus[pinNumber])
             {
                 throw new InvalidOperationException("Cannot open pin vale while it is opened.");
             }
             else
             {
-                openStatus[pinNumber] = true;
+                _openStatus[pinNumber] = true;
             }
         }
 
         /// <inheritdoc/>
         protected override PinValue Read(int pinNumber)
         {
-            if (openStatus[pinNumber])
+            if (_openStatus[pinNumber])
             {
-                return pinValues[pinNumber];
+                return _pinValues[pinNumber];
             }
             else
             {
@@ -144,13 +146,13 @@ namespace Iot.Device.VirtualGpio
         /// <inheritdoc/>
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
-            pinModes[pinNumber] = mode;
+            _pinModes[pinNumber] = mode;
         }
 
         /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
-            var lastPinValue = pinValues[pinNumber];
+            PinValue lastPinValue = _pinValues[pinNumber];
             while (true)
             {
                 if (cancellationToken.IsCancellationRequested)
@@ -161,7 +163,7 @@ namespace Iot.Device.VirtualGpio
                         TimedOut = true
                     };
                 }
-                else if (pinValues[pinNumber] != lastPinValue)
+                else if (_pinValues[pinNumber] != lastPinValue)
                 {
                     return new WaitForEventResult
                     {
@@ -177,10 +179,10 @@ namespace Iot.Device.VirtualGpio
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
-            if (pinModes[pinNumber] == PinMode.Output)
+            if (_pinModes[pinNumber] == PinMode.Output)
             {
-                var lastPinValue = pinValues[pinNumber];
-                pinValues[pinNumber] = value;
+                PinValue lastPinValue = _pinValues[pinNumber];
+                _pinValues[pinNumber] = value;
 
                 if (value != lastPinValue)
                 {
