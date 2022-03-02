@@ -7,42 +7,21 @@ using System.Threading;
 
 namespace Iot.Device.VirtualGpio
 {
-    /// <summary>
-    /// Program-control-input GPIO driver. For simulation, testing, etc.
-    /// </summary>
-    public class VirtualGpioDriver : GpioDriver
+    internal class VirtualGpioDriver : GpioDriver
     {
-        /// <summary>
-        /// Triggered when a input pin value changes.
-        /// </summary>
-        public event PinChangeEventHandler? InputPinValueChanged;
+        internal PinValue this[int pinNumber] => _pinValues[pinNumber];
 
-        /// <summary>
-        /// Triggered when a output pin value changes.
-        /// </summary>
-        public event PinChangeEventHandler? OutputPinValueChanged;
-
-        /// <summary>
-        /// Get pin value by pin number.
-        /// </summary>
-        /// <param name="pinNumber">Pin number</param>
-        /// <returns>Pin value</returns>
-        public PinValue this[int pinNumber] => _pinValues[pinNumber];
-
-        /// <summary>
-        /// Number of pins.
-        /// </summary>
         protected override int PinCount { get; }
+
+        internal event PinChangeEventHandler? InputPinValueChanged;
+
+        internal event PinChangeEventHandler? OutputPinValueChanged;
 
         private readonly bool[] _openStatus;
         private readonly PinMode[] _pinModes;
         private readonly PinValue[] _pinValues;
 
-        /// <summary>
-        /// Initialize a virtual GPIO driver with a specific number of pins.
-        /// </summary>
-        /// <param name="pinCount">Number of pins</param>
-        public VirtualGpioDriver(int pinCount)
+        internal VirtualGpioDriver(int pinCount)
         {
             PinCount = pinCount;
 
@@ -51,13 +30,7 @@ namespace Iot.Device.VirtualGpio
             _pinValues = new PinValue[PinCount];
         }
 
-        /// <summary>
-        /// Simulates input value for a pin.
-        /// </summary>
-        /// <param name="pinNumber">Pin number that accepts input</param>
-        /// <param name="value">Input value. Null represents a Hi-Z state</param>
-        /// <exception cref="SystemException">Throws when the pin is in output mode and try to set a different pin value.</exception>
-        public void Input(int pinNumber, PinValue? value)
+        internal void Input(int pinNumber, PinValue? value)
         {
             if (_pinModes[pinNumber] == PinMode.Output && _pinValues[pinNumber] != value)
             {
@@ -74,13 +47,11 @@ namespace Iot.Device.VirtualGpio
             }
         }
 
-        /// <inheritdoc/>
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             InputPinValueChanged += callback;
         }
 
-        /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
         {
             if (_openStatus[pinNumber])
@@ -93,25 +64,21 @@ namespace Iot.Device.VirtualGpio
             }
         }
 
-        /// <inheritdoc/>
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             return pinNumber;
         }
 
-        /// <inheritdoc/>
         protected override PinMode GetPinMode(int pinNumber)
         {
             return _pinModes[pinNumber];
         }
 
-        /// <inheritdoc/>
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             return true;
         }
 
-        /// <inheritdoc/>
         protected override void OpenPin(int pinNumber)
         {
             if (_openStatus[pinNumber])
@@ -124,7 +91,6 @@ namespace Iot.Device.VirtualGpio
             }
         }
 
-        /// <inheritdoc/>
         protected override PinValue Read(int pinNumber)
         {
             if (_openStatus[pinNumber])
@@ -137,19 +103,16 @@ namespace Iot.Device.VirtualGpio
             }
         }
 
-        /// <inheritdoc/>
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             InputPinValueChanged -= callback;
         }
 
-        /// <inheritdoc/>
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
             _pinModes[pinNumber] = mode;
         }
 
-        /// <inheritdoc/>
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             PinValue lastPinValue = _pinValues[pinNumber];
@@ -176,7 +139,6 @@ namespace Iot.Device.VirtualGpio
             }
         }
 
-        /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
             if (_pinModes[pinNumber] == PinMode.Output)
