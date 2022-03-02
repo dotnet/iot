@@ -40,5 +40,17 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
+
+        [ArduinoImplementation("InterlockedExchangeInt64")]
+        public static long Exchange(ref long location, long value)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("InterlockedCompareExchange_Int64")]
+        public static long CompareExchange(ref long location, long value, long comparand)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

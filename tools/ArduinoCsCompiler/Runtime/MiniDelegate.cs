@@ -11,5 +11,18 @@ namespace ArduinoCsCompiler.Runtime
         {
             throw new NotImplementedException();
         }
+
+        // The following two methods are implemented the same. I haven't found a test case for verifying them, though
+        [ArduinoImplementation("DelegateInternalEqualMethodHandle")]
+        public static Boolean InternalEqualMethodHandles(System.Delegate left, System.Delegate right)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("DelegateCompareUnmanagedFunctionPtrs")]
+        public static Boolean CompareUnmanagedFunctionPtrs(Delegate d1, Delegate d2)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

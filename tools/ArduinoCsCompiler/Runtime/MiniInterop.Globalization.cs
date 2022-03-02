@@ -19,6 +19,12 @@ namespace ArduinoCsCompiler.Runtime
             }
 
             [ArduinoImplementation]
+            public static void InitICUFunctions(IntPtr icuuc, IntPtr icuin, String version, String suffix)
+            {
+                // Probably nothing to do
+            }
+
+            [ArduinoImplementation]
             public static unsafe void InitOrdinalCasingPage(Int32 pageNumber, char* pTarget)
             {
                 throw new NotImplementedException();

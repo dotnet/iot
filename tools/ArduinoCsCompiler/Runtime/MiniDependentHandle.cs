@@ -30,7 +30,7 @@ namespace ArduinoCsCompiler.Runtime
         }
 
         [ArduinoImplementation("DependentHandle_InternalGetTargetAndDependent")]
-        private static object InternalGetTargetAndDependent(
+        public static object InternalGetTargetAndDependent(
             IntPtr dependentHandle,
             out object dependent)
         {
