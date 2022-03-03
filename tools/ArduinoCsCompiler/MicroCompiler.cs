@@ -1148,6 +1148,8 @@ namespace ArduinoCsCompiler
                     CopyToFlash();
                 }
             }
+
+            progress.Report(1);
         }
 
         internal void PrepareStringLoad(int constantSize, int stringSize)
@@ -1175,6 +1177,8 @@ namespace ArduinoCsCompiler
                 progress.Report((double)idx / uploadList.Count);
                 idx++;
             }
+
+            progress.Report(1);
         }
 
         internal void SendSpecialTypeList(IProgress<double> progress, IList<int> typeList, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool forKernel)
@@ -1211,6 +1215,8 @@ namespace ArduinoCsCompiler
                 progress.Report((double)idx / uploadList.Count);
                 idx++;
             }
+
+            progress.Report(1);
         }
 
         internal void SendMethods(IProgress<double> progress, ExecutionSet set, ExecutionSet.SnapShot fromSnapShot, ExecutionSet.SnapShot toSnapShot, bool markAsReadOnly)
@@ -1243,6 +1249,8 @@ namespace ArduinoCsCompiler
 
                 progress.Report((double)idx / uploadList.Count);
             }
+
+            progress.Report(1);
         }
 
         /// <summary>

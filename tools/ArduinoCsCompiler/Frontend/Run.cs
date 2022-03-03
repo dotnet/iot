@@ -54,6 +54,8 @@ namespace ArduinoCsCompiler
             {
                 _loggerFactory.MinLogLevel = LogLevel.Information;
             }
+
+            ErrorManager.ShowProgress = !options.NoProgress;
         }
 
         public void Dispose()

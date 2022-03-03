@@ -16,12 +16,23 @@ namespace ArduinoCsCompiler
         static ErrorManager()
         {
             Logger = NullLogger.Instance;
+            ShowProgress = false;
         }
 
         public static ILogger Logger
         {
             get;
             set; // Set to something usable on startup by Run<T>
+        }
+
+        /// <summary>
+        /// Set this to false to suppress printing progress messages (e.g. for CI environments)
+        /// </summary>
+        /// <remarks>Default is false, to suppress progress during CI (just clutters the output)</remarks>
+        public static bool ShowProgress
+        {
+            get;
+            set;
         }
 
         /// <summary>

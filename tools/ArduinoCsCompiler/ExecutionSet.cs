@@ -284,17 +284,31 @@ namespace ArduinoCsCompiler
             }
 
             EstimateRequiredMemory();
-            Progress<double> progress = new Progress<double>();
+            SynchronousProgress<double> progress = new SynchronousProgress<double>(1);
             double previous = 0;
 
-            progress.ProgressChanged += (sender, d) =>
+            if (ErrorManager.ShowProgress)
             {
-                if (d > previous + 0.01)
+                progress.ProgressChanged += (sender, d) =>
                 {
-                    Console.Write($"\r{d * 100:F0}%...");
-                    previous = d;
-                }
-            };
+                    if (previous >= 1)
+                    {
+                        // We already printed "100%"
+                        return;
+                    }
+
+                    if (d > previous + 0.01 || d >= 1)
+                    {
+                        Console.Write($"\r{d * 100:F0}%...");
+                        if (d >= 1)
+                        {
+                            Console.WriteLine();
+                        }
+
+                        previous = d;
+                    }
+                };
+            }
 
             bool doWriteProgramToFlash = CompilerSettings.DoCopyToFlash(false);
 
@@ -312,11 +326,12 @@ namespace ArduinoCsCompiler
                 _compiler.SetExecutionSetActive(this);
                 _logger.LogInformation("1/5 Uploading class declarations...");
                 _compiler.SendClassDeclarations(progress, this, from, to, false);
-                Console.WriteLine();
+                progress.Done();
                 previous = 0;
+
                 _logger.LogInformation("2/5 Uploading methods..");
                 _compiler.SendMethods(progress, this, from, to, false);
-                Console.WriteLine();
+                progress.Done();
                 previous = 0;
                 List<(int Token, byte[] Data, string NoData)> converted = new();
                 // Need to do this manually, due to stupid nullability conversion restrictions
@@ -335,13 +350,13 @@ namespace ArduinoCsCompiler
                     _compiler.CopyToFlash();
                 }
 
-                Console.WriteLine();
+                progress.Done();
                 previous = 0;
                 int totalStringSize = CalculateTotalStringSize(_strings, from, to);
                 _compiler.PrepareStringLoad(0, totalStringSize); // The first argument is currently unused
                 _logger.LogInformation("4/5 Uploading strings...");
                 _compiler.SendStrings(progress, _strings.ToList(), from, to, false);
-                Console.WriteLine();
+                progress.Done();
                 previous = 0;
                 _logger.LogInformation("5/5 Uploading special types...");
                 _compiler.SendSpecialTypeList(progress, _specialTypeList.Select(x => x.Token).ToList(), from, to, false);
@@ -352,7 +367,7 @@ namespace ArduinoCsCompiler
                     _compiler.WriteFlashHeader(to, TokenOfStartupMethod, CompilerSettings.AutoRestartProgram ? CodeStartupFlags.AutoRestartAfterCrash : CodeStartupFlags.None);
                 }
 
-                Console.WriteLine();
+                progress.Done();
                 previous = 0;
 
                 _logger.LogInformation("Upload successfully completed");

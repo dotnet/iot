@@ -20,5 +20,8 @@ namespace ArduinoCsCompiler
 
         [Option('q', "quiet", Required = false, Default = false, HelpText = "Minimal output only. This is ignored if -v is specified")]
         public bool Quiet { get; set; }
+
+        [Option("no-progress", HelpText = "Suppress printing progress messages", Default = false)]
+        public bool NoProgress { get; set; }
     }
 }
