@@ -11,7 +11,7 @@ namespace Iot.Device.VirtualGpio
     /// </summary>
     public class VirtualGpioController : GpioController
     {
-        private readonly VirtualGpioDriver _driver;
+        private VirtualGpioDriver _driver;
 
         /// <summary>
         /// Create a virtual GPIO controller with a specific number of pins.
@@ -54,5 +54,12 @@ namespace Iot.Device.VirtualGpio
         /// <param name="value">Input value. Null represents a Hi-Z state</param>
         /// <exception cref="SystemException">Throws when the pin is in output mode and try to set a different pin value.</exception>
         public void Input(int pinNumber, PinValue? value) => _driver.Input(pinNumber, value);
+
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            _driver?.Dispose();
+            _driver = null!;
+        }
     }
 }

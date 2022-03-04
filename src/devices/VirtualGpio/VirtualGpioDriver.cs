@@ -11,15 +11,14 @@ namespace Iot.Device.VirtualGpio
     {
         internal PinValue this[int pinNumber] => _pinValues[pinNumber];
 
-        protected override int PinCount { get; }
-
         internal event PinChangeEventHandler? InputPinValueChanged;
-
         internal event PinChangeEventHandler? OutputPinValueChanged;
 
-        private readonly bool[] _openStatus;
-        private readonly PinMode[] _pinModes;
-        private readonly PinValue[] _pinValues;
+        protected override int PinCount { get; }
+
+        private bool[] _openStatus;
+        private PinMode[] _pinModes;
+        private PinValue[] _pinValues;
 
         internal VirtualGpioDriver(int pinCount)
         {
@@ -155,6 +154,16 @@ namespace Iot.Device.VirtualGpio
             {
                 throw new InvalidOperationException("Cannot write pin value while the pin is not in output mode.");
             }
+        }
+
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            _openStatus = null!;
+            _pinModes = null!;
+            _pinValues = null!;
+
+            base.Dispose(disposing);
         }
     }
 }
