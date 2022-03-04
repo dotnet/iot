@@ -40,7 +40,11 @@ if (ledCount == 0)
 
 while (true)
 {
-    Console.Write($"{Environment.NewLine}1: WS2812b{Environment.NewLine}2: WS2815b{Environment.NewLine}3: SK68012{Environment.NewLine}0: Exit{Environment.NewLine}Type of Strip: ");
+    Console.WriteLine("1: WS2812b");
+    Console.WriteLine("2: WS2815b");
+    Console.WriteLine("3: SK68012");
+    Console.WriteLine("0: Exit");
+    Console.Write("Type of Strip: ");
     var ledType = Console.ReadLine()!.Trim();
 
     switch (ledType)
