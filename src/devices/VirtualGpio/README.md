@@ -17,6 +17,7 @@ PinChangeEventHandler pinValueChanged = (sender, args) =>
 {
     Console.WriteLine($"PinNumber: {args.PinNumber}, ChangeType: {args.ChangeType}");
 };
+
 vGpio.OutputPinValueChanged += pinValueChanged;
 vGpio.InputPinValueChanged += pinValueChanged;
 ```
@@ -24,7 +25,7 @@ vGpio.InputPinValueChanged += pinValueChanged;
 ## Write output pins
 ```csharp
 vGpio.OpenPin(0, PinMode.Output);
-vGpio.Write(0, PinValue.High);  // set to high -> trigger `OutputPinValueChanged` event
+vGpio.Write(0, PinValue.High); // set to high -> trigger `OutputPinValueChanged` event
 ```
 
 ## Control input pins
