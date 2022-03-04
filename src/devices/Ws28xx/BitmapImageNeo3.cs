@@ -17,6 +17,9 @@ namespace Iot.Device.Ws28xx
         // data means we have to add 30 bytes of zero padding.
         private const int ResetDelayInBytes = 30;
 
+        protected const int BytesPerComponent = 3;
+        protected const int BytesPerPixel = BytesPerComponent * 3;
+
         public BitmapImageNeo3(int width, int height)
             : base(new byte[width * height * BytesPerPixel + ResetDelayInBytes], width, height, width * BytesPerPixel)
         {
@@ -37,10 +40,6 @@ namespace Iot.Device.Ws28xx
         }
 
         protected static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
-
-        protected static int BytesPerComponent => 3;
-
-        protected static int BytesPerPixel => BytesPerComponent * 3;
 
         static BitmapImageNeo3()
         {
