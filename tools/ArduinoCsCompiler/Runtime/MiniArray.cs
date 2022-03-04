@@ -10,7 +10,7 @@ namespace ArduinoCsCompiler.Runtime
     {
         public int Length
         {
-            [ArduinoImplementation("ArrayGetLength")]
+            [ArduinoImplementation("ArrayGetLength", 50)]
             get
             {
                 throw new NotImplementedException();
@@ -128,13 +128,13 @@ namespace ArduinoCsCompiler.Runtime
             Copy(sourceArray, isourceIndex, destinationArray, idestinationIndex, ilength);
         }
 
-        [ArduinoImplementation("ArrayCopyCore")]
+        [ArduinoImplementation("ArrayCopyCore", 51)]
         private static void CopyCore(Array sourceArray, int sourceIndex, Array destinationArray, int destinationIndex, int length)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("ArrayClear")]
+        [ArduinoImplementation("ArrayClear", 52)]
         public static void Clear(Array array, int index, int length)
         {
             throw new NotImplementedException();
@@ -292,7 +292,7 @@ namespace ArduinoCsCompiler.Runtime
             //    return InternalCreate((void*)t.TypeHandle.Value, lengths.Length, pLengths, pLowerBounds);
         }
 
-        [ArduinoImplementation("ArrayInternalCreate")]
+        [ArduinoImplementation("ArrayInternalCreate", 53)]
         private static unsafe Array InternalCreate(Type elementType, int rank, int* pLengths, int* pLowerBounds)
         {
             throw new NotImplementedException();
@@ -306,19 +306,25 @@ namespace ArduinoCsCompiler.Runtime
             return new ArrayIterator<T>(array);
         }
 
-        [ArduinoImplementation("ArraySetValue1")]
+        [ArduinoImplementation]
+        public static void Clear(Array array)
+        {
+            Clear(array, 0, array.Length);
+        }
+
+        [ArduinoImplementation("ArraySetValue1", 54)]
         public void SetValue(object? value, int index)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("ArrayGetValue1")]
+        [ArduinoImplementation("ArrayGetValue1", 55)]
         public object GetValue(int index)
         {
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("ArrayGetValue1")]
+        [ArduinoImplementation("ArrayGetValue1", 55)]
         public object InternalGetValue(int index)
         {
             throw new NotImplementedException();

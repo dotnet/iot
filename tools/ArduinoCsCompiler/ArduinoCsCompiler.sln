@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArduinoCsCompiler", "ArduinoCsCompiler.csproj", "{15BFC0F8-CC4E-4EBB-A04E-77F187D223D5}"
 EndProject
@@ -34,6 +34,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.sample", "..\..\src\devices\Arduino\samples\Arduino.sample.csproj", "{C6C5ABC7-8A2C-4127-92A4-6D2471AEB3AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mcp3xxx", "..\..\src\devices\Mcp3xxx\Mcp3xxx.csproj", "{A9978931-850E-4E46-9029-1BD82DE4FD6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button", "..\..\src\devices\Button\Button.csproj", "{9365DED9-2434-45BA-9669-0A0BF0991FCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -93,6 +95,10 @@ Global
 		{A9978931-850E-4E46-9029-1BD82DE4FD6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9978931-850E-4E46-9029-1BD82DE4FD6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9978931-850E-4E46-9029-1BD82DE4FD6E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9365DED9-2434-45BA-9669-0A0BF0991FCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9365DED9-2434-45BA-9669-0A0BF0991FCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9365DED9-2434-45BA-9669-0A0BF0991FCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9365DED9-2434-45BA-9669-0A0BF0991FCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
