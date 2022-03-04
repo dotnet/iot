@@ -7,11 +7,13 @@ It allows you to control input pins of GPIO using software code without having t
 # Usage
 
 ## Create vGPIO controller
+
 ```csharp
-VirtualGpioController vGpio = VirtualGpioController.Create(16);
+VirtualGpioController vGpio = VirtualGpioController.Create(16); // with 16 pins
 ```
 
 ## Add event handlers
+
 ```csharp
 PinChangeEventHandler pinValueChanged = (sender, args) =>
 {
@@ -23,20 +25,24 @@ vGpio.InputPinValueChanged += pinValueChanged;
 ```
 
 ## Write output pins
+
 ```csharp
 vGpio.OpenPin(0, PinMode.Output);
 vGpio.Write(0, PinValue.High); // set to high -> trigger `OutputPinValueChanged` event
 ```
 
 ## Control input pins
+
 ```csharp
 vGpio.Input(0, PinValue.Low); // connect to low -> shorted, throw exception
 ```
+
 ```csharp
 vGpio.OpenPin(1, PinMode.Input);
 vGpio.Input(1, PinValue.High);  // connect to high -> trigger `InputPinValueChanged` event
-vGpio.Input(1, null); // input Hi-Z(disconnect) -> ndefined behavior -> stay high -> no event
+vGpio.Input(1, null); // input Hi-Z(disconnect) -> undefined behavior -> stay high -> no event
 ```
+
 ```csharp
 vGpio.OpenPin(2, PinMode.InputPullUp); // default high
 vGpio.Input(2, PinValue.High); // connect to high -> no event
