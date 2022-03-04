@@ -9,7 +9,7 @@ namespace System.Device
     /// <summary>
     /// Helpers for short waits.
     /// </summary>
-    internal static class DelayHelper
+    static partial class DelayHelper
     {
         /* GetTimestamp() currently can take ~300ns. We hope to improve this to get better
          * fidelity for very tight spins.

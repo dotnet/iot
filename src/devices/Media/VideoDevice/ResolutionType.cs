@@ -11,16 +11,16 @@ namespace Iot.Device.Media
         /// <summary>
         /// Discrete
         /// </summary>
-        Discrete = v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE,
+        Discrete = InteropVideodev2.v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_DISCRETE,
 
         /// <summary>
         /// Continuous
         /// </summary>
-        Continuous = v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_CONTINUOUS,
+        Continuous = InteropVideodev2.v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_CONTINUOUS,
 
         /// <summary>
         /// Stepwise
         /// </summary>
-        Stepwise = v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_STEPWISE
+        Stepwise = InteropVideodev2.v4l2_frmsizetypes.V4L2_FRMSIZE_TYPE_STEPWISE
     }
 }

@@ -19,8 +19,4 @@
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
-  </ItemGroup>
-
 </Project>

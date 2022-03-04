@@ -15,7 +15,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
-    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
     <ProjectReference Include="..\..\Mcp3xxx\Mcp3xxx.csproj" />
     <ProjectReference Include="..\Arduino.csproj" />
   </ItemGroup>

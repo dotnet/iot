@@ -9,6 +9,5 @@
     <Compile Include="FamilyBindings\OneWireThermometerDevice.cs" />
     <Compile Include="FamilyBindings\OneWireThermometerDevice.Linux.cs" />
     <None Include="README.md" />
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>

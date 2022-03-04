@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bh1745CustomConfiguration.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bh1745", "Bh1745.csproj", "{C572C86D-5BB2-4610-84EA-768257758933}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{195588CF-3E28-4CCA-B529-123708FAD880}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{195588CF-3E28-4CCA-B529-123708FAD880}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

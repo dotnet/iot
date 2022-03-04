@@ -53,9 +53,9 @@ namespace Iot.Device.Ili9341
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
         public Ili9341(SpiDevice spiDevice, int dataCommandPin, int resetPin, int backlightPin = -1, int spiBufferSize = DefaultSPIBufferSize, GpioController? gpioController = null, bool shouldDispose = true)
         {
-            if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
+            if (spiBufferSize <= 0)
             {
-                throw new ArgumentException(nameof(spiBufferSize), "Value must be between 4096 and 65536.");
+                throw new ArgumentException(nameof(spiBufferSize), "Buffer size must be larger than 0.");
             }
 
             _spiDevice = spiDevice;
@@ -228,18 +228,6 @@ namespace Iot.Device.Ili9341
             };
             SendData(data2);
             SendCommand(Ili9341Command.MemoryWrite);
-        }
-
-        /// <summary>
-        /// Verifies value is within a specific range.
-        /// </summary>
-        /// <param name="value">Value to check.</param>
-        /// <param name="start">Starting value of range.</param>
-        /// <param name="end">Ending value of range.</param>
-        /// <returns>Determines if value is within range.</returns>
-        internal static bool InRange(uint value, uint start, uint end)
-        {
-            return value >= start && value <= end;
         }
 
         /// <summary>
