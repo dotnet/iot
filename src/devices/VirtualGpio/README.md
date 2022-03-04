@@ -34,6 +34,7 @@ vGpio.Write(0, PinValue.High); // set to high -> trigger `OutputPinValueChanged`
 ## Control input pins
 
 ```csharp
+vGpio.Input(0, PinValue.High); // connect to high -> same value, nothing happend
 vGpio.Input(0, PinValue.Low); // connect to low -> shorted, throw exception
 ```
 
@@ -47,5 +48,5 @@ vGpio.Input(1, null); // input Hi-Z(disconnect) -> undefined behavior -> stay hi
 vGpio.OpenPin(2, PinMode.InputPullUp); // default high
 vGpio.Input(2, PinValue.High); // connect to high -> no event
 vGpio.Input(2, PinValue.Low); // connect to low -> trigger `InputPinValueChanged` event
-vGpio.Input(2, null); // input Hi-Z(disconnect) -> go high -> trigger `InputPinValueChanged` event
+vGpio.Input(2, null); // input Hi-Z(disconnect) -> pull-up to high -> trigger `InputPinValueChanged` event
 ```
