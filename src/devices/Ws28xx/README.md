@@ -47,6 +47,7 @@ using SpiDevice spi = SpiDevice.Create(settings);
 
 Ws28xx neo = new Ws2808(spi, count);
 // Ws28xx neo = new Ws2812b(spi, Count);
+// Ws2815b neo = new Ws2815b(spi, ledCount);
 
 while (true)
 {
