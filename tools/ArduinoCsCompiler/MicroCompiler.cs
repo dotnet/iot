@@ -560,6 +560,17 @@ namespace ArduinoCsCompiler
                     }
 
                     staticFieldSize = Math.Max(SizeOfVoidPointer(), size);
+                    if (staticFieldSize > 8 && !classType.Name.Contains(PrivateImplementationDetailsName))
+                    {
+                        // large value types must have a size dividable by four when they're used as static fields, to align the static list correctly and avoid a difference between the
+                        // (aligned) structure size and the place for a static instance of that structure
+                        int delta = staticFieldSize % 4;
+                        if (delta != 0)
+                        {
+                            staticFieldSize += 4 - delta;
+                            size = staticFieldSize;
+                        }
+                    }
                 }
 
                 // The only (known) field that can contain a function pointer. Getting the type correct here helps in type tracking and debugging
@@ -789,30 +800,36 @@ namespace ArduinoCsCompiler
                 for (var index = 0; index < fields.Count; index++)
                 {
                     var member = fields[index];
+                    int nextMemberSize = 0;
                     if (index < fields.Count - 1)
                     {
                         var nextMember = fields[index + 1];
-                        int thisSize = member.SizeOfField;
+                        nextMemberSize = nextMember.SizeOfField;
+                    }
+                    else
+                    {
+                        nextMemberSize = Math.Min(4, newClassSize); // Make sure the whole struct aligns to 4 or the whole struct size again
+                    }
 
-                        // This value is non-zero if the next member is not aligned to its size
-                        int nextOffset = member.Offset + thisSize;
-                        int nextAlign = nextOffset % nextMember.SizeOfField;
-                        // No need to align to more than 32 bit (we're currently only supporting 32 bit CPUs, and 64 bit CPUs would normally also allow 32-bit aligned accesses
-                        bool nextIsAligned = (nextAlign % 4 == 0);
-                        while (!nextIsAligned)
-                        {
-                            thisSize += 1;
-                            nextOffset = member.Offset + thisSize;
-                            nextAlign = nextOffset % nextMember.SizeOfField;
-                            nextIsAligned = (nextAlign % 4 == 0);
-                        }
+                    int thisSize = member.SizeOfField;
+                    // This value is non-zero if the next member is not aligned to its size
+                    int nextOffset = member.Offset + thisSize;
+                    int nextAlign = nextOffset % nextMemberSize;
+                    // No need to align to more than 32 bit (we're currently only supporting 32 bit CPUs, and 64 bit CPUs would normally also allow 32-bit aligned accesses
+                    bool nextIsAligned = (nextAlign % 4 == 0);
+                    while (!nextIsAligned)
+                    {
+                        thisSize += 1;
+                        nextOffset = member.Offset + thisSize;
+                        nextAlign = nextOffset % nextMemberSize;
+                        nextIsAligned = (nextAlign % 4 == 0);
+                    }
 
-                        if (thisSize != member.SizeOfField)
-                        {
-                            // int diff = nextAlign - member.SizeOfField;
-                            member.SizeOfField = thisSize;
-                            newClassSize = CalcOffsets(fields); // need to recalculate after a change
-                        }
+                    if (thisSize != member.SizeOfField)
+                    {
+                        // int diff = nextAlign - member.SizeOfField;
+                        member.SizeOfField = thisSize;
+                        newClassSize = CalcOffsets(fields); // need to recalculate after a change
                     }
                 }
 
@@ -1701,17 +1718,18 @@ namespace ArduinoCsCompiler
                     sizeOfMember = Math.Max(minSizeOfMember, 8);
                     return VariableKind.Uint64;
                 }
-                else
+
+                if (t.DeclaringType == null || !t.DeclaringType.Name.Contains(PrivateImplementationDetailsName))
                 {
                     // Round up to next 4 bytes
-                    if ((sizeOfMember & 4) != 0)
+                    int delta = sizeOfMember % 4;
+                    if (delta != 0)
                     {
-                        sizeOfMember += 3;
-                        sizeOfMember = sizeOfMember & ~0x3;
+                        sizeOfMember += 4 - delta;
                     }
-
-                    return VariableKind.LargeValueType;
                 }
+
+                return VariableKind.LargeValueType;
             }
 
             sizeOfMember = SizeOfVoidPointer();
