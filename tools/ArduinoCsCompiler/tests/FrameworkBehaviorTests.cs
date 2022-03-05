@@ -43,7 +43,7 @@ namespace Iot.Device.Tests
         [Fact]
         public void MarshalOffsetOfBehaviorSimple()
         {
-            Assert.Equal(2, Marshal.SizeOf(typeof(System.Char)));
+            Assert.Equal(1, Marshal.SizeOf(typeof(System.Char))); // !!! this returns 1, because the default marshaller uses ASCII encoding
             Assert.Equal(0, Marshal.OffsetOf(typeof(TestAlignment), nameof(TestAlignment._a)).ToInt32());
             Assert.Equal(4, Marshal.OffsetOf(typeof(TestAlignment), nameof(TestAlignment._b)).ToInt32());
             Assert.Equal(5, Marshal.OffsetOf(typeof(TestAlignment), nameof(TestAlignment._c)).ToInt32());

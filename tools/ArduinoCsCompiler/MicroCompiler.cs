@@ -694,7 +694,8 @@ namespace ArduinoCsCompiler
             if (classType.IsConstructedGenericType)
             {
                 // If EqualityComparer<something> is used, we need to force a reference to IEquatable<something> and ObjectEqualityComparer<something>
-                // as they sometimes fail to get recognized. This is because of the indirections in DefaultEqualityComparer
+                // as they sometimes fail to get recognized. This is because CreateDefaultEqualityComparer uses the special reflection method
+                // CreateInstanceForAnotherGenericParameter
                 var openType = classType.GetGenericTypeDefinition();
                 if (openType == typeof(EqualityComparer<>))
                 {
@@ -704,8 +705,17 @@ namespace ArduinoCsCompiler
                     PrepareClassDeclaration(set, requiredInterface);
                     if (!typeArgs[0].IsValueType)
                     {
-                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                        PrepareClassDeclaration(set, alsoRequired);
+                        // If the class type implements IEquatable<T>, we need the GenericEqualityComparer, otherwise the ObjectEqualityComparer
+                        if (typeArgs[0].IsAssignableTo(requiredInterface))
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        else
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
                     }
                     else if (typeArgs[0].IsGenericType && typeArgs[0].GetGenericTypeDefinition() == typeof(Nullable<>))
                     {
@@ -734,6 +744,11 @@ namespace ArduinoCsCompiler
                             _logger.LogWarning(x, x.Message);
                         }
                     }
+                    ////else if (typeArgs[0].IsClass)
+                    ////{
+                    ////    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                    ////    PrepareClassDeclaration(set, alsoRequired);
+                    ////}
                 }
 
                 if (openType == typeof(Comparer<>))
@@ -744,6 +759,13 @@ namespace ArduinoCsCompiler
                     var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectComparer`1")!.MakeGenericType(typeArgs);
                     PrepareClassDeclaration(set, alsoRequired);
                 }
+
+                ////if (openType == typeof(IEquatable<>))
+                ////{
+                ////    var typeArgs = classType.GetGenericArguments();
+                ////    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                ////    PrepareClassDeclaration(set, alsoRequired);
+                ////}
             }
         }
 
