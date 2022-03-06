@@ -55,7 +55,7 @@ popd
 taskkill /im ExtendedConfigurableFirmataSim.exe /f
 
 Echo All done!
-
+exit /b 0
 :usage
 :error
 echo Usage: ArduinoCsCI.cmd [path-to-home-directory] [Configuration]
