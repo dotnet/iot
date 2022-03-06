@@ -31,7 +31,9 @@ namespace ArduinoCsCompiler
         /// </summary>
         private bool WritePartitionMap(string targetPath)
         {
-            Information alignment = Information.FromKibibytes(1);
+            // CONFIG_WL_SECTOR_SIZE is declared as 4096 in the ESP firmware headers
+            // Aligning to a smaller size will cause a failure to mount the Fat partition.
+            Information alignment = Information.FromBytes(4096);
             if (CommandLineOptions.FlashSize == null)
             {
                 return true;
