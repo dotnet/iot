@@ -4,12 +4,14 @@ trigger:
     include:
     - main
     - release/3.0
+    - feature-*
     
 pr:
   branches:
     include:
     - main
     - release/3.0
+    - feature-*
 
 variables:
   - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
