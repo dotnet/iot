@@ -3,7 +3,7 @@
 
 using System;
 
-namespace IoT.Device.Tsl256x
+namespace Iot.Device.Tsl256x
 {
     [Flags]
     internal enum Register : byte
