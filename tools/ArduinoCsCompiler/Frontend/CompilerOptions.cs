@@ -32,16 +32,16 @@ namespace ArduinoCsCompiler
             }
         }
 
-        [Value(0, HelpText = "Input file/assembly. A dll file containing the startup code", Required = true)]
+        [Value(0, HelpText = "Input file/assembly. A dll or exe file containing the startup code", Required = true, MetaName = "StartupAssembly")]
         public string InputAssembly { get; set; }
 
         [Option('e', "entrypoint", HelpText = "Entry point of program. Must be the name of a static method taking no arguments or a single string[] array.", Default = "Main")]
         public string EntryPoint { get; set; }
 
-        [Option("compileonly", Default = false, HelpText = "Only compile the code, don't upload. Check whether the code could be used on the microcontroller, but don't attempt an actual upload")]
+        [Option("compileonly", Default = false, HelpText = "Only compile the code, don't upload. Check whether the code could be used on the microcontroller, but don't attempt an actual upload.")]
         public bool CompileOnly { get; set; }
 
-        [Option("run", Default = true, HelpText = "Run the program after uploading. The compiler will switch to execution mode after upload and run the program, printing any log output to the console")]
+        [Option("run", Default = true, HelpText = "Run the program after uploading. The compiler will switch to execution mode after upload and run the program, printing any log output to the console.")]
         public bool Run { get; set; }
 
         [Option('d', "debug", HelpText = "Start the interactive remote debugger after the program has started.")]
@@ -53,8 +53,8 @@ namespace ArduinoCsCompiler
         [Option("keepifcurrent", Default = false, HelpText = "If specified, the program will not be transmitted if it is already loaded. Defaults to false, because not all changes might be caught.")]
         public bool DoNotWriteFlashIfAlreadyCurrent { get; set; }
 
-        [Option('c', "culture", HelpText = "The name of the culture to use for 'CultureInfo.CurrentCulture'. Must be a valid culture name such as 'de-CH' or 'Invariant'." +
-                                           "Defaults to the current culture during compile")]
+        [Option('c', "culture", HelpText = "The name of the culture to use for 'CultureInfo.CurrentCulture'. Must be a valid culture name such as 'de-CH' or 'Invariant'. " +
+                                           "Defaults to the current culture during compile.")]
         public string? CultureName { get; set; }
     }
 }

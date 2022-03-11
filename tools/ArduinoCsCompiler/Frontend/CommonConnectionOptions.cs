@@ -16,13 +16,13 @@ namespace ArduinoCsCompiler
             NetworkAddress = string.Empty;
         }
 
-        [Option('p', "port", HelpText = "The serial port where the microcontroller is connected. Defaults to auto-detect", SetName = "ConnectionType")]
+        [Option('p', "port", HelpText = "The serial port where the microcontroller is connected. Defaults to auto-detect.", SetName = "ConnectionType")]
         public string Port { get; set; }
 
         [Option('b', "baudrate", HelpText = "The baudrate to program the microcontroller.", Default = 115200)]
         public int Baudrate { get; set; }
 
-        [Option('n', "network", HelpText = "An IP address to connect to (with optional port number)", SetName = "ConnectionType")]
+        [Option('n', "network", HelpText = "An IP address to connect to (with optional port number).", SetName = "ConnectionType")]
         public string NetworkAddress { get; set; }
 
     }
