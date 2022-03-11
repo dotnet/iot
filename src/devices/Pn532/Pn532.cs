@@ -16,7 +16,7 @@ using Iot.Device.Pn532.AsTarget;
 using Iot.Device.Pn532.ListPassive;
 using Iot.Device.Pn532.RfConfiguration;
 using Iot.Device.Rfid;
-using IoT.Device.Pn532;
+using Iot.Device.Pn532;
 using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Pn532

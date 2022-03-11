@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace IoT.Device.Tsl256x
+namespace Iot.Device.Tsl256x
 {
     /// <summary>
     /// The channel to get the data from
