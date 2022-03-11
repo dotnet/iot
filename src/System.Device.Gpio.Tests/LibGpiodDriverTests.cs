@@ -61,7 +61,9 @@ namespace System.Device.Gpio.Tests
             using var gc = new GpioController(GetTestNumberingScheme(), GetTestDriver());
             gc.OpenPin(InputPin, PinMode.Input);
 
-            static void PinChanged(object sender, PinValueChangedEventArgs args) { }
+            static void PinChanged(object sender, PinValueChangedEventArgs args)
+            {
+            }
 
             for (var i = 0; i < 1000; i++)
             {
