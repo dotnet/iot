@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>9</LangVersion>
+    <IsPackable>false</IsPackable>
+    <!-- Keep quiet about duplicate package references from props files -->
+    <NoWarn>$(NoWarn);NETSDK1023</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\System.Device.Ports.SerialPort\System.Device.Ports.SerialPort.csproj" />
+  </ItemGroup>
+
+</Project>

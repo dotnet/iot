@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition="$(NETCoreSdkRuntimeIdentifier.StartsWith('win'))">$(TargetFrameworks);net6.0-windows10.0.17763.0</TargetFrameworks>
+    <LangVersion>9</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="winmd\**" />
+    <EmbeddedResource Remove="winmd\**" />
+    <None Remove="winmd\**" />
+    <None Include="buildTransitive\net5.0\System.Device.Ports.targets" Pack="true" PackagePath="\buildTransitive\net5.0" />
+    <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' != 'net6.0'">
+    <!--Remove the Linux-specific code-->
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <!--Remove Windows Code-->
+  </ItemGroup>
+
+</Project>
