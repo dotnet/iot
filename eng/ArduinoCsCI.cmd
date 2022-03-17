@@ -56,7 +56,11 @@ taskkill /im ExtendedConfigurableFirmataSim.exe /f
 
 Echo All done!
 exit /b 0
-:usage
+
 :error
+echo Tests failed. Error code %errorlevel%
+exit /b 1
+:usage
+
 echo Usage: ArduinoCsCI.cmd [path-to-home-directory] [Configuration]
 
