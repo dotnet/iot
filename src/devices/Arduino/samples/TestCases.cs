@@ -27,6 +27,8 @@ namespace Iot.Device.Arduino.Sample
         private readonly ArduinoBoard _board;
         private int _ledPin = 13;
         private int _buttonPin = 2;
+        private int _lowestI2cAddress = 0x3;
+        private int _highestI2cAddress = 0x77;
 
         private TestCases(ArduinoBoard board)
         {
@@ -149,17 +151,6 @@ namespace Iot.Device.Arduino.Sample
             Console.WriteLine();
         }
 
-        private static void ScanDeviceAddressesOnI2cBus(ArduinoBoard board)
-        {
-            var bus = board.CreateOrGetI2cBus(0);
-            Console.WriteLine();
-            // Due to internal caching, this takes much longer the first time.
-            var availableDevices = bus.PerformBusScan(new ProgressPrinter());
-            Console.WriteLine();
-            string result = availableDevices.ToUserReadableTable();
-            Console.WriteLine(result);
-        }
-
         private static void MyCallback(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
         {
             Console.WriteLine($"Event on GPIO {pinValueChangedEventArgs.PinNumber}, event type: {pinValueChangedEventArgs.ChangeType}");
@@ -216,6 +207,17 @@ namespace Iot.Device.Arduino.Sample
             }
 
             Console.ReadKey();
+        }
+
+        private void ScanDeviceAddressesOnI2cBus(ArduinoBoard board)
+        {
+            var bus = board.CreateOrGetI2cBus(0);
+            Console.WriteLine();
+            // Due to internal caching, this takes much longer the first time.
+            var availableDevices = bus.PerformBusScan(new ProgressPrinter(), _lowestI2cAddress, _highestI2cAddress);
+            Console.WriteLine();
+            string result = availableDevices.ToUserReadableTable();
+            Console.WriteLine(result);
         }
 
         internal bool Menu()
@@ -322,6 +324,21 @@ namespace Iot.Device.Arduino.Sample
                         }
 
                         Console.WriteLine($"Led-Pin: {_ledPin}. Button-Pin: {_buttonPin}");
+
+                        Console.WriteLine();
+                        Console.Write("Lowest Address for I2C bus scan? (Default: 0x03) ");
+                        input = Console.ReadLine()!;
+                        if (!int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _lowestI2cAddress))
+                        {
+                            _lowestI2cAddress = 3;
+                        }
+
+                        Console.Write("Highest Address for I2C bus scan? (Default: 0x77) ");
+                        input = Console.ReadLine()!;
+                        if (!int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _highestI2cAddress))
+                        {
+                            _highestI2cAddress = 0x77;
+                        }
                     }
 
                     break;
