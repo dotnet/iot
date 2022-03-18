@@ -9,7 +9,7 @@ using System.Threading;
 using UnitsNet;
 using UnitsNet.Units;
 
-namespace IoT.Device.Tsl256x
+namespace Iot.Device.Tsl256x
 {
     /// <summary>
     /// Light to Digital Converter TSL2560 and TSL2561

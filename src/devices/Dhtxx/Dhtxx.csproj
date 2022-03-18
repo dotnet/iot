@@ -11,12 +11,8 @@
     <Compile Include="Devices\Dht21.cs" />
     <Compile Include="Devices\Dht22.cs" />
     <Compile Include="DhtBase.cs" />
-    <Compile Include="..\Common\System\Device\DelayHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>

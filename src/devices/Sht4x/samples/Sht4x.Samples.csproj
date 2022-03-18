@@ -5,6 +5,5 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Sht4x.csproj" />
-    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>

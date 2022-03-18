@@ -6,7 +6,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// 32-bit vector of pins and values.
     /// </summary>
-    internal struct PinVector32
+    partial struct PinVector32
     {
         /// <summary>
         /// Bit vector of pin numbers from 0 (bit 0) to 31 (bit 31).

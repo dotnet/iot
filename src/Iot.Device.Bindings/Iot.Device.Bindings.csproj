@@ -12,6 +12,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage)</TargetsForTfmSpecificContentInPackage>
+    <!--Partial elements should declare access modifier: Disabled for this project to simplify handling in common project. See also there.
+    If we disable this here, the warning is still emmited for the individual projects.-->
+    <NoWarn>$(NoWarn);SA1205</NoWarn>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
   
@@ -32,7 +35,10 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
-	<PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../devices/CharacterLcd/BigFontMap.txt" />

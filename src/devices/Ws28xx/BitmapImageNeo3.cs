@@ -7,17 +7,18 @@ using Iot.Device.Graphics;
 namespace Iot.Device.Ws28xx
 {
     /// <summary>
-    /// Special 24bit RGB format for Neo pixel LEDs where each bit is converted to 3 bits.
+    /// Special 24bit GRB format for Neo pixel LEDs where each bit is converted to 3 bits.
     /// A one is converted to 110, a zero is converted to 100.
     /// </summary>
     internal class BitmapImageNeo3 : BitmapImage
     {
-        private const int BytesPerComponent = 3;
-        private const int BytesPerPixel = BytesPerComponent * 3;
         // The Neo Pixels require a 50us delay (all zeros) after. Since Spi freq is not exactly
         // as requested 100us is used here with good practical results. 100us @ 2.4Mbps and 8bit
         // data means we have to add 30 bytes of zero padding.
         private const int ResetDelayInBytes = 30;
+
+        protected const int BytesPerComponent = 3;
+        protected const int BytesPerPixel = BytesPerComponent * 3;
 
         public BitmapImageNeo3(int width, int height)
             : base(new byte[width * height * BytesPerPixel + ResetDelayInBytes], width, height, width * BytesPerPixel)
@@ -38,7 +39,8 @@ namespace Iot.Device.Ws28xx
             Data[offset++] = _lookup[c.B * BytesPerComponent + 2];
         }
 
-        private static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
+        protected static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
+
         static BitmapImageNeo3()
         {
             for (int i = 0; i < 256; i++)
