@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.Ports.SerialPort.Resources;
 using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
@@ -9,7 +10,6 @@ using System.Runtime.InteropServices;
 
 using Microsoft.Win32.SafeHandles;
 
-/*
 namespace System.Device.Ports.SerialPort
 {
     internal sealed class SafeSerialDeviceHandle : SafeHandleMinusOneIsInvalid
@@ -22,13 +22,18 @@ namespace System.Device.Ports.SerialPort
         internal static SafeSerialDeviceHandle Open(string portName)
         {
             Debug.Assert(portName != null, $"{nameof(portName)} must not be null");
+            if (portName == null)
+            {
+                throw new ArgumentNullException(nameof(portName));
+            }
+
             SafeSerialDeviceHandle handle = Interop.Serial.SerialPortOpen(portName);
 
             if (handle.IsInvalid)
             {
                 // exception type is matching Windows
                 throw new UnauthorizedAccessException(
-                    SR.Format(SR.UnauthorizedAccess_IODenied_Port, portName),
+                    ISR.Format(Strings.UnauthorizedAccess_IODenied_Port, portName),
                     Interop.GetIOException(Interop.Sys.GetLastErrorInfo()));
             }
 
@@ -46,4 +51,3 @@ namespace System.Device.Ports.SerialPort
         }
     }
 }
-*/

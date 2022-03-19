@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.ComponentModel;
+using System.Device.Ports.SerialPort.Resources;
 using System.IO;
 
 using Marshal = System.Runtime.InteropServices.Marshal;
@@ -13,7 +14,7 @@ namespace System.Device.Ports.SerialPort
         // Beginning of static Error methods
         internal static void EndOfFile()
         {
-            throw new EndOfStreamException(SRMessages.IO_EOF_ReadBeyondEOF);
+            throw new EndOfStreamException(Strings.IO_EOF_ReadBeyondEOF);
         }
 
         internal static string GetMessage(int errorCode)
@@ -23,7 +24,7 @@ namespace System.Device.Ports.SerialPort
 
         internal static Exception FileNotOpenException()
         {
-            return new ObjectDisposedException(null, SRMessages.Port_not_open);
+            return new ObjectDisposedException(null, Strings.Port_not_open);
         }
 
         internal static void FileNotOpen()
@@ -33,19 +34,19 @@ namespace System.Device.Ports.SerialPort
 
         internal static void WrongAsyncResult()
         {
-            throw new ArgumentException(SRMessages.Arg_WrongAsyncResult);
+            throw new ArgumentException(Strings.Arg_WrongAsyncResult);
         }
 
         internal static void EndReadCalledTwice()
         {
             // Should ideally be InvalidOperationExc but we can't maintain parity with Stream and SerialStream without some work
-            throw new ArgumentException(SRMessages.InvalidOperation_EndReadCalledMultiple);
+            throw new ArgumentException(Strings.InvalidOperation_EndReadCalledMultiple);
         }
 
         internal static void EndWriteCalledTwice()
         {
             // Should ideally be InvalidOperationExc but we can't maintain parity with Stream and SerialStream without some work
-            throw new ArgumentException(SRMessages.InvalidOperation_EndWriteCalledMultiple);
+            throw new ArgumentException(Strings.InvalidOperation_EndWriteCalledMultiple);
         }
     }
 }
