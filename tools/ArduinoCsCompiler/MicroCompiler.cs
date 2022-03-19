@@ -677,6 +677,16 @@ namespace ArduinoCsCompiler
                     token = set.GetOrAddFieldToken(field);
                 }
 
+                var specialAttrs = field.GetCustomAttributes(true);
+                foreach (var attr in specialAttrs)
+                {
+                    if (attr is ThreadStaticAttribute)
+                    {
+                        _logger.LogWarning($"Class {classType.MemberInfoSignature()} is using [ThreadStatic] on field {field.Name}. This is not supported.");
+                        fieldType |= VariableKind.ThreadSpecific;
+                    }
+                }
+
                 var newvar = new ClassMember(field, fieldType, token, size, -1, staticFieldSize);
                 memberTypes.Add(newvar);
             }

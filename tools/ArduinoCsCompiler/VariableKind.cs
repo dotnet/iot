@@ -29,6 +29,9 @@ namespace ArduinoCsCompiler
         AddressOfVariable = 35, // An address pointing to a variable slot on another method's stack or arglist
         FunctionPointer = 36, // A function pointer
         NativeHandle = 37, // A native handle (or pointer to one)
-        StaticMember = 128, // type is defined by the first value it gets
+        ThreadSpecific = 64, // The variable is thread local or thread static
+        StaticMember = 128, // The field is static
+
+        TypeFilter = 0b0011_1111,
     }
 }
