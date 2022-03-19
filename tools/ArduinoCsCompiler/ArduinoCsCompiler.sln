@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.Tests", "..\..\src\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board", "..\..\src\devices\Board\Board.csproj", "{2087A5D8-FE61-4F04-A0F6-E2A5D2D1475E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\..\src\devices\Common\CommonHelpers.csproj", "{93266917-C265-4F8C-B326-429486FC7C3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\..\src\devices\Common\Common.csproj", "{93266917-C265-4F8C-B326-429486FC7C3C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ArduinoCsCompiler.Tests", "tests\ArduinoCsCompiler.Tests.csproj", "{890DD31D-87C6-45B2-99E8-B0BEA7FAB5A3}"
 EndProject
