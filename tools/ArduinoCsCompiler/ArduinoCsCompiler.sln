@@ -29,7 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Frontend", "Frontend\Fronte
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{B096B0AC-B255-42CD-A935-8AF6734B0B8D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherStation", "samples\WeatherStation.csproj", "{599172D6-F472-4D53-BA77-044C0A32A2B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherStation", "samples\WeatherStation\WeatherStation.csproj", "{599172D6-F472-4D53-BA77-044C0A32A2B3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.sample", "..\..\src\devices\Arduino\samples\Arduino.sample.csproj", "{C6C5ABC7-8A2C-4127-92A4-6D2471AEB3AA}"
 EndProject
