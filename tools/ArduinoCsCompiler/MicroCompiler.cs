@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -2674,6 +2675,7 @@ namespace ArduinoCsCompiler
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.Generic.NonRandomizedStringEqualityComparer"));
             BringToFront(codeSequences, typeof(System.DateTime));
             BringToFront(codeSequences, typeof(MiniString)); // Initializes String.Empty
+            SendToBack(codeSequences, typeof(StreamWriter));
             SendToBack(codeSequences, GetSystemPrivateType("System.DateTimeFormat"));
             SendToBack(codeSequences, typeof(System.TimeZoneInfo));
 

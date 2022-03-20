@@ -13,9 +13,9 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(Monitor), true)]
     internal class MiniMonitor
     {
-        [ArduinoImplementation("MonitorEnter")]
         public static void Enter(Object o)
         {
+            Monitor.TryEnter(o, -1);
         }
 
         [ArduinoImplementation]
@@ -30,20 +30,37 @@ namespace ArduinoCsCompiler.Runtime
         {
         }
 
+        [ArduinoImplementation("MonitorPulseAll")]
         public static void PulseAll(Object o)
         {
-            // No op
         }
 
         public static void Pulse(Object o)
         {
-            // No op
+            PulseAll(o);
         }
 
         [ArduinoImplementation("MonitorWait")]
         public static bool Wait(Object obj, Int32 millisecondsTimeout)
         {
             throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("MonitorTryEnter")]
+        public static bool TryEnter(object obj, Int32 millisecondsTimeout)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static bool TryEnter(object obj, Int32 millisecondsTimeout, ref bool lockTaken)
+        {
+            if (TryEnter(obj, millisecondsTimeout))
+            {
+                lockTaken = true;
+                return true;
+            }
+
+            return false;
         }
     }
 }

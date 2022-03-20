@@ -22,6 +22,12 @@ namespace ArduinoCsCompiler.Tests
             return _data;
         }
 
+        public static int DiningPhilosophers(int a, int b)
+        {
+            DiningPhilosopher.StartDinner();
+            return 1;
+        }
+
         private static void MyStaticThreadStart1()
         {
             _data = 1;

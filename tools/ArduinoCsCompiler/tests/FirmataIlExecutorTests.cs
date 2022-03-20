@@ -48,7 +48,7 @@ namespace Iot.Device.Arduino.Tests
 
             var set = Compiler.PrepareAndRunExecutionSet(method, settings);
 
-            CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(20));
+            CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(60));
 
             if (executeLocally)
             {
@@ -434,9 +434,17 @@ namespace Iot.Device.Arduino.Tests
 
         [Theory]
         [InlineData(nameof(ThreadingTests.StartAndStopThread), 1)]
+        [InlineData(nameof(ThreadingTests.DiningPhilosophers), 1)]
         public void SimpleThreading(string methodName, Int32 expected)
         {
-            LoadCodeMethod(typeof(ThreadingTests), methodName, 0, 0, expected);
+            // No exclusions for this test
+            var settings = new CompilerSettings()
+            {
+                CreateKernelForFlashing = false,
+                UseFlashForKernel = false
+            };
+
+            LoadCodeMethod(typeof(ThreadingTests), methodName, 0, 0, expected, settings);
         }
     }
 }
