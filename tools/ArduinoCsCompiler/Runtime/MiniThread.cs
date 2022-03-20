@@ -10,13 +10,17 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Threading.Thread), false, IncludingPrivates = true)]
     internal class MiniThread
     {
-#pragma warning disable 414
+#pragma warning disable 414, SA1306
+        private IntPtr _DONT_USE_InternalThread;
+        private int _managedThreadId;
         private ExecutionContext? _executionContext;
-#pragma warning restore 414
+#pragma warning restore 414, SA1306
 
         public MiniThread()
         {
             _executionContext = null;
+            _DONT_USE_InternalThread = IntPtr.Zero;
+            _managedThreadId = 1;
         }
 
         /// <summary>
@@ -65,10 +69,9 @@ namespace ArduinoCsCompiler.Runtime
 
         public int ManagedThreadId
         {
-            [ArduinoImplementation]
             get
             {
-                return 1;
+                return _managedThreadId;
             }
         }
 
@@ -78,10 +81,9 @@ namespace ArduinoCsCompiler.Runtime
             Sleep((int)delay.TotalMilliseconds);
         }
 
-        [ArduinoImplementation]
+        [ArduinoImplementation("ThreadYield")]
         public static bool Yield()
         {
-            // We are running in a single-thread environment, so this is effectively a no-op
             return false;
         }
 
@@ -107,6 +109,27 @@ namespace ArduinoCsCompiler.Runtime
         public static Thread GetCurrentThreadNative()
         {
             return MiniUnsafe.As<Thread>(new MiniThread());
+        }
+
+        /// <summary>
+        /// First arg is of type ThreadHandle, but this is a value type over an IntPtr, so their layout is identical
+        /// </summary>
+        [ArduinoImplementation("ThreadStartInternal", CompareByParameterNames = true)]
+        public static unsafe void StartInternal(IntPtr t, int stackSize, int priority, char* pThreadName)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("ThreadInitialize")]
+        public void Initialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("ThreadJoin")]
+        public bool Join(int millisecondsTimeout)
+        {
+            throw new NotImplementedException();
         }
     }
 }

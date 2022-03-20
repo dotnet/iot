@@ -12,6 +12,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using ArduinoCsCompiler;
+using ArduinoCsCompiler.Tests;
 using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 using Xunit.Sdk;
@@ -30,9 +31,9 @@ namespace Iot.Device.Arduino.Tests
             Compiler.ClearAllData(true, false);
         }
 
-        private void LoadCodeMethod<T1, T2, T3>(string methodName, T1 a, T2 b, T3 expectedResult, CompilerSettings? settings = null, bool executeLocally = true)
+        private void LoadCodeMethod<T1, T2, T3>(Type testClass, string methodName, T1 a, T2 b, T3 expectedResult, CompilerSettings? settings = null, bool executeLocally = true)
         {
-            var methods = typeof(TestMethods).GetMethods().Where(x => x.Name == methodName).ToList();
+            var methods = testClass.GetMethods().Where(x => x.Name == methodName).ToList();
             var method = methods.Single();
 
             if (settings == null)
@@ -140,7 +141,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.SmallerOrEqualS), -2, -2, true)]
         public void TestBooleanOperation(string methodName, int argument1, int argument2, bool expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -175,7 +176,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.RshUnS), -8, 1, 2147483644)]
         public void TestArithmeticOperationSigned(string methodName, int argument1, int argument2, int expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -209,7 +210,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.LoadFloatConstant), 0.0, 0.0, 2.0)] // tests the LDC.R4 instruction
         public void TestArithmeticOperationSignedFloat(string methodName, float argument1, float argument2, float expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -233,7 +234,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.LoadDoubleConstant), 0.0, 0.0, 2.0)] // tests the LDC.R8 instruction
         public void TestArithmeticOperationSignedDouble(string methodName, double argument1, double argument2, double expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -260,7 +261,7 @@ namespace Iot.Device.Arduino.Tests
         public void TestArithmeticOperationUnsigned(string methodName, Int64 argument1, Int64 argument2, Int64 expected)
         {
             // Method signature as above, otherwise the test data conversion fails
-            LoadCodeMethod(methodName, (uint)argument1, (uint)argument2, (uint)expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, (uint)argument1, (uint)argument2, (uint)expected);
         }
 
         [Theory]
@@ -268,7 +269,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.ResultTypesTest2), 21, -20, 1)]
         public void TestTypeConversions(string methodName, UInt32 argument1, int argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -281,7 +282,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.StaggedArrayTest), 5, 7, (int)'3')]
         public void ArrayTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -295,7 +296,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.StructInterfaceCall3), 15, 3, 12)]
         public void StructTests(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -308,21 +309,21 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.LargeStructList2), 1, 2, 1)]
         public void LargeStructTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
         [InlineData(nameof(TestMethods.CastClassTest), 0, 0, 1)]
         public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = true, UseFlashForKernel = true });
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = true, UseFlashForKernel = true });
         }
 
         [Theory]
         [InlineData(nameof(TestMethods.SpanImplementationBehavior), 5, 1, 1)]
         public void SpanTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected);
         }
 
         [Theory]
@@ -331,13 +332,13 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.EnumGetValues2))]
         public void EnumTest(string methodName)
         {
-            LoadCodeMethod(methodName, 0, 0, 1);
+            LoadCodeMethod(typeof(TestMethods), methodName, 0, 0, 1);
         }
 
         [Fact]
         public void EnumsHaveNames()
         {
-            LoadCodeMethod(nameof(TestMethods.EnumsHaveNames), 0, 0, 1, CompilerSettings, false);
+            LoadCodeMethod(typeof(TestMethods), nameof(TestMethods.EnumsHaveNames), 0, 0, 1, CompilerSettings, false);
         }
 
         [Theory]
@@ -345,7 +346,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.DoubleToString2))]
         public void DoubleToStringTest(string name)
         {
-            LoadCodeMethod(name, 20.23, 202.1, 20.23, CompilerSettings);
+            LoadCodeMethod(typeof(TestMethods), name, 20.23, 202.1, 20.23, CompilerSettings);
         }
 
         /// <summary>
@@ -373,7 +374,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = true
             };
 
-            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]
@@ -382,7 +383,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.IterateOverArray3), 1)]
         public void IteratorProblems(string methodName, int arg1)
         {
-            LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
         }
 
         /// <summary>
@@ -394,7 +395,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.UnsafeSizeOf), 1)]
         public void CanMergeSimilarGenericMethods(string methodName, int arg1)
         {
-            LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
         }
 
         [Theory]
@@ -412,7 +413,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.FinallyInDifferentBlock), 0)]
         public void ExceptionHandling(string methodName, int arg1)
         {
-            LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
         }
 
         [Theory]
@@ -420,7 +421,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.TryCatchIndexOutOfRangeException), 10)]
         public void ExceptionHandlingForBuiltinErrors(string methodName, int arg1)
         {
-            LoadCodeMethod(methodName, arg1, 0, 1, CompilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
         }
 
         [Theory]
@@ -428,7 +429,14 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.StringStartsWith), 1)]
         public void StringTest(string methodName, Int32 expected)
         {
-            LoadCodeMethod(methodName, 0, 0, expected);
+            LoadCodeMethod(typeof(TestMethods), methodName, 0, 0, expected);
+        }
+
+        [Theory]
+        [InlineData(nameof(ThreadingTests.StartAndStopThread), 1)]
+        public void SimpleThreading(string methodName, Int32 expected)
+        {
+            LoadCodeMethod(typeof(ThreadingTests), methodName, 0, 0, expected);
         }
     }
 }

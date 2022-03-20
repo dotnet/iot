@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using ArduinoCsCompiler.Runtime;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
@@ -688,7 +689,16 @@ namespace ArduinoCsCompiler
                 return GetOrAddMethodToken(replacement, callingMethod);
             }
 
-            token = _nextToken++;
+            if (methodBase.DeclaringType == typeof(Thread) && methodBase.Name == "StartCallback")
+            {
+                // We need to be able to recognize this method in the backend
+                token = (int)KnownTypeTokens.ThreadStartCallback;
+            }
+            else
+            {
+                token = _nextToken++;
+            }
+
             _patchedMethodTokens.Add(methodBase, token);
             _inversePatchedMethodTokens.Add(token, methodBase);
             return token;

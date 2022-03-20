@@ -538,6 +538,35 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            if (classType == typeof(Thread))
+            {
+                fields = fields.OrderBy(x =>
+                {
+                    // make sure the order is given
+                    if (x.Name == "_DONT_USE_InternalThread")
+                    {
+                        return 0;
+                    }
+
+                    if (x.Name == "_managedThreadId")
+                    {
+                        return 1;
+                    }
+
+                    if (x.Name == "_name")
+                    {
+                        return 2;
+                    }
+
+                    if (x.Name == "_startHelper")
+                    {
+                        return 3;
+                    }
+
+                    return 10;
+                }).ToList();
+            }
+
             if (classType.IsValueType && fields.Count > 1)
             {
                 // Order value types by marshalled position. This guarantees correct ordering, which is particularly important
@@ -938,6 +967,18 @@ namespace ArduinoCsCompiler
             if (_disposed)
             {
                 throw new ObjectDisposedException(nameof(MicroCompiler));
+            }
+
+            if (set.Methods().Any(x => x.MethodBase.DeclaringType == typeof(Thread) && x.MethodBase.Name == "Start"))
+            {
+                // We get here if Thread.Start() is called anywhere. This means we need to also include Thread.StartCallback
+                var methodToInclude = typeof(Thread).GetMethod("StartCallback", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (methodToInclude == null)
+                {
+                    throw new NotSupportedException("The method Thread.StartCallback cannot be found");
+                }
+
+                PrepareCodeInternal(set, new EquatableMethod(methodToInclude), null);
             }
 
             if (forKernel)

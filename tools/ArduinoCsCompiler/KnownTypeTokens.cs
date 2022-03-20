@@ -5,7 +5,7 @@
 namespace ArduinoCsCompiler
 {
     /// <summary>
-    /// A set of tokens which is always assigned to these classes, because they need to be identifiable in the firmware, i.e. the token assigned
+    /// A set of tokens which are always assigned to these classes (or methods), because they need to be identifiable in the firmware, i.e. the token assigned
     /// to "System.Type" is always 2. See GetOrAddClassToken for where this is used.
     /// </summary>
     public enum KnownTypeTokens
@@ -42,7 +42,8 @@ namespace ArduinoCsCompiler
         OverflowException = 41,
         IoException = 42,
         ArithmeticException = 43,
-        LargestKnownTypeToken = 50,
+        ThreadStartCallback = 50, // The token of Thread.StartCallback(). This is the startup method for new threads.
+        LargestKnownTypeToken = 51,
         // If more of these are required, check the ctor of ExecutionSet to make sure enough entries have been reserved
         IEnumerableOfT = ExecutionSet.GenericTokenStep,
         SpanOfT = ExecutionSet.GenericTokenStep * 2,
