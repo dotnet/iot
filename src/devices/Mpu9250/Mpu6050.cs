@@ -157,11 +157,20 @@ namespace Iot.Device.Imu
         [Telemetry("Acceleration")]
         public Vector3 GetAccelerometer() => GetRawAccelerometer() * AccelerationScale;
 
-        private Vector3 GetRawAccelerometer()
+        /// <summary>
+        /// Gets the raw accelerometer data
+        /// </summary>
+        /// <returns></returns>
+        internal Vector3 GetRawAccelerometer()
         {
             Span<byte> rawData = stackalloc byte[6]
             {
-                0, 0, 0, 0, 0, 0
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
             };
             Vector3 ace = new Vector3();
             ReadBytes(Register.ACCEL_XOUT_H, rawData);
@@ -300,11 +309,20 @@ namespace Iot.Device.Imu
         [Telemetry("AngularRate")]
         public Vector3 GetGyroscopeReading() => GetRawGyroscope() * GyroscopeScale;
 
-        private Vector3 GetRawGyroscope()
+        /// <summary>
+        /// Gets the raw gyroscope data
+        /// </summary>
+        /// <returns></returns>
+        internal Vector3 GetRawGyroscope()
         {
             Span<byte> rawData = stackalloc byte[6]
             {
-                0, 0, 0, 0, 0, 0
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
             };
             Vector3 gyro = new Vector3();
             ReadBytes(Register.GYRO_XOUT_H, rawData);
@@ -326,7 +344,8 @@ namespace Iot.Device.Imu
         {
             Span<byte> rawData = stackalloc byte[2]
             {
-                0, 0
+                0,
+                0
             };
             ReadBytes(Register.TEMP_OUT_H, rawData);
             // formula from the documentation
@@ -444,7 +463,8 @@ namespace Iot.Device.Imu
             {
                 Span<byte> rawData = stackalloc byte[2]
                 {
-                    0, 0
+                    0,
+                    0
                 };
                 ReadBytes(Register.FIFO_COUNTH, rawData);
                 return BinaryPrimitives.ReadUInt16BigEndian(rawData);
@@ -501,174 +521,172 @@ namespace Iot.Device.Imu
         #region Calibration and tests
 
         /// <summary>
-        /// <![CDATA[
-        /// Run a self test and returns the gyroscope and accelerometer vectores
-        /// a. If factory Self-Test values ST_OTP≠0, compare the current Self-Test response (GXST, GYST, GZST, AXST, AYST and AZST)
-        /// to the factory Self-Test values (ST_OTP) and report Self-Test is passing if all the following criteria are fulfilled:
-        /// Axis    | Pass criteria
-        /// X-gyro  | (GXST / GXST_OTP) > 0.5
-        /// Y-gyro  | (GYST / GYST_OTP) > 0.5
-        /// Z-gyro  | (GZST / GZST_OTP) > 0.5
-        /// X-Accel |  0.5 < (AXST / AXST_OTP) < 1.5
-        /// Y-Accel | 0.5 < (AYST / AYST_OTP) < 1.5
-        /// Z-Accel | 0.5 < (AZST / AZST_OTP) < 1.5
-        /// b. If factory Self-Test values ST_OTP=0, compare the current Self-Test response (GXST, GYST, GZST, AXST, AYST and AZST)
-        /// to the ST absolute limits (ST_AL) and report Self-Test is passing if all the  following criteria are fulfilled.
-        /// Axis   | Pass criteria
-        /// X-gyro | |GXST| ≥ 60dps
-        /// Y-gyro | |GYST| ≥ 60dps
-        /// Z-gyro | |GZST| ≥ 60dps
-        /// X-Accel| 225mgee ≤ |AXST| ≤ 675mgee
-        /// Y-Accel| 225mgee ≤ |AXST| ≤ 675mgee
-        /// Z-Accel| 225mgee ≤ |AXST| ≤ 675mgee
-        /// c. If the Self-Test passes criteria (a) and (b), it’s necessary to check gyro offset values.
-        /// Report passing Self-Test if the following criteria fulfilled.
-        /// Axis   | Pass criteria
-        /// X-gyro | |GXOFFSET| ≤ 20dps
-        /// Y-gyro | |GYOFFSET| ≤ 20dps
-        /// Z-gyro | |GZOFFSET| ≤ 20dps
-        /// ]]>
+        /// Perform full calibration the gyroscope and the accelerometer
+        /// It will automatically adjust as well the offset stored in the device
+        /// The result bias will be stored in the AcceloremeterBias and GyroscopeBias
         /// </summary>
-        /// <returns>the gyroscope and accelerometer vectors</returns>
+        /// <returns>Gyroscope and accelerometer bias</returns>
         [Command]
-        public (Vector3 GyroscopeAverage, Vector3 AccelerometerAverage) RunGyroscopeAccelerometerSelfTest()
+        public (Vector3 GyroscopeBias, Vector3 AccelerometerBias) CalibrateGyroscopeAccelerometer()
         {
-            // Used for the number of cycles to run the test
-            // Value is 200 according to documentation AN-MPU-9250A-03
-            const int numCycles = 200;
+            // = 131 LSB/degrees/sec
+            const int GyroSensitivity = 131;
+            // = 16384 LSB/g
+            const int AccSensitivity = 16384;
+            byte i2cMaster;
+            byte userControls;
 
-            Vector3 accAverage = new Vector3();
-            Vector3 gyroAvegage = new Vector3();
-            Vector3 accSelfTestAverage = new Vector3();
-            Vector3 gyroSelfTestAverage = new Vector3();
-            Vector3 gyroSelfTest = new Vector3();
-            Vector3 accSelfTest = new Vector3();
-            Vector3 gyroFactoryTrim = new Vector3();
-            Vector3 accFactoryTrim = new Vector3();
-            // Tests done with slower GyroScale and Accelerator so 2G so value is 0 in both cases
-            byte gyroAccScale = 0;
+            Span<byte> rawData = stackalloc byte[12];
 
-            // Setup the registers for Gyroscope as in documentation
-            // DLPF Config | LPF BW | Sampling Rate | Filter Delay
-            // 2           | 92Hz   | 1kHz          | 3.9ms
-            WriteRegister(Register.SMPLRT_DIV, 0x00);
-            WriteRegister(Register.CONFIG, 0x02);
+            Vector3 gyroBias = new Vector3();
+            Vector3 acceBias = new Vector3();
+
+            Reset();
+            // Enable accelerator and gyroscope
+            DisableModes = DisableModes.DisableNone;
+            Thread.Sleep(200);
+            // Disable all interrupts
+            WriteRegister(Register.INT_ENABLE, 0x00);
+            // Disable FIFO
+            FifoModes = FifoModes.None;
+            // Disable I2C master
+            i2cMaster = ReadByte(Register.I2C_MST_CTRL);
+            WriteRegister(Register.I2C_MST_CTRL, 0x00);
+            // Disable FIFO and I2C master modes
+            userControls = ReadByte(Register.USER_CTRL);
+            WriteRegister(Register.USER_CTRL, (byte)UserControls.None);
+            // Reset FIFO and DMP
+            WriteRegister(Register.USER_CTRL, (byte)UserControls.FIFO_RST);
+            DelayHelper.DelayMilliseconds(15, false);
+
+            // Configure MPU6050 gyro and accelerometer for bias calculation
+            // Set low-pass filter to 184 Hz
+            GyroscopeBandwidth = GyroscopeBandwidth.Bandwidth0184Hz;
+            AccelerometerBandwidth = AccelerometerBandwidth.Bandwidth0184Hz;
+            // Set sample rate to 1 kHz
+            SampleRateDivider = 0;
+            // Set gyro to maximum sensitivity
             GyroscopeRange = GyroscopeRange.Range0250Dps;
-            // Set full scale range for the gyro to 250 dps
-            // Setup the registers for accelerometer as in documentation
-            // DLPF Config | LPF BW | Sampling Rate | Filter Delay
-            // 2           | 92Hz   | 1kHz          | 7.8ms
-            WriteRegister(Register.ACCEL_CONFIG_2, 0x02);
             AccelerometerRange = AccelerometerRange.Range02G;
 
-            // Read the data 200 times as per the documentation page 5
-            for (int reading = 0; reading < numCycles; reading++)
+            // Configure FIFO will be needed for bias calculation
+            FifoModes = FifoModes.GyroscopeX | FifoModes.GyroscopeY | FifoModes.GyroscopeZ | FifoModes.Accelerometer;
+            // accumulate 40 samples in 40 milliseconds = 480 bytes
+            // Do not exceed 512 bytes max buffer
+            DelayHelper.DelayMilliseconds(40, false);
+            // We have our data, deactivate FIFO
+            FifoModes = FifoModes.None;
+
+            // How many sets of full gyro and accelerometer data for averaging
+            var packetCount = FifoCount / 12;
+
+            for (uint reading = 0; reading < packetCount; reading++)
             {
-                gyroAvegage = GetRawGyroscope();
-                accAverage = GetRawAccelerometer();
+                Vector3 accel_temp = new Vector3();
+                Vector3 gyro_temp = new Vector3();
+
+                // Read data
+                ReadBytes(Register.FIFO_R_W, rawData);
+
+                // Form signed 16-bit integer for each sample in FIFO
+                accel_temp.X = BinaryPrimitives.ReadInt16BigEndian(rawData);
+                accel_temp.Y = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(2));
+                accel_temp.Z = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(4));
+                gyro_temp.X = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(6));
+                gyro_temp.Y = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(8));
+                gyro_temp.Z = BinaryPrimitives.ReadInt16BigEndian(rawData.Slice(10));
+
+                acceBias += accel_temp;
+                gyroBias += gyro_temp;
             }
 
-            accAverage /= numCycles;
-            gyroAvegage /= numCycles;
+            // Make the average
+            acceBias /= packetCount;
+            gyroBias /= packetCount;
 
-            // Set USR_Reg: (1Bh) Gyro_Config, gdrive_axisCTST [0-2] to b111 to enable Self-Test.
-            WriteRegister(Register.ACCEL_CONFIG, 0xE0);
-            // Set USR_Reg: (1Ch) Accel_Config, AX/Y/Z_ST_EN   [0-2] to b111 to enable Self-Test.
-            WriteRegister(Register.GYRO_CONFIG, 0xE0);
-            // Wait 20ms for oscillations to stabilize
-            Thread.Sleep(20);
+            // bias on Z is cumulative
+            acceBias.Z += acceBias.Z > 0 ? -AccSensitivity : AccSensitivity;
 
-            // Read the gyroscope and accelerometer output at a 1kHz rate and average 200 readings.
-            // The averaged values will be the LSB of GX_ST_OS, GY_ST_OS, GZ_ST_OS, AX_ST_OS, AY_ST_OS and AZ_ST_OS in the software
-            for (int reading = 0; reading < numCycles; reading++)
-            {
-                gyroSelfTestAverage = GetRawGyroscope();
-                accSelfTestAverage = GetRawAccelerometer();
-            }
+            // Divide by 4 to get 32.9 LSB per deg/s
+            // Biases are additive, so change sign on calculated average gyro biases
+            rawData[0] = (byte)(((int)(-gyroBias.X / 4) >> 8) & 0xFF);
+            rawData[1] = (byte)((int)(-gyroBias.X / 4) & 0xFF);
+            rawData[2] = (byte)(((int)(-gyroBias.Y / 4) >> 8) & 0xFF);
+            rawData[3] = (byte)((int)(-gyroBias.Y / 4) & 0xFF);
+            rawData[4] = (byte)(((int)(-gyroBias.Z / 4) >> 8) & 0xFF);
+            rawData[5] = (byte)((int)(-gyroBias.Z / 4) & 0xFF);
 
-            accSelfTestAverage /= numCycles;
-            gyroSelfTestAverage /= numCycles;
+            // Changes all Gyroscope offsets
+            WriteRegister(Register.XG_OFFSET_H, rawData[0]);
+            WriteRegister(Register.XG_OFFSET_L, rawData[1]);
+            WriteRegister(Register.YG_OFFSET_H, rawData[2]);
+            WriteRegister(Register.YG_OFFSET_L, rawData[3]);
+            WriteRegister(Register.ZG_OFFSET_H, rawData[4]);
+            WriteRegister(Register.ZG_OFFSET_L, rawData[5]);
 
-            // To cleanup the configuration after the test
-            // Set USR_Reg: (1Bh) Gyro_Config, gdrive_axisCTST [0-2] to b000.
-            WriteRegister(Register.ACCEL_CONFIG, 0x00);
-            // Set USR_Reg: (1Ch) Accel_Config, AX/Y/Z_ST_EN [0-2] to b000.
-            WriteRegister(Register.GYRO_CONFIG, 0x00);
-            // Wait 20ms for oscillations to stabilize
-            Thread.Sleep(20);
+            // Output scaled gyro biases for display in the main program
+            _gyroscopeBias = gyroBias / GyroSensitivity;
 
-            // Retrieve factory Self-Test code (ST_Code) from USR_Reg in the software
-            gyroSelfTest.X = ReadByte(Register.SELF_TEST_X_GYRO);
-            gyroSelfTest.Y = ReadByte(Register.SELF_TEST_Y_GYRO);
-            gyroSelfTest.Z = ReadByte(Register.SELF_TEST_Z_GYRO);
-            accSelfTest.X = ReadByte(Register.SELF_TEST_X_ACCEL);
-            accSelfTest.Y = ReadByte(Register.SELF_TEST_Y_ACCEL);
-            accSelfTest.Z = ReadByte(Register.SELF_TEST_Z_ACCEL);
+            // Construct the accelerometer biases for push to the hardware accelerometer
+            // bias registers. These registers contain factory trim values which must be
+            // added to the calculated accelerometer biases; on boot up these registers
+            // will hold non-zero values. In addition, bit 0 of the lower byte must be
+            // preserved since it is used for temperature compensation calculations.
+            // Accelerometer bias registers expect bias input as 2048 LSB per g, so that
+            // the accelerometer biases calculated above must be divided by 8.
 
-            // Calculate all factory trim
-            accFactoryTrim.X = (float)((2620 / 1 << gyroAccScale) * (Math.Pow(1.01, accSelfTest.X - 1.0)));
-            accFactoryTrim.Y = (float)((2620 / 1 << gyroAccScale) * (Math.Pow(1.01, accSelfTest.Y - 1.0)));
-            accFactoryTrim.Z = (float)((2620 / 1 << gyroAccScale) * (Math.Pow(1.01, accSelfTest.Z - 1.0)));
-            gyroFactoryTrim.X = (float)((2620 / 1 << gyroAccScale) * (Math.Pow(1.01, gyroSelfTest.X - 1.0)));
-            gyroFactoryTrim.Y = (float)((2620 / 1 << gyroAccScale) * (Math.Pow(1.01, gyroSelfTest.Y - 1.0)));
-            gyroFactoryTrim.Z = (float)((2620 / 1 << gyroAccScale) * (Math.Pow(1.01, gyroSelfTest.Z - 1.0)));
+            // A place to hold the factory accelerometer trim biases
+            Vector3 accel_bias_reg = new Vector3();
+            Span<byte> accData = stackalloc byte[2];
+            // Read factory accelerometer trim values
+            ReadBytes(Register.XA_OFFSET_H, accData);
+            accel_bias_reg.X = BinaryPrimitives.ReadInt16BigEndian(accData);
+            ReadBytes(Register.YA_OFFSET_H, accData);
+            accel_bias_reg.Y = BinaryPrimitives.ReadInt16BigEndian(accData);
+            ReadBytes(Register.ZA_OFFSET_H, accData);
+            accel_bias_reg.Z = BinaryPrimitives.ReadInt16BigEndian(accData);
 
-            if (gyroFactoryTrim.X != 0)
-            {
-                gyroAvegage.X = (gyroSelfTestAverage.X - gyroAvegage.X) / gyroFactoryTrim.X;
-            }
-            else
-            {
-                gyroAvegage.X = Math.Abs(gyroSelfTestAverage.X - gyroAvegage.X);
-            }
+            // Define mask for temperature compensation bit 0 of lower byte of
+            // accelerometer bias registers
+            uint mask = 0x01;
+            // Define array to hold mask bit for each accelerometer bias axis
+            Span<byte> mask_bit = stackalloc byte[3];
 
-            if (gyroFactoryTrim.Y != 0)
-            {
-                gyroAvegage.Y = (gyroSelfTestAverage.Y - gyroAvegage.Y) / gyroFactoryTrim.Y;
-            }
-            else
-            {
-                gyroAvegage.Y = Math.Abs(gyroSelfTestAverage.Y - gyroAvegage.Y);
-            }
+            // If temperature compensation bit is set, record that fact in mask_bit
+            mask_bit[0] = (((uint)accel_bias_reg.X & mask) == mask) ? (byte)0x01 : (byte)0x00;
+            mask_bit[1] = (((uint)accel_bias_reg.Y & mask) == mask) ? (byte)0x01 : (byte)0x00;
+            mask_bit[2] = (((uint)accel_bias_reg.Z & mask) == mask) ? (byte)0x01 : (byte)0x00;
 
-            if (gyroFactoryTrim.Z != 0)
-            {
-                gyroAvegage.Z = (gyroSelfTestAverage.Z - gyroAvegage.Z) / gyroFactoryTrim.Z;
-            }
-            else
-            {
-                gyroAvegage.Z = Math.Abs(gyroSelfTestAverage.Z - gyroAvegage.Z);
-            }
+            // Construct total accelerometer bias, including calculated average
+            // accelerometer bias from above
+            // Subtract calculated averaged accelerometer bias scaled to 2048 LSB/g
+            // (16 g full scale) and keep the mask
+            accel_bias_reg -= acceBias / 8;
+            // Add the "reserved" mask as it was
+            rawData[0] = (byte)(((int)accel_bias_reg.X >> 8) & 0xFF);
+            rawData[1] = (byte)(((int)accel_bias_reg.X & 0xFF) | mask_bit[0]);
+            rawData[2] = (byte)(((int)accel_bias_reg.Y >> 8) & 0xFF);
+            rawData[3] = (byte)(((int)accel_bias_reg.Y & 0xFF) | mask_bit[1]);
+            rawData[4] = (byte)(((int)accel_bias_reg.Z >> 8) & 0xFF);
+            rawData[5] = (byte)(((int)accel_bias_reg.Z & 0xFF) | mask_bit[2]);
+            // Push accelerometer biases to hardware registers
+            WriteRegister(Register.XA_OFFSET_H, rawData[0]);
+            WriteRegister(Register.XA_OFFSET_L, rawData[1]);
+            WriteRegister(Register.YA_OFFSET_H, rawData[2]);
+            WriteRegister(Register.YA_OFFSET_L, rawData[3]);
+            WriteRegister(Register.ZA_OFFSET_H, rawData[4]);
+            WriteRegister(Register.ZA_OFFSET_L, rawData[5]);
 
-            // Accelerator
-            if (accFactoryTrim.X != 0)
-            {
-                accAverage.X = (accSelfTestAverage.X - accAverage.X) / accFactoryTrim.X;
-            }
-            else
-            {
-                accAverage.X = Math.Abs(accSelfTestAverage.X - accSelfTestAverage.X);
-            }
+            // Restore the previous modes
+            WriteRegister(Register.USER_CTRL, (byte)(userControls | (byte)UserControls.I2C_MST_EN));
+            i2cMaster = (byte)(i2cMaster & (~(byte)(I2cBusFrequency.Frequency348kHz) | (byte)I2cBusFrequency.Frequency400kHz));
+            WriteRegister(Register.I2C_MST_CTRL, i2cMaster);
+            DelayHelper.DelayMilliseconds(10, false);
 
-            if (accFactoryTrim.Y != 0)
-            {
-                accAverage.Y = (accSelfTestAverage.Y - accAverage.Y) / accFactoryTrim.Y;
-            }
-            else
-            {
-                accAverage.Y = Math.Abs(accSelfTestAverage.Y - accSelfTestAverage.Y);
-            }
+            // Finally store the acceleration bias
+            _accelerometerBias = acceBias / AccSensitivity;
 
-            if (accFactoryTrim.Z != 0)
-            {
-                accAverage.Z = (accSelfTestAverage.Z - accAverage.Z) / accFactoryTrim.Z;
-            }
-            else
-            {
-                accAverage.Z = Math.Abs(accSelfTestAverage.Z - accSelfTestAverage.Z);
-            }
-
-            return (gyroAvegage, accAverage);
+            return (_gyroscopeBias, _accelerometerBias);
         }
 
         #endregion
@@ -688,7 +706,8 @@ namespace Iot.Device.Imu
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);
             Span<byte> dataout = stackalloc byte[2]
             {
-                slvAddress, address
+                slvAddress,
+                address
             };
             _i2cDevice.Write(dataout);
             // I2C_SLVx_REG = I2C_SLVx_ADDR + 1
@@ -724,7 +743,8 @@ namespace Iot.Device.Imu
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);
             Span<byte> dataout = stackalloc byte[2]
             {
-                slvAddress, (byte)(address | 0x80)
+                slvAddress,
+                (byte)(address | 0x80)
             };
             _i2cDevice.Write(dataout);
             dataout[0] = (byte)(slvAddress + 1);
@@ -744,7 +764,8 @@ namespace Iot.Device.Imu
         {
             Span<byte> dataout = stackalloc byte[]
             {
-                (byte)reg, data
+                (byte)reg,
+                data
             };
             _i2cDevice.Write(dataout);
         }
