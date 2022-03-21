@@ -342,7 +342,7 @@ Bindings must:
   * Best if you include a sample that covers usage of all available functions and properties
   * Best if you create mutliple paths to show what the sensor can do
 * use the System.Device API.
-* (*Optional*) Include a unit test project that **DOES NOT** require hardware for testing. We will be running these tests as part of our CI and we won't have sensors plugged in to the microcontrollers, which is why test projects should only contain unit tests for small components in your binding.
+* (*Optional*) Include a unit test project that **DOES NOT** require hardware for testing. We will be running these tests as part of our CI and we won't have sensors plugged in to the microcontrollers, which is why test projects should only contain unit tests for small components in your binding. Unit tests may simulate part of the device or use mocking. (Moq is automatically included as a reference to all unit test assemblies)
 
 Here is an example of a layout of a new Binding *Foo* from the top level of the repo:
 
@@ -354,10 +354,11 @@ iot/
         Foo.csproj
         Foo.cs
         README.md
+        Foo.sln  <-- Solution should include the project itself + the samples and test and optionally reference other highly coupled bindings
         samples/
           Foo.Sample.csproj
           Foo.Sample.cs
-        tests/   <--  Tests are optional, but if present they should be layed out like this.
+        tests/   <-- Tests are optional, but if present they should be layed out like this.
           Foo.Tests.csproj
           Foo.Tests.cs
 ```
