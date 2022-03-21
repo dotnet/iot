@@ -196,7 +196,7 @@ namespace ArduinoCsCompiler
                     }
                     else if (data[2] == (byte)ExecutorCommand.ConditionalBreakpointHit || data[2] == (byte)ExecutorCommand.Variables)
                     {
-                        _compiler.OnCompilerCallback(data[3] | (data[4] << 7), MethodState.Debugging, data);
+                        _compiler.OnCompilerCallback(data[4] | (data[5] << 7), MethodState.Debugging, data);
                     }
                 }
                 else

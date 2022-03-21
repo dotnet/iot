@@ -48,7 +48,7 @@ namespace Iot.Device.Arduino.Tests
 
             var set = Compiler.PrepareAndRunExecutionSet(method, settings);
 
-            CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(120));
 
             if (executeLocally)
             {

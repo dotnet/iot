@@ -53,6 +53,27 @@ namespace ArduinoCsCompiler
             };
         }
 
+        public static List<RemoteStackFrame> DecodeStackTrace(ExecutionSet set, byte[] data)
+        {
+            if (data.Length == 0)
+            {
+                return new List<RemoteStackFrame>();
+            }
+
+            int taskId = data[3] << 8 | data[4];
+
+            List<int> stackTokens = new List<int>();
+            int idx = 6;
+            while (idx <= data.Length - 5)
+            {
+                int token = FirmataCommandSequence.DecodeInt32(data, idx);
+                stackTokens.Add(token);
+                idx += 5;
+            }
+
+            return DecodeStackTrace(set, taskId, stackTokens);
+        }
+
         private void Locals(string[] args)
         {
             int stackFrame = -1;
@@ -390,23 +411,7 @@ namespace ArduinoCsCompiler
 
         public List<RemoteStackFrame> DecodeStackTrace(byte[] data)
         {
-            if (data.Length == 0)
-            {
-                return new List<RemoteStackFrame>();
-            }
-
-            int taskId = data[3] << 8 | data[4];
-
-            List<int> stackTokens = new List<int>();
-            int idx = 6;
-            while (idx <= data.Length - 5)
-            {
-                int token = FirmataCommandSequence.DecodeInt32(data, idx);
-                stackTokens.Add(token);
-                idx += 5;
-            }
-
-            return DecodeStackTrace(_set, taskId, stackTokens);
+            return DecodeStackTrace(_set, data);
         }
 
         public void StartDebugging(bool stopImmediately)

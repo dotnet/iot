@@ -149,29 +149,29 @@ namespace ArduinoCsCompiler
             {
                 var task = _activeTasks.FirstOrDefault(x => x.TaskId == taskId);
 
-                if (task == null)
-                {
-                    // Because two threads run here, we might already have parsed this result
-                    _logger.LogError($"Invalid method state update. {taskId} does not denote an active task.");
-                    return;
-                }
-
-                if (task.State != MethodState.Running && task.HasResult)
+                if (task != null && task.State != MethodState.Running && task.HasResult)
                 {
                     // Result already known
                     _logger.LogDebug($"Task {taskId} reported a result but had already ended.");
-
                     return;
                 }
 
-                var codeRef = task.MethodInfo;
+                if (task == null)
+                {
+                    _logger.LogDebug($"Thread {taskId} sends a debug state.");
+                }
 
-                if (state == MethodState.Debugging)
+                if (state == MethodState.Debugging || task == null)
                 {
                     _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
                     if (_debugger == null)
                     {
                         _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
+                        var stack = Debugger.DecodeStackTrace(_activeExecutionSet, (byte[])args);
+                        foreach (var frame in stack)
+                        {
+                            _logger.LogInformation(frame.ToString());
+                        }
                     }
                     else
                     {
@@ -180,6 +180,8 @@ namespace ArduinoCsCompiler
 
                     return; // Don't update the task state - for an outside observer, debugging does not affect the task state.
                 }
+
+                var codeRef = task.MethodInfo;
 
                 if (state == MethodState.Aborted)
                 {
@@ -2704,6 +2706,12 @@ namespace ArduinoCsCompiler
                 }
 
                 _logger.LogDebug($"Task {task.TaskId}: Static initializer of {initializer.DeclaringType!.MemberInfoSignature()} done.");
+            }
+
+            lock (_activeTasksLock)
+            {
+                // Reset all active tasks but the main task. From now on, task ids are equivalent with thread ids
+                _activeTasks.RemoveAll(x => x.TaskId != 0);
             }
         }
 
