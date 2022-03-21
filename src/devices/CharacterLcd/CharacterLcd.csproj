@@ -4,7 +4,6 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="..\Common\System\Device\DelayHelper.cs" Link="DelayHelper.cs" />
     <Compile Include="Flags.cs" />
     <Compile Include="Hd44780.cs" />
     <Compile Include="ICharacterLcd.cs" />
@@ -23,7 +22,6 @@
     <Compile Include="Registers.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Common/CommonHelpers.csproj" />
     <ProjectReference Include="../ShiftRegister/ShiftRegister.csproj" />
     <None Include="README.md" />
   </ItemGroup>

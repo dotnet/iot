@@ -20,7 +20,7 @@ While most of the bindings and examples in this project require and are designed
 
 ## .NET Versions
 
-Both libraries in this repository are cross-targetting .NET Standard 2.0, .NET Core 2.1 and .NET 5.0. They can be used from any project targeting .NET Core 2.1 or higher, and also from .NET Framework or mono. If you are looking at a Micro Controller Unit (MCU) support, check [.NET nanoFramework](https://github.com/nanoframework/).
+Both libraries in this repository are cross-targeting .NET Standard 2.0, .NET Core 3.1, and .NET 6.0. They can be used from any project targeting .NET Core 2.0 or higher, and also from .NET Framework or mono. If you are looking at a Micro Controller Unit (MCU) support, check [.NET nanoFramework](https://github.com/nanoframework/).
 
 The sample projects target the latest stable .NET Version. This applies to the sample projects with each device as well as the example projects on the `/samples` directory.
 

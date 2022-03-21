@@ -6,7 +6,7 @@ using System.Buffers.Binary;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
-using IoT.Device.Tsl256x;
+using Iot.Device.Tsl256x;
 
 const int PinInterrupt = 4;
 

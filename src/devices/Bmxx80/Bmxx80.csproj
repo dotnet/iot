@@ -30,7 +30,6 @@
     <Compile Include="Register\Bme280Register.cs" />
     <Compile Include="Sampling.cs" />
     <Compile Include="StandbyTime.cs" />
-    <ProjectReference Include="..\Common\CommonHelpers.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="README.md" />

@@ -5,6 +5,5 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="../Lps25h.csproj" />
-    <ProjectReference Include="..\..\Common\CommonHelpers.csproj" />
   </ItemGroup>
 </Project>

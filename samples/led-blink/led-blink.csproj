@@ -11,7 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Device.Gpio" Version="1.5.0" />
+    <PackageReference Include="System.Device.Gpio" Version="2.1.0" />
   </ItemGroup>
 
 </Project>

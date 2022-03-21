@@ -4,8 +4,4 @@
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="../../../../CommonHelpers.csproj" />
-  </ItemGroup>
-
 </Project>

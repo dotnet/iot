@@ -20,6 +20,11 @@ namespace Iot.Device.MotorHat
         public const int I2cAddressBase = 0x60;
 
         /// <summary>
+        /// The <see cref="IMotorPinProvider"/> to use
+        /// </summary>
+        private readonly IMotorPinProvider _pinProvider;
+
+        /// <summary>
         /// Motor Hat is built on top of a PCa9685
         /// </summary>
         private Pca9685 _pca9685;
@@ -40,9 +45,26 @@ namespace Iot.Device.MotorHat
         /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
         /// </remarks>
         public MotorHat(I2cConnectionSettings settings, double frequency = 1600)
+            : this(settings, frequency, MotorPinProvider.Default)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MotorHat"/> class with the specified I2C settings and PWM frequency.
+        /// </summary>
+        /// <param name="settings">The I2C settings of the MotorHat.</param>
+        /// <param name="frequency">The frequency in Hz to set the PWM controller.</param>
+        /// <param name="pinProvider">The <see cref="IMotorPinProvider"/> that provides <see cref="MotorPins"/> for various hats.</param>
+        /// <remarks>
+        /// The default i2c address is 0x60, but the HAT can be configured in hardware to any address from 0x60 to 0x7f.
+        /// The PWM hardware used by this HAT is a PCA9685. It has a total possible frequency range of 24 to 1526 Hz.
+        /// Setting the frequency above or below this range will cause PWM hardware to be set at its maximum or minimum setting.
+        /// </remarks>
+        public MotorHat(I2cConnectionSettings settings, double frequency = 1600, IMotorPinProvider? pinProvider = default)
         {
             I2cDevice device = I2cDevice.Create(settings);
             _pca9685 = new Pca9685(device);
+            _pinProvider = pinProvider ?? MotorPinProvider.Default;
 
             _pca9685.PwmFrequency = frequency;
         }
@@ -71,49 +93,11 @@ namespace Iot.Device.MotorHat
         /// </remarks>
         public DCMotor.DCMotor CreateDCMotor(int motorNumber)
         {
-            if (motorNumber < 1 || motorNumber > 4)
-            {
-                throw new ArgumentOutOfRangeException(nameof(motorNumber), $"Must be between 1 and 4, corresponding with M1, M2, M3 and M4. (Received: {motorNumber}");
-            }
+            var motorPins = _pinProvider.GetPinsForMotor(motorNumber);
 
-            // The PCA9685 PWM controller is used to control the inputs of two dual motor drivers.
-            // These correspond to motor hat screw terminals M1, M2, M3 and M4.
-            // Each motor driver circuit has one speed pin and two IN pins.
-            // The PWM pin expects a PWM input signal. The two IN pins expect a logic 0 or 1 input signal.
-            // The variables speed, in1 and in2 variables identify which PCA9685 PWM output pins will be used to drive this DCMotor.
-            // The speed variable identifies which PCA9685 output pin is used to drive the PWM input on the motor driver.
-            // And the in1 and in2 variables are used to specify which PCA9685 output pins are used to drive the xIN1 and xIN2 input pins of the motor driver.
-            int speedPin, in1Pin, in2Pin;
-
-            switch (motorNumber)
-            {
-                case 1:
-                    speedPin = 8;
-                    in2Pin = 9;
-                    in1Pin = 10;
-                    break;
-                case 2:
-                    speedPin = 13;
-                    in2Pin = 12;
-                    in1Pin = 11;
-                    break;
-                case 3:
-                    speedPin = 2;
-                    in2Pin = 3;
-                    in1Pin = 4;
-                    break;
-                case 4:
-                    speedPin = 7;
-                    in2Pin = 6;
-                    in1Pin = 5;
-                    break;
-                default:
-                    throw new ArgumentException(nameof(motorNumber), $"MotorHat Motor must be between 1 and 4 inclusive. {nameof(motorNumber)}: {motorNumber}");
-            }
-
-            var speedPwm = _pca9685.CreatePwmChannel(speedPin);
-            var in1Pwm = _pca9685.CreatePwmChannel(in1Pin);
-            var in2Pwm = _pca9685.CreatePwmChannel(in2Pin);
+            var speedPwm = _pca9685.CreatePwmChannel(motorPins.SpeedPin);
+            var in1Pwm = _pca9685.CreatePwmChannel(motorPins.In1Pin);
+            var in2Pwm = _pca9685.CreatePwmChannel(motorPins.In2Pin);
 
             _channelsUsed.Add(speedPwm);
             _channelsUsed.Add(in1Pwm);

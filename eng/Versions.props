@@ -4,7 +4,7 @@
     <!-- Disabling the check for End of live TFMs since we still target netcoreapp 2.1 -->
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <MicrosoftDotNetGenAPIPackageVersion>7.0.0-beta.22068.3</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>7.0.0-beta.22157.6</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
     <SystemDrawingCommonPackageVersion>5.0.3</SystemDrawingCommonPackageVersion>
     <SystemIOPortsPackageVersion>5.0.1</SystemIOPortsPackageVersion>
@@ -17,5 +17,6 @@
     <MicrosoftExtensionsLoggingConsolePackageVersion>5.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
     <MicrosoftExtensionsLoggingPackageVersion>5.0.0</MicrosoftExtensionsLoggingPackageVersion>
     <MicrosoftExtensionsLoggingAbstractionsPackageVersion>5.0.0</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
+    <SystemTextJsonPackageVersion>6.0.1</SystemTextJsonPackageVersion>
   </PropertyGroup>
 </Project>
