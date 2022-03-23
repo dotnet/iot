@@ -435,6 +435,7 @@ namespace Iot.Device.Arduino.Tests
         [Theory]
         [InlineData(nameof(ThreadingTests.StartAndStopThread), 1)]
         [InlineData(nameof(ThreadingTests.DiningPhilosophers), 1)]
+        [InlineData(nameof(ThreadingTests.UseThreadStatic), 1)]
         public void SimpleThreading(string methodName, Int32 expected)
         {
             // No exclusions for this test

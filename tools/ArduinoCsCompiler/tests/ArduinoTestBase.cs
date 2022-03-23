@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using ArduinoCsCompiler;
+using Iot.Device.Common;
 using Xunit;
 
 namespace Iot.Device.Arduino.Tests
@@ -26,6 +27,8 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = false,
                 MaxMemoryUsage = 350_000
             };
+
+            ErrorManager.Logger = this.GetCurrentClassLogger();
 
             _compiler = new MicroCompiler(_fixture.Board!, true);
 

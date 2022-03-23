@@ -84,6 +84,8 @@ namespace ArduinoCsCompiler.Tests
                     Thread.Sleep(decision * 100);
                 }
             }
+
+            Console.WriteLine($"Philosopher {_number} has eaten up");
         }
 
         private void TryEat()
@@ -101,7 +103,7 @@ namespace ArduinoCsCompiler.Tests
                 return;
             }
 
-            Console.WriteLine($"Philosopher {_number} is eating");
+            Console.WriteLine($"Philosopher {_number} is eating. He has {_amountOfSpaghetti} portions left");
             _amountOfSpaghetti--;
 
             _right.Return();

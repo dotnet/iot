@@ -7,19 +7,36 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ArduinoCsCompiler.Runtime;
+using Xunit;
 
 namespace ArduinoCsCompiler.Tests
 {
     public class ThreadingTests
     {
-        public static int _data = 0;
+        private static int s_data = 0;
+
+        [ThreadStatic]
+        private static int s_threadStatic = 0;
+
         public static int StartAndStopThread(int a, int b)
         {
-            _data = 0;
+            s_data = 0;
             Thread t = new Thread(MyStaticThreadStart1);
             t.Start();
             t.Join();
-            return _data;
+            return s_data;
+        }
+
+        public static int UseThreadStatic(int a, int b)
+        {
+            s_threadStatic = 1;
+            Thread t = new Thread(UseThreadStaticVariable);
+            t.Start();
+            t.Join();
+
+            MiniAssert.That(s_threadStatic == 1);
+            return 1;
         }
 
         public static int DiningPhilosophers(int a, int b)
@@ -30,7 +47,14 @@ namespace ArduinoCsCompiler.Tests
 
         private static void MyStaticThreadStart1()
         {
-            _data = 1;
+            s_data = 1;
+        }
+
+        private static void UseThreadStaticVariable()
+        {
+            MiniAssert.That(s_threadStatic == 0);
+            s_threadStatic = 2;
+            MiniAssert.That(s_threadStatic == 2);
         }
     }
 }
