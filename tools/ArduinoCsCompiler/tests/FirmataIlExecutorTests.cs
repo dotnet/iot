@@ -48,7 +48,8 @@ namespace Iot.Device.Arduino.Tests
 
             var set = Compiler.PrepareAndRunExecutionSet(method, settings);
 
-            CancellationTokenSource cs = new CancellationTokenSource(TimeSpan.FromSeconds(120));
+            // This always aborts when debugging tests, preventing that we can get stack dumps., so use a looong timeout for that
+            CancellationTokenSource cs = new CancellationTokenSource(System.Diagnostics.Debugger.IsAttached ? -1 : (int)TimeSpan.FromSeconds(60).TotalMilliseconds);
 
             if (executeLocally)
             {
