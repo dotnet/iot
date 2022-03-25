@@ -47,7 +47,8 @@ namespace ArduinoCsCompiler
         private readonly List<ArduinoTask> _activeTasks;
         private readonly object _activeTasksLock;
         private readonly ILogger _logger;
-        private readonly CompilerCommandHandler _commandHandler;
+
+        private CompilerCommandHandler _commandHandler;
 
         private ExecutionSet? _activeExecutionSet;
 
@@ -714,7 +715,7 @@ namespace ArduinoCsCompiler
                 {
                     if (attr is ThreadStaticAttribute)
                     {
-                        ErrorManager.AddWarning("ACS0005", $"Class {classType.MemberInfoSignature()} is using [ThreadStatic] on field {field.Name}. This is not supported.");
+                        ErrorManager.AddWarning("ACS0005", $"Class {classType.MemberInfoSignature()} is using [ThreadStatic] on field {field.Name}. Support is experimental.");
                         fieldType |= VariableKind.ThreadSpecific;
                     }
                 }
@@ -938,7 +939,7 @@ namespace ArduinoCsCompiler
                     // Add all virtual members (the others are not assigned to classes in our metadata)
                     if (m.IsConstructor || m.IsVirtual || m.IsAbstract)
                     {
-                        PrepareCodeInternal(set, m, null);
+                        PrepareMethod(set, m, null);
                     }
                     else
                     {
@@ -947,7 +948,7 @@ namespace ArduinoCsCompiler
                         MicroCompiler.CollectBaseImplementations(set, m, methodsBeingImplemented);
                         if (methodsBeingImplemented.Any())
                         {
-                            PrepareCodeInternal(set, m, null);
+                            PrepareMethod(set, m, null);
                         }
                     }
                 }
@@ -955,7 +956,7 @@ namespace ArduinoCsCompiler
                 foreach (var m in c.TheType.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
                 {
                     // Add all ctors
-                    PrepareCodeInternal(set, m, null);
+                    PrepareMethod(set, m, null);
                 }
             }
         }
@@ -981,7 +982,7 @@ namespace ArduinoCsCompiler
                     throw new NotSupportedException("The method Thread.StartCallback cannot be found");
                 }
 
-                PrepareCodeInternal(set, new EquatableMethod(methodToInclude), null);
+                PrepareMethod(set, new EquatableMethod(methodToInclude), null);
             }
 
             if (forKernel)
@@ -1014,7 +1015,7 @@ namespace ArduinoCsCompiler
                             continue;
                         }
 
-                        PrepareCodeInternal(set, cctor, null);
+                        PrepareMethod(set, cctor, null);
                     }
 
                     if (set.Classes.Count == declarations.Count)
@@ -1069,7 +1070,7 @@ namespace ArduinoCsCompiler
                 {
                     Type t = typeof(ArduinoNativeHelpers);
                     var method = t.GetMethod("MainStub", BindingFlags.Static | BindingFlags.NonPublic)!;
-                    PrepareCodeInternal(set, method, null);
+                    PrepareMethod(set, method, null);
                     int tokenOfStartupMethod = set.GetOrAddMethodToken(method, method);
                     set.TokenOfStartupMethod = tokenOfStartupMethod;
                 }
@@ -1133,7 +1134,7 @@ namespace ArduinoCsCompiler
             foreach (var a in set.ArrayListImplementation)
             {
                 // this adds MiniArray.GetEnumerator(T[]) as implementation of T[].IList<T>()
-                PrepareCodeInternal(set, a.Value, null);
+                PrepareMethod(set, a.Value, null);
                 var m = set.GetMethod(a.Value);
                 var arrayClass = set.Classes.Single(x => x.NewToken == (int)KnownTypeTokens.Array);
                 if (arrayClass.Members.All(y => y.Method != a.Value))
@@ -1166,7 +1167,7 @@ namespace ArduinoCsCompiler
 
                         // If this method is required because base implementations are called, we also need its implementation (obviously)
                         // Unfortunately, this can recursively require further classes and methods
-                        PrepareCodeInternal(set, mb, null);
+                        PrepareMethod(set, mb, null);
 
                         List<int> baseTokens = baseMethodInfos.Select(x => set.GetOrAddMethodToken(x, mb)).ToList();
                         cls.AddClassMember(new ClassMember(mb, VariableKind.Method, set.GetOrAddMethodToken(mb, mb), baseTokens));
@@ -2023,7 +2024,7 @@ namespace ArduinoCsCompiler
                 PrepareClass(exec, mainEntryPoint.DeclaringType);
             }
 
-            PrepareCodeInternal(exec, mainEntryPoint, null);
+            PrepareMethod(exec, mainEntryPoint, null);
 
             exec.MainEntryPointMethod = mainEntryPoint;
             FinalizeExecutionSet(exec, false);
@@ -2097,7 +2098,7 @@ namespace ArduinoCsCompiler
             return exec;
         }
 
-        internal void PrepareCodeInternal(ExecutionSet set, EquatableMethod methodInfo, ArduinoMethodDeclaration? parent)
+        internal void PrepareMethod(ExecutionSet set, EquatableMethod methodInfo, ArduinoMethodDeclaration? parent)
         {
             // Ensure the class is known, if it needs replacement
             var classReplacement = set.GetReplacement(methodInfo.DeclaringType);
@@ -2155,6 +2156,12 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            var specialFlags = methodInfo.GetMethodImplementationFlags();
+            if ((specialFlags & MethodImplAttributes.Synchronized) == MethodImplAttributes.Synchronized)
+            {
+                ErrorManager.AddWarning("ACS0006", $"Method {methodInfo.MethodSignature()} uses [MethodImpl(MethodImplOptions.Synchronized)]. This is ignored.");
+            }
+
             var body = methodInfo.GetMethodBody();
             bool hasBody = !methodInfo.IsAbstract;
 
@@ -2182,7 +2189,7 @@ namespace ArduinoCsCompiler
                         var baseCtor = methods.Single(x => x.Name == "CtorClosedStatic"); // Implementation is same for static and instance, except for a null test
 
                         // Make sure this stub method is in memory
-                        PrepareCodeInternal(set, baseCtor, parent);
+                        PrepareMethod(set, baseCtor, parent);
                         // Directly use the new token (the baseCtor.Token cannot be resolved further down, because it belongs to another assembly)
                         int token = set.GetOrAddMethodToken(baseCtor, methodInfo);
                         needsParsing = false;
@@ -2497,7 +2504,7 @@ namespace ArduinoCsCompiler
                         PrepareClass(set, dep.DeclaringType);
                     }
 
-                    PrepareCodeInternal(set, dep, newInfo);
+                    PrepareMethod(set, dep, newInfo);
                 }
             }
         }
@@ -2902,6 +2909,13 @@ namespace ArduinoCsCompiler
 
         public void Dispose()
         {
+            if (_commandHandler != null)
+            {
+                _commandHandler.Dispose();
+                _board?.RemoveCommandHandler(_commandHandler);
+            }
+
+            _commandHandler = null!;
             _debugger = null;
         }
 

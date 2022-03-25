@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace ArduinoCsCompiler.Tests
+namespace Iot.Device.Arduino.Tests
 {
     /// <summary>
     /// A simple implementation of the Dining Philosophers problem, to test locking and threading

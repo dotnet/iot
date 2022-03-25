@@ -69,6 +69,7 @@ namespace ArduinoCsCompiler.Runtime
 
         public int ManagedThreadId
         {
+            [ArduinoImplementation]
             get
             {
                 return _managedThreadId;

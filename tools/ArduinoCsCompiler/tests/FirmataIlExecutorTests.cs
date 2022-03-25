@@ -12,11 +12,8 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using ArduinoCsCompiler;
-using ArduinoCsCompiler.Tests;
-using Microsoft.VisualBasic.CompilerServices;
 using Xunit;
 using Xunit.Sdk;
-using TestMethodStarting = Xunit.TestMethodStarting;
 
 namespace Iot.Device.Arduino.Tests
 {
@@ -434,10 +431,12 @@ namespace Iot.Device.Arduino.Tests
         }
 
         [Theory]
-        [InlineData(nameof(ThreadingTests.StartAndStopThread), 1)]
-        [InlineData(nameof(ThreadingTests.DiningPhilosophers), 1)]
-        [InlineData(nameof(ThreadingTests.UseThreadStatic), 1)]
-        public void SimpleThreading(string methodName, Int32 expected)
+        [InlineData(nameof(ThreadingTests.StartAndStopThread), 0, 0, 1)]
+        [InlineData(nameof(ThreadingTests.DiningPhilosophers), 0, 0, 1)]
+        [InlineData(nameof(ThreadingTests.UseThreadStatic), 0, 0, 1)]
+        [InlineData(nameof(ThreadingTests.UseThreadStaticInSystem), 10, 5, 1)]
+        [InlineData(nameof(ThreadingTests.UseArrayPool), 0, 0, 1)]
+        public void SimpleThreading(string methodName, Int32 a, Int32 b, Int32 expected)
         {
             // No exclusions for this test
             var settings = new CompilerSettings()
@@ -446,7 +445,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForKernel = false
             };
 
-            LoadCodeMethod(typeof(ThreadingTests), methodName, 0, 0, expected, settings);
+            LoadCodeMethod(typeof(ThreadingTests), methodName, a, b, expected, settings);
         }
     }
 }
