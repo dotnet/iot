@@ -2156,10 +2156,17 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            MethodFlags extraFlags = MethodFlags.None;
             var specialFlags = methodInfo.GetMethodImplementationFlags();
             if ((specialFlags & MethodImplAttributes.Synchronized) == MethodImplAttributes.Synchronized)
             {
-                ErrorManager.AddWarning("ACS0006", $"Method {methodInfo.MethodSignature()} uses [MethodImpl(MethodImplOptions.Synchronized)]. This is ignored.");
+                if (methodInfo.IsStatic)
+                {
+                    // This would require locking on the type. Doable, but if we don't need it, rather warn here.
+                    ErrorManager.AddError("ACS0006", $"Method {methodInfo.MemberInfoSignature()} has [MethodImpl(MethodImplAttributes.Synchronized)] and is static. This is not supported");
+                }
+
+                extraFlags |= MethodFlags.Synchronized;
             }
 
             var body = methodInfo.GetMethodBody();
@@ -2170,7 +2177,7 @@ namespace ArduinoCsCompiler
 
             bool constructedCode = false;
             bool needsParsing = true;
-            MethodFlags constructedFlags = MethodFlags.None;
+
             List<FieldInfo> manuallyReferencedFields = new List<FieldInfo>();
             List<MethodBase> dependentMethods = new List<MethodBase>();
 
@@ -2214,7 +2221,7 @@ namespace ArduinoCsCompiler
                         };
                         ilBytes = code;
                         constructedCode = true;
-                        constructedFlags = MethodFlags.Ctor;
+                        extraFlags |= MethodFlags.Ctor;
                     }
                     else
                     {
@@ -2259,10 +2266,10 @@ namespace ArduinoCsCompiler
                         code.Add((byte)OpCode.CEE_RET);
                         ilBytes = code.ToArray();
                         constructedCode = true;
-                        constructedFlags = MethodFlags.Virtual;
+                        extraFlags |= MethodFlags.Virtual;
                         if (methodDetail.ReturnType == typeof(void))
                         {
-                            constructedFlags |= MethodFlags.Void;
+                            extraFlags |= MethodFlags.Void;
                         }
 
                         needsParsing = false; // We have already translated the tokens
@@ -2287,7 +2294,7 @@ namespace ArduinoCsCompiler
             {
                 // Assemble the startup code for our program. This shall contain a call to all static initializers and finally a call to the
                 // original main method.
-                constructedFlags = MethodFlags.Void | MethodFlags.Static;
+                extraFlags |= MethodFlags.Void | MethodFlags.Static;
                 constructedCode = true;
                 int token;
                 needsParsing = false; // We insert already translated tokens (because the methods we call come from all possible places, the Resolve would otherwise fail)
@@ -2466,11 +2473,11 @@ namespace ArduinoCsCompiler
             ArduinoMethodDeclaration newInfo;
             if (constructedCode)
             {
-                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, constructedFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), parserResult);
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, extraFlags, 0, Math.Max(8, methodInfo.GetParameters().Length + 3), parserResult);
             }
             else
             {
-                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, parserResult);
+                newInfo = new ArduinoMethodDeclaration(tk, methodInfo, parent, parserResult, extraFlags);
             }
 
             if (set.AddMethod(newInfo))

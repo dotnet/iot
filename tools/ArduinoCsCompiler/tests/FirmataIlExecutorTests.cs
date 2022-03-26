@@ -43,6 +43,7 @@ namespace Iot.Device.Arduino.Tests
                 settings.AdditionalSuppressions.Add("System.SR");
             }
 
+            ErrorManager.Clear();
             var set = Compiler.PrepareAndRunExecutionSet(method, settings);
 
             // This always aborts when debugging tests, preventing that we can get stack dumps., so use a looong timeout for that
@@ -77,6 +78,8 @@ namespace Iot.Device.Arduino.Tests
             // The only result is from the end of the method
             Assert.Equal(MethodState.Stopped, state);
             Assert.Single(data);
+
+            Assert.True(ErrorManager.NumErrors == 0, "There were compilation errors");
 
             T3 result = (T3)data[0];
             Assert.Equal(expectedResult, result);
