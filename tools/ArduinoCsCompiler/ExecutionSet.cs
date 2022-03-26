@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using ArduinoCsCompiler.Runtime;
@@ -890,6 +891,12 @@ namespace ArduinoCsCompiler
         internal bool AddClass(ClassDeclaration type)
         {
             if (_classesToSuppress.Contains(type.TheType))
+            {
+                return false;
+            }
+
+            // Unless this compiler setting is enabled, we automatically suppress all preview features (in .NET 6.0 for instance the INumber<T> interfaces)
+            if (!_compilerSettings.UsePreviewFeatures && type.TheType.GetCustomAttributes(typeof(RequiresPreviewFeaturesAttribute), true).Any())
             {
                 return false;
             }

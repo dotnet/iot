@@ -1947,66 +1947,59 @@ namespace ArduinoCsCompiler
                 }
             }
 
-            ExecutionSet exec;
+            ExecutionSet set;
 
             if (ExecutionSet.CompiledKernel == null || ExecutionSet.CompiledKernel.CompilerSettings != compilerSettings)
             {
-                exec = new ExecutionSet(this, compilerSettings);
+                set = new ExecutionSet(this, compilerSettings);
                 // We never want these types in our execution set - reflection is not supported, except in very specific cases
-                exec.SuppressType("System.Reflection.MethodBase");
-                exec.SuppressType("System.Reflection.MethodInfo");
-                exec.SuppressType("System.Reflection.ConstructorInfo");
-                exec.SuppressType("System.Reflection.Module");
-                exec.SuppressType("System.Reflection.Assembly");
-                exec.SuppressType("System.Reflection.RuntimeAssembly");
-                exec.SuppressType("System.Globalization.HebrewNumber");
-                exec.SuppressType("System.Resources.RuntimeResourceSet");
-                exec.SuppressType("System.Resources.ResourceReader");
+                set.SuppressType("System.Reflection.MethodBase");
+                set.SuppressType("System.Reflection.MethodInfo");
+                set.SuppressType("System.Reflection.ConstructorInfo");
+                set.SuppressType("System.Reflection.Module");
+                set.SuppressType("System.Reflection.Assembly");
+                set.SuppressType("System.Reflection.RuntimeAssembly");
+                set.SuppressType("System.Globalization.HebrewNumber");
+                set.SuppressType("System.Resources.RuntimeResourceSet");
+                set.SuppressType("System.Resources.ResourceReader");
                 // exec.SuppressNamespace("System.Runtime.Intrinsics", true);
                 // Native libraries are not supported
-                exec.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));
+                set.SuppressType(typeof(System.Runtime.InteropServices.NativeLibrary));
 
                 // Only the invariant culture is supported (we might later change this to "only one culture is supported", and
                 // upload the strings matching a specific culture)
-                exec.SuppressType(typeof(System.Globalization.HebrewCalendar));
-                exec.SuppressType(typeof(System.Globalization.JapaneseCalendar));
-                exec.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
-                exec.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
-                exec.SuppressType(typeof(IDeserializationCallback));
-                exec.SuppressType(typeof(IConvertible)); // Remove support for this rarely used interface which links many methods (i.e. on String)
-                exec.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
-                exec.SuppressType(typeof(Microsoft.Win32.Registry));
-                exec.SuppressType(typeof(Microsoft.Win32.RegistryKey));
+                set.SuppressType(typeof(System.Globalization.HebrewCalendar));
+                set.SuppressType(typeof(System.Globalization.JapaneseCalendar));
+                set.SuppressType(typeof(System.Globalization.JapaneseLunisolarCalendar));
+                set.SuppressType(typeof(System.Globalization.ChineseLunisolarCalendar));
+                set.SuppressType(typeof(IDeserializationCallback));
+                set.SuppressType(typeof(IConvertible)); // Remove support for this rarely used interface which links many methods (i.e. on String)
+                set.SuppressType(typeof(OutOfMemoryException)); // For the few cases, where this is explicitly called, we don't need to keep it - it's quite fatal, anyway.
+                set.SuppressType(typeof(Microsoft.Win32.Registry));
+                set.SuppressType(typeof(Microsoft.Win32.RegistryKey));
                 // These shall never be loaded - they're host only (but might slip into the execution set when the startup code is referencing them)
-                exec.SuppressType(typeof(MicroCompiler));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.LibGpiodDriver));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.RaspberryPi3Driver));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.UnixDriver));
-                exec.SuppressType(typeof(System.Device.Gpio.Drivers.Windows10Driver));
-                exec.SuppressType(typeof(Iot.Device.Board.DummyGpioDriver));
-                exec.SuppressType(typeof(Iot.Device.Board.KeyboardGpioDriver));
-
-                // We don't currently support threads or tasks
-                // exec.SuppressType(typeof(System.Threading.Tasks.Task));
-                // exec.SuppressType(typeof(System.Threading.Tasks.ValueTask));
-                // exec.SuppressType("System.Threading.Tasks.ThreadPoolTaskScheduler");
+                set.SuppressType(typeof(MicroCompiler));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.LibGpiodDriver));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.RaspberryPi3Driver));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.UnixDriver));
+                set.SuppressType(typeof(System.Device.Gpio.Drivers.Windows10Driver));
+                set.SuppressType(typeof(Iot.Device.Board.DummyGpioDriver));
+                set.SuppressType(typeof(Iot.Device.Board.KeyboardGpioDriver));
 
                 // Can't afford to load these, at least not on the Arduino Due. They're way to big.
-                exec.SuppressType(typeof(UnitsNet.QuantityFormatter));
-                exec.SuppressType(typeof(UnitsNet.UnitAbbreviationsCache));
+                set.SuppressType(typeof(UnitsNet.QuantityFormatter));
+                set.SuppressType(typeof(UnitsNet.UnitAbbreviationsCache));
 
                 foreach (string compilerSettingsAdditionalSuppression in compilerSettings.AdditionalSuppressions)
                 {
-                    exec.SuppressType(compilerSettingsAdditionalSuppression);
+                    set.SuppressType(compilerSettingsAdditionalSuppression);
                 }
 
-                //// exec.SuppressType("System.Runtime.Serialization.SerializationInfo"); // Serialization is not currently supported
-
-                PrepareLowLevelInterface(exec);
+                PrepareLowLevelInterface(set);
                 if (compilerSettings.CreateKernelForFlashing)
                 {
                     // Clone the kernel and save as static member
-                    ExecutionSet.CompiledKernel = new ExecutionSet(exec, this, compilerSettings);
+                    ExecutionSet.CompiledKernel = new ExecutionSet(set, this, compilerSettings);
                 }
                 else
                 {
@@ -2016,19 +2009,19 @@ namespace ArduinoCsCompiler
             else
             {
                 // Another clone, to leave the static member alone. Replace the compiler in that kernel with the current one.
-                exec = new ExecutionSet(ExecutionSet.CompiledKernel, this, compilerSettings);
+                set = new ExecutionSet(ExecutionSet.CompiledKernel, this, compilerSettings);
             }
 
             if (mainEntryPoint.DeclaringType != null)
             {
-                PrepareClass(exec, mainEntryPoint.DeclaringType);
+                PrepareClass(set, mainEntryPoint.DeclaringType);
             }
 
-            PrepareMethod(exec, mainEntryPoint, null);
+            PrepareMethod(set, mainEntryPoint, null);
 
-            exec.MainEntryPointMethod = mainEntryPoint;
-            FinalizeExecutionSet(exec, false);
-            return exec;
+            set.MainEntryPointMethod = mainEntryPoint;
+            FinalizeExecutionSet(set, false);
+            return set;
         }
 
         /// <summary>

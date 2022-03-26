@@ -19,6 +19,8 @@ namespace ArduinoCsCompiler
             InputAssembly = string.Empty;
             EntryPoint = string.Empty;
             TokenMapFile = string.Empty;
+            UsePreviewFeatures = false;
+            Suppressions = new List<string>();
         }
 
         [Usage(ApplicationAlias = "acs")]
@@ -59,5 +61,12 @@ namespace ArduinoCsCompiler
         [Option('c', "culture", HelpText = "The name of the culture to use for 'CultureInfo.CurrentCulture'. Must be a valid culture name such as 'de-CH' or 'Invariant'. " +
                                            "Defaults to the current culture during compile.")]
         public string? CultureName { get; set; }
+
+        [Option("preview", HelpText = "Enable preview features of the runtime", Default = false)]
+        public bool UsePreviewFeatures { get; set; }
+
+        [Option('s', "suppress", HelpText = "Suppress the given class(es). " +
+                                                "Removes these classes (fully qualified names) from the execution set. Separate by ','", Separator = ',')]
+        public IList<string> Suppressions { get; set; }
     }
 }

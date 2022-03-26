@@ -141,7 +141,9 @@ namespace ArduinoCsCompiler
                 CreateKernelForFlashing = false,
                 ForceFlashWrite = !CommandLineOptions.DoNotWriteFlashIfAlreadyCurrent,
                 LaunchProgramFromFlash = true,
-                UseFlashForProgram = true
+                UseFlashForProgram = true,
+                UsePreviewFeatures = CommandLineOptions.UsePreviewFeatures,
+                AdditionalSuppressions = CommandLineOptions.Suppressions,
             };
 
             Logger.LogInformation("Collecting method information and metadata...");
