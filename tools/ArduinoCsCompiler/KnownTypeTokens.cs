@@ -43,7 +43,8 @@ namespace ArduinoCsCompiler
         IoException = 42,
         ArithmeticException = 43,
         ThreadStartCallback = 50, // The token of Thread.StartCallback(). This is the startup method for new threads.
-        LargestKnownTypeToken = 51,
+        AppDomainTimerCallback = 51, // Used to fire the timer in MiniTimerQueue
+        LargestKnownTypeToken = 52,
         // If more of these are required, check the ctor of ExecutionSet to make sure enough entries have been reserved
         IEnumerableOfT = ExecutionSet.GenericTokenStep,
         SpanOfT = ExecutionSet.GenericTokenStep * 2,

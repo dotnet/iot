@@ -14,6 +14,7 @@ namespace ArduinoCsCompiler.Runtime
         private IntPtr _DONT_USE_InternalThread;
         private int _managedThreadId;
         private ExecutionContext? _executionContext;
+        private SynchronizationContext? _synchronizationContext;
 #pragma warning restore 414, SA1306
 
         public MiniThread()
@@ -21,6 +22,7 @@ namespace ArduinoCsCompiler.Runtime
             _executionContext = null;
             _DONT_USE_InternalThread = IntPtr.Zero;
             _managedThreadId = 1;
+            _synchronizationContext = null;
         }
 
         /// <summary>
@@ -47,6 +49,7 @@ namespace ArduinoCsCompiler.Runtime
                 while (previous < ticks)
                 {
                     previous = ticks;
+                    Yield();
                     ticks = Environment.TickCount;
                 }
             }
@@ -54,6 +57,7 @@ namespace ArduinoCsCompiler.Runtime
             while (endTicks > ticks)
             {
                 // Busy waiting is ok here - the microcontroller has no sleep state
+                Yield();
                 ticks = Environment.TickCount;
             }
         }
@@ -74,6 +78,15 @@ namespace ArduinoCsCompiler.Runtime
             {
                 return _managedThreadId;
             }
+        }
+
+        public bool IsThreadPoolThread
+        {
+            // Do we need this info in the backend? Maybe to automatically terminate child threads?
+            [ArduinoImplementation]
+            get;
+            [ArduinoImplementation]
+            set;
         }
 
         [ArduinoImplementation]

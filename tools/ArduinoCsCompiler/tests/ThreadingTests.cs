@@ -79,6 +79,20 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public static int TestTask(int a, int b)
+        {
+            var t = Task.Factory.StartNew(() => 1);
+
+            MiniAssert.That(t.Result == 1);
+            return t.Result;
+        }
+
+        public static int AsyncAwait(int a, int b)
+        {
+            var t = DoSomeExpensiveCalculation();
+            return t.Result;
+        }
+
         private static void MyStaticThreadStart1()
         {
             s_data = 1;
@@ -113,6 +127,13 @@ namespace Iot.Device.Arduino.Tests
             firstArray[0] = c;
             firstArray[1] = c;
             ArrayPool<char>.Shared.Return(firstArray);
+        }
+
+        private static async Task<int> DoSomeExpensiveCalculation()
+        {
+            int b = 2 - 1;
+            await Task.Delay(1000);
+            return b;
         }
     }
 }

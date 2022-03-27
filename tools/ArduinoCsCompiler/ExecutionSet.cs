@@ -695,6 +695,10 @@ namespace ArduinoCsCompiler
                 // We need to be able to recognize this method in the backend
                 token = (int)KnownTypeTokens.ThreadStartCallback;
             }
+            else if (methodBase.DeclaringType.FullName == "System.Threading.TimerQueue" && methodBase.Name == "AppDomainTimerCallback")
+            {
+                token = (int)KnownTypeTokens.AppDomainTimerCallback;
+            }
             else
             {
                 token = _nextToken++;

@@ -359,8 +359,11 @@ namespace ArduinoCsCompiler
                             methodToReplace = ia.TypeToReplace!.GetMethods(flags).SingleOrDefault(x => EquatableMethod.MethodsHaveSameSignature(x, m) || EquatableMethod.AreSameOperatorMethods(x, m));
                             if (methodToReplace == null)
                             {
-                                // That may be ok if it is our own internal implementation, but for now we abort, since we currently have no such case
-                                throw new InvalidOperationException($"A replacement method has nothing to replace: {m.MethodSignature()}");
+                                // if the method is not explicitly marked as InternalCall this is an error
+                                if (!iaMethod.InternalCall)
+                                {
+                                    throw new InvalidOperationException($"A replacement method has nothing to replace: {m.MethodSignature()}");
+                                }
                             }
                             else
                             {
@@ -973,17 +976,7 @@ namespace ArduinoCsCompiler
                 throw new ObjectDisposedException(nameof(MicroCompiler));
             }
 
-            if (set.Methods().Any(x => x.MethodBase.DeclaringType == typeof(Thread) && x.MethodBase.Name == "Start"))
-            {
-                // We get here if Thread.Start() is called anywhere. This means we need to also include Thread.StartCallback
-                var methodToInclude = typeof(Thread).GetMethod("StartCallback", BindingFlags.Instance | BindingFlags.NonPublic);
-                if (methodToInclude == null)
-                {
-                    throw new NotSupportedException("The method Thread.StartCallback cannot be found");
-                }
-
-                PrepareMethod(set, new EquatableMethod(methodToInclude), null);
-            }
+            AddCallbackMethods(set);
 
             if (forKernel)
             {
@@ -993,6 +986,7 @@ namespace ArduinoCsCompiler
             // Because the code below is still not water proof (there could have been virtual methods added only in the end), we do this twice
             for (int i = 0; i < 2; i++)
             {
+                AddCallbackMethods(set);
                 // Contains all classes traversed so far
                 List<ClassDeclaration> declarations = new List<ClassDeclaration>(set.Classes);
                 // Contains the new ones to be traversed this time (start with all)
@@ -1077,6 +1071,39 @@ namespace ArduinoCsCompiler
             }
 
             _logger.LogInformation($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
+        }
+
+        /// <summary>
+        /// Adds some static callback methods required by the runtime
+        /// </summary>
+        /// <param name="set">The execution set</param>
+        /// <exception cref="NotSupportedException">An error occurred finding a required method</exception>
+        private void AddCallbackMethods(ExecutionSet set)
+        {
+            if (set.Methods().Any(x => x.MethodBase.DeclaringType == typeof(Thread) && x.MethodBase.Name == "Start"))
+            {
+                // We get here if Thread.Start() is called anywhere. This means we need to also include Thread.StartCallback
+                var methodToInclude = typeof(Thread).GetMethod("StartCallback", BindingFlags.Instance | BindingFlags.NonPublic);
+                if (methodToInclude == null)
+                {
+                    throw new NotSupportedException("The method Thread.StartCallback cannot be found");
+                }
+
+                PrepareMethod(set, new EquatableMethod(methodToInclude), null);
+            }
+
+            var c1 = set.Classes.FirstOrDefault(x => x.Name == "System.Threading.TimerQueue");
+            if (c1 != null)
+            {
+                // We get here if Thread.Start() is called anywhere. This means we need to also include Thread.StartCallback
+                var methodToInclude = c1.TheType.GetMethod("AppDomainTimerCallback", BindingFlags.Static | BindingFlags.NonPublic);
+                if (methodToInclude == null)
+                {
+                    throw new NotSupportedException("The method TimerQueue.AppDomainTimerCallback cannot be found");
+                }
+
+                PrepareMethod(set, new EquatableMethod(methodToInclude), null);
+            }
         }
 
         /// <summary>

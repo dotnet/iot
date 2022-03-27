@@ -439,6 +439,8 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(ThreadingTests.UseThreadStatic), 0, 0, 1)]
         [InlineData(nameof(ThreadingTests.UseThreadStaticInSystem), 10, 5, 1)]
         [InlineData(nameof(ThreadingTests.UseArrayPool), 0, 0, 1)]
+        [InlineData(nameof(ThreadingTests.AsyncAwait), 0, 0, 1)]
+        [InlineData(nameof(ThreadingTests.TestTask), 0, 0, 1)]
         public void SimpleThreading(string methodName, Int32 a, Int32 b, Int32 expected)
         {
             // No exclusions for this test

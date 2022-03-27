@@ -108,6 +108,15 @@ namespace ArduinoCsCompiler
         }
 
         /// <summary>
+        /// If this is true, the method is an internal call that's not expected to replace something existing.
+        /// </summary>
+        public bool InternalCall
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Computes a hash code for a string that stays consistent over different architectures and between program runs.
         /// </summary>
         /// <param name="text">Text to calculate hash code from</param>
