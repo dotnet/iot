@@ -32,10 +32,10 @@ namespace ArduinoCsCompiler.Runtime
             throw new NotImplementedException();
         }
 
-        [ArduinoImplementation("MonitorPulseAll")]
         public static void PulseAll(Object o)
         {
-            throw new NotImplementedException();
+            // Simplistic implementation: don't do anything.
+            // Should work because at the moment we have a fair scheduler (note that this is called while the calling thread still owns the lock)
         }
 
         [ArduinoImplementation]

@@ -15,6 +15,7 @@ namespace ArduinoCsCompiler.Runtime
         private int _managedThreadId;
         private ExecutionContext? _executionContext;
         private SynchronizationContext? _synchronizationContext;
+        private string _name;
 #pragma warning restore 414, SA1306
 
         public MiniThread()
@@ -23,6 +24,7 @@ namespace ArduinoCsCompiler.Runtime
             _DONT_USE_InternalThread = IntPtr.Zero;
             _managedThreadId = 1;
             _synchronizationContext = null;
+            _name = string.Empty;
         }
 
         /// <summary>
@@ -82,10 +84,25 @@ namespace ArduinoCsCompiler.Runtime
 
         public bool IsThreadPoolThread
         {
-            // Do we need this info in the backend? Maybe to automatically terminate child threads?
-            [ArduinoImplementation]
+            // The backend doesn't do much with this field, but if we implement it here,
+            // we need to add it's backing field to the class, which would require some
+            // special handling
+            [ArduinoImplementation("Thread_get_IsThreadPoolThread")]
             get;
-            [ArduinoImplementation]
+
+            [ArduinoImplementation("Thread_set_IsThreadPoolThread")]
+            set;
+        }
+
+        public bool IsBackground
+        {
+            // The backend doesn't do much with this field, but if we implement it here,
+            // we need to add it's backing field to the class, which would require some
+            // special handling
+            [ArduinoImplementation("Thread_get_IsBackground")]
+            get;
+
+            [ArduinoImplementation("Thread_set_IsBackground")]
             set;
         }
 
@@ -144,6 +161,12 @@ namespace ArduinoCsCompiler.Runtime
         public bool Join(int millisecondsTimeout)
         {
             throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation]
+        public void SetThreadPoolWorkerThreadName()
+        {
+            // Nothing to do, really (we don't keep thread names)
         }
     }
 }

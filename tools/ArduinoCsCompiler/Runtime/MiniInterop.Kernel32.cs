@@ -347,6 +347,7 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
+            // TODO: Probably better rewrite managed
             [ArduinoImplementation("Interop_Kernel32CreateEventEx", 0x213)]
             internal static IntPtr CreateEventExInternal(string name, uint flags, uint desiredAccess)
             {
