@@ -49,6 +49,11 @@ namespace Iot.Device.Imu
         /// <param name="i2cDevice">The I2C device</param>
         public Mpu6050(I2cDevice i2cDevice)
         {
+            if (i2cDevice == null)
+            {
+                throw new ArgumentNullException($"Varible i2cDevice is null");
+            }
+
             _i2cDevice = i2cDevice;
             Reset();
             PowerOn();

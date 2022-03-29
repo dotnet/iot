@@ -1,4 +1,4 @@
-# MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)
+# MPU6xxx/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)
 
 MPU6000, MPU6050 and PMU6500 are a 3 axis Gyroscope, 3 axis Accelerometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The MPU6000 and MPU6050 are identical. They have very little differences with MPU6500. The MPU6500 sensor can be found in various implementation but its main usage is in the MPU9250.
 
@@ -10,7 +10,7 @@ The Magnetometer used is an [AK8963](../Ak8963/README.md). In general, it is man
 
 * Registers [documentation](http://www.invensense.com/wp-content/uploads/2017/11/RM-MPU-9250A-00-v1.6.pdf)
 * [Product specifications](http://www.invensense.com/wp-content/uploads/2015/02/PS-MPU-9250A-01-v1.1.pdf)
-* [MPU6000 and MPU605 register map](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf)
+* [MPU6000 and MPU6050 register map](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6000-Register-Map1.pdf)
 * [MPU6500 register map](https://invensense.tdk.com/wp-content/uploads/2015/02/MPU-6500-Register-Map2.pdf)
 
 ## Usage
