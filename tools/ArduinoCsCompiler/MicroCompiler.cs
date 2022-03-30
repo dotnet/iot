@@ -167,7 +167,7 @@ namespace ArduinoCsCompiler
                     _logger.LogTrace("Hit a breakpoint. Decoding breakpoint position");
                     if (_debugger == null)
                     {
-                        _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This should not happen.");
+                        _logger.LogError("Code hit a breakpoint, but we're not debugging right now. This means something serious has happened");
                         var stack = Debugger.DecodeStackTrace(_activeExecutionSet, (byte[])args);
                         foreach (var frame in stack)
                         {

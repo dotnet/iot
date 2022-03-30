@@ -80,6 +80,7 @@ namespace ArduinoCsCompiler
             KnownTypeTokensMap.Add(typeof(Array), KnownTypeTokens.Array);
             KnownTypeTokensMap.Add(typeof(MiniArray), KnownTypeTokens.Array);
             KnownTypeTokensMap.Add(typeof(Exception), KnownTypeTokens.Exception);
+            KnownTypeTokensMap.Add(typeof(Thread), KnownTypeTokens.Thread);
             KnownTypeTokensMap.Add(typeof(ArithmeticException), KnownTypeTokens.ArithmeticException);
             KnownTypeTokensMap.Add(typeof(DivideByZeroException), KnownTypeTokens.DivideByZeroException);
             KnownTypeTokensMap.Add(typeof(NullReferenceException), KnownTypeTokens.NullReferenceException);

@@ -23,6 +23,7 @@ namespace ArduinoCsCompiler
         ByReferenceByte = 10,
         Delegate = 11,
         MulticastDelegate = 12,
+        Thread = 13,
         Byte = 19,
         Int32 = 20,
         Uint32 = 21,

@@ -22,7 +22,7 @@ namespace ArduinoCsCompiler.Runtime
         {
             _executionContext = null;
             _DONT_USE_InternalThread = IntPtr.Zero;
-            _managedThreadId = 1;
+            _managedThreadId = 0;
             _synchronizationContext = null;
             _name = string.Empty;
         }
@@ -136,10 +136,10 @@ namespace ArduinoCsCompiler.Runtime
             return 0;
         }
 
-        [ArduinoImplementation]
+        [ArduinoImplementation("ThreadGetCurrentThreadNative")]
         public static Thread GetCurrentThreadNative()
         {
-            return MiniUnsafe.As<Thread>(new MiniThread());
+            throw new NotImplementedException();
         }
 
         /// <summary>
