@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mpu9250.sample", "samples\M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mpu6050.sample", "samples\Mpu6050\Mpu6050.sample.csproj", "{7C19C242-8DA5-4C4C-9BBC-AC28C7D53D58}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mpu9250", "Mpu9250.csproj", "{F57412F0-ECDA-4268-99A0-0C8835A94395}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mpu6xxx9xxx", "Mpu6xxx9xxx.csproj", "{F57412F0-ECDA-4268-99A0-0C8835A94395}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
