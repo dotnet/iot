@@ -142,6 +142,11 @@
         <target state="new">Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods. This also applies to classes like StreamWriter and StreamReader.</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidDataBits">
+        <source>An invalid value was passed to DataBits</source>
+        <target state="new">An invalid value was passed to DataBits</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidNullEmptyArgument">
         <source>Argument {0} cannot be null or zero-length.</source>
         <target state="new">Argument {0} cannot be null or zero-length.</target>

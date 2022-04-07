@@ -2,52 +2,15 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
-    <TargetFrameworks Condition="$(NETCoreSdkRuntimeIdentifier.StartsWith('win'))">$(TargetFrameworks);net6.0-windows10.0.17763.0</TargetFrameworks>
-    <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPackable>true</IsPackable>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="winmd\**" />
-    <EmbeddedResource Remove="winmd\**" />
-    <None Remove="winmd\**" />
-    <Compile Remove="Interop.Unix.DefaultPathBufferSize.cs" />
-    <None Include="buildTransitive\net5.0\System.Device.Ports.targets" Pack="true" PackagePath="\buildTransitive\net5.0" />
-    <None Include="Interop\Unix\Interop.Unix.DefaultPathBufferSize.cs" />
-    <PackageReference Include="Microsoft.DotNet.GenAPI" Version="$(MicrosoftDotNetGenApiPackageVersion)">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsPackageVersion)" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' != 'net6.0'">
-    <!--Remove the Linux-specific code-->
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <!--Remove Windows Code-->
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Resources\Strings.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Strings.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Update="Resources\Strings.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>

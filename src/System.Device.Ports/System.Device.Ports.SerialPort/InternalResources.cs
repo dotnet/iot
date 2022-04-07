@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.ComponentModel;
-using System.Device.Ports.SerialPort.Resources;
 using System.IO;
-
-using Marshal = System.Runtime.InteropServices.Marshal;
+using System.Resources;
+using System.Runtime.InteropServices;
 
 namespace System.Device.Ports.SerialPort
 {
@@ -14,7 +13,7 @@ namespace System.Device.Ports.SerialPort
         // Beginning of static Error methods
         internal static void EndOfFile()
         {
-            throw new EndOfStreamException(Strings.IO_EOF_ReadBeyondEOF);
+            throw new EndOfStreamException(ResourceManager. Strings.IO_EOF_ReadBeyondEOF);
         }
 
         internal static string GetMessage(int errorCode)

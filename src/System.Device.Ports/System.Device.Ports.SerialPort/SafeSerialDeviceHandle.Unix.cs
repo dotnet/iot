@@ -7,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
-
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Device.Ports.SerialPort

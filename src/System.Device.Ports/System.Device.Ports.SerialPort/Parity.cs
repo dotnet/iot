@@ -9,7 +9,7 @@ namespace System.Device.Ports.SerialPort
     public enum Parity
     {
         /// <summary>
-        /// No parity check occurs.
+        /// No parity bit is senty or expected.
         /// </summary>
         None = 0,
 
