@@ -47,7 +47,7 @@ namespace IoT.Device.Tsl256x
         /// <param name="packageType">The type of package to have a proper illuminance calculation</param>
         public Tsl256x(I2cDevice i2cDevice, PackageType packageType = PackageType.Other)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException($"I2C Device can't be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice), $"I2C Device can't be null");
             _packageType = packageType;
             IntegrationTime = IntegrationTime.Integration402Milliseconds;
             Gain = Gain.Normal;
