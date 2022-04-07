@@ -27,7 +27,7 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
-        private static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
+        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(500);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
@@ -48,8 +48,13 @@ namespace Iot.Device.Arduino
         private object _lastAnalogValueLock;
         private object _synchronisationLock;
         private Queue<byte> _dataQueue;
+        private StringBuilder _lastRawLine;
 
-        // Event used when waiting for answers (i.e. after requesting firmware version)
+        private CommandError _lastCommandError;
+
+        /// <summary>
+        /// Event used when waiting for answers (i.e. after requesting firmware version)
+        /// </summary>
         private AutoResetEvent _dataReceived;
 
         public event PinChangeEventHandler? DigitalPortValueUpdated;
@@ -58,7 +63,9 @@ namespace Iot.Device.Arduino
 
         public event Action<string, Exception?>? OnError;
 
-        public FirmataDevice()
+        public event Action<ReplyType, byte[]>? OnSysexReply;
+
+        public FirmataDevice(List<SupportedMode> supportedModes)
         {
             _firmwareVersionMajor = 0;
             _firmwareVersionMinor = 0;
@@ -74,7 +81,10 @@ namespace Iot.Device.Arduino
             _dataQueue = new Queue<byte>();
             _lastResponse = new List<byte>();
             _lastRequestId = 1;
+            _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;
+            _lastRawLine = new StringBuilder();
+            SupportedModes = supportedModes;
         }
 
         internal List<SupportedPinConfiguration> PinConfigurations
@@ -84,6 +94,8 @@ namespace Iot.Device.Arduino
                 return _supportedPinConfigurations;
             }
         }
+
+        internal List<SupportedMode> SupportedModes { get; set; }
 
         public void Open(Stream stream)
         {
@@ -159,6 +171,16 @@ namespace Iot.Device.Arduino
             switch (command)
             {
                 default: // command not understood
+                    char c = (char)data;
+                    _lastRawLine.Append(c);
+                    if (c == '\n')
+                    {
+                        OnError?.Invoke(_lastRawLine.ToString().Trim(), null);
+                        OnSysexReply?.Invoke(ReplyType.AsciiData, Encoding.Unicode.GetBytes(_lastRawLine.ToString()));
+                        _lastRawLine.Clear();
+                    }
+
+                    return;
                 case FirmataCommand.END_SYSEX: // should never happen
                     return;
 
@@ -184,6 +206,7 @@ namespace Iot.Device.Arduino
                 case FirmataCommand.START_SYSEX:
                     // this is a special case with no set number of bytes remaining
                     isMessageSysex = true;
+                    _lastRawLine.Clear();
                     break;
             }
 
@@ -204,6 +227,7 @@ namespace Iot.Device.Arduino
                     if (timeout == 0)
                     {
                         // Synchronisation problem: The remainder of the expected message is missing
+                        _lastCommandError = CommandError.Timeout;
                         return;
                     }
                 }
@@ -218,6 +242,7 @@ namespace Iot.Device.Arduino
 
                     if (elapsed > DefaultReplyTimeout)
                     {
+                        _lastCommandError = CommandError.Timeout;
                         return;
                     }
 
@@ -253,6 +278,7 @@ namespace Iot.Device.Arduino
                     {
                         // Firmata sends this message automatically after a device reset (if you press the reset button on the arduino)
                         // If we know the version already, this is unexpected.
+                        _lastCommandError = CommandError.DeviceReset;
                         OnError?.Invoke("The device was unexpectedly reset. Please restart the communication.", null);
                     }
 
@@ -309,6 +335,7 @@ namespace Iot.Device.Arduino
                     // a sysex message must include at least one extended-command byte
                     if (bytes_read < 1)
                     {
+                        _lastCommandError = CommandError.InvalidArguments;
                         return;
                     }
 
@@ -344,7 +371,7 @@ namespace Iot.Device.Arduino
                                 Span<byte> bytesReceived = stackalloc byte[stringLength];
                                 ReassembleByteString(raw_data, 1, stringLength * 2, bytesReceived);
 
-                                string message1 = Encoding.ASCII.GetString(bytesReceived);
+                                string message1 = Encoding.UTF8.GetString(bytesReceived);
                                 int idxNull = message1.IndexOf('\0');
                                 if (message1.Contains("%") && idxNull > 0) // C style printf formatters
                                 {
@@ -377,19 +404,25 @@ namespace Iot.Device.Arduino
                                     }
 
                                     int resolution = raw_data[idx++];
-                                    switch ((SupportedMode)mode)
+                                    SupportedMode? sm = SupportedModes.FirstOrDefault(x => x.Value == mode);
+                                    if (sm == SupportedMode.AnalogInput)
                                     {
-                                        default:
-                                            currentPin.PinModes.Add((SupportedMode)mode);
-                                            break;
-                                        case SupportedMode.AnalogInput:
-                                            currentPin.PinModes.Add(SupportedMode.AnalogInput);
-                                            currentPin.AnalogInputResolutionBits = resolution;
-                                            break;
-                                        case SupportedMode.Pwm:
-                                            currentPin.PinModes.Add(SupportedMode.Pwm);
-                                            currentPin.PwmResolutionBits = resolution;
-                                            break;
+                                        currentPin.PinModes.Add(SupportedMode.AnalogInput);
+                                        currentPin.AnalogInputResolutionBits = resolution;
+                                    }
+                                    else if (sm == SupportedMode.Pwm)
+                                    {
+                                        currentPin.PinModes.Add(SupportedMode.Pwm);
+                                        currentPin.PwmResolutionBits = resolution;
+                                    }
+                                    else if (sm == null)
+                                    {
+                                        sm = new SupportedMode((byte)mode, $"Unknown mode {mode}");
+                                        currentPin.PinModes.Add(sm);
+                                    }
+                                    else
+                                    {
+                                        currentPin.PinModes.Add(sm);
                                     }
                                 }
 
@@ -427,25 +460,23 @@ namespace Iot.Device.Arduino
 
                             break;
                         case FirmataSysexCommand.I2C_REPLY:
-
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data;
                             _dataReceived.Set();
                             break;
 
                         case FirmataSysexCommand.SPI_DATA:
+                            _lastCommandError = CommandError.None;
                             _lastResponse = raw_data;
                             _dataReceived.Set();
                             break;
 
-                        case FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST:
-                        case FirmataSysexCommand.PIN_STATE_RESPONSE:
-                            _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
-                            _dataReceived.Set();
-                            break;
-
                         default:
-
                             // we pass the data forward as-is for any other type of sysex command
+                            _lastCommandError = CommandError.None;
+                            _lastResponse = raw_data; // the instance is constant, so we can just remember the pointer
+                            OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
+                            _dataReceived.Set();
                             break;
                     }
 
@@ -460,18 +491,6 @@ namespace Iot.Device.Arduino
         /// </summary>
         /// <param name="sequence">The command sequence to send</param>
         public void SendCommand(FirmataCommandSequence sequence)
-        {
-            SendCommand(sequence, DefaultReplyTimeout);
-        }
-
-        /// <summary>
-        /// Send a command that does not generate a reply.
-        /// This method must only be used for commands that do not generate a reply. It must not be used if only the caller is not
-        /// interested in the answer.
-        /// </summary>
-        /// <param name="sequence">The command sequence to send</param>
-        /// <param name="timeout">A non-default timeout</param>
-        public void SendCommand(FirmataCommandSequence sequence, TimeSpan timeout)
         {
             if (!sequence.Validate())
             {
@@ -501,7 +520,7 @@ namespace Iot.Device.Arduino
         /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence)
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence)
         {
             return SendCommandAndWait(sequence, DefaultReplyTimeout);
         }
@@ -513,7 +532,20 @@ namespace Iot.Device.Arduino
         /// <param name="timeout">A non-default timeout</param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public List<byte> SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
+        {
+            return SendCommandAndWait(sequence, timeout, out _);
+        }
+
+        /// <summary>
+        /// Send a command and wait for a reply
+        /// </summary>
+        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
+        /// <param name="timeout">A non-default timeout</param>
+        /// <param name="error">An error code in case of failure</param>
+        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
+        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, out CommandError error)
         {
             if (!sequence.Validate())
             {
@@ -541,7 +573,8 @@ namespace Iot.Device.Arduino
                     throw new TimeoutException("Timeout waiting for command answer");
                 }
 
-                return new List<byte>(_lastResponse);
+                error = _lastCommandError;
+                return _lastResponse.ToArray();
             }
         }
 
@@ -656,8 +689,9 @@ namespace Iot.Device.Arduino
                 throw new ObjectDisposedException(nameof(FirmataDevice));
             }
 
-            // Try 3 times (because we have to make sure the receiver's input queue is properly synchronized)
-            for (int i = 0; i < 3; i++)
+            // Try a few times (because we have to make sure the receiver's input queue is properly synchronized and the device
+            // has properly booted)
+            for (int i = 0; i < 20; i++)
             {
                 lock (_synchronisationLock)
                 {
@@ -669,6 +703,15 @@ namespace Iot.Device.Arduino
                     {
                         // Attempt to send a SYSTEM_RESET command
                         _firmataStream.WriteByte(0xFF);
+                        Thread.Sleep(20);
+                        continue;
+                    }
+
+                    if (_actualFirmataProtocolMajorVersion == 0)
+                    {
+                        // The device may be resetting itself as part of opening the serial port (this is the typical
+                        // behavior of the Arduino Uno, but not of most newer boards)
+                        Thread.Sleep(100);
                         continue;
                     }
 
@@ -701,8 +744,10 @@ namespace Iot.Device.Arduino
                     _firmataStream.WriteByte((byte)FirmataSysexCommand.REPORT_FIRMWARE);
                     _firmataStream.WriteByte((byte)FirmataCommand.END_SYSEX);
                     bool result = _dataReceived.WaitOne(TimeSpan.FromSeconds(FIRMATA_INIT_TIMEOUT_SECONDS));
-                    if (result == false)
+                    if (result == false || _firmwareVersionMajor == 0)
                     {
+                        // Wait a bit until we try again.
+                        Thread.Sleep(100);
                         continue;
                     }
 
@@ -775,8 +820,9 @@ namespace Iot.Device.Arduino
             throw new TimeoutException("Timeout waiting for answer. Aborting. ", lastException);
         }
 
-        internal void SetPinMode(int pin, SupportedMode firmataMode)
+        internal void SetPinMode(int pin, SupportedMode mode)
         {
+            byte firmataMode = mode.Value;
             FirmataCommandSequence s = new FirmataCommandSequence(FirmataCommand.SET_PIN_MODE);
             s.WriteByte((byte)pin);
             s.WriteByte((byte)firmataMode);
@@ -790,10 +836,10 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            throw new TimeoutException($"Unable to set Pin mode to {firmataMode}. Looks like a communication problem.");
+            throw new TimeoutException($"Unable to set Pin mode to {firmataMode}.");
         }
 
-        internal SupportedMode GetPinMode(int pinNumber)
+        internal byte GetPinMode(int pinNumber)
         {
             FirmataCommandSequence getPinModeSequence = new FirmataCommandSequence(FirmataCommand.START_SYSEX);
             getPinModeSequence.WriteByte((byte)FirmataSysexCommand.PIN_STATE_QUERY);
@@ -805,7 +851,7 @@ namespace Iot.Device.Arduino
                 var response = SendCommandAndWait(getPinModeSequence);
 
                 // The mode is byte 4
-                if (response.Count < 4)
+                if (response.Length < 4)
                 {
                     throw new InvalidOperationException("Not enough data in reply");
                 }
@@ -816,8 +862,7 @@ namespace Iot.Device.Arduino
                         "The reply didn't match the query (another port was indicated)");
                 }
 
-                SupportedMode mode = (SupportedMode)(response[2]);
-                return mode;
+                return (response[2]);
             });
         }
 
@@ -885,7 +930,7 @@ namespace Iot.Device.Arduino
                 i2cSequence.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
                 i2cSequence.WriteByte((byte)slaveAddress);
                 i2cSequence.WriteByte(0); // Write flag is 0, all other bits as well
-                i2cSequence.AddValuesAsTwo7bitBytes(writeData);
+                i2cSequence.WriteBytesAsTwo7bitBytes(writeData);
                 i2cSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             }
 
@@ -927,7 +972,7 @@ namespace Iot.Device.Arduino
                 // Bytes 1 & 2: Slave address (the MSB is always 0, since we're only supporting 7-bit addresses)
                 // Bytes 3 & 4: Register. Often 0, and probably not needed
                 // Anything after that: reply data, with 2 bytes for each byte in the data stream
-                int bytesReceived = ReassembleByteString(response, 5, response.Count - 5, replyData);
+                int bytesReceived = ReassembleByteString(response, 5, response.Length - 5, replyData);
 
                 if (replyData.Length != bytesReceived)
                 {
@@ -1044,7 +1089,7 @@ namespace Iot.Device.Arduino
             spiCommand.WriteByte(requestId);
             spiCommand.WriteByte(1); // Deselect CS after transfer (yes)
             spiCommand.WriteByte((byte)writeBytes.Length);
-            spiCommand.AddValuesAsTwo7bitBytes(writeBytes);
+            spiCommand.WriteBytesAsTwo7bitBytes(writeBytes);
             spiCommand.WriteByte((byte)FirmataCommand.END_SYSEX);
             return spiCommand;
         }
@@ -1086,38 +1131,6 @@ namespace Iot.Device.Arduino
             spiConfigSequence.WriteByte((byte)(connectionSettings.ChipSelectLine));
             spiConfigSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
             SendCommand(spiConfigSequence);
-        }
-
-        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
-        {
-            temperature = default;
-            humidity = default;
-
-            FirmataCommandSequence dhtCommandSequence = new();
-            dhtCommandSequence.WriteByte((byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST);
-            dhtCommandSequence.WriteByte((byte)dhtType);
-            dhtCommandSequence.WriteByte((byte)pinNumber);
-            dhtCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            var reply = SendCommandAndWait(dhtCommandSequence);
-
-            // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
-            if (reply.Count < 7)
-            {
-                return false;
-            }
-
-            if (reply[0] != (byte)FirmataSysexCommand.DHT_SENSOR_DATA_REQUEST && reply[1] != 0)
-            {
-                return false;
-            }
-
-            int t = reply[3] | reply[4] << 7;
-            int h = reply[5] | reply[6] << 7;
-
-            temperature = Temperature.FromDegreesCelsius(t / 10.0);
-            humidity = RelativeHumidity.FromPercent(h / 10.0);
-
-            return true;
         }
 
         internal uint GetAnalogRawValue(int pinNumber)

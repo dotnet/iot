@@ -8,9 +8,11 @@ using System.Threading;
 using Iot.Device.Multiplexing;
 
 using Sn74hc595 sr = new(Sn74hc595PinMapping.Complete);
+
+// Uncomment this code to use SPI (and comment the line above)
 // SpiConnectionSettings settings = new(0, 0);
 // using var spiDevice = SpiDevice.Create(settings);
-// var sr = new Sn74hc595(spiDevice, Sn74hc595.PinMapping.Standard);
+// using Sn74hc595 sr = new(spiDevice);
 CancellationTokenSource cancellationSource = new();
 Console.CancelKeyPress += (s, e) =>
 {

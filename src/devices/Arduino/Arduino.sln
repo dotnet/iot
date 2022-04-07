@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mcp3xxx", "..\Mcp3xxx\Mcp3x
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd", "..\CharacterLcd\CharacterLcd.csproj", "{D47A6627-4041-4CEA-8903-A6C67C6993CF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{CD593083-8E94-4B60-86BF-DF3FB7873893}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{CD593083-8E94-4B60-86BF-DF3FB7873893}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{9E5A25ED-9839-4C1A-9B27-993437D1CB31}"
 EndProject
@@ -28,6 +28,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HardwareMonitor", "..\HardwareMonitor\HardwareMonitor.csproj", "{D1C467D8-E6E3-4811-826B-216DCB80A16E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board", "..\Board\Board.csproj", "{0413C8F5-20E0-48B2-8C35-AED67219B7C6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Button", "..\Button\Button.csproj", "{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +81,10 @@ Global
 		{0413C8F5-20E0-48B2-8C35-AED67219B7C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0413C8F5-20E0-48B2-8C35-AED67219B7C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0413C8F5-20E0-48B2-8C35-AED67219B7C6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8664F653-3DA8-40A6-AD36-80EE13AC2DC2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+   <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+  </PropertyGroup>
+
+   <ItemGroup>
+     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+     <Compile Include="Brick.cs" />
+     <Compile Include="Resource.Designer.cs">
+       <DesignTime>True</DesignTime>
+       <AutoGen>True</AutoGen>
+       <DependentUpon>Resource.resx</DependentUpon>
+     </Compile>
+     <Compile Include="Models\*.cs" />     
+     <Compile Include="Motors\*.cs" />
+     <Compile Include="Sensors\*.cs" />
+   </ItemGroup>
+
+   <ItemGroup>
+     <EmbeddedResource Include="Resource.resx">
+       <Generator>ResXFileCodeGenerator</Generator>
+       <LastGenOutput>Resource.Designer.cs</LastGenOutput>
+     </EmbeddedResource>
+   </ItemGroup>
+
+   <ItemGroup>
+     <None Include="data\firmware.bin">
+       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+     </None>
+     <None Include="data\signature.bin">
+       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+     </None>
+     <None Include="data\version">
+       <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+     </None>
+   </ItemGroup>
+</Project>

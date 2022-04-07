@@ -17,6 +17,8 @@ using System.IO;
 using System.IO.Ports;
 using System.Threading;
 using System.Linq;
+using System.Net;
+using System.Net.Sockets;
 using Iot.Device.Common;
 using Iot.Device.Board;
 using Microsoft.Extensions.Logging;
@@ -32,6 +34,11 @@ namespace Iot.Device.Arduino
     /// </summary>
     public class ArduinoBoard : Board.Board, IDisposable
     {
+        private readonly List<SupportedMode> _knownSupportedModes = new List<SupportedMode>();
+        private readonly List<ExtendedCommandHandler> _extendedCommandHandlers = new List<ExtendedCommandHandler>();
+        private readonly ReaderWriterLockSlim _commandHandlersLock =
+            new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+
         private SerialPort? _serialPort;
         private Stream? _dataStream;
         private FirmataDevice? _firmata;
@@ -82,6 +89,26 @@ namespace Iot.Device.Arduino
         protected ILogger Logger => _logger;
 
         /// <summary>
+        /// The list of supported pin modes.
+        /// This list can be extended by adding special modes using <see cref="AddCommandHandler{T}"/>.
+        /// </summary>
+        public IReadOnlyList<SupportedMode> KnownModes
+        {
+            get
+            {
+                _commandHandlersLock.EnterReadLock();
+                try
+                {
+                    return _knownSupportedModes.AsReadOnly();
+                }
+                finally
+                {
+                    _commandHandlersLock.ExitReadLock();
+                }
+            }
+        }
+
+        /// <summary>
         /// Searches the given list of com ports for a firmata device.
         /// </summary>
         /// <remarks>
@@ -119,6 +146,42 @@ namespace Iot.Device.Arduino
 
             board = null!;
             return false;
+        }
+
+        /// <summary>
+        /// Tries to connect to an arduino over network.
+        /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
+        /// </summary>
+        /// <param name="boardAddress">The IP address of the board</param>
+        /// <param name="port">The network port to use</param>
+        /// <param name="board">Returns the board if successful</param>
+        /// <returns>True on success, false otherwise</returns>
+        public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port,
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out ArduinoBoard? board)
+        {
+            board = null;
+            try
+            {
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socket.Connect(boardAddress, port);
+                socket.NoDelay = true;
+                var networkStream = new NetworkStream(socket, true);
+                board = new ArduinoBoard(networkStream);
+                if (!(board.FirmataVersion > new Version(1, 0)))
+                {
+                    // Actually not expecting to get here (but the above will throw a SocketException if the remote end is not there)
+                    throw new NotSupportedException("Very old firmware found on board");
+                }
+
+                return true;
+            }
+            catch (SocketException)
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -160,50 +223,93 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Adds a new command handler.
+        /// A command handler can support extended commands.
+        /// </summary>
+        /// <typeparam name="T">An instance of <see cref="ExtendedCommandHandler"/>.</typeparam>
+        /// <param name="newCommandHandler">The new handler</param>
+        public void AddCommandHandler<T>(T newCommandHandler)
+            where T : ExtendedCommandHandler
+        {
+            if (newCommandHandler == null)
+            {
+                throw new ArgumentNullException(nameof(newCommandHandler));
+            }
+
+            _commandHandlersLock.EnterWriteLock();
+            try
+            {
+                if (newCommandHandler.HandlesMode != null)
+                {
+                    // If we already know the mode, replace its configuration with the new one (typically, this will only update the name)
+                    var m = _knownSupportedModes.FirstOrDefault(x => x.Value == newCommandHandler.HandlesMode.Value);
+                    if (m != null)
+                    {
+                        _knownSupportedModes.Remove(m);
+                    }
+
+                    _knownSupportedModes.Add(newCommandHandler.HandlesMode);
+
+                    // Update internal list
+                    Firmata.SupportedModes = _knownSupportedModes;
+                }
+
+                _extendedCommandHandlers.Add(newCommandHandler);
+            }
+            finally
+            {
+                _commandHandlersLock.ExitWriteLock();
+            }
+
+            if (_firmata != null)
+            {
+                // Only if already initialized
+                newCommandHandler.Registered(_firmata, this);
+            }
+        }
+
+        /// <summary>
+        /// Gets the command handler with the provided type. An exact type match is performed.
+        /// </summary>
+        /// <typeparam name="T">The type to query</typeparam>
+        /// <returns>The command handler, or null if none was found</returns>
+        public T? GetCommandHandler<T>()
+            where T : ExtendedCommandHandler
+        {
+            foreach (var cmd in _extendedCommandHandlers)
+            {
+                if (cmd.GetType() == typeof(T))
+                {
+                    return (T)cmd;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Returns the current assignment of the given pin
         /// </summary>
         /// <param name="pinNumber">Pin number to query</param>
         /// <returns>A value of the <see cref="PinUsage"/> enumeration</returns>
         public override PinUsage DetermineCurrentPinUsage(int pinNumber)
         {
-            SupportedMode mode = Firmata.GetPinMode(pinNumber);
-            switch (mode)
+            byte mode = Firmata.GetPinMode(pinNumber);
+            _commandHandlersLock.EnterReadLock();
+            try
             {
-                case SupportedMode.AnalogInput:
-                    return PinUsage.AnalogIn;
-                case SupportedMode.DigitalInput:
-                    return PinUsage.Gpio;
-                case SupportedMode.DigitalOutput:
-                    return PinUsage.Gpio;
-                case SupportedMode.Pwm:
-                    return PinUsage.Pwm;
-                case SupportedMode.Servo:
-                    break;
-                case SupportedMode.Shift:
-                    break;
-                case SupportedMode.I2c:
-                    return PinUsage.I2c;
-                case SupportedMode.OneWire:
-                    break;
-                case SupportedMode.Stepper:
-                    break;
-                case SupportedMode.Encoder:
-                    break;
-                case SupportedMode.Serial:
-                    return PinUsage.Uart;
-                case SupportedMode.InputPullup:
-                    return PinUsage.Gpio;
-                case SupportedMode.Spi:
-                    return PinUsage.Spi;
-                case SupportedMode.Sonar:
-                    break;
-                case SupportedMode.Tone:
-                    break;
-                case SupportedMode.Dht:
-                    return PinUsage.Gpio;
-            }
+                var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
+                if (m == null)
+                {
+                    return PinUsage.Unknown;
+                }
 
-            return PinUsage.Unknown;
+                return m.PinUsage;
+            }
+            finally
+            {
+                _commandHandlersLock.ExitReadLock();
+            }
         }
 
         /// <summary>
@@ -238,6 +344,10 @@ namespace Iot.Device.Arduino
                     throw new InvalidOperationException("Board already initialized");
                 }
 
+                RegisterKnownSupportedModes();
+                // Add the extended command handlers that are defined in this library
+                RegisterCommandHandlers();
+
                 if (_serialPort != null)
                 {
                     _serialPort.Open();
@@ -249,7 +359,7 @@ namespace Iot.Device.Arduino
                     throw new InvalidOperationException("Constructor argument error: Neither port nor stream specified");
                 }
 
-                _firmata = new FirmataDevice();
+                _firmata = new FirmataDevice(_knownSupportedModes);
                 _firmata.Open(_dataStream);
                 _firmata.OnError += FirmataOnError;
                 _firmataVersion = _firmata.QueryFirmataVersion();
@@ -277,7 +387,50 @@ namespace Iot.Device.Arduino
 
                 _firmata.EnableDigitalReporting();
 
+                foreach (var e in _extendedCommandHandlers)
+                {
+                    e.Registered(_firmata, this);
+                    e.OnConnected();
+                }
+
                 _initialized = true;
+            }
+        }
+
+        private void RegisterCommandHandlers()
+        {
+            lock (_commandHandlersLock)
+            {
+                _extendedCommandHandlers.Add(new DhtSensor());
+                _extendedCommandHandlers.Add(new FrequencySensor());
+            }
+        }
+
+        /// <summary>
+        /// Registers the known supported modes. Should only be called once from Initialize.
+        /// </summary>
+        private void RegisterKnownSupportedModes()
+        {
+            lock (_commandHandlersLock)
+            {
+                // We add all known modes to the list, even though we don't really support them all in the core
+                _knownSupportedModes.Add(SupportedMode.DigitalInput);
+                _knownSupportedModes.Add(SupportedMode.DigitalOutput);
+                _knownSupportedModes.Add(SupportedMode.AnalogInput);
+                _knownSupportedModes.Add(SupportedMode.Pwm);
+                _knownSupportedModes.Add(SupportedMode.Servo);
+                _knownSupportedModes.Add(SupportedMode.Shift);
+                _knownSupportedModes.Add(SupportedMode.I2c);
+                _knownSupportedModes.Add(SupportedMode.OneWire);
+                _knownSupportedModes.Add(SupportedMode.Stepper);
+                _knownSupportedModes.Add(SupportedMode.Encoder);
+                _knownSupportedModes.Add(SupportedMode.Serial);
+                _knownSupportedModes.Add(SupportedMode.InputPullup);
+                _knownSupportedModes.Add(SupportedMode.Spi);
+                _knownSupportedModes.Add(SupportedMode.Sonar);
+                _knownSupportedModes.Add(SupportedMode.Tone);
+                _knownSupportedModes.Add(SupportedMode.Dht);
+                _knownSupportedModes.Add(SupportedMode.Frequency);
             }
         }
 
@@ -356,6 +509,47 @@ namespace Iot.Device.Arduino
             else
             {
                 Logger.LogInformation(message);
+            }
+        }
+
+        /// <summary>
+        /// Sets the internal pin mode to the given value, if supported.
+        /// </summary>
+        /// <param name="pin">The pin to configure</param>
+        /// <param name="arduinoMode">The mode to set</param>
+        /// <exception cref="TimeoutException">The mode was not updated, either because the command was not understood or
+        /// the mode is unknown by the firmware</exception>
+        /// <remarks>This method is intended for use by <see cref="ExtendedCommandHandler"/> instances. Users should not
+        /// call this method directly. It is the responsibility of the command handler to use the capabilities table to check
+        /// that the mode is actually supported</remarks>
+        public void SetPinMode(int pin, SupportedMode arduinoMode)
+        {
+            Firmata.SetPinMode(pin, arduinoMode);
+        }
+
+        /// <summary>
+        /// Returns the current assignment of the given pin
+        /// </summary>
+        /// <param name="pinNumber">Pin number to query</param>
+        /// <returns>An instance of <see cref="SupportedMode"/> from the list of known modes (or a new instance for an unknown mode)</returns>
+        /// <remarks>Thi is the opposite of <see cref="SetPinMode"/>. See there for usage limitations.</remarks>
+        public SupportedMode GetPinMode(int pinNumber)
+        {
+            byte mode = Firmata.GetPinMode(pinNumber);
+            _commandHandlersLock.EnterReadLock();
+            try
+            {
+                var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
+                if (m == null)
+                {
+                    return new SupportedMode(mode, $"Unknown mode {mode}");
+                }
+
+                return m;
+            }
+            finally
+            {
+                _commandHandlersLock.ExitReadLock();
             }
         }
 
@@ -498,32 +692,22 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
-        /// Special function to read DHT sensor, if supported
-        /// </summary>
-        /// <param name="pinNumber">Pin Number</param>
-        /// <param name="dhtType">Type of DHT Sensor: 11 = DHT11, 22 = DHT22, etc.</param>
-        /// <param name="temperature">Temperature</param>
-        /// <param name="humidity">Relative humidity</param>
-        /// <returns>True on success, false otherwise</returns>
-        public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
-        {
-            Initialize();
-
-            if (!_supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.Dht))
-            {
-                temperature = default;
-                humidity = default;
-                return false;
-            }
-
-            return Firmata.TryReadDht(pinNumber, dhtType, out temperature, out humidity);
-        }
-
-        /// <summary>
         /// Standard dispose pattern
         /// </summary>
         protected override void Dispose(bool disposing)
         {
+            foreach (var e in _extendedCommandHandlers)
+            {
+                try
+                {
+                    e.Dispose();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Ignore
+                }
+            }
+
             _isDisposed = true;
             // Do this first, to force any blocking read operations to end
             if (_dataStream != null)
@@ -540,6 +724,7 @@ namespace Iot.Device.Arduino
 
             if (_firmata != null)
             {
+                _firmata.OnError -= FirmataOnError;
                 _firmata.Dispose();
                 _firmata = null;
             }

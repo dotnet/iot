@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <LangVersion>9</LangVersion>
+    <RootNamespace>Iot.Device.Mcp960x</RootNamespace>
+    <AssemblyName>Mcp960x</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <None Include="README.md" />
+  </ItemGroup>
+
+</Project>

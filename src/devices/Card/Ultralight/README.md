@@ -2,7 +2,7 @@
 
 This class supports Ultralight cards. They are RFID cards responding to ISO 14443 type A. You need a specific card reader like PN532, PN5180 or MFRC522 to read, write those kind of cards.
 
-## Creating a card and reading it
+## Usage
 
 You will find detailed examples for PN532 [here](../../Pn532/samples), for MFRC522 [here](../../Mfrc522/samples) and for PN5180 [here](../../Pn5180/samples).
 
@@ -157,5 +157,3 @@ else
     Console.WriteLine("Error writing NDEF data on card");
 }
  ```
-
-

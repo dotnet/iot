@@ -23,11 +23,22 @@ namespace Iot.Device.Multiplexing
         /// <param name="bitLength">Bit length of register, including chained registers. Default is 8 bits.</param>
         /// <param name="gpioController">The GPIO Controller used for interrupt handling.</param>
         /// <param name="shouldDispose">True (the default) if the GPIO controller shall be disposed when disposing this instance.</param>
-        public Sn74hc595(Sn74hc595PinMapping pinMapping, int bitLength = 8, GpioController? gpioController = null,  bool shouldDispose = true)
+        public Sn74hc595(Sn74hc595PinMapping pinMapping, int bitLength = 8, GpioController? gpioController = null, bool shouldDispose = true)
         : base(new ShiftRegisterPinMapping(pinMapping.Ser, pinMapping.SrClk, pinMapping.RClk, pinMapping.OE), bitLength, gpioController, shouldDispose)
         {
             _pinMapping = pinMapping;
             SetupPins();
+        }
+
+        /// <summary>
+        /// Initialize a new Sn74hc595 device connected through SPI.
+        /// Uses 3 pins (MOSI -> SER, SCLK -> SRCLK, CE0 -> RCLK)
+        /// </summary>
+        /// <param name="spiDevice">SpiDevice used for serial communication.</param>
+        /// <param name="bitLength">Bit length of register, including chained registers.</param>
+        public Sn74hc595(SpiDevice spiDevice, int bitLength = 8)
+        : base(spiDevice, bitLength)
+        {
         }
 
         /// <summary>

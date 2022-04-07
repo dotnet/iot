@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace System.Device.Gpio.Drivers
@@ -15,6 +16,8 @@ namespace System.Device.Gpio.Drivers
     /// </summary>
     public class SysFsDriver : UnixDriver
     {
+        private const int ERROR_CODE_EINTR = 4; // Interrupted system call
+
         private const string GpioBasePath = "/sys/class/gpio";
         private const string GpioChip = "gpiochip";
         private const string GpioLabel = "/label";
@@ -24,13 +27,13 @@ namespace System.Device.Gpio.Drivers
 
         private static readonly int s_pinOffset = ReadOffset();
 
-        private readonly CancellationTokenSource _eventThreadCancellationTokenSource;
         private readonly List<int> _exportedPins = new List<int>();
         private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
         private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
         private int _pollFileDescriptor = -1;
         private Thread? _eventDetectionThread;
         private int _pinsToDetectEventsCount;
+        private CancellationTokenSource? _eventThreadCancellationTokenSource;
 
         private static int ReadOffset()
         {
@@ -69,8 +72,6 @@ namespace System.Device.Gpio.Drivers
             {
                 throw new PlatformNotSupportedException($"{GetType().Name} is only supported on Linux/Unix.");
             }
-
-            _eventThreadCancellationTokenSource = new CancellationTokenSource();
         }
 
         /// <summary>
@@ -147,8 +148,11 @@ namespace System.Device.Gpio.Drivers
                         _devicePins.Remove(pinNumber);
                     }
 
-                    File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
-                    _exportedPins.Remove(pinNumber);
+                    // If this controller wasn't the one that opened the pin, then Remove will return false, so we don't need to close it.
+                    if (_exportedPins.Remove(pinNumber))
+                    {
+                        File.WriteAllText(Path.Combine(GpioBasePath, "unexport"), pinOffset.ToString(CultureInfo.InvariantCulture));
+                    }
                 }
                 catch (UnauthorizedAccessException e)
                 {
@@ -444,7 +448,15 @@ namespace System.Device.Gpio.Drivers
             }
 
             // Ignore first time because it will always return the current state.
-            Interop.epoll_wait(pollFileDescriptor, out _, 1, 0);
+            while (Interop.epoll_wait(pollFileDescriptor, out _, 1, 0) == -1)
+            {
+                var errorCode = Marshal.GetLastWin32Error();
+                if (errorCode != ERROR_CODE_EINTR)
+                {
+                    // don't retry on unknown error
+                    break;
+                }
+            }
         }
 
         private unsafe bool WasEventDetected(int pollFileDescriptor, int valueFileDescriptor, out int pinNumber, CancellationToken cancellationToken)
@@ -459,7 +471,14 @@ namespace System.Device.Gpio.Drivers
                 int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, PollingTimeout);
                 if (waitResult == -1)
                 {
-                    throw new IOException("Error while waiting for pin interrupts.");
+                    var errorCode = Marshal.GetLastWin32Error();
+                    if (errorCode == ERROR_CODE_EINTR)
+                    {
+                        // ignore Interrupted system call error and retry
+                        continue;
+                    }
+
+                    throw new IOException($"Error while waiting for pin interrupts. (ErrorCode={errorCode})");
                 }
 
                 if (waitResult > 0)
@@ -518,7 +537,11 @@ namespace System.Device.Gpio.Drivers
                 {
                     try
                     {
-                        _eventThreadCancellationTokenSource.Cancel();
+                        if (_eventThreadCancellationTokenSource != null)
+                        {
+                            _eventThreadCancellationTokenSource.Cancel();
+                            _eventThreadCancellationTokenSource.Dispose();
+                        }
                     }
                     catch (ObjectDisposedException)
                     {
@@ -543,8 +566,11 @@ namespace System.Device.Gpio.Drivers
             {
                 try
                 {
-                    _eventThreadCancellationTokenSource.Cancel();
-                    _eventThreadCancellationTokenSource.Dispose();
+                    if (_eventThreadCancellationTokenSource != null)
+                    {
+                        _eventThreadCancellationTokenSource.Cancel();
+                        _eventThreadCancellationTokenSource.Dispose();
+                    }
                 }
                 catch (ObjectDisposedException)
                 {
@@ -618,12 +644,18 @@ namespace System.Device.Gpio.Drivers
                 {
                     IsBackground = true
                 };
+                _eventThreadCancellationTokenSource = new CancellationTokenSource();
                 _eventDetectionThread.Start();
             }
         }
 
         private void DetectEvents()
         {
+            if (_eventThreadCancellationTokenSource == null)
+            {
+                throw new InvalidOperationException("Cannot start to detect events when CancellationTokenSource is null.");
+            }
+
             while (_pinsToDetectEventsCount > 0)
             {
                 try

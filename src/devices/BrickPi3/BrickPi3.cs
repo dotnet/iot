@@ -263,7 +263,7 @@ namespace Iot.Device.BrickPi3
         /// <summary>
         /// Read the 20 charactor BrcikPi3 board name
         /// </summary>
-        /// <returns>BrcikPi3 board name string</returns>
+        /// <returns>BrickPi3 board name string</returns>
         public string GetBoard()
         {
             string retVal = string.Empty;

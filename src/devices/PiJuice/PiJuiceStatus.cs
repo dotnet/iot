@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -77,13 +76,13 @@ namespace Iot.Device.PiJuiceDevice
         /// Clears generated button event
         /// </summary>
         /// <param name="button">Button to clear button event for</param>
-        public void ClearButtonEvent(Button button)
+        public void ClearButtonEvent(ButtonSwitch button)
         {
             byte[] array = button switch
             {
-                Button.Switch1 => new byte[] { 0xF0, 0xFF },
-                Button.Switch2 => new byte[] { 0x0F, 0xFF },
-                Button.Switch3 => new byte[] { 0xFF, 0xF0 },
+                ButtonSwitch.Switch1 => new byte[] { 0xF0, 0xFF },
+                ButtonSwitch.Switch2 => new byte[] { 0x0F, 0xFF },
+                ButtonSwitch.Switch3 => new byte[] { 0xFF, 0xF0 },
                 _ => throw new NotImplementedException()
             };
 

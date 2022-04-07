@@ -1,20 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>.net5.0</TargetFramework>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Card\Ultralight\Ultralight.csproj" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Mfrc522.csproj" />
     <ProjectReference Include="..\..\Ft4222\Ft4222.csproj" />
     <ProjectReference Include="..\..\Card\CardRfid.csproj" />
     <ProjectReference Include="..\..\Card\Mifare\Mifare.csproj" />
   </ItemGroup>
-
 </Project>

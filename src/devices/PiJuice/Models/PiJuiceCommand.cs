@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 namespace Iot.Device.PiJuiceDevice.Models
 {
@@ -60,7 +59,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         FaultEvent = 0x44,
 
         /// <summary>
-        /// Button event types
+        /// ButtonSwitch event types
         /// </summary>
         ButtonEvent = 0x45,
 
@@ -135,7 +134,7 @@ namespace Iot.Device.PiJuiceDevice.Models
         LedConfig = 0x6A,
 
         /// <summary>
-        /// Button configuration
+        /// ButtonSwitch configuration
         /// </summary>
         ButtonConfig = 0x6E,
 

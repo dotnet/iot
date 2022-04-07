@@ -1,21 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netcoreapp3.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
-    <GenerateDocumentationFile>false</GenerateDocumentationFile> 
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <!-- We don't want to run hardware test by default -->
-    <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>    
+    <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="../Arduino.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
-    
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
-
 </Project>

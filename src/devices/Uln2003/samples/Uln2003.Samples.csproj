@@ -1,19 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
-
- <ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)/../Uln2003.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
   </ItemGroup>
-
-  <ItemGroup> 
-      <None Remove="README.md" />
-      <None Remove="Uln2003.png" />
-      <None Remove="Uln2003.fzz" />
+  <ItemGroup>
+    <None Remove="README.md" />
+    <None Remove="Uln2003.png" />
+    <None Remove="Uln2003.fzz" />
   </ItemGroup>
-
 </Project>

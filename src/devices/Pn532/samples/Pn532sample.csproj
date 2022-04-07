@@ -1,15 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\Card\CreditCard\CreditCardProcessing.csproj" />
     <ProjectReference Include="..\..\Card\Mifare\Mifare.csproj" />
@@ -17,5 +13,4 @@
     <ProjectReference Include="..\..\Card\Ultralight\Ultralight.csproj" />
     <ProjectReference Include="..\Pn532.csproj" />
   </ItemGroup>
-
 </Project>

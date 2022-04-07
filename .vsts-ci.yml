@@ -58,8 +58,8 @@ stages:
           ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
             name: Hosted VS2017
           ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
-            name: NetCoreInternal-Pool
-            queue: buildpool.windows.10.amd64.vs2017
+            name: NetCore1ESPool-Internal
+            demands: ImageOverride -equals build.windows.10.amd64.vs2017
         variables:
         - HelixApiAccessToken: ''
         - _InternalBuildArgs: ''
@@ -100,6 +100,13 @@ stages:
         steps:
         - checkout: self
           clean: true
+        # Scan markdown files on style consistency
+        - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          - powershell: |
+              npm install -g markdownlint-cli
+              markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
+            displayName: 'Execute Markdownlint'
+        
         # Use utility script to run script command dependent on agent OS.
         - script: build.cmd -ci -sign
             -configuration $(_BuildConfig)
@@ -128,11 +135,11 @@ stages:
             artifactName: BuiltPackageOutputs
             artifactType: container
           condition: eq(variables['_BuildConfig'], 'Release')
-      
+
       - job: Linux
         container: LinuxContainer
         pool:
-          name: Hosted Ubuntu 1604
+          vmImage: 'ubuntu-latest'
         variables:
         - HelixApiAccessToken: ''
         - ${{ if and(ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:

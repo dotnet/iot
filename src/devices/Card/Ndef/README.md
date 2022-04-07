@@ -4,7 +4,7 @@ This library supports [NDEF messages](https://nfc-forum.org/product/nfc-data-exc
 
 NDEF messages are used on Mifare Cards and is included into this library as well. You have a full example using 2 different NFC readers [PN532](../../Pn532/README.md) and [PN1850](../../Pn1850/README.md) build in.
 
-## Reading NDEF from a card
+## Usage
 
 This operation only require a valid NFC reader which implement `CardTransceiver`, see [the class](../CardTransceiver.cs).
 
@@ -124,7 +124,7 @@ foreach (var msg in message.Records)
 }
 ```
 
-## Writing NDEF to a card
+### Writing NDEF to a card
 
 From the previous example, you will still need to get a card. From there, to create and write messages, it's quite straight forward:
 
@@ -160,7 +160,7 @@ mifareCard.KeyB = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 var res = mifareCard.WriteNdefMessage(message, false);
 ```
 
-## Format a card to NDEF
+### Format a card to NDEF
 
 You can format a card, this will be done using Key B, by default it will use the Default Key B. You can pass as well the Key B in the parameters.
 
@@ -170,7 +170,7 @@ string msg = ret ? "Formatting successful." : "Error formatting card.";
 Console.WriteLine(msg);
 ```
 
-## Check if the card is NDEF formatted
+### Check if the card is NDEF formatted
 
 You can as well check is properly NDEF formatted:
 
@@ -182,4 +182,4 @@ Console.WriteLine($"This card is{isForm} NDEF formatted");
 
 ## Card type supported
 
-NDEF per se is fully independent of cards, so the class can be used independently. A Mifare implementation has been done. All Mifare 1K, 2K and 4K are supported. The Mifare 300 are not.
+NDEF per se is fully independent of cards, so the class can be used independently. A [Mifare implementation](../Mifare) has been done. All Mifare 1K, 2K and 4K are supported. The Mifare 300 are not. Also all [Ultralight cards](../Utralight) are supported as well.

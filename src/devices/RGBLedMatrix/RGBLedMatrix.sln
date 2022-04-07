@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RGBLedMatrix.sample", "samp
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RGBLedMatrix", "RGBLedMatrix.csproj", "{40A8EFFD-B81F-4A1E-A41C-27F12848D16D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{C9339537-8395-4950-AED4-C58910870439}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{C9339537-8395-4950-AED4-C58910870439}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

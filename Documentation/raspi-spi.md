@@ -2,7 +2,7 @@
 
 In most of the cases, it is easy and straight forward to enable SPI for your Raspberry Pi. The basic case can be [found here](https://www.raspberrypi-spy.co.uk/2014/08/enabling-the-spi-interface-on-the-raspberry-pi/).
 
-This page will explain how to setup any SPI. Please refer to the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/) to understand the different SPI available. You should be aware as well that for Raspberry Pi4, some of the configurations are different than for the other version especially for SPI3, 4 and 5. 
+This page will explain how to setup any SPI. Please refer to the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/) to understand the different SPI available. You should be aware as well that for Raspberry Pi4, some of the configurations are different than for the other version especially for SPI3, 4 and 5.
 
 ## Basic Hardware SPI usage
 
@@ -26,11 +26,11 @@ namespace TestTest
 }
 ```
 
-This will open SPI0, with the default Chip Select. It will then write a byte to the MOSI pin and read 1 byte from the MISO pin. 
+This will open SPI0, with the default Chip Select. It will then write a byte to the MOSI pin and read 1 byte from the MISO pin.
 
 If you get something like this, it means you need to check the next sections to activate your SPI0:
 
-```
+```text
 Unhandled exception. System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'.
    at System.Device.Spi.UnixSpiDevice.Initialize()
    at System.Device.Spi.UnixSpiDevice.WriteByte(Byte value)
@@ -46,7 +46,7 @@ In very short, this is the line you'll need to add into the `/boot/config.txt` f
 sudo nano /boot/config.txt
 ```
 
-Add the line: 
+Add the line:
 
 ```text
 dtparam=spi=on
@@ -76,11 +76,11 @@ In order to activate  Chip Select, you'll need to add a specific dtoverlay on th
 
 Here is the table with the different options for SP0 and SP1 (please refer to the [Raspberry Pi documentation](https://www.raspberrypi.org/documentation/hardware/raspberrypi/spi/) to activate other SPI)
 
-# SPI0
+## SPI0
 
 The following dtoverlay definition can be [found here](https://github.com/raspberrypi/firmware/blob/7b99da75f55a5ad7d572ec4ebe4e8f9573deaee7/boot/overlays/README#L2437).
 
-| SPI # | Chip Select # | Header Pin | Default GPIO | Pin Name | 
+| SPI # | Chip Select # | Header Pin | Default GPIO | Pin Name |
 | --- | --- | --- | --- | --- |
 | SPI0 | CE0 | 24 | GPIO08 | SPI0_CE0_N |
 | SPI0 | CE1 | 26 | GPIO07 | SPI0_CE1_N |
@@ -99,9 +99,9 @@ dtoverlay=spi0-1cs,cs0_pin=27,no_miso
 
 There is only for SPI0 that you can use, in both cases with 1 or 2 Chip Select pin the `no_miso`option.
 
-**Important note**: Those overlays are only supported in the very last Raspberry Pi OS. You will get the `System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'` error message if you are using them on an older version. You can use `spi0-cs` where in the previous examples you had `spi0-2cs` or `spi0-1cs`. 
+> **Important note**: Those overlays are only supported in the very last Raspberry Pi OS. You will get the `System.IO.IOException: Error 2. Can not open SPI device file '/dev/spidev0.0'` error message if you are using them on an older version. You can use `spi0-cs` where in the previous examples you had `spi0-2cs` or `spi0-1cs`.
 
-As an alternative, you can as well use the following command line: `sudo raspi-config nonint do_spi 0 `
+As an alternative, you can as well use the following command line: `sudo raspi-config nonint do_spi 0`
 
 So the first example will now give:
 
@@ -111,9 +111,9 @@ dtoverlay=spi0-cs,cs0_pin=27,cs1_pin=22
 
 In older version, no_miso is not supported neither. And you will always get 2 chip select activated and you don't have a way to only select one.
 
-# SPI1 to SPI6
+## SPI1 to SPI6
 
-The following dtoverlay definition can be [found here](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L1167). 
+The following dtoverlay definition can be [found here](https://github.com/raspberrypi/linux/blob/04c8e47067d4873c584395e5cb260b4f170a99ea/arch/arm/boot/dts/overlays/README#L1167).
 
 You can use the same behavior as for SPI0 but you can get from 1 to 3 Chip Select and you can also prevent the creation of a specific node `/dev/spidev1.0` (here on SPI1) with a specific flag `cs0_spidev=disabled` (here for Chip Select 0). So to continue the example, if we want this behavior, the dtoverlay would be for the default GPIO pin 18:
 
@@ -127,9 +127,9 @@ Here is another example where we will use SPI4 with 2 Chip Select, CS0 to GPIO p
 dtoverlay=spi4-2cs,cs1_pin=17,cs1_spidev=disabled
 ```
 
-### Adding your user to the right permission group
+## Adding your user to the right permission group
 
-If you're running, or just upgraded to a version published after August 2020, this should be already done. 
+If you're running, or just upgraded to a version published after August 2020, this should be already done.
 But in case, you can always check that there are the right permissions on SPI:
 
 ```bash

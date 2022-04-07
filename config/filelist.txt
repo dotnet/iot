@@ -1,0 +1,2 @@
+**/Iot.Device.Bindings.*
+**/System.Device.Gpio.*

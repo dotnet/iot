@@ -2,6 +2,10 @@
 
 MFRC522 is a very cheap RFID/NFC reader for Iso 14443 Type A cards. Part of those cars are the [Mifare](../Card/Mifare) family. This reader implement the proprietary Mifare cryptography protocol and can be used transparently.
 
+## Documentation
+
+- MFRC5222 [Datasheet](https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf)
+
 ## Usage
 
 MFRC522 supports SPI, I2C and UART (Serial Port). You can create the reader with any of those protocols.
@@ -80,10 +84,9 @@ else
 
 **Important**: you have to do the `ReselectCard()` operation every time you have a failure in reading or authentication. By default the card will stop responding. This behavior is wanted by design to make is longer to brute force the authentication mechanism. The [samples](./samples) shows a way how to find a key from known keys for [NDEF](../Card/Ndef) scenarios for example. Note that the sample is not fully optimize, it is to help understanding what as the mechanism behind.
 
-## Reference and notes
+## Other notes
 
-* MFRC5222 Datasheet: https://www.nxp.com/docs/en/data-sheet/MFRC522.pdf
-* The SPI implementation has been deeply tested.
-* The I2C and UART has been barely tested due to lack of hardware support. So please open issues if you have any issue.
-* When using I2C, the address can be setup using the hardware pin, it's the reason why there is no default address.
-* If you are using UART, it is more than strongly recommended to use as high as possible serial baud transfer.
+- The SPI implementation has been deeply tested.
+- The I2C and UART has been barely tested due to lack of hardware support. So please open issues if you have any issue.
+- When using I2C, the address can be setup using the hardware pin, it's the reason why there is no default address.
+- If you are using UART, it is more than strongly recommended to use as high as possible serial baud transfer.

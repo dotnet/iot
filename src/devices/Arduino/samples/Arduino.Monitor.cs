@@ -18,6 +18,7 @@ using Iot.Device.Arduino;
 using Iot.Device.Arduino.Sample;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Button;
 using Iot.Device.Common;
 using Iot.Device.HardwareMonitor;
 using UnitsNet;
@@ -80,13 +81,13 @@ namespace Arduino.Samples
 
         public static void DisplayModes(ArduinoBoard board)
         {
-            const int Gpio2 = 2;
+            const int ButtonPin = 2;
             const int MaxMode = 10;
             Length stationAltitude = Length.FromMeters(650);
             int mode = 0;
             var gpioController = board.CreateGpioController();
-            gpioController.OpenPin(Gpio2);
-            gpioController.SetPinMode(Gpio2, PinMode.Input);
+
+            GpioButton button = new GpioButton(ButtonPin, gpioController, false, PinMode.Input, TimeSpan.FromMilliseconds(200));
             CharacterDisplay disp = new CharacterDisplay(board);
             Console.WriteLine("Display output test");
             Console.WriteLine("The button on GPIO 2 changes modes");
@@ -94,7 +95,7 @@ namespace Arduino.Samples
             disp.Output.ScrollUpDelay = TimeSpan.FromMilliseconds(500);
             AutoResetEvent buttonClicked = new AutoResetEvent(false);
 
-            void ChangeMode(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+            void ChangeMode(object? sender, EventArgs pinValueChangedEventArgs)
             {
                 mode++;
                 if (mode > MaxMode)
@@ -106,7 +107,8 @@ namespace Arduino.Samples
                 buttonClicked.Set();
             }
 
-            gpioController.RegisterCallbackForPinValueChangedEvent(Gpio2, PinEventTypes.Falling, ChangeMode);
+            button.Press += ChangeMode;
+
             var device = board.CreateI2cDevice(new I2cConnectionSettings(0, Bmp280.DefaultI2cAddress));
             Bmp280? bmp;
             try
@@ -119,6 +121,14 @@ namespace Arduino.Samples
             {
                 bmp = null;
                 Console.WriteLine("BMP280 not available");
+            }
+
+            DhtSensor? dht = board.GetCommandHandler<DhtSensor>();
+            if (dht == null)
+            {
+                // Note that this is a software error, hardware support is not tested here.
+                Console.WriteLine("DHT Sensor module missing");
+                return;
             }
 
             OpenHardwareMonitor hardwareMonitor = new OpenHardwareMonitor();
@@ -174,7 +184,7 @@ namespace Arduino.Samples
                         break;
                     case 4:
                         modeName = "Temperature / Humidity";
-                        if (board.TryReadDht(3, 11, out temp, out var humidity))
+                        if (dht.TryReadDht(3, 11, out temp, out var humidity))
                         {
                             disp.Output.ReplaceLine(1, string.Format(CultureInfo.CurrentCulture, "{0:s1} {1:s0}", temp, humidity));
                         }
@@ -187,7 +197,7 @@ namespace Arduino.Samples
 
                     case 5:
                         modeName = "Dew point";
-                        if (bmp != null && bmp.TryReadPressure(out p2) && board.TryReadDht(3, 11, out temp, out humidity))
+                        if (bmp != null && bmp.TryReadPressure(out p2) && dht.TryReadDht(3, 11, out temp, out humidity))
                         {
                             Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
                             disp.Output.ReplaceLine(1, dewPoint.ToString("s1", CultureInfo.CurrentCulture));
@@ -286,6 +296,7 @@ namespace Arduino.Samples
             }
 
             hardwareMonitor.Dispose();
+            button.Dispose();
             disp.Output.Clear();
             disp.Dispose();
             bmp?.Dispose();

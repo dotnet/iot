@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>
+    </RootNamespace>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- SA1205: Partial elements should declare access modifier (allows adjusting class visibility in a single source file)-->
+    <NoWarn>$(NoWarn);SA1205;</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="ClassVisibility.cs" />
+    <Compile Include="MathExtensions.cs" />
+    <Compile Include="Iot/Device/Common/*.cs" />
+    <Compile Include="Iot/Device/Graphics/*.cs" />
+    <Compile Include="Iot/Device/Multiplexing/*.cs" />
+    <Compile Include="System/Device/*.cs" />
+    <Compile Include="System/Device/Gpio/*.cs" />
+    <Compile Include="System/Device/Analog/*.cs" />
+    <Compile Include="System/Device/Spi/*.cs" />
+    <Compile Include="Interop/**/*.cs" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <Compile Include="FrameworkCompatibilityExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1' Or '$(TargetFramework)' == 'netstandard2.0'">
+    <Compile Include="IsExternalInit.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+  </ItemGroup>
+</Project>

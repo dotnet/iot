@@ -3,16 +3,20 @@
   <PropertyGroup>
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <DefaultNamespace>Iot.Device.HardwareMonitor</DefaultNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="OpenHardwareMonitor.cs" />
-    <Compile Include="SensorType.cs" />
+    <Compile Include="*.cs" />
+    <Compile Include="JsonSchema\ComputerJson.cs" />
+    <Compile Include="JsonSchema\HardwareJson.cs" />
+    <Compile Include="JsonSchema\SensorJson.cs" />
     <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
   </ItemGroup>
 
 </Project>

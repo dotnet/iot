@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net5.0;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0;netcoreapp3.1</TargetFrameworks>
     <LangVersion>9</LangVersion>
     <Nullable>enable</Nullable>
+    <DefineConstants>$(DefineConstants);BUILDING_IOT_DEVICE_BINDINGS</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <IsPackable>true</IsPackable>
@@ -11,6 +12,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
     <TargetsForTfmSpecificContentInPackage>$(TargetsForTfmSpecificContentInPackage)</TargetsForTfmSpecificContentInPackage>
+    <!--Partial elements should declare access modifier: Disabled for this project to simplify handling in common project. See also there.
+    If we disable this here, the warning is still emmited for the individual projects.-->
+    <NoWarn>$(NoWarn);SA1205</NoWarn>
     <!--Disabling default items so samples source won't get build by the main library-->
   </PropertyGroup>
   
@@ -31,9 +35,16 @@
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
+    <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../devices/CharacterLcd/BigFontMap.txt" />
+    <EmbeddedResource Include="../devices/BuildHat/data/firmware.bin" />
+    <EmbeddedResource Include="../devices/BuildHat/data/signature.bin"/>
+    <EmbeddedResource Include="../devices/BuildHat/data/version" />
   </ItemGroup>
   <!-- This target will call into each device binding project to get out the source files for the framework we are building
   and then it will add the results to the Compile item group. -->

@@ -424,14 +424,14 @@ namespace Iot.Device.Media
             _errorNum = Interop.snd_pcm_hw_params_any(pcm, @params);
             ThrowIfError("Can not fill parameters object.");
 
-            _errorNum = Interop.snd_pcm_hw_params_set_access(pcm, @params, snd_pcm_access_t.SND_PCM_ACCESS_RW_INTERLEAVED);
+            _errorNum = Interop.snd_pcm_hw_params_set_access(pcm, @params, Interop.snd_pcm_access_t.SND_PCM_ACCESS_RW_INTERLEAVED);
             ThrowIfError("Can not set access mode.");
 
             _errorNum = (int)(header.BitsPerSample / 8) switch
             {
-                1 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_U8),
-                2 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_S16_LE),
-                3 => Interop.snd_pcm_hw_params_set_format(pcm, @params, snd_pcm_format_t.SND_PCM_FORMAT_S24_LE),
+                1 => Interop.snd_pcm_hw_params_set_format(pcm, @params, Interop.snd_pcm_format_t.SND_PCM_FORMAT_U8),
+                2 => Interop.snd_pcm_hw_params_set_format(pcm, @params, Interop.snd_pcm_format_t.SND_PCM_FORMAT_S16_LE),
+                3 => Interop.snd_pcm_hw_params_set_format(pcm, @params, Interop.snd_pcm_format_t.SND_PCM_FORMAT_S24_LE),
                 _ => throw new Exception("Bits per sample error. Please reset the value of RecordingBitsPerSample."),
             };
             ThrowIfError("Can not set format.");
@@ -456,8 +456,8 @@ namespace Iot.Device.Media
 
             // The snd_mixer_selem_set_playback_volume_all method in Raspberry Pi is invalid.
             // So here we adjust the volume by setting the left and right channels separately.
-            _errorNum = Interop.snd_mixer_selem_set_playback_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, volume);
-            _errorNum = Interop.snd_mixer_selem_set_playback_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, volume);
+            _errorNum = Interop.snd_mixer_selem_set_playback_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, volume);
+            _errorNum = Interop.snd_mixer_selem_set_playback_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, volume);
             ThrowIfError("Set playback volume error.");
 
             CloseMixer();
@@ -469,8 +469,8 @@ namespace Iot.Device.Media
 
             OpenMixer();
 
-            _errorNum = Interop.snd_mixer_selem_get_playback_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, &volumeLeft);
-            _errorNum = Interop.snd_mixer_selem_get_playback_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, &volumeRight);
+            _errorNum = Interop.snd_mixer_selem_get_playback_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, &volumeLeft);
+            _errorNum = Interop.snd_mixer_selem_get_playback_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, &volumeRight);
             ThrowIfError("Get playback volume error.");
 
             CloseMixer();
@@ -482,8 +482,8 @@ namespace Iot.Device.Media
         {
             OpenMixer();
 
-            _errorNum = Interop.snd_mixer_selem_set_capture_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, volume);
-            _errorNum = Interop.snd_mixer_selem_set_capture_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, volume);
+            _errorNum = Interop.snd_mixer_selem_set_capture_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, volume);
+            _errorNum = Interop.snd_mixer_selem_set_capture_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, volume);
             ThrowIfError("Set recording volume error.");
 
             CloseMixer();
@@ -495,8 +495,8 @@ namespace Iot.Device.Media
 
             OpenMixer();
 
-            _errorNum = Interop.snd_mixer_selem_get_capture_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, &volumeLeft);
-            _errorNum = Interop.snd_mixer_selem_get_capture_volume(_elem, snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, &volumeRight);
+            _errorNum = Interop.snd_mixer_selem_get_capture_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_LEFT, &volumeLeft);
+            _errorNum = Interop.snd_mixer_selem_get_capture_volume(_elem, Interop.snd_mixer_selem_channel_id.SND_MIXER_SCHN_FRONT_RIGHT, &volumeRight);
             ThrowIfError("Get recording volume error.");
 
             CloseMixer();
@@ -533,7 +533,7 @@ namespace Iot.Device.Media
 
             lock (s_playbackInitializationLock)
             {
-                _errorNum = Interop.snd_pcm_open(out _playbackPcm, Settings.PlaybackDeviceName, snd_pcm_stream_t.SND_PCM_STREAM_PLAYBACK, 0);
+                _errorNum = Interop.snd_pcm_open(out _playbackPcm, Settings.PlaybackDeviceName, Interop.snd_pcm_stream_t.SND_PCM_STREAM_PLAYBACK, 0);
                 ThrowIfError("Can not open playback device.");
             }
         }
@@ -561,7 +561,7 @@ namespace Iot.Device.Media
 
             lock (s_recordingInitializationLock)
             {
-                _errorNum = Interop.snd_pcm_open(out _recordingPcm, Settings.RecordingDeviceName, snd_pcm_stream_t.SND_PCM_STREAM_CAPTURE, 0);
+                _errorNum = Interop.snd_pcm_open(out _recordingPcm, Settings.RecordingDeviceName, Interop.snd_pcm_stream_t.SND_PCM_STREAM_CAPTURE, 0);
                 ThrowIfError("Can not open recording device.");
             }
         }

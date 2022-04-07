@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <RootNamespace>Iot.Device.Ht1632.Sample</RootNamespace>
+  </PropertyGroup>
+
+<ItemGroup>
+    <ProjectReference Include="..\Ht1632.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="dotnet-bot.bmp">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />    
+  </ItemGroup>
+
+  <ItemGroup>
+  	<ProjectReference Include="../Ili9341.csproj" />
+    <ProjectReference Include="../../Ft4222/Ft4222.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="images\*.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

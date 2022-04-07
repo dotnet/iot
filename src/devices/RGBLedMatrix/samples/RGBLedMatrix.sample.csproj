@@ -2,16 +2,12 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="../RGBLedMatrix.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="../../Interop/Unix/ThreadHelper.cs" />
   </ItemGroup>
 
   <ItemGroup>

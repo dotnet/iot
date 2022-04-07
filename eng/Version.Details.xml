@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="6.0.0-beta.21364.3">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="7.0.0-beta.22179.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>6a8491b61e0c243cbb6a7ff4966b48e6d1e075b1</Sha>
+      <Sha>1527dc867ccb652def4c0f57fbd2ebbed3a94019</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="6.0.0-beta.21364.3">
+    <Dependency Name="Microsoft.DotNet.Helix.Sdk" Version="7.0.0-beta.22179.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>6a8491b61e0c243cbb6a7ff4966b48e6d1e075b1</Sha>
+      <Sha>1527dc867ccb652def4c0f57fbd2ebbed3a94019</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.GenAPI" Version="6.0.0-beta.21364.3">
+    <Dependency Name="Microsoft.DotNet.GenAPI" Version="7.0.0-beta.22179.1">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>6a8491b61e0c243cbb6a7ff4966b48e6d1e075b1</Sha>
+      <Sha>1527dc867ccb652def4c0f57fbd2ebbed3a94019</Sha>
     </Dependency>
   </ToolsetDependencies>
   <!-- ProductDependencies -->
@@ -24,9 +24,9 @@
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>bfc49945c0bedeffe01bb5d6f3c217dad207d0d8</Sha>
     </Dependency>
-    <Dependency Name="System.Drawing.Common" Version="5.0.2">
+    <Dependency Name="System.Drawing.Common" Version="5.0.3">
       <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>5111aa12cdeb8e8703d475193f78c1848f58f6c6</Sha>
+      <Sha>65fdc453d54fd172d60e4b7f1aa30f2ee9df8a44</Sha>
     </Dependency>
     <Dependency Name="System.IO.Ports" Version="5.0.1">
       <Uri>https://github.com/dotnet/runtime</Uri>

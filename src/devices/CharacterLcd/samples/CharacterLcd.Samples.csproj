@@ -1,16 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="../../Mcp23xxx/Mcp23xxx.csproj" />
     <ProjectReference Include="../../Pcx857x/Pcx857x.csproj" />
-    <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <ProjectReference Include="..\..\Arduino\Arduino.csproj" />
     <ProjectReference Include="..\CharacterLcd.csproj" />
   </ItemGroup>
-
 </Project>

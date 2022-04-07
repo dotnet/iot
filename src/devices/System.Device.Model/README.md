@@ -5,6 +5,7 @@
 This library provides a set of attributes which allow to annotate devices.
 
 They can be used for:
+
 - implementation of Azure Plug & Play
 - providing extra metadata about sensors (we can i.e. generate some parts of the README file or add extra checks)
 
@@ -31,6 +32,7 @@ Every method or property producing telemetry should have `[Telemetry]` attribute
 For properties providing name of the `Telemetry` is optional as it can be deduced from the property name.
 
 Telemetry can be put on:
+
 - properties
 - methods returning value but not taking any arguments
 - methods returning bool and taking one `out` argument
@@ -58,6 +60,7 @@ They should only be used on things which don't change value between calls (unles
 Specifially reading (telemetry) from the device should not change the state of the property.
 
 Usage is similar to Telemetry with some additions:
+
 - they can be writable
   - if same name (i.e. `PowerMode`) is used on i.e. `SetPowerMode` and `ReadPowerMode` they will be merged into a single model property
 - they can be put on methods without return value taking one argument (it must not be be passed by reference)
@@ -103,6 +106,7 @@ protected override void SetDefaultConfiguration() { /* ... */ }
 ## Type serialization
 
 Only simple types can be serialized:
+
 - enums (without Flags attribute)
   - values out of enum range are not permitted (i.e. bitwise combination)
 - UnitsNet units
