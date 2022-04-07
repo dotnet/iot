@@ -48,7 +48,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             if (!SupportedPorts.Contains(port))
             {
-                throw new ArgumentException(nameof(port), "Grove port not supported");
+                throw new ArgumentException("Grove port not supported", nameof(port));
             }
 
             _grovePi = grovePi;

@@ -145,7 +145,7 @@ namespace Iot.Device.Spi
         {
             if (dataToWrite.Length != dataToRead.Length)
             {
-                throw new ArgumentException(nameof(dataToWrite));
+                throw new ArgumentException(null, nameof(dataToWrite));
             }
 
             if (_sdi == -1)

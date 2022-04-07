@@ -43,7 +43,7 @@ namespace Iot.Device.Common
         {
             if ((dec > 99) || (dec < 0))
             {
-                throw new ArgumentException(nameof(dec), "Value must be between 0-99.");
+                throw new ArgumentException("Value must be between 0-99.", nameof(dec));
             }
 
             return (byte)(((dec / 10) << 4) + (dec % 10));

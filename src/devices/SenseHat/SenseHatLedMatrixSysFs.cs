@@ -57,7 +57,7 @@ namespace Iot.Device.SenseHat
         {
             if (colors.Length != NumberOfPixels)
             {
-                throw new ArgumentException(nameof(colors), $"Value must be {NumberOfPixels} elements. Length: {colors.Length}");
+                throw new ArgumentException($"Value must be {NumberOfPixels} elements. Length: {colors.Length}", nameof(colors));
             }
 
             StartWritingColors();
