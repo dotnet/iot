@@ -42,8 +42,7 @@ namespace Iot.Device.Adc
         {
             if (channel < 0 || channel > channelCount - 1)
             {
-                throw new ArgumentOutOfRangeException($"ADC channel must be within the range 0-{channelCount - 1}.",
-                    nameof(channel));
+                throw new ArgumentOutOfRangeException(nameof(channel), $"ADC channel must be within the range 0-{channelCount - 1}.");
             }
         }
 

@@ -247,7 +247,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is 1 to 127");
+                throw new ArgumentOutOfRangeException(nameof(i2cAddress), "The value range is 1 to 127");
             }
 
             Dispose();

@@ -107,7 +107,7 @@ namespace Iot.Device.RadioTransmitter
             // Details in Datasheet P7
             if (frequency < 70 || frequency > 108)
             {
-                throw new ArgumentOutOfRangeException("Range from 70MHz to 108MHz.");
+                throw new ArgumentOutOfRangeException(nameof(frequency), "Range from 70MHz to 108MHz.");
             }
 
             int freq, reg0, reg1, reg2;
