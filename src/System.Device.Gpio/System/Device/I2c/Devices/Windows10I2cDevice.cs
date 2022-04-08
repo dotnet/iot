@@ -29,7 +29,7 @@ namespace System.Device.I2c
             DeviceInformationCollection? deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
             if (deviceInformationCollection is null || deviceInformationCollection.Count == 0)
             {
-                throw new ArgumentException($"No I2C device exists for bus ID {settings.BusId}.", $"{nameof(settings)}.{nameof(settings.BusId)}");
+                throw new ArgumentException($"No I2C device exists for bus ID {settings.BusId}.", nameof(settings));
             }
 
             WinI2c.I2cDevice? winI2cDevice = WinI2c.I2cDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();

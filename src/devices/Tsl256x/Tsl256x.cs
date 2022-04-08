@@ -224,7 +224,7 @@ namespace Iot.Device.Tsl256x
                     break;
                 case IntegrationTime.Manual:
                 default:
-                    throw new ArgumentOutOfRangeException($"Only non manual integration time are supported");
+                    throw new InvalidOperationException($"Only non manual integration time are supported");
             }
 
             return GetIlluminance();

@@ -116,7 +116,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+                throw new ArgumentOutOfRangeException(nameof(solution), "The value range is -1024 mV to 1024 mV");
             }
         }
 
@@ -135,7 +135,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+                throw new ArgumentOutOfRangeException(nameof(solution), "The value range is -1024 mV to 1024 mV");
             }
         }
 
@@ -154,7 +154,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+                throw new ArgumentOutOfRangeException(nameof(solution), "The value range is -1024 mV to 1024 mV");
             }
         }
 
@@ -230,7 +230,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV for refLow, refHigh, readLow and readLow");
+                throw new ArgumentOutOfRangeException(nameof(refLow), "The value range is -1024 mV to 1024 mV for refLow, refHigh, readLow and readLow");
             }
         }
 

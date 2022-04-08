@@ -144,7 +144,7 @@ namespace Iot.Device.Adc
                 4 or 8 => (inputType == InputType.SingleEnded ? 0b1_1000 : 0b1_0000) | channelVal,
                 2 => (inputType == InputType.SingleEnded ? 0b1101 : 0b1001) | channelVal << 1,
                 1 => 0,
-                _ => throw new ArgumentOutOfRangeException("Unsupported Channel Count"),
+                _ => throw new InvalidOperationException($"Unsupported ChannelCount {ChannelCount}."),
             };
 
             // read the data from the device...

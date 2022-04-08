@@ -157,7 +157,7 @@ namespace Iot.Device.Display
 
             if (digits.Length + startAddress > MaxNumberOfDigits)
             {
-                throw new ArgumentOutOfRangeException($"{nameof(Large4Digit7SegmentDisplay)} only supports {MaxNumberOfDigits - startAddress} digits starting from address {startAddress}");
+                throw new ArgumentOutOfRangeException(nameof(digits), $"{nameof(Large4Digit7SegmentDisplay)} only supports {MaxNumberOfDigits - startAddress} digits starting from address {startAddress}");
             }
 
             foreach (byte digit in digits)

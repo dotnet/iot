@@ -697,7 +697,7 @@ namespace Iot.Device.Nrf24l01
 
             if (pipe > 1 && address.Length > 1)
             {
-                throw new ArgumentOutOfRangeException("Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom.");
+                throw new ArgumentOutOfRangeException(nameof(address), "Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom.");
             }
 
             Span<byte> writeData = stackalloc byte[1 + address.Length];
