@@ -207,9 +207,10 @@ namespace Iot.Device.KeyMatrix
                 _gpioController!.OpenPin(_outputPins[i], PinMode.Output);
             }
 
+            bool usePullDown = _inputPins.All(p => _gpioController!.IsPinModeSupported(p, PinMode.InputPullDown));
             for (int i = 0; i < _inputPins.Length; i++)
             {
-                _gpioController!.OpenPin(_inputPins[i], PinMode.Input);
+                _gpioController!.OpenPin(_inputPins[i], usePullDown ? PinMode.InputPullDown : PinMode.Input);
             }
 
             _pinsOpened = true;
