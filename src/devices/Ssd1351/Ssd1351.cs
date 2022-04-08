@@ -51,7 +51,7 @@ namespace Iot.Device.Ssd1351
             _gpioDevice = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
 
-            _spiDevice = spiDevice ?? throw new ArgumentException(null, nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
