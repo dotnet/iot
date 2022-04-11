@@ -1,4 +1,4 @@
-# MPU6xxx/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)
+# MPU6050/MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)
 
 MPU6000, MPU6050 and PMU6500 are a 3 axis Gyroscope, 3 axis Accelerometer and Temperature sensor that can be accessed either thru I2C or SPI. This implementation is only for I2C. The MPU6000 and MPU6050 are identical. They have very little differences with MPU6500. The MPU6500 sensor can be found in various implementation but its main usage is in the MPU9250.
 
