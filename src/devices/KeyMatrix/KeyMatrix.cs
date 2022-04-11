@@ -73,7 +73,7 @@ namespace Iot.Device.KeyMatrix
         /// <param name="gpioController">GPIO controller</param>
         /// <param name="shouldDispose">True to dispose the GpioController</param>
         public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, GpioController? gpioController = null, bool shouldDispose = true)
-            : this(outputPins, inputPins, scanInterval, gpioController, PinMode.Input, shouldDispose)
+            : this(outputPins, inputPins, scanInterval, PinMode.Input, gpioController, shouldDispose)
         {
         }
 
@@ -86,7 +86,7 @@ namespace Iot.Device.KeyMatrix
         /// <param name="gpioController">GPIO controller</param>
         /// <param name="inputPinMode">Mode for input pins - Input / InputPullDown</param>
         /// <param name="shouldDispose">True to dispose the GpioController</param>
-        public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, GpioController? gpioController = null, PinMode inputPinMode = PinMode.Input, bool shouldDispose = true)
+        public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, PinMode inputPinMode, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _shouldDispose = shouldDispose || gpioController == null;
             _gpioController = gpioController ?? new();
