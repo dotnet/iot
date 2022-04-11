@@ -71,6 +71,19 @@ namespace Iot.Device.KeyMatrix
         /// <param name="inputPins">Input pins</param>
         /// <param name="scanInterval">Scanning interval in milliseconds</param>
         /// <param name="gpioController">GPIO controller</param>
+        /// <param name="shouldDispose">True to dispose the GpioController</param>
+        public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, GpioController? gpioController = null, bool shouldDispose = true)
+            : this(outputPins, inputPins, scanInterval, gpioController, PinMode.Input, shouldDispose)
+        {
+        }
+
+        /// <summary>
+        /// Initialize key matrix
+        /// </summary>
+        /// <param name="outputPins">Output pins</param>
+        /// <param name="inputPins">Input pins</param>
+        /// <param name="scanInterval">Scanning interval in milliseconds</param>
+        /// <param name="gpioController">GPIO controller</param>
         /// <param name="inputPinMode">Mode for input pins - Input / InputPullDown</param>
         /// <param name="shouldDispose">True to dispose the GpioController</param>
         public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, GpioController? gpioController = null, PinMode inputPinMode = PinMode.Input, bool shouldDispose = true)
@@ -106,7 +119,7 @@ namespace Iot.Device.KeyMatrix
 
             if (inputPinMode == PinMode.InputPullDown &&
                 !inputPins.All(p => _gpioController.IsPinModeSupported(p, _inputPinMode)))
-                {
+            {
                 throw new ArgumentException("Input pins do not soppurt InputPullDown");
             }
 
