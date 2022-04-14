@@ -51,7 +51,7 @@ namespace Iot.Device.Imu
         {
             if (i2cDevice == null)
             {
-                throw new ArgumentNullException($"Varible i2cDevice is null");
+                throw new ArgumentNullException(nameof(i2cDevice), $"Variable i2cDevice is null");
             }
 
             _i2cDevice = i2cDevice;
