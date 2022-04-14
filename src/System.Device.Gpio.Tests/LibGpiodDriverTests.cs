@@ -54,5 +54,22 @@ namespace System.Device.Gpio.Tests
                 controller.ClosePin(InputPin);
             }
         }
+
+        [Fact]
+        public void UnregisterPinValueChangedShallNotThrow()
+        {
+            using var gc = new GpioController(GetTestNumberingScheme(), GetTestDriver());
+            gc.OpenPin(InputPin, PinMode.Input);
+
+            static void PinChanged(object sender, PinValueChangedEventArgs args)
+            {
+            }
+
+            for (var i = 0; i < 1000; i++)
+            {
+                gc.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Rising | PinEventTypes.Falling, PinChanged);
+                gc.UnregisterCallbackForPinValueChangedEvent(InputPin, PinChanged);
+            }
+        }
     }
 }
