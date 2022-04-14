@@ -12,23 +12,25 @@ namespace System.Device.Gpio.Drivers
     {
         private const int ERROR_CODE_EINTR = 4; // Interrupted system call
 
-        private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
+        private static readonly string s_consumerName = Process.GetCurrentProcess().ProcessName;
 
         public event PinChangeEventHandler? ValueRising;
         public event PinChangeEventHandler? ValueFalling;
 
-        private int _pinNumber;
-        public CancellationTokenSource CancellationTokenSource;
-        private Task _task;
-        private bool _disposing = false;
+        private readonly int _pinNumber;
+        private readonly CancellationTokenSource _cancellationTokenSource;
+        private readonly Task _task;
+        private bool _disposing;
 
         public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle)
         {
             _pinNumber = pinNumber;
-            CancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource = new CancellationTokenSource();
             SubscribeForEvent(safeLineHandle);
-            _task = InitializeEventDetectionTask(CancellationTokenSource.Token, safeLineHandle);
+            _task = InitializeEventDetectionTask(_cancellationTokenSource.Token, safeLineHandle);
         }
+
+        public CancellationToken CancellationToken => _cancellationTokenSource.Token;
 
         private void SubscribeForEvent(SafeLineHandle pinHandle)
         {
@@ -103,8 +105,17 @@ namespace System.Device.Gpio.Drivers
         public void Dispose()
         {
             _disposing = true;
-            CancellationTokenSource.Cancel();
-            _task?.Wait();
+            _cancellationTokenSource.Cancel();
+
+            try
+            {
+                _task.GetAwaiter().GetResult();
+            }
+            catch (TaskCanceledException)
+            {
+                // ignore cancellation exception
+            }
+
             ValueRising = null;
             ValueFalling = null;
         }
