@@ -46,7 +46,7 @@ namespace Iot.Device.Arduino
         private Thread? _inputThread;
         private bool _inputThreadShouldExit;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
-        private BlockingUnorderedCollection<byte[]> _pendingResponses;
+        private BlockingConcurrentBag<byte[]> _pendingResponses;
         private List<PinValue> _lastPinValues;
         private Dictionary<int, uint> _lastAnalogValues;
         private object _lastPinValueLock;
@@ -91,7 +91,7 @@ namespace Iot.Device.Arduino
             _lastAnalogValues = new Dictionary<int, uint>();
             _lastAnalogValueLock = new object();
             _dataQueue = new Queue<byte>(1024);
-            _pendingResponses = new BlockingUnorderedCollection<byte[]>();
+            _pendingResponses = new BlockingConcurrentBag<byte[]>();
             _lastRequestId = 1;
             _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;

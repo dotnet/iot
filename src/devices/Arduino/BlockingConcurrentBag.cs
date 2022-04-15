@@ -15,14 +15,10 @@ namespace Iot.Device.Arduino
     /// <summary>
     /// Represents a collection that removes objects based on a certain pattern
     /// </summary>
-    internal class BlockingUnorderedCollection<T>
+    internal class BlockingConcurrentBag<T>
     {
-        private object _lock = new object();
-        private List<T?> _container = new List<T?>();
-
-        public BlockingUnorderedCollection()
-        {
-        }
+        private readonly object _lock = new object();
+        private readonly List<T?> _container = new List<T?>();
 
         public int Count
         {
@@ -41,6 +37,14 @@ namespace Iot.Device.Arduino
             {
                 _container.Add(elem);
                 Monitor.PulseAll(_lock);
+            }
+        }
+
+        public void Clear()
+        {
+            lock (_lock)
+            {
+                _container.Clear();
             }
         }
 
@@ -65,11 +69,6 @@ namespace Iot.Device.Arduino
                     // The critical section.
                     while (true)
                     {
-                        if (sw.Elapsed > timeout)
-                        {
-                            return false;
-                        }
-
                         // Cannot use FirstOrDefault here, because we need to be able to distinguish between
                         // finding nothing and finding an empty (null, default) element
                         for (var index = 0; index < _container.Count; index++)
@@ -81,6 +80,11 @@ namespace Iot.Device.Arduino
                                 element = elem;
                                 return true;
                             }
+                        }
+
+                        if (sw.Elapsed > timeout)
+                        {
+                            return false;
                         }
 
                         TimeSpan remaining = timeout - sw.Elapsed;

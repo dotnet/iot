@@ -63,9 +63,26 @@ namespace Iot.Device.Arduino
         /// The device is initialized when the first command is sent. The constructor always succeeds.
         /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
+        /// <param name="usesHardwareFlowControl">True to indicate that the stream supports hardware flow control (can be a serial port
+        /// with RTS/CTS handshake or a network stream where the protocol already supports flow control)</param>
+        public ArduinoBoard(Stream serialPortStream, bool usesHardwareFlowControl)
+        {
+            _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
+            StreamUsesHardwareFlowControl = usesHardwareFlowControl;
+            _logger = this.GetCurrentClassLogger();
+        }
+
+        /// <summary>
+        /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
+        /// </summary>
+        /// <remarks>
+        /// The device is initialized when the first command is sent. The constructor always succeeds.
+        /// </remarks>
+        /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
+            StreamUsesHardwareFlowControl = false;
             _logger = this.GetCurrentClassLogger();
         }
 
@@ -80,6 +97,7 @@ namespace Iot.Device.Arduino
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
+            StreamUsesHardwareFlowControl = false; // Would need to configure the serial port externally for this to work
             _logger = this.GetCurrentClassLogger();
         }
 
@@ -96,7 +114,6 @@ namespace Iot.Device.Arduino
         public bool StreamUsesHardwareFlowControl
         {
             get;
-            set;
         }
 
         /// <summary>
@@ -191,7 +208,6 @@ namespace Iot.Device.Arduino
 #endif
             out ArduinoBoard? board)
         {
-            board = null;
             try
             {
                 Stream networkStream;
@@ -214,8 +230,7 @@ namespace Iot.Device.Arduino
                     networkStream = new NetworkStream(socket, true);
                 }
 
-                board = new ArduinoBoard(networkStream);
-                board.StreamUsesHardwareFlowControl = true;
+                board = new ArduinoBoard(networkStream, true);
                 if (!(board.FirmataVersion > new Version(1, 0)))
                 {
                     // Actually not expecting to get here (but the above will throw a SocketException if the remote end is not there)
@@ -226,6 +241,7 @@ namespace Iot.Device.Arduino
             }
             catch (SocketException)
             {
+                board = null;
                 return false;
             }
         }

@@ -2,19 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Iot.Device.Arduino
 {
     internal class ReconnectingNetworkStream : Stream
     {
         private readonly Func<Stream> _reconnect;
+        private readonly object _lock = new object();
         private Stream? _streamImplementation;
-        private object _lock = new object();
 
         public ReconnectingNetworkStream(Stream? underlyingStream, Func<Stream> reconnect)
         {
@@ -28,37 +24,13 @@ namespace Iot.Device.Arduino
         {
         }
 
-        public override bool CanRead
-        {
-            get
-            {
-                return SafeExecute(x => x.CanRead, false);
-            }
-        }
+        public override bool CanRead => SafeExecute(x => x.CanRead, false);
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return SafeExecute(x => x.CanSeek, false);
-            }
-        }
+        public override bool CanSeek => SafeExecute(x => x.CanSeek, false);
 
-        public override bool CanWrite
-        {
-            get
-            {
-                return SafeExecute(x => x.CanWrite, false);
-            }
-        }
+        public override bool CanWrite => SafeExecute(x => x.CanWrite, false);
 
-        public override long Length
-        {
-            get
-            {
-                return SafeExecute(x => x.Length, false);
-            }
-        }
+        public override long Length => SafeExecute(x => x.Length, false);
 
         public override long Position
         {
@@ -109,7 +81,7 @@ namespace Iot.Device.Arduino
                     }
                     catch (IOException)
                     {
-                        // Ignore
+                        // Ignore, cannot currently reconnect. So need to retry later.
                     }
                 }
             }
@@ -173,8 +145,6 @@ namespace Iot.Device.Arduino
                 {
                     throw new TimeoutException("Error executing operation. Retrying next time", x);
                 }
-
-                return;
             }
         }
 
