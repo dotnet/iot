@@ -718,7 +718,7 @@ namespace ArduinoCsCompiler
                 {
                     if (attr is ThreadStaticAttribute)
                     {
-                        ErrorManager.AddWarning("ACS0005", $"Class {classType.MemberInfoSignature()} is using [ThreadStatic] on field {field.Name}. Support is experimental.");
+                        _logger.LogDebug($"Class {classType.MemberInfoSignature()} is using [ThreadStatic] on field {field.Name}.");
                         fieldType |= VariableKind.ThreadSpecific;
                     }
                 }
