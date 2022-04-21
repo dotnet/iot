@@ -31,7 +31,7 @@ namespace Iot.Device.Nmea0183.Sentences
             // Sequence number is 1-based.
             if (sequence < 1 || totalSequences < sequence)
             {
-                throw new ArgumentOutOfRangeException("Current sequence number must be smaller than total sequences");
+                throw new ArgumentOutOfRangeException(nameof(sequence), "Current sequence number must be smaller than total sequences");
             }
 
             TotalSequences = totalSequences;

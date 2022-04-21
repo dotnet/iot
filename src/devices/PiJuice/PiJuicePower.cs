@@ -40,7 +40,7 @@ namespace Iot.Device.PiJuiceDevice
             {
                 if (value.TotalSeconds < 0 || value.TotalSeconds > 255)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value.TotalSeconds));
+                    throw new ArgumentOutOfRangeException(nameof(value), "TotalSeconds must be between 0 and 255.");
                 }
 
                 _piJuice.WriteCommand(PiJuiceCommand.PowerOff, new byte[] { (byte)value.TotalSeconds });
@@ -65,7 +65,7 @@ namespace Iot.Device.PiJuiceDevice
             {
                 if (!value.Disabled && (value.WakeUpPercentage.Percent < 0 || value.WakeUpPercentage.Percent > 100))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value.WakeUpPercentage));
+                    throw new ArgumentOutOfRangeException(nameof(value), "WakeUpPercentage.Percent must be between 0 and 100.");
                 }
 
                 _piJuice.WriteCommandVerify(PiJuiceCommand.WakeUpOnCharge, new byte[] { (byte)(value.Disabled ? 0x7F : (short)value.WakeUpPercentage.Percent) });
@@ -88,7 +88,7 @@ namespace Iot.Device.PiJuiceDevice
             {
                 if (value.TotalMinutes < 0 || value.TotalMinutes > 65535)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value.TotalMinutes));
+                    throw new ArgumentOutOfRangeException(nameof(value), "TotalMinutes must be between 0 and 65535.");
                 }
 
                 var minutes = (int)value.TotalMinutes & 0xFFFF;

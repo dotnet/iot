@@ -31,7 +31,7 @@ namespace Iot.Device.Pn532.AsTarget
             {
                 if (value.Length != _nfcId2.Length)
                 {
-                    throw new ArgumentException(nameof(NfcId2), $"Value must be {_nfcId2.Length} bytes.");
+                    throw new ArgumentException($"Value must be {_nfcId2.Length} bytes.", nameof(NfcId2));
                 }
 
                 value.CopyTo(_nfcId2, 0);
@@ -51,7 +51,7 @@ namespace Iot.Device.Pn532.AsTarget
             {
                 if (value.Length != _pad.Length)
                 {
-                    throw new ArgumentException(nameof(Pad), $"Value must be {_pad.Length} bytes.");
+                    throw new ArgumentException($"Value must be {_pad.Length} bytes.", nameof(Pad));
                 }
 
                 value.CopyTo(_pad, 0);
@@ -72,7 +72,7 @@ namespace Iot.Device.Pn532.AsTarget
             {
                 if (value.Length != _systemCode.Length)
                 {
-                    throw new ArgumentException(nameof(SystemCode), $"Value must be {_systemCode.Length} bytes.");
+                    throw new ArgumentException($"Value must be {_systemCode.Length} bytes.", nameof(SystemCode));
                 }
 
                 value.CopyTo(_systemCode, 0);

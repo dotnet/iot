@@ -387,7 +387,7 @@ namespace Iot.Device.Pn532
                 // The maximum value for the timeout is 12.75 sec (Timeout = 0xFF).
                 if (value / 50 > 0xFF)
                 {
-                    throw new ArgumentException(nameof(VirtualCardTimeout), "Value must be 12750 milliseconds or less.");
+                    throw new ArgumentException("Value must be 12750 milliseconds or less.", nameof(VirtualCardTimeout));
                 }
 
                 _virtualCardTimeout = value / 50;

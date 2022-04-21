@@ -51,7 +51,7 @@ namespace Iot.Device.Imu
         {
             if (i2cDevice == null)
             {
-                throw new ArgumentNullException($"Varible i2cDevice is null");
+                throw new ArgumentNullException(nameof(i2cDevice), $"Variable i2cDevice is null");
             }
 
             _i2cDevice = i2cDevice;
@@ -376,7 +376,7 @@ namespace Iot.Device.Imu
             _wakeOnMotion = true;
             if (accelerometerThreshold > 1020)
             {
-                throw new ArgumentException(nameof(accelerometerThreshold), $"Value has to be between 0mg and 1020mg");
+                throw new ArgumentException($"Value has to be between 0mg and 1020mg", nameof(accelerometerThreshold));
             }
 
             // LSB = 4mg
@@ -742,7 +742,7 @@ namespace Iot.Device.Imu
         {
             if (readBytes.Length > 24)
             {
-                throw new ArgumentException(nameof(readBytes), "Value must be 24 bytes or less.");
+                throw new ArgumentException("Value must be 24 bytes or less.", nameof(readBytes));
             }
 
             byte slvAddress = (byte)((byte)Register.I2C_SLV0_ADDR + 3 * (byte)i2cChannel);

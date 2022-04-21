@@ -40,7 +40,7 @@ namespace Iot.Device.SenseHat
         {
             if (colors.Length != NumberOfPixels)
             {
-                throw new ArgumentException(nameof(colors), $"Value must be {NumberOfPixels} elements. Length: {nameof(colors)}.");
+                throw new ArgumentException($"Value must be {NumberOfPixels} elements. Length: {nameof(colors)}.", nameof(colors));
             }
 
             Span<byte> buffer = stackalloc byte[FrameBufferLength + 1];

@@ -520,7 +520,7 @@ namespace Iot.Device.Display
         {
             if ((left < 0 || left > Size.Width) || (top < 0 || top > Size.Height))
             {
-                throw new ArgumentOutOfRangeException($"The given position is not inside the display. it's 6 raws and 84 columns");
+                throw new ArgumentOutOfRangeException(nameof(left), $"The given position is not inside the display. it's 6 raws and 84 columns");
             }
 
             if (_cursorVisible)

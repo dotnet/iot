@@ -58,7 +58,7 @@ namespace System.Device.Pwm.Channels
             WinPwm.PwmPin? winPin = winController.OpenPin(channel);
             if (winPin is null)
             {
-                throw new ArgumentOutOfRangeException($"The PWM chip is unable to open a channel at index {channel}.", nameof(channel));
+                throw new ArgumentOutOfRangeException(nameof(channel), $"The PWM chip is unable to open a channel at index {channel}.");
             }
 
             _winController = winController;

@@ -18,7 +18,7 @@ namespace Iot.Device.Seesaw
         {
             if (pin < 0 || pin > 63)
             {
-                throw new ArgumentOutOfRangeException("Gpio pin must be within 0-63 range.");
+                throw new ArgumentOutOfRangeException(nameof(pin), "Gpio pin must be within 0-63 range.");
             }
 
             SetGpioPinModeBulk((ulong)(1 << pin), mode);
@@ -73,7 +73,7 @@ namespace Iot.Device.Seesaw
         {
             if (pin > 63)
             {
-                throw new ArgumentOutOfRangeException("Gpio pin must be within 0-63 range.");
+                throw new ArgumentOutOfRangeException(nameof(pin), "Gpio pin must be within 0-63 range.");
             }
 
             WriteGpioDigitalBulk((ulong)(1 << pin), value);
@@ -103,7 +103,7 @@ namespace Iot.Device.Seesaw
         {
             if (pin > 63)
             {
-                throw new ArgumentOutOfRangeException("Gpio pin must be within 0-63 range.");
+                throw new ArgumentOutOfRangeException(nameof(pin), "Gpio pin must be within 0-63 range.");
             }
 
             return ((ReadGpioDigitalBulk((ulong)(1 << pin))) != 0);
