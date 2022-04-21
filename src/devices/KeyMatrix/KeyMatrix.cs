@@ -99,7 +99,7 @@ namespace Iot.Device.KeyMatrix
 
             if (inputPinMode != PinMode.Input && inputPinMode != PinMode.InputPullDown)
             {
-                throw new ArgumentException("Input pins can only be set to Input or inputPullDown.");
+                throw new ArgumentException("Input pins can only be set to Input or InputPullDown.");
             }
 
             if (!outputPins.Any())
@@ -120,7 +120,7 @@ namespace Iot.Device.KeyMatrix
             if (inputPinMode == PinMode.InputPullDown &&
                 !inputPins.All(p => _gpioController.IsPinModeSupported(p, _inputPinMode)))
             {
-                throw new ArgumentException("Input pins do not soppurt InputPullDown");
+                throw new ArgumentException("Not all input pins support InputPullDown");
             }
 
             _outputPins = outputPins.ToArray();
