@@ -1510,7 +1510,7 @@ namespace ArduinoCsCompiler
                 var pm = _patchedMethodTokens.FirstOrDefault(x => (uint)x.Value == token);
                 if (pm.Value != 0)
                 {
-                    w.WriteLine($"0x{token:X8} (Method, not loaded or no implementation present) {pm.Key.Name}");
+                    w.WriteLine($"0x{token:X8} (Method, not loaded or no implementation present) {pm.Key.MemberInfoSignature()}");
                     continue;
                 }
 
