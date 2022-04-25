@@ -44,7 +44,6 @@ namespace Iot.Device.Arduino
         private string _firmwareName;
         private Stream? _firmataStream;
         private Thread? _inputThread;
-        private bool _inputThreadShouldExit;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
         private BlockingConcurrentBag<byte[]> _pendingResponses;
         private List<PinValue> _lastPinValues;
@@ -82,7 +81,7 @@ namespace Iot.Device.Arduino
             _firmwareVersionMinor = 0;
             _firmwareVersion = new Version(0, 0);
             _firmataStream = null;
-            _inputThreadShouldExit = false;
+            InputThreadShouldExit = false;
             _dataReceived = new AutoResetEvent(false);
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
             _synchronisationLock = new object();
@@ -112,6 +111,8 @@ namespace Iot.Device.Arduino
         internal List<SupportedMode> SupportedModes { get; set; }
 
         internal long BytesTransmitted => _bytesTransmitted;
+
+        internal bool InputThreadShouldExit { get; set; }
 
         public void Open(Stream stream)
         {
@@ -146,7 +147,7 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            _inputThreadShouldExit = false;
+            InputThreadShouldExit = false;
 
             _inputThread = new Thread(InputThread);
             _inputThread.Name = "Firmata input thread";
@@ -733,7 +734,7 @@ namespace Iot.Device.Arduino
 
         private void InputThread()
         {
-            while (!_inputThreadShouldExit)
+            while (!InputThreadShouldExit)
             {
                 try
                 {
@@ -742,7 +743,7 @@ namespace Iot.Device.Arduino
                 catch (Exception ex)
                 {
                     // If the exception happens because the stream was closed, don't print an error
-                    if (!_inputThreadShouldExit)
+                    if (!InputThreadShouldExit)
                     {
                         _logger.LogError(ex, $"Error in parser: {ex.Message}");
                         OnError?.Invoke($"Firmata protocol error: Parser exception {ex.Message}", ex);
@@ -861,7 +862,7 @@ namespace Iot.Device.Arduino
 
         private void StopThread()
         {
-            _inputThreadShouldExit = true;
+            InputThreadShouldExit = true;
             if (_inputThread != null)
             {
                 _inputThread.Join();
@@ -1333,7 +1334,7 @@ namespace Iot.Device.Arduino
         {
             if (disposing)
             {
-                _inputThreadShouldExit = true;
+                InputThreadShouldExit = true;
 
                 lock (_synchronisationLock)
                 {

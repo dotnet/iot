@@ -80,10 +80,8 @@ namespace Iot.Device.Arduino
         /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
         public ArduinoBoard(Stream serialPortStream)
+        : this(serialPortStream, false)
         {
-            _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
-            StreamUsesHardwareFlowControl = false;
-            _logger = this.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -797,6 +795,12 @@ namespace Iot.Device.Arduino
                 {
                     // Ignore
                 }
+            }
+
+            if (_firmata != null)
+            {
+                // Can end the next possible moment (otherwise might just throw a bunch of warnings before actually terminating anyway)
+                _firmata.InputThreadShouldExit = true;
             }
 
             _isDisposed = true;
