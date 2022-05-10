@@ -61,11 +61,56 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Positive number required..
+        ///   Looks up a localized string similar to Enum value was out of legal range.
+        /// </summary>
+        internal static string ArgumentOutOfRange_Enum {
+            get {
+                return ResourceManager.GetString("ArgumentOutOfRange_Enum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Positive number required.
         /// </summary>
         internal static string ArgumentOutOfRange_NeedPosNum {
             get {
                 return ResourceManager.GetString("ArgumentOutOfRange_NeedPosNum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The timeout must be greater than or equal to -1.
+        /// </summary>
+        internal static string ArgumentOutOfRange_Timeout {
+            get {
+                return ResourceManager.GetString("ArgumentOutOfRange_Timeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The timeout must be either a positive number or -1.
+        /// </summary>
+        internal static string ArgumentOutOfRange_WriteTimeout {
+            get {
+                return ResourceManager.GetString("ArgumentOutOfRange_WriteTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &apos;{0}&apos; cannot be set while the port is open.
+        /// </summary>
+        internal static string Cant_be_set_when_open {
+            get {
+                return ResourceManager.GetString("Cant_be_set_when_open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Argument &apos;{0}&apos; cannot be zero-length.
+        /// </summary>
+        internal static string EmptyString {
+            get {
+                return ResourceManager.GetString("EmptyString", resourceCulture);
             }
         }
         
@@ -75,6 +120,42 @@ namespace System.Device.Ports.SerialPort {
         internal static string InvalidDataBits {
             get {
                 return ResourceManager.GetString("InvalidDataBits", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The operating system &apos;{0}&apos; is not supported.
+        /// </summary>
+        internal static string NotSupported_OperatingSystem {
+            get {
+                return ResourceManager.GetString("NotSupported_OperatingSystem", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stream does not support seeking.
+        /// </summary>
+        internal static string NotSupported_UnseekableStream {
+            get {
+                return ResourceManager.GetString("NotSupported_UnseekableStream", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The port is already open.
+        /// </summary>
+        internal static string Port_already_open {
+            get {
+                return ResourceManager.GetString("Port_already_open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The port is closed.
+        /// </summary>
+        internal static string Port_not_open {
+            get {
+                return ResourceManager.GetString("Port_not_open", resourceCulture);
             }
         }
     }

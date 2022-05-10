@@ -2,14 +2,59 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
+      <trans-unit id="ArgumentOutOfRange_Enum">
+        <source>Enum value was out of legal range</source>
+        <target state="new">Enum value was out of legal range</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArgumentOutOfRange_NeedPosNum">
-        <source>Positive number required.</source>
-        <target state="new">Positive number required.</target>
+        <source>Positive number required</source>
+        <target state="new">Positive number required</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Timeout">
+        <source>The timeout must be greater than or equal to -1</source>
+        <target state="new">The timeout must be greater than or equal to -1</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_WriteTimeout">
+        <source>The timeout must be either a positive number or -1</source>
+        <target state="new">The timeout must be either a positive number or -1</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Cant_be_set_when_open">
+        <source>'{0}' cannot be set while the port is open</source>
+        <target state="new">'{0}' cannot be set while the port is open</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EmptyString">
+        <source>Argument '{0}' cannot be zero-length</source>
+        <target state="new">Argument '{0}' cannot be zero-length</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidDataBits">
         <source>An invalid value was passed to DataBits</source>
         <target state="new">An invalid value was passed to DataBits</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NotSupported_OperatingSystem">
+        <source>The operating system '{0}' is not supported</source>
+        <target state="new">The operating system '{0}' is not supported</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NotSupported_UnseekableStream">
+        <source>Stream does not support seeking</source>
+        <target state="new">Stream does not support seeking</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Port_already_open">
+        <source>The port is already open</source>
+        <target state="new">The port is already open</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Port_not_open">
+        <source>The port is closed</source>
+        <target state="new">The port is closed</target>
         <note />
       </trans-unit>
     </body>

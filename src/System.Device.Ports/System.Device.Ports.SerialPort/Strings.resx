@@ -117,10 +117,37 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ArgumentOutOfRange_Enum" xml:space="preserve">
+    <value>Enum value was out of legal range</value>
+  </data>
   <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
-    <value>Positive number required.</value>
+    <value>Positive number required</value>
+  </data>
+  <data name="ArgumentOutOfRange_Timeout" xml:space="preserve">
+    <value>The timeout must be greater than or equal to -1</value>
+  </data>
+  <data name="ArgumentOutOfRange_WriteTimeout" xml:space="preserve">
+    <value>The timeout must be either a positive number or -1</value>
+  </data>
+  <data name="Cant_be_set_when_open" xml:space="preserve">
+    <value>'{0}' cannot be set while the port is open</value>
+  </data>
+  <data name="EmptyString" xml:space="preserve">
+    <value>Argument '{0}' cannot be zero-length</value>
   </data>
   <data name="InvalidDataBits" xml:space="preserve">
     <value>An invalid value was passed to DataBits</value>
+  </data>
+  <data name="NotSupported_OperatingSystem" xml:space="preserve">
+    <value>The operating system '{0}' is not supported</value>
+  </data>
+  <data name="NotSupported_UnseekableStream" xml:space="preserve">
+    <value>Stream does not support seeking</value>
+  </data>
+  <data name="Port_already_open" xml:space="preserve">
+    <value>The port is already open</value>
+  </data>
+  <data name="Port_not_open" xml:space="preserve">
+    <value>The port is closed</value>
   </data>
 </root>
