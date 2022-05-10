@@ -101,5 +101,35 @@ namespace System.Device.Ports.SerialPort
         {
             throw new NotImplementedException();
         }
+
+        protected internal override void OpenPort()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected internal override void ClosePort()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DiscardInBuffer()
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void DiscardOutBuffer()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+        }
+
+        protected internal override void InitializeBuffers(int readBufferSize, int writeBufferSize)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
