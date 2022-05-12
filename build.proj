@@ -70,6 +70,7 @@
     <ItemGroup>
       <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
       <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
+      <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\System.Device.Ports\System.Device.Ports.SerialPort\System.Device.Ports.SerialPort.csproj" />
     </ItemGroup>
 
     <MSBuild Projects="@(_ProjectsToPackage)" Targets="Pack" />
