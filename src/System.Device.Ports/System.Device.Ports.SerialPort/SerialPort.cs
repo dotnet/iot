@@ -157,6 +157,7 @@ namespace System.Device.Ports.SerialPort
         {
             if (disposing)
             {
+                // _portHandle
             }
         }
 

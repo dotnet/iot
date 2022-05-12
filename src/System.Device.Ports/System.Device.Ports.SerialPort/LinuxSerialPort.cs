@@ -87,7 +87,12 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override void SetRtsEnable(bool rtsEnable)
+        protected internal override bool GetRtsEnable()
+        {
+            throw new NotImplementedException();
+        }
+
+        protected internal override void SetRtsEnable(bool value, bool setField)
         {
             throw new NotImplementedException();
         }

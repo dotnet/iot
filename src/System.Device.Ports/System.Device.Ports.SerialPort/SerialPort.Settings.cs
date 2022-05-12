@@ -29,6 +29,28 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         public const int InfiniteTimeout = -1;
 
+        /// <summary>
+        /// Indicates that no time-out should occur.
+        /// This value is used for the SetCommTimeouts
+        /// which does not accept -1
+        /// </summary>
+        protected const int InfiniteCommTimeouts = -2;
+
+        /// <summary>
+        /// The default value for XON
+        /// </summary>
+        public const byte DefaultXONChar = (byte)17;
+
+        /// <summary>
+        /// The default value for XOFF
+        /// </summary>
+        public const byte DefaultXOFFChar = (byte)19;
+
+        /// <summary>
+        /// The default value for EOF
+        /// </summary>
+        public const byte EOFChar = (byte)26;
+
         private const int MaxDataBitsNoParity = 9;
         private const int MinDataBits = 5;
         private const int DefaultBaudRate = 9600;
@@ -67,10 +89,14 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         protected string _portName = String.Empty;
 
+        /// <summary>
+        /// The field caching the value for the RTS enable flag
+        /// </summary>
+        protected bool _rtsEnable = DefaultRtsEnable;
+
         private int _readBufferSize = DefaultReadBufferSize;
         private int _readTimeout = DefaultReadTimeout;
         private int _receivedBytesThreshold = DefaultReceivedBytesThreshold;
-        private bool _rtsEnable = DefaultRtsEnable;
         private int _writeBufferSize = DefaultWriteBufferSize;
         private int _writeTimeout = DefaultWriteTimeout;
 
@@ -200,6 +226,9 @@ namespace System.Device.Ports.SerialPort
             get => _breakState;
             set
             {
+                // In the old implementation SetBreakState is set every time using platform specific code
+                // for this reason, this code is commented but I left it here because the old behavior
+                // is still to be confirmed.
                 /*
                 if (value == _breakState)
                 {
@@ -586,7 +615,10 @@ namespace System.Device.Ports.SerialPort
                 }
 
                 _readTimeout = value;
-                SetReadTimeout(_readTimeout);
+                if (IsOpen)
+                {
+                    SetReadTimeout(value);
+                }
             }
         }
 
@@ -640,7 +672,15 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         public bool RtsEnable
         {
-            get => _rtsEnable;
+            get
+            {
+                if (IsOpen)
+                {
+                    _rtsEnable = GetRtsEnable();
+                }
+
+                return _rtsEnable;
+            }
             set
             {
                 if (value == _rtsEnable)
@@ -648,16 +688,27 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                _rtsEnable = value;
-                SetRtsEnable(_rtsEnable);
+                if (Handshake == Handshake.RequestToSend || Handshake == Handshake.RequestToSendXOnXOff)
+                {
+                    throw new InvalidOperationException(Strings.CantSetRtsWithHandshaking);
+                }
+
+                SetRtsEnable(value, true);
             }
         }
+
+        /// <summary>
+        /// Read the RtsEnable flag from the native APIs
+        /// </summary>
+        /// <returns></returns>
+        protected internal abstract bool GetRtsEnable();
 
         /// <summary>
         /// Gets or sets a value indicating whether the Request to Send (RTS) signal is enabled during serial communication.
         /// </summary>
         /// <param name="rtsEnable">true to enable Request to Transmit (RTS); otherwise, false. The default is false.</param>
-        protected internal abstract void SetRtsEnable(bool rtsEnable);
+        /// <param name="setField">true to set the underlying field</param>
+        protected internal abstract void SetRtsEnable(bool rtsEnable, bool setField);
 
         /// <summary>
         /// Gets or sets the size of the serial port output buffer.
