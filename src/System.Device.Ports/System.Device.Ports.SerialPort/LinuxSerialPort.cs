@@ -67,6 +67,11 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
+        protected internal override bool GetDtrEnable()
+        {
+            throw new NotImplementedException();
+        }
+
         protected internal override void SetDtrEnable(bool value)
         {
             throw new NotImplementedException();
@@ -77,7 +82,7 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override byte SetParityReplace(byte value)
+        protected internal override void SetParityReplace(byte value)
         {
             throw new NotImplementedException();
         }

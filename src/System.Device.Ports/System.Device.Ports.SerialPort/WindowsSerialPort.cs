@@ -41,14 +41,11 @@ namespace System.Device.Ports.SerialPort
         private COMSTAT _comStat;
         private DCB _dcb;
         private COMMTIMEOUTS _commTimeouts;
-        private bool _isAsync;
 
         public WindowsSerialPort()
         {
             _portName = DefaultPortName;
-            _isAsync = true;
             var temp1 = _comStat.cbOutQue;
-            var temp2 = _isAsync;
         }
 
         protected internal override void OpenPort()
@@ -117,10 +114,7 @@ namespace System.Device.Ports.SerialPort
                 SetRtsEnable(_rtsEnable);
                 SetReadTimeout(ReadTimeout);
 
-                if (_isAsync)
-                {
-                    _threadPoolBound = ThreadPoolBoundHandle.BindHandle(_portHandle);
-                }
+                _threadPoolBound = ThreadPoolBoundHandle.BindHandle(_portHandle);
 
                 // monitor all events except TXEMPTY
                 PInvoke.SetCommMask(_portHandle, _allComEvents);
@@ -137,6 +131,9 @@ namespace System.Device.Ports.SerialPort
         private void StartBackgroundLoop()
         {
             /*
+            //new PreAllocatedOverlapped()
+            //PreAllocatedOverlapped.UnsafeCreate
+            //
             // prep. for starting event cycle.
             _eventRunner = new EventLoopRunner(this);
             _waitForComEventTask = Task.Factory.StartNew(s => ((EventLoopRunner)s).WaitForCommEvent(),
@@ -434,19 +431,89 @@ namespace System.Device.Ports.SerialPort
             return (MODEM_STATUS_FLAGS.MS_DSR_ON & pinStatus) != 0;
         }
 
+        protected internal override bool GetDtrEnable()
+        {
+            var dtrControl = _dcb.GetFlag(DCBFlags.FDTRCONTROL);
+            return dtrControl == PInvoke.DTR_CONTROL_ENABLE;
+        }
+
         protected internal override void SetDtrEnable(bool value)
         {
-            throw new NotImplementedException();
+            var current = _dcb.GetFlag(DCBFlags.FDTRCONTROL);
+            var newValue = (int)(value ? PInvoke.DTR_CONTROL_ENABLE : PInvoke.DTR_CONTROL_DISABLE);
+            _dcb.SetFlag(DCBFlags.FDTRCONTROL, newValue);
+            if (PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.SetFlag(DCBFlags.FDTRCONTROL, current);
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
+
+            var function = value ? ESCAPE_COMM_FUNCTION.SETDTR : ESCAPE_COMM_FUNCTION.CLRDTR;
+            if (!PInvoke.EscapeCommFunction(_portHandle, function))
+            {
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
         protected internal override void SetHandshake(Handshake value)
         {
-            throw new NotImplementedException();
+            var currentInOutX = _dcb.GetFlag(DCBFlags.FINX);
+            var currentOutXCtsFlow = _dcb.GetFlag(DCBFlags.FOUTXCTSFLOW);
+            var currentRtsControl = _dcb.GetFlag(DCBFlags.FRTSCONTROL);
+
+            var inOutX = (value == Handshake.XOnXOff || value == Handshake.RequestToSendXOnXOff) ? 1 : 0;
+            var outXCtsFlow = (value == Handshake.RequestToSend || value == Handshake.RequestToSendXOnXOff) ? 1 : 0;
+            _dcb.SetFlag(DCBFlags.FINX, inOutX);
+            _dcb.SetFlag(DCBFlags.FOUTX, inOutX);
+            _dcb.SetFlag(DCBFlags.FOUTXCTSFLOW, outXCtsFlow);
+
+            uint flow;
+            if (value == Handshake.RequestToSend || value == Handshake.RequestToSendXOnXOff)
+            {
+                flow = PInvoke.RTS_CONTROL_HANDSHAKE;
+            }
+            else if (RtsEnable)
+            {
+                flow = PInvoke.RTS_CONTROL_ENABLE;
+            }
+            else
+            {
+                flow = PInvoke.RTS_CONTROL_DISABLE;
+            }
+
+            _dcb.SetFlag(DCBFlags.FRTSCONTROL, (int)flow);
+            if (PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.SetFlag(DCBFlags.FINX, currentInOutX);
+                _dcb.SetFlag(DCBFlags.FOUTX, currentInOutX);
+                _dcb.SetFlag(DCBFlags.FOUTXCTSFLOW, currentOutXCtsFlow);
+                _dcb.SetFlag(DCBFlags.FRTSCONTROL, currentRtsControl);
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
-        protected internal override byte SetParityReplace(byte value)
+        protected internal override void SetParityReplace(byte value)
         {
-            throw new NotImplementedException();
+            var currentErrorChar = _dcb.ErrorChar;
+            var currentFlagErrorChar = _dcb.GetFlag(DCBFlags.FERRORCHAR);
+
+            if (_dcb.GetFlag(DCBFlags.FPARITY) == 1)
+            {
+                _dcb.SetFlag(DCBFlags.FERRORCHAR, value != '\0' ? 1 : 0);
+                _dcb.ErrorChar = new CHAR(value);
+            }
+            else
+            {
+                _dcb.SetFlag(DCBFlags.FERRORCHAR, 0);
+                _dcb.ErrorChar = new CHAR((byte)'\0');
+            }
+
+            if (PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.ErrorChar = currentErrorChar;
+                _dcb.SetFlag(DCBFlags.FERRORCHAR, currentFlagErrorChar);
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
         protected internal override void SetReadTimeout(int value)
@@ -526,22 +593,35 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override void SetWriteBufferSize(int value)
         {
-            throw new NotImplementedException();
+            /* There is no specific API to call in Windows */
         }
 
         protected internal override void SetWriteTimeout(int value)
         {
-            throw new NotImplementedException();
+            var currentWriteTimeout = _commTimeouts.WriteTotalTimeoutConstant;
+            _commTimeouts.WriteTotalTimeoutConstant = (uint)(value == InfiniteTimeout ? 0 : value);
+
+            if (PInvoke.SetCommTimeouts(_portHandle, _commTimeouts) == false)
+            {
+                _commTimeouts.WriteTotalTimeoutConstant = currentWriteTimeout;
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
         public override void DiscardInBuffer()
         {
-            throw new NotImplementedException();
+            if (PInvoke.PurgeComm(_portHandle, PURGE_COMM_FLAGS.PURGE_RXCLEAR | PURGE_COMM_FLAGS.PURGE_RXABORT) == false)
+            {
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
         public override void DiscardOutBuffer()
         {
-            throw new NotImplementedException();
+            if (PInvoke.PurgeComm(_portHandle, PURGE_COMM_FLAGS.PURGE_TXCLEAR | PURGE_COMM_FLAGS.PURGE_TXABORT) == false)
+            {
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
         protected override void Dispose(bool disposing)
@@ -551,7 +631,10 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override void InitializeBuffers(int readBufferSize, int writeBufferSize)
         {
-            throw new NotImplementedException();
+            if (!PInvoke.SetupComm(_portHandle, (uint)readBufferSize, (uint)writeBufferSize))
+            {
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
     }
 }

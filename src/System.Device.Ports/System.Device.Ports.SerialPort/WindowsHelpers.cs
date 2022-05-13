@@ -204,6 +204,15 @@ namespace System.Device.Ports.SerialPort
         internal static extern bool ClearCommError([In] IntPtr hFile,
             [Out, Optional] out CLEAR_COMM_ERROR_FLAGS lpErrors,
             [Out, Optional] out COMSTAT lpStat);
+
+        [DllImport("kernel32.dll")]
+        internal static unsafe extern bool WaitCommEvent(IntPtr hFile, COMM_EVENT_MASK* lpEvtMask, void* lpOverlapped);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static unsafe extern bool GetOverlappedResult(IntPtr hFile,
+            void* lpOverlapped,
+            out uint lpNumberOfBytesTransferred,
+            bool bWait);
     }
 
     internal static class DCBFlags

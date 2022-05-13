@@ -171,6 +171,75 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         public abstract void DiscardOutBuffer();
 
+        internal void TriggerErrors(int errors)
+        {
+            if ((errors & (int)SerialError.TXFull) != 0)
+            {
+                ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.TXFull));
+            }
+
+            if ((errors & (int)SerialError.RXOver) != 0)
+            {
+                ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.RXOver));
+            }
+
+            if ((errors & (int)SerialError.Overrun) != 0)
+            {
+                ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.Overrun));
+            }
+
+            if ((errors & (int)SerialError.RXParity) != 0)
+            {
+                ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.RXParity));
+            }
+
+            if ((errors & (int)SerialError.Frame) != 0)
+            {
+                ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.Frame));
+            }
+        }
+
+        internal void TriggerReceiveEvents(int nativeEvents)
+        {
+            if ((nativeEvents & (int)SerialData.Chars) != 0)
+            {
+                DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialData.Chars));
+            }
+
+            if ((nativeEvents & (int)SerialData.Eof) != 0)
+            {
+                DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialData.Eof));
+            }
+        }
+
+        internal void TriggerPinEvents(int nativeEvents)
+        {
+            if ((nativeEvents & (int)SerialPinChange.CtsChanged) != 0)
+            {
+                PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.CtsChanged));
+            }
+
+            if ((nativeEvents & (int)SerialPinChange.DsrChanged) != 0)
+            {
+                PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.DsrChanged));
+            }
+
+            if ((nativeEvents & (int)SerialPinChange.CDChanged) != 0)
+            {
+                PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.CDChanged));
+            }
+
+            if ((nativeEvents & (int)SerialPinChange.Ring) != 0)
+            {
+                PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.Ring));
+            }
+
+            if ((nativeEvents & (int)SerialPinChange.Break) != 0)
+            {
+                PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.Break));
+            }
+        }
+
         /// <summary>
         /// Reads a number of bytes from the SerialPort input buffer and writes those bytes into a byte array at the specified offset.
         /// </summary>

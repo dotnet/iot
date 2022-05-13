@@ -378,23 +378,25 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         public bool DtrEnable
         {
-            get => _dtrEnable;
+            get
+            {
+                _dtrEnable = GetDtrEnable();
+                return _dtrEnable;
+            }
             set
             {
-                /*
-                if (value == _dtrEnable)
-                {
-                    return;
-                }
-                */
-
                 SetDtrEnable(_dtrEnable);
                 _dtrEnable = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets a value that enables the Data Terminal Ready (DTR) signal during serial communication.
+        /// Gets a value that enables the Data Terminal Ready (DTR) signal during serial communication.
+        /// </summary>
+        protected internal abstract bool GetDtrEnable();
+
+        /// <summary>
+        /// Sets a value that enables the Data Terminal Ready (DTR) signal during serial communication.
         /// </summary>
         /// <param name="value">true to enable Data Terminal Ready (DTR); otherwise, false. The default is false.</param>
         protected internal abstract void SetDtrEnable(bool value);
@@ -521,8 +523,7 @@ namespace System.Device.Ports.SerialPort
         /// Gets or sets the byte that replaces invalid bytes in a data stream when a parity error occurs.
         /// </summary>
         /// <param name="value">A byte that replaces invalid bytes.</param>
-        /// <returns></returns>
-        protected internal abstract byte SetParityReplace(byte value);
+        protected internal abstract void SetParityReplace(byte value);
 
         /// <summary>
         /// Gets or sets the value used to interpret the end of a call to the ReadLine() and WriteLine(String) methods.
