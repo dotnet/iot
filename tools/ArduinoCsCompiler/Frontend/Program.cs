@@ -34,6 +34,7 @@ namespace ArduinoCsCompiler
             }
 
             Console.WriteLine($"ArduinoCsCompiler - Version {version.Version}");
+            Console.WriteLine("This tool is in an experimental state - the functionality may significantly change in the future.");
             bool runResult = false;
 
             var parser = new Parser(x =>
