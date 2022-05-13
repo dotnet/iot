@@ -12,6 +12,11 @@
         <target state="new">The given port name is invalid.  It may be a valid port, but not a serial port</target>
         <note />
       </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Bounds_Lower_Upper">
+        <source>Argument must be between {0} and {1}</source>
+        <target state="new">Argument must be between {0} and {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Enum">
         <source>Enum value was out of legal range</source>
         <target state="new">Enum value was out of legal range</target>

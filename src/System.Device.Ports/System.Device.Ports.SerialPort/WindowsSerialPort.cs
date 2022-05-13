@@ -33,7 +33,7 @@ namespace System.Device.Ports.SerialPort
             COMM_EVENT_MASK.EV_CTS |
             /*COMM_EVENT_MASK.EV_TXEMPTY |*/
             COMM_EVENT_MASK.EV_RXFLAG |
-            COMM_EVENT_MASK.EV_RXCHAR;
+            COMM_EVENT_MASK.EV_RXCHAR;  // equivalent to 0x1FB
 
         private ThreadPoolBoundHandle? _threadPoolBound;
         private SafeHandle? _portHandle;
@@ -115,7 +115,6 @@ namespace System.Device.Ports.SerialPort
                 // after the initialization rts in the DCB is false
                 _rtsEnable = _dcb.GetFlag(DCBFlags.FRTSCONTROL) == PInvoke.RTS_CONTROL_ENABLE;
                 SetRtsEnable(_rtsEnable);
-
                 SetReadTimeout(ReadTimeout);
 
                 if (_isAsync)
@@ -133,8 +132,6 @@ namespace System.Device.Ports.SerialPort
                 _threadPoolBound?.Dispose();
                 throw;
             }
-
-            throw new NotImplementedException();
         }
 
         private void StartBackgroundLoop()
@@ -232,67 +229,209 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override void ClosePort()
         {
-            throw new NotImplementedException();
+            if (_portHandle == null || _portHandle.IsInvalid)
+            {
+                return;
+            }
+
+            try
+            {
+            }
+            finally
+            {
+            }
         }
 
-        private unsafe void Initialize()
+        protected internal override void SetBaudRate(int value)
         {
-            throw new NotImplementedException();
+            if (_commProp.dwMaxBaud > 0 && value > _commProp.dwMaxBaud)
+            {
+                throw new ArgumentException(nameof(BaudRate),
+                    string.Format(Strings.ArgumentOutOfRange_Bounds_Lower_Upper, 0, _commProp.dwMaxBaud));
+            }
+
+            var current = _dcb.BaudRate;
+            _dcb.BaudRate = (uint)value;
+            if (!PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.BaudRate = current;
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
-        protected internal override void SetBaudRate(int baudRate)
+        protected internal override void SetParity(Parity value)
         {
-            throw new NotImplementedException();
+            if (_dcb.Parity == (byte)value)
+            {
+                return;
+            }
+
+            var currentParity = _dcb.Parity;
+            var currentErrorChar = _dcb.ErrorChar;
+            var currentFlagParity = _dcb.GetFlag(DCBFlags.FPARITY);
+            var currentFlagErrorChar = _dcb.GetFlag(DCBFlags.FERRORCHAR);
+
+            _dcb.Parity = (byte)value;
+            var parityFlag = value == Parity.None ? 0 : 1;
+            _dcb.SetFlag(DCBFlags.FPARITY, parityFlag);
+            if (parityFlag == 1)
+            {
+                _dcb.ErrorChar = new CHAR(ParityReplace);
+                _dcb.SetFlag(DCBFlags.FERRORCHAR, ParityReplace != '\0' ? 1 : 0);
+            }
+            else
+            {
+                _dcb.ErrorChar = new CHAR((byte)'\0');
+                _dcb.SetFlag(DCBFlags.FERRORCHAR, 0);
+            }
+
+            if (!PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.Parity = currentParity;
+                _dcb.ErrorChar = currentErrorChar;
+                _dcb.SetFlag(DCBFlags.FPARITY, currentFlagParity);
+                _dcb.SetFlag(DCBFlags.FERRORCHAR, currentFlagErrorChar);
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
-        protected internal override void SetParity(Parity parity)
+        protected internal override void SetDataBits(int value)
         {
-            throw new NotImplementedException();
+            if (_dcb.ByteSize == value)
+            {
+                return;
+            }
+
+            var currentByteSize = _dcb.ByteSize;
+            _dcb.ByteSize = (byte)value;
+
+            if (!PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.ByteSize = currentByteSize;
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
-        protected internal override void SetDataBits(int dataBits)
+        protected internal override void SetStopBits(StopBits value)
         {
-            throw new NotImplementedException();
+            byte nativeValue = value switch
+            {
+                StopBits.One => (byte)PInvoke.ONESTOPBIT,
+                StopBits.OnePointFive => (byte)PInvoke.ONE5STOPBITS,
+                StopBits.Two => (byte)PInvoke.TWOSTOPBITS,
+                _ => throw new ArgumentOutOfRangeException(nameof(StopBits), Strings.ArgumentOutOfRange_Enum),
+            };
+
+            byte currentValue = _dcb.StopBits;
+            if (nativeValue == currentValue)
+            {
+                return;
+            }
+
+            _dcb.StopBits = nativeValue;
+            if (PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.StopBits = currentValue;
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
-        protected internal override void SetStopBits(StopBits stopBits)
+        protected internal override void SetBreakState(bool value)
         {
-            throw new NotImplementedException();
+            BOOL result = value
+                ? PInvoke.SetCommBreak(_portHandle)
+                : PInvoke.ClearCommBreak(_portHandle);
+
+            if (!result)
+            {
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
-        protected internal override void SetBreakState(bool breakState)
+        private bool ClearCommError()
         {
-            throw new NotImplementedException();
+            if (_portHandle == null || _portHandle.IsInvalid)
+            {
+                return false;
+            }
+
+            if (!WindowsHelpers.ClearCommError(_portHandle.DangerousGetHandle(),
+                out CLEAR_COMM_ERROR_FLAGS _, out _comStat))
+            {
+                WindowsHelpers.GetExceptionForLastWin32Error();
+            }
+
+            return true;
         }
 
-        protected internal override int GetBytesToRead()
+        protected internal unsafe override int GetBytesToRead()
         {
-            throw new NotImplementedException();
+            if (!ClearCommError())
+            {
+                return 0;
+            }
+
+            return (int)_comStat.cbInQue;
         }
 
         protected internal override int GetBytesToWrite()
         {
-            throw new NotImplementedException();
+            if (!ClearCommError())
+            {
+                return 0;
+            }
+
+            return (int)_comStat.cbOutQue;
         }
 
-        protected internal override int GetCDHolding()
+        private MODEM_STATUS_FLAGS GetPinStatus()
         {
-            throw new NotImplementedException();
+            if (_portHandle == null || _portHandle.IsInvalid)
+            {
+                throw new InvalidOperationException(Strings.Port_not_open);
+            }
+
+            if (!PInvoke.GetCommModemStatus(_portHandle, out MODEM_STATUS_FLAGS pinStatus))
+            {
+                WindowsHelpers.GetExceptionForLastWin32Error();
+            }
+
+            return pinStatus;
         }
 
-        protected internal override int GetCtsHolding()
+        protected internal override bool GetCDHolding()
         {
-            throw new NotImplementedException();
+            var pinStatus = GetPinStatus();
+            return (MODEM_STATUS_FLAGS.MS_RLSD_ON & pinStatus) != 0;
+        }
+
+        protected internal override bool GetCtsHolding()
+        {
+            var pinStatus = GetPinStatus();
+            return (MODEM_STATUS_FLAGS.MS_CTS_ON & pinStatus) != 0;
         }
 
         protected internal override void SetDiscardNull(bool value)
         {
-            throw new NotImplementedException();
+            var currentFlag = _dcb.GetFlag(DCBFlags.FNULL);
+            var currentValue = currentFlag == 1;
+            if (currentValue == value)
+            {
+                return;
+            }
+
+            _dcb.SetFlag(DCBFlags.FNULL, value ? 1 : 0);
+            if (PInvoke.SetCommState(_portHandle, _dcb))
+            {
+                _dcb.SetFlag(DCBFlags.FNULL, currentFlag);
+                throw WindowsHelpers.GetExceptionForLastWin32Error();
+            }
         }
 
-        protected internal override int GetDsrHolding()
+        protected internal override bool GetDsrHolding()
         {
-            throw new NotImplementedException();
+            var pinStatus = GetPinStatus();
+            return (MODEM_STATUS_FLAGS.MS_DSR_ON & pinStatus) != 0;
         }
 
         protected internal override void SetDtrEnable(bool value)
@@ -300,12 +439,12 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override void SetHandshake(Handshake handshake)
+        protected internal override void SetHandshake(Handshake value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override byte SetParityReplace(byte parityReplace)
+        protected internal override byte SetParityReplace(byte value)
         {
             throw new NotImplementedException();
         }
@@ -385,12 +524,12 @@ namespace System.Device.Ports.SerialPort
             }
         }
 
-        protected internal override void SetWriteBufferSize(int writeBufferSize)
+        protected internal override void SetWriteBufferSize(int value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetWriteTimeout(int writeTimeout)
+        protected internal override void SetWriteTimeout(int value)
         {
             throw new NotImplementedException();
         }

@@ -12,27 +12,27 @@ namespace System.Device.Ports.SerialPort
             _portName = DefaultPortName;
         }
 
-        protected internal override void SetBaudRate(int baudRate)
+        protected internal override void SetBaudRate(int value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetParity(Parity parity)
+        protected internal override void SetParity(Parity value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetDataBits(int dataBits)
+        protected internal override void SetDataBits(int value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetStopBits(StopBits stopBits)
+        protected internal override void SetStopBits(StopBits value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetBreakState(bool breakState)
+        protected internal override void SetBreakState(bool value)
         {
             throw new NotImplementedException();
         }
@@ -47,12 +47,12 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override int GetCDHolding()
+        protected internal override bool GetCDHolding()
         {
             throw new NotImplementedException();
         }
 
-        protected internal override int GetCtsHolding()
+        protected internal override bool GetCtsHolding()
         {
             throw new NotImplementedException();
         }
@@ -62,7 +62,7 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override int GetDsrHolding()
+        protected internal override bool GetDsrHolding()
         {
             throw new NotImplementedException();
         }
@@ -72,17 +72,17 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override void SetHandshake(Handshake handshake)
+        protected internal override void SetHandshake(Handshake value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override byte SetParityReplace(byte parityReplace)
+        protected internal override byte SetParityReplace(byte value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetReadTimeout(int timeout)
+        protected internal override void SetReadTimeout(int value)
         {
             throw new NotImplementedException();
         }
@@ -97,12 +97,12 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override void SetWriteBufferSize(int writeBufferSize)
+        protected internal override void SetWriteBufferSize(int value)
         {
             throw new NotImplementedException();
         }
 
-        protected internal override void SetWriteTimeout(int writeTimeout)
+        protected internal override void SetWriteTimeout(int value)
         {
             throw new NotImplementedException();
         }

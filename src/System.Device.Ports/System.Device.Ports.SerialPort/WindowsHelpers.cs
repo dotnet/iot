@@ -199,6 +199,11 @@ namespace System.Device.Ports.SerialPort
             uint result = dcb._bitfield & (mask << whichFlag);
             return (int)(result >> whichFlag);
         }
+
+        [DllImport("kernel32.dll")]
+        internal static extern bool ClearCommError([In] IntPtr hFile,
+            [Out, Optional] out CLEAR_COMM_ERROR_FLAGS lpErrors,
+            [Out, Optional] out COMSTAT lpStat);
     }
 
     internal static class DCBFlags

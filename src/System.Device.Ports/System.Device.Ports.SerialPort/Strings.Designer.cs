@@ -79,6 +79,15 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Argument must be between {0} and {1}.
+        /// </summary>
+        internal static string ArgumentOutOfRange_Bounds_Lower_Upper {
+            get {
+                return ResourceManager.GetString("ArgumentOutOfRange_Bounds_Lower_Upper", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enum value was out of legal range.
         /// </summary>
         internal static string ArgumentOutOfRange_Enum {
