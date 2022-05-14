@@ -121,14 +121,14 @@ namespace System.Device.Ports.SerialPort
         {
             if (IsOpen)
             {
-                ClosePort();
+                ClosePort(false);
             }
         }
 
         /// <summary>
         /// Close the port using platform-specific code
         /// </summary>
-        protected internal abstract void ClosePort();
+        protected internal abstract void ClosePort(bool disposing);
 
         /// <summary>
         /// Releases the unmanaged resources used by the SerialPort and optionally releases the managed resources.
@@ -155,9 +155,9 @@ namespace System.Device.Ports.SerialPort
         /// <param name="disposing">True when called from the Dispose method. False when called from the finalizer.</param>
         protected virtual void Dispose(bool disposing)
         {
+            ClosePort(disposing);
             if (disposing)
             {
-                // _portHandle
             }
         }
 

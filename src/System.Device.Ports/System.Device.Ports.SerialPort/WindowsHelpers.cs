@@ -213,6 +213,14 @@ namespace System.Device.Ports.SerialPort
             void* lpOverlapped,
             out uint lpNumberOfBytesTransferred,
             bool bWait);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern unsafe int ReadFile(IntPtr handle, byte* bytes, uint numBytesToRead,
+            byte* numBytesRead, System.Threading.NativeOverlapped* overlapped);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern unsafe int WriteFile(IntPtr handle, byte* buffer,
+            uint numBytesToWrite, byte* numBytesWritten, System.Threading.NativeOverlapped* lpOverlapped);
     }
 
     internal static class DCBFlags

@@ -20,7 +20,7 @@ using Windows.Win32.Storage.FileSystem;
 
 namespace System.Device.Ports.SerialPort
 {
-    internal class WindowsSerialPort : SerialPort
+    internal partial class WindowsSerialPort : SerialPort
     {
         private const string DefaultPortName = "COM1";
 
@@ -35,6 +35,8 @@ namespace System.Device.Ports.SerialPort
             COMM_EVENT_MASK.EV_RXFLAG |
             COMM_EVENT_MASK.EV_RXCHAR;  // equivalent to 0x1FB
 
+        private WindowsEventLoop? _eventLoop;
+        private Task _waitForComEventTask;
         private ThreadPoolBoundHandle? _threadPoolBound;
         private SafeHandle? _portHandle;
         private COMMPROP _commProp;
@@ -45,7 +47,7 @@ namespace System.Device.Ports.SerialPort
         public WindowsSerialPort()
         {
             _portName = DefaultPortName;
-            var temp1 = _comStat.cbOutQue;
+            _waitForComEventTask = Task.CompletedTask;
         }
 
         protected internal override void OpenPort()
@@ -118,6 +120,7 @@ namespace System.Device.Ports.SerialPort
 
                 // monitor all events except TXEMPTY
                 PInvoke.SetCommMask(_portHandle, _allComEvents);
+                StartBackgroundLoop();
             }
             catch
             {
@@ -130,19 +133,16 @@ namespace System.Device.Ports.SerialPort
 
         private void StartBackgroundLoop()
         {
-            /*
-            //new PreAllocatedOverlapped()
-            //PreAllocatedOverlapped.UnsafeCreate
-            //
-            // prep. for starting event cycle.
-            _eventRunner = new EventLoopRunner(this);
-            _waitForComEventTask = Task.Factory.StartNew(s => ((EventLoopRunner)s).WaitForCommEvent(),
-                _eventRunner,
-                CancellationToken.None,
-                TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning,
-                TaskScheduler.Default);
-            */
+            if (_portHandle == null || _threadPoolBound == null)
+            {
+                return;
+            }
+
+            _eventLoop = new WindowsEventLoop(this, _portHandle, _threadPoolBound);
+            _waitForComEventTask = _eventLoop.StartEventLoop();
         }
+
+        private void StopEventLoop() => _eventLoop?.ShutdownEventLoop();
 
         private unsafe void InitializeDCB()
         {
@@ -224,7 +224,42 @@ namespace System.Device.Ports.SerialPort
             }
         }
 
-        protected internal override void ClosePort()
+        /// <summary>
+        /// Stop the native events
+        /// </summary>
+        /// <returns>True when the SerialPort could be successfully accessed</returns>
+        private bool StopEvents(out bool isSerialPortAccessible)
+        {
+            PInvoke.SetCommMask(_portHandle, 0);
+            if (PInvoke.EscapeCommFunction(_portHandle, ESCAPE_COMM_FUNCTION.CLRDTR))
+            {
+                // return on success
+                isSerialPortAccessible = true;
+                return true;
+            }
+
+            isSerialPortAccessible = false;
+            int hr = Marshal.GetLastWin32Error();
+            Debug.Fail($"Unexpected error code from EscapeCommFunction in {nameof(StopEvents)}  Error code: 0x{(uint)hr:x}");
+
+            // access denied can happen if USB is yanked out. If that happens, we
+            // want to at least allow finalize to succeed and clean up everything
+            // we can. To achieve this, we need to avoid further attempts to access
+            // the SerialPort.  A customer also reported seeing ERROR_BAD_COMMAND here.
+            // Do not throw an exception on the finalizer thread - that's just rude,
+            // since apps can't catch it and we may tear down the app.
+            if ((hr == (uint)WIN32_ERROR.ERROR_ACCESS_DENIED ||
+                hr == (uint)WIN32_ERROR.ERROR_BAD_COMMAND ||
+                hr == (uint)WIN32_ERROR.ERROR_DEVICE_REMOVED))
+            {
+                // throwing is not necessary when these errors occur
+                return true;
+            }
+
+            return false;
+        }
+
+        protected internal override void ClosePort(bool disposing)
         {
             if (_portHandle == null || _portHandle.IsInvalid)
             {
@@ -233,10 +268,73 @@ namespace System.Device.Ports.SerialPort
 
             try
             {
+                StopEventLoop();
+                Thread.MemoryBarrier();
+
+                var success = StopEvents(out bool isPortAccessible);
+                if (disposing && !success)
+                {
+                    throw WindowsHelpers.GetExceptionForLastWin32Error();
+                }
+
+                if (isPortAccessible && !_portHandle.IsClosed)
+                {
+                    Flush();
+                }
+
+                _eventLoop?.WaitCommEventWaitHandle.Set();
+
+                if (isPortAccessible)
+                {
+                    DiscardInBuffer();
+                    DiscardOutBuffer();
+                }
+
+                if (disposing && _eventLoop != null)
+                {
+                    _waitForComEventTask.GetAwaiter().GetResult();
+                    _eventLoop?.WaitCommEventWaitHandle.Close();
+                }
+            }
+            catch (Exception err)
+            {
+                if (disposing)
+                {
+                    Debug.WriteLine($"Exception caught in {nameof(ClosePort)}." +
+                        $" It will {(disposing ? string.Empty : "not ")} be rethrown: {err.ToString()}");
+                    throw;
+                }
             }
             finally
             {
+                if (disposing)
+                {
+                    lock (this)
+                    {
+                        _portHandle.Close();
+                        _portHandle = null;
+                        _threadPoolBound?.Dispose();
+                        _threadPoolBound = null;
+                    }
+                }
+                else
+                {
+                    _portHandle.Close();
+                    _portHandle = null;
+                    _threadPoolBound?.Dispose();
+                    _threadPoolBound = null;
+                }
             }
+        }
+
+        private void Flush()
+        {
+            if (_portHandle == null)
+            {
+                throw new InvalidOperationException(Strings.Port_not_open);
+            }
+
+            PInvoke.FlushFileBuffers(_portHandle);
         }
 
         protected internal override void SetBaudRate(int value)

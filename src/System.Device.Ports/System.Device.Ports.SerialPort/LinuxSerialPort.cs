@@ -117,7 +117,7 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override void ClosePort()
+        protected internal override void ClosePort(bool disposing)
         {
             throw new NotImplementedException();
         }

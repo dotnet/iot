@@ -79,6 +79,24 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IAsyncResult object did not come from the corresponding async method on this type.
+        /// </summary>
+        internal static string Arg_WrongAsyncResult {
+            get {
+                return ResourceManager.GetString("Arg_WrongAsyncResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.
+        /// </summary>
+        internal static string Argument_InvalidOffLen {
+            get {
+                return ResourceManager.GetString("Argument_InvalidOffLen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Argument must be between {0} and {1}.
         /// </summary>
         internal static string ArgumentOutOfRange_Bounds_Lower_Upper {
@@ -93,6 +111,15 @@ namespace System.Device.Ports.SerialPort {
         internal static string ArgumentOutOfRange_Enum {
             get {
                 return ResourceManager.GetString("ArgumentOutOfRange_Enum", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Non-negative number required.
+        /// </summary>
+        internal static string ArgumentOutOfRange_NeedNonNegNumRequired {
+            get {
+                return ResourceManager.GetString("ArgumentOutOfRange_NeedNonNegNumRequired", resourceCulture);
             }
         }
         
@@ -151,6 +178,24 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The port is in the break state and cannot be written to.
+        /// </summary>
+        internal static string In_Break_State {
+            get {
+                return ResourceManager.GetString("In_Break_State", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader&apos;s or TextWriter&apos;s Synchronized methods. This also applies to classes like StreamWriter and StreamReader.
+        /// </summary>
+        internal static string IndexOutOfRange_IORaceCondition {
+            get {
+                return ResourceManager.GetString("IndexOutOfRange_IORaceCondition", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An invalid value was passed to DataBits.
         /// </summary>
         internal static string InvalidDataBits {
@@ -160,11 +205,38 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to EndRead can only be called once for each asynchronous operation.
+        /// </summary>
+        internal static string InvalidOperation_EndReadCalledMultiple {
+            get {
+                return ResourceManager.GetString("InvalidOperation_EndReadCalledMultiple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to EndWrite can only be called once for each asynchronous operation.
+        /// </summary>
+        internal static string InvalidOperation_EndWriteCalledMultiple {
+            get {
+                return ResourceManager.GetString("InvalidOperation_EndWriteCalledMultiple", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cannot create &apos;{0}&apos; because a file or directory with the same name already exists.
         /// </summary>
         internal static string IO_AlreadyExists_Name {
             get {
                 return ResourceManager.GetString("IO_AlreadyExists_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to read beyond the end of the stream.
+        /// </summary>
+        internal static string IO_EOF_ReadBeyondEOF {
+            get {
+                return ResourceManager.GetString("IO_EOF_ReadBeyondEOF", resourceCulture);
             }
         }
         
@@ -192,6 +264,15 @@ namespace System.Device.Ports.SerialPort {
         internal static string IO_FileNotFound_FileName {
             get {
                 return ResourceManager.GetString("IO_FileNotFound_FileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The I/O operation has been aborted because of either a thread exit or an application request.
+        /// </summary>
+        internal static string IO_OperationAborted {
+            get {
+                return ResourceManager.GetString("IO_OperationAborted", resourceCulture);
             }
         }
         
@@ -336,6 +417,15 @@ namespace System.Device.Ports.SerialPort {
         internal static string WinPortName_wrong {
             get {
                 return ResourceManager.GetString("WinPortName_wrong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The write timed out.
+        /// </summary>
+        internal static string Write_timed_out {
+            get {
+                return ResourceManager.GetString("Write_timed_out", resourceCulture);
             }
         }
     }

@@ -12,6 +12,11 @@
         <target state="new">The given port name is invalid.  It may be a valid port, but not a serial port</target>
         <note />
       </trans-unit>
+      <trans-unit id="Arg_WrongAsyncResult">
+        <source>IAsyncResult object did not come from the corresponding async method on this type</source>
+        <target state="new">IAsyncResult object did not come from the corresponding async method on this type</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Bounds_Lower_Upper">
         <source>Argument must be between {0} and {1}</source>
         <target state="new">Argument must be between {0} and {1}</target>
@@ -20,6 +25,11 @@
       <trans-unit id="ArgumentOutOfRange_Enum">
         <source>Enum value was out of legal range</source>
         <target state="new">Enum value was out of legal range</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_NeedNonNegNumRequired">
+        <source>Non-negative number required</source>
+        <target state="new">Non-negative number required</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_NeedPosNum">
@@ -35,6 +45,11 @@
       <trans-unit id="ArgumentOutOfRange_WriteTimeout">
         <source>The timeout must be either a positive number or -1</source>
         <target state="new">The timeout must be either a positive number or -1</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_InvalidOffLen">
+        <source>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection</source>
+        <target state="new">Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection</target>
         <note />
       </trans-unit>
       <trans-unit id="CantSetRtsWithHandshaking">
@@ -57,6 +72,11 @@
         <target state="new">Cannot create '{0}' because a file or directory with the same name already exists</target>
         <note />
       </trans-unit>
+      <trans-unit id="IO_EOF_ReadBeyondEOF">
+        <source>Unable to read beyond the end of the stream</source>
+        <target state="new">Unable to read beyond the end of the stream</target>
+        <note />
+      </trans-unit>
       <trans-unit id="IO_FileExists_Name">
         <source>The file '{0}' already exists</source>
         <target state="new">The file '{0}' already exists</target>
@@ -70,6 +90,11 @@
       <trans-unit id="IO_FileNotFound_FileName">
         <source>Could not find file '{0}'</source>
         <target state="new">Could not find file '{0}'</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IO_OperationAborted">
+        <source>The I/O operation has been aborted because of either a thread exit or an application request</source>
+        <target state="new">The I/O operation has been aborted because of either a thread exit or an application request</target>
         <note />
       </trans-unit>
       <trans-unit id="IO_PathNotFound_NoPathName">
@@ -102,9 +127,29 @@
         <target state="new">The process cannot access the file because it is being used by another process</target>
         <note />
       </trans-unit>
+      <trans-unit id="In_Break_State">
+        <source>The port is in the break state and cannot be written to</source>
+        <target state="new">The port is in the break state and cannot be written to</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="IndexOutOfRange_IORaceCondition">
+        <source>Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods. This also applies to classes like StreamWriter and StreamReader</source>
+        <target state="new">Probable I/O race condition detected while copying memory. The I/O package is not thread safe by default. In multithreaded applications, a stream must be accessed in a thread-safe way, such as a thread-safe wrapper returned by TextReader's or TextWriter's Synchronized methods. This also applies to classes like StreamWriter and StreamReader</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidDataBits">
         <source>An invalid value was passed to DataBits</source>
         <target state="new">An invalid value was passed to DataBits</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidOperation_EndReadCalledMultiple">
+        <source>EndRead can only be called once for each asynchronous operation</source>
+        <target state="new">EndRead can only be called once for each asynchronous operation</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidOperation_EndWriteCalledMultiple">
+        <source>EndWrite can only be called once for each asynchronous operation</source>
+        <target state="new">EndWrite can only be called once for each asynchronous operation</target>
         <note />
       </trans-unit>
       <trans-unit id="Max_Baud">
@@ -155,6 +200,11 @@
       <trans-unit id="WinPortName_wrong">
         <source>Windows port names must start with 'COM' followed by a number</source>
         <target state="new">Windows port names must start with 'COM' followed by a number</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Write_timed_out">
+        <source>The write timed out</source>
+        <target state="new">The write timed out</target>
         <note />
       </trans-unit>
     </body>

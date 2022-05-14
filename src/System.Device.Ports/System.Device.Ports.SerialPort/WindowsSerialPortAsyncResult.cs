@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Windows.Win32.Foundation;
+
 namespace System.Device.Ports.SerialPort
 {
     internal unsafe sealed class WindowsSerialPortAsyncResult : IAsyncResult
@@ -17,6 +19,7 @@ namespace System.Device.Ports.SerialPort
 
         internal int _numBytes;     // number of bytes read OR written
 
+        internal int EndXxxCalled;
         /*
          * Needed for the methods that are not implemented yet
         //internal bool _isComplete;
@@ -37,6 +40,11 @@ namespace System.Device.Ports.SerialPort
 
         public AsyncCallback? UserCallback { get; }
         public object? AsyncState { get; }
+
+        // number of bytes read OR written
+        internal int NumBytes { get; set; }
+        internal WIN32_ERROR ErrorCode { get; set; }
+        internal NativeOverlapped* Overlapped { get; set; }
 
         /// <summary>
         /// Whether this is a read or a write

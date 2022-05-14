@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
 
-using Microsoft.Win32.SafeHandles;
-
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.Devices;
@@ -38,37 +36,44 @@ namespace System.Device.Ports.SerialPort
         // (int)(SerialData.Chars | SerialData.Eof);
         private const COMM_EVENT_MASK ReceivedEvents = COMM_EVENT_MASK.EV_RXCHAR | COMM_EVENT_MASK.EV_RXFLAG;
 
-        private readonly SafeFileHandle _portHandle;
+        private readonly SafeHandle _portHandle;
         private readonly ThreadPoolBoundHandle _threadPoolBound;
         private readonly SerialPort _serialPort;
-        private ManualResetEvent _waitCommEventWaitHandle = new ManualResetEvent(false);
         private COMM_EVENT_MASK _eventsOccurred;
 
-        internal bool _endEventLoop;
+        private bool _endEventLoop;
 
-        public WindowsEventLoop(SerialPort serialPort, SafeFileHandle portHandle, ThreadPoolBoundHandle threadPoolBound)
+        public WindowsEventLoop(SerialPort serialPort, SafeHandle portHandle, ThreadPoolBoundHandle threadPoolBound)
         {
             _serialPort = serialPort;
             _portHandle = portHandle;
             _threadPoolBound = threadPoolBound;
         }
 
-        internal bool ShutdownLoop
+        public ManualResetEvent WaitCommEventWaitHandle { get; } = new ManualResetEvent(false);
+
+        internal Task StartEventLoop()
         {
-            get
-            {
-                return _endEventLoop;
-            }
+            // return Task.Factory.StartNew(s => ((WindowsEventLoop?)s)?.WaitForCommEvent(), _eventLoop,
+            //    CancellationToken.None,
+            //    TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            return Task.Factory.StartNew(_ => WaitForCommEvent(), null, CancellationToken.None,
+                TaskCreationOptions.DenyChildAttach | TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+
+        internal void ShutdownEventLoop()
+        {
+            _endEventLoop = true;
         }
 
         internal unsafe void WaitForCommEvent()
         {
             bool doCleanup = false;
             NativeOverlapped* intOverlapped = null;
-            while (!ShutdownLoop)
+            while (!_endEventLoop)
             {
-                _waitCommEventWaitHandle.Reset();
-                var asyncResult = new WindowsSerialPortAsyncResult(_waitCommEventWaitHandle, null, null, false);
+                WaitCommEventWaitHandle.Reset();
+                var asyncResult = new WindowsSerialPortAsyncResult(WaitCommEventWaitHandle, null, null, false);
 
                 // we're going to use _numBytes for something different in this loop.  In this case, both
                 // freeNativeOverlappedCallback and this thread will decrement that value.  Whichever one decrements it
@@ -77,7 +82,7 @@ namespace System.Device.Ports.SerialPort
                 asyncResult._numBytes = 2;
 
                 intOverlapped = _threadPoolBound.AllocateNativeOverlapped(FreeNativeOverlappedCallback, asyncResult, null);
-                intOverlapped->EventHandle = _waitCommEventWaitHandle.SafeWaitHandle.DangerousGetHandle();
+                intOverlapped->EventHandle = WaitCommEventWaitHandle.SafeWaitHandle.DangerousGetHandle();
 
                 fixed (COMM_EVENT_MASK* eventsOccurredPtr = &_eventsOccurred)
                 {
@@ -102,8 +107,8 @@ namespace System.Device.Ports.SerialPort
 
                             // if we get IO pending, MSDN says we should wait on the WaitHandle, then call GetOverlappedResult
                             // to get the results of WaitCommEvent.
-                            bool success = _waitCommEventWaitHandle.WaitOne();
-                            Debug.Assert(success, $"_waitCommEventWaitHandle.WaitOne() returned error {Marshal.GetLastWin32Error()}");
+                            bool success = WaitCommEventWaitHandle.WaitOne();
+                            Debug.Assert(success, $"WaitCommEventWaitHandle.WaitOne() returned error {Marshal.GetLastWin32Error()}");
 
                             do
                             {
@@ -111,14 +116,14 @@ namespace System.Device.Ports.SerialPort
                                 success = WindowsHelpers.GetOverlappedResult(_portHandle.DangerousGetHandle(), intOverlapped, out _, false);
                                 error = Marshal.GetLastWin32Error();
                             }
-                            while (error == (uint)WIN32_ERROR.ERROR_IO_INCOMPLETE && !ShutdownLoop && !success);
+                            while (error == (uint)WIN32_ERROR.ERROR_IO_INCOMPLETE && !_endEventLoop && !success);
 
                             if (!success)
                             {
                                 // Ignore ERROR_IO_INCOMPLETE and ERROR_INVALID_PARAMETER, because there's a chance we'll get
                                 // one of those while shutting down
                                 if (!((error == (uint)WIN32_ERROR.ERROR_IO_INCOMPLETE ||
-                                    error == (uint)WIN32_ERROR.ERROR_INVALID_PARAMETER) && ShutdownLoop))
+                                    error == (uint)WIN32_ERROR.ERROR_INVALID_PARAMETER) && _endEventLoop))
                                 {
                                     Debug.Fail("GetOverlappedResult returned error, we might leak intOverlapped memory" +
                                         error.ToString(CultureInfo.InvariantCulture));
@@ -134,7 +139,7 @@ namespace System.Device.Ports.SerialPort
                     }
                 }
 
-                if (!ShutdownLoop)
+                if (!_endEventLoop)
                 {
                     CallEvents(_eventsOccurred);
                 }
