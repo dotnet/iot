@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Text;
 using System.Threading.Tasks;
 
 namespace System.Device.Ports.SerialPort
@@ -76,9 +77,9 @@ namespace System.Device.Ports.SerialPort
 
         internal void NoCall()
         {
-            _isOpen = false;
+            IsOpen = false;
 
-            if (_isOpen)
+            if (IsOpen)
             {
                 DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(new SerialData()));
                 ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.Frame));
@@ -96,8 +97,9 @@ namespace System.Device.Ports.SerialPort
                 throw new InvalidOperationException(Strings.Port_already_open);
             }
 
-            InitializeBuffers(_readBufferSize, _writeBufferSize);
             OpenPort();
+            InitializeBuffers(_readBufferSize, _writeBufferSize);
+            IsOpen = true;
         }
 
         /// <summary>
@@ -121,7 +123,14 @@ namespace System.Device.Ports.SerialPort
         {
             if (IsOpen)
             {
-                ClosePort(false);
+                try
+                {
+                    ClosePort(false);
+                }
+                finally
+                {
+                    IsOpen = false;
+                }
             }
         }
 
@@ -171,85 +180,73 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         public abstract void DiscardOutBuffer();
 
-        internal void TriggerErrors(int errors)
+        internal void TriggerErrors(uint errors)
         {
-            if ((errors & (int)SerialError.TXFull) != 0)
+            if ((errors & (uint)SerialError.TXFull) != 0)
             {
                 ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.TXFull));
             }
 
-            if ((errors & (int)SerialError.RXOver) != 0)
+            if ((errors & (uint)SerialError.RXOver) != 0)
             {
                 ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.RXOver));
             }
 
-            if ((errors & (int)SerialError.Overrun) != 0)
+            if ((errors & (uint)SerialError.Overrun) != 0)
             {
                 ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.Overrun));
             }
 
-            if ((errors & (int)SerialError.RXParity) != 0)
+            if ((errors & (uint)SerialError.RXParity) != 0)
             {
                 ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.RXParity));
             }
 
-            if ((errors & (int)SerialError.Frame) != 0)
+            if ((errors & (uint)SerialError.Frame) != 0)
             {
                 ErrorReceived?.Invoke(this, new SerialErrorReceivedEventArgs(SerialError.Frame));
             }
         }
 
-        internal void TriggerReceiveEvents(int nativeEvents)
+        internal void TriggerReceiveEvents(uint nativeEvents)
         {
-            if ((nativeEvents & (int)SerialData.Chars) != 0)
+            if ((nativeEvents & (uint)SerialData.Chars) != 0)
             {
                 DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialData.Chars));
             }
 
-            if ((nativeEvents & (int)SerialData.Eof) != 0)
+            if ((nativeEvents & (uint)SerialData.Eof) != 0)
             {
                 DataReceived?.Invoke(this, new SerialDataReceivedEventArgs(SerialData.Eof));
             }
         }
 
-        internal void TriggerPinEvents(int nativeEvents)
+        internal void TriggerPinEvents(uint nativeEvents)
         {
-            if ((nativeEvents & (int)SerialPinChange.CtsChanged) != 0)
+            if ((nativeEvents & (uint)SerialPinChange.CtsChanged) != 0)
             {
                 PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.CtsChanged));
             }
 
-            if ((nativeEvents & (int)SerialPinChange.DsrChanged) != 0)
+            if ((nativeEvents & (uint)SerialPinChange.DsrChanged) != 0)
             {
                 PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.DsrChanged));
             }
 
-            if ((nativeEvents & (int)SerialPinChange.CDChanged) != 0)
+            if ((nativeEvents & (uint)SerialPinChange.CDChanged) != 0)
             {
                 PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.CDChanged));
             }
 
-            if ((nativeEvents & (int)SerialPinChange.Ring) != 0)
+            if ((nativeEvents & (uint)SerialPinChange.Ring) != 0)
             {
                 PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.Ring));
             }
 
-            if ((nativeEvents & (int)SerialPinChange.Break) != 0)
+            if ((nativeEvents & (uint)SerialPinChange.Break) != 0)
             {
                 PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.Break));
             }
-        }
-
-        /// <summary>
-        /// Reads a number of bytes from the SerialPort input buffer and writes those bytes into a byte array at the specified offset.
-        /// </summary>
-        /// <param name="buffer">The byte array to write the input to.</param>
-        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
-        /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
-        /// <returns>The number of bytes read.</returns>
-        public int Read(byte[] buffer, int offset, int count)
-        {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -298,17 +295,7 @@ namespace System.Device.Ports.SerialPort
         /// <returns>The contents of the input buffer up to the first occurrence of a NewLine value.</returns>
         public string ReadLine()
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Reads a string up to the specified value in the input buffer.
-        /// </summary>
-        /// <param name="value">A value that indicates where the read operation stops.</param>
-        /// <returns>The contents of the input buffer up to the specified value.</returns>
-        public string ReadTo(string value)
-        {
-            throw new NotImplementedException();
+            return ReadTo(NewLine);
         }
 
         /// <summary>
@@ -326,8 +313,35 @@ namespace System.Device.Ports.SerialPort
         /// <param name="text">The string to write to the output buffer.</param>
         public void WriteLine(string text)
         {
+            var bytes = Encoding.GetBytes(text);
+            Write(bytes, 0, bytes.Length);
+        }
+
+        /// <summary>
+        /// Reads a string up to the specified value in the input buffer.
+        /// </summary>
+        /// <param name="value">A value that indicates where the read operation stops.</param>
+        /// <returns>The contents of the input buffer up to the specified value.</returns>
+        public string ReadTo(string value)
+        {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="array">todo</param>
+        /// <param name="offset">todo</param>
+        /// <param name="count">todo</param>
+        public abstract void Write(byte[] array, int offset, int count);
+
+        /// <summary>
+        /// Reads a number of bytes from the SerialPort input buffer and writes those bytes into a byte array at the specified offset.
+        /// </summary>
+        /// <param name="buffer">The byte array to write the input to.</param>
+        /// <param name="offset">The offset in buffer at which to write the bytes.</param>
+        /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
+        /// <returns>The number of bytes read.</returns>
+        public abstract int Read(byte[] buffer, int offset, int count);
     }
 }

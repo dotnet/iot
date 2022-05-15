@@ -125,6 +125,11 @@ namespace System.Device.Ports.SerialPort
             return afsar._numBytes;
         }
 
+        public override int Read(byte[] array, int offset, int count)
+        {
+            return Read(array, offset, count, ReadTimeout);
+        }
+
         internal unsafe int Read(byte[] array, int offset, int count, int timeout)
         {
             CheckReadWriteArguments(array, offset, count);

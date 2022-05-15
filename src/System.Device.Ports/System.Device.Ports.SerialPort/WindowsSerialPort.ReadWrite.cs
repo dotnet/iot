@@ -34,7 +34,7 @@ namespace System.Device.Ports.SerialPort
                 return;
             }
 
-            asyncResult.NumBytes = (int)numBytes;
+            asyncResult._numBytes = (int)numBytes;
             asyncResult.ErrorCode = (WIN32_ERROR)errorCode;
 
             // Call the user-provided callback.  Note that it can and often should

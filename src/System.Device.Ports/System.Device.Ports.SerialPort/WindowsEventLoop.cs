@@ -86,8 +86,8 @@ namespace System.Device.Ports.SerialPort
 
                 fixed (COMM_EVENT_MASK* eventsOccurredPtr = &_eventsOccurred)
                 {
-                    if (WindowsHelpers.WaitCommEvent(_portHandle.DangerousGetHandle(),
-                        eventsOccurredPtr, intOverlapped) == false)
+                    var handle = _portHandle.DangerousGetHandle();
+                    if (!WindowsHelpers.WaitCommEvent(handle, eventsOccurredPtr, intOverlapped))
                     {
                         var hr = (uint)Marshal.GetLastWin32Error();
 
@@ -228,11 +228,11 @@ namespace System.Device.Ports.SerialPort
             }
         }
 
-        private void CallErrorEvents(object? state) => _serialPort?.TriggerErrors((int)state!);
+        private void CallErrorEvents(object? state) => _serialPort?.TriggerErrors((uint)state!);
 
-        private void CallReceiveEvents(object? state) => _serialPort?.TriggerReceiveEvents((int)state!);
+        private void CallReceiveEvents(object? state) => _serialPort?.TriggerReceiveEvents((uint)state!);
 
-        private void CallPinEvents(object? state) => _serialPort?.TriggerPinEvents((int)state!);
+        private void CallPinEvents(object? state) => _serialPort?.TriggerPinEvents((uint)state!);
 
     }
 }

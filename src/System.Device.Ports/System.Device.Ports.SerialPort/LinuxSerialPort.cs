@@ -3,7 +3,7 @@
 
 namespace System.Device.Ports.SerialPort
 {
-    internal class LinuxSerialPort : SerialPort
+    internal partial class LinuxSerialPort : SerialPort
     {
         private const string DefaultPortName = "/dev/tty0";
 

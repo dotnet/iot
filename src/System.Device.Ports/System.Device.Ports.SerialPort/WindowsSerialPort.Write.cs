@@ -113,6 +113,11 @@ namespace System.Device.Ports.SerialPort
             // Number of bytes written is afsar._numBytes.
         }
 
+        public override void Write(byte[] array, int offset, int count)
+        {
+            Write(array, offset, count, WriteTimeout);
+        }
+
         internal unsafe void Write(byte[] array, int offset, int count, int timeout)
         {
             if (BreakState)

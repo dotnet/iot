@@ -42,7 +42,7 @@ namespace System.Device.Ports.SerialPort
         public object? AsyncState { get; }
 
         // number of bytes read OR written
-        internal int NumBytes { get; set; }
+        // internal int NumBytes { get; set; }
         internal WIN32_ERROR ErrorCode { get; set; }
         internal NativeOverlapped* Overlapped { get; set; }
 

@@ -70,7 +70,6 @@ namespace System.Device.Ports.SerialPort
         private const int DefaultReadTimeout = InfiniteTimeout;
         private const int DefaultWriteTimeout = InfiniteTimeout;
 
-        private bool _isOpen;
         private int _baudRate;
         private Parity _parity;
         private int _dataBits;
@@ -118,7 +117,11 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                SetBaudRate(_baudRate);
+                if (IsOpen)
+                {
+                    SetBaudRate(value);
+                }
+
                 _baudRate = value;
             }
         }
@@ -147,7 +150,11 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                SetParity(_parity);
+                if (IsOpen)
+                {
+                    SetParity(value);
+                }
+
                 _parity = value;
             }
         }
@@ -167,8 +174,8 @@ namespace System.Device.Ports.SerialPort
             set
             {
                 // 9 data bit is only supported by toggling the parity bit
-                if (_dataBits < MinDataBits || _dataBits > MaxDataBitsNoParity ||
-                    (_dataBits == MaxDataBitsNoParity && Parity != Parity.None))
+                if (value < MinDataBits || value > MaxDataBitsNoParity ||
+                    (value == MaxDataBitsNoParity && Parity != Parity.None))
                 {
                     throw new ArgumentOutOfRangeException(nameof(DataBits), Strings.InvalidDataBits);
                 }
@@ -178,7 +185,11 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                SetDataBits(_dataBits);
+                if (IsOpen)
+                {
+                    SetDataBits(value);
+                }
+
                 _dataBits = value;
             }
         }
@@ -207,7 +218,11 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                SetStopBits(_stopBits);
+                if (IsOpen)
+                {
+                    SetStopBits(value);
+                }
+
                 _stopBits = value;
             }
         }
@@ -236,7 +251,8 @@ namespace System.Device.Ports.SerialPort
                 }
                 */
 
-                SetBreakState(_breakState);
+                // todo: throw if not open, get and set
+                SetBreakState(value);
                 _breakState = value;
             }
         }
@@ -254,11 +270,12 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetBytesToRead();
             }
         }
@@ -275,11 +292,12 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetBytesToWrite();
             }
         }
@@ -296,11 +314,12 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetCDHolding();
             }
         }
@@ -317,11 +336,12 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open, get and set
                 return GetCtsHolding();
             }
         }
@@ -340,7 +360,11 @@ namespace System.Device.Ports.SerialPort
             get => _discardNull;
             set
             {
-                SetDiscardNull(_discardNull);
+                if (IsOpen)
+                {
+                    SetDiscardNull(value);
+                }
+
                 _discardNull = value;
             }
         }
@@ -359,11 +383,12 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                if (!_isOpen)
+                if (!IsOpen)
                 {
                     throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                // todo: throw if not open
                 return GetDsrHolding();
             }
         }
@@ -380,12 +405,20 @@ namespace System.Device.Ports.SerialPort
         {
             get
             {
-                _dtrEnable = GetDtrEnable();
+                if (IsOpen)
+                {
+                    _dtrEnable = GetDtrEnable();
+                }
+
                 return _dtrEnable;
             }
             set
             {
-                SetDtrEnable(_dtrEnable);
+                if (IsOpen)
+                {
+                    SetDtrEnable(value);
+                }
+
                 _dtrEnable = value;
             }
         }
@@ -458,7 +491,11 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                SetHandshake(_handshake);
+                if (IsOpen)
+                {
+                    SetHandshake(value);
+                }
+
                 _handshake = value;
             }
         }
@@ -472,7 +509,7 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Gets a value indicating the open or closed status of the SerialPort object.
         /// </summary>
-        public bool IsOpen => _isOpen;
+        public bool IsOpen { get; protected set; }
 
         /// <summary>
         /// Gets or sets the value used to interpret the end of a call to the ReadLine() and WriteLine(String) methods.
@@ -514,7 +551,11 @@ namespace System.Device.Ports.SerialPort
                     return;
                 }
 
-                SetParityReplace(_parityReplace);
+                if (IsOpen)
+                {
+                    SetParityReplace(value);
+                }
+
                 _parityReplace = value;
             }
         }
@@ -653,6 +694,7 @@ namespace System.Device.Ports.SerialPort
             }
         }
 
+        // TODO
         private void OnReceivedBytesThresholdChanged()
         {
             // fake the call to our event handler in case the threshold has been set lower
@@ -688,7 +730,14 @@ namespace System.Device.Ports.SerialPort
                     throw new InvalidOperationException(Strings.CantSetRtsWithHandshaking);
                 }
 
-                SetRtsEnable(value, true);
+                if (IsOpen)
+                {
+                    SetRtsEnable(value, true);
+                }
+                else
+                {
+                    _rtsEnable = value;
+                }
             }
         }
 
@@ -731,7 +780,7 @@ namespace System.Device.Ports.SerialPort
                     throw new InvalidOperationException(string.Format(Strings.Cant_be_set_when_open, nameof(WriteBufferSize)));
                 }
 
-                SetWriteBufferSize(_writeBufferSize);
+                SetWriteBufferSize(value);
                 _writeBufferSize = value;
             }
         }
@@ -760,7 +809,11 @@ namespace System.Device.Ports.SerialPort
                     throw new ArgumentOutOfRangeException(nameof(WriteTimeout), Strings.ArgumentOutOfRange_WriteTimeout);
                 }
 
-                SetWriteTimeout(_writeTimeout);
+                if (IsOpen)
+                {
+                    SetWriteTimeout(value);
+                }
+
                 _writeTimeout = value;
             }
         }

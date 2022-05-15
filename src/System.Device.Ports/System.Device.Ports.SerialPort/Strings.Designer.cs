@@ -205,6 +205,15 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Argument {0} cannot be null or zero-length..
+        /// </summary>
+        internal static string InvalidNullEmptyArgument {
+            get {
+                return ResourceManager.GetString("InvalidNullEmptyArgument", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to EndRead can only be called once for each asynchronous operation.
         /// </summary>
         internal static string InvalidOperation_EndReadCalledMultiple {

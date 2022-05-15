@@ -153,8 +153,8 @@ namespace System.Device.Ports.SerialPort
 
             _dcb.DCBlength = (uint)sizeof(DCB);
             _dcb.BaudRate = (uint)BaudRate;
-            _dcb.ByteSize = (byte)DataBits;
             _dcb.Parity = (byte)Parity;
+            _dcb.ByteSize = (byte)DataBits;
             _dcb.StopBits = StopBits switch
             {
                 StopBits.One => (byte)PInvoke.ONESTOPBIT,
@@ -165,8 +165,10 @@ namespace System.Device.Ports.SerialPort
 
             _dcb.SetFlag(DCBFlags.FPARITY, ((Parity == Parity.None) ? 0 : 1));
             _dcb.SetFlag(DCBFlags.FBINARY, 1); // always true for communications resources
-            _dcb.SetFlag(DCBFlags.FOUTXCTSFLOW, ((Handshake == Handshake.RequestToSend ||
-                Handshake == Handshake.RequestToSendXOnXOff) ? 1 : 0));
+            _dcb.SetFlag(DCBFlags.FOUTXCTSFLOW,
+                (Handshake == Handshake.RequestToSend ||
+                Handshake == Handshake.RequestToSendXOnXOff)
+                ? 1 : 0);
 
             // _dcb.SetFlag(DCBFlags.FOUTXDSRFLOW, (dsrTimeout != 0L) ? 1 : 0);
             _dcb.SetFlag(DCBFlags.FOUTXDSRFLOW, 0); // dsrTimeout is always set to 0.
@@ -197,8 +199,7 @@ namespace System.Device.Ports.SerialPort
             // Setting RTS control, which is RTS_CONTROL_HANDSHAKE if RTS / RTS-XOnXOff handshaking
             // used, RTS_ENABLE (RTS pin used during operation) if rtsEnable true but XOnXoff / No handshaking
             // used, and disabled otherwise.
-            if ((Handshake == Handshake.RequestToSend ||
-                Handshake == Handshake.RequestToSendXOnXOff))
+            if (Handshake == Handshake.RequestToSend || Handshake == Handshake.RequestToSendXOnXOff)
             {
                 _dcb.SetFlag(DCBFlags.FRTSCONTROL, (int)PInvoke.RTS_CONTROL_HANDSHAKE);
             }
