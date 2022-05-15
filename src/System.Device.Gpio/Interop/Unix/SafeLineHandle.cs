@@ -6,22 +6,34 @@ using System.Runtime.InteropServices;
 namespace System.Device.Gpio
 {
     /// <summary>
-    /// Pointer to a pin.
+    /// Pointer to a pin (Not a real SafeLineHandle, because we need to align its finalization with the owning object)
     /// </summary>
-    internal class SafeLineHandle : SafeHandle
+    internal sealed class SafeLineHandle : IDisposable
     {
-        public PinMode PinMode { get; set; }
-
+        private IntPtr _handle;
         public SafeLineHandle()
-            : base(IntPtr.Zero, true)
         {
+            _handle = IntPtr.Zero;
         }
 
-        protected override bool ReleaseHandle()
+        public SafeLineHandle(IntPtr handle)
         {
-            // Contrary to intuition, this does not invalidate the handle (see comment on declaration)
-            Interop.libgpiod.gpiod_line_release(handle);
-            return true;
+            _handle = handle;
+            PinMode = PinMode.Input;
+        }
+
+        public PinMode PinMode { get; set; }
+
+        public IntPtr Handle
+        {
+            get
+            {
+                return _handle;
+            }
+            set
+            {
+                _handle = value;
+            }
         }
 
         /// <summary>
@@ -29,9 +41,24 @@ namespace System.Device.Gpio
         /// </summary>
         public void ReleaseLock()
         {
-            ReleaseHandle();
+            // Contrary to intuition, this does not invalidate the handle (see comment on declaration)
+            Interop.libgpiod.gpiod_line_release(_handle);
         }
 
-        public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.libgpiod.InvalidHandleValue;
+        public bool IsInvalid => _handle == IntPtr.Zero || _handle == Interop.libgpiod.InvalidHandleValue;
+
+        public void Dispose()
+        {
+            if (_handle != IntPtr.Zero)
+            {
+                Interop.libgpiod.gpiod_line_release(_handle);
+                _handle = IntPtr.Zero;
+            }
+        }
+
+        public static implicit operator IntPtr(SafeLineHandle self)
+        {
+            return self.Handle;
+        }
     }
 }

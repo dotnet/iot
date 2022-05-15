@@ -115,7 +115,7 @@ namespace System.Device.Gpio.Drivers
                 if (pinHandle is null || (pinHandle is object && !Interop.libgpiod.gpiod_line_is_free(pinHandle)))
                 {
                     pinHandle?.Dispose();
-                    pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
+                    pinHandle = new SafeLineHandle(Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber));
                     _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
                 }
 
@@ -180,7 +180,7 @@ namespace System.Device.Gpio.Drivers
                     return;
                 }
 
-                SafeLineHandle pinHandle = Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber);
+                SafeLineHandle pinHandle = new SafeLineHandle(Interop.libgpiod.gpiod_chip_get_line(_chip, pinNumber));
                 if (pinHandle == null)
                 {
                     throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
