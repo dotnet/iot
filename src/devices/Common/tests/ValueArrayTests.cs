@@ -114,12 +114,12 @@ namespace Iot.Device.Common.Tests
         [Fact]
         public void AddWorks()
         {
-            _myArray = default;
-            _myArray.Add(77);
-            _myArray.Add(78);
-            Assert.Equal(2, _myArray.Count);
-            Assert.Equal(77, _myArray[0]);
-            Assert.Equal(78, _myArray[1]);
+            ValueArray<byte> myArray = default;
+            myArray.Add(77);
+            myArray.Add(78);
+            Assert.Equal(2, myArray.Count);
+            Assert.Equal(77, myArray[0]);
+            Assert.Equal(78, myArray[1]);
         }
 
         [Fact]
