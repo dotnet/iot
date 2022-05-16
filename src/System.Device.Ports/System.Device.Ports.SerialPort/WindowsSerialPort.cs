@@ -115,6 +115,7 @@ namespace System.Device.Ports.SerialPort
                 _rtsEnable = _dcb.GetFlag(DCBFlags.FRTSCONTROL) == PInvoke.RTS_CONTROL_ENABLE;
                 SetRtsEnable(_rtsEnable);
                 SetReadTimeout(ReadTimeout);
+                SetReadTimeout(WriteTimeout);
 
                 _threadPoolBound = ThreadPoolBoundHandle.BindHandle(_portHandle);
 
@@ -328,7 +329,7 @@ namespace System.Device.Ports.SerialPort
             }
         }
 
-        private void Flush()
+        public override void Flush()
         {
             if (_portHandle == null)
             {
@@ -688,11 +689,6 @@ namespace System.Device.Ports.SerialPort
             {
                 _rtsEnable = value;
             }
-        }
-
-        protected internal override void SetWriteBufferSize(int value)
-        {
-            /* There is no specific API to call in Windows */
         }
 
         protected internal override void SetWriteTimeout(int value)

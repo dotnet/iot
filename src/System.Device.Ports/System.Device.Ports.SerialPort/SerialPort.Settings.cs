@@ -86,7 +86,7 @@ namespace System.Device.Ports.SerialPort
         /// The name of the serial port whose default value is platform dependent
         /// and set to a proper default name in the derived platform-specific classes
         /// </summary>
-        protected string _portName = String.Empty;
+        protected string _portName = string.Empty;
 
         /// <summary>
         /// The field caching the value for the RTS enable flag
@@ -414,11 +414,12 @@ namespace System.Device.Ports.SerialPort
             }
             set
             {
-                if (IsOpen)
+                if (!IsOpen)
                 {
-                    SetDtrEnable(value);
+                    throw new InvalidOperationException(Strings.Port_not_open);
                 }
 
+                SetDtrEnable(value);
                 _dtrEnable = value;
             }
         }
@@ -624,6 +625,7 @@ namespace System.Device.Ports.SerialPort
                     throw new InvalidOperationException(string.Format(Strings.Cant_be_set_when_open, nameof(ReadBufferSize)));
                 }
 
+                InitializeBuffers(value, WriteBufferSize);
                 _readBufferSize = value;
             }
         }
@@ -780,16 +782,17 @@ namespace System.Device.Ports.SerialPort
                     throw new InvalidOperationException(string.Format(Strings.Cant_be_set_when_open, nameof(WriteBufferSize)));
                 }
 
-                SetWriteBufferSize(value);
+                InitializeBuffers(ReadBufferSize, value);
                 _writeBufferSize = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the size of the serial port output buffer.
+        /// Initialize the platform-specific buffers for reading and writing operations
         /// </summary>
-        /// <param name="value">The size of the output buffer. The default is 2048.</param>
-        protected internal abstract void SetWriteBufferSize(int value);
+        /// <param name="readBufferSize">The size of the read buffer.</param>
+        /// <param name="writeBufferSize">The size of the write buffer.</param>
+        protected internal abstract void InitializeBuffers(int readBufferSize, int writeBufferSize);
 
         /// <summary>
         /// Gets or sets the number of milliseconds before a time-out occurs when a write operation does not finish.

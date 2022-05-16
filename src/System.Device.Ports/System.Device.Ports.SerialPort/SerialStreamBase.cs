@@ -14,7 +14,7 @@ namespace System.Device.Ports.SerialPort
     {
         public override bool CanSeek => false;
 
-        public override bool CanTimeout => base.CanTimeout;
+        public override bool CanTimeout => true;
 
         public override bool CanRead => throw new NotImplementedException();
 

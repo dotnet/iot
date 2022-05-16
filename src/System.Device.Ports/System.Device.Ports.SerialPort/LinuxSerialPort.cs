@@ -102,11 +102,6 @@ namespace System.Device.Ports.SerialPort
             throw new NotImplementedException();
         }
 
-        protected internal override void SetWriteBufferSize(int value)
-        {
-            throw new NotImplementedException();
-        }
-
         protected internal override void SetWriteTimeout(int value)
         {
             throw new NotImplementedException();
@@ -138,6 +133,11 @@ namespace System.Device.Ports.SerialPort
         }
 
         protected internal override void InitializeBuffers(int readBufferSize, int writeBufferSize)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Flush()
         {
             throw new NotImplementedException();
         }

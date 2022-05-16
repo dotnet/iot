@@ -103,13 +103,6 @@ namespace System.Device.Ports.SerialPort
         }
 
         /// <summary>
-        /// Initialize the platform-specific buffers for reading and writing operations
-        /// </summary>
-        /// <param name="readBufferSize">The size of the read buffer.</param>
-        /// <param name="writeBufferSize">The size of the write buffer.</param>
-        protected internal abstract void InitializeBuffers(int readBufferSize, int writeBufferSize);
-
-        /// <summary>
         /// Open the port using platform-specific code
         /// </summary>
         protected internal abstract void OpenPort();
@@ -248,6 +241,11 @@ namespace System.Device.Ports.SerialPort
                 PinChanged?.Invoke(this, new SerialPinChangedEventArgs(SerialPinChange.Break));
             }
         }
+
+        /// <summary>
+        /// Flush the content of the serial port write buffer
+        /// </summary>
+        public abstract void Flush();
 
         /// <summary>
         /// Reads a number of characters from the SerialPort input buffer and writes them into an array of characters at a given offset.

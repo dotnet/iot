@@ -61,13 +61,6 @@ namespace System.Device.Ports.SerialPort
             asyncResult.UserCallback?.Invoke(asyncResult);
         }
 
-        /*
-        public int Read(byte[] array, int offset, int count)
-        {
-            return Read(array, offset, count, ReadTimeout);
-        }
-        */
-
         private void CheckReadWriteArguments(byte[] array, int offset, int count)
         {
             if (array == null)
