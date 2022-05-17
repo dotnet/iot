@@ -267,7 +267,7 @@ namespace ArduinoCsCompiler.Runtime
 
                 if (throwException)
                 {
-                    throw new ArgumentException();
+                    throw new ArgumentException("Invalid culture name", nameof(cultureName));
                 }
 
                 return false;

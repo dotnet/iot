@@ -121,7 +121,7 @@ namespace ArduinoCsCompiler.Runtime
         {
             if (destinationSizeInBytes < sourceBytesToCopy)
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(destinationSizeInBytes));
             }
 
             Memmove((byte*)destination, (byte*)source, (uint)sourceBytesToCopy);

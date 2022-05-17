@@ -54,7 +54,7 @@ namespace ArduinoCsCompiler.Runtime
 
             if (!enumType.IsEnum)
             {
-                throw new ArgumentException(nameof(enumType));
+                throw new ArgumentException("Type is not an enum", nameof(enumType));
             }
 
             return MiniUnsafe.As<MiniType>(enumType);
