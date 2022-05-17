@@ -339,7 +339,7 @@ namespace System.Device.Gpio.Drivers
                     typeOfEventOccured = e.ChangeType;
                 }
 
-                WaitForEventResult(cancellationToken, eventHandler.CancellationTokenSource.Token, ref eventOccurred);
+                WaitForEventResult(cancellationToken, eventHandler.CancellationToken, ref eventOccurred);
                 RemoveCallbackForPinValueChangedEvent(pinNumber, Callback);
 
                 return new WaitForEventResult

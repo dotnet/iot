@@ -20,7 +20,7 @@ namespace Iot.Device.MotorHat
             {
                 1 => new MotorPins(0, 1, 2),
                 2 => new MotorPins(5, 4, 3),
-                _ => throw new ArgumentException(nameof(index), $"MotorHat Motor must be either 1 or 2. {nameof(index)}: {index}")
+                _ => throw new ArgumentException($"MotorHat Motor must be either 1 or 2. {nameof(index)}: {index}", nameof(index))
             };
         }
     }

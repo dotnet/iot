@@ -55,7 +55,7 @@ namespace Iot.Device.Bmxx80
             {
                 if (!Enum.IsDefined(typeof(Sampling), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 byte status = Read8BitsFromRegister((byte)Bme280Register.CTRL_HUM);

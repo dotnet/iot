@@ -30,7 +30,7 @@ namespace Iot.Device.GoPiGo3.Sensors
         {
             if (!SupportedPorts.Contains(port))
             {
-                throw new ArgumentException(nameof(port), "Grove port not supported");
+                throw new ArgumentException("Grove port not supported", nameof(port));
             }
 
             _goPiGo = goPiGo;

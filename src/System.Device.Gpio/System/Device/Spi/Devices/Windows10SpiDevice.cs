@@ -52,7 +52,7 @@ namespace System.Device.Spi
             DeviceInformationCollection? deviceInformationCollection = DeviceInformation.FindAllAsync(deviceSelector).WaitForCompletion();
             if (deviceInformationCollection is null || deviceInformationCollection.Count == 0)
             {
-                throw new ArgumentException($"No SPI device exists for bus ID {settings.BusId}.", $"{nameof(settings)}.{nameof(settings.BusId)}");
+                throw new ArgumentException($"No SPI device exists for bus ID {settings.BusId}.", nameof(settings));
             }
 
             WinSpi.SpiDevice? winDevice = WinSpi.SpiDevice.FromIdAsync(deviceInformationCollection[0].Id, winSettings).WaitForCompletion();
