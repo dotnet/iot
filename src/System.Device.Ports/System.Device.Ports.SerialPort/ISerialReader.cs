@@ -24,7 +24,7 @@ namespace System.Device.Ports.SerialPort
         /// Read a single byte from the serial port
         /// </summary>
         /// <returns></returns>
-        byte ReadByte();
+        int ReadByte();
 
         /// <summary>
         /// Synchronously read the content of the serial port into the provided buffer
