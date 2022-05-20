@@ -63,10 +63,25 @@ namespace Iot.Device.Arduino
         /// The device is initialized when the first command is sent. The constructor always succeeds.
         /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
-        public ArduinoBoard(Stream serialPortStream)
+        /// <param name="usesHardwareFlowControl">True to indicate that the stream supports hardware flow control (can be a serial port
+        /// with RTS/CTS handshake or a network stream where the protocol already supports flow control)</param>
+        public ArduinoBoard(Stream serialPortStream, bool usesHardwareFlowControl)
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
+            StreamUsesHardwareFlowControl = usesHardwareFlowControl;
             _logger = this.GetCurrentClassLogger();
+        }
+
+        /// <summary>
+        /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
+        /// </summary>
+        /// <remarks>
+        /// The device is initialized when the first command is sent. The constructor always succeeds.
+        /// </remarks>
+        /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
+        public ArduinoBoard(Stream serialPortStream)
+        : this(serialPortStream, false)
+        {
         }
 
         /// <summary>
@@ -80,6 +95,7 @@ namespace Iot.Device.Arduino
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
+            StreamUsesHardwareFlowControl = false; // Would need to configure the serial port externally for this to work
             _logger = this.GetCurrentClassLogger();
         }
 
@@ -87,6 +103,16 @@ namespace Iot.Device.Arduino
         /// The board logger.
         /// </summary>
         protected ILogger Logger => _logger;
+
+        /// <summary>
+        /// Set this to true if the underlying stream uses some kind of hardware or low-level flow control (RTS/CTS for
+        /// a serial port, or a TCP socket). Setting this to true may improve performance on bulk transfers (such as
+        /// large SPI blocks) but can result in buffer overflows if flow control is not working. Default: false
+        /// </summary>
+        public bool StreamUsesHardwareFlowControl
+        {
+            get;
+        }
 
         /// <summary>
         /// The list of supported pin modes.
@@ -162,14 +188,47 @@ namespace Iot.Device.Arduino
 #endif
             out ArduinoBoard? board)
         {
-            board = null;
+            return TryConnectToNetworkedBoard(boardAddress, port, true, out board);
+        }
+
+        /// <summary>
+        /// Tries to connect to an arduino over network.
+        /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
+        /// </summary>
+        /// <param name="boardAddress">The IP address of the board</param>
+        /// <param name="port">The network port to use. The default port is 27016</param>
+        /// <param name="useAutoReconnect">True to use an auto-reconnecting stream. Helpful when using an unreliable connection.</param>
+        /// <param name="board">Returns the board if successful</param>
+        /// <returns>True on success, false otherwise</returns>
+        public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port, bool useAutoReconnect,
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out ArduinoBoard? board)
+        {
             try
             {
-                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(boardAddress, port);
-                socket.NoDelay = true;
-                var networkStream = new NetworkStream(socket, true);
-                board = new ArduinoBoard(networkStream);
+                Stream networkStream;
+                if (useAutoReconnect)
+                {
+                    networkStream = new ReconnectingNetworkStream(() =>
+                    {
+                        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        socket.Connect(boardAddress, port);
+                        socket.NoDelay = true;
+                        Stream socketStream = new NetworkStream(socket, true);
+                        return socketStream;
+                    });
+                }
+                else
+                {
+                    var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    socket.Connect(boardAddress, port);
+                    socket.NoDelay = true;
+                    networkStream = new NetworkStream(socket, true);
+                }
+
+                board = new ArduinoBoard(networkStream, true);
                 if (!(board.FirmataVersion > new Version(1, 0)))
                 {
                     // Actually not expecting to get here (but the above will throw a SocketException if the remote end is not there)
@@ -180,6 +239,7 @@ namespace Iot.Device.Arduino
             }
             catch (SocketException)
             {
+                board = null;
                 return false;
             }
         }
@@ -508,7 +568,21 @@ namespace Iot.Device.Arduino
             }
             else
             {
-                Logger.LogInformation(message);
+                // If the message contains a line feed, strip that
+                Logger.LogInformation(message.TrimEnd(new char[] { '\r', '\n' }));
+            }
+
+            _commandHandlersLock.EnterReadLock();
+            try
+            {
+                foreach (var handler in _extendedCommandHandlers)
+                {
+                    handler.OnErrorMessage(message, exception);
+                }
+            }
+            finally
+            {
+                _commandHandlersLock.ExitReadLock();
             }
         }
 
@@ -561,7 +635,12 @@ namespace Iot.Device.Arduino
         {
             Initialize();
 
-            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
+            if (_firmata == null)
+            {
+                throw new ObjectDisposedException(nameof(_firmata));
+            }
+
+            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(_firmata, _supportedPinConfigurations));
         }
 
         /// <inheritdoc />
@@ -692,6 +771,16 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Performs a software reset of the Arduino firmware
+        /// </summary>
+        public void SoftwareReset()
+        {
+            Initialize();
+            Firmata.SendSoftwareReset();
+            Firmata.QueryCapabilities();
+        }
+
+        /// <summary>
         /// Standard dispose pattern
         /// </summary>
         protected override void Dispose(bool disposing)
@@ -706,6 +795,12 @@ namespace Iot.Device.Arduino
                 {
                     // Ignore
                 }
+            }
+
+            if (_firmata != null)
+            {
+                // Can end the next possible moment (otherwise might just throw a bunch of warnings before actually terminating anyway)
+                _firmata.InputThreadShouldExit = true;
             }
 
             _isDisposed = true;
@@ -753,6 +848,44 @@ namespace Iot.Device.Arduino
             {
                 Firmata.DisableSpi();
             }
+        }
+
+        /// <summary>
+        /// Pings the device, to get an estimate about the round-trip time.
+        /// With some Wifi setups, the round trip time may be significantly higher than desired.
+        /// </summary>
+        /// <param name="number">The number of pings to send</param>
+        /// <returns>The list of reply times. Contains a negative value for lost packets</returns>
+        public List<TimeSpan> Ping(int number)
+        {
+            Initialize();
+            if (_firmata == null)
+            {
+                throw new ObjectDisposedException("Not connected");
+            }
+
+            List<TimeSpan> ret = new();
+            Stopwatch sw = new Stopwatch();
+            for (int i = 0; i < number; i++)
+            {
+                sw.Restart();
+                try
+                {
+                    _firmata.QueryFirmwareVersion(out _);
+                    var elapsed = sw.Elapsed;
+                    ret.Add(elapsed);
+                    _logger.LogInformation($"Round trip time: {elapsed.TotalMilliseconds}ms");
+                }
+                catch (TimeoutException x)
+                {
+                    _logger.LogError(x, $"Timeout: {x.Message}");
+                    ret.Add(TimeSpan.FromMinutes(-1));
+                }
+
+                sw.Stop();
+            }
+
+            return ret;
         }
     }
 }
