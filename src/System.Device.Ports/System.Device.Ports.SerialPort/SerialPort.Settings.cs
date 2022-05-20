@@ -36,21 +36,6 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         protected const int InfiniteCommTimeouts = -2;
 
-        /// <summary>
-        /// The default value for XON
-        /// </summary>
-        public const byte DefaultXONChar = (byte)17;
-
-        /// <summary>
-        /// The default value for XOFF
-        /// </summary>
-        public const byte DefaultXOFFChar = (byte)19;
-
-        /// <summary>
-        /// The default value for EOF
-        /// </summary>
-        public const byte EOFChar = (byte)26;
-
         private const int MaxDataBitsNoParity = 9;
         private const int MinDataBits = 5;
         private const int DefaultBaudRate = 9600;
@@ -61,7 +46,7 @@ namespace System.Device.Ports.SerialPort
         private const bool DefaultDtrEnable = false;
         private const bool DefaultRtsEnable = false;
         private const bool DefaultDiscardNull = false;
-        private const byte DefaultParityReplace = (byte)'?';
+        private const byte DefaultParityReplace = (byte)SerialPortCharacters.QuestionMark;
         /*private const int DefaultBufferSize = 1024;*/
         private const int DefaultReadBufferSize = 4096;
         private const int DefaultWriteBufferSize = 2048;
@@ -86,7 +71,7 @@ namespace System.Device.Ports.SerialPort
         /// The name of the serial port whose default value is platform dependent
         /// and set to a proper default name in the derived platform-specific classes
         /// </summary>
-        protected string _portName = string.Empty;
+        private string _portName = string.Empty;
 
         /// <summary>
         /// The field caching the value for the RTS enable flag

@@ -114,7 +114,7 @@ namespace System.Device.Ports.SerialPort
             // Check for non-timeout errors during the read.
             if (afsar.ErrorCode != 0)
             {
-                throw WindowsHelpers.GetExceptionForWin32Error(afsar.ErrorCode, _portName);
+                throw WindowsHelpers.GetExceptionForWin32Error(afsar.ErrorCode, PortName);
             }
 
             if (failed)

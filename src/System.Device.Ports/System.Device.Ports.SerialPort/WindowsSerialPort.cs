@@ -46,7 +46,7 @@ namespace System.Device.Ports.SerialPort
 
         public WindowsSerialPort()
         {
-            _portName = DefaultPortName;
+            PortName = DefaultPortName;
             _waitForComEventTask = Task.CompletedTask;
         }
 
@@ -54,9 +54,9 @@ namespace System.Device.Ports.SerialPort
         {
             _comStat = default;
 
-            if (_portName == null ||
-                !_portName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) ||
-                !uint.TryParse(_portName.AsSpan(3), out uint portNumber))
+            if (PortName == null ||
+                !PortName.StartsWith("COM", StringComparison.OrdinalIgnoreCase) ||
+                !uint.TryParse(PortName.AsSpan(3), out uint portNumber))
             {
                 throw new ArgumentException(Strings.WinPortName_wrong, nameof(PortName));
             }
@@ -209,15 +209,15 @@ namespace System.Device.Ports.SerialPort
                 _dcb.SetFlag(DCBFlags.FRTSCONTROL, (int)PInvoke.RTS_CONTROL_DISABLE);
             }
 
-            _dcb.XonChar = new CHAR(DefaultXONChar);
-            _dcb.XoffChar = new CHAR(DefaultXOFFChar);
+            _dcb.XonChar = new CHAR((byte)SerialPortCharacters.DefaultXONChar);
+            _dcb.XoffChar = new CHAR((byte)SerialPortCharacters.DefaultXOFFChar);
 
             // minimum number of bytes allowed in each buffer before flow control activated
             // heuristically, this has been set at 1/4 of the buffer size
             _dcb.XonLim = _dcb.XoffLim = (ushort)(_commProp.dwCurrentRxQueue / 4);
 
-            _dcb.EofChar = new CHAR(EOFChar);
-            _dcb.EvtChar = new CHAR(EOFChar);   // This value is used WaitCommEvent event
+            _dcb.EofChar = new CHAR((byte)SerialPortCharacters.EOFChar);
+            _dcb.EvtChar = new CHAR((byte)SerialPortCharacters.EOFChar);   // This value is used WaitCommEvent event
 
             // set DCB structure
             if (PInvoke.SetCommState(_portHandle, _dcb) == false)

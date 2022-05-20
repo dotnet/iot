@@ -9,7 +9,7 @@ namespace System.Device.Ports.SerialPort
 
         public LinuxSerialPort()
         {
-            _portName = DefaultPortName;
+            PortName = DefaultPortName;
         }
 
         protected internal override void SetBaudRate(int value)

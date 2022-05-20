@@ -107,7 +107,7 @@ namespace System.Device.Ports.SerialPort
             // Now check for any error during the write.
             if (afsar.ErrorCode != 0)
             {
-                throw WindowsHelpers.GetExceptionForWin32Error(afsar.ErrorCode, _portName);
+                throw WindowsHelpers.GetExceptionForWin32Error(afsar.ErrorCode, PortName);
             }
 
             // Number of bytes written is afsar._numBytes.
