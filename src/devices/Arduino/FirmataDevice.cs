@@ -14,6 +14,8 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 using Iot.Device;
 using Iot.Device.Common;
@@ -31,21 +33,22 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
-        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(3000);
+        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(1000);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
         private byte _actualFirmataProtocolMajorVersion;
         private byte _actualFirmataProtocolMinorVersion;
 
+        private Version _firmwareVersion;
+
         private int _lastRequestId;
 
         private string _firmwareName;
         private Stream? _firmataStream;
         private Thread? _inputThread;
-        private bool _inputThreadShouldExit;
         private List<SupportedPinConfiguration> _supportedPinConfigurations;
-        private BlockingCollection<byte[]> _pendingResponses;
+        private BlockingConcurrentBag<byte[]> _pendingResponses;
         private List<PinValue> _lastPinValues;
         private Dictionary<int, uint> _lastAnalogValues;
         private object _lastPinValueLock;
@@ -73,12 +76,15 @@ namespace Iot.Device.Arduino
 
         public event Action<ReplyType, byte[]>? OnSysexReply;
 
+        private long _bytesTransmitted = 0;
+
         public FirmataDevice(List<SupportedMode> supportedModes)
         {
             _firmwareVersionMajor = 0;
             _firmwareVersionMinor = 0;
+            _firmwareVersion = new Version(0, 0);
             _firmataStream = null;
-            _inputThreadShouldExit = false;
+            InputThreadShouldExit = false;
             _dataReceived = new AutoResetEvent(false);
             _supportedPinConfigurations = new List<SupportedPinConfiguration>();
             _synchronisationLock = new object();
@@ -87,7 +93,7 @@ namespace Iot.Device.Arduino
             _lastAnalogValues = new Dictionary<int, uint>();
             _lastAnalogValueLock = new object();
             _dataQueue = new Queue<byte>(1024);
-            _pendingResponses = new(new ConcurrentQueue<byte[]>());
+            _pendingResponses = new BlockingConcurrentBag<byte[]>();
             _lastRequestId = 1;
             _lastCommandError = CommandError.None;
             _firmwareName = string.Empty;
@@ -106,6 +112,10 @@ namespace Iot.Device.Arduino
         }
 
         internal List<SupportedMode> SupportedModes { get; set; }
+
+        internal long BytesTransmitted => _bytesTransmitted;
+
+        internal bool InputThreadShouldExit { get; set; }
 
         public void Open(Stream stream)
         {
@@ -140,14 +150,11 @@ namespace Iot.Device.Arduino
                 return;
             }
 
-            _inputThreadShouldExit = false;
+            InputThreadShouldExit = false;
 
             _inputThread = new Thread(InputThread);
             _inputThread.Name = "Firmata input thread";
             _inputThread.Start();
-
-            // Reset device, in case it is still sending data from an aborted process
-            _firmataStream.WriteByte((byte)FirmataCommand.SYSTEM_RESET);
         }
 
         private void ProcessInput()
@@ -372,6 +379,7 @@ namespace Iot.Device.Arduino
                             {
                                 _firmwareVersionMajor = raw_data[1];
                                 _firmwareVersionMinor = raw_data[2];
+                                _firmwareVersion = new Version(_firmwareVersionMajor, _firmwareVersionMinor);
                                 int stringLength = (raw_data.Length - 3) / 2;
                                 Span<byte> bytesReceived = stackalloc byte[stringLength];
                                 ReassembleByteString(raw_data, 3, stringLength * 2, bytesReceived);
@@ -483,20 +491,17 @@ namespace Iot.Device.Arduino
                         case FirmataSysexCommand.I2C_REPLY:
                             _lastCommandError = CommandError.None;
                             _pendingResponses.Add(raw_data);
-                            _dataReceived.Set();
                             break;
 
                         case FirmataSysexCommand.SPI_DATA:
                             _lastCommandError = CommandError.None;
                             _pendingResponses.Add(raw_data);
-                            _dataReceived.Set();
                             break;
 
                         default:
                             // we pass the data forward as-is for any other type of sysex command
                             _lastCommandError = CommandError.None;
-                            _pendingResponses.Add(raw_data); // the instance is constant, so we can just remember the pointer
-                            _dataReceived.Set();
+                            _pendingResponses.Add(raw_data);
                             OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             break;
                     }
@@ -525,46 +530,10 @@ namespace Iot.Device.Arduino
                     throw new ObjectDisposedException(nameof(FirmataDevice));
                 }
 
-                _firmataStream.Write(sequence.AsSpan());
-
+                _firmataStream.Write(sequence.Sequence.ToArray());
+                _bytesTransmitted += sequence.Sequence.Count;
                 _firmataStream.Flush();
             }
-        }
-
-        /// <summary>
-        /// Send a command and wait for a reply
-        /// </summary>
-        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
-        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
-        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public byte[] SendCommandAndWait(FirmataCommandSequence sequence)
-        {
-            return SendCommandAndWait(sequence, DefaultReplyTimeout);
-        }
-
-        /// <summary>
-        /// Send a command and wait for a reply
-        /// </summary>
-        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
-        /// <param name="timeout">A non-default timeout</param>
-        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
-        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout)
-        {
-            return SendCommandAndWait(sequence, timeout, null, out _);
-        }
-
-        /// <summary>
-        /// Send a command and wait for a reply
-        /// </summary>
-        /// <param name="sequence">The command sequence, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
-        /// <param name="timeout">A non-default timeout</param>
-        /// <param name="error">An error code in case of failure</param>
-        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
-        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, out CommandError error)
-        {
-            return SendCommandAndWait(sequence, timeout, null, out error);
         }
 
         /// <summary>
@@ -577,32 +546,74 @@ namespace Iot.Device.Arduino
         /// <param name="error">An error code in case of failure</param>
         /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
         /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
-        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, Func<FirmataCommandSequence, byte[], bool>? isMatchingAck, out CommandError error)
+        public byte[] SendCommandAndWait(FirmataCommandSequence sequence, TimeSpan timeout, Func<FirmataCommandSequence, byte[], bool> isMatchingAck, out CommandError error)
         {
             if (!sequence.Validate())
             {
                 throw new ArgumentException("The command sequence is invalid", nameof(sequence));
+        }
+
+            if (_firmataStream == null)
+        {
+                throw new ObjectDisposedException(nameof(FirmataDevice));
+        }
+
+            _firmataStream.Write(sequence.Sequence.ToArray(), 0, sequence.Sequence.Count);
+            _bytesTransmitted += sequence.Sequence.Count;
+            _firmataStream.Flush();
+
+            byte[]? response;
+            if (!_pendingResponses.TryRemoveElement(x => isMatchingAck(sequence, x!), timeout, out response))
+            {
+                throw new TimeoutException("Timeout waiting for command answer");
             }
 
-            lock (_synchronisationLock)
+            error = _lastCommandError;
+            return response ?? throw new InvalidOperationException("Got a null reply"); // should not happen in our case
+        }
+
+        /// <summary>
+        /// Send a command and wait for a reply
+        /// </summary>
+        /// <param name="sequences">The command sequences to send, typically starting with <see cref="FirmataCommand.START_SYSEX"/> and ending with <see cref="FirmataCommand.END_SYSEX"/></param>
+        /// <param name="timeout">A non-default timeout</param>
+        /// <param name="isMatchingAck">A callback function that should return true if the given reply is the one this command should wait for. The default is true, because asynchronous replies
+        /// are rather the exception than the rule</param>
+        /// <param name="errorFunc">A callback that determines a possible error in the reply message</param>
+        /// <param name="error">An error code in case of failure</param>
+        /// <returns>The raw sequence of sysex reply bytes. The reply does not include the START_SYSEX byte, but it does include the terminating END_SYSEX byte. The first byte is the
+        /// <see cref="FirmataSysexCommand"/> command number of the corresponding request</returns>
+        public bool SendCommandsAndWait(IList<FirmataCommandSequence> sequences, TimeSpan timeout, Func<FirmataCommandSequence, byte[], bool> isMatchingAck,
+            Func<FirmataCommandSequence, byte[], CommandError> errorFunc, out CommandError error)
+        {
+            if (sequences.Any(s => s.Validate() == false))
             {
+                throw new ArgumentException("At least one command sequence is invalid", nameof(sequences));
+            }
+
+            if (sequences.Count > 127)
+            {
+                // Because we only have 7 bits for the sequence counter.
+                throw new ArgumentException("At most 127 sequences can be chained together", nameof(sequences));
+            }
+
+            if (isMatchingAck == null)
+            {
+                throw new ArgumentNullException(nameof(isMatchingAck));
+            }
+
+            error = CommandError.None;
                 if (_firmataStream == null)
                 {
                     throw new ObjectDisposedException(nameof(FirmataDevice));
                 }
 
-                _dataReceived.Reset();
-                _firmataStream.Write(sequence.AsSpan());
-
-                _firmataStream.Flush();
-
-                byte[]? response;
-                do
+            Dictionary<FirmataCommandSequence, bool> sequencesWithAck = new();
+            foreach (var s in sequences)
                 {
-                    if (!_pendingResponses.TryTake(out response, timeout))
-                    {
-                        throw new TimeoutException("Timeout waiting for command answer");
-                    }
+                sequencesWithAck.Add(s, false);
+                _firmataStream.Write(s.InternalSequence, 0, s.Length);
+            }
                 }
                 while (isMatchingAck != null && !isMatchingAck(sequence, response));
 
@@ -659,14 +670,20 @@ namespace Iot.Device.Arduino
 
                 _firmataStream.Flush();
 
-                byte[]? response;
-                do
+            byte[]? response;
+            do
                 {
-                    if (!_pendingResponses.TryTake(out response, timeout))
+                foreach (var s2 in sequencesWithAck)
+                {
+                    if (_pendingResponses.TryRemoveElement(x => isMatchingAck(s2.Key, x!), timeout, out response))
                     {
-                        throw new TimeoutException("Timeout waiting for command answer");
-                    }
-
+                        CommandError e = CommandError.None;
+                        if (response == null)
+                        {
+                            error = CommandError.Aborted;
+                        }
+                        else if (_lastCommandError != CommandError.None)
+                        {
                     if (response != null) // It's possible that we're already done
                     {
                         foreach (var s2 in sequencesWithAck)
@@ -676,23 +693,21 @@ namespace Iot.Device.Arduino
                                 CommandError e = CommandError.None;
                                 if (_lastCommandError != CommandError.None)
                                 {
-                                    error = _lastCommandError;
-                                }
-                                else if ((e = errorFunc(s2.Key, response)) != CommandError.None)
-                                {
-                                    error = e;
-                                }
-
-                                sequencesWithAck[s2.Key] = true;
-                                break;
-                            }
+                            error = _lastCommandError;
                         }
+                        else if ((e = errorFunc(s2.Key, response)) != CommandError.None)
+                        {
+                            error = e;
+                        }
+
+                        sequencesWithAck[s2.Key] = true;
+                        break;
                     }
                 }
-                while (sequencesWithAck.Any(x => x.Value == false));
-
-                return sequencesWithAck.All(x => x.Value);
             }
+            while (sequencesWithAck.Any(x => x.Value == false));
+
+            return sequencesWithAck.All(x => x.Value);
         }
 
         /// <summary>
@@ -786,7 +801,7 @@ namespace Iot.Device.Arduino
 
         private void InputThread()
         {
-            while (!_inputThreadShouldExit)
+            while (!InputThreadShouldExit)
             {
                 try
                 {
@@ -795,7 +810,7 @@ namespace Iot.Device.Arduino
                 catch (Exception ex)
                 {
                     // If the exception happens because the stream was closed, don't print an error
-                    if (!_inputThreadShouldExit)
+                    if (!InputThreadShouldExit)
                     {
                         _logger.LogError(ex, $"Error in parser: {ex.Message}");
                         OnError?.Invoke($"Firmata protocol error: Parser exception {ex.Message}", ex);
@@ -914,7 +929,7 @@ namespace Iot.Device.Arduino
 
         private void StopThread()
         {
-            _inputThreadShouldExit = true;
+            InputThreadShouldExit = true;
             if (_inputThread != null)
             {
                 _inputThread.Join();
@@ -1201,17 +1216,71 @@ namespace Iot.Device.Arduino
             SendCommand(disableSpi);
         }
 
-        public void SpiWrite(int csPin, ReadOnlySpan<byte> writeBytes)
+        public void SpiWrite(int csPin, ReadOnlySpan<byte> writeBytes, bool waitForReply = false)
         {
             // When the command is SPI_WRITE, the device answer is already discarded in the firmware.
+            if (waitForReply)
+            {
+                var command = SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE_ACK, writeBytes, out byte requestId);
+                var response = SendCommandAndWait(command, DefaultReplyTimeout, (sequence, bytes) =>
+                {
+                    if (bytes.Length < 5)
+                    {
+                        return false;
+                    }
+
+                    if (bytes[0] != (byte)FirmataSysexCommand.SPI_DATA || bytes[1] != (byte)FirmataSpiCommand.SPI_REPLY)
+                    {
+                        return false;
+                    }
+
+                    if (bytes[3] != (byte)requestId)
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }, out _lastCommandError);
+
+                if (response[0] != (byte)FirmataSysexCommand.SPI_DATA || response[1] != (byte)FirmataSpiCommand.SPI_REPLY)
+                {
+                    throw new IOException("Firmata protocol error: received incorrect query response");
+                }
+
+                if (response[3] != (byte)requestId)
+                {
+                    throw new IOException($"Firmata protocol sequence error.");
+                }
+            }
+            else
+            {
             var command = SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE, writeBytes, out _);
             SendCommand(command);
+        }
         }
 
         public void SpiTransfer(int csPin, ReadOnlySpan<byte> writeBytes, Span<byte> readBytes)
         {
             var command = SpiWrite(csPin, FirmataSpiCommand.SPI_TRANSFER, writeBytes, out byte requestId);
-            var response = SendCommandAndWait(command);
+            var response = SendCommandAndWait(command, DefaultReplyTimeout, (sequence, bytes) =>
+            {
+                if (bytes.Length < 5)
+                {
+                    return false;
+                }
+
+                if (bytes[0] != (byte)FirmataSysexCommand.SPI_DATA || bytes[1] != (byte)FirmataSpiCommand.SPI_REPLY)
+                {
+                    return false;
+                }
+
+                if (bytes[3] != (byte)requestId)
+                {
+                    return false;
+                }
+
+                return true;
+            }, out _lastCommandError);
 
             if (response[0] != (byte)FirmataSysexCommand.SPI_DATA || response[1] != (byte)FirmataSpiCommand.SPI_REPLY)
             {
@@ -1237,7 +1306,7 @@ namespace Iot.Device.Arduino
             spiCommand.WriteByte(requestId);
             spiCommand.WriteByte(1); // Deselect CS after transfer (yes)
             spiCommand.WriteByte((byte)writeBytes.Length);
-            spiCommand.WriteBytesAsTwo7bitBytes(writeBytes);
+            spiCommand.Write(Encoder7Bit.Encode(writeBytes));
             spiCommand.WriteByte((byte)FirmataCommand.END_SYSEX);
             return spiCommand;
         }
@@ -1262,18 +1331,36 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Only pins <=15 are allowed as CS line");
             }
 
+            if (_firmwareVersion <= new Version(2, 11))
+            {
+                // we could leverage this, if needed, by using the older data encoding
+                throw new NotSupportedException("This library requires firmware version 2.12 or later for SPI transfers");
+            }
+
+            int deviceId = connectionSettings.ChipSelectLine;
             FirmataCommandSequence spiConfigSequence = new();
             spiConfigSequence.WriteByte((byte)FirmataSysexCommand.SPI_DATA);
             spiConfigSequence.WriteByte((byte)FirmataSpiCommand.SPI_DEVICE_CONFIG);
-            byte deviceIdChannel = (byte)(connectionSettings.ChipSelectLine << 3);
+            byte deviceIdChannel = (byte)(deviceId << 3 | (connectionSettings.BusId & 0x7));
             spiConfigSequence.WriteByte((byte)(deviceIdChannel));
-            spiConfigSequence.WriteByte((byte)1);
-            int clockSpeed = 1_000_000; // Hz
-            spiConfigSequence.WriteByte((byte)(clockSpeed & 0x7F));
-            spiConfigSequence.WriteByte((byte)((clockSpeed >> 7) & 0x7F));
-            spiConfigSequence.WriteByte((byte)((clockSpeed >> 15) & 0x7F));
-            spiConfigSequence.WriteByte((byte)((clockSpeed >> 22) & 0x7F));
-            spiConfigSequence.WriteByte((byte)((clockSpeed >> 29) & 0x7F));
+            int dataMode = 0;
+            if (connectionSettings.DataFlow == DataFlow.MsbFirst)
+            {
+                dataMode = 1;
+            }
+
+            int mode = ((int)connectionSettings.Mode) << 1;
+            dataMode |= mode;
+            dataMode |= 0x8; // Use fast transfer mode
+
+            spiConfigSequence.WriteByte((byte)dataMode);
+            int clockSpeed = connectionSettings.ClockFrequency;
+            if (clockSpeed <= 0)
+            {
+                clockSpeed = 1_000_000;
+            }
+
+            spiConfigSequence.SendInt32(clockSpeed);
             spiConfigSequence.WriteByte(0); // Word size (default = 8)
             spiConfigSequence.WriteByte(1); // Default CS pin control (enable)
             spiConfigSequence.WriteByte((byte)(connectionSettings.ChipSelectLine));
@@ -1314,7 +1401,7 @@ namespace Iot.Device.Arduino
         {
             if (disposing)
             {
-                _inputThreadShouldExit = true;
+                InputThreadShouldExit = true;
 
                 lock (_synchronisationLock)
                 {
@@ -1342,6 +1429,14 @@ namespace Iot.Device.Arduino
         {
             Dispose(true);
             GC.SuppressFinalize(this);
+        }
+
+        public void SendSoftwareReset()
+        {
+            lock (_synchronisationLock)
+            {
+                _firmataStream?.WriteByte(0xFF);
+    }
         }
     }
 }
