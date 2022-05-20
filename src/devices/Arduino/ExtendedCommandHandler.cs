@@ -62,13 +62,7 @@ namespace Iot.Device.Arduino
         /// This might need to be checked in Dispose, to make sure an uninitialized component doesn't attempt
         /// to send a command.
         /// </summary>
-        protected bool IsRegistered
-        {
-            get
-            {
-                return _board != null;
-            }
-        }
+        protected bool IsRegistered => _board != null;
 
         /// <summary>
         /// The reference to the arduino board
@@ -185,12 +179,13 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// This is called when a sysex command is received from the board.
         /// This can include the reply to a command sent by a <see cref="SendCommandAndWait(FirmataCommandSequence)"/> before, in which case
-        /// the reply should be ignored, as it is returned as result of the call itself.
+        /// the reply should be ignored, as it is returned as result of the call itself. Therefore it is advised to use this function only
+        /// to listen for data sent by the device automatically (e.g event messages or recurring status reports)
         /// </summary>
         /// <param name="type">Type of data received from the hardware. This should normally be <see cref="ReplyType.SysexCommand"/>,
         /// unless the hardware sends unencoded Ascii messages</param>
         /// <param name="data">The binary representation of the received data</param>
-        /// <remarks>The implementation needs to check whether the data is for itself. The messages are not filtered by requester!</remarks>
+        /// <remarks>The implementation needs to check the type and source of the data. The messages are not filtered by requester!</remarks>
         protected virtual void OnSysexData(ReplyType type, byte[] data)
         {
         }
@@ -203,10 +198,7 @@ namespace Iot.Device.Arduino
         /// <param name="sequence">The sequence that was sent</param>
         /// <param name="reply">The reply</param>
         /// <returns>True if this reply matches the sequence. True is the default, for backwards compatibility</returns>
-        protected virtual bool IsMatchingAck(FirmataCommandSequence sequence, byte[] reply)
-        {
-            return true;
-        }
+        protected virtual bool IsMatchingAck(FirmataCommandSequence sequence, byte[] reply) => true;
 
         /// <summary>
         /// Callback function that returns whether the given reply indicates an error
@@ -214,10 +206,7 @@ namespace Iot.Device.Arduino
         /// <param name="sequence">The original sequence</param>
         /// <param name="reply">The reply. <see cref="IsMatchingAck"/> is already tested to be true for this reply</param>
         /// <returns>A command error code, in case this reply indicates a no-acknowledge</returns>
-        protected virtual CommandError HasCommandError(FirmataCommandSequence sequence, byte[] reply)
-        {
-            return CommandError.None;
-        }
+        protected virtual CommandError HasCommandError(FirmataCommandSequence sequence, byte[] reply) => CommandError.None;
 
         private void OnSysexDataInternal(ReplyType type, byte[] data)
         {

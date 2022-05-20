@@ -44,30 +44,15 @@ namespace Iot.Device.Arduino
             }
         }
 
-        public override void Flush()
-        {
-            SafeExecute(x => x.Flush(), true);
-        }
+        public override void Flush() => SafeExecute(x => x.Flush(), true);
 
-        public override int Read(byte[] buffer, int offset, int count)
-        {
-            return SafeExecute(x => x.Read(buffer, offset, count), true);
-        }
+        public override int Read(byte[] buffer, int offset, int count) => SafeExecute(x => x.Read(buffer, offset, count), true);
 
-        public override long Seek(long offset, SeekOrigin origin)
-        {
-            return SafeExecute(x => x.Seek(offset, origin), true);
-        }
+        public override long Seek(long offset, SeekOrigin origin) => SafeExecute(x => x.Seek(offset, origin), true);
 
-        public override void SetLength(long value)
-        {
-            SafeExecute(x => x.SetLength(value), false);
-        }
+        public override void SetLength(long value) => SafeExecute(x => x.SetLength(value), false);
 
-        public override void Write(byte[] buffer, int offset, int count)
-        {
-            SafeExecute(x => x.Write(buffer, offset, count), false);
-        }
+        public override void Write(byte[] buffer, int offset, int count) => SafeExecute(x => x.Write(buffer, offset, count), false);
 
         private void Connect()
         {
