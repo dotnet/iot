@@ -453,14 +453,6 @@ namespace Iot.Device.Bmxx80
             FilterMode = Bme680FilteringMode.C0;
 
             _bme680Calibration = (Bme680CalibrationData)_calibrationData;
-            SetPowerMode(Bme680PowerMode.Forced);
-            int delay = 20;
-            while (ReadMeasurementInProcess() && delay > 0)
-            {
-                Thread.Sleep(10);
-                delay--;
-            }
-
             if (!TryReadTemperature(out var temp))
             {
                 temp = _ambientTemperatureUserDefault;

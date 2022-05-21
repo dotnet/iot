@@ -163,7 +163,7 @@ namespace Iot.Device.Arduino
                 if (value == existingValue.Value)
                 {
                     return;
-        }
+                }
             }
 
             _device.WriteDigitalPin(pinNumber, value);

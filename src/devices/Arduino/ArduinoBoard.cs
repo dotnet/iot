@@ -638,7 +638,7 @@ namespace Iot.Device.Arduino
             if (_firmata == null)
             {
                 throw new ObjectDisposedException(nameof(_firmata));
-        }
+            }
 
             return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(_firmata, _supportedPinConfigurations));
         }
