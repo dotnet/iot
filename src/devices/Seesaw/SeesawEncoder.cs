@@ -49,7 +49,7 @@ namespace Iot.Device.Seesaw
         /// <param name="encoder">Which encoder to use, defaults to 0</param>
         /// <returns>The encoder change as a 32 bit signed integer</returns>
         /// <exception cref="InvalidOperationException"></exception>
-        public int EncoderDelta(byte encoder = 0)
+        public int GetEncoderDelta(byte encoder = 0)
         {
             if (!HasModule(SeesawModule.Encoder))
             {
