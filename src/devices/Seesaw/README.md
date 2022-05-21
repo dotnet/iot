@@ -96,4 +96,4 @@ In general the Seesaw technology allows user the embedding of the following type
 * [X] EEPROM (although untested)
 * [X] Capacitive Touch
 * [ ] Keypad
-* [ ] Rotary Encoder
+* [X] Rotary Encoder
