@@ -12,7 +12,7 @@ namespace Iot.Device.Seesaw
         /// Read the current position of the encoder
         /// </summary>
         /// <param name="encoder">Which encoder to use, defaults to 0</param>
-        /// <returns>Encoder position</returns>
+        /// <returns>The encoder position as a 32 bit signed integer</returns>
         /// <exception cref="InvalidOperationException"></exception>
         public int GetEncoderPosition(byte encoder = 0)
         {
@@ -47,7 +47,7 @@ namespace Iot.Device.Seesaw
         /// The change in encoder position since it was last read
         /// </summary>
         /// <param name="encoder">Which encoder to use, defaults to 0</param>
-        /// <returns>Change in encoder position</returns>
+        /// <returns>The encoder change as a 32 bit signed integer</returns>
         /// <exception cref="InvalidOperationException"></exception>
         public int EncoderDelta(byte encoder = 0)
         {
