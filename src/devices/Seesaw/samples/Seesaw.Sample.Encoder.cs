@@ -7,6 +7,10 @@ using Iot.Device.Seesaw;
 
 using Seesaw seesawDevice = new Seesaw(I2cDevice.Create(new I2cConnectionSettings(1, 0x36)));
 
+seesawDevice.EnableEncoderInterrupt();
+
+seesawDevice.SetEncoderPosition(100);
+
 int? lastPosition = null;
 while (true)
 {

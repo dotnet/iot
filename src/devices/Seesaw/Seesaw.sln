@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.SoilSensor", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw", "Seesaw.csproj", "{F87E6203-1DA1-4648-9A1C-AB39C0CDE7E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.RotaryEncoder", "samples\Seesaw.Sample.RotaryEncoder.csproj", "{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.Encoder", "samples\Seesaw.Sample.Encoder.csproj", "{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -5,7 +5,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Seesaw.Sample.RotaryEncoder.cs" />
+    <Compile Include="Seesaw.Sample.Encoder.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Seesaw.csproj" />
