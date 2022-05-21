@@ -617,7 +617,7 @@ namespace Iot.Device.Arduino
             {
                 foreach (var s2 in sequencesWithAck)
                 {
-                    if (_pendingResponses.TryRemoveElement(x => isMatchingAck(s2.Key, x!), timeout, out response))
+                    if (s2.Value == false && _pendingResponses.TryRemoveElement(x => isMatchingAck(s2.Key, x!), timeout, out response))
                     {
                         CommandError e = CommandError.None;
                         if (response == null)
