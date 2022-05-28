@@ -44,5 +44,5 @@ gpioController.RegisterCallbackForPinValueChangedEvent(HostInterruptPin, PinEven
     Console.WriteLine($"Encoder position changed: {encoderPosition}");
 });
 
-// press a key to exit application
+// press Enter to exit application
 Console.ReadLine();

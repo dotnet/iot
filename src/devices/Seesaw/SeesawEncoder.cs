@@ -9,11 +9,11 @@ namespace Iot.Device.Seesaw
     public partial class Seesaw : IDisposable
     {
         /// <summary>
-        /// Read the current position of the encoder
+        /// Read the current position of the encoder.
         /// </summary>
-        /// <param name="encoder">Which encoder to use, defaults to 0</param>
-        /// <returns>The encoder position as a 32 bit signed integer</returns>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="encoder">Which encoder to use, defaults to 0.</param>
+        /// <returns>The encoder position as a 32 bit signed integer.</returns>
+        /// <exception cref="InvalidOperationException">The hardware does not support Adafruit SeeSaw encoder functionality.</exception>
         public int GetEncoderPosition(byte encoder = 0)
         {
             if (!HasModule(SeesawModule.Encoder))
@@ -25,11 +25,11 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Set the current position of the encoder
+        /// Set the current position of the encoder.
         /// </summary>
-        /// <param name="position">Encoder position</param>
-        /// <param name="encoder">Which encoder to use, defaults to 0</param>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="position">Encoder position.</param>
+        /// <param name="encoder">Which encoder to use, defaults to 0.</param>
+        /// <exception cref="InvalidOperationException">The hardware does not support Adafruit SeeSaw encoder functionality.</exception>
         public void SetEncoderPosition(int position, byte encoder = 0)
         {
             if (!HasModule(SeesawModule.Encoder))
@@ -44,11 +44,11 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// The change in encoder position since it was last read
+        /// The change in encoder position since it was last read.
         /// </summary>
-        /// <param name="encoder">Which encoder to use, defaults to 0</param>
-        /// <returns>The encoder change as a 32 bit signed integer</returns>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="encoder">Which encoder to use, defaults to 0.</param>
+        /// <returns>The encoder change as a 32 bit signed integer.</returns>
+        /// <exception cref="InvalidOperationException">The hardware does not support Adafruit SeeSaw encoder functionality.</exception>
         public int GetEncoderDelta(byte encoder = 0)
         {
             if (!HasModule(SeesawModule.Encoder))
@@ -60,10 +60,10 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Enable the interrupt to fire when the encoder changes position
+        /// Enable the interrupt to fire when the encoder changes position.
         /// </summary>
-        /// <param name="encoder">Which encoder to use, defaults to 0</param>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="encoder">Which encoder to use, defaults to 0.</param>
+        /// <exception cref="InvalidOperationException">The hardware does not support Adafruit SeeSaw encoder functionality.</exception>
         public void EnableEncoderInterrupt(byte encoder = 0)
         {
             if (!HasModule(SeesawModule.Encoder))
@@ -75,10 +75,10 @@ namespace Iot.Device.Seesaw
         }
 
         /// <summary>
-        /// Disable the interrupt from firing when the encoder changes
+        /// Disable the interrupt from firing when the encoder changes.
         /// </summary>
-        /// <param name="encoder">Which encoder to use, defaults to 0</param>
-        /// <exception cref="InvalidOperationException"></exception>
+        /// <param name="encoder">Which encoder to use, defaults to 0.</param>
+        /// <exception cref="InvalidOperationException">The hardware does not support Adafruit SeeSaw encoder functionality.</exception>
         public void DisableEncoderInterrupt(byte encoder = 0)
         {
             if (!HasModule(SeesawModule.Encoder))
