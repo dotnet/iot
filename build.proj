@@ -53,6 +53,7 @@
   <Target Name="Restore">
     <ItemGroup>
       <_ExcludeProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\serialport-arduino\arduino-demo.csproj" />
+      <_ExcludeProjectsToRestore Include="$(MSBuildThisFileDirectory)eng\**\*.csproj" />
       <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)**\*.csproj" Exclude="@(_ExcludeProjectsToRestore)" />
     </ItemGroup>
 
