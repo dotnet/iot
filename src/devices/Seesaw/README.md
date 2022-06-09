@@ -76,6 +76,12 @@ This sample duplicates the functionality of the rpi-more-blinking-lights sample 
 
 ![eesaw Sample Blinking Lights](SeesawSampleBlinkingLights_bb.png)
 
+### Connecting to a Seesaw based rotary encoder sample
+
+This sample connects a Raspberry Pi to an Adafruit I2C QT Rotary Encoder
+
+![Seesaw sample encoder](SeesawSampleEncoder.png)
+
 ## Binding Notes
 
 When using Seesaw devices with a Raspberry Pi it has been observed that errors sometimes happen on the I2C bus. The nature of this error may be the 'clock stretching' [bug](http://www.advamation.com/knowhow/raspberrypi/rpi-i2c-bug.html) or may just be that the breakout board cannot accommodate the default I2C speed.
@@ -96,4 +102,4 @@ In general the Seesaw technology allows user the embedding of the following type
 * [X] EEPROM (although untested)
 * [X] Capacitive Touch
 * [ ] Keypad
-* [ ] Rotary Encoder
+* [X] Rotary Encoder
