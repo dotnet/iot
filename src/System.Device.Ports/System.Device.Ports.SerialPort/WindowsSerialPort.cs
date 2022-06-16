@@ -39,6 +39,7 @@ namespace System.Device.Ports.SerialPort
         private Task _waitForComEventTask;
         private ThreadPoolBoundHandle? _threadPoolBound;
         private SafeHandle? _portHandle;
+        private FileStream? _fileStream;
         private COMMPROP _commProp;
         private COMSTAT _comStat;
         private DCB _dcb;
@@ -85,6 +86,7 @@ namespace System.Device.Ports.SerialPort
                 }
 
                 _portHandle = handle;
+                _fileStream = new FileStream(new SafeFileHandle(_portHandle.DangerousGetHandle(), false), FileAccess.ReadWrite);
                 _commProp = default;
 
                 // GetCommModemStatus is called because it fails when it is not a legitimate serial device
@@ -117,7 +119,7 @@ namespace System.Device.Ports.SerialPort
                 SetReadTimeout(ReadTimeout);
                 SetReadTimeout(WriteTimeout);
 
-                _threadPoolBound = ThreadPoolBoundHandle.BindHandle(_portHandle);
+                // _threadPoolBound = ThreadPoolBoundHandle.BindHandle(_portHandle);        // not with filestream
 
                 // monitor all events except TXEMPTY
                 PInvoke.SetCommMask(_portHandle, _allComEvents);
@@ -313,6 +315,8 @@ namespace System.Device.Ports.SerialPort
                 {
                     lock (this)
                     {
+                        _fileStream?.Dispose();
+                        _fileStream = null;
                         _portHandle.Close();
                         _portHandle = null;
                         _threadPoolBound?.Dispose();
@@ -321,6 +325,8 @@ namespace System.Device.Ports.SerialPort
                 }
                 else
                 {
+                    _fileStream?.Dispose();
+                    _fileStream = null;
                     _portHandle.Close();
                     _portHandle = null;
                     _threadPoolBound?.Dispose();
