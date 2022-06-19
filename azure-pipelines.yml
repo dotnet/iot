@@ -31,7 +31,7 @@ stages:
   - job: Windows_NT
     displayName: Windows Build
     pool:
-      vmImage: windows-2022
+      vmImage: windows-latest
 
     strategy:
       matrix:
@@ -47,7 +47,8 @@ stages:
       displayName: 'Execute Markdownlint'
       condition: eq(variables['build.reason'], 'PullRequest')
 
-    - script: build.cmd -ci /maxCpuCount:1
+      # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
+    - script: build.cmd -ci
         -configuration $(BuildConfiguration)
         -prepareMachine
         /p:BuildPackages=true
@@ -78,10 +79,6 @@ stages:
       inputs:
         sourceFolder: $(Build.SourcesDirectory)/artifacts/packages/$(BuildConfiguration)/Shipping
         targetFolder: $(Build.ArtifactStagingDirectory)/Packages
-
-    - task: PublishTestResults@2
-      inputs:
-        mergeTestResults: true
 
     - publish: $(Build.ArtifactStagingDirectory)/Packages
       displayName: Publish Build Artifacts
@@ -129,7 +126,7 @@ stages:
           BuildConfiguration: Debug
 
     steps:
-    - script: ./build.sh --ci /maxCpuCount:1
+    - script: ./build.sh --ci
         --configuration $(BuildConfiguration)
         --prepareMachine
       displayName: Build
