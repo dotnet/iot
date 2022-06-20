@@ -30,7 +30,7 @@ namespace Iot.Device.Board
             {
                 try
                 {
-                    using (var device = bus.CreateDevice(addr))
+                    using (I2cDevice device = bus.CreateDevice(addr))
                     {
                         device.ReadByte(); // Success means that this does not throw an exception
                         ret.Add(addr);
@@ -80,7 +80,7 @@ namespace Iot.Device.Board
             {
                 try
                 {
-                    using (var device = bus.CreateDevice(addr))
+                    using (I2cDevice device = bus.CreateDevice(addr))
                     {
                         device.ReadByte(); // Success means that this does not throw an exception
                         addresses.Add(addr);

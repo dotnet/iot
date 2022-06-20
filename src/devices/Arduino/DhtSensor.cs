@@ -35,7 +35,7 @@ namespace Iot.Device.Arduino
         /// <returns>True on success, false otherwise</returns>
         public bool TryReadDht(int pinNumber, int dhtType, out Temperature temperature, out RelativeHumidity humidity)
         {
-            var pinConfiguration = Board.SupportedPinConfigurations;
+            IReadOnlyList<SupportedPinConfiguration> pinConfiguration = Board.SupportedPinConfigurations;
             if (!pinConfiguration[pinNumber].PinModes.Contains(SupportedMode.Dht))
             {
                 temperature = default;
@@ -56,7 +56,7 @@ namespace Iot.Device.Arduino
             dhtCommandSequence.WriteByte((byte)dhtType);
             dhtCommandSequence.WriteByte((byte)pinNumber);
             dhtCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            var reply = SendCommandAndWait(dhtCommandSequence);
+            byte[] reply = SendCommandAndWait(dhtCommandSequence);
 
             // Command, pin number and 2x2 bytes data (+ END_SYSEX byte)
             if (reply.Length < 7)

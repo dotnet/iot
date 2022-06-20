@@ -41,7 +41,7 @@ namespace Iot.Device.Arduino
 
             Channel = channel;
             _pin = channel;
-            var caps = board.SupportedPinConfigurations.FirstOrDefault(x => x.Pin == _pin);
+            SupportedPinConfiguration? caps = board.SupportedPinConfigurations.FirstOrDefault(x => x.Pin == _pin);
             if (caps == null || !caps.PinModes.Contains(SupportedMode.Pwm))
             {
                 throw new NotSupportedException($"Pin {_pin} does not support PWM");

@@ -7,8 +7,8 @@
     <Configurations>Debug;Release</Configurations>
     <Copyright>The .NET Foundation</Copyright>
     <Company>The .NET Foundation</Company>
-	<EnableDefaultItems>false</EnableDefaultItems>
-	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <PropertyGroup>

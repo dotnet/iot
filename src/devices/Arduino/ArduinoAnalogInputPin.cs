@@ -54,7 +54,7 @@ namespace Iot.Device.Arduino
             if (_autoReportingReferenceCount > 0)
             {
                 int physicalPin = Controller.ConvertLogicalNumberingSchemeToPinNumber(pin);
-                var voltage = ConvertToVoltage(rawvalue);
+                ElectricPotential voltage = ConvertToVoltage(rawvalue);
                 var message = new ValueChangedEventArgs(rawvalue, voltage, physicalPin, TriggerReason.Timed);
                 FireValueChanged(message);
             }
