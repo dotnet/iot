@@ -4,6 +4,10 @@ REM First argument is the path to the user home directory (typically C:\Users\Vs
 REM Second argument is either "Debug" or "Release"
 if %1!==! goto :usage
 
+REM Defines the revision to check out in the ExtendedConfigurableFirmata repo
+set FIRMATA_SIMULATOR_CHECKOUT_REVISION=122ed75de8cb53e0dbd96cde71a7c9e21fe4be89
+set RUN_COMPILER_TESTS=FALSE
+
 choco install -y --no-progress arduino-cli
 arduino-cli lib install "DHT sensor library"
 arduino-cli lib install "Servo"
@@ -31,6 +35,9 @@ call "c:\program files\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsD
 
 pushd %ArduinoRootDir%\ExtendedConfigurableFirmata
 
+REM checkout to the currently fixed branch
+git checkout -B main %FIRMATA_SIMULATOR_CHECKOUT_REVISION%
+
 dir
 REM First build the code for the ESP32 (this just verifies that the code builds, it does no run-time checks at all)
 arduino-cli compile --fqbn esp32:esp32:esp32:PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none ./ExtendedConfigurableFirmata.ino --warnings default
@@ -49,6 +56,11 @@ pushd %~dp0\..\tools\ArduinoCsCompiler\
 REM and finally run the Arduino tests, now including the ones skipped previously. Set verbosity to normal to see 
 REM information about all tests being executed (as this test run can take 30 mins or more)
 dotnet test -c %2 --no-build --no-restore --filter feature=firmata -l "console;verbosity=normal" -maxcpucount:1
+
+if RUN_COMPILER_TESTS==TRUE (
+dotnet test -c %2 --no-build --no-restore --filter feature=firmata-compiler -l "console;verbosity=normal" -maxcpucount:1
+)
+
 if errorlevel 1 goto error
 
 popd

@@ -29,7 +29,7 @@ namespace Iot.Device.Arduino.Tests
     /// This class contains some larger examples for the Arduino compiler
     /// </summary>
     [Collection("SingleClientOnly")]
-    [Trait("feature", "firmata")]
+    [Trait("feature", "firmata-compiler")]
     [Trait("requires", "hardware")]
     public class MiniExamples : ArduinoTestBase, IClassFixture<FirmataTestFixture>
     {
