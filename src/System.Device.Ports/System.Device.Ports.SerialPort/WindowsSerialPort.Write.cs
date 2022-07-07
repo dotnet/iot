@@ -115,13 +115,7 @@ namespace System.Device.Ports.SerialPort
 
         public override void Write(byte[] array, int offset, int count)
         {
-            // Write(array, offset, count, WriteTimeout);
-            if (_fileStream == null)
-            {
-                throw new Exception(Strings.Port_not_open);
-            }
-
-            _fileStream.Write(array, offset, count);
+            Write(array, offset, count, WriteTimeout);
         }
 
         internal unsafe void Write(byte[] array, int offset, int count, int timeout)

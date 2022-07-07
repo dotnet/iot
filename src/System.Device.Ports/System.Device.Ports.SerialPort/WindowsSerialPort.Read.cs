@@ -127,13 +127,7 @@ namespace System.Device.Ports.SerialPort
 
         public override int Read(byte[] array, int offset, int count)
         {
-            // return Read(array, offset, count, ReadTimeout);
-            if (_fileStream == null)
-            {
-                throw new Exception(Strings.Port_not_open);
-            }
-
-            return _fileStream.Read(array, offset, count);
+            return Read(array, offset, count, ReadTimeout);
         }
 
         internal unsafe int Read(byte[] array, int offset, int count, int timeout)
