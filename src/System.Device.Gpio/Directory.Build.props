@@ -10,9 +10,5 @@
     <EnablePackageValidation>true</EnablePackageValidation>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageDownload Include="System.Device.Gpio" Version="[2.1.0]" />
-  </ItemGroup>
-
   <Import Project="..\..\Directory.Build.props" />
 </Project>

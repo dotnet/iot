@@ -9,9 +9,5 @@
     <PackageValidationBaselineVersion>2.1.0</PackageValidationBaselineVersion>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageDownload Include="Iot.Device.Bindings" Version="[2.1.0]" />
-  </ItemGroup>
-
   <Import Project="../../Directory.Build.props" />
 </Project>
