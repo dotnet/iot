@@ -1,12 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Runtime.InteropServices;
-using System.Device;
 using System.Device.Spi;
 using System.Device.I2c;
 using System.Device.Pwm;
@@ -15,7 +11,6 @@ using Iot.Device.Adc;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
 using Xunit;
-using UnitsNet;
 
 namespace System.Device.Gpio.Tests;
 
