@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
-using System.Threading.Tasks;
 using WinGpio = global::Windows.Devices.Gpio;
 
 namespace System.Device.Gpio.Drivers;

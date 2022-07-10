@@ -3,7 +3,6 @@
 
 using System.IO;
 using System.Text;
-using System.Threading;
 
 namespace System.Device.Pwm.Channels;
 
