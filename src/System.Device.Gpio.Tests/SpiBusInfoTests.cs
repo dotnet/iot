@@ -3,24 +3,22 @@
 
 using System.Device.Spi;
 using System.Runtime.InteropServices;
-
 using Xunit;
 
-namespace System.Device.Gpio.Tests
+namespace System.Device.Gpio.Tests;
+
+public class SpiBusInfoTests
 {
-    public class SpiBusInfoTests
+    [Fact]
+    public void VerifyBufferSize()
     {
-        [Fact]
-        public void VerifyBufferSize()
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-            {
-                Assert.True(SpiBusInfo.BufferSize > 0, "SpiBusInfo.BufferSize returned 0 or less");
-            }
-            else
-            {
-                Assert.Equal(-1, SpiBusInfo.BufferSize);
-            }
+            Assert.True(SpiBusInfo.BufferSize > 0, "SpiBusInfo.BufferSize returned 0 or less");
+        }
+        else
+        {
+            Assert.Equal(-1, SpiBusInfo.BufferSize);
         }
     }
 }

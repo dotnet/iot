@@ -5,7 +5,6 @@
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 #pragma warning disable SA1307 // Accessible fields should begin with upper-case letter
 
-using System;
 using System.Runtime.InteropServices;
 
 internal partial class Interop

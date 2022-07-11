@@ -3,24 +3,23 @@
 
 using System.Runtime.InteropServices;
 
-namespace System.Device.Gpio
+namespace System.Device.Gpio;
+
+/// <summary>
+/// Pointer to an iterator of all GPIO chips available on the device.
+/// </summary>
+internal class SafeChipIteratorHandle : SafeHandle
 {
-    /// <summary>
-    /// Pointer to an iterator of all GPIO chips available on the device.
-    /// </summary>
-    internal class SafeChipIteratorHandle : SafeHandle
+    public SafeChipIteratorHandle()
+        : base(IntPtr.Zero, true)
     {
-        public SafeChipIteratorHandle()
-            : base(IntPtr.Zero, true)
-        {
-        }
-
-        protected override bool ReleaseHandle()
-        {
-            Interop.libgpiod.gpiod_chip_iter_free(handle);
-            return true;
-        }
-
-        public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.libgpiod.InvalidHandleValue;
     }
+
+    protected override bool ReleaseHandle()
+    {
+        Interop.libgpiod.gpiod_chip_iter_free(handle);
+        return true;
+    }
+
+    public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.libgpiod.InvalidHandleValue;
 }
