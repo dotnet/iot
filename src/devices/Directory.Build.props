@@ -7,6 +7,7 @@
     <!-- Most projects should use this value to build for all possible target frameworks -->
     <DefaultBindingTfms>net6.0;netcoreapp3.1;netstandard2.0;</DefaultBindingTfms>
     <DefaultSampleTfms>net6.0</DefaultSampleTfms>
+    <DefaultTestsTfms>netcoreapp3.1</DefaultTestsTfms>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>
