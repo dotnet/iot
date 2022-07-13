@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+    <TargetFramework>$(DefaultTestsTfms)</TargetFramework>
     <Nullable>enable</Nullable>
 
     <IsPackable>false</IsPackable>

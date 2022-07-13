@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+    <TargetFramework>$(DefaultTestsTfms)</TargetFramework>
     <IsPackable>false</IsPackable>
     <LangVersion>latest</LangVersion>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
