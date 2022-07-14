@@ -141,6 +141,7 @@ public class RaspberryPi3Driver : GpioDriver
             RaspberryBoardInfo.Model.RaspberryPiZeroW or
             RaspberryBoardInfo.Model.RaspberryPiZero2W or
             RaspberryBoardInfo.Model.RaspberryPi4 or
+            RaspberryBoardInfo.Model.RaspberryPi400 or
             RaspberryBoardInfo.Model.RaspberryPiComputeModule4 => new RaspberryPi3LinuxDriver(),
             RaspberryBoardInfo.Model.RaspberryPiComputeModule3 => new RaspberryPiCm3Driver(),
             _ => null,
