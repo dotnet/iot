@@ -3,7 +3,12 @@
 
 using System.Runtime.InteropServices;
 
-namespace System.Device.Gpio
+namespace System.Device.Gpio;
+
+/// <summary>
+/// Pointer to a pin.
+/// </summary>
+internal class SafeLineHandle : SafeHandle
 {
     /// <summary>
     /// Pointer to a pin (Not a real SafeLineHandle, because we need to align its finalization with the owning object)
@@ -53,7 +58,6 @@ namespace System.Device.Gpio
             {
                 Interop.libgpiod.gpiod_line_release(_handle);
                 _handle = IntPtr.Zero;
-            }
         }
 
         public static implicit operator IntPtr(SafeLineHandle self)

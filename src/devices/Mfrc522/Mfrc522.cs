@@ -254,7 +254,7 @@ namespace Iot.Device.Mfrc522
                     break;
                 }
 
-                if (dtTimeout > DateTime.Now)
+                if (dtTimeout < DateTime.Now)
                 {
                     return false;
                 }

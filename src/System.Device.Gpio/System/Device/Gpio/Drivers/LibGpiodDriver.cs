@@ -7,15 +7,15 @@ using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-namespace System.Device.Gpio.Drivers
+namespace System.Device.Gpio.Drivers;
+
+/// <summary>
+/// This driver uses the Libgpiod library to get user-level access to the gpio ports.
+/// It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
+/// "sudo apt install -y libgpiod-dev".
+/// </summary>
+public class LibGpiodDriver : UnixDriver
 {
-    /// <summary>
-    /// This driver uses the Libgpiod library to get user-level access to the gpio ports.
-    /// It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
-    /// "sudo apt install -y libgpiod-dev".
-    /// </summary>
-    public class LibGpiodDriver : UnixDriver
-    {
         private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
         private readonly object _pinNumberLock;
         private readonly ConcurrentDictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
@@ -406,5 +406,4 @@ namespace System.Device.Gpio.Drivers
 
             base.Dispose(disposing);
         }
-    }
 }

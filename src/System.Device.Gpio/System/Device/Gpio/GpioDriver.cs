@@ -4,15 +4,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Device.Gpio
+namespace System.Device.Gpio;
+
+/// <summary>
+/// Base class for Gpio Drivers.
+/// A Gpio driver provides methods to read from and write to digital I/O pins.
+/// </summary>
+public abstract class GpioDriver : IDisposable
 {
     /// <summary>
-    /// Base class for Gpio Drivers.
-    /// A Gpio driver provides methods to read from and write to digital I/O pins.
-    /// </summary>
-    public abstract class GpioDriver : IDisposable
-    {
-        /// <summary>
         /// Finalizer to clean up unmanaged resources
         /// </summary>
         ~GpioDriver()
@@ -150,5 +150,4 @@ namespace System.Device.Gpio
         {
             // Nothing to do in base class.
         }
-    }
 }
