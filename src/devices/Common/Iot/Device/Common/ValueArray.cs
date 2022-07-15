@@ -126,37 +126,6 @@ namespace Iot.Device.Common
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
-#if NET5_0_OR_GREATER
-        /// <summary>
-        /// Returns a span pointing to this instance
-        /// </summary>
-        /// <returns>A span representing this instance</returns>
-        /// <remarks>
-        /// Due to a shortcoming of the Garbage collector, it is the caller's responsibility
-        /// to make sure the lifetime of the Span returned from this method is not longer
-        /// than the lifetime of the array. See also
-        /// https://github.com/dotnet/iot/issues/1886
-        /// </remarks>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> AsSpan()
-        {
-            return MemoryMarshal.CreateSpan(ref _e0, MaximumSize);
-        }
-#else
-        /// <summary>
-        /// Returns an array pointing to this instance.
-        /// Because the method MemoryMarshal.CreateSpan only exists in netstandard2.1 and above, we have to use a hack. Creating a span
-        /// using <see cref="Unsafe.AsPointer{T}"/> creates a GC hole, so instead we return a readonly list. That's always safe, even though
-        /// it defeats the purpose of Span.
-        /// </summary>
-        /// <returns>A pointer to a copy of the list (read-only)</returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public IReadOnlyList<T> AsSpan()
-        {
-            return this.ToList();
-        }
-#endif
-
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
         {
@@ -257,6 +226,8 @@ namespace Iot.Device.Common
             }
 
             int i = _count - 1;
+
+            _count++; // Increase count first, so we can access [i + 1]
             while (i >= index)
             {
                 this[i + 1] = this[i];
@@ -264,7 +235,6 @@ namespace Iot.Device.Common
             }
 
             this[index] = item;
-            _count++;
         }
 
         /// <inheritdoc />

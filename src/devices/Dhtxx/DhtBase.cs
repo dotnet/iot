@@ -80,7 +80,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 var buf = ReadData();
-                return IsLastReadSuccessful ? GetTemperature(buf.AsSpan()) : default(Temperature);
+                return IsLastReadSuccessful ? GetTemperature(buf) : default(Temperature);
             }
         }
 
@@ -96,7 +96,7 @@ namespace Iot.Device.DHTxx
             get
             {
                 var buf = ReadData();
-                return IsLastReadSuccessful ? GetHumidity(buf.AsSpan()) : default(RelativeHumidity);
+                return IsLastReadSuccessful ? GetHumidity(buf) : default(RelativeHumidity);
             }
         }
 
@@ -299,8 +299,10 @@ namespace Iot.Device.DHTxx
             // DHT12 Humidity Register
             _i2cDevice.WriteByte(0x00);
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum
-            _i2cDevice.Read(_readBuff.AsSpan());
+            Span<byte> b = stackalloc byte[5];
+            _i2cDevice.Read(b);
 
+            _readBuff = new ValueArray<byte>(b);
             _lastMeasurement = Environment.TickCount;
 
             if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
@@ -332,7 +334,7 @@ namespace Iot.Device.DHTxx
             var buf = ReadData();
             if (_isLastReadSuccessful)
             {
-                temperature = GetTemperature(buf.AsSpan());
+                temperature = GetTemperature(buf);
                 return true;
             }
 
@@ -355,7 +357,7 @@ namespace Iot.Device.DHTxx
             var buf = ReadData();
             if (_isLastReadSuccessful)
             {
-                humidity = GetHumidity(buf.AsSpan());
+                humidity = GetHumidity(buf);
                 return true;
             }
 
