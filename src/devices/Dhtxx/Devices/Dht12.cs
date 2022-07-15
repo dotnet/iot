@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using UnitsNet;
@@ -39,9 +40,9 @@ namespace Iot.Device.DHTxx
         {
         }
 
-        internal override RelativeHumidity GetHumidity(Span<byte> readBuff) => RelativeHumidity.FromPercent(readBuff[0] + readBuff[1] * 0.1);
+        internal override RelativeHumidity GetHumidity(IReadOnlyList<byte> readBuff) => RelativeHumidity.FromPercent(readBuff[0] + readBuff[1] * 0.1);
 
-        internal override Temperature GetTemperature(Span<byte> readBuff)
+        internal override Temperature GetTemperature(IReadOnlyList<byte> readBuff)
         {
             var temp = readBuff[2] + (readBuff[3] & 0x7F) * 0.1;
             // if MSB = 1 we have negative temperature

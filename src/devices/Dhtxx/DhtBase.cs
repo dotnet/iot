@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
@@ -366,14 +367,14 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Humidity</returns>
-        internal abstract RelativeHumidity GetHumidity(Span<byte> readBuff);
+        internal abstract RelativeHumidity GetHumidity(IReadOnlyList<byte> readBuff);
 
         /// <summary>
         /// Converting data to Temperature
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Temperature</returns>
-        internal abstract Temperature GetTemperature(Span<byte> readBuff);
+        internal abstract Temperature GetTemperature(IReadOnlyList<byte> readBuff);
 
         /// <inheritdoc/>
         public void Dispose()

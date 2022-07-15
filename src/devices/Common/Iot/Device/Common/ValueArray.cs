@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -66,6 +67,40 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
+        /// Constructs a new ValueArray with the contents of the given <see cref="IEnumerable{T}"/>
+        /// </summary>
+        /// <param name="copyFrom">The source list</param>
+        /// <exception cref="ArgumentNullException">The argument is null</exception>
+        /// <exception cref="InvalidOperationException">The input collection contains more than <see cref="MaximumSize"/> elements.</exception>
+        public ValueArray(IEnumerable<T> copyFrom)
+            : this(0)
+        {
+            if (copyFrom == null)
+            {
+                throw new ArgumentNullException(nameof(copyFrom));
+            }
+
+            foreach (var item in copyFrom)
+            {
+                Add(item);
+            }
+        }
+
+        /// <summary>
+        /// Constructs a new ValueArray with the contents of the given <see cref="Span{T}"/>
+        /// </summary>
+        /// <param name="copyFrom">The source list</param>
+        /// <exception cref="InvalidOperationException">The input collection contains more than <see cref="MaximumSize"/> elements.</exception>
+        public ValueArray(Span<T> copyFrom)
+            : this(0)
+        {
+            foreach (var item in copyFrom)
+            {
+                Add(item);
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the number of elements in the collection.
         /// Unlike for <see cref="List{T}"/>, this member is writable, to enable the behavior of <see cref="Array"/>
         /// </summary>
@@ -109,36 +144,18 @@ namespace Iot.Device.Common
         }
 #else
         /// <summary>
-        /// Returns a span pointing to this instance
+        /// Returns an array pointing to this instance.
+        /// Because the method MemoryMarshal.CreateSpan only exists in netstandard2.1 and above, we have to use a hack. Creating a span
+        /// using <see cref="Unsafe.AsPointer{T}"/> creates a GC hole, so instead we return a readonly list. That's always safe, even though
+        /// it defeats the purpose of Span.
         /// </summary>
-        /// <returns>A span representing this instance</returns>
+        /// <returns>A pointer to a copy of the list (read-only)</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#if !BUILDING_IOT_DEVICE_BINDINGS
-        public
-#else
-        internal
-#endif
-        unsafe Span<T> AsSpan()
+        public IReadOnlyList<T> AsSpan()
         {
-            return new Span<T>(Unsafe.AsPointer(ref _e0), _count);
+            return this.ToList();
         }
 #endif
-
-        /// <summary>
-        /// Returns the whole data store as span, including unoccupied elements
-        /// </summary>
-        private Span<T> AsSpanFull()
-        {
-#if NET5_0_OR_GREATER
-            return MemoryMarshal.CreateSpan(ref _e0, MaximumSize);
-#else
-            unsafe
-            {
-                // This is creating a GC memory hole on Netstandard2.0 and earlier, but since the method is private, nothing bad can happen here.
-                return new Span<T>(Unsafe.AsPointer(ref _e0), MaximumSize);
-            }
-#endif
-        }
 
         /// <inheritdoc />
         public IEnumerator<T> GetEnumerator()
@@ -187,10 +204,9 @@ namespace Iot.Device.Common
         /// <inheritdoc />
         public void CopyTo(T[] array, int arrayIndex)
         {
-            Span<T> self = AsSpan();
             for (var index = 0; index < Count; index++)
             {
-                array[arrayIndex++] = self[index];
+                array[arrayIndex++] = this[index];
             }
         }
 
@@ -210,10 +226,9 @@ namespace Iot.Device.Common
         /// <inheritdoc />
         public int IndexOf(T item)
         {
-            Span<T> self = AsSpan();
             for (var index = 0; index < Count; index++)
             {
-                if (item.Equals(self[index]))
+                if (item.Equals(this[index]))
                 {
                     return index;
                 }
@@ -242,10 +257,9 @@ namespace Iot.Device.Common
             }
 
             int i = _count - 1;
-            var self = AsSpanFull();
             while (i >= index)
             {
-                self[i + 1] = self[i];
+                this[i + 1] = this[i];
                 i--;
             }
 
@@ -262,10 +276,9 @@ namespace Iot.Device.Common
             }
 
             int i = index;
-            var self = AsSpan();
             while (i < _count - 1)
             {
-                self[i] = self[i + 1];
+                this[i] = this[i + 1];
                 i++;
             }
 
@@ -277,11 +290,43 @@ namespace Iot.Device.Common
         {
             get
             {
-                return AsSpan()[index];
+                if ((uint)index >= (uint)_count)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
+                return Unsafe.Add(ref _e0, index);
             }
+
             set
             {
-                AsSpan()[index] = value;
+                if ((uint)index >= (uint)_count)
+                {
+                    throw new IndexOutOfRangeException();
+                }
+
+                Unsafe.Add(ref _e0, index) = value;
+            }
+        }
+
+        /// <summary>
+        /// Get a pinnable reference to the first element of this array.
+        /// </summary>
+        /// <returns>A pinnable reference to the first element of the array</returns>
+        /// <example>
+        /// ValueArray{byte} _readbuf; // Member
+        /// //...
+        /// fixed (byte* pReadBuff = _readBuff)
+        /// {
+        ///    _i2cDevice.Read(_readBuff.AsSpan());
+        /// }
+        /// </example>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public unsafe ref T GetPinnableReference()
+        {
+            fixed (byte* p = &Unsafe.As<T, byte>(ref _e0))
+            {
+                return ref Unsafe.AsRef<T>(p);
             }
         }
 
