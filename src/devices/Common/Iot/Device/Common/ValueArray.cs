@@ -91,22 +91,53 @@ namespace Iot.Device.Common
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
+#if NET5_0_OR_GREATER
+        /// <summary>
+        /// Returns a span pointing to this instance
+        /// </summary>
+        /// <returns>A span representing this instance</returns>
+        /// <remarks>
+        /// Due to a shortcoming of the Garbage collector, it is the caller's responsibility
+        /// to make sure the lifetime of the Span returned from this method is not longer
+        /// than the lifetime of the array. See also
+        /// https://github.com/dotnet/iot/issues/1886
+        /// </remarks>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public Span<T> AsSpan()
+        {
+            return MemoryMarshal.CreateSpan(ref _e0, MaximumSize);
+        }
+#else
         /// <summary>
         /// Returns a span pointing to this instance
         /// </summary>
         /// <returns>A span representing this instance</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe Span<T> AsSpan()
+#if !BUILDING_IOT_DEVICE_BINDINGS
+        public
+#else
+        internal
+#endif
+        unsafe Span<T> AsSpan()
         {
             return new Span<T>(Unsafe.AsPointer(ref _e0), _count);
         }
+#endif
 
         /// <summary>
         /// Returns the whole data store as span, including unoccupied elements
         /// </summary>
-        private unsafe Span<T> AsSpanFull()
+        private Span<T> AsSpanFull()
         {
-            return new Span<T>(Unsafe.AsPointer(ref _e0), MaximumSize);
+#if NET5_0_OR_GREATER
+            return MemoryMarshal.CreateSpan(ref _e0, MaximumSize);
+#else
+            unsafe
+            {
+                // This is creating a GC memory hole on Netstandard2.0 and earlier, but since the method is private, nothing bad can happen here.
+                return new Span<T>(Unsafe.AsPointer(ref _e0), MaximumSize);
+            }
+#endif
         }
 
         /// <inheritdoc />

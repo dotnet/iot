@@ -40,6 +40,7 @@ namespace Iot.Device.Common.Tests
             Assert.Equal(0, _myArray[2]);
         }
 
+#if NET5_0_OR_GREATER
         [Fact]
         public void CanBeConvertedToSpan()
         {
@@ -53,6 +54,7 @@ namespace Iot.Device.Common.Tests
             span = _myArray.AsSpan();
             Assert.Equal(2, span[1]);
         }
+#endif
 
         [Fact]
         public void CanBeIteratedOver()
