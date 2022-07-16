@@ -58,14 +58,14 @@ namespace Iot.Device.DHTxx
             return new ValueArray<byte>(stackArray);
         }
 
-        internal override RelativeHumidity GetHumidity(IReadOnlyList<byte> readBuff)
+        internal override RelativeHumidity GetHumidity(ValueArray<byte> readBuff)
         {
             int raw = (((readBuff[1] << 8) | readBuff[2]) << 4) | readBuff[3] >> 4;
 
             return RelativeHumidity.FromPercent(100.0 * raw / Math.Pow(2, 20));
         }
 
-        internal override Temperature GetTemperature(IReadOnlyList<byte> readBuff)
+        internal override Temperature GetTemperature(ValueArray<byte> readBuff)
         {
             int raw = ((((readBuff[3] & 0b_0000_1111) << 8) | readBuff[4]) << 8) | readBuff[5];
 

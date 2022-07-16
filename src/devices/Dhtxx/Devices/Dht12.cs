@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
+using Iot.Device.Common;
 using UnitsNet;
 
 namespace Iot.Device.DHTxx
@@ -40,9 +41,9 @@ namespace Iot.Device.DHTxx
         {
         }
 
-        internal override RelativeHumidity GetHumidity(IReadOnlyList<byte> readBuff) => RelativeHumidity.FromPercent(readBuff[0] + readBuff[1] * 0.1);
+        internal override RelativeHumidity GetHumidity(ValueArray<byte> readBuff) => RelativeHumidity.FromPercent(readBuff[0] + readBuff[1] * 0.1);
 
-        internal override Temperature GetTemperature(IReadOnlyList<byte> readBuff)
+        internal override Temperature GetTemperature(ValueArray<byte> readBuff)
         {
             var temp = readBuff[2] + (readBuff[3] & 0x7F) * 0.1;
             // if MSB = 1 we have negative temperature
