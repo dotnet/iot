@@ -126,8 +126,18 @@ namespace Iot.Device.Common
         /// <inheritdoc />
         public bool IsReadOnly => false;
 
+        /// <summary>
+        /// Creates an enumerator for this instance.
+        /// To avoid a real allocation, the enumerator is returned directly.
+        /// </summary>
+        /// <returns>An instance of the value type <see cref="ValueArrayEnumerator"/>.</returns>
+        public ValueArrayEnumerator GetEnumerator()
+        {
+            return new ValueArrayEnumerator(this);
+        }
+
         /// <inheritdoc />
-        public IEnumerator<T> GetEnumerator()
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return new ValueArrayEnumerator(this);
         }
@@ -135,7 +145,7 @@ namespace Iot.Device.Common
         /// <inheritdoc />
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return GetEnumerator();
+            return new ValueArrayEnumerator(this);
         }
 
         /// <inheritdoc />
@@ -300,17 +310,22 @@ namespace Iot.Device.Common
             }
         }
 
-        private struct ValueArrayEnumerator : IEnumerator<T>, IEnumerator
+        /// <summary>
+        /// Enumerator for a <see cref="ValueArray{T}"/>
+        /// Exposed for performance reasons.
+        /// </summary>
+        public struct ValueArrayEnumerator : IEnumerator<T>, IEnumerator
         {
             private ValueArray<T> _array;
             private int _currentIndex;
 
-            public ValueArrayEnumerator(ValueArray<T> array)
+            internal ValueArrayEnumerator(ValueArray<T> array)
             {
                 _array = array;
                 _currentIndex = -1;
             }
 
+            /// <inheritdoc cref="IEnumerator.MoveNext"/>
             public bool MoveNext()
             {
                 _currentIndex++;
@@ -322,15 +337,18 @@ namespace Iot.Device.Common
                 return false;
             }
 
+            /// <inheritdoc cref="IEnumerator.Reset"/>
             public void Reset()
             {
                 _currentIndex = -1;
             }
 
+            /// <inheritdoc cref="IEnumerator{T}.Current"/>
             public T Current => _array[_currentIndex];
 
             object IEnumerator.Current => Current;
 
+            /// <inheritdoc />
             public void Dispose()
             {
             }
