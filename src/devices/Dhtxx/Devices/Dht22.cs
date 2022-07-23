@@ -26,9 +26,9 @@ namespace Iot.Device.DHTxx
         {
         }
 
-        internal override RelativeHumidity GetHumidity(ValueArray<byte> readBuff) => RelativeHumidity.FromPercent((readBuff[0] << 8 | readBuff[1]) * 0.1);
+        internal override RelativeHumidity GetHumidity(Span<byte> readBuff) => RelativeHumidity.FromPercent((readBuff[0] << 8 | readBuff[1]) * 0.1);
 
-        internal override Temperature GetTemperature(ValueArray<byte> readBuff)
+        internal override Temperature GetTemperature(Span<byte> readBuff)
         {
             var temp = ((readBuff[2] & 0x7F) << 8 | readBuff[3]) * 0.1;
             // if MSB = 1 we have negative temperature

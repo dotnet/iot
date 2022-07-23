@@ -21,12 +21,13 @@ namespace Iot.Device.DHTxx
     [Interface("Temperature and Humidity Sensor DHTxx")]
     public abstract class DhtBase : IDisposable
     {
+        private const int BufferSize = 5;
         private readonly CommunicationProtocol _protocol;
 
         /// <summary>
         /// Read buffer
         /// </summary>
-        private ValueArray<byte> _readBuff = new ValueArray<byte>(5);
+        private byte[] _readBuff = new byte[BufferSize];
 
         /// <summary>
         /// GPIO pin
@@ -153,9 +154,10 @@ namespace Iot.Device.DHTxx
         }
 
         /// <summary>
-        /// Start a reading
+        /// Read data from the sensor. Returns the last read value if the last read operation was too close.
         /// </summary>
-        internal virtual ValueArray<byte> ReadData()
+        /// <returns>The raw data last read</returns>
+        internal virtual byte[] ReadData()
         {
             // The time of two measurements should be more than 1s.
             if (Environment.TickCount - _lastMeasurement < MinTimeBetweenReads.Milliseconds)
@@ -165,18 +167,20 @@ namespace Iot.Device.DHTxx
 
             if (_protocol == CommunicationProtocol.OneWire)
             {
-                return ReadThroughOneWire();
+                _readBuff = ReadThroughOneWire();
             }
             else
             {
-                return ReadThroughI2c();
+                _readBuff = ReadThroughI2c();
             }
+
+            return _readBuff;
         }
 
         /// <summary>
         /// Read through One-Wire
         /// </summary>
-        internal virtual ValueArray<byte> ReadThroughOneWire()
+        internal virtual byte[] ReadThroughOneWire()
         {
             if (_controller is null)
             {
@@ -207,12 +211,13 @@ namespace Iot.Device.DHTxx
 
             // DHT corresponding signal - LOW - about 80 microseconds
             count = _loopCount;
+            byte[] newBuf = new byte[BufferSize];
             while (_controller.Read(_pin) == PinValue.Low)
             {
                 if (count-- == 0)
                 {
                     _isLastReadSuccessful = false;
-                    return default;
+                    return newBuf;
                 }
             }
 
@@ -223,7 +228,7 @@ namespace Iot.Device.DHTxx
                 if (count-- == 0)
                 {
                     _isLastReadSuccessful = false;
-                    return default;
+                    return newBuf;
                 }
             }
 
@@ -237,7 +242,7 @@ namespace Iot.Device.DHTxx
                     if (count-- == 0)
                     {
                         _isLastReadSuccessful = false;
-                        return default;
+                        return newBuf;
                     }
                 }
 
@@ -250,7 +255,7 @@ namespace Iot.Device.DHTxx
                     if (count-- == 0)
                     {
                         _isLastReadSuccessful = false;
-                        return default;
+                        return newBuf;
                     }
                 }
 
@@ -267,29 +272,28 @@ namespace Iot.Device.DHTxx
 
                 if (((i + 1) % 8) == 0)
                 {
-                    _readBuff[i / 8] = readVal;
+                    newBuf[i / 8] = readVal;
                 }
             }
 
             _lastMeasurement = Environment.TickCount;
 
-            if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
+            if ((newBuf[4] == ((newBuf[0] + newBuf[1] + newBuf[2] + newBuf[3]) & 0xFF)))
             {
-                _isLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
+                _isLastReadSuccessful = (newBuf[0] != 0) || (newBuf[2] != 0);
             }
             else
             {
                 _isLastReadSuccessful = false;
-                return default;
             }
 
-            return _readBuff;
+            return newBuf;
         }
 
         /// <summary>
         /// Read through I2C
         /// </summary>
-        internal virtual ValueArray<byte> ReadThroughI2c()
+        internal virtual byte[] ReadThroughI2c()
         {
             if (_i2cDevice is null)
             {
@@ -299,23 +303,21 @@ namespace Iot.Device.DHTxx
             // DHT12 Humidity Register
             _i2cDevice.WriteByte(0x00);
             // humidity int, humidity decimal, temperature int, temperature decimal, checksum
-            Span<byte> b = stackalloc byte[5];
-            _i2cDevice.Read(b);
+            byte[] newBuf = new byte[BufferSize];
+            _i2cDevice.Read(newBuf.AsSpan());
 
-            _readBuff = new ValueArray<byte>(b);
             _lastMeasurement = Environment.TickCount;
 
-            if ((_readBuff[4] == ((_readBuff[0] + _readBuff[1] + _readBuff[2] + _readBuff[3]) & 0xFF)))
+            if ((newBuf[4] == ((newBuf[0] + newBuf[1] + newBuf[2] + newBuf[3]) & 0xFF)))
             {
-                _isLastReadSuccessful = (_readBuff[0] != 0) || (_readBuff[2] != 0);
+                _isLastReadSuccessful = (newBuf[0] != 0) || (newBuf[2] != 0);
             }
             else
             {
                 _isLastReadSuccessful = false;
-                return default;
             }
 
-            return _readBuff;
+            return newBuf;
         }
 
         /// <summary>
@@ -369,14 +371,14 @@ namespace Iot.Device.DHTxx
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Humidity</returns>
-        internal abstract RelativeHumidity GetHumidity(ValueArray<byte> readBuff);
+        internal abstract RelativeHumidity GetHumidity(Span<byte> readBuff);
 
         /// <summary>
         /// Converting data to Temperature
         /// </summary>
         /// <param name="readBuff">Data</param>
         /// <returns>Temperature</returns>
-        internal abstract Temperature GetTemperature(ValueArray<byte> readBuff);
+        internal abstract Temperature GetTemperature(Span<byte> readBuff);
 
         /// <inheritdoc/>
         public void Dispose()

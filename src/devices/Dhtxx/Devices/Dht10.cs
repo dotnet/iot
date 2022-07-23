@@ -37,35 +37,34 @@ namespace Iot.Device.DHTxx
             i2cDevice.WriteByte(DHT10_CMD_INIT);
         }
 
-        internal override ValueArray<byte> ReadThroughI2c()
+        internal override byte[] ReadThroughI2c()
         {
             if (_i2cDevice is null)
             {
                 throw new Exception("I2C decvice not configured.");
             }
 
-            // DHT10 has no calibration bits
+            // DHT10 has no checksum bits
             _isLastReadSuccessful = true;
 
             _i2cDevice.WriteByte(DHT10_CMD_START);
             // make sure DHT10 ends measurement (in the datasheet P7)
             DelayHelper.DelayMilliseconds(75, true);
 
-            Span<byte> stackArray = stackalloc byte[6];
+            byte[] data = new byte[6];
+            _i2cDevice.Read(data.AsSpan());
 
-            _i2cDevice.Read(stackArray);
-
-            return new ValueArray<byte>(stackArray);
+            return data;
         }
 
-        internal override RelativeHumidity GetHumidity(ValueArray<byte> readBuff)
+        internal override RelativeHumidity GetHumidity(Span<byte> readBuff)
         {
             int raw = (((readBuff[1] << 8) | readBuff[2]) << 4) | readBuff[3] >> 4;
 
             return RelativeHumidity.FromPercent(100.0 * raw / Math.Pow(2, 20));
         }
 
-        internal override Temperature GetTemperature(ValueArray<byte> readBuff)
+        internal override Temperature GetTemperature(Span<byte> readBuff)
         {
             int raw = ((((readBuff[3] & 0b_0000_1111) << 8) | readBuff[4]) << 8) | readBuff[5];
 
