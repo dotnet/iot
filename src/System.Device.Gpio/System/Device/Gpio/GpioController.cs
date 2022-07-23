@@ -88,7 +88,7 @@ namespace System.Device.Gpio
         /// The driver attempts to open the pin without changing its mode or value.
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        public void OpenPin(int pinNumber)
+        public GpioPin OpenPin(int pinNumber)
         {
             if (IsPinOpen(pinNumber))
             {
@@ -97,6 +97,7 @@ namespace System.Device.Gpio
 
             OpenPinCore(pinNumber);
             _openPins.TryAdd(pinNumber, null);
+            return new GpioPin(pinNumber, this);
         }
 
         /// <summary>
@@ -114,10 +115,11 @@ namespace System.Device.Gpio
         /// </summary>
         /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
         /// <param name="mode">The mode to be set.</param>
-        public void OpenPin(int pinNumber, PinMode mode)
+        public GpioPin OpenPin(int pinNumber, PinMode mode)
         {
-            OpenPin(pinNumber);
+            var pin = OpenPin(pinNumber);
             SetPinMode(pinNumber, mode);
+            return pin;
         }
 
         /// <summary>
@@ -127,13 +129,14 @@ namespace System.Device.Gpio
         /// <param name="mode">The mode to be set.</param>
         /// <param name="initialValue">The initial value to be set if the mode is output. The driver will attempt to set the mode without causing glitches to the other value.
         /// (if <paramref name="initialValue"/> is <see cref="PinValue.High"/>, the pin should not glitch to low during open)</param>
-        public void OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
+        public GpioPin OpenPin(int pinNumber, PinMode mode, PinValue initialValue)
         {
-            OpenPin(pinNumber);
+            var pin = OpenPin(pinNumber);
             // Set the desired initial value
             _openPins[pinNumber] = initialValue;
 
             SetPinMode(pinNumber, mode);
+            return pin;
         }
 
         /// <summary>
