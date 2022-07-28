@@ -14,8 +14,29 @@ namespace System.Device.Ports.SerialPort
     /// The base Stream class implementing some properties and methods
     /// that are common for any serial port transport
     /// </summary>
-    public abstract class SerialStreamBase : Stream
+    public class SerialStream : Stream
     {
+        private byte[] _oneByteBuffer = new byte[1];
+
+        /// <summary>
+        /// The current serial port instance
+        /// </summary>
+        protected readonly SerialPort _serialPort;
+
+        /// <summary>
+        /// Creates a new instance of the stream managing the Serial Port reads and writes
+        /// </summary>
+        /// <param name="serialPort">A valid serial port instance</param>
+        public SerialStream(SerialPort serialPort)
+        {
+            if (serialPort == null)
+            {
+                throw new ArgumentNullException(nameof(serialPort));
+            }
+
+            _serialPort = serialPort;
+        }
+
         /// <summary>
         /// Returns false as serial communication is not seekable
         /// </summary>
@@ -27,14 +48,14 @@ namespace System.Device.Ports.SerialPort
         public override bool CanTimeout => true;
 
         /// <summary>
-        /// True if this stream can be read
+        /// True when the serial port is opened
         /// </summary>
-        public abstract override bool CanRead { get; }
+        public override bool CanRead => _serialPort.IsOpen;
 
         /// <summary>
-        /// True if this stream can be written
+        /// True when the serial port is closed
         /// </summary>
-        public abstract override bool CanWrite { get; }
+        public override bool CanWrite => _serialPort.IsOpen;
 
         /// <summary>
         /// This property throws because the serial port stream is not seekable
@@ -51,14 +72,32 @@ namespace System.Device.Ports.SerialPort
         }
 
         /// <summary>
-        /// This property should report the same ReadTimeout of the serial port
+        /// Gets or sets the number of milliseconds before a time-out occurs when a read operation does not finish.
         /// </summary>
-        public abstract override int ReadTimeout { get; set; }
+        public override int ReadTimeout
+        {
+            get => _serialPort.ReadTimeout;
+            set => _serialPort.ReadTimeout = value;
+        }
 
         /// <summary>
-        /// This property should report the same WriteTimeout of the serial port
+        /// Gets or sets the number of milliseconds before a time-out occurs when a write operation does not finish.
         /// </summary>
-        public abstract override int WriteTimeout { get; set; }
+        public override int WriteTimeout
+        {
+            get => _serialPort.WriteTimeout;
+            set => _serialPort.WriteTimeout = value;
+        }
+
+        /// <summary>
+        /// Gets the number of bytes of data in the receive buffer.
+        /// </summary>
+        public int BytesToRead => _serialPort.BytesToRead;
+
+        /// <summary>
+        /// Gets the number of bytes of data in the send buffer.
+        /// </summary>
+        public int BytesToWrite => _serialPort.BytesToWrite;
 
         /// <summary>
         /// This method throws because the serial port stream is not seekable
@@ -106,7 +145,9 @@ namespace System.Device.Ports.SerialPort
         public override int ReadByte()
         {
             // TODO: implement this and remove the call to the base
-            return base.ReadByte();
+            // return base.ReadByte();
+            _oneByteBuffer[0] = 0;
+            return _serialPort.Read(_oneByteBuffer, 0, 1);
         }
 
         /// <summary>
@@ -119,7 +160,8 @@ namespace System.Device.Ports.SerialPort
         public override int Read(byte[] buffer, int offset, int count)
         {
             // TODO: implement this and remove the call to the base
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
+            return _serialPort.Read(buffer, offset, count);
         }
 
         /// <summary>
@@ -129,7 +171,9 @@ namespace System.Device.Ports.SerialPort
         public override void WriteByte(byte value)
         {
             // TODO: implement this and remove the call to the base
-            base.WriteByte(value);
+            // base.WriteByte(value);
+            _oneByteBuffer[0] = value;
+            _serialPort.Write(_oneByteBuffer, 0, 1);
         }
 
         /// <summary>
@@ -141,7 +185,8 @@ namespace System.Device.Ports.SerialPort
         public override void Write(byte[] buffer, int offset, int count)
         {
             // TODO: implement this and remove the call to the base
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
+            _serialPort.Write(buffer, offset, count);
         }
 
         #region Can be entirely removed
@@ -272,7 +317,8 @@ namespace System.Device.Ports.SerialPort
         /// <exception cref="NotImplementedException"></exception>
         public override void Flush()
         {
-            throw new NotImplementedException();
+            // throw new NotImplementedException();
+            _serialPort.Flush();
         }
 
         /// <summary>

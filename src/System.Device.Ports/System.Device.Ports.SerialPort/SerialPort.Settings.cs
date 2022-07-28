@@ -38,18 +38,19 @@ namespace System.Device.Ports.SerialPort
 
         private const int MaxDataBitsNoParity = 9;
         private const int MinDataBits = 5;
-        private const int DefaultBaudRate = 9600;
-        private const Parity DefaultParity = Parity.None;
-        private const int DefaultDataBits = 8;
-        private const StopBits DefaultStopBits = StopBits.One;
-        private const Handshake DefaultHandshake = Handshake.None;
-        private const bool DefaultDtrEnable = false;
-        private const bool DefaultRtsEnable = false;
-        private const bool DefaultDiscardNull = false;
-        private const byte DefaultParityReplace = (byte)SerialPortCharacters.QuestionMark;
+
+        internal const int DefaultBaudRate = 9600;
+        internal const Parity DefaultParity = Parity.None;
+        internal const int DefaultDataBits = 8;
+        internal const StopBits DefaultStopBits = StopBits.One;
+        internal const Handshake DefaultHandshake = Handshake.None;
+        internal const bool DefaultDtrEnable = false;
+        internal const bool DefaultRtsEnable = false;
+        internal const bool DefaultDiscardNull = false;
+        internal const byte DefaultParityReplace = (byte)SerialPortCharacters.QuestionMark;
+        internal const int DefaultReadBufferSize = 4096;
+        internal const int DefaultWriteBufferSize = 2048;
         /*private const int DefaultBufferSize = 1024;*/
-        private const int DefaultReadBufferSize = 4096;
-        private const int DefaultWriteBufferSize = 2048;
 
         private const int DefaultReceivedBytesThreshold = 1;
         private const int DefaultReadTimeout = InfiniteTimeout;
@@ -62,9 +63,7 @@ namespace System.Device.Ports.SerialPort
         private bool _breakState;
         private bool _discardNull = DefaultDiscardNull;
         private bool _dtrEnable = DefaultDtrEnable;
-        private Encoding _encoding = Encoding.ASCII;
         private Handshake _handshake = DefaultHandshake;
-        private string _newLine = Environment.NewLine;
         private byte _parityReplace = DefaultParityReplace;
 
         /// <summary>
@@ -421,45 +420,6 @@ namespace System.Device.Ports.SerialPort
         protected internal abstract void SetDtrEnable(bool value);
 
         /// <summary>
-        /// Gets or sets the byte encoding for pre- and post-transmission conversion of text.
-        /// </summary>
-        public Encoding Encoding
-        {
-            get => _encoding;
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(Encoding));
-                }
-
-                if (value == _encoding)
-                {
-                    return;
-                }
-
-                /*
-                // Limit the encodings we support to some known ones.  The code pages < 50000 represent all of the single-byte
-                // and double-byte code pages.  Code page 54936 is GB18030.
-                if (!(value is ASCIIEncoding || value is UTF8Encoding || value is UnicodeEncoding || value is UTF32Encoding ||
-                      value.CodePage < 50000 || value.CodePage == 54936))
-                {
-                    throw new ArgumentException(SR.Format(SR.NotSupportedEncoding, value.WebName), nameof(Encoding));
-                }
-
-                _encoding = value;
-                _decoder = _encoding.GetDecoder();
-
-                // This is somewhat of an approximate guesstimate to get the max char[] size needed to encode a single character
-                _maxByteCountForSingleChar = _encoding.GetMaxByteCount(1);
-                _singleCharBuffer = null;
-                 */
-
-                _encoding = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the handshaking protocol for serial port transmission of data using a value from Handshake.
         /// </summary>
         public Handshake Handshake
@@ -498,33 +458,6 @@ namespace System.Device.Ports.SerialPort
         public bool IsOpen { get; protected set; }
 
         /// <summary>
-        /// Gets or sets the value used to interpret the end of a call to the ReadLine() and WriteLine(String) methods.
-        /// </summary>
-        public string NewLine
-        {
-            get => _newLine;
-            set
-            {
-                if (value == _newLine)
-                {
-                    return;
-                }
-
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(NewLine));
-                }
-
-                if (value.Length == 0)
-                {
-                    throw new ArgumentException(string.Format(Strings.EmptyString, nameof(NewLine)));
-                }
-
-                _newLine = value;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the byte that replaces invalid bytes in a data stream when a parity error occurs.
         /// </summary>
         public byte ParityReplace
@@ -553,7 +486,7 @@ namespace System.Device.Ports.SerialPort
         protected internal abstract void SetParityReplace(byte value);
 
         /// <summary>
-        /// Gets or sets the value used to interpret the end of a call to the ReadLine() and WriteLine(String) methods.
+        /// Gets or sets the port name
         /// </summary>
         public string PortName
         {

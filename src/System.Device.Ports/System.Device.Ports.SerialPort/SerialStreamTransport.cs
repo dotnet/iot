@@ -15,53 +15,18 @@ namespace System.Device.Ports.SerialPort
     /// The class that allows to exchange data through the serial port
     /// with no knowledge about the serial port details
     /// </summary>
-    public class SerialStreamTransport : SerialStreamBase, ISerialReader, ISerialWriter
+    public class SerialStreamTransport : SerialStream // , ISerialReader, ISerialWriter
     {
-        private readonly SerialPort _serialPort;
-
-        internal SerialStreamTransport(SerialPort serialPort)
+        /// <summary>
+        /// Creates a new instance of the stream managing the Serial Port reads and writes
+        /// </summary>
+        /// <param name="serialPort">A valid serial port instance</param>
+        public SerialStreamTransport(SerialPort serialPort)
+            : base(serialPort)
         {
-            _serialPort = serialPort;
         }
 
-        /// <summary>
-        /// Gets or sets the number of milliseconds before a time-out occurs when a read operation does not finish.
-        /// </summary>
-        public override int ReadTimeout
-        {
-            get => _serialPort.ReadTimeout;
-            set => _serialPort.ReadTimeout = value;
-        }
-
-        /// <summary>
-        /// Gets or sets the number of milliseconds before a time-out occurs when a write operation does not finish.
-        /// </summary>
-        public override int WriteTimeout
-        {
-            get => _serialPort.WriteTimeout;
-            set => _serialPort.WriteTimeout = value;
-        }
-
-        /// <summary>
-        /// True when the serial port is opened
-        /// </summary>
-        public override bool CanRead => _serialPort.IsOpen;
-
-        /// <summary>
-        /// True when the serial port is closed
-        /// </summary>
-        public override bool CanWrite => _serialPort.IsOpen;
-
-        /// <summary>
-        /// Gets the number of bytes of data in the receive buffer.
-        /// </summary>
-        public int BytesToRead => _serialPort.BytesToRead;
-
-        /// <summary>
-        /// Gets the number of bytes of data in the send buffer.
-        /// </summary>
-        public int BytesToWrite => _serialPort.BytesToWrite;
-
+        /*
         /// <summary>
         /// todo
         /// </summary>
@@ -140,5 +105,6 @@ namespace System.Device.Ports.SerialPort
         {
             throw new NotImplementedException();
         }
+        */
     }
 }
