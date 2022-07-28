@@ -27,7 +27,7 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// Indicates that no time-out should occur.
         /// </summary>
-        public const int InfiniteTimeout = -1;
+        public const int InfiniteTimeout = SerialPortDefaults.InfiniteTimeout;
 
         /// <summary>
         /// Indicates that no time-out should occur.
@@ -39,32 +39,15 @@ namespace System.Device.Ports.SerialPort
         private const int MaxDataBitsNoParity = 9;
         private const int MinDataBits = 5;
 
-        internal const int DefaultBaudRate = 9600;
-        internal const Parity DefaultParity = Parity.None;
-        internal const int DefaultDataBits = 8;
-        internal const StopBits DefaultStopBits = StopBits.One;
-        internal const Handshake DefaultHandshake = Handshake.None;
-        internal const bool DefaultDtrEnable = false;
-        internal const bool DefaultRtsEnable = false;
-        internal const bool DefaultDiscardNull = false;
-        internal const byte DefaultParityReplace = (byte)SerialPortCharacters.QuestionMark;
-        internal const int DefaultReadBufferSize = 4096;
-        internal const int DefaultWriteBufferSize = 2048;
-        /*private const int DefaultBufferSize = 1024;*/
-
-        private const int DefaultReceivedBytesThreshold = 1;
-        private const int DefaultReadTimeout = InfiniteTimeout;
-        private const int DefaultWriteTimeout = InfiniteTimeout;
-
         private int _baudRate;
         private Parity _parity;
         private int _dataBits;
         private StopBits _stopBits;
         private bool _breakState;
-        private bool _discardNull = DefaultDiscardNull;
-        private bool _dtrEnable = DefaultDtrEnable;
-        private Handshake _handshake = DefaultHandshake;
-        private byte _parityReplace = DefaultParityReplace;
+        private bool _discardNull = SerialPortDefaults.DefaultDiscardNull;
+        private bool _dtrEnable = SerialPortDefaults.DefaultDtrEnable;
+        private Handshake _handshake = SerialPortDefaults.DefaultHandshake;
+        private byte _parityReplace = SerialPortDefaults.DefaultParityReplace;
 
         /// <summary>
         /// The name of the serial port whose default value is platform dependent
@@ -75,13 +58,13 @@ namespace System.Device.Ports.SerialPort
         /// <summary>
         /// The field caching the value for the RTS enable flag
         /// </summary>
-        protected bool _rtsEnable = DefaultRtsEnable;
+        protected bool _rtsEnable = SerialPortDefaults.DefaultRtsEnable;
 
-        private int _readBufferSize = DefaultReadBufferSize;
-        private int _readTimeout = DefaultReadTimeout;
-        private int _receivedBytesThreshold = DefaultReceivedBytesThreshold;
-        private int _writeBufferSize = DefaultWriteBufferSize;
-        private int _writeTimeout = DefaultWriteTimeout;
+        private int _readBufferSize = SerialPortDefaults.DefaultReadBufferSize;
+        private int _readTimeout = SerialPortDefaults.DefaultReadTimeout;
+        private int _receivedBytesThreshold = SerialPortDefaults.DefaultReceivedBytesThreshold;
+        private int _writeBufferSize = SerialPortDefaults.DefaultWriteBufferSize;
+        private int _writeTimeout = SerialPortDefaults.DefaultWriteTimeout;
 
         /// <summary>
         /// The baud rate

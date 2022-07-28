@@ -34,10 +34,10 @@ namespace System.Device.Ports.SerialPort
         /// <param name="dataBits">The data bits in the [5,9] interval</param>
         /// <param name="stopBits">The stop bits</param>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public static SerialPort Create(int baudRate = DefaultBaudRate,
-            Parity parity = DefaultParity,
-            int dataBits = DefaultDataBits,
-            StopBits stopBits = DefaultStopBits)
+        public static SerialPort Create(int baudRate = SerialPortDefaults.DefaultBaudRate,
+            Parity parity = SerialPortDefaults.DefaultParity,
+            int dataBits = SerialPortDefaults.DefaultDataBits,
+            StopBits stopBits = SerialPortDefaults.DefaultStopBits)
         {
             SerialPort instance;
             if (OperatingSystem.IsWindows())

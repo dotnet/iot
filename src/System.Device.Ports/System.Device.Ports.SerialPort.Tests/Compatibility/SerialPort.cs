@@ -3,33 +3,25 @@
 
 using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Reflection.PortableExecutable;
 using System.Text;
-using System.Threading.Tasks;
-
-using SixLabors.ImageSharp.Memory;
 
 using SP = System.Device.Ports.SerialPort.SerialPort;
+using Defaults = System.Device.Ports.SerialPort.SerialPortDefaults;
 
-namespace System.Device.Ports.SerialPort.Compatibility
+namespace System.Device.Ports.SerialPort.Tests
 {
     /// <summary>
     /// A wrapper for the SerialPort class exposing the
     /// same members of System.IO.Ports.SerialPort
     /// </summary>
-    public class SerialPort : Component
+    internal class SerialPort : Component
     {
         private SP _serialPort;
         private SerialStream _serialStream;
         private StreamReader? _streamReader;
         private StreamWriter? _streamWriter;
-
-        private Encoding _encoding = Encoding.ASCII;
 
         /// <summary>
         /// The InfiniteTimeout constant
@@ -40,7 +32,7 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// The default constructor
         /// </summary>
         public SerialPort()
-            : this(String.Empty, SP.DefaultBaudRate, SP.DefaultParity, SP.DefaultDataBits, SP.DefaultStopBits)
+            : this(String.Empty, Defaults.DefaultBaudRate, Defaults.DefaultParity, Defaults.DefaultDataBits, Defaults.DefaultStopBits)
         {
         }
 
@@ -60,7 +52,7 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// </summary>
         /// <param name="portName">The name of the port</param>
         public SerialPort(string portName)
-            : this(portName, SP.DefaultBaudRate, SP.DefaultParity, SP.DefaultDataBits, SP.DefaultStopBits)
+            : this(portName, Defaults.DefaultBaudRate, Defaults.DefaultParity, Defaults.DefaultDataBits, Defaults.DefaultStopBits)
         {
         }
 
@@ -70,7 +62,7 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// <param name="portName">The name of the port</param>
         /// <param name="baudRate">The baud rate</param>
         public SerialPort(string portName, int baudRate)
-            : this(portName, baudRate, SP.DefaultParity, SP.DefaultDataBits, SP.DefaultStopBits)
+            : this(portName, baudRate, Defaults.DefaultParity, Defaults.DefaultDataBits, Defaults.DefaultStopBits)
         {
         }
 
@@ -81,7 +73,7 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// <param name="baudRate">The baud rate</param>
         /// <param name="parity">The parity</param>
         public SerialPort(string portName, int baudRate, Parity parity)
-            : this(portName, baudRate, parity, SP.DefaultDataBits, SP.DefaultStopBits)
+            : this(portName, baudRate, parity, Defaults.DefaultDataBits, Defaults.DefaultStopBits)
         {
         }
 
@@ -93,7 +85,7 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// <param name="parity">The parity</param>
         /// <param name="dataBits">The data bits in the [5,9] interval</param>
         public SerialPort(string portName, int baudRate, Parity parity, int dataBits)
-            : this(portName, baudRate, parity, dataBits, SP.DefaultStopBits)
+            : this(portName, baudRate, parity, dataBits, Defaults.DefaultStopBits)
         {
         }
 
@@ -255,40 +247,7 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// <summary>
         /// The encoding used for string or char based data
         /// </summary>
-        public Encoding Encoding
-        {
-            get
-            {
-                return _encoding;
-            }
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(Encoding));
-                }
-
-                /*
-                // Limit the encodings we support to some known ones.  The code pages < 50000 represent all of the single-byte
-                // and double-byte code pages.  Code page 54936 is GB18030.
-                if (!(value is ASCIIEncoding || value is UTF8Encoding || value is UnicodeEncoding || value is UTF32Encoding ||
-                      value.CodePage < 50000 || value.CodePage == 54936))
-                {
-                    throw new ArgumentException(SR.Format(SR.NotSupportedEncoding, value.WebName), nameof(Encoding));
-                }
-                */
-
-                _encoding = value;
-                /*
-                _decoder = _encoding.GetDecoder();
-
-                // This is somewhat of an approximate guesstimate to get the max char[] size needed to encode a single character
-                _maxByteCountForSingleChar = _encoding.GetMaxByteCount(1);
-                _singleCharBuffer = null;
-                */
-            }
-
-        }
+        public Encoding Encoding { get; set; } = Encoding.ASCII;
 
         /// <summary>
         /// Gets or sets the handshaking protocol for serial port transmission of data using a value from Handshake.
@@ -479,7 +438,7 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// <returns></returns>
         public string ReadExisting()
         {
-            var available = _serialPort.GetBytesToRead();
+            var available = _serialPort.BytesToRead;
             byte[] buffer = ArrayPool<byte>.Shared.Rent(available);
             try
             {
@@ -499,131 +458,11 @@ namespace System.Device.Ports.SerialPort.Compatibility
         /// <returns></returns>
         public string ReadLine() => Reader.ReadLine() ?? String.Empty;
 
-        /*
-        public string ReadTo(string value)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (value.Length == 0)
-            {
-                throw new ArgumentException(Strings.InvalidNullEmptyArgument, nameof(value));
-            }
-
-            int numCharsRead;
-            int timeUsed = 0;
-            int timeNow;
-            StringBuilder currentLine = new StringBuilder();
-            char lastValueChar = value[value.Length - 1];
-
-            // for timeout issues, best to read everything already on the stream into our buffers.
-            // first make sure inBuffer is big enough
-            int bytesInStream = _serialPort.GetBytesToRead();
-            MaybeResizeBuffer(bytesInStream);
-
-            _readLen += _internalSerialStream.Read(_inBuffer, _readLen, bytesInStream);
-
-            if (_singleCharBuffer == null)
-            {
-                // This is somewhat of an approximate guesstimate to get the max char[] size needed to encode a single character
-                _singleCharBuffer = new char[_maxByteCountForSingleChar];
-            }
-
-            try
-            {
-                while (true)
-                {
-                    if (_readTimeout == InfiniteTimeout)
-                    {
-                        numCharsRead = InternalRead(_singleCharBuffer, 0, 1, _readTimeout, true);
-                    }
-                    else if (_readTimeout - timeUsed >= 0)
-                    {
-                        timeNow = Environment.TickCount;
-                        numCharsRead = InternalRead(_singleCharBuffer, 0, 1, _readTimeout - timeUsed, true);
-                        timeUsed += Environment.TickCount - timeNow;
-                    }
-                    else
-                        throw new TimeoutException();
-
-#if DEBUG
-                    if (numCharsRead > 1)
-                    {
-                        for (int i = 0; i < numCharsRead; i++)
-                            Debug.Assert((char.IsSurrogate(_singleCharBuffer[i])), "number of chars read should be more than one only for surrogate characters!");
-                    }
-#endif
-                    Debug.Assert((numCharsRead > 0), "possible bug in ReadBufferIntoChars, reading surrogate char?");
-                    currentLine.Append(_singleCharBuffer, 0, numCharsRead);
-
-                    if (lastValueChar == (char)_singleCharBuffer[numCharsRead - 1] && (currentLine.Length >= value.Length))
-                    {
-                        // we found the last char in the value string.  See if the rest is there.  No need to
-                        // recompare the last char of the value string.
-                        bool found = true;
-                        for (int i = 2; i <= value.Length; i++)
-                        {
-                            if (value[value.Length - i] != currentLine[currentLine.Length - i])
-                            {
-                                found = false;
-                                break;
-                            }
-                        }
-
-                        if (found)
-                        {
-                            // we found the search string.  Exclude it from the return string.
-                            string ret = currentLine.ToString(0, currentLine.Length - value.Length);
-                            if (_readPos == _readLen)
-                                _readPos = _readLen = 0;
-                            return ret;
-                        }
-                    }
-                }
-            }
-            catch
-            {
-                // We probably got here due to timeout.
-                // We will try our best to restore the internal states, it's tricky!
-
-                // 0) Save any existing data
-                // 1) Restore readPos to the original position upon entering ReadTo
-                // 2) Set readLen to the number of bytes read since entering ReadTo
-                // 3) Restore inBuffer so that it contains the bytes from currentLine, resizing if necessary.
-                // 4) Append the buffer with any saved data from 0)
-
-                byte[] readBuffer = _encoding.GetBytes(currentLine.ToString());
-
-                // We will compact the data by default
-                if (readBuffer.Length > 0)
-                {
-                    int bytesToSave = CachedBytesToRead;
-                    byte[] savBuffer = new byte[bytesToSave];
-
-                    if (bytesToSave > 0)
-                        Buffer.BlockCopy(_inBuffer, _readPos, savBuffer, 0, bytesToSave);
-
-                    _readPos = 0;
-                    _readLen = 0;
-
-                    MaybeResizeBuffer(readBuffer.Length + bytesToSave);
-
-                    Buffer.BlockCopy(readBuffer, 0, _inBuffer, _readLen, readBuffer.Length);
-                    _readLen += readBuffer.Length;
-
-                    if (bytesToSave > 0)
-                    {
-                        Buffer.BlockCopy(savBuffer, 0, _inBuffer, _readLen, bytesToSave);
-                        _readLen += bytesToSave;
-                    }
-                }
-
-                throw;
-            }
-        }
-        */
+        /// <summary>
+        /// This API was not migrated and throws
+        /// </summary>
+        /// <exception cref="NotImplementedException"></exception>
+        public string ReadTo(string value) => throw new NotImplementedException();
 
         /// <summary>
         /// Writes a string to output using the current Encoding

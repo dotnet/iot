@@ -11,4 +11,14 @@
     <ProjectReference Include="..\System.Device.Ports.SerialPort\System.Device.Ports.SerialPort.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="../System.Device.Ports.SerialPort/SerialPortDefaults.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Compatibility\SerialPort.cs">
+      <SubType>Component</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>
