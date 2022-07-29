@@ -153,6 +153,13 @@ namespace System.Device.Ports.SerialPort
             return numBytes;
         }
 
+        /// <summary>
+        /// This method is currently not exposed because the
+        /// same strategy is exposed in the SerialStream class that
+        /// is valid for any platform-specific implementation
+        /// Should be this the final implementation, this method
+        /// can be removed
+        /// </summary>
         internal unsafe int ReadByte(int timeout)
         {
             if (_portHandle == null)
