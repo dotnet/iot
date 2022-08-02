@@ -23,6 +23,11 @@ git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\librar
 git clone https://github.com/pgrawehr/ExtendedConfigurableFirmata %ArduinoRootDir%\ExtendedConfigurableFirmata
 arduino-cli core install esp32:esp32
 
+REM Check whether any compiler files have changed - if so, enable the (long running) compiler tests
+git diff --name-status origin/main | find /C /I "tools/ArduinoCsCompiler"
+REM Find returns 1 when the string was NOT found, we want to set the variable to true when it does find something
+if %errorlevel%==0 set RUN_COMPILER_TESTS=TRUE
+
 dir %ArduinoRootDir%
 
 %acspath% --help
@@ -53,11 +58,16 @@ start ExtendedConfigurableFirmataSim\%2\ExtendedConfigurableFirmataSim.exe
 popd
 pushd %~dp0\..\tools\ArduinoCsCompiler\
 
+REM This somehow gets disabled
+echo on
 REM and finally run the Arduino tests, now including the ones skipped previously. Set verbosity to normal to see 
 REM information about all tests being executed (as this test run can take 30 mins or more)
+echo Starting basic arduino tests
 dotnet test -c %2 --no-build --no-restore --filter feature=firmata -l "console;verbosity=normal" -maxcpucount:1
 
-if RUN_COMPILER_TESTS==TRUE (
+echo on
+if %RUN_COMPILER_TESTS%==TRUE (
+echo Starting extended Arduino compiler tests
 dotnet test -c %2 --no-build --no-restore --filter feature=firmata-compiler -l "console;verbosity=normal" -maxcpucount:1
 )
 
