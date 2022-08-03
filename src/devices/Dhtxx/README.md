@@ -27,19 +27,20 @@ The DHT temperature and humidity sensors are very popular. This projects support
 // GPIO Pin
 using (Dht11 dht = new Dht11(26))
 {
-    var temperature = dht.Temperature;
-    var humidity = dht.Humidity;
+    Temperature temperature = default;
+    RelativeHumidity humidity = default;
+    bool success = dht.TryReadHumidity(out humidity) && dht.TryReadTemperature(out temperature);
     // You can only display temperature and humidity if the read is successful otherwise, this will raise an exception as
     // both temperature and humidity are NAN
-    if (dht.IsLastReadSuccessful)
+    if (success)
     {
-        Console.WriteLine($"Temperature: {temperature.DegreesCelsius} \u00B0C, Humidity: {humidity.Percent} %");
+        Console.WriteLine($"Temperature: {temperature.DegreesCelsius:F1}\u00B0C, Relative humidity: {humidity.Percent:F1}%");
 
         // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
         Console.WriteLine(
-            $"Heat index: {WeatherHelper.CalculateHeatIndex(temperature, humidity).Celsius:0.#}\u00B0C");
+            $"Heat index: {WeatherHelper.CalculateHeatIndex(temperature, humidity).DegreesCelsius:F1}\u00B0C");
         Console.WriteLine(
-            $"Dew point: {WeatherHelper.CalculateDewPoint(temperature, humidity).Celsius:0.#}\u00B0C");
+            $"Dew point: {WeatherHelper.CalculateDewPoint(temperature, humidity).DegreesCelsius:F1}\u00B0C");
     }
     else
     {
@@ -63,18 +64,20 @@ I2cDevice device = I2cDevice.Create(settings);
 
 using (Dht12 dht = new Dht12(device))
 {
-    var tempValue = dht.Temperature;
-    var humValue = dht.Humidity;
-    if (dht.IsLastReadSuccessful)
+    Temperature temperature = default;
+    RelativeHumidity humidity = default;
+    bool success = dht.TryReadHumidity(out humidity) && dht.TryReadTemperature(out temperature);
+    // You can only display temperature and humidity if the read is successful otherwise, this will raise an exception as
+    // both temperature and humidity are NAN
+    if (success)
     {
-        Console.WriteLine($"Temperature: {tempValue.Celsius:0.#}\u00B0C");
-        Console.WriteLine($"Relative humidity: {humValue:0.#}%");
+        Console.WriteLine($"Temperature: {temperature.DegreesCelsius:F1}\u00B0C, Relative humidity: {humidity.Percent:F1}%");
 
         // WeatherHelper supports more calculations, such as saturated vapor pressure, actual vapor pressure and absolute humidity.
         Console.WriteLine(
-            $"Heat index: {WeatherHelper.CalculateHeatIndex(tempValue, humValue).Celsius:0.#}\u00B0C");
+            $"Heat index: {WeatherHelper.CalculateHeatIndex(temperature, humidity).DegreesCelsius:F1}\u00B0C");
         Console.WriteLine(
-            $"Dew point: {WeatherHelper.CalculateDewPoint(tempValue, humValue).Celsius:0.#}\u00B0C");
+            $"Dew point: {WeatherHelper.CalculateDewPoint(temperature, humidity).DegreesCelsius:F1}\u00B0C");
     }
     else
     {
