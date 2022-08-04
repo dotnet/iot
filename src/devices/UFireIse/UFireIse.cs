@@ -59,7 +59,7 @@ namespace Iot.Device.UFire
         /// </summary>
         /// <param name="i2cDevice">The I2C device to be used</param>
         public UFireIse(I2cDevice i2cDevice) =>
-            _device = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _device = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
         /// <summary>
         /// Read a value from the ISE Probe Interface, typical measure are in the millivolt range.
@@ -116,7 +116,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+                throw new ArgumentOutOfRangeException(nameof(solution), "The value range is -1024 mV to 1024 mV");
             }
         }
 
@@ -135,7 +135,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+                throw new ArgumentOutOfRangeException(nameof(solution), "The value range is -1024 mV to 1024 mV");
             }
         }
 
@@ -154,7 +154,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV");
+                throw new ArgumentOutOfRangeException(nameof(solution), "The value range is -1024 mV to 1024 mV");
             }
         }
 
@@ -230,7 +230,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is -1024 mV to 1024 mV for refLow, refHigh, readLow and readLow");
+                throw new ArgumentOutOfRangeException(nameof(refLow), "The value range is -1024 mV to 1024 mV for refLow, refHigh, readLow and readLow");
             }
         }
 
@@ -247,7 +247,7 @@ namespace Iot.Device.UFire
             }
             else
             {
-                throw new ArgumentOutOfRangeException("The value range is 1 to 127");
+                throw new ArgumentOutOfRangeException(nameof(i2cAddress), "The value range is 1 to 127");
             }
 
             Dispose();

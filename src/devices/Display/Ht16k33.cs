@@ -139,7 +139,7 @@ namespace Iot.Device.Display
 
                 if (value > MaxBrightness)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Brightness), $"Brightness must be between 0 and {MaxBrightness}");
+                    throw new ArgumentOutOfRangeException(nameof(value), $"Brightness must be between 0 and {MaxBrightness}");
                 }
 
                 _brightness = value;
@@ -162,9 +162,9 @@ namespace Iot.Device.Display
                     return;
                 }
 
-                if (!Enum.IsDefined(typeof(BlinkRate), _blinkRate))
+                if (!Enum.IsDefined(typeof(BlinkRate), value))
                 {
-                    throw new ArgumentOutOfRangeException(nameof(_blinkRate));
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 _blinkRate = value;

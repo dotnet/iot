@@ -1,17 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A15390DB-F07B-4014-9840-5F792089E026}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seesaw.Sample.BlinkingLights", "samples\Seesaw.Sample.BlinkingLights.csproj", "{413D2811-7A97-44AC-9D82-099209920BBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.BlinkingLights", "samples\Seesaw.Sample.BlinkingLights.csproj", "{413D2811-7A97-44AC-9D82-099209920BBE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seesaw.Sample.Capabilities", "samples\Seesaw.Sample.Capabilities.csproj", "{5807BB95-184F-47CC-A8A4-63519079B525}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.Capabilities", "samples\Seesaw.Sample.Capabilities.csproj", "{5807BB95-184F-47CC-A8A4-63519079B525}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seesaw.Sample.SoilSensor", "samples\Seesaw.Sample.SoilSensor.csproj", "{164336C0-7E90-4082-B98D-0AEBB60717E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.SoilSensor", "samples\Seesaw.Sample.SoilSensor.csproj", "{164336C0-7E90-4082-B98D-0AEBB60717E3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seesaw", "Seesaw.csproj", "{F87E6203-1DA1-4648-9A1C-AB39C0CDE7E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw", "Seesaw.csproj", "{F87E6203-1DA1-4648-9A1C-AB39C0CDE7E7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.Encoder", "samples\Seesaw.Sample.Encoder.csproj", "{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +23,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{413D2811-7A97-44AC-9D82-099209920BBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -74,10 +73,29 @@ Global
 		{F87E6203-1DA1-4648-9A1C-AB39C0CDE7E7}.Release|x64.Build.0 = Release|Any CPU
 		{F87E6203-1DA1-4648-9A1C-AB39C0CDE7E7}.Release|x86.ActiveCfg = Release|Any CPU
 		{F87E6203-1DA1-4648-9A1C-AB39C0CDE7E7}.Release|x86.Build.0 = Release|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Debug|x64.Build.0 = Debug|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Debug|x86.Build.0 = Debug|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Release|x64.ActiveCfg = Release|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Release|x64.Build.0 = Release|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Release|x86.ActiveCfg = Release|Any CPU
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{413D2811-7A97-44AC-9D82-099209920BBE} = {A15390DB-F07B-4014-9840-5F792089E026}
 		{5807BB95-184F-47CC-A8A4-63519079B525} = {A15390DB-F07B-4014-9840-5F792089E026}
 		{164336C0-7E90-4082-B98D-0AEBB60717E3} = {A15390DB-F07B-4014-9840-5F792089E026}
+		{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA} = {A15390DB-F07B-4014-9840-5F792089E026}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FAE88427-BD54-45C3-B93A-0FCBC92E93F0}
 	EndGlobalSection
 EndGlobal

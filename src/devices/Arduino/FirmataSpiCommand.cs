@@ -12,5 +12,6 @@ namespace Iot.Device.Arduino
         SPI_READ = 0x04,
         SPI_REPLY = 0x05,
         SPI_END = 0x06,
+        SPI_WRITE_ACK = 0x07,
     }
 }

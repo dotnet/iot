@@ -93,7 +93,7 @@ namespace Iot.Device.Ssd13xx
 
             if (commandBytes is not { Length: >0 })
             {
-                throw new ArgumentException(nameof(command), "Argument is either null or there were no bytes to send.");
+                throw new ArgumentException("Argument is either null or there were no bytes to send.", nameof(command));
             }
 
             foreach (var item in commandBytes)

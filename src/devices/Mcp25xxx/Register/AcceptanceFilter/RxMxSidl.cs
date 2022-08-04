@@ -26,17 +26,17 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxMaskNumber > 1)
             {
-                throw new ArgumentException(nameof(rxMaskNumber), $"Invalid RX Mask Number value {rxMaskNumber}.");
+                throw new ArgumentException($"Invalid RX Mask Number value {rxMaskNumber}.", nameof(rxMaskNumber));
             }
 
             if (extendedIdentifierMask > 3)
             {
-                throw new ArgumentException(nameof(extendedIdentifierMask), $"Invalid EID value {extendedIdentifierMask}.");
+                throw new ArgumentException($"Invalid EID value {extendedIdentifierMask}.", nameof(extendedIdentifierMask));
             }
 
             if (standardIdentifierMask > 7)
             {
-                throw new ArgumentException(nameof(standardIdentifierMask), $"Invalid SID value {standardIdentifierMask}.");
+                throw new ArgumentException($"Invalid SID value {standardIdentifierMask}.", nameof(standardIdentifierMask));
             }
 
             RxMaskNumber = rxMaskNumber;
@@ -53,7 +53,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxMaskNumber > 1)
             {
-                throw new ArgumentException(nameof(rxMaskNumber), $"Invalid RX Mask Number value {rxMaskNumber}.");
+                throw new ArgumentException($"Invalid RX Mask Number value {rxMaskNumber}.", nameof(rxMaskNumber));
             }
 
             RxMaskNumber = rxMaskNumber;
@@ -94,7 +94,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             Address.RxM0Sidl => 0,
             Address.RxM1Sidl => 1,
-            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+            _ => throw new ArgumentException($"Invalid value: {address}.", nameof(address)),
         };
 
         /// <summary>

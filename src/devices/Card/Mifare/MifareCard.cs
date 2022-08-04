@@ -925,15 +925,15 @@ namespace Iot.Device.Card.Mifare
                     // Total blocks where we can write = 30 * 3 = 90
                     if (nbBlocks > 90)
                     {
-                        throw new ArgumentOutOfRangeException($"NNDEF message too large, maximum {90 * 16} bytes, current size is {nbBlocks * 16}");
+                        throw new ArgumentOutOfRangeException(nameof(message), $"NNDEF message too large, maximum {90 * 16} bytes, current size is {nbBlocks * 16}");
                     }
 
                     break;
                 case MifareCardCapacity.Mifare4K:
                     // Total blocks where we can write = 30 * 3 + 8 * 15 = 210
-                    if (nbBlocks > 213)
+                    if (nbBlocks > 210)
                     {
-                        throw new ArgumentOutOfRangeException($"NNDEF message too large, maximum {210 * 16} bytes, current size is {nbBlocks * 16}");
+                        throw new ArgumentOutOfRangeException(nameof(message), $"NNDEF message too large, maximum {210 * 16} bytes, current size is {nbBlocks * 16}");
                     }
 
                     break;
@@ -941,7 +941,7 @@ namespace Iot.Device.Card.Mifare
                     // Total blocks where we can write = 15 * 3 = 45
                     if (nbBlocks > 45)
                     {
-                        throw new ArgumentOutOfRangeException($"NNDEF message too large, maximum {45 * 16} bytes, current size is {nbBlocks * 16}");
+                        throw new ArgumentOutOfRangeException(nameof(message), $"NNDEF message too large, maximum {45 * 16} bytes, current size is {nbBlocks * 16}");
                     }
 
                     break;

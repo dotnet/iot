@@ -35,13 +35,13 @@ namespace Iot.Device.Multiplexing
         {
             if (pins.Length < 2)
             {
-                throw new ArgumentException(nameof(CharlieplexSegment), "2 or more pins must be provided.");
+                throw new ArgumentException("2 or more pins must be provided.", nameof(pins));
             }
 
             int charlieCount = (pins.Length * pins.Length) - pins.Length;
             if (nodeCount > charlieCount)
             {
-                throw new ArgumentException(nameof(CharlieplexSegment), $"Maximum count is {charlieCount} based on {pins.Length} pins. {nodeCount} was specified as the count.");
+                throw new ArgumentException($"Maximum count is {charlieCount} based on {pins.Length} pins. {nodeCount} was specified as the count.", nameof(nodeCount));
             }
 
             if (nodeCount == 0)

@@ -139,7 +139,7 @@ namespace Iot.Device.RadioReceiver
 
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(FrequencyRange), FrequencyRange, null);
+                    throw new InvalidOperationException($"Unsupported FrequencyRange {FrequencyRange}.");
             }
 
             int f = (int)((frequencyMhz * 1000000 + 225000) / 8192);

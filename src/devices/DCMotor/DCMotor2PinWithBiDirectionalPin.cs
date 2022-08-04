@@ -32,7 +32,7 @@ namespace Iot.Device.DCMotor
 
             if (_dirPin == -1)
             {
-                throw new ArgumentOutOfRangeException(nameof(_dirPin));
+                throw new ArgumentOutOfRangeException(nameof(dirpin));
             }
 
             Controller.OpenPin(_dirPin, PinMode.Output);

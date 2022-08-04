@@ -131,7 +131,7 @@ namespace Iot.Device.DistanceSensor
         {
             if (count < 2 || count > 254)
             {
-                throw new ArgumentOutOfRangeException("Count must be between 2 and 254");
+                throw new ArgumentOutOfRangeException(nameof(count), "Count must be between 2 and 254");
             }
 
             switch (measurementRepetition)
@@ -179,7 +179,7 @@ namespace Iot.Device.DistanceSensor
         {
             if ((address & 1) == 1)
             {
-                throw new ArgumentOutOfRangeException("Address must have 0-bit in the LSB.");
+                throw new ArgumentOutOfRangeException(nameof(address), "Address must have 0-bit in the LSB.");
             }
 
             // Read in the unit's serial number.

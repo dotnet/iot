@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using BuildHat.Models;
@@ -806,8 +807,27 @@ namespace Iot.Device.BuildHat
                 prompt = PortReadExisting();
 
                 // Load both files
-                byte[] firmware = Resource.firmware;
-                byte[] signature = Resource.signature;
+                var assembly = Assembly.GetExecutingAssembly();
+                string firmwareName = assembly.GetManifestResourceNames().Single(str => str.EndsWith("firmware.bin"));
+                string signatureName = assembly.GetManifestResourceNames().Single(str => str.EndsWith("signature.bin"));
+                // Similar to: byte[] firmware = Resource.firmware;
+                // But need to be more generic because of the way the building dll is built
+                byte[] firmware;
+                using (Stream stream = assembly.GetManifestResourceStream(firmwareName)!)
+                {
+                    firmware = new byte[stream.Length];
+                    stream.Read(firmware, 0, firmware.Length);
+                }
+
+                // Similar to: byte[] signature = Resource.signature;
+                // But need to be more generic because of the way the building dll is built
+                byte[] signature;
+                using (Stream stream = assembly.GetManifestResourceStream(signatureName)!)
+                {
+                    signature = new byte[stream.Length];
+                    stream.Read(signature, 0, signature.Length);
+                }
+
                 // Step 1: clear and get the prompt
                 PortWrite("clear\r");
                 prompt = PortReadLine();

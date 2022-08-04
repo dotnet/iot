@@ -201,7 +201,7 @@ namespace Iot.Device.Mcp3428
             }
             else
             {
-                if (channel > 0 && channel != LastChannel)
+                if (channel >= 0 && channel != LastChannel)
                 {
                     var conf = Helpers.SetChannelBits(LastConfigByte, channel);
                     WriteConfig(conf);

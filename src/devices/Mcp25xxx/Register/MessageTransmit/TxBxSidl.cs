@@ -31,17 +31,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value {txBufferNumber}.");
+                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
             }
 
             if (extendedIdentifier > 3)
             {
-                throw new ArgumentException(nameof(extendedIdentifier), $"Invalid EID value {extendedIdentifier}.");
+                throw new ArgumentException($"Invalid EID value {extendedIdentifier}.", nameof(extendedIdentifier));
             }
 
             if (standardIdentifier > 7)
             {
-                throw new ArgumentException(nameof(standardIdentifier), $"Invalid SID value {standardIdentifier}.");
+                throw new ArgumentException($"Invalid SID value {standardIdentifier}.", nameof(standardIdentifier));
             }
 
             TxBufferNumber = txBufferNumber;
@@ -59,7 +59,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value {txBufferNumber}.");
+                throw new ArgumentException($"Invalid TX Buffer Number value {txBufferNumber}.", nameof(txBufferNumber));
             }
 
             TxBufferNumber = txBufferNumber;
@@ -110,7 +110,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
             Address.TxB0Sidl => 0,
             Address.TxB1Sidl => 1,
             Address.TxB2Sidl => 2,
-            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+            _ => throw new ArgumentException($"Invalid value: {address}.", nameof(address)),
         };
 
         /// <summary>

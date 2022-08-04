@@ -93,7 +93,7 @@ namespace Iot.Device.Vl53L0X
         {
             if (newAddress > 0x7F)
             {
-                throw new ArgumentException(nameof(newAddress), "Value can't exceed 0x7F");
+                throw new ArgumentException("Value can't exceed 0x7F", nameof(newAddress));
             }
 
             try
@@ -1129,7 +1129,7 @@ namespace Iot.Device.Vl53L0X
         {
             if ((limitMcps < 0) || (limitMcps > 511.99))
             {
-                throw new ArgumentException(nameof(limitMcps), "Value can't be negative or greater than 511.99");
+                throw new ArgumentException("Value can't be negative or greater than 511.99", nameof(limitMcps));
             }
 
             // Q9.7 fixed point format (9 integer bits, 7 fractional bits)

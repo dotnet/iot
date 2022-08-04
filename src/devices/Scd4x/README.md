@@ -1,4 +1,3 @@
-<!-- markdownlint-disable MD033-->
 # SCD4x - CO<sub>2</sub>, Temperature & Humidity Sensor
 
 SCD4x is a CO<sub>2</sub>, temperature & humidity sensor from Sensirion. This project supports the SCD40 and SCD41 sensors.
