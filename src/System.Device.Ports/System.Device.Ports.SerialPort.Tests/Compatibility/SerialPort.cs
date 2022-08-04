@@ -29,6 +29,14 @@ namespace System.Device.Ports.SerialPort.Tests
         public const int InfiniteTimeout = -1;
 
         /// <summary>
+        /// Test purposes only
+        /// </summary>
+        public static string[] GetPortNames()
+        {
+            return new string[] { "COM1:" };
+        }
+
+        /// <summary>
         /// The default constructor
         /// </summary>
         public SerialPort()
@@ -51,7 +59,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// Creates a new instance of the serial port given one or more communication parameters.
         /// </summary>
         /// <param name="portName">The name of the port</param>
-        public SerialPort(string portName)
+        public SerialPort(string? portName)
             : this(portName, Defaults.DefaultBaudRate, Defaults.DefaultParity, Defaults.DefaultDataBits, Defaults.DefaultStopBits)
         {
         }
@@ -61,7 +69,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// </summary>
         /// <param name="portName">The name of the port</param>
         /// <param name="baudRate">The baud rate</param>
-        public SerialPort(string portName, int baudRate)
+        public SerialPort(string? portName, int baudRate)
             : this(portName, baudRate, Defaults.DefaultParity, Defaults.DefaultDataBits, Defaults.DefaultStopBits)
         {
         }
@@ -72,7 +80,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// <param name="portName">The name of the port</param>
         /// <param name="baudRate">The baud rate</param>
         /// <param name="parity">The parity</param>
-        public SerialPort(string portName, int baudRate, Parity parity)
+        public SerialPort(string? portName, int baudRate, Parity parity)
             : this(portName, baudRate, parity, Defaults.DefaultDataBits, Defaults.DefaultStopBits)
         {
         }
@@ -84,7 +92,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// <param name="baudRate">The baud rate</param>
         /// <param name="parity">The parity</param>
         /// <param name="dataBits">The data bits in the [5,9] interval</param>
-        public SerialPort(string portName, int baudRate, Parity parity, int dataBits)
+        public SerialPort(string? portName, int baudRate, Parity parity, int dataBits)
             : this(portName, baudRate, parity, dataBits, Defaults.DefaultStopBits)
         {
         }
@@ -97,7 +105,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// <param name="parity">The parity</param>
         /// <param name="dataBits">The data bits in the [5,9] interval</param>
         /// <param name="stopBits">The stop bits</param>
-        public SerialPort(string portName, int baudRate, Parity parity, int dataBits, StopBits stopBits)
+        public SerialPort(string? portName, int baudRate, Parity parity, int dataBits, StopBits stopBits)
         {
             _serialPort = SP.Create(baudRate, parity, dataBits, stopBits);
             if (!string.IsNullOrEmpty(portName))
