@@ -138,6 +138,24 @@ namespace Iot.Device.Seesaw
 
             /// <summary>Touch channel offset</summary>
             TouchChannelOffset = 0x10,
+
+            // encoder functions
+
+            /// <summary>Status</summary>
+            EncoderStatus = 0x00,
+
+            /// <summary>Enable encoder interrupt</summary>
+            EncoderIntenset = 0x10,
+
+            /// <summary>Clear encoder interrupt</summary>
+            EncoderIntenclr = 0x20,
+
+            /// <summary>Encoder position</summary>
+            EncoderPosition = 0x30,
+
+            /// <summary>Encoder position delta</summary>
+            EncoderDelta = 0x40
+
         }
     }
 }

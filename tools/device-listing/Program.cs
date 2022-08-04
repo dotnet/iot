@@ -15,6 +15,7 @@ string[] categoriesToDisplay = new string[]
     "dac",
     "accelerometer",
     "gas",
+    "gnss",
     "liquid",
     "light",
     "barometer",
@@ -49,6 +50,8 @@ string[] categoriesToDisplay = new string[]
     "multi",
     "protocol",
     "power",
+    "voc",
+    "thermocouple",
 };
 
 Dictionary<string, string?> categoriesDescriptions = new()
@@ -58,6 +61,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "accelerometer", "Accelerometers" },
     { "voc", "Volatile Organic Compound sensors" },
     { "gas", "Gas sensors" },
+    { "gnss", "GNSS Satellite receivers and navigation equipment" },
     { "liquid", "Liquid sensors" },
     { "light", "Light sensor" },
     { "barometer", "Barometers" },
@@ -116,6 +120,8 @@ HashSet<string> ignoredDeviceDirectories = new()
     "Common",
     "Units",
     "Interop",
+    "FtCommon",
+    "Shared",
 };
 
 string? repoRoot = FindRepoRoot(Environment.CurrentDirectory);

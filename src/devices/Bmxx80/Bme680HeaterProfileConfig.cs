@@ -37,7 +37,7 @@ namespace Iot.Device.Bmxx80
         {
             if (!Enum.IsDefined(typeof(Bme680HeaterProfile), profile))
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(profile));
             }
 
             HeaterProfile = profile;

@@ -39,12 +39,12 @@ namespace Iot.Device.SocketCan
         {
             if (!id.IsValid)
             {
-                throw new ArgumentException(nameof(id), "Id is not valid. Ensure Error flag is not set and that id is in the valid range (11-bit for standard frame and 29-bit for extended frame).");
+                throw new ArgumentException("Id is not valid. Ensure Error flag is not set and that id is in the valid range (11-bit for standard frame and 29-bit for extended frame).", nameof(id));
             }
 
             if (data.Length > CanFrame.MaxLength)
             {
-                throw new ArgumentException(nameof(data), $"Data length cannot exceed {CanFrame.MaxLength} bytes.");
+                throw new ArgumentException($"Data length cannot exceed {CanFrame.MaxLength} bytes.", nameof(data));
             }
 
             CanFrame frame = new CanFrame();
@@ -73,7 +73,7 @@ namespace Iot.Device.SocketCan
         {
             if (data.Length < CanFrame.MaxLength)
             {
-                throw new ArgumentException(nameof(data), $"Value must be a minimum of {CanFrame.MaxLength} bytes.");
+                throw new ArgumentException($"Value must be a minimum of {CanFrame.MaxLength} bytes.", nameof(data));
             }
 
             CanFrame frame = new CanFrame();
@@ -125,7 +125,7 @@ namespace Iot.Device.SocketCan
         {
             if (!id.IsValid)
             {
-                throw new ArgumentException(nameof(id), "Value must be a valid CanId");
+                throw new ArgumentException("Value must be a valid CanId", nameof(id));
             }
 
             Span<Interop.CanFilter> filters = stackalloc Interop.CanFilter[1];

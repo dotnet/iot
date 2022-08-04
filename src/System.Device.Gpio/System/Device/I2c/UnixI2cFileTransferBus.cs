@@ -4,39 +4,38 @@
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace System.Device.I2c
+namespace System.Device.I2c;
+
+internal class UnixI2cFileTransferBus : UnixI2cBus
 {
-    internal class UnixI2cFileTransferBus : UnixI2cBus
+    public UnixI2cFileTransferBus(int busFileDescriptor, int busId)
+        : base(busFileDescriptor, busId)
     {
-        public UnixI2cFileTransferBus(int busFileDescriptor, int busId)
-            : base(busFileDescriptor, busId)
+    }
+
+    protected override unsafe void WriteReadCore(ushort deviceAddress, byte* writeBuffer, byte* readBuffer, ushort writeBufferLength, ushort readBufferLength)
+    {
+        int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, deviceAddress);
+        if (result < 0)
         {
+            throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
         }
 
-        protected override unsafe void WriteReadCore(ushort deviceAddress, byte* writeBuffer, byte* readBuffer, ushort writeBufferLength, ushort readBufferLength)
+        if (writeBuffer != null)
         {
-            int result = Interop.ioctl(BusFileDescriptor, (uint)I2cSettings.I2C_SLAVE_FORCE, deviceAddress);
+            result = Interop.write(BusFileDescriptor, new IntPtr(writeBuffer), writeBufferLength);
             if (result < 0)
             {
                 throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
             }
+        }
 
-            if (writeBuffer != null)
+        if (readBuffer != null)
+        {
+            result = Interop.read(BusFileDescriptor, new IntPtr(readBuffer), readBufferLength);
+            if (result < 0)
             {
-                result = Interop.write(BusFileDescriptor, new IntPtr(writeBuffer), writeBufferLength);
-                if (result < 0)
-                {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
-                }
-            }
-
-            if (readBuffer != null)
-            {
-                result = Interop.read(BusFileDescriptor, new IntPtr(readBuffer), readBufferLength);
-                if (result < 0)
-                {
-                    throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
-                }
+                throw new IOException($"Error {Marshal.GetLastWin32Error()} performing I2C data transfer.");
             }
         }
     }

@@ -157,7 +157,7 @@ namespace Iot.Device.Display
 
             if (digits.Length + startAddress > MaxNumberOfDigits)
             {
-                throw new ArgumentOutOfRangeException($"{nameof(Large4Digit7SegmentDisplay)} only supports {MaxNumberOfDigits - startAddress} digits starting from address {startAddress}");
+                throw new ArgumentOutOfRangeException(nameof(digits), $"{nameof(Large4Digit7SegmentDisplay)} only supports {MaxNumberOfDigits - startAddress} digits starting from address {startAddress}");
             }
 
             foreach (byte digit in digits)
@@ -253,7 +253,7 @@ namespace Iot.Device.Display
                     value = " " + value[0] + value.Substring(2, 2);
                     break;
                 case 5 when value[2] != ':':
-                    throw new ArgumentException(nameof(value), $"{nameof(value)}[2] must be a ':'");
+                    throw new ArgumentException($"{nameof(value)}[2] must be a ':'", nameof(value));
                 case 5:
                     Dots |= Dot.CenterColon;
                     value = value.Substring(0, 2) + value.Substring(3, 2);

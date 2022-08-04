@@ -96,7 +96,7 @@ namespace Iot.Device.Bmxx80
             {
                 if (!Enum.IsDefined(typeof(Sampling), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_HUM);
@@ -126,7 +126,7 @@ namespace Iot.Device.Bmxx80
                 {
                     if (!Enum.IsDefined(typeof(Bme680HeaterProfile), value))
                     {
-                        throw new ArgumentOutOfRangeException();
+                        throw new ArgumentOutOfRangeException(nameof(value));
                     }
 
                     var heaterProfile = Read8BitsFromRegister((byte)Bme680Register.CTRL_GAS_1);
@@ -154,7 +154,7 @@ namespace Iot.Device.Bmxx80
             {
                 if (!Enum.IsDefined(typeof(Bme680FilteringMode), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var filter = Read8BitsFromRegister((byte)Bme680Register.CONFIG);
@@ -265,7 +265,7 @@ namespace Iot.Device.Bmxx80
         {
             if (!Enum.IsDefined(typeof(Bme680PowerMode), powerMode))
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(powerMode));
             }
 
             var status = Read8BitsFromRegister((byte)Bme680Register.CTRL_MEAS);
@@ -290,7 +290,7 @@ namespace Iot.Device.Bmxx80
         {
             if (!Enum.IsDefined(typeof(Bme680HeaterProfile), profile))
             {
-                throw new ArgumentOutOfRangeException();
+                throw new ArgumentOutOfRangeException(nameof(profile));
             }
 
             // read ambient temperature for resistance calculation

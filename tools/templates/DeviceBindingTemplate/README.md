@@ -10,6 +10,12 @@ Currently, there is no NuGet package available so the template folder must be st
 dotnet new -i C:\[PATH]\iot\tools\templates\DeviceBindingTemplate\dotnet_new_device-binding_csharp
 ```
 
+The template will now show up in the New Project Dialog as of Visual Studio 2022.
+
+**NOTE**: Make sure to check `Place solution and project in the same directory` in order for the file structure to be created correctly within the `iot\src\devices` directory.
+
+![image](https://user-images.githubusercontent.com/2956825/178381234-0d705376-941f-4999-90d3-6886e7f8c7c1.png)
+
 ## How to Uninstall
 
 The template can be uninstalled by using the following command where `PATH` is the directory path the template was stored.
@@ -36,13 +42,13 @@ iot/
   src/
     devices/
       Foo/
-        Foo.csproj
         Foo.cs
+        Foo.csproj        
         Foo.sln
         README.md
         samples/
-          Foo.Sample.csproj
           Foo.Sample.cs
+          Foo.Samples.csproj
         tests/   <--  Tests are optional
           Foo_Not_Required.Tests.csproj
           Foo.Tests.cs

@@ -16,6 +16,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [ADS1115 - Analog to Digital Converter](Ads1115/README.md)
+* [AXP192 - Enhanced single Cell Li-Battery and Power System Management IC](Axp192/README.md)
 * [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
 * [Mcp3428 - Analog to Digital Converter (I2C)](Mcp3428/README.md)
 * [MCP3xxx family of Analog to Digital Converters](Mcp3xxx/README.md)
@@ -32,6 +33,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [Mpu6886 - accelerometer and gyroscope](Mpu6886/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Gas sensors
@@ -39,8 +41,12 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [CCS811 Gas sensor](Ccs811/README.md)
-* [MH-Z19B CO<sub>2</sub> sensor](Mhz19b/README.md)
-* [SCD4x - CO<sub>2</sub>, humidity, temperature sensor](Scd4x/README.md)
+* [MH-Z19B CO2-Sensor](Mhz19b/README.md)
+* [SCD4x - CO<sub>2</sub>, Temperature & Humidity Sensor](Scd4x/README.md)
+
+### GNSS Satellite receivers and navigation equipment
+
+* [NMEA 0183 Protocol](Nmea0183/README.md)
 
 ### Liquid sensors
 
@@ -60,8 +66,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
-* [SCD4x - CO<sub>2</sub>, humidity, temperature sensor](Scd4x/README.md)
 * [LPS25H - Piezoresistive pressure and thermometer sensor](Lps25h/README.md)
+* [SCD4x - CO<sub>2</sub>, Temperature & Humidity Sensor](Scd4x/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SensorHub - Environmental sensor](SensorHub/README.md)
 
@@ -86,9 +92,9 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MLX90614 - Infra Red Thermometer](Mlx90614/README.md)
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
 * [OpenHardwareMonitor client library](HardwareMonitor/README.md)
+* [SCD4x - CO<sub>2</sub>, Temperature & Humidity Sensor](Scd4x/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SensorHub - Environmental sensor](SensorHub/README.md)
-* [SCD4x - CO<sub>2</sub>, humidity, temperature sensor](Scd4x/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
 * [SHT4x - Temperature & Humidity Sensor](Sht4x/README.md)
 * [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
@@ -105,6 +111,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
 * [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [Mpu6886 - accelerometer and gyroscope](Mpu6886/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Compasses
@@ -115,6 +122,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Lego related devices
 
 * [BrickPi3](BrickPi3/README.md)
+* [Raspberry Pi Build HAT](BuildHat/README.md)
 
 ### Motor controllers/drivers
 
@@ -134,6 +142,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Magnetometers
 
 * [AK8963 - Magnetometer](Ak8963/README.md)
+* [Bmm150 - Magnetometer](Bmm150/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
@@ -146,9 +155,11 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
+* [SCD4x - CO<sub>2</sub>, Temperature & Humidity Sensor](Scd4x/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [SensorHub - Environmental sensor](SensorHub/README.md)
 * [SHT3x - Temperature & Humidity Sensor](Sht3x/README.md)
+* [SHT4x - Temperature & Humidity Sensor](Sht4x/README.md)
 * [SHTC3 - Temperature & Humidity Sensor](Shtc3/README.md)
 * [Si7021 - Temperature & Humidity Sensor](Si7021/README.md)
 
@@ -179,15 +190,18 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
 * [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
+* [Holtek HT1632 - 32×8 & 24×16 LED Driver](Ht1632/README.md)
+* [Ili9341 TFT LCD Controller](Ili9341/README.md)
+* [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen](Pcd8544/README.md)
 * [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
 * [Segment display driver (HT16K33)](Display/README.md)
 * [Sense HAT](SenseHat/README.md)
-* [Solomon Systech Ssd1306 OLED display](Ssd13xx/README.md)
 * [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
+* [Solomon Systech SSD13xx OLED display family](Ssd13xx/README.md)
 * [TM1637 - Segment Display](Tm1637/README.md)
-* [Ws28xx LED drivers](Ws28xx/README.md)
+* [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
 
 ### GPIO Expanders
 
@@ -229,9 +243,10 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
 * [Explorer HAT Pro (Pimoroni)](ExplorerHat/README.md)
+* [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [On-board LED driver](BoardLed/README.md)
 * [Segment display driver (HT16K33)](Display/README.md)
-* [Ws28xx LED drivers](Ws28xx/README.md)
+* [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
 
 ### RFID/NFC modules
 
@@ -248,11 +263,14 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### USB devices
 
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
+* [SPI, GPIO and I2C drivers for FT232H](Ft232H/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP](StUsb4500/README.md)
 
 ### GPIO or bit operating devices
 
+* [AXP192 - Enhanced single Cell Li-Battery and Power System Management IC](Axp192/README.md)
+* [Button](Button/README.md)
 * [Charlieplex Segment binding](Charlieplex/README.md)
 * [Digital liquid level switch](LiquidLevel/README.md)
 * [Generic shift register](ShiftRegister/README.md)
@@ -261,6 +279,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
 * [Quadrature Rotary Encoder](RotaryEncoder/README.md)
 * [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
+* [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
 
 ### Multi-device or robot kit
 
@@ -276,17 +295,32 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Board abstraction](Board/README.md)
 * [GpioDriver for other boards](Gpio/README.md)
 * [MotorHat](MotorHat/README.md)
+* [NMEA 0183 Protocol](Nmea0183/README.md)
 * [Pca9685 - I2C PWM Driver](Pca9685/README.md)
 * [Software PWM](SoftPwm/README.md)
 * [Software SPI](SoftwareSpi/README.md)
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
+* [SPI, GPIO and I2C drivers for FT232H](Ft232H/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [System.Device.Model - attributes for device bindings](System.Device.Model/README.md)
 
 ### Power monitors and related devices
 
+* [AXP192 - Enhanced single Cell Li-Battery and Power System Management IC](Axp192/README.md)
 * [INA219 - Bidirectional Current/Power Monitor](Ina219/README.md)
+* [IP5306 - Power management](Ip5306/README.md)
 * [PiJuice - power supply for Raspberry Pi](PiJuice/README.md)
+
+### Volatile Organic Compound sensors
+
+* [AGS01DB - MEMS VOC Gas Sensor](Ags01db/README.md)
+* [BMxx80 Device Family](Bmxx80/README.md)
+* [CCS811 Gas sensor](Ccs811/README.md)
+
+### Thermocouple devices
+
+* [Max31856 - cold-junction compensated thermocouple to digital converter](Max31856/README.md)
+* [MCP960X - device family of cold-junction compensated thermocouple to digital converter](Mcp960x/README.md)
 
 </categorizedDevices>
 
@@ -308,7 +342,7 @@ Bindings must:
   * Best if you include a sample that covers usage of all available functions and properties
   * Best if you create mutliple paths to show what the sensor can do
 * use the System.Device API.
-* (*Optional*) Include a unit test project that **DOES NOT** require hardware for testing. We will be running these tests as part of our CI and we won't have sensors plugged in to the microcontrollers, which is why test projects should only contain unit tests for small components in your binding.
+* (*Optional*) Include a unit test project that **DOES NOT** require hardware for testing. We will be running these tests as part of our CI and we won't have sensors plugged in to the microcontrollers, which is why test projects should only contain unit tests for small components in your binding. Unit tests may simulate part of the device or use mocking. (Moq is automatically included as a reference to all unit test assemblies)
 
 Here is an example of a layout of a new Binding *Foo* from the top level of the repo:
 
@@ -320,10 +354,11 @@ iot/
         Foo.csproj
         Foo.cs
         README.md
+        Foo.sln  <-- Solution should include the project itself + the samples and test and optionally reference other highly coupled bindings
         samples/
           Foo.Sample.csproj
           Foo.Sample.cs
-        tests/   <--  Tests are optional, but if present they should be layed out like this.
+        tests/   <-- Tests are optional, but if present they should be layed out like this.
           Foo.Tests.csproj
           Foo.Tests.cs
 ```
@@ -462,3 +497,4 @@ public Dispose()
 We are currently not accepting samples that rely on native libraries for hardware interaction. This is for two reasons: we want feedback on the System.Device API and we want to encourage the use of 100% portable .NET solutions. If a native library is used to enable precise timing, please file an issue so that we can discuss your proposed contribution further.
 
 We will only accept samples that use the MIT or compatible licenses (BSD, Apache 2, ...). We will not accept samples that use GPL code or were based on an existing GPL implementation. It is critical that these samples can be used for commercial applications without any concern for licensing.
+
