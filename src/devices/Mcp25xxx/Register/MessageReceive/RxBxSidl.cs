@@ -42,17 +42,17 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             if (rxBufferNumber > 1)
             {
-                throw new ArgumentException(nameof(rxBufferNumber), $"Invalid RX Buffer Number value {rxBufferNumber}.");
+                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
             }
 
             if (extendedIdentifier > 3)
             {
-                throw new ArgumentException(nameof(extendedIdentifier), $"Invalid EID value {extendedIdentifier}.");
+                throw new ArgumentException($"Invalid EID value {extendedIdentifier}.", nameof(extendedIdentifier));
             }
 
             if (standardIdentifier > 7)
             {
-                throw new ArgumentException(nameof(standardIdentifier), $"Invalid SID value {standardIdentifier}.");
+                throw new ArgumentException($"Invalid SID value {standardIdentifier}.", nameof(standardIdentifier));
             }
 
             RxBufferNumber = rxBufferNumber;
@@ -71,7 +71,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             if (rxBufferNumber > 1)
             {
-                throw new ArgumentException(nameof(rxBufferNumber), $"Invalid RX Buffer Number value {rxBufferNumber}.");
+                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
             }
 
             RxBufferNumber = rxBufferNumber;
@@ -129,7 +129,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             Address.RxB0Sidl => 0,
             Address.RxB1Sidl => 1,
-            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+            _ => throw new ArgumentException($"Invalid value: {address}.", nameof(address)),
         };
 
         /// <summary>

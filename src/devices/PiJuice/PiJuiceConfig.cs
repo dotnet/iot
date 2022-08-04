@@ -176,7 +176,7 @@ namespace Iot.Device.PiJuiceDevice
 
             if ((response[0] & 0x07) < 0 || (response[0] & 0x07) > 3)
             {
-                throw new ArgumentOutOfRangeException("Battery temperature sensor configuration out of range");
+                throw new InvalidOperationException("Battery temperature sensor configuration out of range");
             }
 
             return (BatteryTemperatureSense)(response[0] & 0x07);
@@ -278,7 +278,7 @@ namespace Iot.Device.PiJuiceDevice
             int index = _usbMicroCurrentLimits.IndexOf(powerInput.UsbMicroCurrentLimit);
             if (index == -1)
             {
-                throw new ArgumentOutOfRangeException(nameof(powerInput.UsbMicroCurrentLimit));
+                throw new ArgumentOutOfRangeException(nameof(powerInput), $"Unsupported UsbMicroCurrentLimit {powerInput.UsbMicroCurrentLimit}.");
             }
 
             byte usbMicroLimit = (byte)(index << 3);
@@ -286,7 +286,7 @@ namespace Iot.Device.PiJuiceDevice
             index = _usbMicroDpm.IndexOf(powerInput.UsbMicroDynamicPowerManagement);
             if (index == -1)
             {
-                throw new ArgumentOutOfRangeException(nameof(powerInput.UsbMicroDynamicPowerManagement));
+                throw new ArgumentOutOfRangeException(nameof(powerInput), $"Unsupported UsbMicroDynamicPowerManagement {powerInput.UsbMicroDynamicPowerManagement}.");
             }
 
             byte usbMicroDPM = (byte)((index & 0x07) << 3);
@@ -308,7 +308,7 @@ namespace Iot.Device.PiJuiceDevice
 
             if (response[0] < 0 || response[0] > 2)
             {
-                throw new ArgumentOutOfRangeException("Led function type out of range");
+                throw new ArgumentOutOfRangeException(nameof(led), "Led function type out of range");
             }
 
             return new LedConfig(
@@ -356,7 +356,7 @@ namespace Iot.Device.PiJuiceDevice
 
             if (response[0] < 0 || response[0] > 1)
             {
-                throw new ArgumentOutOfRangeException("Run pin out of range.");
+                throw new InvalidOperationException("Run pin out of range.");
             }
 
             return (RunPin)response[0];

@@ -130,7 +130,7 @@ namespace Iot.Device.SocketCan
 
             if (name.Length >= MaxLen)
             {
-                throw new ArgumentException(nameof(name), $"Value exceeds maximum allowed length of {MaxLen} size.");
+                throw new ArgumentException($"Value exceeds maximum allowed length of {MaxLen} size.", nameof(name));
             }
 
             ifreq ifr = new ifreq();

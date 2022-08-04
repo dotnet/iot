@@ -17,8 +17,8 @@ SpiConnectionSettings connection = new(0, 1);
 // Here you can use as well MfRc522.MaximumSpiClockFrequency which is 10_000_000
 // Anything lower will work as well
 connection.ClockFrequency = 5_000_000;
-SpiDevice spi = SpiDevice.Create(connection)
-mfrc522 = new(spi, 4);
+SpiDevice spi = SpiDevice.Create(connection);
+MfRc522? mfrc522 = new(spi, 4);
 ```
 
 The code will create an instance of MFRC522 and will use the pin GPIO4 as the hardware rest pin and will create an GpioController automatically from the default driver. The [samples](./samples) folder have more advance setup using for example an [FT4222](../Ft4222) dongle as a SPI controller.

@@ -4,6 +4,6 @@
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Mpu9250.csproj" />
+    <ProjectReference Include="..\..\Mpu6xxx9xxx.csproj" />
   </ItemGroup>
 </Project>

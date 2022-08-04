@@ -22,7 +22,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxMaskNumber > 1)
             {
-                throw new ArgumentException(nameof(rxMaskNumber), $"Invalid RX Mask Number value {rxMaskNumber}.");
+                throw new ArgumentException($"Invalid RX Mask Number value {rxMaskNumber}.", nameof(rxMaskNumber));
             }
 
             RxMaskNumber = rxMaskNumber;
@@ -56,7 +56,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             Address.RxM0Sidh => 0,
             Address.RxM1Sidh => 1,
-            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+            _ => throw new ArgumentException($"Invalid value: {address}.", nameof(address)),
         };
 
         /// <summary>

@@ -316,19 +316,17 @@ namespace Iot.Device.Max7219
         {
             if (buffer.Rank != 2)
             {
-                throw new ArgumentException(nameof(buffer), $"buffer must be two dimensional.");
+                throw new ArgumentException($"buffer must be two dimensional.", nameof(buffer));
             }
 
             if (buffer.GetUpperBound(0) != CascadedDevices - 1)
             {
-                throw new ArgumentException(nameof(buffer),
-                    $"buffer upper bound ({buffer.GetUpperBound(0)}) for dimension 0 must be {CascadedDevices - 1}.");
+                throw new ArgumentException($"buffer upper bound ({buffer.GetUpperBound(0)}) for dimension 0 must be {CascadedDevices - 1}.", nameof(buffer));
             }
 
             if (buffer.GetUpperBound(1) != NumDigits - 1)
             {
-                throw new ArgumentException(nameof(buffer),
-                    $"buffer upper bound ({buffer.GetUpperBound(1)}) for dimension 1 must be {NumDigits - 1}.");
+                throw new ArgumentException($"buffer upper bound ({buffer.GetUpperBound(1)}) for dimension 1 must be {NumDigits - 1}.", nameof(buffer));
             }
         }
 

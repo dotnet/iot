@@ -20,12 +20,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageTransmit
         {
             if (txBufferNumber > 2)
             {
-                throw new ArgumentException(nameof(txBufferNumber), $"Invalid TX Buffer Number value: {txBufferNumber}.");
+                throw new ArgumentException($"Invalid TX Buffer Number value: {txBufferNumber}.", nameof(txBufferNumber));
             }
 
             if (index > 7)
             {
-                throw new ArgumentException(nameof(index), $"Invalid Index value: {index}.");
+                throw new ArgumentException($"Invalid Index value: {index}.", nameof(index));
             }
 
             TxBufferNumber = txBufferNumber;

@@ -42,7 +42,7 @@ namespace Iot.Device.Mhz19b
         {
             if (uartDevice is not { Length: > 0 })
             {
-                throw new ArgumentException(nameof(uartDevice));
+                throw new ArgumentException($"{nameof(uartDevice)} can't be null or empty.", nameof(uartDevice));
             }
 
             // create serial port using the setting acc. to datasheet, pg. 7, sec. general settings

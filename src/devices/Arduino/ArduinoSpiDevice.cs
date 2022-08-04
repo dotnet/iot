@@ -50,7 +50,7 @@ namespace Iot.Device.Arduino
 
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            Board.Firmata.SpiWrite(ConnectionSettings.ChipSelectLine, buffer);
+            Board.Firmata.SpiWrite(ConnectionSettings.ChipSelectLine, buffer, !Board.StreamUsesHardwareFlowControl);
         }
 
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)

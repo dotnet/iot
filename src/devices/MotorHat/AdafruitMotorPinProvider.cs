@@ -22,7 +22,7 @@ namespace Iot.Device.MotorHat
                 2 => new MotorPins(13, 12, 11),
                 3 => new MotorPins(2, 3, 4),
                 4 => new MotorPins(7, 6, 5),
-                _ => throw new ArgumentException(nameof(index), $"MotorHat Motor must be between 1 and 4 inclusive. {nameof(index)}: {index}")
+                _ => throw new ArgumentException($"MotorHat Motor must be between 1 and 4 inclusive. {nameof(index)}: {index}", nameof(index))
             };
         }
     }

@@ -31,17 +31,17 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxFilterNumber > 5)
             {
-                throw new ArgumentException(nameof(rxFilterNumber), $"Invalid RX Filter Number value {rxFilterNumber}.");
+                throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
             }
 
             if (extendedIdentifierFilter > 3)
             {
-                throw new ArgumentException(nameof(extendedIdentifierFilter), $"Invalid EID value {extendedIdentifierFilter}.");
+                throw new ArgumentException($"Invalid EID value {extendedIdentifierFilter}.", nameof(extendedIdentifierFilter));
             }
 
             if (standardIdentifierFilter > 7)
             {
-                throw new ArgumentException(nameof(standardIdentifierFilter), $"Invalid SID value {standardIdentifierFilter}.");
+                throw new ArgumentException($"Invalid SID value {standardIdentifierFilter}.", nameof(standardIdentifierFilter));
             }
 
             RxFilterNumber = rxFilterNumber;
@@ -59,7 +59,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxFilterNumber > 5)
             {
-                throw new ArgumentException(nameof(rxFilterNumber), $"Invalid RX Filter Number value {rxFilterNumber}.");
+                throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
             }
 
             RxFilterNumber = rxFilterNumber;
@@ -116,7 +116,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             Address.RxF3Sidl => 3,
             Address.RxF4Sidl => 4,
             Address.RxF5Sidl => 5,
-            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+            _ => throw new ArgumentException($"Invalid value: {address}.", nameof(address)),
         };
 
         /// <summary>

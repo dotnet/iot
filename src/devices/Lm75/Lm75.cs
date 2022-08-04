@@ -53,7 +53,7 @@ namespace Iot.Device.Lm75
         /// <param name="i2cDevice">The I2C device used for communication.</param>
         public Lm75(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             Disabled = false;
         }
 
