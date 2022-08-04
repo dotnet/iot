@@ -28,16 +28,15 @@ foreach (Channels channel in Tca9548A.DeviceChannels)
     {
         Console.WriteLine(selectedChannel);
     }
-}
+}x`
 
 ```
 
-
-## TCA9546A - Low Voltage 4-Channel I2C 
+## TCA9546A - Low Voltage 4-Channel I2C
 
 TCA9546A [datasheet](https://www.ti.com/lit/ds/symlink/tca9546a.pdf)
 
-You can use the same class to control the 4-Channel Multiplexer also
+You can use the same class to control the 4-Channel Multiplexer also.
 
 ### Sample wiring
 
