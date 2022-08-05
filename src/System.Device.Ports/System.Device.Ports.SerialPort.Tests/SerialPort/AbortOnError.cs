@@ -55,7 +55,7 @@ namespace System.Device.Ports.SerialPort.Tests
             return flagValue != 0;
         }
 
-        private void SetAbortOnError(string port)
+        private void SetAbortOnError(string? port)
         {
             using (SerialPort com = new SerialPort(port))
             {

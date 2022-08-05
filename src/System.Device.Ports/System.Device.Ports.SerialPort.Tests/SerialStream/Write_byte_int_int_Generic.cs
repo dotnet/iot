@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
+using System.IO;
 using System.IO.PortsTests;
 using System.Text;
 using System.Threading;
@@ -14,6 +15,8 @@ namespace System.Device.Ports.SerialPort.Tests
 {
     public class SerialStream_Write_byte_int_int_Generic : PortsTest
     {
+        private const int NUM_TRYS = 5;
+
         // Set bounds fore random timeout values.
         // If the min is to low write will not timeout accurately and the testcase will fail
         private const int MinRandomTimeout = 250;
@@ -37,8 +40,6 @@ namespace System.Device.Ports.SerialPort.Tests
 
         // The bytes size used when veryifying Handshake
         private static readonly int s_BYTE_SIZE_HANDSHAKE = TCSupport.MinimumBlockingByteCount;
-
-        private const int NUM_TRYS = 5;
 
         #region Test Cases
 
@@ -79,9 +80,9 @@ namespace System.Device.Ports.SerialPort.Tests
             using (var com2 = new SerialPort(TCSupport.LocalMachineSerialInfo.SecondAvailablePortName))
             {
                 var rndGen = new Random(-55);
-                var XOffBuffer = new byte[1];
+                var xOffBuffer = new byte[1];
 
-                XOffBuffer[0] = 19;
+                xOffBuffer[0] = 19;
 
                 com1.WriteTimeout = rndGen.Next(MinRandomTimeout, MaxRandomTimeout);
                 com1.Handshake = Handshake.XOnXOff;
@@ -91,7 +92,7 @@ namespace System.Device.Ports.SerialPort.Tests
                 com1.Open();
                 com2.Open();
 
-                com2.BaseStream.Write(XOffBuffer, 0, 1);
+                com2.BaseStream.Write(xOffBuffer, 0, 1);
                 Thread.Sleep(250);
                 com2.Close();
 
@@ -109,7 +110,7 @@ namespace System.Device.Ports.SerialPort.Tests
 
                 com.WriteTimeout = rndGen.Next(MinRandomTimeout, MaxRandomTimeout);
                 com.Handshake = Handshake.RequestToSendXOnXOff;
-                //  com.Encoding = new System.Text.UTF7Encoding();
+                // com.Encoding = new System.Text.UTF7Encoding();
                 com.Encoding = Encoding.Unicode;
 
                 Debug.WriteLine("Verifying WriteTimeout={0} with successive call to write method", com.WriteTimeout);
@@ -279,13 +280,14 @@ namespace System.Device.Ports.SerialPort.Tests
                         com2.RtsEnable = true;
 
                         while (!_stop)
+                        {
                             Monitor.Wait(this);
+                        }
 
                         com2.RtsEnable = false;
                     }
                 }
             }
-
 
             public void Stop()
             {
@@ -302,13 +304,11 @@ namespace System.Device.Ports.SerialPort.Tests
             private readonly SerialPort _com;
             private readonly int _byteLength;
 
-
             public AsyncWriteRndByteArray(SerialPort com, int byteLength)
             {
                 _com = com;
                 _byteLength = byteLength;
             }
-
 
             public void WriteRndByteArray()
             {
@@ -345,7 +345,6 @@ namespace System.Device.Ports.SerialPort.Tests
             var timer = new Stopwatch();
             int expectedTime = com.WriteTimeout;
             var actualTime = 0;
-
 
             try
             {
@@ -385,7 +384,6 @@ namespace System.Device.Ports.SerialPort.Tests
             }
         }
 
-
         private void Verify_Handshake(Handshake handshake)
         {
             using (var com1 = new SerialPort(TCSupport.LocalMachineSerialInfo.FirstAvailablePortName))
@@ -394,11 +392,11 @@ namespace System.Device.Ports.SerialPort.Tests
                 var asyncWriteRndByteArray = new AsyncWriteRndByteArray(com1, s_BYTE_SIZE_HANDSHAKE);
                 var t = new Task(asyncWriteRndByteArray.WriteRndByteArray);
 
-                var XOffBuffer = new byte[1];
-                var XOnBuffer = new byte[1];
+                var xOffBuffer = new byte[1];
+                var xOnBuffer = new byte[1];
 
-                XOffBuffer[0] = 19;
-                XOnBuffer[0] = 17;
+                xOffBuffer[0] = 19;
+                xOnBuffer[0] = 17;
 
                 Debug.WriteLine("Verifying Handshake={0}", handshake);
                 com1.Handshake = handshake;
@@ -414,7 +412,7 @@ namespace System.Device.Ports.SerialPort.Tests
 
                 if (Handshake.XOnXOff == handshake || Handshake.RequestToSendXOnXOff == handshake)
                 {
-                    com2.BaseStream.Write(XOffBuffer, 0, 1);
+                    com2.BaseStream.Write(xOffBuffer, 0, 1);
                     Thread.Sleep(250);
                 }
 
@@ -438,7 +436,7 @@ namespace System.Device.Ports.SerialPort.Tests
 
                 if (Handshake.XOnXOff == handshake || Handshake.RequestToSendXOnXOff == handshake)
                 {
-                    com2.BaseStream.Write(XOnBuffer, 0, 1);
+                    com2.BaseStream.Write(xOnBuffer, 0, 1);
                 }
 
                 TCSupport.WaitForTaskCompletion(t);

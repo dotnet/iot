@@ -76,7 +76,8 @@ namespace System.Device.Ports.SerialPort.Tests
             VerifyCtor(portName);
         }
 
-        [Fact]
+        // TODO
+        /*[Fact]
         public void Filename()
         {
             string portName;
@@ -99,7 +100,7 @@ namespace System.Device.Ports.SerialPort.Tests
             {
                 File.Delete(fileName);
             }
-        }
+        }*/
 
         [Fact]
         public void PHYSICALDRIVE0()

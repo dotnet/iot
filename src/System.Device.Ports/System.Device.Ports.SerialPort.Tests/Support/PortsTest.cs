@@ -1,14 +1,14 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Text;
-using System.IO;
 using Legacy.Support;
 using Xunit;
 
 namespace System.IO.PortsTests
 {
-    public class PortsTest : FileCleanupTestBase
+    // : FileCleanupTestBase
+    public class PortsTest
     {
         public static bool HasOneSerialPort => TCSupport.SufficientHardwareRequirements(TCSupport.SerialPortRequirements.OneSerialPort);
 
