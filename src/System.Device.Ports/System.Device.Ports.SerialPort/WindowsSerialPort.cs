@@ -409,14 +409,14 @@ namespace System.Device.Ports.SerialPort
             }
         }
 
-        protected internal override void SetStopBits(StopBits value)
+        protected internal override void SetStopBits(StopBits stopBits)
         {
-            byte nativeValue = value switch
+            byte nativeValue = stopBits switch
             {
                 StopBits.One => (byte)PInvoke.ONESTOPBIT,
                 StopBits.OnePointFive => (byte)PInvoke.ONE5STOPBITS,
                 StopBits.Two => (byte)PInvoke.TWOSTOPBITS,
-                _ => throw new ArgumentOutOfRangeException(nameof(StopBits), Strings.ArgumentOutOfRange_Enum),
+                _ => throw new ArgumentOutOfRangeException(nameof(stopBits), Strings.ArgumentOutOfRange_Enum),
             };
 
             byte currentValue = _dcb.StopBits;

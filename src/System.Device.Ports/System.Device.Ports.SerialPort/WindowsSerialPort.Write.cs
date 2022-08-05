@@ -192,7 +192,8 @@ namespace System.Device.Ports.SerialPort
         {
             if (_threadPoolBound == null)
             {
-                throw new ArgumentNullException(nameof(_threadPoolBound));
+                var privateVar = nameof(_threadPoolBound);
+                throw new ArgumentNullException($"The internal parameter {privateVar} is null");
             }
 
             // Create and store async stream class library specific data in the async result
