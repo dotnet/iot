@@ -57,7 +57,7 @@ namespace System.Device.Ports.SerialPort.Tests
         // [ConditionalFact(nameof(HasOneSerialPort))]
         public void PortName_Empty()
         {
-            Debug.WriteLine("Verifying setting PortName=string.Empty);
+            Debug.WriteLine("Verifying setting PortName=\"\"");
             VerifyException(String.Empty, ThrowAt.Set, typeof(ArgumentException), typeof(ArgumentException));
         }
 
