@@ -6,5 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Tca9548a.csproj" />
+    <ProjectReference Include="..\..\Bno055\Bno055.csproj" />
+    <ProjectReference Include="..\..\Bmp180\Bmp180.csproj" />
   </ItemGroup>
 </Project>

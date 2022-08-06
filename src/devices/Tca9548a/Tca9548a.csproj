@@ -5,8 +5,8 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
-<ItemGroup>
+  <ItemGroup>
     <Compile Include="*.cs" />
-    <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
+    <ProjectReference Include=" ..\Board\Board.csproj" />
   </ItemGroup>
 </Project>

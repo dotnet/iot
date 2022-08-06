@@ -6,71 +6,10 @@ using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.Model;
 using System.IO;
+using Iot.Device.Board;
 
 namespace Iot.Device.Tca9548a
 {
-    /// <summary>
-    /// Available channels
-    /// </summary>
-    public enum Channels : byte
-    {
-        /// <summary>
-        /// Channel 0 Byte (2^0 = 1)
-        /// </summary>
-        Channel0 = 0x01,
-
-        /// <summary>
-        /// Channel 1 Byte (2^1 = 2)
-        /// </summary>
-        Channel1 = 0x02,
-
-        /// <summary>
-        /// Channel 2 Byte (2^2 = 4)
-        /// </summary>
-        Channel2 = 0x04,
-
-        /// <summary>
-        /// Channel 3 Byte (2^3 = 8)
-        /// </summary>
-        Channel3 = 0x08,
-
-        /// <summary>
-        /// Channel 4 Byte (2^4 = 16)
-        /// </summary>
-        Channel4 = 0x10,
-
-        /// <summary>
-        /// Channel 5 Byte (2^5 = 32)
-        /// </summary>
-        Channel5 = 0x20,
-
-        /// <summary>
-        /// Channel 6 Byte (2^6 = 64)
-        /// </summary>
-        Channel6 = 0x40,
-
-        /// <summary>
-        /// Channel 7 Byte (2^7 = 128)
-        /// </summary>
-        Channel7 = 0x80
-    }
-
-    /// <summary>
-    /// Mux States
-    /// </summary>
-    public enum MUXState : byte
-    {
-        /// <summary>
-        /// Disables all channels of MuX
-        /// </summary>
-        DisbleAllChannels = 0x00,
-
-        /// <summary>
-        /// Enables all channels of MuX
-        /// </summary>
-        EnableAllChannels = 0xFF,
-    }
-
     /// <summary>
     /// Tca9548A - 8-Channel I2C Switch/Multiplexer
     /// </summary>
@@ -180,38 +119,23 @@ namespace Iot.Device.Tca9548a
         /// <returns></returns>
         public IEnumerable<int> ScanChannelsForDeviceAddress(Channels channel)
         {
-            List<int> addresses = new List<int>();
             SelectChannel(channel);
-            I2cDevice i2c;
-            // First 8 I2C addresses are reserved, last one is 0x7F
-            for (int i = 8; i < 0x80; i++)
+            var devices = _i2CDevice.CreateBusFromI2CDevice().PerformBusScan();
+            if (devices.Contains(_i2CDevice.ConnectionSettings.DeviceAddress))
             {
-                try
-                {
-                    if (i != _i2CDevice.ConnectionSettings.DeviceAddress)
-                    {
-                        i2c = I2cDevice.Create(new I2cConnectionSettings(_i2CDevice.ConnectionSettings.BusId, i));
-                        i2c.ReadByte();
-                        addresses.Add(i);
-                    }
-                }
-                catch (IOException)
-                {
-                    i2c = null!;
-                }
-
+                devices.Remove(_i2CDevice.ConnectionSettings.DeviceAddress);
             }
 
-            return addresses;
+            return devices;
         }
 
         /// <summary>
         /// Enable or Disable all Mux Channels
         /// </summary>
-        /// <param name="MUXState">Multiplexer Channel State</param>
-        public void SwitchTCA9548AState(MUXState MUXState)
+        /// <param name="MuxState">Multiplexer Channel State</param>
+        public void SwitchTCA9548AState(MuxState MuxState)
         {
-            _i2CDevice.WriteByte(Convert.ToByte(MUXState));
+            _i2CDevice.WriteByte(Convert.ToByte(MuxState));
         }
 
         /// <inheritdoc/>
@@ -220,10 +144,10 @@ namespace Iot.Device.Tca9548a
             if (_shouldDispose)
             {
                 _i2CDevice?.Dispose();
-                _i2CDevice = null!;
             }
-        }
 
+            _i2CDevice = null!;
+        }
     }
 
 }
