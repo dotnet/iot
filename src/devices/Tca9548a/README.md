@@ -84,23 +84,18 @@ foreach (var channelDevices in connectedDevices)
         Thread.Sleep(1000);
     }
 }
-
 ```
+
 ### Sample wiring
 
 **Important** to understand:
-
 If you are getting lower data rate from sensor connected via Multiplexer on Raspberry Pi, you need to adjust the bus speed.
 
 This example uses the I2C bus 1 with GPIO 2 and 3 on raspberry pi and gathers data from to BNO055 sensors and 4 BMP180 sensors over TCA9548A Mux
 
 ![Wiring sample](TCA9548A_Connections.png)
 
-
-
 ## TCA9546A - Low Voltage 4-Channel I2C
 
 TCA9546A [datasheet](https://www.ti.com/lit/ds/symlink/tca9546a.pdf)
-
 You can use the same class to control the 4-Channel Multiplexer also.
-
