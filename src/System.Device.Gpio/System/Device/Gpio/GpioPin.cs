@@ -6,7 +6,7 @@ namespace System.Device.Gpio
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) pin.
     /// </summary>
-    public sealed class Gpio​Pin : IDisposable
+    public class Gpio​Pin : IDisposable
     {
         private readonly int _pinNumber;
         private readonly GpioController _controller;
@@ -24,13 +24,7 @@ namespace System.Device.Gpio
         /// <value>
         /// The pin number of the GPIO pin.
         /// </value>
-        public int PinNumber
-        {
-            get
-            {
-                return _pinNumber;
-            }
-        }
+        public int PinNumber => _pinNumber;
 
         /// <summary>
         /// Gets the current pin mode for the general-purpose I/O (GPIO) pin. The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.
