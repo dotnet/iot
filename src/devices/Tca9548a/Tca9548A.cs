@@ -17,6 +17,7 @@ namespace Iot.Device.Tca9548a
     public class Tca9548A : IDisposable
     {
         private readonly bool _shouldDispose;
+        private readonly I2cBus _i2cBus;
 
         /// <summary>
         /// The default I2C Address, page 15 of the main documentation
@@ -34,12 +35,14 @@ namespace Iot.Device.Tca9548a
         /// <summary>
         /// Creates a Multiplexer Instance
         /// </summary>
-        /// <param name="i2cDevice">The I2C Device</param>
+        /// <param name="i2CBus">The I2C Bus on which Mux is</param>
+        /// <param name="address"> Address of the Mux on I2C bus</param>
         /// <param name="shouldDispose">true to dispose the I2C device at dispose</param>
         /// <exception cref="ArgumentNullException">Exception thrown if I2C device is null</exception>
-        public Tca9548A(I2cDevice i2cDevice, bool shouldDispose = true)
+        public Tca9548A(I2cBus i2CBus, byte address = DefaultI2cAddress, bool shouldDispose = true)
         {
-            _i2CDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _i2cBus = i2CBus;
+            _i2CDevice = _i2cBus.CreateDevice(address);
             _shouldDispose = shouldDispose;
         }
 
@@ -120,7 +123,7 @@ namespace Iot.Device.Tca9548a
         public IEnumerable<int> ScanChannelsForDeviceAddress(Channels channel)
         {
             SelectChannel(channel);
-            var devices = _i2CDevice.CreateBusFromI2CDevice().PerformBusScan();
+            var devices = _i2cBus.PerformBusScan();
             if (devices.Contains(_i2CDevice.ConnectionSettings.DeviceAddress))
             {
                 devices.Remove(_i2CDevice.ConnectionSettings.DeviceAddress);

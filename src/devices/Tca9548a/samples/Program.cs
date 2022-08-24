@@ -23,8 +23,8 @@ namespace Tca9548a.Sample
         public static void Main()
         {
             Console.WriteLine("Hello TCA9548A!");
-            I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Tca9548A.DefaultI2cAddress));
-            Tca9548A tca9548a = new Tca9548A(i2cDevice);
+            var bus = I2cBus.Create(1);
+            Tca9548A tca9548a = new Tca9548A(bus);
 
             // Get all connected I2C interfaces
             var connectedDevices = tca9548a.ScanAllChannelsForDeviceAddress();
@@ -43,7 +43,7 @@ namespace Tca9548a.Sample
                 {
                     if (device == Bno055Sensor.DefaultI2cAddress || device == Bno055Sensor.SecondI2cAddress)
                     {
-                        I2cDevice bnoI2cDevice = I2cDevice.Create(new I2cConnectionSettings(i2cDevice.ConnectionSettings.BusId, device));
+                        I2cDevice bnoI2cDevice = bus.CreateDevice(device);
                         Bno055Sensor bno055Sensor = new Bno055Sensor(bnoI2cDevice);
                         Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
                         Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
@@ -70,8 +70,7 @@ namespace Tca9548a.Sample
                     }
                     else if (device == Bmp180.DefaultI2cAddress)
                     {
-                        I2cConnectionSettings i2cSettings = new I2cConnectionSettings(i2cDevice.ConnectionSettings.BusId, Bmp180.DefaultI2cAddress);
-                        using I2cDevice bmpDevice = I2cDevice.Create(i2cSettings);
+                        using I2cDevice bmpDevice = bus.CreateDevice(Bmp180.DefaultI2cAddress);
                         using Bmp180 i2cBmp280 = new(bmpDevice);
                         // set samplings
                         i2cBmp280.SetSampling(Sampling.Standard);

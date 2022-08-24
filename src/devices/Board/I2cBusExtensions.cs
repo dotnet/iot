@@ -44,16 +44,5 @@ namespace Iot.Device.Board
 
             return ret;
         }
-
-        /// <summary>
-        /// Create I2cBus Object type from I2cDevice
-        /// </summary>
-        /// <param name="i2cDevice">The I2cDevice for which I2cBus object needs to be created</param>
-        /// <returns></returns>
-        public static I2cBus CreateBusFromI2CDevice(this I2cDevice i2cDevice)
-        {
-            return I2cBus.Create(i2cDevice.ConnectionSettings.BusId);
-        }
-
     }
 }
