@@ -13,11 +13,11 @@ namespace Iot.Device.Tca9548a
     /// <summary>
     /// Tca9548A - 8-Channel I2C Switch/Multiplexer
     /// </summary>
-    [Interface("BNO055 - 8-Channel I2C Switch/Multiplexer")]
+    [Interface("Tca9548A - 8-Channel I2C Switch/Multiplexer")]
     public class Tca9548A : IDisposable
     {
         private readonly bool _shouldDispose;
-        private readonly I2cBus _i2cBus;
+        internal readonly I2cBus _i2cBus;
 
         /// <summary>
         /// The default I2C Address, page 15 of the main documentation
@@ -44,6 +44,17 @@ namespace Iot.Device.Tca9548a
             _i2cBus = i2CBus;
             _i2CDevice = _i2cBus.CreateDevice(address);
             _shouldDispose = shouldDispose;
+        }
+
+        /// <summary>
+        /// Creates an I2c Device for selected sensor on Multiplexer
+        /// </summary>
+        /// <param name="tcaChannel">TCA Channel on which Device Exists</param>
+        /// <param name="address">I2c address of the device</param>
+        /// <returns></returns>
+        public I2cDevice CreateDeviceOnChannel(Channels tcaChannel, int address)
+        {
+            return new Tca9548ADevice(this, tcaChannel, address);
         }
 
         /// <summary>

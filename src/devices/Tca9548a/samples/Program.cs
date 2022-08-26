@@ -31,20 +31,11 @@ namespace Tca9548a.Sample
 
             foreach (var channelDevices in connectedDevices)
             {
-                // Important to switch channel before connecting to that sensor
-                tca9548a.SelectChannel(channelDevices.Key);
-
-                if (tca9548a.TryGetSelectedChannel(out Channels selectedChannel))
-                {
-                    Console.WriteLine($"Selected Channel on MUX: {selectedChannel}");
-                }
-
                 foreach (var device in channelDevices.Value)
                 {
                     if (device == Bno055Sensor.DefaultI2cAddress || device == Bno055Sensor.SecondI2cAddress)
                     {
-                        I2cDevice bnoI2cDevice = bus.CreateDevice(device);
-                        Bno055Sensor bno055Sensor = new Bno055Sensor(bnoI2cDevice);
+                        Bno055Sensor bno055Sensor = new Bno055Sensor(tca9548a.CreateDeviceOnChannel(channelDevices.Key, device));
                         Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
                         Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
                         Console.WriteLine($"Temperature source: {bno055Sensor.TemperatureSource}, Operation mode: {bno055Sensor.OperationMode}, Units: {bno055Sensor.Units}");
@@ -70,7 +61,7 @@ namespace Tca9548a.Sample
                     }
                     else if (device == Bmp180.DefaultI2cAddress)
                     {
-                        using I2cDevice bmpDevice = bus.CreateDevice(Bmp180.DefaultI2cAddress);
+                        using I2cDevice bmpDevice = tca9548a.CreateDeviceOnChannel(channelDevices.Key, device);
                         using Bmp180 i2cBmp280 = new(bmpDevice);
                         // set samplings
                         i2cBmp280.SetSampling(Sampling.Standard);
