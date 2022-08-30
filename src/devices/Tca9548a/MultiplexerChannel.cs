@@ -6,7 +6,7 @@ namespace Iot.Device.Tca9548a
     /// <summary>
     /// Available channels
     /// </summary>
-    public enum Channels : byte
+    public enum MultiplexerChannel : byte
     {
         /// <summary>
         /// Channel 0 Byte (2^0 = 1)

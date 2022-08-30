@@ -2,22 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Device.I2c;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Iot.Device.Tca9548a
 {
-    /// <summary>
-    /// I2C Device on TCA9548A channel
-    /// </summary>
-    public class Tca9548ADevice : I2cDevice
+    internal class Tca9548ADevice : I2cDevice
     {
         private readonly I2cDevice _channelDevice;
         private readonly Tca9548A _tca9548A;
-        private readonly Channels _tcaChannel;
+        private readonly MultiplexerChannel _tcaChannel;
 
         /// <summary>
         /// The connection settings of a device on an I2C bus.
@@ -25,16 +18,16 @@ namespace Iot.Device.Tca9548a
         public override I2cConnectionSettings ConnectionSettings => _channelDevice.ConnectionSettings;
 
         /// <summary>
-        ///  Initializes a new instance of the <see cref="Tca9548ADevice"/> class on the <see cref="Channels"/> of TCA mux that will use the specified settings to communicate with the I2C device.
+        ///  Initializes a new instance of the <see cref="Tca9548ADevice"/> class on the <see cref="MultiplexerChannel"/> of TCA mux that will use the specified settings to communicate with the I2C device.
         /// </summary>
         /// <param name="tca9548A">Instance on TCA9548A device</param>
         /// <param name="tcaChannel">Channel on which device is </param>
-        /// <param name="address">Address of the device</param>
-        public Tca9548ADevice(Tca9548A tca9548A, Channels tcaChannel, int address)
+        /// <param name="device">I2C device</param>
+        internal Tca9548ADevice(Tca9548A tca9548A, MultiplexerChannel tcaChannel, I2cDevice device)
         {
             _tca9548A = tca9548A;
             _tcaChannel = tcaChannel;
-            _channelDevice = tca9548A._i2cBus.CreateDevice(address);
+            _channelDevice = device;
         }
 
         private void SelectDeviceChannel() => _tca9548A.SelectChannel(_tcaChannel);

@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.Model;
-using System.IO;
-using Iot.Device.Board;
 
 namespace Iot.Device.Tca9548a
 {
@@ -14,10 +13,10 @@ namespace Iot.Device.Tca9548a
     /// Tca9548A - 8-Channel I2C Switch/Multiplexer
     /// </summary>
     [Interface("Tca9548A - 8-Channel I2C Switch/Multiplexer")]
-    public class Tca9548A : IDisposable
+    public class Tca9548A : IList<I2cBus>, IDisposable
     {
         private readonly bool _shouldDispose;
-        internal readonly I2cBus _i2cBus;
+        private readonly List<Tca9548AChannelBus> _channelBuses = new List<Tca9548AChannelBus>();
 
         /// <summary>
         /// The default I2C Address, page 15 of the main documentation
@@ -28,33 +27,31 @@ namespace Iot.Device.Tca9548a
         /// <summary>
         /// Array of all possible Multiplexer Channels
         /// </summary>
-        public static readonly Channels[] DeviceChannels = (Channels[])Enum.GetValues(typeof(Channels));
+        public static readonly MultiplexerChannel[] DeviceChannels = (MultiplexerChannel[])Enum.GetValues(typeof(MultiplexerChannel));
 
-        private I2cDevice _i2CDevice;
+        internal I2cDevice _i2CDevice;
+
+        /// <summary>
+        /// Gets Channel busses of the multiplexer
+        /// </summary>
+        /// <param name="index">channel number</param>
+        /// <returns></returns>
+        public I2cBus this[int index] => _channelBuses[index];
 
         /// <summary>
         /// Creates a Multiplexer Instance
         /// </summary>
-        /// <param name="i2CBus">The I2C Bus on which Mux is</param>
-        /// <param name="address"> Address of the Mux on I2C bus</param>
+        /// <param name="i2CDevice">The I2C Device on which Mux is</param>
         /// <param name="shouldDispose">true to dispose the I2C device at dispose</param>
         /// <exception cref="ArgumentNullException">Exception thrown if I2C device is null</exception>
-        public Tca9548A(I2cBus i2CBus, byte address = DefaultI2cAddress, bool shouldDispose = true)
+        public Tca9548A(I2cDevice i2CDevice, bool shouldDispose = true)
         {
-            _i2cBus = i2CBus;
-            _i2CDevice = _i2cBus.CreateDevice(address);
+            _i2CDevice = i2CDevice ?? throw new ArgumentNullException(nameof(i2CDevice));
             _shouldDispose = shouldDispose;
-        }
-
-        /// <summary>
-        /// Creates an I2c Device for selected sensor on Multiplexer
-        /// </summary>
-        /// <param name="tcaChannel">TCA Channel on which Device Exists</param>
-        /// <param name="address">I2c address of the device</param>
-        /// <returns></returns>
-        public I2cDevice CreateDeviceOnChannel(Channels tcaChannel, int address)
-        {
-            return new Tca9548ADevice(this, tcaChannel, address);
+            foreach (var channel in DeviceChannels)
+            {
+                _channelBuses.Add(new Tca9548AChannelBus(this, channel));
+            }
         }
 
         /// <summary>
@@ -66,7 +63,6 @@ namespace Iot.Device.Tca9548a
             try
             {
                 _i2CDevice.WriteByte(multiplexChannel);
-                _i2CDevice.ReadByte();
             }
             catch (Exception e)
             {
@@ -78,9 +74,12 @@ namespace Iot.Device.Tca9548a
         /// Select a multiplex channel
         /// </summary>
         /// <param name="multiplexChannel">The channel to select</param>
-        public void SelectChannel(Channels multiplexChannel)
+        public void SelectChannel(MultiplexerChannel multiplexChannel)
         {
-            SelectChannel(Convert.ToByte(multiplexChannel));
+            if (TryGetSelectedChannel(out var channel) && channel != multiplexChannel)
+            {
+                SelectChannel(Convert.ToByte(multiplexChannel));
+            }
         }
 
         /// <summary>
@@ -88,59 +87,27 @@ namespace Iot.Device.Tca9548a
         /// </summary>
         /// <param name="selectedChannel"> selected Multiplexer Channel</param>
         /// <returns> true if able to retrieve selected channel</returns>
-        public bool TryGetSelectedChannel(out Channels selectedChannel)
+        public bool TryGetSelectedChannel(out MultiplexerChannel selectedChannel)
         {
             try
             {
                 var channel = _i2CDevice.ReadByte();
-                if (Enum.IsDefined(typeof(Channels), channel))
+                if (Enum.IsDefined(typeof(MultiplexerChannel), channel))
                 {
-                    selectedChannel = (Channels)channel;
+                    selectedChannel = (MultiplexerChannel)channel;
                     return true;
                 }
                 else
                 {
-                    selectedChannel = Channels.Channel0;
+                    selectedChannel = MultiplexerChannel.Channel0;
                     return false;
                 }
             }
             catch (Exception)
             {
-                selectedChannel = Channels.Channel0;
+                selectedChannel = MultiplexerChannel.Channel0;
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Returns all the connected devices on all channels of Multiplexer
-        /// </summary>
-        /// <returns> Dictionary having Keys as Channels and Values as IEnumerable integer type</returns>
-        public Dictionary<Channels, IEnumerable<int>> ScanAllChannelsForDeviceAddress()
-        {
-            Dictionary<Channels, IEnumerable<int>> channels = new Dictionary<Channels, IEnumerable<int>>();
-            foreach (Channels channel in DeviceChannels)
-            {
-                channels.Add(channel, ScanChannelsForDeviceAddress(channel));
-            }
-
-            return channels;
-        }
-
-        /// <summary>
-        /// Returns all the connected device on selected channel
-        /// </summary>
-        /// <param name="channel">Selected Channel on Multiplexer</param>
-        /// <returns></returns>
-        public IEnumerable<int> ScanChannelsForDeviceAddress(Channels channel)
-        {
-            SelectChannel(channel);
-            var devices = _i2cBus.PerformBusScan();
-            if (devices.Contains(_i2CDevice.ConnectionSettings.DeviceAddress))
-            {
-                devices.Remove(_i2CDevice.ConnectionSettings.DeviceAddress);
-            }
-
-            return devices;
         }
 
         /// <summary>
@@ -161,6 +128,75 @@ namespace Iot.Device.Tca9548a
             }
 
             _i2CDevice = null!;
+        }
+
+        /// <inheritdoc/>
+        public int Count => _channelBuses.Count;
+
+        /// <inheritdoc/>
+        public bool IsReadOnly => true;
+
+        I2cBus IList<I2cBus>.this[int index] { get => _channelBuses[index]; set => _channelBuses[index] = (Tca9548AChannelBus)value; }
+
+        /// <inheritdoc/>
+        public int IndexOf(I2cBus item)
+        {
+            return _channelBuses.IndexOf((Tca9548AChannelBus)item);
+        }
+
+        /// <inheritdoc/>
+        public void Insert(int index, I2cBus item)
+        {
+            _channelBuses.Insert(index, (Tca9548AChannelBus)item);
+        }
+
+        /// <inheritdoc/>
+        public void RemoveAt(int index)
+        {
+            _channelBuses.RemoveAt(index);
+        }
+
+        /// <inheritdoc/>
+        public void Add(I2cBus item)
+        {
+            _channelBuses.Add((Tca9548AChannelBus)item);
+        }
+
+        /// <inheritdoc/>
+        public void Clear()
+        {
+            _channelBuses.Clear();
+        }
+
+        /// <inheritdoc/>
+        public bool Contains(I2cBus item)
+        {
+            return _channelBuses.Contains((Tca9548AChannelBus)item);
+        }
+
+        /// <inheritdoc/>
+        public void CopyTo(I2cBus[] array, int arrayIndex)
+        {
+            _channelBuses.CopyTo((Tca9548AChannelBus[])array, arrayIndex);
+
+        }
+
+        /// <inheritdoc/>
+        public bool Remove(I2cBus item)
+        {
+            return _channelBuses.Remove((Tca9548AChannelBus)item);
+        }
+
+        /// <inheritdoc/>
+        public IEnumerator<I2cBus> GetEnumerator()
+        {
+            return _channelBuses.GetEnumerator();
+        }
+
+        /// <inheritdoc/>
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return _channelBuses.GetEnumerator();
         }
     }
 

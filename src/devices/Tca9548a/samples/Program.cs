@@ -9,6 +9,7 @@ using Iot.Device.Bno055;
 using Iot.Device.Bmp180;
 using UnitsNet;
 using Iot.Device.Common;
+using Iot.Device.Board;
 
 namespace Tca9548a.Sample
 {
@@ -24,18 +25,17 @@ namespace Tca9548a.Sample
         {
             Console.WriteLine("Hello TCA9548A!");
             var bus = I2cBus.Create(1);
-            Tca9548A tca9548a = new Tca9548A(bus);
+            Tca9548A tca9548a = new Tca9548A(bus.CreateDevice(Tca9548A.DefaultI2cAddress));
 
             // Get all connected I2C interfaces
-            var connectedDevices = tca9548a.ScanAllChannelsForDeviceAddress();
-
-            foreach (var channelDevices in connectedDevices)
+            foreach (var channelBuses in tca9548a)
             {
-                foreach (var device in channelDevices.Value)
+                var deviceAddress = ((Tca9548AChannelBus)channelBuses).PerformBusScan();
+                foreach (var device in deviceAddress)
                 {
                     if (device == Bno055Sensor.DefaultI2cAddress || device == Bno055Sensor.SecondI2cAddress)
                     {
-                        Bno055Sensor bno055Sensor = new Bno055Sensor(tca9548a.CreateDeviceOnChannel(channelDevices.Key, device));
+                        Bno055Sensor bno055Sensor = new Bno055Sensor(channelBuses.CreateDevice(device));
                         Console.WriteLine($"Id: {bno055Sensor.Info.ChipId}, AccId: {bno055Sensor.Info.AcceleratorId}, GyroId: {bno055Sensor.Info.GyroscopeId}, MagId: {bno055Sensor.Info.MagnetometerId}");
                         Console.WriteLine($"Firmware version: {bno055Sensor.Info.FirmwareVersion}, Bootloader: {bno055Sensor.Info.BootloaderVersion}");
                         Console.WriteLine($"Temperature source: {bno055Sensor.TemperatureSource}, Operation mode: {bno055Sensor.OperationMode}, Units: {bno055Sensor.Units}");
@@ -61,8 +61,7 @@ namespace Tca9548a.Sample
                     }
                     else if (device == Bmp180.DefaultI2cAddress)
                     {
-                        using I2cDevice bmpDevice = tca9548a.CreateDeviceOnChannel(channelDevices.Key, device);
-                        using Bmp180 i2cBmp280 = new(bmpDevice);
+                        using Bmp180 i2cBmp280 = new(channelBuses.CreateDevice(device));
                         // set samplings
                         i2cBmp280.SetSampling(Sampling.Standard);
                         // read values
