@@ -9,9 +9,12 @@ Adafruit sells multiple display backpacks built upon this driver:
 - [1.2" 4-Digit 7-Segment Display w/I2C Backpack - Red](https://www.adafruit.com/product/1270)
 - [Bi-Color (Red/Green) 24-Bar Bargraph w/I2C Backpack Kit](https://www.adafruit.com/product/1721)
 
-More information on wiring can be found on the respective product pages.
+More information on wiring can be found on the respective product pages and at [adafruit/Adafruit_CircuitPython_HT16K33
+](https://github.com/adafruit/Adafruit_CircuitPython_HT16K33) (Adafruit-maintained Python bindings).
 
 ## 7-Segment Display Usage
+
+![Adafruit 1.2" 4-Digit 7-Segment Display w/I2C Backpack - Green](https://cdn-shop.adafruit.com/970x728/1268-00.jpg)
 
 ```csharp
 // Initialize display (busId = 1 for Raspberry Pi 2 & 3)
@@ -38,6 +41,8 @@ display.Flush();
 ```
 
 ## Bi-Color Bargraph Usage
+
+![Bi-Color (Red/Green) 24-Bar Bargraph w/I2C Backpack Kit](https://cdn-shop.adafruit.com/970x728/1721-00.jpg)
 
 ```csharp
 using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
