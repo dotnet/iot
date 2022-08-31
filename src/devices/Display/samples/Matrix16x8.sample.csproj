@@ -6,6 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Display.csproj" />
-    <Compile Include="Program.cs" />
+    <Compile Include="Program.Matrix16x8.cs" />
   </ItemGroup>
 </Project>

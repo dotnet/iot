@@ -13,6 +13,7 @@
     <Compile Include="FontHelper.cs" />
     <Compile Include="ISevenSegmentDisplay.cs" />
     <Compile Include="Large4Digit7SegmentDisplay.cs" />
+    <Compile Include="Matrix16x8.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
