@@ -1,27 +1,21 @@
-# Segment display driver (HT16K33)
+# HT16K33 -- LED Matrix Display Driver
 
-This project contains multipurpose LED display drivers and binding implementations for concrete display configurations.
-
-## Documentation
-
-The **HT16K33** is LED display driver that supports multiple LED configurations and I2C communication.
+The [Ht16k33](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf)  is a memory mapping and multi-function LED controller driver. It is used as a [backpack driver for several Adafruit products](https://www.adafruit.com/?q=Ht16k33). It supports multiple LED configurations and I2C communication.
 
 Adafruit sells multiple display backpacks built upon this driver:
 
-- [Adafruit LED / SEGMENTED category](https://www.adafruit.com/category/103)
-- **Large4Digit7SegmentDisplay** is a binding that supports the **Adafruit 1.2" 4-Digit 7-Segment Display w/I2C Backpack** that comes in 3 colors:
-- [Adafruit 1.2" 4-Digit 7-Segment Display w/I2C Backpack - Yellow](https://www.adafruit.com/product/1268)
-- [Adafruit 1.2" 4-Digit 7-Segment Display w/I2C Backpack - Green](https://www.adafruit.com/product/1269)
-- [Adafruit 1.2" 4-Digit 7-Segment Display w/I2C Backpack - Red](https://www.adafruit.com/product/1270)
-- [HT16K33 datasheet](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf)
+- [1.2" 4-Digit 7-Segment Display w/I2C Backpack - Yellow](https://www.adafruit.com/product/1268)
+- [1.2" 4-Digit 7-Segment Display w/I2C Backpack - Green](https://www.adafruit.com/product/1269)
+- [1.2" 4-Digit 7-Segment Display w/I2C Backpack - Red](https://www.adafruit.com/product/1270)
+- [Bi-Color (Red/Green) 24-Bar Bargraph w/I2C Backpack Kit](https://www.adafruit.com/product/1721)
 
 More information on wiring can be found on the respective product pages.
 
-## Usage
+## 7-Segment Display Usage
 
 ```csharp
 // Initialize display (busId = 1 for Raspberry Pi 2 & 3)
-var display = new Large4Digit7SegmentDisplay(I2cDevice.Create(new I2cConnectionSettings(busId: 1, address: Ht16k33.DefaultI2cAddress));
+using var display = new Large4Digit7SegmentDisplay(I2cDevice.Create(new I2cConnectionSettings(busId: 1, address: Ht16k33.DefaultI2cAddress));
 
 // Set max brightness (automatically turns on display)
 display.Brightness = display.MaxBrightness;
@@ -41,7 +35,23 @@ display.Dots = Dot.DecimalPoint;
 
 // Send buffer to the device
 display.Flush();
+```
 
-// Dispose display object (the device itself will not be turned off until powered down)
-display.Dispose();
+## Bi-Color Bargraph Usage
+
+```csharp
+using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
+    {
+        // Set max brightness
+        Brightness = Ht16k33.MaxBrightness,
+        BufferingEnabled = true
+    };
+
+bargraph.Clear();
+
+bargraph[0] = BarColor.RED;
+bargraph[1] = BarColor.GREEN;
+bargraph[2] = BarColor.YELLOW;
+bargraph[3] = BarColor.OFF;
+bargraph[4] = BarColor.RED;
 ```

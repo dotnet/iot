@@ -7,6 +7,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{20F2
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Large4Digit7SegmentDisplay.sample", "samples\Large4Digit7SegmentDisplay.sample.csproj", "{C4D7AED7-B340-4DCD-974C-5150C6D5F074}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiColorBargraph.sample", "samples\BiColorBargraph.sample.csproj", "{C4D7AED7-B340-4DCD-974C-5150C6D5F074}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Display", "Display.csproj", "{4AAE8B9E-8540-4582-8083-D1F14104BAAC}"
 EndProject
 Global
