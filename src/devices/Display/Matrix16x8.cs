@@ -112,19 +112,22 @@ namespace Iot.Device.Display
             /*
             Task: Update data for 8x16 matrix
 
-            The following diagram shows the intended orientation of the matrix.
+            The following diagram shows the intended orientation of the matrix
+            and its x,y address scheme.
+
+            Note: LED used: https://cdn-shop.adafruit.com/datasheets/KWM-30881XUGB.pdf
 
             ← x →
             0, 0          7, 0              15, 0
-            x x x x x x x x | x x x x x x x x ↑
-            x x x x x x x x | x x x x x x x x y
-       sdl  x x x x x x x x | x x x x x x x x ↓
-       sda  x x x x x x x x | x x x x x x x x
-       gnd  x x x x x x x x | x x x x x x x x
-       vcc  x x x x x x x x | x x x x x x x x ↑
-            x x x x x x x x | x x x x x x x x y
-            x x x x x x x x | x x x x x x x x ↓
-            0, 7          7, 7              15, 7
+            x x x x x x x x | x x x x x x x x 0 ↑
+            x x x x x x x x | x x x x x x x x 1 y
+       sdl  x x x x x x x x | x x x x x x x x 2 ↓
+       sda  x x x x x x x x | x x x x x x x x 3
+       gnd  x x x x x x x x | x x x x x x x x 4
+       vcc  x x x x x x x x | x x x x x x x x 5 ↑
+            x x x x x x x x | x x x x x x x x 6 y
+            x x x x x x x x | x x x x x x x x 7 ↓
+            0 1 2 3 4 5 6 7   8 9 101112131415
             ← x →
 
             The line splits the first and second matrice.
@@ -148,13 +151,6 @@ namespace Iot.Device.Display
          11 x x x x x x x x | 12 x x x x x x x x
          13 x x x x x x x x | 14 x x x x x x x x
          15 x x x x x x x x | 16 x x x x x x x x
-
-            In terms of addressing (for this class), we'll use the
-            expected/intuitive scheme.
-
-            0 1 2 3 4 5 6 7 8 9 101112131415
-          0 x x x x x x x x x x x x x x x x
-          7 x x x x x x x x x x x x x x x x
 
             We now need to marry those together.
             We need to accomodate two things:
