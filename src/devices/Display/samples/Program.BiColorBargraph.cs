@@ -16,11 +16,11 @@ using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(
 
 bargraph.Clear();
 
-bargraph[0] = BarColor.RED;
-bargraph[1] = BarColor.GREEN;
-bargraph[2] = BarColor.YELLOW;
-bargraph[3] = BarColor.OFF;
-bargraph[4] = BarColor.RED;
+bargraph[0] = BarColor.Red;
+bargraph[1] = BarColor.Green;
+bargraph[2] = BarColor.Yellow;
+bargraph[3] = BarColor.Off;
+bargraph[4] = BarColor.Red;
 
 Thread.Sleep(2000);
 bargraph.Clear();
@@ -54,12 +54,12 @@ for (int i = 23; i >= 0; i--)
 Thread.Sleep(2000);
 bargraph.Clear();
 
-bargraph[0] = BarColor.RED;
-bargraph[6] = BarColor.GREEN;
-bargraph[11] = BarColor.YELLOW;
-bargraph[12] = BarColor.YELLOW;
-bargraph[18] = BarColor.GREEN;
-bargraph[23] = BarColor.RED;
+bargraph[0] = BarColor.Red;
+bargraph[6] = BarColor.Green;
+bargraph[11] = BarColor.Yellow;
+bargraph[12] = BarColor.Yellow;
+bargraph[18] = BarColor.Green;
+bargraph[23] = BarColor.Red;
 
 Thread.Sleep(2000);
 bargraph.Clear();

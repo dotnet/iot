@@ -67,9 +67,16 @@ namespace Iot.Device.Display
             {
                 Flush();
             }
-    }
+        }
 
         /*
+            Task: Update data for the bargraph
+
+            The following diagram shows the intended orientation of the bargraph.
+
+            x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x  x
+            23 22 21 20 19 18 17 16 15 14 13 12 11 10 9  8  7  6  5  4  3  2  1  0
+
             Each bargraph has three segments, four LEDs each.
             For the 24-segment bargraph, that's six segments of four LEDs.
             Each segment is addressed separately, with 4 bits (of a byte).
@@ -125,23 +132,24 @@ namespace Iot.Device.Display
             byte red = _displayBuffer[bufferIndex];
             byte green = _displayBuffer[bufferIndex + 1];
 
-            if (value is BarColor.OFF)
+            switch (value)
             {
-                _displayBuffer[bufferIndex] = (byte)(red & ~mask);
-                _displayBuffer[bufferIndex + 1] = (byte)(green & ~mask);
-            }
-            else if (value is BarColor.RED)
-            {
-                _displayBuffer[bufferIndex] = (byte)(red ^ mask);
-            }
-            else if (value is BarColor.GREEN)
-            {
-                _displayBuffer[bufferIndex + 1] = (byte)(green ^ mask);
-            }
-            else if (value is BarColor.YELLOW)
-            {
-                _displayBuffer[bufferIndex] = (byte)(red ^ mask);
-                _displayBuffer[bufferIndex + 1] = (byte)(green ^ mask);
+                case BarColor.Off:
+                    _displayBuffer[bufferIndex] = (byte)(red & ~mask);
+                    _displayBuffer[bufferIndex + 1] = (byte)(green & ~mask);
+                    break;
+                case BarColor.Red:
+                    _displayBuffer[bufferIndex] = (byte)(red ^ mask);
+                    break;
+                case BarColor.Green:
+                    _displayBuffer[bufferIndex + 1] = (byte)(green ^ mask);
+                    break;
+                case BarColor.Yellow:
+                    _displayBuffer[bufferIndex] = (byte)(red ^ mask);
+                    _displayBuffer[bufferIndex + 1] = (byte)(green ^ mask);
+                    break;
+                default:
+                    break;
             }
         }
     }

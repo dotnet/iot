@@ -11,21 +11,21 @@ namespace Iot.Device.Display
         /// <summary>
         /// Disable LED.
         /// </summary>
-        OFF = 0,
+        Off = 0,
 
         /// <summary>
         /// Enable red LED.
         /// </summary>
-        RED = 1,
+        Red = 1,
 
         /// <summary>
         /// Enable green LED.
         /// </summary>
-        GREEN = 2,
+        Green = 2,
 
         /// <summary>
         /// Enable both green and red LEDs, producing a yellow color.
         /// </summary>
-        YELLOW = 3
+        Yellow = 3
     }
 }
