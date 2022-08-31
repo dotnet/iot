@@ -39,6 +39,22 @@ namespace Iot.Device.Display
             }
         }
 
+        /// <summary>
+        /// Enable all LEDs.
+        /// </summary>
+        public void Fill()
+        {
+            _displayBuffer = new byte[]
+            {
+                0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
+            };
+
+            if (BufferingEnabled)
+            {
+                _i2cDevice.Write(_displayBuffer);
+            }
+        }
+
         /// <inheritdoc/>
         public override void Clear()
         {
@@ -56,13 +72,33 @@ namespace Iot.Device.Display
         /// <inheritdoc/>
         public override void Write(ReadOnlySpan<byte> data, int startAddress = 0)
         {
-            // Note: first byte is command data; does not affect display
-            // As structured, this API is an advanced scenario, based
-            // on the complex data structure described in `UpdateBuffer`.
-            // Instread, this API could be updated to write "rows of data".
+            // startAddress is intended to mean which matrix to write to
+            // only 8 bytes are supported at a time
+            int rowIndex = 0;
             foreach (byte b in data)
             {
-                _displayBuffer[startAddress++] = b;
+                int column = (rowIndex * 2) + 1 + startAddress;
+                _displayBuffer[column] = b;
+                rowIndex++;
+            }
+
+            if (BufferingEnabled)
+            {
+                Flush();
+            }
+        }
+
+        /// <summary>
+        /// Writes bytes to matrix, row by row
+        /// </summary>
+        public void Write(ReadOnlySpan<byte> data)
+        {
+            int rowIndex = 0;
+            foreach (byte b in data)
+            {
+                int column = rowIndex > 7 ? (rowIndex - 8) * 2 + 2 : rowIndex * 2 + 1;
+                _displayBuffer[column] = b;
+                rowIndex++;
             }
 
             if (BufferingEnabled)
@@ -76,53 +112,59 @@ namespace Iot.Device.Display
             /*
             Task: Update data for 8x16 matrix
 
+            The following diagram shows the intended orientation of the matrix.
+
+            ← x →
+            0, 0          7, 0              15, 0
+            x x x x x x x x | x x x x x x x x ↑
+            x x x x x x x x | x x x x x x x x y
+       sdl  x x x x x x x x | x x x x x x x x ↓
+       sda  x x x x x x x x | x x x x x x x x
+       gnd  x x x x x x x x | x x x x x x x x
+       vcc  x x x x x x x x | x x x x x x x x ↑
+            x x x x x x x x | x x x x x x x x y
+            x x x x x x x x | x x x x x x x x ↓
+            0, 7          7, 7              15, 7
+            ← x →
+
+            The line splits the first and second matrice.
+
             The underlying data is structured with each
-            long side taking two bytes.
+            long side taking two bytes (split between the two matrices).
 
             For example a value of `1` for the first byte
-            will light up the top right LED.
-            A value of `1` for the second byte will light up
-            the right-most value in the 8th row.
-
-            In terms of orientation, this is the top of the unit
-            where the pins are.
+            will light up the top left LED.
+            A value of `128` for the second byte will light up
+            the top right value.
 
             The diagram demonstrates the layout of the unit and
             the underlying data structure that supports it.
 
-                      ← y →
-            1513119 7 5 3 1 ↑
-            x x x x x x x x x
-            x x x x x x x x ↓
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            161412108 6 4 2
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
-            x x x x x x x x
+          1 x x x x x x x x |  2 x x x x x x x x
+          3 x x x x x x x x |  4 x x x x x x x x
+          5 x x x x x x x x |  6 x x x x x x x x
+          7 x x x x x x x x |  8 x x x x x x x x
+          9 x x x x x x x x | 10 x x x x x x x x
+         11 x x x x x x x x | 12 x x x x x x x x
+         13 x x x x x x x x | 14 x x x x x x x x
+         15 x x x x x x x x | 16 x x x x x x x x
 
             In terms of addressing (for this class), we'll use the
             expected/intuitive scheme.
 
-            7 6 5 4 3 2 1 0
-            x x x x x x x x 0
-            x x x x x x x x 15
+            0 1 2 3 4 5 6 7 8 9 101112131415
+          0 x x x x x x x x x x x x x x x x
+          7 x x x x x x x x x x x x x x x x
 
             We now need to marry those together.
             We need to accomodate two things:
-            - The bytes are structured first up/down not right/left
+            - The bytes are structured right/left
             - x values >=8 jump to the next byte
 
-            y values -> bytes
+            x - columns
+            y - rows
+
+            bytes for rows (counting from top to bottom; y values):
             0 -> 1
             1 -> 3
             2 -> 5
@@ -146,15 +188,15 @@ namespace Iot.Device.Display
 
             // Is x is greater than one matrix/byte
             // then jump to the next matrix/byte
-            int column = x > 7 ? (y * 2) + 2 : (y * 2) + 1;
+            int column = x < 8 ? (y * 2) + 1 : (y * 2) + 2;
             // Same thing here; get an 8-bit mask
-            int mask = x > 7 ? 1 << x - 8 : 1 << x;
+            int mask = x < 8 ? 1 << x : 1 << (x - 8);
             byte data = _displayBuffer[column];
 
             if (value > 0)
             {
                 // Ensure bit is set
-                _displayBuffer[column] = (byte)(data ^ mask);
+                _displayBuffer[column] = (byte)(data | mask);
             }
             else
             {
