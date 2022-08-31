@@ -18,14 +18,14 @@ using Matrix16x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 
 for (int i = 0; i < 8; i++)
 {
     matrix[i,  i] = 1;
-    matrix[i,  i + 8] = 1;
+    matrix[i + 8,  i] = 1;
     Thread.Sleep(500);
 }
 
 for (int i = 0; i < 8; i++)
 {
     matrix[i,  i] = 0;
-    matrix[i,  i + 8] = 0;
+    matrix[i + 8,  i] = 0;
     Thread.Sleep(500);
 }
 

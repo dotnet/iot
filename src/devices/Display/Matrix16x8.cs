@@ -90,9 +90,9 @@ namespace Iot.Device.Display
             The diagram demonstrates the layout of the unit and
             the underlying data structure that supports it.
 
-                      ← x →
+                      ← y →
             1513119 7 5 3 1 ↑
-            x x x x x x x x y
+            x x x x x x x x x
             x x x x x x x x ↓
             x x x x x x x x
             x x x x x x x x
@@ -120,9 +120,9 @@ namespace Iot.Device.Display
             We now need to marry those together.
             We need to accomodate two things:
             - The bytes are structured first up/down not right/left
-            - y values >=8 jump to the next byte
+            - x values >=8 jump to the next byte
 
-            x values -> bytes
+            y values -> bytes
             0 -> 1
             1 -> 3
             2 -> 5
@@ -132,7 +132,7 @@ namespace Iot.Device.Display
             6 -> 13
             7 -> 15
 
-            y > 7
+            x > 7
 
             0 -> 2
             1 -> 4
@@ -144,11 +144,11 @@ namespace Iot.Device.Display
             7 -> 16
             */
 
-            // Is y is greater than one matrix/byte
+            // Is x is greater than one matrix/byte
             // then jump to the next matrix/byte
-            int column = y > 7 ? (x * 2) + 2 : (x * 2) + 1;
+            int column = x > 7 ? (y * 2) + 2 : (y * 2) + 1;
             // Same thing here; get an 8-bit mask
-            int mask = y > 7 ? 1 << y - 8 : 1 << y;
+            int mask = x > 7 ? 1 << x - 8 : 1 << x;
             byte data = _displayBuffer[column];
 
             if (value > 0)
