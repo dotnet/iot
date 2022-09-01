@@ -12,7 +12,7 @@ namespace Iot.Device.Display
     // Product: https://www.adafruit.com/product/2042
     public class Matrix16x8 : Ht16k33
     {
-        private byte[] _displayBuffer = new byte[17];
+        private readonly byte[] _displayBuffer = new byte[17];
 
         /// <summary>
         /// Initialize Matrix display
@@ -46,7 +46,7 @@ namespace Iot.Device.Display
         {
             Span<byte> displayBuffer = _displayBuffer;
             displayBuffer.Fill(0xFF);
-            displayBuffer[0] = 0x00
+            displayBuffer[0] = 0x00;
 
             if (BufferingEnabled)
             {
