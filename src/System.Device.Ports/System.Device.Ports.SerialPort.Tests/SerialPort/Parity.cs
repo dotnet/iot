@@ -606,7 +606,7 @@ namespace System.Device.Ports.SerialPort.Tests
                     break;
 
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(com));
             }
 
             return stopBits;

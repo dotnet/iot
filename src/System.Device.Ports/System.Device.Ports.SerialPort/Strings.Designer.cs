@@ -367,6 +367,15 @@ namespace System.Device.Ports.SerialPort {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Enumeration of serial port names is not supported on the current platform.
+        /// </summary>
+        internal static string PlatformNotSupported_SerialPort_GetPortNames {
+            get {
+                return ResourceManager.GetString("PlatformNotSupported_SerialPort_GetPortNames", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The port is already open.
         /// </summary>
         internal static string Port_already_open {

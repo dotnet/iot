@@ -100,7 +100,6 @@ namespace System.Device.Ports.SerialPort.Tests
             }
         }
 
-
         private void WriteRndByteArray(SerialPort com, int byteLength)
         {
             byte[] buffer = new byte[byteLength];

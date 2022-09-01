@@ -363,7 +363,6 @@ namespace System.Device.Ports.SerialPort.Tests
             }
         }
 
-
         private void VerifyBytesToRead(int numBytesRead)
         {
             VerifyBytesToRead(numBytesRead, DEFAULT_NUMBER_NEW_LINES);
@@ -407,7 +406,6 @@ namespace System.Device.Ports.SerialPort.Tests
                 VerifyRead(com1, com2, bytesToWrite, expectedChars);
             }
         }
-
 
         private void VerifyRead(SerialPort com1, SerialPort com2, byte[] bytesToWrite, char[] expectedChars)
         {

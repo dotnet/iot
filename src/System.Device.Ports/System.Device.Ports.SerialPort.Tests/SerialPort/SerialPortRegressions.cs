@@ -32,8 +32,10 @@ namespace System.Device.Ports.SerialPort.Tests
                 com1.Open();
 
                 if (!com2.IsOpen)
+                {
                     // This is necessary since com1 and com2 might be the same port if we are using a loopback
                     com2.Open();
+                }
 
                 string receivedstr = string.Empty;
                 com2.DataReceived += (sender, args) =>
@@ -43,7 +45,7 @@ namespace System.Device.Ports.SerialPort.Tests
 
                 com1.Write(text);
 
-                //3 seconds is more than enough time to write a few bytes to the other port
+                // 3 seconds is more than enough time to write a few bytes to the other port
                 TCSupport.WaitForPredicate(() => receivedstr.Length >= text.Length, 3000,
                     "Data was not returned in a timely fashion.  Timeout");
 

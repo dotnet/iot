@@ -219,6 +219,9 @@
   <data name="NotSupported_UnseekableStream" xml:space="preserve">
     <value>Stream does not support seeking</value>
   </data>
+  <data name="PlatformNotSupported_SerialPort_GetPortNames" xml:space="preserve">
+    <value>Enumeration of serial port names is not supported on the current platform</value>
+  </data>
   <data name="Port_already_open" xml:space="preserve">
     <value>The port is already open</value>
   </data>

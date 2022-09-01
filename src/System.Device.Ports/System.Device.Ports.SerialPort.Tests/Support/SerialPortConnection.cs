@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 // Notes on test capabilities:
@@ -9,14 +9,14 @@
 // the port will never block and the tests will either hang or fail (we could perhaps detect this when probing for loopback ports)
 // A null-modem connection is available when you have at least two openable ports, where some pair of ports is connected with
 // a null modem connection - i.e. TX/RX and CTS/RTS are crossed between the ports.
-
 using System;
+using System.Device.Ports.SerialPort;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Ports;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit.Sdk;
+using SerialPort = System.Device.Ports.SerialPort.Tests.SerialPort;
 
 namespace Legacy.Support
 {
@@ -40,6 +40,7 @@ namespace Legacy.Support
                     // thus their can not be a connection between com1 and com2
                     connectionVerified = false;
                 }
+
                 return connectionVerified;
             }
         }
@@ -60,6 +61,7 @@ namespace Legacy.Support
                     // thus their can not be a loopback between the ports
                     loopbackVerified = false;
                 }
+
                 return loopbackVerified;
             }
         }
@@ -157,10 +159,12 @@ namespace Legacy.Support
                             measuredHardwareCapacity = hardwareCapacity;
                             break;
                         }
+
                         // We're still pushing stuff out - wait for two readings the same
                         lastHardwareCapacity = hardwareCapacity;
                         Thread.Sleep(10);
                     }
+
                     com.Handshake = Handshake.None;
                     com.DiscardOutBuffer();
                 });
@@ -179,6 +183,7 @@ namespace Legacy.Support
 
                 t.Wait(2000);
             }
+
             return measuredHardwareCapacity;
         }
     }

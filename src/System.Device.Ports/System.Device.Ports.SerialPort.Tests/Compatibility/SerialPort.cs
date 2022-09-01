@@ -33,7 +33,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// </summary>
         public static string[] GetPortNames()
         {
-            return new string[] { "COM1:" };
+            return SP.GetPortNames();
         }
 
         /// <summary>

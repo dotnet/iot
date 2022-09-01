@@ -132,7 +132,6 @@ namespace System.Device.Ports.SerialPort.Tests
                     }
                 }
             }
-
             catch (Exception e)
             {
                 Debug.WriteLine("Thread1 threw the following exception:\n{0}", e);

@@ -20,6 +20,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// </summary>
         // [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         // // [ActiveIssue("https://github.com/dotnet/runtime/issues/34490", TestPlatforms.Windows, TargetFrameworkMonikers.Netcoreapp, TestRuntimes.Mono)]
+        [Fact]
         public void OpenEveryPortName()
         {
             foreach (string portName in SerialPort.GetPortNames())
@@ -31,7 +32,9 @@ namespace System.Device.Ports.SerialPort.Tests
                     {
                         serialPort.Open();
                     }
-                    catch (UnauthorizedAccessException) { }
+                    catch (UnauthorizedAccessException)
+                    {
+                    }
                 }
             }
         }
@@ -41,6 +44,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// (On Windows, the latter uses a different technique to SerialPort to find ports).
         /// </summary>
         // [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [Fact]
         public void AllHelperPortsAreInGetPortNames()
         {
             if (PlatformDetection.IsWindows && PlatformDetection.IsArmOrArm64Process)
@@ -63,6 +67,7 @@ namespace System.Device.Ports.SerialPort.Tests
         /// eg https://github.com/dotnet/corefx/pull/18928 / https://github.com/dotnet/corefx/pull/20668
         /// </summary>
         // [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [Fact]
         public void AllGetPortNamesAreInHelperPorts()
         {
             string[] helperPortNames = PortHelper.GetPorts();

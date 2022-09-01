@@ -53,11 +53,14 @@ namespace Legacy.Support
 
         private static void InitializeSerialInfo()
         {
+            // TODO: We won't run tests on NanoServer
+            /*
             if (PlatformDetection.IsWindowsNanoServer)
             {
                 s_localMachineSerialPortRequirements = SerialPortRequirements.None;
                 return;
             }
+            */
 
             GenerateSerialInfo();
 

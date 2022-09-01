@@ -98,7 +98,6 @@ namespace System.Device.Ports.SerialPort.Tests
             }
         }
 
-
         // [ConditionalFact(nameof(HasNullModem))]
         public void DsrHolding_true_local_close()
         {
@@ -122,14 +121,15 @@ namespace System.Device.Ports.SerialPort.Tests
                 serPortProp.VerifyPropertiesAndPrint(com1);
 
                 if (com1.IsOpen)
+                {
                     com1.Close();
+                }
 
                 serPortProp.SetAllPropertiesToDefaults();
                 serPortProp.SetProperty("PortName", TCSupport.LocalMachineSerialInfo.FirstAvailablePortName);
                 serPortProp.VerifyPropertiesAndPrint(com1);
             }
         }
-
 
         // [ConditionalFact(nameof(HasNullModem))]
         public void DsrHolding_true_remote_close()
@@ -154,7 +154,9 @@ namespace System.Device.Ports.SerialPort.Tests
                 serPortProp.VerifyPropertiesAndPrint(com1);
 
                 if (com2.IsOpen)
+                {
                     com2.Close();
+                }
 
                 Thread.Sleep(100);
 

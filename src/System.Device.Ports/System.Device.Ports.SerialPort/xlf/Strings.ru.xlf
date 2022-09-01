@@ -172,6 +172,11 @@
         <target state="new">Stream does not support seeking</target>
         <note />
       </trans-unit>
+      <trans-unit id="PlatformNotSupported_SerialPort_GetPortNames">
+        <source>Enumeration of serial port names is not supported on the current platform</source>
+        <target state="new">Enumeration of serial port names is not supported on the current platform</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Port_already_open">
         <source>The port is already open</source>
         <target state="new">The port is already open</target>
