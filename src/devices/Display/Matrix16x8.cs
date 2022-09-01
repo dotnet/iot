@@ -44,10 +44,9 @@ namespace Iot.Device.Display
         /// </summary>
         public void Fill()
         {
-            _displayBuffer = new byte[]
-            {
-                0, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
-            };
+            Span<byte> displayBuffer = _displayBuffer;
+            displayBuffer.Fill(0xFF);
+            displayBuffer[0] = 0x00
 
             if (BufferingEnabled)
             {
@@ -58,7 +57,7 @@ namespace Iot.Device.Display
         /// <inheritdoc/>
         public override void Clear()
         {
-            _displayBuffer = new byte[17];
+            _displayBuffer.AsSpan().Clear();
 
             if (BufferingEnabled)
             {
