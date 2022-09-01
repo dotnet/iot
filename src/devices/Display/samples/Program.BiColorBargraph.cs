@@ -22,7 +22,7 @@ bargraph[2] = BarColor.Yellow;
 bargraph[3] = BarColor.Off;
 bargraph[4] = BarColor.Red;
 
-Thread.Sleep(2000);
+Thread.Sleep(1000);
 bargraph.Clear();
 
 for (int i = 0; i < 24; i++)
@@ -35,7 +35,7 @@ for (int i = 0; i < 24; i++)
     int num = i % 4;
     BarColor color = (BarColor)(i % 3 + 1);
     bargraph[i] = color;
-    Thread.Sleep(250);
+    Thread.Sleep(100);
 }
 
 for (int i = 23; i >= 0; i--)
@@ -48,10 +48,10 @@ for (int i = 23; i >= 0; i--)
     int num = i % 4;
     BarColor color = (BarColor)(i % 3 + 1);
     bargraph[i] = color;
-    Thread.Sleep(250);
+    Thread.Sleep(100);
 }
 
-Thread.Sleep(2000);
+Thread.Sleep(1000);
 bargraph.Clear();
 
 bargraph[0] = BarColor.Red;
@@ -61,7 +61,7 @@ bargraph[12] = BarColor.Yellow;
 bargraph[18] = BarColor.Green;
 bargraph[23] = BarColor.Red;
 
-Thread.Sleep(2000);
+Thread.Sleep(1000);
 bargraph.Clear();
 
 byte[] customBuffer =
@@ -71,5 +71,15 @@ byte[] customBuffer =
 
 bargraph.Write(customBuffer);
 
-Thread.Sleep(10000);
+Thread.Sleep(1000);
+bargraph.Clear();
+
+bargraph.Fill(BarColor.Red);
+Thread.Sleep(1000);
+bargraph.Clear();
+bargraph.Fill(BarColor.Green);
+Thread.Sleep(1000);
+bargraph.Clear();
+bargraph.Fill(BarColor.Yellow);
+Thread.Sleep(1000);
 bargraph.Clear();

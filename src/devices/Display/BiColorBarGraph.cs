@@ -12,8 +12,8 @@ namespace Iot.Device.Display
     // Product: https://www.adafruit.com/product/1721
     public class BiColorBarGraph : Ht16k33
     {
-        private byte[] _displayBuffer = new byte[7];
-        private BarColor[] _biColorSegment = new BarColor[24];
+        private readonly byte[] _displayBuffer = new byte[7];
+        private readonly BarColor[] _biColorSegment = new BarColor[24];
 
         /// <summary>
         /// Initialize BarGraph display
@@ -41,10 +41,43 @@ namespace Iot.Device.Display
             }
         }
 
+        /// <summary>
+        /// Enable all LEDs.
+        /// </summary>
+        public void Fill(BarColor color)
+        {
+            byte fill = 0xFF;
+            switch (color)
+            {
+                case BarColor.Red:
+                    _displayBuffer[1] = fill;
+                    _displayBuffer[3] = fill;
+                    _displayBuffer[5] = fill;
+                    break;
+                case BarColor.Green:
+                    _displayBuffer[2] = fill;
+                    _displayBuffer[4] = fill;
+                    _displayBuffer[6] = fill;
+                    break;
+                case BarColor.Yellow:
+                    Span<byte> displayBuffer = _displayBuffer;
+                    displayBuffer.Fill(0xFF);
+                    displayBuffer[0] = 0x00;
+                    break;
+                default:
+                    break;
+            }
+
+            if (BufferingEnabled)
+            {
+                _i2cDevice.Write(_displayBuffer);
+            }
+        }
+
         /// <inheritdoc/>
         public override void Clear()
         {
-            _displayBuffer = new byte[7];
+            _displayBuffer.AsSpan().Clear();
             if (BufferingEnabled)
             {
                 _i2cDevice.Write(_displayBuffer);
