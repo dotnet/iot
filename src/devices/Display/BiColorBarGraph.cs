@@ -61,7 +61,7 @@ namespace Iot.Device.Display
                     break;
                 case BarColor.Yellow:
                     Span<byte> displayBuffer = _displayBuffer;
-                    displayBuffer.Fill(0xFF);
+                    displayBuffer.Fill(fill);
                     displayBuffer[0] = 0x00;
                     break;
                 default:
