@@ -76,8 +76,8 @@ namespace Iot.Device.Display
             int rowIndex = 0;
             foreach (byte b in data)
             {
-                int column = (rowIndex * 2) + 1 + startAddress;
-                _displayBuffer[column] = b;
+                int row = rowIndex * 2 + 1 + startAddress;
+                _displayBuffer[row] = b;
                 rowIndex++;
             }
 
@@ -95,8 +95,8 @@ namespace Iot.Device.Display
             int rowIndex = 0;
             foreach (byte b in data)
             {
-                int column = rowIndex > 7 ? (rowIndex - 8) * 2 + 2 : rowIndex * 2 + 1;
-                _displayBuffer[column] = b;
+                int row = rowIndex > 7 ? (rowIndex - 8) * 2 + 2 : rowIndex * 2 + 1;
+                _displayBuffer[row] = b;
                 rowIndex++;
             }
 
@@ -114,10 +114,12 @@ namespace Iot.Device.Display
             The following diagram shows the intended orientation of the matrix
             and its x,y address scheme.
 
-            Note: LED used: https://cdn-shop.adafruit.com/datasheets/KWM-30881XUGB.pdf
+            LED used:
+            - https://www.adafruit.com/product/2043
+            - https://cdn-shop.adafruit.com/datasheets/KWM-30881XUGB.pdf
 
             ← x →
-            0, 0          7, 0              15, 0
+            0,0           7,0               15,0
             x x x x x x x x | x x x x x x x x 0 ↑
             x x x x x x x x | x x x x x x x x 1 y
        sdl  x x x x x x x x | x x x x x x x x 2 ↓
@@ -127,7 +129,7 @@ namespace Iot.Device.Display
             x x x x x x x x | x x x x x x x x 6 y
             x x x x x x x x | x x x x x x x x 7 ↓
             0 1 2 3 4 5 6 7   8 9 101112131415
-            ← x →
+            ← x →                           15,7
 
             The line splits the first and second matrice.
 
@@ -183,20 +185,20 @@ namespace Iot.Device.Display
 
             // Is x is greater than one matrix/byte
             // then jump to the next matrix/byte
-            int column = x < 8 ? (y * 2) + 1 : (y * 2) + 2;
+            int row = x < 8 ? (y * 2) + 1 : (y * 2) + 2;
             // Same thing here; get an 8-bit mask
             int mask = x < 8 ? 1 << x : 1 << (x - 8);
-            byte data = _displayBuffer[column];
+            byte data = _displayBuffer[row];
 
             if (value > 0)
             {
                 // Ensure bit is set
-                _displayBuffer[column] = (byte)(data | mask);
+                _displayBuffer[row] = (byte)(data | mask);
             }
             else
             {
                 // Unset bit
-                _displayBuffer[column] = (byte)(data & ~mask);
+                _displayBuffer[row] = (byte)(data & ~mask);
             }
         }
     }
