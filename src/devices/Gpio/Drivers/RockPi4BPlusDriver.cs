@@ -11,7 +11,7 @@ namespace Iot.Device.Gpio.Drivers
     /// <remarks>
     /// SoC: Rockchip RK3399
     /// </remarks>
-    internal class RockPi4bPlusDriver : Rk3399Driver
+    public class RockPi4bPlusDriver : Rk3399Driver
     {
         private static readonly int[] _pinNumberConverter = new int[]
         {
