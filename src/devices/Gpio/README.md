@@ -7,6 +7,18 @@ This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO dr
 * For Allwinner SoCs: [SunxiDriver](Drivers/Sunxi/README.md)
 * For Rockchip SoCs: [RockchipDriver](Drivers/Rockchip/README.md)
 
+## Board specific drivers
+
+| Board | Driver |
+| :-: | :-: |
+| Orange Pi 4 | OrangePi4Driver.cs |
+| Orange Pi Lite | OrangePiLiteDriver.cs  |
+| Orange Pi Lite 2 | OrangePiLite2Driver.cs |
+| Orange Pi Zero | OrangePiZeroDriver.cs |
+| Orange Pi Zero 2 | OrangePiZero2Driver.cs |
+| Rock Pi 4B Plus | RockPi4bPlusDriver.cs |
+
+
 ## Benchmarks
 
 The test uses different GPIO drivers to quickly switch the state of GPIO, and uses an oscilloscope to measure the average frequency of GPIO externally.
