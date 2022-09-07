@@ -198,9 +198,6 @@ namespace Iot.Device.Display
             x x x x x x x x Green=11; Red=12
             x x x x x x x x Green=13; Red=14
             x x x x x x x x Green=15; Red=16
-
-            We now need to marry those together.
-            We need to accomodate two things:
             */
 
             int row = (y * 2) + 1;

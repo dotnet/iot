@@ -69,24 +69,7 @@ namespace Iot.Device.Display
         /// <inheritdoc/>
         public override void Write(ReadOnlySpan<byte> data, int startAddress = 0)
         {
-            // startAddress is intended to mean which matrix to write to
-            // only 8 bytes are supported at a time
-            int rowIndex = 0;
-            foreach (byte b in data)
-            {
-                int row = rowIndex * 2 + 1 + startAddress;
-                _displayBuffer[row] = b;
-                rowIndex++;
-            }
-
-            FlushIfBuffering();
-        }
-
-        /// <summary>
-        /// Writes bytes to matrix, row by row
-        /// </summary>
-        public void Write(ReadOnlySpan<byte> data)
-        {
+            // startAddress is ignored
             int rowIndex = 0;
 
             foreach (byte b in data)
@@ -112,14 +95,14 @@ namespace Iot.Device.Display
         private void UpdateBuffer(int x, int y, int value)
         {
             /*
-            Task: Update data for 8x16 matrix
+            Task: Update data for 8x8 matrix
 
             The following diagram shows the intended orientation of the matrix
             and its x,y address scheme.
 
             LED used:
-            - https://www.adafruit.com/product/2043
-            - https://cdn-shop.adafruit.com/datasheets/KWM-30881XUGB.pdf
+            - https://www.adafruit.com/product/1819
+            - https://www.adafruit.com/product/871
 
             ← x →
             0,0           7,0
@@ -134,18 +117,14 @@ namespace Iot.Device.Display
             0 1 2 3 4 5 6 7
             ← x →         7,7
 
-            The line splits the first and second matrice.
+            The "Mini" and "Small" LED matriced are structed 90d different.
+            The diagram above is for the "Small" LED matrix.
+            For the "Mini" matrix, the 0,0 position is 90d to the left.
+            The binding hasn't been updated to accomodate that difference.
+            If you look at the Adafruit images, you'll see this same 90d difference.
 
-            The underlying data is structured with each
-            long side taking two bytes (split between the two matrices).
-
-            For example a value of `1` for the first byte
-            will light up the top left LED.
-            A value of `128` for the second byte will light up
-            the top right value.
-
-            The diagram demonstrates the layout of the unit and
-            the underlying data structure that supports it.
+            The underlying data is structured with every second byte affecting a
+            row in the matrix. This is demonstrated below.
 
           1 x x x x x x x x
           3 x x x x x x x x
@@ -156,6 +135,19 @@ namespace Iot.Device.Display
          13 x x x x x x x x
          15 x x x x x x x x
 
+            The underlying bits in each byte you assigned are off by one.
+            The bit for the first (left-most) LED is not the highest bit but the second one.
+            The right-most LED is controlled by the highest bit.
+
+            For example, if you set the buferr, to the following value,
+            it will create a diagonal line from top left to bottom right.
+
+            0, 64, 0, 32, 0, 16, 0, 8, 0, 4, 0, 2, 0, 1, 0, 128
+
+            The following buffer would create a diagonal line in the opposite direction,
+            starting from top right towards bottom left.
+
+            0, 128, 0, 1, 0, 2, 0, 4, 0, 8, 0, 16, 0, 32, 0, 64
             */
 
             // Is x is greater than one matrix/byte
