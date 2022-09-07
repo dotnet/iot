@@ -24,6 +24,16 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
+        /// Width of matrix.
+        /// </summary>
+        public int Width => 8;
+
+        /// <summary>
+        /// Height of matrix.
+        /// </summary>
+        public int Height => 8;
+
+        /// <summary>
         /// Indexer for updating matrix.
         /// </summary>
         public LedColor this[int x, int y]
@@ -32,10 +42,7 @@ namespace Iot.Device.Display
             {
                 UpdateBuffer(x, y, value);
 
-                if (BufferingEnabled)
-                {
-                    Flush();
-                }
+                FlushIfBuffering();
             }
         }
 
@@ -75,10 +82,7 @@ namespace Iot.Device.Display
                 _displayBuffer[row + 1] = red;
             }
 
-            if (BufferingEnabled)
-            {
-                _i2cDevice.Write(_displayBuffer);
-            }
+            FlushIfBuffering();
         }
 
         /// <inheritdoc/>
@@ -86,10 +90,7 @@ namespace Iot.Device.Display
         {
             _displayBuffer.AsSpan().Clear();
 
-            if (BufferingEnabled)
-            {
-                _i2cDevice.Write(_displayBuffer);
-            }
+            FlushIfBuffering();
         }
 
         /// <inheritdoc/>
@@ -108,10 +109,7 @@ namespace Iot.Device.Display
                 rowIndex++;
             }
 
-            if (BufferingEnabled)
-            {
-                Flush();
-            }
+            FlushIfBuffering();
         }
 
         /// <summary>
@@ -145,6 +143,11 @@ namespace Iot.Device.Display
                 rowIndex++;
             }
 
+            FlushIfBuffering();
+        }
+
+        private void FlushIfBuffering()
+        {
             if (BufferingEnabled)
             {
                 Flush();

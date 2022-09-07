@@ -9,7 +9,12 @@ using System.Threading;
 using Iot.Device.Display;
 
 // Initialize display (busId = 1 for Raspberry Pi 2 & 3)
-using Matrix8x8Bicolor matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
+// Supports Matrix 8x8 and 16x8
+// - https://www.adafruit.com/product/1632
+// - https://www.adafruit.com/product/2042
+// Use Matrix8x8 type for 8x8 matrix
+// Use Matrix16x8 type for 16x8 matrix
+using Matrix8x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
     {
         // Set max brightness
         Brightness = Ht16k33.MaxBrightness,
@@ -18,44 +23,48 @@ using Matrix8x8Bicolor matrix = new(I2cDevice.Create(new I2cConnectionSettings(b
 
 // Dimensions
 int width = matrix.Width - 1;
+int halfWidth = matrix.Width / 2;
 
 // Clear matrix
 matrix.Clear();
 
 // Set pixel in the origin 0, 0 position.
-matrix[0, 0] = LedColor.Red;
+matrix[0, 0] = 1;
 // Set pixels in the middle
-matrix[3, 3] = LedColor.Green;
-matrix[3, 4] = LedColor.Yellow;
-matrix[4, 3] = LedColor.Yellow;
-matrix[4, 4] = LedColor.Red;
+matrix[halfWidth - 1, 3] = 1;
+matrix[halfWidth - 1, 4] = 1;
+matrix[halfWidth, 3] = 1;
+matrix[halfWidth, 4] = 1;
 // Set pixel on the opposite edge
-matrix[7, 7] = LedColor.Green;
+matrix[width - 1, 6] = 1;
+matrix[width - 1, 7] = 1;
+matrix[width, 6] = 1;
+matrix[width, 7] = 1;
 
-Thread.Sleep(1000);
+Thread.Sleep(2000);
 matrix.Clear();
 
 // Draw line in first row
-for (int i = 0; i < 8; i++)
+for (int i = 0; i < matrix.Width; i++)
 {
     if (i % 2 is 1)
     {
         continue;
     }
 
-    matrix[i, 0] = (LedColor)(i % 3 + 1);
+    matrix[i, 0] = 1;
     Thread.Sleep(50);
 }
 
 // Draw line in last row
-for (int i = 0; i < 8; i++)
+for (int i = 0; i < matrix.Width; i++)
 {
     if (i % 2 is 0)
     {
         continue;
     }
 
-    matrix[i, 7] = (LedColor)(i % 3 + 1);
+    matrix[i, 7] = 1;
     Thread.Sleep(50);
 }
 
@@ -65,53 +74,53 @@ matrix.Clear();
 // Draw diagonal lines
 for (int i = 0; i < 8; i++)
 {
-    LedColor color = (LedColor)(i % 3 + 1);
-    matrix[i,  i] = color;
-    matrix[7 - i, i] = color;
+    matrix[i,  i] = 1;
+    matrix[8 - i, i] = 1;
+    // uncomment if matrix.Width == 16
+    // matrix[i + 8, i] = 1;
+    // matrix[15 - i, i] = 1;
     Thread.Sleep(50);
 }
 
 for (int i = 0; i < 8; i++)
 {
-    matrix[i,  i] = LedColor.Off;
-    matrix[7 - i, i] = LedColor.Off;
+    matrix[i,  i] = 0;
+    matrix[8 - i, i] = 0;
+    // uncomment if matrix.Width == 16
+    // matrix[i + 8, i] = 0;
+    // matrix[15 - i, i] = 0;
     Thread.Sleep(50);
 }
 
 // Draw a bounding box
-for (int i = 0; i < 8; i++)
+for (int i = 0; i < matrix.Width; i++)
 {
-    LedColor color = (LedColor)(i % 3 + 1);
-    matrix[i, 0] = color;
+    matrix[i, 0] = 1;
     Thread.Sleep(10);
 }
 
 for (int i = 0; i < 8; i++)
 {
-    LedColor color = (LedColor)(i % 3 + 1);
-    matrix[7, i] = color;
+    matrix[width, i] = 1;
+    Thread.Sleep(10);
+}
+
+for (int i = matrix.Width; i >= 0; i--)
+{
+    matrix[i, 7] = 1;
     Thread.Sleep(10);
 }
 
 for (int i = 7; i >= 0; i--)
 {
-    LedColor color = (LedColor)(i % 3 + 1);
-    matrix[i, 7] = color;
-    Thread.Sleep(10);
-}
-
-for (int i = 7; i >= 0; i--)
-{
-    LedColor color = (LedColor)(i % 3 + 1);
-    matrix[0, i] = color;
+    matrix[0, i] = 1;
     Thread.Sleep(50);
 }
 
 Thread.Sleep(500);
 matrix.Clear();
 
-// Draw a spiral bounding box
-void WriteRowPixels(int row, IEnumerable<int> pixels, LedColor value)
+void WriteRowPixels(int row, IEnumerable<int> pixels, int value)
 {
     foreach (int pixel in pixels)
     {
@@ -120,7 +129,7 @@ void WriteRowPixels(int row, IEnumerable<int> pixels, LedColor value)
     }
 }
 
-void WriteColumnPixels(int column, IEnumerable<int> pixels, LedColor value)
+void WriteColumnPixels(int column, IEnumerable<int> pixels, int value)
 {
     foreach (int pixel in pixels)
     {
@@ -132,32 +141,34 @@ void WriteColumnPixels(int column, IEnumerable<int> pixels, LedColor value)
 // Draw a spiral bounding box
 for (int j = 0; j < 4; j++)
 {
-    int rangeW = 8 - j * 2;
+    int rangeW = matrix.Width - j * 2;
     int rangeH = 8 - j * 2;
-    LedColor color = (LedColor)(j % 3 + 1);
-
     // top
-    WriteRowPixels(j, Enumerable.Range(j, rangeW), color);
+    WriteRowPixels(j, Enumerable.Range(j, rangeW), 1);
 
     // right
-    WriteColumnPixels(width - j, Enumerable.Range(j + 1, rangeH - 2), color);
+    WriteColumnPixels(width - j, Enumerable.Range(j + 1, rangeH - 2), 1);
 
     // bottom
-    WriteRowPixels(7 - j, Enumerable.Range(j, rangeW).Reverse(), color);
+    WriteRowPixels(7 - j, Enumerable.Range(j, rangeW).Reverse(), 1);
 
     // left
-    WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 2).Reverse(), color);
+    WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 2).Reverse(), 1);
 }
 
 Thread.Sleep(1000);
 matrix.Clear();
 
+matrix[0, 0] = 1;
+matrix[0, 7] = 1;
+matrix[width, 0] = 1;
+matrix[width, 7] = 1;
+
+Thread.Sleep(1000);
+matrix.Clear();
+
 // Fill matrix
-matrix.Fill(LedColor.Red);
-Thread.Sleep(1000);
-matrix.Fill(LedColor.Green);
-Thread.Sleep(1000);
-matrix.Fill(LedColor.Yellow);
+matrix.Fill();
 Thread.Sleep(1000);
 matrix.Clear();
 
@@ -173,10 +184,8 @@ var smiley = new byte[]
     0b00111100
 };
 
-matrix.Write(smiley, LedColor.Red);
-Thread.Sleep(500);
-matrix.Write(smiley, LedColor.Yellow);
-Thread.Sleep(500);
-matrix.Write(smiley, LedColor.Green);
+matrix.Write(smiley);
+// uncomment if matrix.Width == 16
+// matrix.Write(smiley, 1);
 Thread.Sleep(2000);
 matrix.Clear();

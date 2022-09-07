@@ -7,10 +7,10 @@ using System.Device.I2c;
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Represents an 8x16 LED matrix using the HT16K33 LED Matrix driver.
+    /// Represents an 8x8 LED matrix using the HT16K33 LED Matrix driver.
     /// </summary>
     // Product: https://www.adafruit.com/product/2042
-    public class Matrix16x8 : Ht16k33
+    public class Matrix8x8 : Ht16k33
     {
         private readonly byte[] _displayBuffer = new byte[17];
 
@@ -18,7 +18,7 @@ namespace Iot.Device.Display
         /// Initialize Matrix display
         /// </summary>
         /// <param name="i2cDevice">The <see cref="I2cDevice"/> to create with.</param>
-        public Matrix16x8(I2cDevice i2cDevice)
+        public Matrix8x8(I2cDevice i2cDevice)
             : base(i2cDevice)
         {
         }
@@ -26,7 +26,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Width of matrix.
         /// </summary>
-        public int Width => 16;
+        public int Width => 8;
 
         /// <summary>
         /// Height of matrix.
@@ -82,6 +82,25 @@ namespace Iot.Device.Display
             FlushIfBuffering();
         }
 
+        /// <summary>
+        /// Writes bytes to matrix, row by row
+        /// </summary>
+        public void Write(ReadOnlySpan<byte> data)
+        {
+            int rowIndex = 0;
+
+            foreach (byte b in data)
+            {
+                int row = (rowIndex * 2) + 1;
+                int highBit = b & 128;
+                int shiftByte = b >> 1 | highBit;
+                _displayBuffer[row] = (byte)shiftByte;
+                rowIndex++;
+            }
+
+            FlushIfBuffering();
+        }
+
         private void FlushIfBuffering()
         {
             if (BufferingEnabled)
@@ -103,17 +122,17 @@ namespace Iot.Device.Display
             - https://cdn-shop.adafruit.com/datasheets/KWM-30881XUGB.pdf
 
             ← x →
-            0,0           7,0               15,0
-            x x x x x x x x | x x x x x x x x 0 ↑
-            x x x x x x x x | x x x x x x x x 1 y
-       sdl  x x x x x x x x | x x x x x x x x 2 ↓
-       sda  x x x x x x x x | x x x x x x x x 3
-       gnd  x x x x x x x x | x x x x x x x x 4
-       vcc  x x x x x x x x | x x x x x x x x 5 ↑
-            x x x x x x x x | x x x x x x x x 6 y
-            x x x x x x x x | x x x x x x x x 7 ↓
-            0 1 2 3 4 5 6 7   8 9 101112131415
-            ← x →                           15,7
+            0,0           7,0
+            x x x x x x x x 0 ↑
+            x x x x x x x x 1 y
+       sdl  x x x x x x x x 2 ↓
+       sda  x x x x x x x x 3
+       gnd  x x x x x x x x 4
+       vcc  x x x x x x x x 5 ↑
+            x x x x x x x x 6 y
+            x x x x x x x x 7 ↓
+            0 1 2 3 4 5 6 7
+            ← x →         7,7
 
             The line splits the first and second matrice.
 
@@ -128,50 +147,22 @@ namespace Iot.Device.Display
             The diagram demonstrates the layout of the unit and
             the underlying data structure that supports it.
 
-          1 x x x x x x x x |  2 x x x x x x x x
-          3 x x x x x x x x |  4 x x x x x x x x
-          5 x x x x x x x x |  6 x x x x x x x x
-          7 x x x x x x x x |  8 x x x x x x x x
-          9 x x x x x x x x | 10 x x x x x x x x
-         11 x x x x x x x x | 12 x x x x x x x x
-         13 x x x x x x x x | 14 x x x x x x x x
-         15 x x x x x x x x | 16 x x x x x x x x
+          1 x x x x x x x x
+          3 x x x x x x x x
+          5 x x x x x x x x
+          7 x x x x x x x x
+          9 x x x x x x x x
+         11 x x x x x x x x
+         13 x x x x x x x x
+         15 x x x x x x x x
 
-            We now need to marry those together.
-            We need to accomodate two things:
-            - The bytes are structured right/left
-            - x values >=8 jump to the next byte
-
-            x - columns
-            y - rows
-
-            bytes for rows (counting from top to bottom; y values):
-            0 -> 1
-            1 -> 3
-            2 -> 5
-            3 -> 7
-            4 -> 9
-            5 -> 11
-            6 -> 13
-            7 -> 15
-
-            x > 7
-
-            0 -> 2
-            1 -> 4
-            2 -> 6
-            3 -> 8
-            4 -> 10
-            5 -> 12
-            6 -> 14
-            7 -> 16
             */
 
             // Is x is greater than one matrix/byte
             // then jump to the next matrix/byte
-            int row = x < 8 ? (y * 2) + 1 : (y * 2) + 2;
+            int row = y * 2 + 1;
             // Same thing here; get an 8-bit mask
-            int mask = x < 8 ? 1 << x : 1 << (x - 8);
+            int mask = 1 << (x + 7) % 8;
             byte data = _displayBuffer[row];
 
             if (value > 0)
