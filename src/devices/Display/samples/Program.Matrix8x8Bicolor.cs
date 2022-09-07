@@ -32,7 +32,7 @@ matrix[4, 4] = LedColor.Red;
 // Set pixel on the opposite edge
 matrix[7, 7] = LedColor.Green;
 
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Clear();
 
 // Draw line in first row
@@ -149,16 +149,16 @@ for (int j = 0; j < 4; j++)
     WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 2).Reverse(), color);
 }
 
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Clear();
 
 // Fill matrix
 matrix.Fill(LedColor.Red);
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Fill(LedColor.Green);
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Fill(LedColor.Yellow);
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Clear();
 
 var smiley = new byte[]

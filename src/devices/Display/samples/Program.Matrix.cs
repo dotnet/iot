@@ -41,7 +41,7 @@ matrix[width - 1, 7] = 1;
 matrix[width, 6] = 1;
 matrix[width, 7] = 1;
 
-Thread.Sleep(2000);
+Thread.Sleep(500);
 matrix.Clear();
 
 // Draw line in first row
@@ -156,7 +156,7 @@ for (int j = 0; j < 4; j++)
     WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 2).Reverse(), 1);
 }
 
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Clear();
 
 matrix[0, 0] = 1;
@@ -164,12 +164,12 @@ matrix[0, 7] = 1;
 matrix[width, 0] = 1;
 matrix[width, 7] = 1;
 
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Clear();
 
 // Fill matrix
 matrix.Fill();
-Thread.Sleep(1000);
+Thread.Sleep(500);
 matrix.Clear();
 
 var smiley = new byte[]
