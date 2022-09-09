@@ -176,6 +176,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [HC-SR04 - Ultrasonic Ranging Module](Hcsr04/README.md)
 * [LidarLiteV3 - LIDAR Time of Flight Sensor](LidarLiteV3/README.md)
 * [VL53L0X - distance sensor](Vl53L0X/README.md)
+* [VL53L1X - distance sensor](Vl53L1X/README.md)
 
 ### Passive InfraRed (motion) sensors
 
