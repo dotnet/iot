@@ -16,28 +16,28 @@ You will find this device for example as ["Adafruit VL53L1X Time of Flight Dista
 
 ## Usage
 
-All calibration and all setup of the sensor is done fully transparently for you including changing the I2C address of the device. Just create a class and start reading the distance.
+All calibration and all setup of the sensor is done fully transparently for you. Just create a class and start reading the distance.
+Make sure you have turned the device on via the xShut pin.
 
 ```csharp
-Vl53L1X vl53L1X = new(i2cAddress: newI2CAddress, xShutPin: xShutPinNo);
+using Vl53L1X vl53L1X = new(I2cDevice.Create(new I2cConnectionSettings(1, Vl53L1X.DefaultI2cAddress)));
 
-Console.WriteLine($"SensorID: {vl53L1X.GetSensorId():X}");
+Console.WriteLine($"SensorID: {vl53L1X.SensorId:X}");
+vl53L1X.Precision = Precision.Short;
 
 while (!Console.KeyAvailable)
 {
    try
    {
-      var dist = vl53L1X.Distance;
-      var rangeStatus = vl53L1X.GetRangeStatus();
-      Console.WriteLine($"RangeStatus {rangeStatus}");
-      Console.WriteLine($"Distance: {dist}");
+       Console.WriteLine($"Distance: {vl53L1X.Distance}");
+       Console.WriteLine($"RangeStatus {vl53L1X.RangeStatus}");
    }
    catch (Exception ex)
    {
       Console.WriteLine($"Exception: {ex.Message}");
    }
 
-
    Thread.Sleep(500);
 }
+
 ```

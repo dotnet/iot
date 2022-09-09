@@ -6,7 +6,7 @@ namespace Iot.Device.Vl53L1X
     /// <summary>
     /// The distance mode of the device
     /// </summary>
-    public enum DistanceMode : byte
+    public enum Precision : byte
     {
         /// <summary>
         /// Short distance. Maximum distance is limited to 1.3m but results in a better ambient immunity.

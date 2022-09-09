@@ -115,7 +115,6 @@
 * [TM1637 - Segment Display](Tm1637/README.md)
 * [TSL256x - Illuminance sensor](Tsl256x/README.md)
 * [VL53L0X - distance sensor](Vl53L0X/README.md)
-* [VL53L1X - distance sensor](Vl53L1X/README.md)
 * [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
 * [μFire ISE Probe - pH, ORP and temperature sensor](UFireIse/README.md)
 </devices>

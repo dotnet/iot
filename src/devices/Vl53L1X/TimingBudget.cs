@@ -44,7 +44,7 @@ namespace Iot.Device.Vl53L1X
         Budget200 = 200,
 
         /// <summary>
-        /// Budget of 15 ms
+        /// Budget of 500 ms
         /// </summary>
         Budget500 = 500,
     }

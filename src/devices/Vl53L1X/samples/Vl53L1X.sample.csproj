@@ -9,5 +9,4 @@
     <ProjectReference Include="..\Vl53L1X.csproj" />
   </ItemGroup>
 
-
 </Project>
