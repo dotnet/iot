@@ -6,15 +6,14 @@ namespace System.Device.Gpio
     /// <summary>
     /// Represents a general-purpose I/O (GPIO) pin.
     /// </summary>
-    public class Gpio​Pin : IDisposable
+    public class Gpio​Pin
     {
         private readonly int _pinNumber;
-        private readonly GpioController _controller;
-        private bool _disposedValue;
+        private readonly GpioDriver _driver;
 
-        internal Gpio​Pin(int pinNumber, GpioController controller)
+        internal Gpio​Pin(int pinNumber, GpioDriver driver)
         {
-            _controller = controller;
+            _driver = driver;
             _pinNumber = pinNumber;
         }
 
@@ -31,7 +30,7 @@ namespace System.Device.Gpio
         /// </summary>
         /// <returns>An enumeration value that indicates the current pin mode for the GPIO pin.
         /// The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.</returns>
-        public PinMode GetPinMode() => _controller.GetPinMode(_pinNumber);
+        public PinMode GetPinMode() => _driver.GetPinMode(_pinNumber);
 
         /// <summary>
         /// Gets whether the general-purpose I/O (GPIO) pin supports the specified pin mode.
@@ -41,7 +40,7 @@ namespace System.Device.Gpio
         /// <see langword="true"/> if the GPIO pin supports the pin mode that pinMode specifies; otherwise false.
         /// If you specify a pin mode for which this method returns <see langword="false"/> when you call <see cref="SetPinMode"/>, <see cref="SetPinMode"/> generates an exception.
         /// </returns>
-        public bool IsPinModeSupported(PinMode pinMode) => _controller.IsPinModeSupported(_pinNumber, pinMode);
+        public bool IsPinModeSupported(PinMode pinMode) => _driver.IsPinModeSupported(_pinNumber, pinMode);
 
         /// <summary>
         /// Sets the pin mode of the general-purpose I/O (GPIO) pin.
@@ -50,13 +49,13 @@ namespace System.Device.Gpio
         /// <param name="value">An enumeration value that specifies pin mode to use for the GPIO pin.
         /// The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.</param>
         /// <exception cref="ArgumentException">The GPIO pin does not support the specified pin mode.</exception>
-        public void SetPinMode(PinMode value) => _controller.SetPinMode(_pinNumber, value);
+        public void SetPinMode(PinMode value) => _driver.SetPinMode(_pinNumber, value);
 
         /// <summary>
         /// Reads the current value of the general-purpose I/O (GPIO) pin.
         /// </summary>
         /// <returns>The current value of the GPIO pin. If the pin is configured as an output, this value is the last value written to the pin.</returns>
-        public PinValue Read() => _controller.Read(_pinNumber);
+        public PinValue Read() => _driver.Read(_pinNumber);
 
         /// <summary>
         /// Drives the specified value onto the general purpose I/O (GPIO) pin according to the current pin mode for the pin
@@ -67,7 +66,7 @@ namespace System.Device.Gpio
         /// <para>If the GPIO pin is configured as an input, the method updates the latched output value for the pin. The latched output value is driven onto the pin when the configuration for the pin changes to output.</para>
         /// </param>
         /// <exception cref="InvalidOperationException">This exception will be thrown on an attempt to write to a pin that hasn't been opened or is not configured as output.</exception>
-        public void Write(PinValue value) => _controller.Write(_pinNumber, value);
+        public void Write(PinValue value) => _driver.Write(_pinNumber, value);
 
         /// <summary>
         /// Occurs when the value of the general-purpose I/O (GPIO) pin changes, either because of an external stimulus when the pin is configured as an input, or when a value is written to the pin when the pin in configured as an output.
@@ -76,35 +75,18 @@ namespace System.Device.Gpio
         {
             add
             {
-                if (_disposedValue)
-                {
-                    throw new ObjectDisposedException(nameof(GpioPin));
-                }
-
-                _controller.RegisterCallbackForPinValueChangedEvent(_pinNumber, PinEventTypes.Falling | PinEventTypes.Rising, value);
+                _driver.AddCallbackForPinValueChangedEvent(_pinNumber, PinEventTypes.Falling | PinEventTypes.Rising, value);
             }
 
             remove
             {
-                if (_disposedValue)
-                {
-                    throw new ObjectDisposedException(nameof(GpioPin));
-                }
-
-                _controller.UnregisterCallbackForPinValueChangedEvent(_pinNumber, value);
+                _driver.RemoveCallbackForPinValueChangedEvent(_pinNumber, value);
             }
         }
 
         /// <summary>
         /// Toggles the output of the general purpose I/O (GPIO) pin if the pin is configured as an output.
         /// </summary>
-        public void Toggle() => _controller.Write(_pinNumber, !_controller.Read(_pinNumber));
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _controller.ClosePin(_pinNumber);
-            _disposedValue = true;
-        }
+        public void Toggle() => _driver.Write(_pinNumber, !_driver.Read(_pinNumber));
     }
 }

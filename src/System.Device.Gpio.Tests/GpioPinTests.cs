@@ -46,21 +46,9 @@ namespace System.Device.Gpio.Tests
             GpioPin pin = ctrl.OpenPin(PinNumber, PinMode.Input);
             ctrl.ClosePin(PinNumber);
             // Assert
-            Assert.Throws<ObjectDisposedException>(() => { var ret = pin.Read(); });
-        }
-
-        [Fact]
-        public void TestDisposePin()
-        {
-            // Arrange
-            var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
-            // Act
-            GpioPin pin = ctrl.OpenPin(PinNumber, PinMode.Input);
-            pin.Dispose();
-            // Assert
-            Assert.Throws<ObjectDisposedException>(() => { var ret = pin.Read(); });
-            // The pin should be close
-            Assert.False(ctrl.IsPinOpen(PinNumber));
+            // This should work even if the pin is closed in the controller as the driver has no idea
+            // Of the controller behavior.
+            var ret = pin.Read();
         }
 
         [Fact]
