@@ -18,7 +18,6 @@ This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO dr
 | Orange Pi Zero 2 | [OrangePiZero2Driver](./Drivers/OrangePiZero2Driver.cs) |
 | Rock Pi 4B Plus | [RockPi4bPlusDriver](./Drivers/RockPi4bPlusDriver.cs) |
 
-
 ## Benchmarks
 
 The test uses different GPIO drivers to quickly switch the state of GPIO, and uses an oscilloscope to measure the average frequency of GPIO externally.
