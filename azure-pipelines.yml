@@ -47,6 +47,7 @@ stages:
       displayName: 'Execute Markdownlint'
       condition: eq(variables['build.reason'], 'PullRequest')
 
+      # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
     - script: build.cmd -ci
         -configuration $(BuildConfiguration)
         -prepareMachine
@@ -88,6 +89,28 @@ stages:
       displayName: Publish Signing Scripts
       artifact: config
       condition: eq(variables['BuildConfiguration'], 'Release')
+
+  - job: Windows_ArduinoIntegration
+    displayName: Arduino Integration Tests
+    timeoutInMinutes: 120
+    pool:
+      vmImage: windows-2022
+
+    strategy:
+      matrix:
+        Build_Release:
+          BuildConfiguration: Release
+        Build_Debug:
+          BuildConfiguration: Debug
+
+    steps:
+    - script: build.cmd -ci 
+        -configuration $(BuildConfiguration)
+        -prepareMachine
+      displayName: Build Iot
+      
+    - script: eng\ArduinoCsCI.cmd $(UserProfile) $(BuildConfiguration)
+      displayName: Build and run Arduino Integration Tests
 
   - job: Linux
     displayName: Linux Build

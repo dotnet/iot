@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
 using System.Net;
 using System.Net.Sockets;
@@ -12,7 +13,7 @@ using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
 using Xunit;
 
-namespace Arduino.Tests
+namespace Iot.Device.Arduino.Tests
 {
     public class FirmataTestFixture : IDisposable
     {
@@ -25,7 +26,8 @@ namespace Arduino.Tests
             {
                 var loggerFactory = LoggerFactory.Create(builder =>
                 {
-                    builder.AddConsole().AddProvider(new DebuggerOutputLoggerProvider());
+                    builder.AddProvider(new DebuggerOutputLoggerProvider())
+                        .SetMinimumLevel(LogLevel.Trace);
                 });
 
                 // Statically register our factory. Note that this must be done before instantiation of any class that wants to use logging.
