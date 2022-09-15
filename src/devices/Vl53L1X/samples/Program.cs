@@ -27,7 +27,7 @@ while (!Console.KeyAvailable)
 {
    try
    {
-       Console.WriteLine($"Distance: {vl53L1X.Distance}");
+       Console.WriteLine($"Distance: {vl53L1X.Distance.Millimeters}");
        Console.WriteLine($"RangeStatus {vl53L1X.RangeStatus}");
    }
    catch (Exception ex)

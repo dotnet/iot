@@ -12,6 +12,7 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using UnitsNet;
 
 namespace Iot.Device.Vl53L1X
 {
@@ -105,23 +106,27 @@ namespace Iot.Device.Vl53L1X
         }
 
         /// <summary>
-        /// Get a distance in millimeters.
+        /// Gets the measured distance.
         /// If ranging has not been started yet, the function will automatically start the ranging feature of the device.
         /// </summary>
-        public ushort Distance
-        {
-            get
-            {
-                if (!_rangingInitialized)
-                {
-                    StartRanging();
-                }
+        public Length Distance => GetDistance();
 
-                WaitForDataReady();
-                ushort distance = ReadUInt16((ushort)Registers.VL53L1X_RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0);
-                ClearInterrupt();
-                return distance;
+        /// <summary>
+        /// Gets the measured distance.
+        /// If ranging has not been started yet, the function will automatically start the ranging feature of the device.
+        /// </summary>
+        /// <returns>Measured distance as <see cref="Length"/></returns>
+        public Length GetDistance()
+        {
+            if (!_rangingInitialized)
+            {
+                StartRanging();
             }
+
+            WaitForDataReady();
+            ushort distance = ReadUInt16((ushort)Registers.VL53L1X_RESULT__FINAL_CROSSTALK_CORRECTED_RANGE_MM_SD0);
+            ClearInterrupt();
+            return Length.FromMillimeters(distance);
         }
 
         /// <inheritdoc />
@@ -251,6 +256,7 @@ namespace Iot.Device.Vl53L1X
                 polarity = (byte)(polarity & 0x10);
                 return polarity >> 4 == 1 ? PinValue.High : PinValue.Low;
             }
+
             set
             {
                 byte temp = ReadByte((ushort)Registers.GPIO_HV_MUX__CTRL);
@@ -304,6 +310,7 @@ namespace Iot.Device.Vl53L1X
                         return TimingBudget.BudgetUnknown;
                 }
             }
+
             set
             {
                 switch (Precision)
@@ -397,6 +404,7 @@ namespace Iot.Device.Vl53L1X
 
                 return temp == 0x14 ? Precision.Short : Precision.Long;
             }
+
             set
             {
                 var timingBudget = TimingBudgetInMs;
@@ -441,6 +449,7 @@ namespace Iot.Device.Vl53L1X
 
                 return (ushort)(temp / (clockPll * 1.065));
             }
+
             set
             {
                 uint clockPll = ReadUInt32((ushort)Registers.VL53L1X_RESULT__OSC_CALIBRATE_VAL);
@@ -568,20 +577,22 @@ namespace Iot.Device.Vl53L1X
         }
 
         /// <summary>
-        /// Gets or sets the offset correction value in mm.
+        /// Gets or sets the offset correction value.
         /// </summary>
-        public short Offset
+        public Length Offset
         {
             get
             {
                 short offset = ReadInt16((ushort)Registers.ALGO__PART_TO_PART_RANGE_OFFSET_MM);
                 offset <<= 3;
                 offset /= 32;
-                return offset;
+                return Length.FromMillimeters(offset);
             }
+
             set
             {
-                WriteInt16((ushort)Registers.ALGO__PART_TO_PART_RANGE_OFFSET_MM, (short)(value * 4));
+                var length = value.Millimeters;
+                WriteInt16((ushort)Registers.ALGO__PART_TO_PART_RANGE_OFFSET_MM, (short)(length * 4));
                 WriteInt16((ushort)Registers.MM_CONFIG__INNER_OFFSET_MM, 0x0);
                 WriteInt16((ushort)Registers.MM_CONFIG__OUTER_OFFSET_MM, 0x0);
             }
@@ -599,6 +610,7 @@ namespace Iot.Device.Vl53L1X
 
                 return (ushort)((xTalk * 1000) >> 9); /* * 1000 to convert kcps to cps and >> 9 (7.9 format) */
             }
+
             set
             {
                 WriteUInt16((ushort)Registers.ALGO__CROSSTALK_COMPENSATION_X_PLANE_GRADIENT_KCPS, 0x0000);
@@ -625,14 +637,14 @@ namespace Iot.Device.Vl53L1X
         /// WindowDetectionMode.Above
         /// </param>
         /// <param name="detectionMode">The <see cref="WindowDetectionMode" /> where 0 = below, 1 = above, 2 = out, and 3 = in</param>
-        public void SetDistanceThreshold(ushort threshLow, ushort threshHigh, WindowDetectionMode detectionMode)
+        public void SetDistanceThreshold(Length threshLow, Length threshHigh, WindowDetectionMode detectionMode)
         {
             byte temp = ReadByte((ushort)Registers.SYSTEM__INTERRUPT_CONFIG_GPIO);
             temp &= 0x47;
             WriteRegister((ushort)Registers.SYSTEM__INTERRUPT_CONFIG_GPIO,
                 (byte)(temp | ((byte)detectionMode & 0x07) | 0x40));
-            WriteUInt16((ushort)Registers.SYSTEM__THRESH_HIGH, threshHigh);
-            WriteUInt16((ushort)Registers.SYSTEM__THRESH_LOW, threshLow);
+            WriteUInt16((ushort)Registers.SYSTEM__THRESH_HIGH, (ushort)threshHigh.Millimeters);
+            WriteUInt16((ushort)Registers.SYSTEM__THRESH_LOW, (ushort)threshLow.Millimeters);
         }
 
         /// <summary>
@@ -650,24 +662,24 @@ namespace Iot.Device.Vl53L1X
         }
 
         /// <summary>
-        /// Returns the low threshold in mm.
+        /// Returns the low threshold.
         /// </summary>
-        public ushort DistanceThresholdLow
+        public Length DistanceThresholdLow
         {
             get
             {
-                return ReadUInt16((ushort)Registers.SYSTEM__THRESH_LOW);
+                return Length.FromMillimeters(ReadUInt16((ushort)Registers.SYSTEM__THRESH_LOW));
             }
         }
 
         /// <summary>
-        /// Returns the high threshold in mm.
+        /// Returns the high threshold.
         /// </summary>
-        public ushort DistanceThresholdHigh
+        public Length DistanceThresholdHigh
         {
             get
             {
-                return ReadUInt16((ushort)Registers.SYSTEM__THRESH_HIGH);
+                return Length.FromMillimeters(ReadUInt16((ushort)Registers.SYSTEM__THRESH_HIGH));
             }
         }
 
@@ -683,6 +695,7 @@ namespace Iot.Device.Vl53L1X
 
                 return new Roi((ushort)((temp & 0x0F) + 1), (ushort)(((temp & 0xF0) >> 4) + 1));
             }
+
             set
             {
                 byte opticalCenter = ReadByte((ushort)Registers.VL53L1X_ROI_CONFIG__MODE_ROI_CENTRE_SPAD);
@@ -720,6 +733,7 @@ namespace Iot.Device.Vl53L1X
             {
                 return ReadByte((ushort)Registers.ROI_CONFIG__USER_ROI_CENTRE_SPAD);
             }
+
             set
             {
                 WriteRegister((ushort)Registers.ROI_CONFIG__USER_ROI_CENTRE_SPAD, value);
@@ -735,6 +749,7 @@ namespace Iot.Device.Vl53L1X
             {
                 return (ushort)(ReadUInt16((ushort)Registers.RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS) << 3);
             }
+
             set
             {
                 WriteUInt16((ushort)Registers.RANGE_CONFIG__MIN_COUNT_RATE_RTN_LIMIT_MCPS, (ushort)(value >> 3));
@@ -742,22 +757,24 @@ namespace Iot.Device.Vl53L1X
         }
 
         /// <summary>
-        /// This function programs a new sigma threshold in mm. The default value is 15 mm.
+        /// This function programs a new sigma threshold. The default value is 15 mm.
         /// </summary>
-        public ushort SigmaThreshold
+        public Length SigmaThreshold
         {
             get
             {
-                return (ushort)(ReadByte((ushort)Registers.RANGE_CONFIG__SIGMA_THRESH) >> 2);
+                return Length.FromMillimeters((ushort)(ReadByte((ushort)Registers.RANGE_CONFIG__SIGMA_THRESH) >> 2));
             }
+
             set
             {
-                if (value > 0xFFFF >> 2)
+                var length = (ushort)value.Millimeters;
+                if (length > 0xFFFF >> 2)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value), "The sigma threshold is too high");
                 }
 
-                WriteUInt16((ushort)Registers.RANGE_CONFIG__SIGMA_THRESH, (ushort)(value << 2));
+                WriteUInt16((ushort)Registers.RANGE_CONFIG__SIGMA_THRESH, (ushort)(length << 2));
             }
         }
 
@@ -785,11 +802,11 @@ namespace Iot.Device.Vl53L1X
 
         /// <summary>
         /// This function performs the offset calibration and programs the offset compensation into the device.
-        /// Target reflectance should be grey17%
+        /// Target reflectance should be grey17%.
         /// </summary>
-        /// <param name="targetDistInMm">Target distance in mm, ST recommended 100 mm</param>
-        /// <returns>The offset value found</returns>
-        public short CalibrateOffset(ushort targetDistInMm)
+        /// <param name="targetDist">The Target distance, ST recommended 100 mm.</param>
+        /// <returns>The offset value found.</returns>
+        public short CalibrateOffset(Length targetDist)
         {
             WriteUInt16((ushort)Registers.ALGO__PART_TO_PART_RANGE_OFFSET_MM, 0x0);
             WriteUInt16((ushort)Registers.MM_CONFIG__INNER_OFFSET_MM, 0x0);
@@ -800,7 +817,7 @@ namespace Iot.Device.Vl53L1X
             for (int i = 0; i < 50; i++)
             {
                 WaitForDataReady();
-                ushort distance = Distance;
+                ushort distance = (ushort)GetDistance().Millimeters;
                 ClearInterrupt();
                 averageDistance += distance;
             }
@@ -808,7 +825,7 @@ namespace Iot.Device.Vl53L1X
             StopRanging();
             averageDistance /= 50;
 
-            short offset = (short)(targetDistInMm - averageDistance);
+            short offset = (short)(targetDist.Millimeters - averageDistance);
 
             WriteInt16((ushort)Registers.ALGO__PART_TO_PART_RANGE_OFFSET_MM, (short)(offset * 4));
 
@@ -817,16 +834,16 @@ namespace Iot.Device.Vl53L1X
 
         /// <summary>
         /// This function performs the xtalk calibration and programs the xtalk compensation to the device.
-        /// Target reflectance should be grey 17%
+        /// Target reflectance should be grey 17%.
         /// </summary>
-        /// <param name="targetDistInMm">
-        /// The target distance in mm.
+        /// <param name="targetDist">
+        /// The target distance.
         /// This is the distance where the sensor starts to "under range"
         /// due to the influence of the photons reflected back from the cover glass becoming strong.
-        /// It's also called inflection point
+        /// It's also called inflection point.
         /// </param>
         /// <returns>The xtalk value found in cps (number of photons in count per second).</returns>
-        public ushort CalibrateXtalk(ushort targetDistInMm)
+        public ushort CalibrateXtalk(Length targetDist)
         {
             WriteUInt16(0x0016, 0);
             StartRanging();
@@ -838,7 +855,7 @@ namespace Iot.Device.Vl53L1X
             {
                 WaitForDataReady();
                 ushort sr = SignalRate;
-                ushort distance = Distance;
+                ushort distance = (ushort)GetDistance().Millimeters;
                 ushort spadNum = SpadNb;
 
                 ClearInterrupt();
@@ -853,7 +870,7 @@ namespace Iot.Device.Vl53L1X
             averageSignalRate /= 50;
             averageSpadNb /= 50;
 
-            ushort xTalk = (ushort)(512 * averageSignalRate * (1 - averageDistance / targetDistInMm) / averageSpadNb);
+            ushort xTalk = (ushort)(512 * averageSignalRate * (1 - averageDistance / targetDist.Millimeters) / averageSpadNb);
             WriteUInt16(0x0016, xTalk);
 
             return xTalk;
