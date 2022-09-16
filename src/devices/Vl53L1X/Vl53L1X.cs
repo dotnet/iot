@@ -489,6 +489,9 @@ namespace Iot.Device.Vl53L1X
         /// <summary>
         /// Returns the signal per SPAD in kcps/SPAD.
         /// </summary>
+        /// <remarks>
+        ///  Kcps is kilo count per second. kcps/SPAD is the return ambient rate measured by the VL53L1X.
+        /// </remarks>
         public ushort SignalPerSpad
         {
             get
@@ -503,6 +506,9 @@ namespace Iot.Device.Vl53L1X
         /// <summary>
         /// Returns the ambient per SPAD in kcps/SPAD.
         /// </summary>
+        /// <remarks>
+        ///  Kcps is kilo count per second. kcps/SPAD is the return ambient rate measured by the VL53L1X.
+        /// </remarks>
         public ushort AmbientPerSpad
         {
             get
@@ -516,6 +522,9 @@ namespace Iot.Device.Vl53L1X
         /// <summary>
         /// Returns the signal in kcps.
         /// </summary>
+        /// <remarks>
+        ///  Kcps is kilo count per second.
+        /// </remarks>
         public ushort SignalRate
         {
             get
@@ -539,6 +548,9 @@ namespace Iot.Device.Vl53L1X
         /// <summary>
         /// Returns the ambient rate in kcps.
         /// </summary>
+        /// <remarks>
+        ///  Kcps is kilo count per second.
+        /// </remarks>
         public ushort AmbientRate
         {
             get
@@ -686,6 +698,9 @@ namespace Iot.Device.Vl53L1X
         /// <summary>
         /// Gets or sets the <see cref="Roi" />, the position of which is centered about the optical center.
         /// The smallest acceptable ROI size is 4.
+        /// The receiving SPAD array of the sensor consists of 16x16 SPADs which covers the full FoV.
+        /// It is possible to program a smaller ROI, with a smaller number of SPADs, to reduce the FoV for applications which
+        /// require a narrow FoV.
         /// </summary>
         public Roi Roi
         {
@@ -743,6 +758,9 @@ namespace Iot.Device.Vl53L1X
         /// <summary>
         /// Gets or sets a new signal threshold in kcps where the default is 1024 kcps.
         /// </summary>
+        /// <remarks>
+        ///  Kcps is kilo counts per second.
+        /// </remarks>
         public ushort SignalThreshold
         {
             get
