@@ -11,6 +11,7 @@ using Iot.Device.Display;
 Is31Fl3731 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
 
 matrix.Initialize();
+matrix.EnableBlinking(0);
 matrix.Fill(0);
 
 for (int i = 0; i < 2; i++)
@@ -21,11 +22,13 @@ for (int i = 0; i < 2; i++)
 
 for (int i = 0; i < 16; i++)
 {
-matrix.WritePixel(i, 0, 0, true, false);
-Thread.Sleep(50);
-// matrix.WritePixel(i, 0, (byte)i, true, false);
-// Thread.Sleep(50);
+    matrix.WritePixel(i, 0, 0, true, false);
+    Thread.Sleep(50);
+    matrix.WritePixel(i, 0, (byte)i, true, false);
+    Thread.Sleep(50);
 }
+
+Thread.Sleep(100);
 
 void FillSlow(byte brightness)
 {
@@ -41,7 +44,9 @@ void FillSlow(byte brightness)
 
 // Dimensions
 int width = matrix.Width - 1;
+int height = matrix.Height - 1;
 int halfWidth = matrix.Width / 2;
+int halfHeight = matrix.Height / 2;
 
 // Clear matrix
 matrix.Fill(0);
@@ -49,15 +54,15 @@ matrix.Fill(0);
 // Set pixel in the origin 0, 0 position.
 matrix[0, 0] = 1;
 // Set pixels in the middle
-matrix[halfWidth - 1, 3] = 1;
-matrix[halfWidth - 1, 4] = 1;
-matrix[halfWidth, 3] = 1;
-matrix[halfWidth, 4] = 1;
+matrix[halfWidth - 1, halfHeight - 1] = 1;
+matrix[halfWidth - 1, halfHeight] = 1;
+matrix[halfWidth, halfHeight - 1] = 1;
+matrix[halfWidth, halfHeight] = 1;
 // Set pixel on the opposite edge
-matrix[width - 1, 6] = 1;
-matrix[width - 1, 7] = 1;
-matrix[width, 6] = 1;
-matrix[width, 7] = 1;
+matrix[width - 1, height - 1] = 1;
+matrix[width - 1, height] = 1;
+matrix[width, height - 1] = 1;
+matrix[width, height] = 1;
 
 Thread.Sleep(500);
 matrix.Fill(0);
@@ -82,31 +87,27 @@ for (int i = 0; i < matrix.Width; i++)
         continue;
     }
 
-    matrix[i, 9] = 1;
+    matrix[i, height] = 1;
     Thread.Sleep(50);
 }
 
 Thread.Sleep(500);
 matrix.Fill(0);
 
+int diagonal = Math.Min(height, width);
+
 // Draw diagonal lines
-for (int i = 0; i < 8; i++)
+for (int i = 0; i <= diagonal; i++)
 {
     matrix[i,  i] = 1;
-    matrix[8 - i, i] = 1;
-    // uncomment if matrix.Width == 16
-    // matrix[i + 8, i] = 1;
-    // matrix[15 - i, i] = 1;
+    matrix[diagonal - i, i] = 1;
     Thread.Sleep(50);
 }
 
-for (int i = 0; i < 8; i++)
+for (int i = 0; i <= diagonal; i++)
 {
     matrix[i,  i] = 0;
-    matrix[8 - i, i] = 0;
-    // uncomment if matrix.Width == 16
-    // matrix[i + 8, i] = 0;
-    // matrix[15 - i, i] = 0;
+    matrix[diagonal - i, i] = 0;
     Thread.Sleep(50);
 }
 
@@ -117,19 +118,19 @@ for (int i = 0; i < matrix.Width; i++)
     Thread.Sleep(10);
 }
 
-for (int i = 0; i < 8; i++)
+for (int i = 0; i < matrix.Height; i++)
 {
     matrix[width, i] = 1;
     Thread.Sleep(10);
 }
 
-for (int i = matrix.Width; i >= 0; i--)
+for (int i = width; i >= 0; i--)
 {
-    matrix[i, 7] = 1;
+    matrix[i, height] = 1;
     Thread.Sleep(10);
 }
 
-for (int i = 7; i >= 0; i--)
+for (int i = height; i >= 0; i--)
 {
     matrix[0, i] = 1;
     Thread.Sleep(50);
@@ -157,30 +158,30 @@ void WriteColumnPixels(int column, IEnumerable<int> pixels, int value)
 }
 
 // Draw a spiral bounding box
-for (int j = 0; j < 4; j++)
+for (int j = 0; j < 5; j++)
 {
     int rangeW = matrix.Width - j * 2;
-    int rangeH = 8 - j * 2;
+    int rangeH = matrix.Height - j * 2;
     // top
     WriteRowPixels(j, Enumerable.Range(j, rangeW), 1);
 
     // right
-    WriteColumnPixels(width - j, Enumerable.Range(j + 1, rangeH - 2), 1);
+    WriteColumnPixels(width - j, Enumerable.Range(j + 1, rangeH - 1), 1);
 
     // bottom
-    WriteRowPixels(7 - j, Enumerable.Range(j, rangeW).Reverse(), 1);
+    WriteRowPixels(height - j, Enumerable.Range(j, rangeW).Reverse(), 1);
 
     // left
-    WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 2).Reverse(), 1);
+    WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 1).Reverse(), 1);
 }
 
 Thread.Sleep(500);
 matrix.Fill(0);
 
 matrix[0, 0] = 1;
-matrix[0, 7] = 1;
+matrix[0, height] = 1;
 matrix[width, 0] = 1;
-matrix[width, 7] = 1;
+matrix[width, height] = 1;
 
-Thread.Sleep(500);
+Thread.Sleep(1000);
 matrix.Fill(0);

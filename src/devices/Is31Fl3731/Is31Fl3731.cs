@@ -36,7 +36,8 @@ namespace Iot.Device.Display
         // Function register
         // Writes data to page nine
         // table 3 in datasheet
-        private const byte CONFIGURATION_REGISTER = 0x0B;
+        private const byte CONFIGURATION_REGISTER = 0x0;
+        private const byte DISPLAY_REGISTER = 0x5;
         private const byte SHUTDOWN = 0x0A;
 
         // Values
@@ -97,6 +98,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void WritePixel(int x, int y, byte brightness, bool enable, bool blink)
         {
+            WriteLedBlink(x, y, blink);
             WriteLed(x, y, enable);
             WriteLedPwm(x, y, brightness);
         }
@@ -126,6 +128,26 @@ namespace Iot.Device.Display
         public void DisableAllLeds(byte page = 0)
         {
             Write(page, LED_REGISTER, _disable_all_leds_data);
+        }
+
+        /// <summary>
+        /// Disable all LEDs.
+        /// </summary>
+        /// <param name="rate">Set the showdown mode. `true` sets device into shutdown mode. `false` sets device into normal operation.</param>
+        public void EnableBlinking(int rate)
+        {
+            int value = 0;
+            if (rate > 0)
+            {
+                rate /= 270;
+                value = rate & 0x07 | 0x08;
+            }
+            else
+            {
+                value = 0;
+            }
+
+            Write(FUNCTION_REGISTER, DISPLAY_REGISTER, (byte)value);
         }
 
         /// <summary>
@@ -197,7 +219,7 @@ namespace Iot.Device.Display
 
         private void WriteLedPwm(int x, int y, byte brightness)
         {
-            int address = GetLedAddress(x, y) + PWM_REGISTER;
+            int address = PWM_REGISTER + GetLedAddress(x, y);
             Write(0, (byte)address, brightness);
         }
 
@@ -205,6 +227,26 @@ namespace Iot.Device.Display
         {
             int longAddress = GetLedAddress(x, y);
             int address = longAddress / 8;
+            int ledBlock = Read(address);
+            int ledRegisterBit = longAddress % 8;
+            int mask = 1 >> ledRegisterBit;
+
+            if (enable)
+            {
+                ledBlock |= mask;
+            }
+            else
+            {
+                ledBlock &= ~mask;
+            }
+
+            Write(0, (byte)address, (byte)ledBlock);
+        }
+
+        private void WriteLedBlink(int x, int y, bool enable)
+        {
+            int longAddress = GetLedAddress(x, y);
+            int address = BLINK_REGISTER + longAddress / 8;
             int ledBlock = Read(address);
             int ledRegisterBit = longAddress % 8;
             int mask = 1 >> ledRegisterBit;
