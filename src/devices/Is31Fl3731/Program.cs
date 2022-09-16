@@ -20,7 +20,7 @@ for (int i = 0; i < 2; i++)
     FillSlow(brightness);
 }
 
-for (int i = 0; i < 16; i++)
+for (int i = 0; i < matrix.Width; i++)
 {
     matrix.WritePixel(i, 0, 0, true, false);
     Thread.Sleep(50);
@@ -158,7 +158,8 @@ void WriteColumnPixels(int column, IEnumerable<int> pixels, int value)
 }
 
 // Draw a spiral bounding box
-for (int j = 0; j < 5; j++)
+int iterations = matrix.Height / 2;
+for (int j = 0; j < iterations; j++)
 {
     int rangeW = matrix.Width - j * 2;
     int rangeH = matrix.Height - j * 2;
