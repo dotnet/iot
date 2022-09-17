@@ -8,10 +8,28 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
 
-Is31Fl3731 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
+// For 16x9 matrix
+using Backpack16x9 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
+// For 16x8 matrix Charlieplex bonet
+// https://www.adafruit.com/product/4122
+// using Bonnet16x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
+//
+// Dimensions
+int width = matrix.Width - 1;
+int height = matrix.Height - 1;
+int halfWidth = matrix.Width / 2;
+int halfHeight = matrix.Height / 2;
 
 matrix.Initialize();
 matrix.EnableBlinking(0);
+matrix.Fill(0);
+
+matrix[0, 0] = 1;
+matrix[0, height] = 1;
+matrix[width, 0] = 1;
+matrix[width, height] = 1;
+
+Thread.Sleep(500);
 matrix.Fill(0);
 
 for (int i = 0; i < 2; i++)
@@ -41,12 +59,6 @@ void FillSlow(byte brightness)
         }
     }
 }
-
-// Dimensions
-int width = matrix.Width - 1;
-int height = matrix.Height - 1;
-int halfWidth = matrix.Width / 2;
-int halfHeight = matrix.Height / 2;
 
 // Clear matrix
 matrix.Fill(0);
@@ -158,7 +170,7 @@ void WriteColumnPixels(int column, IEnumerable<int> pixels, int value)
 }
 
 // Draw a spiral bounding box
-int iterations = matrix.Height / 2;
+int iterations = (int)Math.Ceiling(matrix.Height / 2.0);
 for (int j = 0; j < iterations; j++)
 {
     int rangeW = matrix.Width - j * 2;
@@ -175,14 +187,6 @@ for (int j = 0; j < iterations; j++)
     // left
     WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 1).Reverse(), 1);
 }
-
-Thread.Sleep(500);
-matrix.Fill(0);
-
-matrix[0, 0] = 1;
-matrix[0, height] = 1;
-matrix[width, 0] = 1;
-matrix[width, height] = 1;
 
 Thread.Sleep(1000);
 matrix.Fill(0);

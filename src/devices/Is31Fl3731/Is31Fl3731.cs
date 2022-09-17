@@ -13,7 +13,7 @@ namespace Iot.Device.Display
     // Datasheet: https://cdn-learn.adafruit.com/assets/assets/000/030/994/original/31FL3731.pdf
     // Product: https://www.adafruit.com/product/2946
     // Product: https://www.adafruit.com/product/2974
-    public class Is31Fl3731
+    public abstract class Is31Fl3731 : IDisposable
     {
         // Register addresses
         // Command register
@@ -191,6 +191,20 @@ namespace Iot.Device.Display
             Write(FUNCTION_REGISTER, SHUTDOWN, (byte)mode);
         }
 
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _i2cDevice?.Dispose();
+            _i2cDevice = null!;
+        }
+
+        /// <summary>
+        /// Gets the hardware location for the pixel.
+        /// </summary>
+        /// <param name="x">Specifies the x value.</param>
+        /// <param name="y">Specifies the y value.</param>
+        public abstract int GetLedAddress(int x, int y);
+
         private void Write(byte register, byte address, byte[] value)
         {
             _i2cDevice.Write(new byte[] { COMMAND_REGISTER, register });
@@ -212,8 +226,6 @@ namespace Iot.Device.Display
             _i2cDevice.Write(new byte[] { COMMAND_REGISTER, register });
             _i2cDevice.Write(new byte[] { address, value });
         }
-
-        private int GetLedAddress(int x, int y) => x + y * Width;
 
         private byte ReadLedPwm(int x, int y) => Read(GetLedAddress(x, y) + PWM_REGISTER);
 
