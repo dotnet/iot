@@ -9,20 +9,24 @@ using System.Threading;
 using Iot.Device.Display;
 
 // For 16x9 matrix
+// https://www.adafruit.com/product/2974
 using Backpack16x9 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
 // For 16x8 matrix Charlieplex bonet
 // https://www.adafruit.com/product/4122
 // using Bonnet16x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
-//
+// For Scroll Phat HD 17x7
+// https://shop.pimoroni.com/products/scroll-phat-hd
+// https://shop.pimoroni.com/products/scroll-hat-mini
+// using ScrollPhat17x7 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x61)));
+matrix.Initialize();
+matrix.EnableBlinking(0);
+matrix.Fill(0);
+
 // Dimensions
 int width = matrix.Width - 1;
 int height = matrix.Height - 1;
 int halfWidth = matrix.Width / 2;
 int halfHeight = matrix.Height / 2;
-
-matrix.Initialize();
-matrix.EnableBlinking(0);
-matrix.Fill(0);
 
 matrix[0, 0] = 1;
 matrix[0, height] = 1;
@@ -60,7 +64,7 @@ void FillSlow(byte brightness)
     }
 }
 
-// Clear matrix
+// Clear matrixgit
 matrix.Fill(0);
 
 // Set pixel in the origin 0, 0 position.
