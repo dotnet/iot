@@ -21,6 +21,15 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
+        /// Creates console output with color support
+        /// </summary>
+        public SimpleConsoleLogger(string categoryName, LogLevel minLogLevel)
+        {
+            LoggerName = categoryName;
+            MinLogLevel = minLogLevel;
+        }
+
+        /// <summary>
         /// Specifies the minimum log level that is printed. Default is Information
         /// </summary>
         public LogLevel MinLogLevel
@@ -37,6 +46,11 @@ namespace Iot.Device.Common
         /// <inheritdoc />
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
+            if (!IsEnabled(logLevel))
+            {
+                return;
+            }
+
             var previousColor = Console.ForegroundColor;
             switch (logLevel)
             {
@@ -49,6 +63,11 @@ namespace Iot.Device.Common
                     break;
                 case LogLevel.Information:
                     Console.ForegroundColor = ConsoleColor.Blue;
+                    break;
+                case LogLevel.Trace:
+                case LogLevel.Debug:
+                default:
+                    Console.ForegroundColor = ConsoleColor.DarkGray;
                     break;
             }
 

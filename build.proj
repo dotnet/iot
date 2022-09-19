@@ -1,7 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="Directory.Build.props" />
-
+<Project Sdk="Microsoft.Build.Traversal">
+  
   <PropertyGroup>
     <BuildRestore Condition="'$(BuildRestore)'==''">true</BuildRestore>
     <ProductBuild Condition="'$(ProductBuild)'==''">true</ProductBuild>
@@ -9,80 +7,33 @@
     <SampleBuild Condition="'$(SampleBuild)'==''">true</SampleBuild>
     <BuildTests Condition="'$(BuildTests)'==''">true</BuildTests>
     <BuildPackages Condition="'$(BuildPackages)'==''">false</BuildPackages>
-
-    <BuildDependsOn Condition="'$(BuildRestore)'=='true'">$(BuildDependsOn);Restore</BuildDependsOn>
-    <BuildDependsOn Condition="'$(ProductBuild)'=='true'">$(BuildDependsOn);BuildProduct</BuildDependsOn>
-    <BuildDependsOn Condition="'$(ToolsBuild)'=='true'">$(BuildDependsOn);BuildTools</BuildDependsOn>
-    <BuildDependsOn Condition="'$(SampleBuild)'=='true'">$(BuildDependsOn);BuildSamples</BuildDependsOn>
-    <BuildDependsOn Condition="'$(BuildTests)'=='true'">$(BuildDependsOn);Test</BuildDependsOn>
-    <BuildDependsOn Condition="'$(BuildPackages)'=='true'">$(BuildDependsOn);Pack</BuildDependsOn>
   </PropertyGroup>
 
-  <Import Project="Directory.Build.targets" />
-
   <ItemGroup>
-    <UnitTestProjects Include="$(MSBuildThisFileDirectory)src\devices\**\*.Tests.csproj" />
-  </ItemGroup>
-
-  <Target Name="BuildProduct">
-    <ItemGroup>
-      <_ExcludeBuildProductProjects Include="$(MSBuildThisFileDirectory)src\Native\build-native.proj" />
+      <!-- Build product -->
+      <UnitTestProjects Include="$(MSBuildThisFileDirectory)src\devices\**\*.Tests.csproj" />
       <_BuildProductProjects Include="$(MSBuildThisFileDirectory)src\**\*.csproj" Exclude="@(_ExcludeBuildProductProjects);@(UnitTestProjects)" />
-    </ItemGroup>
+      
+      <ProjectReference Condition="'$(ProductBuild)' == 'true'" Include="@(_BuildProductProjects)" />
 
-    <MSBuild Projects="@(_BuildProductProjects)" />
-  </Target>
-
-  <Target Name="BuildTools">
-    <ItemGroup>
+      <!-- Build tools -->
       <_BuildToolProjects Include="$(MSBuildThisFileDirectory)tools\**\*.csproj" />
-    </ItemGroup>
 
-    <MSBuild Projects="@(_BuildToolProjects)" />
-  </Target>
+      <ProjectReference Condition="'$(ToolsBuild)' == 'true'" Include="@(_BuildToolProjects)" />
 
-  <Target Name="BuildSamples">
-    <ItemGroup>
+      <!-- Build samples -->
       <_ExcludeBuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\serialport-arduino\arduino-demo.csproj" />
       <_BuildSampleProjects Include="$(MSBuildThisFileDirectory)samples\**\*.csproj" Exclude="@(_ExcludeBuildSampleProjects)" />
-    </ItemGroup>
 
-    <MSBuild Projects="@(_BuildSampleProjects)" />
-  </Target>
+      <ProjectReference Condition="'$(SampleBuild)' == 'true'" Include="@(_BuildSampleProjects)" />
 
-  <Target Name="Restore">
-    <ItemGroup>
-      <_ExcludeProjectsToRestore Include="$(MSBuildThisFileDirectory)samples\serialport-arduino\arduino-demo.csproj" />
-      <_ExcludeProjectsToRestore Include="$(MSBuildThisFileDirectory)eng\**\*.csproj" />
-      <_ProjectsToRestore Include="$(MSBuildThisFileDirectory)**\*.csproj" Exclude="@(_ExcludeProjectsToRestore)" />
-    </ItemGroup>
+      <!-- Build tests -->
+      <ProjectReference Condition="'$(BuildTests)' == 'true'" Include="@(UnitTestProjects)" Targets="VSTest" />
 
-    <MSBuild Projects="@(_ProjectsToRestore)" Targets="Restore" />
-  </Target>
-
-  <Target Name="Test">
-    <MSBuild Projects="@(UnitTestProjects)" Targets="VSTest"
-        ContinueOnError="ErrorAndContinue" />
-    <Error Condition="$(MSBuildLastTaskResult) != 'true'"
-        Text="Unit tests failed. Please check the detailed log to find out which ones failed." />
-  </Target>
-
-  <Target Name="Pack">
-    <ItemGroup>
+      <!-- Run Pack -->
       <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\Iot.Device.Bindings\Iot.Device.Bindings.csproj" />
       <_ProjectsToPackage Include="$(MSBuildThisFileDirectory)src\System.Device.Gpio\System.Device.Gpio.csproj" />
-    </ItemGroup>
 
-    <MSBuild Projects="@(_ProjectsToPackage)" Targets="Pack" />
-  </Target>
-
-  <Target Name="Build" DependsOnTargets="$(BuildDependsOn)" />
-
-  <Target Name="Clean">
-    <RemoveDir Directories="$(ArtifactsObjDir)" />
-    <RemoveDir Directories="$(ArtifactsBinDir)" />
-    <RemoveDir Directories="$(ArtifactsPackagesDir)" />
-  </Target>
-
-  <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
+      <ProjectReference Condition="'$(BuildPackages)' == 'true'" Include="@(_ProjectsToPackage)" Targets="Pack" />
+  </ItemGroup>
 </Project>

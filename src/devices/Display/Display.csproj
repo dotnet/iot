@@ -17,6 +17,8 @@
     <Compile Include="Matrix8x8.cs" />
     <Compile Include="Matrix8x8Bicolor.cs" />
     <Compile Include="LedColor.cs" />
+    <Compile Include="BiColorBarGraph.cs" />
+    <Compile Include="BarColor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

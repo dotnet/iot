@@ -398,7 +398,7 @@ namespace Iot.Device.Board
         public virtual I2cBus CreateOrGetI2cBus(int busNumber, int[]? pinAssignment)
         {
             Initialize();
-            if (_i2cBuses.TryGetValue(busNumber, out var bus))
+            if (_i2cBuses.TryGetValue(busNumber, out I2cBusManager? bus))
             {
                 return bus;
             }
@@ -421,7 +421,7 @@ namespace Iot.Device.Board
         public I2cBus CreateOrGetI2cBus(int busNumber)
         {
             Initialize();
-            if (_i2cBuses.TryGetValue(busNumber, out var bus))
+            if (_i2cBuses.TryGetValue(busNumber, out I2cBusManager? bus))
             {
                 return bus;
             }
@@ -458,7 +458,7 @@ namespace Iot.Device.Board
             Initialize();
             // Returns logical pin numbers for the selected bus (or an exception if using a bus number > 1, because that
             // requires specifying the pins)
-            if (_i2cBuses.TryGetValue(connectionSettings.BusId, out var bus))
+            if (_i2cBuses.TryGetValue(connectionSettings.BusId, out I2cBusManager? bus))
             {
                 return bus.CreateDevice(connectionSettings.DeviceAddress);
             }
