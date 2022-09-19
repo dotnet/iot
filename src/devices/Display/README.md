@@ -2,8 +2,7 @@
 
 The [Ht16k33](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf) is a multi-function LED controller driver. It is used as a [backpack driver for several Adafruit products](https://www.adafruit.com/?q=Ht16k33). It uses the I2C protocol.
 
-This binding and samples are based on [adafruit/Adafruit_CircuitPython_HT16K33
-](https://github.com/adafruit/Adafruit_CircuitPython_HT16K33).
+This binding and samples are based on [adafruit/Adafruit_CircuitPython_HT16K33](https://github.com/adafruit/Adafruit_CircuitPython_HT16K33).
 
 ## 7-Segment Display
 
