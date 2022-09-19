@@ -8,5 +8,6 @@
     <Compile Include="Backpack16x9.cs" />
     <Compile Include="Bonnet16x8.cs" />
     <Compile Include="ScrollPhatHD17x7.cs" />
+    <Compile Include="LedShim28x1.cs" />
   </ItemGroup>
 </Project>

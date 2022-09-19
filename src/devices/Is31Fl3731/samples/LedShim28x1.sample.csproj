@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net60</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Is31Fl3731.csproj" />
+    <Compile Include="Program.LedShim28x1.cs" />
+  </ItemGroup>
+</Project>
