@@ -73,6 +73,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 License notice for LED matrices with the HT16K33 chip
 -----------------------------------------------------
 
+https://github.com/adafruit/Adafruit_CircuitPython_HT16K33
+
 The MIT License (MIT)
 
 Copyright (c) 2016 Radomir Dopieralski & Tony DiCola for Adafruit Industries
