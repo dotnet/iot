@@ -1,20 +1,17 @@
 # HT16K33 -- LED Matrix Display Driver
 
-The [Ht16k33](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf)  is a memory mapping and multi-function LED controller driver. It is used as a [backpack driver for several Adafruit products](https://www.adafruit.com/?q=Ht16k33). It supports multiple LED configurations and I2C communication.
+The [Ht16k33](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf) is a multi-function LED controller driver. It is used as a [backpack driver for several Adafruit products](https://www.adafruit.com/?q=Ht16k33). It uses the I2C protocol.
 
-Adafruit sells multiple display backpacks built upon this driver:
+This binding and samples are based on [adafruit/Adafruit_CircuitPython_HT16K33
+](https://github.com/adafruit/Adafruit_CircuitPython_HT16K33).
 
-- [1.2" 4-Digit 7-Segment Display w/I2C Backpack - Yellow](https://www.adafruit.com/product/1268)
-- [1.2" 4-Digit 7-Segment Display w/I2C Backpack - Green](https://www.adafruit.com/product/1269)
-- [1.2" 4-Digit 7-Segment Display w/I2C Backpack - Red](https://www.adafruit.com/product/1270)
-- [Bi-Color (Red/Green) 24-Bar Bargraph w/I2C Backpack Kit](https://www.adafruit.com/product/1721)
+## 7-Segment Display
 
-More information on wiring can be found on the respective product pages and at [adafruit/Adafruit_CircuitPython_HT16K33
-](https://github.com/adafruit/Adafruit_CircuitPython_HT16K33) (Adafruit-maintained Python bindings).
+These [bright crisp displays](https://www.adafruit.com/product/1270) are good for showing numeric output. Besides the four 7-segments there is a top right dot (perhaps useful as a degrees symbol) and two sets of colon-dots (good for time-based projects). They come in several colors.
 
-## 7-Segment Display Usage
+<img src="https://cdn-shop.adafruit.com/970x728/1268-00.jpg" width ="250px" title="Adafruit 1.2 inch 4-Digit 7-Segment Display w/I2C Backpack - Green" />
 
-![Adafruit 1.2" 4-Digit 7-Segment Display w/I2C Backpack - Green](https://cdn-shop.adafruit.com/970x728/1268-00.jpg)
+You can write the following code to control them or checkout a [larger sample](samples/Program.cs).
 
 ```csharp
 // Initialize display (busId = 1 for Raspberry Pi 2 & 3)
@@ -40,9 +37,41 @@ display.Dots = Dot.DecimalPoint;
 display.Flush();
 ```
 
+## 8x8 and 16x8 LED Matrix
+
+Make a [scrolling sign or a small video display](https://www.adafruit.com/product/1614) with [16x8](https://www.adafruit.com/product/2040), [8x8](https://www.adafruit.com/product/1632), and [Bicolor](https://www.adafruit.com/product/902) LED matrices. They are quite visible but not so large it won't plug into a breadboard!
+
+![16x8 LED matrix](https://camo.githubusercontent.com/f85caa66967ebd6752469f1baff0a660104dbe02081f42f1ee78c920f4b60cdd/68747470733a2f2f6d65646961312e67697068792e636f6d2f6d656469612f3974316d38477466613841346162477443682f323030772e77656270)
+
+![8x8 Bicolor LED matrix](https://camo.githubusercontent.com/f85caa66967ebd6752469f1baff0a660104dbe02081f42f1ee78c920f4b60cdd/68747470733a2f2f6d65646961312e67697068792e636f6d2f6d656469612f3974316d38477466613841346162477443682f323030772e77656270)
+
+You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs) ([Bicolor sample](samples/Program.Matrix8x8Bicolor.cs)).
+
+```csharp
+using Matrix8x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
+    {
+        // Set max brightness
+        Brightness = Ht16k33.MaxBrightness,
+        BufferingEnabled = true
+    };
+
+matrix.Clear();
+// Set pixel in the top left
+matrix[0, 0] = 1;
+// Set pixel in the middle
+matrix[3, 4] = 1;
+matrix[4, 3] = 1;
+// Set pixel in the bottom right
+matrix[7, 7] = 1;
+```
+
 ## Bi-Color Bargraph Usage
 
-![Bi-Color (Red/Green) 24-Bar Bargraph w/I2C Backpack Kit](https://cdn-shop.adafruit.com/970x728/1721-00.jpg)
+Make a [small linear display](https://www.adafruit.com/product/1721) with multiple colors using this elegant bi-color LED bargraph. Every bar has two LEDs inside so you can have it display red, green, yellow or with fast multiplexing (provided by the HT16K33 driver chip) any color in between.
+
+![Bi-Color (Red/Green) 24-Bar Bargraph w/I2C Backpack Kit](https://camo.githubusercontent.com/7667a4f1a7f3956b94c8d4373668290fa6af5cf76862553f54247dffe91b4745/68747470733a2f2f692e67697068792e636f6d2f6d656469612f326c4d71686e6b494273504d47704f4a49782f67697068792d646f776e73697a65642e676966)
+
+You can write the following code to control them or checkout a [larger sample](samples/Program.BiColorBargraph.cs).
 
 ```csharp
 using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
@@ -53,10 +82,9 @@ using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(
     };
 
 bargraph.Clear();
-
-bargraph[0] = BarColor.RED;
-bargraph[1] = BarColor.GREEN;
-bargraph[2] = BarColor.YELLOW;
-bargraph[3] = BarColor.OFF;
-bargraph[4] = BarColor.RED;
+bargraph[0] = LedColor.RED;
+bargraph[1] = LedColor.GREEN;
+bargraph[2] = LedColor.YELLOW;
+bargraph[3] = LedColor.OFF;
+bargraph[4] = LedColor.RED;
 ```
