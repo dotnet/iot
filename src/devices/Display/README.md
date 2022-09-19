@@ -41,7 +41,7 @@ display.Flush();
 
 Make a [scrolling sign or a small video display](https://www.adafruit.com/product/1614) with [16x8](https://www.adafruit.com/product/2040), [8x8](https://www.adafruit.com/product/1632), and [Bicolor](https://www.adafruit.com/product/902) LED matrices. They are quite visible but not so large it won't plug into a breadboard!
 
-![16x8 LED matrix](https://camo.githubusercontent.com/f85caa66967ebd6752469f1baff0a660104dbe02081f42f1ee78c920f4b60cdd/68747470733a2f2f6d65646961312e67697068792e636f6d2f6d656469612f3974316d38477466613841346162477443682f323030772e77656270)
+![16x8 LED matrix](https://camo.githubusercontent.com/884d1a62e3ecf4f0c5d89f0b78cb38a65e0bf3955a39531ef6d55e4724191b65/68747470733a2f2f6d65646961302e67697068792e636f6d2f6d656469612f49336163613635723348325a574c696b344d2f323030772e77656270)
 
 ![8x8 Bicolor LED matrix](https://camo.githubusercontent.com/f85caa66967ebd6752469f1baff0a660104dbe02081f42f1ee78c920f4b60cdd/68747470733a2f2f6d65646961312e67697068792e636f6d2f6d656469612f3974316d38477466613841346162477443682f323030772e77656270)
 
