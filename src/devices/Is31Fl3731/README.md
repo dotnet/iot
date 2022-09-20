@@ -105,3 +105,28 @@ for (int y = 0; y < 3; y++)
     }
 }
 ```
+
+## Pimori Led Matrix Breakout - 11x7
+
+A tiny, tightly-packed matrix of 77 individually-controllable bright white LEDs. Ideal for scrolling text, animations, bar graphs, or just general illumination, and it's Raspberry Pi and Arduino-compatible.
+
+![Pimori Led Matrix Breakout - 11x7](https://cdn.shopify.com/s/files/1/0174/1800/products/11x7_matrix_breakout_1_of_4_1500x1500.JPG)
+
+You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs).
+
+```csharp
+using Breakout11x7 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x75)));
+
+matrix.Initialize();
+matrix.EnableBlinking(0);
+matrix.Fill(0);
+
+matrix.Clear();
+// Set pixel in the top left
+matrix[0, 0] = 1;
+// Set pixel in the middle
+matrix[4, 3] = 1;
+matrix[5, 4] = 1;
+// Set pixel in the bottom right
+matrix[10, 6] = 1;
+```
