@@ -63,7 +63,7 @@ A whole heap of LED pixels with individual brightness control, for scrolling mes
 You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs).
 
 ```csharp
-using ScrollPhat17x7 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x61)));;
+using ScrollHat17x7 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x61)));;
 
 matrix.Initialize();
 matrix.EnableBlinking(0);

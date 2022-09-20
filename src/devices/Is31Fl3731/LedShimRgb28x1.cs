@@ -8,16 +8,16 @@ using System.Threading;
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Represents 28x1 matrix, driven by an IS31FL3731 LED chip.
+    /// Represents 28x1 RGB matrix, driven by an IS31FL3731 LED chip.
     /// </summary>
     // Product: https://shop.pimoroni.com/products/led-shim
-    public class LedShim28x1 : Is31Fl3731
+    public class LedShimRgb28x1 : Is31Fl3731
     {
         /// <summary>
         /// Initialize LED driver.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
-        public LedShim28x1(I2cDevice i2cDevice)
+        public LedShimRgb28x1(I2cDevice i2cDevice)
         : base(i2cDevice, 28, 1)
         {
         }
@@ -62,7 +62,8 @@ namespace Iot.Device.Display
             (<21, 2) => x + 25,
             (21, 2) => 111,
             (<27, 2) => x + 83,
-            _ => 93
+            (_, 2) => 93,
+            _ => throw new Exception($"The ({x}, {y}) is not supported.")
         };
     }
 }

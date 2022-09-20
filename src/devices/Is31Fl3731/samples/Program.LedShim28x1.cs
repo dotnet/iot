@@ -10,7 +10,7 @@ using Iot.Device.Display;
 // For 28x1 LED Shim
 // https://shop.pimoroni.com/products/led-shim
 // Port of https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/led_shim.py
-using LedShim28x1 shim = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x75)));
+using LedShimRgb28x1 shim = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x75)));
 shim.Initialize();
 shim.EnableBlinking(0);
 shim.Fill(0);
