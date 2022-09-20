@@ -14,7 +14,7 @@ namespace Iot.Device.Display
     // Product: https://shop.pimoroni.com/products/scroll-hat-mini
     public class ScrollPhat17x7 : Is31Fl3731
     {
-         /// <summary>
+        /// <summary>
         /// Initialize LED driver.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
