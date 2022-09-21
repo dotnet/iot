@@ -58,7 +58,7 @@ while (true)
 
     i %= 6;
 
-    var returnValue = i switch
+    return i switch
     {
         0 => (val, t, p),
         1 => (q, val, p),
@@ -68,8 +68,6 @@ while (true)
         5 => (val, p, q),
         _ => throw new Exception($"Value of {i} is incorrect")
     };
-
-    return returnValue;
 }
 
 void TestPixels(int r, int g, int b)
@@ -126,7 +124,7 @@ void TestRainbowSweep()
         {
             foreach (int x in Enumerable.Range(0, 5))
             {
-                double pixel_hue = (x + y + (step / 20)) / 8;
+                double pixel_hue = (x + y + (step / 20.0 )) / 8.0;
                 pixel_hue = pixel_hue - (int)(pixel_hue);
                 // pixel_hue += 0;
                 pixel_hue = pixel_hue - Math.Floor(pixel_hue);
