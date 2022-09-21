@@ -52,16 +52,28 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
+        /// Default I2C address for device.
+        /// </summary>
+        public static new readonly int DefaultI2cAddress = 0x74;
+
+        /// <inheritdoc/>
+        public override int GetLedAddress(int x, int y) => _addresses[x][y];
+
+        /// <summary>
         /// Write RGB value.
         /// </summary>
-        public void WritePixelRgb(int x, int r, int g, int b)
+        /// <param name="x">Horizontal pixel position.</param>
+        /// <param name="y">Vertical pixel position.</param>
+        /// <param name="r">Red brightness value 0->255.</param>
+        /// <param name="g">Green brightness value 0->255.</param>
+        /// <param name="b">Blue brightness value 0->255.</param>
+        public void WritePixelRgb(int x, int y, int r, int g, int b)
         {
+            x += y * 5;
+
             this[x, 0] = (byte)r;
             this[x, 1] = (byte)g;
             this[x, 2] = (byte)b;
         }
-
-        /// <inheritdoc/>
-        public override int GetLedAddress(int x, int y) => _addresses[x][y];
     }
 }

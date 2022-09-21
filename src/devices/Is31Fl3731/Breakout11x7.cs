@@ -22,6 +22,11 @@ namespace Iot.Device.Display
         {
         }
 
+        /// <summary>
+        /// Default I2C address for device.
+        /// </summary>
+        public static new readonly int DefaultI2cAddress = 0x75;
+
         /// <inheritdoc/>
         public override int GetLedAddress(int x, int y) => (x << 4) - y + (x <= 5 ? 6 : -82);
     }

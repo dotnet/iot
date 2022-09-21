@@ -23,14 +23,9 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
-        /// Write RGB value.
+        /// Default I2C address for device.
         /// </summary>
-        public void WritePixelRgb(int x, int r, int g, int b)
-        {
-            this[x, 0] = (byte)r;
-            this[x, 1] = (byte)g;
-            this[x, 2] = (byte)b;
-        }
+        public static new readonly int DefaultI2cAddress = 0x75;
 
         /// <inheritdoc/>
         public override int GetLedAddress(int x, int y) => (x, y) switch
@@ -65,5 +60,19 @@ namespace Iot.Device.Display
             (_, 2) => 93,
             _ => throw new Exception($"The ({x}, {y}) is not supported.")
         };
+
+        /// <summary>
+        /// Write RGB value.
+        /// </summary>
+        /// <param name="x">Horizontal pixel position.</param>
+        /// <param name="r">Red brightness value 0->255.</param>
+        /// <param name="g">Green brightness value 0->255.</param>
+        /// <param name="b">Blue brightness value 0->255.</param>
+        public void WritePixelRgb(int x, int r, int g, int b)
+        {
+            this[x, 0] = (byte)r;
+            this[x, 1] = (byte)g;
+            this[x, 2] = (byte)b;
+        }
     }
 }

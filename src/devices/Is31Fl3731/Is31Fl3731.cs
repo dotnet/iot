@@ -70,9 +70,9 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
-        /// IS31FL3731 default I2C address
+        /// Default I2C address for device.
         /// </summary>
-        public static readonly int DefaultI2cAddress = 0x74;
+        public static readonly int DefaultI2cAddress;
 
         /// <summary>
         /// Width of LED matrix (x axis).
@@ -85,9 +85,26 @@ namespace Iot.Device.Display
         public readonly int Height = 9;
 
         /// <summary>
+        /// Initialize LED driver.
+        /// </summary>
+        public void Initialize()
+        {
+            // Reset device
+            Reset();
+
+            // set display mode (bits d4:d3)
+            // 00 = picture mode
+            // 01 = auto frame
+            // 1x audio frame play mode
+            Write(FUNCTION_REGISTER, CONFIGURATION_REGISTER, 0);
+            // set data page
+            _i2cDevice.Write(new byte[] { COMMAND_REGISTER, 0 });
+        }
+
+        /// <summary>
         /// Indexer for updating matrix, with PWM register.
         /// </summary>
-        public byte this[int x, int y]
+        public int this[int x, int y]
         {
             get => ReadLedPwm(x, y);
             set => WriteLedPwm(x, y, value);
@@ -96,7 +113,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Set value for LED.
         /// </summary>
-        public void WritePixel(int x, int y, byte brightness, bool enable, bool blink)
+        public void WritePixel(int x, int y, int brightness, bool enable, bool blink)
         {
             WriteLedBlink(x, y, blink);
             WriteLed(x, y, enable);
@@ -148,23 +165,6 @@ namespace Iot.Device.Display
             }
 
             Write(FUNCTION_REGISTER, DISPLAY_REGISTER, (byte)value);
-        }
-
-        /// <summary>
-        /// Initialize LED driver.
-        /// </summary>
-        public void Initialize()
-        {
-            // Reset device
-            Reset();
-
-            // set display mode (bits d4:d3)
-            // 00 = picture mode
-            // 01 = auto frame
-            // 1x audio frame play mode
-            Write(FUNCTION_REGISTER, CONFIGURATION_REGISTER, 0);
-            // set data page
-            _i2cDevice.Write(new byte[] { COMMAND_REGISTER, 0 });
         }
 
         /// <summary>
@@ -229,10 +229,10 @@ namespace Iot.Device.Display
 
         private byte ReadLedPwm(int x, int y) => Read(GetLedAddress(x, y) + PWM_REGISTER);
 
-        private void WriteLedPwm(int x, int y, byte brightness)
+        private void WriteLedPwm(int x, int y, int brightness)
         {
             int address = PWM_REGISTER + GetLedAddress(x, y);
-            Write(0, (byte)address, brightness);
+            Write(0, (byte)address, (byte)brightness);
         }
 
         private void WriteLed(int x, int y, bool enable)
