@@ -15,9 +15,24 @@ namespace Iot.Device.Display
     /// </summary>
     public enum MatrixMode
     {
+        /// <summary>
+        /// Represents a 8x8 LED matrix.
+        /// </summary>
         Size8x8,
+
+        /// <summary>
+        /// Represents a 7x9 LED matrix.
+        /// </summary>
         Size7x9,
+
+        /// <summary>
+        /// Represents a 6x10 LED matrix.
+        /// </summary>
         Size6x10,
+
+        /// <summary>
+        /// Represents an 5x11 LED matrix.
+        /// </summary>
         Size5x11
     }
 }

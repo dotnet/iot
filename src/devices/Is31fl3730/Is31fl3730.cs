@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Device.I2c;
 using System.Threading;
-using System.Threading.Tasks;
-using System.Device.Gpio;
-using System.Device.Spi;
-using Iot.Device.Multiplexing.Utility;
 
 namespace Iot.Device.Display
 {
@@ -22,14 +20,13 @@ namespace Iot.Device.Display
         // table 2 in datasheet
         private const byte CONFIGURATION_REGISTER = 0x0;
         private const byte MATRIX_1_REGISTER = 0x1;
-        private const byte MATRIX_1_REGISTER_LENGTH = MATRIX_2_REGISTER - MATRIX_1_REGISTER;
+        private const int MATRIX_1_REGISTER_LENGTH = MATRIX_2_REGISTER - MATRIX_1_REGISTER;
         private const byte MATRIX_2_REGISTER = 0xE;
-        private const byte MATRIX_2_REGISTER_LENGTH = UPDATE_COLUMN_REGISTER - MATRIX_2_REGISTER;
+        private const int MATRIX_2_REGISTER_LENGTH = UPDATE_COLUMN_REGISTER - MATRIX_2_REGISTER;
         private const byte UPDATE_COLUMN_REGISTER = 0xC;
         private const byte LIGHTING_EFFECT_REGISTER = 0xD;
         private const byte PWM_REGISTER = 0x19;
         private const byte RESET_REGISTER = 0xC;
-        
 
         // Configuration register
         // table 3 in datasheet
@@ -42,6 +39,15 @@ namespace Iot.Device.Display
         private const byte MATRIX_6x10 = 0x2;
         private const byte MATRIX_5x11 = 0x3;
 
+        // Values
+        private readonly byte[] _disable_all_leds_data = new byte[8];
+        private readonly byte[] _enable_all_leds_data = new byte[MATRIX_1_REGISTER_LENGTH];
+        private byte[] _matrix1 = new byte[MATRIX_1_REGISTER_LENGTH];
+        private byte[] _matrix2 = new byte[MATRIX_1_REGISTER_LENGTH];
+        private List<byte[]> _matrices = new();
+
+        private I2cDevice _i2cDevice;
+
        /// <summary>
         /// Initialize IS31FL3730 device
         /// </summary>
@@ -49,8 +55,9 @@ namespace Iot.Device.Display
         public Is31fl3730(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
-            // _enable_all_leds_data.AsSpan().Fill(0xff);
-
+            _enable_all_leds_data.AsSpan().Fill(0xff);
+            _matrices.Add(_matrix1);
+            _matrices.Add(_matrix2);
         }
 
         /// <summary>
@@ -59,7 +66,7 @@ namespace Iot.Device.Display
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         /// <param name="width">The width of the LED matrix.</param>
         /// <param name="height">The height of the LED matrix.</param>
-        public Is31Fl3731(I2cDevice i2cDevice, int width, int height)
+        public Is31fl3730(I2cDevice i2cDevice, int width, int height)
         : this(i2cDevice)
         {
             Width = width;
@@ -69,7 +76,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Default I2C address for device.
         /// </summary>
-        public static readonly int DefaultI2cAddress;
+        public static readonly int DefaultI2cAddress = 0x63;
 
         /// <summary>
         /// Width of LED matrix (x axis).
@@ -80,7 +87,7 @@ namespace Iot.Device.Display
         /// Height of LED matrix (y axis).
         /// </summary>
         public readonly int Height = 9;
-        
+
         private int _configurationValue = 0;
 
         /// <summary>
@@ -90,23 +97,39 @@ namespace Iot.Device.Display
         {
             // Reset device
             Reset();
-
-            // set display mode (bits d4:d3)
-            // 00 = picture mode
-            // 01 = auto frame
-            // 1x audio frame play mode
-            Write(FUNCTION_REGISTER, CONFIGURATION_REGISTER, 0);
-            SetDisplayMode(true, false);
+            SetDisplayMode(true, true);
             SetMatrixMode(MatrixMode.Size8x8);
+            WriteConfiguration();
+            DisableAllLeds();
         }
 
         /// <summary>
         /// Indexer for updating matrix, with PWM register.
         /// </summary>
-        public int this[int x, int y]
+        public int this[int x, int y, int matrix]
         {
-            get => ReadLedPwm(x, y);
-            set => WriteLedPwm(x, y, value);
+            // get => ReadLedPwm(x, y);
+            set => WriteLed(matrix, x, y, value);
+        }
+
+        /// <summary>
+        /// Enable all LEDs.
+        /// </summary>
+        public void EnableAllLeds()
+        {
+            Write(MATRIX_1_REGISTER, _enable_all_leds_data);
+            Write(MATRIX_2_REGISTER, _enable_all_leds_data);
+            WriteUpdateRegister();
+        }
+
+        /// <summary>
+        /// Disable all LEDs.
+        /// </summary>
+        public void DisableAllLeds()
+        {
+            Write(MATRIX_1_REGISTER, _disable_all_leds_data);
+            Write(MATRIX_2_REGISTER, _disable_all_leds_data);
+            WriteUpdateRegister();
         }
 
         /// <summary>
@@ -138,43 +161,42 @@ namespace Iot.Device.Display
                 _configurationValue &= ~SHUTDOWN;
             }
 
-            Write(CONFIGURATION_REGISTER, _configurationValue);
+            WriteUpdateRegister();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _i2cDevice?.Dispose();
+            _i2cDevice = null!;
         }
 
         private void SetDisplayMode(bool matrixOne, bool matrixTwo)
         {
-            if (matrixOne && matrixTwo)
+            _configurationValue |= (matrixOne, matrixTwo) switch
             {
-                _configurationValue |= DISPLAY_MATRIX_BOTH;
-            }
-            else if (matrixOne)
-            {
-                _configurationValue |= DISPLAY_MATRIX_ONE;
-            }
-            else if (matrixTwo)
-            {
-                _configurationValue |= DISPLAY_MATRIX_TWO;
-            }
+                (true, true) => DISPLAY_MATRIX_BOTH,
+                (true, _) => DISPLAY_MATRIX_ONE,
+                (_, true) => DISPLAY_MATRIX_TWO,
+                _ => throw new Exception("Invalid input.")
+            };
         }
 
         private void SetMatrixMode(MatrixMode mode)
         {
-            if (mode is MatrixMode.Size5x11)
+            _configurationValue |= mode switch
             {
-                _configurationValue |= MATRIX_5x11;
-            }
-            else if (mode is MatrixMode.Size6x10)
-            {
-                _configurationValue |= MATRIX_6x10;
-            }
-            else if (mode is MatrixMode.Size7x9)
-            {
-                _configurationValue |= MATRIX_7x9;
-            }
-            else if (mode is MatrixMode.Size8x8)
-            {
-                _configurationValue |= MATRIX_8x8;
-            }
+                MatrixMode.Size5x11 => MATRIX_5x11,
+                MatrixMode.Size6x10 => MATRIX_6x10,
+                MatrixMode.Size7x9 => MATRIX_7x9,
+                MatrixMode.Size8x8 => MATRIX_8x8,
+                _ => throw new Exception("Invalid input.")
+            };
+        }
+
+        private void WriteConfiguration()
+        {
+            Write(CONFIGURATION_REGISTER, (byte)_configurationValue);
         }
 
         private void Write(byte address, byte[] value)
@@ -183,6 +205,40 @@ namespace Iot.Device.Display
             data[0] = address;
             value.CopyTo(data.AsSpan(1));
             _i2cDevice.Write(data);
+        }
+
+        private void Write(byte address, byte value)
+        {
+            _i2cDevice.Write(new byte[] { address, value });
+        }
+
+        private void WriteLed(int matrix, int x, int y, int enable)
+        {
+            byte[] m = _matrices[matrix];
+            byte mask = (byte)(1 >> x);
+
+            if (enable is 1)
+            {
+                m[y] |= mask;
+            }
+            else
+            {
+                m[y] &= (byte)(~mask);
+            }
+
+            UpdateMatrixRegisters();
+        }
+
+        private void WriteUpdateRegister()
+        {
+            Write(UPDATE_COLUMN_REGISTER, 0x80);
+        }
+
+        private void UpdateMatrixRegisters()
+        {
+            Write(MATRIX_1_REGISTER, _matrix1);
+            Write(MATRIX_2_REGISTER, _matrix2);
+            WriteUpdateRegister();
         }
     }
 }
