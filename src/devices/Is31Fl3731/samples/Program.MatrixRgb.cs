@@ -124,7 +124,7 @@ void TestRainbowSweep()
         {
             foreach (int x in Enumerable.Range(0, 5))
             {
-                double pixel_hue = (x + y + (step / 20.0 )) / 8.0;
+                double pixel_hue = (x + y + (step / 20.0)) / 8.0;
                 pixel_hue = pixel_hue - (int)(pixel_hue);
                 // pixel_hue += 0;
                 pixel_hue = pixel_hue - Math.Floor(pixel_hue);
