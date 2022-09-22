@@ -11,7 +11,7 @@ namespace Iot.Device.Display
     /// Represents 5x5 RGB matrix, driven by an IS31FL3731 LED chip.
     /// </summary>
     // Product: https://shop.pimoroni.com/products/5x5-rgb-matrix-breakout
-    public class BreakoutRgb5x5 : Is31Fl3731
+    public class BreakoutRgb5x5 : Is31fl3731
     {
         private byte[][] _addresses = new byte[][]
         {

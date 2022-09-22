@@ -12,7 +12,7 @@ namespace Iot.Device.Display
     /// </summary>
     // Product: https://shop.pimoroni.com/products/scroll-phat-hd
     // Product: https://shop.pimoroni.com/products/scroll-hat-mini
-    public class ScrollPhat17x7 : Is31Fl3731
+    public class ScrollPhat17x7 : Is31fl3731
     {
         /// <summary>
         /// Initialize LED driver.

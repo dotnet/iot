@@ -13,7 +13,7 @@ namespace Iot.Device.Display
     // Datasheet: https://cdn-learn.adafruit.com/assets/assets/000/030/994/original/31FL3731.pdf
     // Product: https://www.adafruit.com/product/2946
     // Product: https://www.adafruit.com/product/2974
-    public abstract class Is31Fl3731 : IDisposable
+    public abstract class Is31fl3731 : IDisposable
     {
         // Register addresses
         // Command register
@@ -50,7 +50,7 @@ namespace Iot.Device.Display
         /// Initialize IS31FL3731 device
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
-        public Is31Fl3731(I2cDevice i2cDevice)
+        public Is31fl3731(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
             _enable_all_leds_data.AsSpan().Fill(0xff);
@@ -62,7 +62,7 @@ namespace Iot.Device.Display
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         /// <param name="width">The width of the LED matrix.</param>
         /// <param name="height">The height of the LED matrix.</param>
-        public Is31Fl3731(I2cDevice i2cDevice, int width, int height)
+        public Is31fl3731(I2cDevice i2cDevice, int width, int height)
         : this(i2cDevice)
         {
             Width = width;
