@@ -20,13 +20,11 @@ namespace Iot.Device.Display
         // table 2 in datasheet
         private const byte CONFIGURATION_REGISTER = 0x0;
         private const byte MATRIX_1_REGISTER = 0x1;
-        private const int MATRIX_1_REGISTER_LENGTH = MATRIX_2_REGISTER - MATRIX_1_REGISTER;
-        private const byte MATRIX_2_REGISTER = 0xE;
-        private const int MATRIX_2_REGISTER_LENGTH = UPDATE_COLUMN_REGISTER - MATRIX_2_REGISTER;
-        private const byte UPDATE_COLUMN_REGISTER = 0xC;
-        private const byte LIGHTING_EFFECT_REGISTER = 0xD;
+        private const byte MATRIX_2_REGISTER = 0x0E;
+        private const byte UPDATE_COLUMN_REGISTER = 0x0C;
+        private const byte LIGHTING_EFFECT_REGISTER = 0x0D;
         private const byte PWM_REGISTER = 0x19;
-        private const byte RESET_REGISTER = 0xC;
+        private const byte RESET_REGISTER = 0x0C;
 
         // Configuration register
         // table 3 in datasheet
@@ -41,12 +39,11 @@ namespace Iot.Device.Display
 
         // Values
         private readonly byte[] _disable_all_leds_data = new byte[8];
-        private readonly byte[] _enable_all_leds_data = new byte[MATRIX_1_REGISTER_LENGTH];
-        private byte[] _matrix1 = new byte[MATRIX_1_REGISTER_LENGTH];
-        private byte[] _matrix2 = new byte[MATRIX_1_REGISTER_LENGTH];
-        private List<byte[]> _matrices = new();
-
+        private readonly byte[] _enable_all_leds_data = new byte[8];
+        private byte[] _matrix1 = new byte[8];
+        private byte[] _matrix2 = new byte[8];
         private I2cDevice _i2cDevice;
+        private int _configurationValue = 0;
 
        /// <summary>
         /// Initialize IS31FL3730 device
@@ -55,9 +52,15 @@ namespace Iot.Device.Display
         public Is31fl3730(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
-            _enable_all_leds_data.AsSpan().Fill(0xff);
-            _matrices.Add(_matrix1);
-            _matrices.Add(_matrix2);
+            // _enable_all_leds_data.AsSpan().Fill(0xff);
+            _enable_all_leds_data[0] = 127;
+            _enable_all_leds_data[1] = 127;
+            _enable_all_leds_data[2] = 127;
+            _enable_all_leds_data[3] = 127;
+            _enable_all_leds_data[4] = 0;
+            _enable_all_leds_data[5] = 0;
+            _enable_all_leds_data[6] = 16;
+            _enable_all_leds_data[7] = 64;
         }
 
         /// <summary>
@@ -88,25 +91,41 @@ namespace Iot.Device.Display
         /// </summary>
         public readonly int Height = 9;
 
-        private int _configurationValue = 0;
+        /// <summary>
+        /// Brightness of LED matrix (override default value (40 mA); set before calling Initialize method).
+        /// </summary>
+        public int Brightness = 128;
+
+        /// <summary>
+        /// Full current setting for each row output of LED matrix (override default value (128; max brightness); set before calling Initialize method).
+        /// </summary>
+        public int CurrentSetting = 0b00001110;
 
         /// <summary>
         /// Initialize LED driver.
         /// </summary>
         public void Initialize()
         {
-            // Reset device
-            Reset();
-            SetDisplayMode(true, true);
-            SetMatrixMode(MatrixMode.Size8x8);
-            WriteConfiguration();
-            DisableAllLeds();
+            if (_configurationValue > 0)
+            {
+                WriteConfiguration();
+            }
+
+            if (CurrentSetting > 0)
+            {
+                _i2cDevice.Write(new byte[] { LIGHTING_EFFECT_REGISTER, (byte)CurrentSetting });
+            }
+
+            if (Brightness > 0)
+            {
+                _i2cDevice.Write(new byte[] { PWM_REGISTER, (byte)Brightness });
+            }
         }
 
         /// <summary>
         /// Indexer for updating matrix, with PWM register.
         /// </summary>
-        public int this[int x, int y, int matrix]
+        public int this[int matrix, int x, int y]
         {
             // get => ReadLedPwm(x, y);
             set => WriteLed(matrix, x, y, value);
@@ -118,7 +137,7 @@ namespace Iot.Device.Display
         public void EnableAllLeds()
         {
             Write(MATRIX_1_REGISTER, _enable_all_leds_data);
-            Write(MATRIX_2_REGISTER, _enable_all_leds_data);
+            // Write(MATRIX_2_REGISTER, _enable_all_leds_data);
             WriteUpdateRegister();
         }
 
@@ -130,6 +149,35 @@ namespace Iot.Device.Display
             Write(MATRIX_1_REGISTER, _disable_all_leds_data);
             Write(MATRIX_2_REGISTER, _disable_all_leds_data);
             WriteUpdateRegister();
+        }
+
+        /// <summary>
+        /// Set display mode. Call before Initialize method.
+        /// </summary>
+        public void SetDisplayMode(bool matrixOne, bool matrixTwo)
+        {
+            _configurationValue |= (matrixOne, matrixTwo) switch
+            {
+                (true, true) => DISPLAY_MATRIX_BOTH,
+                (true, _) => DISPLAY_MATRIX_ONE,
+                (_, true) => DISPLAY_MATRIX_TWO,
+                _ => throw new Exception("Invalid input.")
+            };
+        }
+
+        /// <summary>
+        /// Set matrix mode. Call before Initialize method.
+        /// </summary>
+        public void SetMatrixMode(MatrixMode mode)
+        {
+            _configurationValue |= mode switch
+            {
+                MatrixMode.Size5x11 => MATRIX_5x11,
+                MatrixMode.Size6x10 => MATRIX_6x10,
+                MatrixMode.Size7x9 => MATRIX_7x9,
+                MatrixMode.Size8x8 => MATRIX_8x8,
+                _ => throw new Exception("Invalid input.")
+            };
         }
 
         /// <summary>
@@ -171,29 +219,6 @@ namespace Iot.Device.Display
             _i2cDevice = null!;
         }
 
-        private void SetDisplayMode(bool matrixOne, bool matrixTwo)
-        {
-            _configurationValue |= (matrixOne, matrixTwo) switch
-            {
-                (true, true) => DISPLAY_MATRIX_BOTH,
-                (true, _) => DISPLAY_MATRIX_ONE,
-                (_, true) => DISPLAY_MATRIX_TWO,
-                _ => throw new Exception("Invalid input.")
-            };
-        }
-
-        private void SetMatrixMode(MatrixMode mode)
-        {
-            _configurationValue |= mode switch
-            {
-                MatrixMode.Size5x11 => MATRIX_5x11,
-                MatrixMode.Size6x10 => MATRIX_6x10,
-                MatrixMode.Size7x9 => MATRIX_7x9,
-                MatrixMode.Size8x8 => MATRIX_8x8,
-                _ => throw new Exception("Invalid input.")
-            };
-        }
-
         private void WriteConfiguration()
         {
             Write(CONFIGURATION_REGISTER, (byte)_configurationValue);
@@ -214,19 +239,45 @@ namespace Iot.Device.Display
 
         private void WriteLed(int matrix, int x, int y, int enable)
         {
-            byte[] m = _matrices[matrix];
-            byte mask = (byte)(1 >> x);
+            /*
+            The following diagrams and information demonstrate how the matrix is structured.
 
-            if (enable is 1)
+            This in terms of two products:
+
+            - https://shop.pimoroni.com/products/microdot-phat
+            - https://shop.pimoroni.com/products/led-dot-matrix-breakout
+
+
+            Both of these products present pairs of 5x7 LED mattrices.
+
+            */
+            if (matrix is 0)
             {
-                m[y] |= mask;
+                byte mask = (byte)(1 << x);
+                _matrix1[y] = UpdateByte(_matrix1[y], mask, enable);
             }
-            else
+            else if (matrix is 1)
             {
-                m[y] &= (byte)(~mask);
+                byte mask = (byte)(1 << y);
+                _matrix2[x] = UpdateByte(_matrix2[x], mask, enable);
+
             }
 
             UpdateMatrixRegisters();
+        }
+
+        private byte UpdateByte(byte data, byte mask, int enable)
+        {
+            if (enable is 1)
+            {
+                data |= mask;
+            }
+            else
+            {
+                data &= (byte)(~mask);
+            }
+
+            return data;
         }
 
         private void WriteUpdateRegister()

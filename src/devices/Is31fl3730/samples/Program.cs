@@ -8,6 +8,14 @@ using Iot.Device.Display;
 
 using Is31fl3730 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31fl3730.DefaultI2cAddress)));
 
+// matrix.Brightness = 127;
 matrix.Initialize();
-matrix[0, 5, 0] = 1;
-matrix[1, 5, 1] = 1;
+matrix.DisableAllLeds();
+Thread.Sleep(100);
+matrix.EnableAllLeds();
+// Thread.Sleep(100);
+// matrix[0, 4, 3] = 1;
+// matrix[0, 4, 4] = 1;
+// matrix[0, 4, 5] = 1;
+// matrix[0, 4, 6] = 1;
+// matrix[0, 0, 7] = 1;
