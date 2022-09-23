@@ -13,6 +13,7 @@ namespace Iot.Device.Display
     /// </summary>
     // Datasheet: https://cdn-shop.adafruit.com/product-files/3017/31FL3730.pdf
     // Product: https://shop.pimoroni.com/products/microdot-phat
+    // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
     public class Is31fl3730 : IDisposable
     {
@@ -53,7 +54,7 @@ namespace Iot.Device.Display
         {
             _i2cDevice = i2cDevice;
             // _enable_all_leds_data.AsSpan().Fill(0xff);
-            _enable_all_leds_data[0] = 127;
+            _enable_all_leds_data[0] = 37;
             _enable_all_leds_data[1] = 127;
             _enable_all_leds_data[2] = 127;
             _enable_all_leds_data[3] = 127;
@@ -79,7 +80,27 @@ namespace Iot.Device.Display
         /// <summary>
         /// Default I2C address for device.
         /// </summary>
-        public static readonly int DefaultI2cAddress = 0x63;
+        /*
+        The Pimoroni devices support three I2C devices:
+           
+            - 0x61 (the default)
+            - 0x62
+            - 0x63
+        
+        For the breakout, this is straightforward. There is a default and you can change the address (in the normal way).
+
+        For the Micro Dot pHAT, there are three pairs installed (making six matrices). The addresses are ordered this way:
+
+           x63       x62        x61  
+        ________  _________  ________
+        m2 | m1 || m2 | m1 || m2 | m1
+
+        This ordering makes sense if you are scrolling content right to left.
+
+        More detailed information about the structure of each pair follows (later in doc).
+
+        */
+        public static readonly int DefaultI2cAddress = 0x61;
 
         /// <summary>
         /// Width of LED matrix (x axis).
@@ -250,7 +271,71 @@ namespace Iot.Device.Display
 
             Both of these products present pairs of 5x7 LED mattrices.
 
+            *matrix 2*
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            x       x
+                    *matrix 1*
+
+            Matrix 1 (as demonstrated) is right-most. This makes sense if you scroll content from right to left.
+
+            Each matrices has a (somewhat odd) dot in the bottom left. It has to be enabled in a special way.
+
+            The matrices are updated with quite different data patterns:
+
+            - matrix 1 is row-based.
+            - matrix 2 is column based.
+
+            Let's write a byte to both matrices and see what happens.
+
+            Byte: 00011001
+
+            The following is displayed -- "o" means lit; "x" is unlit.
+
+            *matrix 2*
+            oxxxx | oxxoo
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            oxxxx | xxxxx
+            oxxxx | xxxxx
+            xxxxx | xxxxx
+            xxxxx | xxxxx
+            x       x
+                    *matrix 1*            
+
+            Straightforwardly, both matrices start in the top-left, however
+            matrix 1 is row-based, left to right and matrix 2 is column-based
+            up to down.
+
+            You will notice these matrices are not symmetrical when you consider
+            rows vs columns. Theses matrices are 5x7 not 5x5 or 7x7.
+            
+            That means that writing a byte -- 1000_0000 -- with just the high bit set
+            won't do anything for either matrix since that bit effectively "falls off".
+
+            Does this matter? Sorta.
+
+            If you are updating one pixel at a time, then you just need to update the
+            correct bit, one at a time, either row- or column-based (as you see in
+            the code below).
+
+            If you have a bitmap you want to write all at once, then you can simply write
+            rows of bytes to matrix 1. However, you need to ensure your bitmap only uses
+            the first 5 bits. If you are writing to matrix 2 then writing one row at a
+            time won't work. Your content will be 90d flipped and the content (if you write
+            the same 5-bit encoded bitmap) will be 2 pixels short. Instead, you need to
+            translate row-based content to columns, similar to the `else` clause below.
+
+            Separately, you can disable one matrix or the other. That's largely a separate
+            concern. It has nothing to do with byte structure.          
+
             */
+
             if (matrix is 0)
             {
                 byte mask = (byte)(1 << x);
