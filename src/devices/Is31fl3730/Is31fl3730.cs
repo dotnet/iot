@@ -39,29 +39,28 @@ namespace Iot.Device.Display
         private const byte MATRIX_5x11 = 0x3;
 
         // Values
+        private readonly byte[] _matrix_registers = new byte[] { MATRIX_1_REGISTER, MATRIX_2_REGISTER };
         private readonly byte[] _disable_all_leds_data = new byte[8];
         private readonly byte[] _enable_all_leds_data = new byte[8];
-        private byte[] _matrix1 = new byte[8];
-        private byte[] _matrix2 = new byte[8];
+        private readonly Matrix5x7?[] _matrices = new Matrix5x7[2];
+        private readonly List<byte[]> _buffers = new List<byte[]>(2);
         private I2cDevice _i2cDevice;
+        private byte[] _buffer1 = new byte[8];
+        private byte[] _buffer2 = new byte[8];
+        private bool _matrix1Enabled = true;
+        private bool _matrix2Enabled = false;
         private int _configurationValue = 0;
 
-       /// <summary>
+        /// <summary>
         /// Initialize IS31FL3730 device
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         public Is31fl3730(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
-            // _enable_all_leds_data.AsSpan().Fill(0xff);
-            _enable_all_leds_data[0] = 37;
-            _enable_all_leds_data[1] = 127;
-            _enable_all_leds_data[2] = 127;
-            _enable_all_leds_data[3] = 127;
-            _enable_all_leds_data[4] = 0;
-            _enable_all_leds_data[5] = 0;
-            _enable_all_leds_data[6] = 16;
-            _enable_all_leds_data[7] = 64;
+            _enable_all_leds_data.AsSpan().Fill(0xff);
+            _buffers.Add(_buffer1);
+            _buffers.Add(_buffer2);
         }
 
         /// <summary>
@@ -77,50 +76,56 @@ namespace Iot.Device.Display
             Height = height;
         }
 
-        /// <summary>
-        /// Default I2C address for device.
-        /// </summary>
         /*
         The Pimoroni devices support three I2C devices:
-           
+
             - 0x61 (the default)
             - 0x62
             - 0x63
-        
+
         For the breakout, this is straightforward. There is a default and you can change the address (in the normal way).
 
         For the Micro Dot pHAT, there are three pairs installed (making six matrices). The addresses are ordered this way:
 
-           x63       x62        x61  
+           x63       x62        x61
         ________  _________  ________
         m2 | m1 || m2 | m1 || m2 | m1
 
         This ordering makes sense if you are scrolling content right to left.
 
-        More detailed information about the structure of each pair follows (later in doc).
+        More detailed information about the structure of each pair follows (further down).
 
         */
+
+        /// <summary>
+        /// Default I2C address for device.
+        /// </summary>
         public static readonly int DefaultI2cAddress = 0x61;
 
         /// <summary>
         /// Width of LED matrix (x axis).
         /// </summary>
-        public readonly int Width = 16;
+        public readonly int Width = 5;
 
         /// <summary>
         /// Height of LED matrix (y axis).
         /// </summary>
-        public readonly int Height = 9;
+        public readonly int Height = 7;
 
         /// <summary>
         /// Brightness of LED matrix (override default value (40 mA); set before calling Initialize method).
         /// </summary>
-        public int Brightness = 128;
+        public int Brightness = 0;
 
         /// <summary>
         /// Full current setting for each row output of LED matrix (override default value (128; max brightness); set before calling Initialize method).
         /// </summary>
-        public int CurrentSetting = 0b00001110;
+        public int CurrentSetting = 0;
+
+        /// <summary>
+        /// Indexer for matrix.
+        /// </summary>
+        public Matrix5x7? this[int matrix] => _matrices[matrix];
 
         /// <summary>
         /// Initialize LED driver.
@@ -141,15 +146,29 @@ namespace Iot.Device.Display
             {
                 _i2cDevice.Write(new byte[] { PWM_REGISTER, (byte)Brightness });
             }
+
+            _matrices[0] = _matrix1Enabled ? new Matrix5x7(this, 0) : null;
+            _matrices[1] = _matrix2Enabled ? new Matrix5x7(this, 1) : null;
         }
 
         /// <summary>
-        /// Indexer for updating matrix, with PWM register.
+        /// Fill all LEDS.
         /// </summary>
-        public int this[int matrix, int x, int y]
+        public void Fill(int matrix, int value)
         {
-            // get => ReadLedPwm(x, y);
-            set => WriteLed(matrix, x, y, value);
+            byte[] buffer = _buffers[matrix];
+
+            if (value > 0)
+            {
+                buffer.AsSpan().Fill(255);
+            }
+            else
+            {
+                buffer.AsSpan().Fill(0);
+            }
+
+            Write(_matrix_registers[matrix], _buffer1);
+            WriteUpdateRegister();
         }
 
         /// <summary>
@@ -157,8 +176,16 @@ namespace Iot.Device.Display
         /// </summary>
         public void EnableAllLeds()
         {
-            Write(MATRIX_1_REGISTER, _enable_all_leds_data);
-            // Write(MATRIX_2_REGISTER, _enable_all_leds_data);
+            if (_matrix1Enabled)
+            {
+                Write(MATRIX_1_REGISTER, _enable_all_leds_data);
+            }
+
+            if (_matrix2Enabled)
+            {
+                Write(MATRIX_2_REGISTER, _enable_all_leds_data);
+            }
+
             WriteUpdateRegister();
         }
 
@@ -167,8 +194,16 @@ namespace Iot.Device.Display
         /// </summary>
         public void DisableAllLeds()
         {
-            Write(MATRIX_1_REGISTER, _disable_all_leds_data);
-            Write(MATRIX_2_REGISTER, _disable_all_leds_data);
+            if (_matrix1Enabled)
+            {
+                Write(MATRIX_1_REGISTER, _disable_all_leds_data);
+            }
+
+            if (_matrix2Enabled)
+            {
+                Write(MATRIX_2_REGISTER, _disable_all_leds_data);
+            }
+
             WriteUpdateRegister();
         }
 
@@ -177,6 +212,9 @@ namespace Iot.Device.Display
         /// </summary>
         public void SetDisplayMode(bool matrixOne, bool matrixTwo)
         {
+            _matrix1Enabled = matrixOne;
+            _matrix2Enabled = matrixTwo;
+
             _configurationValue |= (matrixOne, matrixTwo) switch
             {
                 (true, true) => DISPLAY_MATRIX_BOTH,
@@ -258,7 +296,7 @@ namespace Iot.Device.Display
             _i2cDevice.Write(new byte[] { address, value });
         }
 
-        private void WriteLed(int matrix, int x, int y, int enable)
+        internal void WriteLed(int matrix, int x, int y, int enable)
         {
             /*
             The following diagrams and information demonstrate how the matrix is structured.
@@ -306,7 +344,12 @@ namespace Iot.Device.Display
             xxxxx | xxxxx
             xxxxx | xxxxx
             x       x
-                    *matrix 1*            
+                    *matrix 1*
+
+            If you write two bytes, then you'll write to the first two rows or
+            columns, respectively. With the matrix two, you can only write 5 bytes
+            and with matrix one, you can write 7, however, the number of bits that
+            are used differs.
 
             Straightforwardly, both matrices start in the top-left, however
             matrix 1 is row-based, left to right and matrix 2 is column-based
@@ -314,7 +357,7 @@ namespace Iot.Device.Display
 
             You will notice these matrices are not symmetrical when you consider
             rows vs columns. Theses matrices are 5x7 not 5x5 or 7x7.
-            
+
             That means that writing a byte -- 1000_0000 -- with just the high bit set
             won't do anything for either matrix since that bit effectively "falls off".
 
@@ -324,6 +367,19 @@ namespace Iot.Device.Display
             correct bit, one at a time, either row- or column-based (as you see in
             the code below).
 
+            There are those extra pixels at the bottom, one per matrix. They are addressed
+            in the following way. Assume, you have a buffer defined like:
+
+            byte[] buffer = new byte[8]
+
+            To set the extra pixel, ensure the following bit is set:
+
+            - For Matrix 1: buffer[6] = 128;
+            - For Matrix 2: buffer[7] = 64;
+
+            buffer[6] is also used for the 7th row, on matrix 1. If you want to light up all
+            pixels and the special pixel, then set that buffer value to 159. That's all the bits but two of the highest ones (32 and 64).
+
             If you have a bitmap you want to write all at once, then you can simply write
             rows of bytes to matrix 1. However, you need to ensure your bitmap only uses
             the first 5 bits. If you are writing to matrix 2 then writing one row at a
@@ -332,21 +388,14 @@ namespace Iot.Device.Display
             translate row-based content to columns, similar to the `else` clause below.
 
             Separately, you can disable one matrix or the other. That's largely a separate
-            concern. It has nothing to do with byte structure.          
-
+            concern. It has nothing to do with byte structure.
             */
 
-            if (matrix is 0)
-            {
-                byte mask = (byte)(1 << x);
-                _matrix1[y] = UpdateByte(_matrix1[y], mask, enable);
-            }
-            else if (matrix is 1)
-            {
-                byte mask = (byte)(1 << y);
-                _matrix2[x] = UpdateByte(_matrix2[x], mask, enable);
-
-            }
+            int row = matrix is 0 ? y : x;
+            int column = matrix is 0 ? x : y;
+            byte mask = (byte)(1 << column);
+            byte[] m = _buffers[matrix];
+            m[row] = UpdateByte(m[row], mask, enable);
 
             UpdateMatrixRegisters();
         }
@@ -365,6 +414,16 @@ namespace Iot.Device.Display
             return data;
         }
 
+        internal int ReadLed(int matrix, int x, int y)
+        {
+            int row = matrix is 0 ? y : x;
+            int column = matrix is 0 ? x : y;
+            int mask = 1 << column;
+            byte[] m = _buffers[matrix];
+            int r = m[row];
+            return r & mask;
+        }
+
         private void WriteUpdateRegister()
         {
             Write(UPDATE_COLUMN_REGISTER, 0x80);
@@ -372,8 +431,16 @@ namespace Iot.Device.Display
 
         private void UpdateMatrixRegisters()
         {
-            Write(MATRIX_1_REGISTER, _matrix1);
-            Write(MATRIX_2_REGISTER, _matrix2);
+            if (_matrix1Enabled)
+            {
+                Write(MATRIX_1_REGISTER, _buffer1);
+            }
+
+            if (_matrix2Enabled)
+            {
+                Write(MATRIX_2_REGISTER, _buffer2);
+            }
+
             WriteUpdateRegister();
         }
     }
