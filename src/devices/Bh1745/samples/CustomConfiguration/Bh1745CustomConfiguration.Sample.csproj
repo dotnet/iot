@@ -5,13 +5,9 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="rpi-bmp280_i2c.fzz" />
-    <None Remove="rpi-bmp280_i2c.png" />
+    <Compile Include="Bh1745.CustomConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Bme280.sample.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Bmxx80.csproj" />
+    <ProjectReference Include="../../Bh1745.csproj" />
   </ItemGroup>
 </Project>

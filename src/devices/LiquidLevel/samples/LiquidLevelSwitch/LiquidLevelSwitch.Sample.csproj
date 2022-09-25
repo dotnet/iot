@@ -5,13 +5,9 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="rpi-llc200d3sh.fzz" />
-    <None Remove="rpi-llc200d3sh_bb.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Include="LiquidLevelSwitch.sample.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LiquidLevel.csproj" />
+    <ProjectReference Include="../../LiquidLevel.csproj" />
   </ItemGroup>
 </Project>

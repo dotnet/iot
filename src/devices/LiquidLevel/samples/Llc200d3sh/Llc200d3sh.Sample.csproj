@@ -5,9 +5,9 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Seesaw.csproj" />
-    <Compile Include="Seesaw.Sample.BlinkingLights.cs" />
-    <Compile Include="../../../../samples/led-more-blinking-lights/TimeEnvelope.cs" />
-    <Compile Include="Volume.cs" />
+    <Compile Include="Llc200d3sh.sample.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../LiquidLevel.csproj" />
   </ItemGroup>
 </Project>

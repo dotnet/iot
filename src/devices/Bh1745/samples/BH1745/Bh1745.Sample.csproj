@@ -5,13 +5,9 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="rpi-llc200d3sh.fzz" />
-    <None Remove="rpi-llc200d3sh_bb.png" />
+    <Compile Include="Bh1745.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Llc200d3sh.sample.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LiquidLevel.csproj" />
+    <ProjectReference Include="../../Bh1745.csproj" />
   </ItemGroup>
 </Project>
