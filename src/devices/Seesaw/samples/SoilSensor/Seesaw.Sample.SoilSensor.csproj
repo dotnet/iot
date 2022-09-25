@@ -5,7 +5,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../Seesaw.csproj" />
+    <ProjectReference Include="../../Seesaw.csproj" />
     <Compile Include="Seesaw.Sample.SoilSensor.cs" />
   </ItemGroup>
 </Project>
