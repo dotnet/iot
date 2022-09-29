@@ -15,6 +15,7 @@ namespace Iot.Device.Display
     // Product: https://shop.pimoroni.com/products/microdot-phat
     // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
+    // Based on: https://github.com/pimoroni/microdot-phat/blob/master/library/microdotphat/matrix.py
     public class Is31fl3730 : IDisposable
     {
         // Function register
