@@ -41,7 +41,7 @@ namespace Iot.Device.Display
             set => _is31fl3730.WriteLed(Matrix, x, y, value);
         }
 
-        public static readonly int DefaultI2cAddress = 0x61;
+        public const int DefaultI2cAddress = 0x61;
 
         /// <summary>
         /// Width of LED matrix (x axis).
