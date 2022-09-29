@@ -2,11 +2,11 @@
   <!-- Packaging related properties -->
   <PropertyGroup>
     <MajorVersion>2</MajorVersion>
-    <MinorVersion>2</MinorVersion>
+    <MinorVersion>3</MinorVersion>
     <Description>This package provides a set of Device Bindings that use System.Device.Gpio package to communicate with a microcontroller.</Description>
     <PackageTags>.NET Core GPIO Pins SPI I2C PWM BCM2835 BCM2837 RPi IoT Device Bindings</PackageTags>
     <EnablePackageValidation>true</EnablePackageValidation>
-    <PackageValidationBaselineVersion>2.1.0</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>2.2.0</PackageValidationBaselineVersion>
   </PropertyGroup>
 
   <Import Project="../../Directory.Build.props" />
