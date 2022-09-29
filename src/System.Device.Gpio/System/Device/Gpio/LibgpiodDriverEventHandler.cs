@@ -38,7 +38,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
 
         if (eventSuccess < 0)
         {
-            throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, _pinNumber, Marshal.GetLastWin32Error());
+            throw ExceptionHelper.GetIOException(ExceptionResource.RequestEventError, Marshal.GetLastWin32Error(), _pinNumber);
         }
     }
 
