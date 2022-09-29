@@ -46,7 +46,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Width of LED matrix (x axis).
         /// </summary>
-        public int Width { get; } = 5;
+        public readonly int Width = 5;
 
         /// <summary>
         /// Height of LED matrix (y axis).

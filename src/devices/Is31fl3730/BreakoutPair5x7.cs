@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.Threading;
@@ -61,7 +62,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Default I2C address for device.
         /// </summary>
-        public static readonly int DefaultI2cAddress = 0x61;
+        public const int DefaultI2cAddress = 0x61;
 
         /// <summary>
         /// Width of LED matrix (x axis).

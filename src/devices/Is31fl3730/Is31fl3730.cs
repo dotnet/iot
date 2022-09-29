@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.Threading;
+using static System.Linq.Enumerable;
 
 namespace Iot.Device.Display
 {
@@ -36,14 +37,9 @@ namespace Iot.Device.Display
         // Values
         private const byte EIGHT_BIT_VALUE = 0x80;
         private readonly byte[] _matrix_registers = new byte[] { MATRIX_1_REGISTER, MATRIX_2_REGISTER };
-        private readonly byte[] _disable_all_leds_data = new byte[MATRIX_REGISTER_LENGTH];
-        private readonly byte[] _enable_all_leds_data = new byte[MATRIX_REGISTER_LENGTH];
-        private readonly List<byte[]> _buffers = new List<byte[]>(2);
+        private readonly List<byte[]> _buffers;
+        private readonly bool[] _enabled = new bool[2];
         private I2cDevice _i2cDevice;
-        private byte[] _buffer1 = new byte[8];
-        private byte[] _buffer2 = new byte[8];
-        private bool _matrix1Enabled = true;
-        private bool _matrix2Enabled = false;
         private int _configurationValue = 0;
 
         /// <summary>
@@ -53,9 +49,11 @@ namespace Iot.Device.Display
         public Is31fl3730(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
-            _enable_all_leds_data.AsSpan().Fill(0xff);
-            _buffers.Add(_buffer1);
-            _buffers.Add(_buffer2);
+            _buffers = new List<byte[]>()
+            {
+                new byte[8],
+                new byte[8]
+            };
         }
 
         /*
@@ -82,7 +80,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Default I2C address for device.
         /// </summary>
-        public static readonly int DefaultI2cAddress = 0x61;
+        public const int DefaultI2cAddress = 0x61;
 
         /// <summary>
         /// Supported I2C addresses for device.
@@ -121,9 +119,13 @@ namespace Iot.Device.Display
 
             if (DisplayMode > 0)
             {
-                _matrix1Enabled = DisplayMode is DisplayMode.MatrixOneOnly or DisplayMode.MatrixOneAndTwo;
-                _matrix2Enabled = DisplayMode is DisplayMode.MatrixTwoOnly or DisplayMode.MatrixOneAndTwo;
+                _enabled[0] = DisplayMode is DisplayMode.MatrixOneOnly or DisplayMode.MatrixOneAndTwo;
+                _enabled[1] = DisplayMode is DisplayMode.MatrixTwoOnly or DisplayMode.MatrixOneAndTwo;
                 _configurationValue |= (int)DisplayMode;
+            }
+            else
+            {
+                _enabled[0] = true;
             }
 
             if (_configurationValue > 0)
@@ -289,14 +291,12 @@ namespace Iot.Device.Display
         /// </summary>
         public void FillAll(int value)
         {
-            if (_matrix1Enabled)
+            foreach (int i in Range(0, 2))
             {
-                Fill(0, value);
-            }
-
-            if (_matrix2Enabled)
-            {
-                Fill(1, value);
+                if (_enabled[i])
+                {
+                    Fill(i, value);
+                }
             }
         }
 
@@ -344,13 +344,13 @@ namespace Iot.Device.Display
 
         private void Write(byte address, byte[] value)
         {
-            byte[] data = new byte[value.Length + 1];
+            Span<byte> data = stackalloc byte[value.Length + 1];
             data[0] = address;
-            value.CopyTo(data.AsSpan(1));
+            value.CopyTo(data[1..]);
             _i2cDevice.Write(data);
         }
 
-        private void Write(byte address, byte value) => _i2cDevice.Write(new byte[] { address, value });
+        private void Write(byte address, byte value) => _i2cDevice.Write(stackalloc byte[] { address, value });
 
         private byte UpdateByte(byte data, byte mask, int value)
         {
@@ -368,14 +368,9 @@ namespace Iot.Device.Display
 
         private void UpdateMatrixRegister(int matrix)
         {
-            if (matrix is 0 && _matrix1Enabled)
+            if (_enabled[matrix])
             {
-                Write(MATRIX_1_REGISTER, _buffer1);
-            }
-
-            if (matrix is 1 && _matrix2Enabled)
-            {
-                Write(MATRIX_2_REGISTER, _buffer2);
+                Write(_matrix_registers[matrix], _buffers[matrix]);
             }
 
             WriteUpdateRegister();
