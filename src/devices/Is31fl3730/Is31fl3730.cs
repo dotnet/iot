@@ -22,6 +22,7 @@ namespace Iot.Device.Display
         private const byte CONFIGURATION_REGISTER = 0x0;
         private const byte MATRIX_1_REGISTER = 0x1;
         private const byte MATRIX_2_REGISTER = 0x0E;
+        private const int MATRIX_REGISTER_LENGTH = 8;
         private const byte UPDATE_COLUMN_REGISTER = 0x0C;
         private const byte LIGHTING_EFFECT_REGISTER = 0x0D;
         private const byte PWM_REGISTER = 0x19;
@@ -30,19 +31,12 @@ namespace Iot.Device.Display
         // Configuration register
         // table 3 in datasheet
         private const byte SHUTDOWN = 0x80;
-        private const byte DISPLAY_MATRIX_ONE = 0x0;
-        private const byte DISPLAY_MATRIX_TWO = 0x8;
-        private const byte DISPLAY_MATRIX_BOTH = 0x18;
-        private const byte MATRIX_8x8 = 0x0;
-        private const byte MATRIX_7x9 = 0x1;
-        private const byte MATRIX_6x10 = 0x2;
-        private const byte MATRIX_5x11 = 0x3;
 
         // Values
+        private const byte EIGHT_BIT_VALUE = 0x80;
         private readonly byte[] _matrix_registers = new byte[] { MATRIX_1_REGISTER, MATRIX_2_REGISTER };
-        private readonly byte[] _disable_all_leds_data = new byte[8];
-        private readonly byte[] _enable_all_leds_data = new byte[8];
-        private readonly Matrix5x7?[] _matrices = new Matrix5x7[2];
+        private readonly byte[] _disable_all_leds_data = new byte[MATRIX_REGISTER_LENGTH];
+        private readonly byte[] _enable_all_leds_data = new byte[MATRIX_REGISTER_LENGTH];
         private readonly List<byte[]> _buffers = new List<byte[]>(2);
         private I2cDevice _i2cDevice;
         private byte[] _buffer1 = new byte[8];
@@ -61,19 +55,6 @@ namespace Iot.Device.Display
             _enable_all_leds_data.AsSpan().Fill(0xff);
             _buffers.Add(_buffer1);
             _buffers.Add(_buffer2);
-        }
-
-        /// <summary>
-        /// Initialize IS31FL3730 device
-        /// </summary>
-        /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
-        /// <param name="width">The width of the LED matrix.</param>
-        /// <param name="height">The height of the LED matrix.</param>
-        public Is31fl3730(I2cDevice i2cDevice, int width, int height)
-        : this(i2cDevice)
-        {
-            Width = width;
-            Height = height;
         }
 
         /*
@@ -103,200 +84,71 @@ namespace Iot.Device.Display
         public static readonly int DefaultI2cAddress = 0x61;
 
         /// <summary>
-        /// Width of LED matrix (x axis).
+        /// Supported I2C addresses for device.
         /// </summary>
-        public readonly int Width = 5;
+        public static readonly int[] SupportedI2cAddresses = new int[] { DefaultI2cAddress, 0x62, 0x63 };
 
         /// <summary>
-        /// Height of LED matrix (y axis).
-        /// </summary>
-        public readonly int Height = 7;
-
-        /// <summary>
-        /// Brightness of LED matrix (override default value (40 mA); set before calling Initialize method).
+        /// Brightness of LED matrix (override default value (128; max brightness)); set before calling Initialize method).
         /// </summary>
         public int Brightness = 0;
 
         /// <summary>
-        /// Full current setting for each row output of LED matrix (override default value (128; max brightness); set before calling Initialize method).
+        /// Full current setting for each row output of LED matrix (override default value (40 mA)); set before calling Initialize method).
         /// </summary>
-        public int CurrentSetting = 0;
+        public Current Current = 0;
 
         /// <summary>
-        /// Indexer for matrix.
+        /// Matrix mode (override default value (8x8); set before calling Initialize method).
         /// </summary>
-        public Matrix5x7? this[int matrix] => _matrices[matrix];
+        public MatrixMode MatrixMode = 0;
+
+        /// <summary>
+        /// Display mode (override default value (Matrix 1 only); set before calling Initialize method).
+        /// </summary>
+        public DisplayMode DisplayMode = 0;
 
         /// <summary>
         /// Initialize LED driver.
         /// </summary>
         public void Initialize()
         {
-            if (_configurationValue > 0)
+            if (MatrixMode > 0)
             {
-                WriteConfiguration();
+                _configurationValue |= (int)MatrixMode;
             }
 
-            if (CurrentSetting > 0)
+            if (DisplayMode > 0)
             {
-                _i2cDevice.Write(new byte[] { LIGHTING_EFFECT_REGISTER, (byte)CurrentSetting });
+                _matrix1Enabled = DisplayMode is DisplayMode.MatrixOneOnly or DisplayMode.MatrixOneAndTwo;
+                _matrix2Enabled = DisplayMode is DisplayMode.MatrixTwoOnly or DisplayMode.MatrixOneAndTwo;
+                _configurationValue |= (int)DisplayMode;
+            }
+
+            if (_configurationValue > 0)
+            {
+                Write(CONFIGURATION_REGISTER, (byte)_configurationValue);
+            }
+
+            if (Current > 0)
+            {
+                Write(LIGHTING_EFFECT_REGISTER, (byte)Current);
             }
 
             if (Brightness > 0)
             {
-                _i2cDevice.Write(new byte[] { PWM_REGISTER, (byte)Brightness });
+                Write(PWM_REGISTER, (byte)Brightness);
             }
-
-            _matrices[0] = _matrix1Enabled ? new Matrix5x7(this, 0) : null;
-            _matrices[1] = _matrix2Enabled ? new Matrix5x7(this, 1) : null;
         }
 
         /// <summary>
-        /// Fill all LEDS.
+        /// Write LED for matrix.
         /// </summary>
-        public void Fill(int matrix, int value)
-        {
-            byte[] buffer = _buffers[matrix];
-
-            if (value > 0)
-            {
-                buffer.AsSpan().Fill(255);
-            }
-            else
-            {
-                buffer.AsSpan().Fill(0);
-            }
-
-            Write(_matrix_registers[matrix], _buffer1);
-            WriteUpdateRegister();
-        }
-
-        /// <summary>
-        /// Enable all LEDs.
-        /// </summary>
-        public void EnableAllLeds()
-        {
-            if (_matrix1Enabled)
-            {
-                Write(MATRIX_1_REGISTER, _enable_all_leds_data);
-            }
-
-            if (_matrix2Enabled)
-            {
-                Write(MATRIX_2_REGISTER, _enable_all_leds_data);
-            }
-
-            WriteUpdateRegister();
-        }
-
-        /// <summary>
-        /// Disable all LEDs.
-        /// </summary>
-        public void DisableAllLeds()
-        {
-            if (_matrix1Enabled)
-            {
-                Write(MATRIX_1_REGISTER, _disable_all_leds_data);
-            }
-
-            if (_matrix2Enabled)
-            {
-                Write(MATRIX_2_REGISTER, _disable_all_leds_data);
-            }
-
-            WriteUpdateRegister();
-        }
-
-        /// <summary>
-        /// Set display mode. Call before Initialize method.
-        /// </summary>
-        public void SetDisplayMode(bool matrixOne, bool matrixTwo)
-        {
-            _matrix1Enabled = matrixOne;
-            _matrix2Enabled = matrixTwo;
-
-            _configurationValue |= (matrixOne, matrixTwo) switch
-            {
-                (true, true) => DISPLAY_MATRIX_BOTH,
-                (true, _) => DISPLAY_MATRIX_ONE,
-                (_, true) => DISPLAY_MATRIX_TWO,
-                _ => throw new Exception("Invalid input.")
-            };
-        }
-
-        /// <summary>
-        /// Set matrix mode. Call before Initialize method.
-        /// </summary>
-        public void SetMatrixMode(MatrixMode mode)
-        {
-            _configurationValue |= mode switch
-            {
-                MatrixMode.Size5x11 => MATRIX_5x11,
-                MatrixMode.Size6x10 => MATRIX_6x10,
-                MatrixMode.Size7x9 => MATRIX_7x9,
-                MatrixMode.Size8x8 => MATRIX_8x8,
-                _ => throw new Exception("Invalid input.")
-            };
-        }
-
-        /// <summary>
-        /// Reset device.
-        /// </summary>
-        public void Reset()
-        {
-            // Reset device
-            Shutdown(true);
-            Thread.Sleep(10);
-            Shutdown(false);
-        }
-
-        /// <summary>
-        /// Set the shutdown mode.
-        /// </summary>
-        /// <param name="shutdown">Set the showdown mode. `true` sets device into shutdown mode. `false` sets device into normal operation.</param>
-        public void Shutdown(bool shutdown)
-        {
-            // mode values
-            // 0 = normal operation
-            // 1 = shutdown mode
-            if (shutdown)
-            {
-                _configurationValue |= SHUTDOWN;
-            }
-            else
-            {
-                _configurationValue &= ~SHUTDOWN;
-            }
-
-            WriteUpdateRegister();
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _i2cDevice?.Dispose();
-            _i2cDevice = null!;
-        }
-
-        private void WriteConfiguration()
-        {
-            Write(CONFIGURATION_REGISTER, (byte)_configurationValue);
-        }
-
-        private void Write(byte address, byte[] value)
-        {
-            byte[] data = new byte[value.Length + 1];
-            data[0] = address;
-            value.CopyTo(data.AsSpan(1));
-            _i2cDevice.Write(data);
-        }
-
-        private void Write(byte address, byte value)
-        {
-            _i2cDevice.Write(new byte[] { address, value });
-        }
-
-        internal void WriteLed(int matrix, int x, int y, int enable)
+        /// <param name="matrix">The matrix to use.</param>
+        /// <param name="x">The x dimension for the LED.</param>
+        /// <param name="y">The y dimension for the LED.</param>
+        /// <param name="value">The value to write.</param>
+        public void WriteLed(int matrix, int x, int y, int value)
         {
             /*
             The following diagrams and information demonstrate how the matrix is structured.
@@ -391,18 +243,117 @@ namespace Iot.Device.Display
             concern. It has nothing to do with byte structure.
             */
 
-            int row = matrix is 0 ? y : x;
-            int column = matrix is 0 ? x : y;
-            byte mask = (byte)(1 << column);
-            byte[] m = _buffers[matrix];
-            m[row] = UpdateByte(m[row], mask, enable);
+            int logicalRow = matrix is 0 ? y : x;
+            int logicalColumn = matrix is 0 ? x : y;
+            byte mask = (byte)(1 << logicalColumn);
+            byte[] buffer = _buffers[matrix];
+            buffer[logicalRow] = UpdateByte(buffer[logicalRow], mask, value);
 
-            UpdateMatrixRegisters();
+            UpdateMatrixRegister(matrix);
         }
 
-        private byte UpdateByte(byte data, byte mask, int enable)
+        /// <summary>
+        /// Read value of LED for matrix.
+        /// </summary>
+        /// <param name="matrix">The matrix to use.</param>
+        /// <param name="x">The x dimension for the LED.</param>
+        /// <param name="y">The y dimension for the LED.</param>
+        public int ReadLed(int matrix, int x, int y)
         {
-            if (enable is 1)
+            int row = matrix is 0 ? y : x;
+            int column = matrix is 0 ? x : y;
+            int mask = 1 << column;
+            byte[] m = _buffers[matrix];
+            int r = m[row];
+            return r & mask;
+        }
+
+        /// <summary>
+        /// Update decimal point for matrix.
+        /// </summary>
+        public void UpdateDecimalPoint(int matrix, int value)
+        {
+            int matrixOneMask = 128;
+            int matrixtwoMask = 64;
+
+            int mask = matrix is 0 ? matrixOneMask : matrixtwoMask;
+            int row = matrix is 0 ? 6 : 7;
+            byte[] buffer = _buffers[matrix];
+
+            buffer[row] = UpdateByte(buffer[row], (byte)mask, value);
+        }
+
+        /// <summary>
+        /// Fill all LEDs with value.
+        /// </summary>
+        public void FillAll(int value)
+        {
+            if (_matrix1Enabled)
+            {
+                Fill(0, value);
+            }
+
+            if (_matrix2Enabled)
+            {
+                Fill(1, value);
+            }
+        }
+
+        /// <summary>
+        /// Fill all LEDs with value, per Matrix.
+        /// </summary>
+        public void Fill(int matrix, int value)
+        {
+            _buffers[matrix].AsSpan().Fill((byte)value);
+            UpdateMatrixRegister(matrix);
+        }
+
+        /// <summary>
+        /// Reset device.
+        /// </summary>
+        public void Reset() => Write(RESET_REGISTER, EIGHT_BIT_VALUE);
+
+        /// <summary>
+        /// Set the shutdown mode.
+        /// </summary>
+        /// <param name="shutdown">Set the showdown mode. `true` sets device into shutdown mode. `false` sets device into normal operation.</param>
+        public void Shutdown(bool shutdown)
+        {
+            // mode values
+            // 0 = normal operation
+            // 1 = shutdown mode
+            if (shutdown)
+            {
+                _configurationValue |= SHUTDOWN;
+            }
+            else
+            {
+                _configurationValue &= ~SHUTDOWN;
+            }
+
+            WriteUpdateRegister();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _i2cDevice?.Dispose();
+            _i2cDevice = null!;
+        }
+
+        private void Write(byte address, byte[] value)
+        {
+            byte[] data = new byte[value.Length + 1];
+            data[0] = address;
+            value.CopyTo(data.AsSpan(1));
+            _i2cDevice.Write(data);
+        }
+
+        private void Write(byte address, byte value) => _i2cDevice.Write(new byte[] { address, value });
+
+        private byte UpdateByte(byte data, byte mask, int value)
+        {
+            if (value is 1)
             {
                 data |= mask;
             }
@@ -414,34 +365,21 @@ namespace Iot.Device.Display
             return data;
         }
 
-        internal int ReadLed(int matrix, int x, int y)
+        private void UpdateMatrixRegister(int matrix)
         {
-            int row = matrix is 0 ? y : x;
-            int column = matrix is 0 ? x : y;
-            int mask = 1 << column;
-            byte[] m = _buffers[matrix];
-            int r = m[row];
-            return r & mask;
-        }
-
-        private void WriteUpdateRegister()
-        {
-            Write(UPDATE_COLUMN_REGISTER, 0x80);
-        }
-
-        private void UpdateMatrixRegisters()
-        {
-            if (_matrix1Enabled)
+            if (matrix is 0 && _matrix1Enabled)
             {
                 Write(MATRIX_1_REGISTER, _buffer1);
             }
 
-            if (_matrix2Enabled)
+            if (matrix is 1 && _matrix2Enabled)
             {
                 Write(MATRIX_2_REGISTER, _buffer2);
             }
 
             WriteUpdateRegister();
         }
+
+        private void WriteUpdateRegister() => Write(UPDATE_COLUMN_REGISTER, EIGHT_BIT_VALUE);
     }
 }

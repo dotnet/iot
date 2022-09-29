@@ -4,8 +4,11 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="BreakoutPair5x7.cs" />
+    <Compile Include="Current.cs" />
+    <Compile Include="DisplayMode.cs" />
     <Compile Include="Is31fl3730.cs" />
-    <Compile Include="Matrix5x7.cs" />
+    <Compile Include="Matrix3730.cs" />
     <Compile Include="MatrixMode.cs" />
   </ItemGroup>
 </Project>

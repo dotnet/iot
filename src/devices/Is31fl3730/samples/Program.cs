@@ -8,21 +8,19 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
 
-using Is31fl3730 m = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31fl3730.DefaultI2cAddress)));
+using BreakoutPair5x7 breakout = new();
 
-m.SetDisplayMode(true, true);
-m.Initialize();
-m.DisableAllLeds();
+breakout.Fill(0);
 Thread.Sleep(100);
-var mOne = m[0];
-var mTwo = m[1];
+var mOne = breakout[0];
+var mTwo = breakout[1];
 
 if (mOne is null || mTwo is null)
 {
     return;
 }
 
-var matrix = mTwo;
+var matrix = mOne;
 
 // Dimensions
 int width = matrix.Width - 1;

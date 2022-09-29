@@ -9,27 +9,20 @@ using System.Threading;
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Represents an IS31FL3731 LED Matrix driver
+    /// Represents LED Dot Matrix driven by IS31FL3730.
     /// </summary>
-    // Datasheet: https://cdn-shop.adafruit.com/product-files/3017/31FL3730.pdf
-    // Product: https://shop.pimoroni.com/products/microdot-phat
-    // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
-    // Related repo: https://github.com/pimoroni/microdot-phat
-    public class Matrix5x7 : IDisposable
+    public class Matrix3730
     {
         private readonly Is31fl3730 _is31fl3730;
-        
+
         /// <summary>
         /// Initialize IS31FL3730 device
         /// </summary>
         /// <param name="is31fl3730">The <see cref="Iot.Device.Display.Is31fl3730"/> to create with.</param>
-        /// <param name="width">The width of the LED matrix.</param>
-        /// <param name="height">The height of the LED matrix.</param>
-        public Matrix5x7(Is31fl3730 is31fl3730, int width, int height, int matrix)
+        /// <param name="matrix">The index of the matrix (of a pair).</param>
+        public Matrix3730(Is31fl3730 is31fl3730, int matrix)
         {
             _is31fl3730 = is31fl3730;
-            Width = width;
-            Height = height;
             Matrix = matrix;
         }
 
@@ -41,8 +34,6 @@ namespace Iot.Device.Display
             get => _is31fl3730.ReadLed(Matrix, x, y);
             set => _is31fl3730.WriteLed(Matrix, x, y, value);
         }
-
-        public static readonly int DefaultI2cAddress = 0x61;
 
         /// <summary>
         /// Width of LED matrix (x axis).
@@ -58,5 +49,15 @@ namespace Iot.Device.Display
         /// Identification of matrix (of 2).
         /// </summary>
         public readonly int Matrix = 0;
+
+        /// <summary>
+        /// Fill matrix (0 is dark; 1 is lit).
+        /// </summary>
+        public void Fill(int value) => _is31fl3730.Fill(Matrix, value);
+
+        /// <summary>
+        /// Fill matrix (0 is dark; 1 is lit).
+        /// </summary>
+        public void UpdateDecimalPoint(int value) => _is31fl3730.UpdateDecimalPoint(Matrix, value);
     }
 }
