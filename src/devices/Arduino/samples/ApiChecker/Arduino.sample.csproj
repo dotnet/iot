@@ -16,10 +16,9 @@
     <Compile Include="TestCases.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Bmxx80\Bmxx80.csproj" />
-    <ProjectReference Include="..\..\Board\Board.csproj" />
-    <ProjectReference Include="..\..\Common\Common.csproj" />
-    <ProjectReference Include="..\..\Mcp3xxx\Mcp3xxx.csproj" />
-    <ProjectReference Include="..\Arduino.csproj" />
+    <ProjectReference Include="..\..\..\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\..\Board\Board.csproj" />
+    <ProjectReference Include="..\..\..\Mcp3xxx\Mcp3xxx.csproj" />
+    <ProjectReference Include="..\..\Arduino.csproj" />
   </ItemGroup>
 </Project>

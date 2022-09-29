@@ -255,14 +255,22 @@ namespace Iot.Device.Nmea0183
                     }
 
                     // Check whether the given address is ours (new IPs can be added at runtime, if interfaces go up)
-                    var host = Dns.GetHostEntry(Dns.GetHostName());
-                    if (host.AddressList.Contains(pt.Address))
+                    try
                     {
-                        _knownSenders.Add(pt.Address, true);
+                        var host = Dns.GetHostEntry(Dns.GetHostName());
+                        if (host.AddressList.Contains(pt.Address))
+                        {
+                            _knownSenders.Add(pt.Address, true);
+                        }
+                        else
+                        {
+                            _knownSenders.Add(pt.Address, false);
+                        }
                     }
-                    else
+                    catch (SocketException x)
                     {
-                        _knownSenders.Add(pt.Address, false);
+                        // Dns.GetHostEntry() sometimes throws a SocketException, but only on MacOS.
+                        _parent.FireOnParserError($"Unable to get DNS entry for Host, possibly disconnected?. Error: {x.Message}", NmeaError.None);
                     }
                 }
 

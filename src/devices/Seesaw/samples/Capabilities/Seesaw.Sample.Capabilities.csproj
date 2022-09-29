@@ -5,9 +5,10 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Seesaw.Sample.Encoder.cs" />
+    <ProjectReference Include="../../Seesaw.csproj" />
+    <Compile Include="Seesaw.Sample.Capabilities.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Seesaw.csproj" />
+    <None Include="README.md" />
   </ItemGroup>
 </Project>

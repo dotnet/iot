@@ -5,13 +5,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <None Remove="rpi-llc200d3sh.fzz" />
-    <None Remove="rpi-llc200d3sh_bb.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Llc200d3sh.sample.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\LiquidLevel.csproj" />
+    <ProjectReference Include="../../Seesaw.csproj" />
+    <Compile Include="Seesaw.Sample.SoilSensor.cs" />
   </ItemGroup>
 </Project>
