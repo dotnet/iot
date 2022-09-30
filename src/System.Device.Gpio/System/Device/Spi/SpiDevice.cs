@@ -35,7 +35,12 @@ public abstract partial class SpiDevice : IDisposable
     /// Reads a byte from the SPI device.
     /// </summary>
     /// <returns>A byte read from the SPI device.</returns>
-    public abstract byte ReadByte();
+    public virtual unsafe byte ReadByte()
+    {
+        Span<byte> toRead = stackalloc byte[1];
+        Read(toRead);
+        return toRead[0];
+    }
 
     /// <summary>
     /// Reads data from the SPI device.
@@ -50,7 +55,14 @@ public abstract partial class SpiDevice : IDisposable
     /// Writes a byte to the SPI device.
     /// </summary>
     /// <param name="value">The byte to be written to the SPI device.</param>
-    public abstract void WriteByte(byte value);
+    public virtual unsafe void WriteByte(byte value)
+    {
+        Span<byte> toWrite = stackalloc byte[1]
+        {
+            value
+        };
+        Write(toWrite);
+    }
 
     /// <summary>
     /// Writes data to the SPI device.

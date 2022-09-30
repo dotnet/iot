@@ -35,7 +35,12 @@ public abstract partial class I2cDevice : IDisposable
     /// Reads a byte from the I2C device.
     /// </summary>
     /// <returns>A byte read from the I2C device.</returns>
-    public abstract byte ReadByte();
+    public virtual unsafe byte ReadByte()
+    {
+        Span<byte> toRead = stackalloc byte[1];
+        Read(toRead);
+        return toRead[0];
+    }
 
     /// <summary>
     /// Reads data from the I2C device.
@@ -50,7 +55,14 @@ public abstract partial class I2cDevice : IDisposable
     /// Writes a byte to the I2C device.
     /// </summary>
     /// <param name="value">The byte to be written to the I2C device.</param>
-    public abstract void WriteByte(byte value);
+    public virtual unsafe void WriteByte(byte value)
+    {
+        Span<byte> toWrite = stackalloc byte[1]
+        {
+            value
+        };
+        Write(toWrite);
+    }
 
     /// <summary>
     /// Writes data to the I2C device.
