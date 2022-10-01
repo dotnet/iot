@@ -30,8 +30,17 @@ namespace Iot.Device.Nmea0183
     /// </remarks>
     public class AisManager : NmeaSinkAndSource
     {
-        private static readonly TimeSpan WarningRepeatTimeout = TimeSpan.FromMinutes(10);
-        private static readonly TimeSpan CleanupLatency = TimeSpan.FromSeconds(30);
+        /// <summary>
+        /// Time between repeats of the same warning. If this is set to a short value, the same proximity warning will be shown very often,
+        /// which is typically annoying.
+        /// </summary>
+        public static readonly TimeSpan WarningRepeatTimeout = TimeSpan.FromMinutes(10);
+
+        /// <summary>
+        /// Controls how often lost targets are removed completely from the target list. The timespan after which a target is considered lost
+        /// is controlled via <see cref="Iot.Device.Nmea0183.Ais.TrackEstimationParameters.TargetLostTimeout"/>
+        /// </summary>
+        public static readonly TimeSpan CleanupLatency = TimeSpan.FromSeconds(30);
 
         /// <summary>
         /// Delegate for AIS messages
@@ -823,6 +832,14 @@ namespace Iot.Device.Nmea0183
                     _aisBackgroundThread = null;
                 }
             }
+        }
+
+        /// <summary>
+        /// Clears the list of suppressed warnings
+        /// </summary>
+        public void ClearWarnings()
+        {
+            _activeWarnings.Clear();
         }
 
         /// <summary>

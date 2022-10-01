@@ -201,7 +201,6 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         public void EnableDisableBackgroundThread()
         {
             ManualResetEvent ev = new ManualResetEvent(false);
-            _manager.EnableAisAlarms(true, new TrackEstimationParameters() { AisSafetyCheckInterval = TimeSpan.Zero, WarnIfGnssMissing = true });
             _manager.OnMessage += (received, sourceMmsi, destinationMmsi, text) =>
             {
                 if (text.Contains("GNSS"))
@@ -209,6 +208,9 @@ namespace Iot.Device.Nmea0183.Tests.Ais
                     ev.Set();
                 }
             };
+
+            _manager.ClearWarnings();
+            _manager.EnableAisAlarms(true, new TrackEstimationParameters() { AisSafetyCheckInterval = TimeSpan.Zero, WarnIfGnssMissing = true });
 
             // Fails if we actually hit the timeout
             Assert.True(ev.WaitOne(TimeSpan.FromSeconds(30)));
@@ -429,7 +431,8 @@ namespace Iot.Device.Nmea0183.Tests.Ais
                     warningReceived = true;
                     source.ShouldBeEquivalentTo(970001001u);
                     destination.ShouldBeEquivalentTo(0u);
-                    text.ShouldBeEquivalentTo("AIS SART TARGET ACTIVATED: MMSI 970001001 IN POSITION 53* 42.0'N 9* 26.4'E! DISTANCE 3.248,43 NM");
+                    // Because UnitsNet still has the culture bug (uses UI culture), we cannot test the last part of the message
+                    text.ShouldStartWith("AIS SART TARGET ACTIVATED: MMSI 970001001 IN POSITION 53* 42.0'N 9* 26.4'E! DISTANCE");
                 }
             }
 
