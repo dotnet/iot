@@ -14,6 +14,7 @@ namespace Iot.Device.Nmea0183.Sentences
     /// The MWD sequence gives the wind direction and speed in true directions. That means the direction is given in
     /// degrees from true north and the speed is the true wind speed. Calculating the input data for this sentence
     /// requires heading or, as a backup, COG. However, with COG, the data is unreliable when the ship is moored.
+    /// See <see cref="WindSpeedAndAngle"/> for relative wind directions (as measured by the wind instrument)
     /// </summary>
     public class WindDirectionWithRespectToNorth : NmeaSentence
     {
@@ -27,6 +28,9 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Constructs a new MDA sentence
         /// </summary>
+        /// <param name="trueWindDirection">Wind direction relative to true north</param>
+        /// <param name="magneticWindDirection">Wind direction relative to magnetic north</param>
+        /// <param name="windSpeed">Wind speed</param>
         public WindDirectionWithRespectToNorth(Angle? trueWindDirection, Angle? magneticWindDirection, Speed? windSpeed)
             : base(OwnTalkerId, Id, DateTimeOffset.UtcNow)
         {

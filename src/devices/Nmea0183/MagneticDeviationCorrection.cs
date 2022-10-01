@@ -169,6 +169,7 @@ namespace Iot.Device.Nmea0183
             NmeaLogDataReader reader = new NmeaLogDataReader("Reader", fileSet);
             reader.OnNewSequence += MessageFilter;
             reader.StartDecode();
+            reader.StopDecode();
             reader.Dispose();
             _rawData.Compass = rawCompass.ToArray();
             _rawData.Track = rawTrack.ToArray();

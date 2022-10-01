@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Nmea0183
@@ -19,17 +20,26 @@ namespace Iot.Device.Nmea0183
     {
         private readonly NmeaSinkAndSource _source;
         private readonly object _lock;
-        private Dictionary<SentenceId, NmeaSentence> _sentences;
+
+        private readonly Dictionary<int, NmeaSentence> _dinData;
+        private readonly Dictionary<SentenceId, NmeaSentence> _sentences;
+        private readonly Dictionary<String, Dictionary<SentenceId, NmeaSentence>> _sentencesBySource;
+
+        private readonly ILogger _logger;
+
         private Queue<RoutePart> _lastRouteSentences;
         private Dictionary<string, Waypoint> _wayPoints;
         private Queue<SatellitesInView> _lastSatelliteInfos;
+        private Dictionary<string, TransducerDataSet> _xdrData;
 
         private SentenceId[] _groupSentences = new SentenceId[]
         {
-            // These sentences come in groups
+            // These sentences come in groups or carry multiple different data sets
             new SentenceId("GSV"),
             new SentenceId("RTE"),
             new SentenceId("WPL"),
+            new SentenceId("DIN"),
+            new SentenceId("XDR"),
         };
 
         /// <summary>
@@ -41,10 +51,14 @@ namespace Iot.Device.Nmea0183
             _source = source;
             _lock = new object();
             _sentences = new Dictionary<SentenceId, NmeaSentence>();
+            _sentencesBySource = new Dictionary<String, Dictionary<SentenceId, NmeaSentence>>();
             _lastRouteSentences = new Queue<RoutePart>();
             _lastSatelliteInfos = new Queue<SatellitesInView>();
             _wayPoints = new Dictionary<string, Waypoint>();
+            _xdrData = new Dictionary<string, TransducerDataSet>();
+            _dinData = new Dictionary<int, NmeaSentence>();
             StoreRawSentences = false;
+            _logger = this.GetCurrentClassLogger();
             _source.OnNewSequence += OnNewSequence;
         }
 
@@ -69,6 +83,7 @@ namespace Iot.Device.Nmea0183
                 _lastRouteSentences.Clear();
                 _wayPoints.Clear();
                 _lastSatelliteInfos.Clear();
+                _sentencesBySource.Clear();
             }
         }
 
@@ -83,7 +98,7 @@ namespace Iot.Device.Nmea0183
         /// <returns>True if a valid position is returned</returns>
         public bool TryGetCurrentPosition(out GeographicPosition? position, out Angle track, out Speed sog, out Angle? heading)
         {
-            return TryGetCurrentPosition(out position, false, out track, out sog, out heading);
+            return TryGetCurrentPosition(out position, null, false, out track, out sog, out heading, out _);
         }
 
         /// <summary>
@@ -97,30 +112,91 @@ namespace Iot.Device.Nmea0183
         /// <param name="sog">Speed over ground</param>
         /// <param name="heading">Vessel Heading</param>
         /// <returns>True if a valid position is returned</returns>
-        public bool TryGetCurrentPosition(out GeographicPosition? position, bool extrapolate, out Angle track, out Speed sog, out Angle? heading)
+        public bool TryGetCurrentPosition(out GeographicPosition? position, bool extrapolate,
+            out Angle track, out Speed sog, out Angle? heading)
         {
+            return TryGetCurrentPosition(out position, null, extrapolate, out track, out sog, out heading, out _);
+        }
+
+        /// <summary>
+        /// Get the current position from the latest message containing any of the relevant data parts.
+        /// If <paramref name="extrapolate"></paramref> is true, the speed and direction are used to extrapolate the position (many older
+        /// GNSS receivers only deliver the position at 1Hz or less)
+        /// </summary>
+        /// <param name="position">Current position</param>
+        /// <param name="source">Only look at this source (otherwise, if multiple sources provide a position, any is used)</param>
+        /// <param name="extrapolate">True to extrapolate the current position using speed and track</param>
+        /// <param name="track">Track (course over ground)</param>
+        /// <param name="sog">Speed over ground</param>
+        /// <param name="heading">Vessel Heading</param>
+        /// <param name="messageTime">Time of the position report that was used</param>
+        /// <returns>True if a valid position is returned</returns>
+        public bool TryGetCurrentPosition(
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out GeographicPosition? position,
+            String? source, bool extrapolate, out Angle track, out Speed sog, out Angle? heading,
+            out DateTimeOffset messageTime)
+        {
+            return TryGetCurrentPosition(out position, source, extrapolate, out track, out sog, out heading,
+                out messageTime, DateTimeOffset.UtcNow);
+        }
+
+        /// <summary>
+        /// Get the current position from the latest message containing any of the relevant data parts.
+        /// If <paramref name="extrapolate"></paramref> is true, the speed and direction are used to extrapolate the position (many older
+        /// GNSS receivers only deliver the position at 1Hz or less)
+        /// </summary>
+        /// <param name="position">Current position</param>
+        /// <param name="source">Only look at this source (otherwise, if multiple sources provide a position, any is used)</param>
+        /// <param name="extrapolate">True to extrapolate the current position using speed and track</param>
+        /// <param name="track">Track (course over ground)</param>
+        /// <param name="sog">Speed over ground</param>
+        /// <param name="heading">Vessel Heading</param>
+        /// <param name="messageTime">Time of the position report that was used</param>
+        /// <param name="now">The current time (when working with data in the past, this may be the a time within that data set)</param>
+        /// <returns>True if a valid position is returned</returns>
+        public bool TryGetCurrentPosition(
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out GeographicPosition? position,
+            String? source, bool extrapolate, out Angle track, out Speed sog, out Angle? heading, out DateTimeOffset messageTime, DateTimeOffset now)
+        {
+            messageTime = default;
             // Try to get any of the position messages
-            var gll = (PositionFastUpdate?)GetLastSentence(PositionFastUpdate.Id);
-            var gga = (GlobalPositioningSystemFixData?)GetLastSentence(GlobalPositioningSystemFixData.Id);
-            var rmc = (RecommendedMinimumNavigationInformation?)GetLastSentence(RecommendedMinimumNavigationInformation.Id);
-            var vtg = (TrackMadeGood?)GetLastSentence(TrackMadeGood.Id);
-            var hdt = (HeadingTrue?)GetLastSentence(HeadingTrue.Id);
+            var gll = (PositionFastUpdate?)GetLastSentence(source, PositionFastUpdate.Id);
+            var gga = (GlobalPositioningSystemFixData?)GetLastSentence(source, GlobalPositioningSystemFixData.Id);
+            var rmc = (RecommendedMinimumNavigationInformation?)GetLastSentence(source, RecommendedMinimumNavigationInformation.Id);
+            var vtg = (TrackMadeGood?)GetLastSentence(source, TrackMadeGood.Id);
+            var hdt = (HeadingTrue?)GetLastSentence(source, HeadingTrue.Id);
             TimeSpan age;
 
             List<(GeographicPosition, TimeSpan)> orderablePositions = new List<(GeographicPosition, TimeSpan)>();
-            if (gll != null && gll.Position != null)
+            if (gll != null && gll.Position.ContainsValidPosition())
             {
-                orderablePositions.Add((gll.Position, gll.Age));
+                orderablePositions.Add((gll.Position, gll.AgeTo(now)));
+                messageTime = gll.DateTime;
             }
 
-            if (gga != null && gga.Valid)
+            // Choose the best message we can, but if all of them are new, always use the same type
+            if (gll == null || gll.Age > TimeSpan.FromSeconds(2))
             {
-                orderablePositions.Add((gga.Position, gga.Age));
-            }
+                if (gga != null && gga.Valid)
+                {
+                    orderablePositions.Add((gga.Position, gga.AgeTo(now)));
+                    messageTime = gga.DateTime;
+                }
 
-            if (rmc != null && rmc.Valid)
-            {
-                orderablePositions.Add((rmc.Position, rmc.Age));
+                if (gga == null || gga.Age > TimeSpan.FromSeconds(2))
+                {
+                    if (rmc != null && rmc.Valid)
+                    {
+                        orderablePositions.Add((rmc.Position, rmc.AgeTo(now)));
+                        messageTime = rmc.DateTime;
+                    }
+                }
             }
 
             if (orderablePositions.Count == 0)
@@ -130,6 +206,7 @@ namespace Iot.Device.Nmea0183
                 track = Angle.Zero;
                 sog = Speed.Zero;
                 heading = null;
+                messageTime = DateTimeOffset.MinValue;
                 return false;
             }
 
@@ -156,6 +233,7 @@ namespace Iot.Device.Nmea0183
                 sog = Speed.Zero;
                 track = Angle.Zero;
                 heading = null;
+                messageTime = DateTimeOffset.MinValue;
                 return false;
             }
 
@@ -189,6 +267,33 @@ namespace Iot.Device.Nmea0183
                 if (_sentences.TryGetValue(id, out var sentence))
                 {
                     return sentence;
+                }
+
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the last sentence with the given id from the given talker.
+        /// </summary>
+        /// <param name="source">Source to query</param>
+        /// <param name="id">Id to query</param>
+        /// <returns>The last sentence of that type and source, null if not found</returns>
+        public NmeaSentence? GetLastSentence(string? source, SentenceId id)
+        {
+            if (source == null)
+            {
+                return GetLastSentence(id);
+            }
+
+            lock (_lock)
+            {
+                if (_sentencesBySource.TryGetValue(source, out var list))
+                {
+                    if (list.TryGetValue(id, out var sentence))
+                    {
+                        return sentence;
+                    }
                 }
 
                 return null;
@@ -449,12 +554,35 @@ namespace Iot.Device.Nmea0183
                 return;
             }
 
+            string sourceName;
+            if (source == null)
+            {
+                sourceName = MessageRouter.LocalMessageSource;
+                _logger.LogWarning($"Cache got message without source: {sentence.ToNmeaMessage()}");
+            }
+            else
+            {
+                sourceName = source.InterfaceName;
+            }
+
             lock (_lock)
             {
                 if (!_groupSentences.Contains(sentence.SentenceId))
                 {
                     // Standalone sequences. Only the last message needs to be kept
                     _sentences[sentence.SentenceId] = sentence;
+
+                    // We already own the lock to do that a bit more complex update.
+                    if (_sentencesBySource.TryGetValue(sourceName, out var dict))
+                    {
+                        dict[sentence.SentenceId] = sentence;
+                    }
+                    else
+                    {
+                        var d = new Dictionary<SentenceId, NmeaSentence>();
+                        d[sentence.SentenceId] = sentence;
+                        _sentencesBySource[sourceName] = d;
+                    }
                 }
                 else if (sentence.SentenceId == RoutePart.Id && (sentence is RoutePart rte))
                 {
@@ -479,6 +607,17 @@ namespace Iot.Device.Nmea0183
                         _lastSatelliteInfos.Dequeue();
                     }
                 }
+                else if (sentence.SentenceId == TransducerMeasurement.Id && (sentence is TransducerMeasurement xdr))
+                {
+                    foreach (var measurement in xdr.DataSets)
+                    {
+                        _xdrData[measurement.DataName] = measurement;
+                    }
+                }
+                else if (sentence.SentenceId == ProprietaryMessage.Id && (sentence is ProprietaryMessage din))
+                {
+                    _dinData[din.Identifier] = din;
+                }
             }
         }
 
@@ -498,6 +637,62 @@ namespace Iot.Device.Nmea0183
         public void Add(NmeaSentence sentence)
         {
             OnNewSequence(null, sentence);
+        }
+
+        /// <summary>
+        /// Tries to get a DIN sentence type
+        /// </summary>
+        /// <typeparam name="T">The type of the sentence to query</typeparam>
+        /// <param name="hexId">The hexadecimal identifier for this sub-message</param>
+        /// <param name="sentence">Receives the sentence, if any was found</param>
+        /// <returns>True on success, false if no such message was received</returns>
+        public bool TryGetLastDinSentence<T>(int hexId,
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out T sentence)
+            where T : NmeaSentence
+        {
+            // The second condition should always be true, because this list only contains din messages
+            if (!_dinData.TryGetValue(hexId, out var s) || s.SentenceId != ProprietaryMessage.Id)
+            {
+                sentence = null!;
+                return false;
+            }
+
+            if (s is T)
+            {
+                sentence = (T)s;
+                return true;
+            }
+
+            sentence = null!;
+            return false;
+        }
+
+        /// <summary>
+        /// Gets the last transducer data set (from an XDR sentence, see <see cref="TransducerMeasurement"/>) if one with the given name exists.
+        /// </summary>
+        /// <param name="name">The name of the data set. Case sensitive</param>
+        /// <param name="data">Returns the value if it exists</param>
+        /// <returns>True if a value with the given name was found, false otherwise</returns>
+        public bool TryGetTransducerData(string name,
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out TransducerDataSet data)
+        {
+            lock (_lock)
+            {
+                if (_xdrData.TryGetValue(name, out var data1))
+                {
+                    data = data1;
+                    return true;
+                }
+            }
+
+            data = null!;
+            return false;
         }
     }
 }

@@ -16,13 +16,13 @@ namespace Iot.Device.Nmea0183
     /// </summary>
     public class TalkerSentence
     {
-        private static ConcurrentDictionary<SentenceId, Func<TalkerSentence, DateTimeOffset, NmeaSentence>> s_registeredSentences;
+        private static ConcurrentDictionary<SentenceId, Func<TalkerSentence, DateTimeOffset, NmeaSentence?>> s_registeredSentences;
 
         private string[] _fields;
 
-        private static ConcurrentDictionary<SentenceId, Func<TalkerSentence, DateTimeOffset, NmeaSentence>> GetKnownSentences()
+        private static ConcurrentDictionary<SentenceId, Func<TalkerSentence, DateTimeOffset, NmeaSentence?>> GetKnownSentences()
         {
-            var knownSentences = new ConcurrentDictionary<SentenceId, Func<TalkerSentence, DateTimeOffset, NmeaSentence>>();
+            var knownSentences = new ConcurrentDictionary<SentenceId, Func<TalkerSentence, DateTimeOffset, NmeaSentence?>>();
 
             knownSentences[RecommendedMinimumNavigationInformation.Id] = (sentence, time) => new RecommendedMinimumNavigationInformation(sentence, time);
             knownSentences[TimeDate.Id] = (sentence, time) => new TimeDate(sentence, time);
@@ -47,6 +47,23 @@ namespace Iot.Device.Nmea0183
             knownSentences[SatellitesInView.Id] = (sentence, time) => new SatellitesInView(sentence, time);
             knownSentences[WindDirectionWithRespectToNorth.Id] =
                 (sentence, time) => new WindDirectionWithRespectToNorth(sentence, time);
+            knownSentences[ProprietaryMessage.Id] = (sentence, time) =>
+            {
+                var specificMessageId = sentence.Fields.FirstOrDefault();
+                if (specificMessageId != null && int.TryParse(specificMessageId, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int msgid))
+                {
+                    if (msgid == SeaSmartEngineFast.HexId)
+                    {
+                        return new SeaSmartEngineFast(sentence, time);
+                    }
+                    else if (msgid == SeaSmartEngineDetail.HexId)
+                    {
+                        return new SeaSmartEngineDetail(sentence, time);
+                    }
+                }
+
+                return null;
+            };
 
             return knownSentences;
         }
@@ -149,6 +166,20 @@ namespace Iot.Device.Nmea0183
                 throw new ArgumentNullException(nameof(sentence));
             }
 
+            int idx = sentence.IndexOfAny(new char[] { '!', '$' });
+            if (idx < 0 || idx > 6)
+            {
+                // Valid sentences start with $ or ! (for the AIS sentences)
+                errorCode = NmeaError.NoSyncByte;
+                return null;
+            }
+
+            if (idx != 0)
+            {
+                // When the index of the $ is larger than 0 but less than a small amount, try to decode the remainder of the line
+                sentence = sentence.Remove(idx);
+            }
+
             if (sentence.Length < sentenceHeaderMinLength)
             {
                 errorCode = NmeaError.MessageToShort;
@@ -161,9 +192,9 @@ namespace Iot.Device.Nmea0183
                 return null;
             }
 
-            if (sentence[0] != '$' && sentence[0] != '!')
+            // There can't be any nonprintable characters in the stream (such as TAB or NULL)
+            if (sentence.Any(x => Char.IsControl(x)))
             {
-                // Valid sentences start with $ or ! (for the AIS sentences)
                 errorCode = NmeaError.NoSyncByte;
                 return null;
             }
@@ -303,7 +334,7 @@ namespace Iot.Device.Nmea0183
         public NmeaSentence? TryGetTypedValue(ref DateTimeOffset lastMessageTime)
         {
             NmeaSentence? retVal = null;
-            if (s_registeredSentences.TryGetValue(Id, out Func<TalkerSentence, DateTimeOffset, NmeaSentence>? producer))
+            if (s_registeredSentences.TryGetValue(Id, out Func<TalkerSentence, DateTimeOffset, NmeaSentence?>? producer))
             {
                 try
                 {
@@ -311,10 +342,11 @@ namespace Iot.Device.Nmea0183
                 }
                 catch (Exception x) when (x is ArgumentException || x is ArgumentOutOfRangeException || x is FormatException)
                 {
-                    return new RawSentence(TalkerId, Id, Fields, lastMessageTime);
+                    retVal = null;
                 }
             }
-            else
+
+            if (retVal == null)
             {
                 retVal = new RawSentence(TalkerId, Id, Fields, lastMessageTime);
             }

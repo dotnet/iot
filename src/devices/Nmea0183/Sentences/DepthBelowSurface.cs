@@ -79,16 +79,6 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <summary>
-        /// Direction to steer.
-        /// True: Left, False: Right
-        /// </summary>
-        public bool Left
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
         /// Presents this message as output
         /// </summary>
         public override string ToNmeaParameterList()

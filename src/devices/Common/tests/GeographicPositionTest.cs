@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Iot.Device.Common;
 using Xunit;
@@ -39,10 +40,31 @@ namespace Iot.Device.Common.Tests
         [Fact]
         public void DefaultFormatting()
         {
-            Assert.Equal("10° 00' 00.00\"N / 32° 30' 00.00\"E Ellipsoidal Height 12345m", new GeographicPosition(10.0, 32.5, 12345).ToString());
-            Assert.Equal("111° 06' 08.42\"S / 32° 59' 15.36\"W Ellipsoidal Height 200m", new GeographicPosition(-111.10234, -32.9876, 200).ToString());
-            Assert.Equal("11° 00' 00.00\"S / 33° 00' 00.00\"E Ellipsoidal Height 200m", new GeographicPosition(-10.99999999999999999, 32.999999999999999, 200).ToString());
+            Assert.Equal("10° 00' 00.00\"N 032° 30' 00.00\"E Ellipsoidal Height 12345m", new GeographicPosition(10.0, 32.5, 12345).ToString());
+            Assert.Equal("11° 06' 08.42\"S 132° 59' 15.36\"W Ellipsoidal Height 200m", new GeographicPosition(-11.10234, -132.9876, 200).ToString());
+            Assert.Equal("11° 00' 00.00\"S 033° 00' 00.00\"E Ellipsoidal Height 200m", new GeographicPosition(-10.99999999999999999, 32.999999999999999, 200).ToString());
         }
 
+        [Theory]
+        [InlineData("10.000° 23.500°", 10.0, 23.5, 12345, "D3 D3")]
+        [InlineData("10.000°N 23.500°E", 10.0, 23.5, 12345, "D3N D3E")]
+        [InlineData("-20.000°S -123.500°W", -20.0, -123.5, 12345, "D3N D3E")] // Like this probably unexpected (with the sign), but correct for decimal output
+        [InlineData("20.000°S 123.500°W", -20.0, -123.5, 12345, "U3N U3E")] // Therefore we have this
+        [InlineData("20.000°S 123.500°W 100m", -20.0, -123.5, 100, "U3N U3E D0m")]
+        [InlineData("10.500°N 23.512°E", 10.5, 23.51234, 100, "D3N D3E")]
+        [InlineData("10° 30.00'N 23° 30.74'E", 10.5, 23.51234, 100, "M2 M2")]
+        [InlineData("10° 30' 00.0\"N 023° 30' 44.42\"E -100", 10.5, 23.51234, -100, "S1 S2 D0")]
+        public void SpecialFormatting(string expected, double lat, double lon, double alt, string format)
+        {
+            Assert.Equal(expected, new GeographicPosition(lat, lon, alt).ToString(format, CultureInfo.InvariantCulture));
+        }
+
+        [Fact]
+        public void SpecialFormattingBasics()
+        {
+            Assert.Equal("10.000° 32.500°", new GeographicPosition(10.0, 32.5, 12345).ToString("D3 D3", CultureInfo.InvariantCulture));
+            var pos = new GeographicPosition(10.0, 32.5, 12345);
+            Assert.Equal("Pos: 10.0000000°32.500°", $"Pos: {pos:DD3}");
+        }
     }
 }

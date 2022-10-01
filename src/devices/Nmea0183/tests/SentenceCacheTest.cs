@@ -178,13 +178,13 @@ namespace Iot.Device.Nmea0183.Tests
         [Fact]
         public void FillCacheAndTest()
         {
-            NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "../../../Nmea-2021-08-25-16-25.txt");
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "../../../Nmea-2021-08-25-16-25.txt");
             reader.OnNewSequence += (source, msg) =>
             {
                 _cache.Add(msg);
             };
             reader.StartDecode();
-            reader.Dispose();
+            reader.StopDecode();
 
             Assert.True(_cache.TryGetCurrentPosition(out var position, false, out Angle track, out Speed sog, out Angle? heading));
             Assert.Equal(new GeographicPosition(57.055204999999994, 9.9178983333333335, 0), position);

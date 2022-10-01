@@ -89,6 +89,16 @@ namespace Iot.Device.Nmea0183
         }
 
         /// <summary>
+        /// Name of the Source from which to take positions. Null to take any source (but this may cause side effects
+        /// if multiple GPS devices are active, because they deliver slightly different data)
+        /// </summary>
+        public string? NmeaSourceName
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Current operating state of the autopilot controller
         /// </summary>
         public AutopilotErrorState OperationState
@@ -244,7 +254,7 @@ namespace Iot.Device.Nmea0183
                 _activeDeviation = deviation;
             }
 
-            if (_cache.TryGetCurrentPosition(out var position, out Angle track, out Speed sog, out Angle? heading) && position != null)
+            if (_cache.TryGetCurrentPosition(out var position, NmeaSourceName, false, out Angle track, out Speed sog, out Angle? heading, out _) && position != null)
             {
                 string previousWayPoint = string.Empty;
                 string nextWayPoint = string.Empty;

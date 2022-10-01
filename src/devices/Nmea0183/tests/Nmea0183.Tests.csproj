@@ -11,5 +11,8 @@
   <ItemGroup>
     <ProjectReference Include="..\Nmea0183.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Shouldly" Version="4.0.3" />
+  </ItemGroup>
 
 </Project>
