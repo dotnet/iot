@@ -185,5 +185,53 @@ namespace Iot.Device.Common.Tests
 
             Assert.Equal(outHumidityExpected, result.Percent, 3);
         }
+
+        [Theory]
+        [InlineData(1013.25, 35, 1.1455)]
+        [InlineData(1013.25, 0, 1.2922)]
+        [InlineData(1013.25, -25, 1.4224)]
+        public void CalculateAirDensitySimple(double inPressure, double inTemp, double expected)
+        {
+            var result = WeatherHelper.CalculateAirDensity(Pressure.FromMillibars(inPressure),
+                Temperature.FromDegreesCelsius(inTemp));
+
+            Assert.Equal(expected, result.KilogramsPerCubicMeter, 4);
+        }
+
+        [Theory]
+        [InlineData(1013.25, 35, 0, 1.1455)]
+        [InlineData(1013.25, 35, 50, 1.1335)]
+        [InlineData(1013.25, 35, 100, 1.1214)]
+        public void CalculateAirDensity(double inPressure, double inTemp, double inHumidity, double expected)
+        {
+            var result = WeatherHelper.CalculateAirDensity(Pressure.FromMillibars(inPressure),
+                Temperature.FromDegreesCelsius(inTemp), RelativeHumidity.FromPercent(inHumidity));
+
+            Assert.Equal(expected, result.KilogramsPerCubicMeter, 4);
+        }
+
+        [Theory]
+        [InlineData(0, 0, 1.75)] // This is to be expected, see WP article
+        [InlineData(10, 5, 9.8)]
+        [InlineData(-10, 20, -17.9)]
+        [InlineData(-15, 40, -27.4)]
+        public void CalculateWindchill(double temperature, double windSpeed, double expected)
+        {
+            var result = WeatherHelper.CalculateWindchill(Temperature.FromDegreesCelsius(temperature),
+                Speed.FromKilometersPerHour(windSpeed));
+
+            Assert.Equal(expected, result.DegreesCelsius, 1);
+        }
+
+        [Theory]
+        [InlineData(20, 38.5, 1013, 68.83)]
+        [InlineData(20, 88.9, 1013, 367.0)]
+        public void CalculateWindForce(double temperature, double windSpeed, double pressure, double expected)
+        {
+            Density airDensity = WeatherHelper.CalculateAirDensity(Pressure.FromHectopascals(pressure),
+                Temperature.FromDegreesCelsius(temperature));
+            var density = WeatherHelper.CalculateWindForce(airDensity, Speed.FromKilometersPerHour(windSpeed), 1.0);
+            Assert.Equal(expected, density.NewtonsPerSquareMeter, 1);
+        }
     }
 }
