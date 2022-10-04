@@ -1,4 +1,6 @@
-<Project Sdk="Microsoft.Build.Traversal">
+<Project>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.Build.Traversal" />
   
   <PropertyGroup>
     <BuildRestore Condition="'$(BuildRestore)'==''">true</BuildRestore>
@@ -36,4 +38,9 @@
 
       <ProjectReference Condition="'$(BuildPackages)' == 'true'" Include="@(_ProjectsToPackage)" Targets="Pack" />
   </ItemGroup>
+
+  <Import Project="Sdk.targets" Sdk="Microsoft.Build.Traversal" />
+
+  <!-- Undefine Pack target as this repo handles Pack during build based on a different property. -->
+  <Target Name="Pack" />
 </Project>
