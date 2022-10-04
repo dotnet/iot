@@ -211,7 +211,9 @@ namespace Iot.Device.Common.Tests
         }
 
         [Theory]
-        [InlineData(0, 0, 1.75)] // This is to be expected, see WP article
+        // When the wind is calm, the windchill temperature is higher than the actual temperature, because the air close to the skin heats up.
+        // Explained in https://de.wikipedia.org/wiki/Windchill
+        [InlineData(0, 0, 1.75)]
         [InlineData(10, 5, 9.8)]
         [InlineData(-10, 20, -17.9)]
         [InlineData(-15, 40, -27.4)]
