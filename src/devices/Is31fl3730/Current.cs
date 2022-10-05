@@ -18,31 +18,31 @@ namespace Iot.Device.Display
         /// <summary>
         /// 5 mA
         /// </summary>
-        MA5 = 0b1000,
+        CmA5 = 0b1000,
 
         /// <summary>
         /// 10 mA
         /// </summary>
-        MA10 = 0b1001,
+        CmA10 = 0b1001,
 
         /// <summary>
         /// 35 mA
         /// </summary>
-        MA35 = 0b1110,
-
-        /// <summary>
-        /// 10 mA
-        /// </summary>
-        MA40 = 0b0,
-
-        /// <summary>
-        /// 10 mA
-        /// </summary>
-        MA45 = 0b0001,
+        CmA35 = 0b1110,
 
         /// <summary>
         /// 40 mA
         /// </summary>
-        MA75 = 0b0111,
+        CmA40 = 0b0,
+
+        /// <summary>
+        /// 45 mA
+        /// </summary>
+        cMA45 = 0b0001,
+
+        /// <summary>
+        /// 75 mA
+        /// </summary>
+        CmA75 = 0b0111,
     }
 }

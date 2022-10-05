@@ -36,8 +36,14 @@ namespace Iot.Device.Display
 
         // Values
         private const byte EIGHT_BIT_VALUE = 0x80;
+        private const int MATRIX_ONE_DECIMAL_MASK = 128;
+        private const int MATRIX_TWO_DECIMAL_MASK = 64;
         private readonly byte[] _matrix_registers = new byte[] { MATRIX_1_REGISTER, MATRIX_2_REGISTER };
-        private readonly List<byte[]> _buffers;
+        private readonly List<byte[]> _buffers = new List<byte[]>
+        {
+            new byte[8],
+            new byte[8]
+        };
         private readonly bool[] _enabled = new bool[2];
         private I2cDevice _i2cDevice;
         private int _configurationValue = 0;
@@ -49,11 +55,6 @@ namespace Iot.Device.Display
         public Is31fl3730(I2cDevice i2cDevice)
         {
             _i2cDevice = i2cDevice;
-            _buffers = new List<byte[]>()
-            {
-                new byte[8],
-                new byte[8]
-            };
         }
 
         /*
@@ -74,7 +75,6 @@ namespace Iot.Device.Display
         This ordering makes sense if you are scrolling content right to left.
 
         More detailed information about the structure of each pair follows (further down).
-
         */
 
         /// <summary>
@@ -276,13 +276,9 @@ namespace Iot.Device.Display
         /// </summary>
         public void UpdateDecimalPoint(int matrix, int value)
         {
-            int matrixOneMask = 128;
-            int matrixtwoMask = 64;
-
-            int mask = matrix is 0 ? matrixOneMask : matrixtwoMask;
+            int mask = matrix is 0 ? MATRIX_ONE_DECIMAL_MASK : MATRIX_TWO_DECIMAL_MASK;
             int row = matrix is 0 ? 6 : 7;
             byte[] buffer = _buffers[matrix];
-
             buffer[row] = UpdateByte(buffer[row], (byte)mask, value);
         }
 

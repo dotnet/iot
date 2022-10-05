@@ -13,16 +13,12 @@ namespace Iot.Device.Display
     /// Represents an IS31FL3731 LED Matrix driver
     /// </summary>
     // Datasheet: https://cdn-shop.adafruit.com/product-files/3017/31FL3730.pdf
-    // Product: https://shop.pimoroni.com/products/microdot-phat
     // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
     public class BreakoutPair5x7 : IDisposable
     {
-        private readonly Matrix3730 _matrixOne;
-        private readonly Matrix3730 _matrixTwo;
-        private readonly Matrix3730[] _pair = new Matrix3730[2];
+        private readonly Matrix3730[] _pair;
         private Is31fl3730 _is31fl3730;
-        private I2cDevice? _i2cDevice;
 
         /// <summary>
         /// Initialize IS31FL3730 device
@@ -30,13 +26,15 @@ namespace Iot.Device.Display
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         public BreakoutPair5x7(I2cDevice? i2cDevice = null)
         {
-            _i2cDevice = i2cDevice is not null ? i2cDevice : I2cDevice.Create(new(1, Is31fl3730.DefaultI2cAddress));
-            _is31fl3730 = new(_i2cDevice);
+            i2cDevice = i2cDevice is not null ? i2cDevice : I2cDevice.Create(new(1, Is31fl3730.DefaultI2cAddress));
+            _is31fl3730 = new(i2cDevice);
             _is31fl3730.DisplayMode = DisplayMode.MatrixOneAndTwo;
             _is31fl3730.Initialize();
-            _matrixOne = new Matrix3730(_is31fl3730, 0);
-            _matrixTwo = new Matrix3730(_is31fl3730, 1);
-            _pair = new Matrix3730[] { _matrixOne, _matrixTwo };
+            _pair = new Matrix3730[]
+            { 
+                new Matrix3730(_is31fl3730, 0),
+                new Matrix3730(_is31fl3730, 1)
+            };
         }
 
         /// <summary>
@@ -46,9 +44,11 @@ namespace Iot.Device.Display
         public BreakoutPair5x7(Is31fl3730 is31fl3730)
         {
             _is31fl3730 = is31fl3730;
-            _matrixOne = new Matrix3730(_is31fl3730, 0);
-            _matrixTwo = new Matrix3730(_is31fl3730, 1);
-            _pair = new Matrix3730[] { _matrixOne, _matrixTwo };
+            _pair = new Matrix3730[]
+            { 
+                new Matrix3730(_is31fl3730, 0),
+                new Matrix3730(_is31fl3730, 1)
+            };
         }
 
         /// <summary>
@@ -89,8 +89,6 @@ namespace Iot.Device.Display
         {
             _is31fl3730?.Dispose();
             _is31fl3730 = null!;
-            _i2cDevice?.Dispose();
-            _i2cDevice = null!;
         }
     }
 }

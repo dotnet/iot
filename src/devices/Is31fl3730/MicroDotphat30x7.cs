@@ -16,7 +16,7 @@ namespace Iot.Device.Display
     // Product: https://shop.pimoroni.com/products/microdot-phat
     // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
-    public class MicroDotpHat30x7 : IDisposable
+    public class MicroDotPhat30x7 : IDisposable
     {
         private readonly Matrix3730 _matrixOne;
         private readonly Matrix3730 _matrixTwo;
@@ -28,7 +28,7 @@ namespace Iot.Device.Display
         /// Initialize IS31FL3730 device
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
-        public BreakoutPair5x7(I2cDevice? i2cDevice = null)
+        public MicroDotPhat30x7(I2cDevice? i2cDevice = null)
         {
             _i2cDevice = i2cDevice is not null ? i2cDevice : I2cDevice.Create(new(1, Is31fl3730.DefaultI2cAddress));
             _is31fl3730 = new(_i2cDevice);
@@ -43,7 +43,7 @@ namespace Iot.Device.Display
         /// Initialize IS31FL3730 device
         /// </summary>
         /// <param name="is31fl3730">The <see cref="Iot.Device.Display.Is31fl3730"/> to create with.</param>
-        public BreakoutPair5x7(Is31fl3730 is31fl3730)
+        public MicroDotPhat30x7(Is31fl3730 is31fl3730)
         {
             _is31fl3730 = is31fl3730;
             _matrixOne = new Matrix3730(_is31fl3730, 0);
