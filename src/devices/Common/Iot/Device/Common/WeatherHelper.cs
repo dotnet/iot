@@ -15,17 +15,17 @@ namespace Iot.Device.Common
         /// <summary>
         /// Gas constant of dry Air, J / (kg * K)
         /// </summary>
-        public const double SpecificGasConstantOfAir = 287.058;
+        internal const double SpecificGasConstantOfAir = 287.058;
 
         /// <summary>
         /// Gas constant of vapor, J / (kg * K)
         /// </summary>
-        public const double SpecificGasConstantOfVapor = 461.523;
+        internal const double SpecificGasConstantOfVapor = 461.523;
 
         /// <summary>
         /// Default atmospheric temperature gradient = 0.0065K/m (or 0.65K per 100m)
         /// </summary>
-        public const double DefaultTemperatureGradient = 0.0065;
+        internal const double DefaultTemperatureGradient = 0.0065;
 
         /// <summary>
         /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
