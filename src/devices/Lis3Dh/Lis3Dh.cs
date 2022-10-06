@@ -17,9 +17,14 @@ namespace Iot.Device.Lis3DhAccelerometer
     public abstract class Lis3Dh : IDisposable
     {
         /// <summary>
-        /// Default I2C address
+        /// Default I2C address (SDO/SA0 pin low)
         /// </summary>
         public const int DefaultI2cAddress = 0x18;
+
+        /// <summary>
+        /// Secondary I2C address (SDO/SA0 pin high)
+        /// </summary>
+        public const int SecondaryI2cAddress = 0x18;
 
         private const int Max = (1 << 15);
 
@@ -63,7 +68,7 @@ namespace Iot.Device.Lis3DhAccelerometer
         /// <param name="sdoPinValue">SDO pin value. Pin may be also called SA0</param>
         /// <returns>I2C address</returns>
         public static int GetI2cAddress(PinValue sdoPinValue)
-            => DefaultI2cAddress + ((bool)sdoPinValue ? 1 : 0);
+            => sdoPinValue == PinValue.High ? SecondaryI2cAddress : DefaultI2cAddress;
 
         /// <summary>
         /// Creates Lis3Dh instance using I2cDevice
