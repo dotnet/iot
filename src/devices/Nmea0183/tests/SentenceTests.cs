@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183.Sentences;
@@ -140,6 +141,59 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal("A", pitch.DataType);
             Assert.Equal("D", pitch.Unit);
             Assert.Equal("PTCH", pitch.DataName);
+        }
+
+        [Fact]
+        public void TransducerDataSetBehavior()
+        {
+            TransducerDataSet set1 = new TransducerDataSet("A", 4.2, "D", "ROLL");
+            Assert.Equal("A", set1.DataType);
+            Assert.Equal(4.2, set1.Value);
+            Assert.Equal("D", set1.Unit);
+            Assert.Equal("ROLL", set1.DataName);
+            Assert.Equal(Angle.FromDegrees(4.2), set1.AsAngle());
+            Assert.Null(set1.AsTemperature());
+
+            TransducerDataSet set2 = new TransducerDataSet("P", 1024.1234592738179, "P", "ENV_PRESS");
+            Assert.Equal("P,1024.12,P,ENV_PRESS", set2.ToString());
+
+            TransducerDataSet set3 = new TransducerDataSet("P", 12783741024.1234, "P", "ENV_PRESS"); // Something which results in a scientific notation with the G specifier
+            Assert.Equal("P,12783741024.1,P,ENV_PRESS", set3.ToString());
+        }
+
+        [Fact]
+        public void TransducerMeasurementBehavior()
+        {
+            TransducerDataSet set1 = new TransducerDataSet("A", 4.2, "D", "ROLL");
+
+            TransducerDataSet set2 = new TransducerDataSet("P", 1024.1234592738179, "P", "ENV_PRESS");
+            Assert.Equal("P,1024.12,P,ENV_PRESS", set2.ToString());
+
+            TransducerMeasurement ms = new TransducerMeasurement(new List<TransducerDataSet>() { set1, set2 });
+            Assert.Equal(2, ms.DataSets.Count);
+
+            // Collection is read-only
+            Assert.Throws<NotSupportedException>(() => ms.DataSets.Add(new TransducerDataSet()));
+
+            TransducerMeasurement ms2 = new TransducerMeasurement("ROLL", "A", 4.2, "D");
+
+            var set3 = ms2.DataSets[0];
+            Assert.Equal(set1.ToString(), set3.ToString());
+        }
+
+        [Fact]
+        public void ConstructRoute()
+        {
+            var rt = new Route("MyRoute");
+            Assert.False(rt.HasPoints);
+
+            rt = new Route("2", new GeographicPosition(10, -1, 0), new GeographicPosition(10, 0.99, 0), new GeographicPosition(10, 0.98, 0));
+            Assert.True(rt.HasPoints);
+            Assert.Equal(3, rt.Points.Count);
+
+            Assert.Equal(Angle.FromDegrees(89.827).Value, rt.Points[0].BearingToNextWaypoint.GetValueOrDefault().Value, 3);
+            Assert.Equal(Length.FromMeters(218182.004).Value, rt.Points[0].DistanceToNextWaypoint.GetValueOrDefault().Value, 3);
+            Assert.Equal("WP1", rt.Points[1].WaypointName);
         }
 
         [Fact]
