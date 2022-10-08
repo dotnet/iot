@@ -55,7 +55,7 @@ namespace Iot.Device.Ili9341
         {
             if (spiBufferSize <= 0)
             {
-                throw new ArgumentException(nameof(spiBufferSize), "Buffer size must be larger than 0.");
+                throw new ArgumentException("Buffer size must be larger than 0.", nameof(spiBufferSize));
             }
 
             _spiDevice = spiDevice;

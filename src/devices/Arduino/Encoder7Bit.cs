@@ -7,9 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Arduino
 {
+    /// <summary>
+    /// This class is used to encode larger chunks of data for transmission using the Firmata protocol.
+    /// It converts each block of 7 bytes into a block of 8 bytes, keeping the top bit 0.
+    /// </summary>
     public static class Encoder7Bit
     {
         /// <summary>
@@ -29,12 +32,24 @@ namespace Iot.Device.Arduino
             return (int)Math.Ceiling(((inputBytes) * 8.0) / 7);
         }
 
-        public static byte[] Encode(byte[] data)
+        /// <summary>
+        /// Encode a sequence of bytes
+        /// </summary>
+        /// <param name="data">The data to encode</param>
+        /// <returns>The encoded data</returns>
+        public static byte[] Encode(ReadOnlySpan<byte> data)
         {
             return Encode(data, 0, data.Length);
         }
 
-        public static byte[] Encode(byte[] data, int startIndex, int length)
+        /// <summary>
+        /// Encodes a sequence of bytes
+        /// </summary>
+        /// <param name="data">The data to encode</param>
+        /// <param name="startIndex">The start index in the data</param>
+        /// <param name="length">The length of the data</param>
+        /// <returns>The encoded data</returns>
+        public static byte[] Encode(ReadOnlySpan<byte> data, int startIndex, int length)
         {
             int shift = 0;
             byte[] retBytes = new byte[Num7BitOutBytes(length)];
@@ -76,7 +91,12 @@ namespace Iot.Device.Arduino
             return retBytes;
         }
 
-        public static byte[] Decode(byte[] inData)
+        /// <summary>
+        /// Decodes the given data sequence
+        /// </summary>
+        /// <param name="inData">The data to decode</param>
+        /// <returns>The decoded data</returns>
+        public static byte[] Decode(ReadOnlySpan<byte> inData)
         {
             byte[] outBytes = new byte[Num8BitOutBytes(inData.Length)];
             for (int i = 0; i < outBytes.Length; i++)

@@ -30,7 +30,7 @@ namespace Iot.Device.Board
             {
                 try
                 {
-                    using (var device = bus.CreateDevice(addr))
+                    using (I2cDevice device = bus.CreateDevice(addr))
                     {
                         device.ReadByte(); // Success means that this does not throw an exception
                         ret.Add(addr);
@@ -57,10 +57,6 @@ namespace Iot.Device.Board
         /// so this should not be done while devices are being used.</remarks>
         public static (List<int> FoundDevices, int LowestAddress, int HighestAddress) PerformBusScan(this I2cBus bus, IProgress<float>? progress, int lowestAddress = 0x3, int highestAddress = 0x77)
         {
-            List<int> addresses = new();
-            int numberOfDevicesToScan = highestAddress - lowestAddress;
-            float currentPercentage = 0;
-            float stepPerDevice = 100.0f / numberOfDevicesToScan;
             if (lowestAddress < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(lowestAddress));
@@ -71,6 +67,11 @@ namespace Iot.Device.Board
                 throw new ArgumentOutOfRangeException(nameof(highestAddress));
             }
 
+            List<int> addresses = new();
+            int numberOfDevicesToScan = highestAddress - lowestAddress;
+            float currentPercentage = 0;
+            float stepPerDevice = 100.0f / numberOfDevicesToScan;
+
             if (numberOfDevicesToScan <= 0)
             {
                 return (addresses, 0, 0);
@@ -80,7 +81,7 @@ namespace Iot.Device.Board
             {
                 try
                 {
-                    using (var device = bus.CreateDevice(addr))
+                    using (I2cDevice device = bus.CreateDevice(addr))
                     {
                         device.ReadByte(); // Success means that this does not throw an exception
                         addresses.Add(addr);

@@ -5,13 +5,13 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Device.Gpio.Drivers
+namespace System.Device.Gpio.Drivers;
+
+/// <summary>
+/// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
+/// </summary>
+public class RaspberryPi3Driver : GpioDriver
 {
-    /// <summary>
-    /// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
-    /// </summary>
-    public class RaspberryPi3Driver : GpioDriver
-    {
         private GpioDriver _internalDriver;
         private RaspberryPi3LinuxDriver? _linuxDriver;
 
@@ -141,7 +141,8 @@ namespace System.Device.Gpio.Drivers
                 RaspberryBoardInfo.Model.RaspberryPiZeroW or
                 RaspberryBoardInfo.Model.RaspberryPiZero2W or
                 RaspberryBoardInfo.Model.RaspberryPi4 or
-                RaspberryBoardInfo.Model.RaspberryPiComputeModule4 => new RaspberryPi3LinuxDriver(),
+            RaspberryBoardInfo.Model.RaspberryPi400 => new RaspberryPi3LinuxDriver(),
+            RaspberryBoardInfo.Model.RaspberryPiComputeModule4 or
                 RaspberryBoardInfo.Model.RaspberryPiComputeModule3 => new RaspberryPiCm3Driver(),
                 _ => null,
             };
@@ -278,5 +279,4 @@ namespace System.Device.Gpio.Drivers
             _internalDriver = null!;
             base.Dispose(disposing);
         }
-    }
 }

@@ -1,0 +1,4 @@
+thermometer
+hygrometer
+barometer
+gas

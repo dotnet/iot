@@ -25,7 +25,7 @@ namespace Iot.Device.Bh1745
                 MeasurementTime.Ms1280 => 1280,
                 MeasurementTime.Ms2560 => 2560,
                 MeasurementTime.Ms5120 => 5120,
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException(nameof(time))
             };
 
         /// <summary>

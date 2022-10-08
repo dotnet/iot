@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{EA121A48-7916-4D9D-94C8-8E59BCDE3A96}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bh1745.Sample", "samples\Bh1745.Sample.csproj", "{24A728CA-F4EF-4DB0-B13F-65FFD772352B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bh1745.Sample", "samples\BH1745\Bh1745.Sample.csproj", "{24A728CA-F4EF-4DB0-B13F-65FFD772352B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bh1745CustomConfiguration.Sample", "samples\Bh1745CustomConfiguration.Sample.csproj", "{F6ED35EA-2FDE-4056-8165-0FAB6CE5DD5E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bh1745CustomConfiguration.Sample", "samples\CustomConfiguration\Bh1745CustomConfiguration.Sample.csproj", "{F6ED35EA-2FDE-4056-8165-0FAB6CE5DD5E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bh1745", "Bh1745.csproj", "{C572C86D-5BB2-4610-84EA-768257758933}"
 EndProject

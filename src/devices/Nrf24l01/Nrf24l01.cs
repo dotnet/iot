@@ -33,7 +33,7 @@ namespace Iot.Device.Nrf24l01
         public byte PacketSize
         {
             get { return _packetSize; }
-            set { _packetSize = value < 0 || value > 32 ? throw new ArgumentOutOfRangeException("PacketSize needs to be in the range of 0 to 32.") : value; }
+            set { _packetSize = value < 0 || value > 32 ? throw new ArgumentOutOfRangeException(nameof(value), "PacketSize needs to be in the range of 0 to 32.") : value; }
         }
 
         /// <summary>
@@ -692,12 +692,12 @@ namespace Iot.Device.Nrf24l01
 
             if (address.Length > 5 || address.Length < 1)
             {
-                throw new ArgumentOutOfRangeException("Array Length must less than 6.");
+                throw new ArgumentOutOfRangeException(nameof(address), "Array Length must less than 6.");
             }
 
             if (pipe > 1 && address.Length > 1)
             {
-                throw new ArgumentOutOfRangeException("Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom.");
+                throw new ArgumentOutOfRangeException(nameof(address), "Array Length must equal 1 when pipe more than 1. Address equal pipe1's address the first 4 byte + one byte your custom.");
             }
 
             Span<byte> writeData = stackalloc byte[1 + address.Length];
@@ -747,7 +747,7 @@ namespace Iot.Device.Nrf24l01
             // Details in the Datasheet P56
             if (address.Length > 5 || address.Length < 1)
             {
-                throw new ArgumentOutOfRangeException("Array Length must less than 6.");
+                throw new ArgumentOutOfRangeException(nameof(address), "Array Length must less than 6.");
             }
 
             _gpio.Write(_ce, PinValue.Low);
@@ -777,7 +777,7 @@ namespace Iot.Device.Nrf24l01
             // Register: 0x05, bit[6:0]
             if (channel < 0 || channel > 127)
             {
-                throw new ArgumentOutOfRangeException("Channel needs to be in the range of 0 to 127.");
+                throw new ArgumentOutOfRangeException(nameof(channel), "Channel needs to be in the range of 0 to 127.");
             }
 
             _gpio.Write(_ce, PinValue.Low);

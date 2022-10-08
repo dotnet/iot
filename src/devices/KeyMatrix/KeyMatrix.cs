@@ -44,6 +44,7 @@ namespace Iot.Device.KeyMatrix
         private int[] _outputPins;
         private int[] _inputPins;
         private GpioController? _gpioController;
+        private PinMode _inputPinMode;
         private PinValue[] _buttonValues;
         private bool _pinsOpened;
         private int _currentOutput = 0;
@@ -72,13 +73,33 @@ namespace Iot.Device.KeyMatrix
         /// <param name="gpioController">GPIO controller</param>
         /// <param name="shouldDispose">True to dispose the GpioController</param>
         public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, GpioController? gpioController = null, bool shouldDispose = true)
+            : this(outputPins, inputPins, scanInterval, PinMode.Input, gpioController, shouldDispose)
+        {
+        }
+
+        /// <summary>
+        /// Initialize key matrix
+        /// </summary>
+        /// <param name="outputPins">Output pins</param>
+        /// <param name="inputPins">Input pins</param>
+        /// <param name="scanInterval">Scanning interval in milliseconds</param>
+        /// <param name="gpioController">GPIO controller</param>
+        /// <param name="inputPinMode">Mode for input pins - Input / InputPullDown</param>
+        /// <param name="shouldDispose">True to dispose the GpioController</param>
+        public KeyMatrix(IEnumerable<int> outputPins, IEnumerable<int> inputPins, TimeSpan scanInterval, PinMode inputPinMode, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _shouldDispose = shouldDispose || gpioController == null;
             _gpioController = gpioController ?? new();
+            _inputPinMode = inputPinMode;
 
             if (outputPins == null)
             {
                 throw new ArgumentNullException(nameof(outputPins));
+            }
+
+            if (inputPinMode != PinMode.Input && inputPinMode != PinMode.InputPullDown)
+            {
+                throw new ArgumentException("Input pins can only be set to Input or InputPullDown.");
             }
 
             if (!outputPins.Any())
@@ -94,6 +115,12 @@ namespace Iot.Device.KeyMatrix
             if (!inputPins.Any())
             {
                 throw new ArgumentOutOfRangeException(nameof(inputPins), "The number of inputs must be at least 1");
+            }
+
+            if (inputPinMode == PinMode.InputPullDown &&
+                !inputPins.All(p => _gpioController.IsPinModeSupported(p, _inputPinMode)))
+            {
+                throw new ArgumentException("Not all input pins support InputPullDown");
             }
 
             _outputPins = outputPins.ToArray();
@@ -209,7 +236,7 @@ namespace Iot.Device.KeyMatrix
 
             for (int i = 0; i < _inputPins.Length; i++)
             {
-                _gpioController!.OpenPin(_inputPins[i], PinMode.Input);
+                _gpioController!.OpenPin(_inputPins[i], _inputPinMode);
             }
 
             _pinsOpened = true;

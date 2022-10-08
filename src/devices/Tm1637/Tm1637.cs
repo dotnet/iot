@@ -72,7 +72,7 @@ namespace Iot.Device.Tm1637
             {
                 if (value.Length != MaxCharacters)
                 {
-                    throw new ArgumentException(nameof(CharacterOrder), $"Value must be 6 bytes.");
+                    throw new ArgumentException($"Value must be 6 bytes.", nameof(CharacterOrder));
                 }
 
                 // Check if we have all values from 0 to 5
@@ -115,7 +115,7 @@ namespace Iot.Device.Tm1637
             {
                 if (value > 7)
                 {
-                    throw new ArgumentException(nameof(Brightness), "Value must be less than 8.");
+                    throw new ArgumentException("Value must be less than 8.", nameof(Brightness));
                 }
 
                 _brightness = value;
@@ -213,7 +213,7 @@ namespace Iot.Device.Tm1637
         {
             if (rawData.Length > MaxCharacters)
             {
-                throw new ArgumentException(nameof(rawData), $"Maximum number of segments for TM1637 is {MaxCharacters}");
+                throw new ArgumentException($"Maximum number of segments for TM1637 is {MaxCharacters}", nameof(rawData));
             }
 
             // Prepare the buffer with the right order to transfer
@@ -284,7 +284,7 @@ namespace Iot.Device.Tm1637
         {
             if (characterPosition > MaxCharacters)
             {
-                throw new ArgumentException(nameof(characterPosition), $"Maximum number of characters for TM1637 is {MaxCharacters}");
+                throw new ArgumentException($"Maximum number of characters for TM1637 is {MaxCharacters}", nameof(characterPosition));
             }
 
             // Recreate the buffer in correct order

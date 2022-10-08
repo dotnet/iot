@@ -68,7 +68,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             if (!SupportedPorts.Contains(port))
             {
-                throw new ArgumentException(nameof(port), "Grove port not supported.");
+                throw new ArgumentException("Grove port not supported.", nameof(port));
             }
 
             _grovePi = grovePi;
@@ -112,7 +112,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
             {
                 if (value > 10)
                 {
-                    throw new ArgumentException(nameof(Value), "Only 10 leds can be controlled, 1-10.");
+                    throw new ArgumentException("Only 10 leds can be controlled, 1-10.", nameof(Value));
                 }
 
                 _grovePi.WriteCommand(GrovePiCommand.LedBarLevel, _port, _level, 0);
@@ -128,7 +128,7 @@ namespace Iot.Device.GrovePiDevice.Sensors
         {
             if (led > 10)
             {
-                throw new ArgumentException(nameof(led), "Only 10 leds can be controlled, 1-10.");
+                throw new ArgumentException("Only 10 leds can be controlled, 1-10.", nameof(led));
             }
 
             _grovePi.WriteCommand(GrovePiCommand.LedBarSetOneLed, _port, led, status ? (byte)1 : (byte)0);

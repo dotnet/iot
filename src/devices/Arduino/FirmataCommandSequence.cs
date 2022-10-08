@@ -74,6 +74,8 @@ namespace Iot.Device.Arduino
         /// </summary>
         public int Length => _sequenceLength;
 
+        internal byte[] InternalSequence => _sequence.ToArray();
+
         /// <summary>
         /// Decode an uint from packed 7-bit data.
         /// This way of encoding uints is only used in extension modules.
@@ -304,6 +306,71 @@ namespace Iot.Device.Arduino
             unchecked
             {
                 return (_sequence.GetHashCode() * 397) ^ _sequenceLength;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            StringBuilder b = new StringBuilder();
+
+            int maxBytes = Math.Min(Length, 32);
+            for (int i = 0; i < maxBytes; i++)
+            {
+                b.Append($"{_sequence[i]:X2} ");
+            }
+
+            if (maxBytes < Length)
+            {
+                b.Append("...");
+            }
+
+            return b.ToString();
+        }
+
+        /// <inheritdoc />
+        public bool Equals(FirmataCommandSequence? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return _sequence.Equals(other._sequence) && Length == other.Length;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((FirmataCommandSequence)obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (_sequence.GetHashCode() * 397);
             }
         }
     }

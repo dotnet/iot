@@ -61,7 +61,7 @@ namespace Iot.Device.Arduino
 
             Board.SetPinMode(pinNumber, SupportedMode.Frequency);
 
-            var firstQuery = EnableFrequencyReportingInternal(pinNumber, mode, reportDelay);
+            (int TimeStamp, int NewTicks, bool Success) firstQuery = EnableFrequencyReportingInternal(pinNumber, mode, reportDelay);
             _lastFrequencyUpdateClock = firstQuery.TimeStamp;
             _lastFrequencyUpdateTicks = firstQuery.NewTicks;
             _frequencyReportingPin = pinNumber;
@@ -104,7 +104,7 @@ namespace Iot.Device.Arduino
 
         private bool OnFrequencyReport(byte[] bytes)
         {
-            var result = DecodeFrequencyReport(bytes);
+            (int TimeStamp, int NewTicks, bool Success) result = DecodeFrequencyReport(bytes);
             if (!result.Success)
             {
                 // Wrong message type, this is not typically an error
@@ -142,7 +142,7 @@ namespace Iot.Device.Arduino
             sequence.WriteByte((byte)(reportDelay & 0x7f)); // lower 7 bits
             sequence.WriteByte((byte)((reportDelay >> 7) & 0x7f));
             sequence.WriteByte((byte)FirmataCommand.END_SYSEX);
-            var reply = SendCommandAndWait(sequence);
+            byte[] reply = SendCommandAndWait(sequence);
 
             return DecodeFrequencyReport(new Span<byte>(reply.ToArray()));
         }

@@ -45,13 +45,13 @@ namespace Iot.Device.Ssd1351
         {
             if (!InRange((uint)spiBufferSize, 0x1000, 0x10000))
             {
-                throw new ArgumentException(nameof(spiBufferSize), "Value must be between 4096 and 65536.");
+                throw new ArgumentException("Value must be between 4096 and 65536.", nameof(spiBufferSize));
             }
 
             _gpioDevice = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
 
-            _spiDevice = spiDevice ?? throw new ArgumentException(nameof(spiDevice));
+            _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;

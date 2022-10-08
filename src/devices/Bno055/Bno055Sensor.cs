@@ -215,7 +215,7 @@ namespace Iot.Device.Bno055
         /// Get the latest error
         /// </summary>
         /// <returns>Returns the latest error</returns>
-        [Telemetry("Status")]
+        [Telemetry("Error")]
         public Error GetError() => (Error)ReadByte(Registers.SYS_ERR);
 
         /// <summary>

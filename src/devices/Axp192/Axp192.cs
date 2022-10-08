@@ -752,7 +752,7 @@ namespace Iot.Device.Axp192
         {
             if (buffer.Length != 6)
             {
-                throw new ArgumentException(nameof(buffer));
+                throw new ArgumentException("Buffer must be 6 bytes long.", nameof(buffer));
             }
 
             // Address from 0x06 - 0x0B
@@ -768,7 +768,7 @@ namespace Iot.Device.Axp192
         {
             if (buffer.Length != 6)
             {
-                throw new ArgumentException(nameof(buffer));
+                throw new ArgumentException("Buffer must be 6 bytes long.", nameof(buffer));
             }
 
             // Address from 0x06 - 0x0B

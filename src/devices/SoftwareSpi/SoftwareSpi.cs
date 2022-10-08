@@ -145,7 +145,7 @@ namespace Iot.Device.Spi
         {
             if (dataToWrite.Length != dataToRead.Length)
             {
-                throw new ArgumentException(nameof(dataToWrite));
+                throw new ArgumentException($"{nameof(dataToWrite)} and {nameof(dataToWrite)} must have the same length.", nameof(dataToWrite));
             }
 
             if (_sdi == -1)
@@ -219,22 +219,6 @@ namespace Iot.Device.Spi
 
         /// <inheritdoc />
         public override void Write(ReadOnlySpan<byte> data) => TransferWriteOnly(data);
-
-        /// <inheritdoc />
-        public override void WriteByte(byte data)
-        {
-            Span<byte> outData = stackalloc byte[1];
-            outData[0] = data;
-            Write(outData);
-        }
-
-        /// <inheritdoc />
-        public override byte ReadByte()
-        {
-            Span<byte> data = stackalloc byte[1];
-            Read(data);
-            return data[0];
-        }
 
         /// <inheritdoc />
         protected override void Dispose(bool disposing)

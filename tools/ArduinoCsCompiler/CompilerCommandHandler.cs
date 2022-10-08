@@ -344,7 +344,7 @@ namespace ArduinoCsCompiler
         {
             FirmataIlCommandSequence sequence = new FirmataIlCommandSequence(ExecutorCommand.DeclareMethod);
             sequence.SendInt32(declarationToken);
-            sequence.SendUInt14((byte)methodFlags);
+            sequence.SendUInt14(methodFlags);
             sequence.WriteByte(maxStack);
             sequence.WriteByte(argCount);
             sequence.SendInt32((int)nativeMethod);
