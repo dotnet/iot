@@ -27,25 +27,18 @@ namespace Iot.Device.Arduino
         /// </summary>
         public const byte EndSysex = (byte)FirmataCommand.END_SYSEX;
 
-        private byte[] _sequence;
-
-        private int _sequenceLength;
+        private List<byte> _sequence;
 
         /// <summary>
         /// Create a new command sequence
         /// </summary>
         /// <param name="command">The first byte of the command</param>
-        /// <param name="initialSize">Initial size of the underlying list. Should ideally be equal to the expected size of the command</param>
-        internal FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX, int initialSize = InitialCommandLength)
+        internal FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX)
         {
-            if (initialSize <= 0)
+            _sequence = new List<byte>()
             {
-                initialSize = InitialCommandLength;
-            }
-
-            _sequence = new byte[initialSize];
-            _sequence[0] = (byte)command;
-            _sequenceLength = 1;
+                (byte)command
+            };
         }
 
         /// <summary>
@@ -59,20 +52,12 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// The current sequence
         /// </summary>
-        public IReadOnlyList<byte> Sequence
-        {
-            get
-            {
-                var ret = new List<byte>();
-                ret.AddRange(_sequence.Take(_sequenceLength));
-                return ret;
-            }
-        }
+        public IReadOnlyList<byte> Sequence => _sequence;
 
         /// <summary>
         /// The current length of the sequence
         /// </summary>
-        public int Length => _sequenceLength;
+        public int Length => _sequence.Count;
 
         internal byte[] InternalSequence => _sequence.ToArray();
 
@@ -138,7 +123,7 @@ namespace Iot.Device.Arduino
             data[2] = (byte)((value >> 14) & 0x7F);
             data[3] = (byte)((value >> 21) & 0x7F);
             data[4] = (byte)((value >> 28) & 0x7F);
-            AddRange(data);
+            _sequence.AddRange(data);
         }
 
         /// <summary>
@@ -156,7 +141,7 @@ namespace Iot.Device.Arduino
         /// <param name="b">The byte to add</param>
         public void WriteByte(byte b)
         {
-            Add(b);
+            _sequence.Add(b);
         }
 
         /// <summary>
@@ -165,7 +150,7 @@ namespace Iot.Device.Arduino
         /// <param name="bytesToSend">The raw block to send</param>
         public void Write(byte[] bytesToSend)
         {
-            AddRange(bytesToSend);
+            _sequence.AddRange(bytesToSend);
         }
 
         /// <summary>
@@ -178,7 +163,7 @@ namespace Iot.Device.Arduino
         {
             for (int i = startIndex; i < startIndex + length; i++)
             {
-                Add(bytesToSend[i]);
+                _sequence.Add(bytesToSend[i]);
             }
         }
 
@@ -205,107 +190,8 @@ namespace Iot.Device.Arduino
         {
             for (int i = 0; i < values.Length; i++)
             {
-                Add((byte)(values[i] & (uint)sbyte.MaxValue));
-                Add((byte)(values[i] >> 7 & sbyte.MaxValue));
-            }
-        }
-
-        /// <summary>
-        /// Adds one byte to the list
-        /// </summary>
-        /// <param name="elem">The byte to add</param>
-        private void Add(byte elem)
-        {
-            if (_sequenceLength < _sequence.Length)
-            {
-                _sequence[_sequenceLength++] = elem;
-                return;
-            }
-
-            Array.Resize(ref _sequence, _sequence.Length + InitialCommandLength);
-            _sequence[_sequenceLength++] = elem;
-        }
-
-        private void AddRange(byte[] data)
-        {
-            if (_sequenceLength + data.Length < _sequence.Length)
-            {
-                Array.Copy(data, 0, _sequence, _sequenceLength, data.Length);
-                _sequenceLength += data.Length;
-                return;
-            }
-
-            Array.Resize(ref _sequence, _sequence.Length + Math.Max(data.Length, _sequence.Length + InitialCommandLength));
-            AddRange(data);
-        }
-
-        internal ReadOnlySpan<byte> AsSpan()
-        {
-            return _sequence.AsSpan();
-        }
-
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            StringBuilder b = new StringBuilder();
-
-            int maxBytes = Math.Min((int)_sequenceLength, 32);
-            for (int i = 0; i < maxBytes; i++)
-            {
-                b.Append($"{_sequence[i]:X2} ");
-            }
-
-            if (maxBytes < _sequenceLength)
-            {
-                b.Append("...");
-            }
-
-            return b.ToString();
-        }
-
-        /// <inheritdoc />
-        public bool Equals(FirmataCommandSequence? other)
-        {
-            if (ReferenceEquals(null, other))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            return _sequence.Equals(other._sequence) && _sequenceLength == other._sequenceLength;
-        }
-
-        /// <inheritdoc />
-        public override bool Equals(object? obj)
-        {
-            if (ReferenceEquals(null, obj))
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
-            if (obj.GetType() != GetType())
-            {
-                return false;
-            }
-
-            return Equals((FirmataCommandSequence)obj);
-        }
-
-        /// <inheritdoc />
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (_sequence.GetHashCode() * 397) ^ _sequenceLength;
+                _sequence.Add((byte)(values[i] & (uint)sbyte.MaxValue));
+                _sequence.Add((byte)(values[i] >> 7 & sbyte.MaxValue));
             }
         }
 
