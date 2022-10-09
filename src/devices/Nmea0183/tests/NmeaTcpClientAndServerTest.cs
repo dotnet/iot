@@ -29,12 +29,12 @@ namespace Iot.Device.Nmea0183.Tests
         public void ClientCommunicatesWithServerOverTcp()
         {
             int portToUse = NetworkPortScanner.GetNextAvailableTcpPort(1027);
-            NmeaTcpServer server = new NmeaTcpServer("Server", IPAddress.Any, portToUse);
+            using NmeaTcpServer server = new NmeaTcpServer("Server", IPAddress.Any, portToUse);
 
             server.OnNewSequence += ServerOnNewSequence;
             server.StartDecode();
 
-            NmeaTcpClient client = new NmeaTcpClient("Client", "localhost", portToUse);
+            using NmeaTcpClient client = new NmeaTcpClient("Client", "localhost", portToUse);
             client.OnNewSequence += ClientOnNewSequence;
             client.StartDecode();
 
@@ -57,7 +57,7 @@ namespace Iot.Device.Nmea0183.Tests
             server.SendSentence(serverSentence);
 
             timeout = 30;
-            while (_sentencesReceivedByClient.Count < 1 && _sentencesReceivedByServer.Count < 1)
+            while (_sentencesReceivedByClient.Count < 2 && _sentencesReceivedByServer.Count < 2)
             {
                 Thread.Sleep(100);
                 if (timeout-- < 0)
