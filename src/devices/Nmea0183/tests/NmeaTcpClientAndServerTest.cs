@@ -14,6 +14,8 @@ using Xunit;
 
 namespace Iot.Device.Nmea0183.Tests
 {
+    // This test is unreliable when run with netcoreapp3.1 on linux (might hang, or fail in a strange way)
+#if NET5_0_OR_GREATER
     public class NmeaTcpClientAndServerTest
     {
         private List<NmeaSentence> _sentencesReceivedByServer;
@@ -92,4 +94,5 @@ namespace Iot.Device.Nmea0183.Tests
             _sentencesReceivedByServer.Add(sentence);
         }
     }
+#endif
 }
