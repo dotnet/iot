@@ -51,6 +51,7 @@ namespace Iot.Device.Nmea0183.Tests
             }
 
             Assert.True(client.Connected);
+            Thread.Sleep(10);
             Assert.Equal("Client", client.InterfaceName);
             Assert.Equal("Server", server.InterfaceName);
             var clientSentence = new GlobalPositioningSystemFixData(DateTimeOffset.UtcNow, GpsQuality.DifferentialFix, new GeographicPosition(2, 3, 4), 100, 2, 12);
@@ -58,8 +59,8 @@ namespace Iot.Device.Nmea0183.Tests
             var serverSentence = new DepthBelowSurface(Length.FromMeters(5.2));
             server.SendSentence(serverSentence);
 
-            timeout = 30;
-            while (_sentencesReceivedByClient.Count < 2 && _sentencesReceivedByServer.Count < 2)
+            timeout = 50;
+            while (_sentencesReceivedByClient.Count < 2 || _sentencesReceivedByServer.Count < 2)
             {
                 Thread.Sleep(100);
                 if (timeout-- < 0)
