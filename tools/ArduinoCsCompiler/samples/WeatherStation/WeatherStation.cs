@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using Iot.Device.Arduino;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.PowerMode;
+using Iot.Device.Button;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Common;
 using Iot.Device.Graphics;
@@ -27,15 +28,22 @@ namespace WeatherStation
     {
         private const int RedLed = 16;
         private const int Button = 17;
+        private const int TotalPages = 2;
 
         private const int StationAltitude = 650;
 
         private readonly ArduinoBoard _board;
         private Bme680? _bme680;
+        private GpioButton? _button;
+
+        private int _page;
+        private bool _pageChanged;
 
         private WeatherStation(ArduinoBoard board)
         {
             _board = board;
+            _page = 0;
+            _pageChanged = false;
         }
 
         public static int Main(string[] args)
@@ -116,7 +124,6 @@ namespace WeatherStation
             GpioController gpioController = _board.CreateGpioController();
             gpioController.OpenPin(RedLed, PinMode.Output);
             gpioController.Write(RedLed, PinValue.High);
-            gpioController.OpenPin(Button, PinMode.Input);
             // This Sleep is just because the display sometimes needs a bit of time to properly initialize -
             // otherwise it just doesn't properly accept commands
             Thread.Sleep(1000);
@@ -129,7 +136,6 @@ namespace WeatherStation
             hd44780.Clear();
             hd44780.Write("Startup!");
             Thread.Sleep(500);
-            Length stationAltitude = Length.FromMeters(StationAltitude);
             LcdConsole console = new LcdConsole(hd44780, "A00", false);
             LcdCharacterEncoding encoding = LcdConsole.CreateEncoding(CultureInfo.CreateSpecificCulture("de-CH"), "A00", '?', 8);
             console.LoadEncoding(encoding);
@@ -137,34 +143,68 @@ namespace WeatherStation
             console.ReplaceLine(0, "Startup!");
             console.ReplaceLine(1, "Initializing BME680...");
             InitBme();
+            _button = new GpioButton(Button, gpioController, false, PinMode.Input, TimeSpan.FromMilliseconds(50));
+            _button.Press += (sender, e) =>
+            {
+                _page = (_page + 1) % TotalPages;
+                _pageChanged = true;
+            };
             gpioController.Write(RedLed, PinValue.Low);
-            while (gpioController.Read(Button) == PinValue.Low)
+
+            _pageChanged = true;
+
+            Loop(gpioController, console);
+
+            return 0;
+        }
+
+        private void Loop(GpioController gpioController, LcdConsole console)
+        {
+            Length stationAltitude = Length.FromMeters(StationAltitude);
+            while (true)
             {
                 try
                 {
-                    _bme680!.SetPowerMode(Bme680PowerMode.Forced);
-                    var time = DateTime.Now;
-                    if (_bme680.TryReadTemperature(out Temperature temp) && _bme680.TryReadPressure(out Pressure pressure) && _bme680.TryReadHumidity(out RelativeHumidity humidity))
+                    if (_pageChanged)
                     {
-                        Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
-                        Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
-
-                        string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
-                        string humidityLine = humidity.Percent.ToString("F1") + "% RH, DP: " + dewPoint.DegreesCelsius.ToString("F1") + " °C";
-
-                        console.ReplaceLine(0, temperatureLine);
-                        console.ReplaceLine(1, humidityLine);
-                        Console.WriteLine(temperatureLine);
-                        Console.WriteLine(humidityLine);
+                        console.Clear();
+                        _pageChanged = false;
+                        console.LineFeedMode = LineWrapMode.Truncate;
                     }
 
-                    string line = time.ToLongDateString();
-                    console.ReplaceLine(2, line);
-                    console.SetCursorPosition(0, 3);
-                    Console.WriteLine(line);
-                    line = time.ToLongTimeString();
-                    console.ReplaceLine(3, line);
-                    Console.WriteLine(line);
+                    var time = DateTime.Now;
+                    // left align the date in the top left corner, right align the time in the top right corner
+                    string dateString = time.ToShortDateString();
+                    string timeString = time.ToLongTimeString();
+                    int totalLength = dateString.Length + timeString.Length;
+                    int totalGaps = console.Size.Width - totalLength; // The number of spaces required between them
+                    string gaps = new String(' ', totalGaps);
+                    console.ReplaceLine(0, dateString + gaps + timeString);
+                    if (_page == 0)
+                    {
+                        _bme680!.SetPowerMode(Bme680PowerMode.Forced);
+                        if (_bme680.TryReadTemperature(out Temperature temp) && _bme680.TryReadPressure(out Pressure pressure) && _bme680.TryReadHumidity(out RelativeHumidity humidity))
+                        {
+                            Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
+                            Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
+
+                            string temperatureLine = temp.DegreesCelsius.ToString("F2") + " °C " + correctedPressure.Hectopascals.ToString("F1") + " hPa";
+                            string humidityLine = "Humidity:  " + humidity.Percent.ToString("F1") + " %";
+                            string dewPointLine = "Dew Point: " + dewPoint.DegreesCelsius.ToString("F1") + " °C";
+
+                            console.ReplaceLine(1, temperatureLine);
+                            console.ReplaceLine(2, humidityLine);
+                            console.ReplaceLine(3, dewPointLine);
+                        }
+                    }
+
+                    if (_page == 1)
+                    {
+                        string line = time.ToLongDateString();
+                        console.SetCursorPosition(0, 2);
+                        console.LineFeedMode = LineWrapMode.WordWrap;
+                        console.WriteLine(line);
+                    }
                 }
                 catch (TimeoutException x)
                 {
@@ -182,8 +222,6 @@ namespace WeatherStation
                 Thread.Sleep(100);
                 gpioController.Write(RedLed, PinValue.Low);
             }
-
-            return 0;
         }
     }
 }
