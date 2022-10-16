@@ -23,7 +23,8 @@ namespace ArduinoCsCompiler
 {
     public sealed class MicroCompiler : IDisposable
     {
-        private const int DataVersion = 1;
+        // DataVersion 1 was shipped with Iot.Device.Bindings version 2.2.0
+        private const int DataVersion = 2;
 
         /// <summary>
         /// The list of system assemblies (these may contain kernel interop calls)
