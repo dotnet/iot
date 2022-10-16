@@ -65,7 +65,7 @@ namespace Iot.Device.Nmea0183.Tests
                 Thread.Sleep(100);
                 if (timeout-- < 0)
                 {
-                    throw new TimeoutException();
+                    throw new TimeoutException($"Only received {_sentencesReceivedByClient.Count} messages from server and {_sentencesReceivedByServer.Count} from client");
                 }
             }
 
