@@ -292,7 +292,7 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="byteCount">Number of bytes to read.  This must be one or more to read.</param>
         /// <returns>Array of messages</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public byte[][] Read(int byteCount)
+        public byte[][] ReadMessages(int byteCount)
         {
             var rxStatusResponse = RxStatus();
 
@@ -395,9 +395,8 @@ namespace Iot.Device.Mcp25xxx
         /// </summary>
         /// <param name="id">Two bytes id</param>
         /// <param name="data">Message</param>
-        /// <param name="ct">CancellationToken</param>
         /// <exception cref="IOException"></exception>
-        public async Task SendMessage(Tuple<byte, byte> id, byte[] data, CancellationToken ct)
+        public void SendMessage(Tuple<byte, byte> id, byte[] data)
         {
             var txBuffer = GetEmptyTxBuffer();
             SendMessageFromBuffer(txBuffer, id, data);
@@ -409,7 +408,7 @@ namespace Iot.Device.Mcp25xxx
                     return;
                 }
 
-                await Task.Delay(TimeSpan.FromMilliseconds(5), ct);
+                Thread.Sleep(TimeSpan.FromMilliseconds(5));
             }
 
             AbortAllPendingTransmissions();
