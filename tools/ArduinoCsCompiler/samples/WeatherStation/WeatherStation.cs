@@ -27,7 +27,7 @@ namespace WeatherStation
     internal class WeatherStation
     {
         private const int RedLed = 16;
-        private const int Button = 17;
+        private const int Button = 23;
         private const int TotalPages = 2;
 
         private const int StationAltitude = 650;
@@ -180,6 +180,7 @@ namespace WeatherStation
                     int totalGaps = console.Size.Width - totalLength; // The number of spaces required between them
                     string gaps = new String(' ', totalGaps);
                     console.ReplaceLine(0, dateString + gaps + timeString);
+                    Console.WriteLine(timeString);
                     if (_page == 0)
                     {
                         _bme680!.SetPowerMode(Bme680PowerMode.Forced);
@@ -195,6 +196,7 @@ namespace WeatherStation
                             console.ReplaceLine(1, temperatureLine);
                             console.ReplaceLine(2, humidityLine);
                             console.ReplaceLine(3, dewPointLine);
+                            Console.WriteLine("Page 0: " + temperatureLine);
                         }
                     }
 
@@ -204,6 +206,7 @@ namespace WeatherStation
                         console.SetCursorPosition(0, 2);
                         console.LineFeedMode = LineWrapMode.WordWrap;
                         console.WriteLine(line);
+                        Console.WriteLine("Page 1: " + line);
                     }
                 }
                 catch (TimeoutException x)
