@@ -273,7 +273,7 @@ namespace Iot.Device.Mcp25xxx
         }
 
         /// <summary>
-        /// Set
+        /// Set mode
         /// </summary>
         public void SetMode(OperationMode operationMode)
         {

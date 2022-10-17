@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Iot.Device.Mcp25xxx.Register;
+using Iot.Device.Mcp25xxx.Tests.Register.CanControl;
 using Xunit;
 
 namespace Iot.Device.Mcp25xxx.Tests
@@ -140,6 +141,16 @@ namespace Iot.Device.Mcp25xxx.Tests
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.SetBitrate(Bitrates.MCP_8MHz_5kBPS_CFG1, Bitrates.MCP_8MHz_5kBPS_CFG2, Bitrates.MCP_8MHz_5kBPS_CFG3);
+            Assert.Equal(lastExpectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
+        }
+
+        [Fact]
+        public void Send_SetMode_Instruction()
+        {
+            byte[] lastExpectedWriteBuffer = { 0b0000_0010, (byte)Address.CanCtrl, 0b0000_0111 };
+            var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
+            mcp25xxx.SetMode(OperationMode.NormalOperation);
             Assert.Equal(lastExpectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
         }
     }
