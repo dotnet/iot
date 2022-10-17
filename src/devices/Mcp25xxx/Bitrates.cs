@@ -6,7 +6,7 @@ namespace Iot.Device.Mcp25xxx
     /// <summary>
     /// Bitrates for CAN bus
     /// </summary>
-    public enum Bitrates
+    public enum Bitrates : byte
     {
         /// <summary>
         /// Speed 8MHz 1000kBPS CFG1

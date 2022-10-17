@@ -132,5 +132,15 @@ namespace Iot.Device.Mcp25xxx.Tests
             mcp25xxx.EnableRollover();
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
         }
+
+        [Fact]
+        public void Send_SetBitrate_Instruction()
+        {
+            byte[] lastExpectedWriteBuffer = { 0b0000_0010, (byte)Address.Cnf3, (byte)Bitrates.MCP_8MHz_5kBPS_CFG3 };
+            var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
+            mcp25xxx.SetBitrate(Bitrates.MCP_8MHz_5kBPS_CFG1, Bitrates.MCP_8MHz_5kBPS_CFG2, Bitrates.MCP_8MHz_5kBPS_CFG3);
+            Assert.Equal(lastExpectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
+        }
     }
 }

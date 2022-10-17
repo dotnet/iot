@@ -265,11 +265,11 @@ namespace Iot.Device.Mcp25xxx
         /// <summary>
         /// Set CAN Bitrate
         /// </summary>
-        public void SetBitrate(byte Cnf1, byte Cnf2, byte Cnf3)
+        public void SetBitrate(Bitrates cnf1, Bitrates cnf2, Bitrates cnf3)
         {
-            WriteByte(Address.Cnf1, Cnf1);
-            WriteByte(Address.Cnf2, Cnf2);
-            WriteByte(Address.Cnf3, Cnf3);
+            WriteByte(Address.Cnf1, (byte)cnf1);
+            WriteByte(Address.Cnf2, (byte)cnf2);
+            WriteByte(Address.Cnf3, (byte)cnf3);
         }
 
         /// <summary>
