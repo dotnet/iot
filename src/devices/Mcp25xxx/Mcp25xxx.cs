@@ -4,7 +4,14 @@
 using System;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Mcp25xxx.Register;
+using Iot.Device.Mcp25xxx.Register.CanControl;
+using Iot.Device.Mcp25xxx.Register.MessageReceive;
+using Iot.Device.Mcp25xxx.Register.MessageTransmit;
+using Iot.Device.Mcp25xxx.Tests.Register.CanControl;
 
 namespace Iot.Device.Mcp25xxx
 {
@@ -242,6 +249,77 @@ namespace Iot.Device.Mcp25xxx
         }
 
         /// <summary>
+        /// If RXB0 contains a valid message and another valid message is received,
+        /// an overflow error will not occur and the new message will be moved into RXB1
+        /// </summary>
+        public void EnableRollover()
+        {
+            WriteByte(
+                new RxB0Ctrl(
+                    false,
+                    true,
+                    false,
+                    OperatingMode.TurnsMaskFiltersOff));
+        }
+
+        /// <summary>
+        /// Set CAN Bitrate
+        /// </summary>
+        public void SetBitrate()
+        {
+            const byte MCP_16MHz_500kBPS_Cnf1 = 0x00;
+            const byte MCP_16MHz_500kBPS_Cnf2 = 0xF0;
+            const byte MCP_16MHz_500kBPS_Cnf3 = 0x86;
+            WriteByte(Address.Cnf1, MCP_16MHz_500kBPS_Cnf1);
+            WriteByte(Address.Cnf2, MCP_16MHz_500kBPS_Cnf2);
+            WriteByte(Address.Cnf3, MCP_16MHz_500kBPS_Cnf3);
+        }
+
+        /// <summary>
+        /// Set
+        /// </summary>
+        public void SetMode(OperationMode operationMode)
+        {
+            WriteByte(
+                new CanCtrl(
+                    CanCtrl.PinPrescaler.ClockDivideBy8,
+                    true,
+                    false,
+                    false,
+                    operationMode));
+        }
+
+        /// <summary>
+        /// Read messages from all buffers
+        /// </summary>
+        /// <param name="byteCount">Number of bytes to read.  This must be one or more to read.</param>
+        /// <returns>Array of messages</returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public byte[][] Read(int byteCount)
+        {
+            var rxStatusResponse = RxStatus();
+
+            switch (rxStatusResponse.ReceivedMessage)
+            {
+                case RxStatusResponse.ReceivedMessageType.MessageInRxB0:
+                    var messageB0 = ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount);
+                    return new[] { messageB0 };
+                case RxStatusResponse.ReceivedMessageType.MessageInRxB1:
+                    var messageB1 = ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount);
+                    return new[] { messageB1 };
+                case RxStatusResponse.ReceivedMessageType.MessagesInBothBuffers:
+                    var message1 = ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount);
+                    var message2 = ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount);
+                    return new[] { message1, message2 };
+                case RxStatusResponse.ReceivedMessageType.NoRxMessage:
+                    return Array.Empty<byte[]>();
+                default:
+                    throw new Exception(
+                        $"Invalid value for {nameof(rxStatusResponse.ReceivedMessage)}: {rxStatusResponse.ReceivedMessage}.");
+            }
+        }
+
+        /// <summary>
         /// Reads data from the register beginning at the selected address.
         /// </summary>
         /// <param name="address">The address to read.</param>
@@ -313,6 +391,170 @@ namespace Iot.Device.Mcp25xxx
             {
                 register.ToByte()
             });
+        }
+
+        /// <summary>
+        /// Send message
+        /// </summary>
+        /// <param name="id">Two bytes id</param>
+        /// <param name="data">Message</param>
+        /// <param name="ct">CancellationToken</param>
+        /// <exception cref="IOException"></exception>
+        public async Task SendMessage(Tuple<byte, byte> id, byte[] data, CancellationToken ct)
+        {
+            var txBuffer = GetEmptyTxBuffer();
+            SendMessageFromBuffer(txBuffer, id, data);
+            const int tries = 10;
+            for (var i = 0; i < tries; i++)
+            {
+                if (IsMessageSend(txBuffer))
+                {
+                    return;
+                }
+
+                await Task.Delay(TimeSpan.FromMilliseconds(5), ct);
+            }
+
+            AbortAllPendingTransmissions();
+            throw new IOException($"! Cannot Send: {id}#{string.Join(";", data)}");
+        }
+
+        /// <summary>
+        /// Get witch buffer empty now
+        /// </summary>
+        /// <returns>Buffer</returns>
+        public TxBuffer GetEmptyTxBuffer()
+        {
+            var readStatusResponse = ReadStatus();
+            var tx0Full = readStatusResponse.HasFlag(ReadStatusResponse.Tx0Req);
+            var tx1Full = readStatusResponse.HasFlag(ReadStatusResponse.Tx1Req);
+            var tx2Full = readStatusResponse.HasFlag(ReadStatusResponse.Tx2Req);
+
+            if (!tx0Full)
+            {
+                return TxBuffer.Tx0;
+            }
+
+            if (!tx1Full)
+            {
+                return TxBuffer.Tx1;
+            }
+
+            if (!tx2Full)
+            {
+                return TxBuffer.Tx2;
+            }
+
+            return TxBuffer.None;
+        }
+
+        /// <summary>
+        /// Send message from specific buffer
+        /// </summary>
+        /// <param name="txBuffer">Buffer</param>
+        /// <param name="id">Two bytes message id</param>
+        /// <param name="data">Message data</param>
+        public void SendMessageFromBuffer(TxBuffer txBuffer, Tuple<byte, byte> id, byte[] data)
+        {
+            var (instructionsAddress, dataAddress) = GetInstructionsAddress(txBuffer);
+
+            var txBufferNumber = TxBxSidh.GetTxBufferNumber(instructionsAddress);
+            var (firstByte, secondByte) = id;
+            Write(
+                instructionsAddress,
+                new[]
+                {
+                    new TxBxSidh(txBufferNumber, firstByte).ToByte(),
+                    new TxBxSidl(txBufferNumber, secondByte).ToByte(),
+                    new TxBxEid8(txBufferNumber, 0).ToByte(),
+                    new TxBxEid0(txBufferNumber, 0).ToByte(),
+                    new TxBxDlc(txBufferNumber, data.Length, false).ToByte()
+                });
+
+            Write(dataAddress, data);
+            SendFromBuffer(txBuffer);
+        }
+
+        /// <summary>
+        /// Get instructions address from buffer
+        /// </summary>
+        /// <param name="txBuffer">buffer</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public Tuple<Address, Address> GetInstructionsAddress(TxBuffer txBuffer)
+        {
+            return txBuffer switch
+            {
+                TxBuffer.Tx0 => new Tuple<Address, Address>(Address.TxB0Sidh, Address.TxB0D0),
+                TxBuffer.Tx1 => new Tuple<Address, Address>(Address.TxB1Sidh, Address.TxB1D0),
+                TxBuffer.Tx2 => new Tuple<Address, Address>(Address.TxB2Sidh, Address.TxB2D0),
+                TxBuffer.None => throw new ArgumentException("Can not use this Tx buffer", nameof(txBuffer), null),
+                _ => throw new ArgumentOutOfRangeException(nameof(txBuffer), txBuffer, null)
+            };
+        }
+
+        /// <summary>
+        /// Command to mcp25xxx to send bytes from buffer
+        /// </summary>
+        /// <param name="txBuffer">buffer</param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public void SendFromBuffer(TxBuffer txBuffer)
+        {
+            switch (txBuffer)
+            {
+                case TxBuffer.Tx0:
+                    RequestToSend(true, false, false);
+                    break;
+                case TxBuffer.Tx1:
+                    RequestToSend(false, true, false);
+                    break;
+                case TxBuffer.Tx2:
+                    RequestToSend(false, false, true);
+                    break;
+                case TxBuffer.None:
+                    throw new ArgumentException("Can not use this Tx buffer", nameof(txBuffer), null);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(txBuffer), txBuffer, null);
+            }
+        }
+
+        /// <summary>
+        /// Check is buffer empty
+        /// </summary>
+        /// <param name="txBuffer">buffer type</param>
+        /// <returns></returns>
+        public bool IsMessageSend(TxBuffer txBuffer)
+        {
+            var readStatusResponse = ReadStatus();
+
+            switch (txBuffer)
+            {
+                case TxBuffer.Tx0 when readStatusResponse.HasFlag(ReadStatusResponse.Tx0If) &&
+                                       !readStatusResponse.HasFlag(ReadStatusResponse.Tx0Req):
+                case TxBuffer.Tx1 when readStatusResponse.HasFlag(ReadStatusResponse.Tx1If) &&
+                                       !readStatusResponse.HasFlag(ReadStatusResponse.Tx1Req):
+                case TxBuffer.Tx2 when readStatusResponse.HasFlag(ReadStatusResponse.Tx2If) &&
+                                       !readStatusResponse.HasFlag(ReadStatusResponse.Tx2Req):
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Abort send all messages from buffers, buffers will be empty
+        /// </summary>
+        public void AbortAllPendingTransmissions()
+        {
+            WriteByte(
+                new CanCtrl(
+                    CanCtrl.PinPrescaler.ClockDivideBy8,
+                    true,
+                    false,
+                    true,
+                    OperationMode.NormalOperation));
         }
 
         /// <summary>
