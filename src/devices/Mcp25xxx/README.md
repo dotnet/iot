@@ -80,11 +80,11 @@ Console.WriteLine($"Tx2If: {readStatusResponse.HasFlag(ReadStatusResponse.Tx2If)
 You can transmit a message like this:
 
 ```csharp
-    Console.WriteLine("Send simple message");
-    const int id = 1;
-    var message = new[] { (byte)1 };
-    var twoByteId = new Tuple<byte, byte>((id >> 3), (id << 5));
-    mcp25xxx.SendMessage(twoByteId, message);
+Console.WriteLine("Send simple message");
+const int id = 1;
+var message = new[] { (byte)1 };
+var twoByteId = new Tuple<byte, byte>((id >> 3), (id << 5));
+mcp25xxx.SendMessage(twoByteId, message);
 ```
 
 ### Read messages from all buffers
@@ -92,22 +92,22 @@ You can transmit a message like this:
 You can save all message from buffer to memmory like this:
 
 ```csharp
-    ConcurrentQueue<byte[]> readBuffer = new();
-    Console.WriteLine("Start read from buffer mcp25xx buffer to memory buffer");
-    while (!ct.IsCancellationRequested)
+ConcurrentQueue<byte[]> readBuffer = new();
+Console.WriteLine("Start read from buffer mcp25xx buffer to memory buffer");
+while (!ct.IsCancellationRequested)
+{
+    var messages = mcp25xxx.ReadMessages(10);
+    foreach (var message in messages)
     {
-        var messages = mcp25xxx.ReadMessages(10);
-        foreach (var message in messages)
-        {
-            readBuffer.Enqueue(message);
-        }
+        readBuffer.Enqueue(message);
     }
+}
 ```
 
 You can read messaged from memmory like this:
 
 ```csharp
-    var messageOrNull = readBuffer.TryDequeue(out var bytes) ? bytes : null;
+var messageOrNull = readBuffer.TryDequeue(out var bytes) ? bytes : null;
 ```
 
 **Note**: You will find detailed way of using this binding in the [sample file](samples)
