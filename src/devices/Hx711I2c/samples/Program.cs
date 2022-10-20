@@ -17,12 +17,14 @@ if (ft4222s.Count == 0)
 
 Ft4222Device ft4222 = ft4222s[0];
 
+// If using Raspberry Pi rather than FT4222 following initialization method can be used instead:
+// using Hx711I2c hx711 = new(I2cDevice.Create(new I2cConnectionSettings(1, Hx711I2c.DefaultI2cAddress)));
 using Hx711I2c hx711 = new(ft4222.CreateI2cDevice(new I2cConnectionSettings(0, Hx711I2c.DefaultI2cAddress)));
-hx711.ResetSensor();
 hx711.CalibrationScale = 2236.0f;
-hx711.HardwareTare();
-// If blinking LED is not desired:
-// hx711.Tare();
+hx711.Tare(blinkLed: true);
+
+// less accuracy but faster response time
+hx711.SampleAveraging = 10;
 
 // To simulate pressing CAL button:
 // hx711.StartCalibration();

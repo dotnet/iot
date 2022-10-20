@@ -16,7 +16,7 @@ namespace Iot.Device.Hx711
     /// DFRobot KIT0176: I2C 1kg Weight Sensor Kit
     /// </summary>
     [Interface("DFRobot KIT0176: I2C 1kg Weight Sensor Kit")]
-    public class Hx711I2c : IDisposable
+    public sealed class Hx711I2c : IDisposable
     {
         /// <summary>
         /// Default address for I2C, only use when pins A0 and A1 are set to 0.
@@ -34,25 +34,27 @@ namespace Iot.Device.Hx711
         /// <summary>
         /// Raw value telling where 0 is.
         /// It will be set to current weight when Tare function is used.
-        /// Value passed must be a raw reading.
+        /// Value passed must be a raw reading - use <see cref="GetRawReading"/>.
+        /// This value does not have specific unit but is linearly correlated to weight reading.
         /// </summary>
         [Property]
         public float Offset { get; set; }
 
         /// <summary>
-        /// Value which scales raw units into grams
+        /// Value which scales raw units into grams.
+        /// Weight in grams = (Raw Reading - Offset) / CalibrationScale.
         /// </summary>
         [Property]
         public float CalibrationScale { get; set; }
 
         /// <summary>
-        /// When set to true, CAL button will not have any effect on the current calibration setting
+        /// When set to true, CAL button will not have any effect on the current calibration setting.
         /// </summary>
         [Property]
         public bool IgnoreCalibrationButton { get; set; }
 
         /// <summary>
-        /// When set to true, RST button will not change Offset (it won't Tare)
+        /// When set to true, RST button will not change Offset (it won't Tare).
         /// </summary>
         [Property]
         public bool IgnoreResetButton { get; set; }
@@ -64,9 +66,16 @@ namespace Iot.Device.Hx711
         [Property]
         public ushort AutomaticCalibrationWeight
         {
-            // It does not seem to be possible to read from this register
-            set => WriteUInt16(Hx711I2cRegister.REG_SET_TRIGGER_WEIGHT, value);
+            // It does not seem to be possible to read from this register so we use the last value
+            get => _automaticCalibrationWeight;
+            set
+            {
+                _automaticCalibrationWeight = value;
+                WriteUInt16(Hx711I2cRegister.REG_SET_TRIGGER_WEIGHT, value);
+            }
         }
+
+        private ushort _automaticCalibrationWeight;
 
         /// <summary>
         /// Sets the minimum weight in grams which will trigger calibration after CAL button is pressed.
@@ -76,9 +85,47 @@ namespace Iot.Device.Hx711
         [Property]
         public ushort AutomaticCalibrationThreshold
         {
-            // It does not seem to be possible to read from this register
-            set => WriteUInt16(Hx711I2cRegister.REG_SET_CAL_THRESHOLD, value);
+            // It does not seem to be possible to read from this register so we use the last value
+            get => _automaticCalibrationThreshold;
+            set
+            {
+                _automaticCalibrationThreshold = value;
+                WriteUInt16(Hx711I2cRegister.REG_SET_CAL_THRESHOLD, value);
+            }
         }
+
+        private ushort _automaticCalibrationThreshold;
+
+        /// <summary>
+        /// Gets or sets the number of samples that will be taken and then averaged when performing a <see cref="GetWeight"/> operation.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The default value is 20 samples.
+        /// </para>
+        /// <para>
+        /// Larger value gives more accurate <see cref="GetWeight"/> reading but also increases time it takes for operation to complete.
+        /// </para>
+        /// </remarks>
+        [Property]
+        public uint SampleAveraging { get; set; } = 20;
+
+        /// <summary>
+        /// Gets or sets the delay after every read or write operation.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The default value is 1ms.
+        /// </para>
+        /// <para>
+        /// The delay has impact on the time it takes for a <see cref="GetWeight"/> operation to complete.
+        /// </para>
+        /// <para>
+        /// Too small delay may cause ocassional or persistent reading errors.
+        /// </para>
+        /// </remarks>
+        [Property]
+        public TimeSpan ReadWriteDelay { get; set; } = TimeSpan.FromMilliseconds(1);
 
         /// <summary>
         /// Hx711I2c - DFRobot KIT0176: I2C 1kg Weight Sensor Kit
@@ -86,9 +133,7 @@ namespace Iot.Device.Hx711
         public Hx711I2c(I2cDevice i2cDevice)
         {
             _i2c = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-
-            Offset = DefaultOffset;
-            CalibrationScale = GetAutomaticCalibrationScale();
+            ResetSensor();
         }
 
         /// <summary>
@@ -103,9 +148,17 @@ namespace Iot.Device.Hx711
         /// <summary>
         /// Read current weight and use it as 0. Equivalent to pressing RST button.
         /// </summary>
+        /// <param name="blinkLed">When set to true will also blink LED next to RST button.</param>
         [Command]
-        public void Tare()
+        public void Tare(bool blinkLed = false)
         {
+            if (blinkLed)
+            {
+                // this doesn't seem to set peel flag to 1 as RST button does
+                // so we still need to set Offset manually
+                WriteRegisterEmpty(Hx711I2cRegister.REG_CLICK_RST);
+            }
+
             Offset = GetRawReading();
         }
 
@@ -140,18 +193,6 @@ namespace Iot.Device.Hx711
             ReadRegister(Hx711I2cRegister.REG_DATA_GET_CALIBRATION, calibrationBytes);
             Reverse4ByteArray(calibrationBytes);
             return BitConverter.ToSingle(calibrationBytes, 0);
-        }
-
-        /// <summary>
-        /// Same as Tare but will also blink LED next to RST button.
-        /// </summary>
-        [Command]
-        public void HardwareTare()
-        {
-            // this doesn't seem to set peel flag to 1 as RST button does
-            // so we need to Tare by hand
-            Tare();
-            WriteRegisterEmpty(Hx711I2cRegister.REG_CLICK_RST);
         }
 
         /// <summary>
@@ -231,13 +272,21 @@ namespace Iot.Device.Hx711
         /// <summary>
         /// Gets average raw reading.
         /// </summary>
-        /// <param name="samples">Number of times sampling occurs</param>
         /// <returns>Raw reading value</returns>
-        public float GetRawReading(int samples = 20)
+        /// <remarks>
+        /// <para>
+        /// The <see cref="SampleAveraging"/> and <see cref="ReadWriteDelay"/> have direct effect on how long this operation takes to complete.
+        /// </para>
+        /// </remarks>
+        public float GetRawReading()
         {
-            int watchdog = samples * 10;
-            int sum = 0;
-            for (int i = 0; i < samples; i++)
+            uint samples = SampleAveraging;
+            long watchdog = samples * 10;
+
+            // Single sample is 24-bit, if user set SampleAveraging to max value
+            // the result will fit in 56-bit value and therefore overflow is not possible.
+            long sum = 0;
+            for (ulong i = 0; i < samples; i++)
             {
                 uint weightGrams;
                 while (!TryReadSample(out weightGrams))
@@ -247,14 +296,11 @@ namespace Iot.Device.Hx711
 
                 if (watchdog < 0)
                 {
-                    // this never happened during testing
-                    // but given original code could fail reading
-                    // that could cause infinite loop if it somehow happened so
-                    // as a prevention measure better to throw exception
-                    throw new InvalidOperationException("Getting weight failed. Getting bogus result.");
+                    // This can happen when delay after read is too small.
+                    throw new InvalidOperationException("Getting weight failed. Consider increasing ReadWriteDelay.");
                 }
 
-                sum += (int)weightGrams;
+                sum += weightGrams;
             }
 
             return sum / (float)samples;
@@ -327,12 +373,6 @@ namespace Iot.Device.Hx711
             _i2c = null!;
         }
 
-        private static void DelayAfterWrite()
-        {
-            // TODO: python does sleep(0.03) here, 1ms seems to work fine though
-            Thread.Sleep(1);
-        }
-
         private static void Reverse4ByteArray(byte[] bytes)
         {
             Debug.Assert(bytes.Length == 4, "bytes.Length should be 4");
@@ -344,6 +384,11 @@ namespace Iot.Device.Hx711
             tmp = bytes[1];
             bytes[1] = bytes[2];
             bytes[2] = tmp;
+        }
+
+        private void DelayAfterWrite()
+        {
+            Thread.Sleep(ReadWriteDelay);
         }
     }
 }
