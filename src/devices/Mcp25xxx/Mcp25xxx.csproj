@@ -4,7 +4,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Bitrates.cs" />
+    <Compile Include="McpBitrate.cs" />
     <Compile Include="InstructionFormat.cs" />
     <Compile Include="Mcp25xxx.cs" />
     <Compile Include="Mcp2515.cs" />

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.IO;
@@ -263,18 +264,20 @@ namespace Iot.Device.Mcp25xxx
         }
 
         /// <summary>
-        /// Set CAN Bitrate
+        /// The configuration registers (CNF1, CNF2, CNF3) control the bit timing for the CAN bus interface.
         /// </summary>
-        public void SetBitrate(Bitrates cnf1, Bitrates cnf2, Bitrates cnf3)
+        public void SetBitrate(McpBitrate.CanBusFrequencyAndSpeed frequencyAndSpeed)
         {
-            WriteByte(Address.Cnf1, (byte)cnf1);
-            WriteByte(Address.Cnf2, (byte)cnf2);
-            WriteByte(Address.Cnf3, (byte)cnf3);
+            var (cnf1Config, cnf2Config, cnf3Config) = McpBitrate.GetBitTimingConfiguration(frequencyAndSpeed);
+            WriteByte(Address.Cnf1, cnf1Config);
+            WriteByte(Address.Cnf2, cnf2Config);
+            WriteByte(Address.Cnf3, cnf3Config);
         }
 
         /// <summary>
-        /// Set mode
+        /// Set mode of operation
         /// </summary>
+        /// <param name="operationMode">type of operation Mode</param>
         public void SetMode(OperationMode operationMode)
         {
             WriteByte(
@@ -292,28 +295,31 @@ namespace Iot.Device.Mcp25xxx
         /// <param name="byteCount">Number of bytes to read.  This must be one or more to read.</param>
         /// <returns>Array of messages</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public byte[][] ReadMessages(int byteCount)
+        public List<byte[]> ReadMessages(int byteCount)
         {
+            var result = new List<byte[]>();
             var rxStatusResponse = RxStatus();
 
             switch (rxStatusResponse.ReceivedMessage)
             {
                 case RxStatusResponse.ReceivedMessageType.MessageInRxB0:
-                    var messageB0 = ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount);
-                    return new[] { messageB0 };
+                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount));
+                    break;
                 case RxStatusResponse.ReceivedMessageType.MessageInRxB1:
-                    var messageB1 = ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount);
-                    return new[] { messageB1 };
+                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount));
+                    break;
                 case RxStatusResponse.ReceivedMessageType.MessagesInBothBuffers:
-                    var message1 = ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount);
-                    var message2 = ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount);
-                    return new[] { message1, message2 };
+                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount));
+                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount));
+                    break;
                 case RxStatusResponse.ReceivedMessageType.NoRxMessage:
-                    return Array.Empty<byte[]>();
+                    break;
                 default:
                     throw new Exception(
                         $"Invalid value for {nameof(rxStatusResponse.ReceivedMessage)}: {rxStatusResponse.ReceivedMessage}.");
             }
+
+            return result;
         }
 
         /// <summary>
