@@ -6,6 +6,7 @@ Note that this binding does not provide way to communicate with HX711 directly.
 ## Documentation
 
 There is no official datasheet as of writing this document. Some resources with partial information are available though:
+
 - [DFRobot HX711 Weight Sensor Kit](https://wiki.dfrobot.com/HX711_Weight_Sensor_Kit_SKU_KIT0176)
 - [C++/Python implementation](https://github.com/DFRobot/DFRobot_HX711_I2C)
 - [Product website](https://www.dfrobot.com/product-2289.html)
