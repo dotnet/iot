@@ -14,19 +14,10 @@ There is no official datasheet as of writing this document. Some resources with 
 
 | Name              | PCB description |
 | ----------------- | --------------- |
-| VCC               | +               |
-| GND               | -               |
-| SCL               | ??? (C?)        |
-| SDA               | ??? (S?)        |
 | Sensor red wire   | E+              |
 | Sensor black wire | E-              |
 | Sensor white wire | S-              |
 | Sensor green wire | S+              |
-| Auto calibration* | CAL             |
-| Tare / Zero*      | RST             |
-
-`* are recommended usages, they are exposed with TODO and TODO methods.`
-
 
 ## Usage
 
