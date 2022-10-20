@@ -7,7 +7,6 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.CanControl;
 using Iot.Device.Mcp25xxx.Register.MessageReceive;
@@ -21,6 +20,8 @@ namespace Iot.Device.Mcp25xxx
     /// </summary>
     public abstract class Mcp25xxx : IDisposable
     {
+        /// The MCP2515 implements three transmit buffers. Each of these buffers occupies 14 bytes of SRAM
+        private const int TransmitBufferMaxSize = 14;
         private readonly int _reset;
         private readonly int _tx0rts;
         private readonly int _tx1rts;
@@ -266,7 +267,8 @@ namespace Iot.Device.Mcp25xxx
         /// <summary>
         /// The configuration registers (CNF1, CNF2, CNF3) control the bit timing for the CAN bus interface.
         /// </summary>
-        public void SetBitrate(McpBitrate.CanBusFrequencyAndSpeed frequencyAndSpeed)
+        /// <param name="frequencyAndSpeed">CAN bus frequency and speed</param>
+        public void SetBitrate(CanBusFrequencyAndSpeed frequencyAndSpeed)
         {
             var (cnf1Config, cnf2Config, cnf3Config) = McpBitrate.GetBitTimingConfiguration(frequencyAndSpeed);
             WriteByte(Address.Cnf1, cnf1Config);
@@ -292,10 +294,9 @@ namespace Iot.Device.Mcp25xxx
         /// <summary>
         /// Read messages from all buffers
         /// </summary>
-        /// <param name="byteCount">Number of bytes to read.  This must be one or more to read.</param>
-        /// <returns>Array of messages</returns>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public List<byte[]> ReadMessages(int byteCount)
+        /// <param name="byteCount">Number of bytes to read. This must be one or more to read.</param>
+        /// <returns>List of messages received</returns>
+        public List<byte[]> ReadMessages(int byteCount = TransmitBufferMaxSize)
         {
             var result = new List<byte[]>();
             var rxStatusResponse = RxStatus();
@@ -425,7 +426,7 @@ namespace Iot.Device.Mcp25xxx
         /// Get witch buffer empty now
         /// </summary>
         /// <returns>Buffer</returns>
-        public TxBuffer GetEmptyTxBuffer()
+        public TransmitBuffer GetEmptyTxBuffer()
         {
             var readStatusResponse = ReadStatus();
             var tx0Full = readStatusResponse.HasFlag(ReadStatusResponse.Tx0Req);
@@ -434,31 +435,31 @@ namespace Iot.Device.Mcp25xxx
 
             if (!tx0Full)
             {
-                return TxBuffer.Tx0;
+                return TransmitBuffer.Tx0;
             }
 
             if (!tx1Full)
             {
-                return TxBuffer.Tx1;
+                return TransmitBuffer.Tx1;
             }
 
             if (!tx2Full)
             {
-                return TxBuffer.Tx2;
+                return TransmitBuffer.Tx2;
             }
 
-            return TxBuffer.None;
+            return TransmitBuffer.None;
         }
 
         /// <summary>
         /// Send message from specific buffer
         /// </summary>
-        /// <param name="txBuffer">Buffer</param>
+        /// <param name="transmitBuffer">Buffer</param>
         /// <param name="id">Two bytes message id</param>
         /// <param name="data">Message data</param>
-        public void SendMessageFromBuffer(TxBuffer txBuffer, Tuple<byte, byte> id, byte[] data)
+        public void SendMessageFromBuffer(TransmitBuffer transmitBuffer, Tuple<byte, byte> id, byte[] data)
         {
-            var (instructionsAddress, dataAddress) = GetInstructionsAddress(txBuffer);
+            var (instructionsAddress, dataAddress) = GetInstructionsAddress(transmitBuffer);
 
             var txBufferNumber = TxBxSidh.GetTxBufferNumber(instructionsAddress);
             var (firstByte, secondByte) = id;
@@ -473,70 +474,66 @@ namespace Iot.Device.Mcp25xxx
 
             Write(instructionsAddress, buffer);
             Write(dataAddress, data);
-            SendFromBuffer(txBuffer);
+            SendFromBuffer(transmitBuffer);
         }
 
         /// <summary>
         /// Get instructions address from buffer
         /// </summary>
-        /// <param name="txBuffer">buffer</param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public Tuple<Address, Address> GetInstructionsAddress(TxBuffer txBuffer)
+        /// <param name="transmitBuffer">Type of transmit buffer</param>
+        /// <returns>Instructions for specific buffer</returns>
+        public Tuple<Address, Address> GetInstructionsAddress(TransmitBuffer transmitBuffer)
         {
-            return txBuffer switch
+            return transmitBuffer switch
             {
-                TxBuffer.Tx0 => new Tuple<Address, Address>(Address.TxB0Sidh, Address.TxB0D0),
-                TxBuffer.Tx1 => new Tuple<Address, Address>(Address.TxB1Sidh, Address.TxB1D0),
-                TxBuffer.Tx2 => new Tuple<Address, Address>(Address.TxB2Sidh, Address.TxB2D0),
-                TxBuffer.None => throw new ArgumentException("Can not use this Tx buffer", nameof(txBuffer), null),
-                _ => throw new ArgumentOutOfRangeException(nameof(txBuffer), txBuffer, null)
+                TransmitBuffer.Tx0 => new Tuple<Address, Address>(Address.TxB0Sidh, Address.TxB0D0),
+                TransmitBuffer.Tx1 => new Tuple<Address, Address>(Address.TxB1Sidh, Address.TxB1D0),
+                TransmitBuffer.Tx2 => new Tuple<Address, Address>(Address.TxB2Sidh, Address.TxB2D0),
+                TransmitBuffer.None => throw new ArgumentException("Can not use this Tx buffer", nameof(transmitBuffer), null),
+                _ => throw new ArgumentOutOfRangeException(nameof(transmitBuffer), transmitBuffer, null)
             };
         }
 
         /// <summary>
-        /// Command to mcp25xxx to send bytes from buffer
+        /// Command to mcp25xx to send bytes from specific buffer
         /// </summary>
-        /// <param name="txBuffer">buffer</param>
-        /// <exception cref="ArgumentException"></exception>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public void SendFromBuffer(TxBuffer txBuffer)
+        /// <param name="transmitBuffer">Type of transmit buffer</param>
+        public void SendFromBuffer(TransmitBuffer transmitBuffer)
         {
-            switch (txBuffer)
+            switch (transmitBuffer)
             {
-                case TxBuffer.Tx0:
+                case TransmitBuffer.Tx0:
                     RequestToSend(true, false, false);
                     break;
-                case TxBuffer.Tx1:
+                case TransmitBuffer.Tx1:
                     RequestToSend(false, true, false);
                     break;
-                case TxBuffer.Tx2:
+                case TransmitBuffer.Tx2:
                     RequestToSend(false, false, true);
                     break;
-                case TxBuffer.None:
-                    throw new ArgumentException("Can not use this Tx buffer", nameof(txBuffer), null);
+                case TransmitBuffer.None:
+                    throw new ArgumentException("Can not use this Tx buffer", nameof(transmitBuffer), null);
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(txBuffer), txBuffer, null);
+                    throw new ArgumentOutOfRangeException(nameof(transmitBuffer), transmitBuffer, null);
             }
         }
 
         /// <summary>
         /// Check is buffer empty
         /// </summary>
-        /// <param name="txBuffer">buffer type</param>
+        /// <param name="transmitBuffer">buffer type</param>
         /// <returns></returns>
-        public bool IsMessageSend(TxBuffer txBuffer)
+        public bool IsMessageSend(TransmitBuffer transmitBuffer)
         {
             var readStatusResponse = ReadStatus();
 
-            switch (txBuffer)
+            switch (transmitBuffer)
             {
-                case TxBuffer.Tx0 when readStatusResponse.HasFlag(ReadStatusResponse.Tx0If) &&
+                case TransmitBuffer.Tx0 when readStatusResponse.HasFlag(ReadStatusResponse.Tx0If) &&
                                        !readStatusResponse.HasFlag(ReadStatusResponse.Tx0Req):
-                case TxBuffer.Tx1 when readStatusResponse.HasFlag(ReadStatusResponse.Tx1If) &&
+                case TransmitBuffer.Tx1 when readStatusResponse.HasFlag(ReadStatusResponse.Tx1If) &&
                                        !readStatusResponse.HasFlag(ReadStatusResponse.Tx1Req):
-                case TxBuffer.Tx2 when readStatusResponse.HasFlag(ReadStatusResponse.Tx2If) &&
+                case TransmitBuffer.Tx2 when readStatusResponse.HasFlag(ReadStatusResponse.Tx2If) &&
                                        !readStatusResponse.HasFlag(ReadStatusResponse.Tx2Req):
                     return true;
                 default:

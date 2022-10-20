@@ -4,27 +4,27 @@
 namespace Iot.Device.Mcp25xxx
 {
     /// <summary>
-    /// TX Buffers
+    /// Transmit buffers
     /// </summary>
-    public enum TxBuffer
+    public enum TransmitBuffer
     {
         /// <summary>
-        /// TX Buffer 0
+        /// Transmit buffer 0
         /// </summary>
         Tx0 = 0,
 
         /// <summary>
-        /// TX Buffer 1
+        /// Transmit buffer 1
         /// </summary>
         Tx1 = 1,
 
         /// <summary>
-        /// TX Buffer 2
+        /// Transmit buffer 2
         /// </summary>
         Tx2 = 2,
 
         /// <summary>
-        /// No one TX Buffer
+        /// No one transmit buffer
         /// </summary>
         None = 3
     }

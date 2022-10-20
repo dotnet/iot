@@ -7,182 +7,182 @@ using System.Collections.Generic;
 namespace Iot.Device.Mcp25xxx
 {
     /// <summary>
+    /// Standard Frequency and Speed for CAN bus
+    /// </summary>
+    public enum CanBusFrequencyAndSpeed
+    {
+        /// <summary>
+        /// 8MHz 1000kBPS
+        /// </summary>
+        _8MHz1000KBps,
+
+        /// <summary>
+        /// 8MHz 500kBPS
+        /// </summary>
+        _8MHz500KBps,
+
+        /// <summary>
+        /// 8MHz 250kBPS
+        /// </summary>
+        _8MHz250KBps,
+
+        /// <summary>
+        /// 8MHz 200kBPS
+        /// </summary>
+        _8MHz200KBps,
+
+        /// <summary>
+        /// 8MHz 125kBPS
+        /// </summary>
+        _8MHz125KBps,
+
+        /// <summary>
+        /// 8MHz 100kBPS
+        /// </summary>
+        _8MHz100KBps,
+
+        /// <summary>
+        /// 8MHz 80kBPS
+        /// </summary>
+        _8MHz80KBps,
+
+        /// <summary>
+        /// 8MHz 50kBPS
+        /// </summary>
+        _8MHz50KBps,
+
+        /// <summary>
+        /// 8MHz 40kBPS
+        /// </summary>
+        _8MHz40KBps,
+
+        /// <summary>
+        /// 8MHz 20kBPS
+        /// </summary>
+        _8MHz20KBps,
+
+        /// <summary>
+        /// 8MHz 10kBPS
+        /// </summary>
+        _8MHz10KBps,
+
+        /// <summary>
+        /// 8MHz 5kBPS
+        /// </summary>
+        _8MHz5KBps,
+
+        /// <summary>
+        /// 16MHz 1000kBPS
+        /// </summary>
+        _16MHz1000KBps,
+
+        /// <summary>
+        /// 16MHz 500kBPS
+        /// </summary>
+        _16MHz500KBps,
+
+        /// <summary>
+        /// 16MHz 250kBPS
+        /// </summary>
+        _16MHz250KBps,
+
+        /// <summary>
+        /// 16MHz 200kBPS
+        /// </summary>
+        _16MHz200KBps,
+
+        /// <summary>
+        /// 16MHz 125kBPS
+        /// </summary>
+        _16MHz125KBps,
+
+        /// <summary>
+        /// 16MHz 100kBPS
+        /// </summary>
+        _16MHz100KBps,
+
+        /// <summary>
+        /// 16MHz 80kBPS
+        /// </summary>
+        _16MHz80KBps,
+
+        /// <summary>
+        /// 16MHz 50kBPS
+        /// </summary>
+        _16MHz50KBps,
+
+        /// <summary>
+        /// 16MHz 40kBPS
+        /// </summary>
+        _16MHz40KBps,
+
+        /// <summary>
+        /// 16MHz 20kBPS
+        /// </summary>
+        _16MHz20KBps,
+
+        /// <summary>
+        /// 16MHz 10kBPS
+        /// </summary>
+        _16MHz10KBps,
+
+        /// <summary>
+        /// 16MHz 5kBPS
+        /// </summary>
+        _16MHz5KBps,
+
+        /// <summary>
+        /// 20MHz 1000kBPS
+        /// </summary>
+        _20MHz1000KBps,
+
+        /// <summary>
+        /// 20MHz 500kBPS
+        /// </summary>
+        _20MHz500KBps,
+
+        /// <summary>
+        /// 20MHz 250kBPS
+        /// </summary>
+        _20MHz250KBps,
+
+        /// <summary>
+        /// 20MHz 200kBPS
+        /// </summary>
+        _20MHz200KBps,
+
+        /// <summary>
+        /// 20MHz 125kBPS
+        /// </summary>
+        _20MHz125KBps,
+
+        /// <summary>
+        /// 20MHz 100kBPS
+        /// </summary>
+        _20MHz100KBps,
+
+        /// <summary>
+        /// 20MHz 80kBPS
+        /// </summary>
+        _20MHz80KBps,
+
+        /// <summary>
+        /// 20MHz 50kBPS
+        /// </summary>
+        _20MHz50KBps,
+
+        /// <summary>
+        /// 20MHz 40kBPS
+        /// </summary>
+        _20MHz40KBps,
+    }
+
+    /// <summary>
     /// Bit Timing Configuration Registers
     /// </summary>
     public static class McpBitrate
     {
-        /// <summary>
-        /// Standard Frequency and Speed for CAN bus
-        /// </summary>
-        public enum CanBusFrequencyAndSpeed
-        {
-            /// <summary>
-            /// 8MHz 1000kBPS
-            /// </summary>
-            _8MHz1000KBps,
-
-            /// <summary>
-            /// 8MHz 500kBPS
-            /// </summary>
-            _8MHz500KBps,
-
-            /// <summary>
-            /// 8MHz 250kBPS
-            /// </summary>
-            _8MHz250KBps,
-
-            /// <summary>
-            /// 8MHz 200kBPS
-            /// </summary>
-            _8MHz200KBps,
-
-            /// <summary>
-            /// 8MHz 125kBPS
-            /// </summary>
-            _8MHz125KBps,
-
-            /// <summary>
-            /// 8MHz 100kBPS
-            /// </summary>
-            _8MHz100KBps,
-
-            /// <summary>
-            /// 8MHz 80kBPS
-            /// </summary>
-            _8MHz80KBps,
-
-            /// <summary>
-            /// 8MHz 50kBPS
-            /// </summary>
-            _8MHz50KBps,
-
-            /// <summary>
-            /// 8MHz 40kBPS
-            /// </summary>
-            _8MHz40KBps,
-
-            /// <summary>
-            /// 8MHz 20kBPS
-            /// </summary>
-            _8MHz20KBps,
-
-            /// <summary>
-            /// 8MHz 10kBPS
-            /// </summary>
-            _8MHz10KBps,
-
-            /// <summary>
-            /// 8MHz 5kBPS
-            /// </summary>
-            _8MHz5KBps,
-
-            /// <summary>
-            /// 16MHz 1000kBPS
-            /// </summary>
-            _16MHz1000KBps,
-
-            /// <summary>
-            /// 16MHz 500kBPS
-            /// </summary>
-            _16MHz500KBps,
-
-            /// <summary>
-            /// 16MHz 250kBPS
-            /// </summary>
-            _16MHz250KBps,
-
-            /// <summary>
-            /// 16MHz 200kBPS
-            /// </summary>
-            _16MHz200KBps,
-
-            /// <summary>
-            /// 16MHz 125kBPS
-            /// </summary>
-            _16MHz125KBps,
-
-            /// <summary>
-            /// 16MHz 100kBPS
-            /// </summary>
-            _16MHz100KBps,
-
-            /// <summary>
-            /// 16MHz 80kBPS
-            /// </summary>
-            _16MHz80KBps,
-
-            /// <summary>
-            /// 16MHz 50kBPS
-            /// </summary>
-            _16MHz50KBps,
-
-            /// <summary>
-            /// 16MHz 40kBPS
-            /// </summary>
-            _16MHz40KBps,
-
-            /// <summary>
-            /// 16MHz 20kBPS
-            /// </summary>
-            _16MHz20KBps,
-
-            /// <summary>
-            /// 16MHz 10kBPS
-            /// </summary>
-            _16MHz10KBps,
-
-            /// <summary>
-            /// 16MHz 5kBPS
-            /// </summary>
-            _16MHz5KBps,
-
-            /// <summary>
-            /// 20MHz 1000kBPS
-            /// </summary>
-            _20MHz1000KBps,
-
-            /// <summary>
-            /// 20MHz 500kBPS
-            /// </summary>
-            _20MHz500KBps,
-
-            /// <summary>
-            /// 20MHz 250kBPS
-            /// </summary>
-            _20MHz250KBps,
-
-            /// <summary>
-            /// 20MHz 200kBPS
-            /// </summary>
-            _20MHz200KBps,
-
-            /// <summary>
-            /// 20MHz 125kBPS
-            /// </summary>
-            _20MHz125KBps,
-
-            /// <summary>
-            /// 20MHz 100kBPS
-            /// </summary>
-            _20MHz100KBps,
-
-            /// <summary>
-            /// 20MHz 80kBPS
-            /// </summary>
-            _20MHz80KBps,
-
-            /// <summary>
-            /// 20MHz 50kBPS
-            /// </summary>
-            _20MHz50KBps,
-
-            /// <summary>
-            /// 20MHz 40kBPS
-            /// </summary>
-            _20MHz40KBps,
-        }
-
-        private static Dictionary<CanBusFrequencyAndSpeed, Tuple<byte, byte, byte>> s_bitrates = new()
+        private static readonly Dictionary<CanBusFrequencyAndSpeed, Tuple<byte, byte, byte>> s_bitTimingConfiguration = new()
         {
             { CanBusFrequencyAndSpeed._8MHz1000KBps, new Tuple<byte, byte, byte>(0x00, 0x80, 0x80) },
             { CanBusFrequencyAndSpeed._8MHz500KBps, new Tuple<byte, byte, byte>(0x00, 0x90, 0x82) },
@@ -226,7 +226,7 @@ namespace Iot.Device.Mcp25xxx
         /// <returns>The configuration for registers (CNF1, CNF2, CNF3)</returns>
         public static Tuple<byte, byte, byte> GetBitTimingConfiguration(CanBusFrequencyAndSpeed frequencyAndSpeed)
         {
-            return s_bitrates[frequencyAndSpeed];
+            return s_bitTimingConfiguration[frequencyAndSpeed];
         }
     }
 }
