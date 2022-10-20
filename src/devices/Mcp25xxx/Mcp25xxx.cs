@@ -456,17 +456,16 @@ namespace Iot.Device.Mcp25xxx
 
             var txBufferNumber = TxBxSidh.GetTxBufferNumber(instructionsAddress);
             var (firstByte, secondByte) = id;
-            Write(
-                instructionsAddress,
-                new[]
-                {
-                    new TxBxSidh(txBufferNumber, firstByte).ToByte(),
-                    new TxBxSidl(txBufferNumber, secondByte).ToByte(),
-                    new TxBxEid8(txBufferNumber, 0).ToByte(),
-                    new TxBxEid0(txBufferNumber, 0).ToByte(),
-                    new TxBxDlc(txBufferNumber, data.Length, false).ToByte()
-                });
+            ReadOnlySpan<byte> buffer = stackalloc byte[5]
+            {
+                new TxBxSidh(txBufferNumber, firstByte).ToByte(),
+                new TxBxSidl(txBufferNumber, secondByte).ToByte(),
+                new TxBxEid8(txBufferNumber, 0).ToByte(),
+                new TxBxEid0(txBufferNumber, 0).ToByte(),
+                new TxBxDlc(txBufferNumber, data.Length, false).ToByte()
+            };
 
+            Write(instructionsAddress, buffer);
             Write(dataAddress, data);
             SendFromBuffer(txBuffer);
         }
