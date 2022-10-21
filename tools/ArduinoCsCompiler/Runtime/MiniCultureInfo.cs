@@ -1127,6 +1127,12 @@ namespace ArduinoCsCompiler.Runtime
                 return CultureInfo.CurrentCulture.DateTimeFormat.ShortTimePattern;
             }
 
+            [ArduinoCompileTimeConstant]
+            private static string GetShortDatePattern()
+            {
+                return CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+            }
+
             public void GetDateTimeFormat(DateTimeFormatInfo dateTimeInfo)
             {
                 dateTimeInfo.MonthNames = _saMonthNames;
@@ -1136,7 +1142,8 @@ namespace ArduinoCsCompiler.Runtime
                 dateTimeInfo.FullDateTimePattern = GetFullDateTimePattern();
                 dateTimeInfo.LongTimePattern = GetLongTimePattern();
                 dateTimeInfo.ShortTimePattern = GetShortTimePattern();
-                dateTimeInfo.ShortDatePattern = GetShortTimePattern();
+                dateTimeInfo.LongDatePattern = GetLongDatePattern();
+                dateTimeInfo.ShortDatePattern = GetShortDatePattern();
             }
         }
 
