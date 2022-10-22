@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.Device.I2c;
@@ -530,6 +531,15 @@ namespace Iot.Device.Board
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation(bool onlyActive)
+        {
+            ComponentInformation self = base.QueryComponentInformation(onlyActive);
+            self.Name = "Raspberry Pi Board";
+
+            return self;
         }
     }
 }

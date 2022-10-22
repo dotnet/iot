@@ -12,7 +12,7 @@ namespace System.Device.Gpio;
 /// <summary>
 /// Represents a general-purpose I/O (GPIO) controller.
 /// </summary>
-public class GpioController : IDisposable
+public class GpioController : IDisposable, IQueryComponentInformation
 {
     // Constants used to check the hardware on linux
     private const string CpuInfoPath = "/proc/cpuinfo";
@@ -499,5 +499,24 @@ public class GpioController : IDisposable
 
         // Default for Windows IoT Core on a non-specific device
         return new Windows10Driver();
+    }
+
+    /// <inheritdoc />
+    public virtual ComponentInformation QueryComponentInformation(bool onlyActive)
+    {
+        ComponentInformation self = new ComponentInformation(this, "Generic GPIO Controller", string.Empty, ComponentState.Active);
+
+        if (_driver != null)
+        {
+            ComponentInformation driverInfo = _driver.QueryComponentInformation(onlyActive);
+            self.AddSubComponent(driverInfo);
+        }
+
+        if (!onlyActive)
+        {
+            // ...
+        }
+
+        return self;
     }
 }

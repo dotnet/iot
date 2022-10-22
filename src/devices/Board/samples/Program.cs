@@ -42,7 +42,8 @@ namespace BoardSample
             const int led1 = 1;
             const int led2 = 2;
             using Board b = Board.Create();
-
+            Console.WriteLine("Hardware detected: ");
+            Console.WriteLine(b.QueryComponentInformation(true));
             using GpioController controller = b.CreateGpioController();
 
             if (controller.PinCount > 0)
@@ -130,13 +131,15 @@ namespace BoardSample
 
         private static void RaspberryPiTest()
         {
-            using var raspi = new RaspberryPiBoard();
+            using var raspi = Board.Create();
+            Console.WriteLine("Hardware detected: ");
+            Console.WriteLine(raspi.QueryComponentInformation(true));
             PwmRaspiTest(raspi);
             SpiRaspiTestWithSoftwareCs(raspi);
             SpiRaspiTestWithHardwareCs(raspi);
         }
 
-        private static void PwmRaspiTest(RaspberryPiBoard raspi)
+        private static void PwmRaspiTest(Board raspi)
         {
             int pinNumber = 12; // PWM0 pin
 

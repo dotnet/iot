@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.Device.I2c;
@@ -21,7 +22,7 @@ namespace Iot.Device.Board
     /// There should be exactly one instance of a board class per hardware component in an application, but it is possible to work with multiple boards
     /// at once (i.e. when having a GPIO expander connected to the Raspberry Pi)
     /// </summary>
-    public abstract class Board : MarshalByRefObject, IDisposable
+    public abstract class Board : MarshalByRefObject, IDisposable, IQueryComponentInformation
     {
         // See comment at GetBestDriverForBoardOnWindows. This should get some specific factory pattern
         private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
@@ -268,10 +269,13 @@ namespace Iot.Device.Board
         /// <summary>
         /// Return an instance of a <see cref="GpioController"/> for the current board
         /// </summary>
-        /// <returns>An instance of a GpioController. The controller used pin management to prevent reusing the same pin for different purposes
+        /// <returns>An instance of a GpioController. The controller uses pin management to prevent reusing the same pin for different purposes
         /// (or for purposes for which it is not suitable)</returns>
         /// <exception cref="NotSupportedException">Rare: No GPIO Controller was found for the current hardware. The default implementation will return
         /// a simulation interface if no hardware is available.</exception>
+        /// <remarks>
+        /// Derived classes should not normally override this method, but instead <see cref="TryCreateBestGpioDriver"/>.
+        /// </remarks>
         public virtual GpioController CreateGpioController()
         {
             Initialize();
@@ -636,6 +640,24 @@ namespace Iot.Device.Board
             }
 
             return board;
+        }
+
+        /// <inheritdoc />
+        public virtual ComponentInformation QueryComponentInformation(bool onlyActive)
+        {
+            ComponentInformation self = new ComponentInformation(this, "Generic Board", string.Empty, ComponentState.Active);
+
+            var controller = CreateGpioController();
+
+            var controllerInfo = controller.QueryComponentInformation(onlyActive);
+            self.AddSubComponent(controllerInfo);
+
+            foreach (var e in _i2cBuses)
+            {
+                self.AddSubComponent(e.Value.QueryComponentInformation(onlyActive));
+            }
+
+            return self;
         }
     }
 }

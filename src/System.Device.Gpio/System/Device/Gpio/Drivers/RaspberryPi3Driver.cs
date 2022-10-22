@@ -282,4 +282,10 @@ public class RaspberryPi3Driver : GpioDriver
         _internalDriver = null!;
         base.Dispose(disposing);
     }
+
+    /// <inheritdoc />
+    public override ComponentInformation QueryComponentInformation(bool onlyActive)
+    {
+        return _internalDriver.QueryComponentInformation(onlyActive);
+    }
 }
