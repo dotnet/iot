@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.CanControl;
@@ -292,11 +293,21 @@ namespace Iot.Device.Mcp25xxx
         }
 
         /// <summary>
-        /// Read messages from all buffers
+        /// Read arrived messages
+        /// </summary>
+        /// <returns>List of messages received</returns>
+        public CanMessage[] ReadMessages()
+        {
+            var buffersData = ReadAllBuffers(TransmitBufferMaxSize);
+            return buffersData.Select(CanMessage.CreateFromBytes).ToArray();
+        }
+
+        /// <summary>
+        /// Read data from all buffers
         /// </summary>
         /// <param name="byteCount">Number of bytes to read. This must be one or more to read.</param>
-        /// <returns>List of messages received</returns>
-        public List<byte[]> ReadMessages(int byteCount = TransmitBufferMaxSize)
+        /// <returns>List of buffers data received</returns>
+        public List<byte[]> ReadAllBuffers(int byteCount)
         {
             var result = new List<byte[]>();
             var rxStatusResponse = RxStatus();
@@ -400,13 +411,11 @@ namespace Iot.Device.Mcp25xxx
         /// <summary>
         /// Send message
         /// </summary>
-        /// <param name="id">Two bytes id</param>
-        /// <param name="data">Message</param>
-        /// <exception cref="IOException"></exception>
-        public void SendMessage(Tuple<byte, byte> id, byte[] data)
+        /// <param name="message">CAN message</param>
+        public void SendMessage(CanMessage message)
         {
             var txBuffer = GetEmptyTxBuffer();
-            SendMessageFromBuffer(txBuffer, id, data);
+            SendMessageFromBuffer(txBuffer, message);
             const int tries = 10;
             for (var i = 0; i < tries; i++)
             {
@@ -419,7 +428,7 @@ namespace Iot.Device.Mcp25xxx
             }
 
             AbortAllPendingTransmissions();
-            throw new IOException($"! Cannot Send: {id}#{string.Join(";", data)}");
+            throw new IOException($"Cannot Send: {message.Id}#{string.Join(";", message.Data)}");
         }
 
         /// <summary>
@@ -455,25 +464,22 @@ namespace Iot.Device.Mcp25xxx
         /// Send message from specific buffer
         /// </summary>
         /// <param name="transmitBuffer">Buffer</param>
-        /// <param name="id">Two bytes message id</param>
-        /// <param name="data">Message data</param>
-        public void SendMessageFromBuffer(TransmitBuffer transmitBuffer, Tuple<byte, byte> id, byte[] data)
+        /// <param name="message">CAN message</param>
+        public void SendMessageFromBuffer(TransmitBuffer transmitBuffer, CanMessage message)
         {
             var (instructionsAddress, dataAddress) = GetInstructionsAddress(transmitBuffer);
-
             var txBufferNumber = TxBxSidh.GetTxBufferNumber(instructionsAddress);
-            var (firstByte, secondByte) = id;
             ReadOnlySpan<byte> buffer = stackalloc byte[5]
             {
-                new TxBxSidh(txBufferNumber, firstByte).ToByte(),
-                new TxBxSidl(txBufferNumber, secondByte).ToByte(),
-                new TxBxEid8(txBufferNumber, 0).ToByte(),
-                new TxBxEid0(txBufferNumber, 0).ToByte(),
-                new TxBxDlc(txBufferNumber, data.Length, false).ToByte()
+                new TxBxSidh(txBufferNumber, message.Id[0]).ToByte(),
+                new TxBxSidl(txBufferNumber, message.Id[1]).ToByte(),
+                new TxBxEid8(txBufferNumber, message.Id[2]).ToByte(),
+                new TxBxEid0(txBufferNumber, message.Id[3]).ToByte(),
+                new TxBxDlc(txBufferNumber, message.Data.Length, false).ToByte()
             };
 
             Write(instructionsAddress, buffer);
-            Write(dataAddress, data);
+            Write(dataAddress, (byte[]?)message.Data);
             SendFromBuffer(transmitBuffer);
         }
 

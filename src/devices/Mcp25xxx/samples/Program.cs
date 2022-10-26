@@ -16,7 +16,7 @@ using Iot.Device.Mcp25xxx.Register.Interrupt;
 using Iot.Device.Mcp25xxx.Register.MessageReceive;
 using Iot.Device.Mcp25xxx.Register.MessageTransmit;
 
-ConcurrentQueue<byte[]> readBuffer = new();
+ConcurrentQueue<CanMessage> readBuffer = new();
 
 Console.WriteLine("Hello Mcp25xxx Sample!");
 using Mcp25xxx mcp25xxx = GetMcp25xxxDevice();
@@ -77,7 +77,7 @@ void ReadToBufferLoop(Mcp25xxx mcp25xxx, CancellationToken ct)
     Console.WriteLine("Start read from buffer mcp25xx buffer to memory buffer");
     while (!ct.IsCancellationRequested)
     {
-        var messages = mcp25xxx.ReadMessages(10);
+        var messages = mcp25xxx.ReadMessages();
         foreach (var message in messages)
         {
             readBuffer.Enqueue(message);
@@ -85,18 +85,19 @@ void ReadToBufferLoop(Mcp25xxx mcp25xxx, CancellationToken ct)
     }
 }
 
-byte[]? GetBufferMessageOrNull()
+CanMessage? GetBufferMessageOrNull()
 {
-    return readBuffer.TryDequeue(out var bytes) ? bytes : null;
+    return readBuffer.TryDequeue(out var message) ? message : null;
 }
 
 void SendMessage(Mcp25xxx mcp25xxx)
 {
     Console.WriteLine("Send simple message");
     const int id = 1;
-    var message = new[] { (byte)1 };
-    var twoByteId = new Tuple<byte, byte>((id >> 3), (id << 5));
-    mcp25xxx.SendMessage(twoByteId, message);
+    var messageData = new[] { (byte)1 };
+    var twoByteId = new byte[] { id >> 3, id << 5 };
+    var message = CanMessage.CreateStandard(twoByteId, messageData);
+    mcp25xxx.SendMessage(message);
 }
 
 void ReadAllRegisters(Mcp25xxx mcp25xxx)
