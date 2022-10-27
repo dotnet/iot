@@ -52,6 +52,7 @@ string[] categoriesToDisplay = new string[]
     "power",
     "voc",
     "thermocouple",
+    "weight",
 };
 
 Dictionary<string, string?> categoriesDescriptions = new()
@@ -103,6 +104,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "multi", "Multi-device or robot kit" },
     { "lidar", "LIDAR Time of Flight devices" },
     { "thermocouple", "Thermocouple devices" },
+    { "weight", "Weight sensors" },
     // Bucket for stuff we want mentioned but there is no clear category
     // In other words: anything allowing a way to create PWM channel, SPI/I2C/... device
     { "protocol", "Protocols providers/libraries" },

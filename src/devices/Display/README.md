@@ -1,4 +1,4 @@
-# HT16K33 -- LED Matrix Display Driver
+# HT16K33 - LED Matrix Display Driver
 
 The [Ht16k33](https://cdn-shop.adafruit.com/datasheets/ht16K33v110.pdf)  is a memory mapping and multi-function LED controller driver. It is used as a [backpack driver for several Adafruit products](https://www.adafruit.com/?q=Ht16k33). It supports multiple LED configurations and I2C communication.
 
