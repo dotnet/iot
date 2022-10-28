@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Device.Spi;
 using System.Threading;
 using Iot.Device.Mcp25xxx;
+using Iot.Device.Mcp25xxx.Models;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.AcceptanceFilter;
 using Iot.Device.Mcp25xxx.Register.BitTimeConfiguration;
@@ -16,7 +17,7 @@ using Iot.Device.Mcp25xxx.Register.Interrupt;
 using Iot.Device.Mcp25xxx.Register.MessageReceive;
 using Iot.Device.Mcp25xxx.Register.MessageTransmit;
 
-ConcurrentQueue<CanMessage> readBuffer = new();
+ConcurrentQueue<ReceivedCanMessage> readBuffer = new();
 
 Console.WriteLine("Hello Mcp25xxx Sample!");
 using Mcp25xxx mcp25xxx = GetMcp25xxxDevice();
@@ -85,7 +86,7 @@ void ReadToBufferLoop(Mcp25xxx mcp25xxx, CancellationToken ct)
     }
 }
 
-CanMessage? GetBufferMessageOrNull()
+ReceivedCanMessage? GetBufferMessageOrNull()
 {
     return readBuffer.TryDequeue(out var message) ? message : null;
 }
@@ -96,7 +97,7 @@ void SendMessage(Mcp25xxx mcp25xxx)
     const int id = 1;
     var messageData = new[] { (byte)1 };
     var twoByteId = new byte[] { id >> 3, id << 5 };
-    var message = CanMessage.CreateStandard(twoByteId, messageData);
+    var message = SendingCanMessage.CreateStandard(twoByteId, messageData);
     mcp25xxx.SendMessage(message);
 }
 

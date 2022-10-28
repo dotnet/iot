@@ -8,6 +8,7 @@ using System.Device.Spi;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Iot.Device.Mcp25xxx.Models;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.CanControl;
 using Iot.Device.Mcp25xxx.Register.MessageReceive;
@@ -296,10 +297,10 @@ namespace Iot.Device.Mcp25xxx
         /// Read arrived messages
         /// </summary>
         /// <returns>List of messages received</returns>
-        public CanMessage[] ReadMessages()
+        public ReceivedCanMessage[] ReadMessages()
         {
             var buffersData = ReadAllBuffers(TransmitBufferMaxSize);
-            return buffersData.Select(CanMessage.CreateFromBytes).ToArray();
+            return buffersData.Select(d => new ReceivedCanMessage(d)).ToArray();
         }
 
         /// <summary>
@@ -412,7 +413,7 @@ namespace Iot.Device.Mcp25xxx
         /// Send message
         /// </summary>
         /// <param name="message">CAN message</param>
-        public void SendMessage(CanMessage message)
+        public void SendMessage(SendingCanMessage message)
         {
             var txBuffer = GetEmptyTxBuffer();
             SendMessageFromBuffer(txBuffer, message);
@@ -465,7 +466,7 @@ namespace Iot.Device.Mcp25xxx
         /// </summary>
         /// <param name="transmitBuffer">Buffer</param>
         /// <param name="message">CAN message</param>
-        public void SendMessageFromBuffer(TransmitBuffer transmitBuffer, CanMessage message)
+        public void SendMessageFromBuffer(TransmitBuffer transmitBuffer, SendingCanMessage message)
         {
             var (instructionsAddress, dataAddress) = GetInstructionsAddress(transmitBuffer);
             var txBufferNumber = TxBxSidh.GetTxBufferNumber(instructionsAddress);
