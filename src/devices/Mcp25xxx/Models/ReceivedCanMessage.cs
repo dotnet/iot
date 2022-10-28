@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Linq;
 
 namespace Iot.Device.Mcp25xxx.Models
@@ -34,7 +35,7 @@ namespace Iot.Device.Mcp25xxx.Models
         {
             if (RawData.Length < 4)
             {
-                throw new ArgumentException($"Data size {RawData.Length} must be greater then 4 bytes.", nameof(RawData));
+                throw new InvalidDataException($"Raw data size {RawData.Length} must be greater then 4 bytes.");
             }
 
             return new[] { RawData[0], RawData[1], RawData[2], RawData[3] };
@@ -50,7 +51,7 @@ namespace Iot.Device.Mcp25xxx.Models
             const int messageDataStartIndex = 5;
             if (RawData.Length < messageDataStartIndex)
             {
-                throw new ArgumentException($"Data size {RawData.Length} must be greater then {messageDataStartIndex} bytes.", nameof(RawData));
+                throw new InvalidDataException($"Raw data size {RawData.Length} must be greater then {messageDataStartIndex} bytes.");
             }
 
             var messageLength = RawData[4] & 0x0F;
