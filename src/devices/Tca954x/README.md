@@ -1,4 +1,6 @@
-# TCA9548A - TCA9548A Low-Voltage 8-Channel I2C Switch with Reset
+# TCA954X - TCA954X Low-Voltage Multi-Channel I2C Switch with Reset
+
+The TCA954X/PCA954X group of devices is a set of I2C switches. Several types are available, with 2, 4 or 8 channels, and different voltage specifications. The first letter is sometimes also "P".
 
 The TCA9548A device has eight bidirectional translating switches that can be controlled through the I2C bus. The SCL/SDA upstream pair fans out to eight downstream pairs, or channels.
 
@@ -11,6 +13,8 @@ All operations for basic usage has been developed. If needed, RESET operation ca
 TCA9548A [datasheet](https://www.ti.com/lit/ds/symlink/tca9548a.pdf)
 
 You will find this device as ["Adafruit TCA9548A 1-to-8 I2C Multiplexer Breakout"](https://learn.adafruit.com/adafruit-tca9548a-1-to-8-i2c-multiplexer-breakout)
+
+A list of [different variants](https://www.ti.com/interface/i2c/switches-and-multiplexers/products.html?keyMatch=TCA9548) is available on the Texas Instruments Website.
 
 ## Usage
 
