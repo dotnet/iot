@@ -71,7 +71,7 @@ namespace Iot.Device.Arduino
                     {
                         // Cannot use FirstOrDefault here, because we need to be able to distinguish between
                         // finding nothing and finding an empty (null, default) element
-                        for (var index = 0; index < _container.Count; index++)
+                        for (int index = 0; index < _container.Count; index++)
                         {
                             T? elem = _container[index];
                             if (predicate(elem))

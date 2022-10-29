@@ -253,7 +253,7 @@ namespace Iot.Device.Arduino
                 if (data == 0xFFFF)
                 {
                     // get elapsed seconds, given as a double with resolution in nanoseconds
-                    var elapsed = timeout_start.Elapsed;
+                    TimeSpan elapsed = timeout_start.Elapsed;
 
                     if (elapsed > DefaultReplyTimeout)
                     {
@@ -362,7 +362,7 @@ namespace Iot.Device.Arduino
                     }
 
                     // retrieve the raw data array & extract the extended-command byte
-                    var raw_data = message.ToArray();
+                    byte[] raw_data = message.ToArray();
                     FirmataSysexCommand sysCommand = (FirmataSysexCommand)(raw_data[0]);
                     int index = 0;
                     ++index;
@@ -415,7 +415,7 @@ namespace Iot.Device.Arduino
                             {
                                 _supportedPinConfigurations.Clear();
                                 int idx = 1;
-                                var currentPin = new SupportedPinConfiguration(0);
+                                SupportedPinConfiguration currentPin = new SupportedPinConfiguration(0);
                                 int pin = 0;
                                 while (idx < raw_data.Length)
                                 {
@@ -604,7 +604,7 @@ namespace Iot.Device.Arduino
             }
 
             Dictionary<FirmataCommandSequence, bool> sequencesWithAck = new();
-            foreach (var s in sequences)
+            foreach (FirmataCommandSequence s in sequences)
             {
                 sequencesWithAck.Add(s, false);
                 _firmataStream.Write(s.InternalSequence, 0, s.Length);
@@ -615,9 +615,9 @@ namespace Iot.Device.Arduino
             byte[]? response;
             do
             {
-                foreach (var s2 in sequencesWithAck)
+                foreach (KeyValuePair<FirmataCommandSequence, bool> s2 in sequencesWithAck)
                 {
-                    if (_pendingResponses.TryRemoveElement(x => isMatchingAck(s2.Key, x!), timeout, out response))
+                    if (s2.Value == false && _pendingResponses.TryRemoveElement(x => isMatchingAck(s2.Key, x!), timeout, out response))
                     {
                         CommandError e = CommandError.None;
                         if (response == null)
@@ -918,7 +918,7 @@ namespace Iot.Device.Arduino
 
             return PerformRetries(3, () =>
             {
-                var response = SendCommandAndWait(getPinModeSequence, DefaultReplyTimeout, (sequence, bytes) =>
+                byte[] response = SendCommandAndWait(getPinModeSequence, DefaultReplyTimeout, (sequence, bytes) =>
                 {
                     return bytes.Length >= 4 && bytes[1] == pinNumber;
                 }, out _);
@@ -1034,7 +1034,7 @@ namespace Iot.Device.Arduino
 
             if (doWait)
             {
-                var response = SendCommandAndWait(i2cSequence, TimeSpan.FromSeconds(3), (sequence, bytes) =>
+                byte[] response = SendCommandAndWait(i2cSequence, TimeSpan.FromSeconds(3), (sequence, bytes) =>
                 {
                     if (bytes.Length < 5)
                     {
@@ -1154,8 +1154,8 @@ namespace Iot.Device.Arduino
             // When the command is SPI_WRITE, the device answer is already discarded in the firmware.
             if (waitForReply)
             {
-                var command = SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE_ACK, writeBytes, out byte requestId);
-                var response = SendCommandAndWait(command, DefaultReplyTimeout, (sequence, bytes) =>
+                FirmataCommandSequence command = SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE_ACK, writeBytes, out byte requestId);
+                byte[] response = SendCommandAndWait(command, DefaultReplyTimeout, (sequence, bytes) =>
                 {
                     if (bytes.Length < 5)
                     {
@@ -1187,15 +1187,15 @@ namespace Iot.Device.Arduino
             }
             else
             {
-                var command = SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE, writeBytes, out _);
+                FirmataCommandSequence command = SpiWrite(csPin, FirmataSpiCommand.SPI_WRITE, writeBytes, out _);
                 SendCommand(command);
             }
         }
 
         public void SpiTransfer(int csPin, ReadOnlySpan<byte> writeBytes, Span<byte> readBytes)
         {
-            var command = SpiWrite(csPin, FirmataSpiCommand.SPI_TRANSFER, writeBytes, out byte requestId);
-            var response = SendCommandAndWait(command, DefaultReplyTimeout, (sequence, bytes) =>
+            FirmataCommandSequence command = SpiWrite(csPin, FirmataSpiCommand.SPI_TRANSFER, writeBytes, out byte requestId);
+            byte[] response = SendCommandAndWait(command, DefaultReplyTimeout, (sequence, bytes) =>
             {
                 if (bytes.Length < 5)
                 {

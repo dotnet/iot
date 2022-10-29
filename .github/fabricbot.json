@@ -94,12 +94,6 @@
             "parameters": {
               "label": "Needs: Author Feedback"
             }
-          },
-          {
-            "name": "addLabel",
-            "parameters": {
-              "label": "needs attention from author :wave:"
-            }
           }
         ]
       },

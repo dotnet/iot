@@ -221,22 +221,6 @@ namespace Iot.Device.Spi
         public override void Write(ReadOnlySpan<byte> data) => TransferWriteOnly(data);
 
         /// <inheritdoc />
-        public override void WriteByte(byte data)
-        {
-            Span<byte> outData = stackalloc byte[1];
-            outData[0] = data;
-            Write(outData);
-        }
-
-        /// <inheritdoc />
-        public override byte ReadByte()
-        {
-            Span<byte> data = stackalloc byte[1];
-            Read(data);
-            return data[0];
-        }
-
-        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (_shouldDispose)
