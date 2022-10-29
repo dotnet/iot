@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 using System.Device.I2c;
-using Iot.Device.Tca9548a;
+using Iot.Device.Tca954x;
 using Iot.Device.Bno055;
 using Iot.Device.Bmp180;
 using UnitsNet;

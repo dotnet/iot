@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.Model;
 
-namespace Iot.Device.Tca9548a
+namespace Iot.Device.Tca954x
 {
     /// <summary>
     /// Tca9548A - 8-Channel I2C Switch/Multiplexer
@@ -196,7 +196,7 @@ namespace Iot.Device.Tca9548a
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return _channelBuses.GetEnumerator();
+            return GetEnumerator();
         }
     }
 

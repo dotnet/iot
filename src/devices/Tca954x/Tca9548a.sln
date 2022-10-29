@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32519.111
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tca9548a", "Tca9548a.csproj", "{28EDCECC-F951-4004-8213-FAF1ACD3DFD2}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tca954x", "Tca954x.csproj", "{28EDCECC-F951-4004-8213-FAF1ACD3DFD2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tca9548a.sample", "samples\Tca9548a.sample.csproj", "{A2232C4D-B1C5-4B59-A0D9-BC7CA364ACF2}"
 EndProject

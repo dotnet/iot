@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Device.I2c;
 using Iot.Device.Board;
 
-namespace Iot.Device.Tca9548a
+namespace Iot.Device.Tca954x
 {
     /// <summary>
     /// I2C BUs of TCA9548A channel
@@ -39,7 +39,7 @@ namespace Iot.Device.Tca9548a
         public override I2cDevice CreateDevice(int deviceAddress)
         {
             SelectDeviceChannel();
-            return new Tca9548ADevice(_tca9548A, _tcaChannel, _channelBus.CreateDevice(deviceAddress));
+            return new Tca9548AI2cDevice(_tca9548A, _tcaChannel, _channelBus.CreateDevice(deviceAddress));
         }
 
         /// <summary>
