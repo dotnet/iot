@@ -13,7 +13,7 @@ namespace Iot.Device.Board
     /// <summary>
     /// Manages an I2C bus instance
     /// </summary>
-    public class I2cBusManager : I2cBus, IDisposable, IQueryComponentInformation
+    public class I2cBusManager : I2cBus, IDisposable
     {
         private readonly int _sdaPin;
         private readonly int _sclPin;
@@ -123,10 +123,13 @@ namespace Iot.Device.Board
             base.Dispose(disposing);
         }
 
-        /// <inheritdoc />
-        public ComponentInformation QueryComponentInformation(bool onlyActive)
+        /// <summary>
+        /// Query the component information (the tree of active drivers) for diagnostic purposes.
+        /// </summary>
+        /// <returns>A <see cref="ComponentInformation"/> instance</returns>
+        public ComponentInformation QueryComponentInformation()
         {
-            return new ComponentInformation(this, $"I2C Bus Manager, Bus number {_bus}", string.Empty, ComponentState.Active);
+            return new ComponentInformation(this, $"I2C Bus Manager, Bus number {_bus}", ComponentState.Active);
         }
     }
 }

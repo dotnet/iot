@@ -9,14 +9,14 @@ namespace System.Device
 {
     /// <summary>
     /// Interface to support querying component information from a class
+    /// (declared internal for now, since it doesn't need exposing as long as the callers operate on the actual type of the components)
     /// </summary>
-    public interface IQueryComponentInformation
+    internal interface IQueryComponentInformation
     {
         /// <summary>
         /// Query information about a component and it's children.
         /// </summary>
-        /// <param name="onlyActive">True to return only active components, false to also list possible alternatives or inactive drivers</param>
         /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
-        public ComponentInformation QueryComponentInformation(bool onlyActive);
+        public ComponentInformation QueryComponentInformation();
     }
 }

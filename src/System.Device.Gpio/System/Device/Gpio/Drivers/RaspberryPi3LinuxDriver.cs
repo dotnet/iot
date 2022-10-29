@@ -773,7 +773,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
     }
 
     /// <inheritdoc />
-    public override ComponentInformation QueryComponentInformation(bool onlyActive)
+    public override ComponentInformation QueryComponentInformation()
     {
         StringBuilder sb = new StringBuilder();
         Initialize();
@@ -796,7 +796,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
 
         if (_interruptDriver != null)
         {
-            ci.AddSubComponent(_interruptDriver.QueryComponentInformation(onlyActive));
+            ci.AddSubComponent(_interruptDriver.QueryComponentInformation());
         }
 
         return ci;

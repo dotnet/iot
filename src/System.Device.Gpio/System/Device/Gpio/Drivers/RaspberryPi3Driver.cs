@@ -284,8 +284,8 @@ public class RaspberryPi3Driver : GpioDriver
     }
 
     /// <inheritdoc />
-    public override ComponentInformation QueryComponentInformation(bool onlyActive)
+    public override ComponentInformation QueryComponentInformation()
     {
-        return _internalDriver.QueryComponentInformation(onlyActive);
+        return _internalDriver.QueryComponentInformation();
     }
 }

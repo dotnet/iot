@@ -43,7 +43,7 @@ namespace BoardSample
             const int led2 = 2;
             using Board b = Board.Create();
             Console.WriteLine("Hardware detected: ");
-            Console.WriteLine(b.QueryComponentInformation(true));
+            Console.WriteLine(b.QueryComponentInformation());
             using GpioController controller = b.CreateGpioController();
 
             if (controller.PinCount > 0)
@@ -133,7 +133,7 @@ namespace BoardSample
         {
             using var raspi = Board.Create();
             Console.WriteLine("Hardware detected: ");
-            Console.WriteLine(raspi.QueryComponentInformation(true));
+            Console.WriteLine(raspi.QueryComponentInformation());
             PwmRaspiTest(raspi);
             SpiRaspiTestWithSoftwareCs(raspi);
             SpiRaspiTestWithHardwareCs(raspi);

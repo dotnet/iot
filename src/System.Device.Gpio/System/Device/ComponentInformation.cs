@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
@@ -23,6 +26,11 @@ namespace System.Device
         {
         }
 
+        public ComponentInformation(object instance, string name, ComponentState state)
+            : this(instance, name, string.Empty, state)
+        {
+        }
+
         public ComponentInformation(object instance, string name, string version, ComponentState componentState)
         {
             if (instance == null)
@@ -35,6 +43,18 @@ namespace System.Device
 
             Version = version;
             State = componentState;
+
+            if (string.IsNullOrWhiteSpace(Version))
+            {
+                var assembly = instance.GetType().Assembly;
+                var v = (AssemblyInformationalVersionAttribute?)assembly.GetCustomAttributes().FirstOrDefault(x => x is AssemblyInformationalVersionAttribute);
+
+                if (v != null)
+                {
+                    Version = v.InformationalVersion;
+                }
+            }
+
             _subComponents = new List<ComponentInformation>();
         }
 
@@ -45,20 +65,17 @@ namespace System.Device
 
         public string Name
         {
-            get;
-            set;
+            get; init;
         }
 
         public string Version
         {
-            get;
-            set;
+            get; init;
         }
 
         public ComponentState State
         {
-            get;
-            set;
+            get; init;
         }
 
         public IReadOnlyList<ComponentInformation> SubComponents => _subComponents.AsReadOnly();
@@ -73,23 +90,34 @@ namespace System.Device
             _subComponents.Add(subComponent);
         }
 
+        private static string PrintComponentDescription(ComponentInformation component)
+        {
+            string v = string.Empty;
+            if (!string.IsNullOrWhiteSpace(component.Version))
+            {
+                v = $" Version {component.Version}";
+            }
+
+            return $"{{{component.Type}}} {component.Name}{v}{Environment.NewLine}";
+        }
+
         protected virtual void SubComponentToString(StringBuilder output, int ident)
         {
             foreach (var component in _subComponents)
             {
                 output.Append(new string(' ', ident));
                 output.Append('\u2514'); // border element
-                output.Append($"{{{component.Type}}} {component.Name}{Environment.NewLine}");
+                output.Append(PrintComponentDescription(component));
                 component.SubComponentToString(output, ident + 1);
             }
         }
 
         public override string ToString()
         {
-            StringBuilder b = new StringBuilder($"{{{Type}}} {Name}{Environment.NewLine}");
+            StringBuilder b = new StringBuilder(PrintComponentDescription(this));
             SubComponentToString(b, 1);
 
-            return b.ToString();
+            return b.ToString().TrimEnd();
         }
     }
 }
