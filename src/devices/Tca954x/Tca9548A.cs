@@ -35,22 +35,23 @@ namespace Iot.Device.Tca954x
             MultiplexerChannel.Channel5, MultiplexerChannel.Channel6, MultiplexerChannel.Channel7
         };
 
-        internal I2cDevice _i2CDevice;
+        private I2cDevice _i2CDevice;
 
         /// <summary>
         /// Creates a Multiplexer Instance
         /// </summary>
         /// <param name="i2cDevice">The I2C Device of the Mux itself</param>
+        /// <param name="mainBus">The bus the mux is connected to</param>
         /// <param name="shouldDispose">true to dispose the I2C device at dispose</param>
         /// <exception cref="ArgumentNullException">Exception thrown if I2C device is null</exception>
-        public Tca9548A(I2cDevice i2cDevice, bool shouldDispose = true)
+        public Tca9548A(I2cDevice i2cDevice, I2cBus mainBus, bool shouldDispose = true)
         {
             _i2CDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _shouldDispose = shouldDispose;
             _activeChannels = null; // We don't know the state of the multiplexer
             foreach (var channel in DeviceChannels)
             {
-                _channelBuses.Add(new Tca9548AChannelBus(this, channel));
+                _channelBuses.Add(new Tca9548AChannelBus(this, mainBus, channel));
             }
         }
 

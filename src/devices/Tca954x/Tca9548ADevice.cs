@@ -21,8 +21,8 @@ namespace Iot.Device.Tca954x
         ///  Initializes a new instance of the <see cref="Tca9548AI2cDevice"/> class on the <see cref="MultiplexerChannel"/> of TCA mux that will use the specified settings to communicate with the I2C device.
         /// </summary>
         /// <param name="tca9548A">Instance on TCA9548A device</param>
-        /// <param name="tcaChannel">Channel on which device is </param>
-        /// <param name="device">I2C device</param>
+        /// <param name="tcaChannel">Channel on which device is</param>
+        /// <param name="device">I2C device (from the parent bus)</param>
         internal Tca9548AI2cDevice(Tca9548A tca9548A, MultiplexerChannel tcaChannel, I2cDevice device)
         {
             _tca9548A = tca9548A;

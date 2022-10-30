@@ -23,7 +23,7 @@ Create a ```Tca9548A``` class and pass the I2C device. The default I2C address i
 ```csharp
             Console.WriteLine("Hello TCA9548A!");
             var bus = I2cBus.Create(1);
-            Tca9548A tca9548a = new Tca9548A(bus.CreateDevice(Tca9548A.DefaultI2cAddress));
+            Tca9548A tca9548a = new Tca9548A(bus.CreateDevice(Tca9548A.DefaultI2cAddress), bus);
 
             // Get all connected I2C interfaces
             foreach (var channelBuses in tca9548a)

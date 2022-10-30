@@ -21,12 +21,13 @@ namespace Iot.Device.Tca954x
         /// Creates new I2C bus Instance for multiplexer channel
         /// </summary>
         /// <param name="tca9548A">TCA9548A multiplexer </param>
+        /// <param name="mainBus">Main Bus</param>
         /// <param name="channels">Selected Channel on Multiplexer</param>
-        internal Tca9548AChannelBus(Tca9548A tca9548A, MultiplexerChannel channels)
+        internal Tca9548AChannelBus(Tca9548A tca9548A, I2cBus mainBus, MultiplexerChannel channels)
         {
             _tca9548A = tca9548A;
             _tcaChannel = channels;
-            _channelBus = I2cBus.Create(tca9548A._i2CDevice.ConnectionSettings.BusId);
+            _channelBus = mainBus;
         }
 
         private void SelectDeviceChannel() => _tca9548A.SelectChannel(_tcaChannel);
