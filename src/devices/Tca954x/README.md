@@ -1,6 +1,6 @@
 # TCA954X - TCA954X Low-Voltage Multi-Channel I2C Switch with Reset
 
-The TCA954X/PCA954X group of devices is a set of I2C switches. Several types are available, with 2, 4 or 8 channels, and different voltage specifications. The first letter is sometimes also "P".
+The TCA954X/PCA954X group of devices is a set of I2C switches. Several types are available, with 2, 4 or 8 channels, and different voltage specifications. The first letter is sometimes also "P". Not to be confused with PCA95x4, which is a set of GPIO expanders.
 
 The TCA9548A device has eight bidirectional translating switches that can be controlled through the I2C bus. The SCL/SDA upstream pair fans out to eight downstream pairs, or channels.
 

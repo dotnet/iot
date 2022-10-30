@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.Device.Model;
+using System.IO;
 
 namespace Iot.Device.Tca954x
 {
@@ -17,6 +18,7 @@ namespace Iot.Device.Tca954x
     {
         private readonly bool _shouldDispose;
         private readonly List<Tca9548AChannelBus> _channelBuses = new List<Tca9548AChannelBus>();
+        private MultiplexerChannel? _activeChannels;
 
         /// <summary>
         /// The default I2C Address, page 15 of the main documentation
@@ -27,9 +29,30 @@ namespace Iot.Device.Tca954x
         /// <summary>
         /// Array of all possible Multiplexer Channels
         /// </summary>
-        public static readonly MultiplexerChannel[] DeviceChannels = (MultiplexerChannel[])Enum.GetValues(typeof(MultiplexerChannel));
+        private static readonly MultiplexerChannel[] DeviceChannels = new MultiplexerChannel[]
+        {
+            MultiplexerChannel.Channel0, MultiplexerChannel.Channel1, MultiplexerChannel.Channel2, MultiplexerChannel.Channel3, MultiplexerChannel.Channel4,
+            MultiplexerChannel.Channel5, MultiplexerChannel.Channel6, MultiplexerChannel.Channel7
+        };
 
         internal I2cDevice _i2CDevice;
+
+        /// <summary>
+        /// Creates a Multiplexer Instance
+        /// </summary>
+        /// <param name="i2cDevice">The I2C Device of the Mux itself</param>
+        /// <param name="shouldDispose">true to dispose the I2C device at dispose</param>
+        /// <exception cref="ArgumentNullException">Exception thrown if I2C device is null</exception>
+        public Tca9548A(I2cDevice i2cDevice, bool shouldDispose = true)
+        {
+            _i2CDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _shouldDispose = shouldDispose;
+            _activeChannels = null; // We don't know the state of the multiplexer
+            foreach (var channel in DeviceChannels)
+            {
+                _channelBuses.Add(new Tca9548AChannelBus(this, channel));
+            }
+        }
 
         /// <summary>
         /// Gets Channel busses of the multiplexer
@@ -39,46 +62,19 @@ namespace Iot.Device.Tca954x
         public I2cBus this[int index] => _channelBuses[index];
 
         /// <summary>
-        /// Creates a Multiplexer Instance
+        /// Select a group of multiplexer channels.
         /// </summary>
-        /// <param name="i2CDevice">The I2C Device on which Mux is</param>
-        /// <param name="shouldDispose">true to dispose the I2C device at dispose</param>
-        /// <exception cref="ArgumentNullException">Exception thrown if I2C device is null</exception>
-        public Tca9548A(I2cDevice i2CDevice, bool shouldDispose = true)
+        /// <param name="multiplexChannels">The channels to select</param>
+        /// <remarks>
+        /// In most cases, a single channel will be selected at a time, but it is possible to write to several channels at once. Reading
+        /// from multiple channels at once will result in undefined behavior.
+        /// </remarks>
+        public void SelectChannel(MultiplexerChannel multiplexChannels)
         {
-            _i2CDevice = i2CDevice ?? throw new ArgumentNullException(nameof(i2CDevice));
-            _shouldDispose = shouldDispose;
-            foreach (var channel in DeviceChannels)
+            if (TryGetSelectedChannel(out var channel) && channel != multiplexChannels)
             {
-                _channelBuses.Add(new Tca9548AChannelBus(this, channel));
-            }
-        }
-
-        /// <summary>
-        /// Select a multiplex channel
-        /// </summary>
-        /// <param name="multiplexChannel">The channel to select [2^channel number (0-7)]</param>
-        public void SelectChannel(byte multiplexChannel)
-        {
-            try
-            {
-                _i2CDevice.WriteByte(multiplexChannel);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"Unable to select ({_i2CDevice.ConnectionSettings.BusId} ,{_i2CDevice.ConnectionSettings.DeviceAddress}, {multiplexChannel}): {e}");
-            }
-        }
-
-        /// <summary>
-        /// Select a multiplex channel
-        /// </summary>
-        /// <param name="multiplexChannel">The channel to select</param>
-        public void SelectChannel(MultiplexerChannel multiplexChannel)
-        {
-            if (TryGetSelectedChannel(out var channel) && channel != multiplexChannel)
-            {
-                SelectChannel(Convert.ToByte(multiplexChannel));
+                _i2CDevice.WriteByte(Convert.ToByte(multiplexChannels));
+                _activeChannels = multiplexChannels;
             }
         }
 
@@ -91,6 +87,12 @@ namespace Iot.Device.Tca954x
         {
             try
             {
+                if (_activeChannels.HasValue)
+                {
+                    selectedChannel = _activeChannels.Value;
+                    return true;
+                }
+
                 var channel = _i2CDevice.ReadByte();
                 if (Enum.IsDefined(typeof(MultiplexerChannel), channel))
                 {
@@ -108,15 +110,6 @@ namespace Iot.Device.Tca954x
                 selectedChannel = MultiplexerChannel.Channel0;
                 return false;
             }
-        }
-
-        /// <summary>
-        /// Enable or Disable all Mux Channels
-        /// </summary>
-        /// <param name="MuxState">Multiplexer Channel State</param>
-        public void SwitchTCA9548AState(MuxState MuxState)
-        {
-            _i2CDevice.WriteByte(Convert.ToByte(MuxState));
         }
 
         /// <inheritdoc/>

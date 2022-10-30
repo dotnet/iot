@@ -1,13 +1,21 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+
 namespace Iot.Device.Tca954x
 {
     /// <summary>
     /// Available channels
     /// </summary>
+    [Flags]
     public enum MultiplexerChannel : byte
     {
+        /// <summary>
+        /// No channel is selected
+        /// </summary>
+        None = 0,
+
         /// <summary>
         /// Channel 0 Byte (2^0 = 1)
         /// </summary>

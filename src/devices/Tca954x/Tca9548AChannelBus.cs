@@ -45,7 +45,7 @@ namespace Iot.Device.Tca954x
         /// <summary>
         /// Returns all the connected device on selected channel
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The list of used addresses</returns>
         public List<int> PerformBusScan()
         {
             SelectDeviceChannel();
