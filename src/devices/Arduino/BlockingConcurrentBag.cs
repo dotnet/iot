@@ -24,19 +24,34 @@ namespace Iot.Device.Arduino
         {
             get
             {
+                Stopwatch sw = Stopwatch.StartNew();
+                int ret = 0;
                 lock (_lock)
                 {
-                    return _container.Count;
+                    ret = _container.Count;
                 }
+
+                if (sw.ElapsedMilliseconds > 100)
+                {
+                    Console.WriteLine($"Count took {sw.ElapsedMilliseconds}!!!");
+                }
+
+                return ret;
             }
         }
 
         public void Add(T? elem)
         {
+            Stopwatch sw = Stopwatch.StartNew();
             lock (_lock)
             {
                 _container.Add(elem);
                 Monitor.PulseAll(_lock);
+            }
+
+            if (sw.ElapsedMilliseconds > 100)
+            {
+                Console.WriteLine($"Add took {sw.ElapsedMilliseconds}!!!");
             }
         }
 
@@ -45,6 +60,7 @@ namespace Iot.Device.Arduino
             lock (_lock)
             {
                 _container.Clear();
+                Monitor.PulseAll(_lock);
             }
         }
 
@@ -77,18 +93,27 @@ namespace Iot.Device.Arduino
                             if (predicate(elem))
                             {
                                 _container.RemoveAt(index);
+                                Monitor.PulseAll(_lock);
                                 element = elem;
                                 return true;
                             }
                         }
 
-                        if (sw.Elapsed > timeout)
+                        TimeSpan remaining = timeout - sw.Elapsed;
+
+                        if (remaining < TimeSpan.Zero)
                         {
                             return false;
                         }
 
-                        TimeSpan remaining = timeout - sw.Elapsed;
-                        if (remaining <= TimeSpan.Zero || !Monitor.Wait(_lock, remaining))
+                        if (remaining > TimeSpan.FromMilliseconds(500))
+                        {
+                            remaining = TimeSpan.FromMilliseconds(500);
+                        }
+
+                        bool waitSuccess = Monitor.Wait(_lock, remaining);
+
+                        if (sw.Elapsed > timeout && !waitSuccess)
                         {
                             return false;
                         }
@@ -106,6 +131,8 @@ namespace Iot.Device.Arduino
                 {
                     Monitor.Exit(_lock);
                 }
+
+                Console.WriteLine($"Waited {sw.ElapsedMilliseconds} ms for reply. Lock was taken? {lockTaken}");
             }
         }
     }

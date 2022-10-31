@@ -20,6 +20,7 @@ using Iot.Device.Button;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Common;
 using Iot.Device.Graphics;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace WeatherStation
@@ -51,6 +52,7 @@ namespace WeatherStation
             ArduinoBoard? board;
             string portName;
             Console.WriteLine("Connecting...");
+            LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory(LogLevel.Trace);
             if (args.Length > 0)
             {
                 portName = args[0];
@@ -68,7 +70,7 @@ namespace WeatherStation
                     address = IPAddress.Parse(args[1]);
                 }
 
-                if (!ArduinoBoard.TryConnectToNetworkedBoard(address, 27016, out board))
+                if (!ArduinoBoard.TryConnectToNetworkedBoard(address, 27016, false, out board))
                 {
                     Console.WriteLine($"Unable to connect to board at address {address}");
                     return 1;
@@ -148,6 +150,7 @@ namespace WeatherStation
             {
                 _page = (_page + 1) % TotalPages;
                 _pageChanged = true;
+                Console.WriteLine("Button pressed");
             };
             gpioController.Write(RedLed, PinValue.Low);
 
