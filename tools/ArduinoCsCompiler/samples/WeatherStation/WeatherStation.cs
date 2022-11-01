@@ -52,7 +52,6 @@ namespace WeatherStation
             ArduinoBoard? board;
             string portName;
             Console.WriteLine("Connecting...");
-            LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory(LogLevel.Trace);
             if (args.Length > 0)
             {
                 portName = args[0];
@@ -150,7 +149,6 @@ namespace WeatherStation
             {
                 _page = (_page + 1) % TotalPages;
                 _pageChanged = true;
-                Console.WriteLine("Button pressed");
             };
             gpioController.Write(RedLed, PinValue.Low);
 

@@ -487,7 +487,6 @@ namespace Iot.Device.Arduino
                             break;
                         case FirmataSysexCommand.I2C_REPLY:
                             _lastCommandError = CommandError.None;
-                            _logger.LogTrace("Got I2C_REPLY message");
                             _pendingResponses.Add(raw_data);
                             break;
 
@@ -499,7 +498,6 @@ namespace Iot.Device.Arduino
                         default:
                             // we pass the data forward as-is for any other type of sysex command
                             _lastCommandError = CommandError.None;
-                            _logger.LogTrace($"Got {sysCommand} message");
                             _pendingResponses.Add(raw_data);
                             OnSysexReply?.Invoke(ReplyType.SysexCommand, raw_data);
                             break;
@@ -560,7 +558,7 @@ namespace Iot.Device.Arduino
             _firmataStream.Write(sequence.Sequence.ToArray(), 0, sequence.Sequence.Count);
             _bytesTransmitted += sequence.Sequence.Count;
             _firmataStream.Flush();
-            _logger.LogTrace("Sent command now");
+
             byte[]? response;
             if (!_pendingResponses.TryRemoveElement(x => isMatchingAck(sequence, x!), timeout, out response))
             {

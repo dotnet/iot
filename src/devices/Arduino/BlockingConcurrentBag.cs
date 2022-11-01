@@ -24,34 +24,19 @@ namespace Iot.Device.Arduino
         {
             get
             {
-                Stopwatch sw = Stopwatch.StartNew();
-                int ret = 0;
                 lock (_lock)
                 {
-                    ret = _container.Count;
+                    return _container.Count;
                 }
-
-                if (sw.ElapsedMilliseconds > 100)
-                {
-                    Console.WriteLine($"Count took {sw.ElapsedMilliseconds}!!!");
-                }
-
-                return ret;
             }
         }
 
         public void Add(T? elem)
         {
-            Stopwatch sw = Stopwatch.StartNew();
             lock (_lock)
             {
                 _container.Add(elem);
                 Monitor.PulseAll(_lock);
-            }
-
-            if (sw.ElapsedMilliseconds > 100)
-            {
-                Console.WriteLine($"Add took {sw.ElapsedMilliseconds}!!!");
             }
         }
 
@@ -131,8 +116,6 @@ namespace Iot.Device.Arduino
                 {
                     Monitor.Exit(_lock);
                 }
-
-                Console.WriteLine($"Waited {sw.ElapsedMilliseconds} ms for reply. Lock was taken? {lockTaken}");
             }
         }
     }
