@@ -1080,7 +1080,7 @@ namespace Iot.Device.Arduino
                     throw new IOException($"Expected {replyData.Length} bytes, got only {bytesReceived}");
                 }
 
-                _numberOfConsecutiveI2cWrites = 1; // after we get a reply, we can free-fire a few times again
+                _numberOfConsecutiveI2cWrites = 0; // after we get a reply, we can free-fire a few times again
             }
             else
             {
@@ -1088,9 +1088,8 @@ namespace Iot.Device.Arduino
                 // If we use a series of write-only I2C commands we have to occasionally introduce a command that requires an answer, or we flood the device's input buffer,
                 // causing network retries, which under the line causes more delays than this. This problem is particularly obvious with an ESP32 in Wifi mode
                 _numberOfConsecutiveI2cWrites++;
-                if (_numberOfConsecutiveI2cWrites % 32 == 0)
+                if (_numberOfConsecutiveI2cWrites % 4 == 0)
                 {
-                    // Thread.Sleep(5);
                     var pin = _supportedPinConfigurations.FirstOrDefault(x => x.PinModes.Contains(SupportedMode.I2c));
                     if (pin != null)
                     {
