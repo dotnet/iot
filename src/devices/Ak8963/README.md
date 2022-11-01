@@ -1,6 +1,6 @@
 # AK8963 - Magnetometer
 
-The AK8963 is a magnetometer that can be controlled either thru I2C either thru SPI. It is present in other sensors like the [MPU9250](../Mpu9250/README.md). This implementation fully supports the I2C mode and the usage thru the MPU9250. It does not support SPI.
+The AK8963 is a magnetometer that can be controlled either thru I2C either thru SPI. It is present in other sensors like the [MPU9250](../Mpu6xxx9xxx/README.md). This implementation fully supports the I2C mode and the usage thru the MPU9250. It does not support SPI.
 
 ## Documentation
 
@@ -43,7 +43,7 @@ Console.WriteLine($"Mag Y = {ak8963.MagnometerBias.Y}");
 Console.WriteLine($"Mag Z = {ak8963.MagnometerBias.Z}");
 ```
 
-You will find a full example on how to extract raw data without calibration on the [MPU9250 sample](../Mpu9250/samples/Program.cs).
+You will find a full example on how to extract raw data without calibration on the [MPU9250 sample](../Mpu6xxx9xxx/samples/Mpu9250/Program.cs).
 
 If no calibration is performed, you will get a raw data cloud which looks like this:
 
@@ -59,7 +59,7 @@ Once the calibration is done, you will be able to read the data with the bias co
 
 ## Using a different I2C interface
 
-This sensor is used for example in the [MPU9250](../Mpu9250/README.md). The MPU9250 is in this case a master I2C controlling the secondary AK8963 I2C sensor. An abstract class is available to implement basic I2C operation:
+This sensor is used for example in the [MPU9250](../Mpu6xxx9xxx/README.md). The MPU9250 is in this case a master I2C controlling the secondary AK8963 I2C sensor. An abstract class is available to implement basic I2C operation:
 
 ```csharp
 public abstract class Ak8963I2cBase
