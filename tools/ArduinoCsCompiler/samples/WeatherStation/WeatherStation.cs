@@ -164,6 +164,7 @@ namespace WeatherStation
         private void Loop(GpioController gpioController, LcdConsole console)
         {
             Length stationAltitude = Length.FromMeters(StationAltitude);
+            int currentPage = _page;
             while (true)
             {
                 try
@@ -172,6 +173,7 @@ namespace WeatherStation
                     {
                         console.Clear();
                         _pageChanged = false;
+                        currentPage = _page;
                         console.LineFeedMode = LineWrapMode.Truncate;
                     }
 
@@ -184,7 +186,7 @@ namespace WeatherStation
                     string gaps = new String(' ', totalGaps);
                     console.ReplaceLine(0, dateString + gaps + timeString);
                     Console.WriteLine(timeString);
-                    if (_page == 0)
+                    if (currentPage == 0)
                     {
                         _bme680!.SetPowerMode(Bme680PowerMode.Forced);
                         if (_bme680.TryReadTemperature(out Temperature temp) && _bme680.TryReadPressure(out Pressure pressure) && _bme680.TryReadHumidity(out RelativeHumidity humidity))
@@ -199,17 +201,15 @@ namespace WeatherStation
                             console.ReplaceLine(1, temperatureLine);
                             console.ReplaceLine(2, humidityLine);
                             console.ReplaceLine(3, dewPointLine);
-                            Console.WriteLine("Page 0: " + temperatureLine);
                         }
                     }
-
-                    if (_page == 1)
+                    else if (currentPage == 1)
                     {
                         string line = time.ToLongDateString();
                         console.SetCursorPosition(0, 2);
                         console.LineFeedMode = LineWrapMode.WordWrap;
-                        console.WriteLine(line);
-                        Console.WriteLine("Page 1: " + line);
+                        console.Write(line);
+                        console.LineFeedMode = LineWrapMode.Truncate;
                     }
                 }
                 catch (TimeoutException x)
