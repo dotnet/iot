@@ -107,6 +107,13 @@ stages:
               markdownlint -c  $(System.DefaultWorkingDirectory)/.markdownlint.json $(System.DefaultWorkingDirectory)
             displayName: 'Execute Markdownlint'
         
+        # Scan markdown files for dead links
+        - ${{ if or(eq(variables['System.TeamProject'], 'public'), in(variables['Build.Reason'], 'PullRequest')) }}:
+          - powershell: |
+              npm install -g markdown-link-check
+              ls -r *.md | % { markdown-link-check -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
+            displayName: 'Execute markdown-link-check'
+        
         # Use utility script to run script command dependent on agent OS.
         - script: build.cmd -ci -sign
             -configuration $(_BuildConfig)

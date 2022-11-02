@@ -9,7 +9,7 @@ Documentation for the Bmm150 can be [found here](https://www.bosch-sensortec.com
 
 ## Usage
 
-You can find an example in the [sample](./samples/Bmm150.sample.cs) directory. Usage is straight forward including the possibility to have a calibration.
+You can find an example in the [sample](./samples/Program.cs) directory. Usage is straight forward including the possibility to have a calibration.
 
 ```csharp
 I2cConnectionSettings mpui2CConnectionSettingmpus = new(1, Bmm150.DefaultI2cAddress);

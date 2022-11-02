@@ -8,7 +8,7 @@ The [Raspberry Pi Build HAT](https://raspberrypi.com/products/build-hat) is an a
 
 This binding used the following documentations:
 
-- Raspberry Pi [Build HAT](https://www.raspberrypi.com/documentation/accessories/build-hat.htm) documentation.
+- Raspberry Pi [Build HAT](https://www.raspberrypi.com/documentation/accessories/build-hat.html) documentation.
 - Raspberry Pi Build HAT [Serial Protocol](https://datasheets.raspberrypi.com/build-hat/build-hat-serial-protocol.pdf).
 - Raspberry Pi Build HAT [official python library](https://datasheets.raspberrypi.com/build-hat/build-hat-python-library.pdf).
 - [Powered Up serial link protocol](https://www.philohome.com/wedo2reverse/protocol.htm) from Philo.

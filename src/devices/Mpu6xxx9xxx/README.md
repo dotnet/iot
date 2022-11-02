@@ -29,7 +29,7 @@ var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2
 using Mpu9250 mpu9250 = new Mpu9250(I2cDevice.Create(mpui2CConnectionSettingmpus), i2CDeviceAk8963: I2cDevice.Create(new I2cConnectionSettings(1, Ak8963.DefaultI2cAddress)));
 ```
 
-You can find an example in the [sample](./samples/Program.cs) directory. Usage is straightforward including the possibility to have a calibration for all sub sensors.
+You can find an example in the [sample](./samples/Mpu9250/Program.cs) directory. Usage is straightforward including the possibility to have a calibration for all sub sensors.
 
 ```csharp
 var mpui2CConnectionSettingmpus = new I2cConnectionSettings(1, Mpu9250.DefaultI2cAddress);
@@ -199,4 +199,4 @@ It is then up to you to transform them into the correct data. You can multiply y
 
 The following fritzing diagram illustrates one way to wire up the MPU9250 with a Raspberry Pi using I2C.
 
-![Raspberry Pi Breadboard diagram](./Mpu9250_bb.png)
+![Raspberry Pi Breadboard diagram](./images/Mpu9250.png)
