@@ -1,0 +1,14 @@
+{
+    "ignorePatterns": [
+        { "pattern": "https://eu.industrial.panasonic.com/sites/default/pidseu/files/downloads/files/" },
+        { "pattern": "https://www.akm.com/akm/en/file/datasheet/AK8963C.pdf" },
+        { "pattern": "https://dotnet.myget.org/feed/dotnet-core/package/nuget/Iot.Device.Bindings" },
+        { "pattern": "../.vscode/launch.json" },
+        { "pattern": "../.vscode/tasks.json" },
+        { "pattern": "http://url/image" },
+        { "pattern": "https://dev.azure.com/dnceng/internal/_build\\?definitionId" },
+        { "pattern": "https://www.pine64.org/\\?page_id=46823" },
+        { "pattern": "http://ecee.colorado.edu/~mcclurel/Philips_I2C_IO_Expanders_AN469_2.pdf" },
+        { "pattern": "https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/docs/datasheet/core/MPU-6886-000193%2Bv1.1_GHIC_en.pdf" }
+    ] 
+}
