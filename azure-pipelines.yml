@@ -49,7 +49,7 @@ stages:
 
     - powershell: |
         npm install -g markdown-link-check
-        ls -r *.md | % { markdown-link-check -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
+        ls -r *.md | % { markdown-link-check -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { Write-Error "One of the links is wrong" } }
       displayName: 'Execute markdown-link-check'
       condition: eq(variables['build.reason'], 'PullRequest')
 
