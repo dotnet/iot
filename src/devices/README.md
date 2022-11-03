@@ -211,6 +211,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
 * [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
+* [TCA9548A - TCA9548A Low-Voltage 8-Channel I2C Switch with Reset](Tca954x/README.md)
 
 ### CAN BUS libraries/modules
 
