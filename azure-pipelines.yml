@@ -49,10 +49,9 @@ stages:
 
     - powershell: |
         npm install -g markdown-link-check
-        ls -r *.md | % { markdown-link-check -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { Write-Error "One of the links is wrong" } }
+        ls -r *.md | % { markdown-link-check -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { Write-Warning "One of the links is wrong" } }
       displayName: 'Execute markdown-link-check'
       condition: eq(variables['build.reason'], 'PullRequest')
-      continueOnError: true
 
       # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
     - script: build.cmd -ci
