@@ -90,6 +90,18 @@ stages:
       artifact: config
       condition: eq(variables['BuildConfiguration'], 'Release')
 
+  - job: Markdown_link_check
+    displayName: Markdown Link Check
+    pool:
+      vmImage: windows-latest
+
+    steps:
+    - powershell: |
+        npm install -g markdown-link-check
+        ls -r *.md | % { markdown-link-check -v -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
+      displayName: 'Execute markdown-link-check'
+      condition: eq(variables['build.reason'], 'PullRequest')
+
   - job: Windows_ArduinoIntegration
     displayName: Arduino Integration Tests
     timeoutInMinutes: 120
