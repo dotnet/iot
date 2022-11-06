@@ -919,6 +919,7 @@ namespace ArduinoCsCompiler
             ClearStatistics();
             _classes.Add(type);
             _logger.LogDebug($"Class {type.TheType.MemberInfoSignature(true)} added to the execution set with token 0x{type.NewToken:X}");
+            PrintProgress();
             return true;
         }
 
@@ -1013,6 +1014,8 @@ namespace ArduinoCsCompiler
             {
                 _logger.LogDebug($"Method {method.MethodBase.MethodSignature(false)} added to the execution set with token 0x{method.Token:X}");
             }
+
+            PrintProgress();
 
             return true;
         }
@@ -1144,6 +1147,34 @@ namespace ArduinoCsCompiler
                 }
             }
 
+            // If the replacement has a static ctor, also replace it
+            foreach (var methoda in replacement.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                // Replace these only if explicitly requested (would need testing of impact otherwise)
+                if (!EquatableMethod.HasArduinoImplementationAttribute(methoda, out _))
+                {
+                    continue;
+                }
+
+                bool found = false;
+                // Above, we only check the public methods, here we also look at the private ones
+                foreach (var methodb in typeToReplace.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static))
+                {
+                    if (EquatableMethod.MethodsHaveSameSignature(methoda, methodb))
+                    {
+                        // Method A shall replace Method B
+                        AddReplacementMethod(methodb, methoda);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    ErrorManager.AddWarning("ACS0008", $"{replacement.FullName} specifies a static ctor to replace, but the original class has none");
+                }
+            }
+
             foreach (var m in ctorsNeedingReplacement)
             {
                 AddReplacementMethod(m, null);
@@ -1212,8 +1243,9 @@ namespace ArduinoCsCompiler
                     return null;
                 }
 
-                throw new InvalidOperationException($"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}. " +
+                ErrorManager.AddError("ACS0007", $"Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}. " +
                                                     $"Original implementation is in {original.DeclaringType!.AssemblyQualifiedName}");
+                return null;
             }
 
             return elem.Item2;
@@ -1610,6 +1642,14 @@ namespace ArduinoCsCompiler
         {
             ExpectedMemoryUsage = null;
             Statistics = null;
+        }
+
+        private void PrintProgress()
+        {
+            if ((_methods.Count + _classes.Count) % 100 == 0)
+            {
+                _logger.LogInformation($"Collected {_classes.Count} classes and {_methods.Count} methods. And counting...");
+            }
         }
 
         /// <summary>

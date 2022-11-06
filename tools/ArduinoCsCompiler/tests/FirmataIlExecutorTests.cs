@@ -362,6 +362,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.LcdCharacterEncodingTest1), 0)]
         [InlineData(nameof(TestMethods.LcdCharacterEncodingTest2), 0)]
         [InlineData(nameof(TestMethods.StringInterpolation), 0)]
+        [InlineData(nameof(TestMethods.UseStringlyTypedDictionary), 1)]
         [InlineData(nameof(TestMethods.UnitsNetTemperatureTest), 0)]
         [InlineData(nameof(TestMethods.StringEncoding), 0)]
         [InlineData(nameof(TestMethods.PrivateImplementationDetailsUsedCorrectly), 0)]
@@ -376,6 +377,12 @@ namespace Iot.Device.Arduino.Tests
             };
 
             LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, compilerSettings);
+        }
+
+        [Fact]
+        public void ValidateTestMethods()
+        {
+            Assert.Equal(1, TestMethods.UseStringlyTypedDictionary(1, 2));
         }
 
         [Theory]

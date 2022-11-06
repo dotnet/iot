@@ -14,6 +14,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
 using ArduinoCsCompiler.Runtime;
+using ArduinoCsCompiler.Runtime.UnitsNet;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
@@ -374,7 +375,14 @@ namespace ArduinoCsCompiler
                     }
 
                     // Also go over ctors (if any)
-                    foreach (var m in replacement.GetConstructors(BindingFlags.Public | BindingFlags.Instance))
+                    var interestingConstructors = replacement.GetConstructors(BindingFlags.Public | BindingFlags.Instance).ToList();
+                    var cctor = replacement.GetConstructor(BindingFlags.NonPublic | BindingFlags.Static, Array.Empty<Type>());
+                    if (cctor != null)
+                    {
+                        interestingConstructors.Add(cctor);
+                    }
+
+                    foreach (var m in interestingConstructors)
                     {
                         // Methods that have this attribute shall be replaced - if the value is ArduinoImplementation.None, the C# implementation is used,
                         // otherwise a native implementation is provided
@@ -1638,7 +1646,7 @@ namespace ArduinoCsCompiler
         /// <param name="t">Type to query</param>
         /// <param name="minSizeOfMember">Minimum size of the member (used to force alignment)</param>
         /// <param name="sizeOfMember">Returns the actual size of the member, used for value-type arrays (because byte[] should use just one byte per entry)</param>
-        /// <returns></returns>
+        /// <returns>VariableKind instance</returns>
         internal static VariableKind GetVariableType(Type t, int minSizeOfMember, out int sizeOfMember)
         {
             string name = t.Name;
@@ -2507,7 +2515,19 @@ namespace ArduinoCsCompiler
                 // TODO: Parse code to check for LDSFLD or STSFLD instructions and skip if none found.
                 if (methodInfo.DeclaringType != null && GetClassSize(methodInfo.DeclaringType, null).Statics > 0)
                 {
-                    PrepareClass(set, methodInfo.DeclaringType);
+                    if (MicroCompiler.HasReplacementAttribute(methodInfo.DeclaringType!, out var attribute) && attribute.ReplaceEntireType == false)
+                    {
+                        // If this _is_ the replacement class already, and we're not replacing the full type, add the original type, or we end up with
+                        // both the original and the replacement types in the execution set.
+                        if (attribute.TypeToReplace != null)
+                        {
+                            PrepareClass(set, attribute.TypeToReplace);
+                        }
+                    }
+                    else
+                    {
+                        PrepareClass(set, methodInfo.DeclaringType);
+                    }
                 }
 
                 // TODO: Change to dictionary and transfer IlCode object to correct place (it's evaluated inside, but discarded there)
@@ -2699,6 +2719,10 @@ namespace ArduinoCsCompiler
             // We need to figure out dependencies between the cctors (i.e. we know that System.Globalization.JapaneseCalendar..ctor depends on System.DateTime..cctor)
             // For now, we just do that by "knowledge" (analyzing the code manually showed these dependencies)
             // The last of the BringToFront elements below will be the first cctor that gets executed
+            BringToFront(codeSequences, typeof(UnitsNet.BaseUnits));
+            BringToFront(codeSequences, typeof(UnitsNet.BaseDimensions));
+            BringToFront(codeSequences, typeof(UnitsNet.QuantityInfo));
+            BringToFront(codeSequences, typeof(MiniQuantityInfo));
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.HashHelpers"));
             BringToFront(codeSequences, typeof(System.Text.UTF8Encoding));
             BringToFront(codeSequences, typeof(System.Text.Encoding));
