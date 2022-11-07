@@ -4,6 +4,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FrequencyAndSpeed.cs" />
     <Compile Include="McpBitrate.cs" />
     <Compile Include="InstructionFormat.cs" />
     <Compile Include="Mcp25xxx.cs" />

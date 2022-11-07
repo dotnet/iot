@@ -140,7 +140,7 @@ namespace Iot.Device.Mcp25xxx.Tests
             byte[] lastExpectedWriteBuffer = { 0b0000_0010, (byte)Address.Cnf3, 0x86 };
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
-            mcp25xxx.SetBitrate(CanBusFrequencyAndSpeed._16MHz500KBps);
+            mcp25xxx.SetBitrate(FrequencyAndSpeed._16MHz500KBps);
             Assert.Equal(lastExpectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
         }
 

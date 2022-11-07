@@ -58,7 +58,7 @@ void Reset(Mcp25xxx mcp25xxx)
 void SetBitrate(Mcp25xxx mcp25xxx)
 {
     Console.WriteLine("Set bitrate 16MHz 500kBPS");
-    mcp25xxx.SetBitrate(CanBusFrequencyAndSpeed._16MHz500KBps);
+    mcp25xxx.SetBitrate(FrequencyAndSpeed._16MHz500KBps);
 }
 
 void EnableRollover(Mcp25xxx mcp25xxx)

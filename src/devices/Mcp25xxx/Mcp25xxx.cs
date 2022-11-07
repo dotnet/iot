@@ -270,7 +270,7 @@ namespace Iot.Device.Mcp25xxx
         /// The configuration registers (CNF1, CNF2, CNF3) control the bit timing for the CAN bus interface.
         /// </summary>
         /// <param name="frequencyAndSpeed">CAN bus frequency and speed</param>
-        public void SetBitrate(CanBusFrequencyAndSpeed frequencyAndSpeed)
+        public void SetBitrate(FrequencyAndSpeed frequencyAndSpeed)
         {
             var (cnf1Config, cnf2Config, cnf3Config) = McpBitrate.GetBitTimingConfiguration(frequencyAndSpeed);
             WriteByte(Address.Cnf1, cnf1Config);
