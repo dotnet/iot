@@ -4,11 +4,11 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Is31Fl3731.cs" />
     <Compile Include="Backpack16x9.cs" />
     <Compile Include="Bonnet16x8.cs" />
     <Compile Include="Breakout11x7.cs" />
     <Compile Include="BreakoutRgb5x5.cs" />
+    <Compile Include="Is31fl3731.cs" />
     <Compile Include="LedShimRgb28x1.cs" />
     <Compile Include="ScrollHat17x7.cs" />
   </ItemGroup>

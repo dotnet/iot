@@ -13,7 +13,7 @@ namespace Iot.Device.Display
     // Datasheet: https://cdn-learn.adafruit.com/assets/assets/000/030/994/original/31FL3731.pdf
     // Product: https://www.adafruit.com/product/2946
     // Product: https://www.adafruit.com/product/2974
-    public abstract class Is31fl3731 : IDisposable
+    public abstract class Is31fl3731
     {
         // Register addresses
         // Command register
@@ -52,7 +52,7 @@ namespace Iot.Device.Display
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         public Is31fl3731(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
             _enable_all_leds_data.AsSpan().Fill(0xff);
         }
 
@@ -98,7 +98,7 @@ namespace Iot.Device.Display
             // 1x audio frame play mode
             Write(FUNCTION_REGISTER, CONFIGURATION_REGISTER, 0);
             // set data page
-            _i2cDevice.Write(new byte[] { COMMAND_REGISTER, 0 });
+            _i2cDevice.Write(stackalloc byte[] { COMMAND_REGISTER, 0 });
         }
 
         /// <summary>
@@ -126,8 +126,8 @@ namespace Iot.Device.Display
         public void Fill(byte brightness = 128, byte page = 0)
         {
             EnableAllLeds(page);
-            byte[] data = new byte[PWM_REGISTER_LENGTH];
-            data.AsSpan().Fill(brightness);
+            Span<byte> data = stackalloc byte[PWM_REGISTER_LENGTH];
+            data.Fill(brightness);
             Write(page, PWM_REGISTER, data);
         }
 
@@ -153,6 +153,10 @@ namespace Iot.Device.Display
         /// <param name="rate">Set the showdown mode. `true` sets device into shutdown mode. `false` sets device into normal operation.</param>
         public void EnableBlinking(int rate)
         {
+            // See datasheet for Blink Period Time formula
+            // That's where the following values are coming from
+            // Copied from:
+            // https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/53c796f393145452c504b39e8bcf083d3d4f5bf8/adafruit_is31fl3731/__init__.py#L269-L270
             int value = 0;
             if (rate > 0)
             {
@@ -191,13 +195,6 @@ namespace Iot.Device.Display
             Write(FUNCTION_REGISTER, SHUTDOWN, (byte)mode);
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _i2cDevice?.Dispose();
-            _i2cDevice = null!;
-        }
-
         /// <summary>
         /// Gets the hardware location for the pixel.
         /// </summary>
@@ -205,26 +202,26 @@ namespace Iot.Device.Display
         /// <param name="y">Specifies the y value.</param>
         public abstract int GetLedAddress(int x, int y);
 
-        private void Write(byte register, byte address, byte[] value)
+        private void Write(byte register, byte address, byte value)
         {
-            _i2cDevice.Write(new byte[] { COMMAND_REGISTER, register });
-            byte[] data = new byte[value.Length + 1];
+            _i2cDevice.Write(stackalloc byte[] { COMMAND_REGISTER, register });
+            _i2cDevice.Write(stackalloc byte[] { address, value });
+        }
+
+        private void Write(byte register, byte address, Span<byte> value)
+        {
+            _i2cDevice.Write(stackalloc byte[] { COMMAND_REGISTER, register });
+            Span<byte> data = stackalloc byte[value.Length + 1];
             data[0] = address;
-            value.CopyTo(data.AsSpan(1));
+            value.CopyTo(data.Slice(1));
             _i2cDevice.Write(data);
         }
 
         private byte Read(int address)
         {
-            byte[] buffer = new byte[1];
-            _i2cDevice.Write(new byte[] { (byte)address });
+            Span<byte> buffer = stackalloc byte[1];
+            _i2cDevice.Write(stackalloc byte[] { (byte)address });
             return _i2cDevice.ReadByte();
-        }
-
-        private void Write(byte register, byte address, byte value)
-        {
-            _i2cDevice.Write(new byte[] { COMMAND_REGISTER, register });
-            _i2cDevice.Write(new byte[] { address, value });
         }
 
         private byte ReadLedPwm(int x, int y) => Read(GetLedAddress(x, y) + PWM_REGISTER);

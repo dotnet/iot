@@ -6,11 +6,13 @@ using System.Device.I2c;
 using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
+using SixLabors.ImageSharp;
 
 // For 28x1 LED Shim
 // https://shop.pimoroni.com/products/led-shim
 // Port of https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/led_shim.py
-using LedShimRgb28x1 shim = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, LedShimRgb28x1.DefaultI2cAddress)));
+using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, LedShimRgb28x1.DefaultI2cAddress));
+LedShimRgb28x1 shim = new(i2cDevice);
 shim.Initialize();
 shim.EnableBlinking(0);
 shim.Fill(0);
@@ -43,7 +45,8 @@ while (true)
         foreach (int x in Enumerable.Range(0, 28))
         {
             var (r, g, b) = rainbow[(x + offset) % 28];
-            shim.WritePixelRgb(x, r, g, b);
+            Color color = Color.FromRgb(r, g, b);
+            shim.WritePixelRgb(x, color);
         }
     }
 }

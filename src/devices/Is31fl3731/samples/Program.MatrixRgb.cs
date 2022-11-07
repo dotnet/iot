@@ -7,9 +7,11 @@ using System.Device.I2c;
 using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
+using SixLabors.ImageSharp;
 
 // Port of https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/examples/is31fl3731_rgbmatrix5x5_rainbow.py
-using BreakoutRgb5x5 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, BreakoutRgb5x5.DefaultI2cAddress)));
+using I2cDevice i2cdevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, BreakoutRgb5x5.DefaultI2cAddress));
+BreakoutRgb5x5 matrix = new(i2cdevice);
 matrix.Initialize();
 matrix.EnableBlinking(0);
 matrix.Fill(0);
@@ -70,7 +72,7 @@ while (true)
     };
 }
 
-void TestPixels(int r, int g, int b)
+void TestPixels(byte r, byte g, byte b)
 {
     // Draw each row from left to right, top to bottom
     foreach (int y in Enumerable.Range(0, 5))
@@ -78,36 +80,39 @@ void TestPixels(int r, int g, int b)
         foreach (int x in Enumerable.Range(0, 5))
         {
             matrix.Fill(0);  // Clear display
-            matrix.WritePixelRgb(x, y, r, g, b);
+            Color color = Color.FromRgb(r, g, b);
+            matrix.WritePixelRgb(x, y, color);
             Thread.Sleep(50);
         }
     }
 }
 
-void TestRows(int r, int g, int b)
+void TestRows(byte r, byte g, byte b)
 {
+    Color color = Color.FromRgb(r, g, b);
     // Draw full rows from top to bottom
     foreach (int y in Enumerable.Range(0, 5))
     {
         matrix.Fill(0);  // Clear display
         foreach (int x in Enumerable.Range(0, 5))
         {
-            matrix.WritePixelRgb(x, y, r, g, b);
+            matrix.WritePixelRgb(x, y, color);
         }
 
         Thread.Sleep(50);
     }
 }
 
-void TestColumns(int r, int g, int b)
+void TestColumns(byte r, byte g, byte b)
 {
+    Color color = Color.FromRgb(r, g, b);
     // Draw full columns from left to right
     foreach (int x in Enumerable.Range(0, 5))
     {
         matrix.Fill(0);  // Clear display
         foreach (int y in Enumerable.Range(0, 5))
         {
-            matrix.WritePixelRgb(x, y, r, g, b);
+            matrix.WritePixelRgb(x, y, color);
         }
 
         Thread.Sleep(50);
@@ -130,8 +135,8 @@ void TestRainbowSweep()
                 pixel_hue = pixel_hue - Math.Floor(pixel_hue);
 
                 var (r, g, b) = HsvToRgb(pixel_hue, 1, 1);
-
-                matrix.WritePixelRgb(x, y, (int)(r * 255), (int)(g * 255), (int)(b * 255));
+                Color color = Color.FromRgb((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+                matrix.WritePixelRgb(x, y, color);
             }
 
             Thread.Sleep(10);
