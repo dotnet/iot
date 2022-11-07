@@ -136,14 +136,6 @@ namespace Iot.Device.Ft4222
         }
 
         /// <inheritdoc/>
-        public override byte ReadByte()
-        {
-            Span<byte> toRead = stackalloc byte[1];
-            Read(toRead);
-            return toRead[0];
-        }
-
-        /// <inheritdoc/>
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             ushort readBytes;
@@ -166,16 +158,6 @@ namespace Iot.Device.Ft4222
             {
                 throw new IOException($"{nameof(Write)} failed to write, error: {ftStatus}");
             }
-        }
-
-        /// <inheritdoc/>
-        public override void WriteByte(byte value)
-        {
-            Span<byte> toWrite = stackalloc byte[1]
-            {
-                value
-            };
-            Write(toWrite);
         }
 
         /// <inheritdoc/>

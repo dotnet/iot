@@ -5,15 +5,15 @@ VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A15390DB-F07B-4014-9840-5F792089E026}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.BlinkingLights", "samples\Seesaw.Sample.BlinkingLights.csproj", "{413D2811-7A97-44AC-9D82-099209920BBE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.BlinkingLights", "samples\BlinkingLights\Seesaw.Sample.BlinkingLights.csproj", "{413D2811-7A97-44AC-9D82-099209920BBE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.Capabilities", "samples\Seesaw.Sample.Capabilities.csproj", "{5807BB95-184F-47CC-A8A4-63519079B525}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.Capabilities", "samples\Capabilities\Seesaw.Sample.Capabilities.csproj", "{5807BB95-184F-47CC-A8A4-63519079B525}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.SoilSensor", "samples\Seesaw.Sample.SoilSensor.csproj", "{164336C0-7E90-4082-B98D-0AEBB60717E3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.SoilSensor", "samples\SoilSensor\Seesaw.Sample.SoilSensor.csproj", "{164336C0-7E90-4082-B98D-0AEBB60717E3}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw", "Seesaw.csproj", "{F87E6203-1DA1-4648-9A1C-AB39C0CDE7E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.Encoder", "samples\Seesaw.Sample.Encoder.csproj", "{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Seesaw.Sample.Encoder", "samples\Encoder\Seesaw.Sample.Encoder.csproj", "{2AF6BC30-E051-45A3-AA35-9CBB7E6352BA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

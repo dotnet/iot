@@ -10,9 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{499A
 		samples\README.md = samples\README.md
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Llc200d3sh.Sample", "samples\Llc200d3sh.Sample.csproj", "{6A38157B-7F9E-4003-A346-D898C86AE8FA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Llc200d3sh.Sample", "samples\Llc200d3sh\Llc200d3sh.Sample.csproj", "{6A38157B-7F9E-4003-A346-D898C86AE8FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquidLevelSwitch.Sample", "samples\LiquidLevelSwitch.Sample.csproj", "{2675D556-74B1-40DA-B1F8-4CE2733463CF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LiquidLevelSwitch.Sample", "samples\LiquidLevelSwitch\LiquidLevelSwitch.Sample.csproj", "{2675D556-74B1-40DA-B1F8-4CE2733463CF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

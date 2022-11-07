@@ -8,7 +8,7 @@ The Max31856 device is a SPI interface cold-junction compensated thermocouple to
 
 ## Documentation
 
-* Max31856 [datasheet](https://datasheets.maximintegrated.com/en/ds/Max31856.pdf)
+* Max31856 [datasheet](https://datasheets.maximintegrated.com/en/ds/MAX31856.pdf)
 
 ## Usage
 
