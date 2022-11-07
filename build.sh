@@ -12,5 +12,13 @@ while [[ -h $source ]]; do
   [[ $source != /* ]] && source="$scriptroot/$source"
 done
 
+for arg in "$@"
+do
+  case "$arg" in
+  -pack)    _packArg=/p:BuildPackages=true
+            ;;
+  esac
+done
+
 scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
-"$scriptroot/eng/common/build.sh" --build --restore $@
+"$scriptroot/eng/common/build.sh" --build --restore $@ $_packArg

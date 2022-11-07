@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AssemblyName>Arduino.Monitor</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CharacterDisplay.cs" />
+    <Compile Include="Arduino.Monitor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\..\Button\Button.csproj" />
+    <ProjectReference Include="..\..\..\Board\Board.csproj" />
+    <ProjectReference Include="..\..\..\CharacterLcd\CharacterLcd.csproj" />
+    <ProjectReference Include="..\..\..\HardwareMonitor\HardwareMonitor.csproj" />
+    <ProjectReference Include="..\..\..\Mcp3xxx\Mcp3xxx.csproj" />
+    <ProjectReference Include="..\..\Arduino.csproj" />
+  </ItemGroup>
+</Project>

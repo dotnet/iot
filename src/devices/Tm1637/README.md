@@ -4,7 +4,7 @@ TM1637 is a segments display with 6 characters Led controler. It used a 2 wire i
 
 ## Documentation
 
-- TM1637 [datasheet](http://olimex.cl/website_MCI/static/documents/Datasheet_TM1637.pdf)
+- TM1637 [datasheet](https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/docs/datasheet/unit/digi_clock/TM1637.pdf)
 
 ### Device family
 
