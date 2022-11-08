@@ -308,7 +308,7 @@ namespace Iot.Device.Mcp25xxx
         /// </summary>
         /// <param name="byteCount">Number of bytes to read. This must be one or more to read.</param>
         /// <returns>List of buffers data received</returns>
-        public List<byte[]> ReadAllBuffers(int byteCount)
+        private List<byte[]> ReadAllBuffers(int byteCount)
         {
             var result = new List<byte[]>();
             var rxStatusResponse = RxStatus();
