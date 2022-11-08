@@ -15,7 +15,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Models
         [InlineData(new byte[] { 10, 11, 12, 13, 14, 15 }, new byte[] { 10, 11, 12, 13 })]
         public void Get_Message_Id(byte[] rawData, byte[] id)
         {
-            var message = new ReceivedCanMessage(rawData);
+            var message = new ReceivedCanMessage(ReceiveBuffer.RxB0, rawData);
             Assert.Equal(id, message.GetId());
         }
 
@@ -26,7 +26,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Models
         [InlineData(new byte[] { 1, 2, 3 })]
         public void When_Invalid_RawData_Get_Message_Id_Thrown(byte[] rawData)
         {
-            var message = new ReceivedCanMessage(rawData);
+            var message = new ReceivedCanMessage(ReceiveBuffer.RxB0, rawData);
             Assert.Throws<InvalidDataException>(() => message.GetId());
         }
 
@@ -42,7 +42,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Models
         [InlineData(new byte[] { 0, 1, 2, 3, 8, 14, 15, 16, 17, 18, 19, 20, 21 }, new byte[] { 14, 15, 16, 17, 18, 19, 20, 21 })]
         public void Get_Message_Data(byte[] rawData, byte[] id)
         {
-            var message = new ReceivedCanMessage(rawData);
+            var message = new ReceivedCanMessage(ReceiveBuffer.RxB0, rawData);
             Assert.Equal(id, message.GetData());
         }
 
@@ -54,7 +54,7 @@ namespace Iot.Device.Mcp25xxx.Tests.Models
         [InlineData(new byte[] { 1, 2, 3, 4 })]
         public void When_Invalid_RawData_Get_Message_Data_Thrown(byte[] rawData)
         {
-            var message = new ReceivedCanMessage(rawData);
+            var message = new ReceivedCanMessage(ReceiveBuffer.RxB0, rawData);
             Assert.Throws<InvalidDataException>(() => message.GetData());
         }
 

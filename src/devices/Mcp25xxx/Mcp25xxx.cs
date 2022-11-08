@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.Spi;
 using System.IO;
-using System.Linq;
 using System.Threading;
 using Iot.Device.Mcp25xxx.Models;
 using Iot.Device.Mcp25xxx.Register;
@@ -299,40 +297,26 @@ namespace Iot.Device.Mcp25xxx
         /// <returns>List of messages received</returns>
         public ReceivedCanMessage[] ReadMessages()
         {
-            var buffersData = ReadAllBuffers(TransmitBufferMaxSize);
-            return buffersData.Select(d => new ReceivedCanMessage(d)).ToArray();
-        }
-
-        /// <summary>
-        /// Read data from all buffers
-        /// </summary>
-        /// <param name="byteCount">Number of bytes to read. This must be one or more to read.</param>
-        /// <returns>List of buffers data received</returns>
-        private List<byte[]> ReadAllBuffers(int byteCount)
-        {
-            var result = new List<byte[]>();
             var rxStatusResponse = RxStatus();
 
             switch (rxStatusResponse.ReceivedMessage)
             {
                 case RxStatusResponse.ReceivedMessageType.MessageInRxB0:
-                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount));
-                    break;
+                    byte[] messageRxB0 = ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, TransmitBufferMaxSize);
+                    return new[] { new ReceivedCanMessage(ReceiveBuffer.RxB0, messageRxB0) };
                 case RxStatusResponse.ReceivedMessageType.MessageInRxB1:
-                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount));
-                    break;
+                    byte[] messageRxB1 = ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, TransmitBufferMaxSize);
+                    return new[] { new ReceivedCanMessage(ReceiveBuffer.RxB1, messageRxB1) };
                 case RxStatusResponse.ReceivedMessageType.MessagesInBothBuffers:
-                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, byteCount));
-                    result.Add(ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, byteCount));
-                    break;
+                    var firstMessage = ReadRxBuffer(RxBufferAddressPointer.RxB0Sidh, TransmitBufferMaxSize);
+                    var secondMessage = ReadRxBuffer(RxBufferAddressPointer.RxB1Sidh, TransmitBufferMaxSize);
+                    return new[] { new ReceivedCanMessage(ReceiveBuffer.RxB0, firstMessage), new ReceivedCanMessage(ReceiveBuffer.RxB1, secondMessage) };
                 case RxStatusResponse.ReceivedMessageType.NoRxMessage:
-                    break;
+                    return Array.Empty<ReceivedCanMessage>();
                 default:
                     throw new Exception(
                         $"Invalid value for {nameof(rxStatusResponse.ReceivedMessage)}: {rxStatusResponse.ReceivedMessage}.");
             }
-
-            return result;
         }
 
         /// <summary>

@@ -13,6 +13,11 @@ namespace Iot.Device.Mcp25xxx.Models
     public class ReceivedCanMessage
     {
         /// <summary>
+        /// Buffer received this message
+        /// </summary>
+        public ReceiveBuffer Buffer { get; }
+
+        /// <summary>
         /// Received CAN message
         /// </summary>
         public byte[] RawData { get; }
@@ -20,9 +25,11 @@ namespace Iot.Device.Mcp25xxx.Models
         /// <summary>
         /// Received CAN message constructor
         /// </summary>
+        /// <param name="buffer">buffer received this message</param>
         /// <param name="rawData">data from buffer</param>
-        public ReceivedCanMessage(byte[] rawData)
+        public ReceivedCanMessage(ReceiveBuffer buffer, byte[] rawData)
         {
+            Buffer = buffer;
             RawData = rawData;
         }
 
