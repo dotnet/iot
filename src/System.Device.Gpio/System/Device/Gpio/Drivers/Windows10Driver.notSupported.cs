@@ -67,6 +67,12 @@ namespace System.Device.Gpio.Drivers
         }
 
         /// <inheritdoc />
+        protected internal override void Toggle(int pinNumber)
+        {
+            throw new PlatformNotSupportedException();
+        }
+
+        /// <inheritdoc />
         protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             throw new PlatformNotSupportedException();

@@ -30,6 +30,7 @@ public class GpioController : IDisposable
     /// If a pin element exists, that pin is open. Uses current controller's numbering scheme
     /// </summary>
     private readonly ConcurrentDictionary<int, PinValue?> _openPins;
+    private readonly ConcurrentDictionary<int, GpioPin> _gpioPins;
     private GpioDriver _driver;
 
     /// <summary>
@@ -50,6 +51,7 @@ public class GpioController : IDisposable
         _driver = driver;
         NumberingScheme = numberingScheme;
         _openPins = new ConcurrentDictionary<int, PinValue?>();
+        _gpioPins = new ConcurrentDictionary<int, GpioPin>();
     }
 
     /// <summary>
@@ -91,12 +93,13 @@ public class GpioController : IDisposable
     {
         if (IsPinOpen(pinNumber))
         {
-            throw new InvalidOperationException($"Pin {pinNumber} is already open.");
+            return _gpioPins[pinNumber];
         }
 
         OpenPinCore(pinNumber);
         _openPins.TryAdd(pinNumber, null);
-        return new GpioPin(pinNumber, _driver);
+        _gpioPins[pinNumber] = new GpioPin(pinNumber, _driver);
+        return _gpioPins[pinNumber];
     }
 
     /// <summary>
@@ -162,6 +165,7 @@ public class GpioController : IDisposable
     {
         int logicalPinNumber = GetLogicalPinNumber(pinNumber);
         _driver.ClosePin(logicalPinNumber);
+        _gpioPins.TryRemove(pinNumber, out _);
     }
 
     /// <summary>
@@ -244,6 +248,20 @@ public class GpioController : IDisposable
 
         int logicalPinNumber = GetLogicalPinNumber(pinNumber);
         return _driver.Read(logicalPinNumber);
+    }
+
+    /// <summary>
+    /// Toggle the current value of a pin.
+    /// </summary>
+    /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+    public virtual void Toggle(int pinNumber)
+    {
+        if (!IsPinOpen(pinNumber))
+        {
+            throw new InvalidOperationException($"Can not read from pin {pinNumber} because it is not open.");
+        }
+
+        _driver.Toggle(pinNumber);
     }
 
     /// <summary>
@@ -378,6 +396,7 @@ public class GpioController : IDisposable
         }
 
         _openPins.Clear();
+        _gpioPins.Clear();
         _driver?.Dispose();
         _driver = null!;
     }

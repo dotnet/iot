@@ -199,6 +199,9 @@ public class RaspberryPi3Driver : GpioDriver
     protected internal override PinValue Read(int pinNumber) => InternalDriver.Read(pinNumber);
 
     /// <inheritdoc/>
+    protected internal override void Toggle(int pinNumber) => InternalDriver.Toggle(pinNumber);
+
+    /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => InternalDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
 
     /// <inheritdoc/>

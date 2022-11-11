@@ -87,6 +87,6 @@ namespace System.Device.Gpio
         /// <summary>
         /// Toggles the output of the general purpose I/O (GPIO) pin if the pin is configured as an output.
         /// </summary>
-        public virtual void Toggle() => _driver.Write(_pinNumber, !_driver.Read(_pinNumber));
+        public virtual void Toggle() => _driver.Toggle(_pinNumber);
     }
 }
