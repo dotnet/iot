@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -14,9 +14,13 @@ namespace Iot.Device.Board
 {
     /// <summary>
     /// A GPIO Driver for testing on Windows
+    /// This driver uses the keyboard for simulating GPIO pins.
+    /// Pins 0-2 are output only and represent the keyboard LEDs (Caps lock, Scroll Lock and Num Lock).
+    /// Setting a value to any of these pins toggles the LEDs on the keyboard (if they're physically present).
+    /// Pins above 8 are input only and represent the keyboard keys. To get the pin number,
+    /// cast the corresponding <see cref="ConsoleKey"/> to int, e.g. int pinNumber = (int)ConsoleKey.A
     /// </summary>
-    [ExcludeFromCodeCoverage] // Windows-specific
-    internal class KeyboardGpioDriver : GpioDriver
+    public class KeyboardGpioDriver : GpioDriver
     {
         private enum LedKey
         {
@@ -33,6 +37,9 @@ namespace Iot.Device.Board
         private Thread? _pollThread;
         private bool _terminateThread;
 
+        /// <summary>
+        /// Creates an instance of the KeyboardGpioDriver
+        /// </summary>
         public KeyboardGpioDriver()
         {
             _state = new KeyState[SupportedPinCount];
@@ -49,6 +56,7 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override int PinCount
         {
             get
@@ -59,32 +67,42 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             return pinNumber;
         }
 
+        /// <inheritdoc />
         protected override void OpenPin(int pinNumber)
         {
         }
 
+        /// <inheritdoc />
         protected override void ClosePin(int pinNumber)
         {
         }
 
+        /// <inheritdoc />
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
             if (IsPinModeSupported(pinNumber, mode))
             {
                 _state[pinNumber].Mode = mode;
             }
+            else
+            {
+                throw new NotSupportedException($"Pin {pinNumber} does not support mode {mode}");
+            }
         }
 
+        /// <inheritdoc />
         protected override PinMode GetPinMode(int pinNumber)
         {
             return _state[pinNumber].Mode;
         }
 
+        /// <inheritdoc />
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             if (pinNumber < 3)
@@ -160,6 +178,7 @@ namespace Iot.Device.Board
             return (virtualKey, Interop.GetKeyState(virtualKey) & 1);
         }
 
+        /// <inheritdoc />
         protected override PinValue Read(int pinNumber)
         {
             short currentKeyState = Interop.GetAsyncKeyState(pinNumber);
@@ -173,8 +192,10 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
+        /// <inheritdoc />
         protected override void Write(int pinNumber, PinValue value)
         {
             if (pinNumber == 0)
@@ -193,6 +214,7 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             PinValue oldState = Read(pinNumber);
@@ -234,6 +256,7 @@ namespace Iot.Device.Board
             };
         }
 
+        /// <inheritdoc />
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             lock (_state)
@@ -252,6 +275,7 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             bool terminate;

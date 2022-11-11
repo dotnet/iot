@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile> 
+    <!-- We don't want to run hardware test by default -->
+    <VSTestTestCaseFilter Condition="'$(VSTestTestCaseFilter)'==''">requires!=hardware</VSTestTestCaseFilter>
+    <RootNamespace>ArduinoCsCompiler.Tests</RootNamespace>
+	<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\src\devices\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Arduino\tests\Arduino.Tests.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\Board\Board.csproj" />
+    <ProjectReference Include="..\..\..\src\devices\CharacterLcd\CharacterLcd.csproj" />
+    <ProjectReference Include="..\ArduinoCsCompiler.csproj" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+    
+    <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+</Project>

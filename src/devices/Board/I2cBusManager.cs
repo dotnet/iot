@@ -68,12 +68,12 @@ namespace Iot.Device.Board
         /// <remarks>No test is performed whether the given device exists and is usable</remarks>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
-            if (_devices.TryGetValue(deviceAddress, out var device))
+            if (_devices.TryGetValue(deviceAddress, out I2cDevice? device))
             {
                 return device;
             }
 
-            var newDevice = _busInstance.CreateDevice(deviceAddress);
+            I2cDevice newDevice = _busInstance.CreateDevice(deviceAddress);
             _devices.Add(deviceAddress, newDevice);
             return newDevice;
         }
@@ -85,7 +85,7 @@ namespace Iot.Device.Board
         /// <param name="deviceAddress">Address of the device to dispose</param>
         public override void RemoveDevice(int deviceAddress)
         {
-            if (_devices.TryGetValue(deviceAddress, out var device))
+            if (_devices.TryGetValue(deviceAddress, out I2cDevice? device))
             {
                 device.Dispose();
                 _devices.Remove(deviceAddress);
@@ -106,7 +106,7 @@ namespace Iot.Device.Board
                     _board.ReleasePin(_sclPin, PinUsage.I2c, this);
                 }
 
-                foreach (var dev in _devices)
+                foreach (KeyValuePair<int, I2cDevice> dev in _devices)
                 {
                     dev.Value.Dispose();
                 }

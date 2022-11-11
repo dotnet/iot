@@ -1,6 +1,6 @@
 <Project>
-  <!-- These references to third-party libraries are included in all projects except System.Device.Gpio -->
-  <ItemGroup Condition="'$(MSBuildProjectName)' != 'System.Device.Gpio'">
+  <!-- These references to third-party libraries are included in all projects except System.Device.Gpio and the build wrapper project -->
+  <ItemGroup Condition="'$(MSBuildProjectName)' != 'System.Device.Gpio' And '$(MSBuildProjectName)' != 'build'">
     <PackageReference Include="UnitsNet" Version="4.77.0" />
     <PackageReference Include="SixLabors.ImageSharp" Version="1.0.2" />
   </ItemGroup>

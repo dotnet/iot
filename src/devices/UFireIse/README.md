@@ -4,8 +4,8 @@ The μFire ISE Probe Interface is an I²C sensor that can read a pH probe. Attac
 
 ## Documentation
 
-- [µFire connections](https://www.ufire.co/docs/uFireIse/#connections)
-- [µFire class functions](https://www.ufire.co/docs/uFireIse/api.html#class-functions)
+- [µFire connections](https://www.ufire.co/docs/uFire_EC/#connections)
+- [µFire class functions](https://www.ufire.co/docs/uFire_EC/api.html#class-functions)
 
 ## Usage
 

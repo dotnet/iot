@@ -1,0 +1,8 @@
+<Project>
+  <Import Project="../../eng/Analyzers.props" />
+  <Import Project="../../eng/Versions.props" />
+  <Import Project="../../eng/Versions.external.props" />
+  <PropertyGroup>
+	<Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>
