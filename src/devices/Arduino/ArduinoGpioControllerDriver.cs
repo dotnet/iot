@@ -18,6 +18,7 @@ namespace Iot.Device.Arduino
         private readonly IReadOnlyCollection<SupportedPinConfiguration> _supportedPinConfigurations;
         private readonly Dictionary<int, CallbackContainer> _callbackContainers;
         private readonly ConcurrentDictionary<int, PinMode> _pinModes;
+        private readonly ConcurrentDictionary<int, PinValue> _pinValues;
         private readonly object _callbackContainersLock;
         private readonly AutoResetEvent _waitForEventResetEvent;
         private readonly ILogger _logger;
@@ -31,6 +32,7 @@ namespace Iot.Device.Arduino
             _waitForEventResetEvent = new AutoResetEvent(false);
             _callbackContainersLock = new object();
             _pinModes = new ConcurrentDictionary<int, PinMode>();
+            _pinValues = new ConcurrentDictionary<int, PinValue>();
             _outputPinValues = new ConcurrentDictionary<int, PinValue?>();
             _logger = this.GetCurrentClassLogger();
 
@@ -54,11 +56,14 @@ namespace Iot.Device.Arduino
             {
                 throw new ArgumentOutOfRangeException(nameof(pinNumber), $"Pin {pinNumber} is not valid");
             }
+
+            _pinValues.TryAdd(pinNumber, PinValue.Low);
         }
 
         protected override void ClosePin(int pinNumber)
         {
             _pinModes.TryRemove(pinNumber, out _);
+            _pinValues.TryRemove(pinNumber, out _);
         }
 
         protected override void SetPinMode(int pinNumber, PinMode mode)
@@ -152,8 +157,11 @@ namespace Iot.Device.Arduino
 
         protected override PinValue Read(int pinNumber)
         {
-            return _device.ReadDigitalPin(pinNumber);
+            _pinValues[pinNumber] = _device.ReadDigitalPin(pinNumber);
+            return _pinValues[pinNumber];
         }
+
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         protected override void Write(int pinNumber, PinValue value)
         {
@@ -168,6 +176,7 @@ namespace Iot.Device.Arduino
 
             _device.WriteDigitalPin(pinNumber, value);
             _outputPinValues.AddOrUpdate(pinNumber, x => value, (y, z) => value);
+            _pinValues[pinNumber] = value;
         }
 
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
@@ -283,6 +292,7 @@ namespace Iot.Device.Arduino
                     _callbackContainers.Clear();
                 }
 
+                _pinValues.Clear();
                 _outputPinValues.Clear();
                 _device.DigitalPortValueUpdated -= FirmataOnDigitalPortValueUpdated;
             }
