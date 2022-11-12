@@ -29,7 +29,7 @@ namespace WeatherStation
     {
         private const int RedLed = 16;
         private const int Button = 23;
-        private const int TotalPages = 2;
+        private const int TotalPages = 3;
 
         private const int StationAltitude = 650;
 
@@ -155,7 +155,7 @@ namespace WeatherStation
             _pageChanged = true;
 
             Loop(gpioController, console);
-
+            console.BacklightOn = false;
             return 0;
         }
 
@@ -163,7 +163,7 @@ namespace WeatherStation
         {
             Length stationAltitude = Length.FromMeters(StationAltitude);
             int currentPage = _page;
-            while (true)
+            while (!Console.KeyAvailable)
             {
                 try
                 {
@@ -173,6 +173,7 @@ namespace WeatherStation
                         _pageChanged = false;
                         currentPage = _page;
                         console.LineFeedMode = LineWrapMode.Truncate;
+                        console.BacklightOn = true;
                     }
 
                     var time = DateTime.Now;
@@ -208,6 +209,10 @@ namespace WeatherStation
                         console.LineFeedMode = LineWrapMode.WordWrap;
                         console.Write(line);
                         console.LineFeedMode = LineWrapMode.Truncate;
+                    }
+                    else if (currentPage == 2)
+                    {
+                        console.BacklightOn = false;
                     }
                 }
                 catch (TimeoutException x)
