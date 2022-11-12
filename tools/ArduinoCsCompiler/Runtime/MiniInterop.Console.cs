@@ -61,31 +61,6 @@ namespace ArduinoCsCompiler.Runtime
             {
                 return 0;
             }
-
-            [ArduinoImplementation(CompareByParameterNames = true)]
-            internal static unsafe bool PeekConsoleInput(
-                IntPtr hConsoleInput,
-                out void* buffer,
-                int numInputRecords_UseOne,
-                out int numEventsRead)
-            {
-                buffer = null;
-                numEventsRead = 0;
-                return true; // Returning false would mean an error occurred
-            }
-
-            [ArduinoImplementation(CompareByParameterNames = true)]
-            internal static unsafe bool ReadConsoleInput(
-                IntPtr hConsoleInput,
-                out void* buffer,
-                int numInputRecords_UseOne,
-                out int numEventsRead)
-            {
-                // This could probably not be what the client expects here, but we simulate "no keyboard attached" anyway
-                buffer = null;
-                numEventsRead = 0;
-                return true;
-            }
         }
     }
 }
