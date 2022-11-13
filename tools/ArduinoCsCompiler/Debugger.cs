@@ -24,7 +24,7 @@ namespace ArduinoCsCompiler
         private readonly BlockingCollection<(DebuggerDataKind Kind, byte[] Data)> _debugDataReceived;
         private byte[] _lastData;
 
-        private List<(string CommandName, Action<string[]> Operation, string CommandHelp)> _debuggerCommands;
+        private List<DebuggerOperation> _debuggerCommands;
 
         internal Debugger(MicroCompiler compiler, ExecutionSet set)
         {
@@ -35,21 +35,42 @@ namespace ArduinoCsCompiler
             _debugDataReceived = new();
             _debuggerCommands = new()
             {
-                ("quit", Quit, "Exit debugger(but keep code running"),
-                ("code", WriteCurrentInstructions, "Show code in current method. [ARG1] = Number of instructions before and after the current"),
-                ("continue", Continue, "Continue execution"),
-                ("bp", BreakPoint, "Toggle breakpoints. [ARG1] Method"),
-                ("break", DebuggerBreak, "Break execution"),
-                ("help", PrintHelp, "Print Command help"),
-                ("stack", WriteCurrentStack, "Show current stack frames"),
-                ("kill", Kill, "Terminate program"),
-                ("into", (x) => SendDebuggerCommand(DebuggerCommand.StepInto), "Step into current instruction"),
-                ("over", StepOver, "Step over current instruction"),
-                ("leave", (x) => SendDebuggerCommand(DebuggerCommand.StepOut), "Leave current method"),
-                ("locals", Locals, "Retrieve values of locals. [ARG1] = Stack frame number (default: current)"),
-                ("arguments", Arguments, "Retrieve values of method arguments. [ARG1] = Stack frame number (default: current)"),
-                ("evalstack", EvaluationStack, "Retrieve values from the current evaluation stack. [ARG1] = Stack frame number (default: current)"),
-                ("exception", x => SendDebuggerCommand(DebuggerCommand.BreakOnExceptions), "Break when an exception occurs"),
+                new DebuggerOperation("quit", Quit, "Exit debugger(but keep code running", @"Syntax: Quit"),
+                new DebuggerOperation("code", WriteCurrentInstructions, "Show code in current method. [ARG1] = Number of instructions before and after the current method", @"Syntax: code [number]
+Prints [number] of IL instructions before and after the current PC. If [number] is not specified, the whole method is printed."),
+                new DebuggerOperation("continue", Continue, "Continue execution", @"Syntax: continue
+Continue execution, stop at next breakpoint (if any)"),
+                new DebuggerOperation("bp", BreakPoint, "Toggle breakpoints.", @"Syntax: bp Method.Name [overload number] [offset]
+If the name is not unique, a list of matching methods is printed.
+Specify [overload number] to select from the list.
+[Offset] is the Hex offset within the method where to set the breakpoint"),
+                new DebuggerOperation("break", DebuggerBreak, "Break execution", @"Syntax: break [threadId]
+Interrupt a running process, optionally specifying the thread to halt on"),
+                new DebuggerOperation("help", PrintHelp, "Print Command help.", "Help [Command]: Print help for the given command"),
+                new DebuggerOperation("stack", WriteCurrentStack, "Show current stack frames", @"Syntax: stack
+Prints a stack trace"),
+                new DebuggerOperation("kill", Kill, "Terminate program", @"Syntax: Kill
+Terminate the current program"),
+                new DebuggerOperation("into", (x) => SendDebuggerCommand(DebuggerCommand.StepInto), "Step into current instruction", @"Syntax: into
+Single step trough the program, entering a sub-method when the next instruction is a call, callvirt or new instruction"),
+                new DebuggerOperation("over", StepOver, "Step over current instruction", @"Syntax: over
+Single step trough the program, jumping over call instructions
+This will attempt to stay in the same method. May stop at a different instance of the current
+method in case of recursion"), // This is a known limitation
+                new DebuggerOperation("leave", (x) => SendDebuggerCommand(DebuggerCommand.StepOut), "Leave current method", @"Syntax: leave
+Runs program until the current method ends"),
+                new DebuggerOperation("locals", Locals, "Retrieve values of locals. [ARG1] = Stack frame number (default: current)", @"Syntax: locals [StackFrame]
+Prints the local variables of [stack frame]. Use stack command to find the list of active stacks.
+Defaults to the current frame"),
+                new DebuggerOperation("arguments", Arguments, "Retrieve values of method arguments. [ARG1] = Stack frame number (default: current)", @"Syntax: arguments [StackFrame]
+Prints the arguments of the given [stack frame]. Defaults to the active frame"),
+                new DebuggerOperation("evalstack", EvaluationStack, "Retrieve values from the current evaluation stack. [ARG1] = Stack frame number (default: current)", @"Syntax: evalstack [StackFrame]
+Prints the evaluation stack of the given [stack frame]. Defaults to the active frame."),
+                new DebuggerOperation("exception", x => SendDebuggerCommand(DebuggerCommand.BreakOnExceptions), "Break when an exception occurs", @"Syntax: exception
+Breaks execution when an exception is thrown."),
+                new DebuggerOperation("thread", SelectThread, "Switch to thread", @"Syntax: thread [ThreadId]
+Switch to thread [ThreadId]. Breakpoints will only be hit on the given thread.
+Use -1 to allow breaking on all threads.")
             };
         }
 
@@ -111,8 +132,7 @@ namespace ArduinoCsCompiler
         {
             if (args.Length <= 1)
             {
-                Console.WriteLine("Syntax: bp Method.Name [overload number] [offset]");
-                Console.WriteLine("The method name does not need to be unique. If [overload number] is not specified, a list of matching methods will be printed.");
+                PrintHelp(new string[] { "bp" });
                 return;
             }
 
@@ -157,7 +177,11 @@ namespace ArduinoCsCompiler
             int startOffset = 0;
             if (args.Length > 3)
             {
-                Int32.TryParse(args[3], NumberStyles.Any, CultureInfo.CurrentCulture, out startOffset);
+                if (!Int32.TryParse(args[3], NumberStyles.HexNumber, CultureInfo.CurrentCulture, out startOffset))
+                {
+                    Console.WriteLine($"Unable to parse {args[3]} as offset");
+                    return;
+                }
             }
 
             if (overload < methods.Count)
@@ -194,6 +218,23 @@ namespace ArduinoCsCompiler
             {
                 SendDebuggerCommand(DebuggerCommand.StepOver);
             }
+        }
+
+        private void SelectThread(string[] args)
+        {
+            if (args.Length <= 1)
+            {
+                PrintHelp("thread");
+                return;
+            }
+
+            if (!Int32.TryParse(args[1], NumberStyles.Integer, CultureInfo.CurrentCulture, out int result))
+            {
+                PrintHelp("thread");
+                return;
+            }
+
+            _commandHandler.SendDebuggerCommand(DebuggerCommand.SelectThread, result);
         }
 
         private void SendDebuggerCommand(DebuggerCommand command)
@@ -293,7 +334,16 @@ namespace ArduinoCsCompiler
 
         private void DebuggerBreak(string[] args)
         {
-            _commandHandler.SendDebuggerCommand(DebuggerCommand.Break);
+            int thread = -1;
+            if (args.Length > 1)
+            {
+                if (!Int32.TryParse(args[1], NumberStyles.Integer, CultureInfo.CurrentCulture, out thread))
+                {
+                    Console.WriteLine($"{args[1]} is not a valid thread number");
+                }
+            }
+
+            _commandHandler.SendDebuggerCommand(DebuggerCommand.Break, thread);
         }
 
         private void Quit(string[] args)
@@ -315,8 +365,32 @@ namespace ArduinoCsCompiler
             }
         }
 
+        private void PrintHelp(string cmd)
+        {
+            PrintHelp(new string[]
+            {
+                cmd
+            });
+        }
+
         public void PrintHelp(string[] args)
         {
+            if (args.Length >= 2)
+            {
+                Console.WriteLine($"Help for command {args[1]}:");
+                var cmd = _debuggerCommands.FirstOrDefault(x => x.CommandName == args[1]);
+                if (cmd == null)
+                {
+                    Console.WriteLine("No such command");
+                }
+                else
+                {
+                    Console.WriteLine(cmd.LongHelp);
+                }
+
+                return;
+            }
+
             Console.WriteLine("Debugger command help (abbreviations are allowed, as long as they're unique):");
             Console.WriteLine();
             foreach (var item in _debuggerCommands.OrderBy(x => x.CommandName))

@@ -266,9 +266,19 @@ namespace ArduinoCsCompiler
                 }
                 catch (Exception x)
                 {
-                    Logger.LogError($"Code execution caused an exception of type {x.GetType().FullName} on the microcontroller.");
-                    Logger.LogError(x.Message);
-                    Abort();
+                    // Check whether the source of the exception is the compiler itself or really the remote code
+                    if (x.StackTrace != null && x.StackTrace.Contains(nameof(ArduinoTask.GetMethodResults)))
+                    {
+                        Logger.LogError($"Code execution caused an exception of type {x.GetType().FullName} on the microcontroller.");
+                        Logger.LogError(x.Message);
+                        Abort();
+                    }
+                    else
+                    {
+                        Logger.LogError($"Internal error in compiler: {x.Message}");
+                        Logger.LogError(x.ToString());
+                        Abort();
+                    }
                 }
             }
         }
