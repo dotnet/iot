@@ -83,9 +83,6 @@ public class HummingBoardDriver : GpioDriver
     protected internal override PinValue Read(int pinNumber) => _internalDriver.Read(pinNumber);
 
     /// <inheritdoc/>
-    protected internal override void Toggle(int pinNumber) => _internalDriver.Read(pinNumber);
-
-    /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback) => _internalDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
 
     /// <inheritdoc/>

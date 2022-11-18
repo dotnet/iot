@@ -86,7 +86,7 @@ public abstract class GpioDriver : IDisposable
     /// Toggle the current value of a pin.
     /// </summary>
     /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
-    protected internal abstract void Toggle(int pinNumber);
+    protected internal virtual void Toggle(int pinNumber) => Write(pinNumber, !Read(pinNumber));
 
     /// <summary>
     /// Writes a value to a pin.
