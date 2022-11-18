@@ -26,7 +26,7 @@ namespace System.Device.Gpio.Tests
         }
 
         [Fact]
-        public void TestOpnPin()
+        public void TestOpenPin()
         {
             // Arrange
             var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
