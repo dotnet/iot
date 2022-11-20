@@ -105,7 +105,8 @@ namespace Iot.Device.Nmea0183.Ais
                 throw new FormatException($"Unrecognised message: packet header {packetHeader}: {sentence}");
             }
 
-            // var radioChannelCode = sentenceParts[4];
+            // sentenceParts[4] would be the radio channel (A or B) where the message was received. This is not the same as the AIS class,
+            // and therefore quite useless.
             var encodedPayload = sentenceParts[5];
 
             if (string.IsNullOrWhiteSpace(encodedPayload))

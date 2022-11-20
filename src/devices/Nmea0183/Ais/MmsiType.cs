@@ -10,6 +10,8 @@ namespace Iot.Device.Nmea0183.Ais
     /// <remarks>
     /// Any system that uses AIS-Sart, MOB or Epirb type is only activated in case of an emergency. When receiving any message from such
     /// a transmitter an alert should be generated and the nearest MRCC should be contacted immediately. Somebody might be in imminent danger!
+    ///
+    /// Some of these types are rarely or only in very limited areas used.
     /// </remarks>
     public enum MmsiType
     {
@@ -44,27 +46,27 @@ namespace Iot.Device.Nmea0183.Ais
         AtoN,
 
         /// <summary>
-        /// The vessel is an auxiliary vessel of another. Rarely used.
+        /// The vessel is an auxiliary vessel of another.
         /// </summary>
         Auxiliary,
 
         /// <summary>
-        /// This is an AIS-SART transponder. If we see this, we should trigger an alarm.
+        /// This is an AIS-SART transponder.
         /// </summary>
         AisSart,
 
         /// <summary>
-        /// An (increasingly popular) AIS-MOB device was activated. Another reason to sound an alarm.
+        /// An (increasingly popular) AIS-MOB device was activated.
         /// </summary>
         Mob,
 
         /// <summary>
-        /// Similar to the above. Sound an alarm!
+        /// Similar to the above: An Epirb with Ais was activated.
         /// </summary>
         Epirb,
 
         /// <summary>
-        /// Defined, but probably not used.
+        /// Handheld radio of a diver
         /// </summary>
         DiversRadio
     }

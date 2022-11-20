@@ -105,12 +105,7 @@ namespace Iot.Device.Nmea0183.Ais
             string m = Mmsi.ToString(CultureInfo.InvariantCulture);
 
             // Normally, an MMSI should start with at most two zeros, but some targets report otherwise illegal 4-digit MMSI numbers.
-            while (m.Length < 9)
-            {
-                m = "0" + m;
-            }
-
-            return m;
+            return m.PadLeft(9, '0');
         }
 
         /// <summary>
