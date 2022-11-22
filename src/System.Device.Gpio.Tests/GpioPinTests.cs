@@ -33,8 +33,8 @@ namespace System.Device.Gpio.Tests
             // Act
             GpioPin pin = ctrl.OpenPin(PinNumber, PinMode.Input);
             // Assert
-            Assert.True(pin.PinNumber == PinNumber);
-            Assert.True(pin.GetPinMode() == PinMode.Input);
+            Assert.Equal(pin.PinNumber, PinNumber);
+            Assert.Equal(PinMode.Input, pin.GetPinMode());
         }
 
         [Fact]
@@ -60,9 +60,9 @@ namespace System.Device.Gpio.Tests
             GpioPin pin = ctrl.OpenPin(PinNumber, PinMode.Input);
             pin.Write(PinValue.High);
             // Assert
-            Assert.True(pin.Read() == PinValue.High);
+            Assert.Equal(PinValue.High, pin.Read());
             pin.Toggle();
-            Assert.True(pin.Read() == PinValue.Low);
+            Assert.Equal(PinValue.Low, pin.Read());
         }
     }
 }

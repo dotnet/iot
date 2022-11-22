@@ -65,8 +65,6 @@ namespace ArduinoCsCompiler
             return _hardwareLevelAccess.ReadPin(pinNumber);
         }
 
-        protected override void Toggle(int pinNumber) => Write(pinNumber, !Read(pinNumber));
-
         protected override void Write(int pinNumber, PinValue value)
         {
             _hardwareLevelAccess.WritePin(pinNumber, value == PinValue.High ? 1 : 0);

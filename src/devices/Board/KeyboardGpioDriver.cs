@@ -143,7 +143,7 @@ namespace Iot.Device.Board
                 // Simulate a key press
                 Interop.keybd_event((byte)virtualKey,
                     0x45,
-                    Interop.KEYEVENTF_EXTENDEDKEY | 0,
+                    Interop.KEYEVENTF_EXTENDEDKEY,
                     IntPtr.Zero);
 
                 // Simulate a key release
