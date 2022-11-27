@@ -177,7 +177,7 @@ Use -1 to allow breaking on all threads.")
             int startOffset = 0;
             if (args.Length > 3)
             {
-                if (!Int32.TryParse(args[3], NumberStyles.HexNumber, CultureInfo.CurrentCulture, out startOffset))
+                if (!TryParseHexOrDec(args[3], out startOffset))
                 {
                     Console.WriteLine($"Unable to parse {args[3]} as offset");
                     return;
@@ -190,7 +190,17 @@ Use -1 to allow breaking on all threads.")
                 Console.WriteLine($"Setting breakpoint in method {methodToBreakAt.MethodBase.MethodSignature()} at offset 0x{startOffset:X}");
                 _commandHandler.SendDebuggerCommand(DebuggerCommand.BreakPoint, methodToBreakAt.Token, startOffset);
             }
+        }
 
+        public static bool TryParseHexOrDec(string input, out int number)
+        {
+            input = input.Trim();
+            if (input.StartsWith("0x", StringComparison.InvariantCultureIgnoreCase) && input.Length > 2)
+            {
+                return Int32.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out number);
+            }
+
+            return Int32.TryParse(input, NumberStyles.Any, CultureInfo.CurrentCulture, out number);
         }
 
         private void StepOver(string[] args)
