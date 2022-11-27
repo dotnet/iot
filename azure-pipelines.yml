@@ -31,7 +31,7 @@ stages:
   - job: Windows_NT
     displayName: Windows Build
     pool:
-      vmImage: windows-2022
+      vmImage: windows-latest
 
     strategy:
       matrix:
@@ -130,7 +130,7 @@ stages:
           BuildConfiguration: Debug
 
     steps:
-    - script: ./build.sh --ci /maxCpuCount:1
+    - script: ./build.sh --ci
         --configuration $(BuildConfiguration)
         --prepareMachine
       displayName: Build
