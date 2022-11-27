@@ -2,7 +2,7 @@
 
 This library supports [NDEF messages](https://nfc-forum.org/product/nfc-data-exchange-format-ndef-technical-specification/). NDEF is composed of a message with records in it. Every record can be a know type or a specific type. This library fully support all root type of messages.
 
-NDEF messages are used on Mifare Cards and is included into this library as well. You have a full example using 2 different NFC readers [PN532](../../Pn532/README.md) and [PN1850](../../Pn1850/README.md) build in.
+NDEF messages are used on Mifare Cards and is included into this library as well. You have a full example using 2 different NFC readers [PN532](../../Pn532/README.md) and [PN5180](../../Pn5180/README.md) build in.
 
 ## Usage
 
@@ -182,4 +182,4 @@ Console.WriteLine($"This card is{isForm} NDEF formatted");
 
 ## Card type supported
 
-NDEF per se is fully independent of cards, so the class can be used independently. A [Mifare implementation](../Mifare) has been done. All Mifare 1K, 2K and 4K are supported. The Mifare 300 are not. Also all [Ultralight cards](../Utralight) are supported as well.
+NDEF per se is fully independent of cards, so the class can be used independently. A [Mifare implementation](../Mifare) has been done. All Mifare 1K, 2K and 4K are supported. The Mifare 300 are not. Also all [Ultralight cards](../Ultralight) are supported as well.
