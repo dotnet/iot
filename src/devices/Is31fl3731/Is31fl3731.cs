@@ -96,9 +96,9 @@ namespace Iot.Device.Display
             // 00 = picture mode
             // 01 = auto frame
             // 1x audio frame play mode
-            Write(FUNCTION_REGISTER, CONFIGURATION_REGISTER, 0);
+            Write((byte)Register.Function, (byte)FunctionRegister.CONFIGURATION, 0);
             // set data page
-            _i2cDevice.Write(stackalloc byte[] { COMMAND_REGISTER, 0 });
+            _i2cDevice.Write(stackalloc byte[] { (byte)Register.Command, 0 });
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace Iot.Device.Display
             EnableAllLeds(page);
             Span<byte> data = stackalloc byte[PWM_REGISTER_LENGTH];
             data.Fill(brightness);
-            Write(page, PWM_REGISTER, data);
+            Write(page, (byte)FrameRegister.Pwm, data);
         }
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void EnableAllLeds(byte page = 0)
         {
-            Write(page, LED_REGISTER, _enable_all_leds_data);
+            Write(page, (byte)FrameRegister.Led, _enable_all_leds_data);
         }
 
         /// <summary>
@@ -144,7 +144,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void DisableAllLeds(byte page = 0)
         {
-            Write(page, LED_REGISTER, _disable_all_leds_data);
+            Write(page, (byte)FrameRegister.Led, _disable_all_leds_data);
         }
 
         /// <summary>
@@ -168,7 +168,7 @@ namespace Iot.Device.Display
                 value = 0;
             }
 
-            Write(FUNCTION_REGISTER, DISPLAY_REGISTER, (byte)value);
+            Write((byte)Register.Function, (byte)FunctionRegister.DisplayOption, (byte)value);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Iot.Device.Display
             // 0 = shutdown mode
             // 1 = normal operation
             int mode = shutdown ? 0 : 1;
-            Write(FUNCTION_REGISTER, SHUTDOWN, (byte)mode);
+            Write((byte)Register.Function, (byte)FunctionRegister.Shutdown, (byte)mode);
         }
 
         /// <summary>
@@ -204,13 +204,13 @@ namespace Iot.Device.Display
 
         private void Write(byte register, byte address, byte value)
         {
-            _i2cDevice.Write(stackalloc byte[] { COMMAND_REGISTER, register });
+            _i2cDevice.Write(stackalloc byte[] { (byte)Register.Command, register });
             _i2cDevice.Write(stackalloc byte[] { address, value });
         }
 
         private void Write(byte register, byte address, Span<byte> value)
         {
-            _i2cDevice.Write(stackalloc byte[] { COMMAND_REGISTER, register });
+            _i2cDevice.Write(stackalloc byte[] { (byte)Register.Command, register });
             Span<byte> data = stackalloc byte[value.Length + 1];
             data[0] = address;
             value.CopyTo(data.Slice(1));
@@ -224,11 +224,11 @@ namespace Iot.Device.Display
             return _i2cDevice.ReadByte();
         }
 
-        private byte ReadLedPwm(int x, int y) => Read(GetLedAddress(x, y) + PWM_REGISTER);
+        private byte ReadLedPwm(int x, int y) => Read(GetLedAddress(x, y) + (byte)FrameRegister.Pwm);
 
         private void WriteLedPwm(int x, int y, int brightness)
         {
-            int address = PWM_REGISTER + GetLedAddress(x, y);
+            int address = (byte)FrameRegister.Led + GetLedAddress(x, y);
             Write(0, (byte)address, (byte)brightness);
         }
 
@@ -255,7 +255,7 @@ namespace Iot.Device.Display
         private void WriteLedBlink(int x, int y, bool enable)
         {
             int longAddress = GetLedAddress(x, y);
-            int address = BLINK_REGISTER + longAddress / 8;
+            int address = (byte)FrameRegister.Blink + longAddress / 8;
             int ledBlock = Read(address);
             int ledRegisterBit = longAddress % 8;
             int mask = 1 >> ledRegisterBit;
