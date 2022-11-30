@@ -4,60 +4,66 @@
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Register addresses for top-level registers.
+    /// Register addresses for the Command Register.
     /// </summary>
-    public enum Register : byte
+    // Enables pages one to nine
+    // Table 2 in datasheet
+    public static class CommandRegister
     {
         /// <summary>
         /// Address for Command Register.
         /// </summary>
-        Command = 0xFD,
+        public static byte Command = 0xFD;
 
         /// <summary>
         /// Address for Function Register.
         /// </summary>
-        Function = 0xB
+        public static byte Function = 0xB;
     }
 
     /// <summary>
     /// Register addresses for the Frame Register.
     /// </summary>
-    public enum FrameRegister : byte
+    // Writes data to pages one to eight
+    // Table 3 in datasheet
+    public static class FrameRegister
     {
         /// <summary>
         /// Address for the LED Control Register.
         /// </summary>
-        Led = 0x0,
+        public static byte Led = 0x0;
 
         /// <summary>
         /// Address for the Blink Control Register.
         /// </summary>
-        Blink = 0x12,
+        public static byte Blink = 0x12;
 
         /// <summary>
         /// Address for the PWM Register.
         /// </summary>
-        Pwm = 0x24
+        public static byte Pwm = 0x24;
     }
 
     /// <summary>
     /// Register addresses for the Function Register.
     /// </summary>
-    public enum FunctionRegister : byte
+    // Writes data to page nine
+    // Table 3 in datasheet
+    public static class FunctionRegister
     {
         /// <summary>
         /// Address for the LED Control Register.
         /// </summary>
-        CONFIGURATION = 0x0,
+        public static byte Configuration = 0x0;
 
         /// <summary>
         /// Address for the Display Option Register.
         /// </summary>
-        DisplayOption = 0x5,
+        public static byte DisplayOption = 0x5;
 
         /// <summary>
         /// Address for the Shutdown Register.
         /// </summary>
-        Shutdown = 0xA
+        public static byte Shutdown = 0xA;
     }
 }
