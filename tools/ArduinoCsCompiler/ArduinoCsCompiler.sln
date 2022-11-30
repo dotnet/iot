@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{B096
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WeatherStation", "samples\WeatherStation\WeatherStation.csproj", "{599172D6-F472-4D53-BA77-044C0A32A2B3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.sample", "..\..\src\devices\Arduino\samples\Arduino.sample.csproj", "{C6C5ABC7-8A2C-4127-92A4-6D2471AEB3AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.sample", "..\..\src\devices\Arduino\samples\ApiChecker\Arduino.sample.csproj", "{C6C5ABC7-8A2C-4127-92A4-6D2471AEB3AA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Mcp3xxx", "..\..\src\devices\Mcp3xxx\Mcp3xxx.csproj", "{A9978931-850E-4E46-9029-1BD82DE4FD6E}"
 EndProject

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Bme280.sample.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Bmxx80.csproj" />
+  </ItemGroup>
+</Project>

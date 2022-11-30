@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino", "Arduino.csproj",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Device.Gpio", "..\..\System.Device.Gpio\System.Device.Gpio.csproj", "{0B90F9D4-7353-4172-A317-714471A06781}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.sample", "samples\Arduino.sample.csproj", "{2670F7BF-A7C8-49EB-9A99-1719A90D0C67}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.sample", "samples\ApiChecker\Arduino.sample.csproj", "{2670F7BF-A7C8-49EB-9A99-1719A90D0C67}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Bmxx80", "..\Bmxx80\Bmxx80.csproj", "{EEEB0FB8-E1ED-4970-BDF6-DA3D5E2ED074}"
 EndProject
@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CpuTemperature", "..\CpuTem
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{9E5A25ED-9839-4C1A-9B27-993437D1CB31}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.Monitor", "samples\Arduino.Monitor.csproj", "{23B4B60C-9594-42BB-9D25-C54983B0F809}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino.Monitor", "samples\Monitor\Arduino.Monitor.csproj", "{23B4B60C-9594-42BB-9D25-C54983B0F809}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{CA26B999-4C0E-4E82-A46E-A68AC1B85C10}"
 EndProject

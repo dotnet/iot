@@ -35,27 +35,9 @@ namespace Iot.Device.Ft4222
         }
 
         /// <inheritdoc/>
-        public override byte ReadByte()
-        {
-            Span<byte> toRead = stackalloc byte[1];
-            Read(toRead);
-            return toRead[0];
-        }
-
-        /// <inheritdoc/>
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             _i2cBus.Write(_deviceAddress, buffer);
-        }
-
-        /// <inheritdoc/>
-        public override void WriteByte(byte value)
-        {
-            Span<byte> toWrite = stackalloc byte[1]
-            {
-                value
-            };
-            Write(toWrite);
         }
 
         /// <inheritdoc/>

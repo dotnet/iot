@@ -94,16 +94,9 @@
             "parameters": {
               "label": "Needs: Author Feedback"
             }
-          },
-          {
-            "name": "addLabel",
-            "parameters": {
-              "label": "needs attention from author :wave:"
-            }
           }
         ]
-      },
-      "id": "mCiLz-jGDvq"
+      }
     },
     {
       "taskType": "trigger",
@@ -165,8 +158,7 @@
             }
           }
         ]
-      },
-      "id": "xyvQc5Ka9Wn"
+      }
     },
     {
       "taskType": "scheduled",
@@ -261,15 +253,13 @@
             }
           }
         ]
-      },
-      "id": "-B8f4eODGQs"
+      }
     },
     {
       "taskType": "trigger",
       "capabilityId": "PrAutoLabel",
       "subCapability": "Path",
       "version": "1.0",
-      "id": "-6H7G2k9_",
       "config": {
         "taskName": "Auto-add area-System.Device.Gpio and area-device-bindings",
         "configs": [
@@ -293,7 +283,6 @@
       "capabilityId": "AutoMerge",
       "subCapability": "AutoMerge",
       "version": "1.0",
-      "id": "YtRDwsscH",
       "config": {
         "taskName": "Auto merge pull requests that get the auto merge label.",
         "label": "Auto-Merge",
@@ -319,8 +308,7 @@
       "version": "1.0",
       "config": {
         "taskName": "[PR Template] Add a CodeFlow link to new pull requests"
-      },
-      "id": "Nh2hxDBSb"
+      }
     },
     {
       "taskType": "trigger",
@@ -358,8 +346,7 @@
         "eventNames": [
           "pull_request_review"
         ]
-      },
-      "id": "Vz9gJq9xfn"
+      }
     },
     {
       "taskType": "trigger",
@@ -412,8 +399,7 @@
           "issues",
           "project_card"
         ]
-      },
-      "id": "1m4VyFtpxZ"
+      }
     },
     {
       "taskType": "trigger",
@@ -453,8 +439,7 @@
         "eventNames": [
           "issue_comment"
         ]
-      },
-      "id": "1aoCXyJ2BO"
+      }
     },
     {
       "taskType": "trigger",
@@ -494,8 +479,7 @@
         "eventNames": [
           "pull_request_review"
         ]
-      },
-      "id": "zTQvDelp2l"
+      }
     },
     {
       "taskType": "trigger",
@@ -540,8 +524,7 @@
           "issues",
           "project_card"
         ]
-      },
-      "id": "WUWseA-arg"
+      }
     },
     {
       "taskType": "trigger",
@@ -573,8 +556,7 @@
         "eventNames": [
           "issue_comment"
         ]
-      },
-      "id": "spNST1v0r4"
+      }
     },
     {
       "taskType": "trigger",
@@ -606,8 +588,7 @@
         "eventNames": [
           "pull_request_review"
         ]
-      },
-      "id": "EDZObwjzn6"
+      }
     },
     {
       "taskType": "scheduled",
@@ -722,7 +703,6 @@
           }
         ]
       },
-      "id": "4RpMCD3QaH",
       "disabled": false
     },
     {
@@ -839,8 +819,7 @@
             }
           }
         ]
-      },
-      "id": "YZSHINgwKH"
+      }
     },
     {
       "taskType": "trigger",
@@ -891,8 +870,7 @@
           "issues",
           "project_card"
         ]
-      },
-      "id": "sIxxXFKah"
+      }
     },
     {
       "taskType": "trigger",
@@ -942,8 +920,7 @@
         "eventNames": [
           "issue_comment"
         ]
-      },
-      "id": "vIYurRJFwB"
+      }
     },
     {
       "taskType": "trigger",
@@ -987,8 +964,7 @@
           "issues",
           "project_card"
         ]
-      },
-      "id": "5bukTbEe5M"
+      }
     },
     {
       "taskType": "trigger",
@@ -1020,8 +996,7 @@
         "eventNames": [
           "issue_comment"
         ]
-      },
-      "id": "7sd62BlSPc"
+      }
     },
     {
       "taskType": "scheduled",
@@ -1129,8 +1104,7 @@
             "parameters": {}
           }
         ]
-      },
-      "id": "7_0jwKTgdg"
+      }
     },
     {
       "taskType": "scheduled",
@@ -1246,8 +1220,7 @@
             }
           }
         ]
-      },
-      "id": "tZzGjuA-te"
+      }
     },
     {
       "taskType": "scheduled",
@@ -1355,8 +1328,7 @@
             "parameters": {}
           }
         ]
-      },
-      "id": "7SdT6KaXOT"
+      }
     },
     {
       "taskType": "trigger",
@@ -1368,8 +1340,69 @@
         "inPrLabelText": "Status: In PR",
         "fixedLabelText": "Status: Fixed",
         "fixedLabelEnabled": true
-      },
-      "id": "JE8LgScJBp"
+      }
+    },
+    {
+      "taskType": "trigger",
+      "capabilityId": "IssueResponder",
+      "subCapability": "IssuesOnlyResponder",
+      "version": "1.0",
+      "config": {
+        "conditions": {
+          "operator": "and",
+          "operands": [
+            {
+              "operator": "or",
+              "operands": [
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Priority:0"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Priority:1"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Priority:2"
+                  }
+                },
+                {
+                  "name": "labelAdded",
+                  "parameters": {
+                    "label": "Priority:3"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "hasLabel",
+              "parameters": {
+                "label": "untriaged"
+              }
+            }
+          ]
+        },
+        "eventType": "issue",
+        "eventNames": [
+          "issues",
+          "project_card"
+        ],
+        "actions": [
+          {
+            "name": "removeLabel",
+            "parameters": {
+              "label": "untriaged"
+            }
+          }
+        ],
+        "taskName": "Remove untriaged label when a priority is assigned."
+      }
     }
   ],
   "userGroups": []
