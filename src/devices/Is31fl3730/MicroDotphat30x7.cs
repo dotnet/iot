@@ -16,7 +16,7 @@ namespace Iot.Device.Display
     // Product: https://shop.pimoroni.com/products/microdot-phat
     // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
-    public class MicroDotPhat30x7 : IDisposable
+    public class MicroDotPhat30x7
     {
         private readonly Matrix3730 _matrixOne;
         private readonly Matrix3730 _matrixTwo;
@@ -28,9 +28,9 @@ namespace Iot.Device.Display
         /// Initialize IS31FL3730 device
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
-        public MicroDotPhat30x7(I2cDevice? i2cDevice = null)
+        public MicroDotPhat30x7(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice is not null ? i2cDevice : I2cDevice.Create(new(1, Is31fl3730.DefaultI2cAddress));
+            i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} is null.");
             _is31fl3730 = new(_i2cDevice);
             _is31fl3730.DisplayMode = DisplayMode.MatrixOneAndTwo;
             _is31fl3730.Initialize();
@@ -45,7 +45,7 @@ namespace Iot.Device.Display
         /// <param name="is31fl3730">The <see cref="Iot.Device.Display.Is31fl3730"/> to create with.</param>
         public MicroDotPhat30x7(Is31fl3730 is31fl3730)
         {
-            _is31fl3730 = is31fl3730;
+            is31fl3730 = is31fl3730 ?? throw new ArgumentException($"{nameof(is31fl3730)} is null.");
             _matrixOne = new Matrix3730(_is31fl3730, 0);
             _matrixTwo = new Matrix3730(_is31fl3730, 1);
             _pair = new Matrix3730[] { _matrixOne, _matrixTwo };
@@ -83,14 +83,5 @@ namespace Iot.Device.Display
         /// Fill All LEDs.
         /// </summary>
         public void Fill(int value) => _is31fl3730.FillAll(value);
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _is31fl3730?.Dispose();
-            _is31fl3730 = null!;
-            _i2cDevice?.Dispose();
-            _i2cDevice = null!;
-        }
     }
 }

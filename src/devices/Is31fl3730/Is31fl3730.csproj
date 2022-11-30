@@ -4,11 +4,16 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="BreakoutPair5x7.cs" />
+    <!-- Matrix driver -->
     <Compile Include="Current.cs" />
     <Compile Include="DisplayMode.cs" />
     <Compile Include="Is31fl3730.cs" />
-    <Compile Include="Matrix3730.cs" />
     <Compile Include="MatrixMode.cs" />
+    <Compile Include="MatrixValues.cs" />
+    <Compile Include="Registers.cs" />
+    
+    <!-- Matrices -->
+    <Compile Include="BreakoutPair5x7.cs" />
+    <Compile Include="Matrix3730.cs" />
   </ItemGroup>
 </Project>

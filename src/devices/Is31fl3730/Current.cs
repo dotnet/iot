@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Device.Gpio;
 using System.Device.Spi;
+using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Multiplexing.Utility;
 
 namespace Iot.Device.Display
@@ -38,7 +38,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// 45 mA
         /// </summary>
-        cMA45 = 0b0001,
+        CMA45 = 0b0001,
 
         /// <summary>
         /// 75 mA

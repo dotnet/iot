@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
-using System.Threading;
 using static System.Linq.Enumerable;
 
 namespace Iot.Device.Display
@@ -17,28 +16,9 @@ namespace Iot.Device.Display
     // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
     // Based on: https://github.com/pimoroni/microdot-phat/blob/master/library/microdotphat/matrix.py
-    public class Is31fl3730 : IDisposable
+    public class Is31fl3730
     {
-        // Function register
-        // table 2 in datasheet
-        private const byte CONFIGURATION_REGISTER = 0x0;
-        private const byte MATRIX_1_REGISTER = 0x1;
-        private const byte MATRIX_2_REGISTER = 0x0E;
-        private const int MATRIX_REGISTER_LENGTH = 8;
-        private const byte UPDATE_COLUMN_REGISTER = 0x0C;
-        private const byte LIGHTING_EFFECT_REGISTER = 0x0D;
-        private const byte PWM_REGISTER = 0x19;
-        private const byte RESET_REGISTER = 0x0C;
-
-        // Configuration register
-        // table 3 in datasheet
-        private const byte SHUTDOWN = 0x80;
-
-        // Values
-        private const byte EIGHT_BIT_VALUE = 0x80;
-        private const int MATRIX_ONE_DECIMAL_MASK = 128;
-        private const int MATRIX_TWO_DECIMAL_MASK = 64;
-        private readonly byte[] _matrix_registers = new byte[] { MATRIX_1_REGISTER, MATRIX_2_REGISTER };
+        private readonly byte[] _matrix_registers = new byte[] { FunctionRegister.Matrix1, FunctionRegister.Matrix2 };
         private readonly List<byte[]> _buffers = new List<byte[]>
         {
             new byte[8],
@@ -54,7 +34,7 @@ namespace Iot.Device.Display
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         public Is31fl3730(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice;
+            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} is null.");
         }
 
         /*
@@ -130,17 +110,17 @@ namespace Iot.Device.Display
 
             if (_configurationValue > 0)
             {
-                Write(CONFIGURATION_REGISTER, (byte)_configurationValue);
+                Write(FunctionRegister.Configuration, (byte)_configurationValue);
             }
 
             if (Current > 0)
             {
-                Write(LIGHTING_EFFECT_REGISTER, (byte)Current);
+                Write(FunctionRegister.LightingEffect, (byte)Current);
             }
 
             if (Brightness > 0)
             {
-                Write(PWM_REGISTER, (byte)Brightness);
+                Write(FunctionRegister.Pwm, (byte)Brightness);
             }
         }
 
@@ -153,6 +133,13 @@ namespace Iot.Device.Display
         /// <param name="value">The value to write.</param>
         public void WriteLed(int matrix, int x, int y, int value)
         {
+            if (matrix > 1 ||
+                x > 4 ||
+                y > 6)
+                {
+                    throw new ArgumentException("Argument out of range.");
+                }
+
             /*
             The following diagrams and information demonstrate how the matrix is structured.
 
@@ -162,7 +149,7 @@ namespace Iot.Device.Display
             - https://shop.pimoroni.com/products/led-dot-matrix-breakout
 
 
-            Both of these products present pairs of 5x7 LED mattrices.
+            Both of these products present pairs of 5x7 LED matrices.
 
             *matrix 2*
             xxxxx | xxxxx
@@ -276,7 +263,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void UpdateDecimalPoint(int matrix, int value)
         {
-            int mask = matrix is 0 ? MATRIX_ONE_DECIMAL_MASK : MATRIX_TWO_DECIMAL_MASK;
+            int mask = matrix is 0 ? MatrixValues.MatrixOneDecimalMask : MatrixValues.MatrixTwoDecimalMask;
             int row = matrix is 0 ? 6 : 7;
             byte[] buffer = _buffers[matrix];
             buffer[row] = UpdateByte(buffer[row], (byte)mask, value);
@@ -308,7 +295,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Reset device.
         /// </summary>
-        public void Reset() => Write(RESET_REGISTER, EIGHT_BIT_VALUE);
+        public void Reset() => Write(FunctionRegister.Reset, MatrixValues.EightBitValue);
 
         /// <summary>
         /// Set the shutdown mode.
@@ -321,24 +308,17 @@ namespace Iot.Device.Display
             // 1 = shutdown mode
             if (shutdown)
             {
-                _configurationValue |= SHUTDOWN;
+                _configurationValue |= ConfigurationRegister.Shutdown;
             }
             else
             {
-                _configurationValue &= ~SHUTDOWN;
+                _configurationValue &= ~ConfigurationRegister.Shutdown;
             }
 
             WriteUpdateRegister();
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _i2cDevice?.Dispose();
-            _i2cDevice = null!;
-        }
-
-        private void Write(byte address, byte[] value)
+        private void Write(byte address, ReadOnlySpan<byte> value)
         {
             Span<byte> data = stackalloc byte[value.Length + 1];
             data[0] = address;
@@ -372,6 +352,6 @@ namespace Iot.Device.Display
             WriteUpdateRegister();
         }
 
-        private void WriteUpdateRegister() => Write(UPDATE_COLUMN_REGISTER, EIGHT_BIT_VALUE);
+        private void WriteUpdateRegister() => Write(FunctionRegister.UpdateColumn, MatrixValues.EightBitValue);
     }
 }
