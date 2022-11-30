@@ -186,7 +186,7 @@ namespace Iot.Device.Display
             _i2cDevice.Write(stackalloc byte[] { address, value });
         }
 
-        private void Write(byte register, byte address, Span<byte> value)
+        private void Write(byte register, byte address, ReadOnlySpan<byte> value)
         {
             _i2cDevice.Write(stackalloc byte[] { CommandRegister.Command, register });
             Span<byte> data = stackalloc byte[value.Length + 1];
