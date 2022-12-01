@@ -206,7 +206,7 @@ namespace Iot.Device.Display
 
         private void WriteLedPwm(int x, int y, int brightness)
         {
-            int address = FrameRegister.Led + GetLedAddress(x, y);
+            int address = FrameRegister.Pwm + GetLedAddress(x, y);
             Write(0, (byte)address, (byte)brightness);
         }
 
