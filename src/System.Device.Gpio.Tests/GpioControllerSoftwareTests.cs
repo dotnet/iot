@@ -30,13 +30,14 @@ public class GpioControllerSoftwareTests : IDisposable
     }
 
     [Fact]
-    public void OpenTwiceThrows()
+    public void OpenTwiceGpioPinAndClosedTwiceThrows()
     {
         var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
         _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
         _mockedGpioDriver.Setup(x => x.ClosePinEx(1));
-        ctrl.OpenPin(1);
-        Assert.Throws<InvalidOperationException>(() => ctrl.OpenPin(1));
+        GpioPin gpioPin1 = ctrl.OpenPin(1);
+        GpioPin gpiopin2 = ctrl.OpenPin(1);
+        Assert.Equal(gpioPin1, gpiopin2);
         ctrl.ClosePin(1);
         Assert.Throws<InvalidOperationException>(() => ctrl.ClosePin(1));
     }
