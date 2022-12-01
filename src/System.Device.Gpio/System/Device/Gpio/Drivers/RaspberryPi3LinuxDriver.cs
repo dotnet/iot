@@ -175,6 +175,13 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
         return Convert.ToBoolean((register >> (pinNumber % 32)) & 1) ? PinValue.High : PinValue.Low;
     }
 
+    /// <inheritdoc/>
+    protected internal override void Toggle(int pinNumber)
+    {
+        ValidatePinNumber(pinNumber);
+        _interruptDriver!.Toggle(pinNumber);
+    }
+
     /// <summary>
     /// Removes a handler for a pin value changed event.
     /// </summary>

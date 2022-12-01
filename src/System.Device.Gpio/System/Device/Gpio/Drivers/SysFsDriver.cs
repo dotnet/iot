@@ -28,6 +28,7 @@ public class SysFsDriver : UnixDriver
 
     private readonly List<int> _exportedPins = new List<int>();
     private readonly Dictionary<int, UnixDriverDevicePin> _devicePins = new Dictionary<int, UnixDriverDevicePin>();
+    private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
     private TimeSpan _statusUpdateSleepTime = TimeSpan.FromMilliseconds(1);
     private int _pollFileDescriptor = -1;
     private Thread? _eventDetectionThread;
@@ -118,6 +119,8 @@ public class SysFsDriver : UnixDriver
                 SysFsHelpers.EnsureReadWriteAccessToPath(pinPath);
 
                 _exportedPins.Add(pinNumber);
+                // Default value is low, otherwise it's the set pin mode with default value that will override this
+                _pinValues.Add(pinNumber, PinValue.Low);
             }
             catch (UnauthorizedAccessException e)
             {
@@ -145,6 +148,7 @@ public class SysFsDriver : UnixDriver
                 {
                     _devicePins[pinNumber].Dispose();
                     _devicePins.Remove(pinNumber);
+                    _pinValues.Remove(pinNumber);
                 }
 
                 // If this controller wasn't the one that opened the pin, then Remove will return false, so we don't need to close it.
@@ -248,8 +252,12 @@ public class SysFsDriver : UnixDriver
             throw new InvalidOperationException("There was an attempt to read from a pin that is not open.");
         }
 
+        _pinValues[pinNumber] = result;
         return result;
     }
+
+    /// <inheritdoc/>
+    protected internal override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
     private PinValue ConvertSysFsValueToPinValue(string value)
     {
@@ -275,6 +283,7 @@ public class SysFsDriver : UnixDriver
             {
                 string sysFsValue = ConvertPinValueToSysFs(value);
                 File.WriteAllText(valuePath, sysFsValue);
+                _pinValues[pinNumber] = value;
             }
             catch (UnauthorizedAccessException e)
             {
@@ -588,6 +597,7 @@ public class SysFsDriver : UnixDriver
         }
 
         _devicePins.Clear();
+        _pinValues.Clear();
         if (_pollFileDescriptor != -1)
         {
             Interop.close(_pollFileDescriptor);
