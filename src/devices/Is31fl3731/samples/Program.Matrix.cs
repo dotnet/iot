@@ -25,6 +25,9 @@ Backpack16x9 matrix = new(i2cDevice);
 // https://shop.pimoroni.com/products/11x7-led-matrix-breakout
 // using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Breakout11x7.DefaultI2cAddress));
 // Breakout11x7 matrix = new(i2cDevice);
+byte fullLit = 255;
+byte halfLit = 128;
+byte quarterLit = 64;
 matrix.Initialize();
 matrix.EnableBlinking(0);
 matrix.Fill(0);
@@ -35,10 +38,10 @@ int height = matrix.Height - 1;
 int halfWidth = matrix.Width / 2;
 int halfHeight = matrix.Height / 2;
 
-matrix[0, 0] = 1;
-matrix[0, height] = 1;
-matrix[width, 0] = 1;
-matrix[width, height] = 1;
+matrix[0, 0] = fullLit;
+matrix[0, height] = fullLit;
+matrix[width, 0] = fullLit;
+matrix[width, height] = fullLit;
 
 Thread.Sleep(500);
 matrix.Fill(0);
@@ -75,17 +78,17 @@ void FillSlow(byte brightness)
 matrix.Fill(0);
 
 // Set pixel in the origin 0, 0 position.
-matrix[0, 0] = 1;
+matrix[0, 0] = halfLit;
 // Set pixels in the middle
-matrix[halfWidth - 1, halfHeight - 1] = 1;
-matrix[halfWidth - 1, halfHeight] = 1;
-matrix[halfWidth, halfHeight - 1] = 1;
-matrix[halfWidth, halfHeight] = 1;
+matrix[halfWidth - 1, halfHeight - 1] = halfLit;
+matrix[halfWidth - 1, halfHeight] = halfLit;
+matrix[halfWidth, halfHeight - 1] = halfLit;
+matrix[halfWidth, halfHeight] = halfLit;
 // Set pixel on the opposite edge
-matrix[width - 1, height - 1] = 1;
-matrix[width - 1, height] = 1;
-matrix[width, height - 1] = 1;
-matrix[width, height] = 1;
+matrix[width - 1, height - 1] = halfLit;
+matrix[width - 1, height] = halfLit;
+matrix[width, height - 1] = halfLit;
+matrix[width, height] = halfLit;
 
 Thread.Sleep(500);
 matrix.Fill(0);
@@ -98,7 +101,7 @@ for (int i = 0; i < matrix.Width; i++)
         continue;
     }
 
-    matrix[i, 0] = 1;
+    matrix[i, 0] = quarterLit;
     Thread.Sleep(50);
 }
 
@@ -110,20 +113,19 @@ for (int i = 0; i < matrix.Width; i++)
         continue;
     }
 
-    matrix[i, height] = 1;
+    matrix[i, height] = quarterLit;
     Thread.Sleep(50);
 }
 
 Thread.Sleep(500);
 matrix.Fill(0);
-
 int diagonal = Math.Min(height, width);
 
 // Draw diagonal lines
 for (int i = 0; i <= diagonal; i++)
 {
-    matrix[i,  i] = 1;
-    matrix[diagonal - i, i] = 1;
+    matrix[i,  i] = fullLit;
+    matrix[diagonal - i, i] = fullLit;
     Thread.Sleep(50);
 }
 
@@ -137,25 +139,25 @@ for (int i = 0; i <= diagonal; i++)
 // Draw a bounding box
 for (int i = 0; i < matrix.Width; i++)
 {
-    matrix[i, 0] = 1;
+    matrix[i, 0] = fullLit;
     Thread.Sleep(10);
 }
 
 for (int i = 0; i < matrix.Height; i++)
 {
-    matrix[width, i] = 1;
+    matrix[width, i] = fullLit;
     Thread.Sleep(10);
 }
 
 for (int i = width; i >= 0; i--)
 {
-    matrix[i, height] = 1;
+    matrix[i, height] = fullLit;
     Thread.Sleep(10);
 }
 
 for (int i = height; i >= 0; i--)
 {
-    matrix[0, i] = 1;
+    matrix[0, i] = fullLit;
     Thread.Sleep(50);
 }
 
@@ -187,16 +189,16 @@ for (int j = 0; j < iterations; j++)
     int rangeW = matrix.Width - j * 2;
     int rangeH = matrix.Height - j * 2;
     // top
-    WriteRowPixels(j, Enumerable.Range(j, rangeW), 1);
+    WriteRowPixels(j, Enumerable.Range(j, rangeW), quarterLit);
 
     // right
-    WriteColumnPixels(width - j, Enumerable.Range(j + 1, rangeH - 1), 1);
+    WriteColumnPixels(width - j, Enumerable.Range(j + 1, rangeH - 1), quarterLit);
 
     // bottom
-    WriteRowPixels(height - j, Enumerable.Range(j, rangeW).Reverse(), 1);
+    WriteRowPixels(height - j, Enumerable.Range(j, rangeW).Reverse(), quarterLit);
 
     // left
-    WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 1).Reverse(), 1);
+    WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 1).Reverse(), quarterLit);
 }
 
 Thread.Sleep(1000);
