@@ -14,7 +14,7 @@ using SixLabors.ImageSharp;
 using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, LedShimRgb28x1.DefaultI2cAddress));
 LedShimRgb28x1 shim = new(i2cDevice);
 shim.Initialize();
-shim.EnableBlinking(0);
+shim.SetBlinkingRate(0);
 shim.Fill(0);
 
 (byte R, byte G, byte B)[] rainbow =

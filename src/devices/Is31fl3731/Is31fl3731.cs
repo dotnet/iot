@@ -93,7 +93,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void WritePixel(int x, int y, int brightness, bool enable, bool blink)
         {
-            WriteLedBlink(x, y, blink);
+            // WriteLedBlink(x, y, blink);
             WriteLed(x, y, enable);
             WriteLedPwm(x, y, brightness);
         }
@@ -126,10 +126,10 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
-        /// Disable all LEDs.
+        /// Enable blinking at given rate.
         /// </summary>
-        /// <param name="rate">Set the showdown mode. `true` sets device into shutdown mode. `false` sets device into normal operation.</param>
-        public void EnableBlinking(int rate)
+        /// <param name="rate">Set the blinking rate.</param>
+        public void SetBlinkingRate(int rate)
         {
             // See datasheet for Blink Period Time formula
             // That's where the following values are coming from
@@ -233,7 +233,7 @@ namespace Iot.Device.Display
         private void WriteLedBlink(int x, int y, bool enable)
         {
             int longAddress = GetLedAddress(x, y);
-            int address = FrameRegister.Blink + longAddress / 8;
+            int address = FrameRegister.Blink + (longAddress / 8);
             int ledBlock = Read(address);
             int ledRegisterBit = longAddress % 8;
             int mask = 1 >> ledRegisterBit;

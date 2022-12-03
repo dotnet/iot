@@ -13,7 +13,7 @@ using SixLabors.ImageSharp;
 using I2cDevice i2cdevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, BreakoutRgb5x5.DefaultI2cAddress));
 BreakoutRgb5x5 matrix = new(i2cdevice);
 matrix.Initialize();
-matrix.EnableBlinking(0);
+matrix.SetBlinkingRate(0);
 matrix.Fill(0);
 
 while (true)

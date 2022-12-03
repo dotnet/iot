@@ -29,7 +29,7 @@ byte fullLit = 255;
 byte halfLit = 128;
 byte quarterLit = 64;
 matrix.Initialize();
-matrix.EnableBlinking(0);
+matrix.SetBlinkingRate(0);
 matrix.Fill(0);
 
 // Dimensions
@@ -44,6 +44,14 @@ matrix[width, 0] = fullLit;
 matrix[width, height] = fullLit;
 
 Thread.Sleep(500);
+matrix.Fill(0);
+
+matrix.WritePixel(halfWidth - 1, halfHeight - 1, halfLit, true, true);
+matrix.WritePixel(halfWidth - 1, halfHeight, halfLit, true, true);
+matrix.WritePixel(halfWidth, halfHeight - 1, halfLit, true, true);
+matrix.WritePixel(halfWidth, halfHeight, halfLit, true, true);
+
+Thread.Sleep(5000);
 matrix.Fill(0);
 
 for (int i = 0; i < 2; i++)
@@ -62,20 +70,11 @@ for (int i = 0; i < matrix.Width; i++)
 
 Thread.Sleep(100);
 
-void FillSlow(byte brightness)
-{
-    for (int h = 0; h < matrix.Height; h++)
-    {
-        for (int w = 0; w < matrix.Width; w++)
-        {
-            matrix[w, h] = brightness;
-            Thread.Sleep(2);
-        }
-    }
-}
-
 // Clear matrixgit
 matrix.Fill(0);
+
+// Flash middle LEDs
+matrix.SetBlinkingRate(1);
 
 // Set pixel in the origin 0, 0 position.
 matrix[0, 0] = halfLit;
@@ -164,24 +163,6 @@ for (int i = height; i >= 0; i--)
 Thread.Sleep(500);
 matrix.Fill(0);
 
-void WriteRowPixels(int row, IEnumerable<int> pixels, int value)
-{
-    foreach (int pixel in pixels)
-    {
-        matrix[pixel, row] = (byte)value;
-        Thread.Sleep(15);
-    }
-}
-
-void WriteColumnPixels(int column, IEnumerable<int> pixels, int value)
-{
-    foreach (int pixel in pixels)
-    {
-        matrix[column, pixel] = (byte)value;
-        Thread.Sleep(15);
-    }
-}
-
 // Draw a spiral bounding box
 int iterations = (int)Math.Ceiling(matrix.Height / 2.0);
 for (int j = 0; j < iterations; j++)
@@ -203,3 +184,33 @@ for (int j = 0; j < iterations; j++)
 
 Thread.Sleep(1000);
 matrix.Fill(0);
+
+void WriteRowPixels(int row, IEnumerable<int> pixels, int value)
+{
+    foreach (int pixel in pixels)
+    {
+        matrix[pixel, row] = (byte)value;
+        Thread.Sleep(15);
+    }
+}
+
+void WriteColumnPixels(int column, IEnumerable<int> pixels, int value)
+{
+    foreach (int pixel in pixels)
+    {
+        matrix[column, pixel] = (byte)value;
+        Thread.Sleep(15);
+    }
+}
+
+void FillSlow(byte brightness)
+{
+    for (int h = 0; h < matrix.Height; h++)
+    {
+        for (int w = 0; w < matrix.Width; w++)
+        {
+            matrix[w, h] = brightness;
+            Thread.Sleep(2);
+        }
+    }
+}
