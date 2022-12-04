@@ -5,7 +5,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Display.csproj" />
+    <ProjectReference Include="..\..\Display.csproj" />
     <Compile Include="Program.BiColorBargraph.cs" />
   </ItemGroup>
 </Project>
