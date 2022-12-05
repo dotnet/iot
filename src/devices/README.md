@@ -345,6 +345,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Weight sensors
 
 * [DFRobot KIT0176: I2C 1kg Weight Sensor Kit - HX711 (Gravity: I2CWeight Sensor)](Hx711I2c/README.md)
+* [HX711: Load Cell amplifier and 24-Bit ADC Module](Hx711/README.md)
 
 </categorizedDevices>
 
