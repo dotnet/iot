@@ -27,7 +27,9 @@ namespace Iot.Device.HX711
         private double _referenceUnit;
         private readonly List<double> _referenceUnitList = new();
 
-        //TODO mettere Mass
+        /// <summary>
+        /// How much must be dedicted from the gross weight of a commodity to obtain the net weight.
+        /// </summary>
         public int TareValue { get; private set; }
 
         /// <summary>
@@ -158,9 +160,7 @@ namespace Iot.Device.HX711
                 _gpioController.Write(_pinPD_Sck, PinValue.Low);
 
                 // Wait 100 us for the HX711 to power back up.
-                //TODO
-                //DelayHelper.DelayMicroseconds(microseconds: 100, allowThreadYield:true);
-                Thread.Sleep(1);
+                DelayHelper.DelayMicroseconds(microseconds: 100, allowThreadYield:true);
 
                 // Release the Read Lock, now that we've finished driving the HX711
                 // serial interface.
@@ -195,9 +195,7 @@ namespace Iot.Device.HX711
                 _gpioController.Write(_pinPD_Sck, PinValue.Low);
                 _gpioController.Write(_pinPD_Sck, PinValue.High);
 
-                //TODO
-                //DelayHelper.DelayMicroseconds(microseconds: 65, allowThreadYield:true);
-                Thread.Sleep(1);
+                DelayHelper.DelayMicroseconds(microseconds: 65, allowThreadYield:true);
 
                 // Release the Read Lock, now that we've finished driving the HX711
                 // serial interface.
