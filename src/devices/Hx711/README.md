@@ -9,13 +9,13 @@ This can be handy for creating your own industrial scale, process control, or si
 
 ## Documentation
 
-**[HX711](https://homotix_it.e-mind.it/upld/repository/File/hx711.pdf)**
-or
-**[HX711](https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/1/HX711.html)**
+**[HX711 - Source 1](https://homotix_it.e-mind.it/upld/repository/File/hx711.pdf)**
+
+**[HX711 - Source 2](https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/1/HX711.html)**
 
 **[Example for Arduino](https://www.moreware.org/wp/blog/2020/06/09/arduino-come-funziona-la-board-per-celle-di-carico-hx711/)**
 
-## Usage
+## Usage with calibration process
 ```C#
 int pinDout = 23;
 int pinPD_Sck = 24;
@@ -27,20 +27,73 @@ using (var controller = new GpioController())
         hx711.PowerUp();
         Console.WriteLine("HX711 is on.");
 
-        Console.WriteLine("Known weight (in grams) currently on the scale:");
-        var weightCalibration = int.Parse(Console.ReadLine());
+        for (int i = 0; i < 3; i++)
+        {
+            Console.WriteLine("Known weight (in grams) currently on the scale:");
+            var weightCalibration = int.Parse(Console.ReadLine() ?? "");
+            hx711.SetCalibration(Mass.FromGrams(weightCalibration));
+        }
 
-        hx711.StartCalibration(new Mass(weightCalibration, MassUnit.Gram));
-
+        Console.WriteLine("Press ENTER to tare.");
+        _ = Console.ReadLine();
         hx711.Tare();
-        Console.WriteLine($"Tare set. Value: {hx711.TareValue}gr");
+        Console.WriteLine($"Tare set. Value: {hx711.TareValue}");
 
-        var weight = hx711.GetWeight();
-        Console.WriteLine($"Weight: {weight}gr");
+        Console.WriteLine("Press ENTER to start reading.");
+        _ = Console.ReadLine();
+
+        for (int i = 0; i < 25; i++)
+        {
+            var weight = hx711.GetWeight();
+            Console.WriteLine($"Weight: {weight}");
+
+            Thread.Sleep(2_000);
+        }
 
         hx711.PowerDown();
         Console.WriteLine("HX711 is off.");
 
+        Console.WriteLine("Press ENTER to close.");
+        _ = Console.ReadLine();
+    }
+}
+```
+
+## Usage without calibration process
+```C#
+int pinDout = 23;
+int pinPD_Sck = 24;
+
+using (var controller = new GpioController())
+{
+    using (var hx711 = new HX711(pinDout, pinPD_Sck, gpioController: controller, shouldDispose: false))
+    {
+        hx711.PowerUp();
+        Console.WriteLine("HX711 is on.");
+
+        // 1 gram every 107.55 hx711 units
+        hx711.SetReferenceUnit(referenceUnit: 107.55);
+
+        Console.WriteLine("Press ENTER to tare.");
+        _ = Console.ReadLine();
+        hx711.Tare();
+        Console.WriteLine($"Tare set. Value: {hx711.TareValue}");
+
+        Console.WriteLine("Press ENTER to start reading.");
+        _ = Console.ReadLine();
+
+        for (int i = 0; i < 25; i++)
+        {
+            var weight = hx711.GetWeight();
+            Console.WriteLine($"Weight: {weight}");
+
+            Thread.Sleep(2_000);
+        }
+
+        hx711.PowerDown();
+        Console.WriteLine("HX711 is off.");
+
+        Console.WriteLine("Press ENTER to close.");
         _ = Console.ReadLine();
     }
 }
@@ -82,6 +135,7 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 First of all HX711 need a calibration process because it can be connected to any load cell that has a different range and sensitivity.
 To perform it, simply put a known weight on the load cell and start the calibration via `StartCalibration()`.
 If you want a more precise calibration, you can do this several times with different weights.
+If you don't want to carry out the calibration at every start, you can memorize the `ReferenceUnit` which is valued after the calibration and set it using `SetReferenceUnit` method.
 
 ## Notes
 Only connection in Channel A is support at the moment.

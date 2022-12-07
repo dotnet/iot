@@ -1,30 +1,39 @@
-﻿using System.Device.Gpio;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Device.Gpio;
+using UnitsNet;
 
 namespace Iot.Device.HX711
 {
-    internal class HX711Reader
+    internal sealed class HX711Reader
     {
         private readonly GpioController _gpioController;
-        private readonly Hx711Mode _mode;
         private readonly int _pinDout;
         private readonly int _pinPD_Sck;
+
         private readonly object _readLock;
+
+        private readonly HX711Options _options;
         private readonly ByteFormat _byteFormat;
         private readonly ByteFormat _bitFormat;
 
-        internal HX711Reader(GpioController gpioController, Hx711Mode mode, int pinDout, int pinPD_Sck, object readLock)
+        internal HX711Reader(GpioController gpioController, HX711Options options, int pinDout, int pinPD_Sck, object readLock)
         {
             _gpioController = gpioController;
-            _mode = mode;
+            _options = options;
             _pinDout = pinDout;
             _pinPD_Sck = pinPD_Sck;
             _readLock = readLock;
 
             // According to the HX711 Datasheet, order of bits inside each byte is MSB so you shouldn't need to modify it.
+            // Docs say "... starting with the MSB bit first ..."
+            // page 4
+            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/573/4/HX711.html
             _bitFormat = ByteFormat.MSB;
 
-            // Check byte order ("endianness") in this architecture
-            if (BitConverter.IsLittleEndian)
+            // Some HX711 manufacturers return bytes in LSB, but most in MSB.
+            if (options.UseByteLittleEndian)
             {
                 _byteFormat = ByteFormat.LSB;
             }
@@ -38,9 +47,10 @@ namespace Iot.Device.HX711
         /// Read a weight value from HX711, how accurate depends on the number of reading passed
         /// </summary>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
+        /// <param name="offsetFromZero">Offset value from 0</param>
         /// <returns>Return a weight read</returns>
         /// <exception cref="ArgumentException">Throw if number of reads have invalid value</exception>
-        public int Read(int numberOfReads = 3)
+        public int Read(int numberOfReads = 3, int offsetFromZero = 0)
         {
             // Make sure we've been asked to take a rational amount of samples.
             if (numberOfReads <= 0)
@@ -51,17 +61,17 @@ namespace Iot.Device.HX711
             // If we're only average across one value, just read it and return it.
             if (numberOfReads == 1)
             {
-                return this.ReadInt();
+                return CalculateNetValue(this.ReadInt(), offsetFromZero);
             }
 
             // If we're averaging across a low amount of values, just take the
             // median.
             if (numberOfReads < 5)
             {
-                return this.ReadMedian(numberOfReads);
+                return CalculateNetValue(this.ReadMedian(numberOfReads), offsetFromZero);
             }
 
-            return this.ReadAverage(numberOfReads);
+            return CalculateNetValue(this.ReadAverage(numberOfReads), offsetFromZero);
         }
 
         /// <summary>
@@ -142,11 +152,9 @@ namespace Iot.Device.HX711
         {
             // Get a sample from the HX711 in the form of raw bytes.
             var dataBytes = this.ReadRawBytes();
-#if DEBUG
-            Console.Write(dataBytes);
-#endif
+
             // Join the raw bytes into a single 24bit 2s complement value.
-            var twosComplementValue = (dataBytes[0] << 16)
+            int twosComplementValue = (dataBytes[0] << 16)
                 | (dataBytes[1] << 8)
                 | dataBytes[2];
 
@@ -177,8 +185,7 @@ namespace Iot.Device.HX711
                 // Wait until HX711 is ready for us to read a sample.
                 while (!this.IsOutputDataReady())
                 {
-                    // pass
-                    _ = Thread.Yield();
+                    DelayHelper.DelayMicroseconds(microseconds: 1, allowThreadYield: true);
                 }
 
                 // Read three bytes (24bit) of data from the HX711.
@@ -187,7 +194,7 @@ namespace Iot.Device.HX711
                 var thirdByte = this.ReadNextByte();
 
                 // Reading extra bit
-                for (int i = 0; i < CalculateExtraBitByMode(_mode); i++)
+                for (int i = 0; i < CalculateExtraBitByMode(_options.Mode); i++)
                 {
                     // Clock a bit out of the HX711 and throw it away.
                     _ = this.ReadNextBit();
@@ -238,13 +245,22 @@ namespace Iot.Device.HX711
         private byte ReadNextBit()
         {
             // Clock HX711 Digital Serial Clock (PD_SCK). DOUT will be
-            // ready 1us after PD_SCK rising edge, so we sample after
+            // ready 1µs after PD_SCK rising edge, so we sample after
             // lowering PD_SCL, when we know DOUT will be stable.
             _gpioController.Write(_pinPD_Sck, PinValue.High);
             _gpioController.Write(_pinPD_Sck, PinValue.Low);
             var value = _gpioController.Read(_pinDout);
+
             return value == PinValue.High ? (byte)1 : (byte)0;
         }
+
+        /// <summary>
+        /// Calculate net value
+        /// </summary>
+        /// <param name="value">Gross value read from HX711</param>
+        /// <param name="offset">Offset value from 0</param>
+        /// <returns>Return net value read</returns>
+        private static int CalculateNetValue(int value, int offset) => value - offset;
 
         /// <summary>
         /// HX711 Channel and gain factor are set by number of bits read
@@ -263,7 +279,7 @@ namespace Iot.Device.HX711
                 case Hx711Mode.ChannelBGain32: return 2;
                 case Hx711Mode.ChannelAGain64: return 3;
                 default:
-                    throw new ArgumentOutOfRangeException(paramName: nameof(mode), message:"Unknow HX711 mode.");
+                    throw new ArgumentOutOfRangeException("Unknow HX711 mode.");
             }
         }
 
@@ -272,6 +288,22 @@ namespace Iot.Device.HX711
         /// </summary>
         /// <param name="inputValue">24 bit in 2' complement format</param>
         /// <returns>Int converted</returns>
-        private static int ConvertFromTwosComplement24bit(int inputValue) => -(inputValue & 0x800000) + (inputValue & 0x7fffff);
+        private static int ConvertFromTwosComplement24bit(int inputValue)
+        {
+            // Docs says
+            // "When input differential signal goes out of the 24-bit range,
+            // the output data will be saturated at 800000h (MIN) or 7FFFFFh (MAX),
+            // until the input signal comes back to the input range.", page 4
+            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html
+
+            // 24 bit in 2's complement only 23 are a value if
+            // the number is negative. 0xFFFFFF >> 1 = 0x7FFFFF 
+            // Mask to take true value
+            const int MAX_VALUE = 0x7FFFFF;
+            // Mask to take sign bit
+            const int BIT_SIGN = 0x800000;
+
+            return -(inputValue & BIT_SIGN) + (inputValue & MAX_VALUE);
+        }
     }
 }

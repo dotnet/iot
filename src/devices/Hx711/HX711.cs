@@ -18,19 +18,26 @@ namespace Iot.Device.HX711
         private readonly int _pinDout;
         private readonly int _pinPD_Sck;
 
-        private readonly Hx711Mode _mode;
+        private readonly HX711Options _options;
         private readonly object _readLock;
         private readonly HX711Reader _reader;
 
         private bool _isInitialize;
         private bool _isCalibrated;
-        private double _referenceUnit;
+
+        /// <summary>
+        /// Conversion ratio between Hx711 units and grams
+        /// </summary>
+        public double ReferanceUnit { get; private set; }
         private readonly List<double> _referenceUnitList = new();
 
         /// <summary>
-        /// How much must be dedicted from the gross weight of a commodity to obtain the net weight.
+        /// Offset value from 0 at startup
         /// </summary>
-        public int TareValue { get; private set; }
+        private int _offsetFormZero;
+
+        private int _tareValue;
+        public Mass TareValue => Mass.FromGrams(Math.Round(_tareValue / this.ReferanceUnit));
 
         /// <summary>
         /// Creates a new instance of the HX711 module.
@@ -41,7 +48,7 @@ namespace Iot.Device.HX711
         /// <param name="gpioController">GPIO controller related with the pins.</param>
         /// <param name="pinNumberingScheme">Scheme and numeration used by controller.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
-        public HX711(int pinDout, int pinPD_Sck, Hx711Mode mode = Hx711Mode.ChannelAGain128, GpioController? gpioController = null,
+        public HX711(int pinDout, int pinPD_Sck, HX711Options? options = null, GpioController? gpioController = null,
             PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _pinDout = pinDout;
@@ -63,11 +70,12 @@ namespace Iot.Device.HX711
             // Needed calibration
             _isCalibrated = false;
 
-            this.TareValue = 0;
+            _offsetFormZero = 0;
+            _tareValue = 0;
 
-            _mode = mode;
+            _options = options ?? new HX711Options();
 
-            _reader = new HX711Reader(_gpioController, mode, pinDout, pinPD_Sck, _readLock);
+            _reader = new HX711Reader(_gpioController, _options, pinDout, pinPD_Sck, _readLock);
         }
 
         /// <summary>
@@ -77,9 +85,15 @@ namespace Iot.Device.HX711
         /// </summary>
         /// <param name="knowWeight">Known weight currently on load cell and detected by the Hx711.</param>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
-        public void StartCalibration(Mass knowWeight, int numberOfReads = 15)
+        /// <exception cref="ArgumentOutOfRangeException">Throw if know weight have invalid value</exception>
+        public void SetCalibration(Mass knowWeight, int numberOfReads = 15)
         {
-            var readValue = _reader.Read(numberOfReads);
+            if (knowWeight.Grams == 0)
+            {
+                throw new ArgumentOutOfRangeException(paramName: nameof(knowWeight), message: "Param value must be greater than zero!");
+            }
+
+            var readValue = _reader.Read(numberOfReads, _offsetFormZero);
 
             lock (_readLock)
             {
@@ -87,8 +101,23 @@ namespace Iot.Device.HX711
 
                 // If we do several calibrations, the most accurate value is the average.
                 _referenceUnitList.Add(referenceValue);
-                _referenceUnit = _referenceUnitList.Average();
+                this.ReferanceUnit = _referenceUnitList.Average();
 
+                _isCalibrated = true;
+            }
+        }
+
+        /// <summary>
+        /// If you already know the reference unit between the Hx711 value and grams, you can set it and skip the calibration.
+        /// </summary>
+        /// <param name="referenceUnit">Conversion ratio between Hx711 units and grams</param>
+        public void SetReferenceUnit(double referenceUnit)
+        {
+            lock (_readLock)
+            {
+                this.ReferanceUnit = referenceUnit;
+
+                // Calibration no longer required
                 _isCalibrated = true;
             }
         }
@@ -99,20 +128,16 @@ namespace Iot.Device.HX711
         /// </summary>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
         /// <returns>Return a weigh read from HX711</returns>
-        public int GetWeight(int numberOfReads = 3)
+        public Mass GetWeight(int numberOfReads = 3)
         {
             if (!_isCalibrated)
             {
                 throw new HX711CalibrationNotDoneException();
             }
 
-            //TODO restituire una massa e non un valore
-            //var a = new Mass(5, MassUnit.Gram)
-
             // Lock is internal in fisical read
             var value = this.GetNetWeight(numberOfReads);
-            value /= (int)_referenceUnit;
-            return value;
+            return Mass.FromGrams(Math.Round(value / this.ReferanceUnit, digits: 0));
         }
 
         /// <summary>
@@ -128,19 +153,7 @@ namespace Iot.Device.HX711
                     throw new HX711CalibrationNotDoneException();
                 }
 
-                // Backup REFERENCE_UNIT value
-                var backupReferenceUnit = (int)_referenceUnit;
-                _referenceUnit = 1;
-                var value = _reader.Read(numberOfReads);
-
-#if DEBUG
-                Console.WriteLine($"Tare A value: {value}");
-#endif
-
-                this.TareValue = value;
-
-                // Restore the reference unit, now that we've got our offset.
-                _referenceUnit = backupReferenceUnit;
+                _tareValue = this.GetNetWeight(numberOfReads);
             }
         }
 
@@ -159,8 +172,8 @@ namespace Iot.Device.HX711
                 // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/573/5/HX711.html
                 _gpioController.Write(_pinPD_Sck, PinValue.Low);
 
-                // Wait 100 us for the HX711 to power back up.
-                DelayHelper.DelayMicroseconds(microseconds: 100, allowThreadYield:true);
+                // Wait 100µs for the HX711 to power back up.
+                DelayHelper.DelayMicroseconds(microseconds: 100, allowThreadYield: true);
 
                 // Release the Read Lock, now that we've finished driving the HX711
                 // serial interface.
@@ -170,11 +183,15 @@ namespace Iot.Device.HX711
             // isn't what client software has requested from us, take a sample and
             // throw it away, so that next sample from the HX711 will be from the
             // correct channel/gain.
-            if (_mode != Hx711Mode.ChannelAGain128 || !_isInitialize)
+            if (_options.Mode != Hx711Mode.ChannelAGain128 || !_isInitialize)
             {
-                _ = _reader.Read(numberOfReads: 1);
+                _ = _reader.Read(numberOfReads: 15, offsetFromZero: 0);
                 _isInitialize = true;
             }
+
+            // Read offset from 0
+            var value = _reader.Read(numberOfReads: 15, offsetFromZero: 0);
+            _offsetFormZero = value;
         }
 
         /// <summary>
@@ -187,7 +204,7 @@ namespace Iot.Device.HX711
             lock (_readLock)
             {
                 // Cause a rising edge on HX711 Digital Serial Clock (PD_SCK). We then
-                // leave it held up and wait 100 us. After 60us the HX711 should be
+                // leave it held up and wait 100µs. After 60µs the HX711 should be
                 // powered down.
                 // Docs says "When PD_SCK pin changes from low to high
                 // and stays at high for longer than 60µs, HX711
@@ -195,7 +212,7 @@ namespace Iot.Device.HX711
                 _gpioController.Write(_pinPD_Sck, PinValue.Low);
                 _gpioController.Write(_pinPD_Sck, PinValue.High);
 
-                DelayHelper.DelayMicroseconds(microseconds: 65, allowThreadYield:true);
+                DelayHelper.DelayMicroseconds(microseconds: 65, allowThreadYield: true);
 
                 // Release the Read Lock, now that we've finished driving the HX711
                 // serial interface.
@@ -230,6 +247,6 @@ namespace Iot.Device.HX711
         /// </summary>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
         /// <returns>Return total weight - tare weight</returns>
-        private int GetNetWeight(int numberOfReads) => _reader.Read(numberOfReads) - this.TareValue;
+        private int GetNetWeight(int numberOfReads) => _reader.Read(numberOfReads, _offsetFormZero) - _tareValue;
     }
 }

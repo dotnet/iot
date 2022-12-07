@@ -1,8 +1,10 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// See https://aka.ms/new-console-template for more information
 using Iot.Device.HX711;
 using System.Device.Gpio;
 using UnitsNet;
-using UnitsNet.Units;
 
 Console.WriteLine("Hello, World!");
 Console.ReadLine();
@@ -17,31 +19,33 @@ using (var controller = new GpioController())
         hx711.PowerUp();
         Console.WriteLine("HX711 is on.");
 
-        Console.WriteLine("Known weight (in grams) currently on the scale:");
-        var weightCalibration = int.Parse(Console.ReadLine());
+        for (int i = 0; i < 3; i++)
+        {
+            Console.WriteLine("Known weight (in grams) currently on the scale:");
+            var weightCalibration = int.Parse(Console.ReadLine() ?? "");
+            hx711.SetCalibration(Mass.FromGrams(weightCalibration));
+        }
 
-        hx711.StartCalibration(new Mass(weightCalibration, MassUnit.Gram));
-        Thread.Sleep(30_000);
-
-        Console.WriteLine("Known weight (in grams) currently on the scale:");
-        weightCalibration = int.Parse(Console.ReadLine());
-        hx711.StartCalibration(new Mass(weightCalibration, MassUnit.Gram));
-        Thread.Sleep(30_000);
-
-        Console.WriteLine("Known weight (in grams) currently on the scale:");
-        weightCalibration = int.Parse(Console.ReadLine());
-        hx711.StartCalibration(new Mass(weightCalibration, MassUnit.Gram));
-        Thread.Sleep(30_000);
-
+        Console.WriteLine("Press ENTER to tare.");
+        _ = Console.ReadLine();
         hx711.Tare();
-        Console.WriteLine($"Tare set. Value: {hx711.TareValue}gr");
+        Console.WriteLine($"Tare set. Value: {hx711.TareValue}");
 
-        var weight = hx711.GetWeight();
-        Console.WriteLine($"Weight: {weight}gr");
+        Console.WriteLine("Press ENTER to start reading.");
+        _ = Console.ReadLine();
+
+        for (int i = 0; i < 25; i++)
+        {
+            var weight = hx711.GetWeight();
+            Console.WriteLine($"Weight: {weight}");
+
+            Thread.Sleep(2_000);
+        }
 
         hx711.PowerDown();
         Console.WriteLine("HX711 is off.");
 
+        Console.WriteLine("Press ENTER to close.");
         _ = Console.ReadLine();
     }
 }
