@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Linq;
 using UnitsNet;
@@ -108,7 +109,7 @@ namespace Iot.Device.HX711
                 case Hx711Mode.ChannelAGain64:
                     return 3;
                 default:
-                    throw new ArgumentOutOfRangeException("Unknow HX711 mode.");
+                    throw new ArgumentOutOfRangeException(paramName: nameof(mode), message: "Unknow HX711 mode.");
             }
         }
 

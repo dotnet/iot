@@ -86,7 +86,7 @@ namespace Iot.Device.HX711
         }
 
         /// <summary>
-        /// Load cells always return different values also based on their range and sensitivity. 
+        /// Load cells always return different values also based on their range and sensitivity.
         /// For this reason, a first calibration step with a known weight is required.
         /// You can repeat it several times to get a more precise value.
         /// </summary>
