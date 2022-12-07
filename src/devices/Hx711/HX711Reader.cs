@@ -1,7 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
+using System.Linq;
 using UnitsNet;
 
 namespace Iot.Device.HX711
@@ -61,17 +64,75 @@ namespace Iot.Device.HX711
             // If we're only average across one value, just read it and return it.
             if (numberOfReads == 1)
             {
-                return CalculateNetValue(this.ReadInt(), offsetFromZero);
+                return CalculateNetValue(ReadInt(), offsetFromZero);
             }
 
             // If we're averaging across a low amount of values, just take the
             // median.
             if (numberOfReads < 5)
             {
-                return CalculateNetValue(this.ReadMedian(numberOfReads), offsetFromZero);
+                return CalculateNetValue(ReadMedian(numberOfReads), offsetFromZero);
             }
 
-            return CalculateNetValue(this.ReadAverage(numberOfReads), offsetFromZero);
+            return CalculateNetValue(ReadAverage(numberOfReads), offsetFromZero);
+        }
+
+        /// <summary>
+        /// Calculate net value
+        /// </summary>
+        /// <param name="value">Gross value read from HX711</param>
+        /// <param name="offset">Offset value from 0</param>
+        /// <returns>Return net value read</returns>
+        private static int CalculateNetValue(int value, int offset)
+        {
+            return value - offset;
+        }
+
+        /// <summary>
+        /// HX711 Channel and gain factor are set by number of bits read
+        /// after 24 data bits.
+        /// </summary>
+        /// <param name="mode">Current HX711 mode</param>
+        /// <returns>Number of extrabit after 24 bit</returns>
+        /// <exception cref="ArgumentOutOfRangeException">Throw if mode value is invalid.</exception>
+        /// <remarks>Look table "Table 3 Input Channel and Gain Selection" in doc page 4
+        /// https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html</remarks>
+        private static int CalculateExtraBitByMode(Hx711Mode mode)
+        {
+            switch (mode)
+            {
+                case Hx711Mode.ChannelAGain128:
+                    return 1;
+                case Hx711Mode.ChannelBGain32:
+                    return 2;
+                case Hx711Mode.ChannelAGain64:
+                    return 3;
+                default:
+                    throw new ArgumentOutOfRangeException("Unknow HX711 mode.");
+            }
+        }
+
+        /// <summary>
+        /// The output 24 bits of data is in 2's complement format. Convert it to int.
+        /// </summary>
+        /// <param name="inputValue">24 bit in 2' complement format</param>
+        /// <returns>Int converted</returns>
+        private static int ConvertFromTwosComplement24bit(int inputValue)
+        {
+            // Docs says
+            // "When input differential signal goes out of the 24-bit range,
+            // the output data will be saturated at 800000h (MIN) or 7FFFFFh (MAX),
+            // until the input signal comes back to the input range.", page 4
+            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html
+
+            // 24 bit in 2's complement only 23 are a value if
+            // the number is negative. 0xFFFFFF >> 1 = 0x7FFFFF
+            // Mask to take true value
+            const int MAX_VALUE = 0x7FFFFF;
+            // Mask to take sign bit
+            const int BIT_SIGN = 0x800000;
+
+            return -(inputValue & BIT_SIGN) + (inputValue & MAX_VALUE);
         }
 
         /// <summary>
@@ -101,8 +162,9 @@ namespace Iot.Device.HX711
 
             for (int x = 0; x < numberOfReads; x++)
             {
-                valueList.Add(this.ReadInt());
+                valueList.Add(ReadInt());
             }
+
             valueList.Sort();
 
             // We'll be trimming 20% of outlier samples from top and bottom of collected set.
@@ -126,8 +188,9 @@ namespace Iot.Device.HX711
 
             for (int x = 0; x < numberOfReads; x++)
             {
-                valueList.Add(this.ReadInt());
+                valueList.Add(ReadInt());
             }
+
             valueList.Sort();
 
             // If times is odd we can just take the centre value.
@@ -151,7 +214,7 @@ namespace Iot.Device.HX711
         private int ReadInt()
         {
             // Get a sample from the HX711 in the form of raw bytes.
-            var dataBytes = this.ReadRawBytes();
+            var dataBytes = ReadRawBytes();
 
             // Join the raw bytes into a single 24bit 2s complement value.
             int twosComplementValue = (dataBytes[0] << 16)
@@ -183,21 +246,21 @@ namespace Iot.Device.HX711
                 _gpioController.Write(_pinPD_Sck, PinValue.Low);
 
                 // Wait until HX711 is ready for us to read a sample.
-                while (!this.IsOutputDataReady())
+                while (!IsOutputDataReady())
                 {
                     DelayHelper.DelayMicroseconds(microseconds: 1, allowThreadYield: true);
                 }
 
                 // Read three bytes (24bit) of data from the HX711.
-                var firstByte = this.ReadNextByte();
-                var secondByte = this.ReadNextByte();
-                var thirdByte = this.ReadNextByte();
+                var firstByte = ReadNextByte();
+                var secondByte = ReadNextByte();
+                var thirdByte = ReadNextByte();
 
                 // Reading extra bit
                 for (int i = 0; i < CalculateExtraBitByMode(_options.Mode); i++)
                 {
                     // Clock a bit out of the HX711 and throw it away.
-                    _ = this.ReadNextBit();
+                    _ = ReadNextBit();
                 }
 
                 // Depending on how we're configured, return an orderd list of raw byte
@@ -226,12 +289,12 @@ namespace Iot.Device.HX711
                 if (_bitFormat == ByteFormat.MSB)
                 {
                     byteValue <<= 1;
-                    byteValue |= this.ReadNextBit();
+                    byteValue |= ReadNextBit();
                 }
                 else
                 {
                     byteValue >>= 1;
-                    byteValue |= (byte)(this.ReadNextBit() * 0x80);
+                    byteValue |= (byte)(ReadNextBit() * 0x80);
                 }
             }
 
@@ -252,58 +315,6 @@ namespace Iot.Device.HX711
             var value = _gpioController.Read(_pinDout);
 
             return value == PinValue.High ? (byte)1 : (byte)0;
-        }
-
-        /// <summary>
-        /// Calculate net value
-        /// </summary>
-        /// <param name="value">Gross value read from HX711</param>
-        /// <param name="offset">Offset value from 0</param>
-        /// <returns>Return net value read</returns>
-        private static int CalculateNetValue(int value, int offset) => value - offset;
-
-        /// <summary>
-        /// HX711 Channel and gain factor are set by number of bits read
-        /// after 24 data bits.
-        /// </summary>
-        /// <param name="mode">Current HX711 mode</param>
-        /// <returns>Number of extrabit after 24 bit</returns>
-        /// <exception cref="ArgumentOutOfRangeException">Throw if mode value is invalid.</exception>
-        /// <remarks>Look table "Table 3 Input Channel and Gain Selection" in doc page 4
-        /// https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html</remarks>
-        private static int CalculateExtraBitByMode(Hx711Mode mode)
-        {
-            switch (mode)
-            {
-                case Hx711Mode.ChannelAGain128: return 1;
-                case Hx711Mode.ChannelBGain32: return 2;
-                case Hx711Mode.ChannelAGain64: return 3;
-                default:
-                    throw new ArgumentOutOfRangeException("Unknow HX711 mode.");
-            }
-        }
-
-        /// <summary>
-        /// The output 24 bits of data is in 2's complement format. Convert it to int.
-        /// </summary>
-        /// <param name="inputValue">24 bit in 2' complement format</param>
-        /// <returns>Int converted</returns>
-        private static int ConvertFromTwosComplement24bit(int inputValue)
-        {
-            // Docs says
-            // "When input differential signal goes out of the 24-bit range,
-            // the output data will be saturated at 800000h (MIN) or 7FFFFFh (MAX),
-            // until the input signal comes back to the input range.", page 4
-            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html
-
-            // 24 bit in 2's complement only 23 are a value if
-            // the number is negative. 0xFFFFFF >> 1 = 0x7FFFFF 
-            // Mask to take true value
-            const int MAX_VALUE = 0x7FFFFF;
-            // Mask to take sign bit
-            const int BIT_SIGN = 0x800000;
-
-            return -(inputValue & BIT_SIGN) + (inputValue & MAX_VALUE);
         }
     }
 }

@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 // See https://aka.ms/new-console-template for more information
-using Iot.Device.HX711;
+using System.Threading;
+using System;
 using System.Device.Gpio;
+using Iot.Device.HX711;
 using UnitsNet;
-
-Console.WriteLine("Hello, World!");
-Console.ReadLine();
 
 int pinDout = 23;
 int pinPD_Sck = 24;
@@ -22,7 +21,7 @@ using (var controller = new GpioController())
         for (int i = 0; i < 3; i++)
         {
             Console.WriteLine("Known weight (in grams) currently on the scale:");
-            var weightCalibration = int.Parse(Console.ReadLine() ?? "");
+            var weightCalibration = int.Parse(Console.ReadLine() ?? string.Empty);
             hx711.SetCalibration(Mass.FromGrams(weightCalibration));
         }
 

@@ -14,12 +14,12 @@ namespace Iot.Device.HX711
         ChannelAGain128,
 
         /// <summary>
-        /// Load cell link in channel A and use gain of 128 
+        /// Load cell link in channel A and use gain of 64
         /// </summary>
         ChannelAGain64,
 
         /// <summary>
-        /// Load cell link in channel A and use gain of 128 
+        /// Load cell link in channel B and use gain of 32
         /// </summary>
         ChannelBGain32
     }

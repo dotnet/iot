@@ -1,7 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
+using System.Linq;
 using UnitsNet;
 
 namespace Iot.Device.HX711
@@ -36,15 +40,18 @@ namespace Iot.Device.HX711
         /// </summary>
         private int _offsetFormZero;
 
+        /// <summary>
+        /// Weight set as tare
+        /// </summary>
+        public Mass TareValue => Mass.FromGrams(Math.Round(_tareValue / ReferanceUnit));
         private int _tareValue;
-        public Mass TareValue => Mass.FromGrams(Math.Round(_tareValue / this.ReferanceUnit));
 
         /// <summary>
         /// Creates a new instance of the HX711 module.
         /// </summary>
         /// <param name="pinDout">Trigger pulse output. (Digital OUTput)</param>
         /// <param name="pinPD_Sck">Trigger pulse input. (Power Down control and Serial Clock input)</param>
-        /// <param name="mode">How to use the HX711 module.</param>
+        /// <param name="options">How to use the HX711 module.</param>
         /// <param name="gpioController">GPIO controller related with the pins.</param>
         /// <param name="pinNumberingScheme">Scheme and numeration used by controller.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
@@ -101,7 +108,7 @@ namespace Iot.Device.HX711
 
                 // If we do several calibrations, the most accurate value is the average.
                 _referenceUnitList.Add(referenceValue);
-                this.ReferanceUnit = _referenceUnitList.Average();
+                ReferanceUnit = _referenceUnitList.Average();
 
                 _isCalibrated = true;
             }
@@ -115,7 +122,7 @@ namespace Iot.Device.HX711
         {
             lock (_readLock)
             {
-                this.ReferanceUnit = referenceUnit;
+                ReferanceUnit = referenceUnit;
 
                 // Calibration no longer required
                 _isCalibrated = true;
@@ -136,8 +143,8 @@ namespace Iot.Device.HX711
             }
 
             // Lock is internal in fisical read
-            var value = this.GetNetWeight(numberOfReads);
-            return Mass.FromGrams(Math.Round(value / this.ReferanceUnit, digits: 0));
+            var value = GetNetWeight(numberOfReads);
+            return Mass.FromGrams(Math.Round(value / ReferanceUnit, digits: 0));
         }
 
         /// <summary>
@@ -153,7 +160,7 @@ namespace Iot.Device.HX711
                     throw new HX711CalibrationNotDoneException();
                 }
 
-                _tareValue = this.GetNetWeight(numberOfReads);
+                _tareValue = GetNetWeight(numberOfReads);
             }
         }
 
@@ -224,8 +231,8 @@ namespace Iot.Device.HX711
         /// </summary>
         public void Reset()
         {
-            this.PowerDown();
-            this.PowerUp();
+            PowerDown();
+            PowerUp();
         }
 
         /// <inheritdoc />
@@ -243,7 +250,7 @@ namespace Iot.Device.HX711
         }
 
         /// <summary>
-        /// Read weight from HX711 
+        /// Read weight from HX711
         /// </summary>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
         /// <returns>Return total weight - tare weight</returns>

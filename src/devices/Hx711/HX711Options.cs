@@ -21,16 +21,24 @@ namespace Iot.Device.HX711
         /// </summary>
         public bool UseByteLittleEndian { get; private set; }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HX711Options"/> class with default values.
+        /// </summary>
         public HX711Options()
         {
-            this.Mode = Hx711Mode.ChannelAGain128;
-            this.UseByteLittleEndian = false;
+            Mode = Hx711Mode.ChannelAGain128;
+            UseByteLittleEndian = false;
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="HX711Options"/> class.
+        /// </summary>
+        /// <param name="mode">HX711 has 3 modes of operation, choose the one based on the fisical connection with load cell.</param>
+        /// <param name="useByteLittleEndian">If <code>true</code> bytes read from Hx711 made by LSB format.</param>
         public HX711Options(Hx711Mode mode, bool useByteLittleEndian)
         {
-            this.Mode = mode;
-            this.UseByteLittleEndian = useByteLittleEndian;
+            Mode = mode;
+            UseByteLittleEndian = useByteLittleEndian;
         }
     }
 }
