@@ -66,6 +66,12 @@ namespace Iot.Device.Board
         }
 
         /// <inheritdoc />
+        protected override void Toggle(int pinNumber)
+        {
+            throw new NotSupportedException("No such pin");
+        }
+
+        /// <inheritdoc />
         protected override void Write(int pinNumber, PinValue value)
         {
             throw new NotSupportedException("No such pin");

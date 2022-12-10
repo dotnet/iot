@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Runtime.CompilerServices;
@@ -22,13 +23,14 @@ namespace Iot.Device.Pcx857x
         protected I2cDevice Device { get; }
         private readonly GpioController? _controller;
         private readonly int _interrupt;
+        private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
         private bool _shouldDispose;
 
         // Pin mode bits- 0 for input, 1 for output to match PinMode
         private ushort _pinModes;
 
         // Pin value bits, 1 for high
-        private ushort _pinValues;
+        private ushort _pinValueBits;
 
         /// <summary>
         /// Remote I/O expander for I2C-bus with interrupt.
@@ -106,6 +108,7 @@ namespace Iot.Device.Pcx857x
         protected override void ClosePin(int pinNumber)
         {
             // No-op
+            _pinValues.Remove(pinNumber);
         }
 
         /// <inheritdoc/>
@@ -117,6 +120,7 @@ namespace Iot.Device.Pcx857x
             }
 
             Device.Dispose();
+            _pinValues.Clear();
             base.Dispose(disposing);
         }
 
@@ -124,6 +128,7 @@ namespace Iot.Device.Pcx857x
         protected override void OpenPin(int pinNumber)
         {
             // No-op
+            _pinValues.TryAdd(pinNumber, PinValue.Low);
         }
 
         /// <inheritdoc/>
@@ -134,8 +139,12 @@ namespace Iot.Device.Pcx857x
                 new PinValuePair(pinNumber, default)
             };
             Read(values);
-            return values[0].PinValue;
+            _pinValues[pinNumber] = values[0].PinValue;
+            return _pinValues[pinNumber];
         }
+
+        /// <inheritdoc/>
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         /// <summary>
         /// Reads multiple pins from the device
@@ -161,6 +170,7 @@ namespace Iot.Device.Pcx857x
             {
                 int pin = pinValues[i].PinNumber;
                 pinValues[i] = new PinValuePair(pin, (data >> pin) & 1);
+                _pinValues[pin] = pinValues[i].PinValue;
             }
         }
 
@@ -198,21 +208,21 @@ namespace Iot.Device.Pcx857x
                 throw new ArgumentOutOfRangeException(nameof(mode), "Only Input and Output modes are supported.");
             }
 
-            WritePins(_pinValues);
+            WritePins(_pinValueBits);
         }
 
         private void WritePins(ushort value)
         {
             // We need to set all input pins to high
-            _pinValues = (ushort)(value | ~_pinModes);
+            _pinValueBits = (ushort)(value | ~_pinModes);
 
             if (PinCount == 8)
             {
-                WriteByte((byte)_pinValues);
+                WriteByte((byte)_pinValueBits);
             }
             else
             {
-                InternalWriteUInt16(_pinValues);
+                InternalWriteUInt16(_pinValueBits);
             }
         }
 
@@ -224,6 +234,7 @@ namespace Iot.Device.Pcx857x
                 new PinValuePair(pinNumber, value)
             };
             Write(values);
+            _pinValues[pinNumber] = value;
         }
 
         /// <summary>
@@ -250,7 +261,11 @@ namespace Iot.Device.Pcx857x
                 return current;
             }
 
-            WritePins(SetBits(_pinValues, (ushort)values, (ushort)pins));
+            WritePins(SetBits(_pinValueBits, (ushort)values, (ushort)pins));
+            foreach (PinValuePair pinValuePair in pinValues)
+            {
+                _pinValues[pinValuePair.PinNumber] = pinValuePair.PinValue;
+            }
         }
 
         /// <inheritdoc/>
