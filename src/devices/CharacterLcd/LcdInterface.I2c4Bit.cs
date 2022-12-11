@@ -14,7 +14,7 @@ namespace Iot.Device.CharacterLcd
         /// (such as the PCF2119x) are examples of this support.
         /// This driver uses 4-Bit access (each character/command is split into 2x4 bits for transmission)
         /// </summary>
-        private class I2c4Bit : LcdInterface
+        private sealed class I2c4Bit : LcdInterface
         {
             private const byte ENABLE = 0b0000_0100;
             private const byte READWRITE = 0b0000_0010;
@@ -24,11 +24,13 @@ namespace Iot.Device.CharacterLcd
 
             private readonly I2cDevice _i2cDevice;
             private bool _backlightOn;
+            private int _backlightFlag;
 
             public I2c4Bit(I2cDevice i2cDevice)
             {
                 _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
                 _backlightOn = true;
+                _backlightFlag = LCD_BACKLIGHT;
                 InitDisplay();
             }
 
@@ -44,23 +46,9 @@ namespace Iot.Device.CharacterLcd
                 set
                 {
                     _backlightOn = value;
+                    _backlightFlag = value ? LCD_BACKLIGHT : 0;
                     // Need to send a command to make this happen immediately.
                     SendCommandAndWait(0);
-                }
-            }
-
-            private byte BacklightFlag
-            {
-                get
-                {
-                    if (BacklightOn)
-                    {
-                        return LCD_BACKLIGHT;
-                    }
-                    else
-                    {
-                        return 0;
-                    }
                 }
             }
 
@@ -89,8 +77,8 @@ namespace Iot.Device.CharacterLcd
 
             private void Write4Bits(byte command)
             {
-                _i2cDevice.WriteByte((byte)(command | ENABLE | BacklightFlag));
-                _i2cDevice.WriteByte((byte)((command & ~ENABLE) | BacklightFlag));
+                _i2cDevice.WriteByte((byte)(command | ENABLE | _backlightFlag));
+                _i2cDevice.WriteByte((byte)((command & ~ENABLE) | _backlightFlag));
             }
 
             public override void SendCommands(ReadOnlySpan<byte> commands)
