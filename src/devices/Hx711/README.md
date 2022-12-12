@@ -3,8 +3,8 @@
 ## Summary
 
 Device binding for the HX711 weight componet. This componet is necessary if you want to read the weight from a load cell, due to the analog signal and too weak emitted.
-The Load Cell Amplifier and ADC Module is a small breakout board for the HX711 IC that allows you to easily read load cells to measure weight. 
-By connecting the module to your microcontroller you will be able to read the changes in the resistance of the load cell and with some calibration you’ll be able to get very accurate weight measurements. 
+The Load Cell Amplifier and ADC Module is a small breakout board for the HX711 IC that allows you to easily read load cells to measure weight.
+By connecting the module to your microcontroller you will be able to read the changes in the resistance of the load cell and with some calibration you’ll be able to get very accurate weight measurements.
 This can be handy for creating your own industrial scale, process control, or simple presence detection.
 
 ## Documentation
@@ -118,7 +118,7 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 
 ## Pinouts HX711
 
-** Analog Side **
+**Analog Side**
 | Name              | PCB description |
 | ----------------- | --------------- |
 | Sensor red wire   | E+              |
@@ -126,7 +126,7 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 | Sensor white wire | A-              |
 | Sensor green wire | A+              |
 
-** Digital Side **
+**Digital Side**
 | Name              | PCB description         |
 | ----------------- | ----------------------- |
 | GND               | Ground Power Connection |
