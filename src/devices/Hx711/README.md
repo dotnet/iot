@@ -118,7 +118,8 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 
 ## Pinouts HX711
 
-**Analog Side**
+### Analog Side
+
 | Name              | PCB description |
 | ----------------- | --------------- |
 | Sensor red wire   | E+              |
@@ -126,7 +127,8 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 | Sensor white wire | A-              |
 | Sensor green wire | A+              |
 
-**Digital Side**
+### Digital Side
+
 | Name              | PCB description         |
 | ----------------- | ----------------------- |
 | GND               | Ground Power Connection |
