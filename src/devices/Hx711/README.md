@@ -17,11 +17,11 @@ This can be handy for creating your own industrial scale, process control, or si
 
 ```csharp
 int pinDout = 23;
-int pinPD_Sck = 24;
+int pinPdSck = 24;
 
 using (var controller = new GpioController())
 {
-    using (var hx711 = new HX711(pinDout, pinPD_Sck, gpioController: controller, shouldDispose: false))
+    using (var hx711 = new Hx711(pinDout, pinPdSck, gpioController: controller, shouldDispose: false))
     {
         hx711.PowerUp();
         Console.WriteLine("HX711 is on.");
@@ -62,11 +62,11 @@ using (var controller = new GpioController())
 
 ```csharp
 int pinDout = 23;
-int pinPD_Sck = 24;
+int pinPdSck = 24;
 
 using (var controller = new GpioController())
 {
-    using (var hx711 = new HX711(pinDout, pinPD_Sck, gpioController: controller, shouldDispose: false))
+    using (var hx711 = new Hx711(pinDout, pinPdSck, gpioController: controller, shouldDispose: false))
     {
         hx711.PowerUp();
         Console.WriteLine("HX711 is on.");

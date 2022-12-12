@@ -9,11 +9,11 @@ using Iot.Device.Hx711;
 using UnitsNet;
 
 int pinDout = 23;
-int pinPD_Sck = 24;
+int pinPdSck = 24;
 
 using (var controller = new GpioController())
 {
-    using (var hx711 = new Hx711(pinDout, pinPD_Sck, gpioController: controller, shouldDispose: false))
+    using (var hx711 = new Hx711(pinDout, pinPdSck, gpioController: controller, shouldDispose: false))
     {
         hx711.PowerUp();
         Console.WriteLine("Hx711 is on.");
