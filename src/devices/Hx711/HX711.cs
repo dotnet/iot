@@ -8,32 +8,29 @@ using System.Device.Gpio;
 using System.Linq;
 using UnitsNet;
 
-namespace Iot.Device.HX711
+namespace Iot.Device.Hx711
 {
     /// <summary>
-    /// HX711 - Weight scale Module
+    /// Hx711 - Weight scale Module
     /// </summary>
-    /// <remarks>DataSheet: https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/109/1/HX711.html</remarks>
-    public sealed class HX711 : IDisposable
+    /// <remarks>DataSheet: https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/109/1/Hx711.html</remarks>
+    public sealed class Hx711 : IDisposable
     {
         private readonly GpioController _gpioController;
         private readonly bool _shouldDispose;
 
         private readonly int _pinDout;
-        private readonly int _pinPD_Sck;
+        private readonly int _pinPdSck;
 
-        private readonly HX711Options _options;
+        private readonly Hx711Options _options;
         private readonly object _readLock;
-        private readonly HX711Reader _reader;
+        private readonly Hx711Reader _reader;
+
+        private readonly List<double> _referenceUnitList = new();
 
         private bool _isInitialize;
         private bool _isCalibrated;
-
-        /// <summary>
-        /// Conversion ratio between Hx711 units and grams
-        /// </summary>
-        public double ReferanceUnit { get; private set; }
-        private readonly List<double> _referenceUnitList = new();
+        private int _tareValue;
 
         /// <summary>
         /// Offset value from 0 at startup
@@ -41,34 +38,44 @@ namespace Iot.Device.HX711
         private int _offsetFormZero;
 
         /// <summary>
-        /// Weight set as tare
+        /// Conversion ratio between Hx711 units and grams
         /// </summary>
-        public Mass TareValue => Mass.FromGrams(Math.Round(_tareValue / ReferanceUnit));
-        private int _tareValue;
+        public double ReferanceUnit { get; private set; }
 
         /// <summary>
-        /// Creates a new instance of the HX711 module.
+        /// Weight set as tare
+        /// </summary>
+        public Mass TareValue
+        {
+            get
+            {
+                return ReferanceUnit == 0 ? Mass.FromGrams(_tareValue) : Mass.FromGrams(Math.Round(_tareValue / ReferanceUnit));
+            }
+        }
+
+        /// <summary>
+        /// Creates a new instance of the Hx711 module.
         /// </summary>
         /// <param name="pinDout">Trigger pulse output. (Digital OUTput)</param>
-        /// <param name="pinPD_Sck">Trigger pulse input. (Power Down control and Serial Clock input)</param>
-        /// <param name="options">How to use the HX711 module.</param>
+        /// <param name="pinPdSck">Trigger pulse input. (Power Down control and Serial Clock input)</param>
+        /// <param name="options">How to use the Hx711 module.</param>
         /// <param name="gpioController">GPIO controller related with the pins.</param>
         /// <param name="pinNumberingScheme">Scheme and numeration used by controller.</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller.</param>
-        public HX711(int pinDout, int pinPD_Sck, HX711Options? options = null, GpioController? gpioController = null,
+        public Hx711(int pinDout, int pinPdSck, Hx711Options? options = null, GpioController? gpioController = null,
             PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, bool shouldDispose = true)
         {
             _pinDout = pinDout;
-            _pinPD_Sck = pinPD_Sck;
+            _pinPdSck = pinPdSck;
 
             _shouldDispose = shouldDispose || gpioController is null;
             _gpioController = gpioController ?? new(pinNumberingScheme);
 
-            // Mutex for reading from the HX711, in case multiple threads in client
+            // Mutex for reading from the Hx711, in case multiple threads in client
             // software try to access get values from the class at the same time.
             _readLock = new object();
 
-            _gpioController.OpenPin(_pinPD_Sck, PinMode.Output);
+            _gpioController.OpenPin(_pinPdSck, PinMode.Output);
             _gpioController.OpenPin(_pinDout, PinMode.Input);
 
             // Needed initialize
@@ -79,10 +86,11 @@ namespace Iot.Device.HX711
 
             _offsetFormZero = 0;
             _tareValue = 0;
+            ReferanceUnit = 0;
 
-            _options = options ?? new HX711Options();
+            _options = options ?? new Hx711Options();
 
-            _reader = new HX711Reader(_gpioController, _options, pinDout, pinPD_Sck, _readLock);
+            _reader = new Hx711Reader(_gpioController, _options, pinDout, pinPdSck, _readLock);
         }
 
         /// <summary>
@@ -130,16 +138,16 @@ namespace Iot.Device.HX711
         }
 
         /// <summary>
-        /// Read the weight from the HX711 through channel A to which the load cell is connected,
+        /// Read the weight from the Hx711 through channel A to which the load cell is connected,
         /// range and precision depend on load cell connected.
         /// </summary>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
-        /// <returns>Return a weigh read from HX711</returns>
+        /// <returns>Return a weigh read from Hx711</returns>
         public Mass GetWeight(int numberOfReads = 3)
         {
             if (!_isCalibrated)
             {
-                throw new HX711CalibrationNotDoneException();
+                throw new Hx711CalibrationNotDoneException();
             }
 
             // Lock is internal in fisical read
@@ -157,7 +165,7 @@ namespace Iot.Device.HX711
             {
                 if (!_isCalibrated)
                 {
-                    throw new HX711CalibrationNotDoneException();
+                    throw new Hx711CalibrationNotDoneException();
                 }
 
                 _tareValue = GetNetWeight(numberOfReads);
@@ -165,30 +173,30 @@ namespace Iot.Device.HX711
         }
 
         /// <summary>
-        /// Power up HX711 and set it ready to work
+        /// Power up Hx711 and set it ready to work
         /// </summary>
         public void PowerUp()
         {
             // Wait for and get the Read Lock, incase another thread is already
-            // driving the HX711 serial interface.
+            // driving the Hx711 serial interface.
             lock (_readLock)
             {
-                // Lower the HX711 Digital Serial Clock (PD_SCK) line.
+                // Lower the Hx711 Digital Serial Clock (PD_SCK) line.
                 // Docs says "When PD_SCK Input is low, chip is in normal working mode."
                 // page 5
-                // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/573/5/HX711.html
-                _gpioController.Write(_pinPD_Sck, PinValue.Low);
+                // https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/573/5/Hx711.html
+                _gpioController.Write(_pinPdSck, PinValue.Low);
 
-                // Wait 100µs for the HX711 to power back up.
+                // Wait 100µs for the Hx711 to power back up.
                 DelayHelper.DelayMicroseconds(microseconds: 100, allowThreadYield: true);
 
-                // Release the Read Lock, now that we've finished driving the HX711
+                // Release the Read Lock, now that we've finished driving the Hx711
                 // serial interface.
             }
 
-            // HX711 will now be defaulted to Channel A with gain of 128. If this
+            // Hx711 will now be defaulted to Channel A with gain of 128. If this
             // isn't what client software has requested from us, take a sample and
-            // throw it away, so that next sample from the HX711 will be from the
+            // throw it away, so that next sample from the Hx711 will be from the
             // correct channel/gain.
             if (_options.Mode != Hx711Mode.ChannelAGain128 || !_isInitialize)
             {
@@ -202,26 +210,26 @@ namespace Iot.Device.HX711
         }
 
         /// <summary>
-        /// Power down HX711
+        /// Power down Hx711
         /// </summary>
         public void PowerDown()
         {
             // Wait for and get the Read Lock, incase another thread is already
-            // driving the HX711 serial interface.
+            // driving the Hx711 serial interface.
             lock (_readLock)
             {
-                // Cause a rising edge on HX711 Digital Serial Clock (PD_SCK). We then
-                // leave it held up and wait 100µs. After 60µs the HX711 should be
+                // Cause a rising edge on Hx711 Digital Serial Clock (PD_SCK). We then
+                // leave it held up and wait 100µs. After 60µs the Hx711 should be
                 // powered down.
                 // Docs says "When PD_SCK pin changes from low to high
-                // and stays at high for longer than 60µs, HX711
-                // enters power down mode", page 5 https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/573/5/HX711.html
-                _gpioController.Write(_pinPD_Sck, PinValue.Low);
-                _gpioController.Write(_pinPD_Sck, PinValue.High);
+                // and stays at high for longer than 60µs, Hx711
+                // enters power down mode", page 5 https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/573/5/Hx711.html
+                _gpioController.Write(_pinPdSck, PinValue.Low);
+                _gpioController.Write(_pinPdSck, PinValue.High);
 
                 DelayHelper.DelayMicroseconds(microseconds: 65, allowThreadYield: true);
 
-                // Release the Read Lock, now that we've finished driving the HX711
+                // Release the Read Lock, now that we've finished driving the Hx711
                 // serial interface.
             }
         }
@@ -244,13 +252,13 @@ namespace Iot.Device.HX711
             }
             else
             {
-                _gpioController?.ClosePin(_pinPD_Sck);
+                _gpioController?.ClosePin(_pinPdSck);
                 _gpioController?.ClosePin(_pinDout);
             }
         }
 
         /// <summary>
-        /// Read weight from HX711
+        /// Read weight from Hx711
         /// </summary>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
         /// <returns>Return total weight - tare weight</returns>

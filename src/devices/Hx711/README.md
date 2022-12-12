@@ -9,14 +9,13 @@ This can be handy for creating your own industrial scale, process control, or si
 
 ## Documentation
 
-**[HX711 - Source 1](https://homotix_it.e-mind.it/upld/repository/File/hx711.pdf)**
-
-**[HX711 - Source 2](https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/1/HX711.html)**
-
-**[Example for Arduino](https://www.moreware.org/wp/blog/2020/06/09/arduino-come-funziona-la-board-per-celle-di-carico-hx711/)**
+1. [HX711 - Source 1](https://homotix_it.e-mind.it/upld/repository/File/hx711.pdf)
+2. [HX711 - Source 2](https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/1/HX711.html)
+3. [Example for Arduino](https://www.moreware.org/wp/blog/2020/06/09/arduino-come-funziona-la-board-per-celle-di-carico-hx711/)
 
 ## Usage with calibration process
-```C#
+
+```csharp
 int pinDout = 23;
 int pinPD_Sck = 24;
 
@@ -60,7 +59,8 @@ using (var controller = new GpioController())
 ```
 
 ## Usage without calibration process
-```C#
+
+```csharp
 int pinDout = 23;
 int pinPD_Sck = 24;
 
@@ -100,11 +100,13 @@ using (var controller = new GpioController())
 ```
 
 ## Hardware Required
+
 * Load cell
 * HX711
 * Male/Female Jumper Wires
 
 ## Circuit - Scheme
+
 ![Fritz diagram](raspberry_hx711_load_cell.png)
 
 * VCC - 5V
@@ -115,6 +117,7 @@ using (var controller = new GpioController())
 The fritz diagram above depicts how you should wire your RPi in order to run a example program.
 
 ## Pinouts HX711
+
 ** Analog Side **
 | Name              | PCB description |
 | ----------------- | --------------- |
@@ -132,10 +135,12 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 | VCC               | Power Input             |
 
 ## Calibration
+
 First of all HX711 need a calibration process because it can be connected to any load cell that has a different range and sensitivity.
 To perform it, simply put a known weight on the load cell and start the calibration via `StartCalibration()`.
 If you want a more precise calibration, you can do this several times with different weights.
 If you don't want to carry out the calibration at every start, you can memorize the `ReferenceUnit` which is valued after the calibration and set it using `SetReferenceUnit` method.
 
 ## Notes
+
 Only connection in Channel A is support at the moment.

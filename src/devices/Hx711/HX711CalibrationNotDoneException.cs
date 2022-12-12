@@ -3,29 +3,29 @@
 
 using System;
 
-namespace Iot.Device.HX711
+namespace Iot.Device.Hx711
 {
     /// <summary>
     /// Exception thorw if Hx711 miss calibration process
     /// </summary>
-    public class HX711CalibrationNotDoneException : Exception
+    public class Hx711CalibrationNotDoneException : Exception
     {
-        private const string MESSAGE = "HX711 component need a calibration process first.";
+        private new const string Message = "Hx711 component need a calibration process first.";
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HX711CalibrationNotDoneException"/> class.
+        /// Initializes a new instance of the <see cref="Hx711CalibrationNotDoneException"/> class.
         /// </summary>
-        public HX711CalibrationNotDoneException()
-        : base(message: MESSAGE)
+        public Hx711CalibrationNotDoneException()
+        : base(message: Message)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HX711CalibrationNotDoneException"/> class.
+        /// Initializes a new instance of the <see cref="Hx711CalibrationNotDoneException"/> class.
         /// </summary>
         /// <param name="inner">The exception that is the cause of the current exception.</param>
-        public HX711CalibrationNotDoneException(Exception inner)
-            : base(message: MESSAGE, inner)
+        public Hx711CalibrationNotDoneException(Exception inner)
+            : base(message: Message, inner)
         {
         }
     }

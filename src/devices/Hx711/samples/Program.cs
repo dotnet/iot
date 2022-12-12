@@ -5,7 +5,7 @@
 using System.Threading;
 using System;
 using System.Device.Gpio;
-using Iot.Device.HX711;
+using Iot.Device.Hx711;
 using UnitsNet;
 
 int pinDout = 23;
@@ -16,7 +16,7 @@ using (var controller = new GpioController())
     using (var hx711 = new HX711(pinDout, pinPD_Sck, gpioController: controller, shouldDispose: false))
     {
         hx711.PowerUp();
-        Console.WriteLine("HX711 is on.");
+        Console.WriteLine("Hx711 is on.");
 
         for (int i = 0; i < 3; i++)
         {
@@ -42,7 +42,7 @@ using (var controller = new GpioController())
         }
 
         hx711.PowerDown();
-        Console.WriteLine("HX711 is off.");
+        Console.WriteLine("Hx711 is off.");
 
         Console.WriteLine("Press ENTER to close.");
         _ = Console.ReadLine();

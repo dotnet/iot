@@ -8,9 +8,9 @@ using System.Device.Gpio;
 using System.Linq;
 using UnitsNet;
 
-namespace Iot.Device.HX711
+namespace Iot.Device.Hx711
 {
-    internal sealed class HX711Reader
+    internal sealed class Hx711Reader
     {
         private readonly GpioController _gpioController;
         private readonly int _pinDout;
@@ -18,11 +18,11 @@ namespace Iot.Device.HX711
 
         private readonly object _readLock;
 
-        private readonly HX711Options _options;
+        private readonly Hx711Options _options;
         private readonly ByteFormat _byteFormat;
         private readonly ByteFormat _bitFormat;
 
-        internal HX711Reader(GpioController gpioController, HX711Options options, int pinDout, int pinPD_Sck, object readLock)
+        internal Hx711Reader(GpioController gpioController, Hx711Options options, int pinDout, int pinPD_Sck, object readLock)
         {
             _gpioController = gpioController;
             _options = options;
@@ -30,25 +30,25 @@ namespace Iot.Device.HX711
             _pinPD_Sck = pinPD_Sck;
             _readLock = readLock;
 
-            // According to the HX711 Datasheet, order of bits inside each byte is MSB so you shouldn't need to modify it.
-            // Docs say "... starting with the MSB bit first ..."
+            // According to the Hx711 Datasheet, order of bits inside each byte is Msb so you shouldn't need to modify it.
+            // Docs say "... starting with the Msb bit first ..."
             // page 4
-            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/573/4/HX711.html
-            _bitFormat = ByteFormat.MSB;
+            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/573/4/Hx711.html
+            _bitFormat = ByteFormat.Msb;
 
-            // Some HX711 manufacturers return bytes in LSB, but most in MSB.
+            // Some Hx711 manufacturers return bytes in Lsb, but most in Msb.
             if (options.UseByteLittleEndian)
             {
-                _byteFormat = ByteFormat.LSB;
+                _byteFormat = ByteFormat.Lsb;
             }
             else
             {
-                _byteFormat = ByteFormat.MSB;
+                _byteFormat = ByteFormat.Msb;
             }
         }
 
         /// <summary>
-        /// Read a weight value from HX711, how accurate depends on the number of reading passed
+        /// Read a weight value from Hx711, how accurate depends on the number of reading passed
         /// </summary>
         /// <param name="numberOfReads">Number of readings to take from which to average, to get a more accurate value.</param>
         /// <param name="offsetFromZero">Offset value from 0</param>
@@ -81,7 +81,7 @@ namespace Iot.Device.HX711
         /// <summary>
         /// Calculate net value
         /// </summary>
-        /// <param name="value">Gross value read from HX711</param>
+        /// <param name="value">Gross value read from Hx711</param>
         /// <param name="offset">Offset value from 0</param>
         /// <returns>Return net value read</returns>
         private static int CalculateNetValue(int value, int offset)
@@ -90,14 +90,14 @@ namespace Iot.Device.HX711
         }
 
         /// <summary>
-        /// HX711 Channel and gain factor are set by number of bits read
+        /// Hx711 Channel and gain factor are set by number of bits read
         /// after 24 data bits.
         /// </summary>
-        /// <param name="mode">Current HX711 mode</param>
+        /// <param name="mode">Current Hx711 mode</param>
         /// <returns>Number of extrabit after 24 bit</returns>
         /// <exception cref="ArgumentOutOfRangeException">Throw if mode value is invalid.</exception>
         /// <remarks>Look table "Table 3 Input Channel and Gain Selection" in doc page 4
-        /// https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html</remarks>
+        /// https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/457/4/Hx711.html</remarks>
         private static int CalculateExtraBitByMode(Hx711Mode mode)
         {
             switch (mode)
@@ -109,7 +109,7 @@ namespace Iot.Device.HX711
                 case Hx711Mode.ChannelAGain64:
                     return 3;
                 default:
-                    throw new ArgumentOutOfRangeException(paramName: nameof(mode), message: "Unknow HX711 mode.");
+                    throw new ArgumentOutOfRangeException(paramName: nameof(mode), message: "Unknow Hx711 mode.");
             }
         }
 
@@ -124,16 +124,16 @@ namespace Iot.Device.HX711
             // "When input differential signal goes out of the 24-bit range,
             // the output data will be saturated at 800000h (MIN) or 7FFFFFh (MAX),
             // until the input signal comes back to the input range.", page 4
-            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html
+            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/457/4/Hx711.html
 
             // 24 bit in 2's complement only 23 are a value if
             // the number is negative. 0xFFFFFF >> 1 = 0x7FFFFF
             // Mask to take true value
-            const int MAX_VALUE = 0x7FFFFF;
+            const int MaxValue = 0x7FFFFF;
             // Mask to take sign bit
-            const int BIT_SIGN = 0x800000;
+            const int BitSign = 0x800000;
 
-            return -(inputValue & BIT_SIGN) + (inputValue & MAX_VALUE);
+            return -(inputValue & BitSign) + (inputValue & MaxValue);
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace Iot.Device.HX711
             // pin DOUT is high.
             // ...
             // When DOUT goes to low, it indicates data is ready for retrieval", page 4
-            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html
+            // https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/457/4/Hx711.html
             var valueRead = _gpioController.Read(_pinDout);
             return valueRead != PinValue.High;
         }
@@ -209,12 +209,12 @@ namespace Iot.Device.HX711
         }
 
         /// <summary>
-        /// Read a weight value from HX711
+        /// Read a weight value from Hx711
         /// </summary>
         /// <returns>Return a weight read</returns>
         private int ReadInt()
         {
-            // Get a sample from the HX711 in the form of raw bytes.
+            // Get a sample from the Hx711 in the form of raw bytes.
             var dataBytes = ReadRawBytes();
 
             // Join the raw bytes into a single 24bit 2s complement value.
@@ -222,37 +222,34 @@ namespace Iot.Device.HX711
                 | (dataBytes[1] << 8)
                 | dataBytes[2];
 
-#if DEBUG
-            Console.WriteLine($"Twos: {twosComplementValue}");
-#endif
             // Convert from 24bit twos-complement to a signed value.
             int signedIntValue = ConvertFromTwosComplement24bit(twosComplementValue);
 
-            // Return the sample value we've read from the HX711.
+            // Return the sample value we've read from the Hx711.
             return signedIntValue;
         }
 
         /// <summary>
-        /// Read one value from HX711
+        /// Read one value from Hx711
         /// </summary>
         /// <returns>Return bytes read</returns>
         private byte[] ReadRawBytes()
         {
             // Wait for and get the Read Lock, incase another thread is already
-            // driving the HX711 serial interface.
+            // driving the Hx711 serial interface.
             lock (_readLock)
             {
                 // Doc says "Serial clock input PD_SCK shold be low", page
-                // https://html.alldatasheet.com/html-pdf/1132222/AVIA/HX711/457/4/HX711.html
+                // https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/457/4/Hx711.html
                 _gpioController.Write(_pinPD_Sck, PinValue.Low);
 
-                // Wait until HX711 is ready for us to read a sample.
+                // Wait until Hx711 is ready for us to read a sample.
                 while (!IsOutputDataReady())
                 {
                     DelayHelper.DelayMicroseconds(microseconds: 1, allowThreadYield: true);
                 }
 
-                // Read three bytes (24bit) of data from the HX711.
+                // Read three bytes (24bit) of data from the Hx711.
                 var firstByte = ReadNextByte();
                 var secondByte = ReadNextByte();
                 var thirdByte = ReadNextByte();
@@ -260,17 +257,17 @@ namespace Iot.Device.HX711
                 // Reading extra bit
                 for (int i = 0; i < CalculateExtraBitByMode(_options.Mode); i++)
                 {
-                    // Clock a bit out of the HX711 and throw it away.
+                    // Clock a bit out of the Hx711 and throw it away.
                     _ = ReadNextBit();
                 }
 
                 // Depending on how we're configured, return an orderd list of raw byte
                 // values.
-                return _byteFormat == ByteFormat.LSB
+                return _byteFormat == ByteFormat.Lsb
                     ? (new[] { thirdByte, secondByte, firstByte })
                     : (new[] { firstByte, secondByte, thirdByte });
 
-                // Release the Read Lock, now that we've finished driving the HX711
+                // Release the Read Lock, now that we've finished driving the Hx711
                 // serial interface.
             }
         }
@@ -284,10 +281,10 @@ namespace Iot.Device.HX711
             byte byteValue = 0;
 
             // Read bits and build the byte from top, or bottom, depending
-            // on whether we are in MSB or LSB bit mode.
+            // on whether we are in Msb or Lsb bit mode.
             for (int x = 0; x < 8; x++)
             {
-                if (_bitFormat == ByteFormat.MSB)
+                if (_bitFormat == ByteFormat.Msb)
                 {
                     byteValue <<= 1;
                     byteValue |= ReadNextBit();
@@ -308,7 +305,7 @@ namespace Iot.Device.HX711
         /// <returns>Return bit read from Hx711</returns>
         private byte ReadNextBit()
         {
-            // Clock HX711 Digital Serial Clock (PD_SCK). DOUT will be
+            // Clock Hx711 Digital Serial Clock (PD_SCK). DOUT will be
             // ready 1µs after PD_SCK rising edge, so we sample after
             // lowering PD_SCL, when we know DOUT will be stable.
             _gpioController.Write(_pinPD_Sck, PinValue.High);
