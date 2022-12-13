@@ -8,7 +8,9 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
 
-// Initialize display (busId = 1 for Raspberry Pi 2 & 3)
+// Supports Bicolor LED Square Pixel Matrix
+// Product: https://www.adafruit.com/product/902
+// Initialize display
 using Matrix8x8Bicolor matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
     {
         // Set max brightness

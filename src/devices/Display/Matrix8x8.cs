@@ -9,7 +9,7 @@ namespace Iot.Device.Display
     /// <summary>
     /// Represents an 8x8 LED matrix using the HT16K33 LED Matrix driver.
     /// </summary>
-    // Product: https://www.adafruit.com/product/2042
+    // Product: https://www.adafruit.com/product/1049
     public class Matrix8x8 : Ht16k33
     {
         private readonly byte[] _displayBuffer = new byte[17];

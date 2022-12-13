@@ -6,7 +6,9 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Display;
 
-// Initialize display (busId = 1 for Raspberry Pi 2+)
+// Supports BiColor Bargraph
+// https://www.adafruit.com/product/1721
+// Initialize display
 using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
     {
         // Set max brightness

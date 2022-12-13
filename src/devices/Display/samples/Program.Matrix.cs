@@ -8,10 +8,10 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
 
-// Initialize display (busId = 1 for Raspberry Pi 2 & 3)
 // Supports Matrix 8x8 and 16x8
 // - https://www.adafruit.com/product/1632
 // - https://www.adafruit.com/product/2042
+// Initialize display
 // Use Matrix8x8 type for 8x8 matrix
 // Use Matrix16x8 type for 16x8 matrix
 using Matrix8x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
@@ -105,7 +105,7 @@ for (int i = 0; i < 8; i++)
     Thread.Sleep(10);
 }
 
-for (int i = matrix.Width; i >= 0; i--)
+for (int i = width; i >= 0; i--)
 {
     matrix[i, 7] = 1;
     Thread.Sleep(10);
