@@ -29,6 +29,7 @@ byte fullLit = 255;
 byte halfLit = 128;
 byte quarterLit = 64;
 matrix.Initialize();
+// ranges from 270 to 2159; smaller the number to faster blink
 matrix.SetBlinkingRate(0);
 matrix.Fill(0);
 
@@ -43,15 +44,17 @@ matrix[0, height] = fullLit;
 matrix[width, 0] = fullLit;
 matrix[width, height] = fullLit;
 
-Thread.Sleep(500);
+Thread.Sleep(1000);
 matrix.Fill(0);
 
+matrix.SetBlinkingRate(270);
 matrix.WritePixel(halfWidth - 1, halfHeight - 1, halfLit, true, true);
 matrix.WritePixel(halfWidth - 1, halfHeight, halfLit, true, true);
 matrix.WritePixel(halfWidth, halfHeight - 1, halfLit, true, true);
 matrix.WritePixel(halfWidth, halfHeight, halfLit, true, true);
 
-Thread.Sleep(5000);
+Thread.Sleep(1500);
+matrix.SetBlinkingRate(0);
 matrix.Fill(0);
 
 for (int i = 0; i < 2; i++)
@@ -72,9 +75,6 @@ Thread.Sleep(100);
 
 // Clear matrixgit
 matrix.Fill(0);
-
-// Flash middle LEDs
-matrix.SetBlinkingRate(1);
 
 // Set pixel in the origin 0, 0 position.
 matrix[0, 0] = halfLit;

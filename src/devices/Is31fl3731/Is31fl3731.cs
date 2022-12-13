@@ -93,7 +93,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void WritePixel(int x, int y, int brightness, bool enable, bool blink)
         {
-            // WriteLedBlink(x, y, blink);
+            WriteLedBlink(x, y, blink);
             WriteLed(x, y, enable);
             WriteLedPwm(x, y, brightness);
         }
@@ -232,11 +232,12 @@ namespace Iot.Device.Display
 
         private void WriteLedBlink(int x, int y, bool enable)
         {
-            int longAddress = GetLedAddress(x, y);
-            int address = FrameRegister.Blink + (longAddress / 8);
-            int ledBlock = Read(address);
-            int ledRegisterBit = longAddress % 8;
-            int mask = 1 >> ledRegisterBit;
+            int pixelAddress = GetLedAddress(x, y);
+            int blinkOffset = pixelAddress / 8;
+            int ledBit = pixelAddress % 8;
+            int blinkAddress = FrameRegister.Blink + blinkOffset;
+            int ledBlock = Read(blinkAddress);
+            int mask = 1 << ledBit;
 
             if (enable)
             {
@@ -247,7 +248,7 @@ namespace Iot.Device.Display
                 ledBlock &= ~mask;
             }
 
-            Write(0, (byte)address, (byte)ledBlock);
+            Write(0, (byte)blinkAddress, (byte)ledBlock);
         }
     }
 }
