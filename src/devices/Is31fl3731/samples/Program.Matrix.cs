@@ -12,15 +12,18 @@ using Iot.Device.Display;
 // https://www.adafruit.com/product/2974
 using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Backpack16x9.DefaultI2cAddress));
 Backpack16x9 matrix = new(i2cDevice);
+
 // For 16x8 matrix Charlieplex bonet
 // https://www.adafruit.com/product/4122
 // using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Bonnet16x8.DefaultI2cAddress));
 // Bonnet16x8 matrix = new(i2cDevice);
+
 // For Scroll Phat HD 17x7 and Scroll Hat Mini 17x7
 // https://shop.pimoroni.com/products/scroll-phat-hd
 // https://shop.pimoroni.com/products/scroll-hat-mini
 // using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, ScrollPhat17x7.DefaultI2cAddress));
 // ScrollPhat17x7 matrix = new(i2cDevice);
+
 // For LED Matrix Breakout 11x7
 // https://shop.pimoroni.com/products/11x7-led-matrix-breakout
 // using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Breakout11x7.DefaultI2cAddress));
