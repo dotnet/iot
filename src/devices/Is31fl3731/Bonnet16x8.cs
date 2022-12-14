@@ -29,14 +29,11 @@ namespace Iot.Device.Display
         public static new readonly int DefaultI2cAddress = 0x74;
 
         /// <inheritdoc/>
-        public override int GetLedAddress(int x, int y)
+        public override int GetLedAddress(int x, int y) => x switch
         {
-            if (x >= 8)
-            {
-                return (x - 6) * 16 - (y + 1);
-            }
-
-            return (x + 1) * 16 + (7 - y);
-        }
+            < 8 => (x + 1) * 16 + (7 - y),
+            < 16 => (x - 6) * 16 - (y + 1),
+            _ => throw new ArgumentException($"{nameof(x)} value must be < 16.")
+        };
     }
 }
