@@ -12,6 +12,7 @@ namespace Iot.Device.Display
     /// </summary>
     // Product: https://shop.pimoroni.com/products/scroll-phat-hd
     // Product: https://shop.pimoroni.com/products/scroll-hat-mini
+    // Port of: https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/matrix_11x7.py
     public class ScrollPhat17x7 : Is31fl3731
     {
         /// <summary>

@@ -12,6 +12,7 @@ namespace Iot.Device.Display
     /// Represents 28x1 RGB matrix, driven by an IS31FL3731 LED chip.
     /// </summary>
     // Product: https://shop.pimoroni.com/products/led-shim
+    // Port of: https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/led_shim.py
     public class LedShimRgb28x1 : Is31fl3731
     {
         /// <summary>

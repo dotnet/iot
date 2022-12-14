@@ -11,6 +11,7 @@ namespace Iot.Device.Display
     /// Represents 11x7 matrix, driven by an IS31FL3731 LED chip.
     /// </summary>
     // Product: https://shop.pimoroni.com/products/11x7-led-matrix-breakout
+    // Port of: https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/matrix_11x7.py
     public class Breakout11x7 : Is31fl3731
     {
         /// <summary>

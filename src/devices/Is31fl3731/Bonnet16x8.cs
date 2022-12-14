@@ -11,6 +11,7 @@ namespace Iot.Device.Display
     /// Represents 16x8 matrix, driven by an IS31FL3731 LED chip.
     /// </summary>
     // Product: https://www.adafruit.com/product/4122
+    // Port of: https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/charlie_bonnet.py
     public class Bonnet16x8 : Is31fl3731
     {
         /// <summary>

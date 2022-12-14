@@ -11,6 +11,7 @@ namespace Iot.Device.Display
     /// Represents 16x9 matrix, driven by an IS31FL3731 LED chip.
     /// </summary>
     // Product: https://www.adafruit.com/product/2974
+    // Port of: https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/matrix.py
     public class Backpack16x9 : Is31fl3731
     {
         /// <summary>
