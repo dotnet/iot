@@ -21,7 +21,7 @@ if (mOne is null || mTwo is null)
     return;
 }
 
-var matrix = mTwo;
+var matrix = mOne;
 
 // Dimensions
 int width = matrix.Width - 1;
