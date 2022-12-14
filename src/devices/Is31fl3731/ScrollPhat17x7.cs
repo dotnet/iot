@@ -27,7 +27,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Default I2C address for device.
         /// </summary>
-        public static new readonly int DefaultI2cAddress = 0x61;
+        public static new readonly int DefaultI2cAddress = 0x74;
 
         /// <inheritdoc/>
         public override int GetLedAddress(int x, int y)

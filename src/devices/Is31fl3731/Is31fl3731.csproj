@@ -14,6 +14,6 @@
     <Compile Include="Breakout11x7.cs" />
     <Compile Include="BreakoutRgb5x5.cs" />
     <Compile Include="LedShimRgb28x1.cs" />
-    <Compile Include="ScrollHat17x7.cs" />
+    <Compile Include="ScrollPhat17x7.cs" />
   </ItemGroup>
 </Project>
