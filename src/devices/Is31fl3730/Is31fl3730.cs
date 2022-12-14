@@ -263,10 +263,11 @@ namespace Iot.Device.Display
         /// </summary>
         public void UpdateDecimalPoint(int matrix, int value)
         {
-            int mask = matrix is 0 ? MatrixValues.MatrixOneDecimalMask : MatrixValues.MatrixTwoDecimalMask;
-            int row = matrix is 0 ? 6 : 7;
             byte[] buffer = _buffers[matrix];
-            buffer[row] = UpdateByte(buffer[row], (byte)mask, value);
+            int row = matrix is 0 ? 6 : 7;
+            byte mask = matrix is 0 ? MatrixValues.MatrixOneDecimalMask : MatrixValues.MatrixTwoDecimalMask;
+            buffer[row] = UpdateByte(buffer[row], mask, value);
+            UpdateMatrixRegister(matrix);
         }
 
         /// <summary>

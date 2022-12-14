@@ -8,7 +8,8 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
 
-using BreakoutPair5x7 breakout = new();
+using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, BreakoutPair5x7.DefaultI2cAddress));
+BreakoutPair5x7 breakout = new(i2cDevice);
 
 breakout.Fill(0);
 Thread.Sleep(100);
@@ -20,7 +21,7 @@ if (mOne is null || mTwo is null)
     return;
 }
 
-var matrix = mOne;
+var matrix = mTwo;
 
 // Dimensions
 int width = matrix.Width - 1;
@@ -161,5 +162,9 @@ for (int j = 0; j < iterations; j++)
     WriteColumnPixels(j, Enumerable.Range(j + 1, rangeH - 1).Reverse(), 1);
 }
 
+Thread.Sleep(1000);
+matrix.Fill(0);
+
+matrix.UpdateDecimalPoint(1);
 Thread.Sleep(1000);
 matrix.Fill(0);
