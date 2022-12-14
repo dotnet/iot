@@ -25,11 +25,13 @@ Backpack16x9 matrix = new(i2cDevice);
 // https://shop.pimoroni.com/products/11x7-led-matrix-breakout
 // using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Breakout11x7.DefaultI2cAddress));
 // Breakout11x7 matrix = new(i2cDevice);
+
+// blink range: 270-2159; smaller is faster blink
+// brightness range: 0-255; higher is brighter
 byte fullLit = 255;
 byte halfLit = 128;
 byte quarterLit = 64;
 matrix.Initialize();
-// ranges from 270 to 2159; smaller the number to faster blink
 matrix.SetBlinkingRate(0);
 matrix.Fill(0);
 
