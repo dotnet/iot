@@ -13,6 +13,7 @@ namespace Iot.Device.Display
     // Datasheet: https://cdn-learn.adafruit.com/assets/assets/000/030/994/original/31FL3731.pdf
     // Product: https://www.adafruit.com/product/2946
     // Product: https://www.adafruit.com/product/2974
+    // Port of: https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/adafruit_is31fl3731/__init__.py
     public abstract class Is31fl3731
     {
         // Register dimensions
