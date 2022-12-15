@@ -13,7 +13,6 @@ namespace Iot.Device.Hx711
     /// <summary>
     /// Hx711 - Weight scale Module
     /// </summary>
-    /// <remarks>DataSheet: https://html.alldatasheet.com/html-pdf/1132222/AVIA/Hx711/109/1/Hx711.html</remarks>
     public sealed class Hx711 : IDisposable
     {
         private readonly GpioController _gpioController;
