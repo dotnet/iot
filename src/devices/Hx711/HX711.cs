@@ -39,7 +39,7 @@ namespace Iot.Device.Hx711
         /// <summary>
         /// Conversion ratio between Hx711 units and grams
         /// </summary>
-        public double ReferanceUnit { get; private set; }
+        public double ReferenceUnit { get; private set; }
 
         /// <summary>
         /// Weight set as tare
@@ -48,7 +48,7 @@ namespace Iot.Device.Hx711
         {
             get
             {
-                return ReferanceUnit == 0 ? Mass.FromGrams(_tareValue) : Mass.FromGrams(Math.Round(_tareValue / ReferanceUnit));
+                return ReferenceUnit == 0 ? Mass.FromGrams(_tareValue) : Mass.FromGrams(Math.Round(_tareValue / ReferenceUnit));
             }
         }
 
@@ -85,7 +85,7 @@ namespace Iot.Device.Hx711
 
             _offsetFormZero = 0;
             _tareValue = 0;
-            ReferanceUnit = 0;
+            ReferenceUnit = 0;
 
             _options = options ?? new Hx711Options();
 
@@ -115,7 +115,7 @@ namespace Iot.Device.Hx711
 
                 // If we do several calibrations, the most accurate value is the average.
                 _referenceUnitList.Add(referenceValue);
-                ReferanceUnit = _referenceUnitList.Average();
+                ReferenceUnit = _referenceUnitList.Average();
 
                 _isCalibrated = true;
             }
@@ -135,7 +135,7 @@ namespace Iot.Device.Hx711
 
             lock (_readLock)
             {
-                ReferanceUnit = referenceUnit;
+                ReferenceUnit = referenceUnit;
 
                 // Calibration no longer required
                 _isCalibrated = true;
@@ -158,7 +158,7 @@ namespace Iot.Device.Hx711
             // Lock is internal in fisical read
             var value = GetNetWeight(numberOfReads);
 
-            return Mass.FromGrams(Math.Round(value / ReferanceUnit, digits: 0));
+            return Mass.FromGrams(Math.Round(value / ReferenceUnit, digits: 0));
         }
 
         /// <summary>
