@@ -48,7 +48,7 @@ namespace Iot.Device.Hx711
         {
             get
             {
-                return ReferenceUnit == 0 ? Mass.FromGrams(_tareValue) : Mass.FromGrams(Math.Round(_tareValue / ReferenceUnit));
+                return ReferenceUnit == 0 ? Mass.FromGrams(_tareValue) : Mass.FromGrams(_tareValue / ReferenceUnit);
             }
         }
 

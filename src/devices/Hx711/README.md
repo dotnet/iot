@@ -139,9 +139,14 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 ## Calibration
 
 First of all HX711 need a calibration process because it can be connected to any load cell that has a different range and sensitivity.
-To perform it, simply put a known weight on the load cell and start the calibration via `StartCalibration()`.
+To perform it, simply put a known weight on the load cell and start the calibration via `SetCalibration()`.
 If you want a more precise calibration, you can do this several times with different weights.
 If you don't want to carry out the calibration at every start, you can memorize the `ReferenceUnit` which is valued after the calibration and set it using `SetReferenceUnit` method.
+
+## Accuracy
+
+To maintain a higher level of accuracy, if multiple samples are used during calibration, the returned weight is unrounded.
+Therefore it may happen that if a weight of 200 g is used in the calibration phase, if re-read at a later time it returns 199.9999998 g.
 
 ## Notes
 
