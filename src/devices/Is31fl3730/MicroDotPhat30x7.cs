@@ -33,8 +33,8 @@ namespace Iot.Device.Display
             {
                 I2cDevice i2cDevice = I2cDevice.Create(new(1, MatrixValues.Addresses[pair]));
                 _pairs[pair] = new DotMatrixBreakout10x7(i2cDevice);
-                _matrices[pair * 2] = _pairs[pair][1];
-                _matrices[pair * 2 + 1] = _pairs[pair][0];
+                _matrices[pair * 2] = _pairs[pair][0];
+                _matrices[pair * 2 + 1] = _pairs[pair][1];
             }
         }
 
@@ -60,8 +60,8 @@ namespace Iot.Device.Display
 
             foreach (var pair in Enumerable.Range(0, 3))
             {
-                _matrices[pair * 2] = _pairs[pair][1];
-                _matrices[pair * 2 + 1] = _pairs[pair][0];
+                _matrices[pair * 2] = _pairs[pair][0];
+                _matrices[pair * 2 + 1] = _pairs[pair][1];
             }
         }
 
