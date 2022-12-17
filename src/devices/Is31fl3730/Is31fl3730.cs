@@ -349,7 +349,7 @@ namespace Iot.Device.Display
         {
             Span<byte> data = stackalloc byte[value.Length + 1];
             data[0] = address;
-            value.CopyTo(data[1..]);
+            value.CopyTo(data.Slice(1));
             _i2cDevice.Write(data);
         }
 
