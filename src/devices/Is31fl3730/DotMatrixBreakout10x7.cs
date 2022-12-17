@@ -32,8 +32,8 @@ namespace Iot.Device.Display
             _is31fl3730.Initialize();
             _matrices = new DotMatrix5x7[]
             {
-                new DotMatrix5x7(_is31fl3730, 0),
-                new DotMatrix5x7(_is31fl3730, 1)
+                new DotMatrix5x7(_is31fl3730, 1),
+                new DotMatrix5x7(_is31fl3730, 0)
             };
         }
 
@@ -47,8 +47,8 @@ namespace Iot.Device.Display
             _is31fl3730 = is31fl3730;
             _matrices = new DotMatrix5x7[]
             {
-                new DotMatrix5x7(_is31fl3730, 0),
-                new DotMatrix5x7(_is31fl3730, 1)
+                new DotMatrix5x7(_is31fl3730, 1),
+                new DotMatrix5x7(_is31fl3730, 0)
             };
         }
 
@@ -71,6 +71,11 @@ namespace Iot.Device.Display
         /// Indexer for matrices.
         /// </summary>
         public DotMatrix5x7 this[int matrix] => _matrices[matrix];
+
+        /// <summary>
+        /// Length (or count) of matrices.
+        /// </summary>
+        public int Length => _matrices.Length;
 
         /// <summary>
         /// Indexer for matrix pair.

@@ -8,9 +8,9 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
 
-// using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, DotMatrixBreakout10x7.DefaultI2cAddress));
-// DotMatrixBreakout10x7 matrix = new(i2cDevice);
-MicroDotPhat30x7 matrix = new();
+using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, DotMatrixBreakout10x7.DefaultI2cAddress));
+DotMatrixBreakout10x7 matrix = new(i2cDevice);
+// MicroDotPhat30x7 matrix = new();
 matrix.Fill(0);
 
 // Dimensions
@@ -155,15 +155,11 @@ for (int j = 0; j < iterations; j++)
 Thread.Sleep(1000);
 matrix.Fill(0);
 
-// For single matrix demo
-// matrix.WriteDecimalPoint(1);
-// Thread.Sleep(1000);
-
-// For Micro Dot pHat demo
-foreach (var index in Enumerable.Range(0, 6))
+foreach (var index in Enumerable.Range(0, matrix.Length))
 {
     matrix[index].WriteDecimalPoint(1);
-    Thread.Sleep(250);
+    Thread.Sleep(500);
 }
 
+Thread.Sleep(250);
 matrix.Fill(0);

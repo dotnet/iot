@@ -81,6 +81,11 @@ namespace Iot.Device.Display
         public DotMatrix5x7 this[int matrix] => _matrices[matrix];
 
         /// <summary>
+        /// Length (or count) of matrices.
+        /// </summary>
+        public int Length => _matrices.Length;
+
+        /// <summary>
         /// Indexer for Micro Dot pHat matrix.
         /// </summary>
         public int this[int x, int y]
