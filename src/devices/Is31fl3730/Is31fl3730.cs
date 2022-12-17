@@ -18,7 +18,7 @@ namespace Iot.Device.Display
     // Based on: https://github.com/pimoroni/microdot-phat/blob/master/library/microdotphat/matrix.py
     public class Is31fl3730
     {
-        private readonly byte[] _matrix_registers = new byte[] { FunctionRegister.Matrix1, FunctionRegister.Matrix2 };
+        private readonly byte[] _matrix_addresses = new byte[] { FunctionRegister.Matrix1, FunctionRegister.Matrix2 };
         private readonly List<byte[]> _buffers = new List<byte[]>
         {
             new byte[8],
@@ -68,24 +68,29 @@ namespace Iot.Device.Display
         public static readonly int[] SupportedI2cAddresses = new int[] { DefaultI2cAddress, 0x62, 0x63 };
 
         /// <summary>
-        /// Brightness of LED matrix (override default value (128; max brightness)); set before calling Initialize method).
+        /// Brightness of LED matrix (override default value (128; max brightness); set before calling Initialize method).
         /// </summary>
-        public int Brightness = 0;
+        public int Brightness { get; set; }
 
         /// <summary>
         /// Full current setting for each row output of LED matrix (override default value (40 mA)); set before calling Initialize method).
         /// </summary>
-        public Current Current = 0;
+        public Current Current { get; set; }
 
         /// <summary>
         /// Matrix mode (override default value (8x8); set before calling Initialize method).
         /// </summary>
-        public MatrixMode MatrixMode = 0;
+        public MatrixMode MatrixMode { get; set; }
 
         /// <summary>
-        /// Display mode (override default value (Matrix 1 only); set before calling Initialize method).
+        /// Display mode (use to override default value (Matrix 1 only; right-most); set before calling Initialize method).
         /// </summary>
-        public DisplayMode DisplayMode = 0;
+        public DisplayMode DisplayMode { get; set; }
+
+        /// <summary>
+        /// Enables or disables auto-buggering.
+        /// </summary>
+        public bool BufferingEnabled { get; set; } = true;
 
         /// <summary>
         /// Initialize LED driver.
@@ -131,15 +136,8 @@ namespace Iot.Device.Display
         /// <param name="x">The x dimension for the LED.</param>
         /// <param name="y">The y dimension for the LED.</param>
         /// <param name="value">The value to write.</param>
-        public void WriteLed(int matrix, int x, int y, int value)
+        public void Write(int matrix, int x, int y, int value)
         {
-            if (matrix > 1 ||
-                x > 4 ||
-                y > 6)
-                {
-                    throw new ArgumentException("Argument out of range.");
-                }
-
             /*
             The following diagrams and information demonstrate how the matrix is structured.
 
@@ -233,13 +231,20 @@ namespace Iot.Device.Display
             concern. It has nothing to do with byte structure.
             */
 
+            if (matrix > 1 ||
+                x > 4 ||
+                y > 6)
+            {
+                throw new ArgumentException("Argument out of range.");
+            }
+
             int logicalRow = matrix is 0 ? y : x;
             int logicalColumn = matrix is 0 ? x : y;
             byte mask = (byte)(1 << logicalColumn);
             byte[] buffer = _buffers[matrix];
             buffer[logicalRow] = UpdateByte(buffer[logicalRow], mask, value);
 
-            UpdateMatrixRegister(matrix);
+            AutoFlush(matrix);
         }
 
         /// <summary>
@@ -248,7 +253,7 @@ namespace Iot.Device.Display
         /// <param name="matrix">The matrix to use.</param>
         /// <param name="x">The x dimension for the LED.</param>
         /// <param name="y">The y dimension for the LED.</param>
-        public int ReadLed(int matrix, int x, int y)
+        public int Read(int matrix, int x, int y)
         {
             int row = matrix is 0 ? y : x;
             int column = matrix is 0 ? x : y;
@@ -261,19 +266,28 @@ namespace Iot.Device.Display
         /// <summary>
         /// Update decimal point for matrix.
         /// </summary>
-        public void UpdateDecimalPoint(int matrix, int value)
+        public void WriteDecimalPoint(int matrix, int value)
         {
             byte[] buffer = _buffers[matrix];
-            int row = matrix is 0 ? 6 : 7;
+            int row = matrix is 0 ? MatrixValues.MatrixOneDecimalRow : MatrixValues.MatrixTwoDecimalRow;
             byte mask = matrix is 0 ? MatrixValues.MatrixOneDecimalMask : MatrixValues.MatrixTwoDecimalMask;
             buffer[row] = UpdateByte(buffer[row], mask, value);
-            UpdateMatrixRegister(matrix);
+            AutoFlush(matrix);
         }
 
         /// <summary>
-        /// Fill all LEDs with value.
+        /// Fill LEDs with value, per matrix.
         /// </summary>
-        public void FillAll(int value)
+        public void Fill(int matrix, int value)
+        {
+            _buffers[matrix].AsSpan().Fill((byte)value);
+            AutoFlush(matrix);
+        }
+
+        /// <summary>
+        /// Fill LEDs with value.
+        /// </summary>
+        public void Fill(int value)
         {
             foreach (int i in Range(0, 2))
             {
@@ -285,16 +299,28 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
-        /// Fill all LEDs with value, per Matrix.
+        /// Fill LEDs with value, per matrix.
         /// </summary>
-        public void Fill(int matrix, int value)
+        public void Flush(int matrix)
         {
-            _buffers[matrix].AsSpan().Fill((byte)value);
-            UpdateMatrixRegister(matrix);
+            if (_enabled[matrix])
+            {
+                Write(_matrix_addresses[matrix], _buffers[matrix]);
+                WriteUpdateRegister();
+            }
         }
 
         /// <summary>
-        /// Reset device.
+        /// Fill LEDs with value.
+        /// </summary>
+        public void Flush()
+        {
+            Flush(0);
+            Flush(1);
+        }
+
+        /// <summary>
+        /// Resets all registers to default value.
         /// </summary>
         public void Reset() => Write(FunctionRegister.Reset, MatrixValues.EightBitValue);
 
@@ -343,16 +369,21 @@ namespace Iot.Device.Display
             return data;
         }
 
-        private void UpdateMatrixRegister(int matrix)
-        {
-            if (_enabled[matrix])
-            {
-                Write(_matrix_registers[matrix], _buffers[matrix]);
-            }
-
-            WriteUpdateRegister();
-        }
-
+        /*
+            Per the datasheet:
+            The data sent to the Data Registers will be stored in
+            temporary registers. A write operation of any 8-bit value
+            to the Update Column Register is required to update
+            the Data Registers (01h~0Bh, 0Eh~18h).
+        */
         private void WriteUpdateRegister() => Write(FunctionRegister.UpdateColumn, MatrixValues.EightBitValue);
+
+        private void AutoFlush(int matrix)
+        {
+            if (BufferingEnabled)
+            {
+                Flush(matrix);
+            }
+        }
     }
 }

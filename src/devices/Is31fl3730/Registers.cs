@@ -16,12 +16,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Address for Matrix 1 Data Register.
         /// </summary>
-        public static byte Matrix1 = 0x1;
-
-        /// <summary>
-        /// Address for Matrix 2 Data Register.
-        /// </summary>
-        public static byte Matrix2 = 0x0E;
+        public static byte Matrix1 = 0x01;
 
         /// <summary>
         /// Address for Update Column Register.
@@ -34,6 +29,11 @@ namespace Iot.Device.Display
         public static byte LightingEffect = 0x0D;
 
         /// <summary>
+        /// Address for Matrix 2 Data Register.
+        /// </summary>
+        public static byte Matrix2 = 0x0E;
+
+        /// <summary>
         /// Address for PWM Register.
         /// </summary>
         public static byte Pwm = 0x19;
@@ -41,7 +41,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Address for Reset Register.
         /// </summary>
-        public static byte Reset = 0x0C;
+        public static byte Reset = 0xFF;
     }
 
     /// <summary>

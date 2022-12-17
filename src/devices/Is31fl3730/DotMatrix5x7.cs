@@ -11,28 +11,29 @@ namespace Iot.Device.Display
     /// <summary>
     /// Represents LED Dot Matrix driven by IS31FL3730.
     /// </summary>
-    public class Matrix3730
+    public class DotMatrix5x7
     {
         private readonly Is31fl3730 _is31fl3730;
+        private readonly int _matrix;
 
         /// <summary>
-        /// Initialize IS31FL3730 device
+        /// Initialize Dot Matrix IS31FL3730 device.
         /// </summary>
         /// <param name="is31fl3730">The <see cref="Iot.Device.Display.Is31fl3730"/> to create with.</param>
         /// <param name="matrix">The index of the matrix (of a pair).</param>
-        public Matrix3730(Is31fl3730 is31fl3730, int matrix)
+        public DotMatrix5x7(Is31fl3730 is31fl3730, int matrix)
         {
             _is31fl3730 = is31fl3730;
-            Matrix = matrix;
+            _matrix = matrix;
         }
 
         /// <summary>
-        /// Indexer for matrix.
+        /// Indexer for matrix. x: 0..4; y: 0..6.
         /// </summary>
         public int this[int x, int y]
         {
-            get => _is31fl3730.ReadLed(Matrix, x, y);
-            set => _is31fl3730.WriteLed(Matrix, x, y, value);
+            get => _is31fl3730.Read(_matrix, x, y);
+            set => _is31fl3730.Write(_matrix, x, y, value);
         }
 
         /// <summary>
@@ -46,18 +47,13 @@ namespace Iot.Device.Display
         public readonly int Height = 7;
 
         /// <summary>
-        /// Identification of matrix (of 2).
+        /// Fill matrix (0 is dark; 1 is lit).
         /// </summary>
-        public readonly int Matrix = 0;
+        public void Fill(int value) => _is31fl3730.Fill(_matrix, value);
 
         /// <summary>
         /// Fill matrix (0 is dark; 1 is lit).
         /// </summary>
-        public void Fill(int value) => _is31fl3730.Fill(Matrix, value);
-
-        /// <summary>
-        /// Fill matrix (0 is dark; 1 is lit).
-        /// </summary>
-        public void UpdateDecimalPoint(int value) => _is31fl3730.UpdateDecimalPoint(Matrix, value);
+        public void WriteDecimalPoint(int value) => _is31fl3730.WriteDecimalPoint(_matrix, value);
     }
 }
