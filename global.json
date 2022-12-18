@@ -1,15 +1,15 @@
 {
   "tools": {
-    "dotnet": "7.0.100",
+    "dotnet": "7.0.101",
     "runtimes": {
       "dotnet/x64": [
-        "3.1.21",
-        "6.0.11"
+        "3.1.32",
+        "6.0.12"
       ]
     }
   },
   "sdk": {
-    "version": "7.0.100"
+    "version": "7.0.101"
   },
   "msbuild-sdks": {
     "Microsoft.DotNet.Arcade.Sdk": "8.0.0-beta.22552.1",
