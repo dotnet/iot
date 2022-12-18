@@ -63,11 +63,6 @@ namespace Iot.Device.Display
         public const int DefaultI2cAddress = 0x61;
 
         /// <summary>
-        /// Supported I2C addresses for device.
-        /// </summary>
-        public static readonly int[] SupportedI2cAddresses = new int[] { DefaultI2cAddress, 0x62, 0x63 };
-
-        /// <summary>
         /// Brightness of LED matrix (override default value (128; max brightness); set before calling Initialize method).
         /// </summary>
         public int Brightness { get; set; }
@@ -232,8 +227,8 @@ namespace Iot.Device.Display
             */
 
             if (matrix > 1 ||
-                x > 4 ||
-                y > 6)
+                x >= MatrixValues.Height ||
+                y >= MatrixValues.Width)
             {
                 throw new ArgumentException("Argument out of range.");
             }

@@ -68,12 +68,12 @@ namespace Iot.Device.Display
         /// <summary>
         /// Width of LED matrix (x axis).
         /// </summary>
-        public readonly int Width = 30;
+        public readonly int Width = MatrixValues.Width * 6;
 
         /// <summary>
         /// Height of LED matrix (y axis).
         /// </summary>
-        public readonly int Height = 7;
+        public readonly int Height = MatrixValues.Height;
 
         /// <summary>
         /// Indexer for matrices.
@@ -92,10 +92,7 @@ namespace Iot.Device.Display
         {
             get
             {
-                if (x >= 30 || y > 6)
-                {
-                    throw new ArgumentException("Input value out of range.");
-                }
+                CheckDimensions(x, y);
 
                 int matrix = x % 5;
                 int modx = x - (matrix * 5);
@@ -103,10 +100,7 @@ namespace Iot.Device.Display
             }
             set
             {
-                if (x >= 30 || y > 6)
-                {
-                    throw new ArgumentException("Input value out of range.");
-                }
+                CheckDimensions(x, y);
 
                 int matrix = x / 5;
                 int modx = x - (matrix * 5);
@@ -122,6 +116,18 @@ namespace Iot.Device.Display
             foreach (var pair in _pairs)
             {
                 pair.Fill(value);
+            }
+        }
+
+        private void CheckDimensions(int x, int y)
+        {
+            if (x >= Width)
+            {
+                throw new ArgumentException($"{nameof(x)} value ({x}) out of range.");
+            }
+            else if (y >= Height)
+            {
+                throw new ArgumentException($"{nameof(y)} value ({y}) out of range.");
             }
         }
     }

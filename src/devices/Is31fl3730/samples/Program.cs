@@ -8,9 +8,9 @@ using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
 
-using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, DotMatrixBreakout10x7.DefaultI2cAddress));
-DotMatrixBreakout10x7 matrix = new(i2cDevice);
-// MicroDotPhat30x7 matrix = new();
+// using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, DotMatrixBreakout10x7.DefaultI2cAddress));
+// DotMatrixBreakout10x7 matrix = new(i2cDevice);
+MicroDotPhat30x7 matrix = new();
 // Dimensions
 int width = matrix.Width - 1;
 int height = matrix.Height - 1;
