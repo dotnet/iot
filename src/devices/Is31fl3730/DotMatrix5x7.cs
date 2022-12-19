@@ -37,16 +37,6 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
-        /// Width of LED matrix (x axis).
-        /// </summary>
-        public readonly int Width = MatrixValues.Width;
-
-        /// <summary>
-        /// Height of LED matrix (y axis).
-        /// </summary>
-        public readonly int Height = MatrixValues.Height;
-
-        /// <summary>
         /// Fill matrix (0 is dark; 1 is lit).
         /// </summary>
         public void Fill(int value) => _is31fl3730.Fill(_matrix, value);
@@ -55,5 +45,15 @@ namespace Iot.Device.Display
         /// Fill matrix (0 is dark; 1 is lit).
         /// </summary>
         public void WriteDecimalPoint(int value) => _is31fl3730.WriteDecimalPoint(_matrix, value);
+
+        /// <summary>
+        /// Width of LED matrix (x axis).
+        /// </summary>
+        public static readonly int Width = 5;
+
+        /// <summary>
+        /// Height of LED matrix (y axis).
+        /// </summary>
+        public static readonly int Height = 7;
     }
 }

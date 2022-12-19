@@ -88,15 +88,22 @@ namespace Iot.Device.Display
         public bool BufferingEnabled { get; set; } = true;
 
         /// <summary>
+        /// Indexer for matrices.
+        /// </summary>
+        public DotMatrix5x7 this[int index] => GetMatrix(index);
+
+        /// <summary>
         /// Initialize LED driver.
         /// </summary>
         public void Initialize()
         {
+            // Set size of matrix
             if (MatrixMode > 0)
             {
                 _configurationValue |= (int)MatrixMode;
             }
 
+            // Set number of and which supported matrices (either or both)
             if (DisplayMode > 0)
             {
                 _enabled[0] = DisplayMode is DisplayMode.MatrixOneOnly or DisplayMode.MatrixOneAndTwo;
@@ -108,16 +115,19 @@ namespace Iot.Device.Display
                 _enabled[0] = true;
             }
 
+            // If (non-default) configurations values are set, write to device
             if (_configurationValue > 0)
             {
                 Write(FunctionRegister.Configuration, (byte)_configurationValue);
             }
 
+            // Set current value
             if (Current > 0)
             {
                 Write(FunctionRegister.LightingEffect, (byte)Current);
             }
 
+            // Set brightness value
             if (Brightness > 0)
             {
                 Write(FunctionRegister.Pwm, (byte)Brightness);
@@ -227,8 +237,8 @@ namespace Iot.Device.Display
             */
 
             if (matrix > 1 ||
-                x >= MatrixValues.Height ||
-                y >= MatrixValues.Width)
+                x >= DotMatrix5x7.Width ||
+                y >= DotMatrix5x7.Height)
             {
                 throw new ArgumentException("Argument out of range.");
             }
@@ -284,11 +294,11 @@ namespace Iot.Device.Display
         /// </summary>
         public void Fill(int value)
         {
-            foreach (int i in Range(0, 2))
+            foreach (int index in Range(0, 2))
             {
-                if (_enabled[i])
+                if (_enabled[index])
                 {
-                    Fill(i, value);
+                    Fill(index, value);
                 }
             }
         }
@@ -379,6 +389,16 @@ namespace Iot.Device.Display
             {
                 Flush(matrix);
             }
+        }
+
+        private DotMatrix5x7 GetMatrix(int index)
+        {
+            if (index is < 0 or > 1)
+            {
+                throw new ArgumentException($"{nameof(index)} ({index}) is out of range.");
+            }
+
+            return new DotMatrix5x7(this, index);
         }
     }
 }

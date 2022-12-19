@@ -13,8 +13,9 @@
     <Compile Include="Registers.cs" />
     
     <!-- Matrices -->
-    <Compile Include="DotMatrixBreakout10x7.cs" />
+    <Compile Include="DotMatrix.cs" />
     <Compile Include="DotMatrix5x7.cs" />
+    <Compile Include="DotMatrix10x7.cs" />
     <Compile Include="MicroDotPhat30x7.cs" />
   </ItemGroup>
 </Project>

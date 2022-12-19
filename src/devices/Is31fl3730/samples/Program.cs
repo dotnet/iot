@@ -10,7 +10,11 @@ using Iot.Device.Display;
 
 // using I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, DotMatrixBreakout10x7.DefaultI2cAddress));
 // DotMatrixBreakout10x7 matrix = new(i2cDevice);
-MicroDotPhat30x7 matrix = new();
+using I2cDevice first = I2cDevice.Create(new I2cConnectionSettings(busId: 1, MicroDotPhat30x7.Addresses[0]));
+using I2cDevice second = I2cDevice.Create(new I2cConnectionSettings(busId: 1, MicroDotPhat30x7.Addresses[1]));
+using I2cDevice third = I2cDevice.Create(new I2cConnectionSettings(busId: 1, MicroDotPhat30x7.Addresses[2]));
+MicroDotPhat30x7 matrix = new(first, second, third);
+
 // Dimensions
 int width = matrix.Width - 1;
 int height = matrix.Height - 1;
