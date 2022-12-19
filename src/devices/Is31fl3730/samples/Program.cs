@@ -27,8 +27,11 @@ matrix[0, 0] = 1;
 matrix[0, height] = 1;
 matrix[width, 0] = 1;
 matrix[width, height] = 1;
-
 Thread.Sleep(500);
+
+matrix.Fill(255);
+Thread.Sleep(1000);
+
 matrix.Fill(0);
 
 // Set pixel in the origin 0, 0 position.
