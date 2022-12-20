@@ -282,7 +282,8 @@ namespace Iot.Device.Display
         public void Fill(int matrix, int value)
         {
             CheckMatrixIndex(matrix);
-            _buffers[matrix].AsSpan().Fill((byte)value);
+            int fillValue = value > 0 ? 255 : 0;
+            _buffers[matrix].AsSpan().Fill((byte)fillValue);
             AutoFlush(matrix);
         }
 
