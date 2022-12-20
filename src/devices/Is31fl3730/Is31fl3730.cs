@@ -237,8 +237,8 @@ namespace Iot.Device.Display
             */
 
             if (matrix > 1 ||
-                x >= DotMatrix5x7.Width ||
-                y >= DotMatrix5x7.Height)
+                x >= DotMatrix5x7.BaseWidth ||
+                y >= DotMatrix5x7.BaseHeight)
             {
                 throw new ArgumentException("Argument out of range.");
             }

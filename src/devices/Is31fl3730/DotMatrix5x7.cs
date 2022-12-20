@@ -28,12 +28,30 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
+        /// Width of LED matrix (x axis).
+        /// </summary>
+        public int Width { get; } = BaseWidth;
+
+        /// <summary>
+        /// Height of LED matrix (y axis).
+        /// </summary>
+        public int Height { get; } = BaseHeight;
+
+        /// <summary>
         /// Indexer for matrix. x: 0..4; y: 0..6.
         /// </summary>
         public int this[int x, int y]
         {
-            get => _is31fl3730.Read(_matrix, x, y);
-            set => _is31fl3730.Write(_matrix, x, y, value);
+            get
+            {
+                CheckDimensions(x, y);
+                return _is31fl3730.Read(_matrix, x, y);
+            }
+            set
+            {
+                CheckDimensions(x, y);
+                _is31fl3730.Write(_matrix, x, y, value);
+            }
         }
 
         /// <summary>
@@ -49,11 +67,24 @@ namespace Iot.Device.Display
         /// <summary>
         /// Width of LED matrix (x axis).
         /// </summary>
-        public static readonly int Width = 5;
+        public static readonly int BaseWidth = 5;
 
         /// <summary>
         /// Height of LED matrix (y axis).
         /// </summary>
-        public static readonly int Height = 7;
+        public static readonly int BaseHeight = 7;
+
+        private static void CheckDimensions(int x, int y)
+        {
+            if (x is < 0 or >= 5)
+            {
+                throw new ArgumentException($"{nameof(x)} ({x}) is out of range.");
+            }
+
+            if (y is < 0 or >= 7)
+            {
+                throw new ArgumentException($"{nameof(y)} ({y}) is out of range.");
+            }
+        }
     }
 }

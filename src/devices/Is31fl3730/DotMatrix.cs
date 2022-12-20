@@ -26,8 +26,8 @@ namespace Iot.Device.Display
         public DotMatrix(DotMatrix5x7[] matrices)
         {
             _matrices = matrices;
-            Width = matrices.Length * DotMatrix5x7.Width;
-            Height = DotMatrix5x7.Height;
+            Width = DotMatrix5x7.BaseWidth * matrices.Length;
+            Height = DotMatrix5x7.BaseHeight;
         }
 
         /// <summary>
@@ -90,13 +90,8 @@ namespace Iot.Device.Display
                 throw new ArgumentException($"{nameof(y)} value ({y}) out of range.");
             }
 
-            int matrixIndex = x / DotMatrix5x7.Width;
-            int index = x % DotMatrix5x7.Width;
-
-            if (index >= 5)
-            {
-                throw new ArgumentException($"{nameof(x)} value ({x}) out of range.");
-            }
+            int matrixIndex = x / DotMatrix5x7.BaseWidth;
+            int index = x % DotMatrix5x7.BaseWidth;
 
             return (matrixIndex, index);
         }
