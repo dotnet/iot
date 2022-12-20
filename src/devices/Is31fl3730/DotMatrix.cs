@@ -86,7 +86,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Default Is31fl3730 initialization
         /// </summary>
-        public static Is31fl3730 Initialize(I2cDevice i2cDevice)
+        public static Is31fl3730 InitializeI2c(I2cDevice i2cDevice)
         {
             i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} is null.");
             Is31fl3730 is31fl3730 = new(i2cDevice);

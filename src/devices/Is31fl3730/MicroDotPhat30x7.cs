@@ -26,7 +26,7 @@ namespace Iot.Device.Display
         /// <param name="second">The first <see cref="System.Device.I2c.I2cDevice"/> Dot Matrix pair.</param>
         /// <param name="third">The first <see cref="System.Device.I2c.I2cDevice"/> Dot Matrix pair.</param>
         public MicroDotPhat30x7(I2cDevice first, I2cDevice second, I2cDevice third)
-        : this(DotMatrix.Initialize(first), DotMatrix.Initialize(second), DotMatrix.Initialize(third))
+        : this(DotMatrix.InitializeI2c(first), DotMatrix.InitializeI2c(second), DotMatrix.InitializeI2c(third))
         {
         }
 

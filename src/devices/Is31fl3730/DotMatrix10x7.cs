@@ -22,7 +22,7 @@ namespace Iot.Device.Display
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         public DotMatrix10x7(I2cDevice i2cDevice)
-        : this(DotMatrix.Initialize(i2cDevice))
+        : this(DotMatrix.InitializeI2c(i2cDevice))
         {
         }
 
