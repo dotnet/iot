@@ -11,7 +11,7 @@ namespace Iot.Device.Display
     /// <summary>
     /// Represents LED Dot Matrix driven by IS31FL3730.
     /// </summary>
-    public class DotMatrix5x7
+    public class DotMatrix5x7 : IMatrix
     {
         private readonly Is31fl3730 _is31fl3730;
         private readonly int _matrix;
@@ -27,28 +27,20 @@ namespace Iot.Device.Display
             _matrix = matrix;
         }
 
-        /// <summary>
-        /// Width of LED matrix (x axis).
-        /// </summary>
+        /// <inheritdoc/>
         public int Width { get; } = BaseWidth;
 
-        /// <summary>
-        /// Height of LED matrix (y axis).
-        /// </summary>
+        /// <inheritdoc/>
         public int Height { get; } = BaseHeight;
 
-        /// <summary>
-        /// Indexer for matrix. x: 0..4; y: 0..6.
-        /// </summary>
+        /// <inheritdoc/>
         public int this[int x, int y]
         {
             get => _is31fl3730.Read(_matrix, x, y);
             set => _is31fl3730.Write(_matrix, x, y, value);
         }
 
-        /// <summary>
-        /// Fill matrix (0 is dark; 1 is lit).
-        /// </summary>
+        /// <inheritdoc/>
         public void Fill(int value) => _is31fl3730.Fill(_matrix, value);
 
         /// <summary>

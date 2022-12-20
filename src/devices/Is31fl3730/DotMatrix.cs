@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Device.I2c;
-using System.Threading;
 
 namespace Iot.Device.Display
 {
@@ -15,7 +12,7 @@ namespace Iot.Device.Display
     // Datasheet: https://cdn-shop.adafruit.com/product-files/3017/31FL3730.pdf
     // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
-    public class DotMatrix
+    public class DotMatrix : IMatrix
     {
         private readonly DotMatrix5x7[] _matrices;
 
@@ -29,14 +26,10 @@ namespace Iot.Device.Display
             Width = DotMatrix5x7.BaseWidth * matrices.Length;
         }
 
-        /// <summary>
-        /// Width of LED matrix (x axis).
-        /// </summary>
+        /// <inheritdoc/>
         public int Width { get; }
 
-        /// <summary>
-        /// Height of LED matrix (y axis).
-        /// </summary>
+        /// <inheritdoc/>
         public int Height { get; } = DotMatrix5x7.BaseHeight;
 
         /// <summary>
@@ -49,9 +42,7 @@ namespace Iot.Device.Display
         /// </summary>
         public int Length => _matrices.Length;
 
-        /// <summary>
-        /// Indexer for matrix pair.
-        /// </summary>
+        /// <inheritdoc/>
         public int this[int x, int y]
         {
             get
@@ -66,9 +57,7 @@ namespace Iot.Device.Display
             }
         }
 
-        /// <summary>
-        /// Fill All LEDs.
-        /// </summary>
+        /// <inheritdoc/>
         public void Fill(int value)
         {
             foreach (DotMatrix5x7 matrix in _matrices)
@@ -91,7 +80,6 @@ namespace Iot.Device.Display
 
             int matrixIndex = x / DotMatrix5x7.BaseWidth;
             int index = x % DotMatrix5x7.BaseWidth;
-
             return (matrixIndex, index);
         }
 

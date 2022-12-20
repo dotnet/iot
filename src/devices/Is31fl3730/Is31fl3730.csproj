@@ -17,5 +17,8 @@
     <Compile Include="DotMatrix5x7.cs" />
     <Compile Include="DotMatrix10x7.cs" />
     <Compile Include="MicroDotPhat30x7.cs" />
+
+    <!-- Dependencies -->
+    <Compile Include="../Display/IMatrix.cs" />
   </ItemGroup>
 </Project>
