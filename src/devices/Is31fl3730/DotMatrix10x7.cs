@@ -15,10 +15,8 @@ namespace Iot.Device.Display
     // Datasheet: https://cdn-shop.adafruit.com/product-files/3017/31FL3730.pdf
     // Product: https://shop.pimoroni.com/products/led-dot-matrix-breakout
     // Related repo: https://github.com/pimoroni/microdot-phat
-    public class DotMatrix10x7
+    public class DotMatrix10x7 : DotMatrix
     {
-        private readonly DotMatrix _matrix;
-
         /// <summary>
         /// Initialize Dot Matrix Breakout IS31FL3730 device.
         /// </summary>
@@ -33,17 +31,8 @@ namespace Iot.Device.Display
         /// </summary>
         /// <param name="is31fl3730">The <see cref="Iot.Device.Display.Is31fl3730"/> to create with.</param>
         public DotMatrix10x7(Is31fl3730 is31fl3730)
+        : base(Initialize(is31fl3730))
         {
-            is31fl3730 = is31fl3730 ?? throw new ArgumentException($"{nameof(is31fl3730)} is null.");
-            var matrices = new DotMatrix5x7[]
-            {
-                is31fl3730[1],
-                is31fl3730[0]
-            };
-
-            _matrix = new DotMatrix(matrices);
-            Width = _matrix.Width;
-            Height = _matrix.Height;
         }
 
         /// <summary>
@@ -51,38 +40,14 @@ namespace Iot.Device.Display
         /// </summary>
         public const int DefaultI2cAddress = 0x61;
 
-        /// <summary>
-        /// Width of LED matrix (x axis).
-        /// </summary>
-        public int Width { get; }
-
-        /// <summary>
-        /// Height of LED matrix (y axis).
-        /// </summary>
-        public int Height { get; }
-
-        /// <summary>
-        /// Indexer for matrices.
-        /// </summary>
-        public DotMatrix5x7 this[int matrix] => _matrix[matrix];
-
-        /// <summary>
-        /// Length (or count) of matrices.
-        /// </summary>
-        public int Length => _matrix.Length;
-
-        /// <summary>
-        /// Indexer for matrix pair.
-        /// </summary>
-        public int this[int x, int y]
+        private static DotMatrix5x7[] Initialize(Is31fl3730 is31fl3730)
         {
-            get => _matrix[x, y];
-            set => _matrix[x, y] = value;
+            is31fl3730 = is31fl3730 ?? throw new ArgumentException($"{nameof(is31fl3730)} is null");
+            return new DotMatrix5x7[]
+            {
+                is31fl3730[1],
+                is31fl3730[0]
+            };
         }
-
-        /// <summary>
-        /// Fill All LEDs.
-        /// </summary>
-        public void Fill(int value) => _matrix.Fill(value);
     }
 }
