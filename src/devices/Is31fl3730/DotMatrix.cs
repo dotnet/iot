@@ -27,17 +27,18 @@ namespace Iot.Device.Display
         {
             _matrices = matrices;
             Width = matrices.Length * DotMatrix5x7.Width;
+            Height = DotMatrix5x7.Height;
         }
 
         /// <summary>
         /// Width of LED matrix (x axis).
         /// </summary>
-        public readonly int Width;
+        public int Width { get; }
 
         /// <summary>
         /// Height of LED matrix (y axis).
         /// </summary>
-        public readonly int Height = DotMatrix5x7.Height;
+        public int Height { get; }
 
         /// <summary>
         /// Indexer for matrices.
