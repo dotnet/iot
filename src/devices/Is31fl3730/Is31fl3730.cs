@@ -236,13 +236,7 @@ namespace Iot.Device.Display
             concern. It has nothing to do with byte structure.
             */
 
-            if (matrix > 1 ||
-                x >= DotMatrix5x7.BaseWidth ||
-                y >= DotMatrix5x7.BaseHeight)
-            {
-                throw new ArgumentException("Argument out of range.");
-            }
-
+            CheckDimensions(matrix, x, y);
             int logicalRow = matrix is 0 ? y : x;
             int logicalColumn = matrix is 0 ? x : y;
             byte mask = (byte)(1 << logicalColumn);
@@ -260,6 +254,7 @@ namespace Iot.Device.Display
         /// <param name="y">The y dimension for the LED.</param>
         public int Read(int matrix, int x, int y)
         {
+            CheckDimensions(matrix, x, y);
             int row = matrix is 0 ? y : x;
             int column = matrix is 0 ? x : y;
             int mask = 1 << column;
@@ -273,6 +268,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void WriteDecimalPoint(int matrix, int value)
         {
+            CheckMatrixIndex(matrix);
             byte[] buffer = _buffers[matrix];
             int row = matrix is 0 ? MatrixValues.MatrixOneDecimalRow : MatrixValues.MatrixTwoDecimalRow;
             byte mask = matrix is 0 ? MatrixValues.MatrixOneDecimalMask : MatrixValues.MatrixTwoDecimalMask;
@@ -285,6 +281,7 @@ namespace Iot.Device.Display
         /// </summary>
         public void Fill(int matrix, int value)
         {
+            CheckMatrixIndex(matrix);
             _buffers[matrix].AsSpan().Fill((byte)value);
             AutoFlush(matrix);
         }
@@ -308,6 +305,8 @@ namespace Iot.Device.Display
         /// </summary>
         public void Flush(int matrix)
         {
+            CheckMatrixIndex(matrix);
+
             if (_enabled[matrix])
             {
                 Write(_matrix_addresses[matrix], _buffers[matrix]);
@@ -393,12 +392,31 @@ namespace Iot.Device.Display
 
         private DotMatrix5x7 GetMatrix(int index)
         {
-            if (index is < 0 or > 1)
+            CheckMatrixIndex(index);
+            return new DotMatrix5x7(this, index);
+        }
+
+        private void CheckDimensions(int matrix, int x, int y)
+        {
+            CheckMatrixIndex(matrix);
+
+            if (x < 0 || x >= DotMatrix5x7.BaseWidth)
             {
-                throw new ArgumentException($"{nameof(index)} ({index}) is out of range.");
+                throw new ArgumentException($"{nameof(x)} ({x}) value out of range.");
             }
 
-            return new DotMatrix5x7(this, index);
+            if (y < 0 || y >= DotMatrix5x7.BaseHeight)
+            {
+                throw new ArgumentException($"{nameof(y)} ({y}) value out of range.");
+            }
+        }
+
+        private void CheckMatrixIndex(int index)
+        {
+            if (index is < 0 or > 1)
+            {
+                throw new ArgumentException($"{nameof(index)} ({index}) value out of range.");
+            }
         }
     }
 }

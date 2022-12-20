@@ -27,7 +27,6 @@ namespace Iot.Device.Display
         {
             _matrices = matrices;
             Width = DotMatrix5x7.BaseWidth * matrices.Length;
-            Height = DotMatrix5x7.BaseHeight;
         }
 
         /// <summary>
@@ -38,7 +37,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Height of LED matrix (y axis).
         /// </summary>
-        public int Height { get; }
+        public int Height { get; } = DotMatrix5x7.BaseHeight;
 
         /// <summary>
         /// Indexer for matrices.
@@ -80,12 +79,12 @@ namespace Iot.Device.Display
 
         private (int MatrixIndex, int Index) GetMatrixIndex(int x, int y)
         {
-            if (x >= Width || x < 0)
+            if (x < 0 || x >= Width)
             {
                 throw new ArgumentException($"{nameof(x)} value ({x}) out of range.");
             }
 
-            if (y >= Height || y < 0)
+            if (y < 0 || y >= Height)
             {
                 throw new ArgumentException($"{nameof(y)} value ({y}) out of range.");
             }
