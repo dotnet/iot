@@ -14,7 +14,6 @@ The [Micro Dot pHat](https://shop.pimoroni.com/products/microdot-phat) is an una
 
 The following code demonstrates how to control the Micro Dot pHAT.
 
-
 ```csharp
 using I2cDevice first = I2cDevice.Create(new I2cConnectionSettings(busId: 1, MicroDotPhat30x7.Addresses[0]));
 using I2cDevice second = I2cDevice.Create(new I2cConnectionSettings(busId: 1, MicroDotPhat30x7.Addresses[1]));
