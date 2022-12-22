@@ -612,7 +612,19 @@ namespace Iot.Device.Arduino.Sample
             foreach (var pin in _board.SupportedPinConfigurations)
             {
                 Console.Write($"    {pin.Pin}: ");
-                Console.WriteLine(string.Join(", ", pin.PinModes.Select(x => x.Name)));
+                Console.WriteLine(string.Join(", ", pin.PinModes.Select(x =>
+                {
+                    if (x == SupportedMode.AnalogInput)
+                    {
+                        return $"{x.Name} ({pin.AnalogInputResolutionBits} Bits Resolution)";
+                    }
+                    else if (x == SupportedMode.Pwm)
+                    {
+                        return $"{x.Name} ({pin.PwmResolutionBits} Bits Resolution)";
+                    }
+
+                    return x.Name;
+                })));
             }
         }
 
