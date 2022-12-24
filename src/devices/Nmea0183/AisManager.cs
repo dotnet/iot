@@ -329,7 +329,7 @@ namespace Iot.Device.Nmea0183
         {
             lock (_lock)
             {
-                return _targets.Values.Where(x => x is T).Cast<T>();
+                return _targets.Values.OfType<T>();
             }
         }
 
