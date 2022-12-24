@@ -39,83 +39,99 @@ namespace Iot.Device.Am2320
         /// <summary>
         /// Gets the last read temperature.
         /// </summary>
-        /// <remarks>
-        /// If last read was not successful, it returns <code>default(Temperature).</code>
-        /// </remarks>
-        [Telemetry]
-        public Temperature Temperature
+        /// <param name="temperature">[Out] The current temperature on success.</param>
+        /// <returns>True on success, false if reading failed.</returns>
+        [Telemetry("Temperature")]
+        public bool TryReadTemperature(
+#if NET5_0_OR_GREATER
+        [NotNullWhen(true)]
+#endif
+                out Temperature temperature)
         {
-            get
+            temperature = default;
+            if (IsOutDated())
             {
-                if (IsOutDated())
-                {
-                    ReadData();
-                }
-
-                return IsLastReadSuccessful ? GetTemperature() : default(Temperature);
+                ReadData();
             }
+
+            if (IsLastReadSuccessful)
+            {
+                temperature = GetTemperature();
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Gets the last read of relative humidity in percentage.
         /// </summary>
-        /// <remarks>
-        /// If last read was not successful, it returns <code>default(RelativeHumidity).</code>
-        /// </remarks>
-        [Telemetry]
-        public RelativeHumidity Humidity
+        /// <param name="humidity">[Out] The current relative humidity on success.</param>
+        /// <returns>True on success, false if reading failed.</returns>
+        [Telemetry("Humidity")]
+        public bool TryReadHumidity(
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+                    out RelativeHumidity humidity)
         {
-            get
+            humidity = default;
+            if (IsOutDated())
             {
-                if (IsOutDated())
-                {
-                    ReadData();
-                }
-
-                return IsLastReadSuccessful ? GetHumidity() : default(RelativeHumidity);
+                ReadData();
             }
+
+            if (IsLastReadSuccessful)
+            {
+                humidity = GetHumidity();
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
         /// Gets the device information.
         /// </summary>
-        [Property]
-        public DeviceInformation DeviceInformation
+        /// <param name="deviceInformation">[Out] The Device Information on success.</param>
+        /// <returns>True on success, false if reading failed.</returns>
+        [Property("DeviceInformation")]
+        public bool TryGetDeviceInformation(out DeviceInformation? deviceInformation)
         {
-            get
+            deviceInformation = null;
+            Span<byte> buff = stackalloc byte[11];
+
+            // 32 bit device ID
+            // Forces the sensor to wake up and wait 10 ms according to documentation
+            _i2c.WriteByte(0x00);
+            Thread.Sleep(10);
+
+            // Sending functin code 0x03, start regster 0x08 and 7 registers
+            _i2c.Write(stackalloc byte[] { 0x03, 0x08, 0x07 });
+
+            // Wait at least 30 micro seconds
+            Thread.Sleep(1);
+            _i2c.Read(buff);
+
+            // Check if it is valid
+            if (!IsValidReadBuffer(buff, 0x07))
             {
-                Span<byte> buff = stackalloc byte[11];
-
-                // 32 bit device ID
-                // Forces the sensor to wake up and wait 10 ms according to documentation
-                _i2c.WriteByte(0x00);
-                Thread.Sleep(10);
-
-                // Sending functin code 0x03, start regster 0x00 and 4 registers
-                _i2c.Write(stackalloc byte[] { 0x03, 0x08, 0x07 });
-
-                // Wait at least 30 micro seconds
-                Thread.Sleep(1);
-                _i2c.Read(buff);
-
-                // Check if it is valid
-                if (!IsValidReadBuffer(buff, 0x07))
-                {
-                    return null!;
-                }
-
-                if (!IsCrcValid(buff))
-                {
-                    return null!;
-                }
-
-                return new DeviceInformation()
-                {
-                    Model = BinaryPrimitives.ReadUInt16BigEndian(buff.Slice(2)),
-                    Version = buff[4],
-                    DeviceId = BinaryPrimitives.ReadUInt32BigEndian(buff.Slice(5)),
-                };
+                return false;
             }
+
+            if (!IsCrcValid(buff))
+            {
+                return false;
+            }
+
+            deviceInformation = new DeviceInformation()
+            {
+                Model = BinaryPrimitives.ReadUInt16BigEndian(buff.Slice(2)),
+                Version = buff[4],
+                DeviceId = BinaryPrimitives.ReadUInt32BigEndian(buff.Slice(5)),
+            };
+
+            return true;
         }
 
         /// <summary>
