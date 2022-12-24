@@ -115,9 +115,14 @@ namespace Iot.Device.Nmea0183.Ais
             return result;
         }
 
-        public void WriteInt(int var, int length)
+        /// <summary>
+        /// Writes out an integer
+        /// </summary>
+        /// <param name="value">The value to write</param>
+        /// <param name="length">The minimum number of digits</param>
+        public void WriteInt(int value, int length)
         {
-            RawValue += Convert.ToString(var, 2).PadLeft(length, '0');
+            RawValue += Convert.ToString(value, 2).PadLeft(length, '0');
         }
 
         public double ReadUnsignedDouble(int startIndex, int length)
@@ -126,9 +131,14 @@ namespace Iot.Device.Nmea0183.Ais
             return Convert.ToUInt32(bitValue, 2);
         }
 
-        public void WriteUnsignedDouble(double var, int length)
+        /// <summary>
+        /// Writes out the whole part of a double number
+        /// </summary>
+        /// <param name="value">The value to write</param>
+        /// <param name="length">The minimum number of digits to write</param>
+        public void WriteUnsignedDouble(double value, int length)
         {
-            RawValue += Convert.ToString((UInt32)var, 2).PadLeft(length, '0');
+            RawValue += Convert.ToString((UInt32)value, 2).PadLeft(length, '0');
         }
 
         public double ReadDouble(int startIndex, int length)
@@ -144,14 +154,19 @@ namespace Iot.Device.Nmea0183.Ais
             return result;
         }
 
-        public void WriteDouble(double var, int length)
+        /// <summary>
+        /// Writes the value as base-two integer. Used to write latitude/longitude values
+        /// </summary>
+        /// <param name="value">The value to write</param>
+        /// <param name="length">The length of the field</param>
+        private void WriteDouble(double value, int length)
         {
-            if (var < 0)
+            if (value < 0)
             {
-                var = var + Math.Pow(2, length);
+                value = value + Math.Pow(2, length);
             }
 
-            RawValue += Convert.ToString((UInt32)var, 2).PadLeft(length, '0');
+            RawValue += Convert.ToString((UInt32)value, 2).PadLeft(length, '0');
         }
 
         public int? ReadRateOfTurn(int startIndex, int length)
@@ -160,9 +175,9 @@ namespace Iot.Device.Nmea0183.Ais
             return rateOfTurn == -128 ? null : new int?(rateOfTurn);
         }
 
-        public void WriteRateOfTurn(int var, int length)
+        public void WriteRateOfTurn(int value, int length)
         {
-            WriteInt(var, length);
+            WriteInt(value, length);
         }
 
         public uint? ReadTrueHeading(int startIndex, int length)
@@ -171,9 +186,9 @@ namespace Iot.Device.Nmea0183.Ais
             return trueHeading == 511 ? null : new uint?(trueHeading);
         }
 
-        public void WriteTrueHeading(uint var, int length)
+        public void WriteTrueHeading(uint value, int length)
         {
-            WriteUInt(var, length);
+            WriteUInt(value, length);
         }
 
         public double ReadLongitude(int startIndex, int length)
@@ -181,9 +196,9 @@ namespace Iot.Device.Nmea0183.Ais
             return ReadDouble(startIndex, length) / 600000;
         }
 
-        public void WriteLongitude(double var, int length)
+        public void WriteLongitude(double value, int length)
         {
-            WriteDouble(var * 600000, length);
+            WriteDouble(value * 600000, length);
         }
 
         public double ReadLatitude(int startIndex, int length)
@@ -191,9 +206,9 @@ namespace Iot.Device.Nmea0183.Ais
             return ReadDouble(startIndex, length) / 600000;
         }
 
-        public void WriteLatitude(double var, int length)
+        public void WriteLatitude(double value, int length)
         {
-            WriteDouble(var * 600000, length);
+            WriteDouble(value * 600000, length);
         }
 
         public double ReadSpeedOverGround(int startIndex, int length)
@@ -201,9 +216,9 @@ namespace Iot.Device.Nmea0183.Ais
             return ReadUnsignedDouble(startIndex, length) / 10;
         }
 
-        public void WriteSpeedOverGround(double var, int length)
+        public void WriteSpeedOverGround(double value, int length)
         {
-            WriteUnsignedDouble(var * 10, length);
+            WriteUnsignedDouble(value * 10, length);
         }
 
         public double ReadCourseOverGround(int startIndex, int length)
@@ -211,9 +226,9 @@ namespace Iot.Device.Nmea0183.Ais
             return ReadUnsignedDouble(startIndex, length) / 10;
         }
 
-        public void WriteCourseOverGround(double var, int length)
+        public void WriteCourseOverGround(double value, int length)
         {
-            WriteUnsignedDouble(var * 10, length);
+            WriteUnsignedDouble(value * 10, length);
         }
 
         public string ReadString(int startIndex, int length)
