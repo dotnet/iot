@@ -43,9 +43,6 @@ namespace Iot.Device.Am2320
         /// <returns>True on success, false if reading failed.</returns>
         [Telemetry("Temperature")]
         public bool TryReadTemperature(
-#if NET5_0_OR_GREATER
-        [NotNullWhen(true)]
-#endif
                 out Temperature temperature)
         {
             temperature = default;
@@ -70,9 +67,6 @@ namespace Iot.Device.Am2320
         /// <returns>True on success, false if reading failed.</returns>
         [Telemetry("Humidity")]
         public bool TryReadHumidity(
-#if NET5_0_OR_GREATER
-            [NotNullWhen(true)]
-#endif
                     out RelativeHumidity humidity)
         {
             humidity = default;
