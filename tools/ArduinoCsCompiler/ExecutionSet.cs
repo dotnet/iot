@@ -1676,5 +1676,31 @@ namespace ArduinoCsCompiler
                 }
             }
         }
+
+        /// <summary>
+        /// Create a table that allows fast lookups for ResolveClassFromFieldToken and ResolveClassFromCtorToken
+        /// </summary>
+        public void AddReverseFieldLookupTable()
+        {
+            Dictionary<int, ClassDeclaration> fieldOrCtorTokenToClass = new Dictionary<int, ClassDeclaration>();
+            foreach (var c in Classes)
+            {
+                foreach (var f in c.Members)
+                {
+                    // Tokens might be found in multiple classes, due to class replacements (fields in replacement classes shadow the original counterpart)
+                    if (f.Field != null)
+                    {
+                        fieldOrCtorTokenToClass[f.Token] = c;
+                    }
+
+                    if (f.Method is ConstructorInfo)
+                    {
+                        fieldOrCtorTokenToClass[f.Token] = c;
+                    }
+                }
+            }
+
+            _logger.LogDebug($"Got {fieldOrCtorTokenToClass.Count} members in reverse lookup index");
+        }
     }
 }

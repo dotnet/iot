@@ -1077,6 +1077,8 @@ namespace ArduinoCsCompiler
                     int tokenOfStartupMethod = set.GetOrAddMethodToken(method, method);
                     set.TokenOfStartupMethod = tokenOfStartupMethod;
                 }
+
+                set.AddReverseFieldLookupTable();
             }
 
             _logger.LogInformation($"Estimated program memory usage: {set.EstimateRequiredMemory()} bytes.");
