@@ -33,11 +33,24 @@ namespace Iot.Device.Arduino
         /// Create a new command sequence
         /// </summary>
         /// <param name="command">The first byte of the command</param>
-        internal FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX)
+        internal FirmataCommandSequence(FirmataCommand command)
         {
             _sequence = new List<byte>()
             {
                 (byte)command
+            };
+        }
+
+        internal FirmataCommandSequence(FirmataCommand command, int pin)
+        {
+            if (pin > 15)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pin), "Shorthand commands can only be used with pin numbers <= 15");
+            }
+
+            _sequence = new List<byte>()
+            {
+                (byte)(((byte)command) | pin)
             };
         }
 

@@ -1103,14 +1103,27 @@ namespace Iot.Device.Arduino
 
         public void SetPwmChannel(int pin, double dutyCycle)
         {
-            FirmataCommandSequence pwmCommandSequence = new();
-            pwmCommandSequence.WriteByte((byte)FirmataSysexCommand.EXTENDED_ANALOG);
-            pwmCommandSequence.WriteByte((byte)pin);
             // The arduino expects values between 0 and 255 for PWM channels.
-            // The frequency cannot be set.
+            // The frequency cannot currently be set using the protocol
             int pwmMaxValue = _supportedPinConfigurations[pin].PwmResolutionBits; // This is 8 for most arduino boards
             pwmMaxValue = (1 << pwmMaxValue) - 1;
             int value = (int)Math.Max(0, Math.Min(dutyCycle * pwmMaxValue, pwmMaxValue));
+
+            // At most 14 bits used?
+            if (((pwmMaxValue & 0x3FFF) == pwmMaxValue) && (pin <= 15))
+            {
+                // Use shorthand
+                FirmataCommandSequence analogMessage = new FirmataCommandSequence(FirmataCommand.ANALOG_MESSAGE, pin);
+                analogMessage.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
+                analogMessage.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bit (rest unused)
+                // No(!) END_SYSEX here
+                SendCommand(analogMessage);
+                return;
+            }
+
+            FirmataCommandSequence pwmCommandSequence = new();
+            pwmCommandSequence.WriteByte((byte)FirmataSysexCommand.EXTENDED_ANALOG);
+            pwmCommandSequence.WriteByte((byte)pin);
             pwmCommandSequence.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
             pwmCommandSequence.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bit (rest unused)
             pwmCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
