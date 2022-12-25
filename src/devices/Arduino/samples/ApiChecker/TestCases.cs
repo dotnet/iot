@@ -343,14 +343,14 @@ namespace Iot.Device.Arduino.Sample
             Console.WriteLine();
             Console.Write("Lowest Address for I2C bus scan? (Default: 0x03) ");
             input = Console.ReadLine()!;
-            if (!int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _lowestI2cAddress))
+            if (input.Length < 3 || !int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _lowestI2cAddress))
             {
                 _lowestI2cAddress = 3;
             }
 
             Console.Write("Highest Address for I2C bus scan? (Default: 0x77) ");
             input = Console.ReadLine()!;
-            if (!int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _highestI2cAddress))
+            if (input.Length < 3 || !int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _highestI2cAddress))
             {
                 _highestI2cAddress = 0x77;
             }
@@ -403,9 +403,9 @@ namespace Iot.Device.Arduino.Sample
             using (var pwm = _board.CreatePwmChannel(0, pin, 100, 0))
             {
                 Console.WriteLine("Now dimming LED. Press any key to exit");
+                pwm.Start();
                 while (!Console.KeyAvailable)
                 {
-                    pwm.Start();
                     for (double fadeValue = 0; fadeValue <= 1.0; fadeValue += 0.05)
                     {
                         // sets the value (range from 0 to 255):
@@ -426,7 +426,6 @@ namespace Iot.Device.Arduino.Sample
                 }
 
                 Console.ReadKey();
-                pwm.Stop();
             }
         }
 
