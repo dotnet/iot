@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.IO;
+using System.Net.Http.Headers;
 
 namespace Iot.Device.Ft232H
 {
@@ -75,11 +76,18 @@ namespace Iot.Device.Ft232H
 
         internal void Write(int deviceAddress, ReadOnlySpan<byte> buffer)
         {
+            var retry = 0;
+        Retry:
             DeviceInformation.I2cStart();
             var ack = DeviceInformation.I2cSendDeviceAddrAndCheckACK((byte)deviceAddress, false);
             if (!ack)
             {
                 DeviceInformation.I2cStop();
+                if (retry++ < 5)
+                {
+                    goto Retry;
+                }
+
                 throw new IOException($"Error writing device while setting up address");
             }
 

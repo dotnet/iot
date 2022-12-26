@@ -30,11 +30,13 @@ namespace Iot.Device.Ft232H
         // To understand the signal need for I2C communication: https://training.ti.com/sites/default/files/docs/slides-i2c-protocol.pdf
         private const uint I2cMasterFrequencyKbps = 400;
         private const byte I2cDirSDAoutSCLout = 0x03;
+        private const byte I2cDirSDAinSCLout = 0x11;
         private const byte I2cDataSDAloSCLhi = 0x01;
         private const byte I2cDataSDAhiSCLhi = 0x03;
         private const byte I2cDataSDAloSCLlo = 0x00;
         private const byte I2cDataSDAhiSCLlo = 0x02;
-        private const byte NumberCycles = 5;
+        private const byte NumberCycles = 6;
+        private const byte MaskGpio = 0xF8;
 
         private SafeFtHandle _ftHandle = null!;
 
@@ -304,8 +306,8 @@ namespace Iot.Device.Ft232H
             // Command to set directions of lower 8 pins and force value on bits set as output
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
             // SDA and SCL both output high (open drain)
-            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & 0xF8));
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             toSend[idx++] = GpioLowData;
             toSend[idx++] = GpioLowDir;
             Write(toSend);
@@ -344,8 +346,8 @@ namespace Iot.Device.Ft232H
             int count;
             int idx = 0;
             // SDA high, SCL high
-            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & 0xF8));
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             Span<byte> toSend = stackalloc byte[NumberCycles * 3 * 3 + 3];
             for (count = 0; count < NumberCycles; count++)
             {
@@ -355,7 +357,8 @@ namespace Iot.Device.Ft232H
             }
 
             // SDA lo, SCL high
-            GpioLowData = (byte)(0x00 | I2cDataSDAloSCLhi | (GpioLowData & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAloSCLhi | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             for (count = 0; count < NumberCycles; count++)
             {
                 toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
@@ -364,7 +367,7 @@ namespace Iot.Device.Ft232H
             }
 
             // SDA lo, SCL lo
-            GpioLowData = (byte)(0x00 | I2cDataSDAloSCLlo | (GpioLowData & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAloSCLlo | (GpioLowData & MaskGpio));
             for (count = 0; count < NumberCycles; count++)
             {
                 toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
@@ -373,7 +376,7 @@ namespace Iot.Device.Ft232H
             }
 
             // Release SDA
-            GpioLowData = (byte)(0x00 | I2cDataSDAhiSCLlo | (GpioLowData & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAhiSCLlo | (GpioLowData & MaskGpio));
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
             toSend[idx++] = GpioLowData;
             toSend[idx++] = GpioLowDir;
@@ -386,8 +389,8 @@ namespace Iot.Device.Ft232H
             int count;
             int idx = 0;
             // SDA low, SCL low
-            GpioLowData = (byte)(I2cDataSDAloSCLlo | (GpioLowData & 0xF8));
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAloSCLlo | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             Span<byte> toSend = stackalloc byte[NumberCycles * 3 * 3];
             for (count = 0; count < NumberCycles; count++)
             {
@@ -397,8 +400,8 @@ namespace Iot.Device.Ft232H
             }
 
             // SDA low, SCL high
-            GpioLowData = (byte)(I2cDataSDAloSCLhi | (GpioLowData & 0xF8));
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAloSCLhi | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             for (count = 0; count < NumberCycles; count++)
             {
                 toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
@@ -407,8 +410,8 @@ namespace Iot.Device.Ft232H
             }
 
             // SDA high, SCL high
-            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & 0xF8));
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             for (count = 0; count < NumberCycles; count++)
             {
                 toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
@@ -423,8 +426,8 @@ namespace Iot.Device.Ft232H
         {
             int idx = 0;
             // SDA low, SCL low
-            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & 0xF8));
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAhiSCLhi | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             Span<byte> toSend = stackalloc byte[3];
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
             toSend[idx++] = GpioLowData;
@@ -444,8 +447,8 @@ namespace Iot.Device.Ft232H
             toSend[idx++] = 0;
             toSend[idx++] = data;
             // Put line back to idle (data released, clock pulled low)
-            GpioLowData = (byte)(I2cDataSDAhiSCLlo | (GpioLowData & 0xF8));
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
+            GpioLowData = (byte)(I2cDataSDAhiSCLlo | (GpioLowData & MaskGpio));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
             toSend[idx++] = GpioLowData;
             toSend[idx++] = GpioLowDir;
@@ -487,8 +490,8 @@ namespace Iot.Device.Ft232H
             toSend[idx++] = (byte)(ack ? 0x00 : 0xFF);
             // I2C lines back to idle state
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
-            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & 0xF8));
-            GpioLowData = (byte)(I2cDataSDAhiSCLlo | (GpioLowData & 0xF8));
+            GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
+            GpioLowData = (byte)(I2cDataSDAhiSCLlo | (GpioLowData & MaskGpio));
             toSend[idx++] = GpioLowDir;
             toSend[idx++] = GpioLowData;
             // And ask it right away
@@ -532,7 +535,7 @@ namespace Iot.Device.Ft232H
             toSend[1] = (byte)FtOpcode.SendImmediate;
             Write(toSend);
             Read(toRead);
-            return (byte)(toRead[0] & 0xF8);
+            return (byte)(toRead[0] & MaskGpio);
         }
 
         internal void SetGpioValuesLow()
@@ -605,9 +608,9 @@ namespace Iot.Device.Ft232H
             toSend[idx++] = (byte)FtOpcode.Disable3PhaseDataClocking;
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
             // Pin clock output, MISO output, MOSI input
-            GpioLowDir = (byte)((GpioLowDir & 0xF8) | 0x03);
+            GpioLowDir = (byte)((GpioLowDir & MaskGpio) | 0x03);
             // clock, MOSI and MISO to 0
-            GpioLowData = (byte)(GpioLowData & 0xF8);
+            GpioLowData = (byte)(GpioLowData & MaskGpio);
             toSend[idx++] = GpioLowDir;
             toSend[idx++] = GpioLowData;
             // The SK clock frequency can be worked out by below algorithm with divide by 5 set as off

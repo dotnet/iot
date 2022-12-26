@@ -35,7 +35,7 @@ if (devices.Count == 0)
 Ft232HDevice ft232h = Ft232HDevice.GetFt232H()[0];
 // Uncomment the test you want to run
 // TestSpi(ft232h);
-TestGpio(ft232h);
+// TestGpio(ft232h);
 TestI2c(ft232h);
 
 void TestSpi(Ft232HDevice ft232h)
@@ -91,7 +91,7 @@ void TestI2c(Ft232HDevice ft232h)
     Pressure defaultSeaLevelPressure = WeatherHelper.MeanSeaLevel;
     Length stationHeight = Length.FromMeters(640); // Elevation of the sensor
     var ftI2cBus = ft232h.CreateOrGetI2cBus(ft232h.GetDefaultI2cBusNumber());
-    var i2cDevice = ftI2cBus.CreateDevice(Bmp280.SecondaryI2cAddress);
+    var i2cDevice = ftI2cBus.CreateDevice(Bmp280.DefaultI2cAddress);
     using var i2CBmp280 = new Bmp280(i2cDevice);
 
     while (true)
