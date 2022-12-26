@@ -5,6 +5,7 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.Threading;
 using Iot.Device.Am2320;
+using UnitsNet;
 
 Debug.WriteLine("Hello from AM2320!");
 
@@ -12,7 +13,7 @@ Debug.WriteLine("Hello from AM2320!");
 using Am2320 am2330 = new(I2cDevice.Create(new I2cConnectionSettings(1, Am2320.DefaultI2cAddress)));
 
 // On some copies, the device information contains only 0
-var deviceInfo = am2330.DeviceInformation;
+am2330.TryGetDeviceInformation(out DeviceInformation? deviceInfo);
 if (deviceInfo != null)
 {
     Debug.WriteLine($"Model: {deviceInfo.Model}");
@@ -22,8 +23,8 @@ if (deviceInfo != null)
 
 while (true)
 {
-    var temp = am2330.Temperature;
-    var hum = am2330.Humidity;
+    am2330.TryReadTemperature(out Temperature temp);
+    am2330.TryReadHumidity(out RelativeHumidity hum);
     if (am2330.IsLastReadSuccessful)
     {
         Debug.WriteLine($"Temp = {temp.DegreesCelsius} C, Hum = {hum.Percent} %");
