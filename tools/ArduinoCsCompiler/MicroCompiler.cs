@@ -14,11 +14,12 @@ using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 using System.Threading;
 using ArduinoCsCompiler.Runtime;
-using ArduinoCsCompiler.Runtime.UnitsNet;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
+using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
+using TypeInfo = System.Reflection.TypeInfo;
 
 namespace ArduinoCsCompiler
 {
@@ -1125,7 +1126,19 @@ namespace ArduinoCsCompiler
             /// <inheritdoc cref="IComparer{T}.Compare"/>
             public int Compare(ClassDeclaration? x, ClassDeclaration? y)
             {
-                if (x == y)
+                if (x == null || y == null)
+                {
+                    throw new ArgumentNullException(nameof(x));
+                }
+
+                int result = CompareInternal(x, y);
+                // Debug.WriteLine($"Comparing {x.Name} to {y.Name} results in {result}");
+                return result;
+            }
+
+            private static int CompareInternal(ClassDeclaration x, ClassDeclaration y)
+            {
+                if (x!.Equals(y))
                 {
                     return 0;
                 }
@@ -1146,10 +1159,25 @@ namespace ArduinoCsCompiler
 
                 if (xt.IsInterface && yt.IsInterface)
                 {
-                    return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
+                    goto compareByName;
+                }
+
+                // Sort arrays last
+                if (xt.IsArray && !yt.IsArray)
+                {
+                    return 1;
+                }
+                else if (!xt.IsArray && yt.IsArray)
+                {
+                    return -1;
+                }
+                else if (xt.IsArray && yt.IsArray)
+                {
+                    goto compareByName;
                 }
 
                 // Both x and y are not interfaces now (and not equal)
+                // But this returns true if comparing two array-of-enum types! typeof(Enum1[]).IsAssignableTo(typeof(Enum2[]))!
                 if (xt.IsAssignableFrom(yt))
                 {
                     return -1;
@@ -1160,6 +1188,7 @@ namespace ArduinoCsCompiler
                     return 1;
                 }
 
+                compareByName:
                 return string.Compare(x.Name, y.Name, StringComparison.Ordinal);
             }
         }
@@ -2724,7 +2753,6 @@ namespace ArduinoCsCompiler
             BringToFront(codeSequences, typeof(UnitsNet.BaseUnits));
             BringToFront(codeSequences, typeof(UnitsNet.BaseDimensions));
             BringToFront(codeSequences, typeof(UnitsNet.QuantityInfo));
-            BringToFront(codeSequences, typeof(MiniQuantityInfo));
             BringToFront(codeSequences, GetSystemPrivateType("System.Collections.HashHelpers"));
             BringToFront(codeSequences, typeof(System.Text.UTF8Encoding));
             BringToFront(codeSequences, typeof(System.Text.Encoding));

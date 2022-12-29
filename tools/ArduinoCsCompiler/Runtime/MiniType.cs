@@ -33,6 +33,18 @@ namespace ArduinoCsCompiler.Runtime
             }
         }
 
+        /// <summary>
+        /// This returns true for an open generic type only
+        /// </summary>
+        public virtual bool IsGenericTypeDefinition
+        {
+            [ArduinoImplementation("TypeIsGenericTypeDefinition", 0x65)]
+            get
+            {
+                return (m_handle & ExecutionSet.GenericTokenMask) != 0;
+            }
+        }
+
         public virtual bool IsEnum
         {
             [ArduinoImplementation("TypeIsEnum", 0x51)]
@@ -99,6 +111,24 @@ namespace ArduinoCsCompiler.Runtime
             get
             {
                 return "Namespace";
+            }
+        }
+
+        public virtual Type[] GenericTypeArguments
+        {
+            [ArduinoImplementation("TypeGetGenericTypeArguments", 0x63)]
+            get
+            {
+                return new Type[0];
+            }
+        }
+
+        public virtual Type[] GenericTypeParameters
+        {
+            [ArduinoImplementation("TypeGetGenericTypeArguments", 0x66)]
+            get
+            {
+                return new Type[0];
             }
         }
 
@@ -280,6 +310,36 @@ namespace ArduinoCsCompiler.Runtime
         public virtual bool IsEquivalentTo(Type other)
         {
             return Equals(other);
+        }
+
+        [ArduinoImplementation("TypeGetArrayRank", 0x64)]
+        public virtual int GetArrayRank()
+        {
+            return 1;
+        }
+
+        [ArduinoImplementation("TypeGetMethod")]
+        public MethodInfo? GetMethod(string name, Type[] types)
+        {
+            return null;
+        }
+
+        [ArduinoImplementation("TypeGetMethod2")]
+        public MethodInfo? GetMethod(string name, BindingFlags bindingAttr)
+        {
+            return null;
+        }
+
+        [ArduinoImplementation("TypeGetFields")]
+        public FieldInfo[]? GetFields(BindingFlags bindingAttr)
+        {
+            return null;
+        }
+
+        [ArduinoImplementation("TypeGetProperties")]
+        public virtual PropertyInfo[]? GetProperties(BindingFlags bindingFlags)
+        {
+            return null;
         }
 
         public virtual Array GetEnumValues()
