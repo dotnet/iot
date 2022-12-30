@@ -492,8 +492,8 @@ namespace Iot.Device.Ft232H
             toSend[idx++] = (byte)FtOpcode.SetDataBitsLowByte;
             GpioLowDir = (byte)(I2cDirSDAoutSCLout | (GpioLowDir & MaskGpio));
             GpioLowData = (byte)(I2cDataSDAhiSCLlo | (GpioLowData & MaskGpio));
-            toSend[idx++] = GpioLowDir;
             toSend[idx++] = GpioLowData;
+            toSend[idx++] = GpioLowDir;
             // And ask it right away
             toSend[idx++] = (byte)FtOpcode.SendImmediate;
             Write(toSend);
