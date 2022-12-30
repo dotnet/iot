@@ -3,11 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Device.Spi;
 using System.Threading;
-using System.Device.Gpio;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
+using Iot.Device.Board;
 using Iot.Device.Common;
 using Iot.Device.Ft232H;
 using Iot.Device.FtCommon;
@@ -36,6 +37,7 @@ Ft232HDevice ft232h = Ft232HDevice.GetFt232H()[0];
 // Uncomment the test you want to run
 // TestSpi(ft232h);
 // TestGpio(ft232h);
+I2cScan(ft232h);
 TestI2c(ft232h);
 
 void TestSpi(Ft232HDevice ft232h)
@@ -56,16 +58,18 @@ void TestSpi(Ft232HDevice ft232h)
 void TestGpio(Ft232HDevice ft232h)
 {
     // Should transform it into 5
+    const string PinNumber = "D5";
+
     // It's possible to use this function to convert the board names you find in various
     // implementation into the pin number
-    int gpio5 = Ft232HDevice.GetPinNumberFromString("D5");
+    int gpio5 = Ft232HDevice.GetPinNumberFromString(PinNumber);
     var gpioController = ft232h.CreateGpioController();
 
     // Opening GPIO2
     gpioController.OpenPin(gpio5);
     gpioController.SetPinMode(gpio5, PinMode.Output);
 
-    Console.WriteLine("Blinking GPIO5 (D5)");
+    Console.WriteLine($"Blinking GPIO{gpio5} ({PinNumber})");
     while (!Console.KeyAvailable)
     {
         gpioController.Write(gpio5, PinValue.High);
@@ -83,6 +87,23 @@ void TestGpio(Ft232HDevice ft232h)
         Console.CursorLeft = 0;
         Thread.Sleep(50);
     }
+}
+
+void I2cScan(Ft232HDevice ft232h)
+{
+    Console.WriteLine("Hello I2C scanner!");
+    var i2cBus = ft232h.CreateOrGetI2cBus(ft232h.GetDefaultI2cBusNumber());
+    // First 8 I2C addresses are reserved, last one is 0x7F
+    List<int> validAddress = i2cBus.PerformBusScan(3, 0x7F);
+    Console.WriteLine($"Found {validAddress.Count} device(s).");
+
+    foreach (var valid in validAddress)
+    {
+        Console.WriteLine($"Address: 0x{valid:X}");
+    }
+
+    // Let'zs clean all
+    i2cBus.Dispose();
 }
 
 void TestI2c(Ft232HDevice ft232h)
