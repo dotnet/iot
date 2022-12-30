@@ -35,7 +35,7 @@
     <!-- Xunit project to test -->
     <XUnitProject Include="..\src\System.Device.Gpio.Tests\System.Device.Gpio.Tests.csproj">
       <TargetFramework>net6.0</TargetFramework>
-      <RuntimeTargetFramework>net6.0</RuntimeTargetFramework>
+      <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
     </XUnitProject>
     <!-- Target queues -->
     <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.9.Arm32.IoT"/>
