@@ -23,15 +23,22 @@ if (deviceInfo != null)
 
 while (true)
 {
-    am2330.TryReadTemperature(out Temperature temp);
-    am2330.TryReadHumidity(out RelativeHumidity hum);
-    if (am2330.IsLastReadSuccessful)
+    if (am2330.TryReadTemperature(out Temperature temp))
     {
-        Debug.WriteLine($"Temp = {temp.DegreesCelsius} C, Hum = {hum.Percent} %");
+        Debug.Write($"Temp = {temp.DegreesCelsius} C. ");
     }
     else
     {
-        Debug.WriteLine("Not sucessful reading.");
+        Debug.WriteLine("Can't read temperature. ");
+    }
+
+    if (am2330.TryReadHumidity(out RelativeHumidity hum))
+    {
+        Debug.WriteLine($"Hum = {hum.Percent} %.");
+    }
+    else
+    {
+        Debug.WriteLine("Can't read humidity.");
     }
 
     Thread.Sleep(Am2320.MinimumReadPeriod);

@@ -23,15 +23,22 @@ using Am2320 am2330 = new(I2cDevice.Create(new I2cConnectionSettings(1, Am2320.D
 
 while (true)
 {
-    var temp = am2330.Temperature;
-    var hum = am2330.Humidity;
-    if (am2330.IsLastReadSuccessful)
+    if (am2330.TryReadTemperature(out Temperature temp))
     {
-        Debug.WriteLine($"Temp = {temp.DegreesCelsius} C, Hum = {hum.Percent} %");
+        Debug.Write($"Temp = {temp.DegreesCelsius} C. ");
     }
     else
     {
-        Debug.WriteLine("Not sucessful reading.");
+        Debug.WriteLine("Can't read temperature. ");
+    }
+
+    if (am2330.TryReadHumidity(out RelativeHumidity hum))
+    {
+        Debug.WriteLine($"Hum = {hum.Percent} %.");
+    }
+    else
+    {
+        Debug.WriteLine("Can't read humidity.");
     }
 
     Thread.Sleep(Am2320.MinimumReadPeriod);
