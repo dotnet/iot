@@ -133,7 +133,7 @@ namespace Iot.Device.Common
         }
 
         /// <summary>
-        /// Returns the given angle as degrees, minutes and seconds
+        /// Returns the given angle as degree and minutes
         /// </summary>
         /// <param name="angle">Input angle, in degrees</param>
         /// <param name="minDigits">Number of digits for the minutes</param>
