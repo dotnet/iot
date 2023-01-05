@@ -102,15 +102,15 @@ namespace Iot.Device.Common
         /// <param name="degrees">Full degrees</param>
         /// <param name="minutes">Full minutes</param>
         /// <param name="seconds">Seconds including requested number of digits</param>
-        public static void GetDegreesMinutesSeconds(double angle, int secDigits, out double normalizedVal, out double degrees, out double minutes, out double seconds)
+        public static void GetDegreesMinutesSeconds(double angle, int secDigits, out double normalizedVal, out int degrees, out int minutes, out double seconds)
         {
             angle = GeographicPositionExtensions.NormalizeAngleTo180Degrees(angle);
             normalizedVal = angle;
             angle = Math.Abs(angle);
-            degrees = Math.Floor(angle);
+            degrees = (int)Math.Floor(angle);
 
             double remains = (angle - degrees) * 60.0;
-            minutes = Math.Floor(remains);
+            minutes = (int)Math.Floor(remains);
 
             seconds = (remains - minutes) * 60.0;
 
@@ -140,12 +140,12 @@ namespace Iot.Device.Common
         /// <param name="normalizedVal">Normalized angle value (to -180 to 180)</param>
         /// <param name="degrees">Full degrees</param>
         /// <param name="minutes">Minutes including requested number of digits</param>
-        public static void GetDegreesMinutes(double angle, int minDigits, out double normalizedVal, out double degrees, out double minutes)
+        public static void GetDegreesMinutes(double angle, int minDigits, out double normalizedVal, out int degrees, out double minutes)
         {
             angle = GeographicPositionExtensions.NormalizeAngleTo180Degrees(angle);
             normalizedVal = angle;
             angle = Math.Abs(angle);
-            degrees = Math.Floor(angle);
+            degrees = (int)Math.Floor(angle);
 
             double remains = (angle - degrees) * 60.0;
             minutes = remains;
@@ -212,19 +212,19 @@ namespace Iot.Device.Common
 
         private static string GetNorthOrSouth(double sign) => sign >= 0 ? "N" : "S";
 
-        private static string GetLongitudeString(double longitude, int digits)
+        private static string GetLongitudeString(double longitude, int digits, bool withDirection)
         {
             GetDegreesMinutesSeconds(longitude, 2, out var normalizedVal, out var deg, out var min, out var sec);
-            string strEastOrWest = GetEastOrWest(normalizedVal);
+            string strEastOrWest = withDirection ? GetEastOrWest(normalizedVal) : string.Empty;
 
             string secString = sec.ToString($"00.{new string('0', digits)}");
             return FormattableString.Invariant($"{deg:000}{DegreesSymbol} {min:00}{MinutesSymbol} {secString}{SecondsSymbol}{strEastOrWest}");
         }
 
-        private static string GetLatitudeString(double latitude, int digits)
+        private static string GetLatitudeString(double latitude, int digits, bool withDirection)
         {
             GetDegreesMinutesSeconds(latitude, digits, out var normalizedVal, out var deg, out var min, out var sec);
-            string strNorthOrSouth = GetNorthOrSouth(normalizedVal);
+            string strNorthOrSouth = withDirection ? GetNorthOrSouth(normalizedVal) : string.Empty;
 
             string secString = sec.ToString($"00.{new string('0', digits)}");
 
@@ -356,8 +356,8 @@ namespace Iot.Device.Common
                 return "Infinity";
             }
 
-            var strLatRet = GetLatitudeString(Latitude, 2);
-            var strLonRet = GetLongitudeString(Longitude, 2);
+            var strLatRet = GetLatitudeString(Latitude, 2, true);
+            var strLonRet = GetLongitudeString(Longitude, 2, true);
 
             return $"{strLatRet} {strLonRet} Ellipsoidal Height {EllipsoidalHeight:F0}m";
         }
@@ -366,7 +366,7 @@ namespace Iot.Device.Common
         /// Formats this <see cref="GeographicPosition"/> instance to a string.
         /// The format string can contain up to three groups of format identifiers of the form "Xn", where X is one of
         /// * D: Decimal display: The value is printed in decimal notation
-        /// * U: Decimal, unsigned: The value is printed in decimal notation, omitting the sign
+        /// * U: Decimal, unsigned: The value is printed in decimal notation, omitting the sign. When using N or E (see below), the sign is typically omitted.
         /// * M: Minutes: The value is displayed as degrees minutes
         /// * S: Seconds: The value is displayed as degrees minutes seconds
         /// A single digit after the letter indicates the number of digits for the last group (e.g. M2 uses two digits for the minutes)
@@ -378,10 +378,10 @@ namespace Iot.Device.Common
         /// <example>
         /// "Format specifier" - "Output"
         /// "D3 D3" - "10.000° 23.500°"
-        /// "D3N D3E" - "10.000°N 23.500°E"
-        /// "D3N D3E" - "10.500°N 23.512°E"
-        /// "M2 M2" - "10° 30.00'N 23° 30.74'E"
-        /// "S1 S2 D0m" - "10° 30' 00.0\"N 023° 30' 44.42\"E -100m"
+        /// "U3N D3E" - "10.000°N 23.500°E"
+        /// "U3N D3E" - "10.500°N 23.512°E"
+        /// "M2N M2E" - "10° 30.00'N 23° 30.74'E"
+        /// "S1N S2N D0m" - "10° 30' 00.0\"N 023° 30' 44.42\"E -100m"
         /// </example>
         /// </summary>
         /// <param name="format">The format string. Possible options see above</param>
@@ -406,7 +406,7 @@ namespace Iot.Device.Common
                     formatIndex++; // Skip number
                 }
 
-                double degrees;
+                int degrees;
                 double minutes;
                 switch (fmt)
                 {
@@ -462,11 +462,11 @@ namespace Iot.Device.Common
 
                         if (element == 0)
                         {
-                            output.Append(GetLatitudeString(Latitude, digits.Value));
+                            output.Append(GetLatitudeString(Latitude, digits.Value, false));
                         }
                         else if (element == 1)
                         {
-                            output.Append(GetLongitudeString(Longitude, digits.Value));
+                            output.Append(GetLongitudeString(Longitude, digits.Value, false));
                         }
                         else if (element == 2)
                         {
@@ -483,17 +483,17 @@ namespace Iot.Device.Common
                         }
 
                         string formatString =
-                            $"{{0}}{DegreesSymbol} {{1:00.{new string('0', digits.Value)}}}{MinutesSymbol}{{2}}";
+                            $"{{0}}{DegreesSymbol} {{1:00.{new string('0', digits.Value)}}}{MinutesSymbol}";
 
                         if (element == 0)
                         {
                             GetDegreesMinutes(Latitude, digits.Value, out _, out degrees, out minutes);
-                            output.Append(string.Format(formatProvider, formatString, degrees, minutes, GetNorthOrSouth(degrees)));
+                            output.Append(string.Format(formatProvider, formatString, degrees, minutes));
                         }
                         else if (element == 1)
                         {
                             GetDegreesMinutes(Longitude, digits.Value, out _, out degrees, out minutes);
-                            output.Append(string.Format(formatProvider, formatString, degrees, minutes, GetEastOrWest(degrees)));
+                            output.Append(string.Format(formatProvider, formatString, degrees, minutes));
                         }
                         else if (element == 2)
                         {

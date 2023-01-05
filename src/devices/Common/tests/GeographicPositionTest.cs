@@ -52,8 +52,10 @@ namespace Iot.Device.Common.Tests
         [InlineData("20.000°S 123.500°W", -20.0, -123.5, 12345, "U3N U3E")] // Therefore we have this
         [InlineData("20.000°S 123.500°W 100m", -20.0, -123.5, 100, "U3N U3E D0m")]
         [InlineData("10.500°N 23.512°E", 10.5, 23.51234, 100, "D3N D3E")]
-        [InlineData("10° 30.00'N 23° 30.74'E", 10.5, 23.51234, 100, "M2 M2")]
-        [InlineData("10° 30' 00.0\"N 023° 30' 44.42\"E -100", 10.5, 23.51234, -100, "S1 S2 D0")]
+        [InlineData("10.500°S 23.512°W", -10.5, -23.51234, 100, "U3N U3E")]
+        [InlineData("10° 30.00'N 23° 30.74'E", 10.5, 23.51234, 100, "M2N M2E")]
+        [InlineData("10° 30' 00.0\"N 023° 30' 44.42\"E -100m", 10.5, 23.51234, -100, "S1N S2E D0m")]
+        [InlineData("10° 30' 00.0\" 023° 30' 44.42\" -100", 10.5, 23.51234, -100, "S1 S2 D0")]
         public void SpecialFormatting(string expected, double lat, double lon, double alt, string format)
         {
             Assert.Equal(expected, new GeographicPosition(lat, lon, alt).ToString(format, CultureInfo.InvariantCulture));

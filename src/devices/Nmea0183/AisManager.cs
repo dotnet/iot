@@ -591,7 +591,7 @@ namespace Iot.Device.Nmea0183
                 GetOwnShipData(out Ship ownShip); // take in in either case
                 Length distance = ownShip.DistanceTo(ship);
                 SendWarningMessage(ship.FormatMmsi(), ship.Mmsi,
-                    $"{type} Target activated: MMSI {ship.Mmsi} in Position {ship.Position:M1 M1}! Distance {distance}", now);
+                    $"{type} Target activated: MMSI {ship.Mmsi} in Position {ship.Position:M1N M1E}! Distance {distance}", now);
             }
 
             if (AutoSendWarnings == false)
