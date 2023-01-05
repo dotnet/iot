@@ -13,7 +13,7 @@ namespace Iot.Device.Display
     public class BiColorBarGraph : Ht16k33
     {
         private readonly byte[] _displayBuffer = new byte[7];
-        private readonly BarColor[] _biColorSegment = new BarColor[24];
+        private readonly LedColor[] _biColorSegment = new LedColor[24];
 
         /// <summary>
         /// Initialize BarGraph display
@@ -25,9 +25,9 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
-        /// Indexer for <see cref="BiColorBarGraph"/>.
+        /// Indexer for bargraph.
         /// </summary>
-        public BarColor this[int index]
+        public LedColor this[int index]
         {
             get => _biColorSegment[index];
             set
@@ -44,22 +44,22 @@ namespace Iot.Device.Display
         /// <summary>
         /// Enable all LEDs.
         /// </summary>
-        public void Fill(BarColor color)
+        public void Fill(LedColor color)
         {
             byte fill = 0xFF;
             switch (color)
             {
-                case BarColor.Red:
+                case LedColor.Red:
                     _displayBuffer[1] = fill;
                     _displayBuffer[3] = fill;
                     _displayBuffer[5] = fill;
                     break;
-                case BarColor.Green:
+                case LedColor.Green:
                     _displayBuffer[2] = fill;
                     _displayBuffer[4] = fill;
                     _displayBuffer[6] = fill;
                     break;
-                case BarColor.Yellow:
+                case LedColor.Yellow:
                     Span<byte> displayBuffer = _displayBuffer;
                     displayBuffer.Fill(fill);
                     displayBuffer[0] = 0x00;
@@ -155,7 +155,7 @@ namespace Iot.Device.Display
             // x = index % 4 // which third (for example, for the 24 bar graph, there are six thirds)
             // y = x % 3 // which third of the bar segment to use
             // z = index / 12 // which of the bar segments to use
-            BarColor value = _biColorSegment[index];
+            LedColor value = _biColorSegment[index];
             int unit = index / 12;
             int segment = index / 4;
             int third = segment % 3;
@@ -167,17 +167,17 @@ namespace Iot.Device.Display
 
             switch (value)
             {
-                case BarColor.Off:
+                case LedColor.Off:
                     _displayBuffer[bufferIndex] = (byte)(red & ~mask);
                     _displayBuffer[bufferIndex + 1] = (byte)(green & ~mask);
                     break;
-                case BarColor.Red:
+                case LedColor.Red:
                     _displayBuffer[bufferIndex] = (byte)(red ^ mask);
                     break;
-                case BarColor.Green:
+                case LedColor.Green:
                     _displayBuffer[bufferIndex + 1] = (byte)(green ^ mask);
                     break;
-                case BarColor.Yellow:
+                case LedColor.Yellow:
                     _displayBuffer[bufferIndex] = (byte)(red ^ mask);
                     _displayBuffer[bufferIndex + 1] = (byte)(green ^ mask);
                     break;

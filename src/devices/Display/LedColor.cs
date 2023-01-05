@@ -4,9 +4,9 @@
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Describes LED colors in a Bargraph.
+    /// Describes LED colors in an LED matrix or bargraph.
     /// </summary>
-    public enum BarColor
+    public enum LedColor
     {
         /// <summary>
         /// Disable LED.
