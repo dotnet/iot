@@ -72,7 +72,7 @@ void Rainbow(Ws28xx neo, int count, int iterations = 1)
 
 ***Note:***
 
-Using the SK6812 is almost the same, but the alpha channel of the color is used for the white LED. This means that the predefined color definitions (like ```System.Drawing.Color.Red```) will not work correctly as they have the alpha channel set to 255 (0xFF). That will turn the white LED always on. See the [sample](samples/SK6812_Samples/Programs.cs) for the main differences to the above code.
+Using the SK6812 is almost the same, but the alpha channel of the color is used for the white LED. This means that the predefined color definitions (like ```System.Drawing.Color.Red```) will not work correctly as they have the alpha channel set to 255 (0xFF). That will turn the white LED always on. See the [sample](samples/LEDStripSample/Program.cs) for the main differences to the above code.
 Because ```System.Drawing.Color``` is a readonly struct, it's not possible to change the any channel directly. In order to correctly set Red, use ```Color.FromArgb(0, 255, 0, 0)```. For setting the white LED, use ```Color.FromArgb(255, 0, 0, 0)```. It's also possible to use an existing definition and remove the white channel like this:
 
 ```csharp

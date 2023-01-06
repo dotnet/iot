@@ -161,6 +161,8 @@ namespace Iot.Device.Pcx857x.Tests
                 return PinValue.Low;
             }
 
+            protected override void Toggle(int pinNumber) => Write(pinNumber, !Read(pinNumber));
+
             public void Read(Span<PinValuePair> pinValues)
             {
                 for (int i = 0; i < pinValues.Length; i++)

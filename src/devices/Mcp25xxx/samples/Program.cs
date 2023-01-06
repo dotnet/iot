@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Device.Spi;
+using System.Threading;
 using Iot.Device.Mcp25xxx;
+using Iot.Device.Mcp25xxx.Models;
 using Iot.Device.Mcp25xxx.Register;
 using Iot.Device.Mcp25xxx.Register.AcceptanceFilter;
 using Iot.Device.Mcp25xxx.Register.BitTimeConfiguration;
@@ -14,10 +17,14 @@ using Iot.Device.Mcp25xxx.Register.Interrupt;
 using Iot.Device.Mcp25xxx.Register.MessageReceive;
 using Iot.Device.Mcp25xxx.Register.MessageTransmit;
 
-Console.WriteLine("Hello Mcp25xxx Sample!");
+ConcurrentQueue<ReceivedCanMessage> readBuffer = new();
 
+Console.WriteLine("Hello Mcp25xxx Sample!");
 using Mcp25xxx mcp25xxx = GetMcp25xxxDevice();
 Reset(mcp25xxx);
+SetBitrate(mcp25xxx);
+EnableRollover(mcp25xxx);
+SetNormalMode(mcp25xxx);
 
 // ReadAllRegisters(mcp25xxx);
 ReadAllRegistersWithDetails(mcp25xxx);
@@ -31,6 +38,9 @@ ReadAllRegistersWithDetails(mcp25xxx);
 // TransmitMessage(mcp25xxx);
 // LoopbackMode(mcp25xxx);
 // ReadAllRegisters(mcp25xxx);
+// Task.Run(() => ReadToBufferLoop(mcp25xxx, CancellationToken.None), CancellationToken.None);
+SendMessage(mcp25xxx);
+
 // Methods
 Mcp25xxx GetMcp25xxxDevice()
 {
@@ -43,6 +53,52 @@ void Reset(Mcp25xxx mcp25xxx)
 {
     Console.WriteLine("Reset Instruction");
     mcp25xxx.Reset();
+}
+
+void SetBitrate(Mcp25xxx mcp25xxx)
+{
+    Console.WriteLine("Set bitrate 16MHz 500kBPS");
+    mcp25xxx.SetBitrate(FrequencyAndSpeed._16MHz500KBps);
+}
+
+void EnableRollover(Mcp25xxx mcp25xxx)
+{
+    Console.WriteLine("Enable rollover to second buffer");
+    mcp25xxx.EnableRollover();
+}
+
+void SetNormalMode(Mcp25xxx mcp25xxx)
+{
+    Console.WriteLine("Set normal work mode");
+    mcp25xxx.SetMode(OperationMode.NormalOperation);
+}
+
+void ReadToBufferLoop(Mcp25xxx mcp25xxx, CancellationToken ct)
+{
+    Console.WriteLine("Start read from buffer mcp25xx buffer to memory buffer");
+    while (!ct.IsCancellationRequested)
+    {
+        var messages = mcp25xxx.ReadMessages();
+        foreach (var message in messages)
+        {
+            readBuffer.Enqueue(message);
+        }
+    }
+}
+
+ReceivedCanMessage? GetBufferMessageOrNull()
+{
+    return readBuffer.TryDequeue(out var message) ? message : null;
+}
+
+void SendMessage(Mcp25xxx mcp25xxx)
+{
+    Console.WriteLine("Send simple message");
+    const int id = 1;
+    var messageData = new[] { (byte)1 };
+    var twoByteId = new byte[] { id >> 3, id << 5 };
+    var message = SendingCanMessage.CreateStandard(twoByteId, messageData);
+    mcp25xxx.SendMessage(message);
 }
 
 void ReadAllRegisters(Mcp25xxx mcp25xxx)

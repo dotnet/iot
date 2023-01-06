@@ -164,7 +164,7 @@ internal class RaspberryBoardInfo
         0x20E0 => Model.RaspberryPi3APlus,
         0x20A0 or 0x2100 => Model.RaspberryPiComputeModule3,
         0x3111 or 0x3112 or 0x3114 or 0x3115 => Model.RaspberryPi4,
-        0x3140 => Model.RaspberryPiComputeModule4,
+        0x3140 or 0x3141 => Model.RaspberryPiComputeModule4,
         0x3130 => Model.RaspberryPi400,
         _ => Model.Unknown,
     };

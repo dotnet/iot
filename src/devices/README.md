@@ -31,8 +31,9 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [ADXL345 - Accelerometer](Adxl345/README.md)
 * [ADXL357 - Accelerometer](Adxl357/README.md)
 * [BNO055 - inertial measurement unit](Bno055/README.md)
+* [LIS3DH - ultra-low-power high-performance 3-axis nano accelerometer](Lis3Dh/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
-* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [MPU6050/MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu6xxx9xxx/README.md)
 * [Mpu6886 - accelerometer and gyroscope](Mpu6886/README.md)
 * [Sense HAT](SenseHat/README.md)
 
@@ -90,7 +91,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [MAX31865 - Resistance Temperature Detector Amplifier](Max31865/README.md)
 * [MCP9808 - Digital Temperature Sensor](Mcp9808/README.md)
 * [MLX90614 - Infra Red Thermometer](Mlx90614/README.md)
-* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [MPU6050/MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu6xxx9xxx/README.md)
 * [OpenHardwareMonitor client library](HardwareMonitor/README.md)
 * [SCD4x - CO<sub>2</sub>, Temperature & Humidity Sensor](Scd4x/README.md)
 * [Sense HAT](SenseHat/README.md)
@@ -110,7 +111,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
-* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [MPU6050/MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu6xxx9xxx/README.md)
 * [Mpu6886 - accelerometer and gyroscope](Mpu6886/README.md)
 * [Sense HAT](SenseHat/README.md)
 
@@ -136,7 +137,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
-* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [MPU6050/MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu6xxx9xxx/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Magnetometers
@@ -146,7 +147,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [BNO055 - inertial measurement unit](Bno055/README.md)
 * [HMC5883L - 3 Axis Digital Compass](Hmc5883l/README.md)
 * [LSM9DS1 - 3D accelerometer, gyroscope and magnetometer](Lsm9Ds1/README.md)
-* [MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu9250/README.md)
+* [MPU6050/MPU6500/MPU9250 - Gyroscope, Accelerometer, Temperature and Magnetometer (MPU9250 only)](Mpu6xxx9xxx/README.md)
 * [Sense HAT](SenseHat/README.md)
 
 ### Hygrometers
@@ -176,6 +177,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [HC-SR04 - Ultrasonic Ranging Module](Hcsr04/README.md)
 * [LidarLiteV3 - LIDAR Time of Flight Sensor](LidarLiteV3/README.md)
 * [VL53L0X - distance sensor](Vl53L0X/README.md)
+* [VL53L1X - distance sensor](Vl53L1X/README.md)
 
 ### Passive InfraRed (motion) sensors
 
@@ -191,12 +193,12 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
 * [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
 * [Holtek HT1632 - 32×8 & 24×16 LED Driver](Ht1632/README.md)
+* [HT16K33 - LED Matrix Display Driver](Display/README.md)
 * [Ili9341 TFT LCD Controller](Ili9341/README.md)
 * [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen](Pcd8544/README.md)
 * [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
-* [Segment display driver (HT16K33)](Display/README.md)
 * [Sense HAT](SenseHat/README.md)
 * [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
 * [Solomon Systech SSD13xx OLED display family](Ssd13xx/README.md)
@@ -209,6 +211,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
 * [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
+* [TCA9548A - TCA9548A Low-Voltage 8-Channel I2C Switch with Reset](Tca954x/README.md)
 
 ### CAN BUS libraries/modules
 
@@ -243,9 +246,9 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
 * [Explorer HAT Pro (Pimoroni)](ExplorerHat/README.md)
+* [HT16K33 - LED Matrix Display Driver](Display/README.md)
 * [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [On-board LED driver](BoardLed/README.md)
-* [Segment display driver (HT16K33)](Display/README.md)
 * [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
 
 ### RFID/NFC modules
@@ -321,6 +324,10 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 
 * [Max31856 - cold-junction compensated thermocouple to digital converter](Max31856/README.md)
 * [MCP960X - device family of cold-junction compensated thermocouple to digital converter](Mcp960x/README.md)
+
+### Weight sensors
+
+* [DFRobot KIT0176: I2C 1kg Weight Sensor Kit - HX711 (Gravity: I2CWeight Sensor)](Hx711I2c/README.md)
 
 </categorizedDevices>
 

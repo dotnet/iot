@@ -1,31 +1,31 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Display
+namespace Iot.Device.Lis3DhAccelerometer
 {
     /// <summary>
-    /// Describes LED colors in a Bargraph.
+    /// Acceleration scale
     /// </summary>
-    public enum BarColor
+    public enum AccelerationScale : byte
     {
         /// <summary>
-        /// Disable LED.
+        /// Acceleration 2G
         /// </summary>
-        Off = 0,
+        Scale02G = 0b00,
 
         /// <summary>
-        /// Enable red LED.
+        /// Acceleration 4G
         /// </summary>
-        Red = 1,
+        Scale04G = 0b01,
 
         /// <summary>
-        /// Enable green LED.
+        /// Acceleration 8G
         /// </summary>
-        Green = 2,
+        Scale08G = 0b10,
 
         /// <summary>
-        /// Enable both green and red LEDs, producing a yellow color.
+        /// Acceleration 16G
         /// </summary>
-        Yellow = 3
+        Scale16G = 0b11,
     }
 }

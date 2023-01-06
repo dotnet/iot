@@ -4,7 +4,7 @@ SCD4x is a CO<sub>2</sub>, temperature & humidity sensor from Sensirion. This pr
 
 ## Documentation
 
-- SCD4x [datasheet](https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/9.5_CO2/Sensirion_CO2_Sensors_SCD4x_Datasheet.pdf)
+- SCD4x [datasheet](https://sensirion.com/media/documents/E0F04247/631EF271/CD_DS_SCD40_SCD41_Datasheet_D1.pdf)
 
 ## Usage
 
