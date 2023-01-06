@@ -5,7 +5,7 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Display.csproj" />
+    <ProjectReference Include="..\..\Display.csproj" />
     <Compile Include="Program.Matrix8x8Bicolor.cs" />
   </ItemGroup>
 </Project>
