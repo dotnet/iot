@@ -29,13 +29,21 @@ namespace Iot.Device.OneWire
             return Temperature.FromDegreesCelsius(temp * 0.001);
         }
 
-#if !NETSTANDARD2_0
         private async Task<Temperature> ReadTemperatureInternalAsync()
         {
+#if NETSTANDARD2_0
+            string data = string.Empty;
+            await Task.Factory.StartNew(() =>
+            {
+                data = File.ReadAllText(Path.Combine(OneWireBus.SysfsDevicesPath, BusId, DeviceId, "w1_slave"));
+            });
+
+            return ParseTemperature(data);
+#else
             var data = await File.ReadAllTextAsync(Path.Combine(OneWireBus.SysfsDevicesPath, BusId, DeviceId, "w1_slave"));
             return ParseTemperature(data);
-        }
 #endif
+        }
 
         private Temperature ReadTemperatureInternal()
         {

@@ -34,7 +34,8 @@ namespace Iot.Device.Common
         }
 
         /// <inheritdoc />
-        public IDisposable BeginScope<TState>(TState state)
+        public IDisposable? BeginScope<TState>(TState state)
+            where TState : notnull
         {
             return new LogDispatcher.ScopeDisposable();
         }
@@ -46,7 +47,7 @@ namespace Iot.Device.Common
         }
 
         /// <inheritdoc />
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
         {
             string msg = formatter(state, exception);
             Debug.WriteLine(msg);

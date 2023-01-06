@@ -18,8 +18,8 @@
     <ProjectReference Include="..\..\..\src\devices\Board\Board.csproj" />
     <ProjectReference Include="..\..\..\src\devices\CharacterLcd\CharacterLcd.csproj" />
     <ProjectReference Include="..\ArduinoCsCompiler.csproj" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsLoggingConsolePackageVersion)" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
     
     <ProjectReference Include="..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
