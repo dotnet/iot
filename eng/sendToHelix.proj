@@ -38,8 +38,8 @@
       <RuntimeTargetFramework>netcoreapp2.0</RuntimeTargetFramework>
     </XUnitProject>
     <!-- Target queues -->
-    <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.9.Arm32.IoT"/>
-    <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Raspbian.9.Arm32.IoT.Open"/>
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' != ''" Include="Raspbian.11.Arm32.IoT"/>
+    <HelixTargetQueue Condition="'$(HelixAccessToken)' == ''" Include="Raspbian.11.Arm32.IoT.Open"/>
   </ItemGroup>
 
   <PropertyGroup Condition="'$(TestOS)' == 'Unix'">

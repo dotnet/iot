@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Alignment.cs" />
+    <Compile Include="BiColorBarGraph.cs" />
     <Compile Include="BlinkRate.cs" />
     <Compile Include="Ht16k33.cs" />
     <Compile Include="Dot.cs" />
@@ -13,8 +14,10 @@
     <Compile Include="FontHelper.cs" />
     <Compile Include="ISevenSegmentDisplay.cs" />
     <Compile Include="Large4Digit7SegmentDisplay.cs" />
-    <Compile Include="BiColorBarGraph.cs" />
-    <Compile Include="BarColor.cs" />
+    <Compile Include="LedColor.cs" />
+    <Compile Include="Matrix16x8.cs" />
+    <Compile Include="Matrix8x8.cs" />
+    <Compile Include="Matrix8x8Bicolor.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
