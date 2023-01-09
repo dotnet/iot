@@ -43,12 +43,6 @@ namespace Iot.Device.Arduino.Tests
                 settings.AdditionalSuppressions.Add("System.SR");
             }
 
-            ErrorManager.Clear();
-            var set = Compiler.PrepareAndRunExecutionSet(method, settings);
-
-            // This always aborts when debugging tests, preventing that we can get stack dumps., so use a looong timeout for that
-            CancellationTokenSource cs = new CancellationTokenSource(System.Diagnostics.Debugger.IsAttached ? -1 : (int)TimeSpan.FromSeconds(60).TotalMilliseconds);
-
             if (executeLocally)
             {
                 // First execute the method locally, so we don't have an error in the test
@@ -64,6 +58,12 @@ namespace Iot.Device.Arduino.Tests
                 T3 result1 = (T3)uncastedResult;
                 Assert.Equal(expectedResult, result1);
             }
+
+            ErrorManager.Clear();
+            var set = Compiler.PrepareAndRunExecutionSet(method, settings);
+
+            // This always aborts when debugging tests, preventing that we can get stack dumps., so use a looong timeout for that
+            CancellationTokenSource cs = new CancellationTokenSource(System.Diagnostics.Debugger.IsAttached ? -1 : (int)TimeSpan.FromSeconds(60).TotalMilliseconds);
 
             var remoteMethod = set.MainEntryPoint;
 

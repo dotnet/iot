@@ -153,7 +153,7 @@ Use -1 to allow breaking on all threads.")
                 }
             }
 
-            if (methods.Count > 1)
+            if (methods.Count > 1 && overload == -1)
             {
                 Console.WriteLine("The following methods match your query:");
                 int idx = 0;
@@ -163,13 +163,10 @@ Use -1 to allow breaking on all threads.")
                     idx++;
                 }
 
-                if (overload == -1)
-                {
-                    Console.WriteLine("Please specify an overload number");
-                    return;
-                }
+                Console.WriteLine("Please specify an overload number");
+                return;
             }
-            else
+            else if (methods.Count == 1)
             {
                 overload = 0;
             }

@@ -943,8 +943,9 @@ namespace ArduinoCsCompiler
             return false;
         }
 
-        internal bool HasMethod(EquatableMethod m, EquatableMethod callingMethod, out IlCode? found)
+        internal bool HasMethod(EquatableMethod m, EquatableMethod callingMethod, out IlCode? found, out int newToken)
         {
+            newToken = 0;
             if (_classesToSuppress.Contains(m.DeclaringType!))
             {
                 found = null;
@@ -958,8 +959,15 @@ namespace ArduinoCsCompiler
             }
 
             var find = _methods.FirstOrDefault(x => EquatableMethod.AreMethodsIdentical(x.MethodBase, m.Method));
-            found = find?.Code;
-            return find != null;
+            if (find != null)
+            {
+                found = find.Code;
+                newToken = find.Token;
+                return true;
+            }
+
+            found = null;
+            return false;
         }
 
         internal bool AddMethod(ArduinoMethodDeclaration method)

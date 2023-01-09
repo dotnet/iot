@@ -56,6 +56,24 @@ namespace Iot.Device.Arduino.Tests
             Assert.False(b.IsAssignableFrom(a));
         }
 
+        [Fact]
+        public void NullableEqualityComparer()
+        {
+            var t = new NullableEqualityComparer1<int>();
+            Assert.False(t.Equals(null));
+        }
+
+        [Fact]
+        public void Nullability1()
+        {
+            var t = typeof(Nullable<int>);
+            var args = t.GetGenericArguments();
+            Assert.True(args.Length == 1);
+            Assert.Equal(typeof(int), args[0]);
+            var targs = t.GenericTypeArguments;
+            Assert.Equal(args, targs);
+        }
+
         internal enum S1
         {
             None,
@@ -68,6 +86,20 @@ namespace Iot.Device.Arduino.Tests
             Keins,
             Eins,
             Zwei,
+        }
+
+        public sealed class NullableEqualityComparer1<T> : EqualityComparer<T?>
+            where T : struct, IEquatable<T>
+        {
+            public override bool Equals(T? x, T? y)
+            {
+                throw new NotImplementedException();
+            }
+
+            public override int GetHashCode(T? obj)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

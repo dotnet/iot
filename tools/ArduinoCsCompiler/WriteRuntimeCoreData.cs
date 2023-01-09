@@ -140,12 +140,13 @@ namespace ArduinoCsCompiler
                 }
             }
 
-            IEnumerable<int> duplicates = entries.GroupBy(x => x.Value)
-                .Where(g => g.Count() > 1)
-                .Select(x => x.Key).ToList();
+            var duplicates = entries.GroupBy(x => x.Value)
+                .Where(g => g.Count() > 1).ToList();
             if (duplicates.Any())
             {
-                throw new InvalidOperationException($"Duplicate method keys found: {duplicates.First()}");
+                var dup = duplicates.First();
+                var s = entries.First(x => x.Value == dup.Key);
+                throw new InvalidOperationException($"Duplicate method keys found: {dup.Key}: {s}");
             }
 
             var list = entries.OrderBy(x => x.Key).Select(y => (y.Key, y.Value));
