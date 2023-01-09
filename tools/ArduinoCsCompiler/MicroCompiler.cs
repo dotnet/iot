@@ -50,6 +50,7 @@ namespace ArduinoCsCompiler
         private readonly List<ArduinoTask> _activeTasks;
         private readonly object _activeTasksLock;
         private readonly ILogger _logger;
+        private readonly Type _arraySortHelper;
 
         private CompilerCommandHandler _commandHandler;
 
@@ -71,6 +72,8 @@ namespace ArduinoCsCompiler
             _activeTasksLock = new object();
             _activeTasks = new List<ArduinoTask>();
             _activeExecutionSet = null;
+
+            _arraySortHelper = GetSystemPrivateType("System.Collections.Generic.ArraySortHelper`1");
 
             _commandHandler = new CompilerCommandHandler(this);
             board.AddCommandHandler(_commandHandler);
@@ -593,6 +596,136 @@ namespace ArduinoCsCompiler
 
             List<ClassMember> memberTypes = new List<ClassMember>();
 
+            IdentifyFields(set, classType, fields, memberTypes);
+
+            for (var index = 0; index < methods.Count; index++)
+            {
+                var m = methods[index] as ConstructorInfo;
+                if (m != null)
+                {
+                    memberTypes.Add(new ClassMember(m, VariableKind.Method, set.GetOrAddMethodToken(m, m), new List<int>()));
+                }
+            }
+
+            var sizeOfClass = GetClassSize(classType, memberTypes);
+
+            var interfaces = classType.GetInterfaces().ToList();
+
+            sizeOfClass.Dynamic = PerformFieldAlignment(classType, sizeOfClass.Dynamic, memberTypes);
+
+            // Add this first, so we break the recursion to this class further down
+            var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
+            set.AddClass(newClass);
+            foreach (var iface in interfaces)
+            {
+                PrepareClassDeclaration(set, iface);
+            }
+
+            FindDependentClasses(set, classType);
+        }
+
+        /// <summary>
+        /// This method finds classes and interfaces that are dependent on a given interface and are (probably) also required.
+        /// The reason is in the runtime: It constructs these internal type using reflection from the original types (e.g. comparators for a type)
+        /// </summary>
+        /// <param name="set">The execution set</param>
+        /// <param name="classType">The class that's being observed</param>
+        private void FindDependentClasses(ExecutionSet set, Type classType)
+        {
+            if (classType.IsConstructedGenericType)
+            {
+                // If EqualityComparer<something> is used, we need to force a reference to IEquatable<something> and ObjectEqualityComparer<something>
+                // as they sometimes fail to get recognized. This is because CreateDefaultEqualityComparer uses the special reflection method
+                // CreateInstanceForAnotherGenericParameter
+                var openType = classType.GetGenericTypeDefinition();
+                if (openType == typeof(EqualityComparer<>))
+                {
+                    // The logic here can be refined by reversing the logic in ComparerHelpers.CreateDefaultEqualityComparer
+                    var typeArgs = classType.GetGenericArguments();
+                    var requiredInterface = typeof(IEquatable<>).MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, requiredInterface);
+                    if (!typeArgs[0].IsValueType)
+                    {
+                        // If the class type implements IEquatable<T>, we need the GenericEqualityComparer, otherwise the ObjectEqualityComparer
+                        if (typeArgs[0].IsAssignableTo(requiredInterface))
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        else
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                    }
+                    else if (typeArgs[0].IsGenericType && typeArgs[0].GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        var embeddedType = typeArgs[0].GetGenericArguments()[0];
+                        if (embeddedType.IsEnum)
+                        {
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.EnumEqualityComparer`1")!.MakeGenericType(embeddedType);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        else
+                        {
+                            // This doesn't work with enums
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.NullableEqualityComparer`1")!.MakeGenericType(embeddedType);
+                            PrepareClassDeclaration(set, alsoRequired);
+                            // Also need ObjectEqualityComparer<Nullable<T>>
+                            var nullableOfT = typeof(Nullable<>).MakeGenericType(embeddedType);
+                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(nullableOfT);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                    }
+                    else if (!typeArgs[0].IsAssignableTo(requiredInterface))
+                    {
+                        // If the value type being declared does not implement IEquatable<OfItself> we need an ObjectEqualityComparer<T> instead
+                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
+                        PrepareClassDeclaration(set, alsoRequired);
+                    }
+                    else if (typeArgs[0].IsValueType)
+                    {
+                        try
+                        {
+                            // This throws if the given types violate a constraint for the comparer
+                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericComparer`1")!.MakeGenericType(typeArgs);
+                            PrepareClassDeclaration(set, alsoRequired);
+                        }
+                        catch (ArgumentException x)
+                        {
+                            _logger.LogWarning(x, x.Message);
+                        }
+                    }
+                }
+
+                if (openType == typeof(Comparer<>))
+                {
+                    var typeArgs = classType.GetGenericArguments();
+                    var requiredInterface = typeof(IComparable<>).MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, requiredInterface);
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectComparer`1")!.MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, alsoRequired);
+                }
+
+                if (openType == typeof(Nullable<>))
+                {
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(classType);
+                    PrepareClassDeclaration(set, alsoRequired);
+                }
+
+                if (openType == _arraySortHelper)
+                {
+                    var typeArgs = classType.GetGenericArguments();
+                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericArraySortHelper`1")!.MakeGenericType(typeArgs);
+                    PrepareClassDeclaration(set, alsoRequired);
+                }
+            }
+        }
+
+        private void IdentifyFields(ExecutionSet set, Type classType, List<FieldInfo> fields, List<ClassMember> memberTypes)
+        {
             for (var index = 0; index < fields.Count; index++)
             {
                 int staticFieldSize = 0;
@@ -735,119 +868,6 @@ namespace ArduinoCsCompiler
 
                 var newvar = new ClassMember(field, fieldType, token, size, -1, staticFieldSize);
                 memberTypes.Add(newvar);
-            }
-
-            for (var index = 0; index < methods.Count; index++)
-            {
-                var m = methods[index] as ConstructorInfo;
-                if (m != null)
-                {
-                    memberTypes.Add(new ClassMember(m, VariableKind.Method, set.GetOrAddMethodToken(m, m), new List<int>()));
-                }
-            }
-
-            var sizeOfClass = GetClassSize(classType, memberTypes);
-
-            var interfaces = classType.GetInterfaces().ToList();
-
-            sizeOfClass.Dynamic = PerformFieldAlignment(classType, sizeOfClass.Dynamic, memberTypes);
-
-            // Add this first, so we break the recursion to this class further down
-            var newClass = new ClassDeclaration(classType, sizeOfClass.Dynamic, sizeOfClass.Statics, set.GetOrAddClassToken(classType.GetTypeInfo()), memberTypes, interfaces);
-            set.AddClass(newClass);
-            foreach (var iface in interfaces)
-            {
-                PrepareClassDeclaration(set, iface);
-            }
-
-            if (classType.IsConstructedGenericType)
-            {
-                // If EqualityComparer<something> is used, we need to force a reference to IEquatable<something> and ObjectEqualityComparer<something>
-                // as they sometimes fail to get recognized. This is because CreateDefaultEqualityComparer uses the special reflection method
-                // CreateInstanceForAnotherGenericParameter
-                var openType = classType.GetGenericTypeDefinition();
-                if (openType == typeof(EqualityComparer<>))
-                {
-                    // The logic here can be refined by reversing the logic in ComparerHelpers.CreateDefaultEqualityComparer
-                    var typeArgs = classType.GetGenericArguments();
-                    var requiredInterface = typeof(IEquatable<>).MakeGenericType(typeArgs);
-                    PrepareClassDeclaration(set, requiredInterface);
-                    if (!typeArgs[0].IsValueType)
-                    {
-                        // If the class type implements IEquatable<T>, we need the GenericEqualityComparer, otherwise the ObjectEqualityComparer
-                        if (typeArgs[0].IsAssignableTo(requiredInterface))
-                        {
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                        else
-                        {
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                    }
-                    else if (typeArgs[0].IsGenericType && typeArgs[0].GetGenericTypeDefinition() == typeof(Nullable<>))
-                    {
-                        var embeddedType = typeArgs[0].GetGenericArguments()[0];
-                        if (embeddedType.IsEnum)
-                        {
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.EnumEqualityComparer`1")!.MakeGenericType(embeddedType);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                        else
-                        {
-                            // This doesn't work with enums
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.NullableEqualityComparer`1")!.MakeGenericType(embeddedType);
-                            PrepareClassDeclaration(set, alsoRequired);
-                            // Also need ObjectEqualityComparer<Nullable<T>>
-                            var nullableOfT = typeof(Nullable<>).MakeGenericType(embeddedType);
-                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(nullableOfT);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                    }
-                    else if (!typeArgs[0].IsAssignableTo(requiredInterface))
-                    {
-                        // If the value type being declared does not implement IEquatable<OfItself> we need an ObjectEqualityComparer<T> instead
-                        var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                        PrepareClassDeclaration(set, alsoRequired);
-                    }
-                    else if (typeArgs[0].IsValueType)
-                    {
-                        try
-                        {
-                            // This throws if the given types violate a constraint for the comparer
-                            var alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericEqualityComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                            alsoRequired = GetSystemPrivateType("System.Collections.Generic.GenericComparer`1")!.MakeGenericType(typeArgs);
-                            PrepareClassDeclaration(set, alsoRequired);
-                        }
-                        catch (ArgumentException x)
-                        {
-                            _logger.LogWarning(x, x.Message);
-                        }
-                    }
-                    ////else if (typeArgs[0].IsClass)
-                    ////{
-                    ////    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                    ////    PrepareClassDeclaration(set, alsoRequired);
-                    ////}
-                }
-
-                if (openType == typeof(Comparer<>))
-                {
-                    var typeArgs = classType.GetGenericArguments();
-                    var requiredInterface = typeof(IComparable<>).MakeGenericType(typeArgs);
-                    PrepareClassDeclaration(set, requiredInterface);
-                    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectComparer`1")!.MakeGenericType(typeArgs);
-                    PrepareClassDeclaration(set, alsoRequired);
-                }
-
-                ////if (openType == typeof(IEquatable<>))
-                ////{
-                ////    var typeArgs = classType.GetGenericArguments();
-                ////    var alsoRequired = GetSystemPrivateType("System.Collections.Generic.ObjectEqualityComparer`1")!.MakeGenericType(typeArgs);
-                ////    PrepareClassDeclaration(set, alsoRequired);
-                ////}
             }
         }
 
