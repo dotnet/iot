@@ -438,6 +438,9 @@ namespace ArduinoCsCompiler
             PrepareClass(set, hi.Comparer.GetType()); // GenericEqualityComparer<int>
             PrepareClass(set, typeof(IEquatable<Nullable<int>>));
 
+            var comparerOfString = Comparer<string>.Default;
+            PrepareClass(set, comparerOfString.GetType());
+
             PrepareClass(set, typeof(System.Array));
 
             PrepareClass(set, typeof(System.Object));
