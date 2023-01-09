@@ -11,11 +11,10 @@ namespace ArduinoCsCompiler.Runtime
     internal class MiniType
     {
         public static readonly Type[] EmptyTypes = new Type[0];
-#pragma warning disable 414, SX1309
+#pragma warning disable SX1309
         // This is used by firmware code directly. Do not reorder the members without checking the firmware
         // The member contains the token of the class declaration
         private Int32 m_handle;
-#pragma warning restore 414
 
         [ArduinoImplementation("TypeCtor", 0x50)]
         protected MiniType()
@@ -38,7 +37,7 @@ namespace ArduinoCsCompiler.Runtime
         /// </summary>
         public virtual bool IsGenericTypeDefinition
         {
-            [ArduinoImplementation("TypeIsGenericTypeDefinition", 0x65)]
+            [ArduinoImplementation("TypeIsGenericTypeDefinition", 235)]
             get
             {
                 return (m_handle & ExecutionSet.GenericTokenMask) != 0;
@@ -116,16 +115,15 @@ namespace ArduinoCsCompiler.Runtime
 
         public virtual Type[] GenericTypeArguments
         {
-            [ArduinoImplementation("TypeGetGenericTypeArguments", 0x63)]
             get
             {
-                return new Type[0];
+                return (IsGenericType && !IsGenericTypeDefinition) ? GetGenericArguments() : Type.EmptyTypes;
             }
         }
 
         public virtual Type[] GenericTypeParameters
         {
-            [ArduinoImplementation("TypeGetGenericTypeArguments", 0x66)]
+            [ArduinoImplementation("TypeGetGenericTypeParameters", 233)]
             get
             {
                 return new Type[0];
@@ -312,22 +310,20 @@ namespace ArduinoCsCompiler.Runtime
             return Equals(other);
         }
 
-        [ArduinoImplementation("TypeGetArrayRank", 0x64)]
+        [ArduinoImplementation("TypeGetArrayRank", 234)]
         public virtual int GetArrayRank()
         {
             return 1;
         }
 
-        [ArduinoImplementation("TypeGetMethod")]
         public MethodInfo? GetMethod(string name, Type[] types)
         {
-            return null;
+            throw new PlatformNotSupportedException(name);
         }
 
-        [ArduinoImplementation("TypeGetMethod2")]
         public MethodInfo? GetMethod(string name, BindingFlags bindingAttr)
         {
-            return null;
+            throw new PlatformNotSupportedException(name);
         }
 
         [ArduinoImplementation("TypeGetFields")]

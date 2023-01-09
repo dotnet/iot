@@ -78,6 +78,8 @@ namespace ArduinoCsCompiler.Runtime
         // The culture used in the user interface. This is mostly used to load correct localized resources.
         private static volatile MiniCultureInfo? s_userDefaultUICulture;
 
+        private static volatile TextInfo s_textInfo = MiniUnsafe.As<TextInfo>(new MiniTextInfo());
+
         private bool _isReadOnly;
         internal NumberFormatInfo? _numInfo;
         internal DateTimeFormatInfo? _dateTimeInfo;
@@ -467,7 +469,7 @@ namespace ArduinoCsCompiler.Runtime
         /// <summary>
         /// Gets the CompareInfo for this culture.
         /// </summary>
-        public virtual MiniCompareInfo CompareInfo => new MiniCompareInfo(this);
+        public virtual CompareInfo CompareInfo => MiniUnsafe.As<CompareInfo>(new MiniCompareInfo(this));
 
         /// <summary>
         /// Gets the TextInfo for this culture.
@@ -476,7 +478,7 @@ namespace ArduinoCsCompiler.Runtime
         {
             get
             {
-                return null!;
+                return s_textInfo;
             }
         }
 
@@ -487,11 +489,17 @@ namespace ArduinoCsCompiler.Runtime
                 return true;
             }
 
+            if (value == null)
+            {
+                return false;
+            }
+
             if (value is CultureInfo that)
             {
                 // using CompareInfo to verify the data passed through the constructor
                 // CultureInfo(String cultureName, String textAndCompareCultureName)
-                return Name.Equals(that.Name) && CompareInfo.Equals(that.CompareInfo);
+                bool ret = Name.Equals(that.Name);
+                return ret;
             }
 
             return false;

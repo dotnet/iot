@@ -116,8 +116,7 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
-            UInt64 other = (UInt64)obj;
-            return ToUInt64() == other;
+            return MiniRuntimeHelpers.EnumEqualsInternal(this, obj);
         }
     }
 }
