@@ -89,14 +89,15 @@ namespace CharacterLcd.Tests
             var console = new LcdConsole(_lcd.Object, "A00", true);
             console.LineFeedMode = LineWrapMode.WordWrap;
 
-            char[] expect = "Some short text".ToCharArray();
+            // Space-filled, to fully clear the line, even if we would wrap before the last char
+            char[] expect = "Some short text     ".ToCharArray();
             _lcd.Setup(x => x.Write(expect));
             console.Write("Some short text");
 
             _lcd.Setup(x => x.SetCursorPosition(It.IsAny<int>(), It.IsAny<int>()));
             char[] expect2 = "Lengt".ToCharArray();
             _lcd.Setup(x => x.Write(expect2));
-            char[] expect3 = "hy Text, more text".ToCharArray();
+            char[] expect3 = "hy Text, more text  ".ToCharArray();
             _lcd.Setup(x => x.Write(expect3));
             console.WriteLine("Lengthy Text, more text");
         }

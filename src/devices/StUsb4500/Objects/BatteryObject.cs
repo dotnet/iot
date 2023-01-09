@@ -22,7 +22,7 @@ namespace Iot.Device.Usb
             get => Power.FromWatts((ushort)(Value & OperatingPowerMask) / 4.0);
             set
             {
-                value.Watts.CheckArgumentInRange(255.75);
+                value.Watts.CheckArgumentInRange(255.75M);
                 Value = (Value & ~OperatingPowerMask) | (Convert.ToUInt32(value.Watts * 4) & OperatingPowerMask);
             }
         }
