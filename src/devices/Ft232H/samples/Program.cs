@@ -127,7 +127,7 @@ void TestI2c(Ft232HDevice ft232h)
         Console.WriteLine($"Pressure: {readResult.Pressure?.Hectopascals:0.##}hPa");
 
         // This time use altitude calculation
-        if (readResult.Temperature != null && readResult.Pressure != null)
+        if (readResult.Temperature.HasValue && readResult.Pressure.HasValue)
         {
             altValue = WeatherHelper.CalculateAltitude((Pressure)readResult.Pressure, defaultSeaLevelPressure, (Temperature)readResult.Temperature);
             Console.WriteLine($"Calculated Altitude: {altValue.Meters:0.##}m");
@@ -137,7 +137,7 @@ void TestI2c(Ft232HDevice ft232h)
         // Change the stationHeight value above to get a correct reading, but do not be tempted to insert
         // the value obtained from the formula above. Since that estimates the altitude based on pressure,
         // using that altitude to correct the pressure won't work.
-        if (readResult.Temperature != null && readResult.Pressure != null)
+        if (readResult.Temperature.HasValue && readResult.Pressure.HasValue)
         {
             var correctedPressure = WeatherHelper.CalculateBarometricPressure((Pressure)readResult.Pressure, (Temperature)readResult.Temperature, stationHeight);
             Console.WriteLine($"Pressure corrected for altitude {stationHeight:F0}m (with average humidity): {correctedPressure.Hectopascals:0.##} hPa");
