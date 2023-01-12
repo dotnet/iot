@@ -2,7 +2,7 @@
 
 The [IS31FL3730](https://cdn-shop.adafruit.com/product-files/3017/31FL3730.pdf) is a compact LED driver that can drive one or two 8×8, 7×9, 6×10, or 5×11 dot matrix displays. The device can be programmed via an I2C compatible interface.
 
-This binding is similar to the Python version in [pimoroni/microdot-phat](https://github.com/pimoroni/microdot-phat).
+This binding is similar to [pimoroni/microdot-phat](https://github.com/pimoroni/microdot-phat), a Python implementation provided by Pimoroni.
 
 It is demonstrated in [samples/Program.cs](samples/Program.cs).
 
