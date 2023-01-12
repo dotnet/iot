@@ -31,7 +31,7 @@ namespace Iot.Device.Display
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         public Is31fl3731(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} cannot be null");
+            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             _enable_all_leds_data.AsSpan().Fill(0xff);
         }
 
