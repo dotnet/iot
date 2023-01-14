@@ -212,7 +212,7 @@ namespace Iot.Device.CharacterLcd
         /// There are only 256 characters available. There are chip variants
         /// with different character sets. Characters from space ' ' (32) to
         /// '}' are usually the same with the exception of '\', which is a
-        /// yen symbol on some chips '¥'.
+        /// yen symbol on some chips '¥'. See constructor for character map definitions.
         /// </remarks>
         public void Write(string text)
         {
@@ -250,7 +250,7 @@ namespace Iot.Device.CharacterLcd
                     if (actuallyUsedRemainingChars < Size.Width)
                     {
                         CursorLeft = actuallyUsedRemainingChars;
-                }
+                    }
                 }
 
                 if (i != lines.Count - 1)
