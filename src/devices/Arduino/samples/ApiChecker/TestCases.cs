@@ -299,48 +299,7 @@ namespace Iot.Device.Arduino.Sample
                     break;
                 case 'c':
                 case 'C':
-                    {
-                        Console.WriteLine();
-                        Console.Write("Which pin to use for the LED? ");
-                        var input = Console.ReadLine();
-                        if (int.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out int led))
-                        {
-                            _ledPin = led;
-                        }
-                        else
-                        {
-                            Console.Write("You did not enter a valid number");
-                        }
-
-                        Console.Write("Which pin to use for the button? ");
-                        input = Console.ReadLine();
-                        if (int.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out int button))
-                        {
-                            _buttonPin = button;
-                        }
-                        else
-                        {
-                            Console.Write("You did not enter a valid number");
-                        }
-
-                        Console.WriteLine($"Led-Pin: {_ledPin}. Button-Pin: {_buttonPin}");
-
-                        Console.WriteLine();
-                        Console.Write("Lowest Address for I2C bus scan? (Default: 0x03) ");
-                        input = Console.ReadLine()!;
-                        if (!int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _lowestI2cAddress))
-                        {
-                            _lowestI2cAddress = 3;
-                        }
-
-                        Console.Write("Highest Address for I2C bus scan? (Default: 0x77) ");
-                        input = Console.ReadLine()!;
-                        if (!int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _highestI2cAddress))
-                        {
-                            _highestI2cAddress = 0x77;
-                        }
-                    }
-
+                    ConfigurePins();
                     break;
                 case 'i':
                 case 'I':
@@ -354,7 +313,50 @@ namespace Iot.Device.Arduino.Sample
             return true;
         }
 
-        private static void TestFrequency(ArduinoBoard board)
+        private void ConfigurePins()
+        {
+            Console.WriteLine();
+            Console.Write("Which pin to use for the LED? ");
+            var input = Console.ReadLine();
+            if (int.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out int led))
+            {
+                _ledPin = led;
+            }
+            else
+            {
+                Console.Write("You did not enter a valid number");
+            }
+
+            Console.Write("Which pin to use for the button? ");
+            input = Console.ReadLine();
+            if (int.TryParse(input, NumberStyles.Integer, CultureInfo.CurrentCulture, out int button))
+            {
+                _buttonPin = button;
+            }
+            else
+            {
+                Console.Write("You did not enter a valid number");
+            }
+
+            Console.WriteLine($"Led-Pin: {_ledPin}. Button-Pin: {_buttonPin}");
+
+            Console.WriteLine();
+            Console.Write("Lowest Address for I2C bus scan? (Default: 0x03) ");
+            input = Console.ReadLine()!;
+            if (input.Length < 3 || !int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _lowestI2cAddress))
+            {
+                _lowestI2cAddress = 3;
+            }
+
+            Console.Write("Highest Address for I2C bus scan? (Default: 0x77) ");
+            input = Console.ReadLine()!;
+            if (input.Length < 3 || !int.TryParse(input.Substring(2), NumberStyles.HexNumber, CultureInfo.CurrentCulture, out _highestI2cAddress))
+            {
+                _highestI2cAddress = 0x77;
+            }
+        }
+
+        private void TestFrequency(ArduinoBoard board)
         {
             Console.Write("Which pin number to use? ");
             string? input = Console.ReadLine();
@@ -401,9 +403,9 @@ namespace Iot.Device.Arduino.Sample
             using (var pwm = _board.CreatePwmChannel(0, pin, 100, 0))
             {
                 Console.WriteLine("Now dimming LED. Press any key to exit");
+                pwm.Start();
                 while (!Console.KeyAvailable)
                 {
-                    pwm.Start();
                     for (double fadeValue = 0; fadeValue <= 1.0; fadeValue += 0.05)
                     {
                         // sets the value (range from 0 to 255):
@@ -424,7 +426,6 @@ namespace Iot.Device.Arduino.Sample
                 }
 
                 Console.ReadKey();
-                pwm.Stop();
             }
         }
 
@@ -610,7 +611,19 @@ namespace Iot.Device.Arduino.Sample
             foreach (var pin in _board.SupportedPinConfigurations)
             {
                 Console.Write($"    {pin.Pin}: ");
-                Console.WriteLine(string.Join(", ", pin.PinModes.Select(x => x.Name)));
+                Console.WriteLine(string.Join(", ", pin.PinModes.Select(x =>
+                {
+                    if (x == SupportedMode.AnalogInput)
+                    {
+                        return $"{x.Name} ({pin.AnalogInputResolutionBits} Bits Resolution)";
+                    }
+                    else if (x == SupportedMode.Pwm)
+                    {
+                        return $"{x.Name} ({pin.PwmResolutionBits} Bits Resolution)";
+                    }
+
+                    return x.Name;
+                })));
             }
         }
 
