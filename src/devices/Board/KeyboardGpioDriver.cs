@@ -30,6 +30,7 @@ namespace Iot.Device.Board
         }
 
         private const int SupportedPinCount = 256;
+        private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
 
         private KeyState[] _state;
 
@@ -49,6 +50,10 @@ namespace Iot.Device.Board
 
             _pollThread = null;
             _terminateThread = true;
+            foreach (var key in Enum.GetValues(typeof(LedKey)))
+            {
+                _pinValues.Add((int)key!, GetLedState((LedKey)key).KeyValue);
+            }
         }
 
         /// <inheritdoc />
@@ -130,6 +135,27 @@ namespace Iot.Device.Board
 
         private void SetLedState(LedKey key, PinValue state)
         {
+            (int virtualKey, int currentKeyState) = GetLedState(key);
+            _pinValues[(int)key] = state;
+            if ((state == PinValue.High && currentKeyState == 0) ||
+                (state == PinValue.Low && currentKeyState != 0))
+            {
+                // Simulate a key press
+                Interop.keybd_event((byte)virtualKey,
+                    0x45,
+                    Interop.KEYEVENTF_EXTENDEDKEY,
+                    IntPtr.Zero);
+
+                // Simulate a key release
+                Interop.keybd_event((byte)virtualKey,
+                    0x45,
+                    Interop.KEYEVENTF_EXTENDEDKEY | Interop.KEYEVENTF_KEYUP,
+                    IntPtr.Zero);
+            }
+        }
+
+        private (int VirtualKey, int KeyValue) GetLedState(LedKey key)
+        {
             int virtualKey = 0;
             if (key == LedKey.NumLock)
             {
@@ -149,22 +175,7 @@ namespace Iot.Device.Board
             }
 
             // Bit 1 indicates whether the LED is currently on or off (or, whether Scroll lock, num lock, caps lock is on)
-            int currentKeyState = Interop.GetKeyState(virtualKey) & 1;
-            if ((state == PinValue.High && currentKeyState == 0) ||
-                (state == PinValue.Low && currentKeyState != 0))
-            {
-                // Simulate a key press
-                Interop.keybd_event((byte)virtualKey,
-                    0x45,
-                    Interop.KEYEVENTF_EXTENDEDKEY | 0,
-                    IntPtr.Zero);
-
-                // Simulate a key release
-                Interop.keybd_event((byte)virtualKey,
-                    0x45,
-                    Interop.KEYEVENTF_EXTENDEDKEY | Interop.KEYEVENTF_KEYUP,
-                    IntPtr.Zero);
-            }
+            return (virtualKey, Interop.GetKeyState(virtualKey) & 1);
         }
 
         /// <inheritdoc />
@@ -180,6 +191,9 @@ namespace Iot.Device.Board
                 return PinValue.Low;
             }
         }
+
+        /// <inheritdoc />
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         /// <inheritdoc />
         protected override void Write(int pinNumber, PinValue value)
@@ -213,7 +227,8 @@ namespace Iot.Device.Board
                     {
                         return new WaitForEventResult()
                         {
-                            EventTypes = PinEventTypes.Rising, TimedOut = false
+                            EventTypes = PinEventTypes.Rising,
+                            TimedOut = false
                         };
                     }
                     else if (eventTypes == PinEventTypes.Falling && newState == PinValue.Low)

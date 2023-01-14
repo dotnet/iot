@@ -57,12 +57,13 @@ namespace Iot.Device.Board.Tests
         }
 
         [Fact]
-        public void OpenPinAlreadyAssignedThrows()
+        public void GetSameGpioPinWhenOpen()
         {
             var board = CreateBoard();
             var ctrl = board.CreateGpioController();
-            ctrl.OpenPin(1);
-            Assert.Throws<InvalidOperationException>(() => ctrl.OpenPin(1));
+            var firstGpioPin = ctrl.OpenPin(1);
+            var secondGpioPin = ctrl.OpenPin(1);
+            Assert.Equal(firstGpioPin, secondGpioPin);
         }
 
         [Fact]

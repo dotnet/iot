@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
@@ -13,6 +14,8 @@ namespace Iot.Device.Ft232H
     /// </summary>
     public class Ft232HGpio : GpioDriver
     {
+        private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
+
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
@@ -64,12 +67,14 @@ namespace Iot.Device.Ft232H
             }
 
             DeviceInformation.PinOpen[pinNumber] = true;
+            _pinValues.TryAdd(pinNumber, PinValue.Low);
         }
 
         /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
         {
             DeviceInformation.PinOpen[pinNumber] = false;
+            _pinValues.Remove(pinNumber);
         }
 
         /// <inheritdoc/>
@@ -130,14 +135,19 @@ namespace Iot.Device.Ft232H
             if (pinNumber < 8)
             {
                 var val = DeviceInformation.GetGpioValuesLow();
-                return (((val >> pinNumber) & 0x01) == 0x01) ? PinValue.High : PinValue.Low;
+                _pinValues[pinNumber] = (((val >> pinNumber) & 0x01) == 0x01) ? PinValue.High : PinValue.Low;
             }
             else
             {
                 var valhigh = DeviceInformation.GetGpioValuesHigh();
-                return (((valhigh >> (pinNumber - 8)) & 0x01) == 0x01) ? PinValue.High : PinValue.Low;
+                _pinValues[pinNumber] = (((valhigh >> (pinNumber - 8)) & 0x01) == 0x01) ? PinValue.High : PinValue.Low;
             }
+
+            return _pinValues[pinNumber];
         }
+
+        /// <inheritdoc/>
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
@@ -172,6 +182,8 @@ namespace Iot.Device.Ft232H
 
                 DeviceInformation.SetGpioValuesHigh();
             }
+
+            _pinValues[pinNumber] = value;
         }
 
         /// <inheritdoc/>

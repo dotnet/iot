@@ -5,12 +5,17 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{20F2E85F-D100-4EE6-BF7D-8BB8748D626C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Large4Digit7SegmentDisplay.sample", "samples\Large4Digit7SegmentDisplay.sample.csproj", "{C4D7AED7-B340-4DCD-974C-5150C6D5F074}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Large4Digit7SegmentDisplay.sample", "samples\Large4Digit7SegmentDisplay\Large4Digit7SegmentDisplay.sample.csproj", "{C4D7AED7-B340-4DCD-974C-5150C6D5F074}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matrix.sample", "samples\Matrix\Matrix.sample.csproj", "{C4D7AED7-B340-4DCD-974C-5150C6D5F074}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matrix8x8Bicolor.sample", "samples\Matrix8x8Bicolor\Matrix8x8Bicolor.sample.csproj", "{C4D7AED7-B340-4DCD-974C-5150C6D5F074}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BiColorBargraph.sample", "samples\BiColorBargraph.sample.csproj", "{C4D7AED7-B340-4DCD-974C-5150C6D5F074}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Display", "Display.csproj", "{4AAE8B9E-8540-4582-8083-D1F14104BAAC}"
 EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

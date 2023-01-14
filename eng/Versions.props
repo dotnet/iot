@@ -4,7 +4,7 @@
     <!-- Disabling the check for End of live TFMs since we still target netcoreapp 2.1 -->
     <CheckEolTargetFramework>false</CheckEolTargetFramework>
     <PreReleaseVersionLabel>prerelease</PreReleaseVersionLabel>
-    <MicrosoftDotNetGenAPIPackageVersion>8.0.0-beta.22552.1</MicrosoftDotNetGenAPIPackageVersion>
+    <MicrosoftDotNetGenAPIPackageVersion>8.0.0-beta.23061.1</MicrosoftDotNetGenAPIPackageVersion>
     <!-- dotnet/corefx dependencies -->
     <SystemDrawingCommonPackageVersion>5.0.3</SystemDrawingCommonPackageVersion>
     <SystemIOPortsPackageVersion>5.0.1</SystemIOPortsPackageVersion>
@@ -12,11 +12,11 @@
     <SystemRuntimeWindowsRuntimePackageVersion>4.6.0</SystemRuntimeWindowsRuntimePackageVersion>
     <SystemManagementPackageVersion>5.0.0</SystemManagementPackageVersion>
     <SystemThreadingTasksExtensionsPackageVersion>4.5.4</SystemThreadingTasksExtensionsPackageVersion>
-    <SystemMemoryPackageVersion>4.5.4</SystemMemoryPackageVersion>
+    <SystemMemoryPackageVersion>4.5.5</SystemMemoryPackageVersion>
     <SystemRuntimeInteropServicesWindowsRuntimePackageVersion>4.3.0</SystemRuntimeInteropServicesWindowsRuntimePackageVersion>
-    <MicrosoftExtensionsLoggingConsolePackageVersion>5.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
-    <MicrosoftExtensionsLoggingPackageVersion>5.0.0</MicrosoftExtensionsLoggingPackageVersion>
-    <MicrosoftExtensionsLoggingAbstractionsPackageVersion>5.0.0</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
+    <MicrosoftExtensionsLoggingConsolePackageVersion>7.0.0</MicrosoftExtensionsLoggingConsolePackageVersion>
+    <MicrosoftExtensionsLoggingPackageVersion>7.0.0</MicrosoftExtensionsLoggingPackageVersion>
+    <MicrosoftExtensionsLoggingAbstractionsPackageVersion>7.0.0</MicrosoftExtensionsLoggingAbstractionsPackageVersion>
     <SystemTextJsonPackageVersion>6.0.1</SystemTextJsonPackageVersion>
   </PropertyGroup>
 </Project>
