@@ -136,6 +136,11 @@ namespace Iot.Device.Common
         /// </remarks>
         public static Temperature CalculateDewPoint(Temperature airTemperature, RelativeHumidity relativeHumidity)
         {
+            if (relativeHumidity <= RelativeHumidity.FromPercent(0.1))
+            {
+                relativeHumidity = RelativeHumidity.FromPercent(0.1);
+            }
+
             double pa = CalculateActualVaporPressure(airTemperature, relativeHumidity).Hectopascals;
             double a = 6.1121; // hPa
             double c = 257.14; // °C
