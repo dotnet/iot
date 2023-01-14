@@ -76,7 +76,7 @@ namespace Iot.Device.Card.Ultralight
         /// <param name="ATQA">The ATQA</param>
         /// <param name="SAK">The SAK</param>
         /// <returns>True if this is an Ultralight</returns>
-        public static bool IsUltralightCard(ushort ATQA, byte SAK) => (ATQA == 0x4400) && (SAK == 0);
+        public static bool IsUltralightCard(ushort ATQA, byte SAK) => (ATQA == 0x0044) && (SAK == 0);
 
         /// <summary>
         /// Constructor for Ultralight
@@ -435,7 +435,6 @@ namespace Iot.Device.Card.Ultralight
         /// </summary>
         public int NumberBlocks => UltralightCardType switch
         {
-            // Whenever NdefCapacity + 9 is used, then it's a guess
             UltralightCardType.UltralightNtag210 => 16,
             UltralightCardType.UltralightNtag212 => 45,
             UltralightCardType.UltralightNtag213 => 45,
@@ -443,10 +442,10 @@ namespace Iot.Device.Card.Ultralight
             UltralightCardType.UltralightNtag215 => 135,
             UltralightCardType.UltralightNtag216 => 231,
             UltralightCardType.UltralightNtag216F => 231,
-            UltralightCardType.UltralightEV1MF0UL1101 => 41,
-            UltralightCardType.UltralightEV1MF0ULH1101 => 41,
-            UltralightCardType.UltralightEV1MF0UL2101 => NdefCapacity + 9,
-            UltralightCardType.UltralightEV1MF0ULH2101 => NdefCapacity + 9,
+            UltralightCardType.UltralightEV1MF0UL1101 => 20,
+            UltralightCardType.UltralightEV1MF0ULH1101 => 20,
+            UltralightCardType.UltralightEV1MF0UL2101 => 41,
+            UltralightCardType.UltralightEV1MF0ULH2101 => 41,
             UltralightCardType.UltralightNtagI2cNT3H1101 => 231,
             UltralightCardType.UltralightNtagI2cNT3H1101W0 => 231,
             UltralightCardType.UltralightNtagI2cNT3H2111W0 => 476 + 9,
