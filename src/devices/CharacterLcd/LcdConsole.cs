@@ -231,12 +231,26 @@ namespace Iot.Device.CharacterLcd
                 string currentLine = line;
 
                 int remainingChars = Math.Min(currentLine.Length, Size.Width - CursorLeft);
+                int actuallyUsedRemainingChars = (CursorLeft + remainingChars) < Size.Width ? CursorLeft + remainingChars : Size.Width;
+                if (CursorLeft + remainingChars < Size.Width && LineFeedMode != LineWrapMode.Truncate)
+                {
+                    // If we're in line feed mode, make sure we delete anything past the end of the new line (relevant in case of overwriting)
+                    currentLine += new string(' ', Size.Width - remainingChars - CursorLeft);
+                    remainingChars = currentLine.Length;
+                }
+
                 if (remainingChars > 0)
                 {
                     lock (_lock)
                     {
                         WriteCurrentLine(currentLine.Substring(0, remainingChars));
                     }
+
+                    // Reset back, so that if we write a line with multiple calls to Write, the line is continued.
+                    if (actuallyUsedRemainingChars < Size.Width)
+                    {
+                        CursorLeft = actuallyUsedRemainingChars;
+                }
                 }
 
                 if (i != lines.Count - 1)
