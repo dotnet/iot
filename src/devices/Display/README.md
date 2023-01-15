@@ -10,7 +10,7 @@ These [bright crisp displays](https://www.adafruit.com/product/1270) are good fo
 
 <img src="https://cdn-shop.adafruit.com/970x728/1268-00.jpg" width ="250px" title="Adafruit 1.2 inch 4-Digit 7-Segment Display w/I2C Backpack - Green" />
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.cs).
+You can write the following code to control them or checkout a [larger sample](samples/Large4Digit7SegmentDisplay/Program.cs).
 
 ```csharp
 // Initialize display (busId = 1 for Raspberry Pi 2 & 3)
@@ -44,7 +44,7 @@ Make a [scrolling sign or a small video display](https://www.adafruit.com/produc
 
 ![8x8 Bicolor LED matrix](https://camo.githubusercontent.com/f85caa66967ebd6752469f1baff0a660104dbe02081f42f1ee78c920f4b60cdd/68747470733a2f2f6d65646961312e67697068792e636f6d2f6d656469612f3974316d38477466613841346162477443682f323030772e77656270)
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs) ([Bicolor sample](samples/Program.Matrix8x8Bicolor.cs)).
+You can write the following code to control them or checkout a [larger sample](samples\Matrix\Program.Matrix.cs) ([Bicolor sample](samples\Matrix8x8Bicolor\Program.Matrix8x8Bicolor.cs)).
 
 ```csharp
 using Matrix8x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
@@ -70,7 +70,7 @@ Make a [small linear display](https://www.adafruit.com/product/1721) with multip
 
 ![Bi-Color (Red/Green) 24-Bar Bargraph w/I2C Backpack Kit](https://camo.githubusercontent.com/7667a4f1a7f3956b94c8d4373668290fa6af5cf76862553f54247dffe91b4745/68747470733a2f2f692e67697068792e636f6d2f6d656469612f326c4d71686e6b494273504d47704f4a49782f67697068792d646f776e73697a65642e676966)
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.BiColorBargraph.cs).
+You can write the following code to control them or checkout a [larger sample](samples\BiColorBargraph\Program.BiColorBargraph.cs).
 
 ```csharp
 using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
