@@ -78,9 +78,9 @@ namespace Iot.Device.Button.Tests
 
             button.ReleaseButton();
 
-            Assert.True(pressed);
-            Assert.True(holding);
-            Assert.False(doublePressed);
+            Assert.True(holding, "holding");
+            Assert.True(pressed, "pressed");
+            Assert.False(doublePressed, "doublePressed");
         }
 
         [Fact]
@@ -288,5 +288,70 @@ namespace Iot.Device.Button.Tests
             Assert.False(doublePressed);
         }
 
+        /// <summary>
+        /// From issue #1877
+        /// The problem arises when the button is held down for longer then the debounce timeout.
+        /// Then, as it is released there will be a "pressed" event caused by the bounces
+        /// happening during release, and the desired "released" event is fired,
+        /// due to the debouncing getting started by "pressed"
+        /// </summary>
+        [Fact]
+        public void If_Button_Is_Held_Down_Longer_Than_Debouncing()
+        {
+            bool holding = false;
+            bool doublePressed = false;
+            int buttonDownCounter = 0;
+            int buttonUpCounter = 0;
+            int pressedCounter = 0;
+
+            // holding is 2 secs, debounce is 1 sec
+            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000));
+            button.IsHoldingEnabled = true;
+
+            button.Press += (sender, e) =>
+            {
+                pressedCounter++;
+            };
+
+            button.ButtonDown += (sender, e) =>
+            {
+                buttonDownCounter++;
+            };
+
+            button.ButtonUp += (sender, e) =>
+            {
+                buttonUpCounter++;
+            };
+
+            button.Holding += (sender, e) =>
+            {
+                holding = true;
+            };
+
+            button.DoublePress += (sender, e) =>
+            {
+                doublePressed = true;
+            };
+
+            // pushing the button. This will trigger the buttonDown event
+            button.PressButton();
+            Thread.Sleep(2200);
+            // releasing the button. This will trigger the pressed and buttonUp event
+            button.ReleaseButton();
+
+            // now simulating hw bounces which should not be detected
+            button.PressButton();
+            button.ReleaseButton();
+            button.PressButton();
+            button.ReleaseButton();
+            button.PressButton();
+            button.ReleaseButton();
+
+            Assert.True(buttonDownCounter == 1, "ButtonDown counter is wrong");
+            Assert.True(buttonUpCounter == 1, "ButtonUp counter is wrong");
+            Assert.True(pressedCounter == 1, "pressedCounter counter is wrong");
+            Assert.True(holding, "holding");
+            Assert.False(doublePressed, "doublePressed");
+        }
     }
 }
