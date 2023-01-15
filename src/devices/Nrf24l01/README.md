@@ -4,7 +4,7 @@ The nRF24L01 is a single chip radio transceiver for the world wide 2.4 - 2.5 GHz
 
 ## Documentation
 
-- The bindging datasheet can be found [here](https://cdn.datasheetspdf.com/pdf-down/N/R/F/NRF24L01-Nordic.pdf)
+- The bindging datasheet can be found [here](https://infocenter.nordicsemi.com/pdf/nRF24L01P_PS_v1.0.pdf)
 
 ## Board
 
