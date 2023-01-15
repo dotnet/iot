@@ -37,7 +37,7 @@ namespace Iot.Device.Button
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
         /// <param name="isExternalResistor">This parameter is ignored when PinMode is PinMode.Input. When False, if PinMode is PinMode.InputPullUp or PinMode.InputPullDown, the Gpio is configured with the internal resistor (if supported by the board). Otherwise the Gpio is configured as it was specified PinMode.Input.</param>
         public GpioButton(int buttonPin, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp,
-            TimeSpan debounceTime = default(TimeSpan), bool isExternalResistor = false)
+            TimeSpan debounceTime = default, bool isExternalResistor = false)
             : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), gpio, shouldDispose, pinMode, debounceTime, isExternalResistor)
         {
         }
@@ -53,7 +53,7 @@ namespace Iot.Device.Button
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
         /// <param name="isExternalResistor">This parameter is ignored when PinMode is PinMode.Input. When False, if PinMode is PinMode.InputPullUp or PinMode.InputPullDown, the Gpio is configured with the internal resistor (if supported by the board). Otherwise the Gpio is configured as it was specified PinMode.Input</param>
-        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp, TimeSpan debounceTime = default(TimeSpan), bool isExternalResistor = false)
+        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp, TimeSpan debounceTime = default, bool isExternalResistor = false)
             : base(doublePress, holding, debounceTime)
         {
             _gpioController = gpio ?? new GpioController();
