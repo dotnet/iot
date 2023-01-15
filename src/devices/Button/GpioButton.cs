@@ -82,14 +82,14 @@ namespace Iot.Device.Button
         /// Initialization of the button.
         /// </summary>
         /// <param name="buttonPin">GPIO pin of the button.</param>
-        /// <param name="gpio">Gpio Controller.</param>
-        /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="isPullUp">True if the Gpio is either pulled up in hardware or in the Gpio configuration (see <paramref name="isExternalResistor"/>. False if instead the Gpio is pulled down.</param>
         /// <param name="isExternalResistor">When False the pull resistor is configured using the Gpio PinMode.InputPullUp or PinMode.InputPullDown (if supported by the board). Otherwise the Gpio is configured as PinMode.Input.</param>
+        /// <param name="gpio">Gpio Controller.</param>
+        /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public GpioButton(int buttonPin, GpioController? gpio = null, bool shouldDispose = true,
-            bool isPullUp = true, bool isExternalResistor = false, TimeSpan debounceTime = default)
-            : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), gpio, shouldDispose, isPullUp, isExternalResistor, debounceTime)
+        public GpioButton(int buttonPin, bool isPullUp, bool isExternalResistor = false,
+            GpioController? gpio = null, bool shouldDispose = true, TimeSpan debounceTime = default)
+            : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), isPullUp, isExternalResistor, gpio, shouldDispose, debounceTime)
         {
         }
 
@@ -99,12 +99,13 @@ namespace Iot.Device.Button
         /// <param name="buttonPin">GPIO pin of the button.</param>
         /// <param name="doublePress">Max ticks between button presses to count as doublepress.</param>
         /// <param name="holding">Min ms a button is pressed to count as holding.</param>
-        /// <param name="gpio">Gpio Controller.</param>
-        /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="isPullUp">True if the Gpio is either pulled up in hardware or in the Gpio configuration (see <paramref name="isExternalResistor"/>. False if instead the Gpio is pulled down.</param>
         /// <param name="isExternalResistor">When False the pull resistor is configured using the Gpio PinMode.InputPullUp or PinMode.InputPullDown (if supported by the board). Otherwise the Gpio is configured as PinMode.Input.</param>
+        /// <param name="gpio">Gpio Controller.</param>
+        /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, GpioController? gpio = null, bool shouldDispose = true, bool isPullUp = true, bool isExternalResistor = false, TimeSpan debounceTime = default)
+        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, bool isPullUp, bool isExternalResistor = false,
+            GpioController? gpio = null, bool shouldDispose = true, TimeSpan debounceTime = default)
             : base(doublePress, holding, debounceTime)
         {
             _gpioController = gpio ?? new GpioController();
