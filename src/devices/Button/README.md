@@ -8,6 +8,31 @@ The `GpioButton` is a GPIO implementation of the button and inherits from the `B
 Documentation for the M5StickC Plus, including pin mapping, can be [found here](https://docs.m5stack.com/en/core/m5stickc_plus).
 Information regarding standard mouse events, used as inspiration for the button events, can be [found here](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/input-mouse/events?view=netdesktop-5.0#standard-click-event-behavior).
 
+## Configuring the pull-ups or pull-downs for the button
+
+A general rule in electronics is that input pins not permanently tied to a wire whose state is `LOW` or `HIGH`, should always be pulled up or down with a resistor.
+For example, the button causes the input GPIO to have a stable state only during the pressed state.
+In order to ensure the released state to be either `LOW` or `HIGH`, a resistor must always be either added or configured in software to avoid unpredictable readings.
+
+Many boards supports configuring an internal resistor but they may not be available in for all the GPIOs. The developer should carefully read the board documentation to verify whether the internal resistor is supported or not for the specific GPIO.
+
+`PinMode` is an enumeration used to specify whether the GPIO will be used as output or input. In the latter case it can be configured
+without resistor or with a resistor configured either as a pull-up or pull-down.
+
+Since this library detects the transitions using pin state changed event, the button push is detected differently when the button is
+normally HIGH or LOW which in turns depend on the resistor configuration.
+
+In the following table, the first two column represents the physical connections of the two button pins. The last two columns are the values that should be specified in the `Button` constructor.
+
+| Button Pin 1<br />(connected to the GPIO) | Button Pin 2 | `IsExternalResistor` | `PinMode`        |
+| ----------------------------------------- | ------------ | -------------------- | ---------------- |
+| Resistor to `Vcc`                         | `GND`        | True                 | `Input.PullUp`   |
+| Resistor to `GND`                         | `Vcc`        | True                 | `Input.PullDown` |
+| -                                         | `GND`        | False                | `Input.PullUp`   |
+| -                                         | `Vcc`        | False                | `Input.PullDown` |
+
+> The `PinMode.Input` value should never be specified. This binding does not enforce this validation to not break the code written before the introduction of the `IsExternalResistor` argument.
+
 ## Usage
 
 You can find an example in the [samples](./Samples/Program.cs) directory.

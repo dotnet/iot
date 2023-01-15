@@ -81,7 +81,9 @@ namespace Iot.Device.Button
         /// <param name="doublePress">Max ticks between button presses to count as doublepress.</param>
         /// <param name="holding">Min ms a button is pressed to count as holding.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public ButtonBase(TimeSpan doublePress, TimeSpan holding, TimeSpan debounceTime = default(TimeSpan))
+        public ButtonBase(TimeSpan doublePress,
+            TimeSpan holding,
+            TimeSpan debounceTime = default(TimeSpan))
         {
             if (debounceTime.TotalMilliseconds * 3 > doublePress.TotalMilliseconds)
             {
