@@ -4,7 +4,7 @@ SHT3x is the next generation of Sensirion’s temperature and humidity sensors. 
 
 ## Documentation
 
-- SHT30 [datasheet](https://cdn.datasheetspdf.com/pdf-down/S/H/T/SHT30-DIS-Sensirion.pdf)
+- SHT30 [datasheet](https://sensirion.com/media/documents/213E6A3B/63A5A569/Datasheet_SHT3x_DIS.pdf)
 
 ## Board
 

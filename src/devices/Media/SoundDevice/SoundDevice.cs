@@ -19,6 +19,15 @@ namespace Iot.Device.Media
         public static SoundDevice Create(SoundConnectionSettings settings) => new UnixSoundDevice(settings);
 
         /// <summary>
+        /// Create a communications channel to a sound device running on Unix.
+        /// </summary>
+        /// <param name="settings">The connection settings of a sound device.</param>
+        /// <param name="unmute">Unmute the device if true</param>
+        /// <returns>A communications channel to a sound device running on Unix.</returns>
+        /// <remarks>Some device do not support to be unmuted, if you try so, it will raise an exception and dispose the device. In this case, you should set the unmute parameter to false</remarks>
+        public static SoundDevice Create(SoundConnectionSettings settings, bool unmute) => new UnixSoundDevice(settings, unmute);
+
+        /// <summary>
         /// The connection settings of the sound device.
         /// </summary>
         public abstract SoundConnectionSettings Settings { get; }

@@ -48,12 +48,14 @@ __UbuntuPackages+=" symlinks"
 __UbuntuPackages+=" libicu-dev"
 __UbuntuPackages+=" liblttng-ust-dev"
 __UbuntuPackages+=" libunwind8-dev"
+__UbuntuPackages+=" libnuma-dev"
 
 __AlpinePackages+=" gettext-dev"
 __AlpinePackages+=" icu-dev"
 __AlpinePackages+=" libunwind-dev"
 __AlpinePackages+=" lttng-ust-dev"
 __AlpinePackages+=" compiler-rt-static"
+__AlpinePackages+=" numactl-dev"
 
 # runtime libraries' dependencies
 __UbuntuPackages+=" libcurl4-openssl-dev"
@@ -501,7 +503,7 @@ elif [[ -n "$__CodeName" ]]; then
         popd
     fi
 elif [[ "$__Tizen" == "tizen" ]]; then
-    ROOTFS_DIR="$__RootfsDir" "$__CrossDir/$__BuildArch/tizen-build-rootfs.sh"
+    ROOTFS_DIR="$__RootfsDir" "$__CrossDir/tizen-build-rootfs.sh" "$__BuildArch"
 else
     echo "Unsupported target platform."
     usage;

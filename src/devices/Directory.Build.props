@@ -5,8 +5,9 @@
   <Import Project="../../eng/Versions.external.props" />
   <PropertyGroup>
     <!-- Most projects should use this value to build for all possible target frameworks -->
-    <DefaultBindingTfms>net6.0;netcoreapp3.1;netstandard2.0;</DefaultBindingTfms>
+    <DefaultBindingTfms>net6.0;netstandard2.0;</DefaultBindingTfms>
     <DefaultSampleTfms>net6.0</DefaultSampleTfms>
+    <DefaultTestTfms>net6.0</DefaultTestTfms>
     <NoWarn>$(NoWarn);CS8321</NoWarn>
     <DeterministicSourcePaths>false</DeterministicSourcePaths>
     <IsPackable>false</IsPackable>

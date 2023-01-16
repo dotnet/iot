@@ -31,8 +31,8 @@ The binding requires Firmata Version 2.6, which is implemented i.e. by the Confi
 
 - Open the Arduino IDE
 - Go to the library manager and check that you have the "ConfigurableFirmata" library installed
-- Open "ConfigurableFirmata.ino" from the [device binding folder](./ConfigurableFirmata/ConfigurableFirmata.ino) or go to <http://firmatabuilder.com/> to create your own custom firmata firmware. Make sure you have at least the features checked that you will need.
-- Upload this sketch to your Arduino.
+- Load the ConfigurableFirmata sample from the Arduino IDE's sample directory or go to <http://firmatabuilder.com/> to create your own custom firmata firmware. Make sure you have at least the features checked that you will need.
+- Compile and upload this sketch to your Arduino.
 
 After these steps, you can start coding with Iot.Devices.Arduino and make your Arduino do whatever you want, from blinking LEDS to your personal weather station. For usage and examples see the samples folder. Note that ConfigurableFirmata uses a default UART speed of 57600 baud. It is recommended to increase it to at least 115200, though.
 
@@ -40,7 +40,7 @@ When the firmware starts, the on-board-LED flashes a few times, indicating the l
 
 ### Advanced features
 
-Some of the features of this binding require extended features in the Arduino firmware. These include SPI support and DHT sensor support. These features are only available in the main development branch
+Some of the features of this binding require extended features in the Arduino firmware. These include SPI support and DHT sensor support. These features are only available in the main development branch.
 
 #### Download for Windows
 

@@ -6,7 +6,9 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Display;
 
-// Initialize display (busId = 1 for Raspberry Pi 2+)
+// Supports BiColor Bargraph
+// https://www.adafruit.com/product/1721
+// Initialize display
 using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
     {
         // Set max brightness
@@ -16,11 +18,11 @@ using BiColorBarGraph bargraph = new(I2cDevice.Create(new I2cConnectionSettings(
 
 bargraph.Clear();
 
-bargraph[0] = BarColor.Red;
-bargraph[1] = BarColor.Green;
-bargraph[2] = BarColor.Yellow;
-bargraph[3] = BarColor.Off;
-bargraph[4] = BarColor.Red;
+bargraph[0] = LedColor.Red;
+bargraph[1] = LedColor.Green;
+bargraph[2] = LedColor.Yellow;
+bargraph[3] = LedColor.Off;
+bargraph[4] = LedColor.Red;
 
 Thread.Sleep(1000);
 bargraph.Clear();
@@ -33,7 +35,7 @@ for (int i = 0; i < 24; i++)
     }
 
     int num = i % 4;
-    BarColor color = (BarColor)(i % 3 + 1);
+    LedColor color = (LedColor)(i % 3 + 1);
     bargraph[i] = color;
     Thread.Sleep(100);
 }
@@ -46,7 +48,7 @@ for (int i = 23; i >= 0; i--)
     }
 
     int num = i % 4;
-    BarColor color = (BarColor)(i % 3 + 1);
+    LedColor color = (LedColor)(i % 3 + 1);
     bargraph[i] = color;
     Thread.Sleep(100);
 }
@@ -54,12 +56,12 @@ for (int i = 23; i >= 0; i--)
 Thread.Sleep(1000);
 bargraph.Clear();
 
-bargraph[0] = BarColor.Red;
-bargraph[6] = BarColor.Green;
-bargraph[11] = BarColor.Yellow;
-bargraph[12] = BarColor.Yellow;
-bargraph[18] = BarColor.Green;
-bargraph[23] = BarColor.Red;
+bargraph[0] = LedColor.Red;
+bargraph[6] = LedColor.Green;
+bargraph[11] = LedColor.Yellow;
+bargraph[12] = LedColor.Yellow;
+bargraph[18] = LedColor.Green;
+bargraph[23] = LedColor.Red;
 
 Thread.Sleep(1000);
 bargraph.Clear();
@@ -74,12 +76,12 @@ bargraph.Write(customBuffer);
 Thread.Sleep(1000);
 bargraph.Clear();
 
-bargraph.Fill(BarColor.Red);
+bargraph.Fill(LedColor.Red);
 Thread.Sleep(1000);
 bargraph.Clear();
-bargraph.Fill(BarColor.Green);
+bargraph.Fill(LedColor.Green);
 Thread.Sleep(1000);
 bargraph.Clear();
-bargraph.Fill(BarColor.Yellow);
+bargraph.Fill(LedColor.Yellow);
 Thread.Sleep(1000);
 bargraph.Clear();

@@ -40,17 +40,27 @@ namespace Iot.Device.OneWire
             return (DeviceFamily)devFamily;
         }
 
-#if !NETSTANDARD2_0
         internal static async Task ScanForDeviceChangesInternalAsync(OneWireBus bus, int numDevices, int numScans)
         {
+#if NETSTANDARD2_0
+            await Task.Factory.StartNew(() =>
+            {
+                if (numDevices > 0)
+                {
+                    File.WriteAllText(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_max_slave_count"), numDevices.ToString());
+                }
+
+                File.WriteAllText(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
+            });
+#else
             if (numDevices > 0)
             {
                 await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_max_slave_count"), numDevices.ToString());
             }
 
             await File.WriteAllTextAsync(Path.Combine(SysfsDevicesPath, bus.BusId, "w1_master_search"), numScans.ToString());
-        }
 #endif
+        }
 
         internal static void ScanForDeviceChangesInternal(OneWireBus bus, int numDevices, int numScans)
         {
