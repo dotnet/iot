@@ -38,7 +38,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// 45 mA
         /// </summary>
-        CMA45 = 0b0001,
+        CmA45 = 0b0001,
 
         /// <summary>
         /// 75 mA
