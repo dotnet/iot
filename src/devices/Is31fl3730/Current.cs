@@ -9,32 +9,32 @@ namespace Iot.Device.Display
     public enum Current
     {
         /// <summary>
-        /// 5 mA
+        /// 5 mA.
         /// </summary>
         CmA5 = 0b1000,
 
         /// <summary>
-        /// 10 mA
+        /// 10 mA.
         /// </summary>
         CmA10 = 0b1001,
 
         /// <summary>
-        /// 35 mA
+        /// 35 mA.
         /// </summary>
         CmA35 = 0b1110,
 
         /// <summary>
-        /// 40 mA
+        /// 40 mA (default).
         /// </summary>
-        CmA40 = 0b0,
+        CmA40 = 0b0000,
 
         /// <summary>
-        /// 45 mA
+        /// 45 mA.
         /// </summary>
         CmA45 = 0b0001,
 
         /// <summary>
-        /// 75 mA
+        /// 75 mA.
         /// </summary>
         CmA75 = 0b0111,
     }

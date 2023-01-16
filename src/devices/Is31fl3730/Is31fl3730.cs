@@ -27,7 +27,6 @@ namespace Iot.Device.Display
         };
         private readonly bool[] _enabled = new bool[2];
         private I2cDevice _i2cDevice;
-        private int _configurationValue = 0;
 
         /// <summary>
         /// Initialize IS31FL3730 device
@@ -64,26 +63,6 @@ namespace Iot.Device.Display
         public const int DefaultI2cAddress = 0x61;
 
         /// <summary>
-        /// Brightness of LED matrix (override default value (128; max brightness); set before calling Initialize method).
-        /// </summary>
-        public int Brightness { get; set; }
-
-        /// <summary>
-        /// Full current setting for each row output of LED matrix (override default value (40 mA)); set before calling Initialize method).
-        /// </summary>
-        public Current Current { get; set; }
-
-        /// <summary>
-        /// Matrix mode (override default value (8x8); set before calling Initialize method).
-        /// </summary>
-        public MatrixMode MatrixMode { get; set; }
-
-        /// <summary>
-        /// Display mode (use to override default value (Matrix 1 only; right-most); set before calling Initialize method).
-        /// </summary>
-        public DisplayMode DisplayMode { get; set; }
-
-        /// <summary>
         /// Enables or disables auto-buffering.
         /// </summary>
         public bool BufferingEnabled { get; set; } = true;
@@ -94,46 +73,52 @@ namespace Iot.Device.Display
         public DotMatrix5x7 this[int index] => GetMatrix(index);
 
         /// <summary>
-        /// Initialize LED driver.
+        /// Update bright of LED matrix for each of 128 items.
         /// </summary>
-        public void Initialize()
+        // From datasheet:
+        // Set high bit for the 128th item
+        // Set high bit low for the remaining 127 items
+        // And then set lower bits as appropriate, to represent 0-127
+        public void UpdateBrightness(byte value) => Write(FunctionRegister.Pwm, value);
+
+        /// <summary>
+        /// Update current setting for each row output of LED matrix (default value is 40 mA).
+        /// </summary>
+        public void UpdateCurrent(Current value) => Write(FunctionRegister.LightingEffect, (byte)value);
+
+        /// <summary>
+        /// Update configuration register, which controls shutdown, matrix, and display modes.
+        /// </summary>
+        public void UpdateConfiguration(ShowdownMode shutdown, MatrixMode matrix, DisplayMode display)
         {
-            // Set size of matrix
-            if (MatrixMode > 0)
-            {
-                _configurationValue |= (int)MatrixMode;
-            }
+            byte configuration = 0;
+            configuration |= (byte)shutdown;
+            configuration |= (byte)matrix;
+            configuration |= (byte)display;
+            Write(FunctionRegister.Configuration, configuration);
 
             // Set number of and which supported matrices (either or both)
-            if (DisplayMode > 0)
+            if (display is DisplayMode.MatrixOneOnly)
             {
-                _enabled[0] = DisplayMode is DisplayMode.MatrixOneOnly or DisplayMode.MatrixOneAndTwo;
-                _enabled[1] = DisplayMode is DisplayMode.MatrixTwoOnly or DisplayMode.MatrixOneAndTwo;
-                _configurationValue |= (int)DisplayMode;
+                _enabled[0] = true;
+                _enabled[1] = false;
+            }
+            else if (display is DisplayMode.MatrixTwoOnly)
+            {
+                _enabled[0] = false;
+                _enabled[1] = true;
             }
             else
             {
                 _enabled[0] = true;
-            }
-
-            // If (non-default) configurations values are set, write to device
-            if (_configurationValue > 0)
-            {
-                Write(FunctionRegister.Configuration, (byte)_configurationValue);
-            }
-
-            // Set current value
-            if (Current > 0)
-            {
-                Write(FunctionRegister.LightingEffect, (byte)Current);
-            }
-
-            // Set brightness value
-            if (Brightness > 0)
-            {
-                Write(FunctionRegister.Pwm, (byte)Brightness);
+                _enabled[1] = true;
             }
         }
+
+        /// <summary>
+        /// Resets all registers to default value.
+        /// </summary>
+        public void ResetRegisters() => Write(FunctionRegister.Reset, MatrixValues.EightBitValue);
 
         /// <summary>
         /// Write LED for matrix.
@@ -322,32 +307,6 @@ namespace Iot.Device.Display
         {
             Flush(0);
             Flush(1);
-        }
-
-        /// <summary>
-        /// Resets all registers to default value.
-        /// </summary>
-        public void Reset() => Write(FunctionRegister.Reset, MatrixValues.EightBitValue);
-
-        /// <summary>
-        /// Set the shutdown mode.
-        /// </summary>
-        /// <param name="shutdown">Set the showdown mode. `true` sets device into shutdown mode. `false` sets device into normal operation.</param>
-        public void Shutdown(bool shutdown)
-        {
-            // mode values
-            // 0 = normal operation
-            // 1 = shutdown mode
-            if (shutdown)
-            {
-                _configurationValue |= ConfigurationRegister.Shutdown;
-            }
-            else
-            {
-                _configurationValue &= ~ConfigurationRegister.Shutdown;
-            }
-
-            WriteUpdateRegister();
         }
 
         private void Write(byte address, ReadOnlySpan<byte> value)

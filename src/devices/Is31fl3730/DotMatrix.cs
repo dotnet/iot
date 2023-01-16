@@ -99,8 +99,7 @@ namespace Iot.Device.Display
         {
             i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             Is31fl3730 is31fl3730 = new(i2cDevice);
-            is31fl3730.DisplayMode = DisplayMode.MatrixOneAndTwo;
-            is31fl3730.Initialize();
+            is31fl3730.UpdateConfiguration(ShowdownMode.Normal, MatrixMode.Size8x8, DisplayMode.MatrixOneAndTwo);
             return is31fl3730;
         }
     }

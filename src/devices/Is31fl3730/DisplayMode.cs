@@ -11,12 +11,12 @@ namespace Iot.Device.Display
         /// <summary>
         /// Enable matrix one only.
         /// </summary>
-        MatrixOneOnly = 0x0,
+        MatrixOneOnly = 0x00,
 
         /// <summary>
         /// Enable matrix two only.
         /// </summary>
-        MatrixTwoOnly = 0x8,
+        MatrixTwoOnly = 0x08,
 
         /// <summary>
         /// Enable matrix one and two.

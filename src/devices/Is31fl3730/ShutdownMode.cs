@@ -4,13 +4,18 @@
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Register addresses for the Configuration Register.
+    /// IS31FL3730 shutdown mode.
     /// </summary>
-    internal static class ConfigurationRegister
+    public enum ShowdownMode
     {
         /// <summary>
-        /// Shutdown value.
+        /// Enable normal operation.
         /// </summary>
-        internal static byte Shutdown = 0x80;
+        Normal = 0x00,
+
+        /// <summary>
+        /// Enable shutdown mode.
+        /// </summary>
+        Shutdown = 0x80,
     }
 }
