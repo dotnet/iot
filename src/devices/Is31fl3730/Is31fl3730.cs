@@ -9,7 +9,7 @@ using static System.Linq.Enumerable;
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Represents an IS31FL3731 LED Matrix driver
+    /// Represents an IS31FL3730 LED Matrix driver
     /// </summary>
     // Datasheet: https://cdn-shop.adafruit.com/product-files/3017/31FL3730.pdf
     // Product: https://shop.pimoroni.com/products/microdot-phat
@@ -83,7 +83,7 @@ namespace Iot.Device.Display
         public DisplayMode DisplayMode { get; set; }
 
         /// <summary>
-        /// Enables or disables auto-buggering.
+        /// Enables or disables auto-buffering.
         /// </summary>
         public bool BufferingEnabled { get; set; } = true;
 

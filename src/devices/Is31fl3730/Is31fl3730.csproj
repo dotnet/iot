@@ -5,12 +5,13 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Matrix driver -->
+    <Compile Include="ConfigurationRegister.cs" />
     <Compile Include="Current.cs" />
     <Compile Include="DisplayMode.cs" />
+    <Compile Include="FunctionRegister.cs" />
     <Compile Include="Is31fl3730.cs" />
     <Compile Include="MatrixMode.cs" />
     <Compile Include="MatrixValues.cs" />
-    <Compile Include="Registers.cs" />
     
     <!-- Matrices -->
     <Compile Include="DotMatrix.cs" />

@@ -88,7 +88,7 @@ namespace Iot.Device.Display
         /// </summary>
         public static Is31fl3730 InitializeI2c(I2cDevice i2cDevice)
         {
-            i2cDevice = i2cDevice ?? throw new ArgumentException($"{nameof(i2cDevice)} is null.");
+            i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
             Is31fl3730 is31fl3730 = new(i2cDevice);
             is31fl3730.DisplayMode = DisplayMode.MatrixOneAndTwo;
             is31fl3730.Initialize();

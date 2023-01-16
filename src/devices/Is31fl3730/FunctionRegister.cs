@@ -6,52 +6,41 @@ namespace Iot.Device.Display
     /// <summary>
     /// Register addresses for the Function Register.
     /// </summary>
-    public static class FunctionRegister
+    internal static class FunctionRegister
     {
         /// <summary>
         /// Address for Configuration Register.
         /// </summary>
-        public static byte Configuration = 0x0;
+        internal static byte Configuration = 0x0;
 
         /// <summary>
         /// Address for Matrix 1 Data Register.
         /// </summary>
-        public static byte Matrix1 = 0x01;
+        internal static byte Matrix1 = 0x01;
 
         /// <summary>
         /// Address for Update Column Register.
         /// </summary>
-        public static byte UpdateColumn = 0x0C;
+        internal static byte UpdateColumn = 0x0C;
 
         /// <summary>
         /// Address for Lighting Effect Register.
         /// </summary>
-        public static byte LightingEffect = 0x0D;
+        internal static byte LightingEffect = 0x0D;
 
         /// <summary>
         /// Address for Matrix 2 Data Register.
         /// </summary>
-        public static byte Matrix2 = 0x0E;
+        internal static byte Matrix2 = 0x0E;
 
         /// <summary>
         /// Address for PWM Register.
         /// </summary>
-        public static byte Pwm = 0x19;
+        internal static byte Pwm = 0x19;
 
         /// <summary>
         /// Address for Reset Register.
         /// </summary>
-        public static byte Reset = 0xFF;
-    }
-
-    /// <summary>
-    /// Register addresses for the Configuration Register.
-    /// </summary>
-    public static class ConfigurationRegister
-    {
-        /// <summary>
-        /// Shutdown value.
-        /// </summary>
-        public static byte Shutdown = 0x80;
+        internal static byte Reset = 0xFF;
     }
 }

@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Device.I2c;
-using System.Threading;
 
 namespace Iot.Device.Display
 {
@@ -42,7 +39,7 @@ namespace Iot.Device.Display
 
         private static DotMatrix5x7[] Initialize(Is31fl3730 is31fl3730)
         {
-            is31fl3730 = is31fl3730 ?? throw new ArgumentException($"{nameof(is31fl3730)} is null");
+            is31fl3730 = is31fl3730 ?? throw new ArgumentNullException(nameof(is31fl3730));
             return new DotMatrix5x7[]
             {
                 is31fl3730[1],

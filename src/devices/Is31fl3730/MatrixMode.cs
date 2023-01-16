@@ -11,7 +11,7 @@ using Iot.Device.Multiplexing.Utility;
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Represents an IS31FL3731 LED Matrix driver
+    /// IS31FL3730 matrix modes, controlling the size of the matrix.
     /// </summary>
     public enum MatrixMode
     {
