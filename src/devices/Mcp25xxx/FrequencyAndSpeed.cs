@@ -69,6 +69,56 @@ namespace Iot.Device.Mcp25xxx
         _8MHz5KBps,
 
         /// <summary>
+        /// 12MHz 1000kBPS
+        /// </summary>
+        _12MHz1000KBps,
+
+        /// <summary>
+        /// 12MHz 500kBPS
+        /// </summary>
+        _12MHz500KBps,
+
+        /// <summary>
+        /// 12MHz 250kBPS
+        /// </summary>
+        _12MHz250KBps,
+
+        /// <summary>
+        /// 12MHz 200kBPS
+        /// </summary>
+        _12MHz200KBps,
+
+        /// <summary>
+        /// 12MHz 125kBPS
+        /// </summary>
+        _12MHz125KBps,
+
+        /// <summary>
+        /// 12MHz 100kBPS
+        /// </summary>
+        _12MHz100KBps,
+
+        /// <summary>
+        /// 12MHz 80kBPS
+        /// </summary>
+        _12MHz80KBps,
+
+        /// <summary>
+        /// 12MHz 50kBPS
+        /// </summary>
+        _12MHz50KBps,
+
+        /// <summary>
+        /// 12MHz 40kBPS
+        /// </summary>
+        _12MHz40KBps,
+
+        /// <summary>
+        /// 12MHz 20kBPS
+        /// </summary>
+        _12MHz20KBps,
+
+        /// <summary>
         /// 16MHz 1000kBPS
         /// </summary>
         _16MHz1000KBps,

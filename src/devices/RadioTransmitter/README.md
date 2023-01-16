@@ -4,7 +4,7 @@ The radio transmitter devices supported by the project include KT0803.
 
 ## Documentation
 
-- KT0803 radio transmitter [datasheet](https://cdn.datasheetspdf.com/pdf-down/K/T/0/KT0803L-KTMicro.pdf)
+- KT0803 radio transmitter [datasheet](http://radio-z.ucoz.lv/kt_0803/KT0803L_V1.3.pdf)
 
 ## Usage
 

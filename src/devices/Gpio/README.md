@@ -17,6 +17,7 @@ This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO dr
 | Orange Pi Zero | [OrangePiZeroDriver](./Drivers/OrangePiZeroDriver.cs) |
 | Orange Pi Zero 2 | [OrangePiZero2Driver](./Drivers/OrangePiZero2Driver.cs) |
 | Rock Pi 4B Plus | [RockPi4bPlusDriver](./Drivers/RockPi4bPlusDriver.cs) |
+| Orange Pi PC | [OrangePiPCDriver](./Drivers/OrangePiPCDriver.cs) |
 
 ## Benchmarks
 
