@@ -15,7 +15,6 @@
     <Compile Include="Large4Digit7SegmentDisplay.cs" />
     <Compile Include="BiColorBarGraph.cs" />
     <Compile Include="BarColor.cs" />
-    <Compile Include="IMatrix.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />
