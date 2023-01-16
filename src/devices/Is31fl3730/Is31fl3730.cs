@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Device.I2c;
 using static System.Linq.Enumerable;
 
@@ -141,7 +142,7 @@ namespace Iot.Device.Display
         /// <param name="x">The x dimension for the LED.</param>
         /// <param name="y">The y dimension for the LED.</param>
         /// <param name="value">The value to write.</param>
-        public void Write(int matrix, int x, int y, int value)
+        public void Write(int matrix, int x, int y, PinValue value)
         {
             /*
             The following diagrams and information demonstrate how the matrix is structured.
@@ -241,7 +242,7 @@ namespace Iot.Device.Display
             int logicalColumn = matrix is 0 ? x : y;
             byte mask = (byte)(1 << logicalColumn);
             byte[] buffer = _buffers[matrix];
-            buffer[logicalRow] = UpdateByte(buffer[logicalRow], mask, value);
+            buffer[logicalRow] = UpdateByte(buffer[logicalRow], mask, (int)value);
 
             AutoFlush(matrix);
         }
@@ -252,7 +253,7 @@ namespace Iot.Device.Display
         /// <param name="matrix">The matrix to use.</param>
         /// <param name="x">The x dimension for the LED.</param>
         /// <param name="y">The y dimension for the LED.</param>
-        public int Read(int matrix, int x, int y)
+        public PinValue Read(int matrix, int x, int y)
         {
             CheckDimensions(matrix, x, y);
             int row = matrix is 0 ? y : x;
@@ -266,7 +267,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Update decimal point for matrix.
         /// </summary>
-        public void WriteDecimalPoint(int matrix, int value)
+        public void WriteDecimalPoint(int matrix, PinValue value)
         {
             CheckMatrixIndex(matrix);
             byte[] buffer = _buffers[matrix];
@@ -279,18 +280,17 @@ namespace Iot.Device.Display
         /// <summary>
         /// Fill LEDs with value, per matrix.
         /// </summary>
-        public void Fill(int matrix, int value)
+        public void Fill(int matrix, PinValue value)
         {
             CheckMatrixIndex(matrix);
-            int fillValue = value > 0 ? 255 : 0;
-            _buffers[matrix].AsSpan().Fill((byte)fillValue);
+            _buffers[matrix].AsSpan().Fill((byte)value);
             AutoFlush(matrix);
         }
 
         /// <summary>
         /// Fill LEDs with value.
         /// </summary>
-        public void Fill(int value)
+        public void Fill(PinValue value)
         {
             foreach (int index in Range(0, 2))
             {
@@ -360,9 +360,9 @@ namespace Iot.Device.Display
 
         private void Write(byte address, byte value) => _i2cDevice.Write(stackalloc byte[] { address, value });
 
-        private byte UpdateByte(byte data, byte mask, int value)
+        private byte UpdateByte(byte data, byte mask, PinValue value)
         {
-            if (value is 1)
+            if (value == PinValue.High)
             {
                 data |= mask;
             }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Threading;
 
@@ -11,7 +12,7 @@ namespace Iot.Device.Display
     /// <summary>
     /// Represents LED Dot Matrix driven by IS31FL3730.
     /// </summary>
-    public class DotMatrix5x7 : IMatrix
+    public class DotMatrix5x7
     {
         private readonly Is31fl3730 _is31fl3730;
         private readonly int _matrix;
@@ -27,26 +28,24 @@ namespace Iot.Device.Display
             _matrix = matrix;
         }
 
-        /// <inheritdoc/>
-        public int Width { get; } = BaseWidth;
-
-        /// <inheritdoc/>
-        public int Height { get; } = BaseHeight;
-
-        /// <inheritdoc/>
-        public int this[int x, int y]
+        /// <summary>
+        /// Indexer for matrix.
+        /// </summary>
+        public PinValue this[int x, int y]
         {
             get => _is31fl3730.Read(_matrix, x, y);
             set => _is31fl3730.Write(_matrix, x, y, value);
         }
 
-        /// <inheritdoc/>
-        public void Fill(int value) => _is31fl3730.Fill(_matrix, value);
+        /// <summary>
+        /// Fill LEDs with value.
+        /// </summary>
+        public void Fill(PinValue value) => _is31fl3730.Fill(_matrix, value);
 
         /// <summary>
         /// Fill matrix (0 is dark; 1 is lit).
         /// </summary>
-        public void WriteDecimalPoint(int value) => _is31fl3730.WriteDecimalPoint(_matrix, value);
+        public void WriteDecimalPoint(PinValue value) => _is31fl3730.WriteDecimalPoint(_matrix, value);
 
         /// <summary>
         /// Width of LED matrix (x axis).

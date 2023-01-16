@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device.Gpio;
 using System.Device.I2c;
 using System.Linq;
 using System.Threading;
@@ -31,7 +32,7 @@ matrix[width, 0] = 1;
 matrix[width, height] = 1;
 Thread.Sleep(500);
 
-matrix.Fill(255);
+matrix.Fill(1);
 Thread.Sleep(1000);
 
 matrix.Fill(0);
@@ -124,20 +125,20 @@ for (int i = height; i >= 0; i--)
 Thread.Sleep(500);
 matrix.Fill(0);
 
-void WriteRowPixels(int row, IEnumerable<int> pixels, int value)
+void WriteRowPixels(int row, IEnumerable<int> pixels, PinValue value)
 {
     foreach (int pixel in pixels)
     {
-        matrix[pixel, row] = (byte)value;
+        matrix[pixel, row] = value;
         Thread.Sleep(15);
     }
 }
 
-void WriteColumnPixels(int column, IEnumerable<int> pixels, int value)
+void WriteColumnPixels(int column, IEnumerable<int> pixels, PinValue value)
 {
     foreach (int pixel in pixels)
     {
-        matrix[column, pixel] = (byte)value;
+        matrix[column, pixel] = value;
         Thread.Sleep(15);
     }
 }
