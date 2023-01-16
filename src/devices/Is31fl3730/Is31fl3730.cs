@@ -29,7 +29,7 @@ namespace Iot.Device.Display
         private I2cDevice _i2cDevice;
 
         /// <summary>
-        /// Initialize IS31FL3730 device
+        /// Initialize IS31FL3730 device.
         /// </summary>
         /// <param name="i2cDevice">The <see cref="System.Device.I2c.I2cDevice"/> to create with.</param>
         public Is31fl3730(I2cDevice i2cDevice)

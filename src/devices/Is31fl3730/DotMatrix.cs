@@ -20,7 +20,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Initialize virtual Dot Matrix.
         /// </summary>
-        /// <param name="matrices">The  to create with.</param>
+        /// <param name="matrices">The matrices to use.</param>
         public DotMatrix(DotMatrix5x7[] matrices)
         {
             _matrices = matrices;
@@ -57,6 +57,7 @@ namespace Iot.Device.Display
                 var (matrixIndex, index) = GetMatrixIndex(x, y);
                 return _matrices[matrixIndex][index, y];
             }
+
             set
             {
                 var (matrixIndex, index) = GetMatrixIndex(x, y);
