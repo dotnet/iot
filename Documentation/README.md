@@ -134,7 +134,7 @@ This repository mainly contains two different components:
 
 ### Social
 
-* Hackaday.io
+* [Hackaday.io](https://hackaday.io)
 * [hackster.io](https://www.hackster.io/)
 * [instructables](https://www.instructables.com/)
 

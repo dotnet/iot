@@ -13,5 +13,6 @@
         { "pattern": "https://www.digikey.com/" },
         { "pattern": "https://www.aliexpress.com/" },
         { "pattern": "https://www.emvlab.org/tlvutils/" }
+        { "pattern": "https://hackaday.io" }
     ] 
 }
