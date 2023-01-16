@@ -9,7 +9,7 @@ and therefore functionality has been split into 2 classes which allows using the
 
 ## Documentation
 
-- You can find the datasheet [here](https://www.st.com/resource/en/datasheet/lsm9ds1.pdf)
+- You can find the datasheet [here](https://cdn.sparkfun.com/assets/learn_tutorials/3/7/3/LSM9DS1_Datasheet.pdf)
 
 ## Usage
 

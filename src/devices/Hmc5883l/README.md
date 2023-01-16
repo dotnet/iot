@@ -4,7 +4,7 @@ HMC5883L is a surface-mount, multi-chip module designed for low-field magnetic s
 
 ## Documentation
 
-- HMC5883L [datasheet](https://cdn.datasheetspdf.com/pdf-down/H/M/C/HMC5883L-Honeywell.pdf)
+- HMC5883L [datasheet](https://cdn-shop.adafruit.com/datasheets/HMC5883L_3-Axis_Digital_Compass_IC.pdf)
 
 ![sensor](sensor.jpg)
 

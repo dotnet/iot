@@ -12,6 +12,7 @@
         { "pattern": "https://m5stack.oss-cn-shenzhen.aliyuncs.com/resource/docs/datasheet/core/MPU-6886-000193%2Bv1.1_GHIC_en.pdf" },
         { "pattern": "https://www.digikey.com/" },
         { "pattern": "https://www.aliexpress.com/" },
-        { "pattern": "https://www.emvlab.org/tlvutils/" }
+        { "pattern": "https://www.emvlab.org/tlvutils/" },
+        { "pattern": "https://hackaday.io" }
     ] 
 }
