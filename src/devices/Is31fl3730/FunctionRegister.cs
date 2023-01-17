@@ -1,12 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Display
+namespace Iot.Device.Display.Internal
 {
     /// <summary>
     /// Register addresses for the Function Register.
     /// </summary>
-    internal static class FunctionRegister
+    internal static class Is31fl3730_FunctionRegister
     {
         /// <summary>
         /// Address for Configuration Register.

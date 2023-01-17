@@ -1,12 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Display
+namespace Iot.Device.Display.Internal
 {
     /// <summary>
     /// IS31FL3730 matrix driver values.
     /// </summary>
-    internal static class MatrixValues
+    internal static class Is31fl3730_MatrixValues
     {
         /// <summary>
         /// Arbitrary 8-bit value to write to Update Column Register, as required by datasheet.
