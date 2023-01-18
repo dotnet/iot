@@ -2,6 +2,27 @@
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Common.ValueArray`1</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Display.BarColor</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:IoT.Device.Pn532.ErrorCode</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:IoT.Device.Tsl256x.Channel</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
@@ -51,9 +72,23 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Common.ValueArray`1</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Display.BarColor</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:IoT.Device.Pn532.ErrorCode</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -107,9 +142,30 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Pn532.ErrorCode</Target>
+    <Target>T:Iot.Device.Display.BarColor</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Common.ValueArray`1</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Display.BarColor</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:IoT.Device.Pn532.ErrorCode</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -162,13 +218,6 @@
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Pn532.ErrorCode</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
@@ -184,6 +233,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
@@ -198,6 +254,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
@@ -211,64 +281,8 @@
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Common.ValueArray`1</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Common.ValueArray`1</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Common.ValueArray`1</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Display.BarColor</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Display.BarColor</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Display.BarColor</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

@@ -5,7 +5,7 @@ HC-SR501 is used to detect motion based on the infrared heat in the surrounding 
 ## Documentation
 
 - In [Chinese](http://wenku.baidu.com/view/26ef5a9c49649b6648d747b2.html)
-- In [English](https://cdn.datasheetspdf.com/pdf-down/H/C/-/HC-SR501-1-ETC.pdf)
+- In [English](https://www.mpja.com/download/31227sc.pdf)
 
 ![sensor](sensor.jpg)
 

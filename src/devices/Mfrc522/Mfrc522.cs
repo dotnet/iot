@@ -264,7 +264,7 @@ namespace Iot.Device.Mfrc522
             }
             while (true);
 
-            card.Atqa = BinaryPrimitives.ReadUInt16BigEndian(atqa);
+            card.Atqa = BinaryPrimitives.ReadUInt16LittleEndian(atqa);
             var status = Select(out byte[]? nfcId, out byte sak);
             if (status != Status.Ok)
             {

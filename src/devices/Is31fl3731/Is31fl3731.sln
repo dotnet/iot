@@ -1,0 +1,40 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30114.105
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Is31fl3731", "Is31fl3731.csproj", "{17ACEE56-F568-4B43-9B8C-1596B70F52E6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LedShim28x1", "samples\LedShim28x1\LedShim28x1.csproj", "{69D85C33-30BB-4F13-BF96-794ED751439D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Matrix", "samples\Matrix\Matrix.csproj", "{3DE911AB-01CB-4C90-9DE9-5A3AECB61872}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MatrixRgb", "samples\MatrixRgb\MatrixRgb.csproj", "{5A94E2EC-BDA2-478A-A50D-725D0B82E573}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{17ACEE56-F568-4B43-9B8C-1596B70F52E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17ACEE56-F568-4B43-9B8C-1596B70F52E6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17ACEE56-F568-4B43-9B8C-1596B70F52E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17ACEE56-F568-4B43-9B8C-1596B70F52E6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69D85C33-30BB-4F13-BF96-794ED751439D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69D85C33-30BB-4F13-BF96-794ED751439D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69D85C33-30BB-4F13-BF96-794ED751439D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69D85C33-30BB-4F13-BF96-794ED751439D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DE911AB-01CB-4C90-9DE9-5A3AECB61872}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DE911AB-01CB-4C90-9DE9-5A3AECB61872}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DE911AB-01CB-4C90-9DE9-5A3AECB61872}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DE911AB-01CB-4C90-9DE9-5A3AECB61872}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A94E2EC-BDA2-478A-A50D-725D0B82E573}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A94E2EC-BDA2-478A-A50D-725D0B82E573}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A94E2EC-BDA2-478A-A50D-725D0B82E573}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A94E2EC-BDA2-478A-A50D-725D0B82E573}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

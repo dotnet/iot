@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Display.csproj" />
+    <ProjectReference Include="../../Is31fl3731.csproj" />
     <Compile Include="Program.cs" />
   </ItemGroup>
 </Project>
