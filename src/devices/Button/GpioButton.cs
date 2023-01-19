@@ -15,7 +15,6 @@ namespace Iot.Device.Button
         private GpioController _gpioController;
         private PinMode _gpioPinMode;
         private PinMode _eventPinMode;
-        private TimeSpan _debounceTime;
 
         private int _buttonPin;
         private bool _shouldDispose;
@@ -31,68 +30,12 @@ namespace Iot.Device.Button
         /// Initialization of the button.
         /// </summary>
         /// <param name="buttonPin">GPIO pin of the button.</param>
-        /// <param name="pinMode">Pin mode of the system. If the Gpio is an input and an external resistor is used, it must be specified PinMode.InputPullUp or PinMode.InputPullDown so that the correct transition can be detected by the event handler. </param>
-        /// <param name="gpio">Gpio Controller.</param>
-        /// <param name="shouldDispose">True to dispose the GpioController.</param>
-        /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        /// <param name="hasExternalResistor">This parameter is ignored when PinMode is PinMode.Input. When False, if PinMode is PinMode.InputPullUp or PinMode.InputPullDown, the Gpio is configured with the internal resistor (if supported by the board). Otherwise the Gpio is configured as it was specified PinMode.Input.</param>
-        public GpioButton(int buttonPin, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp,
-            TimeSpan debounceTime = default, bool hasExternalResistor = false)
-            : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), gpio, shouldDispose, pinMode, debounceTime, hasExternalResistor)
-        {
-        }
-
-        /// <summary>
-        /// Initialization of the button.
-        /// </summary>
-        /// <param name="buttonPin">GPIO pin of the button.</param>
-        /// <param name="pinMode">Pin mode of the system. If the Gpio is an input and an external resistor is used, it must be specified PinMode.InputPullUp or PinMode.InputPullDown so that the correct transition can be detected by the event handler.</param>
-        /// <param name="doublePress">Max ticks between button presses to count as doublepress.</param>
-        /// <param name="holding">Min ms a button is pressed to count as holding.</param>
-        /// <param name="gpio">Gpio Controller.</param>
-        /// <param name="shouldDispose">True to dispose the GpioController.</param>
-        /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        /// <param name="hasExternalResistor">This parameter is ignored when PinMode is PinMode.Input. When False, if PinMode is PinMode.InputPullUp or PinMode.InputPullDown, the Gpio is configured with the internal resistor (if supported by the board). Otherwise the Gpio is configured as it was specified PinMode.Input</param>
-        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, GpioController? gpio = null, bool shouldDispose = true, PinMode pinMode = PinMode.InputPullUp, TimeSpan debounceTime = default, bool hasExternalResistor = false)
-            : base(doublePress, holding, debounceTime)
-        {
-            _gpioController = gpio ?? new GpioController();
-            _shouldDispose = shouldDispose;
-            _buttonPin = buttonPin;
-            _debounceTime = debounceTime;
-            HasExternalResistor = hasExternalResistor;
-
-            _eventPinMode = pinMode;
-            _gpioPinMode = hasExternalResistor && (pinMode == PinMode.InputPullUp || pinMode == PinMode.InputPullDown)
-                ? _gpioPinMode = PinMode.Input
-                : _gpioPinMode = pinMode;
-
-            if (!HasExternalResistor && _gpioPinMode == PinMode.Input)
-            {
-                throw new ArgumentException($"When GPIO pin is configured as input, {nameof(HasExternalResistor)} must be set to true");
-            }
-
-            if (_gpioPinMode == PinMode.Input | _gpioPinMode == PinMode.InputPullDown | _gpioPinMode == PinMode.InputPullUp)
-            {
-                _gpioController.OpenPin(_buttonPin, _gpioPinMode);
-                _gpioController.RegisterCallbackForPinValueChangedEvent(_buttonPin, PinEventTypes.Falling | PinEventTypes.Rising, PinStateChanged);
-            }
-            else
-            {
-                throw new ArgumentException("GPIO pin can only be set to input, not to output.");
-            }
-        }
-
-        /// <summary>
-        /// Initialization of the button.
-        /// </summary>
-        /// <param name="buttonPin">GPIO pin of the button.</param>
         /// <param name="isPullUp">True if the Gpio is either pulled up in hardware or in the Gpio configuration (see <paramref name="hasExternalResistor"/>. False if instead the Gpio is pulled down.</param>
         /// <param name="hasExternalResistor">When False the pull resistor is configured using the Gpio PinMode.InputPullUp or PinMode.InputPullDown (if supported by the board). Otherwise the Gpio is configured as PinMode.Input.</param>
         /// <param name="gpio">Gpio Controller.</param>
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public GpioButton(int buttonPin, bool isPullUp, bool hasExternalResistor = false,
+        public GpioButton(int buttonPin, bool isPullUp = true, bool hasExternalResistor = false,
             GpioController? gpio = null, bool shouldDispose = true, TimeSpan debounceTime = default)
             : this(buttonPin, TimeSpan.FromTicks(DefaultDoublePressTicks), TimeSpan.FromMilliseconds(DefaultHoldingMilliseconds), isPullUp, hasExternalResistor, gpio, shouldDispose, debounceTime)
         {
@@ -109,14 +52,13 @@ namespace Iot.Device.Button
         /// <param name="gpio">Gpio Controller.</param>
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, bool isPullUp, bool hasExternalResistor = false,
+        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, bool isPullUp = true, bool hasExternalResistor = false,
             GpioController? gpio = null, bool shouldDispose = true, TimeSpan debounceTime = default)
             : base(doublePress, holding, debounceTime)
         {
             _gpioController = gpio ?? new GpioController();
             _shouldDispose = shouldDispose;
             _buttonPin = buttonPin;
-            _debounceTime = debounceTime;
             HasExternalResistor = hasExternalResistor;
 
             _eventPinMode = isPullUp ? PinMode.InputPullUp : PinMode.InputPullDown;
