@@ -87,7 +87,7 @@ The same code works for [Scroll HAT Mini](https://shop.pimoroni.com/products/scr
 
 <img src="https://cdn.shopify.com/s/files/1/0174/1800/products/led-shim-medium-4_1500x1500.jpg" width="250px" alt="Pimori LED Shim" />
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.LedShim28x1.cs).
+You can write the following code to control them or checkout a [larger sample](samples/LedShim28x1/Program.cs).
 
 ```csharp
 using LedShim28x1 shim = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x75)));
