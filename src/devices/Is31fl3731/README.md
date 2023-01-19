@@ -10,7 +10,7 @@ Adafruit sells [16x9 Charlieplexed LED matrices (multiple colors)](https://www.a
 
 <img src="https://cdn-shop.adafruit.com/970x728/2948-05.jpg" width="250px" alt="16x9 Charlieplexed LED matrix" />
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs).
+You can write the following code to control them or checkout a [larger sample](samples/Matrix/Program.cs).
 
 ```csharp
 using Backpack16x9 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
