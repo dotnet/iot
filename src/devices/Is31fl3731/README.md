@@ -35,7 +35,7 @@ You won't be able to look away from the mesmerizing patterns created by this [Ad
 
 <img src="https://cdn-shop.adafruit.com/970x728/4122-00.jpg" width="250px" alt="Adafruit Charlieplexed LED Matrix Bonnet - 16x8" />
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs).
+You can write the following code to control them or checkout a [larger sample](samples/Matrix/Program.cs).
 
 ```csharp
 using Bonnet16x8 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Is31Fl3731.DefaultI2cAddress)));
@@ -60,7 +60,7 @@ A whole heap of LED pixels with individual brightness control, for scrolling mes
 
 <img src="https://cdn.shopify.com/s/files/1/0174/1800/products/scroll-phat-hd-colours-red_768x768.jpg?v=1519637267" width="250px" alt="Pimoroni Scroll pHAT HD -- 17x7" />
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs).
+You can write the following code to control them or checkout a [larger sample](samples/Matrix/Program.cs).
 
 ```csharp
 using ScrollHat17x7 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x61)));;
@@ -112,7 +112,7 @@ A tiny, tightly-packed matrix of 77 individually-controllable bright white LEDs.
 
 <img src="https://cdn.shopify.com/s/files/1/0174/1800/products/11x7_matrix_breakout_1_of_4_1500x1500.JPG" width="250px" alt="Pimori Led Matrix Breakout - 11x7" />
 
-You can write the following code to control them or checkout a [larger sample](samples/Program.Matrix.cs).
+You can write the following code to control them or checkout a [larger sample](samples/Matrix/Program.cs).
 
 ```csharp
 using Breakout11x7 matrix = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, 0x75)));
