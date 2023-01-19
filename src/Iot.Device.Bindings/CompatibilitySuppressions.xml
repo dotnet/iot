@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
@@ -233,7 +234,35 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -254,7 +283,21 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -262,6 +305,48 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -282,6 +367,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
@@ -290,83 +396,6 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
