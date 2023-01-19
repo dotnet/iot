@@ -1,6 +1,6 @@
 parameters:
   runAsPublic: false
-  sourceIndexPackageVersion: 1.0.1-20221220.2
+  sourceIndexPackageVersion: 1.0.1-20220804.1
   sourceIndexPackageSource: https://pkgs.dev.azure.com/dnceng/public/_packaging/dotnet-tools/nuget/v3/index.json
   sourceIndexBuildCommand: powershell -NoLogo -NoProfile -ExecutionPolicy Bypass -Command "eng/common/build.ps1 -restore -build -binarylog -ci"
   preSteps: []
@@ -22,17 +22,16 @@ jobs:
     value: ${{ parameters.binlogPath }}
   - ${{ if and(eq(parameters.runAsPublic, 'false'), ne(variables['System.TeamProject'], 'public'), notin(variables['Build.Reason'], 'PullRequest')) }}:
     - group: source-dot-net stage1 variables
-  - template: /eng/common/templates/variables/pool-providers.yml
 
   ${{ if ne(parameters.pool, '') }}:
     pool: ${{ parameters.pool }}
   ${{ if eq(parameters.pool, '') }}:
     pool:
       ${{ if eq(variables['System.TeamProject'], 'public') }}:
-        name: $(DncEngPublicBuildPool)
+        name: NetCore-Svc-Public
         demands: ImageOverride -equals windows.vs2019.amd64.open
       ${{ if eq(variables['System.TeamProject'], 'internal') }}:
-        name: $(DncEngInternalBuildPool)
+        name: NetCore1ESPool-Svc-Internal
         demands: ImageOverride -equals windows.vs2019.amd64
 
   steps:
@@ -40,10 +39,10 @@ jobs:
     - ${{ preStep }}
 
   - task: UseDotNet@2
-    displayName: Use .NET Core SDK 6
+    displayName: Use .NET Core sdk 3.1
     inputs:
       packageType: sdk
-      version: 6.0.x
+      version: 3.1.x
       installationPath: $(Agent.TempDirectory)/dotnet
       workingDirectory: $(Agent.TempDirectory)
 
