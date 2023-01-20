@@ -6,9 +6,9 @@ A stepper motor is an electromechanical device which converts electrical pulses 
 
 The 28BYJ-48 is a small stepper motor suitable for a large range of applications. More information [here](https://components101.com/motors/28byj-48-stepper-motor)
 
-**[Stepper Motor 28BYJ-48]**: <https://www.st.com/resource/en/datasheet/uln2001.pdf>
+**[Stepper Motor 28BYJ-48]**: <http://www.geeetech.com/Documents/Stepper%20motor%20datasheet.pdf>
 
-**[ULN2003]**: <http://www.geeetech.com/Documents/ULN2003%20datasheet.pdf>
+**[ULN2003]**: <https://www.st.com/resource/en/datasheet/uln2001.pdf>
 
 ## Board
 
