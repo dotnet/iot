@@ -219,7 +219,7 @@ namespace Iot.Device.BrickPi3.Sensors
             int val = 0;
             switch (_colorMode)
             {
-                case ColorSensorMode.Color:        
+                case ColorSensorMode.Color:
                 case ColorSensorMode.Ambient:
                     val = (int)ReadColor();
                     break;
