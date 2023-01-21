@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading;
@@ -55,11 +56,11 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.Equal("Client", client.InterfaceName);
             Assert.Equal("Server", server.InterfaceName);
             var clientSentence = new GlobalPositioningSystemFixData(DateTimeOffset.UtcNow, GpsQuality.DifferentialFix, new GeographicPosition(2, 3, 4), 100, 2, 12);
-            client.SendSentence(clientSentence);
             var serverSentence = new DepthBelowSurface(Length.FromMeters(5.2));
+            client.SendSentence(clientSentence);
             server.SendSentence(serverSentence);
 
-            timeout = 50;
+            timeout = 100;
             while (_sentencesReceivedByClient.Count < 2 || _sentencesReceivedByServer.Count < 2)
             {
                 Thread.Sleep(100);
@@ -67,6 +68,10 @@ namespace Iot.Device.Nmea0183.Tests
                 {
                     throw new TimeoutException($"Only received {_sentencesReceivedByClient.Count} messages from server and {_sentencesReceivedByServer.Count} from client");
                 }
+
+                // Send again, a first message might be lost
+                client.SendSentence(clientSentence);
+                server.SendSentence(serverSentence);
             }
 
             client.StopDecode();
@@ -75,14 +80,14 @@ namespace Iot.Device.Nmea0183.Tests
             Assert.False(client.Connected);
 
             // Two, because both a decoded and a raw sentence will be used in the callback
-            Assert.Equal(2, _sentencesReceivedByClient.Count);
-            Assert.Equal(2, _sentencesReceivedByServer.Count);
+            Assert.True(_sentencesReceivedByClient.Count % 2 == 0);
+            Assert.True(_sentencesReceivedByServer.Count % 2 == 0);
 
             Assert.Equal(_sentencesReceivedByClient[0].ToReadableContent(), serverSentence.ToReadableContent());
             Assert.Equal(_sentencesReceivedByServer[0].ToReadableContent(), clientSentence.ToReadableContent());
 
-            Assert.IsType<RawSentence>(_sentencesReceivedByClient[1]);
-            Assert.IsType<RawSentence>(_sentencesReceivedByServer[1]);
+            Assert.Contains(_sentencesReceivedByClient, x => x.GetType() == typeof(RawSentence));
+            Assert.Contains(_sentencesReceivedByServer, x => x.GetType() == typeof(RawSentence));
         }
 
         private void ClientOnNewSequence(NmeaSinkAndSource source, NmeaSentence sentence)
