@@ -91,7 +91,7 @@ namespace Iot.Device.Nmea0183.Ais
             var checksum = ExtractChecksum(sentence, checksumIndex);
 
             var sentenceWithoutChecksum = sentence.Substring(0, checksumIndex);
-            var calculatedChecksum = CalculateChecksum(sentenceWithoutChecksum);
+            var calculatedChecksum = TalkerSentence.CalculateChecksum(sentenceWithoutChecksum);
 
             if (checksum != calculatedChecksum)
             {
@@ -274,19 +274,6 @@ namespace Iot.Device.Nmea0183.Ais
         {
             var checksum = sentence.Substring(checksumIndex + 1);
             return Convert.ToInt32(checksum, 16);
-        }
-
-        public int CalculateChecksum(string sentence)
-        {
-            var data = sentence.Substring(1);
-
-            var checksum = 0;
-            foreach (var ch in data)
-            {
-                checksum ^= (byte)ch;
-            }
-
-            return Convert.ToInt32(checksum.ToString("X"), 16);
         }
 
         private bool ValidPacketHeader(string packetHeader)
