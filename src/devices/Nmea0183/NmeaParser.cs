@@ -155,7 +155,7 @@ namespace Iot.Device.Nmea0183
                             FireOnParserError("End of stream detected.", NmeaError.PortClosed);
                         }
                     }
-                    catch (ObjectDisposedException)
+                    catch (Exception x) when (x is IOException || x is ObjectDisposedException)
                     {
                         // Ignore here (already reported above)
                     }
