@@ -52,12 +52,18 @@ namespace Iot.Device.Button
         /// <param name="gpio">Gpio Controller.</param>
         /// <param name="shouldDispose">True to dispose the GpioController.</param>
         /// <param name="debounceTime">The amount of time during which the transitions are ignored, or zero</param>
-        public GpioButton(int buttonPin, TimeSpan doublePress, TimeSpan holding, bool isPullUp = true, bool hasExternalResistor = false,
-            GpioController? gpio = null, bool shouldDispose = true, TimeSpan debounceTime = default)
+        public GpioButton(int buttonPin,
+            TimeSpan doublePress,
+            TimeSpan holding,
+            bool isPullUp = true,
+            bool hasExternalResistor = false,
+            GpioController? gpio = null,
+            bool shouldDispose = true,
+            TimeSpan debounceTime = default)
             : base(doublePress, holding, debounceTime)
         {
             _gpioController = gpio ?? new GpioController();
-            _shouldDispose = shouldDispose;
+            _shouldDispose = gpio == null ? true : shouldDispose;
             _buttonPin = buttonPin;
             HasExternalResistor = hasExternalResistor;
 
@@ -66,8 +72,19 @@ namespace Iot.Device.Button
                 ? _gpioPinMode = PinMode.Input
                 : _gpioPinMode = _eventPinMode;
 
-            _gpioController.OpenPin(_buttonPin, _gpioPinMode);
-            _gpioController.RegisterCallbackForPinValueChangedEvent(_buttonPin, PinEventTypes.Falling | PinEventTypes.Rising, PinStateChanged);
+            try
+            {
+                _gpioController.OpenPin(_buttonPin, _gpioPinMode);
+                _gpioController.RegisterCallbackForPinValueChangedEvent(
+                    _buttonPin,
+                    PinEventTypes.Falling | PinEventTypes.Rising,
+                    PinStateChanged);
+            }
+            catch (Exception)
+            {
+                _gpioController.Dispose();
+                throw;
+            }
         }
 
         /// <summary>
