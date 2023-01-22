@@ -82,7 +82,11 @@ namespace Iot.Device.Button
             }
             catch (Exception)
             {
-                _gpioController.Dispose();
+                if (shouldDispose)
+                {
+                    _gpioController.Dispose();
+                }
+
                 throw;
             }
         }
