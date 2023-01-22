@@ -14,7 +14,7 @@ A general rule in electronics is that input pins not permanently tied to a wire 
 For example, a button causes the input GPIO to have a stable state only during the pressed state (the two pins are shorted during the pressed state).
 In order to ensure the released state to be either `LOW` or `HIGH`, a resistor must always be either added or configured in software to avoid unpredictable readings. The Button needs to know the released state in the `PinStateChanged` event in order to correctly detect when it gets pushed.
 
-Many boards supports configuring in software an "internal" resistor which is part of the board hardware, but this configuration may not be available for all the GPIOs. The developer should **carefully read the board documentation** to verify whether or not the internal resistor configuration is available for the each GPIO. When not supported, the board will **not** throw an exception but GPIO pin will float between `Vcc` and `GND`, possibly generating random behavior.
+Many boards supports configuring in software an "internal" resistor which is part of the board hardware, but this configuration may not be available for all the GPIOs. The developer should **carefully read the board documentation** to verify whether or not the internal resistor configuration is available for the each GPIO. If the pin does not support being configured with an internal resistor, the constructor will throw an exception.
 
 The Button binding uses the GPIO `PinMode` enumeration to tell the board to configure the GPIO with an internal pull-up, internal pull-down or without any internal resistors. In the latter case the user **must** either use an external resistor configured either as a pull-up (tied to `Vcc`) or as a pull-down (tied to `GND`).
 

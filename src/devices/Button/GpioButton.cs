@@ -72,6 +72,16 @@ namespace Iot.Device.Button
                 ? _gpioPinMode = PinMode.Input
                 : _gpioPinMode = _eventPinMode;
 
+            if (!_gpioController.IsPinModeSupported(_buttonPin, PinMode.Input))
+            {
+                throw new ArgumentException($"The pin {_buttonPin} cannot be configured as Input");
+            }
+
+            if (!_gpioController.IsPinModeSupported(_buttonPin, _gpioPinMode))
+            {
+                throw new ArgumentException($"The pin {_buttonPin} cannot be configured as {(isPullUp ? "pull-up" : "pull-down")}. Use an external resistor and set {nameof(HasExternalResistor)}=true");
+            }
+
             try
             {
                 _gpioController.OpenPin(_buttonPin, _gpioPinMode);
