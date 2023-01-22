@@ -214,23 +214,14 @@ namespace Iot.Device.BrickPi3.Sensors
         /// <summary>
         /// Read the intensity of the reflected or ambient light in percent. In color mode the color index is returned
         /// </summary>
-        public int Read()
+        public int Read() => _colorMode switch
         {
-            int val = 0;
-            switch (_colorMode)
-            {
-                case ColorSensorMode.Color:
-                case ColorSensorMode.Ambient:
-                    val = (int)ReadColor();
-                    break;
-                case ColorSensorMode.Reflection:
-                default:
-                    val = CalculateRawAverageAsPct();
-                    break;
-            }
-
-            return val;
-        }
+            ColorSensorMode.Color or ColorSensorMode.Ambient
+                => (int)ReadColor(),
+            ColorSensorMode.Reflection
+                => CalculateRawAverageAsPct(),
+            _ => CalculateRawAverageAsPct(),
+        };
 
         private int CalculateRawAverage()
         {
