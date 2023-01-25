@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device;
 using System.Device.Spi;
 using System.Diagnostics;
 
@@ -65,6 +66,14 @@ namespace Iot.Device.Board
             get
             {
                 return _device;
+            }
+        }
+
+        public bool IsDisposed
+        {
+            get
+            {
+                return _device == null;
             }
         }
 
@@ -136,6 +145,15 @@ namespace Iot.Device.Board
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// Query the component information (the tree of active drivers) for diagnostic purposes.
+        /// </summary>
+        /// <returns>A <see cref="ComponentInformation"/> instance</returns>
+        public ComponentInformation QueryComponentInformation()
+        {
+            return new ComponentInformation(this, $"SPI Bus Manager, Bus number {_device.ConnectionSettings.BusId}", ComponentState.Active);
         }
     }
 }

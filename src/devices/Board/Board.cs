@@ -33,6 +33,7 @@ namespace Iot.Device.Board
         private readonly object _pinReservationsLock;
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
         private readonly Dictionary<int, I2cBusManager> _i2cBuses;
+        private readonly Dictionary<int, SpiDeviceManager> _spiBuses;
         private bool _initialized;
         private bool _disposed;
         private Dictionary<int, PinUsage> _knownUsages;
@@ -48,6 +49,7 @@ namespace Iot.Device.Board
         {
             _pinReservations = new Dictionary<int, List<PinReservation>>();
             _i2cBuses = new Dictionary<int, I2cBusManager>();
+            _spiBuses = new Dictionary<int, SpiDeviceManager>();
             _knownUsages = new Dictionary<int, PinUsage>();
             _pinReservationsLock = new object();
             _initialized = false;
@@ -237,7 +239,13 @@ namespace Iot.Device.Board
                 bus.Value.Dispose();
             }
 
+            foreach (var bus in _spiBuses)
+            {
+                bus.Value.Dispose();
+            }
+
             _i2cBuses.Clear();
+            _spiBuses.Clear();
             _disposed = true;
         }
 
@@ -492,6 +500,12 @@ namespace Iot.Device.Board
         public SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings, int[] pinAssignment, PinNumberingScheme pinNumberingScheme)
         {
             Initialize();
+
+            if (_spiBuses.TryGetValue(connectionSettings.BusId, out SpiDeviceManager? bus) && !bus.IsDisposed)
+            {
+                return bus;
+            }
+
             if (pinAssignment == null)
             {
                 throw new ArgumentNullException(nameof(pinAssignment));
@@ -502,7 +516,9 @@ namespace Iot.Device.Board
                 throw new ArgumentException($"Invalid argument. Must provide three or four pins for SPI", nameof(pinAssignment));
             }
 
-            return new SpiDeviceManager(this, connectionSettings, pinAssignment, CreateSimpleSpiDevice);
+            var manager = new SpiDeviceManager(this, connectionSettings, pinAssignment, CreateSimpleSpiDevice);
+            _spiBuses[connectionSettings.BusId] = manager;
+            return manager;
         }
 
         /// <summary>
