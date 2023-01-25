@@ -233,6 +233,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
@@ -261,6 +275,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
@@ -276,6 +304,20 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.SecondI2cAddress</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
