@@ -234,6 +234,7 @@ public abstract class GpioControllerTestBase
         if (driver is SysFsDriver)
         {
             // This test is unreliable (flaky) with SysFs.
+            // See #629 and possibly #1581
             return;
         }
 
