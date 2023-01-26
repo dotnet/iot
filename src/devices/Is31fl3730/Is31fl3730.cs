@@ -20,7 +20,7 @@ namespace Iot.Device.Display
     // Based on: https://github.com/pimoroni/microdot-phat/blob/master/library/microdotphat/matrix.py
     public class Is31fl3730
     {
-        private readonly byte[] _matrix_addresses = new byte[] { Is31fl3730_FunctionRegister.Matrix1, Is31fl3730_FunctionRegister.Matrix2 };
+        private readonly byte[] _matrix_addresses = new byte[] { Is31fl3730FunctionRegister.Matrix1, Is31fl3730FunctionRegister.Matrix2 };
         private readonly List<byte[]> _buffers = new List<byte[]>
         {
             new byte[8],
@@ -80,12 +80,12 @@ namespace Iot.Device.Display
         // Set high bit for the 128th item
         // Set high bit low for the remaining 127 items
         // And then set lower bits as appropriate, to represent 0-127
-        public void UpdateBrightness(byte value) => Write(Is31fl3730_FunctionRegister.Pwm, value);
+        public void UpdateBrightness(byte value) => Write(Is31fl3730FunctionRegister.Pwm, value);
 
         /// <summary>
         /// Update current setting for each row output of LED matrix (default value is 40 mA).
         /// </summary>
-        public void UpdateCurrent(Current value) => Write(Is31fl3730_FunctionRegister.LightingEffect, (byte)value);
+        public void UpdateCurrent(Current value) => Write(Is31fl3730FunctionRegister.LightingEffect, (byte)value);
 
         /// <summary>
         /// Update configuration register, which controls shutdown, matrix, and display modes.
@@ -96,7 +96,7 @@ namespace Iot.Device.Display
             configuration |= (byte)shutdown;
             configuration |= (byte)matrix;
             configuration |= (byte)display;
-            Write(Is31fl3730_FunctionRegister.Configuration, configuration);
+            Write(Is31fl3730FunctionRegister.Configuration, configuration);
 
             // Set number of and which supported matrices (either or both)
             if (display is DisplayMode.MatrixOneOnly)
@@ -119,7 +119,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Resets all registers to default value.
         /// </summary>
-        public void ResetRegisters() => Write(Is31fl3730_FunctionRegister.Reset, Is31fl3730_MatrixValues.EightBitValue);
+        public void ResetRegisters() => Write(Is31fl3730FunctionRegister.Reset, Is31fl3730MatrixValues.EightBitValue);
 
         /// <summary>
         /// Write LED for matrix.
@@ -257,8 +257,8 @@ namespace Iot.Device.Display
         {
             CheckMatrixIndex(matrix);
             byte[] buffer = _buffers[matrix];
-            int row = matrix is 0 ? Is31fl3730_MatrixValues.MatrixOneDecimalRow : Is31fl3730_MatrixValues.MatrixTwoDecimalRow;
-            byte mask = matrix is 0 ? Is31fl3730_MatrixValues.MatrixOneDecimalMask : Is31fl3730_MatrixValues.MatrixTwoDecimalMask;
+            int row = matrix is 0 ? Is31fl3730MatrixValues.MatrixOneDecimalRow : Is31fl3730MatrixValues.MatrixTwoDecimalRow;
+            byte mask = matrix is 0 ? Is31fl3730MatrixValues.MatrixOneDecimalMask : Is31fl3730MatrixValues.MatrixTwoDecimalMask;
             buffer[row] = UpdateByte(buffer[row], mask, value);
             AutoFlush(matrix);
         }
@@ -341,7 +341,7 @@ namespace Iot.Device.Display
             to the Update Column Register is required to update
             the Data Registers (01h~0Bh, 0Eh~18h).
         */
-        private void WriteUpdateRegister() => Write(Is31fl3730_FunctionRegister.UpdateColumn, Is31fl3730_MatrixValues.EightBitValue);
+        private void WriteUpdateRegister() => Write(Is31fl3730FunctionRegister.UpdateColumn, Is31fl3730MatrixValues.EightBitValue);
 
         private void AutoFlush(int matrix)
         {

@@ -6,7 +6,7 @@ namespace Iot.Device.Display.Internal
     /// <summary>
     /// Register addresses for the Function Register.
     /// </summary>
-    internal static class Is31fl3730_FunctionRegister
+    internal static class Is31fl3730FunctionRegister
     {
         /// <summary>
         /// Address for Configuration Register.

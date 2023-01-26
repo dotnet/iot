@@ -6,7 +6,7 @@ namespace Iot.Device.Display.Internal
     /// <summary>
     /// IS31FL3730 matrix driver values.
     /// </summary>
-    internal static class Is31fl3730_MatrixValues
+    internal static class Is31fl3730MatrixValues
     {
         /// <summary>
         /// Arbitrary 8-bit value to write to Update Column Register, as required by datasheet.
