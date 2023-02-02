@@ -80,12 +80,28 @@ namespace Iot.Device.Display
         // Set high bit for the 128th item
         // Set high bit low for the remaining 127 items
         // And then set lower bits as appropriate, to represent 0-127
-        public void UpdateBrightness(byte value) => Write(Is31fl3730FunctionRegister.Pwm, value);
+        public void UpdateBrightness(byte value)
+        {
+            if (value > 128)
+            {
+                throw new ArgumentException($"{nameof(value)} must be between 0-128. {nameof(value)} was: {value}.");
+            }
+
+            Write(Is31fl3730FunctionRegister.Pwm, value);
+        }
 
         /// <summary>
         /// Update current setting for each row output of LED matrix (default value is 40 mA).
         /// </summary>
-        public void UpdateCurrent(Current value) => Write(Is31fl3730FunctionRegister.LightingEffect, (byte)value);
+        public void UpdateCurrent(Current value)
+        {
+            if (!Enum.IsDefined(typeof(Current), value))
+            {
+                throw new ArgumentException($"{value} is not a valid integer value for {nameof(Current)}.");
+            }
+
+            Write(Is31fl3730FunctionRegister.LightingEffect, (byte)value);
+        }
 
         /// <summary>
         /// Update configuration register, which controls shutdown, matrix, and display modes.
