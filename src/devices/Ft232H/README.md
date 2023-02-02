@@ -67,7 +67,7 @@ int Gpio5 = Ft232HDevice.GetPinNumberFromString("D5");
 Let's assume your device is the first one, you'll be able to create an I2C bus like this:
 
 ```csharp
- var ftI2cBus = new Ft232HDevice(devices[0]).CreateI2cBus();
+ var ftI2cBus = new Ft232HDevice(devices[0]).CreateOrGetI2cBus();
 ```
 
 From this bus, like for any other device, you can create an `I2cDevice`, in the following example for a BMP280.
