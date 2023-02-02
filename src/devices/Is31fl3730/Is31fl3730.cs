@@ -269,7 +269,7 @@ namespace Iot.Device.Display
         public void Fill(int matrix, PinValue value)
         {
             CheckMatrixIndex(matrix);
-            _buffers[matrix].AsSpan().Fill((byte)value);
+            _buffers[matrix].AsSpan().Fill((byte)(value == PinValue.High ? 255 : 0));
             AutoFlush(matrix);
         }
 
