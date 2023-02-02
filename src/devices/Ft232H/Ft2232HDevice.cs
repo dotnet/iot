@@ -17,9 +17,9 @@ namespace Iot.Device.Ft2232H
     public class Ft2232HDevice : Ftx232HDevice
     {
         /// <summary>
-        /// Gets all the FT232H connected
+        /// Gets all the FT2232H connected
         /// </summary>
-        /// <returns>A list of FT232H</returns>
+        /// <returns>A list of FT2232H</returns>
         public static List<Ft2232HDevice> GetFt2232H()
         {
             List<Ft2232HDevice> ft2232s = new List<Ft2232HDevice>();

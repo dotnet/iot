@@ -61,9 +61,9 @@ namespace Iot.Device.FtCommon
         internal List<SpiConnectionSettings> ConnectionSettings = new List<SpiConnectionSettings>();
 
         /// <summary>
-        /// Gets all the FT232H connected
+        /// Gets all the FTx232H connected
         /// </summary>
-        /// <returns>A list of FT232H</returns>
+        /// <returns>A list of FTx232H</returns>
         public static List<Ftx232HDevice> GetFtx232H()
         {
             List<Ftx232HDevice> ft232s = new List<Ftx232HDevice>();
@@ -85,7 +85,7 @@ namespace Iot.Device.FtCommon
         }
 
         /// <summary>
-        /// Instantiates a FT232H device object.
+        /// Instantiates a FTx232H device object.
         /// </summary>
         /// <param name="flags">Indicates device state.</param>
         /// <param name="type">Indicates the device type.</param>
@@ -99,7 +99,7 @@ namespace Iot.Device.FtCommon
         }
 
         /// <summary>
-        /// Instantiates a FT232H device object.
+        /// Instantiates a FTx232H device object.
         /// </summary>
         /// <param name="ftDevice">a FT Device</param>
         public Ftx232HDevice(FtDevice ftDevice)

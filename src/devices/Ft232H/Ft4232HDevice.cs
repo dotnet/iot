@@ -12,14 +12,14 @@ using Iot.Device.FtCommon;
 namespace Iot.Device.Ft4232H
 {
     /// <summary>
-    /// FT232H Device
+    /// FT4232H Device
     /// </summary>
     public class Ft4232HDevice : Ftx232HDevice
     {
         /// <summary>
-        /// Gets all the FT232H connected
+        /// Gets all the FT4232H connected
         /// </summary>
-        /// <returns>A list of FT232H</returns>
+        /// <returns>A list of FT4232H</returns>
         public static List<Ft4232HDevice> GetFt2232H()
         {
             List<Ft4232HDevice> ft4232s = new List<Ft4232HDevice>();
@@ -116,7 +116,7 @@ namespace Iot.Device.Ft4232H
         }
 
         /// <summary>
-        /// Instantiates a FT2232H device object.
+        /// Instantiates a FT4232H device object.
         /// </summary>
         /// <param name="flags">Indicates device state.</param>
         /// <param name="type">Indicates the device type.</param>
@@ -130,7 +130,7 @@ namespace Iot.Device.Ft4232H
         }
 
         /// <summary>
-        /// Instantiates a FT2232H device object.
+        /// Instantiates a FT4232H device object.
         /// </summary>
         /// <param name="ftDevice">a FT Device</param>
         public Ft4232HDevice(FtDevice ftDevice)
