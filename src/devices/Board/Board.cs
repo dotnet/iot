@@ -673,6 +673,11 @@ namespace Iot.Device.Board
                 self.AddSubComponent(e.Value.QueryComponentInformation());
             }
 
+            foreach (var e in _spiBuses)
+            {
+                self.AddSubComponent(e.Value.QueryComponentInformation());
+            }
+
             return self;
         }
     }
