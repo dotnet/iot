@@ -11,6 +11,12 @@ namespace System.Device.I2c;
 public abstract partial class I2cDevice : IDisposable, IQueryComponentInformation
 {
     /// <summary>
+    /// This event is raised when <see cref="QueryComponentInformation"/> of the base class is called. This is can be used for bindings
+    /// to intercept that call on their own I2C device, so they can add additional information
+    /// </summary>
+    public event Action<ComponentInformation>? OnQueryComponentInformation;
+
+    /// <summary>
     /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
     /// so the object returned will be a clone of the settings object.
     /// </summary>
@@ -95,6 +101,7 @@ public abstract partial class I2cDevice : IDisposable, IQueryComponentInformatio
         var self = new ComponentInformation(this, "Generic I2C Device base", ComponentState.Active);
         self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
         self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
+        OnQueryComponentInformation?.Invoke(self);
         return self;
     }
 

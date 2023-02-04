@@ -74,6 +74,7 @@ namespace Iot.Device.Tca954x
             _devices.Remove(deviceAddress);
         }
 
+        /// <inheritdoc />
         public override ComponentInformation QueryComponentInformation()
         {
             var self = new ComponentInformation(this, $"Tca9548A Channel {_tcaChannel}", ComponentState.Active);
