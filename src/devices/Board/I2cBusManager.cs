@@ -102,9 +102,11 @@ namespace Iot.Device.Board
             {
                 if (_board != null)
                 {
-                    _board.RemoveBus(this);
-                    _board.ReleasePin(_sdaPin, PinUsage.I2c, this);
-                    _board.ReleasePin(_sclPin, PinUsage.I2c, this);
+                    if (_board.RemoveBus(this))
+                    {
+                        _board.ReleasePin(_sdaPin, PinUsage.I2c, this);
+                        _board.ReleasePin(_sclPin, PinUsage.I2c, this);
+                    }
                 }
 
                 foreach (KeyValuePair<int, I2cDevice> dev in _devices)

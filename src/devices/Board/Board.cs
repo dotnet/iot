@@ -33,7 +33,6 @@ namespace Iot.Device.Board
         private readonly object _pinReservationsLock;
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
         private readonly Dictionary<int, I2cBusManager> _i2cBuses;
-        private readonly Dictionary<int, SpiDeviceManager> _spiBuses;
         private readonly List<IDeviceManager> _managers;
         private bool _initialized;
         private bool _disposed;
@@ -50,7 +49,6 @@ namespace Iot.Device.Board
         {
             _pinReservations = new Dictionary<int, List<PinReservation>>();
             _i2cBuses = new Dictionary<int, I2cBusManager>();
-            _spiBuses = new Dictionary<int, SpiDeviceManager>();
             _managers = new List<IDeviceManager>();
             _knownUsages = new Dictionary<int, PinUsage>();
             _pinReservationsLock = new object();
@@ -250,18 +248,12 @@ namespace Iot.Device.Board
                     bus.Value.Dispose();
                 }
 
-                foreach (var bus in _spiBuses)
-                {
-                    bus.Value.Dispose();
-                }
-
                 foreach (var bus in _managers)
                 {
                     bus.Dispose();
                 }
 
                 _i2cBuses.Clear();
-                _spiBuses.Clear();
                 _managers.Clear();
             }
 
@@ -503,9 +495,10 @@ namespace Iot.Device.Board
         /// This is called from the buses Dispose method, so do NOT call bus.Dispose here
         /// </summary>
         /// <param name="bus">The bus that's being closed</param>
-        internal void RemoveBus(I2cBusManager bus)
+        /// <returns>True if the bus was removed, false if it didn't exist</returns>
+        internal bool RemoveBus(I2cBusManager bus)
         {
-            _i2cBuses.Remove(bus.BusId);
+            return _i2cBuses.Remove(bus.BusId);
         }
 
         /// <summary>
@@ -520,11 +513,6 @@ namespace Iot.Device.Board
         {
             Initialize();
 
-            if (_spiBuses.TryGetValue(connectionSettings.BusId, out SpiDeviceManager? bus) && !bus.IsDisposed)
-            {
-                return bus;
-            }
-
             if (pinAssignment == null)
             {
                 throw new ArgumentNullException(nameof(pinAssignment));
@@ -536,7 +524,6 @@ namespace Iot.Device.Board
             }
 
             var manager = new SpiDeviceManager(this, connectionSettings, pinAssignment, CreateSimpleSpiDevice);
-            _spiBuses[connectionSettings.BusId] = manager;
             return AddManager(manager);
         }
 
@@ -697,7 +684,7 @@ namespace Iot.Device.Board
 
                     if (!isInUse)
                     {
-                        m.Dispose();
+                        // Don't dispose the manager here - Would typically result in a recursive call to Dispose, as we're closing coming from closing pins
                         _managers.RemoveAt(index);
                         index--;
                     }
