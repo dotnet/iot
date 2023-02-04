@@ -867,6 +867,8 @@ namespace Iot.Device.Mfrc522
             // Use built in functions for authentication in case of classic Mifare cards
             if ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB))
             {
+                // UltralightCommand.GetVersion has the same command code as MifareCardCommand.AuthenticationA
+                // GetVersion returns data; AuthenticationA does not
                 if ((dataFromCard == null) || (dataFromCard.Length == 0))
                 {
                     status = SendAndReceiveData(MfrcCommand.MifareAuthenticate, dataToSend.ToArray(), null);
@@ -874,15 +876,14 @@ namespace Iot.Device.Mfrc522
                 else
                 {
                     return SendWithCrc(dataToSend, dataFromCard);
-
                 }
 
                 return status == Status.Ok ? 0 : -1;
             }
             else if ((dataToSend[0] == (byte)MifareCardCommand.Incrementation) || (dataToSend[0] == (byte)MifareCardCommand.Decrementation)
-                || (dataToSend[0] == (byte)MifareCardCommand.Restore))
+                || (dataToSend[0] == (byte)MifareCardCommand.Restore || (dataToSend[0] == (byte)MifareCardCommand.Write16Bytes)))
             {
-                return TwoStepsIncDecRestore(dataToSend, dataFromCard);
+                return TwoStepsWrite16IncDecRestore(dataToSend);
             }
             else if (Enum.IsDefined(typeof(UltralightCommand), (UltralightCommand)dataToSend[0]))
             {
@@ -942,7 +943,7 @@ namespace Iot.Device.Mfrc522
             return 0;
         }
 
-        private int TwoStepsIncDecRestore(ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        private int TwoStepsWrite16IncDecRestore(ReadOnlySpan<byte> dataToSend)
         {
             Status status;
             Span<byte> toSendFirst = stackalloc byte[4];
@@ -952,17 +953,18 @@ namespace Iot.Device.Mfrc522
             status = SendAndReceiveData(MfrcCommand.Transceive, toSendFirst.ToArray(), null);
             if (status != Status.Ok)
             {
-                _logger.LogWarning($"{nameof(TwoStepsIncDecRestore)} - Error {(MfrcCommand)dataToSend[0]}");
+                _logger.LogWarning($"{nameof(TwoStepsWrite16IncDecRestore)} - Error {(MfrcCommand)dataToSend[0]}");
                 return -1;
             }
 
             Span<byte> toSendSecond = stackalloc byte[dataToSend.Length];
+            int dataLength = toSendSecond.Length - 2;
             dataToSend.Slice(2).CopyTo(toSendSecond);
-            CalculateCrc(toSendSecond.Slice(0, 2), toSendSecond.Slice(2, 2));
+            CalculateCrc(toSendSecond.Slice(0, dataLength), toSendSecond.Slice(dataLength, 2));
 
-            status = SendAndReceiveData(MfrcCommand.Transceive, toSendSecond.ToArray(), dataFromCard);
+            status = SendAndReceiveData(MfrcCommand.Transceive, toSendSecond.ToArray(), null);
 
-            return status == Status.Ok ? dataFromCard.Length : -1;
+            return status == Status.Ok ? 0 : -1;
         }
 
         /// <inheritdoc/>
