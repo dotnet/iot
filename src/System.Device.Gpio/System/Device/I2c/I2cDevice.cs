@@ -6,7 +6,7 @@ namespace System.Device.I2c;
 /// <summary>
 /// The communications channel to a device on an I2C bus.
 /// </summary>
-public abstract partial class I2cDevice : IDisposable
+public abstract partial class I2cDevice : IDisposable, IQueryComponentInformation
 {
     /// <summary>
     /// The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
@@ -83,6 +83,12 @@ public abstract partial class I2cDevice : IDisposable
     /// The length of the buffer determines how much data to read from the I2C device.
     /// </param>
     public abstract void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
+
+    /// <summary>
+    /// Query information about a component and it's children.
+    /// </summary>
+    /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
+    public abstract ComponentInformation QueryComponentInformation();
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     public void Dispose()

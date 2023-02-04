@@ -34,6 +34,7 @@ namespace Iot.Device.Board
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
         private readonly Dictionary<int, I2cBusManager> _i2cBuses;
         private readonly Dictionary<int, SpiDeviceManager> _spiBuses;
+        private readonly List<IDeviceManager> _managers;
         private bool _initialized;
         private bool _disposed;
         private Dictionary<int, PinUsage> _knownUsages;
@@ -50,6 +51,7 @@ namespace Iot.Device.Board
             _pinReservations = new Dictionary<int, List<PinReservation>>();
             _i2cBuses = new Dictionary<int, I2cBusManager>();
             _spiBuses = new Dictionary<int, SpiDeviceManager>();
+            _managers = new List<IDeviceManager>();
             _knownUsages = new Dictionary<int, PinUsage>();
             _pinReservationsLock = new object();
             _initialized = false;
@@ -126,6 +128,11 @@ namespace Iot.Device.Board
                     PinReservation rsv = new PinReservation(pinNumber, usage, owner);
                     reservations.Add(rsv);
                 }
+
+                if (owner is IDeviceManager manager)
+                {
+                    AddManager(manager);
+                }
             }
 
             ActivatePinMode(pinNumber, usage);
@@ -159,6 +166,7 @@ namespace Iot.Device.Board
                         }
 
                         _pinReservations.Remove(pinNumber);
+                        ClearOpenManagers();
                     }
                     else
                     {
@@ -177,6 +185,7 @@ namespace Iot.Device.Board
                         if (reservations.Count == 0)
                         {
                             _pinReservations.Remove(pinNumber);
+                            ClearOpenManagers();
                         }
                     }
                 }
@@ -234,18 +243,28 @@ namespace Iot.Device.Board
         /// <inheritdoc cref="IDisposable.Dispose"/>
         protected virtual void Dispose(bool disposing)
         {
-            foreach (var bus in _i2cBuses)
+            lock (_pinReservationsLock)
             {
-                bus.Value.Dispose();
+                foreach (var bus in _i2cBuses)
+                {
+                    bus.Value.Dispose();
+                }
+
+                foreach (var bus in _spiBuses)
+                {
+                    bus.Value.Dispose();
+                }
+
+                foreach (var bus in _managers)
+                {
+                    bus.Dispose();
+                }
+
+                _i2cBuses.Clear();
+                _spiBuses.Clear();
+                _managers.Clear();
             }
 
-            foreach (var bus in _spiBuses)
-            {
-                bus.Value.Dispose();
-            }
-
-            _i2cBuses.Clear();
-            _spiBuses.Clear();
             _disposed = true;
         }
 
@@ -295,7 +314,7 @@ namespace Iot.Device.Board
                 throw new NotSupportedException("No Gpio Driver for this board could be found.");
             }
 
-            return new ManagedGpioController(this, driver);
+            return AddManager(new ManagedGpioController(this, driver));
         }
 
         /// <summary>
@@ -422,7 +441,7 @@ namespace Iot.Device.Board
 
             bus = CreateI2cBusCore(busNumber, pinAssignment);
             _i2cBuses.Add(busNumber, bus);
-            return bus;
+            return AddManager(bus);
         }
 
         /// <summary>
@@ -518,7 +537,7 @@ namespace Iot.Device.Board
 
             var manager = new SpiDeviceManager(this, connectionSettings, pinAssignment, CreateSimpleSpiDevice);
             _spiBuses[connectionSettings.BusId] = manager;
-            return manager;
+            return AddManager(manager);
         }
 
         /// <summary>
@@ -560,7 +579,7 @@ namespace Iot.Device.Board
             int pin, PinNumberingScheme pinNumberingScheme)
         {
             Initialize();
-            return new PwmChannelManager(this, pin, chip, channel, frequency, dutyCyclePercentage, CreateSimplePwmChannel);
+            return AddManager(new PwmChannelManager(this, pin, chip, channel, frequency, dutyCyclePercentage, CreateSimplePwmChannel));
         }
 
         /// <summary>
@@ -658,6 +677,48 @@ namespace Iot.Device.Board
             return board;
         }
 
+        private void ClearOpenManagers()
+        {
+            lock (_pinReservationsLock)
+            {
+                for (int index = 0; index < _managers.Count; index++)
+                {
+                    IDeviceManager m = _managers[index];
+                    var managedPins = m.GetActiveManagedPins();
+                    bool isInUse = false;
+                    foreach (var pin in managedPins)
+                    {
+                        if (_pinReservations.ContainsKey(pin))
+                        {
+                            isInUse = true;
+                            break;
+                        }
+                    }
+
+                    if (!isInUse)
+                    {
+                        m.Dispose();
+                        _managers.RemoveAt(index);
+                        index--;
+                    }
+                }
+            }
+        }
+
+        private T AddManager<T>(T manager)
+            where T : IDeviceManager
+        {
+            lock (_pinReservationsLock)
+            {
+                if (!_managers.Contains(manager))
+                {
+                    _managers.Add(manager);
+                }
+            }
+
+            return manager;
+        }
+
         /// <inheritdoc cref="GpioController.QueryComponentInformation"/>
         public virtual ComponentInformation QueryComponentInformation()
         {
@@ -673,9 +734,10 @@ namespace Iot.Device.Board
                 self.AddSubComponent(e.Value.QueryComponentInformation());
             }
 
-            foreach (var e in _spiBuses)
+            // The I2C busses are also part of this list, but AddSubComponent takes care of that and adds only unique entries
+            foreach (var e in _managers)
             {
-                self.AddSubComponent(e.Value.QueryComponentInformation());
+                self.AddSubComponent(e.QueryComponentInformation());
             }
 
             return self;

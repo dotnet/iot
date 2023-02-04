@@ -38,6 +38,8 @@ namespace System.Device
                 throw new ArgumentNullException(nameof(instance));
             }
 
+            Instance = instance;
+
             Type = instance.GetType().FullName!;
             Name = name;
 
@@ -56,9 +58,15 @@ namespace System.Device
             }
 
             _subComponents = new List<ComponentInformation>();
+            Properties = new Dictionary<string, string>();
         }
 
         public string Type
+        {
+            get;
+        }
+
+        protected object Instance
         {
             get;
         }
@@ -78,6 +86,12 @@ namespace System.Device
             get; init;
         }
 
+        public IDictionary<string, string> Properties
+        {
+            get;
+            init;
+        }
+
         public IReadOnlyList<ComponentInformation> SubComponents => _subComponents.AsReadOnly();
 
         public void AddSubComponent(ComponentInformation subComponent)
@@ -87,7 +101,11 @@ namespace System.Device
                 throw new ArgumentNullException(nameof(subComponent));
             }
 
-            _subComponents.Add(subComponent);
+            // Don't add the same element twice
+            if (_subComponents.All(x => x.Instance != subComponent.Instance))
+            {
+                _subComponents.Add(subComponent);
+            }
         }
 
         private static string PrintComponentDescription(ComponentInformation component)

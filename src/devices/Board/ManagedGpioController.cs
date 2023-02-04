@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.Globalization;
@@ -16,7 +17,7 @@ namespace Iot.Device.Board
     /// <summary>
     /// A GPIO Controller instance that manages pin usage
     /// </summary>
-    internal class ManagedGpioController : GpioController
+    internal class ManagedGpioController : GpioController, IDeviceManager
     {
         private readonly Board _board;
         private readonly GpioDriver _driver;
@@ -43,6 +44,22 @@ namespace Iot.Device.Board
         {
             base.ClosePinCore(pinNumber);
             _board.ReleasePin(pinNumber, PinUsage.Gpio, this);
+        }
+
+        public IReadOnlyCollection<int> GetActiveManagedPins()
+        {
+            return OpenPins.Select(x => x.PinNumber).ToList();
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = base.QueryComponentInformation();
+            self = self with
+            {
+                Name = "Managed GPIO Controller"
+            };
+            self.Properties["ManagedPins"] = string.Join(", ", GetActiveManagedPins());
+            return self;
         }
     }
 }

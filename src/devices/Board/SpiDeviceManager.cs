@@ -2,13 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Device;
 using System.Device.Spi;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Iot.Device.Board
 {
-    internal class SpiDeviceManager : SpiDevice
+    internal class SpiDeviceManager : SpiDevice, IDeviceManager
     {
         private readonly Board _board;
         private readonly int[] _pins;
@@ -75,6 +77,11 @@ namespace Iot.Device.Board
             {
                 return _device == null;
             }
+        }
+
+        public IReadOnlyCollection<int> GetActiveManagedPins()
+        {
+            return _pins.ToList();
         }
 
         public override byte ReadByte()

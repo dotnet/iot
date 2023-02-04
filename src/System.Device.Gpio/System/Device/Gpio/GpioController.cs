@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Device.Gpio.Drivers;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -73,6 +76,17 @@ public class GpioController : IDisposable, IQueryComponentInformation
     /// The number of pins provided by the controller.
     /// </summary>
     public virtual int PinCount => _driver.PinCount;
+
+    /// <summary>
+    /// Returns the collection of open pins
+    /// </summary>
+    protected IEnumerable<GpioPin> OpenPins
+    {
+        get
+        {
+            return _gpioPins.Values;
+        }
+    }
 
     /// <summary>
     /// Gets the logical pin number in the controller's numbering scheme.
