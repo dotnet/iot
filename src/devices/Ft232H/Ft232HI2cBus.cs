@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
+using System.Globalization;
 using System.IO;
 
 namespace Iot.Device.Ft232H
@@ -13,7 +15,7 @@ namespace Iot.Device.Ft232H
     /// </summary>
     internal class Ft232HI2cBus : I2cBus
     {
-        private HashSet<int> _usedAddresses = new HashSet<int>();
+        private Dictionary<int, I2cDevice> _usedAddresses = new Dictionary<int, I2cDevice>();
 
         /// <summary>
         /// Store the FTDI Device Information
@@ -33,12 +35,14 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
-            if (!_usedAddresses.Add(deviceAddress))
+            if (_usedAddresses.ContainsKey(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} is already open.", nameof(deviceAddress));
             }
 
-            return new Ft232HI2c(this, deviceAddress);
+            var ret = new Ft232HI2c(this, deviceAddress);
+            _usedAddresses.Add(deviceAddress, ret);
+            return ret;
         }
 
         /// <inheritdoc/>
@@ -94,6 +98,18 @@ namespace Iot.Device.Ft232H
             }
 
             DeviceInformation.I2cStop();
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "Ftx232HI2c I2C Bus driver", ComponentState.Active);
+            self.Properties["BusNo"] = "0";
+            foreach (var device in _usedAddresses)
+            {
+                self.AddSubComponent(device.Value.QueryComponentInformation());
+            }
+
+            return self;
         }
     }
 }

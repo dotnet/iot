@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
@@ -919,6 +920,12 @@ namespace Iot.Device.Ft232H
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            return base.QueryComponentInformation() with { Name = "Ftx232 Device" };
         }
     }
 }
