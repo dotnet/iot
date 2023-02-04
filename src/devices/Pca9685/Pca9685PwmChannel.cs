@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device;
 using System.Device.Pwm;
 
 namespace Iot.Device.Pwm
@@ -63,6 +64,12 @@ namespace Iot.Device.Pwm
         {
             _parent?.SetChannelAsDestroyed(_channel);
             _parent = null!;
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            return new ComponentInformation(this, "Pca9685 PWM Channel");
         }
     }
 }

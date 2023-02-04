@@ -56,9 +56,9 @@ internal class UnixI2cDevice : I2cDevice
 
     public override ComponentInformation QueryComponentInformation()
     {
-        var self = new ComponentInformation(this, "Unix I2C Device", ComponentState.Active);
-        self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
-        self.Properties["DeviceAddress"] = $"0x{_deviceAddress:x2}";
-        return self;
+        return base.QueryComponentInformation() with
+        {
+            Name = "Unix I2C device"
+        };
     }
 }

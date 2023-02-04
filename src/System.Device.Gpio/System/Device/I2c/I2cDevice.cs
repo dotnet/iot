@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Globalization;
+
 namespace System.Device.I2c;
 
 /// <summary>
@@ -88,7 +90,13 @@ public abstract partial class I2cDevice : IDisposable, IQueryComponentInformatio
     /// Query information about a component and it's children.
     /// </summary>
     /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
-    public abstract ComponentInformation QueryComponentInformation();
+    public virtual ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "Generic I2C Device base", ComponentState.Active);
+        self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
+        self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
+        return self;
+    }
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     public void Dispose()
