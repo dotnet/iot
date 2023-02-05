@@ -152,6 +152,6 @@ public abstract class GpioDriver : IDisposable, IQueryComponentInformation
     /// <inheritdoc />
     public virtual ComponentInformation QueryComponentInformation()
     {
-        return new ComponentInformation(this, "Gpio Driver", string.Empty, ComponentState.Active);
+        return new ComponentInformation(this, "Gpio Driver", ComponentState.Active);
     }
 }

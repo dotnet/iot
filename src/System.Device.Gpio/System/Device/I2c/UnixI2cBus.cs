@@ -211,7 +211,7 @@ internal class UnixI2cBus : I2cBus
             BusFileDescriptor = -1;
         }
 
-        _usedAddresses = null!;
+        _usedAddresses.Clear();
         base.Dispose(disposing);
     }
 

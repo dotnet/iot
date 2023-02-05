@@ -17,21 +17,11 @@ namespace System.Device
         private readonly List<ComponentInformation> _subComponents;
 
         public ComponentInformation(object instance, string name)
-            : this(instance, name, string.Empty)
+            : this(instance, name, ComponentState.Active)
         {
         }
 
-        public ComponentInformation(object instance, string name, string version)
-            : this(instance, name, version, ComponentState.Unknown)
-        {
-        }
-
-        public ComponentInformation(object instance, string name, ComponentState state)
-            : this(instance, name, string.Empty, state)
-        {
-        }
-
-        public ComponentInformation(object instance, string name, string version, ComponentState componentState)
+        public ComponentInformation(object instance, string name, ComponentState componentState)
         {
             if (instance == null)
             {
@@ -43,19 +33,7 @@ namespace System.Device
             Type = instance.GetType().FullName!;
             Name = name;
 
-            Version = version;
             State = componentState;
-
-            if (string.IsNullOrWhiteSpace(Version))
-            {
-                var assembly = instance.GetType().Assembly;
-                var v = (AssemblyInformationalVersionAttribute?)assembly.GetCustomAttributes().FirstOrDefault(x => x is AssemblyInformationalVersionAttribute);
-
-                if (v != null)
-                {
-                    Version = v.InformationalVersion;
-                }
-            }
 
             _subComponents = new List<ComponentInformation>();
             Properties = new Dictionary<string, string>();
@@ -72,11 +50,6 @@ namespace System.Device
         }
 
         public string Name
-        {
-            get; init;
-        }
-
-        public string Version
         {
             get; init;
         }
@@ -110,13 +83,7 @@ namespace System.Device
 
         private static string PrintComponentDescription(ComponentInformation component)
         {
-            string v = string.Empty;
-            if (!string.IsNullOrWhiteSpace(component.Version))
-            {
-                v = $" Version {component.Version}";
-            }
-
-            return $"{{{component.Type}}} {component.Name}{v}{Environment.NewLine}";
+            return $"{{{component.Type}}} {component.Name}{Environment.NewLine}";
         }
 
         protected virtual void SubComponentToString(StringBuilder output, int ident)
