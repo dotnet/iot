@@ -9,18 +9,33 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-#pragma warning disable CS1591
 namespace System.Device
 {
+    /// <summary>
+    /// A class to provide informational data about system components and active drivers and bindings.
+    /// An instance of this class is typically obtained by calling QueryComponentInformation on any supported object.
+    /// The structure represents a tree of connected devices, e.g. a controller and its associated drivers.
+    /// </summary>
     public record ComponentInformation
     {
         private readonly List<ComponentInformation> _subComponents;
 
+        /// <summary>
+        /// Create a new instance of <see cref="ComponentInformation"/>
+        /// </summary>
+        /// <param name="instance">The instance this information belongs to</param>
+        /// <param name="name">An user-readable name for the object</param>
         public ComponentInformation(object instance, string name)
             : this(instance, name, ComponentState.Active)
         {
         }
 
+        /// <summary>
+        /// Create a new instance of <see cref="ComponentInformation"/>
+        /// </summary>
+        /// <param name="instance">The instance this information belongs to</param>
+        /// <param name="name">An user-readable name for the object</param>
+        /// <param name="componentState">The current state of this driver/binding</param>
         public ComponentInformation(object instance, string name, ComponentState componentState)
         {
             if (instance == null)
@@ -39,34 +54,61 @@ namespace System.Device
             Properties = new Dictionary<string, string>();
         }
 
+        /// <summary>
+        /// The name of the type this instance represents.
+        /// </summary>
         public string Type
         {
             get;
         }
 
+        /// <summary>
+        /// The actual instance represented.
+        /// This should only be used for querying information, not for operations on the object.
+        /// </summary>
         protected object Instance
         {
             get;
         }
 
+        /// <summary>
+        /// The user-friendly name of the object
+        /// </summary>
         public string Name
         {
             get; init;
         }
 
+        /// <summary>
+        /// The state of the object
+        /// </summary>
         public ComponentState State
         {
             get; init;
         }
 
+        /// <summary>
+        /// A list of additional properties that belong to this object.
+        /// </summary>
         public IDictionary<string, string> Properties
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// The list of subcomponents.
+        /// </summary>
+        /// <remarks>
+        /// Note to implementors: Be careful not to generate cycles in the tree!
+        /// </remarks>
         public IReadOnlyList<ComponentInformation> SubComponents => _subComponents.AsReadOnly();
 
+        /// <summary>
+        /// Adds another component as subcomponent of this one
+        /// </summary>
+        /// <param name="subComponent">Component to add</param>
+        /// <exception cref="ArgumentNullException">The component to add is null.</exception>
         public void AddSubComponent(ComponentInformation subComponent)
         {
             if (_subComponents == null)
@@ -86,6 +128,11 @@ namespace System.Device
             return $"{{{component.Type}}} {component.Name}{Environment.NewLine}";
         }
 
+        /// <summary>
+        /// Provides the string representation of all sub-components
+        /// </summary>
+        /// <param name="output">The stringbuilder to extend</param>
+        /// <param name="ident">The level of current ident</param>
         protected virtual void SubComponentToString(StringBuilder output, int ident)
         {
             foreach (var component in _subComponents)
@@ -97,6 +144,10 @@ namespace System.Device
             }
         }
 
+        /// <summary>
+        /// Creates a string representation of this object.
+        /// </summary>
+        /// <returns>A multi-line string in form of a tree.</returns>
         public override string ToString()
         {
             StringBuilder b = new StringBuilder(PrintComponentDescription(this));
