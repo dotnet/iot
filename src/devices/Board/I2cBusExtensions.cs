@@ -91,6 +91,10 @@ namespace Iot.Device.Board
                 {
                     // Ignore and continue
                 }
+                finally
+                {
+                    bus.RemoveDevice(addr);
+                }
 
                 currentPercentage += stepPerDevice;
                 if (progress != null)
