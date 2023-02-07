@@ -524,6 +524,7 @@ namespace Iot.Device.Card.Mifare
         /// <param name="accessTypes">An array of 3 AccessType determining access of each block</param>
         /// <returns>The 3 bytes encoding the rights</returns>
         /// This is a synonym of EncodeSectorAndBlockTailer (for backward compatibility)
+        [Obsolete("deprecated, use EncodeSectorAndBlockTailer instead")]
         public (byte B6, byte B7, byte B8) EncodeSectorAndClockTailer(AccessSector accessSector, AccessType[] accessTypes) =>
             EncodeSectorAndBlockTailer(accessSector, accessTypes);
 
@@ -913,8 +914,6 @@ namespace Iot.Device.Card.Mifare
         /// <param name="message">The NDEF Message to write</param>
         /// <param name="writeKeyA">True to write with Key A</param>
         /// <returns>True if success</returns>
-        /// TODO: check the MAD to determine which sectors can be used, instead of assuming
-        /// that all of them are available
         public bool WriteNdefMessage(NdefMessage message, bool writeKeyA = true)
         {
             if ((KeyB is not object or { Length: not 6 }) && (!writeKeyA))
