@@ -1,5 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
@@ -234,6 +233,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
@@ -283,27 +296,6 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
@@ -311,9 +303,16 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -361,6 +360,20 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.SecondI2cAddress</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

@@ -87,7 +87,7 @@ namespace Arduino.Samples
             int mode = 0;
             var gpioController = board.CreateGpioController();
 
-            GpioButton button = new GpioButton(ButtonPin, gpioController, false, PinMode.Input, TimeSpan.FromMilliseconds(200));
+            GpioButton button = new GpioButton(ButtonPin, false, true, gpioController, false, TimeSpan.FromMilliseconds(200));
             CharacterDisplay disp = new CharacterDisplay(board);
             Console.WriteLine("Display output test");
             Console.WriteLine("The button on GPIO 2 changes modes");

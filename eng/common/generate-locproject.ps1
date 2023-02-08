@@ -34,25 +34,6 @@ $jsonTemplateFiles | ForEach-Object {
 $jsonWinformsTemplateFiles = Get-ChildItem -Recurse -Path "$SourcesDirectory" | Where-Object { $_.FullName -Match "en\\strings\.json" } # current winforms pattern
 
 $wxlFiles = Get-ChildItem -Recurse -Path "$SourcesDirectory" | Where-Object { $_.FullName -Match "\\.+\.wxl" -And -Not( $_.Directory.Name -Match "\d{4}" ) } # localized files live in four digit lang ID directories; this excludes them
-if (-not $wxlFiles) {
-    $wxlEnFiles = Get-ChildItem -Recurse -Path "$SourcesDirectory" | Where-Object { $_.FullName -Match "\\1033\\.+\.wxl" } #  pick up en files (1033 = en) specifically so we can copy them to use as the neutral xlf files
-    if ($wxlEnFiles) {
-      $wxlFiles = @()
-      $wxlEnFiles | ForEach-Object {
-        $destinationFile = "$($_.Directory.Parent.FullName)\$($_.Name)"
-        $wxlFiles += Copy-Item "$($_.FullName)" -Destination $destinationFile -PassThru
-      }
-    }
-}
-
-$macosHtmlEnFiles = Get-ChildItem -Recurse -Path "$SourcesDirectory" | Where-Object { $_.FullName -Match "en\.lproj\\.+\.html" } # add installer HTML files
-$macosHtmlFiles = @()
-if ($macosHtmlEnFiles) {
-    $macosHtmlEnFiles | ForEach-Object {
-        $destinationFile = "$($_.Directory.Parent.FullName)\$($_.Name)"
-        $macosHtmlFiles += Copy-Item "$($_.FullName)" -Destination $destinationFile -PassThru
-    }
-}
 
 $xlfFiles = @()
 
@@ -110,7 +91,6 @@ $locJson = @{
             )
         },
         @{
-            LanguageSet = $LanguageSet
             CloneLanguageSet = "WiX_CloneLanguages"
             LssFiles = @( "wxl_loc.lss" )
             LocItems = @(
@@ -118,7 +98,8 @@ $locJson = @{
                     $outputPath = "$($_.Directory.FullName | Resolve-Path -Relative)\"
                     $continue = $true
                     foreach ($exclusion in $exclusions.Exclusions) {
-                        if ($_.FullName.Contains($exclusion)) {
+                        if ($_.FullName.Contains($exclusion))
+                        {
                             $continue = $false
                         }
                     }
@@ -129,29 +110,7 @@ $locJson = @{
                             SourceFile = $sourceFile
                             CopyOption = "LangIDOnPath"
                             OutputPath = $outputPath
-                        }
-                    }
-                }
-            )
-        },
-        @{
-            LanguageSet = $LanguageSet
-            CloneLanguageSet = "VS_macOS_CloneLanguages"
-            LocItems = @(
-                $macosHtmlFiles | ForEach-Object {
-                    $outputPath = "$($_.Directory.FullName | Resolve-Path -Relative)\"
-                    $continue = $true
-                    foreach ($exclusion in $exclusions.Exclusions) {
-                        if ($_.FullName.Contains($exclusion)) {
-                            $continue = $false
-                        }
-                    }
-                    $sourceFile = ($_.FullName | Resolve-Path -Relative)
-                    if ($continue) {
-                        return @{
-                            SourceFile = $sourceFile
-                            CopyOption = "LangIDOnPath"
-                            OutputPath = $outputPath
+                            Languages = "cs-CZ;de-DE;es-ES;fr-FR;it-IT;ja-JP;ko-KR;pl-PL;pt-BR;ru-RU;tr-TR;zh-CN;zh-TW"
                         }
                     }
                 }
