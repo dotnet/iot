@@ -56,6 +56,7 @@ namespace Iot.Device.Ft232H
                 // the device has already been removed
             }
 
+            _settings = null!;
             base.Dispose(disposing);
         }
 
