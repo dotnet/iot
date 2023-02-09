@@ -47,9 +47,15 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            _i2cBus?.RemoveDevice(_deviceAddress);
-            _i2cBus = null!;
-            _settings = null!;
+            try
+            {
+                _i2cBus.RemoveDevice(_deviceAddress);
+            }
+            catch (ArgumentException)
+            {
+                // dont worry if the device has already been removed
+            }
+
             base.Dispose(disposing);
         }
 
