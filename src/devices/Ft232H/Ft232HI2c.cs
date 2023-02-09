@@ -53,7 +53,7 @@ namespace Iot.Device.Ft232H
             }
             catch (ArgumentException)
             {
-                // dont worry if the device has already been removed
+                // the device has already been removed
             }
 
             base.Dispose(disposing);
