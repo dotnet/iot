@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.IO;
+using System.Net.Http.Headers;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft232H
 {
@@ -18,13 +20,13 @@ namespace Iot.Device.Ft232H
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public Ft232HDevice DeviceInformation { get; private set; }
+        public Ftx232HDevice DeviceInformation { get; private set; }
 
         /// <summary>
         /// Creates anI2C Bus
         /// </summary>
         /// <param name="deviceInformation">a FT232H device</param>
-        public Ft232HI2cBus(Ft232HDevice deviceInformation)
+        public Ft232HI2cBus(Ftx232HDevice deviceInformation)
         {
             DeviceInformation = deviceInformation;
             DeviceInformation.I2cInitialize();
