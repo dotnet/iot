@@ -35,17 +35,13 @@ namespace Iot.Device.Shtc3
         {
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
-            Wakeup();
-
             Reset();
         }
 
-        private Status _status;
-
         /// <summary>
-        /// Set Shtc3 state
+        /// Current state of Shtc3 sensor
         /// </summary>
-        internal Status Status => _status;
+        internal Status Status { get; private set; } = Status.Unknown;
 
         private static Register GetMeasurementCmd(bool lowPower, bool clockStretching)
         {
@@ -122,10 +118,7 @@ namespace Iot.Device.Shtc3
         /// <returns>True if operation was successful</returns>
         public bool TryGetTemperatureAndHumidity(out Temperature temperature, out RelativeHumidity relativeHumidity, bool lowPower = false, bool clockStretching = false)
         {
-            if (Status == Status.Sleep)
-            {
-                Wakeup();
-            }
+            Wakeup();
 
             Register cmd = GetMeasurementCmd(lowPower, clockStretching);
 
@@ -174,14 +167,12 @@ namespace Iot.Device.Shtc3
         /// </summary>
         public void Sleep()
         {
-            if (Status == Status.Sleep)
+            if (Status != Status.Sleep)
             {
-                return;
+                Write(Register.SHTC3_SLEEP);
+
+                Status = Status.Sleep;
             }
-
-            Write(Register.SHTC3_SLEEP);
-
-            _status = Status.Sleep;
         }
 
         /// <summary>
@@ -189,9 +180,12 @@ namespace Iot.Device.Shtc3
         /// </summary>
         private void Wakeup()
         {
-            Write(Register.SHTC3_WAKEUP);
+            if (Status != Status.Idle)
+            {
+                Write(Register.SHTC3_WAKEUP);
 
-            _status = Status.Idle;
+                Status = Status.Idle;
+            }
         }
 
         /// <summary>
@@ -199,10 +193,7 @@ namespace Iot.Device.Shtc3
         /// </summary>
         public void Reset()
         {
-            if (Status == Status.Sleep)
-            {
-                Wakeup();
-            }
+            Wakeup();
 
             Write(Register.SHTC3_RESET);
         }
@@ -217,10 +208,7 @@ namespace Iot.Device.Shtc3
         /// </summary>
         private int? ReadId()
         {
-            if (Status == Status.Sleep)
-            {
-                Wakeup();
-            }
+            Wakeup();
 
             Write(Register.SHTC3_ID);
 

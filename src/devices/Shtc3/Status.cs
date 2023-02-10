@@ -9,6 +9,11 @@ namespace Iot.Device.Shtc3
     internal enum Status
     {
         /// <summary>
+        /// Sensor in an unknown state
+        /// </summary>
+        Unknown = 0,
+
+        /// <summary>
         /// Sensor ready to use
         /// </summary>
         Idle,
