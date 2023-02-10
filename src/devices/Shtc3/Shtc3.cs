@@ -192,7 +192,6 @@ namespace Iot.Device.Shtc3
             Write(Register.SHTC3_WAKEUP);
 
             _status = Status.Idle;
-
         }
 
         /// <summary>
