@@ -52,6 +52,12 @@ namespace Iot.Device.Nmea0183.Sentences
             get;
         }
 
+        private static UInt32 InverseEndianess(UInt32 value)
+        {
+            return (value & 0x000000FFU) << 24 | (value & 0x0000FF00U) << 8 |
+                   (value & 0x00FF0000U) >> 8 | (value & 0xFF000000U) >> 24;
+        }
+
         /// <summary>
         /// Decodes a value from a longer hex string (PRDIN messages contain one blob of stringly-typed hex numbers)
         /// </summary>
@@ -79,25 +85,25 @@ namespace Iot.Device.Nmea0183.Sentences
                 return false;
             }
 
+            // length is given in characters here, not in bytes
             string part = input.Substring(start, length);
 
-            if (length == 4 && inverseEndianess)
-            {
-                part = part.Substring(2, 2) + part.Substring(0, 2);
-            }
-
-            if (length == 8 && inverseEndianess)
-            {
-                part = part.Substring(6, 2) + part.Substring(4, 2) + part.Substring(2, 2) + part.Substring(0, 2);
-            }
-
-            if (!Int32.TryParse(part, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out int result))
+            if (!UInt32.TryParse(part, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out UInt32 result))
             {
                 value = 0;
                 return false;
             }
 
-            value = result;
+            if (length == 8 && inverseEndianess)
+            {
+                result = InverseEndianess(result);
+            }
+            else if (length == 4 && inverseEndianess)
+            {
+                result = result >> 8 | ((result & 0xFF) << 8);
+            }
+
+            value = (int)result;
             return true;
         }
     }

@@ -31,7 +31,6 @@ namespace Iot.Device.Nmea0183.Sentences
         protected static Calendar gregorianCalendar = new GregorianCalendar(GregorianCalendarTypes.USEnglish);
 
         private static TalkerId _ownTalkerId = DefaultTalkerId;
-        private DateTimeOffset _dateTime;
 
         /// <summary>
         /// Our own talker ID (default when we send messages ourselves)
@@ -67,7 +66,7 @@ namespace Iot.Device.Nmea0183.Sentences
         public TalkerId TalkerId
         {
             get;
-            set;
+            init;
         }
 
         /// <summary>
@@ -83,14 +82,8 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public DateTimeOffset DateTime
         {
-            get
-            {
-                return _dateTime;
-            }
-            set
-            {
-                _dateTime = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>

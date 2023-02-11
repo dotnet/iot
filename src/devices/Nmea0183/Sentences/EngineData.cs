@@ -50,49 +50,31 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// The NMEA2000 bus timestamp (not really relevant, I think)
         /// </summary>
-        public int MessageTimeStamp
-        {
-            get;
-        }
+        public int MessageTimeStamp { get; }
 
         /// <summary>
         /// The number of the engine. 0 = Single / Starboard, 1 = Port, 2 = Center
         /// </summary>
-        public int EngineNo
-        {
-            get;
-        }
+        public int EngineNo { get; }
 
         /// <summary>
         /// Current running speed of the engine
         /// </summary>
-        public RotationalSpeed Revolutions
-        {
-            get;
-        }
+        public RotationalSpeed Revolutions { get; }
 
         /// <summary>
         /// Propeller pitch
         /// </summary>
-        public Ratio Pitch
-        {
-            get;
-        }
+        public Ratio Pitch { get; }
 
         /// <summary>
         /// Total engine run time
         /// </summary>
-        public TimeSpan OperatingTime
-        {
-            get;
-        }
+        public TimeSpan OperatingTime { get; }
 
         /// <summary>
         /// Engine temperature
         /// </summary>
-        public Temperature? EngineTemperature
-        {
-            get;
-        }
+        public Temperature? EngineTemperature { get; }
     }
 }
