@@ -3,12 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Device.Gpio;
 using System.Device.Spi;
 using System.Threading;
+using System.Device.Gpio;
 using Iot.Device.Bmxx80;
 using Iot.Device.Bmxx80.FilteringMode;
-using Iot.Device.Board;
 using Iot.Device.Common;
 using Iot.Device.Ft232H;
 using Iot.Device.FtCommon;
@@ -37,7 +36,6 @@ Ft232HDevice ft232h = Ft232HDevice.GetFt232H()[0];
 // Uncomment the test you want to run
 // TestSpi(ft232h);
 TestGpio(ft232h);
-TestI2cScan(ft232h);
 TestI2c(ft232h);
 
 void TestSpi(Ft232HDevice ft232h)
@@ -84,17 +82,6 @@ void TestGpio(Ft232HDevice ft232h)
         Console.Write($"State: {gpioController.Read(gpio5)} ");
         Console.CursorLeft = 0;
         Thread.Sleep(50);
-    }
-}
-
-void TestI2cScan(Ft232HDevice ft232h)
-{
-    var ftI2cBus = ft232h.CreateOrGetI2cBus(ft232h.GetDefaultI2cBusNumber());
-
-    Console.WriteLine("Scanning for devices on the I2C bus...");
-    foreach (int address in ftI2cBus.PerformBusScan())
-    {
-        Console.WriteLine($"Device found at address: 0x{address:X2}");
     }
 }
 
