@@ -150,7 +150,7 @@ namespace ArduinoCsCompiler
             Logger.LogInformation("Valid units for sizes: ");
             foreach (var u in Information.Info.UnitInfos)
             {
-                double factor = Information.From(1, u.Value) / Information.FromBytes(1);
+                decimal factor = Information.From(1, u.Value) / Information.FromBytes(1);
                 Logger.LogInformation($"Use {Information.GetAbbreviation(u.Value)} for a multiplication by {factor:N0} bytes");
             }
         }

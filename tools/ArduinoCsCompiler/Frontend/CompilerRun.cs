@@ -67,7 +67,7 @@ namespace ArduinoCsCompiler
                 Logger.LogInformation($"Recommended minimum values are 512 kB of flash and 100 kB of RAM. Some microcontrollers (e.g. ESP32) may allow configuration of the amount of flash " +
                                       $"available for code.");
 
-                if (caps.IntSize != Information.FromBytes(4) || caps.PointerSize != Information.FromBytes(4))
+                if (!caps.IntSize.Equals(Information.FromBytes(4), 0, ComparisonType.Absolute) || !caps.PointerSize.Equals(Information.FromBytes(4), 0, ComparisonType.Absolute))
                 {
                     Logger.LogWarning("Board pointer and/or integer size is not 32 bits. This is untested and may lead to unpredictable behavior.");
                 }

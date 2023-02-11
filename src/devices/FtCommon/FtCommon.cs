@@ -73,7 +73,7 @@ namespace Iot.Device.FtCommon
         {
             List<FtDevice> ftdevices = new List<FtDevice>();
             var devices = GetDevices();
-            foreach (var deviceType in ftDeviceTypes)
+            foreach (var deviceType in ftDeviceTypes.Distinct())
             {
                 ftdevices.AddRange(devices.Where(m => m.Type == deviceType));
             }
