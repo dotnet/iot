@@ -77,6 +77,8 @@ namespace Iot.Device.Nmea0183
 
         private Thread? _aisBackgroundThread;
 
+        private PositionProvider _positionProvider;
+
         /// <summary>
         /// Creates an instance of an <see cref="AisManager"/>
         /// </summary>
@@ -104,6 +106,7 @@ namespace Iot.Device.Nmea0183
             _throwOnUnknownMessage = throwOnUnknownMessage;
             _aisParser = new AisParser(throwOnUnknownMessage);
             _cache = new SentenceCache(this);
+            _positionProvider = new PositionProvider(_cache);
             _targets = new ConcurrentDictionary<uint, AisTarget>();
             _lock = new object();
             _activeWarnings = new ConcurrentDictionary<string, (string Message, DateTimeOffset TimeStamp)>();
@@ -204,7 +207,7 @@ namespace Iot.Device.Nmea0183
             s.DimensionToStern = DimensionToStern;
             s.DimensionToPort = DimensionToPort;
             s.DimensionToStarboard = DimensionToStarboard;
-            if (!_cache.TryGetCurrentPosition(out var position, null, true, out var track, out var sog, out var heading,
+            if (!_positionProvider.TryGetCurrentPosition(out var position, null, true, out var track, out var sog, out var heading,
                     out var messageTime, currentTime) || (messageTime + TrackEstimationParameters.MaximumPositionAge) < currentTime)
             {
                 s.Position = position ?? new GeographicPosition();
