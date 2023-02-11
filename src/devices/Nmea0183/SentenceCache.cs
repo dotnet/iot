@@ -166,35 +166,35 @@ namespace Iot.Device.Nmea0183
         {
             messageTime = default;
             // Try to get any of the position messages
-            var gll = (PositionFastUpdate?)GetLastSentence(source, PositionFastUpdate.Id);
-            var gga = (GlobalPositioningSystemFixData?)GetLastSentence(source, GlobalPositioningSystemFixData.Id);
-            var rmc = (RecommendedMinimumNavigationInformation?)GetLastSentence(source, RecommendedMinimumNavigationInformation.Id);
-            var vtg = (TrackMadeGood?)GetLastSentence(source, TrackMadeGood.Id);
-            var hdt = (HeadingTrue?)GetLastSentence(source, HeadingTrue.Id);
+            var positionFastUpdate = (PositionFastUpdate?)GetLastSentence(source, PositionFastUpdate.Id);
+            var globalPositioningSystemFixDataMessage = (GlobalPositioningSystemFixData?)GetLastSentence(source, GlobalPositioningSystemFixData.Id);
+            var recommendedMinimumNavigationInformationMessage = (RecommendedMinimumNavigationInformation?)GetLastSentence(source, RecommendedMinimumNavigationInformation.Id);
+            var trackMadeGoodMessage = (TrackMadeGood?)GetLastSentence(source, TrackMadeGood.Id);
+            var headingTrueMessage = (HeadingTrue?)GetLastSentence(source, HeadingTrue.Id);
             TimeSpan age;
 
             List<(GeographicPosition, TimeSpan)> orderablePositions = new List<(GeographicPosition, TimeSpan)>();
-            if (gll != null && gll.Position.ContainsValidPosition())
+            if (positionFastUpdate != null && positionFastUpdate.Position.ContainsValidPosition())
             {
-                orderablePositions.Add((gll.Position, gll.AgeTo(now)));
-                messageTime = gll.DateTime;
+                orderablePositions.Add((positionFastUpdate.Position, positionFastUpdate.AgeTo(now)));
+                messageTime = positionFastUpdate.DateTime;
             }
 
             // Choose the best message we can, but if all of them are new, always use the same type
-            if (gll == null || gll.Age > TimeSpan.FromSeconds(2))
+            if (positionFastUpdate == null || positionFastUpdate.Age > TimeSpan.FromSeconds(2))
             {
-                if (gga != null && gga.Valid)
+                if (globalPositioningSystemFixDataMessage != null && globalPositioningSystemFixDataMessage.Valid)
                 {
-                    orderablePositions.Add((gga.Position, gga.AgeTo(now)));
-                    messageTime = gga.DateTime;
+                    orderablePositions.Add((globalPositioningSystemFixDataMessage.Position, globalPositioningSystemFixDataMessage.AgeTo(now)));
+                    messageTime = globalPositioningSystemFixDataMessage.DateTime;
                 }
 
-                if (gga == null || gga.Age > TimeSpan.FromSeconds(2))
+                if (globalPositioningSystemFixDataMessage == null || globalPositioningSystemFixDataMessage.Age > TimeSpan.FromSeconds(2))
                 {
-                    if (rmc != null && rmc.Valid)
+                    if (recommendedMinimumNavigationInformationMessage != null && recommendedMinimumNavigationInformationMessage.Valid)
                     {
-                        orderablePositions.Add((rmc.Position, rmc.AgeTo(now)));
-                        messageTime = rmc.DateTime;
+                        orderablePositions.Add((recommendedMinimumNavigationInformationMessage.Position, recommendedMinimumNavigationInformationMessage.AgeTo(now)));
+                        messageTime = recommendedMinimumNavigationInformationMessage.DateTime;
                     }
                 }
             }
@@ -212,21 +212,21 @@ namespace Iot.Device.Nmea0183
 
             (position, age) = orderablePositions.OrderBy(x => x.Item2).Select(x => (x.Item1, x.Item2)).First();
 
-            if (gga != null && gga.EllipsoidAltitude.HasValue)
+            if (globalPositioningSystemFixDataMessage != null && globalPositioningSystemFixDataMessage.EllipsoidAltitude.HasValue)
             {
                 // If we had seen a gga message, use its height, regardless of which other message provided the position
-                position = new GeographicPosition(position.Latitude, position.Longitude, gga.EllipsoidAltitude.Value);
+                position = new GeographicPosition(position.Latitude, position.Longitude, globalPositioningSystemFixDataMessage.EllipsoidAltitude.Value);
             }
 
-            if (rmc != null)
+            if (recommendedMinimumNavigationInformationMessage != null)
             {
-                sog = rmc.SpeedOverGround;
-                track = rmc.TrackMadeGoodInDegreesTrue;
+                sog = recommendedMinimumNavigationInformationMessage.SpeedOverGround;
+                track = recommendedMinimumNavigationInformationMessage.TrackMadeGoodInDegreesTrue;
             }
-            else if (vtg != null)
+            else if (trackMadeGoodMessage != null)
             {
-                sog = vtg.Speed;
-                track = vtg.CourseOverGroundTrue;
+                sog = trackMadeGoodMessage.Speed;
+                track = trackMadeGoodMessage.CourseOverGroundTrue;
             }
             else
             {
@@ -237,9 +237,9 @@ namespace Iot.Device.Nmea0183
                 return false;
             }
 
-            if (hdt != null)
+            if (headingTrueMessage != null)
             {
-                heading = hdt.Angle;
+                heading = headingTrueMessage.Angle;
             }
             else
             {

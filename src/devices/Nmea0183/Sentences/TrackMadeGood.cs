@@ -15,7 +15,7 @@ namespace Iot.Device.Nmea0183.Sentences
     public class TrackMadeGood : NmeaSentence
     {
         /// <summary>
-        /// This sentence's id
+        /// This sentence Id "VTG"
         /// </summary>
         public static SentenceId Id => new SentenceId("VTG");
         private static bool Matches(SentenceId sentence) => Id == sentence;
