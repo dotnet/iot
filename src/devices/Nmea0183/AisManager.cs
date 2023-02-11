@@ -692,7 +692,7 @@ namespace Iot.Device.Nmea0183
             PositionReportClassAMessage rpt = new PositionReportClassAMessage();
             rpt.Mmsi = ship.Mmsi;
             rpt.SpeedOverGround = ship.SpeedOverGround.Knots;
-            if (ship.RateOfTurn != null)
+            if (ship.RateOfTurn.HasValue)
             {
                 // Inverse of the formula above
                 double v = ship.RateOfTurn.Value.DegreesPerMinute;

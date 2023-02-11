@@ -141,7 +141,8 @@ namespace Iot.Device.Nmea0183.Ais
                         relativeDirection = (direction - self1.TrueHeading.Value).Normalize(false);
                     }
 
-                    Length minimumDistance = Length.MaxValue;
+                    // Some really large distance
+                    Length minimumDistance = Length.FromAstronomicalUnits(1);
                     DateTimeOffset timeOfMinimumDistance = default;
                     int usedIndex = 0;
                     for (int i = 0; i < thisTrack.Count; i++)

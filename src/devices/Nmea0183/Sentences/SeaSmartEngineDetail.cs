@@ -42,7 +42,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public SeaSmartEngineDetail(EngineData data)
         {
-            Status = data.Revolutions != RotationalSpeed.Zero;
+            Status = !data.Revolutions.Equals(RotationalSpeed.Zero, 0, ComparisonType.Absolute);
             OperatingTime = data.OperatingTime;
             Temperature = data.EngineTemperature;
             EngineNumber = data.EngineNo;
@@ -207,7 +207,7 @@ namespace Iot.Device.Nmea0183.Sentences
                 int status = Status ? 0 : 1;
                 string statusString = status.ToString("X4", CultureInfo.InvariantCulture);
                 int engineTempKelvin;
-                if (Temperature != null)
+                if (Temperature.HasValue)
                 {
                     engineTempKelvin = (int)Math.Round(Temperature.Value.Kelvins * 100.0, 1);
                 }
