@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31515.178
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ft232H", "Ft232H.csproj", "{41A5516C-6799-4642-B20D-BEC14CF0B742}"
 EndProject
@@ -17,11 +17,9 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "FtCommon", "..\FtCommon\FtC
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Board", "..\Board\Board.csproj", "{DF7F5D81-1F96-46A6-AB39-977A8522F6FA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tsl256x", "..\Tsl256x\Tsl256x.csproj", "{72A779D8-444D-4273-A759-652B71F76B60}"
+EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		..\FtCommon\FtCommon.projitems*{2f022801-b558-4395-a995-ef10628447b4}*SharedItemsImports = 13
-		..\FtCommon\FtCommon.projitems*{41a5516c-6799-4642-b20d-bec14cf0b742}*SharedItemsImports = 5
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -43,6 +41,10 @@ Global
 		{DF7F5D81-1F96-46A6-AB39-977A8522F6FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DF7F5D81-1F96-46A6-AB39-977A8522F6FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DF7F5D81-1F96-46A6-AB39-977A8522F6FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72A779D8-444D-4273-A759-652B71F76B60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72A779D8-444D-4273-A759-652B71F76B60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72A779D8-444D-4273-A759-652B71F76B60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72A779D8-444D-4273-A759-652B71F76B60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -52,8 +54,13 @@ Global
 		{7CC23CB9-7276-418B-8085-AA06AD7AC63B} = {D476679D-EBC5-406A-B293-93A65C8B58ED}
 		{2F022801-B558-4395-A995-EF10628447B4} = {07E992C0-1091-4A40-B1A0-71878D58140F}
 		{DF7F5D81-1F96-46A6-AB39-977A8522F6FA} = {07E992C0-1091-4A40-B1A0-71878D58140F}
+		{72A779D8-444D-4273-A759-652B71F76B60} = {D476679D-EBC5-406A-B293-93A65C8B58ED}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {ECE390DE-F924-422E-8D21-ABB498BA0D20}
+	EndGlobalSection
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		..\FtCommon\FtCommon.projitems*{2f022801-b558-4395-a995-ef10628447b4}*SharedItemsImports = 13
+		..\FtCommon\FtCommon.projitems*{41a5516c-6799-4642-b20d-bec14cf0b742}*SharedItemsImports = 5
 	EndGlobalSection
 EndGlobal

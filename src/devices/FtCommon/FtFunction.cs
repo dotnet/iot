@@ -53,6 +53,14 @@ namespace Iot.Device.FtCommon
         public static extern FtStatus FT_Close(IntPtr ftHandle);
 
         /// <summary>
+        /// Reset the device.
+        /// </summary>
+        /// <param name="ftHandle">The device handle</param>
+        /// <returns>The status</returns>
+        [DllImport("ftd2xx")]
+        public static extern FtStatus FT_ResetDevice(SafeFtHandle ftHandle);
+
+        /// <summary>
         /// Sets timeouts.
         /// </summary>
         /// <param name="ftHandle">The handle of the open device</param>
@@ -90,7 +98,16 @@ namespace Iot.Device.FtCommon
         /// <param name="ucMode">bit mode</param>
         /// <returns></returns>
         [DllImport("ftd2xx")]
-        public static extern FtStatus FT_SetBitMode(SafeFtHandle ftHandle, byte ucMask, byte ucMode);
+        public static extern FtStatus FT_SetBitMode(SafeFtHandle ftHandle, byte ucMask, FtBitMode ucMode);
+
+        /// <summary>
+        /// Get bit mode.
+        /// </summary>
+        /// <param name="ftHandle">The handle of the open device</param>
+        /// <param name="ucMode">The actual value of each pin regarless if they are input or output.</param>
+        /// <returns></returns>
+        [DllImport("ftd2xx")]
+        public static extern FtStatus FT_GetBitMode(SafeFtHandle ftHandle, ref byte ucMode);
 
         /// <summary>
         /// Get queued status, this is used only to read the status of number of bytes to write.

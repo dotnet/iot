@@ -36,7 +36,6 @@ namespace Iot.Device.Shtc3
             _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
 
             Wakeup();
-            _status = Status.Idle;
 
             Reset();
         }
@@ -181,12 +180,19 @@ namespace Iot.Device.Shtc3
             }
 
             Write(Register.SHTC3_SLEEP);
+
+            _status = Status.Sleep;
         }
 
         /// <summary>
         /// SHTC3 Wakeup
         /// </summary>
-        private void Wakeup() => Write(Register.SHTC3_WAKEUP);
+        private void Wakeup()
+        {
+            Write(Register.SHTC3_WAKEUP);
+
+            _status = Status.Idle;
+        }
 
         /// <summary>
         /// SHTC3 Soft Reset

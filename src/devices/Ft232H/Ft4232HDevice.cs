@@ -3,37 +3,33 @@
 
 using System;
 using System.Collections.Generic;
-using System.Device.Gpio;
-using System.Device.I2c;
-using System.Device.Spi;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Threading;
-using Iot.Device.Board;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Iot.Device.Common;
 using Iot.Device.FtCommon;
 
-namespace Iot.Device.Ft232H
+namespace Iot.Device.Ft4232H
 {
     /// <summary>
-    /// FT232H Device
+    /// FT4232H Device
     /// </summary>
-    public class Ft232HDevice : Ftx232HDevice, IDisposable
+    public class Ft4232HDevice : Ftx232HDevice
     {
         /// <summary>
-        /// Gets all the FT232H connected
+        /// Gets all the FT4232H connected
         /// </summary>
-        /// <returns>A list of FT232H</returns>
-        public static List<Ft232HDevice> GetFt232H()
+        /// <returns>A list of FT4232H</returns>
+        public static List<Ft4232HDevice> GetFt2232H()
         {
-            List<Ft232HDevice> ft232s = new List<Ft232HDevice>();
-            var devices = FtCommon.FtCommon.GetDevices(new FtDeviceType[] { FtDeviceType.Ft232H });
+            List<Ft4232HDevice> ft4232s = new List<Ft4232HDevice>();
+            var devices = FtCommon.FtCommon.GetDevices(new FtDeviceType[] { FtDeviceType.Ft4232H });
             foreach (var device in devices)
             {
-                ft232s.Add(new Ft232HDevice(device));
+                ft4232s.Add(new Ft4232HDevice(device));
             }
 
-            return ft232s;
+            return ft4232s;
         }
 
         /// <summary>
@@ -50,6 +46,9 @@ namespace Iot.Device.Ft232H
             switch (pin)
             {
                 case "ADBUS0":
+                case "BDBUS0":
+                case "CDBUS0":
+                case "DDBUS0":
                 case "D0":
                 case "TCK":
                 case "SK":
@@ -57,6 +56,9 @@ namespace Iot.Device.Ft232H
                 case "SDL":
                     return 0;
                 case "ADBUS1":
+                case "BDBUS1":
+                case "CDBUS1":
+                case "DDBUS1":
                 case "D1":
                 case "DO":
                 case "TDI":
@@ -64,71 +66,57 @@ namespace Iot.Device.Ft232H
                 case "MOSI":
                     return 1;
                 case "ADBUS2":
+                case "BDBUS2":
+                case "CDBUS2":
+                case "DDBUS2":
                 case "D2":
                 case "DI":
                 case "TDO":
                 case "MISO":
                     return 2;
                 case "ADBUS3":
+                case "BDBUS3":
+                case "CDBUS3":
+                case "DDBUS3":
                 case "D3":
                 case "TMS":
                 case "CS":
                     return 3;
                 case "ADBUS4":
+                case "BDBUS4":
+                case "CDBUS4":
+                case "DDBUS4":
                 case "D4":
                 case "GPIOL0":
                     return 4;
                 case "ADBUS5":
+                case "BDBUS5":
+                case "CDBUS5":
+                case "DDBUS5":
                 case "D5":
                 case "GPIOL1":
                     return 5;
                 case "ADBUS6":
+                case "BDBUS6":
+                case "CDBUS6":
+                case "DDBUS6":
                 case "D6":
                 case "GPIOL2":
                     return 6;
                 case "ADBUS7":
+                case "BDBUS7":
+                case "CDBUS7":
+                case "DDBUS7":
                 case "D7":
                 case "GPIOL3":
                     return 7;
-                case "ACBUS0":
-                case "C0":
-                case "GPIOH0":
-                    return 8;
-                case "ACBUS1":
-                case "C1":
-                case "GPIOH1":
-                    return 9;
-                case "ACBUS2":
-                case "C2":
-                case "GPIOH2":
-                    return 10;
-                case "ACBUS3":
-                case "C3":
-                case "GPIOH3":
-                    return 11;
-                case "ACBUS4":
-                case "C4":
-                case "GPIOH4":
-                    return 12;
-                case "ACBUS5":
-                case "C5":
-                case "GPIOH5":
-                    return 13;
-                case "ACBUS6":
-                case "C6":
-                case "GPIOH6":
-                    return 14;
-                case "ACBUS7":
-                case "C7":
-                case "GPIOH7":
-                    return 15;
                 default:
                     return -1;
             }
         }
 
         /// <summary>
-        /// Instantiates a FT232H device object.
+        /// Instantiates a FT4232H device object.
         /// </summary>
         /// <param name="flags">Indicates device state.</param>
         /// <param name="type">Indicates the device type.</param>
@@ -136,16 +124,16 @@ namespace Iot.Device.Ft232H
         /// <param name="locId">The physical location identifier of the device.</param>
         /// <param name="serialNumber">The device serial number.</param>
         /// <param name="description">The device description.</param>
-        public Ft232HDevice(FtFlag flags, FtDeviceType type, uint id, uint locId, string serialNumber, string description)
-        : base(flags, type, id, locId, serialNumber, description)
+        public Ft4232HDevice(FtFlag flags, FtDeviceType type, uint id, uint locId, string serialNumber, string description)
+            : base(flags, type, id, locId, serialNumber, description)
         {
         }
 
         /// <summary>
-        /// Instantiates a FT232H device object.
+        /// Instantiates a FT4232H device object.
         /// </summary>
         /// <param name="ftDevice">a FT Device</param>
-        public Ft232HDevice(FtDevice ftDevice)
+        public Ft4232HDevice(FtDevice ftDevice)
             : base(ftDevice.Flags, ftDevice.Type, ftDevice.Id, ftDevice.LocId, ftDevice.SerialNumber, ftDevice.Description)
         {
         }
