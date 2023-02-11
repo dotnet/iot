@@ -16,6 +16,8 @@ namespace Iot.Device.Nmea0183
     /// <summary>
     /// Provides high-level methods to obtain position and other aggregated data from NMEA sources.
     /// The class takes the best available data sets to generate the required output.
+    /// A position can for instance be obtained from <see cref="PositionFastUpdate"/>, <see cref="GlobalPositioningSystemFixData"/> or
+    /// <see cref="RecommendedMinimumNavigationInformation"/>, depending on whatever the GNSS receiver delivers.
     /// </summary>
     public class PositionProvider
     {

@@ -14,7 +14,9 @@ using UnitsNet;
 namespace Iot.Device.Nmea0183
 {
     /// <summary>
-    /// Caches the last sentence(s) of each type and so provides a way of asking for the current position without waiting for the next message
+    /// Caches the last sentence(s) of each type for later retrieval.
+    /// This is a helper class for <see cref="AutopilotController"/> and <see cref="PositionProvider"/>. Use <see cref="PositionProvider"/> to query the position from
+    /// the most appropriate messages.
     /// </summary>
     public sealed class SentenceCache : IDisposable
     {
