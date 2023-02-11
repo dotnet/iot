@@ -44,7 +44,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         [Fact]
         public void FeedWithRealDataAndCheckGeneralAttributes()
         {
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "../../../Nmea-2021-08-25-16-25.txt");
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
             DateTimeOffset latestPacketDate = default;
             reader.OnNewSequence += (source, msg) =>
             {
@@ -91,7 +91,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         [Fact]
         public void CheckSafety1()
         {
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "../../../Nmea-2021-08-25-16-25.txt");
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
             DateTimeOffset latestPacketDate = default;
             reader.OnNewSequence += (source, msg) =>
             {
@@ -160,7 +160,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         public void CheckSafetyPermanently()
         {
             // This does a safety check all the time. Very expensive...
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "../../../Nmea-2021-08-25-16-25.txt");
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
             List<string> messages = new List<string>();
             _manager.TrackEstimationParameters.AisSafetyCheckInterval = TimeSpan.Zero;
             _manager.OnMessage += (received, sourceMmsi, destinationMmsi, text) =>
@@ -239,7 +239,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         [Fact]
         public void CheckSpecialTargetDecode()
         {
-            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", "../../../Nmea-AisSpecialTargets.txt");
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-AisSpecialTargets.txt"));
             int messagesParsed = 0;
             reader.OnNewSequence += (source, msg) =>
             {

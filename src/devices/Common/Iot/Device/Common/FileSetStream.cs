@@ -16,8 +16,8 @@ namespace Iot.Device.Common
     /// </summary>
     public class FileSetStream : Stream
     {
-        private string[] _fileNames;
-        private FileStream? _activeFile;
+        private List<(String FileName, Stream? Alternate)> _files;
+        private Stream? _activeFile;
         private int _currentFile;
 
         /// <summary>
@@ -27,12 +27,40 @@ namespace Iot.Device.Common
         /// <exception cref="FileNotFoundException">One of the files doesn't exist</exception>
         public FileSetStream(IEnumerable<string> fileNames)
         {
-            _fileNames = fileNames.ToArray();
-            foreach (var f in fileNames)
+            _files = fileNames.Select<string, (string, Stream?)>(x => (x, null)).ToList();
+            foreach (var f in _files)
             {
-                if (!File.Exists(f))
+                if (!File.Exists(f.FileName))
                 {
-                    throw new FileNotFoundException($"The file {f} does not exist", f);
+                    throw new FileNotFoundException($"The file {f.FileName} does not exist", f.FileName);
+                }
+            }
+
+            _currentFile = -1;
+            Loop = false;
+        }
+
+        /// <summary>
+        /// Create a new instance using a set of files.
+        /// </summary>
+        /// <param name="files">A list of file names or streams. If the stream of a pair is non-null, it is used instead of the name</param>
+        /// <exception cref="FileNotFoundException">One of the files doesn't exist</exception>
+        /// <exception cref="InvalidOperationException">A stream was provided that is not readable</exception>
+        public FileSetStream(IEnumerable<(string FileName, Stream? Alternate)> files)
+        {
+            _files = files.ToList();
+            foreach (var f in _files)
+            {
+                if (f.Alternate != null)
+                {
+                    if (f.Alternate.CanRead == false)
+                    {
+                        throw new InvalidOperationException("Streams must be readable");
+                    }
+                }
+                else if (!File.Exists(f.FileName))
+                {
+                    throw new FileNotFoundException($"The file {f.FileName} does not exist", f.FileName);
                 }
             }
 
@@ -138,7 +166,7 @@ namespace Iot.Device.Common
                 _activeFile?.Dispose();
                 _activeFile = null;
                 _currentFile = (_currentFile + 1);
-                if (_currentFile >= _fileNames.Length)
+                if (_currentFile >= _files.Count)
                 {
                     if (Loop)
                     {
@@ -150,7 +178,15 @@ namespace Iot.Device.Common
                     }
                 }
 
-                _activeFile = new FileStream(_fileNames[_currentFile], FileMode.Open, FileAccess.Read);
+                if (_files[_currentFile].Alternate != null)
+                {
+                    _activeFile = _files[_currentFile].Alternate;
+                    _activeFile!.Position = 0;
+                }
+                else
+                {
+                    _activeFile = new FileStream(_files[_currentFile].FileName, FileMode.Open, FileAccess.Read);
+                }
             }
 
             return true;

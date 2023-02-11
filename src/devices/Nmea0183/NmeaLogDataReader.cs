@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Iot.Device.Common;
@@ -18,7 +19,7 @@ namespace Iot.Device.Nmea0183
     /// </summary>
     public class NmeaLogDataReader : NmeaSinkAndSource
     {
-        private readonly IEnumerable<string> _filesToRead;
+        private readonly IEnumerable<(string Name, Stream? Alternate)> _filesToRead;
         private DateTimeOffset? _referenceTimeInLog;
         private DateTimeOffset? _referenceTimeNow;
         private NmeaParser? _internalParser;
@@ -32,7 +33,7 @@ namespace Iot.Device.Nmea0183
         public NmeaLogDataReader(string interfaceName, IEnumerable<string> filesToRead)
             : base(interfaceName)
         {
-            _filesToRead = filesToRead;
+            _filesToRead = filesToRead.Select<string, (string, Stream?)>(x => (x, null));
             _doneEvent = new ManualResetEvent(false);
         }
 
@@ -44,10 +45,44 @@ namespace Iot.Device.Nmea0183
         public NmeaLogDataReader(string interfaceName, string fileToRead)
             : base(interfaceName)
         {
-            _filesToRead = new List<string>()
+            _filesToRead = new List<(string Name, Stream? Alternate)>()
             {
-                fileToRead
+                (fileToRead, null)
             };
+
+            _doneEvent = new ManualResetEvent(false);
+        }
+
+        /// <summary>
+        /// Reads a log file and uses it as a source
+        /// </summary>
+        /// <param name="interfaceName">Name of this interface</param>
+        /// <param name="streamToRead">A file stream to read. Either a | delimited log or a plain text file</param>
+        public NmeaLogDataReader(string interfaceName, Stream streamToRead)
+            : base(interfaceName)
+        {
+            _filesToRead = new List<(string Name, Stream? Alternate)>()
+            {
+                (string.Empty, streamToRead)
+            };
+
+            _doneEvent = new ManualResetEvent(false);
+        }
+
+        /// <summary>
+        /// Reads a log file and uses it as a source
+        /// </summary>
+        /// <param name="interfaceName">Name of this interface</param>
+        /// <param name="streamsToRead">A file stream to read. Either a | delimited log or a plain text file</param>
+        public NmeaLogDataReader(string interfaceName, IEnumerable<Stream> streamsToRead)
+            : base(interfaceName)
+        {
+            if (streamsToRead.Any(x => x == null))
+            {
+                throw new ArgumentNullException(nameof(streamsToRead), "Must not provide null streams");
+            }
+
+            _filesToRead = streamsToRead.Select<Stream, (string, Stream?)>(x => (string.Empty, x)).ToList();
 
             _doneEvent = new ManualResetEvent(false);
         }
