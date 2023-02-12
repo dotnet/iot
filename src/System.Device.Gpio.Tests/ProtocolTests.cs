@@ -102,6 +102,34 @@ public class ProtocolsTests
     }
 
     [Fact]
+    [Trait("feature", "i2c")]
+    public void I2C_I2cBus_MultipleCreate()
+    {
+        I2cBus i2cBus = CreateI2cBusForBme280();
+
+        I2cDevice device1 = i2cBus.CreateDevice(Bmp280.DefaultI2cAddress);
+        device1.ReadByte();
+
+        I2cDevice device2 = i2cBus.CreateDevice(Bmp280.DefaultI2cAddress);
+        device2.ReadByte();
+    }
+
+    [Fact]
+    [Trait("feature", "i2c")]
+    public void I2C_I2cBus_MultipleCreateAndDispose()
+    {
+        I2cBus i2cBus = CreateI2cBusForBme280();
+
+        I2cDevice device1 = i2cBus.CreateDevice(Bmp280.DefaultI2cAddress);
+        device1.ReadByte();
+        device1.Dispose();
+
+        I2cDevice device2 = i2cBus.CreateDevice(Bmp280.DefaultI2cAddress);
+        device2.ReadByte();
+        device2.Dispose();
+    }
+
+    [Fact]
     [Trait("feature", "pwm")]
     [Trait("feature", "spi")]
     public void PWM_DutyCycleIsSetCorrectly()
