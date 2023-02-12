@@ -15,7 +15,7 @@ namespace Iot.Device.Ft232H
     /// </summary>
     internal class Ft232HI2cBus : I2cBus
     {
-        private HashSet<int> _usedAddresses = new HashSet<int>();
+        private HashSet<int>? _usedAddresses = null;
 
         /// <summary>
         /// Store the FTDI Device Information
@@ -35,21 +35,32 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
+            _usedAddresses ??= new HashSet<int>();
             if (!_usedAddresses.Add(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} is already open.", nameof(deviceAddress));
             }
 
+            return CreateDeviceNoCheck(deviceAddress);
+        }
+
+        internal I2cDevice CreateDeviceNoCheck(int deviceAddress)
+        {
             return new Ft232HI2c(this, deviceAddress);
         }
 
         /// <inheritdoc/>
         public override void RemoveDevice(int deviceAddress)
         {
-            if (!_usedAddresses.Remove(deviceAddress))
+            if (!RemoveDeviceNoCheck(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} was not open.", nameof(deviceAddress));
             }
+        }
+
+        internal bool RemoveDeviceNoCheck(int deviceAddress)
+        {
+            return _usedAddresses?.Remove(deviceAddress) ?? false;
         }
 
         internal void Read(int deviceAddress, Span<byte> buffer)
