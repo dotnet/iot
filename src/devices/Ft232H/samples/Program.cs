@@ -41,11 +41,10 @@ Ftx232HDevice ft232h = Ftx232HDevice.GetFtx232H()[0];
 ft232h.Reset();
 // Uncomment the test you want to run
 ////TestSpi(ft232h);
-////TestGpio(ft232h);
+TestGpio(ft232h);
 ////I2cScan(ft232h);
 ////TestI2c(ft232h);
 ////TestI2cTsl2561(ft232h);
-TestI2cOpenClose(ft232h);
 
 void TestSpi(Ftx232HDevice ft232h)
 {
@@ -196,24 +195,4 @@ void TestI2cTsl2561(Ftx232HDevice ft232H)
     tsl256X.StopManualIntegration();
     tsl256X.GetRawChannels(out ushort ch0, out ushort ch1);
     Console.WriteLine($"Raw data channel 0 {ch0}, channel 1 {ch1}");
-}
-
-void TestI2cOpenClose(Ftx232HDevice f232h, byte address = 0x48)
-{
-    /* This method demonstrates the bug discussed in #2031 and #2032 where
-     * disposing an I2C device sets the bus to null and prevents subsequent reads.
-     */
-
-    I2cBus bus = f232h.CreateOrGetI2cBus(0);
-
-    Console.WriteLine($"Opening device 0x{address:X2}");
-    I2cDevice device1 = bus.CreateDevice(address);
-    byte byte1 = device1.ReadByte();
-    Console.WriteLine($"Read: {byte1}");
-    device1.Dispose();
-
-    Console.WriteLine($"Re-opening device 0x{address:X2}");
-    I2cDevice device2 = bus.CreateDevice(address);
-    byte byte2 = device2.ReadByte(); // throws NullReferenceException
-    Console.WriteLine($"Read: {byte2}");
 }
