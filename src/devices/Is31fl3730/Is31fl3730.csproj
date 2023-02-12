@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Matrix driver -->
+    <Compile Include="Current.cs" />
+    <Compile Include="DisplayMode.cs" />
+    <Compile Include="FunctionRegister.cs" />
+    <Compile Include="Is31fl3730.cs" />
+    <Compile Include="MatrixMode.cs" />
+    <Compile Include="MatrixValues.cs" />
+    <Compile Include="ShutdownMode.cs" />
+    
+    <!-- Matrices -->
+    <Compile Include="DotMatrix.cs" />
+    <Compile Include="DotMatrix5x7.cs" />
+    <Compile Include="DotMatrix10x7.cs" />
+    <Compile Include="MicroDotPhat30x7.cs" />
+  </ItemGroup>
+</Project>
