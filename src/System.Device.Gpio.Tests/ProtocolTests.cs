@@ -109,6 +109,7 @@ public class ProtocolsTests
 
         I2cDevice device1 = i2cBus.CreateDevice(Bmp280.DefaultI2cAddress);
         device1.ReadByte();
+        i2cBus.RemoveDevice(Bmp280.DefaultI2cAddress);
 
         I2cDevice device2 = i2cBus.CreateDevice(Bmp280.DefaultI2cAddress);
         device2.ReadByte();
