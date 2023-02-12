@@ -186,6 +186,20 @@ namespace Iot.Device.Board.Tests
         }
 
         [Fact]
+        public void CreateAndRemoveI2cDevice()
+        {
+            using Board board = CreateBoard();
+            I2cBus bus = board.CreateOrGetI2cBus(0);
+
+            I2cDevice device1 = bus.CreateDevice(0x55);
+            device1.ReadByte();
+            bus.RemoveDevice(0x55);
+
+            I2cDevice device2 = bus.CreateDevice(0x55);
+            device2.ReadByte();
+        }
+
+        [Fact]
         public void CreateSpiDeviceDefault()
         {
             var board = CreateBoard();
