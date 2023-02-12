@@ -14,12 +14,14 @@ namespace Iot.Device.Ft232H
         private Ft232HI2cBus _i2cBus;
         private int _deviceAddress;
         private I2cConnectionSettings _settings;
+        private bool _shouldDisposeBus;
 
-        internal Ft232HI2c(Ft232HI2cBus i2cBus, int deviceAddress)
+        internal Ft232HI2c(Ft232HI2cBus i2cBus, int deviceAddress, bool shouldDisposeBus = false)
         {
             _i2cBus = i2cBus;
             _deviceAddress = deviceAddress;
             _settings = new I2cConnectionSettings((int)i2cBus.DeviceInformation.LocId, deviceAddress);
+            _shouldDisposeBus = shouldDisposeBus;
         }
 
         /// <inheritdoc/>
@@ -47,16 +49,22 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
-            try
+            if (_i2cBus != null)
             {
-                _i2cBus.RemoveDevice(_deviceAddress);
-            }
-            catch (ArgumentException)
-            {
-                // the device has already been removed
+                if (_shouldDisposeBus)
+                {
+                    _i2cBus.Dispose();
+                }
+                else
+                {
+                    _i2cBus.RemoveDeviceNoCheck(_deviceAddress);
+                }
+
+                _i2cBus = null!;
             }
 
             _settings = null!;
+
             base.Dispose(disposing);
         }
 
