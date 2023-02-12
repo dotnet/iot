@@ -1,13 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Threading;
 using System.Device.I2c;
 using System.Device.Pwm;
+using System.Threading;
 using Iot.Device.Adc;
 using Iot.Device.Bmxx80;
-using Xunit;
+using Iot.Device.Board;
 using UnitsNet;
+using Xunit;
 using static System.Device.Gpio.Tests.SetupHelpers;
 
 namespace System.Device.Gpio.Tests;
