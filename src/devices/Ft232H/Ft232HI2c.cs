@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.I2c;
 
 namespace Iot.Device.Ft232H
 {
@@ -9,7 +10,26 @@ namespace Iot.Device.Ft232H
     /// This class has been replaced by <see cref="Ft232HI2cDevice"/>
     /// </summary>
     [Obsolete("This class has been replaced by Ft232HI2cDevice", true)]
-    public class Ft232HI2c
+    public class Ft232HI2c : I2cDevice
     {
+        /// <summary>
+        /// This class has been replaced by <see cref="Ft232HI2cDevice"/>
+        /// </summary>
+        public override I2cConnectionSettings ConnectionSettings => throw new NotImplementedException();
+
+        /// <summary>
+        /// This class has been replaced by <see cref="Ft232HI2cDevice"/>
+        /// </summary>
+        public override void Read(Span<byte> buffer) => throw new NotImplementedException();
+
+        /// <summary>
+        /// This class has been replaced by <see cref="Ft232HI2cDevice"/>
+        /// </summary>
+        public override void Write(ReadOnlySpan<byte> buffer) => throw new NotImplementedException();
+
+        /// <summary>
+        /// This class has been replaced by <see cref="Ft232HI2cDevice"/>
+        /// </summary>
+        public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer) => throw new NotImplementedException();
     }
 }
