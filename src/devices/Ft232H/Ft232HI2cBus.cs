@@ -46,7 +46,7 @@ namespace Iot.Device.Ft232H
 
         internal I2cDevice CreateDeviceNoCheck(int deviceAddress)
         {
-            return new Ft232HI2c(this, deviceAddress);
+            return new Ft232HI2cDevice(this, deviceAddress);
         }
 
         /// <inheritdoc/>

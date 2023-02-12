@@ -9,14 +9,14 @@ namespace Iot.Device.Ft232H
     /// <summary>
     /// I2C Device for FT232H
     /// </summary>
-    public class Ft232HI2c : I2cDevice
+    public class Ft232HI2cDevice : I2cDevice
     {
         private Ft232HI2cBus _i2cBus;
         private int _deviceAddress;
         private I2cConnectionSettings _settings;
         private bool _shouldDisposeBus;
 
-        internal Ft232HI2c(Ft232HI2cBus i2cBus, int deviceAddress, bool shouldDisposeBus = false)
+        internal Ft232HI2cDevice(Ft232HI2cBus i2cBus, int deviceAddress, bool shouldDisposeBus = false)
         {
             _i2cBus = i2cBus;
             _deviceAddress = deviceAddress;
