@@ -114,7 +114,6 @@ stages:
 
   - job: Linux
     displayName: Linux Build
-    container: LinuxContainer
     pool:
       vmImage: ubuntu-latest
 
