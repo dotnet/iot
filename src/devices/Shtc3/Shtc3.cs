@@ -41,7 +41,7 @@ namespace Iot.Device.Shtc3
         /// <summary>
         /// Current state of Shtc3 sensor
         /// </summary>
-        internal Status Status { get; private set; } = Status.Unknown;
+        private Status _status = Status.Unknown;
 
         private static Register GetMeasurementCmd(bool lowPower, bool clockStretching)
         {
@@ -167,11 +167,11 @@ namespace Iot.Device.Shtc3
         /// </summary>
         public void Sleep()
         {
-            if (Status != Status.Sleep)
+            if (_status != Status.Sleep)
             {
                 Write(Register.SHTC3_SLEEP);
 
-                Status = Status.Sleep;
+                _status = Status.Sleep;
             }
         }
 
@@ -180,11 +180,11 @@ namespace Iot.Device.Shtc3
         /// </summary>
         private void Wakeup()
         {
-            if (Status != Status.Idle)
+            if (_status != Status.Idle)
             {
                 Write(Register.SHTC3_WAKEUP);
 
-                Status = Status.Idle;
+                _status = Status.Idle;
             }
         }
 
