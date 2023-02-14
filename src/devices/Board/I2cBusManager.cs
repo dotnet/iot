@@ -69,7 +69,7 @@ namespace Iot.Device.Board
         public override I2cDevice CreateDevice(int deviceAddress)
         {
             I2cDevice newDevice = _busInstance.CreateDevice(deviceAddress);
-            _devices.TryAdd(deviceAddress, newDevice);
+            _devices[deviceAddress] = newDevice;
             return newDevice;
         }
 
