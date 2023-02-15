@@ -17,7 +17,7 @@ namespace Iot.Device.Common
     /// This object stores ellipsoidal height, depending on the GNSS receiver and the application, this needs to be transformed to geoidal height.
     /// </remarks>
     [Serializable]
-    public sealed class GeographicPosition : ICloneable, IEquatable<GeographicPosition>
+    public sealed class GeographicPosition : ICloneable, IEquatable<GeographicPosition>, IFormattable
     {
         private const string DegreesSymbol = "°";
         private const string MinutesSymbol = "\'";
@@ -102,15 +102,15 @@ namespace Iot.Device.Common
         /// <param name="degrees">Full degrees</param>
         /// <param name="minutes">Full minutes</param>
         /// <param name="seconds">Seconds including requested number of digits</param>
-        public static void GetDegreesMinutesSeconds(double angle, int secDigits, out double normalizedVal, out double degrees, out double minutes, out double seconds)
+        public static void GetDegreesMinutesSeconds(double angle, int secDigits, out double normalizedVal, out int degrees, out int minutes, out double seconds)
         {
             angle = GeographicPositionExtensions.NormalizeAngleTo180Degrees(angle);
             normalizedVal = angle;
             angle = Math.Abs(angle);
-            degrees = Math.Floor(angle);
+            degrees = (int)Math.Floor(angle);
 
             double remains = (angle - degrees) * 60.0;
-            minutes = Math.Floor(remains);
+            minutes = (int)Math.Floor(remains);
 
             seconds = (remains - minutes) * 60.0;
 
@@ -128,6 +128,37 @@ namespace Iot.Device.Common
                     {
                         degrees -= 360;
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the given angle as degree and minutes
+        /// </summary>
+        /// <param name="angle">Input angle, in degrees</param>
+        /// <param name="minDigits">Number of digits for the minutes</param>
+        /// <param name="normalizedVal">Normalized angle value (to -180 to 180)</param>
+        /// <param name="degrees">Full degrees</param>
+        /// <param name="minutes">Minutes including requested number of digits</param>
+        public static void GetDegreesMinutes(double angle, int minDigits, out double normalizedVal, out int degrees, out double minutes)
+        {
+            angle = GeographicPositionExtensions.NormalizeAngleTo180Degrees(angle);
+            normalizedVal = angle;
+            angle = Math.Abs(angle);
+            degrees = (int)Math.Floor(angle);
+
+            double remains = (angle - degrees) * 60.0;
+            minutes = remains;
+
+            // If rounding the seconds to the given digit would print out "60",
+            // add 1 to the minutes instead
+            if (Math.Round(minutes, minDigits) >= 60.0)
+            {
+                degrees += 1;
+                minutes = 0;
+                if (degrees >= 360)
+                {
+                    degrees -= 360;
                 }
             }
         }
@@ -181,20 +212,23 @@ namespace Iot.Device.Common
 
         private static string GetNorthOrSouth(double sign) => sign >= 0 ? "N" : "S";
 
-        private static string GetLongitudeString(double longitude)
+        private static string GetLongitudeString(double longitude, int digits, bool withDirection)
         {
             GetDegreesMinutesSeconds(longitude, 2, out var normalizedVal, out var deg, out var min, out var sec);
-            string strEastOrWest = GetEastOrWest(normalizedVal);
+            string strEastOrWest = withDirection ? GetEastOrWest(normalizedVal) : string.Empty;
 
-            return FormattableString.Invariant($"{deg}{DegreesSymbol} {min:00}{MinutesSymbol} {sec:00.00}{SecondsSymbol}{strEastOrWest}");
+            string secString = sec.ToString($"00.{new string('0', digits)}");
+            return FormattableString.Invariant($"{deg:000}{DegreesSymbol} {min:00}{MinutesSymbol} {secString}{SecondsSymbol}{strEastOrWest}");
         }
 
-        private static string GetLatitudeString(double latitude)
+        private static string GetLatitudeString(double latitude, int digits, bool withDirection)
         {
-            GetDegreesMinutesSeconds(latitude, 2, out var normalizedVal, out var deg, out var min, out var sec);
-            string strNorthOrSouth = GetNorthOrSouth(normalizedVal);
+            GetDegreesMinutesSeconds(latitude, digits, out var normalizedVal, out var deg, out var min, out var sec);
+            string strNorthOrSouth = withDirection ? GetNorthOrSouth(normalizedVal) : string.Empty;
 
-            string strLatRet = FormattableString.Invariant($"{deg}{DegreesSymbol} {min:00}{MinutesSymbol} {sec:00.00}{SecondsSymbol}{strNorthOrSouth}");
+            string secString = sec.ToString($"00.{new string('0', digits)}");
+
+            string strLatRet = FormattableString.Invariant($"{deg:00}{DegreesSymbol} {min:00}{MinutesSymbol} {secString}{SecondsSymbol}{strNorthOrSouth}");
             return strLatRet;
         }
 
@@ -322,10 +356,186 @@ namespace Iot.Device.Common
                 return "Infinity";
             }
 
-            var strLatRet = GetLatitudeString(Latitude);
-            var strLonRet = GetLongitudeString(Longitude);
+            var strLatRet = GetLatitudeString(Latitude, 2, true);
+            var strLonRet = GetLongitudeString(Longitude, 2, true);
 
-            return $"{strLatRet} / {strLonRet} Ellipsoidal Height {EllipsoidalHeight:F0}m";
+            return $"{strLatRet} {strLonRet} Ellipsoidal Height {EllipsoidalHeight:F0}m";
+        }
+
+        /// <summary>
+        /// Formats this <see cref="GeographicPosition"/> instance to a string.
+        /// The format string can contain up to three groups of format identifiers of the form "Xn", where X is one of
+        /// * D: Decimal display: The value is printed in decimal notation
+        /// * U: Decimal, unsigned: The value is printed in decimal notation, omitting the sign. When using N or E (see below), the sign is typically omitted.
+        /// * M: Minutes: The value is displayed as degrees minutes
+        /// * S: Seconds: The value is displayed as degrees minutes seconds
+        /// A single digit after the letter indicates the number of digits for the last group (e.g. M2 uses two digits for the minutes)
+        /// The first of the above letters prints the latitude, the second the longitude and the third the altitude.
+        /// Additionally, the following special letters can be anywhere in the format string:
+        /// * N: North/South: Prints "N" when the latitude is greater or equal to 0, "S" otherwise
+        /// * E: East/West Prints "E" when the longitude is greater or equal to 0, "W" otherwise
+        /// Any other letters (including spaces) are printed as-is.
+        /// <example>
+        /// "Format specifier" - "Output"
+        /// "D3 D3" - "10.000° 23.500°"
+        /// "U3N D3E" - "10.000°N 23.500°E"
+        /// "U3N D3E" - "10.500°N 23.512°E"
+        /// "M2N M2E" - "10° 30.00'N 23° 30.74'E"
+        /// "S1N S2N D0m" - "10° 30' 00.0\"N 023° 30' 44.42\"E -100m"
+        /// </example>
+        /// </summary>
+        /// <param name="format">The format string. Possible options see above</param>
+        /// <param name="formatProvider">The format provider</param>
+        /// <returns>A string representation of this position</returns>
+        public string ToString(string? format, IFormatProvider? formatProvider)
+        {
+            if (string.IsNullOrWhiteSpace(format))
+            {
+                return ToString();
+            }
+
+            StringBuilder output = new StringBuilder();
+            int element = 0; // 0 latitude, 1 longitude 2 elevation
+            int formatIndex = 0;
+            for (; formatIndex < format!.Length; formatIndex++)
+            {
+                char fmt = format[formatIndex];
+                int? digits = GetNumDigits(format, formatIndex);
+                if (digits != null)
+                {
+                    formatIndex++; // Skip number
+                }
+
+                int degrees;
+                double minutes;
+                switch (fmt)
+                {
+                    case 'D':
+                        if (digits == null)
+                        {
+                            digits = 7;
+                        }
+
+                        if (element == 0)
+                        {
+                            output.Append(Latitude.ToString($"F{digits}", formatProvider) + "°");
+                        }
+                        else if (element == 1)
+                        {
+                            output.Append(Longitude.ToString($"F{digits}", formatProvider) + "°");
+                        }
+                        else if (element == 2)
+                        {
+                            output.Append(EllipsoidalHeight.ToString($"F{digits}", formatProvider));
+                        }
+
+                        element++;
+                        break;
+
+                    case 'U':
+                        if (digits == null)
+                        {
+                            digits = 7;
+                        }
+
+                        if (element == 0)
+                        {
+                            output.Append(Math.Abs(Latitude).ToString($"F{digits}", formatProvider) + "°");
+                        }
+                        else if (element == 1)
+                        {
+                            output.Append(Math.Abs(Longitude).ToString($"F{digits}", formatProvider) + "°");
+                        }
+                        else if (element == 2)
+                        {
+                            throw new FormatException(
+                                "The format specifier 'U' cannot be used for altitude (it's use without sign is undefined)");
+                        }
+
+                        element++;
+                        break;
+                    case 'S':
+                        if (digits == null)
+                        {
+                            digits = 7;
+                        }
+
+                        if (element == 0)
+                        {
+                            output.Append(GetLatitudeString(Latitude, digits.Value, false));
+                        }
+                        else if (element == 1)
+                        {
+                            output.Append(GetLongitudeString(Longitude, digits.Value, false));
+                        }
+                        else if (element == 2)
+                        {
+                            output.Append(EllipsoidalHeight.ToString($"F{digits}", formatProvider));
+                        }
+
+                        element++;
+                        break;
+
+                    case 'M':
+                        if (digits == null)
+                        {
+                            digits = 7;
+                        }
+
+                        string formatString =
+                            $"{{0}}{DegreesSymbol} {{1:00.{new string('0', digits.Value)}}}{MinutesSymbol}";
+
+                        if (element == 0)
+                        {
+                            GetDegreesMinutes(Latitude, digits.Value, out _, out degrees, out minutes);
+                            output.Append(string.Format(formatProvider, formatString, degrees, minutes));
+                        }
+                        else if (element == 1)
+                        {
+                            GetDegreesMinutes(Longitude, digits.Value, out _, out degrees, out minutes);
+                            output.Append(string.Format(formatProvider, formatString, degrees, minutes));
+                        }
+                        else if (element == 2)
+                        {
+                            output.Append(EllipsoidalHeight.ToString($"F{digits}", formatProvider));
+                        }
+
+                        element++;
+                        break;
+                    case 'N':
+                        output.Append(GetNorthOrSouth(Latitude));
+                        break;
+                    case 'E':
+                        output.Append(GetEastOrWest(Longitude));
+                        break;
+                    default:
+                        output.Append(fmt);
+                        break;
+                }
+            }
+
+            return output.ToString();
+        }
+
+        /// <summary>
+        /// Gets a number after the given index from the format string. Only one digit supported.
+        /// </summary>
+        /// <param name="format">The format string</param>
+        /// <param name="index">The index of the identifier (the last letter)</param>
+        /// <returns>An interger or null, if none was found at the given position</returns>
+        private int? GetNumDigits(string format, int index)
+        {
+            int possibleNumberIndex = index + 1;
+            if (possibleNumberIndex < format.Length)
+            {
+                if (Char.IsDigit(format[possibleNumberIndex]))
+                {
+                    // Must succeed
+                    return Int32.Parse(format[possibleNumberIndex].ToString());
+                }
+            }
+
+            return null;
         }
 
         /// <inheritdoc/>

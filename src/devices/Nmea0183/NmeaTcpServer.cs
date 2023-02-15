@@ -18,6 +18,10 @@ namespace Iot.Device.Nmea0183
     /// <summary>
     /// A TCP Server bidirectional sink and source. Provides NMEA sentences to each connected client.
     /// </summary>
+    /// <remarks>
+    /// Using this class in applications targeting .NET core 3.1 or earlier may cause deadlocks when closing the connection.
+    /// It is recommended to target .NET 6.0 or above when using this class.
+    /// </remarks>
     public class NmeaTcpServer : NmeaSinkAndSource
     {
         private readonly IPAddress _bindTo;

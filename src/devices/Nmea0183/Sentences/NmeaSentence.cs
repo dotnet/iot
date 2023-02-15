@@ -31,7 +31,6 @@ namespace Iot.Device.Nmea0183.Sentences
         protected static Calendar gregorianCalendar = new GregorianCalendar(GregorianCalendarTypes.USEnglish);
 
         private static TalkerId _ownTalkerId = DefaultTalkerId;
-        private DateTimeOffset _dateTime;
 
         /// <summary>
         /// Our own talker ID (default when we send messages ourselves)
@@ -67,6 +66,7 @@ namespace Iot.Device.Nmea0183.Sentences
         public TalkerId TalkerId
         {
             get;
+            init;
         }
 
         /// <summary>
@@ -82,14 +82,8 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public DateTimeOffset DateTime
         {
-            get
-            {
-                return _dateTime;
-            }
-            protected set
-            {
-                _dateTime = value;
-            }
+            get;
+            set;
         }
 
         /// <summary>
@@ -125,6 +119,22 @@ namespace Iot.Device.Nmea0183.Sentences
         public abstract bool ReplacesOlderInstance
         {
             get;
+        }
+
+        /// <summary>
+        /// The relative age of this sentence against a time stamp.
+        /// Useful when analyzing recorded data, where "now" should also be a time in the past.
+        /// </summary>
+        /// <param name="now">Time to compare against</param>
+        /// <returns>The time difference</returns>
+        public TimeSpan AgeTo(DateTimeOffset now)
+        {
+            if (!Valid)
+            {
+                return TimeSpan.Zero;
+            }
+
+            return now - DateTime;
         }
 
         /// <summary>
@@ -204,7 +214,19 @@ namespace Iot.Device.Nmea0183.Sentences
         protected char? ReadChar(IEnumerator<string> field)
         {
             string val = ReadString(field);
-            return string.IsNullOrEmpty(val) ? (char?)null : val.Single();
+            if (string.IsNullOrWhiteSpace(val))
+            {
+                return null;
+            }
+
+            if (val.Length == 1)
+            {
+                return val[0];
+            }
+            else
+            {
+                return null; // Probably also illegal
+            }
         }
 
         /// <summary>
