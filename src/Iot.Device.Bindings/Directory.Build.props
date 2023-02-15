@@ -8,6 +8,5 @@
     <EnablePackageValidation>true</EnablePackageValidation>
     <PackageValidationBaselineVersion>2.2.0</PackageValidationBaselineVersion>
   </PropertyGroup>
-
   <Import Project="../../Directory.Build.props" />
 </Project>

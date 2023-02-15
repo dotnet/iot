@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Windows.Foundation;
 
+
 internal static partial class Interop
 {
     public static TResult? WaitForCompletion<TResult>(this IAsyncOperation<TResult> operation)
