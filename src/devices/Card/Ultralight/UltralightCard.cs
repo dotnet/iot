@@ -280,7 +280,13 @@ namespace Iot.Device.Card.Ultralight
                     throw new ArgumentException("For fast read, last block has to be more than first block");
                 }
 
-                dataOut = new byte[(_endAddress - BlockNumber + 1) * 4];
+                var dataOutLength = (_endAddress - BlockNumber + 1) * 4;
+                if (dataOutLength > _rfid.MaximumReadSize)
+                {
+                    throw new ArgumentException($"Fast read is too large for transceiver - maximum is {_rfid.MaximumReadSize / 4} blocks");
+                }
+
+                dataOut = new byte[dataOutLength];
             }
             else if (Command == UltralightCommand.GetVersion)
             {
@@ -298,7 +304,8 @@ namespace Iot.Device.Card.Ultralight
                 dataOut = new byte[3];
             }
 
-            var ret = _rfid.Transceive(Target, Serialize(), dataOut.AsSpan());
+            var protocol = (Command == UltralightCommand.WriteCompatible) ? NfcProtocol.Mifare : NfcProtocol.Iso14443_3;
+            var ret = _rfid.Transceive(Target, Serialize(), dataOut.AsSpan(), protocol);
             _logger.LogDebug($"{nameof(UltralightCommand)}: {Command}, Target: {Target}, Data: {BitConverter.ToString(Serialize())}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}");
             if ((ret > 0) && awaitingData)
             {
@@ -339,14 +346,14 @@ namespace Iot.Device.Card.Ultralight
             {
                 Span<byte> toSend = stackalloc byte[2] { (byte)UltralightCommand.Read16Bytes, 2 };
                 Span<byte> dataOut = stackalloc byte[16];
-                _rfid.Transceive(Target, toSend, dataOut);
+                _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                 return (dataOut[2] & (0b0000_0001 << page)) == (0b0000_0001 << page);
             }
             else if ((page >= 0x08) && (page <= 0x0F))
             {
                 Span<byte> toSend = stackalloc byte[2] { (byte)UltralightCommand.Read16Bytes, 2 };
                 Span<byte> dataOut = stackalloc byte[16];
-                _rfid.Transceive(Target, toSend, dataOut);
+                _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                 return (dataOut[3] & (0b0000_0001 << (page - 8))) == (0b0000_0001 << (page - 8));
             }
             else
@@ -358,7 +365,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtag203:
                         // Read 0x24
                         toSend[1] = 0x24;
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0, 1 and 2 are used , 2 pages lock with specific cases
                         if ((page >= 16) && (page <= 31))
                         {
@@ -377,7 +384,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtag213F:
                     case UltralightCardType.UltralightNtag212:
                         // Read 0x28
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0, 1 and 2 are used , 2 pages lock with specific cases
                         if ((page >= 16) && (page <= 31))
                         {
@@ -394,7 +401,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtag215:
                         // Read 0x82
                         toSend[1] = 0x82;
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0 and 16 pages blocks
                         if ((page >= 16) && (page <= 129))
                         {
@@ -409,7 +416,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtagI2cNT3H1101W0:
                         // Read 0xE2
                         toSend[1] = 0xE2;
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0 and 1 for 16 pages blocks
                         if ((page >= 16) && (page <= 143))
                         {
