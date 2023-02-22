@@ -84,7 +84,7 @@ namespace Iot.Device.Pn532
         /// <inheritdoc/>
         public override NfcProtocol SupportedProtocols =>
             NfcProtocol.Iso14443_3 | NfcProtocol.Iso14443_4 | NfcProtocol.Mifare |
-            NfcProtocol.FeliCa | NfcProtocol.Jewel;
+            NfcProtocol.JisX6319_4 | NfcProtocol.Jewel;
 
         #region Spi and I2c Settings
 
@@ -788,7 +788,7 @@ namespace Iot.Device.Pn532
             {
                 // The PN532 supports these modes with InDataExchange
                 case NfcProtocol.Mifare:
-                case NfcProtocol.FeliCa:
+                case NfcProtocol.JisX6319_4:
                 case NfcProtocol.Jewel:
                 case NfcProtocol.Iso14443_4:
                     return TransceiveAdvance(targetNumber, dataToSend, dataFromCard);

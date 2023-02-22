@@ -31,7 +31,7 @@ namespace Iot.Device.Card
 
         /// <summary>
         /// Mifare Classic
-        /// (proprietary commands on top of ISO/IEC 14443-3 Type A)
+        /// Proprietary commands on top of ISO/IEC 14443-3 Type A
         /// </summary>
         Mifare = (1 << 2),
 
@@ -41,14 +41,9 @@ namespace Iot.Device.Card
         Jewel = (1 << 3),
 
         /// <summary>
-        /// JIS X 6319-4 (compatible with FeliCa)
+        /// JIS X 6319-4. Compatible with FeliCa.
         /// </summary>
         JisX6319_4 = (1 << 4),
-
-        /// <summary>
-        /// JIS X 6319-4 (compatible with FeliCa)
-        /// </summary>
-        FeliCa = JisX6319_4,
 
         /// <summary>
         /// ISO/IEC 15693
