@@ -40,8 +40,10 @@ namespace Iot.Device.Mfrc522
         /// <inheritdoc/>
         public override uint MaximumWriteSize => 62;    // 64-byte FIFO, 2 byte CRC
 
-        /// <inheritdoc/>
-        public override NfcProtocol SupportedProtocols => NfcProtocol.Iso14443_3 | NfcProtocol.Mifare;
+        /// <summary>
+        /// The set of NFC protocols that are supported by this transceiver.
+        /// </summary>
+        public const NfcProtocol SupportedProtocols = NfcProtocol.Iso14443_3 | NfcProtocol.Mifare;
 
         private readonly int _pinReset;
         private readonly ILogger _logger;

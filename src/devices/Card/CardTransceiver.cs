@@ -48,10 +48,5 @@ namespace Iot.Device.Card
         /// the size of a FIFO buffer in the transceiver).
         /// </summary>
         public abstract uint MaximumWriteSize { get; }
-
-        /// <summary>
-        /// The set of RF operating modes that are supported by this transceiver.
-        /// </summary>
-        public abstract NfcProtocol SupportedProtocols { get; }
     }
 }

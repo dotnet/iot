@@ -81,8 +81,10 @@ namespace Iot.Device.Pn532
         /// <inheritdoc/>
         public override uint MaximumWriteSize => 261;   // C-APDU with header, data, and Le
 
-        /// <inheritdoc/>
-        public override NfcProtocol SupportedProtocols =>
+        /// <summary>
+        /// The set of NFC protocols that are supported by this transceiver.
+        /// </summary>
+        public const NfcProtocol SupportedProtocols =
             NfcProtocol.Iso14443_3 | NfcProtocol.Iso14443_4 | NfcProtocol.Mifare |
             NfcProtocol.JisX6319_4 | NfcProtocol.Jewel;
 
