@@ -22,6 +22,7 @@ Each message has a talker identifier (see `TalkerIdentifier`), sentence identifi
 
 The following sentence ids are currently supported:
 
+- AIVDM/AIVDO: AIS messages (see below)
 - BOD: Bearing origin to destination
 - BWC: Bearing and distance to waypoint
 - DBS: Depth below surface
@@ -34,6 +35,7 @@ The following sentence ids are currently supported:
 - MDA: Meterological information
 - MWD: Wind direction absolute
 - MWV: Wind Speed and angle (both true and apparent)
+- PCDIN: (partial) Used to wrap NMEA2000 engine parameter sets
 - RMB: Recommended navigation to destination (for autopilot)
 - RMC: Recommended minimum navigation sentence
 - RPM: Engine revolutions
@@ -49,8 +51,27 @@ All supported messages can both be parsed as well as sent out. Therefore it's po
 send temperature data from an attached DHT11 sensor back to the network.
 
 A `MessageRouter` class is available that can be used to route messages between different interfaces (the Raspberry Pi 4 supports up to
-6 RS-232 interfaces, not including USB-to-Serial adapters).
-Unsupported messages can still be routed around, e.g. AIS data (AIVDM messages)
+6 RS-232 interfaces, not including USB-to-Serial adapters). Unsupported messages can still be routed around as Raw messages. AIS Messages (AIVDM and AIVDO) are also routed as raw messages, but can be decoded using the separate `AisManager` class.
+
+## AIS Decoding
+
+AIS (Automatic Identification System) is a System that automatically provides information about nearby ships by radio. All larger ships must be equipped with a transceiver (sender) that sends the own vessel's position regularly to all nearby vessels. Smaller ships such as yachts can be equipped as well, and many sea-going yachts are, because the system adds a high level of security. All vessels that are equipped with a receiver for this AIS data (typically embedded into a VHF radio) can see the position and speed, as well as the names of other vessels directly on a display or the chart plotter.
+
+The `AisManager` class decodes AIS messages encoded in AIVDM/AIVDO sentences. Just forward the entire data stream to an instance of it (or use the `MessageRouter` for this purpose).
+
+```csharp
+
+_manager = new AisManager("AIS", 12345, "MyVessel");
+using NmeaTcpClient client = new NmeaTcpClient("TcpClient", "localhost");
+client.OnNewSequence += (source, msg) =>
+{
+    _manager.SendSentence(source, msg);
+};
+
+client.StartDecode();
+// ...
+var shipsInView = _manager.GetSpecificTargets<Ship>(); // Get the list of currently visible ships.
+```
 
 ## References
 

@@ -6,12 +6,12 @@ using Iot.Device.Gpio.Drivers;
 namespace System.Device.Gpio.Drivers
 {
     /// <summary>
-    /// A GPIO driver for the Orange Pi PC.
+    /// A GPIO driver for the Orange Pi PC and PC+.
     /// </summary>
     /// <remarks>
     /// SoC: Allwinner H3
     /// </remarks>
-    public class OragePiPCDriver : SunxiDriver
+    public class OrangePiPCDriver : SunxiDriver
     {
         /// <inheritdoc/>
         protected override int CpuxPortBaseAddress => 0x01C20800;
