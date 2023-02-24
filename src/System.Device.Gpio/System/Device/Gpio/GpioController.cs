@@ -15,7 +15,7 @@ namespace System.Device.Gpio;
 /// <summary>
 /// Represents a general-purpose I/O (GPIO) controller.
 /// </summary>
-public class GpioController : IDisposable, IQueryComponentInformation
+public class GpioController : IDisposable
 {
     // Constants used to check the hardware on linux
     private const string CpuInfoPath = "/proc/cpuinfo";
@@ -515,7 +515,14 @@ public class GpioController : IDisposable, IQueryComponentInformation
         return new Windows10Driver();
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Query information about a component and its children.
+    /// </summary>
+    /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
+    /// <remarks>
+    /// The returned data structure (or rather, its string representation) can be used to diagnose problems with incorrect driver types or
+    /// other system configuration problems.
+    /// </remarks>
     public virtual ComponentInformation QueryComponentInformation()
     {
         ComponentInformation self = new ComponentInformation(this, "Generic GPIO Controller", ComponentState.Active);

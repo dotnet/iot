@@ -6,7 +6,7 @@ namespace System.Device.Pwm;
 /// <summary>
 /// Represents a single PWM channel.
 /// </summary>
-public abstract partial class PwmChannel : IDisposable, IQueryComponentInformation
+public abstract partial class PwmChannel : IDisposable
 {
     /// <summary>
     /// The frequency in hertz.

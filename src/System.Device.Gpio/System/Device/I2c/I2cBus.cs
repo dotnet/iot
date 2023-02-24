@@ -6,7 +6,7 @@ namespace System.Device.I2c;
 /// <summary>
 /// I2C bus communication channel.
 /// </summary>
-public abstract partial class I2cBus : IDisposable, IQueryComponentInformation
+public abstract partial class I2cBus : IDisposable
 {
     /// <summary>
     /// Creates default I2cBus

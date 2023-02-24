@@ -10,7 +10,7 @@ namespace System.Device.Gpio;
 /// Base class for Gpio Drivers.
 /// A Gpio driver provides methods to read from and write to digital I/O pins.
 /// </summary>
-public abstract class GpioDriver : IDisposable, IQueryComponentInformation
+public abstract class GpioDriver : IDisposable
 {
     /// <summary>
     /// The number of pins provided by the driver.
@@ -149,7 +149,14 @@ public abstract class GpioDriver : IDisposable, IQueryComponentInformation
         // Nothing to do in base class.
     }
 
-    /// <inheritdoc />
+    /// <summary>
+    /// Query information about a component and its children.
+    /// </summary>
+    /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
+    /// <remarks>
+    /// The returned data structure (or rather, its string representation) can be used to diagnose problems with incorrect driver types or
+    /// other system configuration problems.
+    /// </remarks>
     public virtual ComponentInformation QueryComponentInformation()
     {
         return new ComponentInformation(this, "Gpio Driver", ComponentState.Active);

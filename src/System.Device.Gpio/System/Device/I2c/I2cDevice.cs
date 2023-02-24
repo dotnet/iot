@@ -8,7 +8,7 @@ namespace System.Device.I2c;
 /// <summary>
 /// The communications channel to a device on an I2C bus.
 /// </summary>
-public abstract partial class I2cDevice : IDisposable, IQueryComponentInformation
+public abstract partial class I2cDevice : IDisposable
 {
     /// <summary>
     /// This event is raised when <see cref="QueryComponentInformation"/> of the base class is called. This is can be used for bindings
