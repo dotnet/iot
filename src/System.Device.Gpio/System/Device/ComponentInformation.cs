@@ -18,6 +18,7 @@ namespace System.Device
     /// </summary>
     public record ComponentInformation
     {
+        private const int MaximumRecursionDepth = 50;
         private readonly List<ComponentInformation> _subComponents;
 
         /// <summary>
@@ -114,6 +115,13 @@ namespace System.Device
         /// <param name="ident">The level of current ident</param>
         protected virtual void SubComponentsToString(StringBuilder output, int ident)
         {
+            if (ident > MaximumRecursionDepth)
+            {
+                output.Append(new string(' ', ident));
+                output.AppendLine($"... (further levels skipped, possible loop in device tree)");
+                return;
+            }
+
             foreach (var component in _subComponents)
             {
                 output.Append(new string(' ', ident));
