@@ -58,5 +58,9 @@ public abstract partial class I2cBus : IDisposable
     /// Query information about a component and it's children.
     /// </summary>
     /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
-    public abstract ComponentInformation QueryComponentInformation();
+    public virtual ComponentInformation QueryComponentInformation()
+    {
+        // We expect the description to be overriden, but to avoid adding new abstract members, we provide a default implementation
+        return new ComponentInformation(this, "I2C Bus device");
+    }
 }
