@@ -792,7 +792,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             sb.Append(" and an interrupt driver");
         }
 
-        ComponentInformation ci = new ComponentInformation(this, sb.ToString(), ComponentState.Active);
+        ComponentInformation ci = new ComponentInformation(this, sb.ToString());
 
         if (_interruptDriver != null)
         {

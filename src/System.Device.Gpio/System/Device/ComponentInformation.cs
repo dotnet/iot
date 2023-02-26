@@ -24,19 +24,8 @@ namespace System.Device
         /// Create a new instance of <see cref="ComponentInformation"/>
         /// </summary>
         /// <param name="instance">The instance this information belongs to</param>
-        /// <param name="name">An user-readable name for the object</param>
-        public ComponentInformation(object instance, string name)
-            : this(instance, name, ComponentState.Active)
-        {
-        }
-
-        /// <summary>
-        /// Create a new instance of <see cref="ComponentInformation"/>
-        /// </summary>
-        /// <param name="instance">The instance this information belongs to</param>
-        /// <param name="name">An user-readable name for the object</param>
-        /// <param name="componentState">The current state of this driver/binding</param>
-        public ComponentInformation(object instance, string name, ComponentState componentState)
+        /// <param name="description">An user-readable name for the object</param>
+        public ComponentInformation(object instance, string description)
         {
             if (instance == null)
             {
@@ -45,10 +34,8 @@ namespace System.Device
 
             Instance = instance;
 
-            Type = instance.GetType().FullName!;
-            Name = name;
-
-            State = componentState;
+            Name = instance.GetType().FullName!;
+            Description = description ?? throw new ArgumentNullException(nameof(description));
 
             _subComponents = new List<ComponentInformation>();
             Properties = new Dictionary<string, string>();
@@ -57,7 +44,7 @@ namespace System.Device
         /// <summary>
         /// The name of the type this instance represents.
         /// </summary>
-        public string Type
+        public string Name
         {
             get;
         }
@@ -74,15 +61,7 @@ namespace System.Device
         /// <summary>
         /// The user-friendly name of the object
         /// </summary>
-        public string Name
-        {
-            get; init;
-        }
-
-        /// <summary>
-        /// The state of the object
-        /// </summary>
-        public ComponentState State
+        public string Description
         {
             get; init;
         }
@@ -109,7 +88,7 @@ namespace System.Device
         /// </summary>
         /// <param name="subComponent">Component to add</param>
         /// <exception cref="ArgumentNullException">The component to add is null.</exception>
-        public void AddSubComponent(ComponentInformation subComponent)
+        public virtual void AddSubComponent(ComponentInformation subComponent)
         {
             if (_subComponents == null)
             {
@@ -125,7 +104,7 @@ namespace System.Device
 
         private static string PrintComponentDescription(ComponentInformation component)
         {
-            return $"{{{component.Type}}} {component.Name}{Environment.NewLine}";
+            return $"{{{component.Name}}} {component.Description}{Environment.NewLine}";
         }
 
         /// <summary>
@@ -133,14 +112,14 @@ namespace System.Device
         /// </summary>
         /// <param name="output">The stringbuilder to extend</param>
         /// <param name="ident">The level of current ident</param>
-        protected virtual void SubComponentToString(StringBuilder output, int ident)
+        protected virtual void SubComponentsToString(StringBuilder output, int ident)
         {
             foreach (var component in _subComponents)
             {
                 output.Append(new string(' ', ident));
                 output.Append('\u2514'); // border element
                 output.Append(PrintComponentDescription(component));
-                component.SubComponentToString(output, ident + 1);
+                component.SubComponentsToString(output, ident + 1);
             }
         }
 
@@ -151,7 +130,7 @@ namespace System.Device
         public override string ToString()
         {
             StringBuilder b = new StringBuilder(PrintComponentDescription(this));
-            SubComponentToString(b, 1);
+            SubComponentsToString(b, 1);
 
             return b.ToString().TrimEnd();
         }

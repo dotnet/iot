@@ -58,7 +58,7 @@ internal class UnixI2cDevice : I2cDevice
     {
         return base.QueryComponentInformation() with
         {
-            Name = "Unix I2C device"
+            Description = "Unix I2C device"
         };
     }
 }

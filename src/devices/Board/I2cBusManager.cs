@@ -131,7 +131,7 @@ namespace Iot.Device.Board
         /// <returns>A <see cref="ComponentInformation"/> instance</returns>
         public override ComponentInformation QueryComponentInformation()
         {
-            return new ComponentInformation(this, $"I2C Bus Manager, Bus number {_bus}", ComponentState.Active);
+            return new ComponentInformation(this, $"I2C Bus Manager, Bus number {_bus}");
         }
 
         /// <inheritdoc />

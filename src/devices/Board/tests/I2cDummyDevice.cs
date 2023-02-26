@@ -67,7 +67,7 @@ namespace Board.Tests
 
         public override ComponentInformation QueryComponentInformation()
         {
-            var self = new ComponentInformation(this, "Dummy I2C Device", ComponentState.Active);
+            var self = new ComponentInformation(this, "Dummy I2C Device");
             self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
             self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
             return self;

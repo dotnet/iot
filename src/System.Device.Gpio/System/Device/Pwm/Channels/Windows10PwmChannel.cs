@@ -124,6 +124,6 @@ internal partial class Windows10PwmChannel : PwmChannel
 
     public override ComponentInformation QueryComponentInformation()
     {
-        return new ComponentInformation(this, "Windows IoT Core PWM Channel", ComponentState.Active);
+        return new ComponentInformation(this, "Windows IoT Core PWM Channel");
     }
 }

@@ -160,7 +160,7 @@ namespace Iot.Device.Board
         /// <returns>A <see cref="ComponentInformation"/> instance</returns>
         public ComponentInformation QueryComponentInformation()
         {
-            return new ComponentInformation(this, $"SPI Bus Manager, Bus number {_device.ConnectionSettings.BusId}", ComponentState.Active);
+            return new ComponentInformation(this, $"SPI Bus Manager, Bus number {_device.ConnectionSettings.BusId}");
         }
     }
 }

@@ -78,7 +78,7 @@ namespace Iot.Device.Board
             var ret = base.QueryComponentInformation();
             return ret with
             {
-                Name = "Custom Board"
+                Description = "Custom Board"
             };
         }
     }

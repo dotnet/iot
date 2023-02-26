@@ -232,7 +232,7 @@ internal class UnixPwmChannel : PwmChannel
 
     public override ComponentInformation QueryComponentInformation()
     {
-        var ret = new ComponentInformation(this, "Unix standard PWM Channel", ComponentState.Active);
+        var ret = new ComponentInformation(this, "Unix standard PWM Channel");
         ret.Properties["ChannelPath"] = _channelPath;
         ret.Properties["ChannelName"] = ChannelName;
         return ret;

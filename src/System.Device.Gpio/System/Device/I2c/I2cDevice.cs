@@ -98,7 +98,7 @@ public abstract partial class I2cDevice : IDisposable
     /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
     public virtual ComponentInformation QueryComponentInformation()
     {
-        var self = new ComponentInformation(this, "Generic I2C Device base", ComponentState.Active);
+        var self = new ComponentInformation(this, "Generic I2C Device base");
         self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
         self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
         OnQueryComponentInformation?.Invoke(self);

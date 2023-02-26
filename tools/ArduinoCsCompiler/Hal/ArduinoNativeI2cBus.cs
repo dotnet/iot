@@ -45,7 +45,7 @@ namespace ArduinoCsCompiler
 
         public override ComponentInformation QueryComponentInformation()
         {
-            var self = new ComponentInformation(this, "Arduino Native I2C Bus Driver", ComponentState.Active);
+            var self = new ComponentInformation(this, "Arduino Native I2C Bus Driver");
             self.Properties["BusNo"] = _busId.ToString(CultureInfo.CurrentCulture);
 
             return self;

@@ -102,7 +102,7 @@ namespace Iot.Device.Ft232H
 
         public override ComponentInformation QueryComponentInformation()
         {
-            var self = new ComponentInformation(this, "Ftx232HI2c I2C Bus driver", ComponentState.Active);
+            var self = new ComponentInformation(this, "Ftx232HI2c I2C Bus driver");
             self.Properties["BusNo"] = "0";
             foreach (var device in _usedAddresses)
             {

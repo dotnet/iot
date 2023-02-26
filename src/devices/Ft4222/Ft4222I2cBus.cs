@@ -145,7 +145,7 @@ namespace Iot.Device.Ft4222
 
         public override ComponentInformation QueryComponentInformation()
         {
-            var self = new ComponentInformation(this, "FT4222 I2C Bus driver", ComponentState.Active);
+            var self = new ComponentInformation(this, "FT4222 I2C Bus driver");
             self.Properties["BusNo"] = "0";
             self.Properties["Description"] = DeviceInformation.Description;
             self.Properties["SerialNumber"] = DeviceInformation.SerialNumber;

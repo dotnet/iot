@@ -62,7 +62,7 @@ internal class Windows10I2cBus : I2cBus
 
     public override ComponentInformation QueryComponentInformation()
     {
-        var self = new ComponentInformation(this, "Windows IoT Core I2C bus", ComponentState.Active);
+        var self = new ComponentInformation(this, "Windows IoT Core I2C bus");
         self.Properties["BusNo"] = BusId.ToString(CultureInfo.InvariantCulture);
         foreach (var device in _devices)
         {

@@ -43,7 +43,7 @@ internal class BeagleBonePwmChannel : UnixPwmChannel
         var self = base.QueryComponentInformation();
         return self with
         {
-            Name = "BeagleBone PWM Channel"
+            Description = "BeagleBone PWM Channel"
         };
     }
 }

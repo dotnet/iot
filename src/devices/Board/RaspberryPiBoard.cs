@@ -9,6 +9,7 @@ using System.Device.Gpio.Drivers;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Device.Spi;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -538,10 +539,13 @@ namespace Iot.Device.Board
         public override ComponentInformation QueryComponentInformation()
         {
             ComponentInformation self = base.QueryComponentInformation();
-            return self with
+            var ret = self with
             {
-                Name = "Raspberry Pi"
+                Description = $"Raspberry Pi with {PinCount} pins"
             };
+
+            ret.Properties["PinCount"] = PinCount.ToString(CultureInfo.InvariantCulture);
+            return ret;
         }
     }
 }

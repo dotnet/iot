@@ -525,7 +525,7 @@ public class GpioController : IDisposable
     /// </remarks>
     public virtual ComponentInformation QueryComponentInformation()
     {
-        ComponentInformation self = new ComponentInformation(this, "Generic GPIO Controller", ComponentState.Active);
+        ComponentInformation self = new ComponentInformation(this, "Generic GPIO Controller");
 
         if (_driver != null)
         {

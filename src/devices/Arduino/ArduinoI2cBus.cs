@@ -57,7 +57,7 @@ namespace Iot.Device.Arduino
 
         public override ComponentInformation QueryComponentInformation()
         {
-            var self = new ComponentInformation(this, "Arduino I2C Bus driver", ComponentState.Active);
+            var self = new ComponentInformation(this, "Arduino I2C Bus driver");
             self.Properties["BusNo"] = _busId.ToString(CultureInfo.InvariantCulture);
             foreach (var device in _usedAddresses)
             {

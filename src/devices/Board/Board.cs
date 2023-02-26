@@ -709,7 +709,7 @@ namespace Iot.Device.Board
         /// <inheritdoc cref="GpioController.QueryComponentInformation"/>
         public virtual ComponentInformation QueryComponentInformation()
         {
-            ComponentInformation self = new ComponentInformation(this, "Generic Board", ComponentState.Active);
+            ComponentInformation self = new ComponentInformation(this, "Generic Board");
 
             var controller = CreateGpioController();
 

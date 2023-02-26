@@ -31,7 +31,7 @@ namespace Iot.Device.Board.Tests
 
         public override ComponentInformation QueryComponentInformation()
         {
-            var self = new ComponentInformation(this, "Dummy I2C Bus", ComponentState.Active);
+            var self = new ComponentInformation(this, "Dummy I2C Bus");
             self.Properties["BusNo"] = _busNumber.ToString(CultureInfo.InvariantCulture);
             return self;
         }

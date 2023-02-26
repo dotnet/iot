@@ -128,7 +128,7 @@ namespace Iot.Device.Arduino
 
         public override ComponentInformation QueryComponentInformation()
         {
-            return new ComponentInformation(this, "Arduino PWM Channel", ComponentState.Active);
+            return new ComponentInformation(this, "Arduino PWM Channel");
         }
     }
 }

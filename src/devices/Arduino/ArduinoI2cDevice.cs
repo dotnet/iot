@@ -121,7 +121,7 @@ namespace Iot.Device.Arduino
         {
             return base.QueryComponentInformation() with
             {
-                Name = "Arduino I2C device"
+                Description = "Arduino I2C device"
             };
         }
     }

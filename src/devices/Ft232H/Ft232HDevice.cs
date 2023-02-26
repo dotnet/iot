@@ -925,7 +925,7 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc />
         public override ComponentInformation QueryComponentInformation()
         {
-            return base.QueryComponentInformation() with { Name = "Ftx232 Device" };
+            return base.QueryComponentInformation() with { Description = "Ftx232 Device" };
         }
     }
 }

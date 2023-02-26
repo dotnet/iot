@@ -132,7 +132,7 @@ internal class Windows10I2cDevice : I2cDevice
 
     public override ComponentInformation QueryComponentInformation()
     {
-        var self = new ComponentInformation(this, "Windows IoT Core I2C Device", ComponentState.Active);
+        var self = new ComponentInformation(this, "Windows IoT Core I2C Device");
         self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
         self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
         return self;

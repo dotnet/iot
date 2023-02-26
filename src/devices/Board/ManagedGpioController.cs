@@ -56,7 +56,7 @@ namespace Iot.Device.Board
             var self = base.QueryComponentInformation();
             self = self with
             {
-                Name = "Managed GPIO Controller"
+                Description = "Managed GPIO Controller"
             };
             self.Properties["ManagedPins"] = string.Join(", ", GetActiveManagedPins());
             return self;
