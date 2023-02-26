@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using Iot.Device.Common;
 using Iot.Device.Ndef;
 using Microsoft.Extensions.Logging;
@@ -76,7 +77,7 @@ namespace Iot.Device.Card.Ultralight
         /// <param name="ATQA">The ATQA</param>
         /// <param name="SAK">The SAK</param>
         /// <returns>True if this is an Ultralight</returns>
-        public static bool IsUltralightCard(ushort ATQA, byte SAK) => (ATQA == 0x4400) && (SAK == 0);
+        public static bool IsUltralightCard(ushort ATQA, byte SAK) => (ATQA == 0x0044) && (SAK == 0);
 
         /// <summary>
         /// Constructor for Ultralight
@@ -435,7 +436,6 @@ namespace Iot.Device.Card.Ultralight
         /// </summary>
         public int NumberBlocks => UltralightCardType switch
         {
-            // Whenever NdefCapacity + 9 is used, then it's a guess
             UltralightCardType.UltralightNtag210 => 16,
             UltralightCardType.UltralightNtag212 => 45,
             UltralightCardType.UltralightNtag213 => 45,
@@ -443,10 +443,10 @@ namespace Iot.Device.Card.Ultralight
             UltralightCardType.UltralightNtag215 => 135,
             UltralightCardType.UltralightNtag216 => 231,
             UltralightCardType.UltralightNtag216F => 231,
-            UltralightCardType.UltralightEV1MF0UL1101 => 41,
-            UltralightCardType.UltralightEV1MF0ULH1101 => 41,
-            UltralightCardType.UltralightEV1MF0UL2101 => NdefCapacity + 9,
-            UltralightCardType.UltralightEV1MF0ULH2101 => NdefCapacity + 9,
+            UltralightCardType.UltralightEV1MF0UL1101 => 20,
+            UltralightCardType.UltralightEV1MF0ULH1101 => 20,
+            UltralightCardType.UltralightEV1MF0UL2101 => 41,
+            UltralightCardType.UltralightEV1MF0ULH2101 => 41,
             UltralightCardType.UltralightNtagI2cNT3H1101 => 231,
             UltralightCardType.UltralightNtagI2cNT3H1101W0 => 231,
             UltralightCardType.UltralightNtagI2cNT3H2111W0 => 476 + 9,
@@ -746,7 +746,27 @@ namespace Iot.Device.Card.Ultralight
                 return -1;
             }
 
-            return Data![0] + Data[1] << 8 + Data[2] << 16;
+            return Data![0] + (Data[1] << 8) + (Data[2] << 16);
+        }
+
+        /// <summary>
+        /// Increase a counter by a specified amount
+        /// </summary>
+        /// <param name="counter">A valid counter value, can vary depending on the card. 0xFF will ignore the value and use the one set in Counter</param>
+        /// <param name="increment">The amount to increment the counter. If negative, it will use the value of Data</param>
+        /// <returns>True if success</returns>
+        public bool IncreaseCounter(byte counter = 0xFF, int increment = -1)
+        {
+            Command = UltralightCommand.IncreaseCounter;
+            Counter = counter != 0xFF ? counter : Counter;
+            if (increment >= 0)
+            {
+                Data = new byte[4];
+                BinaryPrimitives.WriteInt32LittleEndian(Data, increment);
+            }
+
+            var ret = RunUltralightCommand();
+            return ret >= 0;
         }
 
         /// <summary>
@@ -959,6 +979,17 @@ namespace Iot.Device.Card.Ultralight
                     break;
                 case UltralightCommand.ReadCounter:
                     ser = new byte[2] { (byte)Command, Counter };
+                    break;
+                case UltralightCommand.IncreaseCounter:
+                    if (Data is null)
+                    {
+                        throw new ArgumentException($"Card is not configured for counter increase.");
+                    }
+
+                    ser = new byte[6];
+                    ser[0] = (byte)Command;
+                    ser[1] = Counter;
+                    Data.AsSpan(0, 3).CopyTo(ser.AsSpan(2));    // 24-bit increment, fourth byte ignored
                     break;
                 case UltralightCommand.PasswordAuthentication:
                     if (AuthenticationKey is null or { Length: not 4 })

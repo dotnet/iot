@@ -109,7 +109,8 @@ namespace Iot.Device.Nmea0183.Sentences
         public override bool ReplacesOlderInstance => false;
 
         /// <summary>
-        /// Return the data sets of this message
+        /// Return the data sets of this message.
+        /// The returned list is a read-only copy of the data sets and cannot be modified.
         /// </summary>
         public IList<TransducerDataSet> DataSets
         {

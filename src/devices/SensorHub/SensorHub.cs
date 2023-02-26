@@ -49,7 +49,7 @@ namespace Iot.Device.SensorHub
         /// <exception cref="IOException">Thrown when ext. temperature sensor not found.</exception>
         public bool TryReadOffBoardTemperature(out Temperature temperature)
         {
-            temperature = Temperature.MaxValue;
+            temperature = default;
 
             var status = ReadRegister(Register.STATUS_REG);
             if (IsStatusRegError(status, StatusFunctionError.TEMP_NOT_FOUND))
@@ -73,7 +73,7 @@ namespace Iot.Device.SensorHub
         /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadBarometerTemperature(out Temperature temperature)
         {
-            temperature = Temperature.MaxValue;
+            temperature = default;
             if (ReadRegister(Register.BMP280_STATUS).Equals(NO_ERROR))
             {
                 temperature = Temperature.FromDegreesCelsius(ReadRegister(Register.BMP280_TEMP_REG));
@@ -91,7 +91,7 @@ namespace Iot.Device.SensorHub
         /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadBarometerPressure(out Pressure pressure)
         {
-            pressure = Pressure.MaxValue;
+            pressure = default;
             if (ReadRegister(Register.BMP280_STATUS).Equals(NO_ERROR))
             {
                 Span<byte> bytes = stackalloc byte[4]
@@ -117,7 +117,7 @@ namespace Iot.Device.SensorHub
         /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadIlluminance(out Illuminance illuminance)
         {
-            illuminance = Illuminance.MaxValue;
+            illuminance = default;
 
             var status = ReadRegister(Register.STATUS_REG);
             if (IsStatusRegError(status, StatusFunctionError.LIGHT_BRIGHTNESS_NOT_FOUND)
@@ -144,7 +144,7 @@ namespace Iot.Device.SensorHub
         /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadRelativeHumidity(out RelativeHumidity humidity)
         {
-            humidity = RelativeHumidity.MaxValue;
+            humidity = default;
             if (ReadRegister(Register.ON_BOARD_SENSOR_ERROR).Equals(NO_ERROR))
             {
                 humidity = RelativeHumidity.FromPercent(ReadRegister(Register.ON_BOARD_HUMIDITY_REG));
@@ -162,7 +162,7 @@ namespace Iot.Device.SensorHub
         /// <returns><c>True</c> on success, <c>False</c> otherwise</returns>
         public bool TryReadOnBoardTemperature(out Temperature temperature)
         {
-            temperature = Temperature.MaxValue;
+            temperature = default;
             if (ReadRegister(Register.ON_BOARD_SENSOR_ERROR).Equals(NO_ERROR))
             {
                 temperature = Temperature.FromDegreesCelsius(ReadRegister(Register.ON_BOARD_TEMP_REG));

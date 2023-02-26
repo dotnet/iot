@@ -290,9 +290,14 @@ namespace Iot.Device.Nmea0183
 
         /// <summary>
         /// AIS receiver - the only two known messages that are supported with this talker are AIVDM and AIVDO,
-        /// and they use a ! as sentence start character.
+        /// They use a ! as sentence start character and are always using "AI" as prefix, regardless of the actual source.
         /// </summary>
         public static TalkerId Ais => new TalkerId('A', 'I');
+
+        /// <summary>
+        /// Proprietary message, mostly for PCDIN sequences.
+        /// </summary>
+        public static TalkerId Proprietary => new TalkerId('P', 'C');
 
         /// <summary>
         /// Filter placeholder for any talker id

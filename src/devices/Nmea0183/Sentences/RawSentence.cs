@@ -31,6 +31,8 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public override bool ReplacesOlderInstance => false;
 
+        internal string[] Fields => _fields;
+
         /// <summary>
         /// Returns the formatted payload
         /// </summary>

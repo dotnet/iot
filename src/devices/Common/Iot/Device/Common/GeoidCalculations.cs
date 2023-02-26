@@ -34,17 +34,9 @@ namespace Iot.Device.Common
         private const int nA2 = GEOGRAPHICLIB_GEODESIC_ORDER;
         private const int nC2 = GEOGRAPHICLIB_GEODESIC_ORDER;
         private const int nA3 = GEOGRAPHICLIB_GEODESIC_ORDER;
-        private const int nA3x = nA3;
         private const int nC3 = GEOGRAPHICLIB_GEODESIC_ORDER;
-        private const int nC3x = ((nC3 * (nC3 - 1)) / 2);
         private const int nC4 = GEOGRAPHICLIB_GEODESIC_ORDER;
-        private const int nC4x = ((nC4 * (nC4 + 1)) / 2);
         private const int nC = (GEOGRAPHICLIB_GEODESIC_ORDER + 1);
-
-        /// <summary>
-        /// Calculate nothing
-        /// </summary>
-        private const uint GEOD_NONE = 0U;
 
         /// <summary>
         /// Calculate latitude
@@ -75,29 +67,9 @@ namespace Iot.Device.Common
         /// Calculate reduced length
         /// </summary>
         private const uint GEOD_REDUCEDLENGTH = 1U << 12 | 1U << 0 | 1U << 2;
-
-        /// <summary>
-        /// Calculate geodesic scale
-        /// </summary>
-        private const uint GEOD_GEODESICSCALE = 1U << 13 | 1U << 0 | 1U << 2;
-
-        /// <summary>
-        /// Calculate reduced length
-        /// </summary>
-        private const uint GEOD_AREA = 1U << 14 | 1U << 4;
-
-        /// <summary>
-        /// Calculate everything
-        /// </summary>
-        private const uint GEOD_ALL = 0x7F80U | 0x1FU;
-
-        private const uint GEOD_NOFLAGS = 0;
-        private const uint GEOD_ARCMODE = 1;
         private const uint GEOD_LONG_UNROLL = 1U << 15;
 
         static bool init = false;
-        const bool FALSE = false;
-        const bool TRUE = true;
         static uint digits;
         static uint maxit1;
         static uint maxit2;
@@ -213,63 +185,27 @@ namespace Iot.Device.Common
         private const uint CAP_C4 = 1U << 4;
         private const uint CAP_ALL = 0x1FU;
         private const uint OUT_ALL = 0x7F80U;
-        
 
-        /* Replacements for C math functions (to be inlined) */
-        private static double fabs(double x)
-        {
-            return Math.Abs(x);
-        }
-
-        private static double sqrt(double x)
-        {
-            return Math.Sqrt(x);
-        }
-
-        private static double log(double x)
-        {
-            return Math.Log(x);
-        }
-
-        private static double pow(double x, double y)
-        {
-            return Math.Pow(x, y);
-        }
 
         private static double fmod(double x, double y)
         {
             return x % y;
         }
 
-        private static double atan2(double y, double x)
-        {
-            return Math.Atan2(y, x);
-        }
-
-        private static double sin(double x)
-        {
-            return Math.Sin(x);
-        }
-
-        private static double cos(double x)
-        {
-            return Math.Cos(x);
-        }
-
         /* Replacements for C99 math functions */
         static double hypotx(double x, double y)
         {
-            x = fabs(x);
-            y = fabs(y);
+            x = Math.Abs(x);
+            y = Math.Abs(y);
             if (x < y)
             {
                 x /= y; /* y is nonzero */
-                return y * sqrt(1 + x * x);
+                return y * Math.Sqrt(1 + x * x);
             }
             else
             {
                 y /= (x != 0 ? x : 1);
-                return x * sqrt(1 + y * y);
+                return x * Math.Sqrt(1 + y * y);
             }
         }
 
@@ -282,12 +218,12 @@ namespace Iot.Device.Common
              * approx x, thus log(y)/z (which is nearly constant near z = 0) returns
              * a good approximation to the true log(1 + x)/x.  The multiplication x *
              * (log(y)/z) introduces little additional error. */
-            return z == 0 ? x : x * log(y) / z;
+            return z == 0 ? x : x * Math.Log(y) / z;
         }
 
         static double atanhx(double x)
         {
-            double y = fabs(x); /* Enforce odd parity */
+            double y = Math.Abs(x); /* Enforce odd parity */
             y = log1px(2 * y / (1 - y)) / 2;
             return x > 0 ? y : (x < 0 ? -y : x); /* atanh(-0.0) = -0.0 */
         }
@@ -295,19 +231,19 @@ namespace Iot.Device.Common
         static double copysignx(double x, double y)
         {
             /* 1/y trick to get the sign of -0.0 */
-            return fabs(x) * (y < 0 || (y == 0 && 1 / y < 0) ? -1 : 1);
+            return Math.Abs(x) * (y < 0 || (y == 0 && 1 / y < 0) ? -1 : 1);
         }
 
         static double cbrtx(double x)
         {
-            double y = pow(fabs(x), 1 / (double)(3)); /* Return the double cube root */
+            double y = Math.Pow(Math.Abs(x), 1 / (double)(3)); /* Return the double cube root */
             return x > 0 ? y : (x < 0 ? -y : x); /* cbrt(-0.0) = -0.0 */
         }
 
         static double remainderx(double x, double y)
         {
             double z;
-            y = fabs(y); /* The result doesn't depend on the sign of y */
+            y = Math.Abs(y); /* The result doesn't depend on the sign of y */
             z = fmod(x, y);
             if (z == 0)
                 /* This shouldn't be necessary.  However, before version 14 (2015),
@@ -315,9 +251,9 @@ namespace Iot.Device.Common
                  *   VC 10,11,12 and 32-bit compile: fmod(-0.0, 360.0) . +0.0
                  * python 2.7 on Windows 32-bit machines has the same problem. */
                 z = copysignx(z, x);
-            else if (2 * fabs(z) == y)
+            else if (2 * Math.Abs(z) == y)
                 z -= fmod(x, 2 * y) - z; /* Implement ties to even */
-            else if (2 * fabs(z) > y)
+            else if (2 * Math.Abs(z) > y)
                 z += (z < 0 ? y : -y); /* Fold remaining cases to (-y/2, y/2) */
             return z;
         }
@@ -344,16 +280,11 @@ namespace Iot.Device.Common
             return z;
         }
 
-        static double sq(double x)
-        {
-            return x * x;
-        }
-
         static double sumx(double u, double v, out double t)
         {
-             double s = u + v;
-             double up = s - v;
-             double vpp = s - up;
+            double s = u + v;
+            double up = s - v;
+            double vpp = s - up;
             up -= u;
             vpp -= v;
             t = -(up + vpp);
@@ -405,7 +336,7 @@ namespace Iot.Device.Common
 
         static double LatFix(double x)
         {
-            return fabs(x) > 90 ? NaN : x;
+            return Math.Abs(x) > 90 ? NaN : x;
         }
 
         static double AngDiff(double x, double y, out double e)
@@ -427,7 +358,7 @@ namespace Iot.Device.Common
             double y;
             if (x == 0)
                 return 0;
-            y = fabs(x);
+            y = Math.Abs(x);
             /* The compiler mustn't "simplify" z - (z - y) to y */
             y = y < z ? z - (z - y) : y;
             return x < 0 ? -y : y;
@@ -474,7 +405,7 @@ namespace Iot.Device.Common
              * quadrant. */
             int q = 0;
             double ang;
-            if (fabs(y) > fabs(x))
+            if (Math.Abs(y) > Math.Abs(x))
             {
                 swapx(ref x, ref y);
                 q = 2;
@@ -518,14 +449,14 @@ namespace Iot.Device.Common
             g.f = f;
             g.f1 = 1 - g.f;
             g.e2 = g.f * (2 - g.f);
-            g.ep2 = g.e2 / sq(g.f1); /* e2 / (1 - e2) */
+            g.ep2 = g.e2 / (g.f1 * g.f1); /* e2 / (1 - e2) */
             g.n = g.f / (2 - g.f);
             g.b = g.a * g.f1;
-            g.c2 = (sq(g.a) + sq(g.b) *
+            g.c2 = (g.a * g.a + g.b * g.b *
                     (g.e2 == 0
                         ? 1
-                        : (g.e2 > 0 ? atanhx(sqrt(g.e2)) : Math.Atan(sqrt(-g.e2))) /
-                          sqrt(fabs(g.e2)))) / 2; /* authalic radius squared */
+                        : (g.e2 > 0 ? atanhx(Math.Sqrt(g.e2)) : Math.Atan(Math.Sqrt(-g.e2))) /
+                          Math.Sqrt(Math.Abs(g.e2)))) / 2; /* authalic radius squared */
             /* The sig12 threshold for "really short".  Using the auxiliary sphere
              * solution with dnm computed at (bet1 + bet2) / 2, the relative error in the
              * azimuth consistency check is sig12^2 * abs(f) * min(1, 1-f/2) / 2.  (Error
@@ -536,7 +467,7 @@ namespace Iot.Device.Common
              * 0.1 is a safety factor (error decreased by 100) and max(0.001, abs(f))
              * stops etol2 getting too large in the nearly spherical case. */
             g.etol2 = 0.1 * tol2 /
-                      sqrt(maxx((double)(0.001), fabs(g.f)) * minx((double)(1), 1 - g.f / 2) / 2);
+                      Math.Sqrt(maxx((double)(0.001), Math.Abs(g.f)) * minx((double)(1), 1 - g.f / 2) / 2);
 
             A3coeff(g);
             C3coeff(g);
@@ -572,7 +503,7 @@ namespace Iot.Device.Common
             /* Ensure cbet1 = +epsilon at poles */
             norm2(ref sbet1, ref cbet1);
             cbet1 = maxx(tiny, cbet1);
-            l.dn1 = sqrt(1 + g.ep2 * sq(sbet1));
+            l.dn1 = Math.Sqrt(1 + g.ep2 * (sbet1 * sbet1));
 
 /* Evaluate alp0 from sin(alp1) * cos(bet1) = sin(alp0), */
             l.salp0 = l.salp1 * cbet1; /* alp0 in [0, pi/2 - |bet1|] */
@@ -594,17 +525,17 @@ namespace Iot.Device.Common
             norm2(ref l.ssig1, ref l.csig1); /* sig1 in (-pi, pi] */
 /* norm2(somg1, comg1); -- don't need to normalize! */
 
-            l.k2 = sq(l.calp0) * g.ep2;
-            eps = l.k2 / (2 * (1 + sqrt(1 + l.k2)) + l.k2);
+            l.k2 = l.calp0 * l.calp0 * g.ep2;
+            eps = l.k2 / (2 * (1 + Math.Sqrt(1 + l.k2)) + l.k2);
 
             if ((l.caps & CAP_C1) != 0)
             {
                 double s, c;
                 l.A1m1 = A1m1f(eps);
                 C1f(eps, l.C1a);
-                l.B11 = SinCosSeries(TRUE, l.ssig1, l.csig1, l.C1a, nC1);
-                s = sin(l.B11);
-                c = cos(l.B11);
+                l.B11 = SinCosSeries(true, l.ssig1, l.csig1, l.C1a, nC1);
+                s = Math.Sin(l.B11);
+                c = Math.Cos(l.B11);
 /* tau1 = sig1 + B11 */
                 l.stau1 = l.ssig1 * c + l.csig1 * s;
                 l.ctau1 = l.csig1 * c - l.ssig1 * s;
@@ -619,22 +550,22 @@ namespace Iot.Device.Common
             {
                 l.A2m1 = A2m1f(eps);
                 C2f(eps, l.C2a);
-                l.B21 = SinCosSeries(TRUE, l.ssig1, l.csig1, l.C2a, nC2);
+                l.B21 = SinCosSeries(true, l.ssig1, l.csig1, l.C2a, nC2);
             }
 
             if ((l.caps & CAP_C3) != 0)
             {
                 C3f(g, eps, l.C3a);
                 l.A3c = -l.f * l.salp0 * A3f(g, eps);
-                l.B31 = SinCosSeries(TRUE, l.ssig1, l.csig1, l.C3a, nC3 - 1);
+                l.B31 = SinCosSeries(true, l.ssig1, l.csig1, l.C3a, nC3 - 1);
             }
 
             if ((l.caps & CAP_C4) != 0)
             {
                 C4f(g, eps, l.C4a);
 /* Multiplier = a^2 * e^2 * cos(alpha0) * sin(alpha0) */
-                l.A4 = sq(l.a) * l.calp0 * l.salp0 * g.e2;
-                l.B41 = SinCosSeries(FALSE, l.ssig1, l.csig1, l.C4a, nC4);
+                l.A4 = l.a * l.a * l.calp0 * l.salp0 * g.e2;
+                l.B41 = SinCosSeries(false, l.ssig1, l.csig1, l.C4a, nC4);
             }
 
             l.a13 = l.s13 = NaN;
@@ -651,120 +582,68 @@ namespace Iot.Device.Common
             geod_lineinit_int(out l, g, lat1, lon1, azi1, salp1, calp1, caps);
         }
 
-        public static void geod_gendirectline(out geod_geodesicline l,
-            geod_geodesic g,
-            double lat1, double lon1, double azi1,
-            uint flags, double s12_a12,
-            uint caps)
-        {
-            geod_lineinit(out l, g, lat1, lon1, azi1, caps);
-            geod_gensetdistance(l, flags, s12_a12);
-        }
-
-        public static void geod_directline(out geod_geodesicline l,
-            geod_geodesic g,
-            double lat1, double lon1, double azi1,
-            double s12, uint caps)
-        {
-            geod_gendirectline(out l, g, lat1, lon1, azi1, GEOD_NOFLAGS, s12, caps);
-        }
-
         public static double geod_genposition(geod_geodesicline l,
-            uint flags, double s12_a12,
-            out double plat2, out double plon2, out double pazi2,
-            out double ps12, out double pm12,
-            out double pM12, out double pM21,
-            out double pS12)
+            double s12_a12,
+            out double plat2, out double plon2, out double pazi2)
         {
             double lat2 = 0,
                 lon2 = 0,
-                azi2 = 0,
-                s12 = 0,
-                m12 = 0,
-                M12 = 0,
-                M21 = 0,
-                S12 = 0;
+                azi2 = 0;
 /* Avoid warning about uninitialized B12. */
-            double sig12, ssig12, csig12, B12 = 0, AB1 = 0;
+            double sig12, ssig12, csig12, B12 = 0;
             double omg12, lam12, lon12;
-            double ssig2, csig2, sbet2, cbet2, somg2, comg2, salp2, calp2, dn2;
-            uint outmask = GEOD_ALL;
+            double ssig2, csig2, sbet2, cbet2, somg2, comg2, salp2, calp2;
 
-            outmask &= l.caps & OUT_ALL;
-            if (!( /*Init() &&*/
-                    ((flags & GEOD_ARCMODE) != 0 || (l.caps & (GEOD_DISTANCE_IN & OUT_ALL)) != 0)))
-                /* Uninitialized or impossible distance calculation requested */
-            {
-                plat2 = plon2 = pazi2 = ps12 = pm12 = pM12 = pM21 = pS12 = 0;
-                return NaN;
-            }
-
-            if ((flags & GEOD_ARCMODE) != 0)
-            {
-                /* Interpret s12_a12 as spherical arc length */
-                sig12 = s12_a12 * degree;
-                sincosdx(s12_a12, out ssig12, out csig12);
-            }
-            else
-            {
-                /* Interpret s12_a12 as distance */
-                double
-                    tau12 = s12_a12 / (l.b * (1 + l.A1m1)),
-                    s = sin(tau12),
-                    c = cos(tau12);
+            /* Interpret s12_a12 as distance */
+            double
+                tau12 = s12_a12 / (l.b * (1 + l.A1m1)),
+                s = Math.Sin(tau12),
+                c = Math.Cos(tau12);
 /* tau2 = tau1 + tau12 */
-                B12 = -SinCosSeries(TRUE,
-                    l.stau1 * c + l.ctau1 * s,
-                    l.ctau1 * c - l.stau1 * s,
-                    l.C1pa, nC1p);
-                sig12 = tau12 - (B12 - l.B11);
-                ssig12 = sin(sig12);
-                csig12 = cos(sig12);
-                if (fabs(l.f) > 0.01)
-                {
-                    /* Reverted distance series is inaccurate for |f| > 1/100, so correct
-                     * sig12 with 1 Newton iteration.  The following table shows the
-                     * approximate maximum error for a = WGS_a() and various f relative to
-                     * GeodesicExact.
-                     *     erri = the error in the inverse solution (nm)
-                     *     errd = the error in the direct solution (series only) (nm)
-                     *     errda = the error in the direct solution (series + 1 Newton) (nm)
-                     *
-                     *       f     erri  errd errda
-                     *     -1/5    12e6 1.2e9  69e6
-                     *     -1/10  123e3  12e6 765e3
-                     *     -1/20   1110 108e3  7155
-                     *     -1/50  18.63 200.9 27.12
-                     *     -1/100 18.63 23.78 23.37
-                     *     -1/150 18.63 21.05 20.26
-                     *      1/150 22.35 24.73 25.83
-                     *      1/100 22.35 25.03 25.31
-                     *      1/50  29.80 231.9 30.44
-                     *      1/20   5376 146e3  10e3
-                     *      1/10  829e3  22e6 1.5e6
-                     *      1/5   157e6 3.8e9 280e6 */
-                    double serr;
-                    ssig2 = l.ssig1 * csig12 + l.csig1 * ssig12;
-                    csig2 = l.csig1 * csig12 - l.ssig1 * ssig12;
-                    B12 = SinCosSeries(TRUE, ssig2, csig2, l.C1a, nC1);
-                    serr = (1 + l.A1m1) * (sig12 + (B12 - l.B11)) - s12_a12 / l.b;
-                    sig12 = sig12 - serr / sqrt(1 + l.k2 * sq(ssig2));
-                    ssig12 = sin(sig12);
-                    csig12 = cos(sig12);
-                    /* Update B12 below */
-                }
+            B12 = -SinCosSeries(true,
+                l.stau1 * c + l.ctau1 * s,
+                l.ctau1 * c - l.stau1 * s,
+                l.C1pa, nC1p);
+            sig12 = tau12 - (B12 - l.B11);
+            ssig12 = Math.Sin(sig12);
+            csig12 = Math.Cos(sig12);
+            if (Math.Abs(l.f) > 0.01)
+            {
+                /* Reverted distance series is inaccurate for |f| > 1/100, so correct
+                 * sig12 with 1 Newton iteration.  The following table shows the
+                 * approximate maximum error for a = WGS_a() and various f relative to
+                 * GeodesicExact.
+                 *     erri = the error in the inverse solution (nm)
+                 *     errd = the error in the direct solution (series only) (nm)
+                 *     errda = the error in the direct solution (series + 1 Newton) (nm)
+                 *
+                 *       f     erri  errd errda
+                 *     -1/5    12e6 1.2e9  69e6
+                 *     -1/10  123e3  12e6 765e3
+                 *     -1/20   1110 108e3  7155
+                 *     -1/50  18.63 200.9 27.12
+                 *     -1/100 18.63 23.78 23.37
+                 *     -1/150 18.63 21.05 20.26
+                 *      1/150 22.35 24.73 25.83
+                 *      1/100 22.35 25.03 25.31
+                 *      1/50  29.80 231.9 30.44
+                 *      1/20   5376 146e3  10e3
+                 *      1/10  829e3  22e6 1.5e6
+                 *      1/5   157e6 3.8e9 280e6 */
+                double serr;
+                ssig2 = l.ssig1 * csig12 + l.csig1 * ssig12;
+                csig2 = l.csig1 * csig12 - l.ssig1 * ssig12;
+                B12 = SinCosSeries(true, ssig2, csig2, l.C1a, nC1);
+                serr = (1 + l.A1m1) * (sig12 + (B12 - l.B11)) - s12_a12 / l.b;
+                sig12 = sig12 - serr / Math.Sqrt(1 + l.k2 * (ssig2 * ssig2));
+                ssig12 = Math.Sin(sig12);
+                csig12 = Math.Cos(sig12);
+                /* Update B12 below */
             }
 
             /* sig2 = sig1 + sig12 */
             ssig2 = l.ssig1 * csig12 + l.csig1 * ssig12;
             csig2 = l.csig1 * csig12 - l.ssig1 * ssig12;
-            dn2 = sqrt(1 + l.k2 * sq(ssig2));
-            if ((outmask & (GEOD_DISTANCE | GEOD_REDUCEDLENGTH | GEOD_GEODESICSCALE)) != 0)
-            {
-                if (((flags & GEOD_ARCMODE) != 0) || fabs(l.f) > 0.01)
-                    B12 = SinCosSeries(TRUE, ssig2, csig2, l.C1a, nC1);
-                AB1 = (1 + l.A1m1) * (B12 - l.B11);
-            }
 
             /* sin(bet2) = cos(alp0) * sin(sig2) */
             sbet2 = l.calp0 * ssig2;
@@ -776,146 +655,33 @@ namespace Iot.Device.Common
             /* tan(alp0) = cos(sig2)*tan(alp2) */
             salp2 = l.salp0;
             calp2 = l.calp0 * csig2; /* No need to normalize */
-
-            if ((outmask & GEOD_DISTANCE) != 0)
-                s12 = ((flags & GEOD_ARCMODE) != 0) ? l.b * ((1 + l.A1m1) * sig12 + AB1) : s12_a12;
-
-            if ((outmask & GEOD_LONGITUDE) != 0)
-            {
-                double E = copysignx(1, l.salp0); /* east or west going? */
+            
 /* tan(omg2) = sin(alp0) * tan(sig2) */
-                somg2 = l.salp0 * ssig2;
-                comg2 = csig2; /* No need to normalize */
-                /* omg12 = omg2 - omg1 */
-                omg12 = ((flags & GEOD_LONG_UNROLL) != 0)
-                    ? E * (sig12
-                           - (atan2(ssig2, csig2) - atan2(l.ssig1, l.csig1))
-                           + (atan2(E * somg2, comg2) - atan2(E * l.somg1, l.comg1)))
-                    : atan2(somg2 * l.comg1 - comg2 * l.somg1,
-                        comg2 * l.comg1 + somg2 * l.somg1);
-                lam12 = omg12 + l.A3c *
-                        (sig12 + (SinCosSeries(TRUE, ssig2, csig2, l.C3a, nC3 - 1)
-                                  - l.B31));
-                lon12 = lam12 / degree;
-                lon2 = ((flags & GEOD_LONG_UNROLL) != 0) ? l.lon1 + lon12 : AngNormalize(AngNormalize(l.lon1) + AngNormalize(lon12));
-            }
+            somg2 = l.salp0 * ssig2;
+            comg2 = csig2; /* No need to normalize */
+            /* omg12 = omg2 - omg1 */
+            double x = comg2 * l.comg1 + somg2 * l.somg1;
+            omg12 = Math.Atan2(somg2 * l.comg1 - comg2 * l.somg1, x);
+            lam12 = omg12 + l.A3c *
+                (sig12 + (SinCosSeries(true, ssig2, csig2, l.C3a, nC3 - 1)
+                          - l.B31));
+            lon12 = lam12 / degree;
+            lon2 = AngNormalize(AngNormalize(l.lon1) + AngNormalize(lon12));
 
-            if ((outmask & GEOD_LATITUDE) != 0)
-                lat2 = atan2dx(sbet2, l.f1 * cbet2);
+            lat2 = atan2dx(sbet2, l.f1 * cbet2);
 
-            if ((outmask & GEOD_AZIMUTH) != 0)
-                azi2 = atan2dx(salp2, calp2);
-
-            if ((outmask & (GEOD_REDUCEDLENGTH | GEOD_GEODESICSCALE)) != 0)
-            {
-                double
-                    B22 = SinCosSeries(TRUE, ssig2, csig2, l.C2a, nC2),
-                    AB2 = (1 + l.A2m1) * (B22 - l.B21),
-                    J12 = (l.A1m1 - l.A2m1) * sig12 + (AB1 - AB2);
-                if ((outmask & GEOD_REDUCEDLENGTH) != 0)
-                    /* Add parens around (csig1 * ssig2) and (ssig1 * csig2) to ensure
-                     * accurate cancellation in the case of coincident points. */
-                    m12 = l.b * ((dn2 * (l.csig1 * ssig2) - l.dn1 * (l.ssig1 * csig2))
-                                 - l.csig1 * csig2 * J12);
-                if ((outmask & GEOD_GEODESICSCALE) != 0)
-                {
-                    double t = l.k2 * (ssig2 - l.ssig1) * (ssig2 + l.ssig1) /
-                               (l.dn1 + dn2);
-                    M12 = csig12 + (t * ssig2 - csig2 * J12) * l.ssig1 / l.dn1;
-                    M21 = csig12 - (t * l.ssig1 - l.csig1 * J12) * ssig2 / dn2;
-                }
-            }
-
-            if ((outmask & GEOD_AREA) != 0)
-            {
-                double
-                    B42 = SinCosSeries(FALSE, ssig2, csig2, l.C4a, nC4);
-                double salp12, calp12;
-                if (l.calp0 == 0 || l.salp0 == 0)
-                {
-                    /* alp12 = alp2 - alp1, used in atan2 so no need to normalize */
-                    salp12 = salp2 * l.calp1 - calp2 * l.salp1;
-                    calp12 = calp2 * l.calp1 + salp2 * l.salp1;
-                }
-                else
-                {
-                    /* tan(alp) = tan(alp0) * sec(sig)
-                     * tan(alp2-alp1) = (tan(alp2) -tan(alp1)) / (tan(alp2)*tan(alp1)+1)
-                     * = calp0 * salp0 * (csig1-csig2) / (salp0^2 + calp0^2 * csig1*csig2)
-                     * If csig12 > 0, write
-                     *   csig1 - csig2 = ssig12 * (csig1 * ssig12 / (1 + csig12) + ssig1)
-                     * else
-                     *   csig1 - csig2 = csig1 * (1 - csig12) + ssig12 * ssig1
-                     * No need to normalize */
-                    salp12 = l.calp0 * l.salp0 *
-                             (csig12 <= 0 ? l.csig1 * (1 - csig12) + ssig12 * l.ssig1 : ssig12 * (l.csig1 * ssig12 / (1 + csig12) + l.ssig1));
-                    calp12 = sq(l.salp0) + sq(l.calp0) * l.csig1 * csig2;
-                }
-
-                S12 = l.c2 * atan2(salp12, calp12) + l.A4 * (B42 - l.B41);
-            }
-
-            /* In the pattern
-             *
-             *   if ((outmask & GEOD_XX) && pYY)
-             *     *pYY = YY;
-             *
-             * the second check "&& pYY" is redundant.  It's there to make the CLang
-             * static analyzer happy.
-             */
+            azi2 = atan2dx(salp2, calp2);
             plat2 = lat2;
             plon2 = lon2;
             pazi2 = azi2;
-            ps12 = s12;
-            pm12 = m12;
-            pM12 = M12;
-            pM21 = M21;
-            pS12 = S12;
 
-            return ((flags & GEOD_ARCMODE) != 0) ? s12_a12 : sig12 / degree;
-        }
-
-        private static void geod_setdistance(geod_geodesicline l, double s13)
-        {
-            l.s13 = s13;
-            l.a13 = geod_genposition(l, GEOD_NOFLAGS, l.s13, out _, out _, out _,
-                out _, out _, out _, out _, out _);
-        }
-
-        static void geod_setarc(geod_geodesicline l, double a13)
-        {
-            l.a13 = a13;
-            l.s13 = NaN;
-            geod_genposition(l, GEOD_ARCMODE, l.a13, out _, out _, out _, out l.s13,
-                out _, out _, out _, out _);
-        }
-
-        private static void geod_gensetdistance(geod_geodesicline l,
-            uint flags, double s13_a13)
-        {
-            if ((flags & GEOD_ARCMODE) != 0)
-            {
-                geod_setarc(l, s13_a13);
-            }
-            else
-            {
-                geod_setdistance(l, s13_a13);
-            }
-        }
-
-        public static void geod_position(geod_geodesicline l, double s12,
-            out double plat2, out double plon2, out double pazi2)
-        {
-            geod_genposition(l, 0, s12, out plat2, out plon2, out pazi2,
-                out _, out _, out _, out _, out _);
+            return sig12 / degree;
         }
 
         public static double geod_gendirect(geod_geodesic g,
             double lat1, double lon1, double azi1,
-            uint flags, double s12_a12,
-            out double plat2, out double plon2, out double pazi2,
-            out double ps12, out double pm12, out double pM12, out double pM21,
-            out double pS12)
+            double s12_a12,
+            out double plat2, out double plon2, out double pazi2)
         {
             geod_geodesicline l;
             uint outmask = GEOD_LATITUDE | GEOD_LONGITUDE | GEOD_AZIMUTH | GEOD_DISTANCE |
@@ -924,8 +690,8 @@ namespace Iot.Device.Common
             geod_lineinit(out l, g, lat1, lon1, azi1,
                 /* Automatically supply GEOD_DISTANCE_IN if necessary */
                 outmask | GEOD_DISTANCE_IN);
-            return geod_genposition(l, flags, s12_a12,
-                out plat2, out plon2, out pazi2, out ps12, out pm12, out pM12, out pM21, out pS12);
+            return geod_genposition(l, s12_a12,
+                out plat2, out plon2, out pazi2);
         }
 
         public static void geod_direct(geod_geodesic g,
@@ -933,19 +699,16 @@ namespace Iot.Device.Common
             double s12,
             out double plat2, out double plon2, out double pazi2)
         {
-            geod_gendirect(g, lat1, lon1, azi1, GEOD_NOFLAGS, s12, out plat2, out plon2, out pazi2,
-                out _, out _, out _, out _, out _);
+            geod_gendirect(g, lat1, lon1, azi1, s12, out plat2, out plon2, out pazi2);
         }
 
         static double geod_geninverse_int(geod_geodesic g,
             double lat1, double lon1, double lat2, double lon2,
             out double ps12,
             out double psalp1, out double pcalp1,
-            out double psalp2, out double pcalp2,
-            out double pm12, out double pM12, out double pM21,
-            out double pS12)
+            out double psalp2, out double pcalp2)
         {
-            double s12 = 0, m12 = 0, M12 = 0, M21 = 0, S12 = 0;
+            double s12 = 0;
             double lon12, lon12s;
             int latsign, lonsign, swapp;
             double sbet1, cbet1, sbet2, cbet2, s12x = 0, m12x = 0;
@@ -956,9 +719,6 @@ namespace Iot.Device.Common
 /* somg12 > 1 marks that it needs to be calculated */
             double omg12 = 0, somg12 = 2, comg12 = 0;
 
-            uint outmask = GEOD_DISTANCE | GEOD_REDUCEDLENGTH | GEOD_GEODESICSCALE | GEOD_AREA;
-
-            outmask &= OUT_ALL;
             /* Compute longitude difference (AngDiff does this carefully).  Result is
              * in [-180, 180] but -180 is only for west-going geodesics.  180 is for
              * east-going and meridional geodesics. */
@@ -982,7 +742,7 @@ namespace Iot.Device.Common
             lat2 = AngRound(LatFix(lat2));
 /* Swap points so that point with higher (abs) latitude is point 1
  * If one latitude is a nan, then it becomes lat1. */
-            swapp = fabs(lat1) < fabs(lat2) ? -1 : 1;
+            swapp = Math.Abs(lat1) < Math.Abs(lat2) ? -1 : 1;
             if (swapp < 0)
             {
                 lonsign *= -1;
@@ -1032,12 +792,12 @@ namespace Iot.Device.Common
             }
             else
             {
-                if (fabs(sbet2) == -sbet1)
+                if (Math.Abs(sbet2) == -sbet1)
                     cbet2 = cbet1;
             }
 
-            dn1 = sqrt(1 + g.ep2 * sq(sbet1));
-            dn2 = sqrt(1 + g.ep2 * sq(sbet2));
+            dn1 = Math.Sqrt(1 + g.ep2 * (sbet1 * sbet1));
+            dn2 = Math.Sqrt(1 + g.ep2 * (sbet2 * sbet2));
 
             meridian = lat1 == -90 || slam12 == 0;
 
@@ -1059,13 +819,12 @@ namespace Iot.Device.Common
                 ssig2 = sbet2;
                 csig2 = calp2 * cbet2;
 
-/* sig12 = sig2 - sig1 */
-                sig12 = atan2(maxx((double)(0), csig1 * ssig2 - ssig1 * csig2),
-                    csig1 * csig2 + ssig1 * ssig2);
+                /* sig12 = sig2 - sig1 */
+                double x = csig1 * csig2 + ssig1 * ssig2;
+                sig12 = Math.Atan2(maxx((double)(0), csig1 * ssig2 - ssig1 * csig2), x);
                 Lengths(g, g.n, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
                     cbet1, cbet2, out s12x, out m12x, out _,
-                    out M12,
-                    out M21, Ca, true, true);
+                    Ca, true, true);
                 /* Add the check for sig12 since zero length geodesics might yield m12 <
                  * 0.  Test case was
                  *
@@ -1084,7 +843,7 @@ namespace Iot.Device.Common
                 }
                 else
                     /* m12 < 0, i.e., prolate and too close to anti-podal */
-                    meridian = FALSE;
+                    meridian = false;
             }
 
             if (!meridian &&
@@ -1098,9 +857,7 @@ namespace Iot.Device.Common
                 salp1 = salp2 = 1;
                 s12x = g.a * lam12;
                 sig12 = omg12 = lam12 / g.f1;
-                m12x = g.b * sin(sig12);
-                if ((outmask & GEOD_GEODESICSCALE) != 0)
-                    M12 = M21 = cos(sig12);
+                m12x = g.b * Math.Sin(sig12);
                 a12 = lon12 / g.f1;
 
             }
@@ -1121,9 +878,7 @@ namespace Iot.Device.Common
                 {
                     /* Short lines (InverseStart sets salp2, calp2, dnm) */
                     s12x = sig12 * g.b * dnm;
-                    m12x = sq(dnm) * g.b * sin(sig12 / dnm);
-                    if ((outmask & GEOD_GEODESICSCALE) != 0)
-                        M12 = M21 = cos(sig12 / dnm);
+                    m12x = dnm * dnm * g.b * Math.Sin(sig12 / dnm);
                     a12 = sig12 / degree;
                     omg12 = lam12 / (g.f1 * dnm);
                 }
@@ -1145,8 +900,8 @@ namespace Iot.Device.Common
                     uint numit = 0;
 /* Bracketing range */
                     double salp1a = tiny, calp1a = 1, salp1b = tiny, calp1b = -1;
-                    bool tripn = FALSE;
-                    bool tripb = FALSE;
+                    bool tripn = false;
+                    bool tripb = false;
                     for (; numit < maxit2; ++numit)
                     {
                         /* the WGS84 test set: mean = 1.47, sd = 1.25, max = 16
@@ -1158,7 +913,7 @@ namespace Iot.Device.Common
                                 out eps, out domg12, numit < maxit1, out dv, Ca);
                         /* 2 * tol0 is approximately 1 ulp for a number in [0, pi]. */
                         /* Reversed test to allow escape with NaNs */
-                        if (tripb || !(fabs(v) >= (tripn ? 8 : 1) * tol0)) break;
+                        if (tripb || !(Math.Abs(v) >= (tripn ? 8 : 1) * tol0)) break;
                         /* Update bracketing values */
                         if (v > 0 && (numit > maxit1 || calp1 / salp1 > calp1b / salp1b))
                         {
@@ -1176,10 +931,10 @@ namespace Iot.Device.Common
                             double
                                 dalp1 = -v / dv;
                             double
-                                sdalp1 = sin(dalp1),
-                                cdalp1 = cos(dalp1),
+                                sdalp1 = Math.Sin(dalp1),
+                                cdalp1 = Math.Cos(dalp1),
                                 nsalp1 = salp1 * cdalp1 + calp1 * sdalp1;
-                            if (nsalp1 > 0 && fabs(dalp1) < pi)
+                            if (nsalp1 > 0 && Math.Abs(dalp1) < pi)
                             {
                                 calp1 = calp1 * cdalp1 - salp1 * sdalp1;
                                 salp1 = nsalp1;
@@ -1187,7 +942,7 @@ namespace Iot.Device.Common
 /* In some regimes we don't get quadratic convergence because
  * slope . 0.  So use convergence conditions based on epsilon
  * instead of sqrt(epsilon). */
-                                tripn = fabs(v) <= 16 * tol0;
+                                tripn = Math.Abs(v) <= 16 * tol0;
                                 continue;
                             }
                         }
@@ -1203,20 +958,19 @@ namespace Iot.Device.Common
                         salp1 = (salp1a + salp1b) / 2;
                         calp1 = (calp1a + calp1b) / 2;
                         norm2(ref salp1, ref calp1);
-                        tripn = FALSE;
-                        tripb = (fabs(salp1a - salp1) + (calp1a - calp1) < tolb ||
-                                 fabs(salp1 - salp1b) + (calp1 - calp1b) < tolb);
+                        tripn = false;
+                        tripb = (Math.Abs(salp1a - salp1) + (calp1a - calp1) < tolb ||
+                                 Math.Abs(salp1 - salp1b) + (calp1 - calp1b) < tolb);
                     }
 
                     Lengths(g, eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
                         cbet1, cbet2, out s12x, out m12x, out _,
-                        out M12,
-                        out M21, Ca, true, true);
+                        Ca, true, true);
                     m12x *= g.b;
                     s12x *= g.b;
                     a12 = sig12 / degree;
                     /* omg12 = lam12 - domg12 */
-                    double sdomg12 = sin(domg12), cdomg12 = cos(domg12);
+                    double sdomg12 = Math.Sin(domg12), cdomg12 = Math.Cos(domg12);
                     somg12 = slam12 * cdomg12 - clam12 * sdomg12;
                     comg12 = clam12 * cdomg12 + slam12 * sdomg12;
                 }
@@ -1224,91 +978,11 @@ namespace Iot.Device.Common
 
             s12 = 0 + s12x; /* Convert -0 to 0 */
 
-            m12 = 0 + m12x; /* Convert -0 to 0 */
-
-            if ((outmask & GEOD_AREA) != 0)
-            {
-                double
-                    /* From Lambda12: sin(alp1) * cos(bet1) = sin(alp0) */
-                    salp0 = salp1 * cbet1,
-                    calp0 = hypotx(calp1, salp1 * sbet1); /* calp0 > 0 */
-                double alp12;
-                if (calp0 != 0 && salp0 != 0)
-                {
-                    double
-                        /* From Lambda12: tan(bet) = tan(sig) * cos(alp) */
-                        ssig1 = sbet1,
-                        csig1 = calp1 * cbet1,
-                        ssig2 = sbet2,
-                        csig2 = calp2 * cbet2,
-                        k2 = sq(calp0) * g.ep2,
-                        eps = k2 / (2 * (1 + sqrt(1 + k2)) + k2),
-                        /* Multiplier = a^2 * e^2 * cos(alpha0) * sin(alpha0). */
-                        A4 = sq(g.a) * calp0 * salp0 * g.e2;
-                    double B41, B42;
-                    norm2(ref ssig1, ref csig1);
-                    norm2(ref ssig2, ref csig2);
-                    C4f(g, eps, Ca);
-                    B41 = SinCosSeries(FALSE, ssig1, csig1, Ca, nC4);
-                    B42 = SinCosSeries(FALSE, ssig2, csig2, Ca, nC4);
-                    S12 = A4 * (B42 - B41);
-                }
-                else
-                    /* Avoid problems with indeterminate sig1, sig2 on equator */
-                    S12 = 0;
-
-                if (!meridian && somg12 > 1)
-                {
-                    somg12 = sin(omg12);
-                    comg12 = cos(omg12);
-                }
-
-                if (!meridian &&
-                    /* omg12 < 3/4 * pi */
-                    comg12 > -(double)(0.7071) && /* Long difference not too big */
-                    sbet2 - sbet1 < (double)(1.75))
-                {
-                    /* Lat difference not too big */
-                    /* Use tan(Gamma/2) = tan(omg12/2)
-                     * * (tan(bet1/2)+tan(bet2/2))/(1+tan(bet1/2)*tan(bet2/2))
-                     * with tan(x/2) = sin(x)/(1+cos(x)) */
-                    double
-                        domg12 = 1 + comg12, dbet1 = 1 + cbet1, dbet2 = 1 + cbet2;
-                    alp12 = 2 * atan2(somg12 * (sbet1 * dbet2 + sbet2 * dbet1),
-                                domg12 * (sbet1 * sbet2 + dbet1 * dbet2));
-                }
-                else
-                {
-                    /* alp12 = alp2 - alp1, used in atan2 so no need to normalize */
-                    double
-                        salp12 = salp2 * calp1 - calp2 * salp1,
-                        calp12 = calp2 * calp1 + salp2 * salp1;
-                    /* The right thing appears to happen if alp1 = +/-180 and alp2 = 0, viz
-                     * salp12 = -0 and alp12 = -180.  However this depends on the sign
-                     * being attached to 0 correctly.  The following ensures the correct
-                     * behavior. */
-                    if (salp12 == 0 && calp12 < 0)
-                    {
-                        salp12 = tiny * calp1;
-                        calp12 = -1;
-                    }
-
-                    alp12 = atan2(salp12, calp12);
-                }
-
-                S12 += g.c2 * alp12;
-                S12 *= swapp * lonsign * latsign;
-/* Convert -0 to 0 */
-                S12 += 0;
-            }
-
             /* Convert calp, salp to azimuth accounting for lonsign, swapp, latsign. */
             if (swapp < 0)
             {
                 swapx(ref salp1, ref salp2);
                 swapx(ref calp1, ref calp2);
-                if ((outmask & GEOD_GEODESICSCALE) != 0)
-                    swapx(ref M12, ref M21);
             }
 
             salp1 *= swapp * lonsign;
@@ -1322,10 +996,6 @@ namespace Iot.Device.Common
             pcalp2 = calp2;
 
             ps12 = s12;
-            pm12 = m12;
-            pM12 = M12;
-            pM21 = M21;
-            pS12 = S12;
 
             /* Returned value in [0, 180] */
             return a12;
@@ -1333,42 +1003,21 @@ namespace Iot.Device.Common
 
         public static double geod_geninverse(geod_geodesic g,
             double lat1, double lon1, double lat2, double lon2,
-            out double ps12, out double pazi1, out double pazi2,
-            out double pm12, out double pM12, out double pM21, out double pS12)
+            out double ps12, out double pazi1, out double pazi2)
         {
             double salp1, calp1, salp2, calp2;
             double a12 = geod_geninverse_int(g, lat1, lon1, lat2, lon2, out ps12,
-                out salp1, out calp1, out salp2, out calp2,
-                out pm12, out pM12, out pM21, out pS12);
+                out salp1, out calp1, out salp2, out calp2);
             pazi1 = atan2dx(salp1, calp1);
             pazi2 = atan2dx(salp2, calp2);
             return a12;
-        }
-
-        public static void geod_inverseline(out geod_geodesicline l,
-            geod_geodesic g,
-            double lat1, double lon1, double lat2, double lon2,
-            uint caps)
-        {
-            double salp1,
-                calp1,
-                a12 = geod_geninverse_int(g, lat1, lon1, lat2, lon2, out _,
-                    out salp1, out calp1, out _, out _,
-                    out _, out _, out _, out _),
-                azi1 = atan2dx(salp1, calp1);
-            caps = (caps != 0) ? caps : GEOD_DISTANCE_IN | GEOD_LONGITUDE;
-            /* Ensure that a12 can be converted to a distance */
-            if ((caps & (OUT_ALL & GEOD_DISTANCE_IN)) != 0) caps |= GEOD_DISTANCE;
-            geod_lineinit_int(out l, g, lat1, lon1, azi1, salp1, calp1, caps);
-            geod_setarc(l, a12);
         }
 
         public static void geod_inverse(geod_geodesic g,
             double lat1, double lon1, double lat2, double lon2,
             out double ps12, out double pazi1, out double pazi2)
         {
-            geod_geninverse(g, lat1, lon1, lat2, lon2, out ps12, out pazi1, out pazi2,
-                out _, out _, out _, out _);
+            geod_geninverse(g, lat1, lon1, lat2, lon2, out ps12, out pazi1, out pazi2);
         }
 
         private static double SinCosSeries(bool sinp, double sinx, double cosx, double[] c, int n)
@@ -1403,7 +1052,6 @@ namespace Iot.Device.Common
             double ssig2, double csig2, double dn2,
             double cbet1, double cbet2,
             out double ps12b, out double pm12b, out double pm0,
-            out double pM12, out double pM21,
             /* Scratch area of the right size */
             double[] Ca, bool usePs12b, bool useRedlp)
         {
@@ -1430,14 +1078,14 @@ namespace Iot.Device.Common
 
             if (usePs12b)
             {
-                double B1 = SinCosSeries(TRUE, ssig2, csig2, Ca, nC1) -
-                            SinCosSeries(TRUE, ssig1, csig1, Ca, nC1);
+                double B1 = SinCosSeries(true, ssig2, csig2, Ca, nC1) -
+                            SinCosSeries(true, ssig1, csig1, Ca, nC1);
                 /* Missing a factor of b */
                 ps12b = A1 * (sig12 + B1);
                 if (useRedlp)
                 {
-                    double B2 = SinCosSeries(TRUE, ssig2, csig2, Cb, nC2) -
-                                SinCosSeries(TRUE, ssig1, csig1, Cb, nC2);
+                    double B2 = SinCosSeries(true, ssig2, csig2, Cb, nC2) -
+                                SinCosSeries(true, ssig1, csig1, Cb, nC2);
                     J12 = m0 * sig12 + (A1 * B1 - A2 * B2);
                 }
             }
@@ -1447,8 +1095,8 @@ namespace Iot.Device.Common
                 int l;
                 for (l = 1; l <= nC2; ++l)
                     Cb[l] = A1 * Ca[l] - A2 * Cb[l];
-                J12 = m0 * sig12 + (SinCosSeries(TRUE, ssig2, csig2, Cb, nC2) -
-                                    SinCosSeries(TRUE, ssig1, csig1, Cb, nC2));
+                J12 = m0 * sig12 + (SinCosSeries(true, ssig2, csig2, Cb, nC2) -
+                                    SinCosSeries(true, ssig1, csig1, Cb, nC2));
             }
 
             pm0 = m0;
@@ -1460,8 +1108,6 @@ namespace Iot.Device.Common
 
             double csig12 = csig1 * csig2 + ssig1 * ssig2;
             double t = g.ep2 * (cbet1 - cbet2) * (cbet1 + cbet2) / (dn1 + dn2);
-            pM12 = csig12 + (t * ssig2 - csig2 * J12) * ssig1 / dn1;
-            pM21 = csig12 - (t * ssig1 - csig1 * J12) * ssig2 / dn2;
 
         }
 
@@ -1471,8 +1117,8 @@ namespace Iot.Device.Common
              * This solution is adapted from Geocentric::Reverse. */
             double k;
             double
-                p = sq(x),
-                q = sq(y),
+                p = x * x,
+                q = y * y,
                 r = (p + q - 1) / 6;
             if (!(q == 0 && r <= 0))
             {
@@ -1480,7 +1126,7 @@ namespace Iot.Device.Common
                     /* Avoid possible division by zero when r = 0 by multiplying equations
                      * for s and t by r^3 and r, resp. */
                     S = p * q / 4, /* S = r^3 * s */
-                    r2 = sq(r),
+                    r2 = r * r,
                     r3 = r * r2,
                     /* The discriminant of the quadratic equation for T3.  This is zero on
                      * the evolute curve p^(1/3)+q^(1/3) = 1 */
@@ -1493,7 +1139,7 @@ namespace Iot.Device.Common
                     /* Pick the sign on the sqrt to maximize abs(T3).  This minimizes loss
                      * of precision due to cancellation.  The result is unchanged because
                      * of the way the T is used in definition of u. */
-                    T3 += T3 < 0 ? -sqrt(disc) : sqrt(disc); /* T3 = (r * t)^3 */
+                    T3 += T3 < 0 ? -Math.Sqrt(disc) : Math.Sqrt(disc); /* T3 = (r * t)^3 */
                     /* N.B. cbrtx always returns the double root.  cbrtx(-8) = -2. */
                     T = cbrtx(T3); /* T = r * t */
                     /* T can be zero; but then r2 / T . 0. */
@@ -1502,19 +1148,20 @@ namespace Iot.Device.Common
                 else
                 {
                     /* T is complex, but the way u is defined the result is double. */
-                    double ang = atan2(sqrt(-disc), -(S + r3));
+                    double x1 = -(S + r3);
+                    double ang = Math.Atan2(Math.Sqrt(-disc), x1);
                     /* There are three possible cube roots.  We choose the root which
                      * avoids cancellation.  Note that disc < 0 implies that r < 0. */
-                    u += 2 * r * cos(ang / 3);
+                    u += 2 * r * Math.Cos(ang / 3);
                 }
 
-                v = sqrt(sq(u) + q); /* guaranteed positive */
+                v = Math.Sqrt(u * u + q); /* guaranteed positive */
                 /* Avoid loss of accuracy when u < 0. */
                 uv = u < 0 ? q / (v - u) : u + v; /* u+v, guaranteed positive */
                 w = (uv - q) / (2 * v); /* positive? */
                 /* Rearrange expression for k to avoid loss of accuracy due to
                  * subtraction.  Division by 0 not possible because uv > 0, w >= 0. */
-                k = uv / (sqrt(uv + sq(w)) + w); /* guaranteed positive */
+                k = uv / (Math.Sqrt(uv + w * w) + w); /* guaranteed positive */
             }
             else
             {
@@ -1556,14 +1203,16 @@ namespace Iot.Device.Common
             sbet12a = sbet2 * cbet1 + cbet2 * sbet1;
             if (shortline)
             {
-                double sbetm2 = sq(sbet1 + sbet2), omg12;
+                double x = sbet1 + sbet2;
+                double sbetm2 = x * x, omg12;
 /* sin((bet1+bet2)/2)^2
  * =  (sbet1 + sbet2)^2 / ((sbet1 + sbet2)^2 + (cbet1 + cbet2)^2) */
-                sbetm2 /= sbetm2 + sq(cbet1 + cbet2);
-                dnm = sqrt(1 + g.ep2 * sbetm2);
+double x1 = cbet1 + cbet2;
+sbetm2 /= sbetm2 + x1 * x1;
+                dnm = Math.Sqrt(1 + g.ep2 * sbetm2);
                 omg12 = lam12 / (g.f1 * dnm);
-                somg12 = sin(omg12);
-                comg12 = cos(omg12);
+                somg12 = Math.Sin(omg12);
+                comg12 = Math.Cos(omg12);
             }
             else
             {
@@ -1572,7 +1221,7 @@ namespace Iot.Device.Common
             }
 
             salp1 = cbet2 * somg12;
-            calp1 = comg12 >= 0 ? sbet12 + cbet2 * sbet1 * sq(somg12) / (1 + comg12) : sbet12a - cbet2 * sbet1 * sq(somg12) / (1 - comg12);
+            calp1 = comg12 >= 0 ? sbet12 + cbet2 * sbet1 * (somg12 * somg12) / (1 + comg12) : sbet12a - cbet2 * sbet1 * (somg12 * somg12) / (1 - comg12);
 
             ssig12 = hypotx(salp1, calp1);
             csig12 = sbet1 * sbet2 + cbet1 * cbet2 * comg12;
@@ -1582,14 +1231,14 @@ namespace Iot.Device.Common
                 /* really short lines */
                 salp2 = cbet1 * somg12;
                 calp2 = sbet12 - cbet1 * sbet2 *
-                        (comg12 >= 0 ? sq(somg12) / (1 + comg12) : 1 - comg12);
+                        (comg12 >= 0 ? somg12 * somg12 / (1 + comg12) : 1 - comg12);
                 norm2(ref salp2, ref calp2);
 /* Set return value */
-                sig12 = atan2(ssig12, csig12);
+                sig12 = Math.Atan2(ssig12, csig12);
             }
-            else if (fabs(g.n) > (double)(0.1) || /* No astroid calc if too eccentric */
+            else if (Math.Abs(g.n) > (double)(0.1) || /* No astroid calc if too eccentric */
                      csig12 >= 0 ||
-                     ssig12 >= 6 * fabs(g.n) * pi * sq(cbet1))
+                     ssig12 >= 6 * Math.Abs(g.n) * pi * (cbet1 * cbet1))
             {
                 /* Nothing to do, zeroth order spherical approximation is OK */
             }
@@ -1602,15 +1251,16 @@ namespace Iot.Device.Common
  * 56.320923501171 0 -56.320923501171 179.664747671772880215
  * which otherwise fails with g++ 4.4.4 x86 -O3 */
                 double x;
-                double lam12x = atan2(-slam12, -clam12); /* lam12 - pi */
+                double x1 = -clam12;
+                double lam12x = Math.Atan2(-slam12, x1); /* lam12 - pi */
                 if (g.f >= 0)
                 {
                     /* In fact f == 0 does not get here */
                     /* x = dlong, y = dlat */
                     {
                         double
-                            k2 = sq(sbet1) * g.ep2,
-                            eps = k2 / (2 * (1 + sqrt(1 + k2)) + k2);
+                            k2 = sbet1 * sbet1 * g.ep2,
+                            eps = k2 / (2 * (1 + Math.Sqrt(1 + k2)) + k2);
                         lamscale = g.f * cbet1 * A3f(g, eps) * pi;
                     }
                     betscale = lamscale * cbet1;
@@ -1624,15 +1274,15 @@ namespace Iot.Device.Common
                     /* x = dlat, y = dlong */
                     double
                         cbet12a = cbet2 * cbet1 - sbet2 * sbet1,
-                        bet12a = atan2(sbet12a, cbet12a);
+                        bet12a = Math.Atan2(sbet12a, cbet12a);
                     double m12b, m0;
 /* In the case of lon12 = 180, this repeats a calculation made in
  * Inverse. */
                     Lengths(g, g.n, pi + bet12a,
                         sbet1, -cbet1, dn1, sbet2, cbet2, dn2,
-                        cbet1, cbet2, out _, out m12b, out m0, out _, out _, Ca, true, true);
+                        cbet1, cbet2, out _, out m12b, out m0, Ca, true, true);
                     x = -1 + m12b / (cbet1 * cbet2 * m0 * pi);
-                    betscale = x < -(double)(0.01) ? sbet12a / x : -g.f * sq(cbet1) * pi;
+                    betscale = x < -(double)(0.01) ? sbet12a / x : -g.f * (cbet1 * cbet1) * pi;
                     lamscale = betscale / cbet1;
                     y = lam12x / lamscale;
                 }
@@ -1643,12 +1293,12 @@ namespace Iot.Device.Common
                     if (g.f >= 0)
                     {
                         salp1 = minx((double)(1), -(double)(x));
-                        calp1 = -sqrt(1 - sq(salp1));
+                        calp1 = -Math.Sqrt(1 - salp1 * salp1);
                     }
                     else
                     {
                         calp1 = maxx((double)(x > -tol1 ? 0 : -1), (double)(x));
-                        salp1 = sqrt(1 - sq(calp1));
+                        salp1 = Math.Sqrt(1 - calp1 * calp1);
                     }
                 }
                 else
@@ -1690,11 +1340,11 @@ namespace Iot.Device.Common
                     double k = Astroid(x, y);
                     double
                         omg12a = lamscale * (g.f >= 0 ? -x * k / (1 + k) : -y * (1 + k) / k);
-                    somg12 = sin(omg12a);
-                    comg12 = -cos(omg12a);
+                    somg12 = Math.Sin(omg12a);
+                    comg12 = -Math.Cos(omg12a);
 /* Update spherical estimate of alp1 using omg12 instead of lam12 */
                     salp1 = cbet2 * somg12;
-                    calp1 = sbet12a - cbet2 * sbet1 * sq(somg12) / (1 - comg12);
+                    calp1 = sbet12a - cbet2 * sbet1 * (somg12 * somg12) / (1 - comg12);
                 }
             }
 
@@ -1787,10 +1437,11 @@ namespace Iot.Device.Common
              *       = sqrt(sq(calp0) - sq(sbet2)) / cbet2
              * and subst for calp0 and rearrange to give (choose positive sqrt
              * to give alp2 in [0, pi/2]). */
-            calp2 = cbet2 != cbet1 || fabs(sbet2) != -sbet1
-                ? sqrt(sq(calp1 * cbet1) +
-                       (cbet1 < -sbet1 ? (cbet2 - cbet1) * (cbet1 + cbet2) : (sbet1 - sbet2) * (sbet1 + sbet2))) / cbet2
-                : fabs(calp1);
+            double x2 = calp1 * cbet1;
+            calp2 = cbet2 != cbet1 || Math.Abs(sbet2) != -sbet1
+                ? Math.Sqrt(x2 * x2 +
+                            (cbet1 < -sbet1 ? (cbet2 - cbet1) * (cbet1 + cbet2) : (sbet1 - sbet2) * (sbet1 + sbet2))) / cbet2
+                : Math.Abs(calp1);
 /* tan(bet2) = tan(sig2) * cos(alp2)
  * tan(omg2) = sin(alp0) * tan(sig2). */
             ssig2 = sbet2;
@@ -1800,20 +1451,20 @@ namespace Iot.Device.Common
 /* norm2(&somg2, &comg2); -- don't need to normalize! */
 
 /* sig12 = sig2 - sig1, limit to [0, pi] */
-            sig12 = atan2(maxx((double)(0), csig1 * ssig2 - ssig1 * csig2),
-                csig1 * csig2 + ssig1 * ssig2);
+double x = csig1 * csig2 + ssig1 * ssig2;
+sig12 = Math.Atan2(maxx((double)(0), csig1 * ssig2 - ssig1 * csig2), x);
 
             /* omg12 = omg2 - omg1, limit to [0, pi] */
             somg12 = maxx((double)(0), comg1 * somg2 - somg1 * comg2);
             comg12 = comg1 * comg2 + somg1 * somg2;
 /* eta = omg12 - lam120 */
-            eta = atan2(somg12 * clam120 - comg12 * slam120,
-                comg12 * clam120 + somg12 * slam120);
-            k2 = sq(calp0) * g.ep2;
-            eps = k2 / (2 * (1 + sqrt(1 + k2)) + k2);
+double x1 = comg12 * clam120 + somg12 * slam120;
+eta = Math.Atan2(somg12 * clam120 - comg12 * slam120, x1);
+            k2 = calp0 * calp0 * g.ep2;
+            eps = k2 / (2 * (1 + Math.Sqrt(1 + k2)) + k2);
             C3f(g, eps, Ca);
-            B312 = (SinCosSeries(TRUE, ssig2, csig2, Ca, nC3 - 1) -
-                    SinCosSeries(TRUE, ssig1, csig1, Ca, nC3 - 1));
+            B312 = (SinCosSeries(true, ssig2, csig2, Ca, nC3 - 1) -
+                    SinCosSeries(true, ssig1, csig1, Ca, nC3 - 1));
             domg12 = -g.f * A3f(g, eps) * salp0 * (sig12 + B312);
             lam12 = eta + domg12;
 
@@ -1824,7 +1475,7 @@ namespace Iot.Device.Common
                 else
                 {
                     Lengths(g, eps, sig12, ssig1, csig1, dn1, ssig2, csig2, dn2,
-                        cbet1, cbet2, out _, out dlam12, out _, out _, out _, Ca, true, true);
+                        cbet1, cbet2, out _, out dlam12, out _, Ca, true, true);
                     dlam12 *= g.f1 / (calp2 * cbet2);
                 }
             }
@@ -1889,7 +1540,7 @@ namespace Iot.Device.Common
                 /* (1-eps)*A1-1, polynomial in eps2 of order 3 */ 1, 4, 64, 0, 256,
             };
             int m = nA1 / 2;
-            double t = polyval(m, coeff, 0, sq(eps)) / coeff[m + 1];
+            double t = polyval(m, coeff, 0, eps * eps) / coeff[m + 1];
             return (t + eps) / (1 - eps);
         }
 
@@ -1906,7 +1557,7 @@ namespace Iot.Device.Common
                 /* C1[6]/eps^6, polynomial in eps2 of order 0 */ -7, 2048,
             };
             double
-                eps2 = sq(eps),
+                eps2 = eps * eps,
                 d = eps;
             int o = 0, l;
             for (l = 1; l <= nC1; ++l)
@@ -1932,7 +1583,7 @@ namespace Iot.Device.Common
                 /* C1p[6]/eps^6, polynomial in eps2 of order 0 */ 38081, 61440,
             };
             double
-                eps2 = sq(eps),
+                eps2 = eps * eps,
                 d = eps;
             int o = 0, l;
             for (l = 1; l <= nC1p; ++l)
@@ -1953,7 +1604,7 @@ namespace Iot.Device.Common
                 /* (eps+1)*A2-1, polynomial in eps2 of order 3 */ -11, -28, -192, 0, 256,
             };
             int m = nA2 / 2;
-            double t = polyval(m, coeff, 0, sq(eps)) / coeff[m + 1];
+            double t = polyval(m, coeff, 0, eps * eps) / coeff[m + 1];
             return (t - eps) / (1 + eps);
         }
 
@@ -1970,7 +1621,7 @@ namespace Iot.Device.Common
                 /* C2[6]/eps^6, polynomial in eps2 of order 0 */ 77, 2048,
             };
             double
-                eps2 = sq(eps),
+                eps2 = eps * eps,
                 d = eps;
             int o = 0, l;
             for (l = 1; l <= nC2; ++l)
