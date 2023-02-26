@@ -80,7 +80,7 @@ public class GpioController : IDisposable
     /// <summary>
     /// Returns the collection of open pins
     /// </summary>
-    protected IEnumerable<GpioPin> OpenPins
+    private IEnumerable<GpioPin> OpenPins
     {
         get
         {
@@ -532,6 +532,9 @@ public class GpioController : IDisposable
             ComponentInformation driverInfo = _driver.QueryComponentInformation();
             self.AddSubComponent(driverInfo);
         }
+
+        // PinCount is not added on purpose, because the property throws NotSupportedException on some hardware
+        self.Properties["OpenPins"] = string.Join(", ", _openPins.Select(x => x.Key));
 
         return self;
     }

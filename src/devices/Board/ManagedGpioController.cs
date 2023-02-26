@@ -21,12 +21,14 @@ namespace Iot.Device.Board
     {
         private readonly Board _board;
         private readonly GpioDriver _driver;
+        private readonly HashSet<int> _openPins;
 
         public ManagedGpioController(Board board, GpioDriver driver)
         : base(PinNumberingScheme.Logical, driver)
         {
             _board = board ?? throw new ArgumentNullException(nameof(board));
             _driver = driver ?? throw new ArgumentNullException(nameof(driver));
+            _openPins = new HashSet<int>();
         }
 
         protected override int GetLogicalPinNumber(int pinNumber)
@@ -38,17 +40,19 @@ namespace Iot.Device.Board
         {
             _board.ReservePin(pinNumber, PinUsage.Gpio, this);
             base.OpenPinCore(pinNumber);
+            _openPins.Add(pinNumber);
         }
 
         protected override void ClosePinCore(int pinNumber)
         {
             base.ClosePinCore(pinNumber);
             _board.ReleasePin(pinNumber, PinUsage.Gpio, this);
+            _openPins.Remove(pinNumber);
         }
 
         public IReadOnlyCollection<int> GetActiveManagedPins()
         {
-            return OpenPins.Select(x => x.PinNumber).ToList();
+            return _openPins;
         }
 
         public override ComponentInformation QueryComponentInformation()
@@ -58,7 +62,6 @@ namespace Iot.Device.Board
             {
                 Description = "Managed GPIO Controller"
             };
-            self.Properties["ManagedPins"] = string.Join(", ", GetActiveManagedPins());
             return self;
         }
     }
