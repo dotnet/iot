@@ -42,6 +42,10 @@ namespace Iot.Device.Arduino.Sample
             blueChannel.DutyCycle = 1.0;
             redChannel.DutyCycle = 1.0;
             Sleep(1000);
+            greenChannel.DutyCycle = 0;
+            blueChannel.DutyCycle = 0;
+            redChannel.DutyCycle = 0;
+            Sleep(1000);
 
             var converter = new ColorSpaceConverter();
             float angle = 0.0f;

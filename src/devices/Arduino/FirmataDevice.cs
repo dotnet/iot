@@ -75,6 +75,8 @@ namespace Iot.Device.Arduino
 
         private long _bytesTransmitted = 0;
 
+        private int _numberOfConsecutiveI2cWrites = 0;
+
         public FirmataDevice(List<SupportedMode> supportedModes)
         {
             _firmwareVersionMajor = 0;
@@ -884,6 +886,7 @@ namespace Iot.Device.Arduino
                 {
                     lastException = x;
                     OnError?.Invoke("Timeout waiting for answer. Retries possible.", x);
+                    Thread.Sleep(20);
                 }
             }
 
@@ -998,7 +1001,7 @@ namespace Iot.Device.Arduino
             // See documentation at https://github.com/firmata/protocol/blob/master/i2c.md
             FirmataCommandSequence i2cSequence = new FirmataCommandSequence();
             bool doWait = false;
-            if (writeData != null && writeData.Length > 0)
+            if (writeData.Length > 0)
             {
                 i2cSequence.WriteByte((byte)FirmataSysexCommand.I2C_REQUEST);
                 i2cSequence.WriteByte((byte)slaveAddress);
@@ -1010,7 +1013,7 @@ namespace Iot.Device.Arduino
 
             int sequenceNo = (_i2cSequence++) & 0b111;
 
-            if (replyData != null && replyData.Length > 0)
+            if (replyData.Length > 0)
             {
                 doWait = true;
                 if (i2cSequence.Length > 1)
@@ -1034,7 +1037,7 @@ namespace Iot.Device.Arduino
 
             if (doWait)
             {
-                byte[] response = SendCommandAndWait(i2cSequence, TimeSpan.FromSeconds(3), (sequence, bytes) =>
+                byte[] response = SendCommandAndWait(i2cSequence, TimeSpan.FromSeconds(10), (sequence, bytes) =>
                 {
                     if (bytes.Length < 5)
                     {
@@ -1074,23 +1077,53 @@ namespace Iot.Device.Arduino
                 {
                     throw new IOException($"Expected {replyData.Length} bytes, got only {bytesReceived}");
                 }
+
+                _numberOfConsecutiveI2cWrites = 0; // after we get a reply, we can free-fire a few times again
             }
             else
             {
                 SendCommand(i2cSequence);
+                // If we use a series of write-only I2C commands we have to occasionally introduce a command that requires an answer, or we flood the device's input buffer,
+                // causing network retries, which under the line causes more delays than this. This problem is particularly obvious with an ESP32 in Wifi mode
+                _numberOfConsecutiveI2cWrites++;
+                if (_numberOfConsecutiveI2cWrites % 4 == 0)
+                {
+                    var pin = _supportedPinConfigurations.FirstOrDefault(x => x.PinModes.Contains(SupportedMode.I2c));
+                    if (pin != null)
+                    {
+                        GetPinMode(pin.Pin);
+                    }
+                    else
+                    {
+                        Thread.Sleep(10); // Hopefully, this doesn't happen
+                    }
+                }
             }
         }
 
         public void SetPwmChannel(int pin, double dutyCycle)
         {
-            FirmataCommandSequence pwmCommandSequence = new();
-            pwmCommandSequence.WriteByte((byte)FirmataSysexCommand.EXTENDED_ANALOG);
-            pwmCommandSequence.WriteByte((byte)pin);
             // The arduino expects values between 0 and 255 for PWM channels.
-            // The frequency cannot be set.
+            // The frequency cannot currently be set using the protocol
             int pwmMaxValue = _supportedPinConfigurations[pin].PwmResolutionBits; // This is 8 for most arduino boards
             pwmMaxValue = (1 << pwmMaxValue) - 1;
             int value = (int)Math.Max(0, Math.Min(dutyCycle * pwmMaxValue, pwmMaxValue));
+
+            // At most 14 bits used?
+            if (((pwmMaxValue & 0x3FFF) == pwmMaxValue) && (pin <= 15))
+            {
+                // Use shorthand
+                FirmataCommandSequence analogMessage = new FirmataCommandSequence(FirmataCommand.ANALOG_MESSAGE, pin);
+                analogMessage.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
+                analogMessage.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bit (rest unused)
+                // No(!) END_SYSEX here
+                SendCommand(analogMessage);
+                return;
+            }
+
+            FirmataCommandSequence pwmCommandSequence = new();
+            pwmCommandSequence.WriteByte((byte)FirmataSysexCommand.EXTENDED_ANALOG);
+            pwmCommandSequence.WriteByte((byte)pin);
             pwmCommandSequence.WriteByte((byte)(value & (uint)sbyte.MaxValue)); // lower 7 bits
             pwmCommandSequence.WriteByte((byte)(value >> 7 & sbyte.MaxValue)); // top bit (rest unused)
             pwmCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
