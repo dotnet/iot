@@ -3,7 +3,6 @@
   <PropertyGroup>
     <RuntimeIdentifier Condition="$(Configuration.StartsWith('Windows'))">win-arm</RuntimeIdentifier>
     <RuntimeIdentifier Condition="$(Configuration.StartsWith('Linux'))">linux-arm</RuntimeIdentifier>
-    <XUnitArguments>$(XUnitArguments) -notrait feature=pwm</XUnitArguments>
   </PropertyGroup>
 
   <Import Project="..\..\Directory.Build.props" />
