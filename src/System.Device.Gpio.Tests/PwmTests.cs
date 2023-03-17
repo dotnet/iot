@@ -15,6 +15,11 @@ public class PwmTests
 {
     public class OurRaspberryPiBoard : RaspberryPiBoard
     {
+        public OurRaspberryPiBoard()
+        {
+            Initialize();
+        }
+
         public void ActivatePinMode2(int pinNumber, PinUsage pinUsage)
         {
             ActivatePinMode(pinNumber, pinUsage);
