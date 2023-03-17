@@ -13,25 +13,6 @@ namespace System.Device.Gpio.Tests;
 [Trait("feature", "pwm")]
 public class PwmTests
 {
-    public class OurRaspberryPiBoard : RaspberryPiBoard
-    {
-        public OurRaspberryPiBoard()
-        {
-            Initialize();
-        }
-
-        public void ActivatePinMode2(int pinNumber, PinUsage pinUsage)
-        {
-            ActivatePinMode(pinNumber, pinUsage);
-        }
-    }
-
-    static PwmTests()
-    {
-        using OurRaspberryPiBoard board = new();
-        board.ActivatePinMode2(12, PinUsage.Pwm);
-    }
-
     [Fact]
     public void DutyCycle_ReportsValueBack()
     {
