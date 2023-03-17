@@ -9,6 +9,7 @@
     <HelixBuild Condition="'$(HelixBuild)' == ''">123460.01</HelixBuild>
     <HelixConfiguration>$(Configuration)</HelixConfiguration>
     <XUnitArguments>$(XUnitArguments) -nocolor -verbose -serialize -maxthreads 1</XUnitArguments>
+    <XUnitArguments>$(XUnitArguments) -notrait feature=pwm</XUnitArguments>
 
     <IncludeDotNetCli>true</IncludeDotNetCli>
     <DotNetCliPackageType>sdk</DotNetCliPackageType>

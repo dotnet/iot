@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Device.Pwm;
 using Iot.Device.Adc;
+using Iot.Device.Board;
 using Xunit;
 using static System.Device.Gpio.Tests.SetupHelpers;
 
