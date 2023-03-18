@@ -83,9 +83,10 @@ stages:
     pool:
       vmImage: windows-latest
 
+    # Use Version 3.10.3 of markdown-link-check, as 3.11.0 is broken (completely ignores the json file)
     steps:
     - powershell: |
-        npm install -g markdown-link-check
+        npm install -g markdown-link-check@3.10.3
         ls -r *.md | % { markdown-link-check -v -c $(System.DefaultWorkingDirectory)\.markdown-link-check.json $_.FullName; if (-Not $?) { throw "One of the links is wrong" } }
       displayName: 'Execute markdown-link-check'
       condition: eq(variables['build.reason'], 'PullRequest')
