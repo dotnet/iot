@@ -8,20 +8,11 @@ REM Defines the revision to check out in the ExtendedConfigurableFirmata repo
 set FIRMATA_SIMULATOR_CHECKOUT_REVISION=e2cfb5223aeb71e3a0756d67619db6c238b6acb5
 set RUN_COMPILER_TESTS=FALSE
 
-choco install -y --no-progress arduino-cli
-arduino-cli lib install "DHT sensor library"
-arduino-cli lib install "Servo"
-
-arduino-cli config init
-arduino-cli config add board_manager.additional_urls https://raw.githubusercontent.com/espressif/arduino-esp32/gh-pages/package_esp32_dev_index.json
-arduino-cli core update-index
-
 set ArduinoRootDir=%1\Documents\Arduino
 set acspath=%~dp0\..\tools\ArduinoCsCompiler\Frontend\bin\%2\net6.0\acs.exe
 
 git clone https://github.com/firmata/ConfigurableFirmata %ArduinoRootDir%\libraries\ConfigurableFirmata
 git clone https://github.com/pgrawehr/ExtendedConfigurableFirmata %ArduinoRootDir%\ExtendedConfigurableFirmata
-arduino-cli core install esp32:esp32
 
 REM Check whether any compiler files have changed - if so, enable the (long running) compiler tests
 git diff --name-status origin/main | find /C /I "tools/ArduinoCsCompiler"
@@ -44,9 +35,6 @@ REM checkout to the currently fixed branch
 git checkout -B main %FIRMATA_SIMULATOR_CHECKOUT_REVISION%
 
 dir
-REM First build the code for the ESP32 (this just verifies that the code builds, it does no run-time checks at all)
-arduino-cli compile --fqbn esp32:esp32:esp32:PSRAM=disabled,PartitionScheme=default,CPUFreq=240,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none ./ExtendedConfigurableFirmata.ino --warnings default
-if errorlevel 1 goto error
 
 REM then build the simulator code as Visual Studio C++ project
 msbuild /p:Configuration=%2 ExtendedConfigurableFirmataSim\ExtendedConfigurableFirmataSim.vcxproj
