@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{4D8428C9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{B5716002-E727-4D8B-9AE8-BE734FC04002}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RpiOverlay.sample", "samples\RpiOverlay.sample\RpiOverlay.sample.csproj", "{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -101,6 +103,18 @@ Global
 		{B5716002-E727-4D8B-9AE8-BE734FC04002}.Release|x64.Build.0 = Release|Any CPU
 		{B5716002-E727-4D8B-9AE8-BE734FC04002}.Release|x86.ActiveCfg = Release|Any CPU
 		{B5716002-E727-4D8B-9AE8-BE734FC04002}.Release|x86.Build.0 = Release|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Debug|x64.Build.0 = Debug|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Debug|x86.Build.0 = Debug|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Release|x64.ActiveCfg = Release|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Release|x64.Build.0 = Release|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Release|x86.ActiveCfg = Release|Any CPU
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +122,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{F2A31327-2447-4F7C-9659-717ADAE282F3} = {E3BCE30D-56D7-422C-B77A-6C47739C6EC2}
 		{88675694-18F0-4479-9CEA-613DC6AFB2A9} = {4D8428C9-F577-4427-8272-748347076B0A}
+		{5AA65D29-DD8A-4517-8AE3-9092D3F19E73} = {E3BCE30D-56D7-422C-B77A-6C47739C6EC2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A05EAE44-F586-4137-AB5A-BC530A21533D}

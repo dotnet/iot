@@ -1,0 +1,2 @@
+dtparam=i2c=on
+dtoverlay=i2c3,pins_2_3

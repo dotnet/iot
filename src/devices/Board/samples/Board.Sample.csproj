@@ -4,11 +4,13 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
     <LangVersion>preview</LangVersion>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Mcp3xxx\Mcp3xxx.csproj" />
     <ProjectReference Include="..\Board.csproj" />
+    <Compile Include="Program.cs" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,2 @@
+dtparam=spi=on"
+dtoverlay=spi0-2cs,cs0_pin=27,cs1_pin=22
