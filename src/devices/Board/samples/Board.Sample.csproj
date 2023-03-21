@@ -4,7 +4,6 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
     <LangVersion>preview</LangVersion>
-    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
   <ItemGroup>

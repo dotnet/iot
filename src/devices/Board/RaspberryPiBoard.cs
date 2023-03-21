@@ -619,7 +619,7 @@ namespace Iot.Device.Board
         /// Checks if the I2C overlay is activated in the configuraztion file.
         /// </summary>
         /// <returns>True if it is.</returns>
-        public bool IsI2cOverlayActivate()
+        public bool IsI2cActivated()
         {
             _activateI2c.Clear();
             // We are checking possible activation from here: https://github.com/dotnet/iot/blob/main/Documentation/raspi-i2c.md
@@ -646,7 +646,7 @@ namespace Iot.Device.Board
         {
             int scl = -1;
             int sda = -1;
-            if (!IsI2cOverlayActivate())
+            if (!IsI2cActivated())
             {
                 return new int[0];
             }
@@ -683,7 +683,7 @@ namespace Iot.Device.Board
         /// Checks if the SPI overlay is activated in the configuraztion file.
         /// </summary>
         /// <returns>True if it is.</returns>
-        public bool IsSpiOverlayActivate()
+        public bool IsSpiActivated()
         {
             _activateI2c.Clear();
             // We are checking possible activation from here: https://github.com/dotnet/iot/blob/main/Documentation/raspi-i2c.md
@@ -711,7 +711,7 @@ namespace Iot.Device.Board
         public int[] GetOverlayPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
         {
             int[] pins = new int[0];
-            if (!IsSpiOverlayActivate())
+            if (!IsSpiActivated())
             {
                 return pins;
             }
@@ -769,7 +769,7 @@ namespace Iot.Device.Board
         /// Checks if the I2C overlay is activated in the configuraztion file.
         /// </summary>
         /// <returns>True if it is.</returns>
-        public bool IsPwmOverlayActivate()
+        public bool IsPwmActivated()
         {
             _activatePwm.Clear();
             // We are checking possible activation from here: https://github.com/dotnet/iot/blob/main/Documentation/raspi-pwm.md
@@ -795,7 +795,7 @@ namespace Iot.Device.Board
         public int GetOverlayPinAssignmentForPwm(int pwmChannel)
         {
             int pin = -1;
-            if (!IsPwmOverlayActivate())
+            if (!IsPwmActivated())
             {
                 return pin;
             }
