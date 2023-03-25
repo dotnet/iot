@@ -296,8 +296,9 @@ namespace Iot.Device.Mfrc522
         /// Check if a new card is present.
         /// </summary>
         /// <param name="atqa">ATQA buffer must be 2 bytes length and will contain the ATQA answer if there is a card.</param>
+        /// <param name="reselect">true if this is reselecting an existing card (e.g., after a halt)</param>
         /// <returns>true if there is a card, else false.</returns>
-        public bool IsCardPresent(byte[] atqa)
+        public bool IsCardPresent(byte[] atqa, bool reselect = false)
         {
             if (atqa is not object or { Length: not 2 })
             {
@@ -306,7 +307,7 @@ namespace Iot.Device.Mfrc522
 
             // Switch off the cryptography for Mifare card in case it's on
             ClearRegisterBit(Register.Status2, (byte)Status2.MFCrypto1On);
-            Status sc = PiccRequestA(atqa);
+            Status sc = PiccRequestA(atqa, reselect ? CardCommand.WupA : CardCommand.ReqA);
             if (sc == Status.Collision || sc == Status.Ok)
             {
                 return true;
@@ -426,7 +427,7 @@ namespace Iot.Device.Mfrc522
             return Status.Ok;
         }
 
-        private Status PiccRequestA(byte[] bufferAtqa)
+        private Status PiccRequestA(byte[] bufferAtqa, CardCommand cardCommand = CardCommand.ReqA)
         {
             // all received bits will be cleared after a collision
             // only used during bitwise anticollision at 106 kBd,
@@ -434,7 +435,7 @@ namespace Iot.Device.Mfrc522
             ClearRegisterBit(Register.Coll, 0x80);
             // Only 7 bits are valid in th ReqA request
             byte validBits = 0x07;
-            Status sc = SendAndReceiveData(MfrcCommand.Transceive, new[] { (byte)CardCommand.ReqA }, bufferAtqa, validBits);
+            Status sc = SendAndReceiveData(MfrcCommand.Transceive, new[] { (byte)cardCommand }, bufferAtqa, validBits);
             if (sc != Status.Ok)
             {
                 return sc;
@@ -987,8 +988,7 @@ namespace Iot.Device.Mfrc522
             Halt();
             // We reselect the card and ignore the target number as reader supports only 1 card
             // And we assume here that the card hasn't been changed in the mean time
-            IsCardPresent(new byte[2]);
-            return Select(out byte[]? uuid, out byte sak) == Status.Ok;
+            return IsCardPresent(new byte[2], true) && (Select(out byte[]? uuid, out byte sak) == Status.Ok);
         }
     }
 }
