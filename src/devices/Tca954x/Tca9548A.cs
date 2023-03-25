@@ -48,7 +48,6 @@ namespace Iot.Device.Tca954x
         public Tca9548A(I2cDevice i2cDevice, I2cBus mainBus, bool shouldDispose = true)
         {
             _i2CDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
-            _i2CDevice.OnQueryComponentInformation += MainDeviceOnQueryComponentInformation;
             _shouldDispose = shouldDispose;
             _activeChannels = null; // We don't know the state of the multiplexer
             foreach (var channel in DeviceChannels)
@@ -194,15 +193,5 @@ namespace Iot.Device.Tca954x
         {
             return GetEnumerator();
         }
-
-        private void MainDeviceOnQueryComponentInformation(ComponentInformation busDevice)
-        {
-            busDevice.AddSubComponent(new ComponentInformation(this, "TCA 9548A Multiplexer Device"));
-            foreach (var item in _channelBuses)
-            {
-                busDevice.AddSubComponent(item.QueryComponentInformation());
-            }
-        }
     }
-
 }
