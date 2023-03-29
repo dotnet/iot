@@ -35,7 +35,8 @@ var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
 if (decrypted is object)
 {
     Console.Write($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
-    if (decrypted.Ats is object) {
+    if (decrypted.Ats is object)
+    {
         Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
     }
     else
