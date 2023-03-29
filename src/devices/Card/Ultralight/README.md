@@ -9,8 +9,35 @@ You will find detailed examples for PN532 [here](../../Pn532/samples), for MFRC5
 You'll need first to get the card from an RFID reader. The example below shows how to do it with a MFRC522 and read all the sectors, read the configuration data, and print all the sector data information, read NDEF, write NDEF.
 
 ```csharp
-// Note: mfrc522 should not be null
-var ultralight = new UltralightCard(mfrc522, 0);
+using System.Text;
+using System.Device.Spi;
+using Iot.Device.Mfrc522;
+using Iot.Device.Rfid;
+using Iot.Device.Card.Ultralight;
+using Iot.Device.Ndef;
+
+const int SpiBus = 0;
+const int ChipSelect = 1;
+
+SpiConnectionSettings spiConnectionSettings = new(SpiBus, ChipSelect) { ClockFrequency = 1000000 };
+using SpiDevice spiDevice = SpiDevice.Create(spiConnectionSettings);
+using MfRc522 mfrc522 = new(spiDevice);
+Data106kbpsTypeA? card = null;
+
+while (!Console.KeyAvailable)
+{
+    if (mfrc522.ListenToCardIso14443TypeA(out card, TimeSpan.FromSeconds(1)))
+    {
+        break;
+    }
+}
+
+if (card is null)
+{
+    return;
+}
+
+var ultralight = new UltralightCard(mfrc522, 0) { ReselectAfterError = true };
 ultralight.SerialNumber = card.NfcId;
 Console.WriteLine($"Type: {ultralight.UltralightCardType}, Ndef capacity: {ultralight.NdefCapacity}");
 
@@ -63,8 +90,8 @@ for (int block = 0; block < ultralight.NumberBlocks; block++)
 {
     ultralight.BlockNumber = (byte)block; // Safe cast, can't be more than 255
     ultralight.Command = UltralightCommand.Read16Bytes;
-    var res = ultralight.RunUltralightCommand();
-    if (res > 0)
+    var ret = ultralight.RunUltralightCommand();
+    if (ret > 0)
     {
         Console.Write($"  Block: {ultralight.BlockNumber:X2} - ");
         for (int i = 0; i < 4; i++)
@@ -86,14 +113,14 @@ for (int block = 0; block < ultralight.NumberBlocks; block++)
 
 Console.WriteLine("Configuration of the card");
 // Get the Configuration
-res = ultralight.TryGetConfiguration(out Configuration configuration);
+var res = ultralight.TryGetConfiguration(out Configuration configuration);
 if (res)
 {
     Console.WriteLine("  Mirror:");
     Console.WriteLine($"    {configuration.Mirror.MirrorType}, page: {configuration.Mirror.Page}, position: {configuration.Mirror.Position}");
     Console.WriteLine("  Authentication:");
     Console.WriteLine($"    Page req auth: {configuration.Authentication.AuthenticationPageRequirement}, Is auth req for read and write: {configuration.Authentication.IsReadWriteAuthenticationRequired}");
-    Console.WriteLine($"    Is write lock: {configuration.Authentication.IsWrittenLocked}, Max num tries: {configuration.Authentication.MaximumNumberOfPossibleTry}");
+    Console.WriteLine($"    Is write lock: {configuration.Authentication.IsWritingLocked}, Max num tries: {configuration.Authentication.MaximumNumberOfPossibleTries}");
     Console.WriteLine("  NFC Counter:");
     Console.WriteLine($"    Enabled: {configuration.NfcCounter.IsEnabled}, Password protected: {configuration.NfcCounter.IsPasswordProtected}");
     Console.WriteLine($"  Is strong modulation: {configuration.IsStrongModulation}");
@@ -156,4 +183,4 @@ else
 {
     Console.WriteLine("Error writing NDEF data on card");
 }
- ```
+```
