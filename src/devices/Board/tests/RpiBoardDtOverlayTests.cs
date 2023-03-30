@@ -113,6 +113,21 @@ namespace Iot.Device.Board.Tests
         }
 
         [Fact]
+        public void CheckI2cPinDefaultConfig()
+        {
+            // Arrange
+            _board.ConfigurationFile = Path.Combine("ConfigFiles", "configI2c-defaultpins.txt");
+
+            // Act
+            var pins = _board.GetOverlayPinAssignmentForI2c(3);
+
+            // dtoverlay=i2c3 => default are 4 and 5
+            Assert.True(pins.Length == 2);
+            Assert.Equal(4, pins[0]);
+            Assert.Equal(5, pins[1]);
+        }
+
+        [Fact]
         public void CheckSpiConfig()
         {
             _board.ConfigurationFile = Path.Combine("ConfigFiles", "config.Spi.txt");
@@ -185,8 +200,19 @@ namespace Iot.Device.Board.Tests
             var pin1 = _board.GetOverlayPinAssignmentForPwm(1);
 
             // Assert
-            Assert.Equal(19, pin0);
+            Assert.Equal(18, pin0);
             Assert.Equal(-1, pin1);
+        }
+
+        [Fact]
+        public void CheckPwm1PinConfigNotActivated()
+        {
+            // Arrange
+            _board.ConfigurationFile = Path.Combine("ConfigFiles", "config.Pwm1invalid.txt");
+
+            // Act
+            // Assert
+            Assert.Throws<ArgumentException>(() => _board.GetOverlayPinAssignmentForPwm(0));
         }
 
         [Fact]

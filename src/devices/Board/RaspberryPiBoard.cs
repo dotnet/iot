@@ -30,8 +30,14 @@ namespace Iot.Device.Board
             "dtparam=i2c_arm=on",
             "dtparam=i2c_baudrate=",
             "dtparam=i2c_arm_baudrate=",
-            // This is taking the assumption that any other parameter will go after.
-            // Those parameters are almost never used.
+            // Activating only 1 I2C with the default pins:
+            "dtoverlay=i2c0",
+            "dtoverlay=i2c1",
+            "dtoverlay=i2c3",
+            "dtoverlay=i2c4",
+            "dtoverlay=i2c5",
+            "dtoverlay=i2c6",
+            // We will use those ones to ensure valid options.
             "dtoverlay=i2c0,pins_0_1",
             "dtoverlay=i2c0,pins_28_29",
             "dtoverlay=i2c0,pins_44_45",
@@ -70,16 +76,8 @@ namespace Iot.Device.Board
         };
         private readonly string[] _possiblePwmActivations = new string[]
         {
-            // Single channel
-            "dtoverlay=pwm,pin=12,func=4",
-            "dtoverlay=pwm,pin=18,func=2",
-            "dtoverlay=pwm,pin=13,func=4",
-            "dtoverlay=pwm,pin=19,func=2",
-            // Dual channel
-            "dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4",
-            "dtoverlay=pwm-2chan,pin=18,func=2,pin2=13,func2=4",
-            "dtoverlay=pwm-2chan,pin=12,func=4,pin2=19,func2=2",
-            "dtoverlay=pwm-2chan,pin=18,func=2,pin2=19,func2=2",
+            "dtoverlay=pwm",
+            "dtoverlay=pwm-2chan",
         };
 
         private ManagedGpioController? _managedGpioController;
@@ -627,9 +625,11 @@ namespace Iot.Device.Board
 
             foreach (var possibleActivation in _possibleI2cActivations)
             {
-                if (config.Any(m => m.Trim().StartsWith(possibleActivation)))
+                // We need the actual line as the configuration can be more complex than the list.
+                var choices = config.Where(m => m.Trim().StartsWith(possibleActivation));
+                if (choices.Any())
                 {
-                    _activateI2c.Add(possibleActivation);
+                    _activateI2c.Add(choices.First().Replace("\r", string.Empty));
 
                 }
             }
@@ -652,14 +652,33 @@ namespace Iot.Device.Board
             }
 
             // Checks if there is an overlay because it does override the default configuration
-            var dtoverlay = _activateI2c.Where(m => m.StartsWith($"dtoverlay=i2c{busId}")).FirstOrDefault();
+            var dtoverlay = _activateI2c.Where(m => m.StartsWith($"dtoverlay=i2c{busId},")).FirstOrDefault();
+            if (string.IsNullOrEmpty(dtoverlay))
+            {
+                // Give another try without the parameters
+                dtoverlay = _activateI2c.Where(m => m.StartsWith($"dtoverlay=i2c{busId}")).FirstOrDefault();
+            }
+
             if (!string.IsNullOrEmpty(dtoverlay))
             {
                 // we have an overlay, extract the pins and check them
                 // dtoverlay=i2c1,pins_2_3
-                var pins = dtoverlay.Substring(dtoverlay.IndexOf('_') + 1).Split('_');
-                sda = int.Parse(pins[0]);
-                scl = int.Parse(pins[1]);
+                if (dtoverlay.IndexOf('_') > 0)
+                {
+                    var pins = dtoverlay.Substring(dtoverlay.IndexOf('_') + 1).Split('_');
+                    sda = int.Parse(pins[0]);
+                    scl = int.Parse(pins[1]);
+                    // Rebuild the chain and check those are valid options
+                    var rebuilt = $"dtoverlay=i2c{busId},pins_{sda}_{scl}";
+                    if (!_possibleI2cActivations.Contains(rebuilt))
+                    {
+                        throw new InvalidOperationException($"Invalid I2C overlay configuration: {dtoverlay}");
+                    }
+                }
+                else
+                {
+                    return GetDefaultPinAssignmentForI2c(busId);
+                }
             }
             else
             {
@@ -777,9 +796,11 @@ namespace Iot.Device.Board
 
             foreach (var possibleActivation in _possiblePwmActivations)
             {
-                if (config.Any(m => m.Trim().StartsWith(possibleActivation)))
+                // We need the actual line as the configuration can be more complex than the list.
+                var choices = config.Where(m => m.Trim().StartsWith(possibleActivation));
+                if (choices.Any())
                 {
-                    _activatePwm.Add(possibleActivation);
+                    _activatePwm.Add(choices.First().Replace("\r", string.Empty));
 
                 }
             }
@@ -794,6 +815,9 @@ namespace Iot.Device.Board
         /// <returns>The set of pins for the given Pwm bus on chipn 0 as only one supported.</returns>
         public int GetOverlayPinAssignmentForPwm(int pwmChannel)
         {
+            int[] validPwm0 = new int[] { 12, 18, 40, 52 };
+            int[] validPwm1 = new int[] { 13, 19, 41, 45, 53 };
+
             int pin = -1;
             if (!IsPwmActivated())
             {
@@ -810,15 +834,54 @@ namespace Iot.Device.Board
                 // Single or dual?
                 if ((pwmChannel == 1) && dtoverlay.Contains("2chan"))
                 {
-                    // 2 channels
-                    pin = int.Parse(dtoverlay.Substring(dtoverlay.IndexOf("pin2=") + 5).Split(',')[0]);
+                    // Do we have an overlay with pins?
+                    var possibleDtoverlay = _activatePwm.Where(m => m.StartsWith($"dtoverlay=pwm-2chan,")).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(possibleDtoverlay))
+                    {
+                        dtoverlay = possibleDtoverlay;
+                    }
+
+                    if (dtoverlay.IndexOf("pin2=") > 0)
+                    {
+                        // 2 channels
+                        pin = int.Parse(dtoverlay.Substring(dtoverlay.IndexOf("pin2=") + 5).Split(',')[0]);
+                        // Is it a potential valid pin?
+                        if (!validPwm1.Contains(pin))
+                        {
+                            throw new ArgumentException($"PWM{pwmChannel} pin2 is not a valid pin.");
+                        }
+                    }
+                    else
+                    {
+                        // We'll use the default one
+                        pin = 19;
+                    }
                 }
                 else if (pwmChannel == 0)
                 {
-                    pin = int.Parse(dtoverlay.Substring(dtoverlay.IndexOf("pin=") + 4).Split(',')[0]);
-                }
+                    // Do we have an overlay with pins?
+                    var possibleDtoverlay = _activatePwm.Where(m => m.StartsWith($"dtoverlay=pwm,")).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(possibleDtoverlay))
+                    {
+                        dtoverlay = possibleDtoverlay;
+                    }
 
-                return pin;
+                    if (dtoverlay.IndexOf("pin=") > 0)
+                    {
+                        pin = int.Parse(dtoverlay.Substring(dtoverlay.IndexOf("pin=") + 4).Split(',')[0]);
+                        // Is it a potential valid pin?
+                        if (!validPwm0.Contains(pin))
+                        {
+                            throw new ArgumentException($"PWM{pwmChannel} pin is not a valid pin.");
+                        }
+                    }
+                    else
+                    {
+                        // We'll use the default one
+                        pin = 18;
+
+                    }
+                }
             }
 
             return pin;
