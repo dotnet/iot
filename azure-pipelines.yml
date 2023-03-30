@@ -139,11 +139,11 @@ stages:
         /p:Configuration=$(_BuildConfig)
         /p:HelixBuild=$(Build.BuildNumber)
         /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
-        /p:HelixAccessToken=$(HelixApiAccessToken)
+#        /p:HelixAccessToken=$(HelixApiAccessToken)
       displayName: Run Helix Tests
       condition: eq(variables['build.reason'], 'PullRequest')
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+#      env:
+#        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
     - task: PublishBuildArtifacts@1
       displayName: Publish Build logs
