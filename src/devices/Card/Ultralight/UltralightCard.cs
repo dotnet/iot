@@ -486,12 +486,12 @@ namespace Iot.Device.Card.Ultralight
 
             // We need to add 0x03 then the length on 1 or 2 bytes then the trailer 0xFE
             int messageLengthBytes = message.Length > 254 ? 3 : 1;
-            if (messageLengthBytes > NdefCapacity)
+            Span<byte> serializedMessage = stackalloc byte[message.Length + 2 + messageLengthBytes];
+            if (serializedMessage.Length > NdefCapacity)
             {
-                return false;
+                throw new ArgumentOutOfRangeException(nameof(message), $"NDEF message too large, maximum {NdefCapacity} bytes, current size is {serializedMessage.Length} bytes");
             }
 
-            Span<byte> serializedMessage = stackalloc byte[message.Length + 2 + messageLengthBytes];
             message.Serialize(serializedMessage.Slice(1 + messageLengthBytes));
             serializedMessage[0] = 0x03;
             if (messageLengthBytes == 1)
@@ -601,7 +601,7 @@ namespace Iot.Device.Card.Ultralight
                     Command = UltralightCommand.Write4Bytes;
                     Data = new byte[4] { 0xE1, 0x10, (byte)(NdefCapacity / 8), 0x00 };
                     res = RunUltralightCommand();
-                    if (res <= 0)
+                    if (res < 0)
                     {
                         return false;
                     }
@@ -613,12 +613,10 @@ namespace Iot.Device.Card.Ultralight
             }
 
             BlockNumber++;
-            Data![0] = 0x03; // NDEF start marker
-            Data[1] = 0x00; // Length of message
-            Data[2] = 0xFE; // NDEF end marker
-            Data[3] = 0x00; // Empty
+            Data = new byte[4] { 0x03, 0x00, 0xFE, 0x00 }; // NDEF start marker, length 0, NDEF end marker, empty
+            Command = UltralightCommand.Write4Bytes;
             res = RunUltralightCommand();
-            if (res <= 0)
+            if (res < 0)
             {
                 return false;
             }
