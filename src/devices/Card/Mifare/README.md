@@ -27,7 +27,9 @@ while (!Console.KeyAvailable)
     // Give time to PN532 to process
     Thread.Sleep(200);
 }
-if (retData is null) {
+
+if (retData is null)
+{
     return;
 }
 
