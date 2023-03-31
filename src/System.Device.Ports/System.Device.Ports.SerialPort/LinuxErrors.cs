@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -145,6 +146,9 @@ namespace System.Device.Ports.SerialPort
         public const int ENOTRECOVERABLE = 131; // State not recoverable
         public const int ERFKILL = 132;         // Operation not possible due to RF-kill
         public const int EHWPOISON = 133;       // Memory page has hardware error
+
+        public static string GetLastErrorDescription()
+            => GetErrorDescription(Marshal.GetLastWin32Error());
 
         public static string GetErrorDescription(int errno)
         {

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
+using System.IO;
 
 /*
     Termios man page: https://linux.die.net/man/3/termios
@@ -35,24 +36,24 @@ using System.Runtime.InteropServices;
 
 namespace System.Device.Ports.SerialPort
 {
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct Termios
+    {
+        public uint IFlag;
+        public uint OFlag;
+        public uint CFlag;
+        public uint LFlag;
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = LinuxHelpers.NCCS)]
+        public byte[] Cc;
+        public uint ISpeed;
+        public uint OSpeed;
+    }
+
     internal class LinuxHelpers
     {
-        private const string Libc = "libc";
-        private const int NCCS = 19;
-
-        [StructLayout(LayoutKind.Sequential)]
-        internal struct Termios
-        {
-            public uint IFlag;
-            public uint OFlag;
-            public uint CFlag;
-            public uint LFlag;
-
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = NCCS)]
-            public byte[] Cc;
-            public uint ISpeed;
-            public uint OSpeed;
-        }
+        internal const string Libc = "libc";
+        internal const int NCCS = 19;
 
         internal static partial class TermiosInterop
         {
@@ -144,7 +145,6 @@ namespace System.Device.Ports.SerialPort
             public static extern int CfSetsSpeed(in Termios termios, uint speed);
         }
 
-
         internal static partial class Termios_old
         {
             [Flags]
@@ -167,6 +167,156 @@ namespace System.Device.Ports.SerialPort
                 SendQueue = 2,
             }
 
+        }
+
+    }
+
+    /// <summary>
+    /// Wraps the Termios communication
+    /// </summary>
+    internal class TermiosIo
+    {
+        private int _fd;
+
+        /// <summary>
+        /// Put the state of FD into *TERMIOS_P
+        /// </summary>
+        public Termios TcGetAttr()
+        {
+            int result = LinuxHelpers.TermiosInterop.TcGetAttr(_fd, out Termios termios);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+
+            return termios;
+        }
+
+        /// <summary>
+        /// Set the state of FD to *TERMIOS_P.
+        /// Values for OPTIONAL_ACTIONS(TCSA*) are in bits/termios.h
+        /// </summary>
+        public void TcSetAttr(int optionalActions, in Termios termios)
+        {
+            int result = LinuxHelpers.TermiosInterop.TcSetAttr(_fd, optionalActions, termios);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Send zero bits on FD
+        /// </summary>
+        public void TcSendBreak(int duration)
+        {
+            int result = LinuxHelpers.TermiosInterop.TcSendBreak(_fd, duration);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Wait for pending output to be written on FD
+        /// </summary>
+        public void TcDrain()
+        {
+            int result = LinuxHelpers.TermiosInterop.TcDrain(_fd);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Flush pending data on FD.
+        /// Values for QUEUE_SELECTOR(TC{ I,O,IO}FLUSH) are in bits/termios.h
+        /// </summary>
+        public void TcFlush(int queueSelector)
+        {
+            int result = LinuxHelpers.TermiosInterop.TcFlush(_fd, queueSelector);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Suspend or restart transmission on FD.
+        /// Values for ACTION(TC[IO]{ OFF,ON}) are in bits/termios.h
+        /// </summary>
+        public void TcFlow(int action)
+        {
+            int result = LinuxHelpers.TermiosInterop.TcFlow(_fd, action);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Set *TERMIOS_P to indicate raw mode
+        /// </summary>
+        public void CfMakeRaw(ref Termios termios)
+        {
+            int result = LinuxHelpers.TermiosInterop.CfMakeRaw(ref termios);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Return the input baud rate stored in *TERMIOS_P
+        /// </summary>
+        public uint CfGetISpeed(in Termios termios)
+        {
+            return LinuxHelpers.TermiosInterop.CfGetISpeed(termios);
+        }
+
+        /// <summary>
+        /// Return the output baud rate stored in *TERMIOS_P
+        /// </summary>
+        public uint CfGetOSpeed(in Termios termios)
+        {
+            return LinuxHelpers.TermiosInterop.CfGetOSpeed(termios);
+        }
+
+        /// <summary>
+        /// Set the input baud rate stored in *TERMIOS_P to SPEED
+        /// </summary>
+        public void CfSetISpeed(in Termios termios, uint speed)
+        {
+            int result = LinuxHelpers.TermiosInterop.CfSetISpeed(termios, speed);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Set the output baud rate stored in *TERMIOS_P to SPEED
+        /// </summary>
+        public void CfSetOSpeed(in Termios termios, uint speed)
+        {
+            int result = LinuxHelpers.TermiosInterop.CfSetOSpeed(termios, speed);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Set both the input and output baud rates in *TERMIOS_OP to SPEED
+        /// </summary>
+        public void CfSetsSpeed(in Termios termios, uint speed)
+        {
+            int result = LinuxHelpers.TermiosInterop.CfSetsSpeed(termios, speed);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
         }
 
     }
