@@ -5,11 +5,16 @@ namespace System.Device.Ports.SerialPort
 {
     internal partial class LinuxSerialPort : SerialPort
     {
-        private const string DefaultPortName = "/dev/tty0";
+        private const string DefaultPortName = "/dev/ttyUSB0";
 
         public LinuxSerialPort()
         {
             PortName = DefaultPortName;
+        }
+
+        protected internal override void OpenPort()
+        {
+            throw new NotImplementedException();
         }
 
         protected internal override void SetBaudRate(int value)
@@ -103,11 +108,6 @@ namespace System.Device.Ports.SerialPort
         }
 
         protected internal override void SetWriteTimeout(int value)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected internal override void OpenPort()
         {
             throw new NotImplementedException();
         }
