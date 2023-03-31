@@ -26,6 +26,11 @@ using System.Runtime.InteropServices;
     typedef unsigned int tcflag_t;      // uint
     typedef unsigned char cc_t;         // byte
     typedef unsigned int speed_t;       // uint
+
+    Return value:
+    - Success: 0
+    - Failure: -1 (errno)
+    - cfgetispeed() and cfgetospeed(): baud rate
 */
 
 namespace System.Device.Ports.SerialPort
@@ -138,6 +143,7 @@ namespace System.Device.Ports.SerialPort
             [DllImport(Libc, EntryPoint = "cfsetspeed", SetLastError = true)]
             public static extern int CfSetsSpeed(in Termios termios, uint speed);
         }
+
 
         internal static partial class Termios_old
         {
