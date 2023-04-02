@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
+using System.Device.Ports.SerialPort.Windows;
 
 using Microsoft.Win32.SafeHandles;
 
@@ -21,50 +22,38 @@ namespace System.Device.Ports.SerialPort
 {
     internal partial class WindowsSerialPort
     {
-        // User-accessible async write method.  Returns WindowsSerialPortAsyncResult : IAsyncResult
-        // Throws an exception if port is in break state.
-        public IAsyncResult BeginWrite(byte[] array, int offset, int numBytes,
-            AsyncCallback userCallback, object stateObject)
+        // User-accessible async read method.  Returns WindowsSerialPortAsyncResult : IAsyncResult
+        public IAsyncResult BeginRead(byte[] array, int offset, int numBytes, AsyncCallback userCallback, object stateObject)
         {
-            if (BreakState)
-            {
-                throw new InvalidOperationException(Strings.In_Break_State);
-            }
-
             CheckReadWriteArguments(array, offset, numBytes);
 
-            int oldtimeout = WriteTimeout;
-            WriteTimeout = SerialPort.InfiniteTimeout;
+            int oldtimeout = ReadTimeout;
+            ReadTimeout = SerialPort.InfiniteTimeout;
             IAsyncResult result;
             try
             {
-                result = BeginWriteCore(array, offset, numBytes, userCallback, stateObject);
+                result = BeginReadCore(array, offset, numBytes, userCallback, stateObject);
             }
             finally
             {
-                WriteTimeout = oldtimeout;
+                ReadTimeout = oldtimeout;
             }
 
             return result;
         }
 
-        // Async companion to BeginWrite.
+        // Async companion to BeginRead.
         // Note, assumed IAsyncResult argument is of derived type WindowsSerialPortAsyncResult,
         // and throws an exception if untrue.
-        // Also fails if called in port's break state.
-        public unsafe void EndWrite(IAsyncResult asyncResult)
+        public unsafe int EndRead(IAsyncResult asyncResult)
         {
-            if (BreakState)
-            {
-                throw new InvalidOperationException(Strings.In_Break_State);
-            }
-
-            if (asyncResult == null || !(asyncResult is WindowsSerialPortAsyncResult afsar))
+            if (asyncResult == null)
             {
                 throw new ArgumentNullException(nameof(asyncResult));
             }
 
-            if (!afsar.IsWrite)
+            var afsar = asyncResult as WindowsSerialPortAsyncResult;
+            if (afsar == null || afsar.IsWrite)
             {
                 throw new ArgumentException(Strings.Arg_WrongAsyncResult);
             }
@@ -73,8 +62,10 @@ namespace System.Device.Ports.SerialPort
             // NativeOverlapped class or GCHandle twice.
             if (1 == Interlocked.CompareExchange(ref afsar.EndXxxCalled, 1, 0))
             {
-                throw new ArgumentException(Strings.InvalidOperation_EndWriteCalledMultiple);
+                throw new ArgumentException(Strings.InvalidOperation_EndReadCalledMultiple);
             }
+
+            bool failed = false;
 
             // Obtain the WaitHandle, but don't use public property in case we
             // delay initialize the manual reset event in the future.
@@ -86,7 +77,24 @@ namespace System.Device.Ports.SerialPort
                 try
                 {
                     wh.WaitOne();
-                    Debug.Assert(afsar.IsCompleted == true, "SerialStream::EndWrite - AsyncFSCallback didn't set _isComplete to true!");
+                    Debug.Assert(afsar.IsCompleted == true, "SerialStream::EndRead - AsyncFSCallback didn't set _isComplete to true!");
+
+                    /*
+                    // InfiniteTimeout is not something native to the underlying serial device,
+                    // we specify the timeout to be a very large value (MAXWORD-1) to achieve
+                    // an infinite timeout illusion.
+
+                    // I'm not sure what we can do here after an asyn operation with infinite
+                    // timeout returns with no data. From a purist point of view we should
+                    // somehow restart the read operation but we are not in a position to do so
+                    // (and frankly that may not necessarily be the right thing to do here)
+                    // I think the best option in this (almost impossible to run into) situation
+                    // is to throw some sort of IOException.
+                    */
+                    if ((afsar._numBytes == 0) && (ReadTimeout == SerialPort.InfiniteTimeout) && (afsar.ErrorCode == 0))
+                    {
+                        failed = true;
+                    }
                 }
                 finally
                 {
@@ -98,96 +106,83 @@ namespace System.Device.Ports.SerialPort
             NativeOverlapped* overlappedPtr = afsar.Overlapped;
             if (overlappedPtr != null)
             {
-                // Legacy behavior as indicated by tests (e.g.: System.IO.Ports.Tests.SerialStream_EndWrite.EndWriteAfterSerialStreamClose)
-                // expects to be able to call EndWrite after Close/Dispose - even if disposed _threadPoolBinding can free the
+                // Legacy behavior as indicated by tests (e.g.: System.IO.Ports.Tests.SerialStream_EndRead.EndReadAfterClose)
+                // expects to be able to call EndRead after Close/Dispose - even if disposed _threadPoolBinding can free the
                 // native overlapped.
                 _threadPoolBound?.FreeNativeOverlapped(overlappedPtr);
             }
 
-            // Now check for any error during the write.
+            // Check for non-timeout errors during the read.
             if (afsar.ErrorCode != 0)
             {
                 throw WindowsHelpers.GetExceptionForWin32Error(afsar.ErrorCode, PortName);
             }
 
-            // Number of bytes written is afsar._numBytes.
-        }
-
-        public override void Write(byte[] array, int offset, int count)
-        {
-            Write(array, offset, count, WriteTimeout);
-        }
-
-        internal unsafe void Write(byte[] array, int offset, int count, int timeout)
-        {
-            if (BreakState)
+            if (failed)
             {
-                throw new InvalidOperationException(Strings.In_Break_State);
+                throw new IOException(Strings.IO_OperationAborted);
             }
 
+            return afsar._numBytes;
+        }
+
+        public override int Read(byte[] array, int offset, int count)
+        {
+            return Read(array, offset, count, ReadTimeout);
+        }
+
+        internal unsafe int Read(byte[] array, int offset, int count, int timeout)
+        {
             CheckReadWriteArguments(array, offset, count);
 
             if (count == 0)
             {
-                return; // no need to expend overhead in creating asyncResult, etc.
+                return 0; // return immediately if no bytes requested; no need for overhead.
             }
 
-            Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, $"Serial Stream Write - write timeout is {timeout}");
+            Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, $"Serial Stream Read - called with timeout {timeout}");
 
-            int numBytes;
-            IAsyncResult result = BeginWriteCore(array, offset, count, null, null);
-            EndWrite(result);
-
-            var afsar = result as WindowsSerialPortAsyncResult;
-            Debug.Assert(afsar != null, "afsar should be a WindowsSerialPortAsyncResult and should not be null");
-            numBytes = afsar._numBytes;
+            int numBytes = 0;
+            IAsyncResult result = BeginReadCore(array, offset, count, null, null);
+            numBytes = EndRead(result);
 
             if (numBytes == 0)
             {
-                throw new TimeoutException(Strings.Write_timed_out);
-            }
-        }
-
-        // use default timeout as argument to WriteByte with timeout arg
-        public void WriteByte(byte value)
-        {
-            WriteByte(value, WriteTimeout);
-        }
-
-        internal unsafe void WriteByte(byte value, int timeout)
-        {
-            if (BreakState)
-            {
-                throw new InvalidOperationException(Strings.In_Break_State);
+                throw new TimeoutException();
             }
 
+            return numBytes;
+        }
+
+        /// <summary>
+        /// This method is currently not exposed because the
+        /// same strategy is exposed in the SerialStream class that
+        /// is valid for any platform-specific implementation
+        /// Should be this the final implementation, this method
+        /// can be removed
+        /// </summary>
+        internal unsafe int ReadByte(int timeout)
+        {
             if (_portHandle == null)
             {
                 throw new InvalidOperationException(Strings.Port_not_open);
             }
 
-            _singleByteBuf[0] = value;
-
-            int numBytes;
-            IAsyncResult result = BeginWriteCore(_singleByteBuf, 0, 1, null, null);
-            EndWrite(result);
-
-            if (result == null || !(result is WindowsSerialPortAsyncResult afsar))
-            {
-                throw new ArgumentException(Strings.Arg_WrongAsyncResult);
-            }
-
-            numBytes = afsar._numBytes;
+            int numBytes = 0;
+            IAsyncResult result = BeginReadCore(_singleByteBuf, 0, 1, null, null);
+            numBytes = EndRead(result);
 
             if (numBytes == 0)
             {
-                throw new TimeoutException(Strings.Write_timed_out);
+                throw new TimeoutException();
             }
-
-            return;
+            else
+            {
+                return _singleByteBuf[0];
+            }
         }
 
-        private unsafe WindowsSerialPortAsyncResult BeginWriteCore(byte[] array, int offset, int numBytes,
+        private unsafe WindowsSerialPortAsyncResult BeginReadCore(byte[] array, int offset, int numBytes,
             AsyncCallback? userCallback, object? stateObject)
         {
             if (_threadPoolBound == null)
@@ -197,24 +192,25 @@ namespace System.Device.Ports.SerialPort
             }
 
             // Create and store async stream class library specific data in the async result
-            var asyncResult = new WindowsSerialPortAsyncResult(new ManualResetEvent(false), userCallback, stateObject, true);
+            var asyncResult = new WindowsSerialPortAsyncResult(new ManualResetEvent(false), userCallback, stateObject, false);
 
             NativeOverlapped* intOverlapped = _threadPoolBound.AllocateNativeOverlapped(AsyncFSCallback, asyncResult, array);
 
             asyncResult.Overlapped = intOverlapped;
 
-            // queue an async WriteFile operation and pass in a packed overlapped
-            int r = WriteFileNative(array, offset, numBytes, intOverlapped, out WIN32_ERROR hr);
+            // queue an async ReadFile operation and pass in a packed overlapped
+            // int r = ReadFile(_handle, array, numBytes, null, intOverlapped);
+            int r = ReadFileNative(array, offset, numBytes, intOverlapped, out WIN32_ERROR hr);
 
-            // WriteFile, the OS version, will return 0 on failure.  But
-            // my WriteFileNative wrapper returns -1.  My wrapper will return
+            // ReadFile, the OS version, will return 0 on failure.  But
+            // my ReadFileNative wrapper returns -1.  My wrapper will return
             // the following:
             // On error, r==-1.
             // On async requests that are still pending, r==-1 w/ hr==ERROR_IO_PENDING
-            // On async requests that completed sequentially, r==0
+            // on async requests that completed sequentially, r==0
             // Note that you will NEVER RELIABLY be able to get the number of bytes
-            // written back from this call when using overlapped IO!  You must
-            // not pass in a non-null lpNumBytesWritten to WriteFile when using
+            // read back from this call when using overlapped structures!  You must
+            // not pass in a non-null lpNumBytesRead to ReadFile when using
             // overlapped structures!
             if (r == -1)
             {
@@ -234,7 +230,8 @@ namespace System.Device.Ports.SerialPort
             return asyncResult;
         }
 
-        private unsafe int WriteFileNative(byte[] bytes, int offset, int count, NativeOverlapped* overlapped, out WIN32_ERROR hr)
+        // Internal method, wrapping the PInvoke to ReadFile().
+        private unsafe int ReadFileNative(byte[] bytes, int offset, int count, NativeOverlapped* overlapped, out WIN32_ERROR hr)
         {
             if (_portHandle == null)
             {
@@ -242,9 +239,7 @@ namespace System.Device.Ports.SerialPort
             }
 
             // Don't corrupt memory when multiple threads are erroneously writing
-            // to this stream simultaneously.  (Note that the OS is reading from
-            // the array we pass to WriteFile, but if we read beyond the end and
-            // that memory isn't allocated, we could get an AV.)
+            // to this stream simultaneously.
             if (bytes.Length - offset < count)
             {
                 throw new IndexOutOfRangeException(Strings.IndexOutOfRange_IORaceCondition);
@@ -256,20 +251,21 @@ namespace System.Device.Ports.SerialPort
                 return 0;
             }
 
-            int numBytesWritten = 0;
             int r = 0;
+            int numBytesRead = 0;
 
             fixed (byte* p = bytes)
             {
-                r = WindowsHelpers.WriteFile(_portHandle.DangerousGetHandle(), p + offset, (uint)count, null, overlapped);
+                r = WindowsHelpers.ReadFile(_portHandle.DangerousGetHandle(), p + offset, (uint)count, null, overlapped);
             }
 
             if (r == 0)
             {
                 hr = (WIN32_ERROR)Marshal.GetLastWin32Error();
+
                 // Note: we should never silently ignore an error here without some
-                // extra work.  We must make sure that BeginWriteCore won't return an
-                // IAsyncResult that will cause EndWrite to block, since the OS won't
+                // extra work.  We must make sure that BeginReadCore won't return an
+                // IAsyncResult that will cause EndRead to block, since the OS won't
                 // call AsyncFSCallback for us.
 
                 // For invalid handles, detect the error and mark our handle
@@ -277,7 +273,8 @@ namespace System.Device.Ports.SerialPort
                 // help ensure we avoid handle recycling bugs.
                 if (hr == WIN32_ERROR.ERROR_INVALID_HANDLE)
                 {
-                    _portHandle?.SetHandleAsInvalid();
+                    _portHandle.SetHandleAsInvalid();
+                    _portHandle.Dispose();
                     _portHandle = null;
                 }
 
@@ -288,7 +285,7 @@ namespace System.Device.Ports.SerialPort
                 hr = 0;
             }
 
-            return numBytesWritten;
+            return numBytesRead;
         }
 
     }

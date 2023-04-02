@@ -16,7 +16,7 @@ using Windows.Win32.Storage.FileSystem;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 
-namespace System.Device.Ports.SerialPort
+namespace System.Device.Ports.SerialPort.Windows
 {
     internal class WindowsEventLoop
     {

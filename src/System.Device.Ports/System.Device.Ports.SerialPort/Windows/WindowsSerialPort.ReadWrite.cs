@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.IO;
 using System.Diagnostics;
+using System.Device.Ports.SerialPort.Windows;
 
 using Microsoft.Win32.SafeHandles;
 

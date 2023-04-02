@@ -12,7 +12,7 @@ using Windows.Win32.Devices.Communication;
 
 #pragma warning disable CA1416 // Validate platform compatibility
 
-namespace System.Device.Ports.SerialPort
+namespace System.Device.Ports.SerialPort.Windows
 {
     internal static class WindowsHelpers
     {
@@ -26,7 +26,7 @@ namespace System.Device.Ports.SerialPort
         {
             var hr = Marshal.GetHRForLastWin32Error();
             return Marshal.GetExceptionForHR(hr)
-                ?? new ComponentModel.Win32Exception(hr, String.Format(Strings.Win32Error, hr));
+                ?? new ComponentModel.Win32Exception(hr, string.Format(Strings.Win32Error, hr));
         }
 
         public static Exception GetExceptionForWin32Error(WIN32_ERROR errorCode)
@@ -86,7 +86,7 @@ namespace System.Device.Ports.SerialPort
         public static int MakeHRFromErrorCode(WIN32_ERROR errorCode) => MakeHRFromErrorCode((int)errorCode);
 
         public static int MakeHRFromErrorCode(int errorCode)
-            => ((0xFFFF0000 & errorCode) != 0) ? errorCode : unchecked(((int)0x80070000) | errorCode);
+            => (0xFFFF0000 & errorCode) != 0 ? errorCode : unchecked((int)0x80070000 | errorCode);
 
         public static string GetMessage(int errorCode) => GetMessage(errorCode, IntPtr.Zero);
         public static string GetMessage(WIN32_ERROR errorCode) => GetMessage((int)errorCode, IntPtr.Zero);
@@ -174,7 +174,7 @@ namespace System.Device.Ports.SerialPort
             dcb._bitfield &= ~(mask << whichFlag);
 
             // set the region
-            dcb._bitfield |= ((uint)setting);
+            dcb._bitfield |= (uint)setting;
         }
 
         internal static int GetFlag(this DCB dcb, int whichFlag)
@@ -196,7 +196,7 @@ namespace System.Device.Ports.SerialPort
                 mask = 0x1;
             }
 
-            uint result = dcb._bitfield & (mask << whichFlag);
+            uint result = dcb._bitfield & mask << whichFlag;
             return (int)(result >> whichFlag);
         }
 
@@ -216,20 +216,20 @@ namespace System.Device.Ports.SerialPort
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern unsafe int ReadFile(IntPtr handle, byte* bytes, uint numBytesToRead,
-            byte* numBytesRead, System.Threading.NativeOverlapped* overlapped);
+            byte* numBytesRead, Threading.NativeOverlapped* overlapped);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern unsafe int ReadFileEx(IntPtr handle, byte* bytes, uint numBytesToRead,
-            System.Threading.NativeOverlapped* overlapped,
-            System.Threading.IOCompletionCallback lpCompletionRoutine);
+            Threading.NativeOverlapped* overlapped,
+            Threading.IOCompletionCallback lpCompletionRoutine);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern unsafe int WriteFile(IntPtr handle, byte* buffer,
-            uint numBytesToWrite, byte* numBytesWritten, System.Threading.NativeOverlapped* lpOverlapped);
+            uint numBytesToWrite, byte* numBytesWritten, Threading.NativeOverlapped* lpOverlapped);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern unsafe int WriteFileEx(IntPtr handle, byte* buffer, uint nNumberOfBytesToWrite,
-            System.Threading.NativeOverlapped* lpOverlapped, System.Threading.IOCompletionCallback lpCompletionRoutine);
+            Threading.NativeOverlapped* lpOverlapped, Threading.IOCompletionCallback lpCompletionRoutine);
     }
 
     internal static class DCBFlags
