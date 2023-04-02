@@ -14,7 +14,7 @@ namespace Iot.Device.CharacterLcd
         /// (such as the PCF2119x) are examples of this support.
         /// This driver uses 4-Bit access (each character/command is split into 2x4 bits for transmission)
         /// </summary>
-        private class I2c4Bit : LcdInterface
+        private sealed class I2c4Bit : LcdInterface
         {
             private const byte ENABLE = 0b0000_0100;
             private const byte READWRITE = 0b0000_0010;

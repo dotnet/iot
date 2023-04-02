@@ -75,6 +75,19 @@ namespace Iot.Device.Pn532
         /// </summary>
         public FirmwareVersion? FirmwareVersion { get; internal set; }
 
+        /// <inheritdoc/>
+        public override uint MaximumReadSize => 258;    // R-APDU with 256 bytes of data plus SW1,SW2
+
+        /// <inheritdoc/>
+        public override uint MaximumWriteSize => 261;   // C-APDU with header, data, and Le
+
+        /// <summary>
+        /// The set of NFC protocols that are supported by this transceiver.
+        /// </summary>
+        public const NfcProtocol SupportedProtocols =
+            NfcProtocol.Iso14443_3 | NfcProtocol.Iso14443_4 | NfcProtocol.Mifare |
+            NfcProtocol.JisX6319_4 | NfcProtocol.Jewel;
+
         #region Spi and I2c Settings
 
         /// <summary>
@@ -745,48 +758,51 @@ namespace Iot.Device.Pn532
                 return -1;
             }
 
-            if (dataFromCard.Length > 0)
+            Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
+            ret = ReadResponse(CommandSet.InCommunicateThru, toReceive);
+            if (ret > 0)
             {
-                Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
-                ret = ReadResponse(CommandSet.InCommunicateThru, toReceive);
-                toReceive.Slice(1).CopyTo(dataFromCard);
-                if ((toReceive[0] == (byte)ErrorCode.None) && (ret > 0))
+                if (dataFromCard.Length > 0)
                 {
-                    return ret - 1;
+                    toReceive.Slice(1).CopyTo(dataFromCard);
+                    if (toReceive[0] == (byte)ErrorCode.None)
+                    {
+                        return ret - 1;
+                    }
                 }
+                else
+                {
+                    // if the response is only an ACK, there is no CRC - but the PN532 reports a CRC error
+                    if ((toReceive[0] == (byte)ErrorCode.None) || (toReceive[0] == (byte)ErrorCode.CRCError))
+                    {
+                        return 0;
+                    }
+                }
+            }
 
-                return -1;
-            }
-            else
-            {
-                return 0;
-            }
+            return -1;
         }
 
-        /// <summary>
-        /// Write data to a card and read what the card responses
-        /// </summary>
-        /// <param name="targetNumber">The card target number</param>
-        /// <param name="dataToSend">The data to write to the card</param>
-        /// <param name="dataFromCard">The potential data to receive</param>
-        /// <returns>The number of bytes read</returns>
-        public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        /// <inheritdoc/>
+        public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard, NfcProtocol protocol)
         {
-            // We need to add some logic here to understand what the command is and the size of the needed buffer.
-            // For Mifare card, the authentications needs to use the native part.
-            // For non Mifare card, it should not.
-            if (((dataToSend[0] == 0x60) || (dataToSend[0] == 0x61)) && (dataFromCard.Length == 0))
+            switch (protocol)
             {
-                return TransceiveAdvance(targetNumber, dataToSend, dataFromCard);
-            }
-            else
-            {
-                return WriteReadDirect(dataToSend, dataFromCard);
+                // The PN532 supports these modes with InDataExchange
+                case NfcProtocol.Mifare:
+                case NfcProtocol.JisX6319_4:
+                case NfcProtocol.Jewel:
+                case NfcProtocol.Iso14443_4:
+                    return TransceiveAdvance(targetNumber, dataToSend, dataFromCard);
+
+                // Otherwise, use InCommunicateThru
+                default:
+                    return WriteReadDirect(dataToSend, dataFromCard);
             }
         }
 
         /// <summary>
-        /// Use the build in feature to transceive the data to the card. This add specific logic for some cards.
+        /// Use the built in feature to transceive the data to the card. This add specific logic for some cards.
         /// </summary>
         /// <param name="targetNumber">The card target number</param>
         /// <param name="dataToSend">The data to write to the card</param>
@@ -2103,6 +2119,7 @@ namespace Iot.Device.Pn532
             else if (_i2cDevice is object)
             {
                 Span<byte> i2cackReceived = stackalloc byte[7];
+                i2cackReceived.Clear();
                 _i2cDevice.Read(i2cackReceived);
                 i2cackReceived.Slice(1).CopyTo(ackReceived);
             }

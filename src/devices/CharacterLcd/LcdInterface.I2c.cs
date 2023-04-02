@@ -12,7 +12,7 @@ namespace Iot.Device.CharacterLcd
         /// Built-in I2c access to the Hd44780 compatible controller. The Philips/NXP LCD driver ICs
         /// (such as the PCF2119x) are examples of this support.
         /// </summary>
-        private class I2c : LcdInterface
+        private sealed class I2c : LcdInterface
         {
             [Flags]
             private enum ControlByteFlags : byte
