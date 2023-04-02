@@ -522,6 +522,7 @@ public class GpioController : IDisposable
     /// <remarks>
     /// The returned data structure (or rather, its string representation) can be used to diagnose problems with incorrect driver types or
     /// other system configuration problems.
+    /// This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
     /// </remarks>
     public virtual ComponentInformation QueryComponentInformation()
     {

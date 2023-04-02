@@ -793,6 +793,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
         }
 
         ComponentInformation ci = new ComponentInformation(this, sb.ToString());
+        ci.Properties["Model"] = _detectedModel ?? string.Empty;
 
         if (_interruptDriver != null)
         {

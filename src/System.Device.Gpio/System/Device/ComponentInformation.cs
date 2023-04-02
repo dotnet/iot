@@ -16,6 +16,9 @@ namespace System.Device
     /// An instance of this class is typically obtained by calling QueryComponentInformation on any supported object.
     /// The structure represents a tree of connected devices, e.g. a controller and its associated drivers.
     /// </summary>
+    /// <remarks>
+    /// This class is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+    /// </remarks>
     public record ComponentInformation
     {
         private const int MaximumRecursionDepth = 50;
