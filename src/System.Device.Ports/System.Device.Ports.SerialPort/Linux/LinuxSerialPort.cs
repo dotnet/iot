@@ -22,6 +22,11 @@ namespace System.Device.Ports.SerialPort
             base.Dispose(disposing);
         }
 
+        protected void SaveParameters()
+        {
+            _tio.TcSetAttr(LinuxConstants.TCSANOW);
+        }
+
         protected internal override void OpenPort()
         {
             _tio.TcGetAttr();   // read the current values of the port after opening it
@@ -104,22 +109,22 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override int GetBytesToRead()
         {
-            throw new NotImplementedException();
+            return (int)_tio.AvailableBytes;
         }
 
         protected internal override int GetBytesToWrite()
         {
-            throw new NotImplementedException();
+            return (int)_tio.OutputBufferBytes;
         }
 
         protected internal override bool GetCDHolding()
         {
-            throw new NotImplementedException();
+            return _tio.SignalCD;
         }
 
         protected internal override bool GetCtsHolding()
         {
-            throw new NotImplementedException();
+            return _tio.SignalCTS;
         }
 
         protected internal override void SetDiscardNull(bool value)
@@ -129,12 +134,12 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override bool GetDsrHolding()
         {
-            throw new NotImplementedException();
+            return _tio.SignalDSR;
         }
 
         protected internal override bool GetDtrEnable()
         {
-            throw new NotImplementedException();
+            return _tio.SignalDTR;
         }
 
         protected internal override void SetDtrEnable(bool value)
@@ -175,7 +180,7 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override bool GetRtsEnable()
         {
-            throw new NotImplementedException();
+            return _tio.SignalRTS;
         }
 
         protected internal override void SetRtsEnable(bool value, bool setField)
@@ -190,12 +195,12 @@ namespace System.Device.Ports.SerialPort
 
         public override void DiscardInBuffer()
         {
-            throw new NotImplementedException();
+            _tio.TcFlush(LinuxConstants.TCIFLUSH);
         }
 
         public override void DiscardOutBuffer()
         {
-            throw new NotImplementedException();
+            _tio.TcFlush(LinuxConstants.TCOFLUSH);
         }
 
         protected internal override void InitializeBuffers(int readBufferSize, int writeBufferSize)

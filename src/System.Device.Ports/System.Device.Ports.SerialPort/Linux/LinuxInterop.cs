@@ -107,7 +107,7 @@ namespace System.Device.Ports.SerialPort.Linux
         /// int tcsetattr(int fd, int optional_actions, const struct termios *termios_p);
         /// </summary>
         [DllImport(LinuxConstants.Libc, EntryPoint = "tcsetattr", SetLastError = true)]
-        public static extern int TcSetAttr(int fd, int optionalActions, in Termios termios);
+        public static extern int TcSetAttr(int fd, uint optionalActions, in Termios termios);
 
         /// <summary>
         /// Send zero bits on FD
@@ -129,7 +129,7 @@ namespace System.Device.Ports.SerialPort.Linux
         /// int tcflush(int fd, int queue_selector);
         /// </summary>
         [DllImport(LinuxConstants.Libc, EntryPoint = "tcflush", SetLastError = true)]
-        public static extern int TcFlush(int fd, int queueSelector);
+        public static extern int TcFlush(int fd, uint queueSelector);
 
         /// <summary>
         /// Suspend or restart transmission on FD.
@@ -183,6 +183,13 @@ namespace System.Device.Ports.SerialPort.Linux
 
         [DllImport(LinuxConstants.Libc, EntryPoint = "ioctl", SetLastError = true)]
         public static extern int Ioctl(int fd, uint Command, [In, Out] ref Termios termios);
+
+        [DllImport(LinuxConstants.Libc, EntryPoint = "ioctl", SetLastError = true)]
+        public static extern int IoctlRead32(int fd, uint Command, [Out] out uint word);
+
+        [DllImport(LinuxConstants.Libc, EntryPoint = "ioctl", SetLastError = true)]
+        public static extern int IoctlWrite32(int fd, uint Command, [In] in uint word);
+
     }
 
 }

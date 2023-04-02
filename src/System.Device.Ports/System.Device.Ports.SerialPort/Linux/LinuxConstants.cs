@@ -282,32 +282,79 @@ namespace System.Device.Ports.SerialPort.Linux
         public const uint TIOCM_LOOP = 0x8000;
 
         /* IOCTLs */
+
+        /// <summary>
+        /// Gets the current serial port settings
+        /// </summary>
         public const uint TCGETS = 0x5401;
+
+        /// <summary>
+        /// Sets the serial port settings immediately
+        /// </summary>
         public const uint TCSETS = 0x5402;
+
+        /// <summary>
+        /// Sets the serial port settings after allowing
+        /// the input and output buffers to drain/empty
+        /// </summary>
         public const uint TCSETSW = 0x5403;
+
+        /// <summary>
+        /// Sets the serial port settings after flushing
+        /// the input and output buffers
+        /// </summary>
         public const uint TCSETSF = 0x5404;
         public const uint TCGETA = 0x5405;
         public const uint TCSETA = 0x5406;
         public const uint TCSETAW = 0x5407;
         public const uint TCSETAF = 0x5408;
+
+        /// <summary>
+        /// Sends a break for the given time
+        /// </summary>
         public const uint TCSBRK = 0x5409;
+
+        /// <summary>
+        /// Controls software flow control
+        /// </summary>
         public const uint TCXONC = 0x540A;
+
+        /// <summary>
+        /// Flushes the input and/or output queue
+        /// </summary>
         public const uint TCFLSH = 0x540B;
         public const uint TIOCEXCL = 0x540C;
         public const uint TIOCNXCL = 0x540D;
         public const uint TIOCSCTTY = 0x540E;
         public const uint TIOCGPGRP = 0x540F;
         public const uint TIOCSPGRP = 0x5410;
+
+        /// <summary>
+        /// Get the number of bytes in the output buffer
+        /// https://man7.org/linux/man-pages/man2/ioctl_tty.2.html
+        /// </summary>
         public const uint TIOCOUTQ = 0x5411;
         public const uint TIOCSTI = 0x5412;
         public const uint TIOCGWINSZ = 0x5413;
         public const uint TIOCSWINSZ = 0x5414;
+
+        /// <summary>
+        /// Returns the state of the "MODEM" bits
+        /// </summary>
         public const uint TIOCMGET = 0x5415;
         public const uint TIOCMBIS = 0x5416;
         public const uint TIOCMBIC = 0x5417;
+
+        /// <summary>
+        /// Sets the state of the "MODEM" bits
+        /// </summary>
         public const uint TIOCMSET = 0x5418;
         public const uint TIOCGSOFTCAR = 0x5419;
         public const uint TIOCSSOFTCAR = 0x541A;
+
+        /// <summary>
+        /// Returns the number of bytes in the input buffer
+        /// </summary>
         public const uint FIONREAD = 0x541B;
         public const uint TIOCINQ = FIONREAD;
         public const uint TIOCLINUX = 0x541C;

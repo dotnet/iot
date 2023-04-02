@@ -55,7 +55,7 @@ namespace System.Device.Ports.SerialPort.Linux
         /// <summary>
         /// Writes the termios values to the driver
         /// </summary>
-        public void TcSetAttr(int optionalActions)
+        public void TcSetAttr(uint optionalActions)
         {
             int result = LinuxInterop.TcSetAttr(_fd, optionalActions, _termios);
             if (LinuxErrors.IsError(result))
@@ -90,8 +90,9 @@ namespace System.Device.Ports.SerialPort.Linux
 
         /// <summary>
         /// Flush pending data on the driver.
+        /// TCIFLUSH, TCOFLUSH, TCIOFLUSH
         /// </summary>
-        public void TcFlush(int queueSelector)
+        public void TcFlush(uint queueSelector)
         {
             int result = LinuxInterop.TcFlush(_fd, queueSelector);
             if (LinuxErrors.IsError(result))
@@ -187,6 +188,30 @@ namespace System.Device.Ports.SerialPort.Linux
                 throw new IOException(LinuxErrors.GetLastErrorDescription());
             }
         }
+
+        public uint IoctlRead32(uint command)
+        {
+            int result = LinuxInterop.IoctlRead32(_fd, command, out uint data);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+
+            return data;
+        }
+
+        /*
+        public void IoctlWrite32(int data)
+        {
+            int result = LinuxInterop.Ioctl(_fd, LinuxConstants.???, data);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+
+            return data;
+        }
+        */
 
         public Parity Parity
         {
@@ -703,6 +728,8 @@ namespace System.Device.Ports.SerialPort.Linux
 
             set
             {
+                // A similar approach: https://github.com/dotnet/runtime/issues/64507
+                // ===
                 _termios.CFlag &= ~LinuxConstants.CBAUD;
                 _termios.CFlag |= LinuxConstants.CBAUDEX;
                 // _termios.CFlag |= LinuxConstants.BOTHER; // same value
@@ -711,6 +738,30 @@ namespace System.Device.Ports.SerialPort.Linux
                 Ioctl(LinuxConstants.TCSETS2);
             }
         }
+
+        public uint AvailableBytes => IoctlRead32(LinuxConstants.FIONREAD);
+        public uint OutputBufferBytes => IoctlRead32(LinuxConstants.TIOCOUTQ);
+
+        public uint ModemWord
+        {
+            get => IoctlRead32(LinuxConstants.TIOCMGET);
+            // set => IoctlWrite32(LinuxConstants.TIOCMSET);
+        }
+
+        public uint GetModemFlag(uint flag) => ModemWord & flag;
+
+        public bool SignalLE => GetModemFlag(LinuxConstants.TIOCM_LE) == LinuxConstants.TIOCM_LE;
+        public bool SignalDTR => GetModemFlag(LinuxConstants.TIOCM_DTR) == LinuxConstants.TIOCM_DTR;
+        public bool SignalRTS => GetModemFlag(LinuxConstants.TIOCM_RTS) == LinuxConstants.TIOCM_RTS;
+        public bool SignalST => GetModemFlag(LinuxConstants.TIOCM_ST) == LinuxConstants.TIOCM_ST;
+        public bool SignalSR => GetModemFlag(LinuxConstants.TIOCM_SR) == LinuxConstants.TIOCM_SR;
+        public bool SignalCTS => GetModemFlag(LinuxConstants.TIOCM_CTS) == LinuxConstants.TIOCM_CTS;
+        public bool SignalCD => GetModemFlag(LinuxConstants.TIOCM_CD) == LinuxConstants.TIOCM_CD;  // Same as TIOCM_CAR
+        public bool SignalRNG => GetModemFlag(LinuxConstants.TIOCM_RNG) == LinuxConstants.TIOCM_RNG;    // Same as TIOCM_RI
+        public bool SignalDSR => GetModemFlag(LinuxConstants.TIOCM_DSR) == LinuxConstants.TIOCM_DSR;
+        public bool SignalOUT1 => GetModemFlag(LinuxConstants.TIOCM_OUT1) == LinuxConstants.TIOCM_OUT1;
+        public bool SignalOUT2 => GetModemFlag(LinuxConstants.TIOCM_OUT2) == LinuxConstants.TIOCM_OUT2;
+        public bool SignalLOOP => GetModemFlag(LinuxConstants.TIOCM_LOOP) == LinuxConstants.TIOCM_LOOP;
 
     }
 }
