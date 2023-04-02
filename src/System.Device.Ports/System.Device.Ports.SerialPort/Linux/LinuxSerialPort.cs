@@ -48,15 +48,18 @@ namespace System.Device.Ports.SerialPort
 
             try
             {
-                _tio.CfSetISpeed((uint)value);
-                _tio.CfSetOSpeed((uint)value);
+                _tio.CfSetISpeed(speed);
+                _tio.CfSetOSpeed(speed);
+                return;
             }
             catch (Exception)
             {
-                // TODO
-                // ioctl
+                // when the speed cannot be sent using the standard API
+                // we can just go on and try setting it via ioctl
             }
 
+            // This will write the termios structure to the driver using ioctl
+            _tio.CustomBaudRate = speed;
         }
 
         protected internal override void SetParity(Parity value)

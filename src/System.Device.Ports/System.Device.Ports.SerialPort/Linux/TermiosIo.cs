@@ -8,6 +8,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static System.Device.Ports.SerialPort.Linux.LinuxInterop;
+
 /*
     Termios functions return values:
     - Success: 0
@@ -168,6 +170,18 @@ namespace System.Device.Ports.SerialPort.Linux
         public void CfSetsSpeed(uint speed)
         {
             int result = LinuxInterop.CfSetsSpeed(_termios, speed);
+            if (LinuxErrors.IsError(result))
+            {
+                throw new IOException(LinuxErrors.GetLastErrorDescription());
+            }
+        }
+
+        /// <summary>
+        /// Transfer the Termios structure through ioctl
+        /// </summary>
+        public void Ioctl(uint command)
+        {
+            int result = LinuxInterop.Ioctl(_fd, command, ref _termios);
             if (LinuxErrors.IsError(result))
             {
                 throw new IOException(LinuxErrors.GetLastErrorDescription());
@@ -674,6 +688,29 @@ namespace System.Device.Ports.SerialPort.Linux
                 38400 => LinuxConstants.B38400,
                 _ => 0,
             };
+
+        public uint CustomBaudRate
+        {
+            get
+            {
+                if (IsSetCFlag(LinuxConstants.CBAUDEX))
+                {
+                    return _termios.OSpeed;
+                }
+
+                return 0;
+            }
+
+            set
+            {
+                _termios.CFlag &= ~LinuxConstants.CBAUD;
+                _termios.CFlag |= LinuxConstants.CBAUDEX;
+                // _termios.CFlag |= LinuxConstants.BOTHER; // same value
+                _termios.ISpeed = value;
+                _termios.OSpeed = value;
+                Ioctl(LinuxConstants.TCSETS2);
+            }
+        }
 
     }
 }

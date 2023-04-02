@@ -181,10 +181,8 @@ namespace System.Device.Ports.SerialPort.Linux
         [DllImport(LinuxConstants.Libc, EntryPoint = "cfsetspeed", SetLastError = true)]
         public static extern int CfSetsSpeed(in Termios termios, uint speed);
 
-        internal static class IoctlsRequest
-        {
-        }
-
+        [DllImport(LinuxConstants.Libc, EntryPoint = "ioctl", SetLastError = true)]
+        public static extern int Ioctl(int fd, uint Command, [In, Out] ref Termios termios);
     }
 
 }
