@@ -58,6 +58,7 @@ namespace System.Device.Ports.SerialPort.Linux
         /// <summary>
         /// Writes the termios values to the driver
         /// </summary>
+        /// <param name="optionalActions">TCSANOW, TCSADRAIN or TCSAFLUSH</param>
         public void TcSetAttr(uint optionalActions)
         {
             int result = LinuxInterop.TcSetAttr(_fd, optionalActions, _termios);
@@ -214,6 +215,16 @@ namespace System.Device.Ports.SerialPort.Linux
             }
         }
 
+        /// <summary>
+        /// Read the register values from the driver
+        /// </summary>
+        public void Read() => TcGetAttr();
+
+        /// <summary>
+        /// Writes the changes to the driver
+        /// </summary>
+        public void Write() => TcSetAttr(LinuxConstants.TCSANOW);
+
         public Parity Parity
         {
             get
@@ -261,7 +272,6 @@ namespace System.Device.Ports.SerialPort.Linux
                     // https://viereck.ch/linux-mark-space-parity/
                     default:
                         throw new NotSupportedException($"Parity {value} is not supported on this platform");
-
                 }
             }
         }

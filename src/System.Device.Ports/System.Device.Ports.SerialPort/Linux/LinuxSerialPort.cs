@@ -22,14 +22,9 @@ namespace System.Device.Ports.SerialPort
             base.Dispose(disposing);
         }
 
-        protected void SaveParameters()
-        {
-            _tio.TcSetAttr(LinuxConstants.TCSANOW);
-        }
-
         protected internal override void OpenPort()
         {
-            _tio.TcGetAttr();   // read the current values of the port after opening it
+            _tio.Read();   // read the current values of the port after opening it
             throw new NotImplementedException();
         }
 
@@ -70,11 +65,13 @@ namespace System.Device.Ports.SerialPort
         protected internal override void SetParity(Parity value)
         {
             _tio.Parity = value;
+            _tio.Write();
         }
 
         protected internal override void SetDataBits(int value)
         {
             _tio.DataBits = value;
+            _tio.Write();
         }
 
         protected internal override void SetStopBits(StopBits value)
@@ -94,6 +91,8 @@ namespace System.Device.Ports.SerialPort
                 default:
                     throw new NotSupportedException($"Stop bits {value} is not supported on this platform");
             }
+
+            _tio.Write();
         }
 
         protected internal override void SetBreakState(bool value)
@@ -157,6 +156,7 @@ namespace System.Device.Ports.SerialPort
         protected internal override void SetHandshake(Handshake value)
         {
             _tio.Handshake = value;
+            _tio.Write();
         }
 
         protected internal override void SetDiscardNull(bool value)
@@ -178,6 +178,7 @@ namespace System.Device.Ports.SerialPort
             {
                 _tio.VTime = 0;
                 _tio.VMin = 0;
+                _tio.Write();
                 return;
             }
 
@@ -185,11 +186,13 @@ namespace System.Device.Ports.SerialPort
             {
                 _tio.VTime = 0;     // blocking read
                 _tio.VMin = 255;    // number of bytes to read before returning
+                _tio.Write();
                 return;
             }
 
             _tio.VTime = (byte)(value * 10);
             _tio.VMin = 0;
+            _tio.Write();
         }
 
         protected internal override void SetWriteTimeout(int value)
