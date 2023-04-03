@@ -2,39 +2,60 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Ports.SerialPort.Linux;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+
+using static System.Net.WebRequestMethods;
 
 namespace System.Device.Ports.SerialPort
 {
     internal partial class LinuxSerialPort : SerialPort
     {
         private const string DefaultPortName = "/dev/ttyUSB0";
-        private TermiosIo _tio;
+        private TermiosIo? _tio;
+        private FileStream? _file = null;
 
         public LinuxSerialPort()
         {
             PortName = DefaultPortName;
-            _tio = new();
-            _tio.CanonicalMode = false;
+        }
+
+        [MemberNotNull(nameof(_file))]
+        [MemberNotNull(nameof(_tio))]
+        private void Validate()
+        {
+            if (_file == null || _tio == null)
+            {
+                throw new InvalidOperationException($"The port {PortName} is closed");
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
+            _file?.Dispose();
+            _file = null;
             base.Dispose(disposing);
         }
 
         protected internal override void OpenPort()
         {
+            _file = new(PortName, FileMode.Open, FileAccess.ReadWrite);
+            _tio = new(_file.SafeFileHandle.DangerousGetHandle().ToInt32());
+            _tio.CanonicalMode = false;
             _tio.Read();   // read the current values of the port after opening it
+
             throw new NotImplementedException();
         }
 
         protected internal override void ClosePort(bool disposing)
         {
-            throw new NotImplementedException();
+            _file?.Close();
         }
 
         protected internal override void SetBaudRate(int value)
         {
+            Validate();
+
             if (value <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(value));
@@ -64,18 +85,24 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override void SetParity(Parity value)
         {
+            Validate();
+
             _tio.Parity = value;
             _tio.Write();
         }
 
         protected internal override void SetDataBits(int value)
         {
+            Validate();
+
             _tio.DataBits = value;
             _tio.Write();
         }
 
         protected internal override void SetStopBits(StopBits value)
         {
+            Validate();
+
             switch (value)
             {
                 case StopBits.One:
@@ -97,6 +124,8 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override void SetBreakState(bool value)
         {
+            Validate();
+
             // there is no "stop the break" in Linux
             if (value)
             {
@@ -108,53 +137,63 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override int GetBytesToRead()
         {
+            Validate();
             return (int)_tio.AvailableBytes;
         }
 
         protected internal override int GetBytesToWrite()
         {
+            Validate();
             return (int)_tio.OutputBufferBytes;
         }
 
         protected internal override bool GetCDHolding()
         {
+            Validate();
             return _tio.ModemStatus.SignalCD;
         }
 
         protected internal override bool GetCtsHolding()
         {
+            Validate();
             return _tio.ModemStatus.SignalCTS;
         }
 
         protected internal override bool GetDsrHolding()
         {
+            Validate();
             return _tio.ModemStatus.SignalDSR;
         }
 
         protected internal override bool GetDtrEnable()
         {
+            Validate();
             return _tio.ModemStatus.SignalDTR;
         }
 
         protected internal override bool GetRtsEnable()
         {
+            Validate();
             return _tio.ModemStatus.SignalRTS;
         }
 
         protected internal override void SetDtrEnable(bool value)
         {
+            Validate();
             _tio.ModemStatus.SignalDTR = value;
             _tio.ModemStatus.Write();
         }
 
         protected internal override void SetRtsEnable(bool value, bool setField)
         {
+            Validate();
             _tio.ModemStatus.SignalRTS = value;
             _tio.ModemStatus.Write();
         }
 
         protected internal override void SetHandshake(Handshake value)
         {
+            Validate();
             _tio.Handshake = value;
             _tio.Write();
         }
@@ -174,6 +213,7 @@ namespace System.Device.Ports.SerialPort
         // TODO: get?
         protected internal override void SetReadTimeout(int value)
         {
+            Validate();
             if (value == 0)
             {
                 _tio.VTime = 0;
@@ -203,11 +243,13 @@ namespace System.Device.Ports.SerialPort
 
         public override void DiscardInBuffer()
         {
+            Validate();
             _tio.TcFlush(LinuxConstants.TCIFLUSH);
         }
 
         public override void DiscardOutBuffer()
         {
+            Validate();
             _tio.TcFlush(LinuxConstants.TCOFLUSH);
         }
 
@@ -227,6 +269,7 @@ namespace System.Device.Ports.SerialPort
         /// </summary>
         public override void Flush()
         {
+            Validate();
             _tio.TcDrain();
         }
     }

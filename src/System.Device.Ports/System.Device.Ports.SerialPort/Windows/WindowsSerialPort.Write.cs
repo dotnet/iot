@@ -119,6 +119,46 @@ namespace System.Device.Ports.SerialPort
             Write(array, offset, count, WriteTimeout);
         }
 
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            // TODO: convert the called method to Span
+            var array = buffer.ToArray();
+            Write(array, 0, array.Length, WriteTimeout);
+        }
+
+        public async override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer)
+        {
+            // TODO: convert the called method to Span
+            var array = buffer.ToArray();
+            var offset = 0;
+            var count = array.Length;
+            var timeout = WriteTimeout;
+            if (BreakState)
+            {
+                throw new InvalidOperationException(Strings.In_Break_State);
+            }
+
+            CheckReadWriteArguments(array, offset, count);
+            if (count == 0)
+            {
+                return; // no need to expend overhead in creating asyncResult, etc.
+            }
+
+            Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, $"Serial Stream Write - write timeout is {timeout}");
+
+            IAsyncResult asyncResult = BeginWriteCore(array, offset, count, null, null);
+            await Task.Factory.FromAsync(asyncResult, res => EndWrite(res));
+
+            var afsar = asyncResult as WindowsSerialPortAsyncResult;
+            Debug.Assert(afsar != null, "afsar should be a WindowsSerialPortAsyncResult and should not be null");
+            int numBytes = afsar._numBytes;
+
+            if (numBytes == 0)
+            {
+                throw new TimeoutException(Strings.Write_timed_out);
+            }
+        }
+
         internal unsafe void Write(byte[] array, int offset, int count, int timeout)
         {
             if (BreakState)

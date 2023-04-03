@@ -8,8 +8,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-using static System.Device.Ports.SerialPort.Linux.LinuxInterop;
-
 /*
     Termios functions return values:
     - Success: 0
@@ -29,7 +27,7 @@ namespace System.Device.Ports.SerialPort.Linux
         private LinuxInterop.Termios _termios;
         private ModemStatus _modemStatus;
 
-        public TermiosIo()
+        public TermiosIo(int handle)
         {
             _fd = 0;
             _modemStatus = new(this);

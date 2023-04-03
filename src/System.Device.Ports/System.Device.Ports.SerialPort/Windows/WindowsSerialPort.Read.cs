@@ -131,6 +131,33 @@ namespace System.Device.Ports.SerialPort
             return Read(array, offset, count, ReadTimeout);
         }
 
+        public override int Read(Span<byte> buffer)
+        {
+            // TODO: convert the called method to Span
+            var array = buffer.ToArray();
+            return Read(array, 0, array.Length);
+        }
+
+        public async override ValueTask<int> ReadAsync(Memory<byte> buffer)
+        {
+            // TODO: convert the called method to Span
+            var array = buffer.ToArray();
+            int offset = 0;
+            int count = array.Length;
+            var timeout = ReadTimeout;
+            CheckReadWriteArguments(array, offset, count);
+            if (count == 0)
+            {
+                return 0; // return immediately if no bytes requested; no need for overhead.
+            }
+
+            Debug.Assert(timeout == SerialPort.InfiniteTimeout || timeout >= 0, $"Serial Stream Read - called with timeout {timeout}");
+
+            IAsyncResult asyncResult = BeginReadCore(array, offset, count, null, null);
+            var result = await Task.Factory.FromAsync(asyncResult, res => EndRead(res));
+            return result;
+        }
+
         internal unsafe int Read(byte[] array, int offset, int count, int timeout)
         {
             CheckReadWriteArguments(array, offset, count);

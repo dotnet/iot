@@ -256,12 +256,44 @@ namespace System.Device.Ports.SerialPort
         public abstract void Write(byte[] array, int offset, int count);
 
         /// <summary>
-        /// Reads a number of bytes from the SerialPort input buffer and writes those bytes into a byte array at the specified offset.
+        /// Reads a number of bytes from the SerialPort input buffer
+        /// and writes those bytes into a byte array at the specified offset.
         /// </summary>
         /// <param name="buffer">The byte array to write the input to.</param>
         /// <param name="offset">The offset in buffer at which to write the bytes.</param>
-        /// <param name="count">The maximum number of bytes to read. Fewer bytes are read if count is greater than the number of bytes in the input buffer.</param>
+        /// <param name="count">The maximum number of bytes to read.
+        /// Fewer bytes are read if count is greater than the number
+        /// of bytes in the input buffer.</param>
         /// <returns>The number of bytes read.</returns>
         public abstract int Read(byte[] buffer, int offset, int count);
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="buffer">todo</param>
+        public abstract void Write(ReadOnlySpan<byte> buffer);
+
+        /// <summary>
+        /// Reads a number of bytes from the SerialPort input buffer
+        /// and writes those bytes into a byte array at the specified offset.
+        /// </summary>
+        /// <param name="buffer">The byte array to write the input to.</param>
+        /// <returns>The number of bytes read.</returns>
+        public abstract int Read(Span<byte> buffer);
+
+        /// <summary>
+        /// TODO
+        /// </summary>
+        /// <param name="buffer">todo</param>
+        public abstract ValueTask WriteAsync(ReadOnlyMemory<byte> buffer);
+
+        /// <summary>
+        /// Reads a number of bytes from the SerialPort input buffer
+        /// and writes those bytes into a byte array at the specified offset.
+        /// </summary>
+        /// <param name="buffer">The byte array to write the input to.</param>
+        /// <returns>The number of bytes read.</returns>
+        public abstract ValueTask<int> ReadAsync(Memory<byte> buffer);
+
     }
 }
