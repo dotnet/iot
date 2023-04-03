@@ -3,8 +3,11 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Intrinsics.X86;
 using System.Text;
 using System.Threading.Tasks;
+
+using UnitsNet;
 
 /*
     Termios man page: https://linux.die.net/man/3/termios
@@ -181,12 +184,70 @@ namespace System.Device.Ports.SerialPort.Linux
         public const uint TCSAFLUSH = 2;
 
         /* c_iflag bits */
+
+        /// <summary>
+        /// If this bit is set, break conditions are ignored.
+        /// A break condition is defined in the context of asynchronous
+        /// serial data transmission as a series of zero-value bits
+        /// longer than a single byte
+        /// </summary>
         public const uint IGNBRK = 0x001;           /* Ignore break condition */
+
+        /// <summary>
+        /// If this bit is set and IGNBRK is not set, a break condition
+        /// clears the terminal input and output queues and raises a
+        /// SIGINT signal for the foreground process group associated
+        /// with the terminal.
+        /// If neither BRKINT nor IGNBRK are set, a break condition
+        /// is passed to the application as a single '\0' character
+        /// if PARMRK is not set, or otherwise as a three-character
+        /// sequence '\377', '\0', '\0'
+        /// </summary>
         public const uint BRKINT = 0x002;           /* Signal interrupt on break */
+
+        /// <summary>
+        /// If this bit is set, any byte with a framing or parity
+        /// error is ignored. This is only useful if INPCK is also set
+        /// </summary>
         public const uint IGNPAR = 0x004;           /* Ignore characters with parity errors */
+
+        /// <summary>
+        /// If this bit is set, input bytes with parity or framing errors
+        /// are marked when passed to the program. This bit is meaningful
+        /// only when INPCK is set and IGNPAR is not set.
+        /// The way erroneous bytes are marked is with two preceding bytes,
+        /// 377 and 0. Thus, the program actually reads three bytes for one
+        /// erroneous byte received from the terminal.
+        /// If a valid byte has the value 0377, and ISTRIP(see below) is not set,
+        /// the program might confuse it with the prefix that marks a parity error.
+        /// So a valid byte 0377 is passed to the program as two bytes,
+        /// 0377 0377, in this case
+        /// </summary>
         public const uint PARMRK = 0x008;           /* Mark parity and framing errors */
+
+        /// <summary>
+        /// If this bit is set, input parity checking is enabled.
+        /// If it is not set, no checking at all is done for parity errors
+        /// on input; the characters are simply passed through to the application.
+        /// Parity checking on input processing is independent of whether parity
+        /// detection and generation on the underlying terminal hardware is enabled;
+        /// see Control Modes.For example, you could clear the INPCK input mode flag
+        /// and set the PARENB control mode flag to ignore parity errors on input,
+        /// but still generate parity on output.
+        /// If this bit is set, what happens when a parity error is detected
+        /// depends on whether the IGNPAR or PARMRK bits are set.
+        /// If neither of these bits are set, a byte with a parity error is passed
+        /// to the application as a '\0' character.
+        /// https://www.gnu.org/software/libc/manual/html_node/Input-Modes.html
+        /// </summary>
         public const uint INPCK = 0x010;            /* Enable input parity check */
+
+        /// <summary>
+        /// If this bit is set, valid input bytes are stripped to seven bits;
+        /// otherwise, all eight bits are available for programs to read
+        /// </summary>
         public const uint ISTRIP = 0x020;           /* Strip 8th bit off characters */
+
         public const uint INLCR = 0x040;            /* Map NL to CR on input */
         public const uint IGNCR = 0x080;            /* Ignore CR */
         public const uint ICRNL = 0x100;            /* Map CR to NL on input */

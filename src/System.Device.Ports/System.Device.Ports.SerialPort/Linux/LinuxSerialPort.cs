@@ -119,32 +119,39 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override bool GetCDHolding()
         {
-            return _tio.SignalCD;
+            return _tio.ModemStatus.SignalCD;
         }
 
         protected internal override bool GetCtsHolding()
         {
-            return _tio.SignalCTS;
-        }
-
-        protected internal override void SetDiscardNull(bool value)
-        {
-            throw new NotImplementedException();
+            return _tio.ModemStatus.SignalCTS;
         }
 
         protected internal override bool GetDsrHolding()
         {
-            return _tio.SignalDSR;
+            return _tio.ModemStatus.SignalDSR;
         }
 
         protected internal override bool GetDtrEnable()
         {
-            return _tio.SignalDTR;
+            return _tio.ModemStatus.SignalDTR;
+        }
+
+        protected internal override bool GetRtsEnable()
+        {
+            return _tio.ModemStatus.SignalRTS;
         }
 
         protected internal override void SetDtrEnable(bool value)
         {
-            throw new NotImplementedException();
+            _tio.ModemStatus.SignalDTR = value;
+            _tio.ModemStatus.Write();
+        }
+
+        protected internal override void SetRtsEnable(bool value, bool setField)
+        {
+            _tio.ModemStatus.SignalRTS = value;
+            _tio.ModemStatus.Write();
         }
 
         protected internal override void SetHandshake(Handshake value)
@@ -152,9 +159,16 @@ namespace System.Device.Ports.SerialPort
             _tio.Handshake = value;
         }
 
+        protected internal override void SetDiscardNull(bool value)
+        {
+            throw new PlatformNotSupportedException(
+                $"This platform do not allow discarding nulls");
+        }
+
         protected internal override void SetParityReplace(byte value)
         {
-            throw new NotImplementedException();
+            throw new PlatformNotSupportedException(
+                $"This platform do not allow changing the character marking parity errors");
         }
 
         // TODO: get?
@@ -178,18 +192,9 @@ namespace System.Device.Ports.SerialPort
             _tio.VMin = 0;
         }
 
-        protected internal override bool GetRtsEnable()
-        {
-            return _tio.SignalRTS;
-        }
-
-        protected internal override void SetRtsEnable(bool value, bool setField)
-        {
-            throw new NotImplementedException();
-        }
-
         protected internal override void SetWriteTimeout(int value)
         {
+            // TODO: async + cancel?
             throw new NotImplementedException();
         }
 
@@ -205,12 +210,21 @@ namespace System.Device.Ports.SerialPort
 
         protected internal override void InitializeBuffers(int readBufferSize, int writeBufferSize)
         {
-            throw new NotImplementedException();
+            // In Linux the serial port buffers are currently fixed to 4096 bytes (non-canonical mode)
+            // https://elixir.bootlin.com/linux/latest/source/include/linux/tty.h#L247
+            // https://elixir.bootlin.com/linux/latest/source/drivers/tty/n_tty.c#L1583
+            // #define N_TTY_BUF_SIZE 4096
+            //
+            // This will not throw because the Platform-independent method calls this
+            // throw new PlatformNotSupportedException($"Read and write buffers cannot be changed");
         }
 
+        /// <summary>
+        /// Sends the data which is pending in the out buffer
+        /// </summary>
         public override void Flush()
         {
-            throw new NotImplementedException();
+            _tio.TcDrain();
         }
     }
 }

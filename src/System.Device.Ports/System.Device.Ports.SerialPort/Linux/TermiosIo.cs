@@ -27,13 +27,16 @@ namespace System.Device.Ports.SerialPort.Linux
     {
         private int _fd;
         private LinuxInterop.Termios _termios;
+        private ModemStatus _modemStatus;
 
         public TermiosIo()
         {
             _fd = 0;
+            _modemStatus = new(this);
         }
 
         public LinuxInterop.Termios Termios => _termios;
+        public ModemStatus ModemStatus => _modemStatus;
 
         private bool IsSetCFlag(uint bit) => (_termios.CFlag & bit) == bit;
         private bool IsSetIFlag(uint bit) => (_termios.IFlag & bit) == bit;
@@ -89,7 +92,9 @@ namespace System.Device.Ports.SerialPort.Linux
         }
 
         /// <summary>
-        /// Flush pending data on the driver.
+        /// Discards (clears) data written to the object referred to by fd
+        /// but not transmitted, or data received but not read, depending
+        /// on the value of queue_selector
         /// TCIFLUSH, TCOFLUSH, TCIOFLUSH
         /// </summary>
         public void TcFlush(uint queueSelector)
@@ -200,18 +205,14 @@ namespace System.Device.Ports.SerialPort.Linux
             return data;
         }
 
-        /*
-        public void IoctlWrite32(int data)
+        public void IoctlWrite32(uint command, uint data)
         {
-            int result = LinuxInterop.Ioctl(_fd, LinuxConstants.???, data);
+            int result = LinuxInterop.IoctlWrite32(_fd, command, data);
             if (LinuxErrors.IsError(result))
             {
                 throw new IOException(LinuxErrors.GetLastErrorDescription());
             }
-
-            return data;
         }
-        */
 
         public Parity Parity
         {
@@ -233,20 +234,26 @@ namespace System.Device.Ports.SerialPort.Linux
 
             set
             {
+                _termios.IFlag &= ~LinuxConstants.IGNPAR;
+                _termios.IFlag &= ~LinuxConstants.PARMRK;   // parity errors will be marked with a null
+
                 switch (value)
                 {
                     case Parity.None:
                         _termios.CFlag &= ~LinuxConstants.PARENB;
+                        _termios.IFlag &= ~LinuxConstants.INPCK;
                         break;
 
                     case Parity.Even:
                         _termios.CFlag |= LinuxConstants.PARENB;
                         _termios.CFlag &= ~LinuxConstants.PARODD;
+                        _termios.IFlag |= LinuxConstants.INPCK;
                         break;
 
                     case Parity.Odd:
                         _termios.CFlag |= LinuxConstants.PARENB;
                         _termios.CFlag |= LinuxConstants.PARODD;
+                        _termios.IFlag |= LinuxConstants.INPCK;
                         break;
 
                     case Parity.Mark:
@@ -741,27 +748,5 @@ namespace System.Device.Ports.SerialPort.Linux
 
         public uint AvailableBytes => IoctlRead32(LinuxConstants.FIONREAD);
         public uint OutputBufferBytes => IoctlRead32(LinuxConstants.TIOCOUTQ);
-
-        public uint ModemWord
-        {
-            get => IoctlRead32(LinuxConstants.TIOCMGET);
-            // set => IoctlWrite32(LinuxConstants.TIOCMSET);
-        }
-
-        public uint GetModemFlag(uint flag) => ModemWord & flag;
-
-        public bool SignalLE => GetModemFlag(LinuxConstants.TIOCM_LE) == LinuxConstants.TIOCM_LE;
-        public bool SignalDTR => GetModemFlag(LinuxConstants.TIOCM_DTR) == LinuxConstants.TIOCM_DTR;
-        public bool SignalRTS => GetModemFlag(LinuxConstants.TIOCM_RTS) == LinuxConstants.TIOCM_RTS;
-        public bool SignalST => GetModemFlag(LinuxConstants.TIOCM_ST) == LinuxConstants.TIOCM_ST;
-        public bool SignalSR => GetModemFlag(LinuxConstants.TIOCM_SR) == LinuxConstants.TIOCM_SR;
-        public bool SignalCTS => GetModemFlag(LinuxConstants.TIOCM_CTS) == LinuxConstants.TIOCM_CTS;
-        public bool SignalCD => GetModemFlag(LinuxConstants.TIOCM_CD) == LinuxConstants.TIOCM_CD;  // Same as TIOCM_CAR
-        public bool SignalRNG => GetModemFlag(LinuxConstants.TIOCM_RNG) == LinuxConstants.TIOCM_RNG;    // Same as TIOCM_RI
-        public bool SignalDSR => GetModemFlag(LinuxConstants.TIOCM_DSR) == LinuxConstants.TIOCM_DSR;
-        public bool SignalOUT1 => GetModemFlag(LinuxConstants.TIOCM_OUT1) == LinuxConstants.TIOCM_OUT1;
-        public bool SignalOUT2 => GetModemFlag(LinuxConstants.TIOCM_OUT2) == LinuxConstants.TIOCM_OUT2;
-        public bool SignalLOOP => GetModemFlag(LinuxConstants.TIOCM_LOOP) == LinuxConstants.TIOCM_LOOP;
-
     }
 }
