@@ -116,7 +116,7 @@ namespace System.Device.Ports.SerialPort
                 _rtsEnable = _dcb.GetFlag(DCBFlags.FRTSCONTROL) == PInvoke.RTS_CONTROL_ENABLE;
                 SetRtsEnable(_rtsEnable);
                 SetReadTimeout(ReadTimeout);
-                SetReadTimeout(WriteTimeout);
+                SetWriteTimeout(WriteTimeout);
 
                 _threadPoolBound = ThreadPoolBoundHandle.BindHandle(_portHandle);
 
