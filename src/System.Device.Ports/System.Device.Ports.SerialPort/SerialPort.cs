@@ -43,6 +43,7 @@ namespace System.Device.Ports.SerialPort
             if (OperatingSystem.IsWindows())
             {
                 instance = new WindowsSerialPort();
+                // instance = new Windows2.Windows2SerialPort();
             }
             else if (OperatingSystem.IsLinux())
             {

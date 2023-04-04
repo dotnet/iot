@@ -24,6 +24,9 @@ ReadFile
 WriteFile
 GetOverlappedResult
 CloseHandle
+CreateIoCompletionPort
+GetQueuedCompletionStatus
+PostQueuedCompletionStatus
 
 WIN32_ERROR
 GENERIC_READ
