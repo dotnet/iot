@@ -9,7 +9,7 @@ namespace System.Device.Ports.SerialPort
     /// <summary>
     /// The class that allows to exchange data across a standard Serial Port
     /// </summary>
-    public abstract partial class SerialPort
+    public abstract partial class SerialPort : IDisposable
     {
         /// <summary>
         /// Indicates that data has been received through a port represented by the SerialPort object.

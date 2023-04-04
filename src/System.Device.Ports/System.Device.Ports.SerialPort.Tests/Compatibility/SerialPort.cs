@@ -107,11 +107,19 @@ namespace System.Device.Ports.SerialPort.Tests
         /// <param name="stopBits">The stop bits</param>
         public SerialPort(string? portName, int baudRate, Parity parity, int dataBits, StopBits stopBits)
         {
-            _serialPort = SP.Create(baudRate, parity, dataBits, stopBits);
-            if (!string.IsNullOrEmpty(portName))
+            if (portName is null)
             {
-                _serialPort.PortName = portName;
+                throw new ArgumentNullException(nameof(portName), "A valid port name was expected");
             }
+
+            /*
+            if (String.IsNullOrEmpty(portName))
+            {
+                throw new ArgumentException("A valid port name was expected", nameof(portName));
+            }
+            */
+            _serialPort = SP.Create(baudRate, parity, dataBits, stopBits);
+            _serialPort.PortName = portName;
 
             _serialStream = new SerialStream(_serialPort);
         }

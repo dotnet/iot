@@ -476,24 +476,21 @@ namespace System.Device.Ports.SerialPort
             get => _portName;
             set
             {
-                if (value == _portName)
-                {
-                    return;
-                }
-
-                if (_portName == null)
-                {
-                    throw new ArgumentNullException(nameof(PortName));
-                }
-
                 if (value.Length == 0)
                 {
-                    throw new ArgumentException(string.Format(Strings.EmptyString, nameof(PortName)));
+                    // the default port name will be used on string.Empty
+                    return;
                 }
 
                 if (IsOpen)
                 {
-                    throw new InvalidOperationException(string.Format(Strings.Cant_be_set_when_open, nameof(PortName)));
+                    throw new InvalidOperationException(
+                        string.Format(Strings.Cant_be_set_when_open, nameof(PortName)));
+                }
+
+                if (value == _portName)
+                {
+                    return;
                 }
 
                 _portName = value;
