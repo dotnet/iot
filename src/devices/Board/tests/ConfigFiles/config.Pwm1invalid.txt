@@ -1,0 +1,1 @@
+dtoverlay=pwm,pin=19,func=2

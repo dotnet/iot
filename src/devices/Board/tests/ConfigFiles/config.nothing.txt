@@ -1,0 +1,3 @@
+Nothing in there
+So no i2c, no spi and no pwm
+configured
