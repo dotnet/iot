@@ -144,7 +144,7 @@ namespace WeatherStation
             console.ReplaceLine(0, "Startup!");
             console.ReplaceLine(1, "Initializing BME680...");
             InitBme();
-            _button = new GpioButton(Button, gpioController, false, PinMode.Input, TimeSpan.FromMilliseconds(50));
+            _button = new GpioButton(Button, false, true, gpioController, false, TimeSpan.FromMilliseconds(50));
             _button.Press += (sender, e) =>
             {
                 _page = (_page + 1) % TotalPages;
