@@ -68,13 +68,8 @@ namespace Iot.Device.Board
         /// <remarks>No test is performed whether the given device exists and is usable</remarks>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
-            if (_devices.TryGetValue(deviceAddress, out I2cDevice? device))
-            {
-                return device;
-            }
-
             I2cDevice newDevice = _busInstance.CreateDevice(deviceAddress);
-            _devices.Add(deviceAddress, newDevice);
+            _devices[deviceAddress] = newDevice;
             return newDevice;
         }
 

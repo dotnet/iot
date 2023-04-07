@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Linq;
 using System.Threading;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft232H
 {
@@ -19,16 +20,16 @@ namespace Iot.Device.Ft232H
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public Ft232HDevice DeviceInformation { get; private set; }
+        public Ftx232HDevice DeviceInformation { get; private set; }
 
         /// <inheritdoc/>
-        protected override int PinCount => Ft232HDevice.PinCountConst;
+        protected override int PinCount => DeviceInformation.PinCount;
 
         /// <summary>
         /// Creates a GPIO Driver
         /// </summary>
         /// <param name="deviceInformation">The FT232H device</param>
-        internal Ft232HGpio(Ft232HDevice deviceInformation)
+        internal Ft232HGpio(Ftx232HDevice deviceInformation)
         {
             DeviceInformation = deviceInformation;
             // Open device
@@ -80,6 +81,11 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
+            if ((pinNumber < 0) || (pinNumber >= PinCount))
+            {
+                throw new ArgumentException($"Pin number can only be between 0 and {PinCount - 1}");
+            }
+
             if (pinNumber < 8)
             {
                 if (mode != PinMode.Output)
@@ -115,6 +121,11 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         protected override PinMode GetPinMode(int pinNumber)
         {
+            if ((pinNumber < 0) || (pinNumber >= PinCount))
+            {
+                throw new ArgumentException($"Pin number can only be between 0 and {PinCount - 1}");
+            }
+
             if (pinNumber < 8)
             {
                 return ((DeviceInformation.GpioLowDir >> pinNumber) & 0x01) == 0x01 ? PinMode.Output : PinMode.Input;
@@ -132,6 +143,11 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         protected override PinValue Read(int pinNumber)
         {
+            if ((pinNumber < 0) || (pinNumber >= PinCount))
+            {
+                throw new ArgumentException($"Pin number can only be between 0 and {PinCount - 1}");
+            }
+
             if (pinNumber < 8)
             {
                 var val = DeviceInformation.GetGpioValuesLow();
@@ -152,6 +168,11 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         protected override void Write(int pinNumber, PinValue value)
         {
+            if ((pinNumber < 0) || (pinNumber >= PinCount))
+            {
+                throw new ArgumentException($"Pin number can only be between 0 and {PinCount - 1}");
+            }
+
             if (pinNumber < 8)
             {
                 if (value == PinValue.High)

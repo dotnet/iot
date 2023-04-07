@@ -6,11 +6,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="Ft2232HDevice.cs" />
     <Compile Include="Ft232HDevice.cs" />
     <Compile Include="Ft232HGpio.cs" />
-    <Compile Include="Ft232HI2c.cs" />
     <Compile Include="Ft232HI2cBus.cs" />
+    <Compile Include="Ft232HI2cDevice.cs" />
     <Compile Include="Ft232HSpi.cs" />
+    <Compile Include="Ft4232HDevice.cs" />
+    <Compile Include="Ftx232HDevice.cs" />
   </ItemGroup>
 
   <ItemGroup>

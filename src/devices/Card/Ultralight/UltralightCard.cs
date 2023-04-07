@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 using Iot.Device.Common;
 using Iot.Device.Ndef;
 using Microsoft.Extensions.Logging;
@@ -76,7 +77,7 @@ namespace Iot.Device.Card.Ultralight
         /// <param name="ATQA">The ATQA</param>
         /// <param name="SAK">The SAK</param>
         /// <returns>True if this is an Ultralight</returns>
-        public static bool IsUltralightCard(ushort ATQA, byte SAK) => (ATQA == 0x4400) && (SAK == 0);
+        public static bool IsUltralightCard(ushort ATQA, byte SAK) => (ATQA == 0x0044) && (SAK == 0);
 
         /// <summary>
         /// Constructor for Ultralight
@@ -279,7 +280,13 @@ namespace Iot.Device.Card.Ultralight
                     throw new ArgumentException("For fast read, last block has to be more than first block");
                 }
 
-                dataOut = new byte[(_endAddress - BlockNumber + 1) * 4];
+                var dataOutLength = (_endAddress - BlockNumber + 1) * 4;
+                if (dataOutLength > _rfid.MaximumReadSize)
+                {
+                    throw new ArgumentException($"Fast read is too large for transceiver - maximum is {_rfid.MaximumReadSize / 4} blocks");
+                }
+
+                dataOut = new byte[dataOutLength];
             }
             else if (Command == UltralightCommand.GetVersion)
             {
@@ -297,7 +304,8 @@ namespace Iot.Device.Card.Ultralight
                 dataOut = new byte[3];
             }
 
-            var ret = _rfid.Transceive(Target, Serialize(), dataOut.AsSpan());
+            var protocol = (Command == UltralightCommand.WriteCompatible) ? NfcProtocol.Mifare : NfcProtocol.Iso14443_3;
+            var ret = _rfid.Transceive(Target, Serialize(), dataOut.AsSpan(), protocol);
             _logger.LogDebug($"{nameof(UltralightCommand)}: {Command}, Target: {Target}, Data: {BitConverter.ToString(Serialize())}, Success: {ret}, Dataout: {BitConverter.ToString(dataOut)}");
             if ((ret > 0) && awaitingData)
             {
@@ -338,14 +346,14 @@ namespace Iot.Device.Card.Ultralight
             {
                 Span<byte> toSend = stackalloc byte[2] { (byte)UltralightCommand.Read16Bytes, 2 };
                 Span<byte> dataOut = stackalloc byte[16];
-                _rfid.Transceive(Target, toSend, dataOut);
+                _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                 return (dataOut[2] & (0b0000_0001 << page)) == (0b0000_0001 << page);
             }
             else if ((page >= 0x08) && (page <= 0x0F))
             {
                 Span<byte> toSend = stackalloc byte[2] { (byte)UltralightCommand.Read16Bytes, 2 };
                 Span<byte> dataOut = stackalloc byte[16];
-                _rfid.Transceive(Target, toSend, dataOut);
+                _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                 return (dataOut[3] & (0b0000_0001 << (page - 8))) == (0b0000_0001 << (page - 8));
             }
             else
@@ -357,7 +365,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtag203:
                         // Read 0x24
                         toSend[1] = 0x24;
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0, 1 and 2 are used , 2 pages lock with specific cases
                         if ((page >= 16) && (page <= 31))
                         {
@@ -376,7 +384,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtag213F:
                     case UltralightCardType.UltralightNtag212:
                         // Read 0x28
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0, 1 and 2 are used , 2 pages lock with specific cases
                         if ((page >= 16) && (page <= 31))
                         {
@@ -393,7 +401,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtag215:
                         // Read 0x82
                         toSend[1] = 0x82;
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0 and 16 pages blocks
                         if ((page >= 16) && (page <= 129))
                         {
@@ -408,7 +416,7 @@ namespace Iot.Device.Card.Ultralight
                     case UltralightCardType.UltralightNtagI2cNT3H1101W0:
                         // Read 0xE2
                         toSend[1] = 0xE2;
-                        _rfid.Transceive(Target, toSend, dataOut);
+                        _rfid.Transceive(Target, toSend, dataOut, NfcProtocol.Iso14443_3);
                         // byte 0 and 1 for 16 pages blocks
                         if ((page >= 16) && (page <= 143))
                         {
@@ -435,7 +443,6 @@ namespace Iot.Device.Card.Ultralight
         /// </summary>
         public int NumberBlocks => UltralightCardType switch
         {
-            // Whenever NdefCapacity + 9 is used, then it's a guess
             UltralightCardType.UltralightNtag210 => 16,
             UltralightCardType.UltralightNtag212 => 45,
             UltralightCardType.UltralightNtag213 => 45,
@@ -443,10 +450,10 @@ namespace Iot.Device.Card.Ultralight
             UltralightCardType.UltralightNtag215 => 135,
             UltralightCardType.UltralightNtag216 => 231,
             UltralightCardType.UltralightNtag216F => 231,
-            UltralightCardType.UltralightEV1MF0UL1101 => 41,
-            UltralightCardType.UltralightEV1MF0ULH1101 => 41,
-            UltralightCardType.UltralightEV1MF0UL2101 => NdefCapacity + 9,
-            UltralightCardType.UltralightEV1MF0ULH2101 => NdefCapacity + 9,
+            UltralightCardType.UltralightEV1MF0UL1101 => 20,
+            UltralightCardType.UltralightEV1MF0ULH1101 => 20,
+            UltralightCardType.UltralightEV1MF0UL2101 => 41,
+            UltralightCardType.UltralightEV1MF0ULH2101 => 41,
             UltralightCardType.UltralightNtagI2cNT3H1101 => 231,
             UltralightCardType.UltralightNtagI2cNT3H1101W0 => 231,
             UltralightCardType.UltralightNtagI2cNT3H2111W0 => 476 + 9,
@@ -479,12 +486,12 @@ namespace Iot.Device.Card.Ultralight
 
             // We need to add 0x03 then the length on 1 or 2 bytes then the trailer 0xFE
             int messageLengthBytes = message.Length > 254 ? 3 : 1;
-            if (messageLengthBytes > NdefCapacity)
+            Span<byte> serializedMessage = stackalloc byte[message.Length + 2 + messageLengthBytes];
+            if (serializedMessage.Length > NdefCapacity)
             {
-                return false;
+                throw new ArgumentOutOfRangeException(nameof(message), $"NDEF message too large, maximum {NdefCapacity} bytes, current size is {serializedMessage.Length} bytes");
             }
 
-            Span<byte> serializedMessage = stackalloc byte[message.Length + 2 + messageLengthBytes];
             message.Serialize(serializedMessage.Slice(1 + messageLengthBytes));
             serializedMessage[0] = 0x03;
             if (messageLengthBytes == 1)
@@ -594,7 +601,7 @@ namespace Iot.Device.Card.Ultralight
                     Command = UltralightCommand.Write4Bytes;
                     Data = new byte[4] { 0xE1, 0x10, (byte)(NdefCapacity / 8), 0x00 };
                     res = RunUltralightCommand();
-                    if (res <= 0)
+                    if (res < 0)
                     {
                         return false;
                     }
@@ -606,12 +613,10 @@ namespace Iot.Device.Card.Ultralight
             }
 
             BlockNumber++;
-            Data![0] = 0x03; // NDEF start marker
-            Data[1] = 0x00; // Length of message
-            Data[2] = 0xFE; // NDEF end marker
-            Data[3] = 0x00; // Empty
+            Data = new byte[4] { 0x03, 0x00, 0xFE, 0x00 }; // NDEF start marker, length 0, NDEF end marker, empty
+            Command = UltralightCommand.Write4Bytes;
             res = RunUltralightCommand();
-            if (res <= 0)
+            if (res < 0)
             {
                 return false;
             }
@@ -746,7 +751,27 @@ namespace Iot.Device.Card.Ultralight
                 return -1;
             }
 
-            return Data![0] + Data[1] << 8 + Data[2] << 16;
+            return Data![0] + (Data[1] << 8) + (Data[2] << 16);
+        }
+
+        /// <summary>
+        /// Increase a counter by a specified amount
+        /// </summary>
+        /// <param name="counter">A valid counter value, can vary depending on the card. 0xFF will ignore the value and use the one set in Counter</param>
+        /// <param name="increment">The amount to increment the counter. If negative, it will use the value of Data</param>
+        /// <returns>True if success</returns>
+        public bool IncreaseCounter(byte counter = 0xFF, int increment = -1)
+        {
+            Command = UltralightCommand.IncreaseCounter;
+            Counter = counter != 0xFF ? counter : Counter;
+            if (increment >= 0)
+            {
+                Data = new byte[4];
+                BinaryPrimitives.WriteInt32LittleEndian(Data, increment);
+            }
+
+            var ret = RunUltralightCommand();
+            return ret >= 0;
         }
 
         /// <summary>
@@ -959,6 +984,17 @@ namespace Iot.Device.Card.Ultralight
                     break;
                 case UltralightCommand.ReadCounter:
                     ser = new byte[2] { (byte)Command, Counter };
+                    break;
+                case UltralightCommand.IncreaseCounter:
+                    if (Data is null)
+                    {
+                        throw new ArgumentException($"Card is not configured for counter increase.");
+                    }
+
+                    ser = new byte[6];
+                    ser[0] = (byte)Command;
+                    ser[1] = Counter;
+                    Data.AsSpan(0, 3).CopyTo(ser.AsSpan(2));    // 24-bit increment, fourth byte ignored
                     break;
                 case UltralightCommand.PasswordAuthentication:
                     if (AuthenticationKey is null or { Length: not 4 })

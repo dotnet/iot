@@ -48,14 +48,12 @@ __UbuntuPackages+=" symlinks"
 __UbuntuPackages+=" libicu-dev"
 __UbuntuPackages+=" liblttng-ust-dev"
 __UbuntuPackages+=" libunwind8-dev"
-__UbuntuPackages+=" libnuma-dev"
 
 __AlpinePackages+=" gettext-dev"
 __AlpinePackages+=" icu-dev"
 __AlpinePackages+=" libunwind-dev"
 __AlpinePackages+=" lttng-ust-dev"
 __AlpinePackages+=" compiler-rt-static"
-__AlpinePackages+=" numactl-dev"
 
 # runtime libraries' dependencies
 __UbuntuPackages+=" libcurl4-openssl-dev"
@@ -393,9 +391,9 @@ elif [[ "$__CodeName" == "illumos" ]]; then
         --with-gnu-ld --disable-nls --disable-libgomp --disable-libquadmath --disable-libssp --disable-libvtv --disable-libcilkrts --disable-libada --disable-libsanitizer \
         --disable-libquadmath-support --disable-shared --enable-tls
     make -j "$JOBS" && make install && cd ..
-    BaseUrl=https://pkgsrc.smartos.org
+    BaseUrl=https://pkgsrc.joyent.com
     if [[ "$__UseMirror" == 1 ]]; then
-        BaseUrl=https://pkgsrc.smartos.skylime.net
+        BaseUrl=http://pkgsrc.smartos.skylime.net
     fi
     BaseUrl="$BaseUrl/packages/SmartOS/trunk/${__illumosArch}/All"
     echo "Downloading manifest"
@@ -404,8 +402,7 @@ elif [[ "$__CodeName" == "illumos" ]]; then
     read -ra array <<<"$__IllumosPackages"
     for package in "${array[@]}"; do
         echo "Installing '$package'"
-        # find last occurrence of package in listing and extract its name
-        package="$(sed -En '/.*href="('"$package"'-[0-9].*).tgz".*/h;$!d;g;s//\1/p' All)"
+        package="$(grep ">$package-[0-9]" All | sed -En 's/.*href="(.*)\.tgz".*/\1/p')"
         echo "Resolved name '$package'"
         wget "$BaseUrl"/"$package".tgz
         ar -x "$package".tgz
@@ -503,7 +500,7 @@ elif [[ -n "$__CodeName" ]]; then
         popd
     fi
 elif [[ "$__Tizen" == "tizen" ]]; then
-    ROOTFS_DIR="$__RootfsDir" "$__CrossDir/tizen-build-rootfs.sh" "$__BuildArch"
+    ROOTFS_DIR="$__RootfsDir" "$__CrossDir/$__BuildArch/tizen-build-rootfs.sh"
 else
     echo "Unsupported target platform."
     usage;

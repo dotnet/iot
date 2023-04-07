@@ -293,8 +293,8 @@ namespace Iot.Device.Nmea0183.Tests
         {
             GeographicPosition start = new GeographicPosition(0, 1, 0);
             GeographicPosition end = new GeographicPosition(0, 2, 0);
-            var points = GreatCircle.CalculateRoute(start, end, 1000);
-            Assert.Equal(112, points.Count);
+            var points = GreatCircle.CalculateRoute(start, end, Length.FromMeters(1000));
+            Assert.Equal(113, points.Count);
             double previousLon = 0.9;
             foreach (var pt in points)
             {
@@ -308,7 +308,7 @@ namespace Iot.Device.Nmea0183.Tests
         public void RouteCalculationForward()
         {
             GeographicPosition start = new GeographicPosition(0, 1, 0);
-            var points = GreatCircle.CalculateRoute(start, 180, 1000, 100);
+            var points = GreatCircle.CalculateRoute(start, Angle.FromDegrees(180), Length.FromMeters(1000), Length.FromMeters(100));
             Assert.Equal(11, points.Count);
             double previousLat = 1.1;
             foreach (var pt in points)

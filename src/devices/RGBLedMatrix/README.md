@@ -6,7 +6,7 @@ RGB LED Matrix interface protocol is sometimes referred as `HUB75`.
 
 - 32x16 32x32 RGB led matrix [documentation](https://learn.adafruit.com/32x16-32x32-rgb-led-matrix/)
 - TLC59283 [datasheet](http://www.ti.com/lit/ds/symlink/tlc59283.pdf)
-- FM6124 [datasheet](https://datasheet4u.com/datasheet-parts/FM6124-datasheet.php?id=1309677) (diagram on page 3)
+- FM6124 [datasheet](https://datasheet.lcsc.com/lcsc/2108230930_Shenzhen-Fuman-Elec-FM6124_C2887410.pdf) (diagram on page 3)
 
 ## Usage
 

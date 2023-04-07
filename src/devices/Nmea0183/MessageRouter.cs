@@ -173,7 +173,7 @@ namespace Iot.Device.Nmea0183
                 if (source != this)
                 {
                     // We're not the source, so this should use the sink here.
-                    DispatchSentenceEvents(sentence);
+                    DispatchSentenceEvents(source, sentence);
                     return;
                 }
 
