@@ -15,6 +15,8 @@ namespace Iot.Device.Card.Mifare
     /// </summary>
     public struct MifareApplicationIdentifier : IEquatable<MifareApplicationIdentifier>
     {
+        private readonly ushort _appId;
+
         /// <summary>
         /// Construct a MifareApplicationIdentifier from an ushort
         /// </summary>
@@ -151,7 +153,5 @@ namespace Iot.Device.Card.Mifare
         public static MifareApplicationIdentifier AdminSectorNotApplicable = new(0x0005);
 
         #endregion
-
-        private readonly ushort _appId;
     }
 }

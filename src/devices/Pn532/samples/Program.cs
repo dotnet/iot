@@ -355,8 +355,7 @@ void MifareWriteNdef(Pn532 pn532)
         {
             // The directory can optionally indicate which sector belongs to the
             // card publisher.
-            var cardPublisherSector = directory.CardPublisherSector;
-            if (cardPublisherSector != 0)
+            if (directory.CardPublisherSector != 0)
             {
                 Console.WriteLine($"Card directory (CardPublisherSector = {directory.CardPublisherSector}):");
             }

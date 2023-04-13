@@ -15,6 +15,9 @@ namespace Iot.Device.Card.Mifare
     /// </summary>
     public class MifareDirectory
     {
+        private readonly MifareCard _card;
+        private readonly byte[] _data;
+
         /// <summary>
         /// Create an empty MifareDirectory for a specified MifareCard
         /// </summary>
@@ -405,8 +408,5 @@ namespace Iot.Device.Card.Mifare
             RecalculateCrc();
             return new MifareDirectoryEntry(appId, entry.FirstSector, numberOfSectors);
         }
-
-        private readonly MifareCard _card;
-        private readonly byte[] _data;
     }
 }
