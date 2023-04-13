@@ -100,6 +100,15 @@ namespace Iot.Device.Card.Mifare
         public byte[] Data { get; set; } = new byte[0];
 
         /// <summary>
+        /// Reselect the card after a card command fails
+        /// After an error, the card will not respond to any further commands
+        /// until it is reselected. If this property is false, the caller
+        /// is responsible for calling ReselectCard when RunMifareCardCommand
+        /// returns an error (-1).
+        /// </summary>
+        public bool ReselectAfterError { get; set; } = false;
+
+        /// <summary>
         /// Determine the block group corresponding to a block number
         /// </summary>
         /// <param name="blockNumber">block number</param>
@@ -158,6 +167,11 @@ namespace Iot.Device.Card.Mifare
             if ((ret > 0) && (Command == MifareCardCommand.Read16Bytes))
             {
                 Data = dataOut;
+            }
+
+            if (ret < 0 && ReselectAfterError)
+            {
+                ReselectCard();
             }
 
             return ret;

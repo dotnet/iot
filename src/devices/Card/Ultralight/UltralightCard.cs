@@ -72,6 +72,15 @@ namespace Iot.Device.Card.Ultralight
         public byte[]? SerialNumber { get; set; }
 
         /// <summary>
+        /// Reselect the card after a card command fails
+        /// After an error, the card will not respond to any further commands
+        /// until it is reselected. If this property is false, the caller
+        /// is responsible for calling ReselectCard when RunUltralightCommand
+        /// returns an error (-1).
+        /// </summary>
+        public bool ReselectAfterError { get; set; } = false;
+
+        /// <summary>
         /// Check if this is a Ultralight card type
         /// </summary>
         /// <param name="ATQA">The ATQA</param>
@@ -310,6 +319,11 @@ namespace Iot.Device.Card.Ultralight
             if ((ret > 0) && awaitingData)
             {
                 Data = dataOut;
+            }
+
+            if (ret < 0 && ReselectAfterError)
+            {
+                ReselectCard();
             }
 
             return ret;
