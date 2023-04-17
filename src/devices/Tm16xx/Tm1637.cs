@@ -34,7 +34,7 @@ namespace Iot.Device.Tm16xx
         /// <summary>
         /// Sets the screen on or off.
         /// </summary>
-        [Obsolete($"This is kept for code backward compatible. Uses {nameof(IsScreenOn)} instead.")]
+        [Obsolete($"This is kept for code backward compatible. Uses IsScreenOn instead.")]
         public bool ScreenOn
         {
             get => IsScreenOn;
@@ -44,7 +44,7 @@ namespace Iot.Device.Tm16xx
         /// <summary>
         /// Gets or sets the screen brightness. Value must be in range from 0 to 7. For TM1637, 7 is the brightest.
         /// </summary>
-        [Obsolete($"This is kept for code backward compatible. Uses {nameof(ScreenBrightness)} instead.")]
+        [Obsolete($"This is kept for code backward compatible. Uses ScreenBrightness instead.")]
         public byte Brightness
         {
             get => ScreenBrightness;
