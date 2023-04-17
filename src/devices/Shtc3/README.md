@@ -5,7 +5,7 @@ To reduce power cosumption this project use capability of sensor to allow measur
 
 ## Documentation
 
-- SHTC3 [datasheet](https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/2_Humidity_Sensors/Datasheets/Sensirion_Humidity_Sensors_SHTC3_Datasheet.pdf)
+- SHTC3 [datasheet](https://sensirion.com/media/documents/643F9C8E/63A5A436/Datasheet_SHTC3.pdf)
 
 ## Usage
 

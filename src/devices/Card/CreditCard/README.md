@@ -16,7 +16,7 @@ This class has been tested with various American Express, Visa and Mastercard, m
 Some resources to understand how to communicate with a Credit Card and how to get the data out of it:
 
 - [The EMV tutorial](https://www.openscdp.org/scripts/tutorial/emv/index.html) from the OpenSCDP web site
-- [A good list of EMV & NFC Tags](https://www.eftlab.co.uk/knowledge-base/145-emv-nfc-tags/) from EFTLab
+- [A good list of EMV & NFC Tags](https://www.eftlab.co.uk/knowledge-base/complete-list-of-emv-nfc-tags) from EFTLab
 - [A complete list of APDU response](https://www.eftlab.co.uk/knowledge-base/complete-list-of-apdu-responses/) from EFTLab
 - [A simple TLV parser](https://www.emvlab.org/tlvutils/) from emvlab.org
 - [Book with all the contact card specifications](https://www.emvco.com/emv-technologies/contact/) and [contactless](https://www.emvco.com/emv-technologies/contactless/) from EMVCo. Note that those are the official specifications. Main book used for this decoder is the contactless EMV 4.3 book 3.

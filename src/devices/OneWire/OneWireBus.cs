@@ -42,7 +42,6 @@ namespace Iot.Device.OneWire
             }
         }
 
-#if !NETSTANDARD2_0
         /// <summary>
         /// Start a new scan for device changes on the bus.
         /// </summary>
@@ -50,7 +49,6 @@ namespace Iot.Device.OneWire
         /// <param name="numScans">Number of scans to do to find numDevices devices. Use -1 for platform default.</param>
         /// <returns>Task representing the async work.</returns>
         public Task ScanForDeviceChangesAsync(int numDevices = -1, int numScans = -1) => ScanForDeviceChangesInternalAsync(this, numDevices, numScans);
-#endif
 
         /// <summary>
         /// Start a new scan for device changes on the bus.

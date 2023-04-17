@@ -18,6 +18,7 @@ namespace Iot.Device.Arduino
         private readonly IReadOnlyCollection<SupportedPinConfiguration> _supportedPinConfigurations;
         private readonly Dictionary<int, CallbackContainer> _callbackContainers;
         private readonly ConcurrentDictionary<int, PinMode> _pinModes;
+        private readonly ConcurrentDictionary<int, PinValue> _pinValues;
         private readonly object _callbackContainersLock;
         private readonly AutoResetEvent _waitForEventResetEvent;
         private readonly ILogger _logger;
@@ -31,6 +32,7 @@ namespace Iot.Device.Arduino
             _waitForEventResetEvent = new AutoResetEvent(false);
             _callbackContainersLock = new object();
             _pinModes = new ConcurrentDictionary<int, PinMode>();
+            _pinValues = new ConcurrentDictionary<int, PinValue>();
             _outputPinValues = new ConcurrentDictionary<int, PinValue?>();
             _logger = this.GetCurrentClassLogger();
 
@@ -54,11 +56,14 @@ namespace Iot.Device.Arduino
             {
                 throw new ArgumentOutOfRangeException(nameof(pinNumber), $"Pin {pinNumber} is not valid");
             }
+
+            _pinValues.TryAdd(pinNumber, PinValue.Low);
         }
 
         protected override void ClosePin(int pinNumber)
         {
             _pinModes.TryRemove(pinNumber, out _);
+            _pinValues.TryRemove(pinNumber, out _);
         }
 
         protected override void SetPinMode(int pinNumber, PinMode mode)
@@ -82,7 +87,7 @@ namespace Iot.Device.Arduino
                     throw new NotSupportedException($"Mode {mode} is not supported for this operation");
             }
 
-            var pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
+            SupportedPinConfiguration? pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
             if (pinConfig == null || !pinConfig.PinModes.Contains(firmataMode))
             {
                 _logger.LogError($"Mode {mode} is not supported on Pin {pinNumber}");
@@ -98,12 +103,12 @@ namespace Iot.Device.Arduino
 
         protected override PinMode GetPinMode(int pinNumber)
         {
-            if (_pinModes.TryGetValue(pinNumber, out var existingValue))
+            if (_pinModes.TryGetValue(pinNumber, out PinMode existingValue))
             {
                 return existingValue;
             }
 
-            var mode = _device.GetPinMode(pinNumber);
+            byte mode = _device.GetPinMode(pinNumber);
 
             PinMode ret;
             if (mode == SupportedMode.DigitalOutput.Value)
@@ -146,14 +151,17 @@ namespace Iot.Device.Arduino
                     return false;
             }
 
-            var pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
+            SupportedPinConfiguration? pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
             return pinConfig != null && pinConfig.PinModes.Contains(firmataMode);
         }
 
         protected override PinValue Read(int pinNumber)
         {
-            return _device.ReadDigitalPin(pinNumber);
+            _pinValues[pinNumber] = _device.ReadDigitalPin(pinNumber);
+            return _pinValues[pinNumber];
         }
+
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         protected override void Write(int pinNumber, PinValue value)
         {
@@ -168,6 +176,7 @@ namespace Iot.Device.Arduino
 
             _device.WriteDigitalPin(pinNumber, value);
             _outputPinValues.AddOrUpdate(pinNumber, x => value, (y, z) => value);
+            _pinValues[pinNumber] = value;
         }
 
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
@@ -220,14 +229,14 @@ namespace Iot.Device.Arduino
         {
             lock (_callbackContainersLock)
             {
-                if (_callbackContainers.TryGetValue(pinNumber, out var cb))
+                if (_callbackContainers.TryGetValue(pinNumber, out CallbackContainer? cb))
                 {
                     cb.EventTypes = cb.EventTypes | eventTypes;
                     cb.OnPinChanged += callback;
                 }
                 else
                 {
-                    var cb2 = new CallbackContainer(pinNumber, eventTypes);
+                    CallbackContainer cb2 = new CallbackContainer(pinNumber, eventTypes);
                     cb2.OnPinChanged += callback;
                     _callbackContainers.Add(pinNumber, cb2);
                 }
@@ -238,7 +247,7 @@ namespace Iot.Device.Arduino
         {
             lock (_callbackContainersLock)
             {
-                if (_callbackContainers.TryGetValue(pinNumber, out var cb))
+                if (_callbackContainers.TryGetValue(pinNumber, out CallbackContainer? cb))
                 {
                     cb.OnPinChanged -= callback;
                     if (cb.NoEventsConnected)
@@ -283,6 +292,7 @@ namespace Iot.Device.Arduino
                     _callbackContainers.Clear();
                 }
 
+                _pinValues.Clear();
                 _outputPinValues.Clear();
                 _device.DigitalPortValueUpdated -= FirmataOnDigitalPortValueUpdated;
             }
@@ -319,7 +329,7 @@ namespace Iot.Device.Arduino
             public void FireOnPinChanged(PinEventTypes eventType)
             {
                 // Copy event instance, prevents problems when elements are added or removed at the same time
-                var threadSafeCopy = OnPinChanged;
+                PinChangeEventHandler? threadSafeCopy = OnPinChanged;
                 threadSafeCopy?.Invoke(PinNumber, new PinValueChangedEventArgs(eventType, PinNumber));
             }
         }

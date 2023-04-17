@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Display.csproj" />
+    <Compile Include="Program.BiColorBargraph.cs" />
+  </ItemGroup>
+</Project>

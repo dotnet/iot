@@ -57,6 +57,11 @@ namespace Iot.Device
             stream.Write(data.ToArray(), 0, data.Length);
         }
 
+        public static void Write(this Stream stream, ReadOnlySpan<byte> data)
+        {
+            stream.Write(data.ToArray(), 0, data.Length);
+        }
+
         public static int Read(this Stream stream, Span<byte> data)
         {
             byte[] rawData = new byte[data.Length];

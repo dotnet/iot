@@ -45,6 +45,7 @@ namespace Iot.Device.Arduino
             lock (_lock)
             {
                 _container.Clear();
+                Monitor.PulseAll(_lock);
             }
         }
 
@@ -71,24 +72,33 @@ namespace Iot.Device.Arduino
                     {
                         // Cannot use FirstOrDefault here, because we need to be able to distinguish between
                         // finding nothing and finding an empty (null, default) element
-                        for (var index = 0; index < _container.Count; index++)
+                        for (int index = 0; index < _container.Count; index++)
                         {
                             T? elem = _container[index];
                             if (predicate(elem))
                             {
                                 _container.RemoveAt(index);
+                                Monitor.PulseAll(_lock);
                                 element = elem;
                                 return true;
                             }
                         }
 
-                        if (sw.Elapsed > timeout)
+                        TimeSpan remaining = timeout - sw.Elapsed;
+
+                        if (remaining < TimeSpan.Zero)
                         {
                             return false;
                         }
 
-                        TimeSpan remaining = timeout - sw.Elapsed;
-                        if (remaining <= TimeSpan.Zero || !Monitor.Wait(_lock, remaining))
+                        if (remaining > TimeSpan.FromMilliseconds(500))
+                        {
+                            remaining = TimeSpan.FromMilliseconds(500);
+                        }
+
+                        bool waitSuccess = Monitor.Wait(_lock, remaining);
+
+                        if (sw.Elapsed > timeout && !waitSuccess)
                         {
                             return false;
                         }

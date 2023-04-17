@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../Seesaw.csproj" />
+    <Compile Include="Seesaw.Sample.SoilSensor.cs" />
+  </ItemGroup>
+</Project>

@@ -23,7 +23,9 @@ namespace Iot.Device.Nmea0183
     /// </summary>
     public class NmeaUdpServer : NmeaSinkAndSource
     {
-        private readonly int _port;
+        private readonly int _localPort;
+        private readonly int _remotePort;
+
         private UdpClient? _server;
         private NmeaParser? _parser;
         private UdpClientStream? _clientStream;
@@ -33,7 +35,7 @@ namespace Iot.Device.Nmea0183
         /// </summary>
         /// <param name="name">The network source name</param>
         public NmeaUdpServer(string name)
-        : this(name, 10110)
+        : this(name, 10110, 10110)
         {
         }
 
@@ -41,11 +43,24 @@ namespace Iot.Device.Nmea0183
         /// Create an UDP server with the given name on the given port
         /// </summary>
         /// <param name="name">The network source name</param>
-        /// <param name="port">The network port to use</param>
+        /// <param name="port">The network port to use. The default is 10110</param>
         public NmeaUdpServer(string name, int port)
-        : base(name)
+        : this(name, port, port)
         {
-            _port = port;
+        }
+
+        /// <summary>
+        /// Create an UDP server with the given name on the given port, using an alternate outgoing port. The outgoing and incoming
+        /// port may be equal only if the sender and the receiver are not on the same computer.
+        /// </summary>
+        /// <param name="name">The network source name</param>
+        /// <param name="localPort">The port to receive data on</param>
+        /// <param name="remotePort">The network port to send data to (must be different than local port when communicating to a local process)</param>
+        public NmeaUdpServer(string name, int localPort, int remotePort)
+            : base(name)
+        {
+            _localPort = localPort;
+            _remotePort = remotePort;
         }
 
         /// <summary>
@@ -74,7 +89,7 @@ namespace Iot.Device.Nmea0183
                 throw new InvalidOperationException("Server already started");
             }
 
-            _server = new UdpClient(_port);
+            _server = new UdpClient(_localPort);
 
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
@@ -95,8 +110,8 @@ namespace Iot.Device.Nmea0183
                 _server.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReceiveTimeout, 1000);
             }
 
-            _clientStream = new UdpClientStream(_server, _port, this);
-            _parser = new NmeaParser($"{InterfaceName} (Port {_port})", _clientStream, _clientStream);
+            _clientStream = new UdpClientStream(_server, _localPort, _remotePort, this);
+            _parser = new NmeaParser($"{InterfaceName} (Port {_localPort})", _clientStream, _clientStream);
             _parser.OnNewSequence += OnSentenceReceivedFromClient;
             _parser.OnParserError += ParserOnParserError;
             _parser.StartDecode();
@@ -160,7 +175,8 @@ namespace Iot.Device.Nmea0183
         private sealed class UdpClientStream : Stream, IDisposable
         {
             private readonly UdpClient _client;
-            private readonly int _port;
+            private readonly int _localPort;
+            private readonly int _remotePort;
             private readonly NmeaUdpServer _parent;
             private readonly Queue<byte> _data;
 
@@ -171,10 +187,11 @@ namespace Iot.Device.Nmea0183
             private CancellationTokenSource _cancellationSource;
             private CancellationToken _cancellationToken;
 
-            public UdpClientStream(UdpClient client, int port, NmeaUdpServer parent)
+            public UdpClientStream(UdpClient client, int localPort, int remotePort, NmeaUdpServer parent)
             {
                 _client = client;
-                _port = port;
+                _localPort = localPort;
+                _remotePort = remotePort;
                 _parent = parent;
                 _data = new Queue<byte>();
                 _knownSenders = new();
@@ -208,7 +225,7 @@ namespace Iot.Device.Nmea0183
                 bool isself;
                 while (!_cancellationSource.IsCancellationRequested)
                 {
-                    pt = new IPEndPoint(IPAddress.Any, _port);
+                    pt = new IPEndPoint(IPAddress.Any, _localPort);
                     try
                     {
                         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -242,6 +259,17 @@ namespace Iot.Device.Nmea0183
                         return 0;
                     }
 
+                    if (pt.Port != _remotePort)
+                    {
+                        continue;
+                    }
+
+                    // If remote port and local port are not the same, we do not need to do these tests.
+                    if (_remotePort != _localPort)
+                    {
+                        break;
+                    }
+
                     if (_knownSenders.TryGetValue(pt.Address, out isself))
                     {
                         if (isself)
@@ -255,14 +283,22 @@ namespace Iot.Device.Nmea0183
                     }
 
                     // Check whether the given address is ours (new IPs can be added at runtime, if interfaces go up)
-                    var host = Dns.GetHostEntry(Dns.GetHostName());
-                    if (host.AddressList.Contains(pt.Address))
+                    try
                     {
-                        _knownSenders.Add(pt.Address, true);
+                        var host = Dns.GetHostEntry(Dns.GetHostName());
+                        if (host.AddressList.Contains(pt.Address))
+                        {
+                            _knownSenders.Add(pt.Address, true);
+                        }
+                        else
+                        {
+                            _knownSenders.Add(pt.Address, false);
+                        }
                     }
-                    else
+                    catch (SocketException x)
                     {
-                        _knownSenders.Add(pt.Address, false);
+                        // Dns.GetHostEntry() sometimes throws a SocketException, but only on MacOS.
+                        _parent.FireOnParserError($"Unable to get DNS entry for Host, possibly disconnected?. Error: {x.Message}", NmeaError.None);
                     }
                 }
 
@@ -326,7 +362,7 @@ namespace Iot.Device.Nmea0183
 
                     try
                     {
-                        IPEndPoint pt = new IPEndPoint(IPAddress.Broadcast, _port);
+                        IPEndPoint pt = new IPEndPoint(IPAddress.Broadcast, _remotePort);
                         _client.Send(tempBuf, count, pt);
                         _lastUnsuccessfulSend.Stop();
                     }

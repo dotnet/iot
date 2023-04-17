@@ -8,7 +8,7 @@ All operations for a current usage has been developed. The individual interrupti
 
 ![BNO055](./BNO055.jpg)
 
-BNO055 [datasheet](https://ae-bst.resource.bosch.com/media/_tech/media/datasheets/BST-BNO055-DS000.pdf)
+BNO055 [datasheet](https://www.bosch-sensortec.com/media/boschsensortec/downloads/datasheets/bst-bno055-ds000.pdf)
 
 You will find this device as ["Inertial Measurement Unit"](https://www.dexterindustries.com/product/imu-sensor/) or ["Adafruit BNO055 Absolute Orientation Sensor"](https://learn.adafruit.com/adafruit-bno055-absolute-orientation-sensor/overview)
 

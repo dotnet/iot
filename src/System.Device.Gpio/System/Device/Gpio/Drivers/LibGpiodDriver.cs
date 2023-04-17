@@ -6,6 +6,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Net.NetworkInformation;
 
 namespace System.Device.Gpio.Drivers;
 
@@ -21,6 +22,7 @@ public class LibGpiodDriver : UnixDriver
     private readonly ConcurrentDictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
     private readonly ConcurrentDictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler;
     private readonly int _pinCount;
+    private readonly ConcurrentDictionary<int, PinValue> _pinValue;
     private SafeChipHandle _chip;
 
     /// <inheritdoc />
@@ -76,6 +78,7 @@ public class LibGpiodDriver : UnixDriver
             _pinCount = Interop.libgpiod.gpiod_chip_num_lines(_chip);
             _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodDriverEventHandler>();
             _pinNumberToSafeLineHandle = new ConcurrentDictionary<int, SafeLineHandle>();
+            _pinValue = new ConcurrentDictionary<int, PinValue>();
         }
         catch (DllNotFoundException)
         {
@@ -134,6 +137,7 @@ public class LibGpiodDriver : UnixDriver
                 pinHandle?.Dispose();
                 // We know this works
                 _pinNumberToSafeLineHandle.TryRemove(pinNumber, out _);
+                _pinValue.TryRemove(pinNumber, out _);
             }
         }
     }
@@ -211,6 +215,9 @@ public class LibGpiodDriver : UnixDriver
             }
 
             _pinNumberToSafeLineHandle.TryAdd(pinNumber, pinHandle);
+            // This is setting up a default value without reading the driver as it's the default behavior.
+            // If the Setmode with an initial value is used, this is going to be corrected automatically
+            _pinValue.TryAdd(pinNumber, PinValue.Low);
         }
     }
 
@@ -225,11 +232,15 @@ public class LibGpiodDriver : UnixDriver
                 throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
             }
 
+            _pinValue[pinNumber] = result;
             return result;
         }
 
         throw ExceptionHelper.GetInvalidOperationException(ExceptionResource.PinNotOpenedError, pin: pinNumber);
     }
+
+    /// <inheritdoc/>
+    protected internal override void Toggle(int pinNumber) => Write(pinNumber, !_pinValue[pinNumber]);
 
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
@@ -307,6 +318,7 @@ public class LibGpiodDriver : UnixDriver
                     pinNumber);
             }
 
+            _pinValue[pinNumber] = initialValue;
             pinHandle.PinMode = mode;
             return;
         }
@@ -372,6 +384,7 @@ public class LibGpiodDriver : UnixDriver
         }
 
         Interop.libgpiod.gpiod_line_set_value(pinHandle, (value == PinValue.High) ? 1 : 0);
+        _pinValue[pinNumber] = value;
     }
 
     /// <inheritdoc/>
@@ -399,6 +412,7 @@ public class LibGpiodDriver : UnixDriver
             }
 
             _pinNumberToSafeLineHandle.Clear();
+            _pinValue.Clear();
         }
 
         _chip?.Dispose();

@@ -6,7 +6,7 @@ The MAX44009 ambient light sensor features an I2C digital output that is ideal f
 
 ## Documentation
 
-- You can find the datasheet [here](https://cdn.datasheetspdf.com/pdf-down/M/A/X/MAX44009_MaximIntegratedProducts.pdf)
+- You can find the datasheet [here](https://www.analog.com/media/en/technical-documentation/data-sheets/max44009.pdf)
 
 ## Usage
 

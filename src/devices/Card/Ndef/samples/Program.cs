@@ -30,7 +30,7 @@ var nfc = Console.ReadKey();
 Console.WriteLine();
 if (nfc is not { KeyChar: '1' or '2' })
 {
-    Console.WriteLine("Please chose either PN532 or PN1850");
+    Console.WriteLine("Please chose either PN532 or PN5180");
     return;
 }
 

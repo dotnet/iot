@@ -1,42 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!-- https://learn.microsoft.com/en-us/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
-    <DiagnosticId>CP1003</DiagnosticId>
-    <Target>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Target>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0008</DiagnosticId>
-    <Target>T:System.Device.Spi.DataFlow</Target>
-    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
-    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
-  </Suppression>
-  <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:System.Device.Spi.DataFlow.#ctor</Target>
-    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
-    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0008</DiagnosticId>
-    <Target>T:System.Device.Spi.SpiMode</Target>
-    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
-    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:System.Device.Spi.SpiMode.#ctor</Target>
-    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
-    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0008</DiagnosticId>
-    <Target>T:System.Device.Gpio.PinChangeEventHandler</Target>
-    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
-    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0008</DiagnosticId>
-    <Target>T:System.Device.Gpio.PinEventTypes</Target>
+    <Target>M:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.#ctor</Target>
     <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
   </Suppression>
@@ -47,20 +14,8 @@
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0008</DiagnosticId>
-    <Target>T:System.Device.Gpio.PinMode</Target>
-    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
-    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
-  </Suppression>
-  <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:System.Device.Gpio.PinMode.#ctor</Target>
-    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
-    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0008</DiagnosticId>
-    <Target>T:System.Device.Gpio.PinNumberingScheme</Target>
     <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
   </Suppression>
@@ -89,15 +44,61 @@
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
   </Suppression>
   <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Spi.DataFlow.#ctor</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Spi.SpiMode.#ctor</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>CP0008</DiagnosticId>
     <Target>T:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode</Target>
     <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.#ctor</Target>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:System.Device.Gpio.PinChangeEventHandler</Target>
     <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
     <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:System.Device.Gpio.PinEventTypes</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:System.Device.Gpio.PinMode</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:System.Device.Gpio.PinNumberingScheme</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:System.Device.Spi.DataFlow</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:System.Device.Spi.SpiMode</Target>
+    <Left>lib/netstandard2.0/System.Device.Gpio.dll</Left>
+    <Right>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Right>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP1003</DiagnosticId>
+    <Target>lib/net6.0-windows10.0.17763/System.Device.Gpio.dll</Target>
   </Suppression>
 </Suppressions>

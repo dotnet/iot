@@ -9,6 +9,8 @@
     <Import_RootNamespace>FtCommon</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)FtBitMode.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)FtChannel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtCommon.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtDevice.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)FtDeviceType.cs" />

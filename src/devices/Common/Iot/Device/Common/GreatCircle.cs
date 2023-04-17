@@ -217,7 +217,7 @@ namespace Iot.Device.Common
         /// <param name="end">End position</param>
         /// <param name="distanceStep">Distance between waypoints</param>
         /// <returns>A list of waypoints</returns>
-        public static IList<GeographicPosition> CalculateRoute(GeographicPosition start, GeographicPosition end, double distanceStep)
+        public static IList<GeographicPosition> CalculateRoute(GeographicPosition start, GeographicPosition end, Length distanceStep)
         {
             if (start == null)
             {
@@ -229,14 +229,27 @@ namespace Iot.Device.Common
                 throw new ArgumentNullException(nameof(end));
             }
 
-            IList<GeographicPosition> ret = new List<GeographicPosition>();
-            GeoidCalculations.geod_geodesicline line;
-            GeoidCalculations.geod_inverseline(out line, _geod, start.Latitude, start.Longitude, end.Latitude, end.Longitude, 0);
-            double distanceTotal = line.s13;
-            for (double d = 0; d <= distanceTotal; d += distanceStep)
+            if (distanceStep <= Length.Zero)
             {
-                GeoidCalculations.geod_position(line, d, out double lat2, out double lon2, out _);
-                ret.Add(new GeographicPosition(lat2, lon2, 0));
+                throw new ArgumentOutOfRangeException(nameof(distanceStep), "Step length must be positive");
+            }
+
+            IList<GeographicPosition> ret = new List<GeographicPosition>();
+            DistAndDir(start, end, out Length totalDistance, out Angle angle);
+            Length distanceCovered = Length.Zero;
+            GeographicPosition currentPos = start;
+            ret.Add(currentPos); // Include start
+            while (distanceCovered + distanceStep < totalDistance)
+            {
+                currentPos = CalcCoords(currentPos, angle, distanceStep);
+                ret.Add(currentPos);
+                distanceCovered += distanceStep;
+            }
+
+            if (end != currentPos)
+            {
+                // And include end, unless it's exactly equal to the last point
+                ret.Add(end);
             }
 
             return ret;
@@ -247,24 +260,42 @@ namespace Iot.Device.Common
         /// </summary>
         /// <param name="start">Starting position</param>
         /// <param name="direction">Starting direction</param>
-        /// <param name="distance">Distance to travel</param>
+        /// <param name="totalDistance">Distance to travel</param>
         /// <param name="distanceStep">Waypoint step distance</param>
         /// <returns>A list of waypoints</returns>
-        public static IList<GeographicPosition> CalculateRoute(GeographicPosition start, double direction, double distance, double distanceStep)
+        public static IList<GeographicPosition> CalculateRoute(GeographicPosition start, Angle direction, Length totalDistance, Length distanceStep)
         {
             if (start == null)
             {
                 throw new ArgumentNullException(nameof(start));
             }
 
-            IList<GeographicPosition> ret = new List<GeographicPosition>();
-            GeoidCalculations.geod_geodesicline line;
-            GeoidCalculations.geod_directline(out line, _geod, start.Latitude, start.Longitude, direction, distance, 0);
-            double distanceTotal = distance;
-            for (double d = 0; d <= distanceTotal; d += distanceStep)
+            if (totalDistance < Length.Zero)
             {
-                GeoidCalculations.geod_position(line, d, out double lat2, out double lon2, out _);
-                ret.Add(new GeographicPosition(lat2, lon2, 0));
+                throw new ArgumentOutOfRangeException(nameof(totalDistance), "Distance to travel must be positive");
+            }
+
+            if (distanceStep <= Length.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(distanceStep), "Step length must be positive");
+            }
+
+            IList<GeographicPosition> ret = new List<GeographicPosition>();
+            Length distanceCovered = Length.Zero;
+            GeographicPosition currentPos = start;
+            ret.Add(currentPos); // Include start
+            while (distanceCovered + distanceStep < totalDistance)
+            {
+                currentPos = CalcCoords(currentPos, direction, distanceStep);
+                ret.Add(currentPos);
+                distanceCovered += distanceStep;
+            }
+
+            // Add a final point if we're not close to the target already (the / 50 cares for an epsilon)
+            if (distanceCovered < totalDistance - (distanceStep / 50))
+            {
+                currentPos = CalcCoords(start, direction, totalDistance);
+                ret.Add(currentPos);
             }
 
             return ret;

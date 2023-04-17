@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -16,6 +17,7 @@ namespace Iot.Device.Mcp23xxx
         private readonly int _reset;
         private readonly int _interruptA;
         private readonly int _interruptB;
+        private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
         private BankStyle _bankStyle;
         private GpioController? _controller;
         private bool _shouldDispose;
@@ -243,6 +245,7 @@ namespace Iot.Device.Mcp23xxx
                 _controller = null;
             }
 
+            _pinValues.Clear();
             _bus?.Dispose();
             _bus = null!;
             base.Dispose(disposing);
@@ -359,8 +362,12 @@ namespace Iot.Device.Mcp23xxx
                 new PinValuePair(pinNumber, default)
             };
             Read(pinValuePairs);
-            return pinValuePairs[0].PinValue;
+            _pinValues[pinNumber] = pinValuePairs[0].PinValue;
+            return _pinValues[pinNumber];
         }
+
+        /// <inheritdoc/>
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         /// <summary>
         /// Reads the value of a set of pins
@@ -394,6 +401,7 @@ namespace Iot.Device.Mcp23xxx
             {
                 int pin = pinValuePairs[i].PinNumber;
                 pinValuePairs[i] = new PinValuePair(pin, result & (1 << pin));
+                _pinValues[pin] = pinValuePairs[i].PinValue;
             }
         }
 
@@ -410,6 +418,7 @@ namespace Iot.Device.Mcp23xxx
                 new PinValuePair(pinNumber, value)
             };
             Write(pinValuePairs);
+            _pinValues[pinNumber] = value;
         }
 
         /// <summary>
@@ -452,6 +461,10 @@ namespace Iot.Device.Mcp23xxx
             }
 
             _gpioCache = newValue;
+            foreach (PinValuePair pinValuePair in pinValuePairs)
+            {
+                _pinValues[pinValuePair.PinNumber] = pinValuePair.PinValue;
+            }
         }
 
         private ushort SetBits(ushort current, ushort bits, ushort mask)
@@ -519,12 +532,14 @@ namespace Iot.Device.Mcp23xxx
         protected override void OpenPin(int pinNumber)
         {
             // No-op
+            _pinValues.TryAdd(pinNumber, PinValue.Low);
         }
 
         /// <inheritdoc/>
         protected override void ClosePin(int pinNumber)
         {
             // No-op
+            _pinValues.Remove(pinNumber);
         }
 
         /// <inheritdoc/>

@@ -422,22 +422,14 @@ namespace Iot.Device.HardwareMonitor
                 {
                     if (unitThatWasUsed == null)
                     {
-#if !NET5_0_OR_GREATER
                         unitThatWasUsed = singleValue!.Unit;
-#else
-                        unitThatWasUsed = singleValue.Unit;
-#endif
                     }
-#if !NET5_0_OR_GREATER
                     else if (!unitThatWasUsed.Equals(singleValue!.Unit))
-#else
-                    else if (!unitThatWasUsed.Equals(singleValue.Unit))
-#endif
                     {
                         throw new NotSupportedException($"The different sensors for {hardware.Name} deliver values in different units");
                     }
 
-                    value += singleValue.Value;
+                    value += (double)singleValue!.Value;
                     count++;
                 }
             }
@@ -601,7 +593,7 @@ namespace Iot.Device.HardwareMonitor
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="monitoringInterval"/> is less than 0.</exception>
         public void EnableDerivedSensors(Area cpuDieSize = default, TimeSpan monitoringInterval = default)
         {
-            if (cpuDieSize == default)
+            if (cpuDieSize.Equals(Area.Zero, 0, ComparisonType.Absolute))
             {
                 // Values for some recent intel chips (coffee lake)
                 if (LogicalProcessors <= 4)
@@ -643,7 +635,7 @@ namespace Iot.Device.HardwareMonitor
                     {
                         double previousEnergy = newSensor.Value;
                         // Value is in watts, so increment is in watts-hours, which is an unit we can later convert from
-                        double increment = value.Value * timeSinceUpdate.TotalHours;
+                        double increment = (double)value.Value * timeSinceUpdate.TotalHours;
                         double newEnergy = previousEnergy + increment;
                         newSensor.Value = newEnergy;
                     });

@@ -1,10 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.ComponentModel;
+using System;
+using System.Collections.Generic;
 using System.Device;
 using System.Device.Gpio;
-using System.Runtime.InteropServices;
+using System.IO;
 
 namespace Iot.Device.Tm16xx
 {
@@ -17,7 +18,7 @@ namespace Iot.Device.Tm16xx
         private readonly int _clockWidthMicroseconds;
         private readonly bool _shouldDispose;
         private bool _disposedValue;
-        private protected byte[] _characterOrder;
+        private protected byte[] _characterOrder = new byte[0];
         private protected bool _screenOn;
         private protected byte _brightness;
         private protected int _maxCharacters;
@@ -121,8 +122,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
         /// <param name="clockWidthMicroseconds">Waiting time between clock up and down.</param>
-        protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds) : this(pinClk, pinDio,
-            clockWidthMicroseconds, PinNumberingScheme.Logical, null, true)
+        protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds)
+            : this(pinClk, pinDio, clockWidthMicroseconds, PinNumberingScheme.Logical, null, true)
         {
         }
 
@@ -133,9 +134,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinDio">The data pin.</param>
         /// <param name="clockWidthMicroseconds">Waiting time between clock up and down.</param>
         /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
-        protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds,
-            PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical) : this(pinClk, pinDio,
-            clockWidthMicroseconds, pinNumberingScheme, null, true)
+        protected Tm16xxI2CLikeBase(int pinClk, int pinDio, int clockWidthMicroseconds, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+            : this(pinClk, pinDio, clockWidthMicroseconds, pinNumberingScheme, null, true)
         {
         }
 
@@ -171,6 +171,10 @@ namespace Iot.Device.Tm16xx
         {
         }
 
+        /// <summary>
+        /// Disposes the class.
+        /// </summary>
+        /// <param name="disposing">True to dispose.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
@@ -199,37 +203,39 @@ namespace Iot.Device.Tm16xx
         #endregion
 
         #region Low level IO
-        protected private virtual void StartTransmission()
-        {
-            //Console.Write("Start");
 
-            Controller.Write(PinClk, PinValue.High); //should already be high
-            Controller.Write(PinDio, PinValue.High); //should already be high
+        private protected virtual void StartTransmission()
+        {
+            // should already be high
+            Controller.Write(PinClk, PinValue.High);
+
+            // should already be high
+            Controller.Write(PinDio, PinValue.High);
             DelayHelper.DelayMicroseconds(_clockWidthMicroseconds, true);
             Controller.Write(PinDio, PinValue.Low);
             DelayHelper.DelayMicroseconds(_clockWidthMicroseconds, true);
         }
 
-        protected private virtual void StopTransmission()
+        private protected virtual void StopTransmission()
         {
-            //Console.WriteLine(" Stop");
+            // should be changed from high to low
+            Controller.Write(PinClk, PinValue.Low);
 
-            Controller.Write(PinClk, PinValue.Low); //should be changed from high to low
-            Controller.Write(PinDio, PinValue.Low); //just changed to output, state is not sure
+            // just changed to output, state is not sure
+            Controller.Write(PinDio, PinValue.Low);
             DelayHelper.DelayMicroseconds(_clockWidthMicroseconds, true);
             Controller.Write(PinClk, PinValue.High);
             DelayHelper.DelayMicroseconds(_clockWidthMicroseconds, true);
             Controller.Write(PinDio, PinValue.High);
         }
 
-        protected private virtual PinValue WriteByteAndWaitAcknowledge(byte data)
+        private protected virtual PinValue WriteByteAndWaitAcknowledge(byte data)
         {
-            //Console.Write(" " + Convert.ToString(data, 2).PadLeft(8, '0'));
             WriteByte(data);
             return WaitAcknowledge();
         }
 
-        protected private virtual void WriteByte(byte data)
+        private protected virtual void WriteByte(byte data)
         {
             foreach (bool bit in ByteToBitConverter(data))
             {
@@ -241,9 +247,9 @@ namespace Iot.Device.Tm16xx
             }
         }
 
-        protected private abstract IEnumerable<bool> ByteToBitConverter(byte data);
+        private protected abstract IEnumerable<bool> ByteToBitConverter(byte data);
 
-        protected private virtual PinValue WaitAcknowledge()
+        private protected virtual PinValue WaitAcknowledge()
         {
             Controller.Write(PinClk, PinValue.Low);
             Controller.Write(PinDio, PinValue.High);
@@ -255,15 +261,7 @@ namespace Iot.Device.Tm16xx
             {
                 throw new IOException("Device reports an IO error.");
             }
-            //if (ack == PinValue.Low)
-            //{
-            //    // We get acknowledge from the device
-            //    Console.Write(" <S>");
-            //}
-            //else
-            //{
-            //    Console.Write(" <E>");
-            //}
+
             Controller.SetPinMode(PinDio, PinMode.Output);
             Controller.Write(PinClk, PinValue.High);
             DelayHelper.DelayMicroseconds(_clockWidthMicroseconds, true);

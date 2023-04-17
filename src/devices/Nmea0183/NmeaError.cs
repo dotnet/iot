@@ -43,6 +43,11 @@ namespace Iot.Device.Nmea0183
         /// The message processing was delayed. A possible reason for this is if attempting
         /// to send to much data over a slow serial link.
         /// </summary>
-        MessageDelayed
+        MessageDelayed,
+
+        /// <summary>
+        /// A message was dropped, because a newer message was already in the queue. This indicates an output buffer overrun.
+        /// </summary>
+        MessageDropped
     }
 }

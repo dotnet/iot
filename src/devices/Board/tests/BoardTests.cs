@@ -57,12 +57,13 @@ namespace Iot.Device.Board.Tests
         }
 
         [Fact]
-        public void OpenPinAlreadyAssignedThrows()
+        public void GetSameGpioPinWhenOpen()
         {
             var board = CreateBoard();
             var ctrl = board.CreateGpioController();
-            ctrl.OpenPin(1);
-            Assert.Throws<InvalidOperationException>(() => ctrl.OpenPin(1));
+            var firstGpioPin = ctrl.OpenPin(1);
+            var secondGpioPin = ctrl.OpenPin(1);
+            Assert.Equal(firstGpioPin, secondGpioPin);
         }
 
         [Fact]
@@ -182,6 +183,34 @@ namespace Iot.Device.Board.Tests
             bus.Dispose();
             // Now fine
             ctrl.OpenPin(0);
+        }
+
+        [Fact]
+        public void CreateAndRemoveI2cDevice()
+        {
+            using Board board = CreateBoard();
+            I2cBus bus = board.CreateOrGetI2cBus(0);
+
+            I2cDevice device1 = bus.CreateDevice(0x55);
+            device1.ReadByte();
+            bus.RemoveDevice(0x55);
+
+            I2cDevice device2 = bus.CreateDevice(0x55);
+            device2.ReadByte();
+        }
+
+        [Fact]
+        public void CreateAndDisposeI2cDevice()
+        {
+            using Board board = CreateBoard();
+            I2cBus bus = board.CreateOrGetI2cBus(0);
+
+            I2cDevice device1 = bus.CreateDevice(0x55);
+            device1.ReadByte();
+            device1.Dispose();
+
+            I2cDevice device2 = bus.CreateDevice(0x55);
+            device2.ReadByte();
         }
 
         [Fact]

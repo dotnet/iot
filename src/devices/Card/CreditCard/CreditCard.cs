@@ -735,7 +735,7 @@ namespace Iot.Device.Card.CreditCardProcessing
 
         private int ReadFromCard(byte target, ReadOnlySpan<byte> toSend, Span<byte> received)
         {
-            var ret = _nfc.Transceive(_target, toSend, received);
+            var ret = _nfc.Transceive(_target, toSend, received, NfcProtocol.Iso14443_4);
             if (ret >= TailerSize)
             {
                 if (ret == TailerSize)
@@ -748,7 +748,7 @@ namespace Iot.Device.Card.CreditCardProcessing
                         Span<byte> toGet = stackalloc byte[5];
                         ApduCommands.GetBytesToRead.CopyTo(toGet);
                         toGet[4] = err.CorrectLegnthOrBytesAvailable;
-                        ret = _nfc.Transceive(_target, toGet, received);
+                        ret = _nfc.Transceive(_target, toGet, received, NfcProtocol.Iso14443_4);
                     }
                 }
             }

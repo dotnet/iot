@@ -85,18 +85,42 @@ if (pn532.FirmwareVersion is FirmwareVersion version)
         $"Is it a PN532!: {version.IsPn532}, Version: {version.Version}, Version supported: {version.VersionSupported}");
     // To adjust the baud rate, uncomment the next line
     // pn532.SetSerialBaudRate(BaudRate.B0921600);
+    var sampleFunctions = new (Action<Pn532> Fn, string Name)[]
+    {
+        (DumpAllRegisters, nameof(DumpAllRegisters)),
+        (RunTests, nameof(RunTests)),
+        (ProcessUltralight, nameof(ProcessUltralight)),
+        (ReadMiFare, nameof(ReadMiFare)),
+        (MifareReadNdef, nameof(MifareReadNdef)),
+        (MifareWriteNdef, nameof(MifareWriteNdef)),
+        (TestGPIO, nameof(TestGPIO)),
+        (ReadCreditCard, nameof(ReadCreditCard))
+    };
 
-    // To dump all the registers, uncomment the next line
-    // DumpAllRegisters(pn532);
+    while (true)
+    {
+        Console.WriteLine("Select the function you want to run ('Q' or 'X' to exit):");
+        for (int i = 0; i < sampleFunctions.Length; i++)
+        {
+            Console.WriteLine($" {i}: {sampleFunctions[i].Name}");
+        }
 
-    // To run tests, uncomment the next line
-    // RunTests(pn532);
-    ProcessUltralight(pn532);
-    // ReadMiFare(pn532);
-    // TestGPIO(pn532);
+        var functionChoice = Console.ReadKey();
+        Console.WriteLine();
+        if (Char.ToUpper(functionChoice.KeyChar) is 'Q' or 'X')
+        {
+            break;
+        }
 
-    // To read Credit Cards, uncomment the next line
-    // ReadCreditCard(pn532);
+        if (UInt32.TryParse(functionChoice.KeyChar.ToString(), out uint choiceIndex) && choiceIndex < sampleFunctions.Length)
+        {
+            sampleFunctions[choiceIndex].Fn(pn532);
+        }
+        else
+        {
+            Console.WriteLine($"Please enter a number between 0 and {sampleFunctions.Length - 1} (or CR to exit)");
+        }
+    }
 }
 else
 {
@@ -131,7 +155,7 @@ void DumpAllRegisters(Pn532 pn532)
     }
 }
 
-void ReadMiFare(Pn532 pn532)
+MifareCard? DetectMifare(Pn532 pn532)
 {
     byte[]? retData = null;
     while ((!Console.KeyAvailable))
@@ -148,7 +172,7 @@ void ReadMiFare(Pn532 pn532)
 
     if (retData is null)
     {
-        return;
+        return null;
     }
 
     for (int i = 0; i < retData.Length; i++)
@@ -161,11 +185,15 @@ void ReadMiFare(Pn532 pn532)
     var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
     if (decrypted is object)
     {
-        Console.WriteLine(
+        Console.Write(
             $"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
-        if (decrypted.Ats is object)
+        if (decrypted.Ats is object && decrypted.Ats.Length > 0)
         {
             Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
+        }
+        else
+        {
+            Console.WriteLine();
         }
 
         MifareCard mifareCard = new(pn532, decrypted.TargetNumber)
@@ -175,19 +203,36 @@ void ReadMiFare(Pn532 pn532)
         };
 
         mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
+        if (mifareCard.Capacity == MifareCardCapacity.Unknown)
+        {
+            Console.WriteLine("Not a supported Mifare card");
+            return null;
+        }
+
         mifareCard.SerialNumber = decrypted.NfcId;
         mifareCard.KeyA = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         mifareCard.KeyB = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-        for (byte block = 0; block < 64; block++)
+        return mifareCard;
+    }
+
+    return null;
+}
+
+void ReadMiFare(Pn532 pn532)
+{
+    var mifareCard = DetectMifare(pn532);
+    if (mifareCard is object)
+    {
+        for (uint blockUint = 0; blockUint < mifareCard.GetNumberBlocks(); blockUint++)
         {
+            byte block = (byte)blockUint;
             mifareCard.BlockNumber = block;
             mifareCard.Command = MifareCardCommand.AuthenticationB;
             var ret = mifareCard.RunMifareCardCommand();
-            // This will reselect the card in case of issue
-            mifareCard.ReselectCard();
             if (ret < 0)
             {
-                // Try another one
+                // Reselect the card in case of issue and try the other key
+                mifareCard.ReselectCard();
                 mifareCard.Command = MifareCardCommand.AuthenticationA;
                 ret = mifareCard.RunMifareCardCommand();
             }
@@ -203,16 +248,18 @@ void ReadMiFare(Pn532 pn532)
                 }
                 else
                 {
+                    mifareCard.ReselectCard();
                     Console.WriteLine($"Error reading bloc: {block}");
                 }
 
-                if (block % 4 == 3 && mifareCard.Data is object)
+                if (mifareCard.IsSectorBlock(block) && mifareCard.Data is object)
                 {
                     // Check what are the permissions
-                    for (byte j = 3; j > 0; j--)
+                    for (byte j = MifareCard.SectorToBlockNumber(MifareCard.BlockNumberToSector(block), 0); j < block; j++)
                     {
-                        var access = mifareCard.BlockAccess((byte)(block - j), mifareCard.Data);
-                        Console.WriteLine($"Bloc: {block - j}, Access: {access}");
+                        var group = MifareCard.BlockNumberToBlockGroup(j);
+                        var access = mifareCard.BlockAccess(group, mifareCard.Data);
+                        Console.WriteLine($"Bloc: {j}, Access: {access}");
                     }
 
                     var sector = mifareCard.SectorTailerAccess(block, mifareCard.Data);
@@ -223,6 +270,136 @@ void ReadMiFare(Pn532 pn532)
             {
                 Console.WriteLine($"Authentication error");
             }
+        }
+    }
+}
+
+void MifareReadNdef(Pn532 pn532)
+{
+    var mifareCard = DetectMifare(pn532);
+    if (mifareCard is object)
+    {
+        NdefMessage message;
+        var res = mifareCard.TryReadNdefMessage(out message);
+        if (res && message.Length != 0)
+        {
+            foreach (var record in message.Records)
+            {
+                Console.WriteLine($"Record length: {record.Length}");
+                if (TextRecord.IsTextRecord(record))
+                {
+                    var text = new TextRecord(record);
+                    Console.WriteLine(text.Text);
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("No NDEF message in this ");
+        }
+    }
+}
+
+void MifareWriteNdef(Pn532 pn532)
+{
+    var mifareCard = DetectMifare(pn532);
+    if (mifareCard is null)
+    {
+        return;
+    }
+
+    // If the card is not already formatted for NDEF, then format it.
+    // If the card was already formatted, use it as-is.
+    bool res = true;
+    if (!mifareCard.IsFormattedNdef())
+    {
+        // There are multiple reasons that IsFormattedNdef may fail, including
+        // an authentication failure or insufficient access permission. If this
+        // happens, the card will be in an error state and must be reselected.
+        mifareCard.ReselectCard();
+
+        // Allocate 14 sectors (1 through 14) for NDEF content, and reserve one sector
+        // for issuer-specific information. In cards larger than 1K, the remaining
+        // sectors are free and may be allocated later for other purposes.
+        Console.WriteLine("Attempting to format for NDEF");
+        res = mifareCard.FormatNdef(14);
+        if (res)
+        {
+            // FormatNdef has already created the application directory and allocated
+            // space for NFC-NDEF. Read the directory from the card, and allocate a sector
+            // for the card publisher (the AppID of 0xFF01 is arbitary)
+            var cardIssuerId = new MifareApplicationIdentifier(0xFF01);
+            var directory = MifareDirectory.LoadFromCard(mifareCard);
+            var entry = directory?.Allocate(cardIssuerId, 1);
+            res = entry is object;
+            if (res)
+            {
+                // Set the card publisher sector in the directory and
+                // write the updated directory back to the card.
+                directory!.CardPublisherSector = entry!.FirstSector;
+                res = directory.StoreToCard(mifareCard.KeyB);
+            }
+        }
+
+        if (!res)
+        {
+            Console.WriteLine("NDEF formatting failed");
+        }
+    }
+
+    if (res)
+    {
+        // Display the Mifare application directory
+        var directory = MifareDirectory.LoadFromCard(mifareCard);
+        if (directory is object)
+        {
+            // The directory can optionally indicate which sector belongs to the
+            // card publisher.
+            if (directory.CardPublisherSector != 0)
+            {
+                Console.WriteLine($"Card directory (CardPublisherSector = {directory.CardPublisherSector}):");
+            }
+            else
+            {
+                Console.WriteLine("Card directory:");
+            }
+
+            // Each directory entry describes a range of sectors that is allocated to an
+            // application. The range is contiguous, except that on 2K and 4K cards it skips
+            // sector 16.
+            foreach (var entry in directory.GetApplications())
+            {
+                Console.WriteLine($"AppId {entry.ApplicationIdentifier}: {entry.NumberOfSectors} sectors");
+                Console.Write("   ");
+                foreach (var sector in entry.GetAllSectors())
+                {
+                    Console.Write($" {sector}");
+                }
+
+                Console.WriteLine();
+            }
+        }
+        else
+        {
+            res = false;
+        }
+    }
+
+    if (res)
+    {
+        // Create a new NDEF message
+        NdefMessage newMessage = new NdefMessage();
+        var timestamp = DateTime.Now.ToString();
+        newMessage.Records.Add(new TextRecord("I ❤ .NET IoT", "en", Encoding.UTF8));
+        newMessage.Records.Add(new TextRecord(timestamp, "en", Encoding.UTF8));
+        res = mifareCard.WriteNdefMessage(newMessage);
+        if (res)
+        {
+            Console.WriteLine($"NDEF data successfully written on the card at {timestamp}.");
+        }
+        else
+        {
+            Console.WriteLine("Error writing NDEF data on card");
         }
     }
 }
@@ -404,7 +581,7 @@ void ProcessUltralight(Pn532 pn532)
     Console.WriteLine();
 
     var card = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
-    if (card is not object)
+    if (card is not object || !UltralightCard.IsUltralightCard(card.Atqa, card.Sak))
     {
         Console.WriteLine("Not a valid card, please try again.");
         return;

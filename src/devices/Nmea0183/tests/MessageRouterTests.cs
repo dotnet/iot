@@ -162,7 +162,7 @@ namespace Iot.Device.Nmea0183.Tests
         private RawSentence GnssRawSentence()
         {
             return new RawSentence(TalkerId.GlobalPositioningSystem, new SentenceId("GGA"),
-                "163824, 4728.7024, N, 00929.9665, E, 2, 12, 0.6, 398.5, M, 46.8, M,,".Split(',', StringSplitOptions.None),
+                "163824, 4728.7024, N, 00929.9665, E, 2, 12, 0.6, 398.5, M, 46.8, M,,".Split(new char[] { ',' }, StringSplitOptions.None),
                 new DateTimeOffset(2020, 04, 26, 16, 38, 24, TimeSpan.Zero));
         }
     }
