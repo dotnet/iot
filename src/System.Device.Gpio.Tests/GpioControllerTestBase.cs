@@ -230,9 +230,17 @@ public abstract class GpioControllerTestBase
     [Fact]
     public void AddCallbackFallingEdgeNotDetectedTest()
     {
+        var driver = GetTestDriver();
+        if (driver is SysFsDriver)
+        {
+            // This test is unreliable (flaky) with SysFs.
+            // See https://github.com/dotnet/iot/issues/629 and possibly https://github.com/dotnet/iot/issues/1581
+            return;
+        }
+
         bool wasCalled = false;
         AutoResetEvent ev = new AutoResetEvent(false);
-        using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
+        using (GpioController controller = new GpioController(GetTestNumberingScheme(), driver))
         {
             controller.OpenPin(InputPin, PinMode.Input);
             controller.OpenPin(OutputPin, PinMode.Output);

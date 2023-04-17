@@ -46,6 +46,8 @@ namespace Iot.Device.Nmea0183
         private Route? _activeRoute;
         private HeadingAndDeclination? _activeDeviation;
 
+        private PositionProvider _positionProvider;
+
         /// <summary>
         /// This class can control an autopilot, given an external input (of mainly WPT and RTE sentences)
         /// </summary>
@@ -66,6 +68,7 @@ namespace Iot.Device.Nmea0183
                 _cache = cache;
             }
 
+            _positionProvider = new PositionProvider(_cache);
             _threadRunning = false;
             _currentOrigin = null;
             _knownNextWaypoint = null;
@@ -86,6 +89,16 @@ namespace Iot.Device.Nmea0183
             {
                 return _threadRunning && _updateThread != null && _updateThread.IsAlive;
             }
+        }
+
+        /// <summary>
+        /// Name of the Source from which to take positions. Null to take any source (but this may cause side effects
+        /// if multiple GPS devices are active, because they deliver slightly different data)
+        /// </summary>
+        public string? NmeaSourceName
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -244,7 +257,7 @@ namespace Iot.Device.Nmea0183
                 _activeDeviation = deviation;
             }
 
-            if (_cache.TryGetCurrentPosition(out var position, out Angle track, out Speed sog, out Angle? heading) && position != null)
+            if (_positionProvider.TryGetCurrentPosition(out var position, NmeaSourceName, false, out Angle track, out Speed sog, out Angle? heading, out _) && position != null)
             {
                 string previousWayPoint = string.Empty;
                 string nextWayPoint = string.Empty;
@@ -263,7 +276,7 @@ namespace Iot.Device.Nmea0183
 
                 RoutePoint? next;
                 // This returns RoutePresent if at least one valid waypoint is in the list
-                if (currentRoute == null && _cache.TryGetCurrentRoute(out currentRoute) != AutopilotErrorState.RoutePresent)
+                if (currentRoute == null && _positionProvider.TryGetCurrentRoute(out currentRoute) != AutopilotErrorState.RoutePresent)
                 {
                     // No route. But if we have an RMB message, there could still be a current target (typically one that was
                     // directly selected with "Goto")

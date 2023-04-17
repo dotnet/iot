@@ -55,7 +55,7 @@ namespace Iot.Device.Common
 
         private class NullLogger : ILogger
         {
-            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+            public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
             {
             }
 
@@ -64,7 +64,8 @@ namespace Iot.Device.Common
                 return false;
             }
 
-            public IDisposable BeginScope<TState>(TState state)
+            public IDisposable? BeginScope<TState>(TState state)
+                where TState : notnull
             {
                 return new ScopeDisposable();
             }

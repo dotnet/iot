@@ -12,7 +12,8 @@ namespace Iot.Device.Nmea0183.Sentences
     // page 14
 
     /// <summary>
-    /// Represents GlobalPositioningSystemFixData (GGA) NMEA0183 sentence
+    /// Represents GlobalPositioningSystemFixData (GGA) NMEA0183 sentence. This message is typically
+    /// preferred over RMC if it is available.
     /// </summary>
     public class GlobalPositioningSystemFixData : NmeaSentence
     {
@@ -240,7 +241,12 @@ namespace Iot.Device.Nmea0183.Sentences
             if (LatitudeDegrees.HasValue && LongitudeDegrees.HasValue && EllipsoidAltitude.HasValue)
             {
                 GeographicPosition position = new GeographicPosition(LatitudeDegrees.Value, LongitudeDegrees.Value, EllipsoidAltitude.Value);
-                return $"Position: {position}";
+                return $"Position with height: {position}";
+            }
+            else if (LatitudeDegrees.HasValue && LongitudeDegrees.HasValue)
+            {
+                GeographicPosition position = new GeographicPosition(LatitudeDegrees.Value, LongitudeDegrees.Value, 0);
+                return $"Position (no valid height): {position}";
             }
 
             return "Position unknown";

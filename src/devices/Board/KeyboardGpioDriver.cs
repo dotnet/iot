@@ -14,9 +14,13 @@ namespace Iot.Device.Board
 {
     /// <summary>
     /// A GPIO Driver for testing on Windows
+    /// This driver uses the keyboard for simulating GPIO pins.
+    /// Pins 0-2 are output only and represent the keyboard LEDs (Caps lock, Scroll Lock and Num Lock).
+    /// Setting a value to any of these pins toggles the LEDs on the keyboard (if they're physically present).
+    /// Pins above 8 are input only and represent the keyboard keys. To get the pin number,
+    /// cast the corresponding <see cref="ConsoleKey"/> to int, e.g. int pinNumber = (int)ConsoleKey.A
     /// </summary>
-    [ExcludeFromCodeCoverage] // Windows-specific
-    internal class KeyboardGpioDriver : GpioDriver
+    public class KeyboardGpioDriver : GpioDriver
     {
         private enum LedKey
         {
@@ -26,12 +30,16 @@ namespace Iot.Device.Board
         }
 
         private const int SupportedPinCount = 256;
+        private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
 
         private KeyState[] _state;
 
         private Thread? _pollThread;
         private bool _terminateThread;
 
+        /// <summary>
+        /// Creates an instance of the KeyboardGpioDriver
+        /// </summary>
         public KeyboardGpioDriver()
         {
             _state = new KeyState[SupportedPinCount];
@@ -42,8 +50,13 @@ namespace Iot.Device.Board
 
             _pollThread = null;
             _terminateThread = true;
+            foreach (var key in Enum.GetValues(typeof(LedKey)))
+            {
+                _pinValues.Add((int)key!, GetLedState((LedKey)key).KeyValue);
+            }
         }
 
+        /// <inheritdoc />
         protected override int PinCount
         {
             get
@@ -54,32 +67,42 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
         {
             return pinNumber;
         }
 
+        /// <inheritdoc />
         protected override void OpenPin(int pinNumber)
         {
         }
 
+        /// <inheritdoc />
         protected override void ClosePin(int pinNumber)
         {
         }
 
+        /// <inheritdoc />
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
             if (IsPinModeSupported(pinNumber, mode))
             {
                 _state[pinNumber].Mode = mode;
             }
+            else
+            {
+                throw new NotSupportedException($"Pin {pinNumber} does not support mode {mode}");
+            }
         }
 
+        /// <inheritdoc />
         protected override PinMode GetPinMode(int pinNumber)
         {
             return _state[pinNumber].Mode;
         }
 
+        /// <inheritdoc />
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode)
         {
             if (pinNumber < 3)
@@ -112,6 +135,27 @@ namespace Iot.Device.Board
 
         private void SetLedState(LedKey key, PinValue state)
         {
+            (int virtualKey, int currentKeyState) = GetLedState(key);
+            _pinValues[(int)key] = state;
+            if ((state == PinValue.High && currentKeyState == 0) ||
+                (state == PinValue.Low && currentKeyState != 0))
+            {
+                // Simulate a key press
+                Interop.keybd_event((byte)virtualKey,
+                    0x45,
+                    Interop.KEYEVENTF_EXTENDEDKEY,
+                    IntPtr.Zero);
+
+                // Simulate a key release
+                Interop.keybd_event((byte)virtualKey,
+                    0x45,
+                    Interop.KEYEVENTF_EXTENDEDKEY | Interop.KEYEVENTF_KEYUP,
+                    IntPtr.Zero);
+            }
+        }
+
+        private (int VirtualKey, int KeyValue) GetLedState(LedKey key)
+        {
             int virtualKey = 0;
             if (key == LedKey.NumLock)
             {
@@ -131,24 +175,10 @@ namespace Iot.Device.Board
             }
 
             // Bit 1 indicates whether the LED is currently on or off (or, whether Scroll lock, num lock, caps lock is on)
-            int currentKeyState = Interop.GetKeyState(virtualKey) & 1;
-            if ((state == PinValue.High && currentKeyState == 0) ||
-                (state == PinValue.Low && currentKeyState != 0))
-            {
-                // Simulate a key press
-                Interop.keybd_event((byte)virtualKey,
-                    0x45,
-                    Interop.KEYEVENTF_EXTENDEDKEY | 0,
-                    IntPtr.Zero);
-
-                // Simulate a key release
-                Interop.keybd_event((byte)virtualKey,
-                    0x45,
-                    Interop.KEYEVENTF_EXTENDEDKEY | Interop.KEYEVENTF_KEYUP,
-                    IntPtr.Zero);
-            }
+            return (virtualKey, Interop.GetKeyState(virtualKey) & 1);
         }
 
+        /// <inheritdoc />
         protected override PinValue Read(int pinNumber)
         {
             short currentKeyState = Interop.GetAsyncKeyState(pinNumber);
@@ -162,6 +192,10 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
+
+        /// <inheritdoc />
         protected override void Write(int pinNumber, PinValue value)
         {
             if (pinNumber == 0)
@@ -180,6 +214,7 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
         {
             PinValue oldState = Read(pinNumber);
@@ -192,7 +227,8 @@ namespace Iot.Device.Board
                     {
                         return new WaitForEventResult()
                         {
-                            EventTypes = PinEventTypes.Rising, TimedOut = false
+                            EventTypes = PinEventTypes.Rising,
+                            TimedOut = false
                         };
                     }
                     else if (eventTypes == PinEventTypes.Falling && newState == PinValue.Low)
@@ -220,6 +256,7 @@ namespace Iot.Device.Board
             };
         }
 
+        /// <inheritdoc />
         protected override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
             lock (_state)
@@ -238,6 +275,7 @@ namespace Iot.Device.Board
             }
         }
 
+        /// <inheritdoc />
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             bool terminate;

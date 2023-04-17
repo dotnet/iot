@@ -45,6 +45,7 @@ namespace Iot.Device.Tm16xx
         public abstract LedSegment LedSegment { get; set; }
 
         #region One Byte Display
+
         /// <summary>
         /// Displays a series of raw data. Each byte represents a character.
         /// </summary>
@@ -59,6 +60,7 @@ namespace Iot.Device.Tm16xx
         {
             Display(MemoryMarshal.AsBytes(characters));
         }
+
         /// <summary>
         /// Displays a series of raw data. Each byte represents a character.
         /// </summary>
@@ -76,6 +78,7 @@ namespace Iot.Device.Tm16xx
         {
             Display(characters.AsSpan());
         }
+
         /// <summary>
         /// Displays a raw data byte on the specified position.
         /// </summary>
@@ -92,6 +95,7 @@ namespace Iot.Device.Tm16xx
         {
             Display(characterPosition, (byte)character);
         }
+
         #endregion
 
         /// <summary>

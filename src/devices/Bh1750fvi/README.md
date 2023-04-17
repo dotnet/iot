@@ -4,7 +4,7 @@ BH1750FVI is an digital Ambient Light Sensor IC for I2C bus interface. This IC i
 
 ## Documentation
 
-Product datasheet can be found [here](https://cdn.datasheetspdf.com/pdf-down/B/H/1/BH1750FVI_Rohm.pdf)
+Product datasheet can be found [here](https://www.mouser.com/datasheet/2/348/bh1750fvi-e-186247.pdf)
 
 ## Sensor Image
 

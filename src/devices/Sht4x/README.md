@@ -4,7 +4,7 @@ SHT4x is a temperature and humidity sensor from Sensirion. This project supports
 
 ## Documentation
 
-- SHT40 [datasheet](https://www.sensirion.com/fileadmin/user_upload/customers/sensirion/Dokumente/2_Humidity_Sensors/Datasheets/Sensirion_Humidity_Sensors_SHT4x_Datasheet.pdf)
+- SHT40 [datasheet](https://sensirion.com/media/documents/33FD6951/63B52FAF/Datasheet_SHT4x.pdf)
 
 ## Usage
 

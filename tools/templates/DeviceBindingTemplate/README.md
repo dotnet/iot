@@ -50,10 +50,11 @@ iot/
           Foo.Sample.cs
           Foo.Samples.csproj
         tests/   <--  Tests are optional
-          Foo_Not_Required.Tests.csproj
+          Foo.Tests.csproj
           Foo.Tests.cs
 ```
 
 ## Tests Project
 
-There is an optional test project created when the device binding project is created.  The tests folder can be deleted if not used.
+There is a test project created when the device binding project is created. The amount and number of tests that are expected will
+depend on the type of binding.

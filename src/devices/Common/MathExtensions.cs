@@ -47,6 +47,29 @@ namespace Iot.Device
         /// Returns val, limited to the range min-max (inclusive)
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static float Clamp(float val, float min, float max)
+        {
+#if !NET5_0_OR_GREATER
+            if (val < min)
+            {
+                return min;
+            }
+
+            if (val > max)
+            {
+                return max;
+            }
+
+            return val;
+#else
+            return Math.Clamp(val, min, max);
+#endif
+        }
+
+        /// <summary>
+        /// Returns val, limited to the range min-max (inclusive)
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static int Clamp(int val, int min, int max)
         {
 #if !NET5_0_OR_GREATER

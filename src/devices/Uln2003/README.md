@@ -8,7 +8,7 @@ The 28BYJ-48 is a small stepper motor suitable for a large range of applications
 
 **[Stepper Motor 28BYJ-48]**: <http://www.geeetech.com/Documents/Stepper%20motor%20datasheet.pdf>
 
-**[ULN2003]**: <http://www.geeetech.com/Documents/ULN2003%20datasheet.pdf>
+**[ULN2003]**: <https://www.st.com/resource/en/datasheet/uln2001.pdf>
 
 ## Board
 

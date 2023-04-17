@@ -14,6 +14,7 @@ public class Windows10Driver : GpioDriver
 {
     private static readonly WinGpio.GpioController s_winGpioController = WinGpio.GpioController.GetDefault();
     private readonly Dictionary<int, Windows10DriverPin> _openPins = new Dictionary<int, Windows10DriverPin>();
+    private readonly Dictionary<int, PinValue> _pinValues = new Dictionary<int, PinValue>();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Windows10Driver"/> class.
@@ -68,6 +69,7 @@ public class Windows10Driver : GpioDriver
         {
             pin.ClosePin();
             _openPins.Remove(pinNumber);
+            _pinValues.Remove(pinNumber);
         }
     }
 
@@ -113,6 +115,8 @@ public class Windows10Driver : GpioDriver
 
         WinGpio.GpioPin windowsPin = s_winGpioController.OpenPin(pinNumber, WinGpio.GpioSharingMode.Exclusive);
         _openPins[pinNumber] = new Windows10DriverPin(this, windowsPin);
+        // Default value, override by the set pin mode with another default value
+        _pinValues[pinNumber] = PinValue.Low;
     }
 
     /// <summary>
@@ -120,7 +124,15 @@ public class Windows10Driver : GpioDriver
     /// </summary>
     /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
     /// <returns>The value of the pin.</returns>
-    protected internal override PinValue Read(int pinNumber) => LookupOpenPin(pinNumber).Read();
+    protected internal override PinValue Read(int pinNumber)
+    {
+        var value = LookupOpenPin(pinNumber).Read();
+        _pinValues[pinNumber] = value;
+        return value;
+    }
+
+    /// <inheritdoc/>
+    protected internal override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
     /// <summary>
     /// Removes a handler for a pin value changed event.
@@ -152,7 +164,11 @@ public class Windows10Driver : GpioDriver
     /// </summary>
     /// <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
     /// <param name="value">The value to be written to the pin.</param>
-    protected internal override void Write(int pinNumber, PinValue value) => LookupOpenPin(pinNumber).Write(value);
+    protected internal override void Write(int pinNumber, PinValue value)
+    {
+        LookupOpenPin(pinNumber).Write(value);
+        _pinValues[pinNumber] = value;
+    }
 
     /// <summary>
     /// Lookups an open pin in the driver.

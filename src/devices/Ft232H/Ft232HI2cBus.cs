@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Device.I2c;
 using System.IO;
+using System.Net.Http.Headers;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft232H
 {
@@ -13,18 +15,18 @@ namespace Iot.Device.Ft232H
     /// </summary>
     internal class Ft232HI2cBus : I2cBus
     {
-        private HashSet<int> _usedAddresses = new HashSet<int>();
+        private HashSet<int>? _usedAddresses = null;
 
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public Ft232HDevice DeviceInformation { get; private set; }
+        public Ftx232HDevice DeviceInformation { get; private set; }
 
         /// <summary>
         /// Creates anI2C Bus
         /// </summary>
         /// <param name="deviceInformation">a FT232H device</param>
-        public Ft232HI2cBus(Ft232HDevice deviceInformation)
+        public Ft232HI2cBus(Ftx232HDevice deviceInformation)
         {
             DeviceInformation = deviceInformation;
             DeviceInformation.I2cInitialize();
@@ -33,21 +35,32 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
+            _usedAddresses ??= new HashSet<int>();
             if (!_usedAddresses.Add(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} is already open.", nameof(deviceAddress));
             }
 
-            return new Ft232HI2c(this, deviceAddress);
+            return CreateDeviceNoCheck(deviceAddress);
+        }
+
+        internal I2cDevice CreateDeviceNoCheck(int deviceAddress)
+        {
+            return new Ft232HI2cDevice(this, deviceAddress);
         }
 
         /// <inheritdoc/>
         public override void RemoveDevice(int deviceAddress)
         {
-            if (!_usedAddresses.Remove(deviceAddress))
+            if (!RemoveDeviceNoCheck(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} was not open.", nameof(deviceAddress));
             }
+        }
+
+        internal bool RemoveDeviceNoCheck(int deviceAddress)
+        {
+            return _usedAddresses?.Remove(deviceAddress) ?? false;
         }
 
         internal void Read(int deviceAddress, Span<byte> buffer)

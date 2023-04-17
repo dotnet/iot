@@ -4,13 +4,19 @@
     <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FrequencyAndSpeed.cs" />
+    <Compile Include="McpBitrate.cs" />
     <Compile Include="InstructionFormat.cs" />
     <Compile Include="Mcp25xxx.cs" />
     <Compile Include="Mcp2515.cs" />
     <Compile Include="Mcp25625.cs" />
+    <Compile Include="Models\SendingCanMessage.cs" />
+    <Compile Include="Models\ReceivedCanMessage.cs" />
     <Compile Include="ReadStatusResponse.cs" />
+    <Compile Include="ReceiveBuffer.cs" />
     <Compile Include="RxBufferAddressPointer.cs" />
     <Compile Include="RxStatusResponse.cs" />
+    <Compile Include="TransmitBuffer.cs" />
     <Compile Include="TxBufferAddressPointer.cs" />
     <Compile Include="Register\**\*.cs" />
     <None Include="README.md" />

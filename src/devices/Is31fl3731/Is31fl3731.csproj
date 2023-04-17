@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <EnableDefaultItems>false</EnableDefaultItems>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- matrix driver -->
+    <Compile Include="Is31fl3731.cs" />
+    <Compile Include="Registers.cs" />
+
+    <!-- matrices -->
+    <Compile Include="Backpack16x9.cs" />
+    <Compile Include="Bonnet16x8.cs" />
+    <Compile Include="Breakout11x7.cs" />
+    <Compile Include="BreakoutRgb5x5.cs" />
+    <Compile Include="LedShimRgb28x1.cs" />
+    <Compile Include="ScrollPhat17x7.cs" />
+  </ItemGroup>
+</Project>

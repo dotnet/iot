@@ -151,9 +151,9 @@ namespace Iot.Device.Arduino
 #endif
             out ArduinoBoard? board)
         {
-            foreach (var port in comPorts)
+            foreach (string port in comPorts)
             {
-                foreach (var baud in baudRates)
+                foreach (int baud in baudRates)
                 {
                     ArduinoBoard? b = null;
                     try
@@ -179,7 +179,7 @@ namespace Iot.Device.Arduino
         /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
         /// </summary>
         /// <param name="boardAddress">The IP address of the board</param>
-        /// <param name="port">The network port to use</param>
+        /// <param name="port">The network port to use. The default port is 27016</param>
         /// <param name="board">Returns the board if successful</param>
         /// <returns>True on success, false otherwise</returns>
         public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port,
@@ -302,7 +302,7 @@ namespace Iot.Device.Arduino
                 if (newCommandHandler.HandlesMode != null)
                 {
                     // If we already know the mode, replace its configuration with the new one (typically, this will only update the name)
-                    var m = _knownSupportedModes.FirstOrDefault(x => x.Value == newCommandHandler.HandlesMode.Value);
+                    SupportedMode? m = _knownSupportedModes.FirstOrDefault(x => x.Value == newCommandHandler.HandlesMode.Value);
                     if (m != null)
                     {
                         _knownSupportedModes.Remove(m);
@@ -336,7 +336,7 @@ namespace Iot.Device.Arduino
         public T? GetCommandHandler<T>()
             where T : ExtendedCommandHandler
         {
-            foreach (var cmd in _extendedCommandHandlers)
+            foreach (ExtendedCommandHandler cmd in _extendedCommandHandlers)
             {
                 if (cmd.GetType() == typeof(T))
                 {
@@ -358,7 +358,7 @@ namespace Iot.Device.Arduino
             _commandHandlersLock.EnterReadLock();
             try
             {
-                var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
+                SupportedMode? m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
                 if (m == null)
                 {
                     return PinUsage.Unknown;
@@ -430,7 +430,7 @@ namespace Iot.Device.Arduino
 
                 Logger.LogInformation($"Firmata version on board is {_firmataVersion}.");
 
-                _firmwareVersion = _firmata.QueryFirmwareVersion(out var firmwareName);
+                _firmwareVersion = _firmata.QueryFirmwareVersion(out string firmwareName);
                 _firmwareName = firmwareName;
 
                 Logger.LogInformation($"Firmware version on board is {_firmwareVersion}");
@@ -440,14 +440,14 @@ namespace Iot.Device.Arduino
                 _supportedPinConfigurations = _firmata.PinConfigurations.AsReadOnly();
 
                 Logger.LogInformation("Device capabilities: ");
-                foreach (var pin in _supportedPinConfigurations)
+                foreach (SupportedPinConfiguration pin in _supportedPinConfigurations)
                 {
                     Logger.LogInformation(pin.ToString());
                 }
 
                 _firmata.EnableDigitalReporting();
 
-                foreach (var e in _extendedCommandHandlers)
+                foreach (ExtendedCommandHandler e in _extendedCommandHandlers)
                 {
                     e.Registered(_firmata, this);
                     e.OnConnected();
@@ -575,7 +575,7 @@ namespace Iot.Device.Arduino
             _commandHandlersLock.EnterReadLock();
             try
             {
-                foreach (var handler in _extendedCommandHandlers)
+                foreach (ExtendedCommandHandler handler in _extendedCommandHandlers)
                 {
                     handler.OnErrorMessage(message, exception);
                 }
@@ -613,7 +613,7 @@ namespace Iot.Device.Arduino
             _commandHandlersLock.EnterReadLock();
             try
             {
-                var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
+                SupportedMode? m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
                 if (m == null)
                 {
                     return new SupportedMode(mode, $"Unknown mode {mode}");
@@ -729,7 +729,7 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Only bus number 0 is currently supported");
             }
 
-            var pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2c)).Select(y => y.Pin);
+            IEnumerable<int> pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2c)).Select(y => y.Pin);
 
             return pins.ToArray();
         }
@@ -742,7 +742,7 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Only bus number 0 is currently supported");
             }
 
-            var pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.Spi)).Select(y => y.Pin);
+            IEnumerable<int> pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.Spi)).Select(y => y.Pin);
 
             return pins.ToArray();
         }
@@ -785,7 +785,7 @@ namespace Iot.Device.Arduino
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            foreach (var e in _extendedCommandHandlers)
+            foreach (ExtendedCommandHandler e in _extendedCommandHandlers)
             {
                 try
                 {
@@ -872,7 +872,7 @@ namespace Iot.Device.Arduino
                 try
                 {
                     _firmata.QueryFirmwareVersion(out _);
-                    var elapsed = sw.Elapsed;
+                    TimeSpan elapsed = sw.Elapsed;
                     ret.Add(elapsed);
                     _logger.LogInformation($"Round trip time: {elapsed.TotalMilliseconds}ms");
                 }

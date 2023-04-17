@@ -13,6 +13,21 @@ namespace Iot.Device.Common
     public static class WeatherHelper
     {
         /// <summary>
+        /// Gas constant of dry Air, J / (kg * K)
+        /// </summary>
+        internal const double SpecificGasConstantOfAir = 287.058;
+
+        /// <summary>
+        /// Gas constant of vapor, J / (kg * K)
+        /// </summary>
+        internal const double SpecificGasConstantOfVapor = 461.523;
+
+        /// <summary>
+        /// Default atmospheric temperature gradient = 0.0065K/m (or 0.65K per 100m)
+        /// </summary>
+        internal const double DefaultTemperatureGradient = 0.0065;
+
+        /// <summary>
         /// The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
         /// </summary>
         public static readonly Pressure MeanSeaLevel = Pressure.FromPascals(101325);
@@ -121,6 +136,11 @@ namespace Iot.Device.Common
         /// </remarks>
         public static Temperature CalculateDewPoint(Temperature airTemperature, RelativeHumidity relativeHumidity)
         {
+            if (relativeHumidity <= RelativeHumidity.FromPercent(0.1))
+            {
+                relativeHumidity = RelativeHumidity.FromPercent(0.1);
+            }
+
             double pa = CalculateActualVaporPressure(airTemperature, relativeHumidity).Hectopascals;
             double a = 6.1121; // hPa
             double c = 257.14; // °C
@@ -183,7 +203,7 @@ namespace Iot.Device.Common
         /// <returns>The altitude</returns>
         public static Length CalculateAltitude(Pressure pressure, Pressure seaLevelPressure, Temperature airTemperature)
         {
-            double meters = ((Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, 1 / 5.255) - 1) * airTemperature.Kelvins) / 0.0065;
+            double meters = ((Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, 1 / 5.255) - 1) * airTemperature.Kelvins) / DefaultTemperatureGradient;
             return Length.FromMeters(meters);
         }
 
@@ -222,7 +242,7 @@ namespace Iot.Device.Common
         /// <returns>The estimated absolute sea-level pressure</returns>
         /// <remarks><see cref="CalculatePressure"/> solved for sea level pressure</remarks>
         public static Pressure CalculateSeaLevelPressure(Pressure pressure, Length altitude, Temperature airTemperature) =>
-            Pressure.FromPascals(Math.Pow((((0.0065 * altitude.Meters) / airTemperature.Kelvins) + 1), 5.255) * pressure.Pascals);
+            Pressure.FromPascals(Math.Pow((((DefaultTemperatureGradient * altitude.Meters) / airTemperature.Kelvins) + 1), 5.255) * pressure.Pascals);
 
         /// <summary>
         /// Calculates the approximate absolute pressure from given sea-level pressure, altitude and air temperature.
@@ -232,7 +252,7 @@ namespace Iot.Device.Common
         /// <param name="airTemperature">The air temperature at the point for which pressure is being calculated</param>
         /// <returns>The estimated absolute pressure at the given altitude</returns>
         public static Pressure CalculatePressure(Pressure seaLevelPressure, Length altitude, Temperature airTemperature) =>
-            Pressure.FromPascals(seaLevelPressure.Pascals / Math.Pow((((0.0065 * altitude.Meters) / airTemperature.Kelvins) + 1), 5.255));
+            Pressure.FromPascals(seaLevelPressure.Pascals / Math.Pow((((DefaultTemperatureGradient * altitude.Meters) / airTemperature.Kelvins) + 1), 5.255));
 
         /// <summary>
         /// Calculates the temperature gradient for the given pressure difference
@@ -243,7 +263,7 @@ namespace Iot.Device.Common
         /// <returns>The standard temperature at the given altitude, when the given pressure difference is known</returns>
         /// <remarks><see cref="CalculatePressure"/> solved for temperature</remarks>
         public static Temperature CalculateTemperature(Pressure pressure, Pressure seaLevelPressure, Length altitude) =>
-            Temperature.FromKelvins((0.0065 * altitude.Meters) / (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, 1 / 5.255) - 1));
+            Temperature.FromKelvins((DefaultTemperatureGradient * altitude.Meters) / (Math.Pow(seaLevelPressure.Pascals / pressure.Pascals, 1 / 5.255) - 1));
 
         /// <summary>
         /// Calculates the barometric pressure from a raw reading, using the reduction formula from the german met service.
@@ -302,7 +322,7 @@ namespace Iot.Device.Common
             Length measurementAltitude)
         {
             double x = (9.80665 / (287.05 * ((measuredTemperature.Kelvins) + 0.12 * vaporPressure.Hectopascals +
-                                             (0.0065 * measurementAltitude.Meters) / 2))) * measurementAltitude.Meters;
+                                             (DefaultTemperatureGradient * measurementAltitude.Meters) / 2))) * measurementAltitude.Meters;
             double barometricPressure = measuredPressure.Hectopascals * Math.Exp(x);
             return Pressure.FromHectopascals(barometricPressure);
         }
@@ -331,5 +351,84 @@ namespace Iot.Device.Common
         }
 
         #endregion
+
+        /// <summary>
+        /// Simplified air density (not taking humidity into account)
+        /// </summary>
+        /// <param name="airPressure">Measured air pressure</param>
+        /// <param name="temperature">Measured temperature</param>
+        /// <returns>Approximate standard air density</returns>
+        /// <remarks>From https://de.wikipedia.org/wiki/Luftdichte </remarks>
+        public static Density CalculateAirDensity(Pressure airPressure, Temperature temperature)
+        {
+            var result = airPressure.Pascals / (SpecificGasConstantOfAir * temperature.Kelvins);
+            return Density.FromKilogramsPerCubicMeter(result);
+        }
+
+        /// <summary>
+        /// Calculates the air density
+        /// </summary>
+        /// <param name="airPressure">Measured air pressure</param>
+        /// <param name="temperature">Measured temperature</param>
+        /// <param name="humidity">Measured relative humidity</param>
+        /// <returns>Approximate standard air density at sea level</returns>
+        /// <remarks>From https://de.wikipedia.org/wiki/Luftdichte </remarks>
+        public static Density CalculateAirDensity(Pressure airPressure, Temperature temperature, RelativeHumidity humidity)
+        {
+            double rs = SpecificGasConstantOfAir;
+            double rd = SpecificGasConstantOfVapor;
+            var pd = CalculateSaturatedVaporPressureOverWater(temperature);
+            // It's still called "constant" even though it's not constant
+            double gasConstant = rs / (1 - (humidity.Percent / 100) * (pd.Pascals / airPressure.Pascals) * (1 - (rs / rd)));
+            var result = airPressure.Pascals / (gasConstant * temperature.Kelvins);
+            return Density.FromKilogramsPerCubicMeter(result);
+        }
+
+        /// <summary>
+        /// Calculates the wind chill temperature - this is the perceived temperature in (heavy) winds at cold temperatures.
+        /// This is only useful at temperatures below about 20°C, above use <see cref="CalculateHeatIndex"/> instead.
+        /// Not suitable for wind speeds &lt; 5 km/h.
+        /// </summary>
+        /// <param name="temperature">The measured air temperature</param>
+        /// <param name="windSpeed">The wind speed (measured at 10m above ground)</param>
+        /// <returns>The perceived temperature. Note that this is not a real temperature, and the skin will never really reach
+        /// this temperature. This is more an indication on how fast the skin will reach the air temperature. If the skin
+        /// reaches a temperature of about -5°C, frostbite might occur.</returns>
+        /// <remarks>From https://de.wikipedia.org/wiki/Windchill </remarks>
+        /// <exception cref="ArgumentOutOfRangeException">The wind speed is less than zero</exception>
+        public static Temperature CalculateWindchill(Temperature temperature, Speed windSpeed)
+        {
+            if (windSpeed < Speed.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(windSpeed), "The wind speed cannot be negative");
+            }
+
+            double va = temperature.DegreesCelsius;
+            if (windSpeed < Speed.FromKilometersPerHour(1))
+            {
+                // otherwise, the result is unusable, because the second and third terms of the equation are 0, resulting in a constant offset from the input temperature
+                windSpeed = Speed.FromKilometersPerHour(1);
+            }
+
+            double wct = 13.12 + 0.6215 * va + (0.3965 * va - 11.37) * Math.Pow(windSpeed.KilometersPerHour, 0.16);
+            return Temperature.FromDegreesCelsius(wct);
+        }
+
+        /// <summary>
+        /// Calculates the wind force on an object.
+        /// </summary>
+        /// <param name="densityOfAir">The denisty of the air, calculated using one of the overloads of <see cref="CalculateAirDensity(UnitsNet.Pressure,UnitsNet.Temperature)"/></param>
+        /// <param name="windSpeed">The speed of the wind</param>
+        /// <param name="pressureCoefficient">Pressure coefficient for the shape of the object. Use 1 for a rectangular object directly facing the wind</param>
+        /// <returns>The Pressure the wind applies on the object</returns>
+        /// <remarks>From https://de.wikipedia.org/wiki/Winddruck </remarks>
+        public static Pressure CalculateWindForce(Density densityOfAir, Speed windSpeed, double pressureCoefficient = 1.0)
+        {
+            double v = windSpeed.MetersPerSecond;
+            double rho = densityOfAir.KilogramsPerCubicMeter;
+
+            double wd = pressureCoefficient * rho / 2 * (v * v);
+            return Pressure.FromNewtonsPerSquareMeter(wd);
+        }
     }
 }

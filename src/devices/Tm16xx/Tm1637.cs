@@ -1,6 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 
 namespace Iot.Device.Tm16xx
@@ -9,11 +11,7 @@ namespace Iot.Device.Tm16xx
     /// Represents Titanmec TM1637 device.
     /// </summary>
     public class Tm1637 : Tm16xxI2CLikeBase
-    { 
-        // To store what has been displayed last. Used when change on brightness or screen on/off is used.
-        private byte _lastDisplay = 0, _lastDisplayIndex = 0;
-        private byte _displayState = 0;
-
+    {
         #region Const
 
         // According to the doc, the clock pulse width minimum is 400 ns
@@ -24,6 +22,11 @@ namespace Iot.Device.Tm16xx
         private const byte FixedAddressWritingCommand = 0b0100_0100;
         private const byte SequencedWritingCommand = 0b0100_0000;
 
+        // To store what has been displayed last. Used when change on brightness or screen on/off is used.
+        private byte _lastDisplay = 0;
+        private byte _lastDisplayIndex = 0;
+        private byte _displayState = 0;
+
         #endregion
 
         #region State
@@ -31,7 +34,7 @@ namespace Iot.Device.Tm16xx
         /// <summary>
         /// Sets the screen on or off.
         /// </summary>
-        [Obsolete($"This is kept for code backward compatible. Uses {nameof(IsScreenOn)} instead.")]
+        [Obsolete($"This is kept for code backward compatible. Uses IsScreenOn instead.")]
         public bool ScreenOn
         {
             get => IsScreenOn;
@@ -41,7 +44,7 @@ namespace Iot.Device.Tm16xx
         /// <summary>
         /// Gets or sets the screen brightness. Value must be in range from 0 to 7. For TM1637, 7 is the brightest.
         /// </summary>
-        [Obsolete($"This is kept for code backward compatible. Uses {nameof(ScreenBrightness)} instead.")]
+        [Obsolete($"This is kept for code backward compatible. Uses ScreenBrightness instead.")]
         public byte Brightness
         {
             get => ScreenBrightness;
@@ -56,7 +59,10 @@ namespace Iot.Device.Tm16xx
             get => LedSegment.Led7Segment;
             set
             {
-                if (value == LedSegment.Led7Segment) return;
+                if (value == LedSegment.Led7Segment)
+                {
+                    return;
+                }
 
                 throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(Tm1637)} can only support 7-segment mode.");
             }
@@ -72,21 +78,25 @@ namespace Iot.Device.Tm16xx
         {
             if (brightness > 7)
             {
-                throw new ArgumentException("Value must be less than 8.", nameof(ScreenBrightness));
+                throw new ArgumentException("Value must be less than 8.", nameof(brightness));
             }
 
             _brightness = brightness;
             _screenOn = screenOn;
-            if (waitForNextDisplay) return;
+            if (waitForNextDisplay)
+            {
+                return;
+            }
+
             OnStateChanged();
         }
 
         private protected override void OnStateChanged()
         {
-            //Generates the state code for this time and future.
+            // Generates the state code for this time and future.
             _displayState = (byte)((_screenOn ? 0b1000_1000 : 0b1000_0000) + _brightness);
 
-            //Sends display command.
+            // Sends display command.
             DisplayOneInternal(_lastDisplayIndex, _lastDisplay);
         }
 
@@ -100,7 +110,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
         /// <param name="controller">The instance of the Gpio controller which will not be disposed with this object.</param>
-        public Tm1637(int pinClk, int pinDio, GpioController controller) : this(pinClk, pinDio, gpioController : controller)
+        public Tm1637(int pinClk, int pinDio, GpioController controller)
+            : this(pinClk, pinDio, gpioController: controller)
         {
         }
 
@@ -109,8 +120,8 @@ namespace Iot.Device.Tm16xx
         /// </summary>
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
-        public Tm1637(int pinClk, int pinDio) :
-            this(pinClk, pinDio, PinNumberingScheme.Logical, null, true)
+        public Tm1637(int pinClk, int pinDio)
+            : this(pinClk, pinDio, PinNumberingScheme.Logical, null, true)
         {
         }
 
@@ -120,8 +131,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
         /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
-        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical) :
-            this(pinClk, pinDio, pinNumberingScheme, null, true)
+        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+            : this(pinClk, pinDio, pinNumberingScheme, null, true)
         {
         }
 
@@ -133,7 +144,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
         /// <param name="gpioController">The instance of the gpio controller. Set to <see langword="null" /> to create a new one.</param>
         /// <param name="shouldDispose">Sets to <see langword="true" /> to dispose the Gpio controller with this object. If the <paramref name="gpioController"/> is set to <see langword="null"/>, this parameter will be ignored and the new created Gpio controller will always be disposed with this object.</param>
-        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true) : base(pinClk, pinDio, ClockWidthMicroseconds, pinNumberingScheme, gpioController, shouldDispose)
+        public Tm1637(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
+            : base(pinClk, pinDio, ClockWidthMicroseconds, pinNumberingScheme, gpioController, shouldDispose)
         {
             _maxCharacters = 6;
             _brightness = 7;
@@ -143,6 +155,7 @@ namespace Iot.Device.Tm16xx
         #endregion
 
         #region Display
+
         /// <summary>
         /// Displays segments starting at first segment with byte array containing raw data for each segment including the dot.
         /// <remarks>
@@ -226,7 +239,7 @@ namespace Iot.Device.Tm16xx
             DisplayMultipleInternal(0, 0, 0, 0, 0, 0);
         }
 
-        //Displays without updating _lastDisplayIndex and _lastDisplay.
+        // Displays without updating _lastDisplayIndex and _lastDisplay.
         private void DisplayOneInternal(int index, byte rawData)
         {
             StartTransmission();
@@ -259,6 +272,7 @@ namespace Iot.Device.Tm16xx
             {
                 WriteByteAndWaitAcknowledge(rawData[i]);
             }
+
             StopTransmission();
             StartTransmission();
             // Set the display on/off and the brightness
@@ -276,6 +290,7 @@ namespace Iot.Device.Tm16xx
                 yield return (data & 0b0000_0001) != 0;
                 data >>= 1;
             }
+
             yield return (data & 0b0000_0001) != 0;
         }
 

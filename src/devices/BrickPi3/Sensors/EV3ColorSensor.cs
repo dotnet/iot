@@ -216,8 +216,10 @@ namespace Iot.Device.BrickPi3.Sensors
         /// </summary>
         public int Read() => _colorMode switch
         {
-            ColorSensorMode.Color or ColorSensorMode.Reflection or ColorSensorMode.Ambient
+            ColorSensorMode.Color or ColorSensorMode.Ambient
                 => (int)ReadColor(),
+            ColorSensorMode.Reflection
+                => CalculateRawAverageAsPct(),
             _ => CalculateRawAverageAsPct(),
         };
 

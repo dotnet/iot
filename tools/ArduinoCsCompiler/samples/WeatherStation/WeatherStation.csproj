@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <RootNamespace>WeatherStation</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <AssemblyName>WeatherStation</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="WeatherStation.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\src\devices\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\..\..\..\src\devices\Bmxx80\Bmxx80.csproj" />
+    <ProjectReference Include="..\..\..\..\src\devices\CharacterLcd\CharacterLcd.csproj" />
+    <ProjectReference Include="..\..\..\..\src\devices\Common\Common.csproj" />
+    <ProjectReference Include="..\..\..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
+  </ItemGroup>
+
+ 
+  
+
+</Project>

@@ -36,6 +36,19 @@ namespace Iot.Device.Nmea0183.Sentences
         }
 
         /// <summary>
+        /// Constructs a new MWV sentence
+        /// </summary>
+        public EngineRevolutions(TalkerId talker, RotationSource source, RotationalSpeed speed, int engineNumber, Ratio pitch)
+            : base(talker, Id, DateTimeOffset.UtcNow)
+        {
+            RotationalSpeed = speed;
+            RotationSource = source;
+            EngineNumber = engineNumber;
+            PropellerPitch = pitch;
+            Valid = true;
+        }
+
+        /// <summary>
         /// Internal constructor
         /// </summary>
         public EngineRevolutions(TalkerSentence sentence, DateTimeOffset time)

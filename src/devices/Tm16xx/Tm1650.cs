@@ -1,6 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.Device.Gpio;
 
 namespace Iot.Device.Tm16xx
@@ -10,18 +12,16 @@ namespace Iot.Device.Tm16xx
     /// </summary>
     public class Tm1650 : Tm16xxI2CLikeBase
     {
-        private bool _use7Segment;
-        private byte[] _characterMemoryAddress;
-        
         #region Const
 
-        const int MemoryAddressPrefix = 0b0110_1000;
+        private const int MemoryAddressPrefix = 0b0110_1000;
         private const byte ModeCommand = 0b0100_1000;
 
         // According to the doc, the clock pulse width minimum is 400 ns
         // And waiting time between clk up and down is 1 µs
         private const byte ClockWidthMicroseconds = 1;
-
+        private bool _use7Segment;
+        private byte[] _characterMemoryAddress = new byte[0];
         #endregion
 
         #region Character memory address
@@ -40,11 +40,8 @@ namespace Iot.Device.Tm16xx
         /// </summary>
         public override LedSegment LedSegment
         {
-            get
-            {
-                if (_use7Segment) return LedSegment.Led7Segment;
-                else return LedSegment.Led8Segment;
-            }
+            get => _use7Segment ? LedSegment.Led7Segment : LedSegment.Led8Segment;
+
             set
             {
                 switch (value)
@@ -58,6 +55,7 @@ namespace Iot.Device.Tm16xx
                     default:
                         throw new ArgumentOutOfRangeException(nameof(value), value, $"{nameof(Tm1650)} can only support 7-segment and 8-segment modes.");
                 }
+
                 OnStateChanged();
             }
         }
@@ -72,7 +70,7 @@ namespace Iot.Device.Tm16xx
         {
             if (brightness > 7)
             {
-                throw new ArgumentException("Value must be less than 8.", nameof(ScreenBrightness));
+                throw new ArgumentException("Value must be less than 8.", nameof(brightness));
             }
 
             _brightness = brightness;
@@ -83,7 +81,7 @@ namespace Iot.Device.Tm16xx
 
         private protected override void OnStateChanged()
         {
-            //Sends display command.
+            // Sends display command.
             var displayCommand = (byte)((_brightness << 4) |
                                         (_use7Segment ? 8 : 0) |
                                         (_screenOn ? 1 : 0));
@@ -104,7 +102,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
         /// <param name="controller">The instance of the Gpio controller which will not be disposed with this object.</param>
-        public Tm1650(int pinClk, int pinDio, GpioController controller) : this(pinClk, pinDio, gpioController : controller)
+        public Tm1650(int pinClk, int pinDio, GpioController controller)
+            : this(pinClk, pinDio, gpioController: controller)
         {
         }
 
@@ -113,8 +112,8 @@ namespace Iot.Device.Tm16xx
         /// </summary>
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
-        public Tm1650(int pinClk, int pinDio) :
-            this(pinClk, pinDio, PinNumberingScheme.Logical, null, true)
+        public Tm1650(int pinClk, int pinDio)
+            : this(pinClk, pinDio, PinNumberingScheme.Logical, null, true)
         {
         }
 
@@ -124,8 +123,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinClk">The clock pin.</param>
         /// <param name="pinDio">The data pin.</param>
         /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
-        public Tm1650(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical) :
-            this(pinClk, pinDio, pinNumberingScheme, null, true)
+        public Tm1650(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical)
+            : this(pinClk, pinDio, pinNumberingScheme, null, true)
         {
         }
 
@@ -137,7 +136,8 @@ namespace Iot.Device.Tm16xx
         /// <param name="pinNumberingScheme">Uses the logical or physical pin layout for new created Gpio controller.</param>
         /// <param name="gpioController">The instance of the gpio controller. Set to <see langword="null" /> to create a new one.</param>
         /// <param name="shouldDispose">Sets to <see langword="true" /> to dispose the Gpio controller with this object. If the <paramref name="gpioController"/> is set to <see langword="null"/>, this parameter will be ignored and the new created Gpio controller will always be disposed with this object.</param>
-        public Tm1650(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true) : base(pinClk, pinDio, ClockWidthMicroseconds, pinNumberingScheme, gpioController, shouldDispose)
+        public Tm1650(int pinClk, int pinDio, PinNumberingScheme pinNumberingScheme = PinNumberingScheme.Logical, GpioController? gpioController = null, bool shouldDispose = true)
+            : base(pinClk, pinDio, ClockWidthMicroseconds, pinNumberingScheme, gpioController, shouldDispose)
         {
             _maxCharacters = 4;
             _characterOrder = new byte[4] { 0, 1, 2, 3 };
@@ -148,6 +148,7 @@ namespace Iot.Device.Tm16xx
         #endregion
 
         #region Display
+
         /// <summary>
         /// Displays segments starting at first segment with byte array containing raw data for each segment including the dot.
         /// <remarks>
@@ -180,7 +181,7 @@ namespace Iot.Device.Tm16xx
 
             for (int j = rawData.Length; j < _maxCharacters; j++)
             {
-                DisplayOneInternal(j,  (byte)Character.Nothing);
+                DisplayOneInternal(j, (byte)Character.Nothing);
             }
         }
 
@@ -240,6 +241,7 @@ namespace Iot.Device.Tm16xx
                 yield return (data & 0b1000_0000) != 0;
                 data <<= 1;
             }
+
             yield return (data & 0b1000_0000) != 0;
         }
 

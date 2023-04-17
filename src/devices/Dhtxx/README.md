@@ -14,10 +14,10 @@ The DHT temperature and humidity sensors are very popular. This projects support
 | Protocol | I2C | 1-Wire | I2C, 1-Wire | 1-Wire | 1-Wire |
 
 * **DHT10** [datasheet (Currently only Chinese)](http://www.aosong.com/userfiles/files/media/DHT10%E8%A7%84%E6%A0%BC%E4%B9%A6.pdf)
-* **DHT11** [datasheet](https://cdn.datasheetspdf.com/pdf-down/D/H/T/DHT11-Aosong.pdf)
-* **DHT12** [datasheet](https://cdn.datasheetspdf.com/pdf-down/D/H/T/DHT12-Aosong.pdf)
-* **DHT21** [datasheet](https://cdn.datasheetspdf.com/pdf-down/A/M/2/AM2301-Aosong.pdf)
-* **DHT22** [datasheet](https://cdn-shop.adafruit.com/datasheets/DHT22.pdf)
+* **DHT11** [datasheet](https://www.mouser.com/datasheet/2/758/DHT11-Technical-Data-Sheet-Translated-Version-1143054.pdf)
+* **DHT12** [datasheet](https://www.sunrom.com/download/592.pdf)
+* **DHT21** [datasheet](https://mikroshop.ch/pdf/DHT21.pdf)
+* **DHT22** [datasheet](https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf)
 
 ## Usage
 
