@@ -1,19 +1,19 @@
 {
   "tools": {
-    "dotnet": "7.0.202",
+    "dotnet": "7.0.203",
     "runtimes": {
       "dotnet/x64": [
         "3.1.32",
-        "6.0.15"
+        "6.0.16"
       ]
     }
   },
   "sdk": {
-    "version": "7.0.202"
+    "version": "7.0.203"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23164.3",
-    "Microsoft.DotNet.Helix.Sdk": "7.0.0-beta.23164.3",
+    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23211.2",
+    "Microsoft.DotNet.Helix.Sdk": "7.0.0-beta.23211.2",
     "Microsoft.Build.Traversal": "3.1.6"
   }
 }

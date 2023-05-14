@@ -64,7 +64,8 @@ switch (connectionChoice.KeyChar)
         // Here you can use as well MfRc522.MaximumSpiClockFrequency which is 10_000_000
         // Anything lower will work as well
         connection.ClockFrequency = 5_000_000;
-        SpiDevice spi = board.CreateSpiDevice(connection);
+        // the following is a work-around for https://github.com/dotnet/iot/issues/1869
+        SpiDevice spi = (board is RaspberryPiBoard) ? SpiDevice.Create(connection) : board.CreateSpiDevice(connection);
         mfrc522 = new(spi, pinReset, gpioController, false);
         break;
     case '2':
@@ -104,7 +105,9 @@ if (mfrc522 is not object)
 }
 
 Console.WriteLine($"Version: {mfrc522.Version}, version should be 1 or 2. Some clones may appear with version 0");
-Console.WriteLine("Place your Mifare or Ultralight card on the reader. The default B key for Mifare is set to 0xFF 0xFF 0xFF 0xFF 0xFF 0xFF will be used to read the card. The default password for Ultralight is set to 0xFF 0xFF 0xFF 0xFF and will be used if write permissions require authentication.");
+Console.WriteLine("Place your Mifare or Ultralight card on the reader.");
+Console.WriteLine($"The default B key for Mifare ({BitConverter.ToString(MifareCard.DefaultKeyB.ToArray())}) will be used to read the card.");
+Console.WriteLine($"The default password for Ultralight ({BitConverter.ToString(UltralightCard.DefaultPassword)}) will be used if write permissions require authentication.");
 
 bool res;
 Data106kbpsTypeA card;
@@ -124,22 +127,28 @@ if (UltralightCard.IsUltralightCard(card.Atqa, card.Sak))
 else
 {
     Console.WriteLine("Mifare card detected, dumping the memory.");
-    ProcessMifare();
+    ProcessMifare(card.Atqa, card.Sak);
 }
 
 board.Dispose();
 
-void ProcessMifare()
+void ProcessMifare(ushort Atqa, byte Sak)
 {
     var mifare = new MifareCard(mfrc522!, 0);
     mifare.SerialNumber = card.NfcId;
-    mifare.Capacity = MifareCardCapacity.Mifare1K;
     mifare.KeyA = MifareCard.DefaultKeyA.ToArray();
     mifare.KeyB = MifareCard.DefaultKeyB.ToArray();
-    int ret;
-
-    for (byte block = 0; block < 64; block++)
+    mifare.SetCapacity(Atqa, Sak);
+    if (mifare.Capacity == MifareCardCapacity.Unknown)
     {
+        Console.WriteLine("Unsupported Mifare card type");
+        return;
+    }
+
+    int ret;
+    for (uint blockUint = 0; blockUint < mifare.GetNumberBlocks(); blockUint++)
+    {
+        byte block = (byte)blockUint;
         mifare.BlockNumber = block;
         mifare.Command = MifareCardCommand.AuthenticationB;
         ret = mifare.RunMifareCardCommand();
@@ -191,15 +200,16 @@ void ProcessMifare()
                 Console.WriteLine($"Error reading bloc: {block}");
             }
 
-            if (block % 4 == 3)
+            if (mifare.IsSectorBlock(block))
             {
                 if (mifare.Data != null)
                 {
                     // Check what are the permissions
-                    for (byte j = 3; j > 0; j--)
+                    for (byte j = MifareCard.SectorToBlockNumber(MifareCard.BlockNumberToSector(block), 0); j < block; j++)
                     {
-                        var access = mifare.BlockAccess((byte)(block - j), mifare.Data);
-                        Console.WriteLine($"Bloc: {block - j}, Access: {access}");
+                        var group = MifareCard.BlockNumberToBlockGroup(j);
+                        var access = mifare.BlockAccess(group, mifare.Data);
+                        Console.WriteLine($"Bloc: {j}, Access: {access}");
                     }
 
                     var sector = mifare.SectorTailerAccess(block, mifare.Data);
@@ -335,7 +345,7 @@ void ProcessUltralight()
     res = ultralight.IsFormattedNdef();
     if (!res)
     {
-        Console.WriteLine("Card is not NDEF formated, we will try to format it");
+        Console.WriteLine("Card is not NDEF formatted, we will try to format it");
         res = ultralight.FormatNdef();
         if (!res)
         {
@@ -346,7 +356,7 @@ void ProcessUltralight()
             res = ultralight.IsFormattedNdef();
             if (res)
             {
-                Console.WriteLine("Formating successful");
+                Console.WriteLine("Formatting successful");
             }
             else
             {

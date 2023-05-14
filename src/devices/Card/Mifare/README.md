@@ -7,7 +7,18 @@ This class supports Mifare cards. They are RFID cards responding to ISO 14443 ty
 You'll need first to get the card from an RFID reader. The example below shows how to do it with a PN532 and read all the sectors and print all the sector data information.
 
 ```csharp
-byte[] retData = null;
+using System.Device.I2c;
+using Iot.Device.Pn532;
+using Iot.Device.Pn532.ListPassive;
+using Iot.Device.Card.Mifare;
+
+const int I2cBus = 1;
+
+I2cConnectionSettings i2cSettings = new(I2cBus, Pn532.I2cDefaultAddress);
+using I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
+using Pn532 pn532 = new(i2cDevice, true);
+
+byte[]? retData = null;
 while (!Console.KeyAvailable)
 {
     retData = pn532.ListPassiveTarget(MaxTarget.One, TargetBaudRate.B106kbpsTypeA);
@@ -16,15 +27,26 @@ while (!Console.KeyAvailable)
     // Give time to PN532 to process
     Thread.Sleep(200);
 }
+
 if (retData is null)
+{
     return;
-var decrypted = pn532.Decode106kbpsTypeA(retData.AsSpan().Slice(1));
+}
+
+var decrypted = pn532.TryDecode106kbpsTypeA(retData.AsSpan().Slice(1));
 if (decrypted is object)
 {
-    Console.WriteLine($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
+    Console.Write($"Tg: {decrypted.TargetNumber}, ATQA: {decrypted.Atqa} SAK: {decrypted.Sak}, NFCID: {BitConverter.ToString(decrypted.NfcId)}");
     if (decrypted.Ats is object)
+    {
         Console.WriteLine($", ATS: {BitConverter.ToString(decrypted.Ats)}");
-    MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber) { BlockNumber = 0, Command = MifareCardCommand.AuthenticationA };
+    }
+    else
+    {
+        Console.WriteLine();
+    }
+
+    MifareCard mifareCard = new MifareCard(pn532, decrypted.TargetNumber) { ReselectAfterError = true };
     mifareCard.SetCapacity(decrypted.Atqa, decrypted.Sak);
     mifareCard.SerialNumber = decrypted.NfcId;
     mifareCard.KeyA = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
@@ -33,25 +55,28 @@ if (decrypted is object)
     {
         mifareCard.BlockNumber = block;
         mifareCard.Command = MifareCardCommand.AuthenticationB;
-        var ret = mifareCard.RunMifiCardCommand();
+        var ret = mifareCard.RunMifareCardCommand();
         if (ret < 0)
         {
             // Try another one
             mifareCard.Command = MifareCardCommand.AuthenticationA;
-            ret = mifareCard.RunMifiCardCommand();
+            ret = mifareCard.RunMifareCardCommand();
         }
 
         if (ret >= 0)
         {
             mifareCard.BlockNumber = block;
             mifareCard.Command = MifareCardCommand.Read16Bytes;
-            ret = mifareCard.RunMifiCardCommand();
+            ret = mifareCard.RunMifareCardCommand();
             if (ret >= 0)
+            {
                 Console.WriteLine($"Bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
+            }
             else
             {
                 Console.WriteLine($"Error reading bloc: {block}, Data: {BitConverter.ToString(mifareCard.Data)}");
             }
+
             if (block % 4 == 3)
             {
                 // Check what are the permissions

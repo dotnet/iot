@@ -6,6 +6,7 @@ using System.Device.Pwm;
 using Iot.Device.Adc;
 using Iot.Device.Board;
 using Xunit;
+using Xunit.Abstractions;
 using static System.Device.Gpio.Tests.SetupHelpers;
 
 namespace System.Device.Gpio.Tests;
@@ -13,6 +14,37 @@ namespace System.Device.Gpio.Tests;
 [Trait("feature", "pwm")]
 public class PwmTests
 {
+    private readonly ITestOutputHelper _output;
+
+    public PwmTests(ITestOutputHelper output)
+    {
+        var board = new RaspberryPiBoard();
+        _output = output;
+
+        try
+        {
+            var isPwm = board.IsPwmActivated();
+            _output.WriteLine($"Is PWM overlay actvated? {isPwm}");
+
+            for (int busid = 0; busid < 2; busid++)
+            {
+                var pin = board.GetOverlayPinAssignmentForPwm(busid);
+                if (pin != -1)
+                {
+                    _output.WriteLine($"PWM overlay pin on channel {busid}: {pin}.");
+                }
+                else
+                {
+                    _output.WriteLine($"No PWM pins defined in the overlay for channel {busid}");
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _output.WriteLine($"Exception in checking PWM configuration: {ex}");
+        }
+    }
+
     [Fact]
     public void DutyCycle_ReportsValueBack()
     {
