@@ -716,12 +716,6 @@ namespace Iot.Device.Board
             var controllerInfo = controller.QueryComponentInformation();
             self.AddSubComponent(controllerInfo);
 
-            foreach (var e in _i2cBuses)
-            {
-                self.AddSubComponent(e.Value.QueryComponentInformation());
-            }
-
-            // The I2C busses are also part of this list, but AddSubComponent takes care of that and adds only unique entries
             foreach (var e in _managers)
             {
                 self.AddSubComponent(e.QueryComponentInformation());

@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
+using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading;
 using Iot.Device.FtCommon;
 
@@ -223,6 +226,16 @@ namespace Iot.Device.Ft232H
         protected override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
             throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var ret = base.QueryComponentInformation();
+            ret.Properties["Description"] = DeviceInformation.Description;
+            ret.Properties["SerialNumber"] = DeviceInformation.SerialNumber;
+            ret.Properties["Channel"] = DeviceInformation.Channel.ToString();
+            return ret;
         }
     }
 }
