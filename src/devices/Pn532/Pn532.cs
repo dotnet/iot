@@ -18,8 +18,6 @@ using Iot.Device.Pn532.RfConfiguration;
 using Iot.Device.Rfid;
 using Iot.Device.Pn532;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp.PixelFormats;
-using UnitsNet;
 
 namespace Iot.Device.Pn532
 {
