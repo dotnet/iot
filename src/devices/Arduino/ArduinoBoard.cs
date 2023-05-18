@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Device;
 using System.Device.Analog;
 using System.Text;
 using System.Device.Gpio;
@@ -848,6 +849,16 @@ namespace Iot.Device.Arduino
             {
                 Firmata.DisableSpi();
             }
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = base.QueryComponentInformation();
+            self.Properties["FirmwareVersion"] = FirmwareVersion.ToString();
+            self.Properties["FirmwareName"] = FirmwareName;
+            self.Properties["FirmataVersion"] = FirmataVersion.ToString();
+            return self;
         }
 
         /// <summary>

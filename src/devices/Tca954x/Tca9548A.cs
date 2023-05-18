@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
 using System.Device.Model;
 using System.IO;
@@ -193,5 +194,4 @@ namespace Iot.Device.Tca954x
             return GetEnumerator();
         }
     }
-
 }

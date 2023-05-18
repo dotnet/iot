@@ -282,4 +282,12 @@ public class RaspberryPi3Driver : GpioDriver
         _internalDriver = null!;
         base.Dispose(disposing);
     }
+
+    /// <inheritdoc />
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var ret = new ComponentInformation(this, "Generic Raspberry Pi Wrapper driver");
+        ret.AddSubComponent(_internalDriver.QueryComponentInformation());
+        return ret;
+    }
 }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Pwm;
@@ -69,6 +70,16 @@ namespace Iot.Device.Board
         protected override PwmChannel CreateSimplePwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage)
         {
             return _pwmChannelCreator(channel);
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var ret = base.QueryComponentInformation();
+            return ret with
+            {
+                Description = "Custom Board"
+            };
         }
     }
 }

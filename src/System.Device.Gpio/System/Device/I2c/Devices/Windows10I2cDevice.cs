@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Globalization;
 using Windows.Devices.Enumeration;
 using WinI2c = Windows.Devices.I2c;
 
@@ -127,5 +128,13 @@ internal class Windows10I2cDevice : I2cDevice
         _winI2cDevice = null!;
 
         base.Dispose(disposing);
+    }
+
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "Windows IoT Core I2C Device");
+        self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
+        self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
+        return self;
     }
 }

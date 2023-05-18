@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Globalization;
+
 namespace System.Device.I2c;
 
 /// <summary>
@@ -83,6 +85,21 @@ public abstract partial class I2cDevice : IDisposable
     /// The length of the buffer determines how much data to read from the I2C device.
     /// </param>
     public abstract void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer);
+
+    /// <summary>
+    /// Query information about a component and it's children.
+    /// </summary>
+    /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
+    /// <remarks>
+    /// This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+    /// </remarks>
+    public virtual ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "Generic I2C Device base");
+        self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
+        self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
+        return self;
+    }
 
     /// <inheritdoc cref="IDisposable.Dispose"/>
     public void Dispose()

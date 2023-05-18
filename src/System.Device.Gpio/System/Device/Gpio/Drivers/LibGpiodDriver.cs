@@ -387,6 +387,16 @@ public class LibGpiodDriver : UnixDriver
         _pinValue[pinNumber] = value;
     }
 
+    /// <inheritdoc />
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "LibGpiodDriver");
+        IntPtr libgpiodVersionPtr = Interop.libgpiod.gpiod_version_string();
+        string libgpiodVersion = Marshal.PtrToStringAnsi(libgpiodVersionPtr) ?? string.Empty;
+        self.Properties["LibGpiodVersion"] = libgpiodVersion;
+        return self;
+    }
+
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {

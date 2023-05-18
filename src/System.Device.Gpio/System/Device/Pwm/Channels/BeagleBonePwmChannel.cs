@@ -37,4 +37,13 @@ internal class BeagleBonePwmChannel : UnixPwmChannel
     /// https://github.com/beagleboard/linux/commit/0e09cd3599153a865e87e212ffed6d485488dd4f
     /// </remarks>
     protected override string ChannelName => $"pwm-{_chip}:{_channel}";
+
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var self = base.QueryComponentInformation();
+        return self with
+        {
+            Description = "BeagleBone PWM Channel"
+        };
+    }
 }

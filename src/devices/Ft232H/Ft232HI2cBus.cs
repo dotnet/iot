@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
 using System.IO;
 using System.Net.Http.Headers;
@@ -15,7 +16,7 @@ namespace Iot.Device.Ft232H
     /// </summary>
     internal class Ft232HI2cBus : I2cBus
     {
-        private HashSet<int>? _usedAddresses = null;
+        private readonly Dictionary<int, I2cDevice> _usedAddresses;
 
         /// <summary>
         /// Store the FTDI Device Information
@@ -30,18 +31,20 @@ namespace Iot.Device.Ft232H
         {
             DeviceInformation = deviceInformation;
             DeviceInformation.I2cInitialize();
+            _usedAddresses = new Dictionary<int, I2cDevice>();
         }
 
         /// <inheritdoc/>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
-            _usedAddresses ??= new HashSet<int>();
-            if (!_usedAddresses.Add(deviceAddress))
+            if (!_usedAddresses.ContainsKey(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} is already open.", nameof(deviceAddress));
             }
 
-            return CreateDeviceNoCheck(deviceAddress);
+            I2cDevice ret = CreateDeviceNoCheck(deviceAddress);
+            _usedAddresses[deviceAddress] = ret;
+            return ret;
         }
 
         internal I2cDevice CreateDeviceNoCheck(int deviceAddress)
@@ -60,7 +63,7 @@ namespace Iot.Device.Ft232H
 
         internal bool RemoveDeviceNoCheck(int deviceAddress)
         {
-            return _usedAddresses?.Remove(deviceAddress) ?? false;
+            return _usedAddresses.Remove(deviceAddress);
         }
 
         internal void Read(int deviceAddress, Span<byte> buffer)
@@ -107,6 +110,18 @@ namespace Iot.Device.Ft232H
             }
 
             DeviceInformation.I2cStop();
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "Ftx232HI2c I2C Bus driver");
+            self.Properties["BusNo"] = "0";
+            foreach (var device in _usedAddresses)
+            {
+                self.AddSubComponent(device.Value.QueryComponentInformation());
+            }
+
+            return self;
         }
     }
 }

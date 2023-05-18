@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
+using System.Globalization;
 using Iot.Device.Board;
 
 namespace Iot.Device.Tca954x
@@ -16,6 +18,7 @@ namespace Iot.Device.Tca954x
         private readonly I2cBus _channelBus;
         private readonly Tca9548A _tca9548A;
         private readonly MultiplexerChannel _tcaChannel;
+        private readonly Dictionary<int, I2cDevice> _devices;
 
         /// <summary>
         /// Creates new I2C bus Instance for multiplexer channel
@@ -28,6 +31,7 @@ namespace Iot.Device.Tca954x
             _tca9548A = tca9548A;
             _tcaChannel = channels;
             _channelBus = mainBus;
+            _devices = new Dictionary<int, I2cDevice>();
         }
 
         private void SelectDeviceChannel() => _tca9548A.SelectChannel(_tcaChannel);
@@ -40,7 +44,14 @@ namespace Iot.Device.Tca954x
         public override I2cDevice CreateDevice(int deviceAddress)
         {
             SelectDeviceChannel();
-            return new Tca9548AI2cDevice(_tca9548A, _tcaChannel, _channelBus.CreateDevice(deviceAddress));
+            if (_devices.ContainsKey(deviceAddress))
+            {
+                throw new InvalidOperationException($"Channel {_tcaChannel} has already a device with address 0x{deviceAddress:x2}");
+            }
+
+            var device = new Tca9548AI2cDevice(_tca9548A, _tcaChannel, _channelBus.CreateDevice(deviceAddress));
+            _devices[deviceAddress] = device;
+            return device;
         }
 
         /// <summary>
@@ -60,8 +71,20 @@ namespace Iot.Device.Tca954x
         public override void RemoveDevice(int deviceAddress)
         {
             SelectDeviceChannel();
-            _channelBus.RemoveDevice(deviceAddress);
+            _devices.Remove(deviceAddress);
         }
 
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, $"Tca9548A Channel {_tcaChannel}");
+            self.Properties["Channel"] = _tcaChannel.ToString();
+            foreach (var device in _devices)
+            {
+                self.AddSubComponent(device.Value.QueryComponentInformation());
+            }
+
+            return self;
+        }
     }
 }
