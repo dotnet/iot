@@ -11,8 +11,13 @@ namespace Iot.Device.Axp192
     [Flags]
     public enum BatteryStatus
     {
-        /// <summary>Overwinered</summary>
-        Overwinered = 0b1000_000,
+        /// <summary>
+        /// Empty value
+        /// </summary>
+        None = 0,
+
+        /// <summary>AXP192 is overheated</summary>
+        Overheated = 0b1000_000,
 
         /// <summary>Charging</summary>
         Charging = 0b0100_0000,
@@ -23,7 +28,7 @@ namespace Iot.Device.Axp192
         /// <summary>Battery Activation Mode</summary>
         BatteryActivationMode = 0b0000_1000,
 
-        /// <summary>Charging CurrentLess Than Expected</summary>
+        /// <summary>Charging Current Less Than Expected</summary>
         ChargingCurrentLessThanExpected = 0b0000_0100,
 
         /// <summary>Mode B, when not present, the Mode A (sleep) is activated</summary>
