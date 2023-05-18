@@ -3,9 +3,9 @@
 
 using System;
 using System.Device.I2c;
+using System.Drawing;
 using System.Threading;
 using Iot.Device.Lp55231;
-using SixLabors.ImageSharp;
 
 var i2cDevice = I2cDevice.Create(new I2cConnectionSettings(1, Lp55231.DefaultI2cAddress));
 
@@ -22,8 +22,8 @@ ledDriver.Misc = MiscFlags.ClockSourceSelection
                | MiscFlags.ChargeModeGainHighBit
                | MiscFlags.AddressAutoIncrementEnable;
 
-ledDriver[0] = Color.FromRgba(255, 0, 0, byte.MaxValue);
-ledDriver[1] = Color.FromRgba(0, 255, 0, byte.MaxValue);
-ledDriver[2] = Color.FromRgba(0, 0, 255, byte.MaxValue);
+ledDriver[0] = Color.FromArgb(255, 0, 0);
+ledDriver[1] = Color.FromArgb(0, 255, 0);
+ledDriver[2] = Color.FromArgb(0, 0, 255);
 
 Console.WriteLine("Should be showing red, green, blue");

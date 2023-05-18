@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuildHat.samples", "samples
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BuildHatTests", "tests\BuildHatTests\BuildHatTests.csproj", "{CD468E74-AF86-48D8-96AA-1E267084AB2F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonHelpers", "..\Common\CommonHelpers.csproj", "{F0563C1E-F8B4-47A7-9C1F-A700FF9F5C65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{F0563C1E-F8B4-47A7-9C1F-A700FF9F5C65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

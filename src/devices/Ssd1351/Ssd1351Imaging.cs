@@ -3,8 +3,8 @@
 
 using System;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Ssd1351
 {
@@ -14,7 +14,7 @@ namespace Iot.Device.Ssd1351
         /// Send a bitmap to the ssd1351 display specifying the starting position and destination clipping rectangle.
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
-        public void SendBitmap(Bitmap bm)
+        public void SendBitmap(BitmapImage bm)
         {
             SendBitmap(bm, new Point(0, 0), new Rectangle(0, 0, ScreenWidthPx, ScreenHeightPx));
         }
@@ -24,7 +24,7 @@ namespace Iot.Device.Ssd1351
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         /// <param name="updateRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
-        public void SendBitmap(Bitmap bm, Rectangle updateRect)
+        public void SendBitmap(BitmapImage bm, Rectangle updateRect)
         {
             SendBitmap(bm, new Point(updateRect.X, updateRect.Y), updateRect);
         }
@@ -35,7 +35,7 @@ namespace Iot.Device.Ssd1351
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         /// <param name="sourcePoint">A coordinate point in the source bitmap where copying starts from.</param>
         /// <param name="destinationRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
-        public void SendBitmap(Bitmap bm, Point sourcePoint, Rectangle destinationRect)
+        public void SendBitmap(BitmapImage bm, Point sourcePoint, Rectangle destinationRect)
         {
             if (bm is null)
             {
@@ -49,7 +49,6 @@ namespace Iot.Device.Ssd1351
 
             // get the pixel data and send it to the display
             SendBitmapPixelData(GetBitmapPixelData(bm, new Rectangle(sourcePoint.X, sourcePoint.Y, destinationRect.Width, destinationRect.Height)), destinationRect);
-
         }
 
         /// <summary>
@@ -57,10 +56,8 @@ namespace Iot.Device.Ssd1351
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
         /// <param name="sourceRect">A rectangle that defines where in the bitmap data is to be converted from.</param>
-        public Span<byte> GetBitmapPixelData(Bitmap bm, Rectangle sourceRect)
+        public Span<byte> GetBitmapPixelData(BitmapImage bm, Rectangle sourceRect)
         {
-            BitmapData bmd;
-            byte[] bitmapData; // array that takes the raw bytes of the bitmap
             byte[] outputBuffer; // array used to form the data to be written out to the SPI interface
 
             if (bm is null)
@@ -74,18 +71,11 @@ namespace Iot.Device.Ssd1351
             }
 
             // allocate the working arrays.
-            bitmapData = new byte[sourceRect.Width * sourceRect.Height * 4];
             outputBuffer = new byte[sourceRect.Width * sourceRect.Height * (_colorDepth == ColorDepth.ColourDepth65K ? 2 : 3)];
+            Span<byte> bitmapData = bm.AsByteSpan();
 
-            // get the raw pixel data for the bitmap
-            bmd = bm.LockBits(sourceRect, ImageLockMode.ReadOnly, bm.PixelFormat);
-
-            Marshal.Copy(bmd.Scan0, bitmapData, 0, bitmapData.Length);
-
-            bm.UnlockBits(bmd);
-
-            // iterate over the source bitmap converting each pixle in the raw data
-            // to a format suitablle for sending to the display
+            // iterate over the source bitmap converting each pixel in the raw data
+            // to a format suitable for sending to the display
             for (int i = 0; i < bitmapData.Length; i += 4)
             {
                 if (_colorDepth == ColorDepth.ColourDepth65K)

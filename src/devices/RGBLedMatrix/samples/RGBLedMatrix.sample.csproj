@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../RGBLedMatrix.csproj" />
+    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
   </ItemGroup>
 
   <ItemGroup>

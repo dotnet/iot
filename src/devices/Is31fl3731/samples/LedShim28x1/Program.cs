@@ -3,10 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
-using SixLabors.ImageSharp;
 
 // For 28x1 LED Shim
 // https://shop.pimoroni.com/products/led-shim
@@ -45,7 +45,7 @@ while (true)
         foreach (int x in Enumerable.Range(0, 28))
         {
             var (r, g, b) = rainbow[(x + offset) % 28];
-            Color color = Color.FromRgb(r, g, b);
+            Color color = Color.FromArgb(r, g, b);
             shim.WritePixelRgb(x, color);
         }
     }

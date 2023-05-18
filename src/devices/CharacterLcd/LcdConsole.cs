@@ -8,7 +8,7 @@ using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Globalization;
-using SixLabors.ImageSharp;
+using System.Drawing;
 using Iot.Device.Graphics;
 
 namespace Iot.Device.CharacterLcd

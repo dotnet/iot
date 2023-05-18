@@ -4,13 +4,14 @@
 using System;
 using System.Drawing;
 using System.IO;
+using Iot.Device.Graphics;
 using Iot.Device.Media;
 
-VideoConnectionSettings settings = new(0, (2560, 1920), PixelFormat.JPEG);
+VideoConnectionSettings settings = new(0, (2560, 1920), VideoPixelFormat.JPEG);
 using VideoDevice device = VideoDevice.Create(settings);
 
 // Get the supported formats of the device
-foreach (PixelFormat item in device.GetSupportedPixelFormats())
+foreach (VideoPixelFormat item in device.GetSupportedPixelFormats())
 {
     Console.Write($"{item} ");
 }
@@ -18,7 +19,7 @@ foreach (PixelFormat item in device.GetSupportedPixelFormats())
 Console.WriteLine();
 
 // Get the resolutions of the format
-foreach (var resolution in device.GetPixelFormatResolutions(PixelFormat.YUYV))
+foreach (var resolution in device.GetPixelFormatResolutions(VideoPixelFormat.YUYV))
 {
     Console.Write($"[{resolution.MinWidth}x{resolution.MinHeight}]->[{resolution.MaxWidth}x{resolution.MaxHeight}], Step [{resolution.StepWidth},{resolution.StepHeight}] ");
 }
@@ -35,10 +36,10 @@ string path = Directory.GetCurrentDirectory();
 device.Capture($"{path}/jpg_direct_output.jpg");
 
 // Change capture setting
-device.Settings.PixelFormat = PixelFormat.YUV420;
+device.Settings.PixelFormat = VideoPixelFormat.YUV420;
 
 // Convert pixel format
 using var stream = new MemoryStream(device.Capture());
 Color[] colors = VideoDevice.Yv12ToRgb(stream, settings.CaptureSize);
-Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
-bitmap.Save($"{path}/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
+var bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
+bitmap.SaveToFile($"{path}/yuyv_to_jpg.jpg", ImageFileType.Jpg);

@@ -13,14 +13,14 @@ namespace LEDStripSample
     public class Animations
     {
         private int _ledCount;
-        private Ws28xx _ledStrip;
+        private Iot.Device.Ws28xx.Ws28xx _ledStrip;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Animations"/> class.
         /// </summary>
         /// <param name="ledStrip">The led strip.</param>
         /// <param name="ledCount">The led count.</param>
-        public Animations(Ws28xx ledStrip, int ledCount)
+        public Animations(Iot.Device.Ws28xx.Ws28xx ledStrip, int ledCount)
         {
             _ledStrip = ledStrip;
             _ledCount = ledCount;
@@ -126,7 +126,7 @@ namespace LEDStripSample
         /// <param name="token">The token.</param>
         public void Rainbow(CancellationToken token)
         {
-            BitmapImage img = _ledStrip.Image;
+            RawPixelContainer img = _ledStrip.Image;
             while (!token.IsCancellationRequested)
             {
                 for (var i = 0; i < 255; i++)
@@ -159,7 +159,7 @@ namespace LEDStripSample
         /// <param name="count">The count.</param>
         public void SetColor(Color color, int count)
         {
-            BitmapImage img = _ledStrip.Image;
+            RawPixelContainer img = _ledStrip.Image;
             for (var i = 0; i < count; i++)
             {
                 img.SetPixel(i, 0, color);
@@ -197,7 +197,7 @@ namespace LEDStripSample
         /// <param name="token">The token.</param>
         public void TheatreChase(Color color, Color blankColor, CancellationToken token)
         {
-            BitmapImage img = _ledStrip.Image;
+            RawPixelContainer img = _ledStrip.Image;
             while (!token.IsCancellationRequested)
             {
                 for (var j = 0; j < 3; j++)

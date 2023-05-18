@@ -6,9 +6,9 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.Device.Pwm;
 using System.Threading;
+using System.Drawing;
 using System.Collections.Generic;
 using Iot.Device.Display.Pcd8544Enums;
-using SixLabors.ImageSharp;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Graphics;
 

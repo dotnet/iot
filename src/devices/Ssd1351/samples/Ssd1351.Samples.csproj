@@ -4,9 +4,6 @@
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="$(MSBuildThisFileDirectory)\..\Ssd1351.csproj" />
   </ItemGroup>
   <ItemGroup>

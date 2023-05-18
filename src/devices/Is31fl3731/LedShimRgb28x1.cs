@@ -3,8 +3,7 @@
 
 using System;
 using System.Device.I2c;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using System.Drawing;
 
 namespace Iot.Device.Display
 {
@@ -70,10 +69,9 @@ namespace Iot.Device.Display
         /// <param name="color">Color value.</param>
         public void WritePixelRgb(int x, Color color)
         {
-            Rgb24 pixel = color.ToPixel<Rgb24>();
-            this[x, 0] = pixel.R;
-            this[x, 1] = pixel.G;
-            this[x, 2] = pixel.B;
+            this[x, 0] = color.R;
+            this[x, 1] = color.G;
+            this[x, 2] = color.B;
         }
 
     }

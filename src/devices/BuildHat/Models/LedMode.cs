@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace BuildHat.Models
+namespace Iot.Device.BuildHat.Models
 {
     /// <summary>
     /// Led mode for the leds on the Build HAT.

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30804.86
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33326.253
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Pcd8544", "Pcd8544.csproj", "{11BF29C0-463C-4423-B028-92833F068001}"
 EndProject
@@ -14,6 +14,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{85E17B98-0745-407A-894B-214F25BAE20F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CharacterLcd.Tests", "..\CharacterLcd\tests\CharacterLcd.Tests.csproj", "{9395365B-927A-4E84-9294-AD243BB167D8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpConnector", "..\SkiaSharpConnector\SkiaSharpConnector.csproj", "{1388471B-70A2-4749-AE47-1D73BD43FA10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{9395365B-927A-4E84-9294-AD243BB167D8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9395365B-927A-4E84-9294-AD243BB167D8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9395365B-927A-4E84-9294-AD243BB167D8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1388471B-70A2-4749-AE47-1D73BD43FA10}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1388471B-70A2-4749-AE47-1D73BD43FA10}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1388471B-70A2-4749-AE47-1D73BD43FA10}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1388471B-70A2-4749-AE47-1D73BD43FA10}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

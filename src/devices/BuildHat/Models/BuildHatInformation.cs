@@ -3,7 +3,7 @@
 
 using System;
 
-namespace BuildHat.Models
+namespace Iot.Device.BuildHat.Models
 {
     /// <summary>
     /// Class containing the board information.
