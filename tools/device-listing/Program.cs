@@ -48,6 +48,7 @@ string[] categoriesToDisplay = new string[]
     "usb",
     "gpio",
     "multi",
+    "multiplexer",
     "protocol",
     "power",
     "voc",
@@ -102,6 +103,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "gpio", "GPIO or bit operating devices" },
     { "power", "Power monitors and related devices" },
     { "multi", "Multi-device or robot kit" },
+    { "multiplexer", "Bus and GPIO multiplexers" },
     { "lidar", "LIDAR Time of Flight devices" },
     { "thermocouple", "Thermocouple devices" },
     { "weight", "Weight sensors" },
@@ -114,7 +116,6 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "gopigo3", null },
     { "grovepi", null },
     { "i2c", null },
-    { "multiplexer", null },
 };
 
 HashSet<string> ignoredDeviceDirectories = new()

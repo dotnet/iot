@@ -80,6 +80,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Thermometers
 
 * [AHT10/15/20 - Temperature and humidity sensor modules](Ahtxx/README.md)
+* [AM2320 - Temperature and Humidity sensor](Am2320/README.md)
 * [BMP180 - barometer, altitude and temperature sensor](Bmp180/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [Cpu Temperature](CpuTemperature/README.md)
@@ -153,6 +154,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Hygrometers
 
 * [AHT10/15/20 - Temperature and humidity sensor modules](Ahtxx/README.md)
+* [AM2320 - Temperature and Humidity sensor](Am2320/README.md)
 * [BMxx80 Device Family](Bmxx80/README.md)
 * [DHTxx - Digital-Output Relative Humidity & Temperature Sensor Module](Dhtxx/README.md)
 * [HTS221 - Capacitive digital sensor for relative humidity and temperature](Hts221/README.md)
@@ -194,12 +196,15 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Character LCD (Liquid Crystal Display)](CharacterLcd/README.md)
 * [Holtek HT1632 - 32×8 & 24×16 LED Driver](Ht1632/README.md)
 * [HT16K33 - LED Matrix Display Driver](Display/README.md)
-* [Ili9341 TFT LCD Controller](Ili9341/README.md)
+* [Ili934x TFT LCD Controller](Ili934x/README.md)
+* [IS31FL3730 -- LED Matrix Display Driver](Is31fl3730/README.md)
+* [IS31FL3731 -- LED Matrix Display Driver](Is31fl3731/README.md)
 * [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [Max7219 (LED Matrix driver)](Max7219/README.md)
 * [PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen](Pcd8544/README.md)
 * [RGBLedMatrix - RGB LED Matrix](RGBLedMatrix/README.md)
 * [Sense HAT](SenseHat/README.md)
+* [SkiaSharp graphics library adapter](SkiaSharpAdapter/README.md)
 * [Solomon Systech Ssd1351 - CMOS OLED](Ssd1351/README.md)
 * [Solomon Systech SSD13xx OLED display family](Ssd13xx/README.md)
 * [TM1637 - Segment Display](Tm1637/README.md)
@@ -211,7 +216,6 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Mcp23xxx - I/O Expander device family](Mcp23xxx/README.md)
 * [NXP/TI PCx857x](Pcx857x/README.md)
 * [Pca95x4 - I2C GPIO Expander](Pca95x4/README.md)
-* [TCA9548A - TCA9548A Low-Voltage 8-Channel I2C Switch with Reset](Tca954x/README.md)
 
 ### CAN BUS libraries/modules
 
@@ -225,6 +229,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Touch sensors
 
 * [Adafruit Seesaw - extension board (ADC, PWM, GPIO expander)](Seesaw/README.md)
+* [Ili934x TFT LCD Controller](Ili934x/README.md)
 * [MPR121 - Proximity Capacitive Touch Sensor Controller](Mpr121/README.md)
 
 ### Wireless communication modules
@@ -247,6 +252,8 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [APA102 - Double line transmission integrated control LED](Apa102/README.md)
 * [Explorer HAT Pro (Pimoroni)](ExplorerHat/README.md)
 * [HT16K33 - LED Matrix Display Driver](Display/README.md)
+* [IS31FL3730 -- LED Matrix Display Driver](Is31fl3730/README.md)
+* [IS31FL3731 -- LED Matrix Display Driver](Is31fl3731/README.md)
 * [Lp55231 - Nine-Channel RGB, White-LED Driver](Lp55231/README.md)
 * [On-board LED driver](BoardLed/README.md)
 * [Ws28xx / SK6812 LED drivers](Ws28xx/README.md)
@@ -261,12 +268,13 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 ### Media libraries
 
 * [Buzzer - Piezo Buzzer Controller](Buzzer/README.md)
+* [SkiaSharp graphics library adapter](SkiaSharpAdapter/README.md)
 * [Still image recording library](Media/README.md)
 
 ### USB devices
 
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
-* [SPI, GPIO and I2C drivers for FT232H](Ft232H/README.md)
+* [SPI, GPIO and I2C drivers for FT232H, FT2232H, FT4232H](Ft232H/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [STUSB4500 - Autonomous USB-C PD controller for Power Sinks / UFP](StUsb4500/README.md)
 
@@ -291,6 +299,14 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Sense HAT](SenseHat/README.md)
 * [SensorHub - Environmental sensor](SensorHub/README.md)
 
+### Bus and GPIO multiplexers
+
+* [Charlieplex Segment binding](Charlieplex/README.md)
+* [Generic shift register](ShiftRegister/README.md)
+* [MBI5027 -- 16-bit shift register with error detection](Mbi5027/README.md)
+* [SN74HC595 -- 8-bit shift register](Sn74hc595/README.md)
+* [TCA954X - TCA954X Low-Voltage Multi-Channel I2C Switch with Reset](Tca954x/README.md)
+
 ### Protocols providers/libraries
 
 * [1-wire](OneWire/README.md)
@@ -303,7 +319,7 @@ Our vision: the majority of .NET bindings are written completely in .NET languag
 * [Software PWM](SoftPwm/README.md)
 * [Software SPI](SoftwareSpi/README.md)
 * [SPI, GPIO and I2C drivers for Arduino with Firmata](Arduino/README.md)
-* [SPI, GPIO and I2C drivers for FT232H](Ft232H/README.md)
+* [SPI, GPIO and I2C drivers for FT232H, FT2232H, FT4232H](Ft232H/README.md)
 * [SPI, GPIO and I2C drivers for FT4222](Ft4222/README.md)
 * [System.Device.Model - attributes for device bindings](System.Device.Model/README.md)
 

@@ -38,6 +38,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Ili9341.Ili9341</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Iot.Device.Media.PixelFormat</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
@@ -199,6 +206,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Ili9341.Ili9341</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Iot.Device.Media.PixelFormat</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
@@ -235,6 +249,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Iot.Device.Ft232H.Ft232HI2c</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Ili9341.Ili9341</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -304,6 +325,27 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.BatteryStatus.Overwinered</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.Gpio0Behavior.MnosLeakOpenOutput</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.PowerStatus.VbuxExists</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
@@ -312,6 +354,27 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.SecondI2cAddress</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetGPIO0(Iot.Device.Axp192.Gpio0Behavior,System.Byte)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO2Output(System.Byte)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO3Output(System.Byte)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -584,6 +647,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertLogicalNumberingSchemeToPinNumber(System.Int32)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertPinNumberToLogicalNumberingScheme(System.Int32)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
@@ -601,6 +678,48 @@
     <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.BatteryStatus.Overwinered</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.Gpio0Behavior.MnosLeakOpenOutput</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.PowerStatus.VbuxExists</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetGPIO0(Iot.Device.Axp192.Gpio0Behavior,System.Byte)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO2Output(System.Byte)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO3Output(System.Byte)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -871,6 +990,41 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertLogicalNumberingSchemeToPinNumber(System.Int32)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertPinNumberToLogicalNumberingScheme(System.Int32)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.BatteryStatus.Overwinered</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.Gpio0Behavior.MnosLeakOpenOutput</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>F:Iot.Device.Axp192.PowerStatus.VbuxExists</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
@@ -879,6 +1033,27 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.SecondI2cAddress</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetGPIO0(Iot.Device.Axp192.Gpio0Behavior,System.Byte)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO2Output(System.Byte)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO3Output(System.Byte)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -1145,6 +1320,20 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Ws28xx.Ws28xx.#ctor(System.Device.Spi.SpiDevice,Iot.Device.Graphics.BitmapImage)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertLogicalNumberingSchemeToPinNumber(System.Int32)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertPinNumberToLogicalNumberingScheme(System.Int32)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
