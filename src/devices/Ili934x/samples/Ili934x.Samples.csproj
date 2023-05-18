@@ -6,12 +6,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />    
-  </ItemGroup>
-
-  <ItemGroup>
-  	<ProjectReference Include="../Ili9341.csproj" />
+  	<ProjectReference Include="../Ili934x.csproj" />
     <ProjectReference Include="../../Ft4222/Ft4222.csproj" />
+    <ProjectReference Include="../../Arduino/Arduino.csproj" />
+    <ProjectReference Include="..\..\Axp192\Axp192.csproj" />
+    <ProjectReference Include="..\..\Nmea0183\Nmea0183.csproj" />
+    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
   </ItemGroup>
 
   <ItemGroup>
