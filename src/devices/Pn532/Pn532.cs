@@ -629,7 +629,7 @@ namespace Iot.Device.Pn532
         {
             try
             {
-                if ((toDecode[1] != 18) || (toDecode[1] != 20))
+                if ((toDecode[1] != 18) && (toDecode[1] != 20))
                 {
                     return null;
                 }
