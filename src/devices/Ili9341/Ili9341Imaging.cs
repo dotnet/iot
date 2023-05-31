@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
+#pragma warning disable CA1416 // Temporarily, will be removed after binding is updated
 namespace Iot.Device.Ili9341
 {
     public partial class Ili9341
