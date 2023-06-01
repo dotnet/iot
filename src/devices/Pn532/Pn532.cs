@@ -629,6 +629,9 @@ namespace Iot.Device.Pn532
         {
             try
             {
+                // toDecode[1] is POL_RES, which specifies the packet length.
+                // 20 means the packet contains a system code.
+                // See https://nxp.com/docs/en/user-guide/141520.pdf page 116 for more details.
                 if ((toDecode[1] != 18) && (toDecode[1] != 20))
                 {
                     return null;
