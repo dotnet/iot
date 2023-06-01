@@ -175,15 +175,6 @@ namespace Iot.Device.Graphics
         public abstract Span<byte> AsByteSpan();
 
         /// <summary>
-        /// Return the data pointer as a raw span of integers. For 32bit images, this equals to one pixel per entry.
-        /// </summary>
-        /// <returns>A span of integers</returns>
-        public virtual Span<int> AsIntSpan()
-        {
-            return MemoryMarshal.Cast<byte, int>(AsByteSpan());
-        }
-
-        /// <summary>
         /// Saves this bitmap to a file
         /// </summary>
         /// <param name="filename">The filename to save it to</param>
@@ -191,7 +182,7 @@ namespace Iot.Device.Graphics
         /// <remarks>
         /// Generally, the method is not checking that the filename extension matches the file type provided.
         /// </remarks>
-        public virtual void SaveToFile(string filename, ImageFileType fileType)
+        public void SaveToFile(string filename, ImageFileType fileType)
         {
             using (var fs = new FileStream(filename, FileMode.CreateNew))
             {

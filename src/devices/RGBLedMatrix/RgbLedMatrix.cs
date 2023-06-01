@@ -385,7 +385,7 @@ namespace Iot.Device.LEDMatrix
         /// <param name="y">Upper left y coordinate on the display</param>
         /// <param name="bitmap">System.Drawing.Bitmap object to draw</param>
         /// <param name="backBuffer">true if want use back buffer, false otherwise</param>
-        public unsafe void DrawBitmap(int x, int y, BitmapImage bitmap, bool backBuffer = false)
+        public void DrawBitmap(int x, int y, BitmapImage bitmap, bool backBuffer = false)
         {
             if (y >= Height || x >= Width || x + bitmap.Width <= 0 || y + bitmap.Height <= 0)
             {
@@ -397,7 +397,7 @@ namespace Iot.Device.LEDMatrix
             Rectangle partialBitmap = new Rectangle(x, y, bitmap.Width, bitmap.Height);
             partialBitmap.Intersect(new Rectangle(0, 0, Width, Height));
 
-            int bmpStride = bitmap.Width * 4;
+            int bmpStride = bitmap.Stride;
             int pos = 3 * ((y < 0 ? Math.Abs(y) * bitmap.Width : 0) + (x < 0 ? Math.Abs(x) : 0));
             int stride = (bmpStride - 3 * bitmap.Width) + 3 * (bitmap.Width - partialBitmap.Width);
 
@@ -430,7 +430,7 @@ namespace Iot.Device.LEDMatrix
         /// <param name="repGreen">replacement color for the green color</param>
         /// <param name="repBlue">replacement color for the blue color</param>
         /// <param name="backBuffer">true if want use back buffer, false otherwise</param>
-        public unsafe void DrawBitmap(int x, int y, BitmapImage bitmap, byte red, byte green, byte blue, byte repRed,
+        public void DrawBitmap(int x, int y, BitmapImage bitmap, byte red, byte green, byte blue, byte repRed,
             byte repGreen, byte repBlue, bool backBuffer = false)
         {
             if (y >= Height || x >= Width || x + bitmap.Width <= 0 || y + bitmap.Height <= 0)
@@ -447,7 +447,7 @@ namespace Iot.Device.LEDMatrix
             int coorX = Math.Max(0, x);
             int coorY = Math.Max(0, y);
 
-            int bmpStride = bitmap.Width * 4; // BitmapImage is (currently) always ARGB8888 or XRGB0888
+            int bmpStride = bitmap.Stride;
             int pos = 3 * (bitmapY * bitmap.Width + bitmapX);
             int stride = (bmpStride - 3 * bitmap.Width) + 3 * (bitmap.Width - bitmapWidth);
 
