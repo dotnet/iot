@@ -39,7 +39,7 @@ namespace Iot.Device.Graphics
             }
 
             var resultImage = BitmapImage.CreateBitmap(area.Width, area.Height, PixelFormat.Format32bppXrgb);
-            Span<int> targetImage = resultImage.AsIntSpan();
+            Span<int> targetImage = MemoryMarshal.Cast<byte, int>(resultImage.AsByteSpan());
 
             nuint red_mask = image.red_mask;
             nuint green_mask = image.green_mask;
