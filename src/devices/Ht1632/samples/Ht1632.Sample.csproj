@@ -7,6 +7,7 @@
   </PropertyGroup>
 
 <ItemGroup>
+    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
     <ProjectReference Include="..\Ht1632.csproj" />
   </ItemGroup>
 

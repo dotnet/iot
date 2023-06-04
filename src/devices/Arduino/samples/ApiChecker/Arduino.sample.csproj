@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <TargetFrameworks>$(DefaultSampleTfms)</TargetFrameworks>
     <RootNamespace>Iot.Device.Arduino.Sample</RootNamespace>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AssemblyName>Arduino.sample</AssemblyName>

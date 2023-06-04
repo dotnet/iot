@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Iot.Device.Ft4222;
 using Iot.Device.Ili9341;
-
+#pragma warning disable CA1416 // Temporarily, will be removed after binding is updated
 Console.WriteLine("Are you using Ft4222? Type 'yes' and press ENTER if so, anything else will be treated as no.");
 bool isFt4222 = Console.ReadLine() == "yes";
 

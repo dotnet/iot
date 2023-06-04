@@ -3,11 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SixLabors.ImageSharp.ColorSpaces;
-using SixLabors.ImageSharp.ColorSpaces.Conversion;
 using static System.Threading.Thread;
 
 namespace Iot.Device.Arduino.Sample
@@ -47,7 +46,6 @@ namespace Iot.Device.Arduino.Sample
             redChannel.DutyCycle = 0;
             Sleep(1000);
 
-            var converter = new ColorSpaceConverter();
             float angle = 0.0f;
             float hv = 1.0f;
             float hvDelta = 0; // 0.001f;
@@ -57,8 +55,7 @@ namespace Iot.Device.Arduino.Sample
             float blueCorrection = 0.95f;
             while (!Console.KeyAvailable)
             {
-                var hsv = new Hsv(angle, 1.0f, 1.0f);
-                var rgb = converter.ToRgb(hsv);
+                Color rgb = Color.Blue;
                 redChannel.DutyCycle = rgb.R;
                 blueChannel.DutyCycle = rgb.B * blueCorrection;
                 greenChannel.DutyCycle = rgb.G * greenCorrection;

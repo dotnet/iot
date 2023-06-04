@@ -3,8 +3,7 @@
 
 using System;
 using System.Device.I2c;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using System.Drawing;
 
 namespace Iot.Device.CharacterLcd
 {
@@ -82,10 +81,9 @@ namespace Iot.Device.CharacterLcd
         /// <param name="color">The color to set.</param>
         private void ForceSetBacklightColor(Color color)
         {
-            var col = color.ToPixel<Rgba32>();
-            SetRgbRegister(RgbRegisters.REG_RED, col.R);
-            SetRgbRegister(RgbRegisters.REG_GREEN, col.G);
-            SetRgbRegister(RgbRegisters.REG_BLUE, col.B);
+            SetRgbRegister(RgbRegisters.REG_RED, color.R);
+            SetRgbRegister(RgbRegisters.REG_GREEN, color.G);
+            SetRgbRegister(RgbRegisters.REG_BLUE, color.B);
         }
 
         /// <summary>

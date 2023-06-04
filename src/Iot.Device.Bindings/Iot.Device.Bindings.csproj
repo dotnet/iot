@@ -22,6 +22,7 @@
     <!-- Excluding samples and test projects when getting source files -->
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/samples/**/*.csproj" />
     <_ExcludeProjectReferences Include="$(DeviceRoot)**/tests/**/*.csproj" />
+    <_ExcludeProjectReferences Include="$(DeviceRoot)SkiaSharpAdapter/*.csproj" />
   </ItemGroup>
 
   <!-- The following ItemGroup is in charge of getting the source files we will compile on each TFM -->
@@ -30,12 +31,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
     <ProjectReference Include="$(MainLibraryPath)System.Device.Gpio.csproj" />
     <PackageReference Include="System.Management" Version="$(SystemManagementPackageVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(MicrosoftExtensionsLoggingAbstractionsPackageVersion)" />
     <PackageReference Include="System.Text.Json" Version="$(SystemTextJsonPackageVersion)" />
+    <!-- This package is only used for windows specific stuff. -->
+    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition="$(TargetFramework) == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />

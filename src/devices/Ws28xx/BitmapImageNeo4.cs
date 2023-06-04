@@ -3,10 +3,9 @@
 
 using System.Drawing;
 using Iot.Device.Graphics;
-
 namespace Iot.Device.Ws28xx
 {
-    internal class BitmapImageNeo4 : BitmapImage
+    internal class BitmapImageNeo4 : RawPixelContainer
     {
         private const int BytesPerComponent = 3;
         private const int BytesPerPixel = BytesPerComponent * 4;

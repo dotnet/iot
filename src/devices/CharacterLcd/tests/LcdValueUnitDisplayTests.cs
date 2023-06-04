@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Drawing;
 using Iot.Device.CharacterLcd;
 using Moq;
-using SixLabors.ImageSharp;
 using Xunit;
 
 namespace CharacterLcd.Tests
