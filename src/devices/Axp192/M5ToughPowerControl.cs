@@ -16,15 +16,26 @@ using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
 
-#pragma warning disable CS1591
 namespace Iot.Device.Axp192
 {
+    /// <summary>
+    /// High-level abstraction for the AXP192 in an M5Tough enclosure.
+    /// This binding knows the hardware connections from the ESP32 CPU to the AXP192 and the connected hardware and directly offers to toggle named devices (e.g. switch the
+    /// display backlight on and off.
+    /// </summary>
+    /// <remarks>
+    /// This binding is useful together with the Arduino/Firmata binding or the Arduino Compiler.
+    /// </remarks>
     public class M5ToughPowerControl : IDisposable
     {
         private Axp192 _axp;
         private ILogger _logger;
         private Board.Board _board;
 
+        /// <summary>
+        /// Create an instance of this class
+        /// </summary>
+        /// <param name="board">The board connection (typically an instance of ArduinoBoard)</param>
         public M5ToughPowerControl(Board.Board board)
         {
             _board = board;
@@ -39,6 +50,9 @@ namespace Iot.Device.Axp192
             Init();
         }
 
+        /// <summary>
+        /// True to enable the speaker, false to mute it.
+        /// </summary>
         public bool EnableSpeaker
         {
             get
@@ -51,6 +65,10 @@ namespace Iot.Device.Axp192
             }
         }
 
+        /// <summary>
+        /// Configures the AXP hardware to default operational settings.
+        /// Enables the LCD and sets the default charging mode for the optional battery.
+        /// </summary>
         protected virtual void Init()
         {
             _axp.SetVbusSettings(true, false, VholdVoltage.V4_0, false, VbusCurrentLimit.MilliAmper500);
@@ -179,11 +197,19 @@ namespace Iot.Device.Axp192
             }
         }
 
+        /// <summary>
+        /// Gets a data set of current power parameters (power consumption, battery level, etc.)
+        /// </summary>
+        /// <returns></returns>
         public PowerControlData GetPowerControlData()
         {
             return _axp.GetPowerControlData();
         }
 
+        /// <summary>
+        /// Default dispose implementation
+        /// </summary>
+        /// <param name="disposing">True to dispose managed resources, false to dispose only unmanaged resources</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -192,6 +218,7 @@ namespace Iot.Device.Axp192
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);

@@ -948,7 +948,7 @@ namespace Iot.Device.Arduino
                     _firmata.QueryFirmwareVersion(out _);
                     TimeSpan elapsed = sw.Elapsed;
                     ret.Add(elapsed);
-                    // _logger.LogInformation($"Round trip time: {elapsed.TotalMilliseconds}ms");
+                    _logger.LogInformation($"Round trip time: {elapsed.TotalMilliseconds}ms");
                 }
                 catch (TimeoutException x)
                 {
