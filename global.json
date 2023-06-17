@@ -12,8 +12,8 @@
     "version": "7.0.203"
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23313.4",
-    "Microsoft.DotNet.Helix.Sdk": "7.0.0-beta.23313.4",
+    "Microsoft.DotNet.Arcade.Sdk": "7.0.0-beta.23316.4",
+    "Microsoft.DotNet.Helix.Sdk": "7.0.0-beta.23316.4",
     "Microsoft.Build.Traversal": "3.1.6"
   }
 }
