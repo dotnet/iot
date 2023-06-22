@@ -15,7 +15,8 @@ internal partial class Interop
 {
     internal partial class libgpiod
     {
-        private const string LibgpiodLibrary = "libgpiod";
+        // Binding to the 2.x mayor version of libgpiod which comes installed on most distros today.
+        private const string LibgpiodLibrary = "libgpiod.so.2";
         internal static IntPtr InvalidHandleValue = new IntPtr(-1);
 
         /// <summary>
