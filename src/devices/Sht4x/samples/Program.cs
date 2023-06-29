@@ -13,6 +13,9 @@ I2cConnectionSettings settings = new(1, Sht4x.DefaultI2cAddress);
 using I2cDevice device = I2cDevice.Create(settings);
 using Sht4x sensor = new(device);
 
+// Read serial number
+Console.WriteLine($"Serial number: {sensor.ReadSerialNumber()}");
+
 // Async loop.
 for (int i = 0; i < 3; ++i)
 {

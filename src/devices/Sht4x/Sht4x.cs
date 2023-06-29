@@ -81,6 +81,25 @@ namespace Iot.Device.Sht4x
         }
 
         /// <summary>
+        /// Reads the serial number of the device
+        /// </summary>
+        /// <returns>
+        /// A 32 bit integer with the serial number.
+        /// If a CRC check failed for a reading, it will be <see langword="null"/>.
+        /// </returns>
+        public int? ReadSerialNumber()
+        {
+            Span<byte> buffer = stackalloc byte[6];
+            _device.WriteByte((byte)0x89);
+            _device.Read(buffer);
+
+            ushort? msb = Sensirion.ReadUInt16BigEndianAndCRC8(buffer);
+            ushort? lsb = Sensirion.ReadUInt16BigEndianAndCRC8(buffer.Slice(3, 3));
+
+            return lsb + (msb << 16);
+        }
+
+        /// <summary>
         /// Reads relative humidity and temperature.
         /// </summary>
         /// <returns>
