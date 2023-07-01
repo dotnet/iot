@@ -56,11 +56,5 @@ namespace ArduinoCsCompiler
             WriteByte((byte)(value & 0x7F));
             WriteByte((byte)((value >> 7) & 0x7F));
         }
-
-        public void SendInt14(int value)
-        {
-            WriteByte((byte)(value & 0x7F));
-            WriteByte((byte)((value >> 7) & 0x7F));
-        }
     }
 }
