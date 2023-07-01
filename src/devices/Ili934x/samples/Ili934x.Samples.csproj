@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+  	<ProjectReference Include="../Ili934x.csproj" />
+    <ProjectReference Include="../../Ft4222/Ft4222.csproj" />
+    <ProjectReference Include="../../Arduino/Arduino.csproj" />
+    <ProjectReference Include="..\..\Axp192\Axp192.csproj" />
+    <ProjectReference Include="..\..\Nmea0183\Nmea0183.csproj" />
+    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="images\*.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
