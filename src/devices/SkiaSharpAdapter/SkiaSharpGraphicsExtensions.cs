@@ -75,7 +75,7 @@ namespace Iot.Device.Graphics.SkiaSharpAdapter
         }
 
         /// <summary>
-        /// Draws another image into this one, at the given position and without scaling
+        /// Draws another image into this one, at the given position and with scaling
         /// </summary>
         /// <param name="graphics">The target bitmap</param>
         /// <param name="source">The source bitmap</param>

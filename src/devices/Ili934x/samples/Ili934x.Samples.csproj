@@ -14,10 +14,4 @@
     <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Update="images\*.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
