@@ -584,6 +584,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertLogicalNumberingSchemeToPinNumber(System.Int32)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertPinNumberToLogicalNumberingScheme(System.Int32)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
@@ -871,6 +885,20 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertLogicalNumberingSchemeToPinNumber(System.Int32)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertPinNumberToLogicalNumberingScheme(System.Int32)</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
     <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
@@ -1145,6 +1173,20 @@
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
     <Target>M:Iot.Device.Ws28xx.Ws28xx.#ctor(System.Device.Spi.SpiDevice,Iot.Device.Graphics.BitmapImage)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertLogicalNumberingSchemeToPinNumber(System.Int32)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:System.Device.Analog.AnalogController.ConvertPinNumberToLogicalNumberingScheme(System.Int32)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
