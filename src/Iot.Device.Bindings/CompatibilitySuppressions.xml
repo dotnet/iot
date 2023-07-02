@@ -38,6 +38,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Ili9341.Ili9341</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Iot.Device.Media.PixelFormat</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
@@ -199,6 +206,13 @@
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Ili9341.Ili9341</Target>
+    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Iot.Device.Media.PixelFormat</Target>
     <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
@@ -235,6 +249,13 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Iot.Device.Ft232H.Ft232HI2c</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Iot.Device.Ili9341.Ili9341</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
