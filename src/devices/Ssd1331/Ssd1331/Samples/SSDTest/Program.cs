@@ -18,15 +18,15 @@ while (true)
 {
     ssd1331.Contrast(9);
     ssd1331.FillScreen(Color.Red);
-    delay(500);
+    Delay(500);
     ssd1331.FillScreen(Color.Green);
-    delay(500);
+    Delay(500);
     ssd1331.FillScreen(Color.Blue);
-    delay(500);
+    Delay(500);
     ssd1331.FillScreen(Color.White);
-    delay(500);
+    Delay(500);
     ssd1331.ClearScreen();
-    delay(500);
+    Delay(500);
     ssd1331.Circle(20, 40, 30, Color.Blue, true);
     ssd1331.Circle(20, 50, 35, Color.White, false);
     ssd1331.Circle(20, 60, 40, Color.Red, false);
@@ -34,7 +34,7 @@ while (true)
     ssd1331.Line(95, 0, 0, 63, Color.FromArgb(255, 0, 255));
     ssd1331.Rect(10, 10, 90, 60, Color.FromArgb(255, 255, 0));
     ssd1331.FillRect(20, 20, 40, 40, Color.White, Color.Green);
-    delay(2000);
+    Delay(2000);
 
     for (int y = 9; y >= 0; y--)
     {
@@ -42,9 +42,10 @@ while (true)
         ssd1331.Foreground(Color.White);
         ssd1331.Locate(1, 10);
         ssd1331.Print($"Contrast: {y}\nline 2");
-        delay(300);
+        Delay(300);
     }
-    delay(2000);
+
+    Delay(2000);
     ssd1331.ClearScreen();
     ssd1331.Contrast(9);
 
@@ -68,33 +69,43 @@ while (true)
 
     ssd1331.ScrollSet(0, 8, 18, 1, 0);
     ssd1331.StartScrolling();
-    gettime(); delay(1000); gettime(); delay(1000); gettime(); delay(1000);
+    ShowTime();
 
     ssd1331.ScrollSet(0, 8, 18, -2, 0);
     ssd1331.StartScrolling();
-    gettime(); delay(1000); gettime(); delay(1000); gettime(); delay(1000);
+    ShowTime();
 
     ssd1331.ScrollSet(0, 8, 18, 3, 0);
     ssd1331.StartScrolling();
-    gettime(); delay(1000); gettime(); delay(1000); gettime(); delay(1000);
+    ShowTime();
 
     ssd1331.ScrollSet(0, 8, 18, -4, 0);
     ssd1331.StartScrolling();
-    gettime(); delay(1000); gettime(); delay(1000); gettime(); delay(1000);
+    ShowTime();
 
     ssd1331.StopScrolling();
 
     ssd1331.Bitmap16FS(0, 0, "balloon.bmp");
-    delay(5000);
+    Delay(5000);
 }
 
-void gettime()
+void ShowTime()
+{
+    GetTime();
+    Delay(1000);
+    GetTime();
+    Delay(1000);
+    GetTime();
+    Delay(1000);
+}
+
+void GetTime()
 {
     ssd1331.Locate(0, 0);
     ssd1331.Print(DateTime.Now.ToString("h:mm:ss tt"));
 }
 
-void delay(int ms)
+void Delay(int ms)
 {
     Task.Delay(ms).Wait();
 }
