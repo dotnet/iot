@@ -603,7 +603,7 @@ namespace Iot.Device.Ssd1331
         }
 
         /// <summary>
-        /// This command sets the gray levels GS0 -> GS63. 0xB8 & 0xB9
+        /// This command sets the gray levels GS0 -> GS63. 0xB8 and 0xB9
         /// </summary>
         /// <param name="grayLevels">A byte array containing 32 gray levels representing GS0 -> GS63.
         /// If this parameter is null or an empty array then the gray leves are set to default.</param>
@@ -742,7 +742,7 @@ namespace Iot.Device.Ssd1331
         }
 
         /// <summary>
-        /// Continuous Horizontal & Vertical Scrolling Setup. 0x27
+        /// Continuous Horizontal and Vertical Scrolling Setup. 0x27
         /// </summary>
         /// <param name="horizontal">Set number of column as horizontal scroll offset. 0-95. 0 = no horizontal scroll</param>
         /// <param name="start_line">Define start row address</param>
