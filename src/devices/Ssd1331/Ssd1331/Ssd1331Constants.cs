@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,13 +11,13 @@ namespace Iot.Device.Ssd1331
 {
     public partial class Ssd1331
     {
-        private const byte width = 95;
-        private const byte height = 63;
+        private const byte _width = 95;
+        private const byte _height = 63;
 
-        private const byte X_width = 6;
-        private const byte Y_height = 8;
+        private const byte _xWidth = 6;
+        private const byte _yHeight = 8;
 
-        byte[,] font6x8 = new byte[,]
+        private byte[,] _font6x8 = new byte[,]
         {
             { 0x00,0x00,0x00,0x00,0x00,0x00 } , /*SPC */
             { 0x00,0x00,0x5F,0x00,0x00,0x00 } , /* !  */
@@ -114,44 +117,44 @@ namespace Iot.Device.Ssd1331
             { 0x00,0x00,0x00,0x00,0x00,0x00 }   /*null*/
         };
 
-        private const byte Ssd1331_SetColumnAddress = 0x15;
-        private const byte Ssd1331_SetRowAddress = 0x75;
-        private const byte Ssd1331_SetContrastA = 0x81;
-        private const byte Ssd1331_SetContrastB = 0x82;
-        private const byte Ssd1331_SetContrastC = 0x83;
-        private const byte Ssd1331_MasterCurrentControl = 0x87;
-        private const byte Ssd1331_SetSecondPrechargeA = 0x8A;
-        private const byte Ssd1331_SetSecondPrechargeB = 0x8B;
-        private const byte Ssd1331_SetSecondPrechargeC = 0x8C;
-        private const byte Ssd1331_RemapColorDepth = 0xA0;
-        private const byte Ssd1331_SetDisplayStartLine = 0xA1;
-        private const byte Ssd1331_SetDisplayOffset = 0xA2;
-        private const byte Ssd1331_SetNormalDisplay = 0xA4;
-        private const byte Ssd1331_SetDisplayAllOn = 0xA5;
-        private const byte Ssd1331_SetDisplayAllOff = 0xA6;
-        private const byte Ssd1331_SetInvertedDisplay = 0xA7;
-        private const byte Ssd1331_SetMultiplexRatio = 0xA8;
-        private const byte Ssd1331_DimModeSetting = 0xAB;
-        private const byte Ssd1331_SetMasterConfiguration = 0xAD;
-        private const byte Ssd1331_SetDisplayOnDim = 0xAC;
-        private const byte Ssd1331_SetDisplayOff = 0xAE;
-        private const byte Ssd1331_SetDisplayOn = 0xAF;
-        private const byte Ssd1331_PowerSaveMode = 0xB0;
-        private const byte Ssd1331_PhasePeriodAdjustment = 0xB1;
-        private const byte Ssd1331_SetClockDiv = 0xB3;
-        private const byte Ssd1331_SetGrayLevels = 0xB8;
-        private const byte Ssd1331_SetDefaultGrayLevels = 0xB9;
-        private const byte Ssd1331_SetPrechargeLevel = 0xBB;
-        private const byte Ssd1331_SetVcomh = 0xBE;
-        private const byte Ssd1331_SetCommandLock = 0xFD;
-        private const byte Ssd1331_DrawLine = 0x21;
-        private const byte Ssd1331_DrawRectangle = 0x22;
-        private const byte Ssd1331_Copy = 0x23;
-        private const byte Ssd1331_DimWindow = 0x24;
-        private const byte Ssd1331_ClearWindow = 0x25;
-        private const byte Ssd1331_FillEnable = 0x26;
-        private const byte Ssd1331_ScrollingSetup = 0x27;
-        private const byte Ssd1331_StopScroll = 0x2E;
-        private const byte Ssd1331_StartScroll = 0x2F;
+        private const byte ssd1331SetColumnAddress = 0x15;
+        private const byte ssd1331SetRowAddress = 0x75;
+        private const byte ssd1331SetContrastA = 0x81;
+        private const byte ssd1331SetContrastB = 0x82;
+        private const byte ssd1331SetContrastC = 0x83;
+        private const byte ssd1331MasterCurrentControl = 0x87;
+        private const byte ssd1331SetSecondPrechargeA = 0x8A;
+        private const byte ssd1331SetSecondPrechargeB = 0x8B;
+        private const byte ssd1331SetSecondPrechargeC = 0x8C;
+        private const byte ssd1331RemapColorDepth = 0xA0;
+        private const byte ssd1331SetDisplayStartLine = 0xA1;
+        private const byte ssd1331SetDisplayOffset = 0xA2;
+        private const byte ssd1331SetNormalDisplay = 0xA4;
+        private const byte ssd1331SetDisplayAllOn = 0xA5;
+        private const byte ssd1331SetDisplayAllOff = 0xA6;
+        private const byte ssd1331SetInvertedDisplay = 0xA7;
+        private const byte ssd1331SetMultiplexRatio = 0xA8;
+        private const byte ssd1331DimModeSetting = 0xAB;
+        private const byte ssd1331SetMasterConfiguration = 0xAD;
+        private const byte ssd1331SetDisplayOnDim = 0xAC;
+        private const byte ssd1331SetDisplayOff = 0xAE;
+        private const byte ssd1331SetDisplayOn = 0xAF;
+        private const byte ssd1331PowerSaveMode = 0xB0;
+        private const byte ssd1331PhasePeriodAdjustment = 0xB1;
+        private const byte ssd1331SetClockDiv = 0xB3;
+        private const byte ssd1331SetGrayLevels = 0xB8;
+        private const byte ssd1331SetDefaultGrayLevels = 0xB9;
+        private const byte ssd1331SetPrechargeLevel = 0xBB;
+        private const byte ssd1331SetVcomh = 0xBE;
+        private const byte ssd1331SetCommandLock = 0xFD;
+        private const byte ssd1331DrawLine = 0x21;
+        private const byte ssd1331DrawRectangle = 0x22;
+        private const byte ssd1331Copy = 0x23;
+        private const byte ssd1331DimWindow = 0x24;
+        private const byte ssd1331ClearWindow = 0x25;
+        private const byte ssd1331FillEnable = 0x26;
+        private const byte ssd1331ScrollingSetup = 0x27;
+        private const byte ssd1331StopScroll = 0x2E;
+        private const byte ssd1331StartScroll = 0x2F;
     }
 }

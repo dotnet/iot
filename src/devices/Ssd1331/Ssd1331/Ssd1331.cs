@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.using System;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,19 +24,19 @@ namespace Iot.Device.Ssd1331
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
 
-        private Color BGround_Color = Color.Black;
-        private Color Char_Color = Color.White;
-        int char_x;
-        int char_y;
-        FontSize chr_size = FontSize.Normal;
-        bool externalfont;
-        byte[]? _font;
-        byte _x;
-        byte _y;
-        byte _x1;
-        byte _x2;
-        byte _y1;
-        byte _y2;
+        private Color _bgroundColor = Color.Black;
+        private Color _charColor = Color.White;
+        private int _charX;
+        private int _charY;
+        private FontSize _chrSize = FontSize.Normal;
+        private bool _externalfont;
+        private byte[]? _font;
+        private byte _x;
+        private byte _y;
+        private byte _x1;
+        private byte _x2;
+        private byte _y1;
+        private byte _y2;
 
         #endregion
 
@@ -51,28 +53,37 @@ namespace Iot.Device.Ssd1331
         /// <param name="dataCommandPin">The id of the GPIO pin used to control the DC line (data/command).</param>
         /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (data/command).</param>
         /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
-        public Ssd1331(SpiDevice spiDevice, int dataCommandPin, int resetPin, GpioController? gpioController = null, bool shouldDispose = true)
+        public Ssd1331(SpiDevice spiDevice, int dataCommandPin, int resetPin = -1, GpioController? gpioController = null, bool shouldDispose = true)
         {
             _gpioDevice = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
 
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
+            if (dataCommandPin < 0)
+                throw new ArgumentException("Data Command Pin must be a positive number", nameof(dataCommandPin));
 
             _dcPinId = dataCommandPin;
             _resetPinId = resetPin;
 
             _gpioDevice.OpenPin(_dcPinId, PinMode.Output);
-            _gpioDevice.OpenPin(_resetPinId, PinMode.Output);
+
+            if (resetPin > 0)
+                _gpioDevice.OpenPin(_resetPinId, PinMode.Output);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
+            _gpioDevice.ClosePin(_dcPinId);
+            if (_resetPinId > 0)
+                _gpioDevice.ClosePin(_resetPinId);
+
             if (_shouldDispose)
             {
                 _gpioDevice?.Dispose();
                 _gpioDevice = null!;
             }
+
 
             _spiDevice?.Dispose();
             _spiDevice = null!;
@@ -95,6 +106,18 @@ namespace Iot.Device.Ssd1331
         }
 
         /// <summary>
+        /// Write a block of data to the SPI device
+        /// </summary>
+        /// <param name="data">The data to be sent to the SPI device</param>
+        /// <param name="blnIsCommand">A flag indicating that the data is really a command when true or data when false.</param>
+        private void SendSPI(ReadOnlySpan<byte> data, bool blnIsCommand = false)
+        {
+            // set the DC pin to indicate if the data being sent to the display is DATA or COMMAND bytes.
+            _gpioDevice.Write(_dcPinId, blnIsCommand ? PinValue.Low : PinValue.High);
+            _spiDevice.Write(data);
+        }
+
+        /// <summary>
         /// Verifies value is within a specific range.
         /// </summary>
         /// <param name="value">Value to check.</param>
@@ -106,7 +129,7 @@ namespace Iot.Device.Ssd1331
             return value >= start && value <= end;
         }
 
-        private (byte C, byte B, byte A) toRGB(Color col)
+        private (byte C, byte B, byte A) ToRGB(Color col)
         {
             ushort c;
             c = (ushort)(col.R >> 3);
@@ -122,7 +145,7 @@ namespace Iot.Device.Ssd1331
             return (lC, lB, lA);
         }
 
-        private (byte high, byte low) toHighLow(Color col)
+        private (byte high, byte low) ToHighLow(Color col)
         {
             ushort c;
             c = (ushort)(col.R >> 3);
@@ -131,13 +154,13 @@ namespace Iot.Device.Ssd1331
             c <<= 5;
             c |= (ushort)(col.B >> 3);
 
-            byte high, low;
-            high = (byte)(c >> 8);
-            low = (byte)(c & 0xFF);
+            byte high = (byte)(c >> 8);
+            byte low = (byte)(c & 0xFF);
+
             return (high, low);
         }
 
-        private void MaxSsd1331_window()
+        private void MaxSsd1331Window()
         {
             SetColumnAddress();
             SetRowAddress();
@@ -169,10 +192,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="commandParameters">parameteters for the command to be sent</param>
         public void SendCommand(byte command, params byte[] commandParameters)
         {
-            Span<byte> paramSpan = stackalloc byte[commandParameters.Length];
-            for (int i = 0; i < commandParameters.Length; paramSpan[i] = commandParameters[i], i++)
-            {
-            }
+            Span<byte> paramSpan = new Span<byte>(commandParameters);
 
             SendCommand(command, paramSpan);
         }
@@ -196,9 +216,12 @@ namespace Iot.Device.Ssd1331
             else
             {
                 Span<byte> commandSpan = stackalloc byte[data.Length + 1];
-                commandSpan[0] = (byte)command;
+                commandSpan[0] = command;
                 for (int i = 0; i < data.Length; i++)
+                {
                     commandSpan[i + 1] = data[i];
+                }
+
                 SendSPI(commandSpan, true);
             }
         }
@@ -209,10 +232,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="data">The data to send to the display controller.</param>
         public void SendData(params byte[] data)
         {
-            Span<byte> paramSpan = stackalloc byte[data.Length];
-            for (int i = 0; i < data.Length; paramSpan[i] = data[i], i++)
-            {
-            }
+            Span<byte> paramSpan = new Span<byte>(data);
 
             SendData(paramSpan);
         }
@@ -240,16 +260,19 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void Reset()
         {
-            _gpioDevice.Write(_dcPinId, PinValue.Low);
-            _gpioDevice.Write(_resetPinId, PinValue.High);
+            if (_resetPinId > 0)
+            {
+                _gpioDevice.Write(_dcPinId, PinValue.Low);
+                _gpioDevice.Write(_resetPinId, PinValue.High);
 
-            Task.Delay(20).Wait();
+                Task.Delay(20).Wait();
 
-            _gpioDevice.Write(_resetPinId, PinValue.Low);
-            Task.Delay(20).Wait();
+                _gpioDevice.Write(_resetPinId, PinValue.Low);
+                Task.Delay(20).Wait();
 
-            _gpioDevice.Write(_resetPinId, PinValue.High);
-            Task.Delay(20).Wait();
+                _gpioDevice.Write(_resetPinId, PinValue.High);
+                Task.Delay(20).Wait();
+            }
         }
 
         /// <summary>
@@ -290,14 +313,14 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         /// <param name="startColumn">Column start address with a range of 0-95. (defaults to 0)</param>
         /// <param name="endColumn">Column end address with a range of 0-95. (defaults to 95)</param>
-        public void SetColumnAddress(byte startColumn = 0x00, byte endColumn = width)
+        public void SetColumnAddress(byte startColumn = 0x00, byte endColumn = _width)
         {
-            if (startColumn > width)
+            if (startColumn > _width)
             {
                 throw new ArgumentException("The column start address is invalid.", nameof(startColumn));
             }
 
-            if (endColumn > width)
+            if (endColumn > _width)
             {
                 throw new ArgumentException("The column end address is invalid.", nameof(endColumn));
             }
@@ -307,7 +330,7 @@ namespace Iot.Device.Ssd1331
                 throw new ArgumentException("The column end address must be greater or equal to the row start address.", nameof(endColumn));
             }
 
-            SendCommand(Ssd1331_SetColumnAddress, startColumn, endColumn);
+            SendCommand(ssd1331SetColumnAddress, startColumn, endColumn);
         }
 
         /// <summary>
@@ -315,14 +338,14 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         /// <param name="startRow">Row start address with a range of 0-63. (defaults to 0)</param>
         /// <param name="endRow">Row end address with a range of 0-63. (defaults to 63)</param>
-        public void SetRowAddress(byte startRow = 0x00, byte endRow = height)
+        public void SetRowAddress(byte startRow = 0x00, byte endRow = _height)
         {
-            if (startRow > height)
+            if (startRow > _height)
             {
                 throw new ArgumentException("The row start address is invalid.", nameof(startRow));
             }
 
-            if (endRow > height)
+            if (endRow > _height)
             {
                 throw new ArgumentException("The row end address is invalid.", nameof(endRow));
             }
@@ -332,7 +355,7 @@ namespace Iot.Device.Ssd1331
                 throw new ArgumentException("The row end address must be greater or equal to the row start address.", nameof(endRow));
             }
 
-            SendCommand(Ssd1331_SetRowAddress, startRow, endRow);
+            SendCommand(ssd1331SetRowAddress, startRow, endRow);
         }
 
         /// <summary>
@@ -341,7 +364,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="contrast">Contrast level 0-255. Defaults to 128</param>
         public void SetContrastColorA(byte contrast = 0x80)
         {
-            SendCommand(Ssd1331_SetContrastA, contrast);
+            SendCommand(ssd1331SetContrastA, contrast);
         }
 
         /// <summary>
@@ -350,7 +373,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="contrast">Contrast level 0-255. Defaults to 128</param>
         public void SetContrastColorB(byte contrast = 0x80)
         {
-            SendCommand(Ssd1331_SetContrastB, contrast);
+            SendCommand(ssd1331SetContrastB, contrast);
         }
 
         /// <summary>
@@ -359,7 +382,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="contrast">Contrast level 0-255. Defaults to 128</param>
         public void SetContrastColorC(byte contrast = 0x80)
         {
-            SendCommand(Ssd1331_SetContrastC, contrast);
+            SendCommand(ssd1331SetContrastC, contrast);
         }
 
         /// <summary>
@@ -374,7 +397,7 @@ namespace Iot.Device.Ssd1331
                 throw new ArgumentException("The master current control attenuation factor is invalid.", nameof(attenuationFactor));
             }
 
-            SendCommand(Ssd1331_MasterCurrentControl, attenuationFactor);
+            SendCommand(ssd1331MasterCurrentControl, attenuationFactor);
         }
 
         /// <summary>
@@ -386,7 +409,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="C">Color "C" Pre-charge Speed</param>
         public void SetSecondPrecharge(byte A = 0x81, byte B = 0x82, byte C = 0x83)
         {
-            SendCommand(Ssd1331_SetSecondPrechargeA, A, Ssd1331_SetSecondPrechargeB, B, Ssd1331_SetSecondPrechargeC, C);
+            SendCommand(ssd1331SetSecondPrechargeA, A, ssd1331SetSecondPrechargeB, B, ssd1331SetSecondPrechargeC, C);
         }
 
         /// <summary>
@@ -399,9 +422,9 @@ namespace Iot.Device.Ssd1331
         /// <param name="scanMode">San fdrom Column 0 to 95 or Column 95 to 0</param>
         /// <param name="commonSplit">Defines if to split commons odd then even columns. (defaults to odd/even)</param>
         /// <param name="colorDepth">Number of colors displayed. (defaults to 0x65K)</param>
-        public void SetSegmentReMapColorDepth(AddressIncrement addressIncrement = AddressIncrement.Horizontal, Seg0Common seg0Common = Seg0Common.Column95, ColorSequence colorSequence = ColorSequence.RGB, RightLeftSwapping swapping = RightLeftSwapping.Disable, ScanMode scanMode = ScanMode.ToColumn0, CommonSplit commonSplit = CommonSplit.OddEven, ColorDepth colorDepth = ColorDepth.ColourDepth65K)
+        public void SetSegmentReMapColorDepth(AddressIncrement addressIncrement = AddressIncrement.Horizontal, Seg0Common seg0Common = Seg0Common.Column95, ColorSequence colorSequence = ColorSequence.RGB, LeftRightSwapping swapping = LeftRightSwapping.Disable, ScanMode scanMode = ScanMode.ToColumn0, CommonSplit commonSplit = CommonSplit.OddEven, ColorDepth colorDepth = ColorDepth.ColourDepth65K)
         {
-            SendCommand(Ssd1331_RemapColorDepth, (byte)(((int)colorDepth << 6) + ((int)commonSplit << 5) + ((int)scanMode << 4) + ((int)swapping << 3) + ((int)colorSequence << 2) + ((int)seg0Common << 1) + addressIncrement));
+            SendCommand(ssd1331RemapColorDepth, (byte)(((int)colorDepth << 6) + ((int)commonSplit << 5) + ((int)scanMode << 4) + ((int)swapping << 3) + ((int)colorSequence << 2) + ((int)seg0Common << 1) + addressIncrement));
         }
 
         /// <summary>
@@ -410,12 +433,12 @@ namespace Iot.Device.Ssd1331
         /// <param name="displayStartLine">Display start line with a range of 0-63. (defaults to 0)</param>
         public void SetDisplayStartLine(byte displayStartLine = 0x00)
         {
-            if (displayStartLine > height)
+            if (displayStartLine > _height)
             {
                 throw new ArgumentException("The display start line is invalid.", nameof(displayStartLine));
             }
 
-            SendCommand(Ssd1331_SetDisplayStartLine, displayStartLine);
+            SendCommand(ssd1331SetDisplayStartLine, displayStartLine);
         }
 
         /// <summary>
@@ -424,12 +447,12 @@ namespace Iot.Device.Ssd1331
         /// <param name="displayOffset">Display offset with a range of 0-63. (defaults to 0x00)</param>
         public void SetDisplayOffset(byte displayOffset = 0x00)
         {
-            if (displayOffset > height)
+            if (displayOffset > _height)
             {
                 throw new ArgumentException("The display offset is invalid.", nameof(displayOffset));
             }
 
-            SendCommand(Ssd1331_SetDisplayOffset, displayOffset);
+            SendCommand(ssd1331SetDisplayOffset, displayOffset);
         }
 
         /// <summary>
@@ -437,7 +460,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetNormalDisplay()
         {
-            SendCommand(Ssd1331_SetNormalDisplay);
+            SendCommand(ssd1331SetNormalDisplay);
         }
 
         /// <summary>
@@ -445,7 +468,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetDisplayAllOn()
         {
-            SendCommand(Ssd1331_SetDisplayAllOn);
+            SendCommand(ssd1331SetDisplayAllOn);
         }
 
         /// <summary>
@@ -453,7 +476,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetDisplayAllOff()
         {
-            SendCommand(Ssd1331_SetDisplayAllOff);
+            SendCommand(ssd1331SetDisplayAllOff);
         }
 
         /// <summary>
@@ -461,21 +484,21 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetInverseDisplay()
         {
-            SendCommand(Ssd1331_SetInvertedDisplay);
+            SendCommand(ssd1331SetInvertedDisplay);
         }
 
         /// <summary>
         /// Set MUX ratio to N+1 Mux. 0xA8
         /// </summary>
         /// <param name="multiplexRatio">Multiplex ratio with a range of 15-63. (defaults to 63)</param>
-        public void SetMultiplexRatio(byte multiplexRatio = height)
+        public void SetMultiplexRatio(byte multiplexRatio = _height)
         {
-            if (!Ssd1331.InRange(multiplexRatio, 0x0F, height))
+            if (!Ssd1331.InRange(multiplexRatio, 0x0F, _height))
             {
                 throw new ArgumentException("The multiplex ratio is invalid.", nameof(multiplexRatio));
             }
 
-            SendCommand(Ssd1331_SetMultiplexRatio, multiplexRatio);
+            SendCommand(ssd1331SetMultiplexRatio, multiplexRatio);
         }
 
         /// <summary>
@@ -493,7 +516,7 @@ namespace Iot.Device.Ssd1331
                 throw new ArgumentException("The precharge voltage setting is invalid.", nameof(precharge));
             }
 
-            SendCommand(Ssd1331_DimModeSetting, 0x00, colorA, colorB, colorC, precharge);
+            SendCommand(ssd1331DimModeSetting, 0x00, colorA, colorB, colorC, precharge);
         }
 
         /// <summary>
@@ -501,7 +524,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetMasterConfiguration()
         {
-            SendCommand(Ssd1331_SetMasterConfiguration, 0x8F);
+            SendCommand(ssd1331SetMasterConfiguration, 0x8F);
         }
 
         /// <summary>
@@ -509,7 +532,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetDisplayOnDim()
         {
-            SendCommand(Ssd1331_SetDisplayOnDim);
+            SendCommand(ssd1331SetDisplayOnDim);
         }
 
         /// <summary>
@@ -517,7 +540,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetDisplayOff()
         {
-            SendCommand(Ssd1331_SetDisplayOff);
+            SendCommand(ssd1331SetDisplayOff);
         }
 
         /// <summary>
@@ -525,7 +548,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void SetDisplayOn()
         {
-            SendCommand(Ssd1331_SetDisplayOn);
+            SendCommand(ssd1331SetDisplayOn);
         }
 
         /// <summary>
@@ -535,7 +558,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void EnablePowerSave(bool enable)
         {
-            SendCommand(Ssd1331_PowerSaveMode, (byte)(enable ? 0x1A : 0x0B));
+            SendCommand(ssd1331PowerSaveMode, (byte)(enable ? 0x1A : 0x0B));
         }
 
         /// <summary>
@@ -555,7 +578,7 @@ namespace Iot.Device.Ssd1331
                 throw new ArgumentException("The phase 2 period is invalid.", nameof(phase2Period));
             }
 
-            SendCommand(Ssd1331_PhasePeriodAdjustment, (byte)((phase2Period << 4) | phase1Period));
+            SendCommand(ssd1331PhasePeriodAdjustment, (byte)((phase2Period << 4) | phase1Period));
         }
 
         /// <summary>
@@ -576,7 +599,7 @@ namespace Iot.Device.Ssd1331
                 throw new ArgumentException("The oscillator frequency is invalid.", nameof(oscillatorFrequency));
             }
 
-            SendCommand(Ssd1331_SetClockDiv, (byte)((oscillatorFrequency << 4) | displayClockDivideRatio));
+            SendCommand(ssd1331SetClockDiv, (byte)((oscillatorFrequency << 4) | displayClockDivideRatio));
         }
 
         /// <summary>
@@ -588,7 +611,7 @@ namespace Iot.Device.Ssd1331
         {
             if (grayLevels is null || grayLevels.Length == 0)
             {
-                SendCommand(Ssd1331_SetDefaultGrayLevels);
+                SendCommand(ssd1331SetDefaultGrayLevels);
             }
             else
             {
@@ -597,7 +620,7 @@ namespace Iot.Device.Ssd1331
                     throw new ArgumentException("The gray level array must contain 32 entries.", nameof(grayLevels));
                 }
 
-                SendCommand(Ssd1331_SetGrayLevels, grayLevels);
+                SendCommand(ssd1331SetGrayLevels, grayLevels);
             }
         }
 
@@ -614,7 +637,7 @@ namespace Iot.Device.Ssd1331
                 throw new ArgumentException("The pre-charge voltage level is invalid.", nameof(level));
             }
 
-            SendCommand(Ssd1331_SetPrechargeLevel, level);
+            SendCommand(ssd1331SetPrechargeLevel, level);
         }
 
         /// <summary>
@@ -624,7 +647,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="level">Vcomh deselect level. (defaults to 0.82 x Vcc)</param>
         public void SetVcomhDeselectLevel(VComHDeselectLevel level = VComHDeselectLevel.VccX083)
         {
-            SendCommand(Ssd1331_SetVcomh, (byte)level);
+            SendCommand(ssd1331SetVcomh, (byte)level);
         }
 
         /// <summary>
@@ -634,7 +657,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void Lock(bool enable)
         {
-            SendCommand(Ssd1331_SetCommandLock, (byte)(enable ? 0x01 : 0x00));
+            SendCommand(ssd1331SetCommandLock, (byte)(enable ? 0x01 : 0x00));
         }
 
         /// <summary>
@@ -649,7 +672,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="colorA">Color A of the line</param>
         public void DrawLine(byte startCol, byte startRow, byte endCol, byte endRow, byte colorC, byte colorB, byte colorA)
         {
-            SendCommand(Ssd1331_DrawLine, startCol, startRow, endCol, endRow, colorC, colorB, colorA);
+            SendCommand(ssd1331DrawLine, startCol, startRow, endCol, endRow, colorC, colorB, colorA);
         }
 
         /// <summary>
@@ -667,7 +690,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="fillColorA">Color A of the fill area</param>
         public void DrawRect(byte startCol, byte startRow, byte endCol, byte endRow, byte colorC, byte colorB, byte colorA, byte fillColorC = 0, byte fillColorB = 0, byte fillColorA = 0)
         {
-            SendCommand(Ssd1331_DrawRectangle, startCol, startRow, endCol, endRow, colorC, colorB, colorA, fillColorC, fillColorB, fillColorA);
+            SendCommand(ssd1331DrawRectangle, startCol, startRow, endCol, endRow, colorC, colorB, colorA, fillColorC, fillColorB, fillColorA);
         }
 
         /// <summary>
@@ -681,7 +704,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="newStartRow">Row Address of New Start</param>
         public void Copy(byte startCol, byte startRow, byte endCol, byte endRow, byte newStartCol, byte newStartRow)
         {
-            SendCommand(Ssd1331_Copy, startCol, startRow, endCol, endRow, newStartCol, newStartRow);
+            SendCommand(ssd1331Copy, startCol, startRow, endCol, endRow, newStartCol, newStartRow);
         }
 
         /// <summary>
@@ -693,7 +716,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="endRow">Row Address of End</param>
         public void DimWindow(byte startCol, byte startRow, byte endCol, byte endRow)
         {
-            SendCommand(Ssd1331_DimWindow, startCol, startRow, endCol, endRow);
+            SendCommand(ssd1331DimWindow, startCol, startRow, endCol, endRow);
         }
 
         /// <summary>
@@ -705,7 +728,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="endRow">Row Address of End</param>
         public void ClearWindow(byte startCol, byte startRow, byte endCol, byte endRow)
         {
-            SendCommand(Ssd1331_ClearWindow, startCol, startRow, endCol, endRow);
+            SendCommand(ssd1331ClearWindow, startCol, startRow, endCol, endRow);
         }
 
         /// <summary>
@@ -715,7 +738,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void FillEnable(bool enable)
         {
-            SendCommand(Ssd1331_FillEnable, (byte)(enable ? 1 : 0));
+            SendCommand(ssd1331FillEnable, (byte)(enable ? 1 : 0));
         }
 
         /// <summary>
@@ -728,10 +751,10 @@ namespace Iot.Device.Ssd1331
         /// <param name="frame_interval">Set time interval between each scroll step</param>
         public void ScrollSet(int horizontal, int start_line, int linecount, int vertical, FrameInterval frame_interval)
         {
-            if ((start_line > height + 1) || ((start_line + linecount) > height + 1)) return;
+            if ((start_line > _height + 1) || ((start_line + linecount) > _height + 1)) return;
             if (frame_interval > FrameInterval.Frames200) frame_interval = FrameInterval.Frames200;
 
-            SendCommand(Ssd1331_ScrollingSetup, (byte)horizontal, (byte)start_line, (byte)linecount, (byte)vertical, (byte)frame_interval);
+            SendCommand(ssd1331ScrollingSetup, (byte)horizontal, (byte)start_line, (byte)linecount, (byte)vertical, (byte)frame_interval);
         }
 
         /// <summary>
@@ -739,7 +762,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void StopScrolling()
         {
-            SendCommand(Ssd1331_StopScroll);
+            SendCommand(ssd1331StopScroll);
         }
 
         /// <summary>
@@ -747,7 +770,7 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void StartScrolling()
         {
-            SendCommand(Ssd1331_StartScroll);
+            SendCommand(ssd1331StartScroll);
         }
 
         #endregion
@@ -759,9 +782,9 @@ namespace Iot.Device.Ssd1331
         /// </summary>
         public void ClearScreen()
         {
-            SendCommand(Ssd1331_ClearWindow, 0, 0, width, height);
+            SendCommand(ssd1331ClearWindow, 0, 0, _width, _height);
             Task.Delay(100).Wait();
-            MaxSsd1331_window();
+            MaxSsd1331Window();
             Background(Color.Black);
         }
 
@@ -771,7 +794,7 @@ namespace Iot.Device.Ssd1331
         /// <param name="color">Background color</param>
         public void Background(Color color)
         {
-            BGround_Color = color;
+            _bgroundColor = color;
         }
 
         /// <summary>
@@ -780,25 +803,25 @@ namespace Iot.Device.Ssd1331
         /// <param name="color">Text Forground Color</param>
         public void Foreground(Color color)
         {
-            Char_Color = color;
+            _charColor = color;
         }
 
         public void FillScreen(Color color)
         {
-            FillRect(0, 0, width, height, color, color);
+            FillRect(0, 0, _width, _height, color, color);
         }
 
         public void Rect(byte x1, byte y1, byte x2, byte y2, Color lineColor)
         {
-            if (x1 > width) x1 = width;
-            if (y1 > height) y1 = height;
-            if (x2 > width) x2 = width;
-            if (y2 > height) y2 = height;
+            if (x1 > _width) x1 = _width;
+            if (y1 > _height) y1 = _height;
+            if (x2 > _width) x2 = _width;
+            if (y2 > _height) y2 = _height;
 
             byte lC, lB, lA;
-            (lC, lB, lA) = toRGB(lineColor);
+            (lC, lB, lA) = ToRGB(lineColor);
             FillEnable(false);
-            SendCommand(Ssd1331_DrawRectangle, x1, y1, x2, y2, lC, lB, lA, 0, 0, 0);
+            SendCommand(ssd1331DrawRectangle, x1, y1, x2, y2, lC, lB, lA, 0, 0, 0);
             Task.Delay(100).Wait();
         }
 
@@ -814,28 +837,28 @@ namespace Iot.Device.Ssd1331
         {
             byte lC, lB, lA;
             byte fC, fB, fA;
-            (lC, lB, lA) = toRGB(lineColor);
-            (fC, fB, fA) = toRGB(fillColor);
+            (lC, lB, lA) = ToRGB(lineColor);
+            (fC, fB, fA) = ToRGB(fillColor);
 
-            if (x > width)
+            if (x > _width)
                 throw new ArgumentException("The start column is invalid.", nameof(x));
-            if (x > height)
+            if (x > _height)
                 throw new ArgumentException("The start row is invalid.", nameof(y));
-            if (x + w > width)
+            if (x + w > _width)
                 throw new ArgumentException("The width is invalid.", nameof(w));
-            if (y + h > height)
+            if (y + h > _height)
                 throw new ArgumentException("The height is invalid.", nameof(h));
 
             FillEnable(true);
-            SendCommand(Ssd1331_DrawRectangle, x, y, (byte)(x + w), (byte)(y + h), lC, lB, lA, fC, fB, fA);
+            SendCommand(ssd1331DrawRectangle, x, y, (byte)(x + w), (byte)(y + h), lC, lB, lA, fC, fB, fA);
             Task.Delay(100).Wait();
             FillEnable(false);
         }
 
         public void Circle(byte radius, byte x, byte y, Color col, bool fill)
         {
-            if (x > width) x = width;
-            if (y > height) y = height;
+            if (x > _width) x = _width;
+            if (y > _height) y = _height;
 
             int cx, cy, d;
             d = 3 - 2 * radius;
@@ -886,15 +909,15 @@ namespace Iot.Device.Ssd1331
 
         public void Line(byte x1, byte y1, byte x2, byte y2, Color col)
         {
-            if (x1 > width) x1 = width;
-            if (y1 > height) y1 = height;
-            if (x2 > width) x2 = width;
-            if (y2 > height) y2 = height;
+            if (x1 > _width) x1 = _width;
+            if (y1 > _height) y1 = _height;
+            if (x2 > _width) x2 = _width;
+            if (y2 > _height) y2 = _height;
 
             byte lC, lB, lA;
-            (lC, lB, lA) = toRGB(col);
+            (lC, lB, lA) = ToRGB(col);
             FillEnable(false);
-            SendCommand(Ssd1331_DrawLine, x1, y1, x2, y2, lC, lB, lA);
+            SendCommand(ssd1331DrawLine, x1, y1, x2, y2, lC, lB, lA);
         }
 
         public void Pixel(byte x, byte y, Color col)
@@ -903,9 +926,9 @@ namespace Iot.Device.Ssd1331
             //(lC, lB, lA) = toRGB(col);
 
             byte low, high;
-            (high, low) = toHighLow(col);
+            (high, low) = ToHighLow(col);
 
-            if (x < 0 || x > width || y < 0 || y > height)
+            if (x < 0 || x > _width || y < 0 || y > _height)
                 return;
             SetColumnAddress(x, x);
             SetRowAddress(y, y);
@@ -918,9 +941,9 @@ namespace Iot.Device.Ssd1331
             int v = contrast * 20;
             if (v > 180)
                 v = 180;
-            SendCommand(Ssd1331_SetContrastA, (byte)v);
-            SendCommand(Ssd1331_SetContrastB, (byte)v);
-            SendCommand(Ssd1331_SetContrastC, (byte)v);
+            SendCommand(ssd1331SetContrastA, (byte)v);
+            SendCommand(ssd1331SetContrastB, (byte)v);
+            SendCommand(ssd1331SetContrastC, (byte)v);
         }
 
         public void Window(int x, int y, int w, int h)
@@ -969,7 +992,7 @@ namespace Iot.Device.Ssd1331
 
             PixelHeight = BMP_Header[OffsetPixelHeight] + (BMP_Header[OffsetPixelHeight + 1] << 8) + (BMP_Header[OffsetPixelHeight + 2] << 16) + (BMP_Header[OffsetPixelHeight + 3] << 24);
             PixelWidth = BMP_Header[OffsetPixelWidth] + (BMP_Header[OffsetPixelWidth + 1] << 8) + (BMP_Header[OffsetPixelWidth + 2] << 16) + (BMP_Header[OffsetPixelWidth + 3] << 24);
-            if (PixelHeight > height + 1 + y || PixelWidth > width + 1 + x)
+            if (PixelHeight > _height + 1 + y || PixelWidth > _width + 1 + x)
             {
                 Image.Close();
                 return -3;                                        // to big
@@ -996,7 +1019,7 @@ namespace Iot.Device.Ssd1331
                     SendData(line[i + 1], line[i]);
             }
             Image.Close();
-            MaxSsd1331_window();
+            MaxSsd1331Window();
             return PixelWidth;
         }
 
@@ -1006,8 +1029,8 @@ namespace Iot.Device.Ssd1331
 
         public void Locate(byte column, byte row)
         {
-            char_x = column;
-            char_y = row;
+            _charX = column;
+            _charY = row;
         }
 
         public void Print(string message)
@@ -1019,7 +1042,7 @@ namespace Iot.Device.Ssd1331
 
         public void PutChar(byte value)
         {
-            if (externalfont)
+            if (_externalfont)
             {
                 byte hor, vert, offset, bpl, j, i, b;
                 byte z, w;
@@ -1030,19 +1053,19 @@ namespace Iot.Device.Ssd1331
                 byte[] sign = new byte[hor * vert];
                 if (value == 0x0A)
                 {
-                    char_x = 0;
-                    char_y += vert;
+                    _charX = 0;
+                    _charY += vert;
                 }
                 if (value < 32 || value > 127) return;
-                if (char_x + hor > 95)
+                if (_charX + hor > 95)
                 {
-                    char_x = 0;
-                    char_y += vert;
-                    if (char_y >= 63 - _font[2])
-                        char_y = 0;
+                    _charX = 0;
+                    _charY += vert;
+                    if (_charY >= 63 - _font[2])
+                        _charY = 0;
                 }
 
-                Window(char_x, char_y, hor, vert);
+                Window(_charX, _charY, hor, vert);
                 Array.Copy(_font, ((value - 32) * offset) + 4, sign, 0, vert * hor + 1);
                 w = sign[0];
                 for (j = 0; j < vert; j++)
@@ -1052,62 +1075,62 @@ namespace Iot.Device.Ssd1331
                         z = sign[bpl * i + ((j & 0xF8) >> 3) + 1];
                         b = (byte)(1 << (j & 0x07));
                         if ((z & b) == 0x00)
-                            putp(BGround_Color);
+                            putp(_bgroundColor);
                         else
-                            putp(Char_Color);
+                            putp(_charColor);
                     }
                 }
                 if ((w + 2) < hor)
-                    char_x += w + 2;
+                    _charX += w + 2;
                 else
-                    char_x += hor;
+                    _charX += hor;
 
             }
             else
             {
                 if (value == 0x0A)
                 {
-                    char_x = 0;
-                    char_y += Y_height;
+                    _charX = 0;
+                    _charY += _yHeight;
                 }
                 if (value < 32 || value > 127)
                     return;
-                if (char_x + X_width > width)
+                if (_charX + _xWidth > _width)
                 {
-                    char_x = 0;
-                    char_y += Y_height;
-                    if (char_y >= height - Y_height)
-                        char_y = 0;
+                    _charX = 0;
+                    _charY += _yHeight;
+                    if (_charY >= _height - _yHeight)
+                        _charY = 0;
                 }
                 int i, j, w, lpx = 0, lpy = 0, k, l, xw;
                 byte Temp;
-                w = X_width;
+                w = _xWidth;
                 FontSizeConvert(ref lpx, ref lpy);
-                xw = X_width;
+                xw = _xWidth;
 
                 for (i = 0; i < xw; i++)
                 {
                     for (l = 0; l < lpx; l++)
                     {
-                        Temp = font6x8[value - 32, i];
-                        for (j = Y_height - 1; j >= 0; j--)
+                        Temp = _font6x8[value - 32, i];
+                        for (j = _yHeight - 1; j >= 0; j--)
                         {
                             for (k = 0; k < lpx; k++)
                             {
-                                Pixel((byte)(char_x + (i * lpx) + l), (byte)(char_y + (((j + 1) * lpy) - 1) - k), ((Temp & 0x80) == 0x80) ? Char_Color : BGround_Color);
+                                Pixel((byte)(_charX + (i * lpx) + l), (byte)(_charY + (((j + 1) * lpy) - 1) - k), ((Temp & 0x80) == 0x80) ? _charColor : _bgroundColor);
                             }
                             Temp <<= 1;
                         }
                     }
                 }
                 FontSizeConvert(ref lpx, ref lpy);
-                char_x += (w * lpx);
+                _charX += (w * lpx);
             }
         }
 
         private void FontSizeConvert(ref int lpx, ref int lpy)
         {
-            switch (chr_size)
+            switch (_chrSize)
             {
                 case FontSize.Wide:
                     lpx = 2;
@@ -1135,16 +1158,16 @@ namespace Iot.Device.Ssd1331
 
         public void SetFontSize(FontSize fontSize)
         {
-            chr_size = fontSize;
+            _chrSize = fontSize;
         }
 
         public void SetFont(byte[] f)
         {
             _font = f;
             if (f == null)
-                externalfont = false;
+                _externalfont = false;
             else
-                externalfont = true;
+                _externalfont = true;
         }
 
         #endregion

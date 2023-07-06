@@ -1,13 +1,13 @@
-﻿// See https://aka.ms/new-console-template for more information
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Drawing;
 using System.Device.Spi;
 using Iot.Device.Ssd1331;
+
 const int pinID_DC = 23;
 const int pinID_Reset = 24;
 
-//using Bitmap dotnetBM = new(96, 64);
-//using Graphics g = Graphics.FromImage(dotnetBM);
 using SpiDevice displaySPI = SpiDevice.Create(new SpiConnectionSettings(0, 0) { Mode = SpiMode.Mode3, DataBitLength = 8, ClockFrequency = 12_000_000 /* 12MHz */ });
 using Ssd1331 ssd1331 = new(displaySPI, pinID_DC, pinID_Reset);
 
