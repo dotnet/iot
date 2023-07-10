@@ -208,6 +208,16 @@ namespace Iot.Device.Arduino
             }
         }
 
+        /// <summary>
+        /// Write a packed Int14 to the stream. This is used to write an integer of up to 14 bits.
+        /// </summary>
+        /// <param name="value">The value to write. Only the 14 least significant bits are transmitted</param>
+        public void SendInt14(int value)
+        {
+            WriteByte((byte)(value & 0x7F));
+            WriteByte((byte)((value >> 7) & 0x7F));
+        }
+
         /// <inheritdoc/>
         public override string ToString()
         {

@@ -34,7 +34,8 @@ namespace System.Device.Analog
         }
 
         /// <summary>
-        /// The change type that triggered the event.
+        /// The absolute voltage of the new value.
+        /// For this to be valid, the voltage reference of the <see cref="AnalogController"/> must be set correctly.
         /// </summary>
         public ElectricPotential Value
         {
@@ -42,7 +43,7 @@ namespace System.Device.Analog
         }
 
         /// <summary>
-        /// The pin number that triggered the event.
+        /// The physical pin number that triggered the event.
         /// </summary>
         public int PinNumber
         {
