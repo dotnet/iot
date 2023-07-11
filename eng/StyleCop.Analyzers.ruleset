@@ -1,5 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <RuleSet Name="SyleCop Rules" ToolsVersion="15.0">
+  <Rules AnalyzerId="Microsoft.Analyzers.ManagedCodeAnalysis" RuleNamespace="Microsoft.Rules.Managed">
+    <Rule Id="CA2208" Action="Error" />
+  </Rules>
   <Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.Analyzers">
     <Rule Id="SA0000" Action="Error" />
     <Rule Id="SA0001" Action="None" /> <!-- XML comment analysis is disabled (default for sample projects) -->
@@ -164,10 +167,10 @@
     <Rule Id="SA1626" Action="None" /> <!-- Single-line comments should not use documentation style slashes -->
     <Rule Id="SA1627" Action="None" /> <!-- The documentation text within the \'exception\' tag should not be empty -->
     <Rule Id="SA1629" Action="None" /> <!-- Documentation text should end with a period -->
-    <Rule Id="SA1633" Action="None" /> <!-- File should have header -->
-    <Rule Id="SA1634" Action="None" /> <!-- File Header must show copyright. Our header does not use the expected syntax -->
-    <Rule Id="SA1635" Action="None" /> <!-- Same as SA1634? -->
-    <Rule Id="SA1636" Action="None" /> <!-- File Header copyright tag must match -->
+    <Rule Id="SA1633" Action="Error" /> <!-- File should have header -->
+    <Rule Id="SA1634" Action="None" /> <!-- File Header must show copyright. -->
+    <Rule Id="SA1635" Action="Error" /> <!-- Same as SA1634? -->
+    <Rule Id="SA1636" Action="Error" /> <!-- File Header copyright tag must match -->
     <Rule Id="SA1637" Action="None" /> <!-- File Header must contain file name -->
     <Rule Id="SA1638" Action="Error" />
     <Rule Id="SA1640" Action="None" /> <!-- File header must have valid company text -->
@@ -179,6 +182,6 @@
     <Rule Id="SA1651" Action="Error" />
     <Rule Id="SA1652" Action="Error" />
     <Rule Id="SX1101" Action="Error" /> <!-- Do not prefix local members with this -->
-	<Rule Id="SX1309" Action="Error" /> <!-- Members should be prefixed with _ -->
+    <Rule Id="SX1309" Action="Error" /> <!-- Members should be prefixed with _ -->
   </Rules>
 </RuleSet>

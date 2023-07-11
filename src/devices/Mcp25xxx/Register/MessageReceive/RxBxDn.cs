@@ -20,12 +20,12 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             if (rxBufferNumber > 1)
             {
-                throw new ArgumentException(nameof(rxBufferNumber), $"Invalid RX Buffer Number value {rxBufferNumber}.");
+                throw new ArgumentException($"Invalid RX Buffer Number value {rxBufferNumber}.", nameof(rxBufferNumber));
             }
 
             if (index > 7)
             {
-                throw new ArgumentException(nameof(index), $"Invalid Index value {index}.");
+                throw new ArgumentException($"Invalid Index value {index}.", nameof(index));
             }
 
             RxBufferNumber = rxBufferNumber;
@@ -64,7 +64,7 @@ namespace Iot.Device.Mcp25xxx.Register.MessageReceive
         {
             >= Address.RxB0D0 and <= Address.RxB0D7 => 0,
             >= Address.RxB1D0 and <= Address.RxB1D7 => 1,
-            _ => throw new ArgumentException(nameof(address), $"Invalid address value {address}."),
+            _ => throw new ArgumentException($"Invalid address value {address}.", nameof(address)),
         };
 
         /// <summary>

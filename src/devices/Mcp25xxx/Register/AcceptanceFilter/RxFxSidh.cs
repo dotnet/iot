@@ -23,7 +23,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
         {
             if (rxFilterNumber > 5)
             {
-                throw new ArgumentException(nameof(rxFilterNumber), $"Invalid RX Filter Number value {rxFilterNumber}.");
+                throw new ArgumentException($"Invalid RX Filter Number value {rxFilterNumber}.", nameof(rxFilterNumber));
             }
 
             RxFilterNumber = rxFilterNumber;
@@ -65,7 +65,7 @@ namespace Iot.Device.Mcp25xxx.Register.AcceptanceFilter
             Address.RxF3Sidh => 3,
             Address.RxF4Sidh => 4,
             Address.RxF5Sidh => 5,
-            _ => throw new ArgumentException(nameof(address), $"Invalid value: {address}."),
+            _ => throw new ArgumentException($"Invalid value: {address}.", nameof(address)),
         };
 
         /// <summary>

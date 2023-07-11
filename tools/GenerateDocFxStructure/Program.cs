@@ -170,7 +170,7 @@ namespace GenerateDocFxStructure
         {
             if ((_options == null) || (_message == null))
             {
-                throw new ArgumentNullException($"Options or message can't be null, something went wrong");
+                throw new InvalidOperationException($"Options or message can't be null, something went wrong");
             }
 
             string[] lines = File.ReadAllLines(filepath);

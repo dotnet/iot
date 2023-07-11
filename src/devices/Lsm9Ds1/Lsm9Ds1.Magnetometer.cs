@@ -102,7 +102,7 @@ namespace Iot.Device.Lsm9Ds1
             MagneticInductionScale.Scale08G => Max / 8,
             MagneticInductionScale.Scale12G => Max / 12,
             MagneticInductionScale.Scale16G => Max / 16,
-            _ => throw new ArgumentException(nameof(_magneticInductionScale)),
+            _ => throw new ArgumentException("Invalid magnetic induction scale.", nameof(_magneticInductionScale)),
         };
 
         /// <inheritdoc/>

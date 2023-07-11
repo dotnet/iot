@@ -10,13 +10,14 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.Drawing;
 using Iot.Device.Display;
 using Iot.Device.Ft4222;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
 using Iot.Device.CharacterLcd;
+using Iot.Device.Graphics;
+using Iot.Device.Graphics.SkiaSharpAdapter;
 
+SkiaSharpAdapter.Register();
 Console.WriteLine("Hello PCD8544, screen of Nokia 5110!");
 Console.WriteLine("Please select the platform you want to use:");
 Console.WriteLine("  1. Native device like a Raspberry Pi");
@@ -289,15 +290,15 @@ void DisplayTextChangePositionBlink()
 void DisplayingBitmap()
 {
     Console.WriteLine("Displaying bitmap, text, resizing them");
-    using Image<Rgba32> bitmapMe = Image.Load<Rgba32>(Path.Combine("me.bmp"));
+    using BitmapImage bitmapMe = BitmapImage.CreateFromFile(Path.Combine("me.bmp"));
     var bitmap1 = BitmapToByteArray(bitmapMe);
-    using Image<Rgba32> bitmapNokia = Image.Load<Rgba32>(Path.Combine("nokia_bw.bmp"));
+    using BitmapImage bitmapNokia = BitmapImage.CreateFromFile(Path.Combine("nokia_bw.bmp"));
     var bitmap2 = BitmapToByteArray(bitmapNokia);
 
     // Open a non bitmap and resize it
-    using Image<Rgba32> bitmapLarge = Image.Load<Rgba32>(Path.Combine("nonbmp.jpg"));
-    bitmapLarge.Mutate(x => x.Resize(Pcd8544.PixelScreenSize));
-    bitmapLarge.Mutate(x => x.BlackWhite());
+    BitmapImage bitmapLarge = BitmapImage.CreateFromFile(Path.Combine("nonbmp.jpg"));
+    bitmapLarge = bitmapLarge.Resize(Pcd8544.PixelScreenSize);
+    bitmapLarge.Clear();
     var bitmap3 = BitmapToByteArray(bitmapLarge);
 
     for (byte i = 0; i < 2; i++)
@@ -337,6 +338,8 @@ void DisplayingBitmap()
         lcd.Draw();
         Thread.Sleep(1500);
     }
+
+    bitmapLarge.Dispose();
 }
 
 void DisplayLinesPointsRectabngles()
@@ -463,7 +466,7 @@ lcd.Dispose();
 // In case we're using FT4222, gpio needs to be disposed after the screen
 gpio?.Dispose();
 
-byte[] BitmapToByteArray(Image<Rgba32> bitmap)
+byte[] BitmapToByteArray(BitmapImage bitmap)
 {
     if (bitmap is not object)
     {
@@ -477,7 +480,7 @@ byte[] BitmapToByteArray(Image<Rgba32> bitmap)
 
     byte[] toReturn = new byte[Pcd8544.ScreenBufferByteSize];
     int width = Pcd8544.PixelScreenSize.Width;
-    Rgba32 colWhite = new(255, 255, 255);
+    Color colWhite = Color.White;
     for (int position = 0; position < Pcd8544.ScreenBufferByteSize; position++)
     {
         byte toStore = 0;

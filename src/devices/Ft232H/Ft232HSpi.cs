@@ -4,6 +4,7 @@
 using System;
 using System.Device.Spi;
 using System.Linq;
+using Iot.Device.FtCommon;
 
 namespace Iot.Device.Ft232H
 {
@@ -20,15 +21,15 @@ namespace Iot.Device.Ft232H
         /// <summary>
         /// Store the FTDI Device Information
         /// </summary>
-        public Ft232HDevice DeviceInformation { get; internal set; }
+        public Ftx232HDevice DeviceInformation { get; internal set; }
 
-        internal Ft232HSpi(SpiConnectionSettings settings, Ft232HDevice deviceInformation)
+        internal Ft232HSpi(SpiConnectionSettings settings, Ftx232HDevice deviceInformation)
         {
             DeviceInformation = deviceInformation;
             _settings = settings;
-            if ((_settings.ChipSelectLine < 3) || (_settings.ChipSelectLine > Ft232HDevice.PinCountConst))
+            if ((_settings.ChipSelectLine < 3) || (_settings.ChipSelectLine > DeviceInformation.PinCount))
             {
-                throw new ArgumentException($"Chip Select line has to be between 3 and {Ft232HDevice.PinCountConst - 1}");
+                throw new ArgumentException($"Chip Select line has to be between 3 and {DeviceInformation.PinCount - 1}");
             }
 
             if (DeviceInformation.ConnectionSettings.Where(m => m.ChipSelectLine == _settings.ChipSelectLine).Any())

@@ -6,9 +6,9 @@ using System.Device.Gpio;
 using System.Device.Spi;
 using System.Device.Pwm;
 using System.Threading;
+using System.Drawing;
 using System.Collections.Generic;
 using Iot.Device.Display.Pcd8544Enums;
-using SixLabors.ImageSharp;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Graphics;
 
@@ -520,7 +520,7 @@ namespace Iot.Device.Display
         {
             if ((left < 0 || left > Size.Width) || (top < 0 || top > Size.Height))
             {
-                throw new ArgumentOutOfRangeException($"The given position is not inside the display. it's 6 raws and 84 columns");
+                throw new ArgumentOutOfRangeException(nameof(left), $"The given position is not inside the display. it's 6 raws and 84 columns");
             }
 
             if (_cursorVisible)

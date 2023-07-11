@@ -3,12 +3,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Device.Spi;
+using System.Globalization;
+using System.IO;
+using System.Linq;
 using System.Text;
+using UnitsNet;
 
 namespace Iot.Device.Board
 {
@@ -19,10 +24,68 @@ namespace Iot.Device.Board
     public class RaspberryPiBoard : GenericBoard
     {
         private readonly object _initLock = new object();
+        private readonly string[] _possibleI2cActivations = new string[]
+        {
+            "dtparam=i2c=on",
+            "dtparam=i2c_arm=on",
+            "dtparam=i2c_baudrate=",
+            "dtparam=i2c_arm_baudrate=",
+            // Activating only 1 I2C with the default pins:
+            "dtoverlay=i2c0",
+            "dtoverlay=i2c1",
+            "dtoverlay=i2c3",
+            "dtoverlay=i2c4",
+            "dtoverlay=i2c5",
+            "dtoverlay=i2c6",
+            // We will use those ones to ensure valid options.
+            "dtoverlay=i2c0,pins_0_1",
+            "dtoverlay=i2c0,pins_28_29",
+            "dtoverlay=i2c0,pins_44_45",
+            "dtoverlay=i2c0,pins_46_47",
+            "dtoverlay=i2c1,pins_2_3",
+            "dtoverlay=i2c1,pins_44_45",
+            "dtoverlay=i2c3,pins_2_3",
+            "dtoverlay=i2c3,pins_4_5",
+            "dtoverlay=i2c4,pins_6_7",
+            "dtoverlay=i2c4,pins_8_9",
+            "dtoverlay=i2c5,pins_10_11",
+            "dtoverlay=i2c5,pins_12_13",
+            "dtoverlay=i2c6,pins_0_1",
+            "dtoverlay=i2c6,pins_22_23",
+        };
+        private readonly string[] _possibleSpiActivations = new string[]
+        {
+            "dtparam=spi=on",
+            "dtoverlay=spi0-0cs",
+            "dtoverlay=spi0-1cs",
+            "dtoverlay=spi0-2cs",
+            "dtoverlay=spi1-1cs",
+            "dtoverlay=spi1-2cs",
+            "dtoverlay=spi1-3cs",
+            "dtoverlay=spi2-1cs",
+            "dtoverlay=spi2-2cs",
+            "dtoverlay=spi2-3cs",
+            "dtoverlay=spi3-1cs",
+            "dtoverlay=spi3-2cs",
+            "dtoverlay=spi4-1cs",
+            "dtoverlay=spi4-2cs",
+            "dtoverlay=spi5-1cs",
+            "dtoverlay=spi5-2cs",
+            "dtoverlay=spi6-1cs",
+            "dtoverlay=spi6-2cs",
+        };
+        private readonly string[] _possiblePwmActivations = new string[]
+        {
+            "dtoverlay=pwm",
+            "dtoverlay=pwm-2chan",
+        };
 
         private ManagedGpioController? _managedGpioController;
         private RaspberryPi3Driver? _raspberryPi3Driver;
         private bool _initialized;
+        private List<string> _activateI2c = new List<string>();
+        private List<string> _activateSpi = new List<string>();
+        private List<string> _activatePwm = new List<string>();
 
         /// <summary>
         /// Creates an instance of a Rasperry Pi board.
@@ -42,6 +105,11 @@ namespace Iot.Device.Board
             get;
             protected set;
         }
+
+        /// <summary>
+        /// Gets or sets the path to the configuration file for Raspberry PI.
+        /// </summary>
+        public string ConfigurationFile { get; set; } = "/boot/config.txt";
 
         /// <inheritdoc />
         protected override GpioDriver? TryCreateBestGpioDriver()
@@ -194,6 +262,31 @@ namespace Iot.Device.Board
                     else if (cs == 2)
                     {
                         pins.Add(16);
+                    }
+
+                    break;
+                case 2:
+                    // Available only on the compute module
+                    // GPIO​40 / PWM0 / SPI2 MISO / UART1 TX
+                    // ​GPIO​41 / PWM1 / SPI2 MOSI / UART1 RX
+                    // GPIO​42 / GPCLK1 / SPI2 SCLK / UART1 RTS
+                    // GPIO​43 / GPCLK2 / SPI2 CE0 / UART1 CTS
+                    // GPIO​44 / GPCLK1 / I2C0 SDA / I2C1 SDA / SPI2 CE1
+                    // GPIO45 / PWM1 / I2C0 SCL / I2C1 SCL / SPI2 CE2
+                    pins.Add(40);
+                    pins.Add(41);
+                    pins.Add(42);
+                    if (cs == 0)
+                    {
+                        pins.Add(43);
+                    }
+                    else if (cs == 1)
+                    {
+                        pins.Add(44);
+                    }
+                    else if (cs == 2)
+                    {
+                        pins.Add(45);
                     }
 
                     break;
@@ -520,6 +613,280 @@ namespace Iot.Device.Board
             return PinUsage.Unknown;
         }
 
+        /// <summary>
+        /// Checks if the I2C overlay is activated in the configuraztion file.
+        /// </summary>
+        /// <returns>True if it is.</returns>
+        public bool IsI2cActivated()
+        {
+            _activateI2c.Clear();
+            // We are checking possible activation from here: https://github.com/dotnet/iot/blob/main/Documentation/raspi-i2c.md
+            var config = File.ReadAllText(ConfigurationFile).Split('\n').Where(m => !m.Trim().StartsWith("#")).Where(m => m.Length > 1);
+
+            foreach (var possibleActivation in _possibleI2cActivations)
+            {
+                // We need the actual line as the configuration can be more complex than the list.
+                var choices = config.Where(m => m.Trim().StartsWith(possibleActivation));
+                if (choices.Any())
+                {
+                    _activateI2c.Add(choices.First().Replace("\r", string.Empty));
+
+                }
+            }
+
+            return _activateI2c.Any();
+        }
+
+        /// <summary>
+        /// Gets the overlay pin assignment for I2C.
+        /// </summary>
+        /// <param name="busId">Bus Id.</param>
+        /// <returns>The set of pins for the given I2C bus.</returns>
+        public int[] GetOverlayPinAssignmentForI2c(int busId)
+        {
+            int scl = -1;
+            int sda = -1;
+            if (!IsI2cActivated())
+            {
+                return new int[0];
+            }
+
+            // Checks if there is an overlay because it does override the default configuration
+            var dtoverlay = _activateI2c.Where(m => m.StartsWith($"dtoverlay=i2c{busId},")).FirstOrDefault();
+            if (string.IsNullOrEmpty(dtoverlay))
+            {
+                // Give another try without the parameters
+                dtoverlay = _activateI2c.Where(m => m.StartsWith($"dtoverlay=i2c{busId}")).FirstOrDefault();
+            }
+
+            if (!string.IsNullOrEmpty(dtoverlay))
+            {
+                // we have an overlay, extract the pins and check them
+                // dtoverlay=i2c1,pins_2_3
+                if (dtoverlay.IndexOf('_') > 0)
+                {
+                    var pins = dtoverlay.Substring(dtoverlay.IndexOf('_') + 1).Split('_');
+                    sda = int.Parse(pins[0]);
+                    scl = int.Parse(pins[1]);
+                    // Rebuild the chain and check those are valid options
+                    var rebuilt = $"dtoverlay=i2c{busId},pins_{sda}_{scl}";
+                    if (!_possibleI2cActivations.Contains(rebuilt))
+                    {
+                        throw new InvalidOperationException($"Invalid I2C overlay configuration: {dtoverlay}");
+                    }
+                }
+                else
+                {
+                    return GetDefaultPinAssignmentForI2c(busId);
+                }
+            }
+            else
+            {
+                var dtparam = _activateI2c.Where(m => m.StartsWith($"dtparam"));
+                if (dtparam.Any())
+                {
+                    // We're using the default one
+                    return GetDefaultPinAssignmentForI2c(busId);
+                }
+            }
+
+            return new int[]
+            {
+                // Return in the default scheme of the board
+                sda,
+                scl
+            };
+        }
+
+        /// <summary>
+        /// Checks if the SPI overlay is activated in the configuraztion file.
+        /// </summary>
+        /// <returns>True if it is.</returns>
+        public bool IsSpiActivated()
+        {
+            _activateI2c.Clear();
+            // We are checking possible activation from here: https://github.com/dotnet/iot/blob/main/Documentation/raspi-i2c.md
+            var config = File.ReadAllText(ConfigurationFile).Split('\n').Where(m => !m.Trim().StartsWith("#")).Where(m => m.Length > 1);
+
+            foreach (var possibleActivation in _possibleSpiActivations)
+            {
+                // We need the actual line as the configuration can be more complex than the list.
+                var choices = config.Where(m => m.Trim().StartsWith(possibleActivation));
+                if (choices.Any())
+                {
+                    // Remove the \r as introduced on the Windows machine for the tests.
+                    _activateSpi.Add(choices.First().Replace("\r", string.Empty));
+                }
+            }
+
+            return _activateSpi.Any();
+        }
+
+        /// <summary>
+        /// Gets the overlay pin assignment for Spi.
+        /// </summary>
+        /// <param name="connectionSettings">Connection settings to check.</param>
+        /// <returns>The set of pins for the given SPI bus. If no miso, it will be marked as -1.</returns>
+        public int[] GetOverlayPinAssignmentForSpi(SpiConnectionSettings connectionSettings)
+        {
+            int[] pins = new int[0];
+            if (!IsSpiActivated())
+            {
+                return pins;
+            }
+
+            // Checks if there is an overlay because it does override the default configuration
+            var dtoverlay = _activateSpi.Where(m => m.StartsWith($"dtoverlay=spi{connectionSettings.BusId}")).FirstOrDefault();
+            if (!string.IsNullOrEmpty(dtoverlay))
+            {
+                // Overlays look like this:
+                // dtoverlay=spi4-2cs,cs1_pin=17,cs1_spidev=disabled
+                // dtoverlay=spi0-2cs,cs0_pin=27,cs1_pin=22
+                // Can be as well: dtoverlay=spi0-2cs
+                // Or: dtoverlay=spi0-1cs,nomiso
+                // First find number of Chip Select
+                var numberCs = int.Parse(dtoverlay.Substring(dtoverlay.IndexOf('-') + 1, 1));
+                if ((connectionSettings.ChipSelectLine >= numberCs))
+                {
+                    throw new ArgumentException($"SPI {connectionSettings.BusId} is setup with {numberCs} chip select and you ask for number {connectionSettings.ChipSelectLine}.");
+                }
+
+                // This does returns
+                // MISO, MISO, CLK and CS
+                pins = GetDefaultPinAssignmentForSpi(connectionSettings);
+                // If SPI Bus is 0, check if we have no_miso
+                if ((connectionSettings.BusId == 0) && dtoverlay.Contains("no_miso"))
+                {
+                    pins[0] = -1;
+                }
+
+                // Now let's check the CS if it's the default value or not
+                string csDefined = $"cs{connectionSettings.ChipSelectLine}_pin=";
+                if (dtoverlay.Contains(csDefined))
+                {
+                    // In case it's part of a string, we keep only the first one
+                    var pinValueStr = dtoverlay.Substring(dtoverlay.IndexOf(csDefined) + csDefined.Length).Split(',')[0].Trim();
+                    pins[3] = int.Parse(pinValueStr);
+                }
+
+                return pins;
+            }
+            else
+            {
+                var dtparam = _activateSpi.Where(m => m.StartsWith($"dtparam"));
+                if (dtparam.Any())
+                {
+                    // We're using the default one
+                    return GetDefaultPinAssignmentForSpi(connectionSettings);
+                }
+            }
+
+            return pins;
+        }
+
+        /// <summary>
+        /// Checks if the I2C overlay is activated in the configuraztion file.
+        /// </summary>
+        /// <returns>True if it is.</returns>
+        public bool IsPwmActivated()
+        {
+            _activatePwm.Clear();
+            // We are checking possible activation from here: https://github.com/dotnet/iot/blob/main/Documentation/raspi-pwm.md
+            var config = File.ReadAllText(ConfigurationFile).Split('\n').Where(m => !m.Trim().StartsWith("#")).Where(m => m.Length > 1);
+
+            foreach (var possibleActivation in _possiblePwmActivations)
+            {
+                // We need the actual line as the configuration can be more complex than the list.
+                var choices = config.Where(m => m.Trim().StartsWith(possibleActivation));
+                if (choices.Any())
+                {
+                    _activatePwm.Add(choices.First().Replace("\r", string.Empty));
+
+                }
+            }
+
+            return _activatePwm.Any();
+        }
+
+        /// <summary>
+        /// Gets the overlay pin assignment for Pwm.
+        /// </summary>
+        /// <param name="pwmChannel">The PWM channel.</param>
+        /// <returns>The set of pins for the given Pwm bus on chipn 0 as only one supported.</returns>
+        public int GetOverlayPinAssignmentForPwm(int pwmChannel)
+        {
+            int[] validPwm0 = new int[] { 12, 18, 40, 52 };
+            int[] validPwm1 = new int[] { 13, 19, 41, 45, 53 };
+
+            int pin = -1;
+            if (!IsPwmActivated())
+            {
+                return pin;
+            }
+
+            // Checks if there is an overlay because it does override the default configuration
+            var dtoverlay = _activatePwm.Where(m => m.StartsWith($"dtoverlay=pwm")).FirstOrDefault();
+            if (!string.IsNullOrEmpty(dtoverlay))
+            {
+                // we have an overlay, extract the pins and check them
+                // dtoverlay=pwm,pin=19,func=2
+                // dtoverlay=pwm-2chan,pin=12,func=4,pin2=13,func2=4
+                // Single or dual?
+                if ((pwmChannel == 1) && dtoverlay.Contains("2chan"))
+                {
+                    // Do we have an overlay with pins?
+                    var possibleDtoverlay = _activatePwm.Where(m => m.StartsWith($"dtoverlay=pwm-2chan,")).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(possibleDtoverlay))
+                    {
+                        dtoverlay = possibleDtoverlay;
+                    }
+
+                    if (dtoverlay.IndexOf("pin2=") > 0)
+                    {
+                        // 2 channels
+                        pin = int.Parse(dtoverlay.Substring(dtoverlay.IndexOf("pin2=") + 5).Split(',')[0]);
+                        // Is it a potential valid pin?
+                        if (!validPwm1.Contains(pin))
+                        {
+                            throw new ArgumentException($"PWM{pwmChannel} pin2 is not a valid pin.");
+                        }
+                    }
+                    else
+                    {
+                        // We'll use the default one
+                        pin = 19;
+                    }
+                }
+                else if (pwmChannel == 0)
+                {
+                    // Do we have an overlay with pins?
+                    var possibleDtoverlay = _activatePwm.Where(m => m.StartsWith($"dtoverlay=pwm,")).FirstOrDefault();
+                    if (!string.IsNullOrEmpty(possibleDtoverlay))
+                    {
+                        dtoverlay = possibleDtoverlay;
+                    }
+
+                    if (dtoverlay.IndexOf("pin=") > 0)
+                    {
+                        pin = int.Parse(dtoverlay.Substring(dtoverlay.IndexOf("pin=") + 4).Split(',')[0]);
+                        // Is it a potential valid pin?
+                        if (!validPwm0.Contains(pin))
+                        {
+                            throw new ArgumentException($"PWM{pwmChannel} pin is not a valid pin.");
+                        }
+                    }
+                    else
+                    {
+                        // We'll use the default one
+                        pin = 18;
+
+                    }
+                }
+            }
+
+            return pin;
+        }
+
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
@@ -530,6 +897,19 @@ namespace Iot.Device.Board
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            ComponentInformation self = base.QueryComponentInformation();
+            var ret = self with
+            {
+                Description = $"Raspberry Pi with {PinCount} pins"
+            };
+
+            ret.Properties["PinCount"] = PinCount.ToString(CultureInfo.InvariantCulture);
+            return ret;
         }
     }
 }

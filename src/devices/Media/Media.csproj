@@ -7,10 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Drawing.Common" Version="$(SystemDrawingCommonPackageVersion)" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Include="VideoDevice/*.cs" />
     <Compile Include="VideoDevice/Devices/*.cs" />
     <Compile Include="SoundDevice/*.cs" />

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
+#pragma warning disable CA1416 // Temporarily, will be removed after binding is updated
 namespace Iot.Device.Ili9341
 {
     public partial class Ili9341
@@ -44,7 +45,7 @@ namespace Iot.Device.Ili9341
 
             if (bm.PixelFormat != PixelFormat.Format32bppArgb)
             {
-                throw new ArgumentException(nameof(bm), $"Pixel format {bm.PixelFormat.ToString()} not supported.");
+                throw new ArgumentException($"Pixel format {bm.PixelFormat.ToString()} not supported.", nameof(bm));
             }
 
             // get the pixel data and send it to the display
@@ -69,7 +70,7 @@ namespace Iot.Device.Ili9341
 
             if (bm.PixelFormat != PixelFormat.Format32bppArgb)
             {
-                throw new ArgumentException(nameof(bm), $"Pixel format {bm.PixelFormat.ToString()} not supported.");
+                throw new ArgumentException($"Pixel format {bm.PixelFormat.ToString()} not supported.", nameof(bm));
             }
 
             // allocate the working arrays.

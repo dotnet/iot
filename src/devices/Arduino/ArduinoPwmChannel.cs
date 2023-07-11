@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Pwm;
 using System.Linq;
 using System.Text;
@@ -41,7 +42,7 @@ namespace Iot.Device.Arduino
 
             Channel = channel;
             _pin = channel;
-            var caps = board.SupportedPinConfigurations.FirstOrDefault(x => x.Pin == _pin);
+            SupportedPinConfiguration? caps = board.SupportedPinConfigurations.FirstOrDefault(x => x.Pin == _pin);
             if (caps == null || !caps.PinModes.Contains(SupportedMode.Pwm))
             {
                 throw new NotSupportedException($"Pin {_pin} does not support PWM");
@@ -110,8 +111,8 @@ namespace Iot.Device.Arduino
         public override void Stop()
         {
             _enabled = false;
-            _board.Firmata.SetPinMode(_pin, SupportedMode.DigitalInput);
             Update();
+            _board.Firmata.SetPinMode(_pin, SupportedMode.DigitalInput);
         }
 
         private void Update()
@@ -123,6 +124,11 @@ namespace Iot.Device.Arduino
         {
             Stop();
             base.Dispose(disposing);
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            return new ComponentInformation(this, "Arduino PWM Channel");
         }
     }
 }

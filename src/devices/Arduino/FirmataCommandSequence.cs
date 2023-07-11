@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace Iot.Device.Arduino
@@ -12,8 +13,10 @@ namespace Iot.Device.Arduino
     /// A firmata command sequence
     /// Intended to be changed to public visibility later
     /// </summary>
-    public class FirmataCommandSequence
+    public class FirmataCommandSequence : IEquatable<FirmataCommandSequence>
     {
+        private const int InitialCommandLength = 32;
+
         /// <summary>
         /// Start of sysex command byte. Used as start byte for almost all extended commands.
         /// </summary>
@@ -30,11 +33,24 @@ namespace Iot.Device.Arduino
         /// Create a new command sequence
         /// </summary>
         /// <param name="command">The first byte of the command</param>
-        internal FirmataCommandSequence(FirmataCommand command = FirmataCommand.START_SYSEX)
+        internal FirmataCommandSequence(FirmataCommand command)
         {
             _sequence = new List<byte>()
             {
                 (byte)command
+            };
+        }
+
+        internal FirmataCommandSequence(FirmataCommand command, int pin)
+        {
+            if (pin > 15)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pin), "Shorthand commands can only be used with pin numbers <= 15");
+            }
+
+            _sequence = new List<byte>()
+            {
+                (byte)(((byte)command) | pin)
             };
         }
 
@@ -55,6 +71,8 @@ namespace Iot.Device.Arduino
         /// The current length of the sequence
         /// </summary>
         public int Length => _sequence.Count;
+
+        internal byte[] InternalSequence => _sequence.ToArray();
 
         /// <summary>
         /// Decode an uint from packed 7-bit data.
@@ -93,6 +111,17 @@ namespace Iot.Device.Arduino
         public static Int32 DecodeInt32(ReadOnlySpan<byte> data, int fromOffset)
         {
             return (Int32)DecodeUInt32(data, fromOffset);
+        }
+
+        /// <summary>
+        /// Decodes a 14-bit integer into a short
+        /// </summary>
+        /// <param name="data">Data array</param>
+        /// <param name="idx">Start offset</param>
+        /// <returns></returns>
+        public static short DecodeInt14(byte[] data, int idx)
+        {
+            return (short)(data[idx] | data[idx + 1] << 7);
         }
 
         /// <summary>
@@ -176,6 +205,81 @@ namespace Iot.Device.Arduino
             {
                 _sequence.Add((byte)(values[i] & (uint)sbyte.MaxValue));
                 _sequence.Add((byte)(values[i] >> 7 & sbyte.MaxValue));
+            }
+        }
+
+        /// <summary>
+        /// Write a packed Int14 to the stream. This is used to write an integer of up to 14 bits.
+        /// </summary>
+        /// <param name="value">The value to write. Only the 14 least significant bits are transmitted</param>
+        public void SendInt14(int value)
+        {
+            WriteByte((byte)(value & 0x7F));
+            WriteByte((byte)((value >> 7) & 0x7F));
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            StringBuilder b = new StringBuilder();
+
+            int maxBytes = Math.Min(Length, 32);
+            for (int i = 0; i < maxBytes; i++)
+            {
+                b.Append($"{_sequence[i]:X2} ");
+            }
+
+            if (maxBytes < Length)
+            {
+                b.Append("...");
+            }
+
+            return b.ToString();
+        }
+
+        /// <inheritdoc />
+        public bool Equals(FirmataCommandSequence? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return _sequence.Equals(other._sequence) && Length == other.Length;
+        }
+
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((FirmataCommandSequence)obj);
+        }
+
+        /// <inheritdoc />
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (_sequence.GetHashCode() * 397);
             }
         }
     }

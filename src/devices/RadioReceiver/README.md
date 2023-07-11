@@ -4,7 +4,7 @@ The radio receiver devices supported by the project include TEA5767.
 
 ## Documentation
 
-- TEA5767 radio receiver [datasheet](https://cdn.datasheetspdf.com/pdf-down/T/E/A/TEA5767HN-NXP.pdf)
+- TEA5767 radio receiver [datasheet](https://www.sparkfun.com/datasheets/Wireless/General/TEA5767.pdf)
 
 ## Usage
 

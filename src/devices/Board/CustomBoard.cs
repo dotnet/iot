@@ -1,5 +1,9 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Pwm;
@@ -66,6 +70,16 @@ namespace Iot.Device.Board
         protected override PwmChannel CreateSimplePwmChannel(int chip, int channel, int frequency, double dutyCyclePercentage)
         {
             return _pwmChannelCreator(channel);
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var ret = base.QueryComponentInformation();
+            return ret with
+            {
+                Description = "Custom Board"
+            };
         }
     }
 }

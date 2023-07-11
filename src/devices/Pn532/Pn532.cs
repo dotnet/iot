@@ -16,7 +16,7 @@ using Iot.Device.Pn532.AsTarget;
 using Iot.Device.Pn532.ListPassive;
 using Iot.Device.Pn532.RfConfiguration;
 using Iot.Device.Rfid;
-using IoT.Device.Pn532;
+using Iot.Device.Pn532;
 using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Pn532
@@ -26,7 +26,9 @@ namespace Iot.Device.Pn532
     /// </summary>
     public class Pn532 : CardTransceiver, IDisposable
     {
-        private const int I2cMaxBuffer = 1024;
+        // Host-controller frame size
+        private const int MaxPacketData = 264;      // maximum length of packet data
+        private const int MaxPacketFraming = 12;    // maximum additional number of bytes for framing
         // Communication way
         private const byte ToHostCheckSumD5 = 0xD5;
         private const byte FromHostCheckSumD4 = 0xD4;
@@ -74,6 +76,19 @@ namespace Iot.Device.Pn532
         /// Firmware version information
         /// </summary>
         public FirmwareVersion? FirmwareVersion { get; internal set; }
+
+        /// <inheritdoc/>
+        public override uint MaximumReadSize => 258;    // R-APDU with 256 bytes of data plus SW1,SW2
+
+        /// <inheritdoc/>
+        public override uint MaximumWriteSize => 261;   // C-APDU with header, data, and Le
+
+        /// <summary>
+        /// The set of NFC protocols that are supported by this transceiver.
+        /// </summary>
+        public const NfcProtocol SupportedProtocols =
+            NfcProtocol.Iso14443_3 | NfcProtocol.Iso14443_4 | NfcProtocol.Mifare |
+            NfcProtocol.JisX6319_4 | NfcProtocol.Jewel;
 
         #region Spi and I2c Settings
 
@@ -387,7 +402,7 @@ namespace Iot.Device.Pn532
                 // The maximum value for the timeout is 12.75 sec (Timeout = 0xFF).
                 if (value / 50 > 0xFF)
                 {
-                    throw new ArgumentException(nameof(VirtualCardTimeout), "Value must be 12750 milliseconds or less.");
+                    throw new ArgumentException("Value must be 12750 milliseconds or less.", nameof(VirtualCardTimeout));
                 }
 
                 _virtualCardTimeout = value / 50;
@@ -531,7 +546,7 @@ namespace Iot.Device.Pn532
             }
 
             // TODO: check what is the real maximum size
-            Span<byte> listData = stackalloc byte[1024];
+            Span<byte> listData = stackalloc byte[MaxPacketData];
             ret = ReadResponse(CommandSet.InListPassiveTarget, listData);
             _logger.LogDebug($"{nameof(ListPassiveTarget)}: {ret}, number tags: {listData[0]}");
             if ((ret >= 0) && (listData[0] > 0))
@@ -614,7 +629,10 @@ namespace Iot.Device.Pn532
         {
             try
             {
-                if ((toDecode[1] != 18) || (toDecode[1] != 20))
+                // toDecode[1] is POL_RES, which specifies the packet length.
+                // 20 means the packet contains a system code.
+                // See https://nxp.com/docs/en/user-guide/141520.pdf page 116 for more details.
+                if ((toDecode[1] != 18) && (toDecode[1] != 20))
                 {
                     return null;
                 }
@@ -745,48 +763,51 @@ namespace Iot.Device.Pn532
                 return -1;
             }
 
-            if (dataFromCard.Length > 0)
+            Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
+            ret = ReadResponse(CommandSet.InCommunicateThru, toReceive);
+            if (ret > 0)
             {
-                Span<byte> toReceive = stackalloc byte[1 + dataFromCard.Length];
-                ret = ReadResponse(CommandSet.InCommunicateThru, toReceive);
-                toReceive.Slice(1).CopyTo(dataFromCard);
-                if ((toReceive[0] == (byte)ErrorCode.None) && (ret > 0))
+                if (dataFromCard.Length > 0)
                 {
-                    return ret - 1;
+                    toReceive.Slice(1).CopyTo(dataFromCard);
+                    if (toReceive[0] == (byte)ErrorCode.None)
+                    {
+                        return ret - 1;
+                    }
                 }
+                else
+                {
+                    // if the response is only an ACK, there is no CRC - but the PN532 reports a CRC error
+                    if ((toReceive[0] == (byte)ErrorCode.None) || (toReceive[0] == (byte)ErrorCode.CRCError))
+                    {
+                        return 0;
+                    }
+                }
+            }
 
-                return -1;
-            }
-            else
-            {
-                return 0;
-            }
+            return -1;
         }
 
-        /// <summary>
-        /// Write data to a card and read what the card responses
-        /// </summary>
-        /// <param name="targetNumber">The card target number</param>
-        /// <param name="dataToSend">The data to write to the card</param>
-        /// <param name="dataFromCard">The potential data to receive</param>
-        /// <returns>The number of bytes read</returns>
-        public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        /// <inheritdoc/>
+        public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard, NfcProtocol protocol)
         {
-            // We need to add some logic here to understand what the command is and the size of the needed buffer.
-            // For Mifare card, the authentications needs to use the native part.
-            // For non Mifare card, it should not.
-            if (((dataToSend[0] == 0x60) || (dataToSend[0] == 0x61)) && (dataFromCard.Length == 0))
+            switch (protocol)
             {
-                return TransceiveAdvance(targetNumber, dataToSend, dataFromCard);
-            }
-            else
-            {
-                return WriteReadDirect(dataToSend, dataFromCard);
+                // The PN532 supports these modes with InDataExchange
+                case NfcProtocol.Mifare:
+                case NfcProtocol.JisX6319_4:
+                case NfcProtocol.Jewel:
+                case NfcProtocol.Iso14443_4:
+                    return TransceiveAdvance(targetNumber, dataToSend, dataFromCard);
+
+                // Otherwise, use InCommunicateThru
+                default:
+                    return WriteReadDirect(dataToSend, dataFromCard);
             }
         }
 
         /// <summary>
-        /// Use the build in feature to transceive the data to the card. This add specific logic for some cards.
+        /// Use the built in feature to transceive the data to the card. This add specific logic for some cards.
         /// </summary>
         /// <param name="targetNumber">The card target number</param>
         /// <param name="dataToSend">The data to write to the card</param>
@@ -863,7 +884,7 @@ namespace Iot.Device.Pn532
                 return null;
             }
 
-            Span<byte> receivedData = stackalloc byte[1024];
+            Span<byte> receivedData = stackalloc byte[MaxPacketData];
             ret = ReadResponse(CommandSet.InAutoPoll, receivedData);
             _logger.LogDebug($"{nameof(AutoPoll)}, success: {ret}");
             if (ret >= 0)
@@ -909,7 +930,7 @@ namespace Iot.Device.Pn532
                 return (null, null);
             }
 
-            Span<byte> receivedData = stackalloc byte[1024];
+            Span<byte> receivedData = stackalloc byte[MaxPacketData];
             ret = ReadResponse(CommandSet.TgInitAsTarget, receivedData);
             _logger.LogDebug($"{nameof(InitAsTarget)}, success: {ret}");
             if (ret >= 0)
@@ -1184,9 +1205,7 @@ namespace Iot.Device.Pn532
             // For example if you write on a register that is creating an output
             // So this buffer is here only to avoid having an exception when writing to
             // A register that will create an output
-            // The maximum amount of data return if 260 but writing specific register can
-            // Generate a larger amount
-            Span<byte> returnVal = stackalloc byte[1024];
+            Span<byte> returnVal = stackalloc byte[MaxPacketData];
             ret = ReadResponse(CommandSet.ReadRegister, returnVal);
             _logger.LogDebug($"{nameof(WriteRegister)}: {ret}");
             return ret >= 0;
@@ -1514,6 +1533,7 @@ namespace Iot.Device.Pn532
         }
 
         /// <summary>
+        /// Normal Frame:
         /// PREAMBLE 1 byte4
         /// START CODE 2 bytes (0x00 and 0xFF),
         /// LEN 1 byte indicating the number of bytes in the data field
@@ -1543,23 +1563,42 @@ namespace Iot.Device.Pn532
         /// |_____________________________________________ Preamble
         /// If the length is large than 255, then you have LEN and LCS = 0xFF and
         /// 2 additional bytes for the MBS and LBS size of the real length
+        /// Extended Frame:
+        /// The information frame has an extended definition allowing exchanging more data
+        /// between the host controller and the PN532.
+        /// In the firmware implementation of the PN532, the maximum length of the packet data is
+        /// limited to 264 bytes(265 bytes with TFI included).
+        /// The structure of this frame is the following:
+        /// 00 00 FF FF FF LENm LENl LCS TFI PD0 PD1 ……... PDn DCS 00
+        /// -- ----- ----- ---- ---- --- --- ----------------- --- --
+        /// |    |     |     |   |    |   |            |        |  |_ Postamble
+        /// |    |     |     |   |    |   |            |        |____ Packet Data Checksum
+        /// |    |     |     |   |    |   |            |_____________ Packet Data
+        /// |    |     |     |   |    |   |__________________________ Specific PN532 Frame Identifier
+        /// |    |     |     |   |    |______________________________ Packet Length Checksum
+        /// |    |     |     |   |___________________________________ Packet Length LSByte
+        /// |    |     |     |_______________________________________ Packet Length MSByte
+        /// |    |     |_____________________________________________ Fixed for extrended frame
+        /// |    |___________________________________________________ Start codes
+        /// |________________________________________________________ Preamble
         /// </summary>
         /// <param name="commandSet">The command to use</param>
         /// <param name="writeData">The additional data to send</param>
         /// <returns></returns>
         private byte[] CreateWriteMessage(CommandSet commandSet, ReadOnlySpan<byte> writeData)
         {
-            // 7 bytes + writeData length + 2 bytes if preamble
             int correctionPreamble = 2;
             int correctionIndex = 0;
-            int correctionLArgeSizeBuffer = writeData.Length < 250 ? 0 : 2;
+            int correctionLargeBuffer = writeData.Length < 250 ? 0 : 3;
             if (!((_parametersFlags & ParametersFlags.RemovePrePostAmble) == ParametersFlags.RemovePrePostAmble))
             {
                 correctionPreamble = 0;
                 correctionIndex = 1;
             }
 
-            Span<byte> buff = stackalloc byte[7 + writeData.Length + correctionPreamble + correctionLArgeSizeBuffer];
+            // 7 bytes + writeData length + 2 bytes if preamble
+            // 7 bytes + writeData length + 2 bytes if preamble + 3 bytes for extended frame
+            Span<byte> buff = stackalloc byte[7 + writeData.Length + correctionPreamble + correctionLargeBuffer];
             if (correctionPreamble != 0)
             {
                 buff[0] = Preamble;
@@ -1568,7 +1607,7 @@ namespace Iot.Device.Pn532
             buff[1 - correctionIndex] = StartCode1;
             buff[2 - correctionIndex] = StartCode2;
             // Normal frame size
-            if (correctionLArgeSizeBuffer == 0)
+            if (correctionLargeBuffer == 0)
             {
                 // Size for commandSet + size of buffer + 1
                 byte length = (byte)(1 + writeData.Length + 1);
@@ -1581,17 +1620,26 @@ namespace Iot.Device.Pn532
                 // Large frame size
                 buff[3 - correctionIndex] = 0xFF;
                 buff[4 - correctionIndex] = 0xFF;
-                buff[5 - correctionIndex] = (byte)(writeData.Length >> 8);
-                buff[6 - correctionIndex] = (byte)(writeData.Length);
+
+                // Size for commandSet + size of buffer + 1 (tfi)
+                var length = (1 + 1 + writeData.Length);
+                var lenMB = (byte)(length >> 8);
+                var lenLB = (byte)(length & 0xFF);
+                buff[5 - correctionIndex] = lenMB;
+                buff[6 - correctionIndex] = lenLB;
+
+                // CRC for length
+                var lengthCRC = (byte)(~(byte)(lenMB + lenLB) + 1);
+                buff[7 - correctionIndex] = lengthCRC;
             }
 
             // We are writing from Host
-            buff[5 - correctionIndex + correctionLArgeSizeBuffer] = FromHostCheckSumD4;
+            buff[5 - correctionIndex + correctionLargeBuffer] = FromHostCheckSumD4;
             // The command and the data
-            buff[6 - correctionIndex + correctionLArgeSizeBuffer] = (byte)commandSet;
+            buff[6 - correctionIndex + correctionLargeBuffer] = (byte)commandSet;
             if (!writeData.IsEmpty)
             {
-                writeData.CopyTo(buff.Slice(7 - correctionIndex + correctionLArgeSizeBuffer));
+                writeData.CopyTo(buff.Slice(7 - correctionIndex + correctionLargeBuffer));
             }
 
             // Checksum
@@ -1601,10 +1649,10 @@ namespace Iot.Device.Pn532
                 checkSum += writeData[i];
             }
 
-            buff[7 + writeData.Length - correctionIndex + correctionLArgeSizeBuffer] = (byte)(~checkSum + 1);
+            buff[7 + writeData.Length - correctionIndex + correctionLargeBuffer] = (byte)(~checkSum + 1);
             if (correctionPreamble != 0)
             {
-                buff[8 + writeData.Length + correctionLArgeSizeBuffer] = Postamble;
+                buff[8 + writeData.Length - correctionIndex + correctionLargeBuffer] = Postamble;
             }
 
             _logger.LogDebug($"Message to send: {BitConverter.ToString(buff.ToArray())}");
@@ -1982,9 +2030,9 @@ namespace Iot.Device.Pn532
                 }
             }
 
-            // For I2C, we need to read at least 2 bytes other wise it things we're still trying
+            // For I2C, we need to read at least 2 bytes other wise it thinks we're still trying
             // to check the status
-            byte[] preamb = new byte[I2cMaxBuffer];
+            Span<byte> preamb = stackalloc byte[readData.Length + MaxPacketFraming];
             _i2cDevice.Read(preamb);
             int idxPreamb = 0;
             // Dropping the first byte, it is 0x01 and read previously in the pooling
@@ -2053,7 +2101,7 @@ namespace Iot.Device.Pn532
             // Finally, we can read the data
             if (length - 2 > 0)
             {
-                preamb.AsSpan().Slice(idxPreamb, length - 2).CopyTo(readData);
+                preamb.Slice(idxPreamb, length - 2).CopyTo(readData);
                 idxPreamb += length - 2;
             }
 
@@ -2103,6 +2151,7 @@ namespace Iot.Device.Pn532
             else if (_i2cDevice is object)
             {
                 Span<byte> i2cackReceived = stackalloc byte[7];
+                i2cackReceived.Clear();
                 _i2cDevice.Read(i2cackReceived);
                 i2cackReceived.Slice(1).CopyTo(ackReceived);
             }

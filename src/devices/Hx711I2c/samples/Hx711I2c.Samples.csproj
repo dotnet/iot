@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Hx711I2c.csproj" />
+    <ProjectReference Include="../../Board/Board.csproj" />
+    <ProjectReference Include="../../Ft4222/Ft4222.csproj" />
+  </ItemGroup>
+</Project>

@@ -4,7 +4,7 @@ The MLX90614 is an Infra Red thermometer for noncontact temperature measurements
 
 ## Documentation
 
-- You can find the datasheet [here](https://cdn.datasheetspdf.com/pdf-down/M/L/X/MLX90614-Melexis.pdf)
+- You can find the datasheet [here](https://www.melexis.com/-/media/files/documents/datasheets/mlx90614-datasheet-melexis.pdf)
 
 ## Board
 

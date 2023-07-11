@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Buffers.Binary;
@@ -205,17 +204,17 @@ namespace Iot.Device.PiJuiceDevice
         {
             if (ledBlink.Count < 1)
             {
-                throw new ArgumentOutOfRangeException(nameof(ledBlink.Count));
+                throw new ArgumentOutOfRangeException(nameof(ledBlink), $"Count must be equal or greater than 1.");
             }
 
             if (ledBlink.FirstPeriod.TotalMilliseconds is < 10 or > 2550)
             {
-                throw new ArgumentOutOfRangeException(nameof(ledBlink.FirstPeriod));
+                throw new ArgumentOutOfRangeException(nameof(ledBlink), "FirstPeriod.TotalMilliseconds must be between 10 and 2550.");
             }
 
             if (ledBlink.SecondPeriod.TotalMilliseconds is < 10 or > 2550)
             {
-                throw new ArgumentOutOfRangeException(nameof(ledBlink.SecondPeriod));
+                throw new ArgumentOutOfRangeException(nameof(ledBlink), "SecondPeriod.TotalMilliseconds must be between 10 and 2550.");
             }
 
             var data = new byte[9];

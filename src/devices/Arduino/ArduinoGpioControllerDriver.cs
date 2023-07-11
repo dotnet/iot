@@ -14,26 +14,30 @@ namespace Iot.Device.Arduino
 {
     internal class ArduinoGpioControllerDriver : GpioDriver
     {
-        private readonly ArduinoBoard _arduinoBoard;
+        private readonly FirmataDevice _device;
         private readonly IReadOnlyCollection<SupportedPinConfiguration> _supportedPinConfigurations;
         private readonly Dictionary<int, CallbackContainer> _callbackContainers;
         private readonly ConcurrentDictionary<int, PinMode> _pinModes;
+        private readonly ConcurrentDictionary<int, PinValue> _pinValues;
         private readonly object _callbackContainersLock;
         private readonly AutoResetEvent _waitForEventResetEvent;
         private readonly ILogger _logger;
+        private readonly ConcurrentDictionary<int, PinValue?> _outputPinValues;
 
-        internal ArduinoGpioControllerDriver(ArduinoBoard arduinoBoard, IReadOnlyCollection<SupportedPinConfiguration> supportedPinConfigurations)
+        internal ArduinoGpioControllerDriver(FirmataDevice device, IReadOnlyCollection<SupportedPinConfiguration> supportedPinConfigurations)
         {
-            _arduinoBoard = arduinoBoard ?? throw new ArgumentNullException(nameof(arduinoBoard));
+            _device = device ?? throw new ArgumentNullException(nameof(device));
             _supportedPinConfigurations = supportedPinConfigurations ?? throw new ArgumentNullException(nameof(supportedPinConfigurations));
             _callbackContainers = new Dictionary<int, CallbackContainer>();
             _waitForEventResetEvent = new AutoResetEvent(false);
             _callbackContainersLock = new object();
             _pinModes = new ConcurrentDictionary<int, PinMode>();
+            _pinValues = new ConcurrentDictionary<int, PinValue>();
+            _outputPinValues = new ConcurrentDictionary<int, PinValue?>();
             _logger = this.GetCurrentClassLogger();
 
             PinCount = _supportedPinConfigurations.Count;
-            _arduinoBoard.Firmata.DigitalPortValueUpdated += FirmataOnDigitalPortValueUpdated;
+            _device.DigitalPortValueUpdated += FirmataOnDigitalPortValueUpdated;
         }
 
         protected override int PinCount { get; }
@@ -48,11 +52,18 @@ namespace Iot.Device.Arduino
 
         protected override void OpenPin(int pinNumber)
         {
+            if (pinNumber < 0 || pinNumber >= PinCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pinNumber), $"Pin {pinNumber} is not valid");
+            }
+
+            _pinValues.TryAdd(pinNumber, PinValue.Low);
         }
 
         protected override void ClosePin(int pinNumber)
         {
             _pinModes.TryRemove(pinNumber, out _);
+            _pinValues.TryRemove(pinNumber, out _);
         }
 
         protected override void SetPinMode(int pinNumber, PinMode mode)
@@ -65,23 +76,25 @@ namespace Iot.Device.Arduino
                     break;
                 case PinMode.InputPullUp:
                     firmataMode = SupportedMode.InputPullup;
+                    _outputPinValues.TryRemove(pinNumber, out _);
                     break;
                 case PinMode.Input:
                     firmataMode = SupportedMode.DigitalInput;
+                    _outputPinValues.TryRemove(pinNumber, out _);
                     break;
                 default:
                     _logger.LogError($"Mode {mode} is not supported as argument to {nameof(SetPinMode)}");
                     throw new NotSupportedException($"Mode {mode} is not supported for this operation");
             }
 
-            var pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
+            SupportedPinConfiguration? pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
             if (pinConfig == null || !pinConfig.PinModes.Contains(firmataMode))
             {
                 _logger.LogError($"Mode {mode} is not supported on Pin {pinNumber}");
                 throw new NotSupportedException($"Mode {mode} is not supported on Pin {pinNumber}.");
             }
 
-            _arduinoBoard.Firmata.SetPinMode(pinNumber, firmataMode);
+            _device.SetPinMode(pinNumber, firmataMode);
 
             // Cache this value. Since the GpioController calls GetPinMode when trying to write a pin (to verify whether it is set to output),
             // that would be very expensive here. And setting output pins should be cheap.
@@ -90,12 +103,12 @@ namespace Iot.Device.Arduino
 
         protected override PinMode GetPinMode(int pinNumber)
         {
-            if (_pinModes.TryGetValue(pinNumber, out var existingValue))
+            if (_pinModes.TryGetValue(pinNumber, out PinMode existingValue))
             {
                 return existingValue;
             }
 
-            var mode = _arduinoBoard.Firmata.GetPinMode(pinNumber);
+            byte mode = _device.GetPinMode(pinNumber);
 
             PinMode ret;
             if (mode == SupportedMode.DigitalOutput.Value)
@@ -138,18 +151,32 @@ namespace Iot.Device.Arduino
                     return false;
             }
 
-            var pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
+            SupportedPinConfiguration? pinConfig = _supportedPinConfigurations.FirstOrDefault(x => x.Pin == pinNumber);
             return pinConfig != null && pinConfig.PinModes.Contains(firmataMode);
         }
 
         protected override PinValue Read(int pinNumber)
         {
-            return _arduinoBoard.Firmata.ReadDigitalPin(pinNumber);
+            _pinValues[pinNumber] = _device.ReadDigitalPin(pinNumber);
+            return _pinValues[pinNumber];
         }
+
+        protected override void Toggle(int pinNumber) => Write(pinNumber, !_pinValues[pinNumber]);
 
         protected override void Write(int pinNumber, PinValue value)
         {
-            _arduinoBoard.Firmata.WriteDigitalPin(pinNumber, value);
+            if (_outputPinValues.TryGetValue(pinNumber, out PinValue? existingValue) && existingValue != null)
+            {
+                // If this output value is already present, don't send a message.
+                if (value == existingValue.Value)
+                {
+                    return;
+                }
+            }
+
+            _device.WriteDigitalPin(pinNumber, value);
+            _outputPinValues.AddOrUpdate(pinNumber, x => value, (y, z) => value);
+            _pinValues[pinNumber] = value;
         }
 
         protected override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
@@ -173,7 +200,7 @@ namespace Iot.Device.Arduino
                 }
             }
 
-            _arduinoBoard.Firmata.DigitalPortValueUpdated += WaitForEventPortValueUpdated;
+            _device.DigitalPortValueUpdated += WaitForEventPortValueUpdated;
             try
             {
                 WaitHandle.WaitAny(new[] { cancellationToken.WaitHandle, _waitForEventResetEvent });
@@ -188,7 +215,7 @@ namespace Iot.Device.Arduino
             }
             finally
             {
-                _arduinoBoard.Firmata.DigitalPortValueUpdated -= WaitForEventPortValueUpdated;
+                _device.DigitalPortValueUpdated -= WaitForEventPortValueUpdated;
             }
 
             return new WaitForEventResult()
@@ -202,14 +229,14 @@ namespace Iot.Device.Arduino
         {
             lock (_callbackContainersLock)
             {
-                if (_callbackContainers.TryGetValue(pinNumber, out var cb))
+                if (_callbackContainers.TryGetValue(pinNumber, out CallbackContainer? cb))
                 {
                     cb.EventTypes = cb.EventTypes | eventTypes;
                     cb.OnPinChanged += callback;
                 }
                 else
                 {
-                    var cb2 = new CallbackContainer(pinNumber, eventTypes);
+                    CallbackContainer cb2 = new CallbackContainer(pinNumber, eventTypes);
                     cb2.OnPinChanged += callback;
                     _callbackContainers.Add(pinNumber, cb2);
                 }
@@ -220,7 +247,7 @@ namespace Iot.Device.Arduino
         {
             lock (_callbackContainersLock)
             {
-                if (_callbackContainers.TryGetValue(pinNumber, out var cb))
+                if (_callbackContainers.TryGetValue(pinNumber, out CallbackContainer? cb))
                 {
                     cb.OnPinChanged -= callback;
                     if (cb.NoEventsConnected)
@@ -265,7 +292,9 @@ namespace Iot.Device.Arduino
                     _callbackContainers.Clear();
                 }
 
-                _arduinoBoard.Firmata.DigitalPortValueUpdated -= FirmataOnDigitalPortValueUpdated;
+                _pinValues.Clear();
+                _outputPinValues.Clear();
+                _device.DigitalPortValueUpdated -= FirmataOnDigitalPortValueUpdated;
             }
 
             base.Dispose(disposing);
@@ -300,7 +329,7 @@ namespace Iot.Device.Arduino
             public void FireOnPinChanged(PinEventTypes eventType)
             {
                 // Copy event instance, prevents problems when elements are added or removed at the same time
-                var threadSafeCopy = OnPinChanged;
+                PinChangeEventHandler? threadSafeCopy = OnPinChanged;
                 threadSafeCopy?.Invoke(PinNumber, new PinValueChangedEventArgs(eventType, PinNumber));
             }
         }

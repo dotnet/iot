@@ -16,7 +16,7 @@ The following deliverables are not in any particular order:
 * [ ] Collaborate with IoT Plug and Play
 * [ ] Add E2E sample that leverages Azure IoT Hub to showcase the integration with Azure services
 * [ ] Add testing for I2C, SPI, PWM protocols
-* [ ] Add testing infrastructure for IoT.Device.Bindings
+* [ ] Add testing infrastructure for Iot.Device.Bindings
 * [ ] Add control engineering algorithms (for example: PID)
 * [ ] Support new protocols; for example I2S.
 * [ ] Support common serial protocols: RS-485 Serial Port, Modbus, 1-wire

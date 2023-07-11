@@ -49,12 +49,12 @@ namespace Iot.Device.Arduino
             }
         }
 
-        private void FirmataOnAnalogPinValueUpdated(int pin, uint rawvalue)
+        private void FirmataOnAnalogPinValueUpdated(int channel, uint rawvalue)
         {
             if (_autoReportingReferenceCount > 0)
             {
-                int physicalPin = Controller.ConvertLogicalNumberingSchemeToPinNumber(pin);
-                var voltage = ConvertToVoltage(rawvalue);
+                int physicalPin = Controller.ConvertAnalogChannelNumberToPinNumber(channel);
+                ElectricPotential voltage = ConvertToVoltage(rawvalue);
                 var message = new ValueChangedEventArgs(rawvalue, voltage, physicalPin, TriggerReason.Timed);
                 FireValueChanged(message);
             }
@@ -65,13 +65,22 @@ namespace Iot.Device.Arduino
         /// <summary>
         /// The arduino would theoretically allow for an external analog reference, but firmata currently doesn't support that.
         /// </summary>
-        public override ElectricPotential MaxVoltage => ElectricPotential.FromVolts(5);
+        public override ElectricPotential MaxVoltage => VoltageReference;
 
         /// <summary>
-        /// Similar here: Some boards support more than 10 bit resolution, but we'd have to extend the firmware for that.
+        /// The ADC resolution for this pin, as reported by the firmware.
         /// </summary>
-        public override int AdcResolutionBits => 10;
+        public override int AdcResolutionBits => _configuration.AnalogInputResolutionBits;
 
+        /// <summary>
+        /// Reads the analog raw value from a given pin.
+        /// </summary>
+        /// <returns>The analog raw value of the given pin</returns>
+        /// <remarks>
+        /// This returns the last cached value from the board. The board sends regular updates when a value changes,
+        /// but this does not request an update before returning a value, so that the read value might be incorrect
+        /// if the analog pin has just been opened.
+        /// </remarks>
         public override uint ReadRaw()
         {
             return _board.Firmata.GetAnalogRawValue(PinNumber);

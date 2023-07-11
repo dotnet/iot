@@ -7,9 +7,9 @@ to a hardware RTC clock.
 
 ## Documentation
 
-- DS1307 [datasheet](https://cdn.datasheetspdf.com/pdf-down/D/S/1/DS1307-Maxim.pdf)
+- DS1307 [datasheet](https://www.analog.com/media/en/technical-documentation/data-sheets/DS1307.pdf)
 - DS3231 [datasheet](https://datasheets.maximintegrated.com/en/ds/DS3231.pdf)
-- PCF8563 [datasheet](https://cdn.datasheetspdf.com/pdf-down/P/C/F/PCF-856.pdf)
+- PCF8563 [datasheet](https://www.nxp.com/docs/en/data-sheet/PCF8563.pdf)
 
 ## Board
 

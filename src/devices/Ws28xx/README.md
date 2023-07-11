@@ -2,11 +2,12 @@
 
 This binding allows you to update the RGB LEDs on Ws28xx / SK6812 and based strips and matrices.
 
-To see how to use the binding in code, see the [sample](samples/Ws28xx_Samples/Program.cs).
+To see how to use the binding in code, see the [sample](samples/LEDStripSample/Program.cs).
 
 ## Documentation
 
 * WS2812B: [Datasheet](https://cdn-shop.adafruit.com/datasheets/WS2812B.pdf)
+* WS2815B: [Datasheet](http://www.world-semi.com/DownLoadFile/138)
 * WS2808: [Datasheet](https://datasheetspdf.com/pdf-file/806051/Worldsemi/WS2801/1)
 * SK6812: [Datasheet](https://cdn-shop.adafruit.com/product-files/2757/p2757_SK6812RGBW_REV01.pdf)
 * [Neo pixels guide](https://learn.adafruit.com/adafruit-neopixel-uberguide)
@@ -46,6 +47,7 @@ using SpiDevice spi = SpiDevice.Create(settings);
 
 Ws28xx neo = new Ws2808(spi, count);
 // Ws28xx neo = new Ws2812b(spi, Count);
+// Ws2815b neo = new Ws2815b(spi, ledCount);
 
 while (true)
 {
@@ -70,7 +72,7 @@ void Rainbow(Ws28xx neo, int count, int iterations = 1)
 
 ***Note:***
 
-Using the SK6812 is almost the same, but the alpha channel of the color is used for the white LED. This means that the predefined color definitions (like ```System.Drawing.Color.Red```) will not work correctly as they have the alpha channel set to 255 (0xFF). That will turn the white LED always on. See the [sample](samples/SK6812_Samples/Programs.cs) for the main differences to the above code.
+Using the SK6812 is almost the same, but the alpha channel of the color is used for the white LED. This means that the predefined color definitions (like ```System.Drawing.Color.Red```) will not work correctly as they have the alpha channel set to 255 (0xFF). That will turn the white LED always on. See the [sample](samples/LEDStripSample/Program.cs) for the main differences to the above code.
 Because ```System.Drawing.Color``` is a readonly struct, it's not possible to change the any channel directly. In order to correctly set Red, use ```Color.FromArgb(0, 255, 0, 0)```. For setting the white LED, use ```Color.FromArgb(255, 0, 0, 0)```. It's also possible to use an existing definition and remove the white channel like this:
 
 ```csharp

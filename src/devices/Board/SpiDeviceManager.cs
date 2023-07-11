@@ -2,12 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Device;
 using System.Device.Spi;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Iot.Device.Board
 {
-    internal class SpiDeviceManager : SpiDevice
+    internal class SpiDeviceManager : SpiDevice, IDeviceManager
     {
         private readonly Board _board;
         private readonly int[] _pins;
@@ -66,6 +69,19 @@ namespace Iot.Device.Board
             {
                 return _device;
             }
+        }
+
+        public bool IsDisposed
+        {
+            get
+            {
+                return _device == null;
+            }
+        }
+
+        public IReadOnlyCollection<int> GetActiveManagedPins()
+        {
+            return _pins.ToList();
         }
 
         public override byte ReadByte()
@@ -136,6 +152,15 @@ namespace Iot.Device.Board
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// Query the component information (the tree of active drivers) for diagnostic purposes.
+        /// </summary>
+        /// <returns>A <see cref="ComponentInformation"/> instance</returns>
+        public ComponentInformation QueryComponentInformation()
+        {
+            return new ComponentInformation(this, $"SPI Bus Manager, Bus number {_device.ConnectionSettings.BusId}");
         }
     }
 }

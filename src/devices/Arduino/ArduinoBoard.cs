@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Device;
 using System.Device.Analog;
 using System.Text;
 using System.Device.Gpio;
@@ -63,10 +64,25 @@ namespace Iot.Device.Arduino
         /// The device is initialized when the first command is sent. The constructor always succeeds.
         /// </remarks>
         /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
-        public ArduinoBoard(Stream serialPortStream)
+        /// <param name="usesHardwareFlowControl">True to indicate that the stream supports hardware flow control (can be a serial port
+        /// with RTS/CTS handshake or a network stream where the protocol already supports flow control)</param>
+        public ArduinoBoard(Stream serialPortStream, bool usesHardwareFlowControl)
         {
             _dataStream = serialPortStream ?? throw new ArgumentNullException(nameof(serialPortStream));
+            StreamUsesHardwareFlowControl = usesHardwareFlowControl;
             _logger = this.GetCurrentClassLogger();
+        }
+
+        /// <summary>
+        /// Creates an instance of an Ardino board connection using the given stream (typically from a serial port)
+        /// </summary>
+        /// <remarks>
+        /// The device is initialized when the first command is sent. The constructor always succeeds.
+        /// </remarks>
+        /// <param name="serialPortStream">A stream to an Arduino/Firmata device</param>
+        public ArduinoBoard(Stream serialPortStream)
+        : this(serialPortStream, false)
+        {
         }
 
         /// <summary>
@@ -80,6 +96,7 @@ namespace Iot.Device.Arduino
         {
             _dataStream = null;
             _serialPort = new SerialPort(portName, baudRate);
+            StreamUsesHardwareFlowControl = false; // Would need to configure the serial port externally for this to work
             _logger = this.GetCurrentClassLogger();
         }
 
@@ -87,6 +104,16 @@ namespace Iot.Device.Arduino
         /// The board logger.
         /// </summary>
         protected ILogger Logger => _logger;
+
+        /// <summary>
+        /// Set this to true if the underlying stream uses some kind of hardware or low-level flow control (RTS/CTS for
+        /// a serial port, or a TCP socket). Setting this to true may improve performance on bulk transfers (such as
+        /// large SPI blocks) but can result in buffer overflows if flow control is not working. Default: false
+        /// </summary>
+        public bool StreamUsesHardwareFlowControl
+        {
+            get;
+        }
 
         /// <summary>
         /// The list of supported pin modes.
@@ -125,9 +152,9 @@ namespace Iot.Device.Arduino
 #endif
             out ArduinoBoard? board)
         {
-            foreach (var port in comPorts)
+            foreach (string port in comPorts)
             {
-                foreach (var baud in baudRates)
+                foreach (int baud in baudRates)
                 {
                     ArduinoBoard? b = null;
                     try
@@ -153,7 +180,7 @@ namespace Iot.Device.Arduino
         /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
         /// </summary>
         /// <param name="boardAddress">The IP address of the board</param>
-        /// <param name="port">The network port to use</param>
+        /// <param name="port">The network port to use. The default port is 27016</param>
         /// <param name="board">Returns the board if successful</param>
         /// <returns>True on success, false otherwise</returns>
         public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port,
@@ -162,14 +189,47 @@ namespace Iot.Device.Arduino
 #endif
             out ArduinoBoard? board)
         {
-            board = null;
+            return TryConnectToNetworkedBoard(boardAddress, port, true, out board);
+        }
+
+        /// <summary>
+        /// Tries to connect to an arduino over network.
+        /// This requires an arduino with an ethernet shield or an ESP32 with enabled WIFI support.
+        /// </summary>
+        /// <param name="boardAddress">The IP address of the board</param>
+        /// <param name="port">The network port to use. The default port is 27016</param>
+        /// <param name="useAutoReconnect">True to use an auto-reconnecting stream. Helpful when using an unreliable connection.</param>
+        /// <param name="board">Returns the board if successful</param>
+        /// <returns>True on success, false otherwise</returns>
+        public static bool TryConnectToNetworkedBoard(IPAddress boardAddress, int port, bool useAutoReconnect,
+#if NET5_0_OR_GREATER
+            [NotNullWhen(true)]
+#endif
+            out ArduinoBoard? board)
+        {
             try
             {
-                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket.Connect(boardAddress, port);
-                socket.NoDelay = true;
-                var networkStream = new NetworkStream(socket, true);
-                board = new ArduinoBoard(networkStream);
+                Stream networkStream;
+                if (useAutoReconnect)
+                {
+                    networkStream = new ReconnectingNetworkStream(() =>
+                    {
+                        var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        socket.Connect(boardAddress, port);
+                        socket.NoDelay = true;
+                        Stream socketStream = new NetworkStream(socket, true);
+                        return socketStream;
+                    });
+                }
+                else
+                {
+                    var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                    socket.Connect(boardAddress, port);
+                    socket.NoDelay = true;
+                    networkStream = new NetworkStream(socket, true);
+                }
+
+                board = new ArduinoBoard(networkStream, true);
                 if (!(board.FirmataVersion > new Version(1, 0)))
                 {
                     // Actually not expecting to get here (but the above will throw a SocketException if the remote end is not there)
@@ -180,6 +240,7 @@ namespace Iot.Device.Arduino
             }
             catch (SocketException)
             {
+                board = null;
                 return false;
             }
         }
@@ -242,7 +303,7 @@ namespace Iot.Device.Arduino
                 if (newCommandHandler.HandlesMode != null)
                 {
                     // If we already know the mode, replace its configuration with the new one (typically, this will only update the name)
-                    var m = _knownSupportedModes.FirstOrDefault(x => x.Value == newCommandHandler.HandlesMode.Value);
+                    SupportedMode? m = _knownSupportedModes.FirstOrDefault(x => x.Value == newCommandHandler.HandlesMode.Value);
                     if (m != null)
                     {
                         _knownSupportedModes.Remove(m);
@@ -276,7 +337,7 @@ namespace Iot.Device.Arduino
         public T? GetCommandHandler<T>()
             where T : ExtendedCommandHandler
         {
-            foreach (var cmd in _extendedCommandHandlers)
+            foreach (ExtendedCommandHandler cmd in _extendedCommandHandlers)
             {
                 if (cmd.GetType() == typeof(T))
                 {
@@ -298,7 +359,7 @@ namespace Iot.Device.Arduino
             _commandHandlersLock.EnterReadLock();
             try
             {
-                var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
+                SupportedMode? m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
                 if (m == null)
                 {
                     return PinUsage.Unknown;
@@ -370,7 +431,7 @@ namespace Iot.Device.Arduino
 
                 Logger.LogInformation($"Firmata version on board is {_firmataVersion}.");
 
-                _firmwareVersion = _firmata.QueryFirmwareVersion(out var firmwareName);
+                _firmwareVersion = _firmata.QueryFirmwareVersion(out string firmwareName);
                 _firmwareName = firmwareName;
 
                 Logger.LogInformation($"Firmware version on board is {_firmwareVersion}");
@@ -380,14 +441,27 @@ namespace Iot.Device.Arduino
                 _supportedPinConfigurations = _firmata.PinConfigurations.AsReadOnly();
 
                 Logger.LogInformation("Device capabilities: ");
-                foreach (var pin in _supportedPinConfigurations)
+                foreach (SupportedPinConfiguration pin in _supportedPinConfigurations)
                 {
                     Logger.LogInformation(pin.ToString());
                 }
 
                 _firmata.EnableDigitalReporting();
 
-                foreach (var e in _extendedCommandHandlers)
+                string? result = _firmata.CheckSystemVariablesSupported();
+                if (result != null)
+                {
+                    Logger.LogInformation($"System variable support not available in firmware. Error: {result}");
+                }
+                else
+                {
+                    Logger.LogInformation("System variable support detected");
+                    GetSystemVariable(SystemVariable.MaxSysexSize, -1, out int bufferSize);
+                    // Should be excluding the SYSEX byte itself and the terminator, but see https://github.com/firmata/ConfigurableFirmata/issues/136
+                    Logger.LogInformation($"Maximum SYSEX message size: {bufferSize}");
+                }
+
+                foreach (ExtendedCommandHandler e in _extendedCommandHandlers)
                 {
                     e.Registered(_firmata, this);
                     e.OnConnected();
@@ -397,13 +471,64 @@ namespace Iot.Device.Arduino
             }
         }
 
+        /// <summary>
+        /// Queries the given system variable.
+        /// </summary>
+        /// <param name="variableId">The variable to query</param>
+        /// <param name="value">Receives the value</param>
+        /// <returns>True on success, false otherwise (value not supported, etc. Check the log output)</returns>
+        /// <exception cref="IOException">There was an error sending the command</exception>
+        public bool GetSystemVariable(SystemVariable variableId, out int value)
+        {
+            value = 0;
+            return Firmata.GetOrSetSystemVariable(variableId, -1, true, ref value);
+        }
+
+        /// <summary>
+        /// Queries the given system variable.
+        /// </summary>
+        /// <param name="variableId">The variable to query</param>
+        /// <param name="pinNumber">The pin number to use (-1 if not applicable for the given parameter)</param>
+        /// <param name="value">Receives the value</param>
+        /// <returns>True on success, false otherwise (value not supported, etc. Check the log output)</returns>
+        /// <exception cref="IOException">There was an error sending the command</exception>
+        public bool GetSystemVariable(SystemVariable variableId, int pinNumber, out int value)
+        {
+            value = 0;
+            return Firmata.GetOrSetSystemVariable(variableId, pinNumber, true, ref value);
+        }
+
+        /// <summary>
+        /// Update the given system variable.
+        /// </summary>
+        /// <param name="variableId">The variable to update</param>
+        /// <param name="value">The new value</param>
+        /// <returns>True on success, false otherwise (check the log output)</returns>
+        /// <exception cref="IOException">There was a communication error</exception>
+        public bool SetSystemVariable(SystemVariable variableId, int value)
+        {
+            return Firmata.GetOrSetSystemVariable(variableId, -1, false, ref value);
+        }
+
+        /// <summary>
+        /// Update the given system variable.
+        /// </summary>
+        /// <param name="variableId">The variable to update</param>
+        /// <param name="pinNumber">The pin number to use, or -1 if not relevant</param>
+        /// <param name="value">The new value</param>
+        /// <returns>True on success, false otherwise (check the log output)</returns>
+        /// <exception cref="IOException">There was a communication error</exception>
+        public bool SetSystemVariable(SystemVariable variableId, int pinNumber, int value)
+        {
+            return Firmata.GetOrSetSystemVariable(variableId, pinNumber, false, ref value);
+        }
+
         private void RegisterCommandHandlers()
         {
-            lock (_commandHandlersLock)
-            {
-                _extendedCommandHandlers.Add(new DhtSensor());
-                _extendedCommandHandlers.Add(new FrequencySensor());
-            }
+            _commandHandlersLock.EnterWriteLock();
+            _extendedCommandHandlers.Add(new DhtSensor());
+            _extendedCommandHandlers.Add(new FrequencySensor());
+            _commandHandlersLock.ExitWriteLock();
         }
 
         /// <summary>
@@ -411,27 +536,26 @@ namespace Iot.Device.Arduino
         /// </summary>
         private void RegisterKnownSupportedModes()
         {
-            lock (_commandHandlersLock)
-            {
-                // We add all known modes to the list, even though we don't really support them all in the core
-                _knownSupportedModes.Add(SupportedMode.DigitalInput);
-                _knownSupportedModes.Add(SupportedMode.DigitalOutput);
-                _knownSupportedModes.Add(SupportedMode.AnalogInput);
-                _knownSupportedModes.Add(SupportedMode.Pwm);
-                _knownSupportedModes.Add(SupportedMode.Servo);
-                _knownSupportedModes.Add(SupportedMode.Shift);
-                _knownSupportedModes.Add(SupportedMode.I2c);
-                _knownSupportedModes.Add(SupportedMode.OneWire);
-                _knownSupportedModes.Add(SupportedMode.Stepper);
-                _knownSupportedModes.Add(SupportedMode.Encoder);
-                _knownSupportedModes.Add(SupportedMode.Serial);
-                _knownSupportedModes.Add(SupportedMode.InputPullup);
-                _knownSupportedModes.Add(SupportedMode.Spi);
-                _knownSupportedModes.Add(SupportedMode.Sonar);
-                _knownSupportedModes.Add(SupportedMode.Tone);
-                _knownSupportedModes.Add(SupportedMode.Dht);
-                _knownSupportedModes.Add(SupportedMode.Frequency);
-            }
+            _commandHandlersLock.EnterWriteLock();
+            // We add all known modes to the list, even though we don't really support them all in the core
+            _knownSupportedModes.Add(SupportedMode.DigitalInput);
+            _knownSupportedModes.Add(SupportedMode.DigitalOutput);
+            _knownSupportedModes.Add(SupportedMode.AnalogInput);
+            _knownSupportedModes.Add(SupportedMode.Pwm);
+            _knownSupportedModes.Add(SupportedMode.Servo);
+            _knownSupportedModes.Add(SupportedMode.Shift);
+            _knownSupportedModes.Add(SupportedMode.I2c);
+            _knownSupportedModes.Add(SupportedMode.OneWire);
+            _knownSupportedModes.Add(SupportedMode.Stepper);
+            _knownSupportedModes.Add(SupportedMode.Encoder);
+            _knownSupportedModes.Add(SupportedMode.Serial);
+            _knownSupportedModes.Add(SupportedMode.InputPullup);
+            _knownSupportedModes.Add(SupportedMode.Spi);
+            _knownSupportedModes.Add(SupportedMode.Sonar);
+            _knownSupportedModes.Add(SupportedMode.Tone);
+            _knownSupportedModes.Add(SupportedMode.Dht);
+            _knownSupportedModes.Add(SupportedMode.Frequency);
+            _commandHandlersLock.ExitWriteLock();
         }
 
         /// <summary>
@@ -508,7 +632,21 @@ namespace Iot.Device.Arduino
             }
             else
             {
-                Logger.LogInformation(message);
+                // If the message contains a line feed, strip that
+                Logger.LogInformation(message.TrimEnd(new char[] { '\r', '\n' }));
+            }
+
+            _commandHandlersLock.EnterReadLock();
+            try
+            {
+                foreach (ExtendedCommandHandler handler in _extendedCommandHandlers)
+                {
+                    handler.OnErrorMessage(message, exception);
+                }
+            }
+            finally
+            {
+                _commandHandlersLock.ExitReadLock();
             }
         }
 
@@ -539,7 +677,7 @@ namespace Iot.Device.Arduino
             _commandHandlersLock.EnterReadLock();
             try
             {
-                var m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
+                SupportedMode? m = _knownSupportedModes.FirstOrDefault(x => x.Value == mode);
                 if (m == null)
                 {
                     return new SupportedMode(mode, $"Unknown mode {mode}");
@@ -561,7 +699,12 @@ namespace Iot.Device.Arduino
         {
             Initialize();
 
-            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(this, _supportedPinConfigurations));
+            if (_firmata == null)
+            {
+                throw new ObjectDisposedException(nameof(_firmata));
+            }
+
+            return new GpioController(PinNumberingScheme.Logical, new ArduinoGpioControllerDriver(_firmata, _supportedPinConfigurations));
         }
 
         /// <inheritdoc />
@@ -650,7 +793,7 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Only bus number 0 is currently supported");
             }
 
-            var pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2c)).Select(y => y.Pin);
+            IEnumerable<int> pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.I2c)).Select(y => y.Pin);
 
             return pins.ToArray();
         }
@@ -663,7 +806,7 @@ namespace Iot.Device.Arduino
                 throw new NotSupportedException("Only bus number 0 is currently supported");
             }
 
-            var pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.Spi)).Select(y => y.Pin);
+            IEnumerable<int> pins = _supportedPinConfigurations.Where(x => x.PinModes.Contains(SupportedMode.Spi)).Select(y => y.Pin);
 
             return pins.ToArray();
         }
@@ -692,11 +835,21 @@ namespace Iot.Device.Arduino
         }
 
         /// <summary>
+        /// Performs a software reset of the Arduino firmware
+        /// </summary>
+        public void SoftwareReset()
+        {
+            Initialize();
+            Firmata.SendSoftwareReset();
+            Firmata.QueryCapabilities();
+        }
+
+        /// <summary>
         /// Standard dispose pattern
         /// </summary>
         protected override void Dispose(bool disposing)
         {
-            foreach (var e in _extendedCommandHandlers)
+            foreach (ExtendedCommandHandler e in _extendedCommandHandlers)
             {
                 try
                 {
@@ -706,6 +859,12 @@ namespace Iot.Device.Arduino
                 {
                     // Ignore
                 }
+            }
+
+            if (_firmata != null)
+            {
+                // Can end the next possible moment (otherwise might just throw a bunch of warnings before actually terminating anyway)
+                _firmata.InputThreadShouldExit = true;
             }
 
             _isDisposed = true;
@@ -753,6 +912,54 @@ namespace Iot.Device.Arduino
             {
                 Firmata.DisableSpi();
             }
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = base.QueryComponentInformation();
+            self.Properties["FirmwareVersion"] = FirmwareVersion.ToString();
+            self.Properties["FirmwareName"] = FirmwareName;
+            self.Properties["FirmataVersion"] = FirmataVersion.ToString();
+            return self;
+        }
+
+        /// <summary>
+        /// Pings the device, to get an estimate about the round-trip time.
+        /// With some Wifi setups, the round trip time may be significantly higher than desired.
+        /// </summary>
+        /// <param name="number">The number of pings to send</param>
+        /// <returns>The list of reply times. Contains a negative value for lost packets</returns>
+        public List<TimeSpan> Ping(int number)
+        {
+            Initialize();
+            if (_firmata == null)
+            {
+                throw new ObjectDisposedException("Not connected");
+            }
+
+            List<TimeSpan> ret = new();
+            Stopwatch sw = new Stopwatch();
+            for (int i = 0; i < number; i++)
+            {
+                sw.Restart();
+                try
+                {
+                    _firmata.QueryFirmwareVersion(out _);
+                    TimeSpan elapsed = sw.Elapsed;
+                    ret.Add(elapsed);
+                    _logger.LogInformation($"Round trip time: {elapsed.TotalMilliseconds}ms");
+                }
+                catch (TimeoutException x)
+                {
+                    _logger.LogError(x, $"Timeout: {x.Message}");
+                    ret.Add(TimeSpan.FromMinutes(-1));
+                }
+
+                sw.Stop();
+            }
+
+            return ret;
         }
     }
 }

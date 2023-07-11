@@ -1,11 +1,14 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Globalization;
 using System.Text;
 using Iot.Device.CharacterLcd;
 using Iot.Device.Graphics;
 using Moq;
-using SixLabors.ImageSharp;
 using Xunit;
 
 namespace CharacterLcd.Tests
@@ -86,14 +89,15 @@ namespace CharacterLcd.Tests
             var console = new LcdConsole(_lcd.Object, "A00", true);
             console.LineFeedMode = LineWrapMode.WordWrap;
 
-            char[] expect = "Some short text".ToCharArray();
+            // Space-filled, to fully clear the line, even if we would wrap before the last char
+            char[] expect = "Some short text     ".ToCharArray();
             _lcd.Setup(x => x.Write(expect));
             console.Write("Some short text");
 
             _lcd.Setup(x => x.SetCursorPosition(It.IsAny<int>(), It.IsAny<int>()));
             char[] expect2 = "Lengt".ToCharArray();
             _lcd.Setup(x => x.Write(expect2));
-            char[] expect3 = "hy Text, more text".ToCharArray();
+            char[] expect3 = "hy Text, more text  ".ToCharArray();
             _lcd.Setup(x => x.Write(expect3));
             console.WriteLine("Lengthy Text, more text");
         }

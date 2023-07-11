@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Drawing;
@@ -35,7 +34,7 @@ namespace CameraIoT
         public Camera()
         {
             // You can select other size and other format, this is a very basic one supported by all types of webcams including old ones
-            VideoConnectionSettings settings = new VideoConnectionSettings(0, (640, 480), Iot.Device.Media.PixelFormat.JPEG);
+            VideoConnectionSettings settings = new VideoConnectionSettings(0, (640, 480), Iot.Device.Media.VideoPixelFormat.JPEG);
             _device = VideoDevice.Create(settings);
             // if the device has sufficent ram, enabling pooling significantly improves frames per second by preventing GC.
             _device.ImageBufferPoolingEnabled = true;

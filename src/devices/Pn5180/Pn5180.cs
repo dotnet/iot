@@ -54,6 +54,19 @@ namespace Iot.Device.Pn5180
         /// </summary>
         public const SpiMode DefaultSpiMode = System.Device.Spi.SpiMode.Mode0;
 
+        /// <inheritdoc/>
+        public override uint MaximumReadSize => 508;
+
+        /// <inheritdoc/>
+        public override uint MaximumWriteSize => 260;
+
+        /// <summary>
+        /// The set of NFC protocols that are supported by this transceiver.
+        /// </summary>
+        public const NfcProtocol SupportedProtocols =
+            NfcProtocol.Iso14443_3 | NfcProtocol.Iso14443_4 | NfcProtocol.Mifare |
+            NfcProtocol.JisX6319_4 | NfcProtocol.Jewel | NfcProtocol.Iso15693;
+
         /// <summary>
         /// Create a PN5180 RFID/NFC reader
         /// </summary>
@@ -66,12 +79,12 @@ namespace Iot.Device.Pn5180
         {
             if (pinBusy < 0)
             {
-                throw new ArgumentException(nameof(pinBusy), "Value must be a legal pin number. cannot be negative.");
+                throw new ArgumentException("Value must be a legal pin number. cannot be negative.", nameof(pinBusy));
             }
 
             if (pinNss < 0)
             {
-                throw new ArgumentException(nameof(pinBusy), "Value must be a legal pin number. cannot be negative.");
+                throw new ArgumentException("Value must be a legal pin number. cannot be negative.", nameof(pinBusy));
             }
 
             _logger = this.GetCurrentClassLogger();
@@ -109,7 +122,7 @@ namespace Iot.Device.Pn5180
         #region EEPROM
 
         /// <summary>
-        /// Get the Product, Firmware and EEPROM versions of the PN8150
+        /// Get the Product, Firmware and EEPROM versions of the PN5180
         /// </summary>
         /// <returns>A tuple with the Product, Firmware and EEPROM versions</returns>
         public (Version? Product, Version? Firmware, Version? Eeprom) GetVersions()
@@ -137,7 +150,7 @@ namespace Iot.Device.Pn5180
         {
             if (outputIdentifier.Length != 16)
             {
-                throw new ArgumentException(nameof(outputIdentifier), "Value must be 16 bytes long");
+                throw new ArgumentException("Value must be 16 bytes long", nameof(outputIdentifier));
             }
 
             return ReadEeprom(EepromAddress.DieIdentifier, outputIdentifier);
@@ -152,7 +165,7 @@ namespace Iot.Device.Pn5180
         {
             if (eeprom.Length != 255)
             {
-                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must match.");
+                throw new ArgumentException("Size of EEPROM is 255 bytes. Value must match.", nameof(eeprom));
             }
 
             return ReadEeprom(EepromAddress.DieIdentifier, eeprom);
@@ -167,7 +180,7 @@ namespace Iot.Device.Pn5180
         {
             if (eeprom.Length != 255)
             {
-                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must match.");
+                throw new ArgumentException("Size of EEPROM is 255 bytes. Value must match.", nameof(eeprom));
             }
 
             return WriteEeprom(EepromAddress.DieIdentifier, eeprom);
@@ -183,7 +196,7 @@ namespace Iot.Device.Pn5180
         {
             if ((byte)address + eeprom.Length > 255)
             {
-                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must 255 bytes or less.");
+                throw new ArgumentException("Size of EEPROM is 255 bytes. Value must 255 bytes or less.", nameof(eeprom));
             }
 
             Span<byte> dumpEeprom = stackalloc byte[3];
@@ -216,7 +229,7 @@ namespace Iot.Device.Pn5180
         {
             if ((byte)address + eeprom.Length > 255)
             {
-                throw new ArgumentException(nameof(eeprom), "Size of EEPROM is 255 bytes. Value must 255 bytes or less.");
+                throw new ArgumentException("Size of EEPROM is 255 bytes. Value must 255 bytes or less.", nameof(eeprom));
             }
 
             Span<byte> dumpEeprom = stackalloc byte[2 + eeprom.Length];
@@ -264,12 +277,12 @@ namespace Iot.Device.Pn5180
         {
             if (toSend.Length > 260)
             {
-                throw new ArgumentException(nameof(toSend), "Data to send can't be larger than 260 bytes");
+                throw new ArgumentException("Data to send can't be larger than 260 bytes", nameof(toSend));
             }
 
             if ((numberValidBitsLastByte < 1) || (numberValidBitsLastByte > 8))
             {
-                throw new ArgumentException(nameof(numberValidBitsLastByte), "Number of valid bits in last byte can only be between 1 and 8");
+                throw new ArgumentException("Number of valid bits in last byte can only be between 1 and 8", nameof(numberValidBitsLastByte));
             }
 
             Span<byte> sendData = stackalloc byte[2 + toSend.Length];
@@ -303,7 +316,7 @@ namespace Iot.Device.Pn5180
         {
             if (toRead.Length > 508)
             {
-                throw new ArgumentException(nameof(toRead), "Data to read can't be larger than 508 bytes");
+                throw new ArgumentException("Data to read can't be larger than 508 bytes", nameof(toRead));
             }
 
             Span<byte> sendData = stackalloc byte[2];
@@ -406,19 +419,30 @@ namespace Iot.Device.Pn5180
         }
 
         /// <inheritdoc/>
-        public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
+        public override int Transceive(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard, NfcProtocol protocol)
         {
-            // Check if we have a Mifare Card authentication request
-            // Only valid for Type A card so with a target number equal to 0
-            if (((targetNumber == 0) && ((dataToSend[0] == (byte)MifareCardCommand.AuthenticationA) || (dataToSend[0] == (byte)MifareCardCommand.AuthenticationB))) && (dataFromCard.Length == 0))
+            if (protocol == NfcProtocol.Mifare)
             {
-                var ret = MifareAuthenticate(dataToSend.Slice(2, 6).ToArray(), (MifareCardCommand)dataToSend[0], dataToSend[1], dataToSend.Slice(8).ToArray());
-                return ret ? 0 : -1;
+                // Check if we have a Mifare Card authentication request or 2-step write (special handling)
+                switch ((MifareCardCommand)dataToSend[0])
+                {
+                    case MifareCardCommand.AuthenticationA:
+                    case MifareCardCommand.AuthenticationB:
+                        var ret = MifareAuthenticate(dataToSend.Slice(2, 6).ToArray(), (MifareCardCommand)dataToSend[0], dataToSend[1], dataToSend.Slice(8).ToArray());
+                        return ret ? 0 : -1;
+
+                    case MifareCardCommand.Incrementation:
+                    case MifareCardCommand.Decrementation:
+                    case MifareCardCommand.Restore:
+                    case MifareCardCommand.Write16Bytes:
+                        return TwoStepsWrite16IncDecRestore(dataToSend);
+
+                    default:
+                        return TransceiveBuffer(dataToSend, dataFromCard);
+                }
             }
-            else
-            {
-                return TransceiveClassic(targetNumber, dataToSend, dataFromCard);
-            }
+
+            return TransceiveClassic(targetNumber, dataToSend, dataFromCard);
         }
 
         /// <inheritdoc/>
@@ -446,6 +470,17 @@ namespace Iot.Device.Pn5180
             }
         }
 
+        private int TwoStepsWrite16IncDecRestore(ReadOnlySpan<byte> dataToSend)
+        {
+            if (TransceiveBuffer(dataToSend.Slice(0, 2), Span<byte>.Empty) < 0)
+            {
+                _logger.LogWarning($"{nameof(TwoStepsWrite16IncDecRestore)} - Error {(MifareCardCommand)dataToSend[0]}");
+                return -1;
+            }
+
+            return TransceiveBuffer(dataToSend.Slice(2), Span<byte>.Empty);
+        }
+
         private int TransceiveClassic(byte targetNumber, ReadOnlySpan<byte> dataToSend, Span<byte> dataFromCard)
         {
             // type B card have a tag number which is always more than 1
@@ -461,7 +496,7 @@ namespace Iot.Device.Pn5180
                 var card = _activeSelected.Where(m => m.Card.TargetNumber == targetNumber).FirstOrDefault();
                 if (card is null)
                 {
-                    throw new ArgumentException(nameof(targetNumber), $"Device with target number {targetNumber} is not part of the list of selected devices. Card may have been removed.");
+                    throw new ArgumentException($"Device with target number {targetNumber} is not part of the list of selected devices. Card may have been removed.", nameof(targetNumber));
                 }
 
                 Span<byte> toSend = stackalloc byte[dataToSend.Length + 2];
@@ -634,15 +669,16 @@ namespace Iot.Device.Pn5180
                 return -1;
             }
 
-            // 10 etu needed for 1 byte, 1 etu = 9.4 µs, so about 100 µs are needed to transfer 1 character
-            return ReadWithTimeout(dataFromCard, dataFromCard.Length / 100);
+            // 10 etu needed for 1 byte, 1 etu = 9.4 µs, so about 100 µs (0.1ms) are needed per byte
+            // add a couple of milliseconds for general overhead to avoid timing out too soon
+            return ReadWithTimeout(dataFromCard, 2 + (dataFromCard.Length + 9) / 10);
         }
 
         private bool SendRBlock(byte targetNumber, RBlock ack, int blockNumber)
         {
             if (!((blockNumber == 1) || (blockNumber == 0)))
             {
-                throw new ArgumentException(nameof(blockNumber), "Value can be only 0 or 1.");
+                throw new ArgumentException("Value can be only 0 or 1.", nameof(blockNumber));
             }
 
             Span<byte> rBlock = new byte[2] { (byte)(0b1010_1010 | (byte)ack | blockNumber), targetNumber };
@@ -674,17 +710,17 @@ namespace Iot.Device.Pn5180
             _logger.LogDebug($"{nameof(MifareAuthenticate)}: ");
             if (key.Length != 6)
             {
-                throw new ArgumentException(nameof(key), "Value must be 6 bytes.");
+                throw new ArgumentException("Value must be 6 bytes.", nameof(key));
             }
 
             if (cardUid.Length != 4)
             {
-                throw new ArgumentException(nameof(cardUid), "Value must be 4 bytes.");
+                throw new ArgumentException("Value must be 4 bytes.", nameof(cardUid));
             }
 
             if (!((mifareCommand == MifareCardCommand.AuthenticationA) || (mifareCommand == MifareCardCommand.AuthenticationB)))
             {
-                throw new ArgumentException(nameof(mifareCommand), $"{nameof(MifareCardCommand.AuthenticationA)} and {nameof(MifareCardCommand.AuthenticationB)} are the only supported commands");
+                throw new ArgumentException($"{nameof(MifareCardCommand.AuthenticationA)} and {nameof(MifareCardCommand.AuthenticationB)} are the only supported commands", nameof(mifareCommand));
             }
 
             Span<byte> toAuthenticate = stackalloc byte[13];
@@ -795,7 +831,7 @@ namespace Iot.Device.Pn5180
             // Page 41 documentation PN5180A0XX-C3.pdf
             if ((configuration.Length > 195) || (configuration.Length % 5 != 0) || (configuration.Length == 0))
             {
-                throw new ArgumentException(nameof(configuration), "Value must be a positive multiple of 5 and no larger than 195 bytes.");
+                throw new ArgumentException("Value must be a positive multiple of 5 and no larger than 195 bytes.", nameof(configuration));
             }
 
             Span<byte> rfConfig = stackalloc byte[2];
@@ -835,7 +871,7 @@ namespace Iot.Device.Pn5180
             // Page 41 documentation PN5180A0XX-C3.pdf
             if ((configuration.Length > 252) || (configuration.Length % 6 != 0) || (configuration.Length == 0))
             {
-                throw new ArgumentException(nameof(configuration), "Value must be a positive multiple of 6 and no larger than 252 bytes.");
+                throw new ArgumentException("Value must be a positive multiple of 6 and no larger than 252 bytes.", nameof(configuration));
             }
 
             Span<byte> rfConfig = stackalloc byte[1 + configuration.Length];
@@ -1345,7 +1381,7 @@ namespace Iot.Device.Pn5180
         {
             if (crc.Length != 2)
             {
-                throw new ArgumentException(nameof(crc), $"Value must be 2 bytes.");
+                throw new ArgumentException($"Value must be 2 bytes.", nameof(crc));
             }
 
             var crcRet = CalculateCrc(buffer, 0xFFFF);
@@ -1363,7 +1399,7 @@ namespace Iot.Device.Pn5180
         {
             if (crc.Length != 2)
             {
-                throw new ArgumentException(nameof(crc), "Value must be 2 bytes.");
+                throw new ArgumentException("Value must be 2 bytes.", nameof(crc));
             }
 
             var crcRet = CalculateCrc(buffer, 0x6363);
@@ -1390,7 +1426,7 @@ namespace Iot.Device.Pn5180
             _logger.LogDebug($"{nameof(GetRxStatus)}");
             if (rxStatus.Length != 4)
             {
-                throw new ArgumentException(nameof(rxStatus), "Value must be 4 bytes.");
+                throw new ArgumentException("Value must be 4 bytes.", nameof(rxStatus));
             }
 
             try
@@ -1412,7 +1448,7 @@ namespace Iot.Device.Pn5180
             _logger.LogDebug($"{nameof(GetIrqStatus)}");
             if (irqStatus.Length != 4)
             {
-                throw new ArgumentException(nameof(irqStatus), "Value must be 4 bytes.");
+                throw new ArgumentException("Value must be 4 bytes.", nameof(irqStatus));
             }
 
             try
@@ -1437,7 +1473,7 @@ namespace Iot.Device.Pn5180
         {
             if (data.Length != 4)
             {
-                throw new ArgumentException(nameof(data), "Value must be 4 bytes.");
+                throw new ArgumentException("Value must be 4 bytes.", nameof(data));
             }
 
             Span<byte> toSend = stackalloc byte[2 + data.Length];
@@ -1476,13 +1512,13 @@ namespace Iot.Device.Pn5180
             // 3.Wait until BUSY is high
             // 4.Deassert NSS
             // 5.Wait until BUSY is low
-            // Wait for the PN8150 to be ready
+            // Wait for the PN5180 to be ready
             Stopwatch stopwatch = Stopwatch.StartNew();
             while (_gpioController.Read(_pinBusy) == PinValue.High)
             {
                 if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
-                    throw new TimeoutException($"PN8150 not ready to write");
+                    throw new TimeoutException($"PN5180 not ready to write");
                 }
             }
 
@@ -1495,7 +1531,7 @@ namespace Iot.Device.Pn5180
             {
                 if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
-                    throw new TimeoutException($"PN8150 is still busy after writting");
+                    throw new TimeoutException($"PN5180 is still busy after writting");
                 }
             }
 
@@ -1515,13 +1551,13 @@ namespace Iot.Device.Pn5180
             // 4.Deassert NSS
             // 5.Wait until BUSY is low
 
-            // Wait for the PN8150 to be ready
+            // Wait for the PN5180 to be ready
             Stopwatch stopwatch = Stopwatch.StartNew();
             while (_gpioController.Read(_pinBusy) == PinValue.High)
             {
                 if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
-                    throw new TimeoutException($"PN8150 not ready to write");
+                    throw new TimeoutException($"PN5180 not ready to write");
                 }
             }
 
@@ -1543,7 +1579,7 @@ namespace Iot.Device.Pn5180
             {
                 if (stopwatch.Elapsed.TotalMilliseconds >= TimeoutWaitingMilliseconds)
                 {
-                    throw new TimeoutException($"PN8150 is still busy after reading");
+                    throw new TimeoutException($"PN5180 is still busy after reading");
                 }
             }
 

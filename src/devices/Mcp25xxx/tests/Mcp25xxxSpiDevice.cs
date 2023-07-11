@@ -8,10 +8,12 @@ namespace Iot.Device.Mcp25xxx.Tests
 {
     public class Mcp25xxxSpiDevice : SpiDevice
     {
-        public override SpiConnectionSettings ConnectionSettings => throw new NotImplementedException();
-        public byte[]? LastReadBuffer { get; set; }
+        public event Action? TransferCompleted;
 
-        public byte LastReadByte { get; set; }
+        public override SpiConnectionSettings ConnectionSettings => throw new NotImplementedException();
+        public byte[]? NextReadBuffer { get; set; }
+
+        public byte NextReadByte { get; set; }
 
         public byte[]? LastWriteBuffer { get; private set; }
 
@@ -19,15 +21,16 @@ namespace Iot.Device.Mcp25xxx.Tests
 
         public override void Read(Span<byte> buffer)
         {
-            LastReadBuffer = buffer.ToArray();
+            NextReadBuffer = buffer.ToArray();
         }
 
-        public override byte ReadByte() => LastReadByte;
+        public override byte ReadByte() => NextReadByte;
 
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             LastWriteBuffer = writeBuffer.ToArray();
-            LastReadBuffer = readBuffer.ToArray();
+            NextReadBuffer.CopyTo(readBuffer);
+            TransferCompleted?.Invoke();
         }
 
         public override void Write(ReadOnlySpan<byte> buffer)

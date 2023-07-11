@@ -6,7 +6,8 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <ProjectReference Include="../../../Media.csproj" />
+    <ProjectReference Include="..\..\..\Media.csproj" />
+    <ProjectReference Include="..\..\..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
   </ItemGroup>
 
   <ItemGroup>

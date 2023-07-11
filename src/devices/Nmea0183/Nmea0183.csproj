@@ -10,12 +10,13 @@
   <ItemGroup>
     <Compile Include="*.cs" />
     <Compile Include="Sentences/*.cs" />
+    <Compile Include="Ais/*.cs" />
+    <Compile Include="AisSentences/*.cs" />
     <None Include="DeviationTable.xsd" />
     <None Include="README.md" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Rtc\Rtc.csproj" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsLoggingPackageVersion)" />
   </ItemGroup>

@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-// See the LICENSE file in the project root for more information.
 
 using System;
 using System.Device.Gpio;
@@ -43,7 +42,8 @@ namespace BoardSample
             const int led1 = 1;
             const int led2 = 2;
             using Board b = Board.Create();
-
+            Console.WriteLine("Hardware detected: ");
+            Console.WriteLine(b.QueryComponentInformation());
             using GpioController controller = b.CreateGpioController();
 
             if (controller.PinCount > 0)
@@ -131,13 +131,16 @@ namespace BoardSample
 
         private static void RaspberryPiTest()
         {
-            using var raspi = new RaspberryPiBoard();
+            using var raspi = (RaspberryPiBoard)Board.Create();
+            Console.WriteLine("Hardware detected: ");
+            Console.WriteLine(raspi.QueryComponentInformation());
+            RaspiTestOverlays(raspi);
             PwmRaspiTest(raspi);
             SpiRaspiTestWithSoftwareCs(raspi);
             SpiRaspiTestWithHardwareCs(raspi);
         }
 
-        private static void PwmRaspiTest(RaspberryPiBoard raspi)
+        private static void PwmRaspiTest(Board raspi)
         {
             int pinNumber = 12; // PWM0 pin
 
@@ -223,6 +226,60 @@ namespace BoardSample
             }
 
             Console.ReadKey(true);
+        }
+
+        private static void RaspiTestOverlays(RaspberryPiBoard raspi)
+        {
+            Console.WriteLine("Hello Raspberry PI overlay config!");
+
+            var isI2c = raspi.IsI2cActivated();
+            Console.WriteLine($"Is I2C overlay actvated? {isI2c}");
+
+            for (int busid = 0; busid < 2; busid++)
+            {
+                var pins = raspi.GetOverlayPinAssignmentForI2c(busid);
+                if (pins != null && pins.Length == 2)
+                {
+                    Console.WriteLine($"I2C overlay pins on busID {busid}: {pins[0]} {pins[1]}");
+                }
+                else
+                {
+                    Console.WriteLine($"No I2C pins defined in the overlay on busID {busid}");
+                }
+            }
+
+            var isSpi = raspi.IsSpiActivated();
+            Console.WriteLine($"Is SPI overlay actvated? {isSpi}");
+
+            for (int busid = 0; busid < 2; busid++)
+            {
+                // If you want to check chip select, place the number of the chip select pin instead of -1.
+                var pins = raspi.GetOverlayPinAssignmentForSpi(new SpiConnectionSettings(busid, -1));
+                if (pins != null)
+                {
+                    Console.WriteLine($"SPI overlay pins on busID {busid}: MISO {pins[0]} MOSI {pins[1]} Clock {pins[2]}.");
+                }
+                else
+                {
+                    Console.WriteLine($"No SPI pins defined in the overlay on busID {busid}");
+                }
+            }
+
+            var isPwm = raspi.IsPwmActivated();
+            Console.WriteLine($"Is PWM overlay actvated? {isPwm}");
+
+            for (int busid = 0; busid < 2; busid++)
+            {
+                var pin = raspi.GetOverlayPinAssignmentForPwm(busid);
+                if (pin != -1)
+                {
+                    Console.WriteLine($"PWM overlay pin on channel {busid}: {pin}.");
+                }
+                else
+                {
+                    Console.WriteLine($"No PWM pins defined in the overlay for channel {busid}");
+                }
+            }
         }
     }
 }

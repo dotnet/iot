@@ -25,12 +25,6 @@ namespace Iot.Device.Arduino
         }
 
         public override SpiConnectionSettings ConnectionSettings { get; }
-        public override byte ReadByte()
-        {
-            Span<byte> dummy = stackalloc byte[1];
-            Read(dummy);
-            return dummy[0];
-        }
 
         public override void Read(Span<byte> buffer)
         {
@@ -38,19 +32,9 @@ namespace Iot.Device.Arduino
             Board.Firmata.SpiTransfer(ConnectionSettings.ChipSelectLine, dummy, buffer);
         }
 
-        public override void WriteByte(byte value)
-        {
-            ReadOnlySpan<byte> span = stackalloc byte[1]
-            {
-                value
-            };
-
-            Write(span);
-        }
-
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            Board.Firmata.SpiWrite(ConnectionSettings.ChipSelectLine, buffer);
+            Board.Firmata.SpiWrite(ConnectionSettings.ChipSelectLine, buffer, !Board.StreamUsesHardwareFlowControl);
         }
 
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)

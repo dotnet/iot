@@ -1,2 +1,5 @@
 usb
 protocol
+i2c
+spi
+gpio

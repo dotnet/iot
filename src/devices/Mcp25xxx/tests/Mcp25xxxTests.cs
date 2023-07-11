@@ -1,7 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Device.Spi;
 using Iot.Device.Mcp25xxx.Register;
+using Iot.Device.Mcp25xxx.Tests.Register.CanControl;
+using Moq;
 using Xunit;
 
 namespace Iot.Device.Mcp25xxx.Tests
@@ -23,11 +27,16 @@ namespace Iot.Device.Mcp25xxx.Tests
         public void Send_Read_Instruction_By_Address(Address address)
         {
             byte[] expectedWriteBuffer = new byte[] { 0b0000_0011, (byte)address, 0b0000_0000 };
+            byte[] reply = new byte[]
+            {
+                0, 0, 0xff
+            };
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            mcp25xxxSpiDevice.NextReadBuffer = reply;
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
-            mcp25xxx.Read(address);
+            byte b = mcp25xxx.Read(address);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice?.LastWriteBuffer);
-            Assert.Equal(3, mcp25xxxSpiDevice?.LastReadBuffer?.Length);
+            Assert.Equal(0xff, b);
         }
 
         [Theory]
@@ -41,9 +50,9 @@ namespace Iot.Device.Mcp25xxx.Tests
             expectedWriteBuffer[0] = instructionFormat;
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
+            mcp25xxxSpiDevice.NextReadBuffer = new byte[byteCount];
             mcp25xxx.ReadRxBuffer(addressPointer, byteCount);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(byteCount, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Theory]
@@ -95,20 +104,32 @@ namespace Iot.Device.Mcp25xxx.Tests
             byte[] expectedWriteBuffer = new byte[] { 0b1010_0000, 0b0000_0000 };
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
-            mcp25xxx.ReadStatus();
+            mcp25xxxSpiDevice.NextReadBuffer = new byte[]
+            {
+                0, 3
+            };
+
+            var response = mcp25xxx.ReadStatus();
+            Assert.Equal(ReadStatusResponse.Rx0If | ReadStatusResponse.Rx1If, response);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
         }
 
         [Fact]
         public void Send_RxStatus_Instruction()
         {
             byte[] expectedWriteBuffer = new byte[] { 0b1011_0000, 0b0000_0000 };
+            byte[] reply = new byte[]
+            {
+                0, 0xC2
+            };
             var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            mcp25xxxSpiDevice.NextReadBuffer = reply;
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
-            mcp25xxx.RxStatus();
+            var status = mcp25xxx.RxStatus();
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
-            Assert.Equal(1, mcp25xxxSpiDevice.LastReadBuffer?.Length - 1);
+            Assert.Equal(RxStatusResponse.MessageReceivedType.StandardDataFrame, status.MessageTypeReceived);
+            Assert.Equal(RxStatusResponse.ReceivedMessageType.MessagesInBothBuffers, status.ReceivedMessage);
+            Assert.Equal(RxStatusResponse.FilterMatchType.RxF2, status.FilterMatch);
         }
 
         [Theory]
@@ -121,6 +142,63 @@ namespace Iot.Device.Mcp25xxx.Tests
             Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
             mcp25xxx.BitModify(address, mask, value);
             Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
+        }
+
+        [Fact]
+        public void Send_EnableRollover_Instruction()
+        {
+            byte[] expectedWriteBuffer = { 0b0000_0010, (byte)Address.RxB0Ctrl, 0b0110_0110 };
+            var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
+            mcp25xxx.EnableRollover();
+            Assert.Equal(expectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
+        }
+
+        [Fact]
+        public void Send_SetBitrate_Instruction()
+        {
+            byte[] lastExpectedWriteBuffer = { 0b0000_0010, (byte)Address.Cnf3, 0x86 };
+            var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
+            mcp25xxx.SetBitrate(FrequencyAndSpeed._16MHz500KBps);
+            Assert.Equal(lastExpectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
+        }
+
+        [Fact]
+        public void Send_SetMode_Instruction()
+        {
+            byte[] lastExpectedWriteBuffer = { 0b0000_0010, (byte)Address.CanCtrl, 0b0000_0111 };
+            var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
+            mcp25xxx.SetMode(OperationMode.NormalOperation);
+            Assert.Equal(lastExpectedWriteBuffer, mcp25xxxSpiDevice.LastWriteBuffer);
+        }
+
+        [Fact]
+        public void ReceiveMessagesSuccess()
+        {
+            var mcp25xxxSpiDevice = new Mcp25xxxSpiDevice();
+            mcp25xxxSpiDevice.TransferCompleted += () =>
+            {
+                // The second reply;
+                mcp25xxxSpiDevice.NextReadBuffer = new byte[]
+                {
+                    0 /* dummy */, 0xb, 0xa, 0, 0, 0x4 /* Msg length*/, 1, 2, 3, 4
+                };
+            };
+
+            byte[] reply = new byte[]
+            {
+                0, 0x42
+            };
+            Mcp25xxx mcp25xxx = new Mcp25625(mcp25xxxSpiDevice);
+            mcp25xxxSpiDevice.NextReadBuffer = reply;
+            var msg = mcp25xxx.ReadMessages();
+            Assert.Single(msg);
+
+            Assert.Equal(0xa0b, BitConverter.ToInt32(msg[0].GetId(), 0));
+            Assert.Equal(4, msg[0].GetData().Length);
+            Assert.Equal(1, msg[0].GetData()[0]);
         }
     }
 }

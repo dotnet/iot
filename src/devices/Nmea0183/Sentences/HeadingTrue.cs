@@ -20,7 +20,7 @@ namespace Iot.Device.Nmea0183.Sentences
     public class HeadingTrue : NmeaSentence
     {
         /// <summary>
-        /// This sentence's id
+        /// This sentence ID "HDT"
         /// </summary>
         public static SentenceId Id => new SentenceId("HDT");
         private static bool Matches(SentenceId sentence) => Id == sentence;

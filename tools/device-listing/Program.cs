@@ -15,6 +15,7 @@ string[] categoriesToDisplay = new string[]
     "dac",
     "accelerometer",
     "gas",
+    "gnss",
     "liquid",
     "light",
     "barometer",
@@ -49,6 +50,9 @@ string[] categoriesToDisplay = new string[]
     "multi",
     "protocol",
     "power",
+    "voc",
+    "thermocouple",
+    "weight",
 };
 
 Dictionary<string, string?> categoriesDescriptions = new()
@@ -58,6 +62,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "accelerometer", "Accelerometers" },
     { "voc", "Volatile Organic Compound sensors" },
     { "gas", "Gas sensors" },
+    { "gnss", "GNSS Satellite receivers and navigation equipment" },
     { "liquid", "Liquid sensors" },
     { "light", "Light sensor" },
     { "barometer", "Barometers" },
@@ -99,6 +104,7 @@ Dictionary<string, string?> categoriesDescriptions = new()
     { "multi", "Multi-device or robot kit" },
     { "lidar", "LIDAR Time of Flight devices" },
     { "thermocouple", "Thermocouple devices" },
+    { "weight", "Weight sensors" },
     // Bucket for stuff we want mentioned but there is no clear category
     // In other words: anything allowing a way to create PWM channel, SPI/I2C/... device
     { "protocol", "Protocols providers/libraries" },
@@ -116,6 +122,8 @@ HashSet<string> ignoredDeviceDirectories = new()
     "Common",
     "Units",
     "Interop",
+    "FtCommon",
+    "Shared",
 };
 
 string? repoRoot = FindRepoRoot(Environment.CurrentDirectory);

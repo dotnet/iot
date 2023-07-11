@@ -182,7 +182,7 @@ namespace Iot.Device.Media
         /// Get all the pixel formats supported by the device.
         /// </summary>
         /// <returns>Supported pixel formats.</returns>
-        public override IEnumerable<PixelFormat> GetSupportedPixelFormats()
+        public override IEnumerable<VideoPixelFormat> GetSupportedPixelFormats()
         {
             Initialize();
 
@@ -192,7 +192,7 @@ namespace Iot.Device.Media
                 type = InteropVideodev2.v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
             };
 
-            List<PixelFormat> result = new List<PixelFormat>();
+            List<VideoPixelFormat> result = new List<VideoPixelFormat>();
             while (V4l2Struct(InteropVideodev2.V4l2Request.VIDIOC_ENUM_FMT, ref fmtdesc) != -1)
             {
                 result.Add(fmtdesc.pixelformat);
@@ -207,7 +207,7 @@ namespace Iot.Device.Media
         /// </summary>
         /// <param name="format">Pixel format.</param>
         /// <returns>Supported resolution.</returns>
-        public override IEnumerable<Resolution> GetPixelFormatResolutions(PixelFormat format)
+        public override IEnumerable<Resolution> GetPixelFormatResolutions(VideoPixelFormat format)
         {
             Initialize();
 

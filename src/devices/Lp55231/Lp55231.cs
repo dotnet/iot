@@ -3,9 +3,8 @@
 
 using System;
 using System.Device.I2c;
+using System.Drawing;
 using System.IO;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
 
 namespace Iot.Device.Lp55231
 {
@@ -56,9 +55,9 @@ namespace Iot.Device.Lp55231
 
             _leds = new[]
             {
-                Color.FromRgba(0, 0, 0, byte.MaxValue),
-                Color.FromRgba(0, 0, 0, byte.MaxValue),
-                Color.FromRgba(0, 0, 0, byte.MaxValue)
+                Color.FromArgb(255, 0, 0, 0),
+                Color.FromArgb(255, 0, 0, 0),
+                Color.FromArgb(255, 0, 0, 0)
             };
         }
 
@@ -176,11 +175,9 @@ namespace Iot.Device.Lp55231
 
                 if (value != _leds[index])
                 {
-                    var color = value.ToPixel<Rgba32>();
-
-                    SetIntensity(RedChannel(index), color.R);
-                    SetIntensity(GreenChannel(index), color.G);
-                    SetIntensity(BlueChannel(index), color.B);
+                    SetIntensity(RedChannel(index), value.R);
+                    SetIntensity(GreenChannel(index), value.G);
+                    SetIntensity(BlueChannel(index), value.B);
 
                     _leds[index] = value;
                 }

@@ -77,7 +77,7 @@ namespace Iot.Device.Bh1745
             {
                 if (!Enum.IsDefined(typeof(InterruptStatus), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var intReset = Read8BitsFromRegister((byte)Register.SYSTEM_CONTROL);
@@ -99,7 +99,7 @@ namespace Iot.Device.Bh1745
             {
                 if (!Enum.IsDefined(typeof(MeasurementTime), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var time = Read8BitsFromRegister((byte)Register.MODE_CONTROL1);
@@ -138,7 +138,7 @@ namespace Iot.Device.Bh1745
             {
                 if (!Enum.IsDefined(typeof(AdcGain), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var adcGain = Read8BitsFromRegister((byte)Register.MODE_CONTROL2);
@@ -173,7 +173,7 @@ namespace Iot.Device.Bh1745
             {
                 if (!Enum.IsDefined(typeof(LatchBehavior), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var intLatch = Read8BitsFromRegister((byte)Register.INTERRUPT);
@@ -194,7 +194,7 @@ namespace Iot.Device.Bh1745
             {
                 if (!Enum.IsDefined(typeof(InterruptSource), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var intSource = Read8BitsFromRegister((byte)Register.INTERRUPT);
@@ -231,7 +231,7 @@ namespace Iot.Device.Bh1745
             {
                 if (!Enum.IsDefined(typeof(InterruptPersistence), value))
                 {
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(value));
                 }
 
                 var intPersistence = Read8BitsFromRegister((byte)Register.PERSISTENCE);
