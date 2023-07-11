@@ -57,11 +57,13 @@ namespace System.Device.Analog
         public abstract bool SupportsAnalogInput(int pin);
 
         /// <summary>
-        /// Convert the input pin number to logical pin numbers.
+        /// Convert the input pin number to an analog channel number.
+        /// The analog channel number is typically named A0 - Axx on Arduino boards. E.g. on Uno and Nano boards, A0
+        /// equals digital pin 14.
         /// </summary>
-        /// <param name="pinNumber">Pin Number, in the numbering scheme of the analog controller</param>
-        /// <returns>Logical pin number</returns>
-        public virtual int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
+        /// <param name="pinNumber">Pin number</param>
+        /// <returns>Analog channel number. Returns -1 if the given pin does not support analog input</returns>
+        public virtual int ConvertPinNumberToAnalogChannelNumber(int pinNumber)
         {
             return pinNumber;
         }
@@ -69,17 +71,17 @@ namespace System.Device.Analog
         /// <summary>
         /// Convert logical pin to caller's pin numbering scheme.
         /// </summary>
-        /// <param name="logicalPinNumber">Logical pin numbering of the board</param>
-        /// <returns>Pin number in the scheme of the parent analog controller</returns>
-        public virtual int ConvertLogicalNumberingSchemeToPinNumber(int logicalPinNumber)
+        /// <param name="analogChannelNumber">Logical pin numbering of the board</param>
+        /// <returns>Pin number of the given analog channel, or -1 if the input channel is not valid.</returns>
+        public virtual int ConvertAnalogChannelNumberToPinNumber(int analogChannelNumber)
         {
-            return logicalPinNumber;
+            return analogChannelNumber;
         }
 
         /// <summary>
         /// Opens a pin in order for it to be ready to use.
         /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        /// <param name="pinNumber">The pin number to open (not the analog channel!).</param>
         public AnalogInputPin OpenPin(int pinNumber)
         {
             // This does the number conversion itself, therefore done first
@@ -88,14 +90,12 @@ namespace System.Device.Analog
                 throw new NotSupportedException($"Pin {pinNumber} is not supporting analog input.");
             }
 
-            int logicalPinNumber = ConvertPinNumberToLogicalNumberingScheme(pinNumber);
-
             if (_openPins.Any(x => x.PinNumber == pinNumber))
             {
                 throw new InvalidOperationException("The selected pin is already open.");
             }
 
-            AnalogInputPin openPin = OpenPinCore(logicalPinNumber);
+            AnalogInputPin openPin = OpenPinCore(pinNumber);
             _openPins.Add(openPin);
             return openPin;
         }
@@ -103,19 +103,18 @@ namespace System.Device.Analog
         /// <summary>
         /// Overriden by derived classes: Returns an instance of the <see cref="AnalogInputPin"/> for the specified pin.
         /// </summary>
-        /// <param name="pinNumber">Pin number, in the logical pin numbering scheme</param>
-        /// <returns>An instance of a pin</returns>
+        /// <param name="pinNumber">The pin number to open (not the analog channel)</param>
+        /// <returns>An instance of an analog pin</returns>
         protected abstract AnalogInputPin OpenPinCore(int pinNumber);
 
         /// <summary>
-        /// Checks if a specific pin is open.
+        /// Checks if a specific analog channel is open.
         /// </summary>
-        /// <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
-        /// <returns>The status if the pin is open or closed.</returns>
+        /// <param name="pinNumber">The analog channel number.</param>
+        /// <returns>The status if the channel is open or closed.</returns>
         public virtual bool IsPinOpen(int pinNumber)
         {
-            int logicalPinNumber = ConvertPinNumberToLogicalNumberingScheme(pinNumber);
-            return _openPins.Any(x => x.PinNumber == logicalPinNumber);
+            return _openPins.Any(x => x.PinNumber == pinNumber);
         }
 
         /// <summary>
@@ -136,7 +135,9 @@ namespace System.Device.Analog
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            foreach (var pin in _openPins)
+            // Make copy, because Dispose manipulates the array.
+            var copy = _openPins.ToArray();
+            foreach (var pin in copy)
             {
                 pin.Dispose();
             }

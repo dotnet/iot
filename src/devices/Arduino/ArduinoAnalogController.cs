@@ -35,60 +35,58 @@ namespace Iot.Device.Arduino
             get;
         }
 
-        public override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
+        /// <inheritdoc />
+        public override int ConvertPinNumberToAnalogChannelNumber(int pinNumber)
         {
-            int numberAnalogPinsFound = 0;
-            for (int i = 0; i < _supportedPinConfigurations.Count; i++)
+            if (pinNumber >= 0 && pinNumber < _supportedPinConfigurations.Count)
             {
-                if (_supportedPinConfigurations[i].PinModes.Contains(SupportedMode.AnalogInput))
+                int channel = _supportedPinConfigurations[pinNumber].AnalogPinNumber;
+                if (channel != 127)
                 {
-                    numberAnalogPinsFound++;
-                    if (pinNumber == i)
-                    {
-                        return numberAnalogPinsFound - 1;
-                    }
+                    return channel;
                 }
+
+                return -1;
             }
 
-            throw new InvalidOperationException($"Pin {pinNumber} is not a valid analog input pin.");
+            throw new InvalidOperationException($"Pin {pinNumber} is not a valid input pin.");
         }
 
-        public override int ConvertLogicalNumberingSchemeToPinNumber(int logicalPinNumber)
+        /// <inheritdoc />
+        public override int ConvertAnalogChannelNumberToPinNumber(int analogChannelNumber)
         {
-            int numberAnalogPinsFound = 0;
             for (int i = 0; i < _supportedPinConfigurations.Count; i++)
             {
-                if (_supportedPinConfigurations[i].PinModes.Contains(SupportedMode.AnalogInput))
+                if (_supportedPinConfigurations[i].AnalogPinNumber == analogChannelNumber)
                 {
-                    numberAnalogPinsFound++;
-                    if (logicalPinNumber == numberAnalogPinsFound - 1)
-                    {
-                        return i;
-                    }
+                    return i;
                 }
             }
 
-            throw new InvalidOperationException($"Pin A{logicalPinNumber} does not exist");
+            return -1;
         }
 
         public override bool SupportsAnalogInput(int pinNumber)
         {
+            if (pinNumber >= _supportedPinConfigurations.Count || pinNumber < 0)
+            {
+                return false;
+            }
+
             return _supportedPinConfigurations[pinNumber].PinModes.Contains(SupportedMode.AnalogInput);
         }
 
         protected override AnalogInputPin OpenPinCore(int pinNumber)
         {
-            // This method is called with the logical pin numbering (input pin A0 is 0, A1 is 1, etc)
-            // but the SetPinMode method operates on the global numbers
-            int fullNumber = ConvertLogicalNumberingSchemeToPinNumber(pinNumber);
-            _board.Firmata.SetPinMode(fullNumber, SupportedMode.AnalogInput);
-            _board.Firmata.EnableAnalogReporting(pinNumber);
-            return new ArduinoAnalogInputPin(_board, this, _supportedPinConfigurations[fullNumber], pinNumber, VoltageReference);
+            _board.Firmata.SetPinMode(pinNumber, SupportedMode.AnalogInput);
+            _board.Firmata.EnableAnalogReporting(pinNumber, ConvertPinNumberToAnalogChannelNumber(pinNumber));
+            return new ArduinoAnalogInputPin(_board, this, _supportedPinConfigurations[pinNumber], pinNumber, VoltageReference);
         }
 
         public override void ClosePin(AnalogInputPin pin)
         {
-            _board.Firmata.DisableAnalogReporting(pin.PinNumber);
+            base.ClosePin(pin);
+            _board.Firmata.DisableAnalogReporting(pin.PinNumber, ConvertPinNumberToAnalogChannelNumber(pin.PinNumber));
         }
     }
 }
