@@ -11,6 +11,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
@@ -70,7 +71,19 @@ namespace Arduino.Samples
                 IPAddress address = IPAddress.Loopback;
                 if (args.Length > 1)
                 {
-                    address = IPAddress.Parse(args[1]);
+                    try
+                    {
+                        var ip = Dns.GetHostAddresses(args[1], AddressFamily.InterNetwork);
+                        if (ip.Any())
+                        {
+                            address = ip.First();
+                        }
+                    }
+                    catch (SocketException x)
+                    {
+                        Console.WriteLine($"Unable to resolve address {args[0]}: {x.Message}");
+                        return;
+                    }
                 }
 
                 ConnectToSocket(address);

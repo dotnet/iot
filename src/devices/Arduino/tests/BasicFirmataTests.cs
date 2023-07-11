@@ -111,6 +111,22 @@ namespace Iot.Device.Arduino.Tests
             ctrl.Dispose();
         }
 
+        [Fact]
+        public void SupportsSystemVariables()
+        {
+            Assert.True(Board.GetSystemVariable(SystemVariable.FunctionSupportCheck, -1, out int v));
+            Assert.Equal(1, v);
+
+            Assert.True(Board.GetSystemVariable(SystemVariable.MaxSysexSize, -1, out v));
+            Assert.True(v >= 64);
+        }
+
+        [Fact]
+        public void UnsupportedSystemVariable()
+        {
+            Assert.False(Board.SetSystemVariable((SystemVariable)99, 2, 2));
+        }
+
         private static int GetFirstAnalogPin(ArduinoBoard board)
         {
             int analogPin = 14;
