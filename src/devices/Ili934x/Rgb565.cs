@@ -55,7 +55,7 @@ namespace Iot.Device.Ili934x
                     return 0;
                 }
 
-                return gbyte | 0x7;
+                return gbyte | 0x3;
             }
         }
 
@@ -119,7 +119,7 @@ namespace Iot.Device.Ili934x
             return new Rgb565(Swap(retval));
         }
 
-        private static ushort Swap(ushort val) => (ushort)(val >> 8 | val << 8);
+        private static ushort Swap(ushort val) => (ushort)((val >> 8) | (val << 8));
 
         public ushort PackedValue
         {

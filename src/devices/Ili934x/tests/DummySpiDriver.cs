@@ -16,20 +16,14 @@ namespace Ili934x.Tests
     /// </summary>
     internal class DummySpiDriver : SpiDevice
     {
-        private List<byte> _outputData;
         public DummySpiDriver()
         {
-            _outputData = new List<byte>();
             ConnectionSettings = new SpiConnectionSettings(0, 1);
         }
 
         public override SpiConnectionSettings ConnectionSettings { get; }
 
-        public List<byte> Data
-        {
-            get { return _outputData; }
-            set { _outputData = value; }
-        }
+        public List<byte> Data { get; } = new List<byte>();
 
         public override void Read(Span<byte> buffer)
         {
@@ -38,12 +32,12 @@ namespace Ili934x.Tests
 
         public override void Write(ReadOnlySpan<byte> buffer)
         {
-            _outputData.AddRange(buffer.ToArray());
+            Data.AddRange(buffer.ToArray());
         }
 
         public override void TransferFullDuplex(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
-            _outputData.AddRange(writeBuffer.ToArray());
+            Data.AddRange(writeBuffer.ToArray());
             readBuffer.Clear();
         }
     }

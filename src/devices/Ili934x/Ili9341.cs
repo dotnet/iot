@@ -109,25 +109,13 @@ namespace Iot.Device.Ili934x
         /// Width of the screen, in pixels
         /// </summary>
         /// <remarks>This is of type int, because all image sizes use int, even though this can never be negative</remarks>
-        public virtual int ScreenWidth
-        {
-            get
-            {
-                return 240;
-            }
-        }
+        public virtual int ScreenWidth => 240;
 
         /// <summary>
         /// Height of the screen, in pixels
         /// </summary>
         /// <remarks>This is of type int, because all image sizes use int, even though this can never be negative</remarks>
-        public virtual int ScreenHeight
-        {
-            get
-            {
-                return 320;
-            }
-        }
+        public virtual int ScreenHeight => 320;
 
         /// <summary>
         /// Returns the last FPS value (frames per second).
@@ -151,7 +139,20 @@ namespace Iot.Device.Ili934x
         }
 
         /// <summary>
-        /// Send filled rectangle to the ILI9341 display.
+        /// Fill rectangle to the specified color
+        /// </summary>
+        /// <param name="color">The color to fill the rectangle with.</param>
+        /// <param name="x">The x co-ordinate of the point to start the rectangle at in pixels.</param>
+        /// <param name="y">The y co-ordinate of the point to start the rectangle at in pixels.</param>
+        /// <param name="w">The width of the rectangle in pixels.</param>
+        /// <param name="h">The height of the rectangle in pixels.</param>
+        public void FillRect(Color color, int x, int y, int w, int h)
+        {
+            FillRect(color, x, y, w, h, false);
+        }
+
+        /// <summary>
+        /// Fill rectangle to the specified color
         /// </summary>
         /// <param name="color">The color to fill the rectangle with.</param>
         /// <param name="x">The x co-ordinate of the point to start the rectangle at in pixels.</param>
@@ -159,7 +160,7 @@ namespace Iot.Device.Ili934x
         /// <param name="w">The width of the rectangle in pixels.</param>
         /// <param name="h">The height of the rectangle in pixels.</param>
         /// <param name="doRefresh">True to immediately update the screen, false to only update the back buffer</param>
-        public void FillRect(Color color, int x, int y, int w, int h, bool doRefresh = true)
+        private void FillRect(Color color, int x, int y, int w, int h, bool doRefresh)
         {
             Span<byte> colourBytes = stackalloc byte[2]; // create a short span that holds the colour data to be sent to the display
 
