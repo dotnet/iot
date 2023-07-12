@@ -25,7 +25,7 @@ namespace Iot.Device.Hx711
         private readonly object _readLock;
         private readonly Hx711Reader _reader;
 
-        private readonly List<double> _referenceUnitList = new();
+        private readonly List<double> _conversionRatioList = new();
 
         private bool _isInitialize;
         private bool _isCalibrated;
@@ -39,7 +39,7 @@ namespace Iot.Device.Hx711
         /// <summary>
         /// Conversion ratio between Hx711 units and grams
         /// </summary>
-        public double ReferenceUnit { get; private set; }
+        public double ConversionRatio { get; private set; }
 
         /// <summary>
         /// Weight set as tare
@@ -48,7 +48,7 @@ namespace Iot.Device.Hx711
         {
             get
             {
-                return ReferenceUnit == 0 ? Mass.FromGrams(_tareValue) : Mass.FromGrams(_tareValue / ReferenceUnit);
+                return ConversionRatio == 0 ? Mass.FromGrams(_tareValue) : Mass.FromGrams(_tareValue / ConversionRatio);
             }
         }
 
@@ -85,7 +85,7 @@ namespace Iot.Device.Hx711
 
             _offsetFormZero = 0;
             _tareValue = 0;
-            ReferenceUnit = 0;
+            ConversionRatio = 0;
 
             _options = options ?? new Hx711Options();
 
@@ -114,8 +114,8 @@ namespace Iot.Device.Hx711
                 var referenceValue = readValue / knowWeight.Grams;
 
                 // If we do several calibrations, the most accurate value is the average.
-                _referenceUnitList.Add(referenceValue);
-                ReferenceUnit = _referenceUnitList.Average();
+                _conversionRatioList.Add(referenceValue);
+                ConversionRatio = _conversionRatioList.Average();
 
                 _isCalibrated = true;
             }
@@ -124,18 +124,18 @@ namespace Iot.Device.Hx711
         /// <summary>
         /// If you already know the reference unit between the Hx711 value and grams, you can set it and skip the calibration.
         /// </summary>
-        /// <param name="referenceUnit">Conversion ratio between Hx711 units and grams</param>
+        /// <param name="conversionRatio">Conversion ratio between Hx711 units and grams</param>
         /// <exception cref="ArgumentOutOfRangeException">Throw if know weight have invalid value</exception>
-        public void SetReferenceUnit(double referenceUnit)
+        public void SetConversionRatio(double conversionRatio)
         {
-            if (referenceUnit == 0)
+            if (conversionRatio == 0)
             {
-                throw new ArgumentOutOfRangeException(paramName: nameof(referenceUnit), message: "Param value must be greater than zero!");
+                throw new ArgumentOutOfRangeException(paramName: nameof(conversionRatio), message: "Param value must be greater than zero!");
             }
 
             lock (_readLock)
             {
-                ReferenceUnit = referenceUnit;
+                ConversionRatio = conversionRatio;
 
                 // Calibration no longer required
                 _isCalibrated = true;
@@ -158,7 +158,7 @@ namespace Iot.Device.Hx711
             // Lock is internal in fisical read
             var value = GetNetWeight(numberOfReads);
 
-            return Mass.FromGrams(Math.Round(value / ReferenceUnit, digits: 0));
+            return Mass.FromGrams(Math.Round(value / ConversionRatio, digits: 0));
         }
 
         /// <summary>

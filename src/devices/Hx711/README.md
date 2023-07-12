@@ -72,7 +72,7 @@ using (var controller = new GpioController())
         Console.WriteLine("HX711 is on.");
 
         // 1 gram every 107.55 hx711 units
-        hx711.SetReferenceUnit(referenceUnit: 107.55);
+        hx711.SetConversionRatio(conversionRatio: 107.55);
 
         Console.WriteLine("Press ENTER to tare.");
         _ = Console.ReadLine();
@@ -141,7 +141,7 @@ The fritz diagram above depicts how you should wire your RPi in order to run a e
 First of all HX711 need a calibration process because it can be connected to any load cell that has a different range and sensitivity.
 To perform it, simply put a known weight on the load cell and start the calibration via `SetCalibration()`.
 If you want a more precise calibration, you can do this several times with different weights.
-If you don't want to carry out the calibration at every start, you can memorize the `ReferenceUnit` which is valued after the calibration and set it using `SetReferenceUnit` method.
+If you don't want to carry out the calibration at every start, you can memorize the `ConversionRatio` which is valued after the calibration and set it using `SetConversionRatio` method.
 
 ## Accuracy
 
