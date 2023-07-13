@@ -9,7 +9,7 @@ This is a list of steps which need to happen in order to release new version of 
 - Step 1: Ensure all PRs meant for this release are merged.
   - While the process is ongoing, make sure no new PRs get merged in order to ensure that the official build doesn't get reset.
 - Step 2: Regenerate device listing:
-  - `dotnet run` on <https://github.com/dotnet/iot/tree/master/tools/device-listing>
+  - `dotnet run` on <https://github.com/dotnet/iot/tree/main/tools/device-listing>
   - Fix all warnings, re-run if needed to ensure no warnings.
   - Always manually review the changes paying attention the generated document looks clear.
   - Adjust categories/code of the generator if necessary.
