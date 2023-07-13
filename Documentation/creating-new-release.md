@@ -14,7 +14,7 @@ This is a list of steps which need to happen in order to release new version of 
   - Always manually review the changes paying attention the generated document looks clear.
   - Adjust categories/code of the generator if necessary.
 - Step 3: Create new package:
-  - Go to <https://dev.azure.com/dnceng/internal/_build?definitionId=239>
+  - Go to <https://dev.azure.com/dotnet/IoT/_build?definitionId=179>
   - Select "Run Pipeline", select row which says `variables` and add new one: `DotNetFinalVersionKind=release` (no quotes anywhere).
   - Run and wait for it to finish.
   - Once it is done and passes go to the artifacts section of the build, and find an artifact called 'Built packages' and from there download the two stable packages.
