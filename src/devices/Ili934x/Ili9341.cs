@@ -7,8 +7,9 @@ using System.Device.Spi;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Graphics;
 
-namespace Iot.Device.Ili9341
+namespace Iot.Device.Ili934x
 {
     /// <summary>
     /// The ILI9341 is a QVGA (Quarter VGA) driver integrated circuit that is used to control 240×320 VGA LCD screens.
@@ -25,11 +26,9 @@ namespace Iot.Device.Ili9341
         /// </summary>
         public const SpiMode DefaultSpiMode = SpiMode.Mode3;
 
-        private const int ScreenWidthPx = 240;
-        private const int ScreenHeightPx = 320;
         private const int DefaultSPIBufferSize = 0x1000;
-        private const byte LcdPortraitConfig = 8 | 0x40;
-        private const byte LcdLandscapeConfig = 44;
+        internal const byte LcdPortraitConfig = 8 | 0x40;
+        internal const byte LcdLandscapeConfig = 44;
 
         private readonly int _dcPinId;
         private readonly int _resetPinId;
@@ -40,17 +39,23 @@ namespace Iot.Device.Ili9341
         private SpiDevice _spiDevice;
         private GpioController _gpioDevice;
 
+        private Rgb565[] _screenBuffer;
+        private Rgb565[] _previousBuffer;
+
+        private double _fps;
+        private DateTimeOffset _lastUpdate;
+
         /// <summary>
-        /// Initializes new instance of ILI9341 device that will communicate using SPI bus.
+        /// Initializes new instance of ILI9342 device that will communicate using SPI bus.
         /// </summary>
         /// <param name="spiDevice">The SPI device used for communication. This Spi device will be displayed along with the ILI9341 device.</param>
-        /// <param name="dataCommandPin">The id of the GPIO pin used to control the DC line (data/command).</param>
-        /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (data/command).</param>
+        /// <param name="dataCommandPin">The id of the GPIO pin used to control the DC line (data/command). This pin must be provided.</param>
+        /// <param name="resetPin">The id of the GPIO pin used to control the /RESET line (RST). Can be -1 if not connected</param>
         /// <param name="backlightPin">The pin for turning the backlight on and off, or -1 if not connected.</param>
         /// <param name="spiBufferSize">The size of the SPI buffer. If data larger than the buffer is sent then it is split up into multiple transmissions. The default value is 4096.</param>
         /// <param name="gpioController">The GPIO controller used for communication and controls the the <paramref name="resetPin"/> and the <paramref name="dataCommandPin"/>
         /// If no Gpio controller is passed in then a default one will be created and disposed when ILI9341 device is disposed.</param>
-        /// <param name="shouldDispose">True to dispose the Gpio Controller</param>
+        /// <param name="shouldDispose">True to dispose the Gpio Controller when done</param>
         public Ili9341(SpiDevice spiDevice, int dataCommandPin, int resetPin, int backlightPin = -1, int spiBufferSize = DefaultSPIBufferSize, GpioController? gpioController = null, bool shouldDispose = true)
         {
             if (spiBufferSize <= 0)
@@ -64,9 +69,14 @@ namespace Iot.Device.Ili9341
             _backlightPin = backlightPin;
             _gpioDevice = gpioController ?? new GpioController();
             _shouldDispose = shouldDispose || gpioController is null;
+            _fps = 0;
+            _lastUpdate = DateTimeOffset.UtcNow;
 
             _gpioDevice.OpenPin(_dcPinId, PinMode.Output);
-            _gpioDevice.OpenPin(_resetPinId, PinMode.Output);
+            if (_resetPinId >= 0)
+            {
+                _gpioDevice.OpenPin(_resetPinId, PinMode.Output);
+            }
 
             _spiBufferSize = spiBufferSize;
 
@@ -81,6 +91,43 @@ namespace Iot.Device.Ili9341
             SendCommand(Ili9341Command.SoftwareReset);
             SendCommand(Ili9341Command.DisplayOff);
             Thread.Sleep(10);
+            InitDisplayParameters();
+            SendCommand(Ili9341Command.SleepOut);
+            Thread.Sleep(120);
+            SendCommand(Ili9341Command.DisplayOn);
+            Thread.Sleep(100);
+            SendCommand(Ili9341Command.MemoryWrite);
+
+            _screenBuffer = new Rgb565[ScreenWidth * ScreenHeight];
+            _previousBuffer = new Rgb565[ScreenWidth * ScreenHeight];
+
+            // And clear the display
+            SendFrame(true);
+        }
+
+        /// <summary>
+        /// Width of the screen, in pixels
+        /// </summary>
+        /// <remarks>This is of type int, because all image sizes use int, even though this can never be negative</remarks>
+        public virtual int ScreenWidth => 240;
+
+        /// <summary>
+        /// Height of the screen, in pixels
+        /// </summary>
+        /// <remarks>This is of type int, because all image sizes use int, even though this can never be negative</remarks>
+        public virtual int ScreenHeight => 320;
+
+        /// <summary>
+        /// Returns the last FPS value (frames per second).
+        /// The value is unfiltered.
+        /// </summary>
+        public double Fps => _fps;
+
+        /// <summary>
+        /// Configure memory and orientation parameters
+        /// </summary>
+        protected virtual void InitDisplayParameters()
+        {
             SendCommand(Ili9341Command.MemoryAccessControl, LcdPortraitConfig);
             SendCommand(Ili9341Command.ColModPixelFormatSet, 0x55); // 16-bits per pixel
             SendCommand(Ili9341Command.FrameRateControlInNormalMode, 0x00, 0x1B);
@@ -89,83 +136,70 @@ namespace Iot.Device.Ili9341
             SendCommand(Ili9341Command.PageAddressSet, 0x00, 0x00, 0x01, 0x3F); // height of the screen
             SendCommand(Ili9341Command.EntryModeSet, 0x07);
             SendCommand(Ili9341Command.DisplayFunctionControl, 0x0A, 0x82, 0x27, 0x00);
-            SendCommand(Ili9341Command.SleepOut);
-            Thread.Sleep(120);
-            SendCommand(Ili9341Command.DisplayOn);
-            Thread.Sleep(100);
-            SendCommand(Ili9341Command.MemoryWrite);
         }
 
         /// <summary>
-        /// Convert a color structure to a byte tuple representing the colour in 565 format.
-        /// </summary>
-        /// <param name="color">The color to be converted.</param>
-        /// <returns>
-        /// This method returns the low byte and the high byte of the 16bit value representing RGB565 or BGR565 value
-        ///
-        /// byte    11111111 00000000
-        /// bit     76543210 76543210
-        ///
-        /// For ColorSequence.RGB
-        ///         RRRRRGGG GGGBBBBB
-        ///         43210543 21043210
-        ///
-        /// For ColorSequence.BGR
-        ///         BBBBBGGG GGGRRRRR
-        ///         43210543 21043210
-        /// </returns>
-        private (byte Low, byte High) Color565(Color color)
-        {
-            // get the top 5 MSB of the blue or red value
-            UInt16 retval = (UInt16)(color.R >> 3);
-            // shift right to make room for the green Value
-            retval <<= 6;
-            // combine with the 6 MSB if the green value
-            retval |= (UInt16)(color.G >> 2);
-            // shift right to make room for the red or blue Value
-            retval <<= 5;
-            // combine with the 6 MSB if the red or blue value
-            retval |= (UInt16)(color.B >> 3);
-            return ((byte)(retval >> 8), (byte)(retval & 0xFF));
-        }
-
-        /// <summary>
-        /// Send filled rectangle to the ILI9341 display.
+        /// Fill rectangle to the specified color
         /// </summary>
         /// <param name="color">The color to fill the rectangle with.</param>
         /// <param name="x">The x co-ordinate of the point to start the rectangle at in pixels.</param>
         /// <param name="y">The y co-ordinate of the point to start the rectangle at in pixels.</param>
         /// <param name="w">The width of the rectangle in pixels.</param>
         /// <param name="h">The height of the rectangle in pixels.</param>
-        public void FillRect(Color color, uint x, uint y, uint w, uint h)
+        public void FillRect(Color color, int x, int y, int w, int h)
         {
-            Span<byte> colourBytes = stackalloc byte[2]; // create a short span that holds the colour data to be sent to the display
-            Span<byte> displayBytes = stackalloc byte[(int)(w * h * 2)]; // span used to form the data to be written out to the SPI interface
-
-            // set the colourbyte array to represent the fill colour
-            (colourBytes[0], colourBytes[1]) = Color565(color);
-
-            // set the pixels in the array representing the raw data to be sent to the display
-            // to the fill color
-            for (int i = 0; i < w * h; i++)
-            {
-                displayBytes[i * 2 + 0] = colourBytes[0];
-                displayBytes[i * 2 + 1] = colourBytes[1];
-            }
-
-            // specify a location for the rows and columns on the display where the data is to be written
-            SetWindow(x, y, x + w - 1, y + h - 1);
-
-            // write out the pixel data
-            SendData(displayBytes);
+            FillRect(color, x, y, w, h, false);
         }
 
         /// <summary>
-        /// Clears screen
+        /// Fill rectangle to the specified color
         /// </summary>
-        public void ClearScreen()
+        /// <param name="color">The color to fill the rectangle with.</param>
+        /// <param name="x">The x co-ordinate of the point to start the rectangle at in pixels.</param>
+        /// <param name="y">The y co-ordinate of the point to start the rectangle at in pixels.</param>
+        /// <param name="w">The width of the rectangle in pixels.</param>
+        /// <param name="h">The height of the rectangle in pixels.</param>
+        /// <param name="doRefresh">True to immediately update the screen, false to only update the back buffer</param>
+        private void FillRect(Color color, int x, int y, int w, int h, bool doRefresh)
         {
-            FillRect(Color.Black, 0, 0, ScreenWidthPx, ScreenHeightPx);
+            Span<byte> colourBytes = stackalloc byte[2]; // create a short span that holds the colour data to be sent to the display
+
+            // set the colourbyte array to represent the fill colour
+            var c = Rgb565.FromRgba32(color);
+
+            // set the pixels in the array representing the raw data to be sent to the display
+            // to the fill color
+            for (int j = y; j < y + h; j++)
+            {
+                for (int i = x; i < x + w; i++)
+                {
+                    _screenBuffer[i + j * ScreenWidth] = c;
+                }
+            }
+
+            if (doRefresh)
+            {
+                SendFrame();
+            }
+        }
+
+        /// <summary>
+        /// Clears the screen to a specific color
+        /// </summary>
+        /// <param name="color">The color to clear the screen to</param>
+        /// <param name="doRefresh">Immediately force an update of the screen. If false, only the backbuffer is cleared.</param>
+        public void ClearScreen(Color color, bool doRefresh = false)
+        {
+            FillRect(color, 0, 0, ScreenWidth, ScreenHeight, doRefresh);
+        }
+
+        /// <summary>
+        /// Clears the screen to black
+        /// </summary>
+        /// <param name="doRefresh">Immediately force an update of the screen. If false, only the backbuffer is cleared.</param>
+        public void ClearScreen(bool doRefresh = false)
+        {
+            FillRect(Color.FromArgb(0, 0, 0), 0, 0, ScreenWidth, ScreenHeight, doRefresh);
         }
 
         /// <summary>
@@ -173,6 +207,11 @@ namespace Iot.Device.Ili9341
         /// </summary>
         public async Task ResetDisplayAsync()
         {
+            if (_resetPinId < 0)
+            {
+                return;
+            }
+
             _gpioDevice.Write(_resetPinId, PinValue.High);
             await Task.Delay(20).ConfigureAwait(false);
             _gpioDevice.Write(_resetPinId, PinValue.Low);
@@ -207,7 +246,7 @@ namespace Iot.Device.Ili9341
             _gpioDevice.Write(_backlightPin, PinValue.Low);
         }
 
-        private void SetWindow(uint x0 = 0, uint y0 = 0, uint x1 = ScreenWidthPx - 1, uint y1 = ScreenWidthPx - 1)
+        private void SetWindow(int x0, int y0, int x1, int y1)
         {
             SendCommand(Ili9341Command.ColumnAddressSet);
             Span<byte> data = stackalloc byte[4]
@@ -235,7 +274,7 @@ namespace Iot.Device.Ili9341
         /// </summary>
         /// <param name="command">Command to send.</param>
         /// <param name="commandParameters">parameteters for the command to be sent</param>
-        private void SendCommand(Ili9341Command command, params byte[] commandParameters)
+        internal void SendCommand(Ili9341Command command, params byte[] commandParameters)
         {
             SendCommand(command, commandParameters.AsSpan());
         }
@@ -245,7 +284,7 @@ namespace Iot.Device.Ili9341
         /// </summary>
         /// <param name="command">Command to send.</param>
         /// <param name="data">Span to send as parameters for the command.</param>
-        private void SendCommand(Ili9341Command command, Span<byte> data)
+        internal void SendCommand(Ili9341Command command, Span<byte> data)
         {
             Span<byte> commandSpan = stackalloc byte[]
             {
@@ -295,17 +334,55 @@ namespace Iot.Device.Ili9341
             while (index < data.Length); // repeat until all data sent.
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Creates an image with the correct size and color depth to be sent to the screen
+        /// </summary>
+        /// <returns>An image instance</returns>
+        public virtual BitmapImage CreateBackBuffer()
+        {
+            return BitmapImage.CreateBitmap(ScreenWidth, ScreenHeight, PixelFormat.Format32bppArgb);
+        }
+
+        /// <inheritdoc cref="Dispose()"/>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_gpioDevice != null)
+                {
+                    if (_resetPinId >= 0)
+                    {
+                        _gpioDevice.ClosePin(_resetPinId);
+                    }
+
+                    if (_backlightPin >= 0)
+                    {
+                        _gpioDevice.ClosePin(_backlightPin);
+                    }
+
+                    if (_dcPinId >= 0)
+                    {
+                        _gpioDevice.ClosePin(_dcPinId);
+                    }
+
+                    if (_shouldDispose)
+                    {
+                        _gpioDevice?.Dispose();
+                    }
+
+                    _gpioDevice = null!;
+                }
+
+                _spiDevice?.Dispose();
+                _spiDevice = null!;
+            }
+        }
+
+        /// <inheritdoc />
         public void Dispose()
         {
-            if (_shouldDispose)
-            {
-                _gpioDevice?.Dispose();
-                _gpioDevice = null!;
-            }
-
-            _spiDevice?.Dispose();
-            _spiDevice = null!;
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

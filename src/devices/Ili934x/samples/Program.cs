@@ -9,7 +9,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Iot.Device.Ft4222;
-using Iot.Device.Ili9341;
+using Iot.Device.Graphics;
+using Iot.Device.Graphics.SkiaSharpAdapter;
+using Iot.Device.Ili934x;
+
 #pragma warning disable CA1416 // Temporarily, will be removed after binding is updated
 Console.WriteLine("Are you using Ft4222? Type 'yes' and press ENTER if so, anything else will be treated as no.");
 bool isFt4222 = Console.ReadLine() == "yes";
@@ -18,38 +21,43 @@ int pinDC = isFt4222 ? 1 : 23;
 int pinReset = isFt4222 ? 0 : 24;
 int pinLed = isFt4222 ? 2 : -1;
 
-using Bitmap dotnetBM = new(240, 320);
-using Graphics g = Graphics.FromImage(dotnetBM);
+SkiaSharpAdapter.Register();
 using SpiDevice displaySPI = isFt4222 ? GetSpiFromFt4222() : GetSpiFromDefault();
 GpioController gpio = isFt4222 ? GetGpioControllerFromFt4222() : new GpioController();
 using Ili9341 ili9341 = new(displaySPI, pinDC, pinReset, backlightPin: pinLed, gpioController: gpio);
 
 while (true)
 {
+    using var backBuffer = ili9341.CreateBackBuffer();
     foreach (string filepath in Directory.GetFiles(@"images", "*.png").OrderBy(f => f))
     {
         Console.WriteLine($"Drawing {filepath}");
-        using Bitmap bm = (Bitmap)Bitmap.FromFile(filepath);
-        g.Clear(Color.Black);
-        g.DrawImage(bm, 0, 0, bm.Width, bm.Height);
-        ili9341.SendBitmap(dotnetBM);
+        using var image = BitmapImage.CreateFromFile(filepath);
+        var api = backBuffer.GetDrawingApi();
+        api.DrawImage(image, new Rectangle(0, 0, image.Width, image.Height), new Rectangle(0, 0, image.Width, image.Height));
+        ili9341.DrawBitmap(backBuffer);
+        ili9341.SendFrame(true);
         Task.Delay(1000).Wait();
     }
 
     Console.WriteLine("FillRect(Color.Red, 120, 160, 60, 80)");
     ili9341.FillRect(Color.Red, 120, 160, 60, 80);
+    ili9341.SendFrame(true);
     Task.Delay(1000).Wait();
 
     Console.WriteLine("FillRect(Color.Blue, 0, 0, 240, 320)");
     ili9341.FillRect(Color.Blue, 0, 0, 240, 320);
+    ili9341.SendFrame(true);
     Task.Delay(1000).Wait();
 
     Console.WriteLine("ClearScreen()");
     ili9341.ClearScreen();
+    ili9341.SendFrame(true);
     Task.Delay(1000).Wait();
 
     Console.WriteLine("FillRect(Color.Green, 0, 0, 120, 160)");
     ili9341.FillRect(Color.Green, 0, 0, 120, 160);
+    ili9341.SendFrame(true);
     Task.Delay(1000).Wait();
 }
 
