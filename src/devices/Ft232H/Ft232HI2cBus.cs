@@ -37,7 +37,7 @@ namespace Iot.Device.Ft232H
         /// <inheritdoc/>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
-            if (!_usedAddresses.ContainsKey(deviceAddress))
+            if (_usedAddresses.ContainsKey(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} is already open.", nameof(deviceAddress));
             }

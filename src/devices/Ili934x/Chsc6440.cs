@@ -370,12 +370,7 @@ namespace Iot.Device.Ili934x
             if (disposing)
             {
                 _updateThreadActive = false;
-                var temp = _updateThread;
-                if (temp != null)
-                {
-                    temp.Join();
-                }
-
+                _updateThread?.Join();
                 _updateThread = null;
                 if (_interruptPin >= 0 && _gpioController != null)
                 {
@@ -390,13 +385,10 @@ namespace Iot.Device.Ili934x
 
                 _gpioController = null;
 
-                if (_i2c != null)
-                {
-                    _i2c.Dispose();
-                }
-
+                _i2c?.Dispose();
                 _i2c = null!;
-                _updateEvent.Dispose();
+                _updateEvent?.Dispose();
+                _updateEvent = null!;
             }
         }
 

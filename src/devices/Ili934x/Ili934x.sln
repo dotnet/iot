@@ -13,11 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino", "..\Arduino\Ardui
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{B63EB5C0-F1AD-4348-BFEF-F38F178D33D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Axp192", "..\Axp192\Axp192.csproj", "{079BECB2-C2F8-4DC0-B9A2-111EA143A3C5}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Nmea0183", "..\Nmea0183\Nmea0183.csproj", "{5277BF07-40B8-4E65-A777-20ECB2A420CF}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpConnector", "..\SkiaSharpConnector\SkiaSharpConnector.csproj", "{DD919A7C-32DD-4D0B-B7B4-61285E188672}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpAdapter", "..\SkiaSharpAdapter\SkiaSharpAdapter.csproj", "{DD919A7C-32DD-4D0B-B7B4-61285E188672}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{22FB5850-0D20-4703-80BA-5C902119F31E}"
 EndProject

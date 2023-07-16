@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 namespace Iot.Device.Ili934x
 {
     /// <summary>
-    /// Event arguments for dragging (moving the finger over the screeN9
+    /// Event arguments for dragging (moving the finger over the screen)
     /// </summary>
     public class DragEventArgs : EventArgs
     {
