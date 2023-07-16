@@ -13,10 +13,11 @@ namespace Iot.Device.Axp192
         Storage4 = 0x09,
         Storage5 = 0x0A,
         Storage6 = 0x0B,
-        SwitchControleDcDC1_3LDO2_3 = 0x12,
+        SwitchControleDcDc1_3LDO2_3 = 0x12,
 
         VoltageSettingDcDc1 = 0x26,
-        VoltageSettingDcDC3 = 0x27,
+        VoltageSettingDcDc2 = 0x23,
+        VoltageSettingDcDc3 = 0x27,
         VoltageSettingLdo2_3 = 0x28,
 
         PathSettingVbus = 0x30,
@@ -68,6 +69,11 @@ namespace Iot.Device.Axp192
 
         ControlGpio0 = 0x90,
         VoltageOutputSettingGpio0Ldo = 0x91,
+        ControlGpio1 = 0x92,
+        ControlGpio2 = 0x93,
+        ReadWriteGpio012 = 0x94,
+        ControlGpio34 = 0x95,
+        ReadWriteGpio34 = 0x96,
 
         CoulombCounterChargingData1 = 0xB0,
         CoulombCounterChargingData2 = 0xB1,
