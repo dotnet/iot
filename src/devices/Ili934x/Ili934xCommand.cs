@@ -4,7 +4,7 @@
 using System;
 using System.Device.Gpio;
 
-namespace Iot.Device.Ili9341
+namespace Iot.Device.Ili934x
 {
     internal enum Ili9341Command : byte
     {
