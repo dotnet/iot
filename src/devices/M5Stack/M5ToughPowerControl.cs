@@ -13,10 +13,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Arduino;
 using Iot.Device.Common;
+using Iot.Device.Axp192;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
 
-namespace Iot.Device.Axp192
+namespace Iot.Device.M5Stack
 {
     /// <summary>
     /// High-level abstraction for the AXP192 in an M5Tough enclosure.
@@ -28,7 +29,7 @@ namespace Iot.Device.Axp192
     /// </remarks>
     public class M5ToughPowerControl : IDisposable
     {
-        private Axp192 _axp;
+        private Axp192.Axp192 _axp;
         private ILogger _logger;
         private Board.Board _board;
 
@@ -44,7 +45,7 @@ namespace Iot.Device.Axp192
                 21, 22
             });
 
-            _axp = new Axp192(bus.CreateDevice(Axp192.I2cDefaultAddress));
+            _axp = new Axp192.Axp192(bus.CreateDevice(Axp192.Axp192.I2cDefaultAddress));
             _logger = this.GetCurrentClassLogger();
 
             Init();

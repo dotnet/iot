@@ -9,4 +9,8 @@
   <ItemGroup>
     <None Include="README.md" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Arduino\Arduino.csproj" />
+    <ProjectReference Include="..\Axp192\Axp192.csproj" />
+  </ItemGroup>
 </Project>
