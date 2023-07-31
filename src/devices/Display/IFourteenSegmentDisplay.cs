@@ -8,6 +8,9 @@ namespace Iot.Device.Display
     /// <summary>
     /// Represents a 14-Segment display that can display multiple digits
     /// </summary>
+    /// <remarks>
+    /// Derived from src/devices/Display/ISevenSegmentDisplay.cs
+    /// </remarks>
     public interface IFourteenSegmentDisplay
     {
         /// <summary>

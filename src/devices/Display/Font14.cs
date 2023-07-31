@@ -4,9 +4,15 @@
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Fonts for 7-Segment displays
+    /// Fonts for 14-Segment displays
     /// </summary>
-    public enum Font14 : byte
+    /// <remarks>
+    /// Sources:
+    /// Derived from /src/devices/Display/Font.cs
+    /// Leds inside outer segments are refernced as
+    /// points of the compass.
+    /// </remarks>
+    public enum Font14 : ushort
     {
         /// <summary>
         /// Digit 0
@@ -187,6 +193,16 @@ namespace Iot.Device.Display
         Letter_J = Segment14.TopRight | Segment14.BottomRight | Segment14.Bottom,
 
         /// <summary>
+        /// Lower case letter k
+        /// </summary>
+        Letter_k = Segment14.North | Segment14.NorthEast | Segment14.South | Segment14.SouthEast,
+
+        /// <summary>
+        /// Upper case letter K
+        /// </summary>
+        Letter_K = Segment14.TopLeft | Segment14.BottomLeft | Segment14.West | Segment14.NorthEast | Segment14.SouthEast,
+
+        /// <summary>
         /// Lower case letter l
         /// </summary>
         Letter_l = Segment14.Bottom | Segment14.BottomLeft,
@@ -195,6 +211,16 @@ namespace Iot.Device.Display
         /// Upper case letter L
         /// </summary>
         Letter_L = Segment14.Bottom | Segment14.BottomLeft | Segment14.TopLeft,
+
+        /// <summary>
+        /// Lower case letter l
+        /// </summary>
+        Letter_m = Segment14.BottomLeft | Segment14.Middle | Segment14.South | Segment14.BottomRight,
+
+        /// <summary>
+        /// Upper case letter L
+        /// </summary>
+        Letter_M = Segment14.BottomLeft | Segment14.TopLeft | Segment14.NorthWest | Segment14.NorthEast | Segment14.TopRight | Segment14.BottomRight,
 
         /// <summary>
         /// Lower case letter n
@@ -227,6 +253,16 @@ namespace Iot.Device.Display
         Letter_P = Segment14.Top | Segment14.TopRight | Segment14.BottomLeft | Segment14.TopLeft | Segment14.Middle,
 
         /// <summary>
+        /// Lower case letter q
+        /// </summary>
+        Letter_q = Segment14.TopRight | Segment14.BottomRight | Segment14.East | Segment14.North,
+
+        /// <summary>
+        /// Upper case letter Q
+        /// </summary>
+        Letter_Q = Segment14.Top | Segment14.TopRight | Segment14.BottomRight | Segment14.Bottom | Segment14.TopLeft | Segment14.BottomLeft,
+
+        /// <summary>
         /// Lower case letter r
         /// </summary>
         Letter_r = Segment14.BottomLeft | Segment14.Middle,
@@ -249,7 +285,12 @@ namespace Iot.Device.Display
         /// <summary>
         /// Lower case letter t
         /// </summary>
-        Letter_t = Segment14.Bottom | Segment14.BottomLeft | Segment14.TopLeft | Segment14.Middle,
+        Letter_t = Segment14.TopLeft | Segment14.BottomLeft | Segment14.West | Segment14.Bottom,
+
+        /// <summary>
+        /// Upper case letter T
+        /// </summary>
+        Letter_T = Segment14.Top | Segment14.North | Segment14.South,
 
         /// <summary>
         /// Lower case letter u
@@ -262,14 +303,44 @@ namespace Iot.Device.Display
         Letter_U = Segment14.TopRight | Segment14.BottomRight | Segment14.Bottom | Segment14.BottomLeft | Segment14.TopLeft,
 
         /// <summary>
+        /// Lower case letter v
+        /// </summary>
+        Letter_v = Segment14.BottomRight | Segment14.SouthEast,
+
+        /// <summary>
+        /// Upper case letter V
+        /// </summary>
+        Letter_V = Segment14.TopRight | Segment14.BottomRight | Segment14.BackSlash,
+
+        /// <summary>
+        /// Lower case letter w
+        /// </summary>
+        Letter_w = Segment14.BottomRight | Segment14.Bottom | Segment14.South | Segment14.BottomLeft,
+
+        /// <summary>
+        /// Upper case letter W
+        /// </summary>
+        Letter_W = Segment14.TopRight | Segment14.BottomRight | Segment14.SouthEast | Segment14.SouthWest | Segment14.TopLeft | Segment14.BottomLeft,
+
+        /// <summary>
+        /// Lower case letter x
+        /// </summary>
+        Letter_x = Segment14.NorthWest | Segment14.NorthEast | Segment14.SouthWest | Segment14.SouthEast,
+
+        /// <summary>
+        /// Upper case letter X
+        /// </summary>
+        Letter_X = Segment14.NorthWest | Segment14.NorthEast | Segment14.SouthWest | Segment14.SouthEast,
+
+        /// <summary>
         /// Lower case letter y (same as upper case letter Y)
         /// </summary>
-        Letter_y = Segment14.TopRight | Segment14.BottomRight | Segment14.Bottom | Segment14.TopLeft | Segment14.Middle,
+        Letter_y = Segment14.TopRight | Segment14.BottomRight | Segment14.North | Segment14.East,
 
         /// <summary>
         /// Upper case letter Y (same as lower case letter y)
         /// </summary>
-        Letter_Y = Letter_y,
+        Letter_Y = Segment14.TopRight | Segment14.BottomRight | Segment14.Bottom | Segment14.TopLeft | Segment14.Middle,
 
         /// <summary>
         /// Upper case letter z (same as upper case letter Z)
@@ -315,6 +386,11 @@ namespace Iot.Device.Display
         /// ] symbol
         /// </summary>
         Symbol_RightSquareBracket = Segment14.Top | Segment14.Bottom | Segment14.BottomRight | Segment14.TopRight,
+
+        /// <summary>
+        /// . symbol
+        /// </summary>
+        Symbol_FullStop = Segment14.FullStop,
 
         /// <summary>
         /// Whitespace

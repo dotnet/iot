@@ -9,62 +9,129 @@ namespace Iot.Device.Display
     /// Individual segment bits
     /// </summary>
     /// <remarks>
-    ///  --0--
-    /// |     |
-    /// 5     1
-    /// |     |
-    ///  --6--
-    /// |     |
-    /// 4     2
-    /// |     |
-    ///  --3--   . 7
+    ///  -----8-----
+    /// |\    |    /|
+    /// | \   |   / |
+    /// |  0  1  2  |
+    /// 13  \ | /   14
+    /// |    \|/    |
+    /// |-15-----16-|
+    /// |    /|\    |
+    /// 12   / | \  10
+    /// |  3  4  5  |
+    /// | /   |   \ |
+    ///  ----11----- .6
+    ///
+    /// Sources:
+    /// Derived from /src/devices/Display/FontHelper.cs
     /// </remarks>
     [Flags]
-    public enum Segment14 : byte
+    public enum Segment14 : ushort
     {
         /// <summary>
         /// No segment
         /// </summary>
-        None = 0b0000_0000,
+        None = 0b0000_0000_0000_0000,
 
         /// <summary>
-        /// Top segment
+        /// NorthWest
         /// </summary>
-        Top = 0b0000_0001,
+        NorthWest = 0b000_0000_0000_0001,
 
         /// <summary>
-        /// Top right segment
+        /// Nort
         /// </summary>
-        TopRight = 0b0000_0010,
+        North = 0b000_0000_0000_0010,
 
         /// <summary>
-        /// Bottom right segment
+        /// NorthEast
         /// </summary>
-        BottomRight = 0b0000_0100,
+        NorthEast = 0b000_0000_0000_0100,
 
         /// <summary>
-        /// Bottom segment
+        /// SouthWest
         /// </summary>
-        Bottom = 0b0000_1000,
+        SouthWest = 0b000_0000_0000_1000,
 
         /// <summary>
-        /// Bottom left segment
+        /// SoutH
         /// </summary>
-        BottomLeft = 0b0001_0000,
+        South = 0b000_0000_0001_0000,
 
         /// <summary>
-        /// Top left segment
+        /// SouthEast
         /// </summary>
-        TopLeft = 0b0010_0000,
-
-        /// <summary>
-        /// Middle segment
-        /// </summary>
-        Middle = 0b1100_0000,
+        SouthEast = 0b000_0000_0010_0000,
 
         /// <summary>
         /// Dot
         /// </summary>
-        Dot = 0b0100_0000
+        FullStop = 0b0000_0000_0100_0000,
+
+        /// <summary>
+        /// Top segment
+        /// </summary>
+        Top = 0b0000_0001_0000_0000,
+
+        /// <summary>
+        /// Top right segment
+        /// </summary>
+        TopRight = 0b0000_0010_0000_0000,
+
+        /// <summary>
+        /// Bottom right segment
+        /// </summary>
+        BottomRight = 0b0000_0100_0000_0000,
+
+        /// <summary>
+        /// Bottom segment
+        /// </summary>
+        Bottom = 0b0000_1000_0000_0000,
+
+        /// <summary>
+        /// Bottom left segment
+        /// </summary>
+        BottomLeft = 0b0001_0000_0000_0000,
+
+        /// <summary>
+        /// Top left segment
+        /// </summary>
+        TopLeft = 0b0010_0000_0000_0000,
+
+        /// <summary>
+        /// West
+        /// </summary>
+        West = 0b0100_0000_0000_0000,
+
+        /// <summary>
+        /// East
+        /// </summary>
+        East = 0b1000_0000_0000_0000,
+
+        /// <summary>
+        /// Middle segment
+        /// </summary>
+        Middle = East | West,
+
+        /// <summary>
+        /// Whole left segment
+        /// </summary>
+        Left = TopLeft | BottomLeft,
+
+        /// <summary>
+        /// Whole right segment
+        /// </summary>
+        Right = TopRight | BottomRight,
+
+        /// <summary>
+        /// Forward Slash
+        /// </summary>
+        ForwardSlash = NorthEast | SouthWest,
+
+        /// <summary>
+        /// Back Slash
+        /// </summary>
+        BackSlash = NorthWest | SouthEast
+
     }
 }

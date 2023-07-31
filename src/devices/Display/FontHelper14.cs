@@ -8,6 +8,10 @@ namespace Iot.Device.Display
     /// <summary>
     /// Provides segment mappings for hexadecimal digits and certain ASCII characters
     /// </summary>
+    /// <remarks>
+    /// Sources:
+    /// Derived from /src/devices/Display/FontHelper.cs
+    /// </remarks>
     public static class FontHelper14
     {
         #region Private members
@@ -50,20 +54,20 @@ namespace Iot.Device.Display
             Font14.Letter_H,
             Font14.Letter_I,
             Font14.Letter_J,
-            Font14.Whitespace, // letter K is not supported
+            Font14.Letter_K,
             Font14.Letter_L,
-            Font14.Whitespace, // letter M is not supported
+            Font14.Letter_M,
             Font14.Letter_N,
             Font14.Letter_O,
             Font14.Letter_P,
-            Font14.Whitespace, // letter Q is not supported
+            Font14.Letter_Q,
             Font14.Letter_R,
             Font14.Letter_S,
-            Font14.Whitespace, // letter T is not supported
+            Font14.Letter_T,
             Font14.Letter_U,
-            Font14.Whitespace, // letter V is not supported
-            Font14.Whitespace, // letter W is not supported
-            Font14.Whitespace, // letter X is not supported
+            Font14.Letter_V,
+            Font14.Letter_W,
+            Font14.Letter_X,
             Font14.Letter_Y,
             Font14.Letter_Z
         };
@@ -83,20 +87,20 @@ namespace Iot.Device.Display
             Font14.Letter_h,
             Font14.Letter_i,
             Font14.Letter_j,
-            Font14.Whitespace, // letter k is not supported
+            Font14.Letter_k,
             Font14.Letter_l,
-            Font14.Whitespace, // letter m is not supported
+            Font14.Letter_m,
             Font14.Letter_n,
             Font14.Letter_o,
             Font14.Letter_p,
-            Font14.Whitespace, // letter q is not supported
+            Font14.Letter_q,
             Font14.Letter_r,
             Font14.Letter_s,
             Font14.Letter_t,
             Font14.Letter_u,
-            Font14.Whitespace, // letter v is not supported
-            Font14.Whitespace, // letter w is not supported
-            Font14.Whitespace, // letter x is not supported
+            Font14.Letter_v,
+            Font14.Letter_w,
+            Font14.Letter_x,
             Font14.Letter_y,
             Font14.Letter_z
         };
@@ -166,6 +170,7 @@ namespace Iot.Device.Display
             '°' => Font14.Symbol_Degree,
             '[' => Font14.Symbol_LeftSquareBracket,
             ']' => Font14.Symbol_RightSquareBracket,
+            '.' => Font14.Symbol_FullStop,
             _ => Font14.Whitespace
         };
 
@@ -176,14 +181,25 @@ namespace Iot.Device.Display
         /// <param name="output">list of corresponding character fonts</param>
         public static void ConvertString(ReadOnlySpan<char> input, Span<Font14> output)
         {
-            if (input.Length != output.Length)
+            /*if (input.Length != output.Length)
             {
                 throw new InvalidOperationException($"{nameof(input)} and {nameof(output)} length must be the same");
-            }
-
+            }*/
+            var fsOffset = 0;
             for (int i = 0, l = input.Length; i < l; i++)
             {
-                output[i] = GetCharacter(input[i]);
+                output[i - fsOffset] = GetCharacter(input[i]);
+                // read ahead next char might be a decimal point
+                if ((i + 1) < l)
+                {
+                    if (GetCharacter(input[i + 1]) == Font14.Symbol_FullStop)
+                    {
+                        // add full stop to current digit.
+                        output[i - fsOffset] = output[i - fsOffset] | Font14.Symbol_FullStop;
+                        i++;
+                        fsOffset++;
+                    }
+                }
             }
         }
 
@@ -194,7 +210,9 @@ namespace Iot.Device.Display
         /// <returns>list of corresponding character fonts</returns>
         public static Font14[] GetString(string input)
         {
-            var fonts = new Font14[input.Length];
+            var decimalCount = input.Split('.').Length - 1;
+            decimalCount = decimalCount > 0 ? decimalCount - (input.Substring(0, 1) == "." ? 1 : 0) : 0;
+            var fonts = new Font14[input.Length - decimalCount];
             if (fonts.Length > 0)
             {
                 ConvertString(input.AsSpan(), fonts.AsSpan());

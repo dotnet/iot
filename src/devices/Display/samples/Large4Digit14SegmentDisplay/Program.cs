@@ -6,7 +6,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Display;
 
-const string SupportedCharacters = "0123456789aAbBcCdDeEfFgGhHiIjJlLnNoOpPrRsStuUyYzZ-=_|°[]     ";
+const string SupportedCharacters = "0123456789aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ-=_|°[]     ";
 
 // Initialize display
 using Large4Digit14SegmentDisplay display = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))
@@ -52,7 +52,7 @@ Thread.Sleep(2000);
 display.BlinkRate = BlinkRate.Off;
 
 // Write time to the display
-display.Write(DateTime.Now.ToString("H:mm").PadLeft(5));
+display.Write(DateTime.Now.ToString("Hmm").PadLeft(4));
 
 // Wait 3 seconds
 Thread.Sleep(3000);
@@ -78,20 +78,7 @@ var stringSamples = new[]
     ("PP", Alignment.Right),
     ("PPP", Alignment.Left),
     ("PPP", Alignment.Right),
-    ("PP:", Alignment.Left),
-    (":PP", Alignment.Right),
-    ("PP:P", Alignment.Left),
-    ("P:PP", Alignment.Right),
     ("PPPP", Alignment.Left),
-    ("PP:PP", Alignment.Left),
-    (":PP:PP", Alignment.Left),
-    (":PP:P", Alignment.Left),
-    (":PP:", Alignment.Left),
-    (":PP", Alignment.Left),
-    (":P", Alignment.Left),
-    (":PPP", Alignment.Left),
-    (":PPPP", Alignment.Left),
-    (":", Alignment.Left),
 };
 
 // Iterate WriteString branches
@@ -158,6 +145,10 @@ display.Write("Off", Alignment.Right);
 
 // Wait 2 seconds
 Thread.Sleep(2000);
+
+// clear display for next run
+display.Clear();
+display.Flush();
 
 // Turn off display
 display.DisplayOn = false;

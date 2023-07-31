@@ -8,14 +8,12 @@ using System.Runtime.InteropServices;
 namespace Iot.Device.Display
 {
     /// <summary>
-    /// Adafruit 1.2" 4-Digit 7-Segment Display w/I2C Backpack
+    /// PIMORONI FOUR LETTER PHAT 14 segment display
     /// </summary>
     /// <remarks>
-    /// Comes in yellow, green and red colors:
-    /// https://www.adafruit.com/product/1268
-    /// https://www.adafruit.com/product/1269
-    /// https://www.adafruit.com/product/1270
+    /// https://shop.pimoroni.com/products/four-letter-phat
     /// Sources:
+    /// Derived from /src/devices/Display/Large4Digit7SegmentDisplay.cs
     /// https://github.com/adafruit/Adafruit_LED_Backpack/blob/master/Adafruit_LEDBackpack.cpp
     /// https://github.com/sobek1985/Adafruit_LEDBackpack/blob/master/Adafruit_LEDBackpack/AlphaNumericFourCharacters.cs
     /// </remarks>
@@ -144,23 +142,24 @@ namespace Iot.Device.Display
         /// <inheritdoc/>
         /// <remarks>Write clears dots, you'll have to reset them afterwards</remarks>
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="startAddress"/></exception>
-        /// <exception cref="ArgumentOutOfRangeException"><see cref="Large4Digit14SegmentDisplay"/> only supports <see cref="MaxNumberOfDigits"/> digits</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><see cref="Large4Digit7SegmentDisplay"/> only supports <see cref="MaxNumberOfDigits"/> digits</exception>
         public override void Write(ReadOnlySpan<byte> digits, int startAddress = 0)
         {
+            Console.WriteLine($"Length: {digits.Length}");
             if (digits.Length == 0)
             {
                 // Nothing to write
                 return;
             }
 
-            if (startAddress < 0 || startAddress >= MaxNumberOfDigits)
+            if (startAddress < 0 || startAddress >= (MaxNumberOfDigits * 2))
             {
                 throw new ArgumentOutOfRangeException(nameof(startAddress));
             }
 
-            if (digits.Length + startAddress > MaxNumberOfDigits)
+            if (digits.Length + startAddress > (MaxNumberOfDigits * 2))
             {
-                throw new ArgumentOutOfRangeException(nameof(digits), $"{nameof(Large4Digit14SegmentDisplay)} only supports {MaxNumberOfDigits - startAddress} digits starting from address {startAddress}");
+                throw new ArgumentOutOfRangeException(nameof(digits), $"{nameof(Large4Digit7SegmentDisplay)} only supports {MaxNumberOfDigits - startAddress} digits starting from address {startAddress}");
             }
 
             foreach (byte digit in digits)
@@ -171,13 +170,48 @@ namespace Iot.Device.Display
             AutoFlush();
         }
 
+        /// <summary>
+        /// Write raw data to display buffer
+        /// </summary>
+        /// <param name="digits">Array of ushort to write to the display</param>
+        /// <param name="startAddress">Address to start writing from</param>
+        public void Write(ReadOnlySpan<ushort> digits, int startAddress = 0)
+        {
+            if (digits.Length == 0)
+            {
+                // Nothing to write
+                return;
+            }
+
+            if (startAddress < 0 || startAddress >= (MaxNumberOfDigits * 2))
+            {
+                throw new ArgumentOutOfRangeException(nameof(startAddress));
+            }
+
+            if (digits.Length + startAddress > (MaxNumberOfDigits * 2))
+            {
+                throw new ArgumentOutOfRangeException(nameof(digits), $"{nameof(Large4Digit14SegmentDisplay)} only supports {MaxNumberOfDigits - startAddress} digits starting from address {startAddress}");
+            }
+
+            foreach (ushort digit in digits)
+            {
+                var asBytes = BitConverter.GetBytes(digit);
+
+                _displayBuffer[(int)s_digitAddressList[startAddress]] = (byte)(asBytes[1]);
+                _displayBuffer[(int)s_digitAddressList[startAddress] + 1] = (byte)(asBytes[0]);
+                startAddress++;
+            }
+
+            AutoFlush();
+        }
+
         /// <inheritdoc/>
         public void Write(ReadOnlySpan<Segment14> digits, int startAddress = 0) =>
-            Write(MemoryMarshal.Cast<Segment14, byte>(digits), startAddress);
+            Write(MemoryMarshal.Cast<Segment14, ushort>(digits), startAddress);
 
         /// <inheritdoc/>
         public void Write(ReadOnlySpan<Font14> characters, int startAddress = 0) =>
-            Write(MemoryMarshal.Cast<Font14, byte>(characters), startAddress);
+            Write(MemoryMarshal.Cast<Font14, ushort>(characters), startAddress);
 
         /// <inheritdoc/>
         public override void Clear() =>
@@ -236,6 +270,7 @@ namespace Iot.Device.Display
                 case 2 when alignment == Alignment.Left:
                 case 3 when alignment == Alignment.Left:
                 case 4:
+                case 5:
                     // Nothing to do
                     break;
                 default:
