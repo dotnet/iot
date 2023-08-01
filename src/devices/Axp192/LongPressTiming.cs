@@ -17,7 +17,7 @@ namespace Iot.Device.Axp192
         /// <summary>2 seconds</summary>
         S2 = 0b0010_0000,
 
-        /// <summary>1.5 seconds</summary>
+        /// <summary>2.5 seconds</summary>
         S2_5 = 0b0011_0000,
     }
 }

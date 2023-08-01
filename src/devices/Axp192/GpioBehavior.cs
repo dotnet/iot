@@ -4,9 +4,9 @@
 namespace Iot.Device.Axp192
 {
     /// <summary>
-    /// GPIO0 behavior
+    /// GPIO1-4 behavior
     /// </summary>
-    public enum Gpio0Behavior
+    public enum GpioBehavior
     {
         /// <summary>NMOS Leak Open Output</summary>
         NmosLeakOpenOutput = 0,
@@ -14,11 +14,11 @@ namespace Iot.Device.Axp192
         /// <summary>Universal Input Function</summary>
         UniversalInputFunction = 1,
 
-        /// <summary>Low Noise LDO</summary>
-        LowNoiseLDO = 2,
+        /// <summary>PWM output</summary>
+        PwmOut = 2,
 
-        /// <summary>Current Absorption</summary>
-        CurrentAbsorption = 3,
+        /// <summary>Reserved</summary>
+        Reserved = 3,
 
         /// <summary>ADC Input</summary>
         AdcInput = 4,
