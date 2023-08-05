@@ -7,8 +7,9 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Graphics;
 
-namespace Iot.Device.Graphics
+namespace Iot.Device.Gui
 {
     /// <summary>
     /// A class that takes screenshots.
@@ -81,7 +82,7 @@ namespace Iot.Device.Graphics
         {
             if (_display != IntPtr.Zero)
             {
-                Interop.XCloseDisplay(_display);
+                InteropGui.XCloseDisplay(_display);
                 _display = IntPtr.Zero;
             }
         }

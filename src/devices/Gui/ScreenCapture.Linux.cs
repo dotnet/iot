@@ -8,9 +8,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static Interop;
+using Iot.Device.Graphics;
+using static Iot.Device.Gui.InteropGui;
 
-namespace Iot.Device.Graphics
+namespace Iot.Device.Gui
 {
     public partial class ScreenCapture
     {
@@ -68,7 +69,7 @@ namespace Iot.Device.Graphics
         private Rectangle ScreenSizeLinux()
         {
             var root = XDefaultRootWindow(_display);
-            Interop.XWindowAttributes gwa = default;
+            InteropGui.XWindowAttributes gwa = default;
 
             XGetWindowAttributes(_display, root, ref gwa);
             int width = gwa.width;

@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Iot.Device.Graphics
+namespace Iot.Device.Gui
 {
     /// <summary>
     /// Simulates a touch device on Windows

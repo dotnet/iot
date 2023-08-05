@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Gui.csproj" />
+    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
   </ItemGroup>
 
 </Project>

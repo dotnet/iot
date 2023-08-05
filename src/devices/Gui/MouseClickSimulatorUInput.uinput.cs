@@ -9,9 +9,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using static Interop;
+using static Iot.Device.Gui.InteropGui;
 
-namespace Iot.Device.Graphics
+namespace Iot.Device.Gui
 {
     /// <summary>
     /// A mouse click simulator that uses /dev/uinput for simulating a touch screen (basically a mouse, but with absolute coordinates)
@@ -29,7 +29,7 @@ namespace Iot.Device.Graphics
         {
             uinput_setup usetup = default;
 
-            _fd = open("/dev/uinput", Interop.FileOpenFlags.O_WRONLY | Interop.FileOpenFlags.O_NONBLOCK);
+            _fd = Interop.open("/dev/uinput", Interop.FileOpenFlags.O_WRONLY | Interop.FileOpenFlags.O_NONBLOCK);
 
             if (_fd <= 0)
             {
@@ -38,14 +38,14 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
             }
 
             /* enable mouse button left and relative events */
-            ioctlv(_fd, UI_SET_EVBIT, EV_KEY);
-            ioctlv(_fd, UI_SET_KEYBIT, BTN_LEFT);
-            ioctlv(_fd, UI_SET_KEYBIT, BTN_MIDDLE);
-            ioctlv(_fd, UI_SET_KEYBIT, BTN_RIGHT);
+            Interop.ioctlv(_fd, UI_SET_EVBIT, EV_KEY);
+            Interop.ioctlv(_fd, UI_SET_KEYBIT, BTN_LEFT);
+            Interop.ioctlv(_fd, UI_SET_KEYBIT, BTN_MIDDLE);
+            Interop.ioctlv(_fd, UI_SET_KEYBIT, BTN_RIGHT);
 
-            ioctlv(_fd, UI_SET_EVBIT, EV_ABS);
-            ioctlv(_fd, UI_SET_ABSBIT, ABS_X);
-            ioctlv(_fd, UI_SET_ABSBIT, ABS_Y);
+            Interop.ioctlv(_fd, UI_SET_EVBIT, EV_ABS);
+            Interop.ioctlv(_fd, UI_SET_ABSBIT, ABS_X);
+            Interop.ioctlv(_fd, UI_SET_ABSBIT, ABS_Y);
 
             uinput_abs_setup abssetup = default;
             abssetup.code = ABS_X;
@@ -55,7 +55,7 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
             abssetup.absinfo.fuzz = 0;
             abssetup.absinfo.value = 0;
             abssetup.absinfo.resolution = 0;
-            ioctlv(_fd, UI_ABS_SETUP, new IntPtr(&abssetup));
+            Interop.ioctlv(_fd, UI_ABS_SETUP, new IntPtr(&abssetup));
             abssetup.code = ABS_Y;
             abssetup.absinfo.minimum = 0;
             abssetup.absinfo.maximum = height;
@@ -63,7 +63,7 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
             abssetup.absinfo.fuzz = 0;
             abssetup.absinfo.value = 0;
             abssetup.absinfo.resolution = 0;
-            ioctlv(_fd, UI_ABS_SETUP, new IntPtr(&abssetup));
+            Interop.ioctlv(_fd, UI_ABS_SETUP, new IntPtr(&abssetup));
 
             usetup.id.bustype = BUS_USB;
             usetup.id.vendor = 0x1234; /* sample vendor */
@@ -77,8 +77,8 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
                 usetup.name[i] = name[i];
             }
 
-            ioctlv(_fd, UI_DEV_SETUP, new IntPtr(&usetup));
-            ioctlv(_fd, UI_DEV_CREATE, 0);
+            Interop.ioctlv(_fd, UI_DEV_SETUP, new IntPtr(&usetup));
+            Interop.ioctlv(_fd, UI_DEV_CREATE, 0);
         }
 
         /// <summary>
@@ -183,8 +183,8 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
         /// </summary>
         public void Dispose()
         {
-            ioctl(_fd, UI_DEV_DESTROY, 0);
-            close(_fd);
+            Interop.ioctl(_fd, UI_DEV_DESTROY, 0);
+            Interop.close(_fd);
             _fd = 0;
         }
 
@@ -200,7 +200,7 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
             /* timestamp values below are ignored */
 
             int size = sizeof(input_event);
-            int result = write(fd, new IntPtr(&ie), size);
+            int result = Interop.write(fd, new IntPtr(&ie), size);
             if (result != size)
             {
                 throw new IOException($"Unable to write to input device stream: {Marshal.GetLastWin32Error()}");

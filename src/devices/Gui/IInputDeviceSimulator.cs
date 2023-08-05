@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Iot.Device.Graphics
+namespace Iot.Device.Gui
 {
     /// <summary>
     /// Simulator for an input device

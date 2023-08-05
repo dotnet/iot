@@ -10,8 +10,9 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Graphics;
 
-namespace Iot.Device.Graphics
+namespace Iot.Device.Gui
 {
     public partial class ScreenCapture
     {
