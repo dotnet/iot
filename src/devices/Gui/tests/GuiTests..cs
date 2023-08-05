@@ -6,13 +6,45 @@ using System.Runtime.InteropServices;
 using Iot.Device.Graphics;
 using Iot.Device.Graphics.SkiaSharpAdapter;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Iot.Device.Gui.Tests
 {
     public class ScreenCaptureTests
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+
+        public ScreenCaptureTests(ITestOutputHelper testOutputHelper)
+        {
+            _testOutputHelper = testOutputHelper;
+        }
+
         [Fact]
         public void TestCapture()
+        {
+            var os = Environment.OSVersion;
+            if (os.Platform == PlatformID.Unix)
+            {
+                try
+                {
+                    DoRunTest();
+                }
+                catch (DllNotFoundException x)
+                {
+                    _testOutputHelper.WriteLine($"Cannot run test, because libX11.so is missing: {x}");
+                }
+            }
+            else if (os.Platform == PlatformID.Win32NT)
+            {
+                DoRunTest();
+            }
+            else if (os.Platform == PlatformID.MacOSX)
+            {
+                DoRunTest();
+            }
+        }
+
+        private static void DoRunTest()
         {
             SkiaSharpAdapter.Register();
             var screenCapture = new ScreenCapture();
