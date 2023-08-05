@@ -16,7 +16,7 @@ namespace Iot.Device.Gui
     /// <summary>
     /// A mouse click simulator that uses /dev/uinput for simulating a touch screen (basically a mouse, but with absolute coordinates)
     /// </summary>
-    public sealed unsafe class MouseClickSimulatorUInput : IInputDeviceSimulator, IDisposable
+    internal sealed unsafe class MouseClickSimulatorUInputAbsolute : IPointingDevice, IDisposable
     {
         private int _fd;
 
@@ -25,7 +25,7 @@ namespace Iot.Device.Gui
         /// </summary>
         /// <param name="width">Width of device</param>
         /// <param name="height">Height of device</param>
-        public MouseClickSimulatorUInput(int width, int height)
+        public MouseClickSimulatorUInputAbsolute(int width, int height)
         {
             uinput_setup usetup = default;
 
@@ -84,7 +84,7 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
         /// <summary>
         /// Finalizer
         /// </summary>
-        ~MouseClickSimulatorUInput()
+        ~MouseClickSimulatorUInputAbsolute()
         {
             Dispose();
         }
@@ -100,13 +100,22 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
             MoveMouseTo(new Point(x, y));
         }
 
+        public void MoveTo(Point point)
+        {
+            MoveMouseTo(point);
+        }
+
+        public void MoveBy(int x, int y)
+        {
+            throw new NotSupportedException("An absolute mouse device cannot perform a relative movement");
+        }
+
         /// <summary>
         /// Move the mouse to the given position (absolute)
         /// </summary>
         /// <param name="pt">Point to move the mouse to</param>
-        public void MoveMouseTo(Point pt)
+        internal void MoveMouseTo(Point pt)
         {
-            Console.WriteLine($"Moving to {pt.X},{pt.Y}");
             Emit(_fd, EV_ABS, ABS_X, pt.X);
             Emit(_fd, EV_ABS, ABS_Y, pt.Y);
             Emit(_fd, EV_SYN, SYN_REPORT, 0);
@@ -115,20 +124,17 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
         /// <summary>
         /// Returns nothing useful
         /// </summary>
-        public (int X, int Y) GetPosition()
+        public Point GetPosition()
         {
-            throw new NotSupportedException(); // Not currently supported by this device
+            throw new NotSupportedException("Cannot query current mouse position"); // Not currently supported by this device
         }
 
         /// <summary>
         /// Clicks the mouse at the given position.
         /// </summary>
-        /// <param name="x">X position of mouse</param>
-        /// <param name="y">Y position of mouse</param>
         /// <param name="button">Button to click</param>
-        public void Click(int x, int y, MouseButton button)
+        public void Click(MouseButton button)
         {
-            MoveTo(x, y);
             int btn = GetButtonKeyCode(button);
 
             Emit(_fd, EV_KEY, btn, 1);
@@ -159,9 +165,8 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
         }
 
         /// <inheritdoc />
-        public void ButtonDown(int x, int y, MouseButton button)
+        public void ButtonDown(MouseButton button)
         {
-            MoveTo(x, y);
             int btn = GetButtonKeyCode(button);
 
             Emit(_fd, EV_KEY, btn, 1);
@@ -169,9 +174,8 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
         }
 
         /// <inheritdoc />
-        public void ButtonUp(int x, int y, MouseButton button)
+        public void ButtonUp(MouseButton button)
         {
-            MoveTo(x, y);
             int btn = GetButtonKeyCode(button);
 
             Emit(_fd, EV_KEY, btn, 0);
@@ -183,8 +187,12 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
         /// </summary>
         public void Dispose()
         {
-            Interop.ioctl(_fd, UI_DEV_DESTROY, 0);
-            Interop.close(_fd);
+            if (_fd > 0)
+            {
+                Interop.ioctl(_fd, UI_DEV_DESTROY, 0);
+                Interop.close(_fd);
+            }
+
             _fd = 0;
         }
 

@@ -13,35 +13,12 @@ namespace Iot.Device.Gui
     /// <summary>
     /// Simulates a touch device on Windows
     /// </summary>
-    public class WindowsTouchSimulator : IInputDeviceSimulator
+    internal sealed class WindowsMouseSimulator : IPointingDevice
     {
         /// <summary>
         /// Returns true for this device
         /// </summary>
         public bool AbsoluteCoordinates => true;
-
-        private static void PerformClickWindows(Point pt, MouseButton buttons)
-        {
-            var mpt = new Interop.MousePoint(pt.X, pt.Y);
-            Interop.SetCursorPosition(mpt);
-            if ((buttons & MouseButton.Left) != MouseButton.None)
-            {
-                Interop.MouseEvent(mpt, Interop.MouseEventFlags.LeftDown | Interop.MouseEventFlags.Absolute);
-                Interop.MouseEvent(mpt, Interop.MouseEventFlags.LeftUp | Interop.MouseEventFlags.Absolute);
-            }
-
-            if ((buttons & MouseButton.Right) != MouseButton.None)
-            {
-                Interop.MouseEvent(mpt, Interop.MouseEventFlags.RightDown | Interop.MouseEventFlags.Absolute);
-                Interop.MouseEvent(mpt, Interop.MouseEventFlags.RightUp | Interop.MouseEventFlags.Absolute);
-            }
-
-            if ((buttons & MouseButton.Middle) != MouseButton.None)
-            {
-                Interop.MouseEvent(mpt, Interop.MouseEventFlags.MiddleDown | Interop.MouseEventFlags.Absolute);
-                Interop.MouseEvent(mpt, Interop.MouseEventFlags.MiddleUp | Interop.MouseEventFlags.Absolute);
-            }
-        }
 
         private static void MouseDownWindows(Point pt, MouseButton buttons)
         {
@@ -91,29 +68,49 @@ namespace Iot.Device.Gui
         }
 
         /// <inheritdoc />
-        public void Click(int x, int y, MouseButton button)
+        public void MoveTo(Point point)
         {
-            MouseDownWindows(new Point(x, y), button);
-            MouseUpWindows(new Point(x, y), button);
+            MoveTo(point.X, point.Y);
+        }
+
+        public void MoveBy(int x, int y)
+        {
+            var pt = GetPosition();
+            var newPt = new Point(pt.X + x, pt.Y + y);
+            MoveTo(newPt.X, newPt.Y);
         }
 
         /// <inheritdoc />
-        public (int X, int Y) GetPosition()
+        public void Click(MouseButton button)
+        {
+            var pt = GetPosition();
+            MouseDownWindows(pt, button);
+            MouseUpWindows(pt, button);
+        }
+
+        /// <inheritdoc />
+        public Point GetPosition()
         {
             var pt = Interop.GetCursorPosition();
-            return (pt.X, pt.Y);
+            return new Point(pt.X, pt.Y);
         }
 
         /// <inheritdoc />
-        public void ButtonDown(int x, int y, MouseButton button)
+        public void ButtonDown(MouseButton button)
         {
-            MouseDownWindows(new Point(x, y), button);
+            var pt = GetPosition();
+            MouseDownWindows(pt, button);
         }
 
         /// <inheritdoc />
-        public void ButtonUp(int x, int y, MouseButton button)
+        public void ButtonUp(MouseButton button)
         {
-            MouseUpWindows(new Point(x, y), button);
+            var pt = GetPosition();
+            MouseUpWindows(pt, button);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

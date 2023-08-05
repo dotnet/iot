@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,9 +11,9 @@ using System.Threading.Tasks;
 namespace Iot.Device.Gui
 {
     /// <summary>
-    /// Simulator for an input device
+    /// Interface representing a (virtual) pointing device.
     /// </summary>
-    public interface IInputDeviceSimulator
+    public interface IPointingDevice : IDisposable
     {
         /// <summary>
         /// Returns true if this device expects absolute coordinates, false if it requires relative coordinates
@@ -30,32 +31,39 @@ namespace Iot.Device.Gui
         void MoveTo(int x, int y);
 
         /// <summary>
-        /// Click once with the given button at the given position
+        /// Move the cursor to the given position
         /// </summary>
-        /// <param name="x">X position</param>
-        /// <param name="y">Y position</param>
+        /// <param name="point">Absolute position on screen to move cursor to</param>
+        void MoveTo(Point point);
+
+        /// <summary>
+        /// Move the cursor by the given amount
+        /// </summary>
+        /// <param name="x">Move by this amount in x</param>
+        /// <param name="y">Move by this amount in y</param>
+        void MoveBy(int x, int y);
+
+        /// <summary>
+        /// Click once with the given button
+        /// </summary>
         /// <param name="button">Button to press</param>
-        void Click(int x, int y, MouseButton button);
+        void Click(MouseButton button);
 
         /// <summary>
         /// Returns the current position (always absolute)
         /// </summary>
-        (int X, int Y) GetPosition();
+        Point GetPosition();
 
         /// <summary>
-        /// Press (and start holding) the button at the given position
+        /// Press (and start holding) the button
         /// </summary>
-        /// <param name="x">X position</param>
-        /// <param name="y">Y position</param>
         /// <param name="button">Button to press</param>
-        void ButtonDown(int x, int y, MouseButton button);
+        void ButtonDown(MouseButton button);
 
         /// <summary>
-        /// Release the button at the given position
+        /// Release the button
         /// </summary>
-        /// <param name="x">X position</param>
-        /// <param name="y">Y position</param>
-        /// <param name="button">Button to press</param>
-        void ButtonUp(int x, int y, MouseButton button);
+        /// <param name="button">Button to release</param>
+        void ButtonUp(MouseButton button);
     }
 }
