@@ -562,7 +562,7 @@ namespace Iot.Device.Axp192
                     return (value & 0x20) != 0 ? PinValue.High : PinValue.Low;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(pin), "Valid pin numbers are 0-2 and 4");
+            throw new ArgumentOutOfRangeException(nameof(pin), "Valid pin numbers are 0-4");
         }
 
         /// <summary>
