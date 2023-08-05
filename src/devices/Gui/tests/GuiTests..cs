@@ -3,6 +3,8 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Iot.Device.Graphics;
+using Iot.Device.Graphics.SkiaSharpAdapter;
 using Xunit;
 
 namespace Iot.Device.Gui.Tests
@@ -10,17 +12,19 @@ namespace Iot.Device.Gui.Tests
     public class ScreenCaptureTests
     {
         [Fact]
-        public void TestWindows()
+        public void TestCapture()
         {
+            SkiaSharpAdapter.Register();
             var screenCapture = new ScreenCapture();
-            if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            var os = Environment.OSVersion;
+            if (os.Platform == PlatformID.Win32NT || os.Platform == PlatformID.Unix)
             {
                 var size = screenCapture.ScreenSize();
                 Assert.True(size.Width > 0);
                 Assert.True(size.Height > 0);
-                var img = screenCapture.GetScreenContents();
+                BitmapImage img = screenCapture.GetScreenContents();
                 Assert.NotNull(img);
-                Assert.Equal(size.Width, img!.Width);
+                Assert.Equal(size.Width, img.Width);
                 Assert.Equal(size.Height, img.Height);
             }
             else

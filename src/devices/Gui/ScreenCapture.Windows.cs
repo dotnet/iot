@@ -17,7 +17,7 @@ namespace Iot.Device.Gui
     public partial class ScreenCapture
     {
         [SuppressMessage("Interoperability", "CA1416", Justification = "Only used on windows, see call site")]
-        private static unsafe BitmapImage? GetScreenContentsWindows(Rectangle area)
+        private static unsafe BitmapImage GetScreenContentsWindows(Rectangle area)
         {
             try
             {
@@ -48,9 +48,9 @@ namespace Iot.Device.Gui
                     return image;
                 }
             }
-            catch (Win32Exception)
+            catch (Win32Exception x)
             {
-                return null;
+                throw new NotSupportedException($"Unable to take a screenshot: {x.Message}", x);
             }
         }
 

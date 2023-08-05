@@ -30,8 +30,11 @@ namespace Iot.Device.Gui
         /// <summary>
         /// Gets the contents of a section of the screen
         /// </summary>
-        /// <returns>An image. Returns null if no image can currently be retrieved (may happen e.g. when the safe desktop is shown)</returns>
-        public virtual BitmapImage? GetScreenContents(Rectangle area)
+        /// <returns>An image</returns>
+        /// <exception cref="NotSupportedException">No image can currently be retrieved (may happen e.g. when the safe desktop is shown or the application has otherwise
+        /// no access to the Gui)</exception>
+        /// <exception cref="PlatformNotSupportedException">This operation is not supported on the current platform</exception>
+        public virtual BitmapImage GetScreenContents(Rectangle area)
         {
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
@@ -50,7 +53,10 @@ namespace Iot.Device.Gui
         /// Gets the contents of the screen
         /// </summary>
         /// <returns>An image. Returns null if no image can currently be retrieved (may happen e.g. when the safe desktop is shown)</returns>
-        public BitmapImage? GetScreenContents()
+        /// <exception cref="NotSupportedException">No image can currently be retrieved (may happen e.g. when the safe desktop is shown or the application has otherwise
+        /// no access to the Gui)</exception>
+        /// <exception cref="PlatformNotSupportedException">This operation is not supported on the current platform</exception>
+        public BitmapImage GetScreenContents()
         {
             return GetScreenContents(ScreenSize());
         }
