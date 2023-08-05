@@ -16,10 +16,8 @@ namespace Iot.Device.Gui
     /// <summary>
     /// A mouse click simulator that uses /dev/uinput for simulating a touch screen (basically a mouse, but with absolute coordinates)
     /// </summary>
-    internal sealed unsafe class MouseClickSimulatorUInputAbsolute : IPointingDevice, IDisposable
+    internal sealed unsafe class MouseClickSimulatorUInputAbsolute : MouseClickSimulatorUInputBase, IPointingDevice, IDisposable
     {
-        private int _fd;
-
         /// <summary>
         /// Construct an instance of this class
         /// </summary>
@@ -82,30 +80,22 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
         }
 
         /// <summary>
-        /// Finalizer
-        /// </summary>
-        ~MouseClickSimulatorUInputAbsolute()
-        {
-            Dispose();
-        }
-
-        /// <summary>
         /// Always returns true for this device (this could be easily rewritten to support both, though)
         /// </summary>
-        public bool AbsoluteCoordinates => true;
+        public override bool AbsoluteCoordinates => true;
 
         /// <inheritdoc />
-        public void MoveTo(int x, int y)
+        public override void MoveTo(int x, int y)
         {
             MoveMouseTo(new Point(x, y));
         }
 
-        public void MoveTo(Point point)
+        public override void MoveTo(Point point)
         {
             MoveMouseTo(point);
         }
 
-        public void MoveBy(int x, int y)
+        public override void MoveBy(int x, int y)
         {
             throw new NotSupportedException("An absolute mouse device cannot perform a relative movement");
         }
@@ -120,99 +110,5 @@ fix this, create a file '/etc/udev/rules.d/98-input.rules' with content 'SUBSYST
             Emit(_fd, EV_ABS, ABS_Y, pt.Y);
             Emit(_fd, EV_SYN, SYN_REPORT, 0);
         }
-
-        /// <summary>
-        /// Returns nothing useful
-        /// </summary>
-        public Point GetPosition()
-        {
-            throw new NotSupportedException("Cannot query current mouse position"); // Not currently supported by this device
-        }
-
-        /// <summary>
-        /// Clicks the mouse at the given position.
-        /// </summary>
-        /// <param name="button">Button to click</param>
-        public void Click(MouseButton button)
-        {
-            int btn = GetButtonKeyCode(button);
-
-            Emit(_fd, EV_KEY, btn, 1);
-            Emit(_fd, EV_SYN, SYN_REPORT, 0);
-            Emit(_fd, EV_KEY, btn, 0);
-            Emit(_fd, EV_SYN, SYN_REPORT, 0);
-        }
-
-        private static int GetButtonKeyCode(MouseButton button)
-        {
-            int btn = 0;
-            switch (button)
-            {
-                case MouseButton.Left:
-                    btn = BTN_LEFT;
-                    break;
-                case MouseButton.Right:
-                    btn = BTN_RIGHT;
-                    break;
-                case MouseButton.Middle:
-                    btn = BTN_MIDDLE;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(button));
-            }
-
-            return btn;
-        }
-
-        /// <inheritdoc />
-        public void ButtonDown(MouseButton button)
-        {
-            int btn = GetButtonKeyCode(button);
-
-            Emit(_fd, EV_KEY, btn, 1);
-            Emit(_fd, EV_SYN, SYN_REPORT, 0);
-        }
-
-        /// <inheritdoc />
-        public void ButtonUp(MouseButton button)
-        {
-            int btn = GetButtonKeyCode(button);
-
-            Emit(_fd, EV_KEY, btn, 0);
-            Emit(_fd, EV_SYN, SYN_REPORT, 0);
-        }
-
-        /// <summary>
-        /// Closes the device
-        /// </summary>
-        public void Dispose()
-        {
-            if (_fd > 0)
-            {
-                Interop.ioctl(_fd, UI_DEV_DESTROY, 0);
-                Interop.close(_fd);
-            }
-
-            _fd = 0;
-        }
-
-        private void Emit(int fd, int type, int code, int val)
-        {
-            input_event ie = default;
-
-            ie.time_sec = 0;
-            ie.time_usec = 0;
-            ie.type = (UInt16)type;
-            ie.code = (UInt16)code;
-            ie.value = val;
-            /* timestamp values below are ignored */
-
-            int size = sizeof(input_event);
-            int result = Interop.write(fd, new IntPtr(&ie), size);
-            if (result != size)
-            {
-                throw new IOException($"Unable to write to input device stream: {Marshal.GetLastWin32Error()}");
-            }
-        }
-}
+    }
 }

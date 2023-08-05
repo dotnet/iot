@@ -21,7 +21,7 @@ namespace Iot.Device.Gui
             var os = Environment.OSVersion;
             if (os.Platform == PlatformID.Unix)
             {
-                throw new NotImplementedException("TODO");
+                return new MouseClickSimulatorUInputRelative();
             }
 
             if (os.Platform == PlatformID.Win32NT)

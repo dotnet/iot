@@ -13,10 +13,12 @@ Console.WriteLine("Attempting to control your mouse");
 
 var screen = new ScreenCapture();
 Rectangle size = screen.ScreenSize();
+Console.WriteLine($"Screen size is {size.Width}*{size.Height}.");
+Console.WriteLine($"Trying with absolute coordinates");
 var myMouse = VirtualPointingDevice.CreateAbsolute(size.Width, size.Height);
 
 // Note: The sample is not attempting to click anywhere, because that could result in some undesired effect
-for (int i = 0; i < 10; i++)
+for (int i = 0; i < 5; i++)
 {
     myMouse.MoveTo(0, 0);
     Thread.Sleep(1000);
@@ -25,3 +27,20 @@ for (int i = 0; i < 10; i++)
     myMouse.MoveTo(size.Width, size.Height);
     Thread.Sleep(1000);
 }
+
+myMouse.Dispose();
+
+Console.WriteLine($"Trying with relative coordinates");
+myMouse = VirtualPointingDevice.CreateRelative();
+
+for (int i = 0; i < 10; i++)
+{
+    myMouse.MoveBy(10, 10);
+    Thread.Sleep(1000);
+    myMouse.MoveBy(20, 5);
+    Thread.Sleep(1000);
+    myMouse.MoveBy(-30, -15);
+    Thread.Sleep(1000);
+}
+
+myMouse.Dispose();
