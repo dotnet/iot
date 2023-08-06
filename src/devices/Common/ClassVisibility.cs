@@ -53,10 +53,6 @@ namespace Iot.Device.Common
     internal partial class NumberHelper
     {
     }
-
-    internal partial struct Window
-    {
-    }
 }
 
 namespace System.Device

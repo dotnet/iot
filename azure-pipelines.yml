@@ -47,7 +47,7 @@ stages:
       displayName: 'Execute Markdownlint'
       condition: eq(variables['build.reason'], 'PullRequest')
 
-      # Hint: Add  to disable parellelization in build. Ensures all tests results are printed to the console
+      # Hint: Add /maxCpuCount:1 to disable parellelization in build. Ensures all tests results are printed to the console
     - script: build.cmd -ci
         -configuration $(BuildConfiguration)
         -prepareMachine
@@ -129,7 +129,7 @@ stages:
     steps:
     - script: ./build.sh --ci
         --configuration $(BuildConfiguration)
-        --prepareMachine /maxCpuCount:1
+        --prepareMachine
       displayName: Build
 
     - script: ./eng/common/msbuild.sh --warnaserror false --ci
@@ -168,7 +168,7 @@ stages:
     steps:
     - script: ./build.sh --ci
         --configuration $(BuildConfiguration)
-        --prepareMachine /maxCpuCount:1
+        --prepareMachine
       displayName: Build
 
     - task: PublishBuildArtifacts@1
