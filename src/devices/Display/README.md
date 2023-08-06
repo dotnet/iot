@@ -35,6 +35,13 @@ display.Dots = Dot.DecimalPoint;
 // Send buffer to the device
 display.Flush();
 ```
+## 14-Segment Display
+
+This display (https://shop.pimoroni.com/products/four-letter-phat?variant=39256047178) is good for showing alpha-numeric output, and its additional segments provide a wider range of characters 
+
+<img src="https://shop.pimoroni.com/cdn/shop/products/Four_letter_pHAT_5_of_5_1a005b45-151c-4938-8610-8ec758b4182d_1500x1500.JPG?v=1539263861" width ="250px" title="Pimoroni Four Letter Phat" />
+
+Checkout a [sample](samples/Large4Digit14SegmentDisplay/Program.cs).
 
 ## 8x8 and 16x8 LED Matrix
 
