@@ -17,7 +17,7 @@ namespace Iot.Device.Display
     /// https://github.com/adafruit/Adafruit_LED_Backpack/blob/master/Adafruit_LEDBackpack.cpp
     /// https://github.com/sobek1985/Adafruit_LEDBackpack/blob/master/Adafruit_LEDBackpack/AlphaNumericFourCharacters.cs
     /// </remarks>
-    public partial class Large4Digit14SegmentDisplay : Ht16k33, IFourteenSegmentDisplay
+    public partial class Large4Digit14SegmentDisplay : Ht16k33
     {
         #region Private members
         #region Constants
@@ -121,7 +121,9 @@ namespace Iot.Device.Display
         {
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Gets the number of digits supported by the display
+        /// </summary>
         public int NumberOfDigits { get; } = MaxNumberOfDigits;
 
         /// <summary>
@@ -145,7 +147,6 @@ namespace Iot.Device.Display
         /// <exception cref="ArgumentOutOfRangeException"><see cref="Large4Digit7SegmentDisplay"/> only supports <see cref="MaxNumberOfDigits"/> digits</exception>
         public override void Write(ReadOnlySpan<byte> digits, int startAddress = 0)
         {
-            Console.WriteLine($"Length: {digits.Length}");
             if (digits.Length == 0)
             {
                 // Nothing to write
@@ -175,7 +176,7 @@ namespace Iot.Device.Display
         /// </summary>
         /// <param name="digits">Array of ushort to write to the display</param>
         /// <param name="startAddress">Address to start writing from</param>
-        public void Write(ReadOnlySpan<ushort> digits, int startAddress = 0)
+        private void Write(ReadOnlySpan<ushort> digits, int startAddress = 0)
         {
             if (digits.Length == 0)
             {
@@ -205,11 +206,19 @@ namespace Iot.Device.Display
             AutoFlush();
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Write a series of digits to the display buffer
+        /// </summary>
+        /// <param name="digits">a list of digits represented in segments</param>
+        /// <param name="startAddress">Address to start writing from</param>
         public void Write(ReadOnlySpan<Segment14> digits, int startAddress = 0) =>
             Write(MemoryMarshal.Cast<Segment14, ushort>(digits), startAddress);
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// Write a series of characters to the display buffer
+        /// </summary>
+        /// <param name="characters">a list of characters represented in fonts</param>
+        /// <param name="startAddress">Address to start writing from</param>
         public void Write(ReadOnlySpan<Font14> characters, int startAddress = 0) =>
             Write(MemoryMarshal.Cast<Font14, ushort>(characters), startAddress);
 
@@ -279,6 +288,38 @@ namespace Iot.Device.Display
 
             Write(FontHelper14.GetString(value));
         }
+
+        /// <summary>
+        /// Write an array of up to 4 bytes as hex
+        /// </summary>
+        /// <param name="values">Array of bytes</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="values"/>Length of array must be greater 0 and less than  MaxNumberOfDigits</exception>
+        public void WriteHex(byte[] values)
+        {
+            if (values.Length > 4)
+            {
+                throw new ArgumentOutOfRangeException(nameof(values), $"{nameof(values)} can contain maximum {MaxNumberOfDigits} bytes");
+            }
+
+            Write(FontHelper14.GetHexDigits(values));
+        }
+
+        /// <summary>
+        /// Write a single char to a spcific display digit
+        /// </summary>
+        /// <param name="c">The character to display</param>
+        /// <param name="pos">zero-based index of character position from the left</param>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="pos"/>position must be between 0 and MaxNumberOfDigits-1</exception>
+        public void WriteChar(char c, int pos)
+        {
+            if (pos >= MaxNumberOfDigits || pos < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(pos), $"{nameof(pos)} must be between 0 and  {MaxNumberOfDigits - 1} bytes");
+            }
+
+            this[pos] = (Segment14)FontHelper.GetCharacter(c);
+        }
+
         #endregion
         #endregion
     }

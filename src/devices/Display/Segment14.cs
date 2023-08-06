@@ -124,6 +124,11 @@ namespace Iot.Device.Display
         Right = TopRight | BottomRight,
 
         /// <summary>
+        /// Whole right segment
+        /// </summary>
+        Center = North | South,
+
+        /// <summary>
         /// Forward Slash
         /// </summary>
         ForwardSlash = NorthEast | SouthWest,

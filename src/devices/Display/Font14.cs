@@ -112,7 +112,7 @@ namespace Iot.Device.Display
         /// <summary>
         /// Upper case letter B (same as digit 8)
         /// </summary>
-        Letter_B = Digit_8,
+        Letter_B = Segment14.Top | Segment14.Middle | Segment14.Bottom | Segment14.North | Segment14.South | Segment14.Right,
 
         /// <summary>
         /// Lower case letter b

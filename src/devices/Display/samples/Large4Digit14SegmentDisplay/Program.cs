@@ -22,10 +22,10 @@ display.Write("Iot");
 Thread.Sleep(2000);
 
 // Change 'o' to '°' in "IoT"
-display[1] = (Segment14)FontHelper.GetCharacter('°');
+display.WriteChar('°', 1);
 
-// Wait .5 seconds
-Thread.Sleep(500);
+// Wait 2 seconds
+Thread.Sleep(2000);
 
 // Write 42 to the left side of the display
 display.Write(42, Alignment.Left);
@@ -61,8 +61,7 @@ Thread.Sleep(3000);
 display.BufferingEnabled = true;
 
 // Write -42°C to display using "decimal point" between 3rd and 4th digit as the ° character
-display.Write("-42C");
-// display.Dots = Dot.DecimalPoint;
+display.Write("-42.C");
 
 // Turn off buffering
 display.BufferingEnabled = false;
@@ -93,7 +92,7 @@ var hexDigits = new byte[4];
 new Random().NextBytes(hexDigits);
 
 // Display random hex number
-display.Write(FontHelper14.GetHexDigits(hexDigits));
+display.WriteHex(hexDigits);
 
 // Wait 3 seconds
 Thread.Sleep(3000);
@@ -120,22 +119,6 @@ for (int i = 0, l = SupportedCharacters.Length - 3; i < l; i++)
     // Wait 0.5 seconds
     Thread.Sleep(500);
 }
-
-/*
-var dots = new[] { Dot.CenterColon, Dot.DecimalPoint, Dot.LeftLower, Dot.LeftUpper };
-
-// Iterate dots
-foreach (var dot in dots)
-{
-    display.Dots = dot;
-
-    // Wait 0.5 seconds
-    Thread.Sleep(500);
-}
-
-// Set all supported dots
-display.Dots = Dot.CenterColon | Dot.DecimalPoint | Dot.LeftLower | Dot.LeftUpper;
-*/
 
 // Wait 3 seconds
 Thread.Sleep(3000);

@@ -16,7 +16,6 @@
     <Compile Include="FontHelper.cs" />
     <Compile Include="FontHelper14.cs" />
     <Compile Include="ISevenSegmentDisplay.cs" />
-    <Compile Include="IFourteenSegmentDisplay.cs" />
     <Compile Include="Large4Digit7SegmentDisplay.cs" />
     <Compile Include="Large4Digit14SegmentDisplay.cs" />
     <Compile Include="LedColor.cs" />

@@ -12,7 +12,7 @@ namespace Iot.Device.Display
     /// Sources:
     /// Derived from /src/devices/Display/FontHelper.cs
     /// </remarks>
-    public static class FontHelper14
+    internal static class FontHelper14
     {
         #region Private members
 
@@ -181,10 +181,11 @@ namespace Iot.Device.Display
         /// <param name="output">list of corresponding character fonts</param>
         public static void ConvertString(ReadOnlySpan<char> input, Span<Font14> output)
         {
-            /*if (input.Length != output.Length)
+             /*if (input.Length != output.Length)
             {
                 throw new InvalidOperationException($"{nameof(input)} and {nameof(output)} length must be the same");
             }*/
+
             var fsOffset = 0;
             for (int i = 0, l = input.Length; i < l; i++)
             {
