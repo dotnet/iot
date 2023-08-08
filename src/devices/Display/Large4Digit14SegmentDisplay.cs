@@ -296,7 +296,7 @@ namespace Iot.Device.Display
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="values"/>Length of array must be greater 0 and less than  MaxNumberOfDigits</exception>
         public void WriteHex(byte[] values)
         {
-            if (values.Length > 4)
+            if (values.Length > MaxNumberOfDigits)
             {
                 throw new ArgumentOutOfRangeException(nameof(values), $"{nameof(values)} can contain maximum {MaxNumberOfDigits} bytes");
             }
@@ -317,7 +317,11 @@ namespace Iot.Device.Display
                 throw new ArgumentOutOfRangeException(nameof(pos), $"{nameof(pos)} must be between 0 and  {MaxNumberOfDigits - 1} bytes");
             }
 
-            this[pos] = (Segment14)FontHelper.GetCharacter(c);
+            Font14[] ch = { FontHelper14.GetCharacter(c) };
+
+            var tp = new ReadOnlySpan<Font14>(ch);
+
+            Write(tp, pos);
         }
 
         #endregion
