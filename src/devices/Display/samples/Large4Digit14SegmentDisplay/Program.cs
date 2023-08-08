@@ -6,7 +6,7 @@ using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Display;
 
-const string SupportedCharacters = "0123456789aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ-=_|°[]     ";
+const string SupportedCharacters = "0123456789aAbBcCdDeEfFgGhHiIjJkKlLmMnNoOpPqQrRsStTuUvVwWxXyYzZ-=+/\\*?%_|°[]     ";
 
 // Initialize display
 using Large4Digit14SegmentDisplay display = new(I2cDevice.Create(new I2cConnectionSettings(busId: 1, Ht16k33.DefaultI2cAddress)))

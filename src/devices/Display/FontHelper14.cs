@@ -163,7 +163,10 @@ namespace Iot.Device.Display
             _ when value >= 'A' && value <= 'Z' => s_upperCaseLetters[value - 'A'],
             _ when value >= 'a' && value <= 'z' => s_lowerCaseLetters[value - 'a'],
             _ when value >= '0' && value <= '9' => s_hexDigits[value - '0'],
+            '+' => Font14.Symbol_Plus,
             '-' => Font14.Symbol_Minus,
+            '\\' => Font14.Symbol_BackSlash,
+            '/' => Font14.Symbol_ForwardSlash,
             '=' => Font14.Symbol_Equals,
             '_' => Font14.Symbol_Underscore,
             '|' => Font14.Symbol_Pipe,
@@ -171,6 +174,9 @@ namespace Iot.Device.Display
             '[' => Font14.Symbol_LeftSquareBracket,
             ']' => Font14.Symbol_RightSquareBracket,
             '.' => Font14.Symbol_FullStop,
+            '?' => Font14.Symbol_QuestionMark,
+            '%' => Font14.Symbol_Percent,
+            '*' => Font14.Symbol_Asterisk,
             _ => Font14.Whitespace
         };
 
