@@ -44,10 +44,10 @@ namespace Iot.Device.Gui
         void MoveBy(int x, int y);
 
         /// <summary>
-        /// Click once with the given button
+        /// Click once with the given buttons
         /// </summary>
-        /// <param name="button">Button to press</param>
-        void Click(MouseButton button);
+        /// <param name="buttons">Button(s) to press</param>
+        void Click(MouseButton buttons);
 
         /// <summary>
         /// Returns the current position (always absolute)
@@ -55,15 +55,15 @@ namespace Iot.Device.Gui
         Point GetPosition();
 
         /// <summary>
-        /// Press (and start holding) the button
+        /// Press (and start holding) the given buttons
         /// </summary>
-        /// <param name="button">Button to press</param>
-        void ButtonDown(MouseButton button);
+        /// <param name="buttons">Buttons to press</param>
+        void ButtonDown(MouseButton buttons);
 
         /// <summary>
-        /// Release the button
+        /// Release the given buttons
         /// </summary>
-        /// <param name="button">Button to release</param>
-        void ButtonUp(MouseButton button);
+        /// <param name="buttons">Buttons to release</param>
+        void ButtonUp(MouseButton buttons);
     }
 }

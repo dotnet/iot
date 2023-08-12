@@ -14,11 +14,13 @@ namespace Iot.Device.Gui
 {
     internal partial class InteropGui
     {
+        /// <summary>
+        /// Name of the X11 dynamic link library. Install with `sudo apt install libx11-dev` if not present.
+        /// </summary>
         internal const string X11 = "libX11.so";
 
         // Definitions for this file come from X.h and Xlib.h from the Raspberry Pi (32 Bit Raspberry Pi OS)
-        // Some structures may have different alignment on 64 bit systems, so that it may be required to replace
-        // some field types with nint/nuint
+        // They where tested to work with 64 bit ARM as well.
         internal static UInt32 AllPlanes = 0xFFFF_FFFF;
 
         internal static UInt32 XYBitmap = 0; /* depth 1, XYFormat */
@@ -130,12 +132,25 @@ namespace Iot.Device.Gui
         [DllImport(X11)]
         internal static extern unsafe Window XDefaultRootWindow(IntPtr display);
 
+        /// <summary>
+        /// Retrieves window attributes
+        /// </summary>
+        /// <param name="display">The display to operate on</param>
+        /// <param name="w">The window handle to use</param>
+        /// <param name="window_attributes_return">Out: A window attribute structure</param>
+        /// <returns></returns>
         [DllImport(X11)]
         internal static extern int XGetWindowAttributes(
             IntPtr display,
             Window w,
             ref XWindowAttributes window_attributes_return);
 
+        /// <summary>
+        /// Returns an user-readable description of a window, for debugging purposes
+        /// </summary>
+        /// <param name="display">The display handle</param>
+        /// <param name="w">The window handle</param>
+        /// <returns>A string containing name and size of the given window</returns>
         internal static string GetWindowDescription(IntPtr display, Window w)
         {
             XWindowAttributes attr = default;
@@ -144,6 +159,9 @@ namespace Iot.Device.Gui
             return $"Window {w}: Location {attr.x}/{attr.y} Size {attr.width}/{attr.height}";
         }
 
+        /// <summary>
+        /// Gets the color of a pixel in an image
+        /// </summary>
         [DllImport(X11)]
         internal static extern UInt32 XGetPixel(IntPtr image, int x, int y);
 
@@ -155,13 +173,30 @@ namespace Iot.Device.Gui
         [DllImport(X11)]
         internal static extern int XDestroyImage(IntPtr image);
 
+        /// <summary>
+        /// Free an image created by <see cref="XGetImage"/>
+        /// </summary>
+        /// <param name="image">The image handle to dispose</param>
+        /// <returns>Result code</returns>
         [DllImport(X11)]
         internal static extern int XFree(XImage image);
 
+        /// <summary>
+        /// Gets an image of the current display/window
+        /// </summary>
+        /// <param name="display">Display to operate on</param>
+        /// <param name="w">Window handle</param>
+        /// <param name="x">Left edge of window portion to grab</param>
+        /// <param name="y">Top edge of window portion to grab</param>
+        /// <param name="width">Width of area to grab</param>
+        /// <param name="height">Height of area to grab</param>
+        /// <param name="plane_mask">Mask of image planes to get. Normally <see cref="AllPlanes"/></param>
+        /// <param name="format">Image format, normally <see cref="ZPixmap"/></param>
+        /// <returns></returns>
         [DllImport(X11)]
         internal static extern IntPtr XGetImage(
             IntPtr display,
-            Window d, // Window
+            Window w, // Window
             int x,
             int y,
             UInt32 width,
@@ -169,6 +204,9 @@ namespace Iot.Device.Gui
             UInt32 plane_mask,
             UInt32 format);
 
+        /// <summary>
+        /// Queries the mouse pointer
+        /// </summary>
         [DllImport(X11)]
         internal static extern bool XQueryPointer(
             IntPtr display, /* display */
@@ -181,6 +219,9 @@ namespace Iot.Device.Gui
             [In, Out] ref int win_y_return, /* win_y_return */
             [In, Out] ref uint mask_return); /* mask_return */
 
+        /// <summary>
+        /// Send an event to the window message queue
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XSendEvent(
             IntPtr display, /* display */
@@ -189,6 +230,9 @@ namespace Iot.Device.Gui
             int event_mask, /* event_mask */
             [In, Out] ref XButtonEvent event_send); /* event_send */
 
+        /// <summary>
+        /// Send an event to the window message queue
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XSendEvent(
             IntPtr display, /* display */
@@ -197,9 +241,17 @@ namespace Iot.Device.Gui
             int event_mask, /* event_mask */
             [In, Out] ref XMotionEvent event_send); /* event_send */
 
+        /// <summary>
+        /// Flush all commands to the display
+        /// </summary>
+        /// <param name="display">The display handle</param>
+        /// <returns>Error return</returns>
         [DllImport(X11)]
         internal static extern int XFlush(IntPtr display);
 
+        /// <summary>
+        /// Queries for button press events in the event handler queue
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XWindowEvent(
             IntPtr display,
@@ -207,6 +259,9 @@ namespace Iot.Device.Gui
             int event_mask,
             ref XButtonEvent event_return);
 
+        /// <summary>
+        /// Queries for mouse move events in the event handler queue
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XWindowEvent(
             IntPtr display,
@@ -214,6 +269,9 @@ namespace Iot.Device.Gui
             int event_mask,
             ref XMotionEvent event_return);
 
+        /// <summary>
+        /// A method to create a very simplistic window
+        /// </summary>
         [DllImport(X11)]
         internal static extern Window XCreateSimpleWindow(
             IntPtr display,
@@ -226,15 +284,24 @@ namespace Iot.Device.Gui
             Int32 border,
             Int32 background);
 
+        /// <summary>
+        /// Enable handling of certain event types by the given window
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XSelectInput(
             IntPtr display,
             Window w,
             int event_mask);
 
+        /// <summary>
+        /// Make sure the window is visible
+        /// </summary>
         [DllImport(X11)]
         internal static extern void XMapWindow(IntPtr display, Window w);
 
+        /// <summary>
+        /// Transform mouse positions between windows
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XWarpPointer(
             IntPtr display,
@@ -247,17 +314,32 @@ namespace Iot.Device.Gui
             int dest_x,
             int dest_y);
 
+        /// <summary>
+        /// Look at the next event without actually consuming it
+        /// </summary>
+        /// <param name="display">The display to use</param>
+        /// <param name="event_return">The next event in the queue</param>
+        /// <returns>Error return</returns>
         [DllImport(X11)]
         internal static extern int XPeekEvent(IntPtr display, [In, Out] ref XEvent event_return);
 
+        /// <summary>
+        /// Hide the given window
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XUnmapWindow(
             IntPtr display,
             Window w);
 
+        /// <summary>
+        /// Destroy a window and clear its resources
+        /// </summary>
         [DllImport(X11)]
         internal static extern int XDestroyWindow(IntPtr display, Window w);
 
+        /// <summary>
+        /// Structure with window attributes
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct XWindowAttributes
         {
@@ -299,6 +381,9 @@ namespace Iot.Device.Gui
 
         internal unsafe delegate int AddPixel(XImage image, int x, int y, UInt32 color);
 
+        /// <summary>
+        /// Structure representing an image in the X11 world
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal class XImage
         {
@@ -326,6 +411,9 @@ namespace Iot.Device.Gui
             public UInt64 pad4;*/
         }
 
+        /// <summary>
+        /// Image function callbacks
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct ImageFuncs
         {
@@ -433,6 +521,12 @@ namespace Iot.Device.Gui
             public uint same_screen; /* same screen flag */
         }
 
+        /// <summary>
+        /// Union of the above (add more if you need to have other events, such as keyboard)
+        /// </summary>
+        /// <remarks>
+        /// Note that this is an union. All members start at offset 0, and therefore also the different event types include the type field.
+        /// </remarks>
         [StructLayout(LayoutKind.Explicit)]
         internal unsafe struct XEvent
         {

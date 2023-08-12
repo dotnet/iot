@@ -43,56 +43,74 @@ namespace Iot.Device.Gui
         public abstract void MoveBy(int x, int y);
 
         /// <summary>
-        /// Clicks the mouse at the given position.
+        /// Clicks the mouse at the given position using a set of buttons
         /// </summary>
-        /// <param name="button">Button to click</param>
-        public void Click(MouseButton button)
+        /// <param name="buttons">Button to click</param>
+        public void Click(MouseButton buttons)
         {
-            int btn = GetButtonKeyCode(button);
+            IList<int> buttonList = GetButtonKeyCodes(buttons);
 
-            Emit(_fd, InteropGui.EV_KEY, btn, 1);
-            Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
-            Emit(_fd, InteropGui.EV_KEY, btn, 0);
-            Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
-        }
-
-        protected static int GetButtonKeyCode(MouseButton button)
-        {
-            int btn = 0;
-            switch (button)
+            foreach (var btn in buttonList)
             {
-                case MouseButton.Left:
-                    btn = InteropGui.BTN_LEFT;
-                    break;
-                case MouseButton.Right:
-                    btn = InteropGui.BTN_RIGHT;
-                    break;
-                case MouseButton.Middle:
-                    btn = InteropGui.BTN_MIDDLE;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(button));
+                Emit(_fd, InteropGui.EV_KEY, btn, 1);
+                Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
             }
 
-            return btn;
+            foreach (var btn2 in buttonList)
+            {
+                Emit(_fd, InteropGui.EV_KEY, btn2, 0);
+                Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
+            }
+        }
+
+        private static IList<int> GetButtonKeyCodes(MouseButton buttons)
+        {
+            if (buttons == MouseButton.None)
+            {
+                return Array.Empty<int>();
+            }
+
+            List<int> buttonList = new List<int>();
+            if (buttons.HasFlag(MouseButton.Left))
+            {
+                buttonList.Add(InteropGui.BTN_LEFT);
+            }
+
+            if (buttons.HasFlag(MouseButton.Middle))
+            {
+                buttonList.Add(InteropGui.BTN_MIDDLE);
+            }
+
+            if (buttons.HasFlag(MouseButton.Right))
+            {
+                buttonList.Add(InteropGui.BTN_RIGHT);
+            }
+
+            return buttonList;
         }
 
         /// <inheritdoc />
-        public void ButtonDown(MouseButton button)
+        public void ButtonDown(MouseButton buttons)
         {
-            int btn = GetButtonKeyCode(button);
+            IList<int> buttonList = GetButtonKeyCodes(buttons);
 
-            Emit(_fd, InteropGui.EV_KEY, btn, 1);
-            Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
+            foreach (var btn in buttonList)
+            {
+                Emit(_fd, InteropGui.EV_KEY, btn, 1);
+                Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
+            }
         }
 
         /// <inheritdoc />
-        public void ButtonUp(MouseButton button)
+        public void ButtonUp(MouseButton buttons)
         {
-            int btn = GetButtonKeyCode(button);
+            IList<int> buttonList = GetButtonKeyCodes(buttons);
 
-            Emit(_fd, InteropGui.EV_KEY, btn, 0);
-            Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
+            foreach (var btn in buttonList)
+            {
+                Emit(_fd, InteropGui.EV_KEY, btn, 0);
+                Emit(_fd, InteropGui.EV_SYN, InteropGui.SYN_REPORT, 0);
+            }
         }
 
         protected unsafe void Emit(int fd, int type, int code, int val)

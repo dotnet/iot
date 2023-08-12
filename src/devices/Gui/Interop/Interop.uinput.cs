@@ -124,6 +124,9 @@ namespace Iot.Device.Gui
             public UInt16 version;
         }
 
+        /// <summary>
+        /// Structure to set up an input device
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal unsafe struct uinput_setup
         {
@@ -132,6 +135,9 @@ namespace Iot.Device.Gui
             public UInt32 ff_effects_max;
         }
 
+        /// <summary>
+        /// Structure for an event of an input device
+        /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 2)]
         internal struct input_event
         {
@@ -193,6 +199,9 @@ namespace Iot.Device.Gui
             public Int32 resolution;
         }
 
+        /// <summary>
+        /// Structure used to set up an absolute pointing device
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         internal struct uinput_abs_setup
         {
