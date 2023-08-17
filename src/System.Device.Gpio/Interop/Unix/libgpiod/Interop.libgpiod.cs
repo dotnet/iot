@@ -8,15 +8,48 @@
 using System;
 using System.Device.Gpio;
 using System.Runtime.InteropServices;
+#if NET6_0_OR_GREATER
+using System.Runtime.Loader;
+using System.Reflection;
+#endif
 // Since this is only used on Linux, and in C on Linux sizeof(long) == sizeof(void*) this is a valid alias.
 using NativeLong = System.IntPtr;
 
 internal partial class Interop
 {
-    internal partial class libgpiod
+    internal static partial class Libgpiod
     {
+#if NET6_0_OR_GREATER
+        private const string LibgpiodLibrary = "libgpiod.so.2";
+#else
         private const string LibgpiodLibrary = "libgpiod";
-        internal static IntPtr InvalidHandleValue = new IntPtr(-1);
+#endif
+        internal static IntPtr InvalidHandleValue;
+
+        static Libgpiod()
+        {
+            InvalidHandleValue = new IntPtr(-1);
+#if NET6_0_OR_GREATER
+            Assembly currentAssembly = typeof(Libgpiod).Assembly;
+
+            AssemblyLoadContext.GetLoadContext(currentAssembly)!.ResolvingUnmanagedDll += (assembly, libgpiodName) =>
+            {
+                if (assembly != currentAssembly || libgpiodName != LibgpiodLibrary)
+                {
+                    return IntPtr.Zero;
+                }
+
+                // If loading the 2.x libgpiod failed, we may be running in a Linux distribution that has the 1.x
+                // version installed, so we try to load that instead.
+                if (NativeLibrary.TryLoad("libgpiod.so.1", out IntPtr handle))
+                {
+                    return handle;
+                }
+
+                return IntPtr.Zero;
+            };
+#endif
+        }
 
         /// <summary>
         /// Release all resources allocated for the gpiochip iterator and close the most recently opened gpiochip(if any).

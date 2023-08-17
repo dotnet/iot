@@ -20,17 +20,17 @@ internal class SafeLineHandle : SafeHandle
     protected override bool ReleaseHandle()
     {
         // Contrary to intuition, this does not invalidate the handle (see comment on declaration)
-        Interop.libgpiod.gpiod_line_release(handle);
+        Interop.Libgpiod.gpiod_line_release(handle);
         return true;
     }
 
     /// <summary>
-    /// Release the lock on the line handle. <see cref="Interop.libgpiod.gpiod_line_release"/>
+    /// Release the lock on the line handle. <see cref="Interop.Libgpiod.gpiod_line_release"/>
     /// </summary>
     public void ReleaseLock()
     {
         ReleaseHandle();
     }
 
-    public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.libgpiod.InvalidHandleValue;
+    public override bool IsInvalid => handle == IntPtr.Zero || handle == Interop.Libgpiod.InvalidHandleValue;
 }
