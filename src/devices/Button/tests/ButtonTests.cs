@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Xunit;
 
@@ -47,14 +48,18 @@ namespace Iot.Device.Button.Tests
         }
 
         [Fact]
-        public void If_Button_Is_Held_Holding_Event_Fires()
+        public async Task If_Button_Is_Held_Holding_Event_Fires()
         {
             bool pressed = false;
             bool holding = false;
             bool doublePressed = false;
 
-            TestButton button = new TestButton();
+            // we set short times to avoid wasting when executing the tests
+            var debounceTime = TimeSpan.FromMilliseconds(200);
+            var holdingTime = TimeSpan.FromMilliseconds(400);
+            TestButton button = new TestButton(debounceTime, holdingTime);
             button.IsHoldingEnabled = true;
+            TaskCompletionSource<DateTime> tcs = new TaskCompletionSource<DateTime>();
 
             button.Press += (sender, e) =>
             {
@@ -64,6 +69,10 @@ namespace Iot.Device.Button.Tests
             button.Holding += (sender, e) =>
             {
                 holding = true;
+                if (e.HoldingState == ButtonHoldingState.Completed)
+                {
+                    tcs.SetResult(DateTime.Now);
+                }
             };
 
             button.DoublePress += (sender, e) =>
@@ -71,13 +80,21 @@ namespace Iot.Device.Button.Tests
                 doublePressed = true;
             };
 
+            DateTime now = DateTime.Now;
             button.PressButton();
 
-            // Wait longer than default holding threshold milliseconds, for the click to be recognized as a holding event.
-            Thread.Sleep(2100);
+            Thread.Sleep((int)holdingTime.TotalMilliseconds + 100);
 
             button.ReleaseButton();
 
+            // this is only needed to avoid to wait indefinitely in case the code gets broken and the test fail
+            var firstTask = await Task.WhenAny(tcs.Task, Task.Delay(2 * (int)holdingTime.TotalMilliseconds));
+            Assert.True(tcs.Task == firstTask, "holding timeout");
+
+            // holdingTime is the DateTime retrieved in the holding timer handler
+            var effectiveHoldingTime = tcs.Task.Result;
+
+            Assert.True(effectiveHoldingTime - now >= holdingTime, "holding");
             Assert.True(holding, "holding");
             Assert.True(pressed, "pressed");
             Assert.False(doublePressed, "doublePressed");
@@ -255,7 +272,8 @@ namespace Iot.Device.Button.Tests
             bool doublePressed = false;
             int pressedCounter = 0;
 
-            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000));
+            var holdingTime = TimeSpan.FromMilliseconds(2000);
+            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
 
             button.Press += (sender, e) =>
             {
@@ -305,7 +323,8 @@ namespace Iot.Device.Button.Tests
             int pressedCounter = 0;
 
             // holding is 2 secs, debounce is 1 sec
-            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000));
+            var holdingTime = TimeSpan.FromMilliseconds(2000);
+            TestButton button = new TestButton(TimeSpan.FromMilliseconds(1000), holdingTime);
             button.IsHoldingEnabled = true;
 
             button.Press += (sender, e) =>
