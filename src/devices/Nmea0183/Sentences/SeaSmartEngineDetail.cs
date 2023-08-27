@@ -42,7 +42,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public SeaSmartEngineDetail(EngineData data)
         {
-            Status = !data.Revolutions.Equals(RotationalSpeed.Zero, 0, ComparisonType.Absolute);
+            Status = !data.Revolutions.Equals(RotationalSpeed.Zero, RotationalSpeed.Zero);
             OperatingTime = data.OperatingTime;
             Temperature = data.EngineTemperature;
             EngineNumber = data.EngineNo;

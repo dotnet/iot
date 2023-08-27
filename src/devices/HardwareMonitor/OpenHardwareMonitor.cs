@@ -593,7 +593,7 @@ namespace Iot.Device.HardwareMonitor
         /// <exception cref="ArgumentOutOfRangeException"><paramref name="monitoringInterval"/> is less than 0.</exception>
         public void EnableDerivedSensors(Area cpuDieSize = default, TimeSpan monitoringInterval = default)
         {
-            if (cpuDieSize.Equals(Area.Zero, 0, ComparisonType.Absolute))
+            if (cpuDieSize.Equals(Area.Zero, Area.Zero))
             {
                 // Values for some recent intel chips (coffee lake)
                 if (LogicalProcessors <= 4)
