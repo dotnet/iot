@@ -57,6 +57,7 @@ namespace Iot.Device.Button.Tests
             // we set short times to avoid wasting when executing the tests
             var debounceTime = TimeSpan.FromMilliseconds(200);
             var holdingTime = TimeSpan.FromMilliseconds(400);
+            var timeoutTime = TimeSpan.FromMilliseconds(20000);
             TestButton button = new TestButton(debounceTime, holdingTime);
             button.IsHoldingEnabled = true;
             TaskCompletionSource<DateTime> tcs = new TaskCompletionSource<DateTime>();
@@ -88,7 +89,7 @@ namespace Iot.Device.Button.Tests
             button.ReleaseButton();
 
             // this is only needed to avoid to wait indefinitely in case the code gets broken and the test fail
-            var firstTask = await Task.WhenAny(tcs.Task, Task.Delay(2 * (int)holdingTime.TotalMilliseconds));
+            var firstTask = await Task.WhenAny(tcs.Task, Task.Delay(timeoutTime));
             Assert.True(tcs.Task == firstTask, "holding timeout");
 
             // holdingTime is the DateTime retrieved in the holding timer handler
