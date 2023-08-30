@@ -50,7 +50,7 @@ namespace Iot.Device.Button.Tests
         }
 
         [Fact]
-        public async void If_Button_Is_Held_Holding_Event_Fires()
+        public async Task If_Button_Is_Held_Holding_Event_Fires()
         {
             bool pressed = false;
             bool holding = false;
