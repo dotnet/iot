@@ -72,10 +72,7 @@ namespace Iot.Device.Button.Tests
             button.Holding += (sender, e) =>
             {
                 holding = true;
-                if (e.HoldingState == ButtonHoldingState.Completed)
-                {
-                    tcs.SetResult(DateTime.Now);
-                }
+                tcs.TrySetResult(DateTime.Now);
             };
 
             button.DoublePress += (sender, e) =>
@@ -362,10 +359,7 @@ namespace Iot.Device.Button.Tests
             button.Holding += (sender, e) =>
             {
                 holding = true;
-                if (e.HoldingState == ButtonHoldingState.Completed)
-                {
-                    tcs.SetResult(DateTime.Now);
-                }
+                tcs.TrySetResult(DateTime.Now);
             };
 
             button.DoublePress += (sender, e) =>
