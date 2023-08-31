@@ -722,7 +722,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 if (File.Exists(ModelFilePath))
                 {
                     string model = File.ReadAllText(ModelFilePath, Text.Encoding.ASCII);
-                    if (model.Contains("Raspberry Pi 4"))
+                    if (model.Contains("Raspberry Pi 4") || model.Contains("Raspberry Pi Compute Module 4"))
                     {
                         IsPi4 = true;
                     }
