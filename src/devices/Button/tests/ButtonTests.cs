@@ -2,15 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Iot.Device.Button.Tests
 {
     public class ButtonTests
     {
+        private readonly ITestOutputHelper _testOutput;
+
+        public ButtonTests(ITestOutputHelper testOutput)
+        {
+            _testOutput = testOutput;
+        }
+
         [Fact]
         public void If_Button_Is_Once_Pressed_Press_Event_Fires()
         {
@@ -63,6 +72,7 @@ namespace Iot.Device.Button.Tests
             TestButton button = new TestButton(debounceTime, holdingTime);
             button.IsHoldingEnabled = true;
             TaskCompletionSource<DateTime> tcs = new TaskCompletionSource<DateTime>();
+            Stopwatch sw = new();
 
             button.Press += (sender, e) =>
             {
@@ -73,6 +83,7 @@ namespace Iot.Device.Button.Tests
             {
                 holding = true;
                 tcs.TrySetResult(DateTime.Now);
+                _testOutput.WriteLine("h " + sw.ElapsedTicks);
             };
 
             button.DoublePress += (sender, e) =>
@@ -80,21 +91,25 @@ namespace Iot.Device.Button.Tests
                 doublePressed = true;
             };
 
+            sw.Start();
             DateTime now = DateTime.Now;
+            _testOutput.WriteLine("s " + sw.ElapsedTicks);
             button.PressButton();
 
             Thread.Sleep((int)holdingTime.TotalMilliseconds + 100);
 
             button.ReleaseButton();
 
+            _testOutput.WriteLine("w " + sw.ElapsedTicks);
             // this is only needed to avoid to wait indefinitely in case the code gets broken and the test fail
             var firstTask = await Task.WhenAny(tcs.Task, Task.Delay(timeoutTime));
+            _testOutput.WriteLine("e " + sw.ElapsedTicks);
             Assert.True(tcs.Task == firstTask, "holding timeout");
 
             // holdingTime is the DateTime retrieved in the holding timer handler
             var effectiveHoldingTime = tcs.Task.Result;
 
-            Assert.True(effectiveHoldingTime - now >= holdingTime, "holding");
+            Assert.True(effectiveHoldingTime - now >= holdingTime, "holding time");
             Assert.True(holding, "holding");
             Assert.True(pressed, "pressed");
             Assert.False(doublePressed, "doublePressed");
@@ -334,6 +349,7 @@ namespace Iot.Device.Button.Tests
             int buttonUpCounter = 0;
             int pressedCounter = 0;
 
+            Stopwatch sw = new();
             TaskCompletionSource<DateTime> tcs = new TaskCompletionSource<DateTime>();
             var debounceTime = TimeSpan.FromMilliseconds(200);
             var holdingTime = TimeSpan.FromMilliseconds(400);
@@ -360,6 +376,7 @@ namespace Iot.Device.Button.Tests
             {
                 holding = true;
                 tcs.TrySetResult(DateTime.Now);
+                _testOutput.WriteLine("h " + sw.ElapsedTicks);
             };
 
             button.DoublePress += (sender, e) =>
@@ -367,7 +384,9 @@ namespace Iot.Device.Button.Tests
                 doublePressed = true;
             };
 
+            sw.Start();
             DateTime now = DateTime.Now;
+            _testOutput.WriteLine("s " + sw.ElapsedTicks);
 
             // pushing the button. This will trigger the buttonDown event
             button.PressButton();
@@ -383,14 +402,17 @@ namespace Iot.Device.Button.Tests
             button.PressButton();
             button.ReleaseButton();
 
+            _testOutput.WriteLine("w " + sw.ElapsedTicks);
             // this is only needed to avoid to wait indefinitely in case the code gets broken and the test fail
             var firstTask = await Task.WhenAny(tcs.Task, Task.Delay(timeoutTime));
+            _testOutput.WriteLine("e " + sw.ElapsedTicks);
+
             Assert.True(tcs.Task == firstTask, "holding timeout");
 
             // holdingTime is the DateTime retrieved in the holding timer handler
             var effectiveHoldingTime = tcs.Task.Result;
 
-            Assert.True(effectiveHoldingTime - now >= holdingTime, "holding");
+            Assert.True(effectiveHoldingTime - now >= holdingTime, "holding time");
             Assert.True(holding, "holding");
 
             Assert.True(buttonDownCounter == 1, "ButtonDown counter is wrong");
