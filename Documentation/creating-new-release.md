@@ -9,12 +9,12 @@ This is a list of steps which need to happen in order to release new version of 
 - Step 1: Ensure all PRs meant for this release are merged.
   - While the process is ongoing, make sure no new PRs get merged in order to ensure that the official build doesn't get reset.
 - Step 2: Regenerate device listing:
-  - `dotnet run` on <https://github.com/dotnet/iot/tree/master/tools/device-listing>
+  - `dotnet run` on <https://github.com/dotnet/iot/tree/main/tools/device-listing>
   - Fix all warnings, re-run if needed to ensure no warnings.
   - Always manually review the changes paying attention the generated document looks clear.
   - Adjust categories/code of the generator if necessary.
 - Step 3: Create new package:
-  - Go to <https://dev.azure.com/dnceng/internal/_build?definitionId=239>
+  - Go to <https://dev.azure.com/dotnet/IoT/_build?definitionId=179>
   - Select "Run Pipeline", select row which says `variables` and add new one: `DotNetFinalVersionKind=release` (no quotes anywhere).
   - Run and wait for it to finish.
   - Once it is done and passes go to the artifacts section of the build, and find an artifact called 'Built packages' and from there download the two stable packages.

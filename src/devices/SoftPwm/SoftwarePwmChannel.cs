@@ -5,6 +5,7 @@ using System;
 using System.Device.Gpio;
 using System.Device.Pwm;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading;
 
 namespace System.Device.Pwm.Drivers
@@ -175,6 +176,15 @@ namespace System.Device.Pwm.Drivers
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "Software Pwm driver");
+            self.AddSubComponent(_controller.QueryComponentInformation());
+            self.Properties["Pin"] = _pin.ToString(CultureInfo.InvariantCulture);
+            return self;
         }
     }
 }

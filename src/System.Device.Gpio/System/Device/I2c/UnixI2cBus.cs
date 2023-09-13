@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -11,9 +13,7 @@ internal class UnixI2cBus : I2cBus
 {
     private const string DefaultDevicePath = "/dev/i2c";
     private static readonly object s_initializationLock = new object();
-    public int BusId { get; }
-    protected int BusFileDescriptor { get; private set; }
-    private HashSet<int>? _usedAddresses = null;
+    private ConcurrentDictionary<int, I2cDevice> _usedAddresses;
 
     public static new unsafe UnixI2cBus Create(int busId)
     {
@@ -49,7 +49,11 @@ internal class UnixI2cBus : I2cBus
     {
         BusId = busId;
         BusFileDescriptor = busFileDescriptor;
+        _usedAddresses = new ConcurrentDictionary<int, I2cDevice>();
     }
+
+    public int BusId { get; }
+    protected int BusFileDescriptor { get; private set; }
 
     public override I2cDevice CreateDevice(int deviceAddress)
     {
@@ -58,13 +62,9 @@ internal class UnixI2cBus : I2cBus
             throw new ObjectDisposedException(nameof(UnixI2cBus));
         }
 
-        _usedAddresses ??= new HashSet<int>();
-        if (!_usedAddresses.Add(deviceAddress))
-        {
-            throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} is already open.", nameof(deviceAddress));
-        }
-
-        return CreateDeviceNoCheck(deviceAddress);
+        return _usedAddresses.AddOrUpdate(deviceAddress,
+            (addr) => CreateDeviceNoCheck(deviceAddress),
+            (addr, dev) => throw new ArgumentException($"Device with address 0x{addr,0X2} is already open.", nameof(deviceAddress)));
     }
 
     internal I2cDevice CreateDeviceNoCheck(int deviceAddress)
@@ -82,7 +82,7 @@ internal class UnixI2cBus : I2cBus
 
     internal bool RemoveDeviceNoCheck(int deviceAddress)
     {
-        return _usedAddresses?.Remove(deviceAddress) ?? false;
+        return _usedAddresses.TryRemove(deviceAddress, out _);
     }
 
     internal unsafe void Read(int deviceAddress, Span<byte> buffer)
@@ -211,7 +211,19 @@ internal class UnixI2cBus : I2cBus
             BusFileDescriptor = -1;
         }
 
-        _usedAddresses = null!;
+        _usedAddresses.Clear();
         base.Dispose(disposing);
+    }
+
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "Unix I2C Bus driver");
+        self.Properties["BusNo"] = BusId.ToString(CultureInfo.InvariantCulture);
+        foreach (var device in _usedAddresses)
+        {
+            self.AddSubComponent(device.Value.QueryComponentInformation());
+        }
+
+        return self;
     }
 }

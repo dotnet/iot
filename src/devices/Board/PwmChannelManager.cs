@@ -2,11 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
+using System.Device;
 using System.Device.Pwm;
+using System.Globalization;
 
 namespace Iot.Device.Board
 {
-    internal class PwmChannelManager : PwmChannel
+    internal class PwmChannelManager : PwmChannel, IDeviceManager
     {
         private readonly Board _board;
         private readonly int _pin;
@@ -64,6 +67,22 @@ namespace Iot.Device.Board
             }
 
             base.Dispose(disposing);
+        }
+
+        public IReadOnlyCollection<int> GetActiveManagedPins()
+        {
+            return new List<int>()
+            {
+                _pin
+            };
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "PWM Channel manager");
+            self.Properties["ManagedPins"] = _pin.ToString(CultureInfo.InvariantCulture);
+            self.AddSubComponent(_pwm.QueryComponentInformation());
+            return self;
         }
     }
 }

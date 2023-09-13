@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -113,6 +115,14 @@ namespace Iot.Device.Arduino
             }
 
             base.Dispose(disposing);
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            return base.QueryComponentInformation() with
+            {
+                Description = "Arduino I2C device"
+            };
         }
     }
 }

@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Media
 {
@@ -133,11 +134,11 @@ namespace Iot.Device.Media
         /// <param name="colors">RGB data.</param>
         /// <param name="format">Bitmap pixel format</param>
         /// <returns>Bitmap</returns>
-        public static Bitmap RgbToBitmap((uint Width, uint Height) size, Color[] colors, System.Drawing.Imaging.PixelFormat format = System.Drawing.Imaging.PixelFormat.Format24bppRgb)
+        public static BitmapImage RgbToBitmap((uint Width, uint Height) size, Color[] colors, Iot.Device.Graphics.PixelFormat format = Iot.Device.Graphics.PixelFormat.Format32bppXrgb)
         {
             int width = (int)size.Width, height = (int)size.Height;
 
-            Bitmap pic = new Bitmap(width, height, format);
+            BitmapImage pic = BitmapImage.CreateBitmap(width, height, format);
 
             for (int x = 0; x < width; x++)
             {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Text;
@@ -12,7 +13,7 @@ namespace Iot.Device.Board
     /// <summary>
     /// Manages an I2C bus instance
     /// </summary>
-    public class I2cBusManager : I2cBus, IDisposable
+    public class I2cBusManager : I2cBus, IDisposable, IDeviceManager
     {
         private readonly int _sdaPin;
         private readonly int _sclPin;
@@ -96,9 +97,11 @@ namespace Iot.Device.Board
             {
                 if (_board != null)
                 {
-                    _board.RemoveBus(this);
-                    _board.ReleasePin(_sdaPin, PinUsage.I2c, this);
-                    _board.ReleasePin(_sclPin, PinUsage.I2c, this);
+                    if (_board.RemoveBus(this))
+                    {
+                        _board.ReleasePin(_sdaPin, PinUsage.I2c, this);
+                        _board.ReleasePin(_sclPin, PinUsage.I2c, this);
+                    }
                 }
 
                 foreach (KeyValuePair<int, I2cDevice> dev in _devices)
@@ -115,6 +118,24 @@ namespace Iot.Device.Board
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <summary>
+        /// Query the component information (the tree of active drivers) for diagnostic purposes.
+        /// </summary>
+        /// <returns>A <see cref="ComponentInformation"/> instance</returns>
+        public override ComponentInformation QueryComponentInformation()
+        {
+            return new ComponentInformation(this, $"I2C Bus Manager, Bus number {_bus}");
+        }
+
+        /// <inheritdoc />
+        public IReadOnlyCollection<int> GetActiveManagedPins()
+        {
+            return new List<int>()
+            {
+                _sclPin, _sdaPin
+            };
         }
     }
 }

@@ -163,5 +163,91 @@ namespace Iot.Device.CharacterLcd.Samples
             console.Write("Test finished");
             console.Dispose();
         }
+
+        /// <summary>
+        /// A test method
+        /// </summary>
+        /// <param name="lcd">The lcd driver</param>
+        public static void ValueTest(ICharacterLcd lcd)
+        {
+            Random random = new Random(1234);
+            Console.WriteLine("Value and unit test - big font (press any key to go to the next test)");
+            Console.WriteLine("Displaying time, culture de-CH");
+            LcdValueUnitDisplay val = new LcdValueUnitDisplay(lcd, CultureInfo.CreateSpecificCulture("de-CH"));
+            val.InitForRom("A00");
+            while (Console.KeyAvailable == false)
+            {
+                val.DisplayTime(DateTime.Now);
+                Thread.Sleep(100);
+            }
+
+            Console.ReadKey(true);
+            Console.WriteLine("Same, now long time format");
+            while (Console.KeyAvailable == false)
+            {
+                val.DisplayTime(DateTime.Now, "T");
+                Thread.Sleep(100);
+            }
+
+            Console.ReadKey(true);
+            Console.WriteLine("Now with en-US culture");
+            val = new LcdValueUnitDisplay(lcd, CultureInfo.CreateSpecificCulture("en-US"));
+            val.InitForRom("A00");
+            while (Console.KeyAvailable == false)
+            {
+                val.DisplayTime(DateTime.Now);
+                Thread.Sleep(100);
+            }
+
+            Console.ReadKey(true);
+            Console.WriteLine("Now something a bit more technical");
+            while (Console.KeyAvailable == false)
+            {
+                double voltage = random.NextDouble();
+                val.DisplayValue(voltage.ToString("F3") + "kV", "Supply Voltage");
+                Thread.Sleep(500);
+            }
+
+            Console.ReadKey(true);
+            Console.WriteLine("Common units");
+            string unitsToDisplay = "kV mA nF μF pF MΩ";
+            int index = 0;
+            while (Console.KeyAvailable == false)
+            {
+                string current = unitsToDisplay.Substring(index);
+                val.DisplayValue(current);
+                index = (index + 1) % unitsToDisplay.Length;
+                Thread.Sleep(500);
+            }
+
+            Console.ReadKey(true);
+            Console.WriteLine("And the letters of the latin alphabet");
+            char[] chars = new[] { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z' };
+            int idx = 0;
+            while (Console.KeyAvailable == false)
+            {
+                string letter = chars[idx].ToString();
+                letter = letter + letter.ToLower(val.Culture);
+                val.DisplayValue(letter, letter);
+                idx = (idx + 1) % chars.Length;
+                Thread.Sleep(1000);
+            }
+
+            Console.ReadKey(true);
+            CancellationTokenSource ts = new CancellationTokenSource();
+            Task t = val.DisplayBigTextAsync("The quick brown fox jumps over the lazy dog.", TimeSpan.FromSeconds(1), ts.Token);
+            while ((Console.KeyAvailable == false) && (t.IsCompleted == false))
+            {
+                // Do nothing
+                Thread.Sleep(50);
+            }
+
+            Console.ReadKey();
+            ts.Cancel();
+            t.Wait();
+            ts.Dispose();
+            Console.WriteLine("Big font tests done. Press Enter to continue");
+            Console.ReadLine();
+        }
     }
 }

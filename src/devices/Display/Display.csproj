@@ -10,10 +10,14 @@
     <Compile Include="Ht16k33.cs" />
     <Compile Include="Dot.cs" />
     <Compile Include="Font.cs" />
+    <Compile Include="Font14.cs" />
     <Compile Include="Segment.cs" />
+    <Compile Include="Segment14.cs" />
     <Compile Include="FontHelper.cs" />
+    <Compile Include="FontHelper14.cs" />
     <Compile Include="ISevenSegmentDisplay.cs" />
     <Compile Include="Large4Digit7SegmentDisplay.cs" />
+    <Compile Include="Large4Digit14SegmentDisplay.cs" />
     <Compile Include="LedColor.cs" />
     <Compile Include="Matrix16x8.cs" />
     <Compile Include="Matrix8x8.cs" />

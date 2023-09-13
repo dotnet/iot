@@ -121,4 +121,9 @@ internal partial class Windows10PwmChannel : PwmChannel
         _winController = null!;
         base.Dispose(disposing);
     }
+
+    public override ComponentInformation QueryComponentInformation()
+    {
+        return new ComponentInformation(this, "Windows IoT Core PWM Channel");
+    }
 }

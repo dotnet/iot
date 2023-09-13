@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using System.Drawing;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Ht1632
 {
@@ -17,7 +17,7 @@ namespace Iot.Device.Ht1632
         /// </summary>
         /// <param name="pixel">Input pixel</param>
         /// <returns>True if lit.</returns>
-        public delegate bool BrightnessConvertor(IPixel pixel);
+        public delegate bool BrightnessConvertor(Color pixel);
 
         /// <summary>
         /// Show image with 8-Com mode
@@ -25,8 +25,8 @@ namespace Iot.Device.Ht1632
         /// <param name="ht1632">HT1632 device</param>
         /// <param name="image">Image to show. Width at least 8 pixels, height at least 32 pixels </param>
         /// <param name="brightnessConvertor">Method for whether pixel is lit or not. Use <see cref="LinearBrightnessConvertor"/> if null.</param>
-        public static void ShowImageWith8Com<TPixel>(this Ht1632 ht1632, Image<TPixel> image, BrightnessConvertor? brightnessConvertor = null)
-            where TPixel : unmanaged, IPixel<TPixel> => ht1632.ShowImage(image, 8, 32, brightnessConvertor ?? LinearBrightnessConvertor);
+        public static void ShowImageWith8Com(this Ht1632 ht1632, BitmapImage image, BrightnessConvertor? brightnessConvertor = null)
+            => ht1632.ShowImage(image, 8, 32, brightnessConvertor ?? LinearBrightnessConvertor);
 
         /// <summary>
         /// Show image with 16-Com mode
@@ -34,22 +34,20 @@ namespace Iot.Device.Ht1632
         /// <param name="ht1632">HT1632 device</param>
         /// <param name="image">Image to show. Width at least 16 pixels, height at least 24 pixels </param>
         /// <param name="brightnessConvertor">Method for whether pixel is lit or not. Use <see cref="LinearBrightnessConvertor"/> if null.</param>
-        public static void ShowImageWith16Com<TPixel>(this Ht1632 ht1632, Image<TPixel> image, BrightnessConvertor? brightnessConvertor = null)
-            where TPixel : unmanaged, IPixel<TPixel> => ht1632.ShowImage(image, 16, 24, brightnessConvertor ?? LinearBrightnessConvertor);
+        public static void ShowImageWith16Com(this Ht1632 ht1632, BitmapImage image, BrightnessConvertor? brightnessConvertor = null)
+            => ht1632.ShowImage(image, 16, 24, brightnessConvertor ?? LinearBrightnessConvertor);
 
         /// <summary>
         /// Lit if average value of RGB is greater than half.
         /// </summary>
         /// <param name="pixel">Input pixel</param>
         /// <returns>True if average value of RGB is greater than half.</returns>
-        public static bool LinearBrightnessConvertor(IPixel pixel)
+        public static bool LinearBrightnessConvertor(Color pixel)
         {
-            var vector = pixel.ToScaledVector4();
-            return vector.X + vector.Y + vector.Z > 1.5;
+            return pixel.R + pixel.G + pixel.B > (3 * 127);
         }
 
-        private static void ShowImage<TPixel>(this Ht1632 ht1632, Image<TPixel> image, int com, int row, BrightnessConvertor brightnessConvertor)
-            where TPixel : unmanaged, IPixel<TPixel>
+        private static void ShowImage(this Ht1632 ht1632, BitmapImage image, int com, int row, BrightnessConvertor brightnessConvertor)
         {
             if (image.Width < com || image.Height < row)
             {

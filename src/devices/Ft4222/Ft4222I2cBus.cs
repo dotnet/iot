@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -18,8 +20,8 @@ namespace Iot.Device.Ft4222
     {
         private const uint I2cMasterFrequencyKbps = 400;
 
+        private readonly Dictionary<int, I2cDevice> _usedAddresses = new Dictionary<int, I2cDevice>();
         private SafeFtHandle _ftHandle;
-        private HashSet<int> _usedAddresses = new HashSet<int>();
 
         /// <summary>
         /// Store the FTDI Device Information
@@ -115,12 +117,14 @@ namespace Iot.Device.Ft4222
         /// <inheritdoc/>
         public override I2cDevice CreateDevice(int deviceAddress)
         {
-            if (!_usedAddresses.Add(deviceAddress))
+            if (_usedAddresses.ContainsKey(deviceAddress))
             {
                 throw new ArgumentException($"Device with address 0x{deviceAddress,0X2} is already open.", nameof(deviceAddress));
             }
 
-            return new Ft4222I2c(this, deviceAddress);
+            var ret = new Ft4222I2c(this, deviceAddress);
+            _usedAddresses.Add(deviceAddress, ret);
+            return ret;
         }
 
         /// <inheritdoc/>
@@ -137,6 +141,20 @@ namespace Iot.Device.Ft4222
         {
             _ftHandle?.Dispose();
             _ftHandle = null!;
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "FT4222 I2C Bus driver");
+            self.Properties["BusNo"] = "0";
+            self.Properties["Description"] = DeviceInformation.Description;
+            self.Properties["SerialNumber"] = DeviceInformation.SerialNumber;
+            foreach (var device in _usedAddresses)
+            {
+                self.AddSubComponent(device.Value.QueryComponentInformation());
+            }
+
+            return self;
         }
     }
 }

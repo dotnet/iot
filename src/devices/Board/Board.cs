@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.Device.I2c;
@@ -32,6 +33,7 @@ namespace Iot.Device.Board
         private readonly object _pinReservationsLock;
         private readonly Dictionary<int, List<PinReservation>> _pinReservations;
         private readonly Dictionary<int, I2cBusManager> _i2cBuses;
+        private readonly List<IDeviceManager> _managers;
         private bool _initialized;
         private bool _disposed;
         private Dictionary<int, PinUsage> _knownUsages;
@@ -47,6 +49,7 @@ namespace Iot.Device.Board
         {
             _pinReservations = new Dictionary<int, List<PinReservation>>();
             _i2cBuses = new Dictionary<int, I2cBusManager>();
+            _managers = new List<IDeviceManager>();
             _knownUsages = new Dictionary<int, PinUsage>();
             _pinReservationsLock = new object();
             _initialized = false;
@@ -123,6 +126,11 @@ namespace Iot.Device.Board
                     PinReservation rsv = new PinReservation(pinNumber, usage, owner);
                     reservations.Add(rsv);
                 }
+
+                if (owner is IDeviceManager manager)
+                {
+                    AddManager(manager);
+                }
             }
 
             ActivatePinMode(pinNumber, usage);
@@ -156,6 +164,7 @@ namespace Iot.Device.Board
                         }
 
                         _pinReservations.Remove(pinNumber);
+                        ClearOpenManagers();
                     }
                     else
                     {
@@ -174,6 +183,7 @@ namespace Iot.Device.Board
                         if (reservations.Count == 0)
                         {
                             _pinReservations.Remove(pinNumber);
+                            ClearOpenManagers();
                         }
                     }
                 }
@@ -231,12 +241,22 @@ namespace Iot.Device.Board
         /// <inheritdoc cref="IDisposable.Dispose"/>
         protected virtual void Dispose(bool disposing)
         {
-            foreach (var bus in _i2cBuses)
+            lock (_pinReservationsLock)
             {
-                bus.Value.Dispose();
+                foreach (var bus in _i2cBuses)
+                {
+                    bus.Value.Dispose();
+                }
+
+                foreach (var bus in _managers)
+                {
+                    bus.Dispose();
+                }
+
+                _i2cBuses.Clear();
+                _managers.Clear();
             }
 
-            _i2cBuses.Clear();
             _disposed = true;
         }
 
@@ -268,10 +288,13 @@ namespace Iot.Device.Board
         /// <summary>
         /// Return an instance of a <see cref="GpioController"/> for the current board
         /// </summary>
-        /// <returns>An instance of a GpioController. The controller used pin management to prevent reusing the same pin for different purposes
+        /// <returns>An instance of a GpioController. The controller uses pin management to prevent reusing the same pin for different purposes
         /// (or for purposes for which it is not suitable)</returns>
         /// <exception cref="NotSupportedException">Rare: No GPIO Controller was found for the current hardware. The default implementation will return
         /// a simulation interface if no hardware is available.</exception>
+        /// <remarks>
+        /// Derived classes should not normally override this method, but instead <see cref="TryCreateBestGpioDriver"/>.
+        /// </remarks>
         public virtual GpioController CreateGpioController()
         {
             Initialize();
@@ -283,7 +306,7 @@ namespace Iot.Device.Board
                 throw new NotSupportedException("No Gpio Driver for this board could be found.");
             }
 
-            return new ManagedGpioController(this, driver);
+            return AddManager(new ManagedGpioController(this, driver));
         }
 
         /// <summary>
@@ -410,7 +433,7 @@ namespace Iot.Device.Board
 
             bus = CreateI2cBusCore(busNumber, pinAssignment);
             _i2cBuses.Add(busNumber, bus);
-            return bus;
+            return AddManager(bus);
         }
 
         /// <summary>
@@ -472,9 +495,10 @@ namespace Iot.Device.Board
         /// This is called from the buses Dispose method, so do NOT call bus.Dispose here
         /// </summary>
         /// <param name="bus">The bus that's being closed</param>
-        internal void RemoveBus(I2cBusManager bus)
+        /// <returns>True if the bus was removed, false if it didn't exist</returns>
+        internal bool RemoveBus(I2cBusManager bus)
         {
-            _i2cBuses.Remove(bus.BusId);
+            return _i2cBuses.Remove(bus.BusId);
         }
 
         /// <summary>
@@ -488,6 +512,7 @@ namespace Iot.Device.Board
         public SpiDevice CreateSpiDevice(SpiConnectionSettings connectionSettings, int[] pinAssignment, PinNumberingScheme pinNumberingScheme)
         {
             Initialize();
+
             if (pinAssignment == null)
             {
                 throw new ArgumentNullException(nameof(pinAssignment));
@@ -498,7 +523,8 @@ namespace Iot.Device.Board
                 throw new ArgumentException($"Invalid argument. Must provide three or four pins for SPI", nameof(pinAssignment));
             }
 
-            return new SpiDeviceManager(this, connectionSettings, pinAssignment, CreateSimpleSpiDevice);
+            var manager = new SpiDeviceManager(this, connectionSettings, pinAssignment, CreateSimpleSpiDevice);
+            return AddManager(manager);
         }
 
         /// <summary>
@@ -540,7 +566,7 @@ namespace Iot.Device.Board
             int pin, PinNumberingScheme pinNumberingScheme)
         {
             Initialize();
-            return new PwmChannelManager(this, pin, chip, channel, frequency, dutyCyclePercentage, CreateSimplePwmChannel);
+            return AddManager(new PwmChannelManager(this, pin, chip, channel, frequency, dutyCyclePercentage, CreateSimplePwmChannel));
         }
 
         /// <summary>
@@ -636,6 +662,66 @@ namespace Iot.Device.Board
             }
 
             return board;
+        }
+
+        private void ClearOpenManagers()
+        {
+            lock (_pinReservationsLock)
+            {
+                for (int index = 0; index < _managers.Count; index++)
+                {
+                    IDeviceManager m = _managers[index];
+                    var managedPins = m.GetActiveManagedPins();
+                    bool isInUse = false;
+                    foreach (var pin in managedPins)
+                    {
+                        if (_pinReservations.ContainsKey(pin))
+                        {
+                            isInUse = true;
+                            break;
+                        }
+                    }
+
+                    if (!isInUse)
+                    {
+                        // Don't dispose the manager here - Would typically result in a recursive call to Dispose, as we're closing coming from closing pins
+                        _managers.RemoveAt(index);
+                        index--;
+                    }
+                }
+            }
+        }
+
+        private T AddManager<T>(T manager)
+            where T : IDeviceManager
+        {
+            lock (_pinReservationsLock)
+            {
+                if (!_managers.Contains(manager))
+                {
+                    _managers.Add(manager);
+                }
+            }
+
+            return manager;
+        }
+
+        /// <inheritdoc cref="GpioController.QueryComponentInformation"/>
+        public virtual ComponentInformation QueryComponentInformation()
+        {
+            ComponentInformation self = new ComponentInformation(this, "Generic Board");
+
+            var controller = CreateGpioController();
+
+            var controllerInfo = controller.QueryComponentInformation();
+            self.AddSubComponent(controllerInfo);
+
+            foreach (var e in _managers)
+            {
+                self.AddSubComponent(e.QueryComponentInformation());
+            }
+
+            return self;
         }
     }
 }

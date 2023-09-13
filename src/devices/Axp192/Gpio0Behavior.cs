@@ -9,7 +9,7 @@ namespace Iot.Device.Axp192
     public enum Gpio0Behavior
     {
         /// <summary>NMOS Leak Open Output</summary>
-        MnosLeakOpenOutput = 0,
+        NmosLeakOpenOutput = 0,
 
         /// <summary>Universal Input Function</summary>
         UniversalInputFunction = 1,

@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Globalization;
 using System.IO;
 using System.Text;
 
@@ -61,6 +63,14 @@ namespace Board.Tests
         {
             _disposed = true;
             base.Dispose(disposing);
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "Dummy I2C Device");
+            self.Properties["BusNo"] = ConnectionSettings.BusId.ToString(CultureInfo.InvariantCulture);
+            self.Properties["DeviceAddress"] = $"0x{ConnectionSettings.DeviceAddress:x2}";
+            return self;
         }
     }
 }

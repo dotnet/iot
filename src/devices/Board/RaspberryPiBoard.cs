@@ -3,15 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.Gpio.Drivers;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Device.Spi;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Cryptography;
 using System.Text;
 using UnitsNet;
 
@@ -160,47 +160,47 @@ namespace Iot.Device.Board
             switch (busId)
             {
                 case 0:
-                    {
-                        // Bus 0 is the one on logical pins 0 and 1. According to the docs, it should not
-                        // be used by application software and instead is reserved for HATs, but if you don't have one, it is free for other purposes
-                        sda = 0;
-                        scl = 1;
-                        break;
-                    }
+                {
+                    // Bus 0 is the one on logical pins 0 and 1. According to the docs, it should not
+                    // be used by application software and instead is reserved for HATs, but if you don't have one, it is free for other purposes
+                    sda = 0;
+                    scl = 1;
+                    break;
+                }
 
                 case 1:
-                    {
-                        // This is the bus commonly used by application software.
-                        sda = 2;
-                        scl = 3;
-                        break;
-                    }
+                {
+                    // This is the bus commonly used by application software.
+                    sda = 2;
+                    scl = 3;
+                    break;
+                }
 
                 case 2:
-                    {
-                        throw new NotSupportedException("I2C Bus number 2 doesn't exist");
-                    }
+                {
+                    throw new NotSupportedException("I2C Bus number 2 doesn't exist");
+                }
 
                 case 3:
-                    {
-                        sda = 4;
-                        scl = 5;
-                        break;
-                    }
+                {
+                    sda = 4;
+                    scl = 5;
+                    break;
+                }
 
                 case 4:
-                    {
-                        sda = 6;
-                        scl = 7;
-                        break;
-                    }
+                {
+                    sda = 6;
+                    scl = 7;
+                    break;
+                }
 
                 case 5:
-                    {
-                        sda = 10;
-                        scl = 11;
-                        break;
-                    }
+                {
+                    sda = 10;
+                    scl = 11;
+                    break;
+                }
 
                 case 6:
                     sda = 22;
@@ -897,6 +897,19 @@ namespace Iot.Device.Board
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            ComponentInformation self = base.QueryComponentInformation();
+            var ret = self with
+            {
+                Description = $"Raspberry Pi with {PinCount} pins"
+            };
+
+            ret.Properties["PinCount"] = PinCount.ToString(CultureInfo.InvariantCulture);
+            return ret;
         }
     }
 }

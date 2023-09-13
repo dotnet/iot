@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Device.Gpio.Drivers;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -73,6 +76,17 @@ public class GpioController : IDisposable
     /// The number of pins provided by the controller.
     /// </summary>
     public virtual int PinCount => _driver.PinCount;
+
+    /// <summary>
+    /// Returns the collection of open pins
+    /// </summary>
+    private IEnumerable<GpioPin> OpenPins
+    {
+        get
+        {
+            return _gpioPins.Values;
+        }
+    }
 
     /// <summary>
     /// Gets the logical pin number in the controller's numbering scheme.
@@ -499,5 +513,30 @@ public class GpioController : IDisposable
 
         // Default for Windows IoT Core on a non-specific device
         return new Windows10Driver();
+    }
+
+    /// <summary>
+    /// Query information about a component and its children.
+    /// </summary>
+    /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
+    /// <remarks>
+    /// The returned data structure (or rather, its string representation) can be used to diagnose problems with incorrect driver types or
+    /// other system configuration problems.
+    /// This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+    /// </remarks>
+    public virtual ComponentInformation QueryComponentInformation()
+    {
+        ComponentInformation self = new ComponentInformation(this, "Generic GPIO Controller");
+
+        if (_driver != null)
+        {
+            ComponentInformation driverInfo = _driver.QueryComponentInformation();
+            self.AddSubComponent(driverInfo);
+        }
+
+        // PinCount is not added on purpose, because the property throws NotSupportedException on some hardware
+        self.Properties["OpenPins"] = string.Join(", ", _openPins.Select(x => x.Key));
+
+        return self;
     }
 }

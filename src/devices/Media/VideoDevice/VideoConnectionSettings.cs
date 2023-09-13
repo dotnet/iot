@@ -14,7 +14,7 @@ namespace Iot.Device.Media
         /// <param name="busId">The bus ID the video device is connected to.</param>
         /// <param name="captureSize">The size of video device captured image.</param>
         /// <param name="pixelFormat">The pixel format of video device captured image.</param>
-        public VideoConnectionSettings(int busId, (uint Width, uint Height) captureSize, PixelFormat pixelFormat = PixelFormat.YUYV)
+        public VideoConnectionSettings(int busId, (uint Width, uint Height) captureSize, VideoPixelFormat pixelFormat = VideoPixelFormat.YUYV)
         {
             BusId = busId;
             CaptureSize = captureSize;
@@ -34,7 +34,7 @@ namespace Iot.Device.Media
         /// <summary>
         /// The pixel format of video device captured image.
         /// </summary>
-        public PixelFormat PixelFormat { get; set; }
+        public VideoPixelFormat PixelFormat { get; set; }
 
         /// <summary>
         /// The exposure type of video device.

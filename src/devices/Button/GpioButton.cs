@@ -4,8 +4,6 @@
 using System;
 using System.Device.Gpio;
 
-using SixLabors.ImageSharp.Formats.Gif;
-
 namespace Iot.Device.Button
 {
     /// <summary>

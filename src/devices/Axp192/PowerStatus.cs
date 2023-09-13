@@ -17,8 +17,8 @@ namespace Iot.Device.Axp192
         /// <summary>Acin Available</summary>
         AcinAvailable = 0b0100_0000,
 
-        /// <summary>Vbux Exists</summary>
-        VbuxExists = 0b0010_0000,
+        /// <summary>Vbus Exists</summary>
+        VbusExists = 0b0010_0000,
 
         /// <summary>Vbus Available</summary>
         VbusAvailable = 0b0001_0000,
