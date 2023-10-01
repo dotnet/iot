@@ -54,5 +54,25 @@ namespace Iot.Device.Mcp23xxx
         /// Reads the interrupt pin for the given port if configured.
         /// </summary>
         public PinValue ReadInterrupt(Port port) => InternalReadInterrupt(port);
+
+        /// <summary>
+        /// Reads all bits of port A in a single operation.
+        /// </summary>
+        /// <returns></returns>
+        public int ReadPortA()
+        {
+            int value = ReadByte(Register.GPIO, Port.PortA);
+            return value;
+        }
+
+        /// <summary>
+        /// Reads all bits of port B in a single operation.
+        /// </summary>
+        /// <returns></returns>
+        public int ReadPortB()
+        {
+            int value = ReadByte(Register.GPIO, Port.PortB);
+            return value;
+        }
     }
 }
