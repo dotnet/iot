@@ -573,7 +573,7 @@ namespace Iot.Device.Mcp23xxx
         /// </summary>
         /// <param name="pinNumber">The pin number for which an interrupt shall be triggered</param>
         /// <param name="eventTypes">Event(s) that should trigger the interrupt on the given pin</param>
-        /// <exception cref="ArgumentException">eventTypes is not valid</exception>
+        /// <exception cref="ArgumentException">EventTypes is not valid (must have at least one event type selected)</exception>
         public void EnableInterruptOnChange(int pinNumber, PinEventTypes eventTypes)
         {
             byte oldValue, newValue;
