@@ -40,7 +40,7 @@ namespace Iot.Device.Mcp23xxx.Tests
         }
 
         [Fact]
-        public void AddEventHandler()
+        public void AddEventHandlerPortA()
         {
             GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
             theDeviceController.OpenPin(1, PinMode.Input);
@@ -53,6 +53,23 @@ namespace Iot.Device.Mcp23xxx.Tests
             Assert.True(_callbackNo == 1);
             // Nothing registered for an event on interrupt B, so this shouldn't do anything
             _driverMock.FireEvent(new PinValueChangedEventArgs(PinEventTypes.Falling, 22));
+            Assert.True(_callbackNo == 1);
+        }
+
+        [Fact]
+        public void AddEventHandlerPortB()
+        {
+            GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
+            theDeviceController.OpenPin(10, PinMode.Input);
+            theDeviceController.RegisterCallbackForPinValueChangedEvent(10, PinEventTypes.Rising, Callback);
+
+            _mockI2c.DeviceMock.Registers[0x0F] = 4; // Port A INTF register (pin 1 triggered the event)
+            _mockI2c.DeviceMock.Registers[0x13] = 4; // Port A GPIO register (pin 1 is high now)
+            // This should simulate the interrupt being triggered on the master controller, not the mcp!
+            _driverMock.FireEvent(new PinValueChangedEventArgs(PinEventTypes.Falling, 22));
+            Assert.True(_callbackNo == 1);
+            // Nothing registered for an event on interrupt B, so this shouldn't do anything
+            _driverMock.FireEvent(new PinValueChangedEventArgs(PinEventTypes.Falling, 11));
             Assert.True(_callbackNo == 1);
         }
 
@@ -76,13 +93,14 @@ namespace Iot.Device.Mcp23xxx.Tests
         private void Callback(object sender, PinValueChangedEventArgs e)
         {
             Assert.Equal(PinEventTypes.Rising, e.ChangeType);
-            Assert.Equal(1, e.PinNumber);
+            Assert.True(e.PinNumber == 1 || e.PinNumber == 10);
             _callbackNo++;
         }
 
         public void Dispose()
         {
             _gpioController.Dispose();
+            _device.Dispose();
         }
     }
 }

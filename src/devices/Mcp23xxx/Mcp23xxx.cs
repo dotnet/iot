@@ -767,14 +767,14 @@ namespace Iot.Device.Mcp23xxx
                 Port port = GetPortForPinNumber(pinNumber);
                 if (port == Port.PortA)
                 {
-                    if (_eventHandlers.Any(x => x.Key <= 7))
+                    if (!_eventHandlers.Any(x => x.Key <= 7))
                     {
                         _controller.UnregisterCallbackForPinValueChangedEvent(_interruptA, InterruptHandler);
                     }
                 }
                 else
                 {
-                    if (_eventHandlers.Any(x => x.Key >= 8))
+                    if (!_eventHandlers.Any(x => x.Key >= 8))
                     {
                         _controller.UnregisterCallbackForPinValueChangedEvent(_interruptB, InterruptHandler);
                     }
