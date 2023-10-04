@@ -101,20 +101,4 @@ namespace Iot.Device.Seesaw
             Write(SeesawModule.Neopixel, SeesawFunction.NeopixelShow, Array.Empty<byte>());
         }
     }
-
-    /// <summary>
-    /// NeoPixel speed setting.
-    /// </summary>
-    public enum NeopixelSpeed : byte
-    {
-        /// <summary>
-        /// 400MHz.
-        /// </summary>
-        Speed_400Mhz = 0x0,
-
-        /// <summary>
-        /// 800MHz.
-        /// </summary>
-        Speed_800MHz = 0x1,
-    }
 }
