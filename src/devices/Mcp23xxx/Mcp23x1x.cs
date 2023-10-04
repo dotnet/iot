@@ -58,7 +58,8 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Reads all bits of port A in a single operation.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>In the low byte: A bit field of the value of the first 8 GPIO ports
+        /// (Bit 0: GPIO 0, Bit 1: GPIO 1 etc.). Only the bits of input ports are defined.</returns>
         public int ReadPortA()
         {
             int value = ReadByte(Register.GPIO, Port.PortA);
@@ -68,7 +69,8 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Reads all bits of port B in a single operation.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>In the low byte: A bit field of the value of the second 8 GPIO ports
+        /// (Bit 0: GPIO 8, Bit 1: GPIO 9 etc.). Only the bits of input ports are defined.</returns>
         public int ReadPortB()
         {
             int value = ReadByte(Register.GPIO, Port.PortB);
