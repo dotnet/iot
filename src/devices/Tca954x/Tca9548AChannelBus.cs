@@ -15,7 +15,7 @@ namespace Iot.Device.Tca954x
     /// </summary>
     public class Tca9548AChannelBus : I2cBus
     {
-        private readonly I2cBus _channelBus;
+        private readonly I2cBus _mainBus;
         private readonly Tca9548A _tca9548A;
         private readonly MultiplexerChannel _tcaChannel;
         private readonly Dictionary<int, I2cDevice> _devices;
@@ -26,11 +26,15 @@ namespace Iot.Device.Tca954x
         /// <param name="tca9548A">TCA9548A multiplexer </param>
         /// <param name="mainBus">Main Bus</param>
         /// <param name="channels">Selected Channel on Multiplexer</param>
+        /// <remarks>
+        /// To send to a device, we set up the channel on the mux and then use the main channel
+        /// to talk to the device. That means that the data sent on the bus for the device
+        /// is identical as if there was no mux.</remarks>
         internal Tca9548AChannelBus(Tca9548A tca9548A, I2cBus mainBus, MultiplexerChannel channels)
         {
             _tca9548A = tca9548A;
             _tcaChannel = channels;
-            _channelBus = mainBus;
+            _mainBus = mainBus;
             _devices = new Dictionary<int, I2cDevice>();
         }
 
@@ -49,7 +53,7 @@ namespace Iot.Device.Tca954x
                 throw new InvalidOperationException($"Channel {_tcaChannel} has already a device with address 0x{deviceAddress:x2}");
             }
 
-            var device = new Tca9548AI2cDevice(_tca9548A, _tcaChannel, _channelBus.CreateDevice(deviceAddress));
+            var device = new Tca9548AI2cDevice(_tca9548A, _tcaChannel, _tca9548A.CreateOrGetMasterBusDevice(deviceAddress));
             _devices[deviceAddress] = device;
             return device;
         }
@@ -61,7 +65,7 @@ namespace Iot.Device.Tca954x
         public List<int> PerformBusScan()
         {
             SelectDeviceChannel();
-            return _channelBus.PerformBusScan();
+            return _mainBus.PerformBusScan();
         }
 
         /// <summary>

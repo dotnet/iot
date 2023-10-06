@@ -8,14 +8,17 @@ namespace Iot.Device.Tca954x
 {
     internal class Tca9548AI2cDevice : I2cDevice
     {
-        private readonly I2cDevice _channelDevice;
+        /// <summary>
+        /// The real device instance (an I2c device on the master bus)
+        /// </summary>
+        private readonly I2cDevice _realDevice;
         private readonly Tca9548A _tca9548A;
         private readonly MultiplexerChannel _tcaChannel;
 
         /// <summary>
         /// The connection settings of a device on an I2C bus.
         /// </summary>
-        public override I2cConnectionSettings ConnectionSettings => _channelDevice.ConnectionSettings;
+        public override I2cConnectionSettings ConnectionSettings => _realDevice.ConnectionSettings;
 
         /// <summary>
         ///  Initializes a new instance of the <see cref="Tca9548AI2cDevice"/> class on the <see cref="MultiplexerChannel"/> of TCA mux that will use the specified settings to communicate with the I2C device.
@@ -27,7 +30,7 @@ namespace Iot.Device.Tca954x
         {
             _tca9548A = tca9548A;
             _tcaChannel = tcaChannel;
-            _channelDevice = device;
+            _realDevice = device;
         }
 
         private void SelectDeviceChannel() => _tca9548A.SelectChannel(_tcaChannel);
@@ -42,7 +45,7 @@ namespace Iot.Device.Tca954x
         public override void Read(Span<byte> buffer)
         {
             SelectDeviceChannel();
-            _channelDevice.Read(buffer);
+            _realDevice.Read(buffer);
         }
 
         /// <summary>
@@ -52,7 +55,7 @@ namespace Iot.Device.Tca954x
         public override byte ReadByte()
         {
             SelectDeviceChannel();
-            return _channelDevice.ReadByte();
+            return _realDevice.ReadByte();
         }
 
         /// <summary>
@@ -65,7 +68,7 @@ namespace Iot.Device.Tca954x
         public override void Write(ReadOnlySpan<byte> buffer)
         {
             SelectDeviceChannel();
-            _channelDevice.Write(buffer);
+            _realDevice.Write(buffer);
         }
 
         /// <summary>
@@ -75,7 +78,7 @@ namespace Iot.Device.Tca954x
         public override void WriteByte(byte value)
         {
             SelectDeviceChannel();
-            _channelDevice.WriteByte(value);
+            _realDevice.WriteByte(value);
         }
 
         /// <summary>
@@ -92,13 +95,13 @@ namespace Iot.Device.Tca954x
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
         {
             SelectDeviceChannel();
-            _channelDevice.WriteRead(writeBuffer, readBuffer);
+            _realDevice.WriteRead(writeBuffer, readBuffer);
         }
 
         /// <inheritdoc cref="IDisposable.Dispose"/>
         protected override void Dispose(bool disposing)
         {
-            _channelDevice.Dispose();
+            _tca9548A.ReleaseDevice(_realDevice, ConnectionSettings.DeviceAddress);
             base.Dispose(disposing);
         }
     }
