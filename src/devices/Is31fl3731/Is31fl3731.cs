@@ -235,8 +235,8 @@ namespace Iot.Device.Display
 
         private void WriteLedPwm(ReadOnlySpan<byte> value)
         {
-            int num = FrameRegister.Pwm + GetLedAddress(0, 0);
-            Write(0, (byte)num, value);
+            int address = FrameRegister.Pwm + GetLedAddress(0, 0);
+            Write(0, (byte)address, value);
         }
 
         private void WriteLed(int x, int y, bool enable)
