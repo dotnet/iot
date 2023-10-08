@@ -329,27 +329,42 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="mode">The mode to be set.</param>
         protected override void SetPinMode(int pinNumber, PinMode mode)
         {
-            if (mode != PinMode.Input && mode != PinMode.Output)
+            if (mode != PinMode.Input && mode != PinMode.Output && mode != PinMode.InputPullUp)
             {
-                throw new ArgumentException("The Mcp controller supports Input and Output modes only.");
+                throw new ArgumentException("The Mcp controller supports the following pin modes: Input, Output and InputPullUp.");
             }
 
             ValidatePin(pinNumber);
 
-            if (pinNumber < 8)
+            Port port = GetPortForPinNumber(pinNumber);
+            if (port == Port.PortB)
             {
-                byte value = mode == PinMode.Output
-                    ? ClearBit(InternalReadByte(Register.IODIR, Port.PortA), pinNumber)
-                    : SetBit(InternalReadByte(Register.IODIR, Port.PortA), pinNumber);
-                InternalWriteByte(Register.IODIR, value, Port.PortA);
+                pinNumber -= 8;
+            }
+
+            byte value;
+            if (mode == PinMode.Output)
+            {
+                value = ClearBit(InternalReadByte(Register.IODIR, port), pinNumber);
             }
             else
             {
-                byte value = mode == PinMode.Output
-                    ? ClearBit(InternalReadByte(Register.IODIR, Port.PortB), pinNumber - 8)
-                    : SetBit(InternalReadByte(Register.IODIR, Port.PortB), pinNumber - 8);
-                InternalWriteByte(Register.IODIR, value, Port.PortB);
+                value = SetBit(InternalReadByte(Register.IODIR, port), pinNumber);
             }
+
+            InternalWriteByte(Register.IODIR, value, port);
+
+            byte value2;
+            if (mode == PinMode.InputPullUp)
+            {
+                value2 = SetBit(InternalReadByte(Register.GPPU, port), pinNumber);
+            }
+            else
+            {
+                value2 = ClearBit(InternalReadByte(Register.GPPU, port), pinNumber);
+            }
+
+            InternalWriteByte(Register.GPPU, value2, port);
         }
 
         /// <summary>
@@ -835,6 +850,6 @@ namespace Iot.Device.Mcp23xxx
 
         /// <inheritdoc/>
         protected override bool IsPinModeSupported(int pinNumber, PinMode mode) =>
-            (mode == PinMode.Input || mode == PinMode.Output);
+            (mode == PinMode.Input || mode == PinMode.Output || mode == PinMode.InputPullUp);
     }
 }
