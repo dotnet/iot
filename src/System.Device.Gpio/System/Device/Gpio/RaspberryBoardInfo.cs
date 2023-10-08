@@ -110,7 +110,7 @@ internal class RaspberryBoardInfo
         /// <summary>
         /// Pi 5 Model B+
         /// </summary>
-        RaspberryPi5BPlus,
+        RaspberryPi5,
     }
 
     #region Fields
@@ -171,7 +171,7 @@ internal class RaspberryBoardInfo
         0x3111 or 0x3112 or 0x3114 or 0x3115 => Model.RaspberryPi4,
         0x3140 or 0x3141 => Model.RaspberryPiComputeModule4,
         0x3130 or 0x3131 => Model.RaspberryPi400,
-        0x4170 => Model.RaspberryPi5BPlus,
+        0x4170 => Model.RaspberryPi5,
         _ => Model.Unknown,
     };
 
