@@ -122,6 +122,43 @@ namespace Iot.Device.Tca954x
             }
         }
 
+        /// <summary>
+        /// Returns the given channel.
+        /// </summary>
+        /// <param name="channelNo">The channel number (0-7)</param>
+        /// <returns>An <see cref="I2cBus"/> representing the provided channel</returns>
+        public I2cBus GetChannel(int channelNo)
+        {
+            if (channelNo < 0 || channelNo >= 8)
+            {
+                throw new ArgumentOutOfRangeException(nameof(channelNo), "Valid channels are 0-7");
+            }
+
+            return GetChannel((MultiplexerChannel)(1 << channelNo));
+        }
+
+        /// <summary>
+        /// Returns the given channel
+        /// </summary>
+        /// <param name="channel">A single channel value</param>
+        /// <returns>The given channel as <see cref="I2cBus"/> instance</returns>
+        /// <exception cref="ArgumentOutOfRangeException">The channel value is not valid or represents more than one channel</exception>
+        public I2cBus GetChannel(MultiplexerChannel channel)
+        {
+            return channel switch
+            {
+                MultiplexerChannel.Channel0 => this[0],
+                MultiplexerChannel.Channel1 => this[1],
+                MultiplexerChannel.Channel2 => this[2],
+                MultiplexerChannel.Channel3 => this[3],
+                MultiplexerChannel.Channel4 => this[4],
+                MultiplexerChannel.Channel5 => this[5],
+                MultiplexerChannel.Channel6 => this[6],
+                MultiplexerChannel.Channel7 => this[7],
+                _ => throw new ArgumentOutOfRangeException(nameof(channel), $"Not a valid single channel selection: {channel}"),
+            };
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
