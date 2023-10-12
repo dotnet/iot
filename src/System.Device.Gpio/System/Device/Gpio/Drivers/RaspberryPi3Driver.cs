@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace System.Device.Gpio.Drivers;
 
 /// <summary>
-/// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
+/// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian or Raspberry Pi OS (or, with some limitations, ubuntu)
 /// </summary>
 public class RaspberryPi3Driver : GpioDriver
 {
@@ -141,7 +141,6 @@ public class RaspberryPi3Driver : GpioDriver
             RaspberryBoardInfo.Model.RaspberryPiZeroW or
             RaspberryBoardInfo.Model.RaspberryPiZero2W or
             RaspberryBoardInfo.Model.RaspberryPi4 or
-            RaspberryBoardInfo.Model.RaspberryPi5 or
             RaspberryBoardInfo.Model.RaspberryPi400 => new RaspberryPi3LinuxDriver(),
             RaspberryBoardInfo.Model.RaspberryPiComputeModule4 or
             RaspberryBoardInfo.Model.RaspberryPiComputeModule3 => new RaspberryPiCm3Driver(),

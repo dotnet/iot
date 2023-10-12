@@ -25,6 +25,7 @@ public class GpioController : IDisposable
     private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
     private const string RaspberryPi2Product = "Raspberry Pi 2";
     private const string RaspberryPi3Product = "Raspberry Pi 3";
+    private const string RaspberryPi5Product = "Raspberry Pi 5";
 
     private const string HummingBoardProduct = "HummingBoard-Edge";
     private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
@@ -504,6 +505,11 @@ public class GpioController : IDisposable
             baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
         {
             return new RaspberryPi3Driver();
+        }
+
+        if (baseBoardProduct == RaspberryPi5Product || baseBoardProduct.StartsWith($"{RaspberryPi5Product} "))
+        {
+            return new LibGpiodDriver();
         }
 
         if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
