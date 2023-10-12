@@ -12,10 +12,24 @@ namespace Iot.Device.Camera.Settings;
 
 /// <summary>
 /// Build the command line options using a fluent API
+/// The provided values are NOT validated by this builder
 /// </summary>
 public class CommandOptionsBuilder
 {
     private HashSet<CommandOptionAndValue> _commands = new();
+
+    /// <summary>
+    /// Retrieves all the command line options and values in a string array
+    /// </summary>
+    /// <returns></returns>
+    public string[] GetArguments()
+    {
+        var args = _commands
+            .Select(c => $"{c.Option.Option} {c.Value}")
+            .ToArray();
+
+        return args;
+    }
 
     /// <summary>
     /// Adds the option specified in the argument
