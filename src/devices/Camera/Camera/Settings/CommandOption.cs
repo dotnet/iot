@@ -14,6 +14,7 @@ namespace Iot.Device.Camera.Settings;
 /// </summary>
 public record class CommandOption(
     CommandCategory Category,
+    Command Command,
     string Option,
     string Help,
     CommandInputType InputType = CommandInputType.Void,
