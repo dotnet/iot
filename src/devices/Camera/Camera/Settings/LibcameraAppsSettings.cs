@@ -123,6 +123,10 @@ public class LibcameraAppsSettings
                 "--sharpness", "Set image sharpness <number> (>=0.0)",
                 CommandInputType.Decimal),
 
+            new CommandOption(CommandCategory.CameraControl, Command.Contrast,
+                "--contrast", "Set image sharpness <number> (>=0.0, default == 1.0)",
+                CommandInputType.Decimal),
+
             new CommandOption(CommandCategory.CameraControl, Command.Brightness,
                 "--brightness", "Set image brightness <number> (-1.0 to +1.0)",
                 CommandInputType.Decimal),

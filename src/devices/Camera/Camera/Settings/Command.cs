@@ -140,6 +140,11 @@ public enum Command
     Sharpness,
 
     /// <summary>
+    /// The command for the --contrast option
+    /// </summary>
+    Contrast,
+
+    /// <summary>
     /// The command for the --brightness option
     /// </summary>
     Brightness,
