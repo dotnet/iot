@@ -14,11 +14,12 @@ namespace Iot.Device.Tca954x
         private readonly I2cDevice _realDevice;
         private readonly Tca9548A _tca9548A;
         private readonly MultiplexerChannel _tcaChannel;
+        private readonly I2cConnectionSettings _virtualConnectionSettings;
 
         /// <summary>
-        /// The connection settings of a device on an I2C bus.
+        /// The connection settings of an attached device. This returns the settings for the virtual multiplexer bus.
         /// </summary>
-        public override I2cConnectionSettings ConnectionSettings => _realDevice.ConnectionSettings;
+        public override I2cConnectionSettings ConnectionSettings => _virtualConnectionSettings;
 
         /// <summary>
         ///  Initializes a new instance of the <see cref="Tca9548AI2cDevice"/> class on the <see cref="MultiplexerChannel"/> of TCA mux that will use the specified settings to communicate with the I2C device.
@@ -26,11 +27,14 @@ namespace Iot.Device.Tca954x
         /// <param name="tca9548A">Instance on TCA9548A device</param>
         /// <param name="tcaChannel">Channel on which device is</param>
         /// <param name="device">I2C device (from the parent bus)</param>
-        internal Tca9548AI2cDevice(Tca9548A tca9548A, MultiplexerChannel tcaChannel, I2cDevice device)
+        /// <param name="virtualConnectionSettings">The connection settings to report for this device</param>
+        internal Tca9548AI2cDevice(Tca9548A tca9548A, MultiplexerChannel tcaChannel, I2cDevice device,
+            I2cConnectionSettings virtualConnectionSettings)
         {
             _tca9548A = tca9548A;
             _tcaChannel = tcaChannel;
             _realDevice = device;
+            _virtualConnectionSettings = virtualConnectionSettings;
         }
 
         private void SelectDeviceChannel() => _tca9548A.SelectChannel(_tcaChannel);

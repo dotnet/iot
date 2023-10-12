@@ -19,6 +19,7 @@ namespace Iot.Device.Tca954x
         private readonly Tca9548A _tca9548A;
         private readonly MultiplexerChannel _tcaChannel;
         private readonly Dictionary<int, I2cDevice> _devices;
+        private readonly int _busNo;
 
         /// <summary>
         /// Creates new I2C bus Instance for multiplexer channel
@@ -36,6 +37,18 @@ namespace Iot.Device.Tca954x
             _tcaChannel = channels;
             _mainBus = mainBus;
             _devices = new Dictionary<int, I2cDevice>();
+            _busNo = channels switch
+            {
+                MultiplexerChannel.Channel0 => 0,
+                MultiplexerChannel.Channel1 => 1,
+                MultiplexerChannel.Channel2 => 2,
+                MultiplexerChannel.Channel3 => 3,
+                MultiplexerChannel.Channel4 => 4,
+                MultiplexerChannel.Channel5 => 5,
+                MultiplexerChannel.Channel6 => 6,
+                MultiplexerChannel.Channel7 => 7,
+                _ => 0
+            };
         }
 
         private void SelectDeviceChannel() => _tca9548A.SelectChannel(_tcaChannel);
@@ -53,7 +66,8 @@ namespace Iot.Device.Tca954x
                 throw new InvalidOperationException($"Channel {_tcaChannel} has already a device with address 0x{deviceAddress:x2}");
             }
 
-            var device = new Tca9548AI2cDevice(_tca9548A, _tcaChannel, _tca9548A.CreateOrGetMasterBusDevice(deviceAddress));
+            var device = new Tca9548AI2cDevice(_tca9548A, _tcaChannel, _tca9548A.CreateOrGetMasterBusDevice(deviceAddress),
+                new I2cConnectionSettings(_busNo, deviceAddress));
             _devices[deviceAddress] = device;
             return device;
         }

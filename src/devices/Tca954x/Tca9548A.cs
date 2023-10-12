@@ -81,6 +81,20 @@ namespace Iot.Device.Tca954x
         /// </remarks>
         public void SelectChannel(MultiplexerChannel multiplexChannels)
         {
+            if (_activeChannels.HasValue)
+            {
+                MultiplexerChannel selectedChannel = _activeChannels.Value;
+                if (selectedChannel == multiplexChannels)
+                {
+                    return;
+                }
+                else
+                {
+                    _i2CDevice.WriteByte(Convert.ToByte(multiplexChannels));
+                    _activeChannels = multiplexChannels;
+                }
+            }
+
             if (TryGetSelectedChannel(out var channel) && channel != multiplexChannels)
             {
                 _i2CDevice.WriteByte(Convert.ToByte(multiplexChannels));
@@ -91,8 +105,9 @@ namespace Iot.Device.Tca954x
         /// <summary>
         /// Try getting the selected channel on Multiplexer
         /// </summary>
-        /// <param name="selectedChannel"> selected Multiplexer Channel</param>
-        /// <returns> true if able to retrieve selected channel</returns>
+        /// <param name="selectedChannel">Selected Multiplexer Channel</param>
+        /// <returns>True if able to retrieve selected channel. Returns false otherwise. Also
+        /// returns false if more than one channel is selected.</returns>
         public bool TryGetSelectedChannel(out MultiplexerChannel selectedChannel)
         {
             try
@@ -106,6 +121,9 @@ namespace Iot.Device.Tca954x
                 var channel = _i2CDevice.ReadByte();
                 if (Enum.IsDefined(typeof(MultiplexerChannel), channel))
                 {
+                    // This also returns true if the selected channel is "None", meaning
+                    // the mux is disabled. Be careful when fixing this, as the above method
+                    // SelectChannel is initially depending on it.
                     selectedChannel = (MultiplexerChannel)channel;
                     return true;
                 }
