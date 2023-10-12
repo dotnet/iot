@@ -166,7 +166,9 @@ public class UnitTest1
     [Fact]
     public Task TestCommandLineArguments1()
     {
+        // repeating the options will NOT repeat the arguments
         var builder = new CommandOptionsBuilder()
+            .WithContinuousStreaming()
             .WithContinuousStreaming()
             .WithH264VideoOptions("baseline", "4", 15)
             .WithResolution(640, 480);
