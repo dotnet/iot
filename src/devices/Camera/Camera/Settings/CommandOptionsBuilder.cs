@@ -25,7 +25,7 @@ public class CommandOptionsBuilder
     public string[] GetArguments()
     {
         var args = _commands
-            .Select(c => $"{c.Option.Option} {c.Value}")
+            .Select(c => $"{c.Option.Option}{(string.IsNullOrEmpty(c.Value) ? string.Empty : " ")}{c.Value}")
             .ToArray();
 
         return args;

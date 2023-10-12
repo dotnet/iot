@@ -159,4 +159,21 @@ public class UnitTest1
         Assert.Equal("4056x3040", cam1.MaxResolution);
         Assert.Equal("/base/soc/i2c0mux/i2c@1/imx477@1a", cam1.DevicePath);
     }
+
+    /// <summary>
+    /// Test the command line arguments
+    /// </summary>
+    [Fact]
+    public Task TestCommandLineArguments1()
+    {
+        var builder = new CommandOptionsBuilder()
+            .WithContinuousStreaming()
+            .WithH264VideoOptions("baseline", "4", 15)
+            .WithResolution(640, 480);
+
+        var args = builder.GetArguments();
+        Assert.Equal(10, args.Length);
+
+        return Task.CompletedTask;
+    }
 }
