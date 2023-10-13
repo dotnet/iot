@@ -470,14 +470,52 @@ public class GpioController : IDisposable
     /// <returns>A driver that works with the board the program is executing on.</returns>
     private static GpioDriver GetBestDriverForBoardOnLinux()
     {
-        RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
 
-        if (internalDriver is object)
+        boardInfo = RaspberryBoardInfo.LoadBoardInfo();
+
+        boardInfo.BoardModel switch
         {
-            return new RaspberryPi3Driver(internalDriver);
-        }
+            RaspberryBoardInfo.Model.RaspberryPi3B or
+            RaspberryBoardInfo.Model.RaspberryPi3APlus or
+            RaspberryBoardInfo.Model.RaspberryPi3BPlus or
+            RaspberryBoardInfo.Model.RaspberryPiZeroW or
+            RaspberryBoardInfo.Model.RaspberryPiZero2W or
+            RaspberryBoardInfo.Model.RaspberryPi4 or
+            RaspberryBoardInfo.Model.RaspberryPi400 or
+            RaspberryBoardInfo.Model.RaspberryPiComputeModule4 or
+            RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
 
-        return UnixDriver.Create();
+                RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
+
+                if (internalDriver is object)
+                {
+                    console.WriteLine($"Using internal RaspberryPi3LinuxDriver");
+                    return new RaspberryPi3Driver(internalDriver);
+                }
+
+                console.WriteLine($"Using UnixDriver");
+                return UnixDriver.Create();
+                break;
+
+            case RaspberryBoardInfo.Model.RaspberryPi5:
+
+                //
+                // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
+                //
+                // We need to create a new driver for the Raspberry Pi 5, 
+                // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
+                //
+                console.WriteLine($"Using LibGpiodDriver");
+                return new LibGpiodDriver(4);
+                break;
+            
+            case else:
+
+                console.WriteLine($"Using UnixDriver");
+                return UnixDriver.Create();
+                break;
+
+        };       
     }
 
     /// <summary>
@@ -505,11 +543,6 @@ public class GpioController : IDisposable
             baseBoardProduct == RaspberryPi2Product || baseBoardProduct.StartsWith($"{RaspberryPi2Product} "))
         {
             return new RaspberryPi3Driver();
-        }
-
-        if (baseBoardProduct == RaspberryPi5Product || baseBoardProduct.StartsWith($"{RaspberryPi5Product} "))
-        {
-            return new LibGpiodDriver();
         }
 
         if (baseBoardProduct == HummingBoardProduct || baseBoardProduct.StartsWith($"{HummingBoardProduct} "))
