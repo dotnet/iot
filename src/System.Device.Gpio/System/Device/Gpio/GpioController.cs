@@ -471,11 +471,11 @@ public class GpioController : IDisposable
     private static GpioDriver GetBestDriverForBoardOnLinux()
     {
 
-        boardInfo = RaspberryBoardInfo.LoadBoardInfo();
+        var boardInfo = RaspberryBoardInfo.LoadBoardInfo();
 
-        boardInfo.BoardModel switch
+        switch (boardInfo.BoardModel)
         {
-            RaspberryBoardInfo.Model.RaspberryPi3B or
+            case RaspberryBoardInfo.Model.RaspberryPi3B or
             RaspberryBoardInfo.Model.RaspberryPi3APlus or
             RaspberryBoardInfo.Model.RaspberryPi3BPlus or
             RaspberryBoardInfo.Model.RaspberryPiZeroW or
@@ -489,32 +489,22 @@ public class GpioController : IDisposable
 
                 if (internalDriver is object)
                 {
-                    console.WriteLine($"Using internal RaspberryPi3LinuxDriver");
                     return new RaspberryPi3Driver(internalDriver);
                 }
 
-                console.WriteLine($"Using UnixDriver");
                 return UnixDriver.Create();
-                break;
-
+                
             case RaspberryBoardInfo.Model.RaspberryPi5:
 
-                //
                 // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
-                //
                 // We need to create a new driver for the Raspberry Pi 5, 
                 // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
-                //
-                console.WriteLine($"Using LibGpiodDriver");
                 return new LibGpiodDriver(4);
-                break;
-            
-            case else:
+                
+            default:
 
-                console.WriteLine($"Using UnixDriver");
                 return UnixDriver.Create();
-                break;
-
+                
         };       
     }
 
