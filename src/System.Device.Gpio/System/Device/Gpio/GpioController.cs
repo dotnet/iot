@@ -470,20 +470,19 @@ public class GpioController : IDisposable
     /// <returns>A driver that works with the board the program is executing on.</returns>
     private static GpioDriver GetBestDriverForBoardOnLinux()
     {
-
         var boardInfo = RaspberryBoardInfo.LoadBoardInfo();
 
         switch (boardInfo.BoardModel)
         {
-            case RaspberryBoardInfo.Model.RaspberryPi3B or
-            RaspberryBoardInfo.Model.RaspberryPi3APlus or
-            RaspberryBoardInfo.Model.RaspberryPi3BPlus or
-            RaspberryBoardInfo.Model.RaspberryPiZeroW or
-            RaspberryBoardInfo.Model.RaspberryPiZero2W or
-            RaspberryBoardInfo.Model.RaspberryPi4 or
-            RaspberryBoardInfo.Model.RaspberryPi400 or
-            RaspberryBoardInfo.Model.RaspberryPiComputeModule4 or
-            RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
+            case RaspberryBoardInfo.Model.RaspberryPi3B
+                or RaspberryBoardInfo.Model.RaspberryPi3APlus
+                or RaspberryBoardInfo.Model.RaspberryPi3BPlus
+                or RaspberryBoardInfo.Model.RaspberryPiZeroW
+                or RaspberryBoardInfo.Model.RaspberryPiZero2W
+                or RaspberryBoardInfo.Model.RaspberryPi4
+                or RaspberryBoardInfo.Model.RaspberryPi400
+                or RaspberryBoardInfo.Model.RaspberryPiComputeModule4
+                or RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
 
                 RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
 
@@ -493,19 +492,18 @@ public class GpioController : IDisposable
                 }
 
                 return UnixDriver.Create();
-                
+
             case RaspberryBoardInfo.Model.RaspberryPi5:
 
                 // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
-                // We need to create a new driver for the Raspberry Pi 5, 
+                // We need to create a new driver for the Raspberry Pi 5,
                 // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
                 return new LibGpiodDriver(4);
-                
+
             default:
 
                 return UnixDriver.Create();
-                
-        };       
+        };
     }
 
     /// <summary>
