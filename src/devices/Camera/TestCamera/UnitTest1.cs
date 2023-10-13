@@ -137,6 +137,27 @@ public class UnitTest1
     }
 
     /// <summary>
+    /// Retrieving failure output
+    /// </summary>
+    [Fact]
+    public async Task TestText2()
+    {
+        /* CreateTestFile(Video1); */
+
+        ProcessSettings settings = new()
+        {
+            Filename = FakeVideocapture,
+            WorkingDirectory = null,
+        };
+
+        using var proc = new ProcessRunner(settings);
+        var text = await proc.ExecuteReadOutputAsStringAsync(string.Empty);
+        var source = "Expected a filename as agument" + Environment.NewLine;
+
+        Assert.Equal(source, text);
+    }
+
+    /// <summary>
     /// Test parsing --list-cameras
     /// </summary>
     /// <returns></returns>
@@ -175,6 +196,23 @@ public class UnitTest1
 
         var args = builder.GetArguments();
         Assert.Equal(10, args.Length);
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Test the command line arguments
+    /// </summary>
+    [Fact]
+    public Task TestCommandLineArguments2()
+    {
+        var output = CommandOptionsBuilder.Create(Command.Output, "-");
+
+        var builder = new CommandOptionsBuilder()
+            .With(output);
+
+        var args = builder.GetArguments();
+        Assert.Single(args);
 
         return Task.CompletedTask;
     }

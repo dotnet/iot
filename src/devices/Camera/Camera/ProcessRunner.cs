@@ -66,6 +66,18 @@ public class ProcessRunner : IDisposable
     }
 
     /// <summary>
+    /// Retrieves the full command line equivalent to the one run from this class.
+    /// The working directory is either ProcessSettings.WorkingDirectory or, if null,
+    /// the Environment.CurrentDirectory.
+    /// The working directory is important when referring to files from the command line.
+    /// </summary>
+    public string GetFullCommandLine(string[] arguments)
+    {
+        var argsString = string.Join(' ', arguments);
+        return $"{_processSettings.Filename} {argsString}";
+    }
+
+    /// <summary>
     /// Execute the process with a number of arguments. The target
     /// Stream received the stdout of the process
     /// </summary>
@@ -167,7 +179,7 @@ public class ProcessRunner : IDisposable
         psi.RedirectStandardOutput = true;
         psi.RedirectStandardError = true;
         psi.CreateNoWindow = true;
-        psi.WorkingDirectory = _processSettings.WorkingDirectory ?? Directory.GetCurrentDirectory();
+        psi.WorkingDirectory = _processSettings.WorkingDirectory ?? Environment.CurrentDirectory;
 
         return psi;
     }

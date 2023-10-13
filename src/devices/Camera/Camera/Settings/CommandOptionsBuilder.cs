@@ -19,6 +19,18 @@ public class CommandOptionsBuilder
     private HashSet<CommandOptionAndValue> _commands = new();
 
     /// <summary>
+    /// Gets the CommmandOption, given the matching Command field
+    /// </summary>
+    public static CommandOption Get(Command command)
+        => LibcameraAppsSettings.DefaultOptions.Single(d => d.Command == command);
+
+    /// <summary>
+    /// Create an instance of CommadnOptionAndValue
+    /// </summary>
+    public static CommandOptionAndValue Create(Command command, string value = "")
+        => new CommandOptionAndValue(Get(command), value);
+
+    /// <summary>
     /// Retrieves all the command line options and values in a string array
     /// </summary>
     /// <returns></returns>
@@ -217,7 +229,4 @@ public class CommandOptionsBuilder
         var cmd = Get(Command.Profile);
         _commands.Add(new CommandOptionAndValue(cmd, level));
     }
-
-    private CommandOption Get(Command command)
-        => LibcameraAppsSettings.DefaultOptions.Single(d => d.Command == command);
 }

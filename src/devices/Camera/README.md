@@ -68,7 +68,70 @@ The expected output from the process determines which method should be used:
 - When running `libcamera-still` or `libcamera-vid` in capture mode, a binary still image or video stream is written on `stdout`. This content should be read by creating a (file or memory) Stream and passed to one of the `ExecuteAsync` methods.
 - Depending on the command line, the process could run in continuous mode (it should be stopped manually) or it will self-terminate after a given time. The `ProcessRunner` class allows to eventually forcibly stop the process when it is capturing continuously and should be stopped.
 
-In the Unit tests, the exchange of data through `stdin` and `stdout` is validated through the `FakeVideoCapture` console application. This application takes a file in input and writes its content to `stdout` using `2Kb `chunks. The unit tests run this process and read its `stdin` to verify that all the content is correctly processed.
+In the Unit tests, the exchange of data through `stdin` and `stdout` is validated through the `FakeVideoCapture` console application. This application takes a file in input and writes its content to `stdout` using `2Kb ` chunks. The unit tests run this process and read its `stdin` to verify that all the content is correctly processed.
 
+## Setting up the correct command line options
 
+The class `CommandOptionsBuilder` simplify the construction of the command line which is common to almost all the `libcamera-apps` applications.
 
+This is not a required step as the user may manually build the string with the help of the [official documentation](https://www.raspberrypi.com/documentation/computers/camera_software.html#common-command-line-options) and pass it to the execution functions of the `ProcessRunner` class.
+
+Instead, the `CommandOptionsBuilder` allows to build the most popular options with the following code:
+
+```csharp
+var output = CommandOptionsBuilder.Create(Command.Output, "-");
+var builder = new CommandOptionsBuilder()
+    .With(output);
+```
+
+The class also exposes some methods adding groups of popular options:
+
+```csharp
+var builder = new CommandOptionsBuilder()
+    .WithContinuousStreaming()
+    .WithH264VideoOptions("baseline", "4", 15)
+    .WithResolution(640, 480);
+var args = builder.GetArguments();
+```
+
+It's worth noting that options with the same value will be added only once even if it gets added multiple times.
+
+## Verify the command line
+
+If something goes wrong during the execution of the process, there are two ways to verify the correctness of the command line.
+
+**The first** is to retrieve the full command line from the `ProcessRunner`:
+
+```csharp
+var builder = new CommandOptionsBuilder()
+    .WithContinuousStreaming();
+var args = builder.GetArguments();
+
+ProcessSettings settings = new()
+{
+    Filename = "libcamera-vid",
+    WorkingDirectory = null,
+};
+
+using var proc = new ProcessRunner(settings);
+var fullCommandLine = proc.GetFullCommandLine(args);
+```
+
+The `fullCommandLine` obtained from the `ProcessRunner` can now be executed manually in a terminal to verify the output from the `libcamera-vid` application and fix the values for the command line options.
+
+It's worth noting that the result may change depending on the `WorkingDirectory`. When `null` is specified, the process is executed using `Environment.CurrentDirectory`.
+
+> Usually it is not necessary to run the `libcamera-apps` as `root`.
+
+**The second** is retrieving the text output from the execution. If the process printed an error message, this should be available through the following code:
+
+```
+ProcessSettings settings = new()
+{
+    Filename = "libcamera-vid",
+    WorkingDirectory = null,
+};
+
+using var proc = new ProcessRunner(settings);
+var text = await proc.ExecuteReadOutputAsStringAsync(args);
+```
