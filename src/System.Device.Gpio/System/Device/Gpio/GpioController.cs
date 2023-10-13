@@ -474,15 +474,15 @@ public class GpioController : IDisposable
 
         switch (boardInfo.BoardModel)
         {
-            case RaspberryBoardInfo.Model.RaspberryPi3B
-                or RaspberryBoardInfo.Model.RaspberryPi3APlus
-                or RaspberryBoardInfo.Model.RaspberryPi3BPlus
-                or RaspberryBoardInfo.Model.RaspberryPiZeroW
-                or RaspberryBoardInfo.Model.RaspberryPiZero2W
-                or RaspberryBoardInfo.Model.RaspberryPi4
-                or RaspberryBoardInfo.Model.RaspberryPi400
-                or RaspberryBoardInfo.Model.RaspberryPiComputeModule4
-                or RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
+            case RaspberryBoardInfo.Model.RaspberryPi3B:
+            case RaspberryBoardInfo.Model.RaspberryPi3APlus:
+            case RaspberryBoardInfo.Model.RaspberryPi3BPlus:
+            case RaspberryBoardInfo.Model.RaspberryPiZeroW:
+            case RaspberryBoardInfo.Model.RaspberryPiZero2W:
+            case RaspberryBoardInfo.Model.RaspberryPi4:
+            case RaspberryBoardInfo.Model.RaspberryPi400:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule4:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
 
                 RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
 
@@ -503,7 +503,7 @@ public class GpioController : IDisposable
             default:
 
                 return UnixDriver.Create();
-        };
+        }
     }
 
     /// <summary>
