@@ -38,6 +38,9 @@ namespace Iot.Device.Mcp23xxx
 
         private object _interruptHandlerLock = new object();
 
+        private byte[] _interruptPins;
+        private byte[] _interruptLastInputValues;
+
         /// <summary>
         /// A general purpose parallel I/O expansion for I2C or SPI applications.
         /// </summary>
@@ -64,6 +67,9 @@ namespace Iot.Device.Mcp23xxx
             _reset = reset;
             _interruptA = interruptA;
             _interruptB = interruptB;
+
+            _interruptPins = new byte[2];
+            _interruptLastInputValues = new byte[2];
 
             // Only need master controller if there are external pins provided.
             if (_reset != -1 || _interruptA != -1 || _interruptB != -1)
@@ -609,6 +615,7 @@ namespace Iot.Device.Mcp23xxx
         /// <remarks>After calling this method, call <see cref="Read(int)"/> once to make sure the interrupt flag for the given port is cleared</remarks>
         public void EnableInterruptOnChange(int pinNumber, PinEventTypes eventTypes)
         {
+            ValidatePin(pinNumber);
             byte oldValue, newValue;
             lock (_interruptHandlerLock)
             {
@@ -663,6 +670,9 @@ namespace Iot.Device.Mcp23xxx
                 newValue = ClearBit(oldValue, 1);
                 newValue = ClearBit(newValue, 2);
                 InternalWriteByte(Register.IOCON, newValue, Port.PortA);
+
+                _interruptPins[(int)port] = SetBit(_interruptPins[(int)port], pinNumber);
+                _interruptLastInputValues[(int)port] = InternalReadByte(Register.GPIO, port);
             }
         }
 
@@ -683,6 +693,7 @@ namespace Iot.Device.Mcp23xxx
         /// <param name="pinNumber">The pin number</param>
         public void DisableInterruptOnChange(int pinNumber)
         {
+            ValidatePin(pinNumber);
             byte oldValue, newValue;
             lock (_interruptHandlerLock)
             {
@@ -692,12 +703,14 @@ namespace Iot.Device.Mcp23xxx
                     oldValue = InternalReadByte(Register.GPINTEN, Port.PortA);
                     newValue = ClearBit(oldValue, pinNumber);
                     InternalWriteByte(Register.GPINTEN, newValue, Port.PortA);
+                    _interruptPins[0] = ClearBit(_interruptPins[0], pinNumber);
                 }
                 else
                 {
                     oldValue = InternalReadByte(Register.GPINTEN, Port.PortB);
-                    newValue = ClearBit(oldValue, pinNumber);
+                    newValue = ClearBit(oldValue, pinNumber - 8);
                     InternalWriteByte(Register.GPINTEN, newValue, Port.PortB);
+                    _interruptPins[1] = ClearBit(_interruptPins[1], pinNumber - 8);
                 }
             }
         }
@@ -711,8 +724,16 @@ namespace Iot.Device.Mcp23xxx
             lock (_interruptHandlerLock)
             {
                 port = e.PinNumber == _interruptA ? Port.PortA : Port.PortB;
-                interruptPending = InternalReadByte(Register.INTF, port);
+
+                // It seems that this register has at most 1 bit set - the one that triggered the interrupt.
+                // If another pin which has interrupt handling enabled changes until we clear the interrupt flag, that
+                // interrupt is lost.
+                int pinThatCausedInterrupt = InternalReadByte(Register.INTF, port);
                 newValues = InternalReadByte(Register.GPIO, port);
+
+                interruptPending = (newValues ^ _interruptLastInputValues[(int)port]) & _interruptPins[(int)port]; // Which values changed?
+                interruptPending |= pinThatCausedInterrupt; // this one certainly did (even if the value is now the same)
+                _interruptLastInputValues[(int)port] = (byte)newValues;
             }
 
             int offset = 0;
