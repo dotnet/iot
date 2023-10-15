@@ -372,7 +372,7 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Reads the value of a set of pins
         /// </summary>
-        protected override void Read(Span<PinValuePair> pinValuePairs)
+        public override void Read(Span<PinValuePair> pinValuePairs)
         {
             (uint pins, _) = new PinVector32(pinValuePairs);
             if ((pins >> PinCount) > 0)
@@ -424,7 +424,7 @@ namespace Iot.Device.Mcp23xxx
         /// <summary>
         /// Writes values to a set of pins
         /// </summary>
-        protected override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+        public override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             (uint mask, uint newBits) = new PinVector32(pinValuePairs);
             if ((mask >> PinCount) > 0)

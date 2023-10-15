@@ -135,7 +135,7 @@ public abstract class GpioDriver : IDisposable
     /// Write the given pins with the given values.
     /// </summary>
     /// <param name="pinValuePairs">The pin/value pairs to write.</param>
-    protected internal virtual void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+    public virtual void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
     {
         for (int i = 0; i < pinValuePairs.Length; i++)
         {
@@ -147,7 +147,7 @@ public abstract class GpioDriver : IDisposable
     /// Read the given pins with the given pin numbers.
     /// </summary>
     /// <param name="pinValuePairs">The pin/value pairs to read.</param>
-    protected internal virtual void Read(Span<PinValuePair> pinValuePairs)
+    public virtual void Read(Span<PinValuePair> pinValuePairs)
     {
         for (int i = 0; i < pinValuePairs.Length; i++)
         {
