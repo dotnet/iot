@@ -427,10 +427,7 @@ public class GpioController : IDisposable
     /// <param name="pinValuePairs">The pin/value pairs to write.</param>
     public void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
     {
-        for (int i = 0; i < pinValuePairs.Length; i++)
-        {
-            Write(pinValuePairs[i].PinNumber, pinValuePairs[i].PinValue);
-        }
+        _driver.Write(pinValuePairs);
     }
 
     /// <summary>
@@ -439,11 +436,7 @@ public class GpioController : IDisposable
     /// <param name="pinValuePairs">The pin/value pairs to read.</param>
     public void Read(Span<PinValuePair> pinValuePairs)
     {
-        for (int i = 0; i < pinValuePairs.Length; i++)
-        {
-            int pin = pinValuePairs[i].PinNumber;
-            pinValuePairs[i] = new PinValuePair(pin, Read(pin));
-        }
+        _driver.Read(pinValuePairs);
     }
 
     /// <summary>
