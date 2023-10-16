@@ -19,15 +19,15 @@ using Iot.Device.Common;
 using Iot.Device.Ft4222;
 using Iot.Device.Graphics;
 using Iot.Device.Graphics.SkiaSharpAdapter;
+using Iot.Device.Gui;
 using Iot.Device.Ili934x;
+using Iot.Device.M5Stack;
 using UnitsNet;
 
 namespace Iot.Device.Ili934x.Samples
 {
     internal class Program
     {
-        private static LowLevelX11Window? _window = null;
-
         public static int Main(string[] args)
         {
             bool isFt4222 = false;
@@ -159,17 +159,11 @@ namespace Iot.Device.Ili934x.Samples
                 touch.EnableEvents();
             }
 
-            IInputDeviceSimulator touchSimulator;
+            IPointingDevice touchSimulator;
 
             using ScreenCapture screenCapture = new ScreenCapture();
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-            {
-                touchSimulator = new WindowsTouchSimulator();
-            }
-            else
-            {
-                touchSimulator = new MouseClickSimulatorUInput(screenCapture.ScreenSize().Width, screenCapture.ScreenSize().Height);
-            }
+            var size = screenCapture.ScreenSize();
+            touchSimulator = VirtualPointingDevice.CreateAbsolute(size.Width, size.Height);
 
             using RemoteControl ctrol = new RemoteControl(touch, display, powerControl, touchSimulator, screenCapture, nmeaSourceAddress);
             ctrol.DisplayFeatures();
@@ -187,8 +181,6 @@ namespace Iot.Device.Ili934x.Samples
 
             powerControl?.Dispose();
             board?.Dispose();
-
-            _window?.Dispose();
 
             return 0;
         }
@@ -212,16 +204,6 @@ namespace Iot.Device.Ili934x.Samples
             {
                 ClockFrequency = Ili9341.DefaultSpiClockFrequency, Mode = Ili9341.DefaultSpiMode
             });
-        }
-
-        private static void TestWindowing()
-        {
-            if (Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                _window = new LowLevelX11Window();
-                _window.CreateWindow(10, 20, 200, 100);
-                _window.StartMessageLoop();
-            }
         }
     }
 }

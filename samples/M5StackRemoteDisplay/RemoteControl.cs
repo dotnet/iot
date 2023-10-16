@@ -16,7 +16,9 @@ using System.Threading.Tasks;
 using Iot.Device.Axp192;
 using Iot.Device.Graphics;
 using Iot.Device.Graphics.SkiaSharpAdapter;
+using Iot.Device.Gui;
 using Iot.Device.Ili934x;
+using Iot.Device.M5Stack;
 using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
 using UnitsNet;
@@ -45,9 +47,9 @@ namespace Iot.Device.Ili934x.Samples
         private float _scale;
         private ElectricPotential _backLight;
         private ScreenMode _screenMode;
-        private MouseButton _mouseEnabled;
+        private MouseButton _mouseButtonsToPress; // The mouse button(s) to simulate on a touch event
         private Point _lastDragBegin;
-        private IInputDeviceSimulator _clickSimulator;
+        private IPointingDevice _clickSimulator;
         private NmeaTcpClient _tcpClient;
         private SentenceCache _cache;
 
@@ -57,7 +59,7 @@ namespace Iot.Device.Ili934x.Samples
         private bool _forceUpdate;
         private PositionProvider _positionProvider;
 
-        public RemoteControl(Chsc6440? touch, Ili9342 screen, M5ToughPowerControl? powerControl, IInputDeviceSimulator deviceSimulator, ScreenCapture capture, string nmeaSourceAddress)
+        public RemoteControl(Chsc6440? touch, Ili9342 screen, M5ToughPowerControl? powerControl, IPointingDevice deviceSimulator, ScreenCapture capture, string nmeaSourceAddress)
         {
             _touch = touch;
             _screen = screen;
@@ -68,7 +70,7 @@ namespace Iot.Device.Ili934x.Samples
             _scale = 1.0f;
             _screenMode = ScreenMode.Mirror;
             _backLight = ElectricPotential.FromMillivolts(3000);
-            _mouseEnabled = MouseButton.None;
+            _mouseButtonsToPress = MouseButton.None;
             _clickSimulator = deviceSimulator ?? throw new ArgumentNullException(nameof(deviceSimulator));
             _capture = capture;
             _nmeaSourceAddress = nmeaSourceAddress;
@@ -192,14 +194,14 @@ namespace Iot.Device.Ili934x.Samples
                 {
                     _screenMode = ScreenMode.Battery;
                     Console.WriteLine("Changed to battery status mode");
-                    _mouseEnabled = MouseButton.None;
+                    _mouseButtonsToPress = MouseButton.None;
                     _menuMode = false;
                 }
                 else if (point.Y < 50 && point.X >= 160 && point.X < 220)
                 {
                     _screenMode = ScreenMode.NmeaValue;
                     Console.WriteLine("Changed to NMEA display mode");
-                    _mouseEnabled = MouseButton.None;
+                    _mouseButtonsToPress = MouseButton.None;
                     _forceUpdate = true;
                     _menuMode = false;
                 }
@@ -215,20 +217,20 @@ namespace Iot.Device.Ili934x.Samples
                 }
                 else if (point.X < 100)
                 {
-                    if (_mouseEnabled == MouseButton.Left)
+                    if (_mouseButtonsToPress == MouseButton.Left)
                     {
-                        _mouseEnabled = MouseButton.Right;
+                        _mouseButtonsToPress = MouseButton.Right;
                     }
-                    else if (_mouseEnabled == MouseButton.Right)
+                    else if (_mouseButtonsToPress == MouseButton.Right)
                     {
-                        _mouseEnabled = MouseButton.None;
+                        _mouseButtonsToPress = MouseButton.None;
                     }
                     else
                     {
-                        _mouseEnabled = MouseButton.Left;
+                        _mouseButtonsToPress = MouseButton.Left;
                     }
 
-                    Console.WriteLine($"Mouse mode: {_mouseEnabled}");
+                    Console.WriteLine($"Mouse mode: {_mouseButtonsToPress}");
                 }
             }
             else
@@ -241,10 +243,10 @@ namespace Iot.Device.Ili934x.Samples
 
                 if (_screenMode == ScreenMode.Mirror)
                 {
-                    if (_mouseEnabled != MouseButton.None)
+                    if (_mouseButtonsToPress != MouseButton.None)
                     {
                         var pt = ToAbsoluteScreenPosition(point);
-                        _clickSimulator.Click(pt.X, pt.Y, _mouseEnabled);
+                        _clickSimulator.MoveTo(pt.X, pt.Y);
                     }
                 }
                 else if (_screenMode == ScreenMode.NmeaValue)
@@ -267,19 +269,20 @@ namespace Iot.Device.Ili934x.Samples
                 return;
             }
 
-            if (_mouseEnabled == MouseButton.Left)
+            if (_mouseButtonsToPress == MouseButton.Left)
             {
                 var pos = ToAbsoluteScreenPosition(e.CurrentPoint);
+                _clickSimulator.MoveTo(pos.X, pos.Y);
                 if (e.IsDragBegin)
                 {
-                    _clickSimulator.ButtonDown(pos.X, pos.Y, _mouseEnabled);
+                    _clickSimulator.ButtonDown(_mouseButtonsToPress);
                     _lastDragBegin = e.CurrentPoint;
                 }
 
                 _clickSimulator.MoveTo(pos.X, pos.Y);
                 if (e.IsDragEnd)
                 {
-                    _clickSimulator.ButtonUp(pos.X, pos.Y, _mouseEnabled);
+                    _clickSimulator.ButtonUp(_mouseButtonsToPress);
                     _lastDragBegin = new Point(99999, 99999); // Outside
                 }
 
@@ -371,11 +374,11 @@ namespace Iot.Device.Ili934x.Samples
                 if (_menuMode)
                 {
                     BitmapImage bm = _defaultMenuBar;
-                    if (_mouseEnabled == MouseButton.Left)
+                    if (_mouseButtonsToPress == MouseButton.Left)
                     {
                         bm = _leftMouseMenuBar;
                     }
-                    else if (_mouseEnabled == MouseButton.Right)
+                    else if (_mouseButtonsToPress == MouseButton.Right)
                     {
                         bm = _rightMouseMenuBar;
                     }
@@ -441,7 +444,7 @@ namespace Iot.Device.Ili934x.Samples
             var bmp = capture.GetScreenContents();
             if (bmp != null)
             {
-                _screen.FillRect(Color.Black, 0, 0, _screen.ScreenWidth, _screen.ScreenHeight, false);
+                _screen.FillRect(Color.Black, 0, 0, _screen.ScreenWidth, _screen.ScreenHeight);
                 using var resizedBitmap = bmp.Resize(new Size((int)(bmp.Width * scale), (int)(bmp.Height * scale)));
                 var pt = new Point((int)left, (int)top);
                 var rect = new Rectangle(0, 0, _screen.ScreenWidth, _screen.ScreenHeight);
@@ -504,12 +507,12 @@ namespace Iot.Device.Ili934x.Samples
                 Console.ReadKey(true);
             }
 
-            _screen.FillRect(Color.FromArgb(0, 0, 255), 0, 0, 320, 240, true);
+            _screen.FillRect(Color.FromArgb(0, 0, 255), 0, 0, 320, 240);
 
             // Draws a few stripes
             for (int x = 0; x < backBuffer.Width; x += 4)
             {
-                _screen.FillRect(Color.FromArgb(255, 0, 0), x, 0, 1, 240, false);
+                _screen.FillRect(Color.FromArgb(255, 0, 0), x, 0, 1, 240);
             }
 
             _screen.SendFrame();
