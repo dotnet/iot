@@ -38,7 +38,7 @@ public class ProcessRunner : IDisposable
     public int? PId => _process?.Id;
 
     /// <summary>
-    /// Dispose the active run process
+    /// Dispose the active running process
     /// </summary>
     public void Dispose()
     {
@@ -60,6 +60,7 @@ public class ProcessRunner : IDisposable
             if (_process != null && !_process.HasExited)
             {
                 _process.Kill(true);
+                _process.Dispose();
             }
         }
         catch (Exception)
@@ -90,8 +91,10 @@ public class ProcessRunner : IDisposable
     }
 
     /// <summary>
-    /// Execute the process with a number of arguments. The target
-    /// Stream receives the stdout of the process
+    /// Execute the process with a number of arguments.
+    /// The target Stream receives the stdout of the process, if any.
+    /// If the process is not expected to return any output (for example when
+    /// the app directly writes one or more files), the stream can be null
     /// </summary>
     public async Task ExecuteAsync(string argsString, Stream? target)
     {
@@ -107,9 +110,6 @@ public class ProcessRunner : IDisposable
             return;
         }
 
-        // var br = new BinaryReader(_process.StandardOutput.BaseStream);
-        // await br.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
-        // _process.Dispose();
         await _process.StandardOutput.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
         _process.WaitForExit(1000);
     }
@@ -173,10 +173,6 @@ public class ProcessRunner : IDisposable
         _process.StartInfo = processStartInfo;
         _process.Start();
 
-        // var br = new BinaryReader(_process.StandardOutput.BaseStream);
-        // the copy to pipe will exit only if the stream ends or the cancellation token is triggered
-        // When using a webcam, the stream will exit only if the device is closed
-        // await br.BaseStream.CopyToAsync(target, _cts.Token);
         await _process.StandardOutput.BaseStream.CopyToAsync(target, _cts.Token);
         _process.Dispose();
     }
