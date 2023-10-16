@@ -180,7 +180,7 @@ namespace Iot.Device.Seesaw
         /// Read the given pins with the given pin numbers.
         /// </summary>
         /// <param name="pinValuePairs">The pin/value pairs to read.</param>
-        public override void Read(Span<PinValuePair> pinValuePairs)
+        protected override void Read(Span<PinValuePair> pinValuePairs)
         {
             for (int i = 0; i < pinValuePairs.Length; i++)
             {
@@ -234,7 +234,7 @@ namespace Iot.Device.Seesaw
         /// Write the given pins with the given values.
         /// </summary>
         /// <param name="pinValuePairs">The pin/value pairs to write.</param>
-        public override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
+        protected override void Write(ReadOnlySpan<PinValuePair> pinValuePairs)
         {
             for (int i = 0; i < pinValuePairs.Length; i++)
             {

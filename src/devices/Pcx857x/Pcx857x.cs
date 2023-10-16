@@ -150,7 +150,7 @@ namespace Iot.Device.Pcx857x
         /// Reads multiple pins from the device
         /// </summary>
         /// <param name="pinValues">Pins and values to be read</param>
-        public override void Read(Span<PinValuePair> pinValues)
+        protected override void Read(Span<PinValuePair> pinValues)
         {
             (uint pins, _) = new PinVector32(pinValues);
             if (pins >> PinCount > 0)
@@ -240,7 +240,7 @@ namespace Iot.Device.Pcx857x
         /// <summary>
         /// Writes a value to a set of pins.
         /// </summary>
-        public override void Write(ReadOnlySpan<PinValuePair> pinValues)
+        protected override void Write(ReadOnlySpan<PinValuePair> pinValues)
         {
             (uint pins, uint values) = new PinVector32(pinValues);
             if (pins >> PinCount > 0)
