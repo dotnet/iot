@@ -30,5 +30,4 @@ public class ProcessSettings
     /// If null, the Directory.GetCurrentDirectory() will be used.
     /// </summary>
     public string? WorkingDirectory { get; set; } = null;
-
 }

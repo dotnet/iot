@@ -8,4 +8,8 @@
     <RootNamespace>Iot.Device.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="System.IO.Pipelines" Version="7.0.0" />
+  </ItemGroup>
+
 </Project>

@@ -8,4 +8,8 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Camera\Camera.csproj" />
+  </ItemGroup>
+
 </Project>

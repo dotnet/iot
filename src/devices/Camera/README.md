@@ -146,3 +146,45 @@ ProcessSettings settings = new()
 using var proc = new ProcessRunner(settings);
 var text = await proc.ExecuteReadOutputAsStringAsync(args);
 ```
+
+## Switching the camera stack to `libcamera` or legacy in Raspbian
+
+Depending on the `OS` release, the capture drivers are either the legacy `raspi*` or the newest `libcamera`.
+
+The operating system version can be checked using the following command:
+
+```bash
+cat /etc/os-release
+```
+
+The `OS` versions are listed here: https://www.raspberrypi.com/software/operating-systems/
+
+| OS Version | Codename | Default camera stack |
+| ---------- | -------- | -------------------- |
+| 9          | Stretch  | legacy               |
+| 10         | Buster   | legacy               |
+| 11         | Bullseye | `libcamera`          |
+| 12         | Bookworm | `libcamera`          |
+
+The utilities to capture pictures or videos are fully [described in the documentation](https://www.raspberrypi.com/documentation/computers/camera_software.html). The two main utilities are the following:
+
+| Feature        | `raspicam` utilities | `libcamera` utilities |
+| -------------- | -------------------- | --------------------- |
+| Still pictures | `raspistill`         | `libcamera-still`     |
+| video          | `raspivid`           | `libcamera-vid`       |
+
+The command line described in the documentation is very similar for both the stacks.
+
+## Capturing stills and videos
+
+Once the `ProcessRunner` has been created and the command line configured manually or via the `CommandOptionsBuilder`, we can finally capture stills or videos.
+
+### Capturing stills
+
+
+
+### Capturing a fixed-length video
+
+### Capturing in continuous mode
+
+> The continuous mode can also be used to capture time-lapse videos.

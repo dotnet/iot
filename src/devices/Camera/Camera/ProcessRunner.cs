@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO.Pipelines;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,6 +43,7 @@ public class ProcessRunner : IDisposable
     public void Dispose()
     {
         _cts.Cancel();
+        Kill();
         if (_process != null && !_process.WaitForExit(5000))
         {
             throw new Exception($"Process '{_processSettings.Filename}' is hung");
@@ -79,9 +81,9 @@ public class ProcessRunner : IDisposable
 
     /// <summary>
     /// Execute the process with a number of arguments. The target
-    /// Stream received the stdout of the process
+    /// Stream receives the stdout of the process
     /// </summary>
-    public Task ExecuteAsync(string[] arguments, Stream target)
+    public Task ExecuteAsync(string[] arguments, Stream? target)
     {
         var argsString = string.Join(' ', arguments);
         return ExecuteAsync(argsString, target);
@@ -89,9 +91,9 @@ public class ProcessRunner : IDisposable
 
     /// <summary>
     /// Execute the process with a number of arguments. The target
-    /// Stream received the stdout of the process
+    /// Stream receives the stdout of the process
     /// </summary>
-    public async Task ExecuteAsync(string argsString, Stream target)
+    public async Task ExecuteAsync(string argsString, Stream? target)
     {
         var processStartInfo = BuildOptions(argsString);
         _process = new Process();
@@ -99,9 +101,16 @@ public class ProcessRunner : IDisposable
         _process.StartInfo = processStartInfo;
         _process.Start();
 
-        var br = new BinaryReader(_process.StandardOutput.BaseStream);
-        await br.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
+        if (target == null)
+        {
+            await _process.WaitForExitAsync(_cts.Token);
+            return;
+        }
+
+        // var br = new BinaryReader(_process.StandardOutput.BaseStream);
+        // await br.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
         // _process.Dispose();
+        await _process.StandardOutput.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
         _process.WaitForExit(1000);
     }
 
@@ -132,7 +141,7 @@ public class ProcessRunner : IDisposable
     /// <summary>
     /// Runs the execute on a separate thread
     /// </summary>
-    public Task<Task> ContinuousRunAsync(string[] arguments, Stream target)
+    public Task<Task> ContinuousRunAsync(string[] arguments, Stream? target)
     {
         var argsString = string.Join(' ', arguments);
         return ContinuousRunAsync(argsString, target);
@@ -141,7 +150,7 @@ public class ProcessRunner : IDisposable
     /// <summary>
     /// Runs the execute on a separate thread
     /// </summary>
-    public async Task<Task> ContinuousRunAsync(string argsString, Stream target)
+    public async Task<Task> ContinuousRunAsync(string argsString, Stream? target)
     {
         return await Task.Factory.StartNew(async () =>
         {
@@ -149,7 +158,10 @@ public class ProcessRunner : IDisposable
         }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
     }
 
-    /*
+    /// <summary>
+    /// Execute the process with a number of arguments. The target Pipe
+    /// receive the stdout of the process
+    /// </summary>
     public async Task ExecuteAsync(string argsString, PipeWriter target)
     {
         _cts = new CancellationTokenSource();
@@ -161,14 +173,13 @@ public class ProcessRunner : IDisposable
         _process.StartInfo = processStartInfo;
         _process.Start();
 
-        var br = new BinaryReader(_process.StandardOutput.BaseStream);
-
+        // var br = new BinaryReader(_process.StandardOutput.BaseStream);
         // the copy to pipe will exit only if the stream ends or the cancellation token is triggered
         // When using a webcam, the stream will exit only if the device is closed
-        await br.BaseStream.CopyToAsync(target, _cts.Token);
+        // await br.BaseStream.CopyToAsync(target, _cts.Token);
+        await _process.StandardOutput.BaseStream.CopyToAsync(target, _cts.Token);
         _process.Dispose();
     }
-    */
 
     private ProcessStartInfo BuildOptions(string arguments)
     {

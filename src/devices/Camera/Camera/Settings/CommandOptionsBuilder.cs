@@ -25,10 +25,25 @@ public class CommandOptionsBuilder
         => LibcameraAppsSettings.DefaultOptions.Single(d => d.Command == command);
 
     /// <summary>
+    /// Gets the CommmandOption, given the matching CommandCategory and Command fields
+    /// </summary>
+    public static CommandOption GetByCategory(CommandCategory category, Command command)
+        => LibcameraAppsSettings.DefaultOptions.Single(d => d.Category == category && d.Command == command);
+
+    /// <summary>
     /// Create an instance of CommadnOptionAndValue
     /// </summary>
     public static CommandOptionAndValue Create(Command command, string value = "")
         => new CommandOptionAndValue(Get(command), value);
+
+    /// <summary>
+    /// Allow to easily build the command line options needed to capture pictures or videos
+    /// </summary>
+    public CommandOptionsBuilder()
+    {
+        // This is needed to output the binary to stdout
+        AddOutput("-");
+    }
 
     /// <summary>
     /// Retrieves all the command line options and values in a string array
@@ -53,14 +68,65 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the options to stream indefinitely until the process gets stopped
+    /// Remove the specified option
+    /// </summary>
+    /// <param name="command">The command to remove</param>
+    /// <returns></returns>
+    public CommandOptionsBuilder Remove(CommandOption command)
+    {
+        var optionsAndValues = _commands.Where(cv => cv.Option == command).ToArray();
+        foreach (var cv in optionsAndValues)
+        {
+            _commands.Remove(cv);
+        }
+
+        return this;
+    }
+
+    /// <summary>
+    /// Tells the app to output the binary content towards the specified output
+    /// </summary>
+    /// <param name="output">A valid option, URL or filename</param>
+    /// <returns></returns>
+    public CommandOptionsBuilder WithOutput(string output)
+    {
+        AddOutput(output);
+        return this;
+    }
+
+    /// <summary>
+    /// Adds the options to capture the stream for the given amount of milliseconds.
+    /// The value 0 (default) will capture indefinitely until the process gets stopped
+    /// This option makes only sense for videos.
     /// </summary>
     /// <returns></returns>
-    public CommandOptionsBuilder WithContinuousStreaming()
+    public CommandOptionsBuilder WithContinuousStreaming(int ms = 0)
     {
-        AddContinuous();
-        AddOutput("-");
+        AddTimeout(ms);
         AddFlush();
+        return this;
+    }
+
+    /// <summary>
+    /// Set the timeout option to 1ms which is the minimum delay to take a still picture
+    /// When capturing pictures, the value '0' will continue to capture indefinitely which is rarely desired.
+    /// Instead, to capture a single still picture immediately, use the value '1' (1ms delay)
+    /// </summary>
+    public CommandOptionsBuilder WithTimeout(int ms = 1)
+    {
+        AddTimeout(ms);
+        return this;
+    }
+
+    /// <summary>
+    /// This option is only valid on still pictures
+    /// It captures a new image every interval (specified in milliseconds)
+    /// The format of the filename should use the counter. For example: "image%d.jpg"
+    /// </summary>
+    /// <param name="ms">The interval in milliseconds</param>
+    public CommandOptionsBuilder WithTimelapse(int ms)
+    {
+        AddTimelapse(ms);
         return this;
     }
 
@@ -70,6 +136,15 @@ public class CommandOptionsBuilder
     public CommandOptionsBuilder WithHflip()
     {
         AddHflip();
+        return this;
+    }
+
+    /// <summary>
+    /// Adds the option to mirror vertically
+    /// </summary>
+    public CommandOptionsBuilder WithVflip()
+    {
+        AddVflip();
         return this;
     }
 
@@ -108,13 +183,13 @@ public class CommandOptionsBuilder
     /// <returns></returns>
     public CommandOptionsBuilder WithPictureOptions(int quality = 93, string encoding = "jpg")
     {
-        AddQuality(quality);
+        AddPictureQuality(quality);
         AddEncoding(encoding);
         return this;
     }
 
     /// <summary>
-    /// Adds the option to capture a video stream
+    /// Adds the option to capture a video stream in H.264 format
     /// This method will automatically set H264 and the 'inline' option that writes the H264 header to
     /// every Intra frame. The frequency of Intra frames can be changed.
     /// </summary>
@@ -132,10 +207,32 @@ public class CommandOptionsBuilder
         return this;
     }
 
-    private void AddContinuous()
+    /// <summary>
+    /// Adds the option to capture a video stream in MJPEG format
+    /// </summary>
+    public CommandOptionsBuilder WithMJPEGVideoOptions(int quality)
+    {
+        AddCodec("mjpeg");
+        AddMJPEGQuality(quality);
+        return this;
+    }
+
+    /// <summary>
+    /// This option has a different meaning for still pictures and videos
+    /// When capturing videos, the value '0' means to capture forever
+    /// When capturing pictures, the value '0' will continue to capture indefinitely which is rarely desired.
+    /// Instead, to capture a single still picture immediately, use the value '1' (1ms delay)
+    /// </summary>
+    private void AddTimeout(int ms)
     {
         var cmd = Get(Command.Timeout);
-        _commands.Add(new CommandOptionAndValue(cmd, "0"));
+        _commands.Add(new CommandOptionAndValue(cmd, ms.ToString()));
+    }
+
+    private void AddTimelapse(int ms)
+    {
+        var cmd = Get(Command.Timelapse);
+        _commands.Add(new CommandOptionAndValue(cmd, ms.ToString()));
     }
 
     private void AddOutput(string value)
@@ -153,6 +250,12 @@ public class CommandOptionsBuilder
     private void AddHflip()
     {
         var cmd = Get(Command.Hflip);
+        _commands.Add(new CommandOptionAndValue(cmd));
+    }
+
+    private void AddVflip()
+    {
+        var cmd = Get(Command.Vflip);
         _commands.Add(new CommandOptionAndValue(cmd));
     }
 
@@ -188,9 +291,15 @@ public class CommandOptionsBuilder
         _commands.Add(new CommandOptionAndValue(cmd, value.ToString(CultureInfo.InvariantCulture)));
     }
 
-    private void AddQuality(int quality)
+    private void AddPictureQuality(int quality)
     {
-        var cmd = Get(Command.Quality);
+        var cmd = GetByCategory(CommandCategory.Still, Command.Quality);
+        _commands.Add(new CommandOptionAndValue(cmd, quality.ToString()));
+    }
+
+    private void AddMJPEGQuality(int quality)
+    {
+        var cmd = GetByCategory(CommandCategory.Video, Command.Quality);
         _commands.Add(new CommandOptionAndValue(cmd, quality.ToString()));
     }
 
