@@ -10,7 +10,7 @@ This binding includes:
   - The `ProcessSettings` holds the settings used to configure the inter-process communication using the Linux pipes.
   - The `ProcessSettingsFactory` is a factory class for the `ProcessSettings` specifically targeting the still and video capturing apps available on the Raspbian OS.
 - The `CameraInfo` class that parses the output from `--list-cameras` and retrieve the basic information about the installed cameras
-- The `Command*` types represent the options to be passed to the `libcamera-apps` command line. 
+- The `Command*` types represent the options to be passed to the `libcamera-apps` command line.
   - The `CommandOptionsBuilder` class allows to easily set up the most popular options without having to remember the command line or hardcoding the strings in the code.
 - The `LibcameraAppsSettings` contains the list of all the available known options of the apps shipped with the Raspbian OS at the time of writing.
 
@@ -50,7 +50,7 @@ On our side, we have no visibility over the upcoming API/ABI changes and we woul
 
 #### H.264 hardware encoder
 
-From our investigation, the H.264 hardware encoder available on the Raspberry PI is **not** supported by `libcamera`. This means that, even using `libcamera`,  after acquiring the video stream, it is still necessary to do additional steps to interop with the `HW` integrated circuit to encode the video and finally rebuild the video stream. 
+From our investigation, the H.264 hardware encoder available on the Raspberry PI is **not** supported by `libcamera`. This means that, even using `libcamera`,  after acquiring the video stream, it is still necessary to do additional steps to interop with the `HW` integrated circuit to encode the video and finally rebuild the video stream.
 
 Instead, the `libcamera-apps` that are built and shipped by the `Raspberry Foundation` do support the H264 the hardware encoding available on the Raspberry PI boards.
 
@@ -80,7 +80,7 @@ The expected output from the process determines which method should be used:
 - When running `libcamera-still` or `libcamera-vid` in capture mode, a binary still image or video stream is written on `stdout`. This content should be read by creating a (file or memory) Stream and passed to one of the `ExecuteAsync` methods.
 - Depending on the command line, the process could run in continuous mode (it should be stopped manually) or it will self-terminate after a given time. The `ProcessRunner` class allows to eventually stop 'on-demand' the process when it is capturing continuously.
 
-In the Unit tests, the exchange of data through `stdin` and `stdout` is validated through the `FakeVideoCapture` console application. This application takes a file in input and writes its content to `stdout` using `2Kb ` chunks. The unit tests run this process and read its `stdin` to verify that all the content is correctly processed.
+In the Unit tests, the exchange of data through `stdin` and `stdout` is validated through the `FakeVideoCapture` console application. This application takes a file in input and writes its content to `stdout` using `2Kb` chunks. The unit tests run this process and read its `stdin` to verify that all the content is correctly processed.
 
 ## Setting up the correct command line options
 
@@ -140,7 +140,7 @@ It's worth noting that the result may change depending on the `WorkingDirectory`
 
 **The second** is retrieving the text output from the execution. If the process printed an error message, this should be available through the following code:
 
-```
+```csharp
 ProcessSettings settings = new()
 {
     Filename = "libcamera-vid",
@@ -161,7 +161,7 @@ The operating system version can be checked using the following command:
 cat /etc/os-release
 ```
 
-The `OS` versions are listed here: https://www.raspberrypi.com/software/operating-systems/
+The `OS` versions are listed here: [Raspbian OS versions](https://www.raspberrypi.com/software/operating-systems/)
 
 | OS Version | Codename | Default camera stack |
 | ---------- | -------- | -------------------- |
@@ -193,7 +193,7 @@ Once the `ProcessRunner` has been created and the command line has been configur
 
 ### Preparing the application stack
 
-The `ProcessSettingsFactory` exposes a few methods to prepare an instance of the `ProcessSettings` class with the correct application name. 
+The `ProcessSettingsFactory` exposes a few methods to prepare an instance of the `ProcessSettings` class with the correct application name.
 
 ```csharp
 var processSettings = ProcessSettingsFactory.CreateForLibcamerastill();
@@ -291,6 +291,3 @@ The list of `CameraInfo` is obtained by running the app with the `--list-cameras
 - `Name`: the name of the camera
 - `MaxResolution`: a string with the horizontal and vertical resolution
 - `DevicePath`: the Linux device path of the camera
-
-
-
