@@ -206,10 +206,10 @@ public class UnitTest1
     [Fact]
     public Task TestCommandLineArguments2()
     {
-        var output = CommandOptionsBuilder.Create(Command.Output, "-");
+        var timeout = CommandOptionsBuilder.Create(Command.Timeout, "5000");
 
-        var builder = new CommandOptionsBuilder()
-            .With(output);
+        var builder = new CommandOptionsBuilder(false)
+            .With(timeout);
 
         var args = builder.GetArguments();
         Assert.Single(args);

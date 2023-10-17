@@ -24,7 +24,7 @@ internal class Program
         var arg = args[0];
         ProcessSettings? processSettings = arg switch
         {
-            "list" => ProcessSettingsFactory.CreateForLibcamerastill(),
+            "list" => ProcessSettingsFactory.CreateForLibcamerastillAndStderr(),
             "still-legacy" => ProcessSettingsFactory.CreateForRaspistill(),
             "video-legacy" => ProcessSettingsFactory.CreateForRaspivid(),
             "lapse-legacy" => ProcessSettingsFactory.CreateForRaspistill(),

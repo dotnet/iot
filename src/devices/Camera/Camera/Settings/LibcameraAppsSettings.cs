@@ -35,6 +35,9 @@ public class LibcameraAppsSettings
             new CommandOption(CommandCategory.Common, Command.Config,
                 "--config", "Read options from the given file <filename>", CommandInputType.Filename),
 
+            new CommandOption(CommandCategory.Common, Command.Camera,
+                "--camera", "Selects which camera to use <index>", CommandInputType.IndexOfCamera),
+
             new CommandOption(CommandCategory.Common, Command.Timeout,
                 "--timeout", "Delay before application stops automatically <milliseconds>", CommandInputType.Milliseconds),
 

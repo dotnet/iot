@@ -44,10 +44,6 @@ public class ProcessRunner : IDisposable
     {
         _cts.Cancel();
         Kill();
-        if (_process != null && !_process.WaitForExit(5000))
-        {
-            throw new Exception($"Process '{_processSettings.Filename}' is hung");
-        }
     }
 
     /// <summary>
@@ -60,6 +56,11 @@ public class ProcessRunner : IDisposable
             if (_process != null && !_process.HasExited)
             {
                 _process.Kill(true);
+                if (!_process.HasExited)
+                {
+                    _process.WaitForExit(5000);
+                }
+
                 _process.Dispose();
             }
         }
@@ -110,7 +111,15 @@ public class ProcessRunner : IDisposable
             return;
         }
 
-        await _process.StandardOutput.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
+        if (_processSettings.CaptureStderrInsteadOfStdout)
+        {
+            await _process.StandardError.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
+        }
+        else
+        {
+            await _process.StandardOutput.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
+        }
+
         _process.WaitForExit(1000);
     }
 
@@ -173,7 +182,15 @@ public class ProcessRunner : IDisposable
         _process.StartInfo = processStartInfo;
         _process.Start();
 
-        await _process.StandardOutput.BaseStream.CopyToAsync(target, _cts.Token);
+        if (_processSettings.CaptureStderrInsteadOfStdout)
+        {
+            await _process.StandardError.BaseStream.CopyToAsync(target, _cts.Token);
+        }
+        else
+        {
+            await _process.StandardOutput.BaseStream.CopyToAsync(target, _cts.Token);
+        }
+
         _process.Dispose();
     }
 

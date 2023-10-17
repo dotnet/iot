@@ -30,6 +30,11 @@ public enum Command
     ListCameras,
 
     /// <summary>
+    /// The command for the --camera option
+    /// </summary>
+    Camera,
+
+    /// <summary>
     /// The command for the --config option
     /// </summary>
     Config,

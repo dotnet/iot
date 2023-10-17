@@ -39,10 +39,13 @@ public class CommandOptionsBuilder
     /// <summary>
     /// Allow to easily build the command line options needed to capture pictures or videos
     /// </summary>
-    public CommandOptionsBuilder()
+    public CommandOptionsBuilder(bool includeOutputToStdio = true)
     {
-        // This is needed to output the binary to stdout
-        AddOutput("-");
+        if (includeOutputToStdio)
+        {
+            // This is needed to output the binary to stdout
+            AddOutput("-");
+        }
     }
 
     /// <summary>
@@ -80,6 +83,25 @@ public class CommandOptionsBuilder
             _commands.Remove(cv);
         }
 
+        return this;
+    }
+
+    /// <summary>
+    /// Tells the app to output the text with all the installed cameras and their characteristics
+    /// </summary>
+    public CommandOptionsBuilder WithListCameras()
+    {
+        AddListCameras();
+        return this;
+    }
+
+    /// <summary>
+    /// Tells the app to use the camera with the specified index.
+    /// The indexes are obtained from the output when WithListCameras is used
+    /// </summary>
+    public CommandOptionsBuilder WithCamera(int index)
+    {
+        AddCamera(index);
         return this;
     }
 
@@ -215,6 +237,18 @@ public class CommandOptionsBuilder
         AddCodec("mjpeg");
         AddMJPEGQuality(quality);
         return this;
+    }
+
+    private void AddListCameras()
+    {
+        var cmd = Get(Command.ListCameras);
+        _commands.Add(new CommandOptionAndValue(cmd));
+    }
+
+    private void AddCamera(int index)
+    {
+        var cmd = Get(Command.Camera);
+        _commands.Add(new CommandOptionAndValue(cmd, index.ToString()));
     }
 
     /// <summary>

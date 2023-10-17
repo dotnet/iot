@@ -89,8 +89,13 @@ internal class Capture
 
     public async Task CaptureTimelapse()
     {
-        var builder = new CommandOptionsBuilder()
-            .Remove(CommandOptionsBuilder.Get(Command.Output))
+        // The false argument avoids the app to output to stdio
+        // Time lapse images will be directly saved on disk without
+        // writing anything on the terminal
+        // Alternatively, we can leave the default (true) and
+        // use the '.Remove' method
+        var builder = new CommandOptionsBuilder(false)
+            // .Remove(CommandOptionsBuilder.Get(Command.Output))
             .WithOutput("image_%04d.jpg")
             .WithTimeout(5000)
             .WithTimelapse(1000)
@@ -113,8 +118,20 @@ internal class Capture
 
     public async Task<IEnumerable<CameraInfo>> List()
     {
+        var builder = new CommandOptionsBuilder()
+            .WithListCameras();
+        var args = builder.GetArguments();
+
         using var proc = new ProcessRunner(_processSettings);
-        var text = await proc.ExecuteReadOutputAsStringAsync(string.Empty);
+        Console.WriteLine("Using the following command line:");
+        Console.WriteLine(proc.GetFullCommandLine(args));
+        Console.WriteLine();
+
+        var text = await proc.ExecuteReadOutputAsStringAsync(args);
+        Console.WriteLine($"Output being parsed:");
+        Console.WriteLine(text);
+        Console.WriteLine();
+
         var cameras = await CameraInfo.From(text);
         return cameras;
     }

@@ -37,6 +37,18 @@ public static class ProcessSettingsFactory
     }
 
     /// <summary>
+    /// Create a ProcessSettings instance targeting libcamera-still and capturing stderr
+    /// </summary>
+    /// <returns></returns>
+    public static ProcessSettings CreateForLibcamerastillAndStderr()
+    {
+        var settings = new ProcessSettings();
+        settings.Filename = "libcamera-still";
+        settings.CaptureStderrInsteadOfStdout = true;
+        return settings;
+    }
+
+    /// <summary>
     /// Create a ProcessSettings instance targeting libcamera-still
     /// </summary>
     /// <returns></returns>

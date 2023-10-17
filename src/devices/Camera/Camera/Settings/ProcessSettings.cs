@@ -30,4 +30,10 @@ public class ProcessSettings
     /// If null, the Directory.GetCurrentDirectory() will be used.
     /// </summary>
     public string? WorkingDirectory { get; set; } = null;
+
+    /// <summary>
+    /// When true, the stderr output is captured instead of the stdout
+    /// This is needed in apps that outputs text such as the app usage
+    /// </summary>
+    public bool CaptureStderrInsteadOfStdout { get; set; } = false;
 }
