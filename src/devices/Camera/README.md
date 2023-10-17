@@ -179,6 +179,14 @@ The utilities to capture pictures or videos are fully [described in the document
 
 The command line described in the documentation is very similar for both the stacks.
 
+From `Bullseye` on, the `raspi-config` app allows to re-enable or disable the legacy camera stack.
+
+```bash
+sudo raspi-config
+```
+
+Then choose `Interface Options` and finally `Legacy Camera` (which refers to the `raspicam` old stack).
+
 ## Capturing stills and videos
 
 Once the `ProcessRunner` has been created and the command line has been configured (manually or via the `CommandOptionsBuilder`), we can finally capture stills or videos.
