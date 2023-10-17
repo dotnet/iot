@@ -5,13 +5,6 @@ using Iot.Device.Camera.Settings;
 
 namespace Camera.Samples;
 
-/*
-
-raspistill -n -t 1 -w 640 -h 480 -o still-legacy.jpg
-raspivid -o video-legacy.h264
-
-*/
-
 internal class Program
 {
     private static async Task<int> Main(string[] args)
