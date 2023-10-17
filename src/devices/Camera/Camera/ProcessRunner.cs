@@ -55,7 +55,11 @@ public class ProcessRunner : IDisposable
         {
             if (_process != null && !_process.HasExited)
             {
+#if NETSTANDARD2_0
+                _process.Kill();
+#else
                 _process.Kill(true);
+#endif
                 if (!_process.HasExited)
                 {
                     _process.WaitForExit(5000);
@@ -77,7 +81,7 @@ public class ProcessRunner : IDisposable
     /// </summary>
     public string GetFullCommandLine(string[] arguments)
     {
-        var argsString = string.Join(' ', arguments);
+        var argsString = string.Join(" ", arguments);
         return $"{_processSettings.Filename} {argsString}";
     }
 
@@ -87,7 +91,7 @@ public class ProcessRunner : IDisposable
     /// </summary>
     public Task ExecuteAsync(string[] arguments, Stream? target)
     {
-        var argsString = string.Join(' ', arguments);
+        var argsString = string.Join(" ", arguments);
         return ExecuteAsync(argsString, target);
     }
 
@@ -107,7 +111,11 @@ public class ProcessRunner : IDisposable
 
         if (target == null)
         {
+#if NETSTANDARD2_0
+            _process.WaitForExit();
+#else
             await _process.WaitForExitAsync(_cts.Token);
+#endif
             return;
         }
 
@@ -129,7 +137,7 @@ public class ProcessRunner : IDisposable
     /// </summary>
     public async Task<string> ExecuteReadOutputAsStringAsync(string[] arguments)
     {
-        var argsString = string.Join(' ', arguments);
+        var argsString = string.Join(" ", arguments);
         return await ExecuteReadOutputAsStringAsync(argsString);
     }
 
@@ -152,7 +160,7 @@ public class ProcessRunner : IDisposable
     /// </summary>
     public Task<Task> ContinuousRunAsync(string[] arguments, Stream? target)
     {
-        var argsString = string.Join(' ', arguments);
+        var argsString = string.Join(" ", arguments);
         return ContinuousRunAsync(argsString, target);
     }
 
