@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Camera\Camera.csproj" />
+    <ProjectReference Include="..\..\Camera\Camera.csproj" />
   </ItemGroup>
 
   <ItemGroup>

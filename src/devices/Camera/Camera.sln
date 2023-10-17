@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCamera", "TestCamera\TestCamera.csproj", "{36C9AAE4-E27C-4E92-9D8C-BD19F6736FEC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestCamera", "tests\TestCamera\TestCamera.csproj", "{36C9AAE4-E27C-4E92-9D8C-BD19F6736FEC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeVideoCapture", "FakeVideoCapture\FakeVideoCapture.csproj", "{577817F6-6D6B-4560-A284-D75743CED725}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FakeVideoCapture", "tests\FakeVideoCapture\FakeVideoCapture.csproj", "{577817F6-6D6B-4560-A284-D75743CED725}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Camera", "Camera\Camera.csproj", "{7949E477-5A4B-47CD-B61D-9C5C5ABAF927}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camera.Samples", "Camera.Samples\Camera.Samples.csproj", "{094EE649-6711-4D54-96CB-841C1D99C49D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Camera.Samples", "samples\Camera.Samples\Camera.Samples.csproj", "{094EE649-6711-4D54-96CB-841C1D99C49D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
