@@ -4,8 +4,7 @@
 using System;
 using System.Linq;
 using System.Collections.Generic;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
+using Iot.Device.Graphics;
 
 namespace Iot.Device.Ssd13xx.Samples
 {
@@ -21,7 +20,7 @@ namespace Iot.Device.Ssd13xx.Samples
         /// </summary>
         /// <param name="s">Ssd1306 object.</param>
         /// <param name="image">Image to display.</param>
-        internal static void DisplayImage(this Ssd1306 s, Image<L16> image)
+        internal static void DisplayImage(this Ssd1306 s, BitmapImage image)
         {
             Int16 width = 128;
             Int16 pages = 4;
@@ -35,7 +34,7 @@ namespace Iot.Device.Ssd13xx.Samples
                     for (byte bit = 0; bit < 8; bit++)
                     {
                         bits = bits << 1;
-                        bits |= image[x, page * 8 + 7 - bit].PackedValue > 0 ? 1 : 0;
+                        bits |= image[x, page * 8 + 7 - bit].GetBrightness() > 0.1f ? 1 : 0;
                     }
 
                     buffer.Add((byte)bits);

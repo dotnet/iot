@@ -4,17 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
 using System.IO;
-using SixLabors.Fonts;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Processing;
-using SixLabors.ImageSharp.Drawing.Processing;
+using Iot.Device.Graphics;
+using Iot.Device.Graphics.SkiaSharpAdapter;
 using Iot.Device.Ssd13xx;
 using Iot.Device.Ssd13xx.Commands;
 using Iot.Device.Ssd13xx.Samples;
@@ -22,6 +20,7 @@ using Ssd1306Cmnds = Iot.Device.Ssd13xx.Commands.Ssd1306Commands;
 using Ssd1327Cmnds = Iot.Device.Ssd13xx.Commands.Ssd1327Commands;
 
 Console.WriteLine("Hello Ssd1306 Sample!");
+SkiaSharpAdapter.Register();
 
 #if SSD1327
 using Ssd1327 device = GetSsd1327WithI2c();
@@ -189,7 +188,7 @@ void DisplayImages(Ssd1306 ssd1306)
     Console.WriteLine("Display Images");
     foreach (var image_name in Directory.GetFiles("images", "*.bmp").OrderBy(f => f))
     {
-        using Image<L16> image = Image.Load<L16>(image_name);
+        using BitmapImage image = BitmapImage.CreateFromFile(image_name);
         ssd1306.DisplayImage(image);
         Thread.Sleep(1000);
     }
@@ -200,26 +199,16 @@ void DisplayClock(Ssd1306 ssd1306)
     Console.WriteLine("Display clock");
     var fontSize = 25;
     var font = "DejaVu Sans";
-    var fontsys = SystemFonts.CreateFont(font, fontSize, FontStyle.Italic);
     var y = 0;
 
     foreach (var i in Enumerable.Range(0, 100))
     {
-        using (Image<Rgba32> image = new Image<Rgba32>(128, 32))
+        using (var image = BitmapImage.CreateBitmap(128, 32, PixelFormat.Format32bppArgb))
         {
-            if (image.TryGetSinglePixelSpan(out Span<Rgba32> imageSpan))
-            {
-                imageSpan.Fill(Color.Black);
-            }
-
-            image.Mutate(ctx => ctx
-                .DrawText(DateTime.Now.ToString("HH:mm:ss"), fontsys, Color.White,
-                    new SixLabors.ImageSharp.PointF(0, y)));
-
-            using (Image<L16> image_t = image.CloneAs<L16>())
-            {
-                ssd1306.DisplayImage(image_t);
-            }
+            image.Clear(Color.Black);
+            var g = image.GetDrawingApi();
+            g.DrawText(DateTime.Now.ToString("HH:mm:ss"), font, fontSize, Color.White, new Point(0, y));
+            ssd1306.DisplayImage(image);
 
             y++;
             if (y >= image.Height)
