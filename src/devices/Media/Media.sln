@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MjpegStream", "VideoDevice\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{2EDE86C6-43D3-42AA-A8E0-1AE61BD5F6EB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpConnector", "..\SkiaSharpConnector\SkiaSharpConnector.csproj", "{02C24406-6764-45EC-967E-E9AAB5EA92E1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpAdapter", "..\SkiaSharpAdapter\SkiaSharpAdapter.csproj", "{02C24406-6764-45EC-967E-E9AAB5EA92E1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
