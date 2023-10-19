@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Camera\Camera.csproj" />
+    <ProjectReference Include="..\FakeVideoCapture\FakeVideoCapture.csproj" />
   </ItemGroup>
 
   <ItemGroup>

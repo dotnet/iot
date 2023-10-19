@@ -15,7 +15,7 @@ namespace TestCamera;
 public class ProcessRunnerTests
 {
     private const string FakeVideocapture =
-        @"..\..\..\..\FakeVideoCapture\bin\Debug\net6.0\FakeVideoCapture.exe";
+        @"FakeVideoCapture.exe";
 
     private const string Video1 = "test.bin";
     private const string Text1 = "test.txt";
