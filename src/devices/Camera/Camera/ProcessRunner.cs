@@ -106,31 +106,39 @@ public class ProcessRunner : IDisposable
     public async Task ExecuteAsync(string argsString, Stream? target)
     {
         var processStartInfo = BuildOptions(argsString);
-        _process = new Process();
-        _process.EnableRaisingEvents = true;
-        _process.StartInfo = processStartInfo;
-        _process.Start();
-
-        if (target == null)
+        try
         {
+            _process = new Process();
+            _process.EnableRaisingEvents = true;
+            _process.StartInfo = processStartInfo;
+            _process.Start();
+
+            if (target == null)
+            {
 #if NETSTANDARD2_0
-            _process.WaitForExit();
+                _process.WaitForExit();
 #else
-            await _process.WaitForExitAsync(_cts.Token);
+                await _process.WaitForExitAsync(_cts.Token);
 #endif
-            return;
-        }
+                return;
+            }
 
-        if (_processSettings.CaptureStderrInsteadOfStdout)
-        {
-            await _process.StandardError.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
-        }
-        else
-        {
-            await _process.StandardOutput.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
-        }
+            if (_processSettings.CaptureStderrInsteadOfStdout)
+            {
+                await _process.StandardError.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
+            }
+            else
+            {
+                await _process.StandardOutput.BaseStream.CopyToAsync(target, _processSettings.BufferSize, _cts.Token);
+            }
 
-        _process.WaitForExit(1000);
+            _process.WaitForExit(1000);
+        }
+        finally
+        {
+            _process?.Dispose();
+            _process = null;
+        }
     }
 
     /// <summary>
@@ -187,21 +195,27 @@ public class ProcessRunner : IDisposable
 
         var folder = Directory.GetCurrentDirectory();
         var processStartInfo = BuildOptions(argsString);
-        _process = new Process();
-        // _process.EnableRaisingEvents = true;
-        _process.StartInfo = processStartInfo;
-        _process.Start();
-
-        if (_processSettings.CaptureStderrInsteadOfStdout)
+        try
         {
-            await _process.StandardError.BaseStream.CopyToAsync(target, _cts.Token);
-        }
-        else
-        {
-            await _process.StandardOutput.BaseStream.CopyToAsync(target, _cts.Token);
-        }
+            _process = new Process();
+            // _process.EnableRaisingEvents = true;
+            _process.StartInfo = processStartInfo;
+            _process.Start();
 
-        _process.Dispose();
+            if (_processSettings.CaptureStderrInsteadOfStdout)
+            {
+                await _process.StandardError.BaseStream.CopyToAsync(target, _cts.Token);
+            }
+            else
+            {
+                await _process.StandardOutput.BaseStream.CopyToAsync(target, _cts.Token);
+            }
+        }
+        finally
+        {
+            _process?.Dispose();
+            _process = null;
+        }
     }
 
     private ProcessStartInfo BuildOptions(string arguments)

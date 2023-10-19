@@ -14,4 +14,10 @@ namespace Iot.Device.Camera.Settings;
 /// </summary>
 public record class CommandOptionAndValue(CommandOption Option, string Value = "")
 {
+    /// <summary>
+    /// Create an instance of CommadnOptionAndValue
+    /// </summary>
+    public static CommandOptionAndValue Create(Command command, string value = "")
+        => new CommandOptionAndValue(CommandOptionsBuilder.Get(command), value);
+
 }

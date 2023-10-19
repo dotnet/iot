@@ -31,12 +31,6 @@ public class CommandOptionsBuilder
         => LibcameraAppsSettings.DefaultOptions.Single(d => d.Category == category && d.Command == command);
 
     /// <summary>
-    /// Create an instance of CommadnOptionAndValue
-    /// </summary>
-    public static CommandOptionAndValue Create(Command command, string value = "")
-        => new CommandOptionAndValue(Get(command), value);
-
-    /// <summary>
     /// Allow to easily build the command line options needed to capture pictures or videos
     /// </summary>
     public CommandOptionsBuilder(bool includeOutputToStdio = true)

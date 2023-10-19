@@ -12,7 +12,7 @@ namespace TestCamera;
 /// <summary>
 /// Unit tests for the Camera binding
 /// </summary>
-public class UnitTest1
+public class ProcessRunnerTests
 {
     private const string FakeVideocapture =
         @"..\..\..\..\FakeVideoCapture\bin\Debug\net6.0\FakeVideoCapture.exe";
@@ -155,65 +155,5 @@ public class UnitTest1
         var source = "Expected a filename as agument" + Environment.NewLine;
 
         Assert.Equal(source, text);
-    }
-
-    /// <summary>
-    /// Test parsing --list-cameras
-    /// </summary>
-    /// <returns></returns>
-    [Fact]
-    public async Task TestCameraList()
-    {
-        var source = await File.ReadAllTextAsync(Text1, Encoding.UTF8);
-        var cameras = await CameraInfo.From(source);
-
-        Assert.Equal(2, cameras.Count());
-        var cam0 = cameras.First();
-        Assert.Equal(0, cam0.Index);
-        Assert.Equal("imx219", cam0.Name);
-        Assert.Equal("3280x2464", cam0.MaxResolution);
-        Assert.Equal("/base/soc/i2c0mux/i2c@1/imx219@10", cam0.DevicePath);
-
-        var cam1 = cameras.Skip(1).First();
-        Assert.Equal(1, cam1.Index);
-        Assert.Equal("imx477", cam1.Name);
-        Assert.Equal("4056x3040", cam1.MaxResolution);
-        Assert.Equal("/base/soc/i2c0mux/i2c@1/imx477@1a", cam1.DevicePath);
-    }
-
-    /// <summary>
-    /// Test the command line arguments
-    /// </summary>
-    [Fact]
-    public Task TestCommandLineArguments1()
-    {
-        // repeating the options will NOT repeat the arguments
-        var builder = new CommandOptionsBuilder()
-            .WithContinuousStreaming()
-            .WithContinuousStreaming()
-            .WithH264VideoOptions("baseline", "4", 15)
-            .WithResolution(640, 480);
-
-        var args = builder.GetArguments();
-        Assert.Equal(10, args.Length);
-
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    /// Test the command line arguments
-    /// </summary>
-    [Fact]
-    public Task TestCommandLineArguments2()
-    {
-        var timeout = CommandOptionsBuilder.Create(Command.Timeout, "5000");
-
-        var builder = new CommandOptionsBuilder(false)
-            .With(timeout);
-
-        var args = builder.GetArguments();
-        Assert.Single(args);
-
-        return Task.CompletedTask;
     }
 }
