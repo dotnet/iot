@@ -11,28 +11,34 @@ using System.Threading.Tasks;
 namespace Iot.Device.Camera.Settings;
 
 /// <summary>
-/// Build the command line options using a fluent API
-/// The provided values are NOT validated by this builder
+/// Build the command line options using a fluent API.
+/// The provided values are NOT validated by this builder.
 /// </summary>
 public class CommandOptionsBuilder
 {
     private HashSet<CommandOptionAndValue> _commands = new();
 
     /// <summary>
-    /// Gets the CommmandOption, given the matching Command field
+    /// Gets the CommmandOption, given the matching Command field.
     /// </summary>
+    /// <param name="command">The command to retrieve.</param>
+    /// <returns>The command option.</returns>
     public static CommandOption Get(Command command)
         => LibcameraAppsSettings.DefaultOptions.Single(d => d.Command == command);
 
     /// <summary>
-    /// Gets the CommmandOption, given the matching CommandCategory and Command fields
+    /// Gets the CommmandOption, given the matching CommandCategory and Command fields.
     /// </summary>
+    /// <param name="category">The category of the command to retrieve.</param>
+    /// <param name="command">The command to retrieve.</param>
+    /// <returns>An instance of the CommandOption.</returns>
     public static CommandOption GetByCategory(CommandCategory category, Command command)
         => LibcameraAppsSettings.DefaultOptions.Single(d => d.Category == category && d.Command == command);
 
     /// <summary>
-    /// Allow to easily build the command line options needed to capture pictures or videos
+    /// Allow to easily build the command line options needed to capture pictures or videos.
     /// </summary>
+    /// <param name="includeOutputToStdio">True to redirect the stdio output to the given stream.</param>
     public CommandOptionsBuilder(bool includeOutputToStdio = true)
     {
         if (includeOutputToStdio)
@@ -43,9 +49,9 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Retrieves all the command line options and values in a string array
+    /// Retrieves all the command line options and values in a string array.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>An array of strings with all the command options accumulated in this instance.</returns>
     public string[] GetArguments()
     {
         var args = _commands
@@ -56,8 +62,10 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the option specified in the argument
+    /// Adds the option specified in the argument.
     /// </summary>
+    /// <param name="optionAndValue">The command option and its value to be added to the current instance.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder With(CommandOptionAndValue optionAndValue)
     {
         _commands.Add(optionAndValue);
@@ -65,10 +73,10 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Remove the specified option
+    /// Remove the specified option.
     /// </summary>
-    /// <param name="command">The command to remove</param>
-    /// <returns></returns>
+    /// <param name="command">The command to remove.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder Remove(CommandOption command)
     {
         var optionsAndValues = _commands.Where(cv => cv.Option == command).ToArray();
@@ -81,8 +89,9 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Tells the app to output the text with all the installed cameras and their characteristics
+    /// Tells the app to output the text with all the installed cameras and their characteristics.
     /// </summary>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithListCameras()
     {
         AddListCameras();
@@ -91,8 +100,10 @@ public class CommandOptionsBuilder
 
     /// <summary>
     /// Tells the app to use the camera with the specified index.
-    /// The indexes are obtained from the output when WithListCameras is used
+    /// The indexes are obtained from the output when WithListCameras is used.
     /// </summary>
+    /// <param name="index">The index of the camera to be used.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithCamera(int index)
     {
         AddCamera(index);
@@ -100,10 +111,10 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Tells the app to output the binary content towards the specified output
+    /// Tells the app to output the binary content towards the specified output.
     /// </summary>
-    /// <param name="output">A valid option, URL or filename</param>
-    /// <returns></returns>
+    /// <param name="output">A valid option, URL or filename.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithOutput(string output)
     {
         AddOutput(output);
@@ -112,10 +123,11 @@ public class CommandOptionsBuilder
 
     /// <summary>
     /// Adds the options to capture the stream for the given amount of milliseconds.
-    /// The value 0 (default) will capture indefinitely until the process gets stopped
+    /// The value 0 (default) will capture indefinitely until the process gets stopped.
     /// This option makes only sense for videos.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="ms">The length of the capture operation in milliseconds.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithContinuousStreaming(int ms = 0)
     {
         AddTimeout(ms);
@@ -124,10 +136,12 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Set the timeout option to 1ms which is the minimum delay to take a still picture
+    /// Sets the timeout option to 1ms which is the minimum delay to take a still picture.
     /// When capturing pictures, the value '0' will continue to capture indefinitely which is rarely desired.
-    /// Instead, to capture a single still picture immediately, use the value '1' (1ms delay)
+    /// Instead, to capture a single still picture immediately, use the value '1' (1ms delay).
     /// </summary>
+    /// <param name="ms">The time after which a still picture is captured, in milliseconds.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithTimeout(int ms = 1)
     {
         AddTimeout(ms);
@@ -135,11 +149,12 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// This option is only valid on still pictures
-    /// It captures a new image every interval (specified in milliseconds)
-    /// The format of the filename should use the counter. For example: "image%d.jpg"
+    /// This option is only valid on still pictures.
+    /// It captures a new image every interval (specified in milliseconds).
+    /// The format of the filename should use the counter. For example: "image%d.jpg".
     /// </summary>
-    /// <param name="ms">The interval in milliseconds</param>
+    /// <param name="ms">The interval in milliseconds.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithTimelapse(int ms)
     {
         AddTimelapse(ms);
@@ -147,8 +162,9 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the option to mirror horizontally
+    /// Adds the option to mirror horizontally.
     /// </summary>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithHflip()
     {
         AddHflip();
@@ -156,8 +172,9 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the option to mirror vertically
+    /// Adds the option to mirror vertically.
     /// </summary>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithVflip()
     {
         AddVflip();
@@ -165,8 +182,11 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the resolution options
+    /// Adds the resolution options.
     /// </summary>
+    /// <param name="width">The width of the image.</param>
+    /// <param name="height">The heighy of the image.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithResolution(int width, int height)
     {
         AddWidthAndHeight(width, height);
@@ -174,13 +194,13 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the image quality options
+    /// Adds the image quality options.
     /// </summary>
-    /// <param name="sharpness">The sharpness value (must be positive, typically no more than 2.0)</param>
-    /// <param name="contrast">The contrast value (must be zero or positive, typically no more than 2.0)</param>
-    /// <param name="brightness">The brightness value (must be between -1.0=black and 1.0=white)</param>
-    /// <param name="saturation">The saturation value (0 is gray, 1.0 is the default, larger values are saturated)</param>
-    /// <returns></returns>
+    /// <param name="sharpness">The sharpness value (must be positive, typically no more than 2.0).</param>
+    /// <param name="contrast">The contrast value (must be zero or positive, typically no more than 2.0).</param>
+    /// <param name="brightness">The brightness value (must be between -1.0=black and 1.0=white).</param>
+    /// <param name="saturation">The saturation value (0 is gray, 1.0 is the default, larger values are saturated).</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithImageQuality(decimal sharpness = 1.0m, decimal contrast = 1.0m,
         decimal brightness = 0.0m, decimal saturation = 1.0m)
     {
@@ -192,11 +212,11 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the option to take a still picture
+    /// Adds the option to take a still picture.
     /// </summary>
-    /// <param name="quality">0 to 100, default is 93</param>
-    /// <param name="encoding">One of the following strings: jpg, png, bmp, rgb, yuv420</param>
-    /// <returns></returns>
+    /// <param name="quality">0 to 100, default is 93.</param>
+    /// <param name="encoding">One of the following strings: jpg, png, bmp, rgb, yuv420.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithPictureOptions(int quality = 93, string encoding = "jpg")
     {
         AddPictureQuality(quality);
@@ -205,14 +225,14 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the option to capture a video stream in H.264 format
+    /// Adds the option to capture a video stream in H.264 format.
     /// This method will automatically set H264 and the 'inline' option that writes the H264 header to
     /// every Intra frame. The frequency of Intra frames can be changed.
     /// </summary>
-    /// <param name="profile">The H264 profile used by the hardware encoder: baseline, main or high</param>
-    /// <param name="level">The level of the H264 protocol: 4, 4.1 or 4.2</param>
-    /// <param name="intra">The frequency of I (Intra) frames (number of frames)</param>
-    /// <returns></returns>
+    /// <param name="profile">The H264 profile used by the hardware encoder: baseline, main or high.</param>
+    /// <param name="level">The level of the H264 protocol: 4, 4.1 or 4.2.</param>
+    /// <param name="intra">The frequency of I (Intra) frames (number of frames).</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithH264VideoOptions(string profile, string level, int intra = 60)
     {
         AddCodec("h264");
@@ -224,8 +244,10 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// Adds the option to capture a video stream in MJPEG format
+    /// Adds the option to capture a video stream in MJPEG format.
     /// </summary>
+    /// <param name="quality">The quality of each MJPEG picture.</param>
+    /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithMJPEGVideoOptions(int quality)
     {
         AddCodec("mjpeg");
@@ -246,11 +268,13 @@ public class CommandOptionsBuilder
     }
 
     /// <summary>
-    /// This option has a different meaning for still pictures and videos
-    /// When capturing videos, the value '0' means to capture forever
+    /// This option has a different meaning for still pictures and videos.
+    /// When capturing videos, the value '0' means to capture forever.
     /// When capturing pictures, the value '0' will continue to capture indefinitely which is rarely desired.
-    /// Instead, to capture a single still picture immediately, use the value '1' (1ms delay)
+    /// Instead, to capture a single still picture immediately, use the value '1' (1ms delay).
     /// </summary>
+    /// <param name="ms">When a still picture is captured, it represents the time, in milliseconds, after which the still picture is saved.
+    /// When a video is captured, it represents the time after which the capture will start.</param>
     private void AddTimeout(int ms)
     {
         var cmd = Get(Command.Timeout);

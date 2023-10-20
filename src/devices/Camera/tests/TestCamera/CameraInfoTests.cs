@@ -12,7 +12,7 @@ using Iot.Device.Camera;
 namespace TestCamera;
 
 /// <summary>
-/// Tests for the CameraInfo class
+/// Tests for the CameraInfo class.
 /// </summary>
 public class CameraInfoTests
 {
@@ -21,7 +21,7 @@ public class CameraInfoTests
     /// <summary>
     /// Test parsing --list-cameras
     /// </summary>
-    /// <returns></returns>
+    /// <returns>The test task operation.</returns>
     [Fact]
     public async Task TestCameraList()
     {

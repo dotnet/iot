@@ -55,7 +55,18 @@ public enum CommandInputType
     String,
 
     /// <summary>
-    /// A single formattable string
+    /// A single formattable string accepting the following directives.<para/>
+    /// Directive   Substitution<para/>
+    /// %frame      The sequence number of the frame<para/>
+    /// %fps        The instantaneous frame rate<para/>
+    /// %exp        The shutter speed used to capture the image, in microseconds<para/>
+    /// %ag         The analogue gain applied to the image in the sensor<para/>
+    /// %dg         The digital gain applied to the image by the ISP<para/>
+    /// %rg         The gain applied to the red component of each pixel<para/>
+    /// %bg         The gain applied to the blue component of each pixel<para/>
+    /// %focus      The focus metric for the image, where a larger value implies a sharper image<para/>
+    /// %lp         The current lens position in dioptres (1 / distance in metres).<para/>
+    /// %afstate    The autofocus algorithm state (one of idle, scanning, focused or failed).<para/>
     /// </summary>
     FormattableString,
 
@@ -164,22 +175,3 @@ public enum CommandInputType
     /// </summary>
     ListeningTcpUri,
 }
-
-
-
-/*
-Formattable string:
-
-Directive   Substitution
-%frame      The sequence number of the frame
-%fps        The instantaneous frame rate
-%exp        The shutter speed used to capture the image, in microseconds
-%ag         The analogue gain applied to the image in the sensor
-%dg         The digital gain applied to the image by the ISP
-%rg         The gain applied to the red component of each pixel
-%bg         The gain applied to the blue component of each pixel
-%focus      The focus metric for the image, where a larger value implies a sharper image
-%lp         The current lens position in dioptres (1 / distance in metres).
-%afstate    The autofocus algorithm state (one of idle, scanning, focused or failed).
-
-*/

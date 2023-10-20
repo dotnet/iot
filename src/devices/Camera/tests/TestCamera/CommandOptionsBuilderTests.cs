@@ -17,8 +17,9 @@ namespace TestCamera;
 public class CommandOptionsBuilderTests
 {
     /// <summary>
-    /// Test the command line arguments
+    /// Test the command line arguments.
     /// </summary>
+    /// <returns>The test task operation.</returns>
     [Fact]
     public Task TestCommandLineArguments1()
     {
@@ -30,14 +31,20 @@ public class CommandOptionsBuilderTests
             .WithResolution(640, 480);
 
         var args = builder.GetArguments();
+        // Total are:
+        // new CommandOptionsBuilder() => 1
+        // .WithContinuousStreaming() => 2
+        // .WithH264VideoOptions(...) => 5
+        // .WithResolution(...) => 2
         Assert.Equal(10, args.Length);
 
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Test the command line arguments
+    /// Test the command line arguments.
     /// </summary>
+    /// <returns>The test task operation.</returns>
     [Fact]
     public Task TestCommandLineArguments2()
     {

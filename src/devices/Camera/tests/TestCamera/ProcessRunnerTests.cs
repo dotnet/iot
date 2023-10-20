@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Text;
 
 using Iot.Device.Camera;
-using Iot.Device.Camera.Settings;
+using Iot.Device.Common;
 
 namespace TestCamera;
 
@@ -51,8 +51,9 @@ public class ProcessRunnerTests
     }
 
     /// <summary>
-    /// Test 1
+    /// Test on the binary output.
     /// </summary>
+    /// <returns>The test task operation.</returns>
     [Fact]
     public async Task TestBinary1()
     {
@@ -79,10 +80,11 @@ public class ProcessRunnerTests
     }
 
     /// <summary>
-    /// Test 2
+    /// Test on the binary output.
     /// This is a "continuous test" that provides the ability to stop
-    /// the external process prematurely
+    /// the external process prematurely.
     /// </summary>
+    /// <returns>The test task operation.</returns>
     [Fact]
     public async Task TestBinary2()
     {
@@ -116,8 +118,9 @@ public class ProcessRunnerTests
     }
 
     /// <summary>
-    /// Test 1
+    /// Test on the text output.
     /// </summary>
+    /// <returns>The test task operation.</returns>
     [Fact]
     public async Task TestText1()
     {
@@ -137,8 +140,9 @@ public class ProcessRunnerTests
     }
 
     /// <summary>
-    /// Retrieving failure output
+    /// Retrieving failure output.
     /// </summary>
+    /// <returns>The test task operation.</returns>
     [Fact]
     public async Task TestText2()
     {

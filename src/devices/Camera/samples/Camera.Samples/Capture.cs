@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Iot.Device.Camera;
 using Iot.Device.Camera.Settings;
+using Iot.Device.Common;
 
 namespace Camera.Samples;
 

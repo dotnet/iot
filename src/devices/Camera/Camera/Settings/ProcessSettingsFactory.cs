@@ -7,66 +7,88 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using Iot.Device.Common;
+
 namespace Iot.Device.Camera.Settings;
 
 /// <summary>
-/// A factory for the ProcessSettings
+/// A factory for the <see cref="ProcessSettings"/> class.
 /// </summary>
 public static class ProcessSettingsFactory
 {
     /// <summary>
-    /// Create a ProcessSettings instance targeting raspistill
+    /// The process name of the legacy application used to capture still pictures on the Raspbian OS
     /// </summary>
-    /// <returns></returns>
+    public const string RaspiStill = "raspistill";
+
+    /// <summary>
+    /// The process name of the legacy application used to capture video streams on the Raspbian OS
+    /// </summary>
+    public const string RaspiVid = "raspivid";
+
+    /// <summary>
+    /// The process name of the libcamera application used to capture still pictures on the Raspbian OS
+    /// </summary>
+    public const string LibcameraStill = "libcamera-still";
+
+    /// <summary>
+    /// The process name of the libcamera application used to capture video streams on the Raspbian OS
+    /// </summary>
+    public const string LibcameraVid = "libcamera-vid";
+
+    /// <summary>
+    /// Creates a ProcessSettings instance targeting raspistill.
+    /// </summary>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
     public static ProcessSettings CreateForRaspistill()
     {
         var settings = new ProcessSettings();
-        settings.Filename = "raspistill";
+        settings.Filename = RaspiStill;
         return settings;
     }
 
     /// <summary>
-    /// Create a ProcessSettings instance targeting raspivid
+    /// Creates a ProcessSettings instance targeting raspivid.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
     public static ProcessSettings CreateForRaspivid()
     {
         var settings = new ProcessSettings();
-        settings.Filename = "raspivid";
+        settings.Filename = RaspiVid;
         return settings;
     }
 
     /// <summary>
-    /// Create a ProcessSettings instance targeting libcamera-still and capturing stderr
+    /// Creates a ProcessSettings instance targeting libcamera-still and capturing stderr.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
     public static ProcessSettings CreateForLibcamerastillAndStderr()
     {
         var settings = new ProcessSettings();
-        settings.Filename = "libcamera-still";
+        settings.Filename = LibcameraStill;
         settings.CaptureStderrInsteadOfStdout = true;
         return settings;
     }
 
     /// <summary>
-    /// Create a ProcessSettings instance targeting libcamera-still
+    /// Creates a ProcessSettings instance targeting libcamera-still.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
     public static ProcessSettings CreateForLibcamerastill()
     {
         var settings = new ProcessSettings();
-        settings.Filename = "libcamera-still";
+        settings.Filename = LibcameraStill;
         return settings;
     }
 
     /// <summary>
-    /// Create a ProcessSettings instance targeting raspivid
+    /// Creates a ProcessSettings instance targeting raspivid.
     /// </summary>
-    /// <returns></returns>
+    /// <returns>An instance of the <see cref="ProcessSettings"/> class</returns>
     public static ProcessSettings CreateForLibcameravid()
     {
         var settings = new ProcessSettings();
-        settings.Filename = "libcamera-vid";
+        settings.Filename = LibcameraVid;
         return settings;
     }
 }
