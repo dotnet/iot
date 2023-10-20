@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ssd13xx.Samples", "samples\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Ssd13xx", "Ssd13xx.csproj", "{CDC920A8-123F-432D-834E-49BAB00191E7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpAdapter", "..\..\..\..\iot3\src\devices\SkiaSharpAdapter\SkiaSharpAdapter.csproj", "{02FB0C9A-5618-4A16-9D63-0B338A7800A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino", "..\Arduino\Arduino.csproj", "{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpAdapter", "..\SkiaSharpAdapter\SkiaSharpAdapter.csproj", "{76D9C818-0A02-4DC1-A480-5C8552AC1B65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,18 +63,30 @@ Global
 		{CDC920A8-123F-432D-834E-49BAB00191E7}.Release|x64.Build.0 = Release|Any CPU
 		{CDC920A8-123F-432D-834E-49BAB00191E7}.Release|x86.ActiveCfg = Release|Any CPU
 		{CDC920A8-123F-432D-834E-49BAB00191E7}.Release|x86.Build.0 = Release|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Debug|x64.Build.0 = Debug|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Debug|x86.Build.0 = Debug|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Release|x64.ActiveCfg = Release|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Release|x64.Build.0 = Release|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Release|x86.ActiveCfg = Release|Any CPU
-		{02FB0C9A-5618-4A16-9D63-0B338A7800A8}.Release|x86.Build.0 = Release|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Debug|x64.Build.0 = Debug|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Debug|x86.Build.0 = Debug|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Release|x64.ActiveCfg = Release|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Release|x64.Build.0 = Release|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Release|x86.ActiveCfg = Release|Any CPU
+		{9531CD82-A4B7-4F7A-A220-E2E004A6F0E9}.Release|x86.Build.0 = Release|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Debug|x64.Build.0 = Debug|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Debug|x86.Build.0 = Debug|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|x64.ActiveCfg = Release|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|x64.Build.0 = Release|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|x86.ActiveCfg = Release|Any CPU
+		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -80,5 +94,8 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{0C3BE886-C62F-41CA-BD18-1CECFE591589} = {59ED0E9C-95C8-469A-9EA8-0BC0624806A9}
 		{26A1466F-AAD0-4DCF-AB48-061ED86EA645} = {DA6C1243-517A-4827-A7B0-05DDCEFA88A5}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4AE79F3F-25E2-4C61-BE07-B2D2169C7000}
 	EndGlobalSection
 EndGlobal

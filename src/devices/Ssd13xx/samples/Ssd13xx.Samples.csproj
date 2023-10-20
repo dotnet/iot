@@ -6,7 +6,8 @@
 
   <ItemGroup>
     <ProjectReference Include="../Ssd13xx.csproj" />
-    <ProjectReference Include="..\..\..\..\..\iot3\src\devices\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
+    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
+    <ProjectReference Include="..\..\Arduino\Arduino.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="images\*.bmp">
