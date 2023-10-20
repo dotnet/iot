@@ -94,8 +94,6 @@ namespace Iot.Device.Ili934x.Samples
                 nmeaSourceAddress = args[idx + 1];
             }
 
-            //// TestWindowing();
-
             int pinDC = isFt4222 ? 1 : 23;
             int pinReset = isFt4222 ? 0 : 24;
             int pinLed = isFt4222 ? 2 : -1;
