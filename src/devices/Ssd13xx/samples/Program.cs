@@ -227,7 +227,7 @@ public class Program
         var font = "DejaVu Sans";
         var y = 0;
 
-        foreach (var i in Enumerable.Range(0, 100))
+        while (!Console.KeyAvailable)
         {
             using (var image = BitmapImage.CreateBitmap(128, 32, PixelFormat.Format32bppArgb))
             {
@@ -245,6 +245,8 @@ public class Program
                 Thread.Sleep(100);
             }
         }
+
+        Console.ReadKey(true);
     }
 
     // Referencing https://stackoverflow.com/questions/6803073/get-local-ip-address
