@@ -100,10 +100,13 @@ public class ProcessRunnerTests
         using var ms = new MemoryStream();
         var runningTask = await proc.ContinuousRunAsync(Video1, ms);
 
-        // wait for its termination or stop the process invoking Dispose
+        // We have two different ways to stop capturing
+        // 1. wait for its termination or stop the process invoking Dispose
         await runningTask;
         /*
-        await Task.Delay(20);
+        // 2. programmatically stop the capture after a period of time
+        // These two lines will make the capture stop after 10 seconds
+        await Task.Delay(10000);
         proc.Dispose();
         */
 
