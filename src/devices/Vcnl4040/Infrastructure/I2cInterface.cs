@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.I2c;
+using Iot.Device.Vncl4040.Definitions;
 
 namespace Iot.Device.Vncl4040.Infrastructure
 {
@@ -10,7 +11,7 @@ namespace Iot.Device.Vncl4040.Infrastructure
     /// Represents an convinient interface to the I2C bus in the context of this binding.
     /// It provides aids to simplify read and write operations.
     /// </summary>
-    public class I2cInterface
+    internal class I2cInterface
         : IDisposable
     {
         private I2cDevice _i2cDevice;
@@ -36,57 +37,24 @@ namespace Iot.Device.Vncl4040.Infrastructure
         /// <summary>
         /// Reads bytes from the device register
         /// </summary>
-        /// <param name="registerAddress">Register address</param>
+        /// <param name="address">Register address</param>
         /// <param name="buffer">Bytes to be read from the register</param>
-        public void Read(byte registerAddress, Span<byte> buffer)
+        public void Read(Address address, Span<byte> buffer)
         {
-            Write(registerAddress, Span<byte>.Empty);
+            Write(address, Span<byte>.Empty);
             _i2cDevice.Read(buffer);
-        }
-
-        /// <summary>
-        /// Reads a byte from a device register
-        /// </summary>
-        /// <param name="registerAddress">Register address</param>
-        public byte Read(byte registerAddress)
-        {
-            Write(registerAddress, Span<byte>.Empty);
-            return _i2cDevice.ReadByte();
-        }
-
-        /// <summary>
-        /// Reads a byte from a device register
-        /// </summary>
-        /// <param name="registerAddress">Register address</param>
-        public byte Read(int registerAddress)
-        {
-            Write((byte)registerAddress, Span<byte>.Empty);
-            return _i2cDevice.ReadByte();
         }
 
         /// <summary>
         /// Writes bytes to the device register
         /// </summary>
-        /// <param name="registerAddress">Register address</param>
+        /// <param name="address">Register address</param>
         /// <param name="data">Bytes to be written to the register</param>
-        public void Write(byte registerAddress, Span<byte> data)
+        public void Write(Address address, Span<byte> data)
         {
             Span<byte> output = stackalloc byte[data.Length + 1];
-            output[0] = registerAddress;
+            output[0] = (byte)address;
             data.CopyTo(output.Slice(1));
-            _i2cDevice.Write(output);
-        }
-
-        /// <summary>
-        /// Writes a single byte to the device register
-        /// </summary>
-        /// <param name="registerAddress">Register address</param>
-        /// <param name="data">Byte to be written to the register</param>
-        public void Write(byte registerAddress, byte data)
-        {
-            Span<byte> output = stackalloc byte[2];
-            output[0] = registerAddress;
-            output[1] = data;
             _i2cDevice.Write(output);
         }
     }
