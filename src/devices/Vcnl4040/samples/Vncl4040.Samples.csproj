@@ -7,6 +7,6 @@
     <AdditionalFiles Remove="C:\Users\marcu\Source\Repos\iot\eng\\stylecop.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../Vcnl4040.csproj" />
+    <ProjectReference Include="..\Vncl4040.csproj" />
   </ItemGroup>
 </Project>

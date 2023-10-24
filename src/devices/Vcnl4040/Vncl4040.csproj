@@ -3,6 +3,7 @@
     <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
     <!--Disabling default items so samples source won't get build by the main library-->
     <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.Vncl4040</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
@@ -13,5 +14,16 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Infrastructure\I2cInterface.cs" />
+    <Compile Include="Infrastructure\Register.cs" />
+    <Compile Include="Internal\Address.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Definitions\" />
   </ItemGroup>
 </Project>
