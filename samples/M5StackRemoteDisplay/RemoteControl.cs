@@ -383,12 +383,12 @@ namespace Iot.Device.Ili934x.Samples
                         bm = _rightMouseMenuBar;
                     }
 
-                    _screen.DrawBitmap(bm, new Point(0, 0), new Rectangle(0, 0, bm.Width, bm.Height));
+                    _screen.DrawBitmap(bm, new Point(0, 0), new Rectangle(0, 0, bm.Width, bm.Height), false);
                 }
                 else
                 {
                     // Draw the "open menu here" icon over the top right of the screen.
-                    _screen.DrawBitmap(_openMenu, new Point(0, 0), new Rectangle(_screen.ScreenWidth - _openMenu.Width, 0, _openMenu.Width, _openMenu.Height));
+                    _screen.DrawBitmap(_openMenu, new Point(0, 0), new Rectangle(_screen.ScreenWidth - _openMenu.Width, 0, _openMenu.Width, _openMenu.Height), false);
                 }
 
                 _screen.SendFrame();
@@ -452,18 +452,18 @@ namespace Iot.Device.Ili934x.Samples
                 left = pt.X;
                 top = pt.Y;
 
-                _screen.DrawBitmap(resizedBitmap, pt, rect);
+                _screen.DrawBitmap(resizedBitmap, pt, rect, false);
                 bmp.Dispose();
             }
         }
 
         private bool DrawNmeaValue(bool force)
         {
-            _screen.ClearScreen(Color.White);
+            _screen.ClearScreen(Color.White, false);
             var data = _dataSets[_selectedDataSet];
             if (data.Update(_cache, 1E-2) || force)
             {
-                using var bmp = _screen.CreateBackBuffer();
+                using var bmp = _screen.GetBackBufferCompatibleImage();
                 using var g = bmp.GetDrawingApi();
                 string font = GetDefaultFontName();
                 g.DrawText(data.Value, font, 110, Color.Blue, new Point(20, 30));
@@ -480,7 +480,7 @@ namespace Iot.Device.Ili934x.Samples
         private void StartupDisplay()
         {
             using var image = BitmapImage.CreateFromFile(@"images/Landscape.png");
-            using var backBuffer = _screen.CreateBackBuffer();
+            using var backBuffer = _screen.GetBackBufferCompatibleImage();
             for (int i = 1; i < 20; i++)
             {
                 float factor = i / 10.0f;
@@ -537,7 +537,7 @@ namespace Iot.Device.Ili934x.Samples
             if (_powerControl != null)
             {
                 var pc = _powerControl.GetPowerControlData();
-                using var bmp = _screen.CreateBackBuffer();
+                using var bmp = _screen.GetBackBufferCompatibleImage();
                 var font = GetDefaultFontName();
                 using var g = bmp.GetDrawingApi();
                 g.DrawText(pc.ToString(), font, 18, Color.Blue, new Point(0, 10));
