@@ -45,6 +45,17 @@ namespace Iot.Device.Graphics
         public abstract BitmapImage GetBackBufferCompatibleImage();
 
         /// <summary>
+        /// Clears the screen to black
+        /// </summary>
+        public virtual void ClearScreen()
+        {
+            var bmp = GetBackBufferCompatibleImage();
+            bmp.Clear(Color.Black);
+            DrawBitmap(bmp);
+            bmp.Dispose();
+        }
+
+        /// <summary>
         /// Send a bitmap to the Ili9341 display.
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller.</param>

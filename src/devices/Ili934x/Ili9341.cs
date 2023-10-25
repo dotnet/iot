@@ -218,7 +218,7 @@ namespace Iot.Device.Ili934x
         /// <summary>
         /// Immediately clears the screen to black.
         /// </summary>
-        public void ClearScreen()
+        public override void ClearScreen()
         {
             ClearScreen(true);
         }

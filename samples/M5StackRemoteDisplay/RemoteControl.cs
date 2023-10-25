@@ -30,7 +30,7 @@ namespace Iot.Device.Ili934x.Samples
     {
         // Note: Owner of these is the outer class
         private readonly Chsc6440? _touch;
-        private readonly Ili9341 _screen;
+        private readonly GraphicDisplay _screen;
         private readonly M5ToughPowerControl? _powerControl;
 
         private readonly BitmapImage _defaultMenuBar;
@@ -392,9 +392,14 @@ namespace Iot.Device.Ili934x.Samples
                 }
 
                 _screen.SendFrame();
-                Console.WriteLine($"\rFPS: {_screen.Fps}");
+                double fps = 0;
+                if (_screen is Ili9341 ili)
+                {
+                    fps = ili.Fps;
+                }
+                Console.WriteLine($"\rFPS: {fps}");
                 // This typically happens if nothing needs to be done (the screen didn't change)
-                if (_screen.Fps > 10)
+                if (fps > 10)
                 {
                     Thread.Sleep(100);
                 }
@@ -444,7 +449,7 @@ namespace Iot.Device.Ili934x.Samples
             var bmp = capture.GetScreenContents();
             if (bmp != null)
             {
-                _screen.FillRect(Color.Black, 0, 0, _screen.ScreenWidth, _screen.ScreenHeight);
+                using var target = _screen.GetBackBufferCompatibleImage();
                 using var resizedBitmap = bmp.Resize(new Size((int)(bmp.Width * scale), (int)(bmp.Height * scale)));
                 var pt = new Point((int)left, (int)top);
                 var rect = new Rectangle(0, 0, _screen.ScreenWidth, _screen.ScreenHeight);
@@ -452,18 +457,19 @@ namespace Iot.Device.Ili934x.Samples
                 left = pt.X;
                 top = pt.Y;
 
-                _screen.DrawBitmap(resizedBitmap, pt, rect, false);
+                target.GetDrawingApi().DrawImage(resizedBitmap, -pt.X, -pt.Y);
+                _screen.DrawBitmap(target, Point.Empty, rect, false);
                 bmp.Dispose();
             }
         }
 
         private bool DrawNmeaValue(bool force)
         {
-            _screen.ClearScreen(Color.White, false);
             var data = _dataSets[_selectedDataSet];
             if (data.Update(_cache, 1E-2) || force)
             {
                 using var bmp = _screen.GetBackBufferCompatibleImage();
+                bmp.Clear(Color.White);
                 using var g = bmp.GetDrawingApi();
                 string font = GetDefaultFontName();
                 g.DrawText(data.Value, font, 110, Color.Blue, new Point(20, 30));
@@ -472,6 +478,10 @@ namespace Iot.Device.Ili934x.Samples
 
                 _screen.DrawBitmap(bmp);
                 return true;
+            }
+            else
+            {
+                _screen.ClearScreen();
             }
 
             return false;
@@ -506,16 +516,6 @@ namespace Iot.Device.Ili934x.Samples
             {
                 Console.ReadKey(true);
             }
-
-            _screen.FillRect(Color.FromArgb(0, 0, 255), 0, 0, 320, 240);
-
-            // Draws a few stripes
-            for (int x = 0; x < backBuffer.Width; x += 4)
-            {
-                _screen.FillRect(Color.FromArgb(255, 0, 0), x, 0, 1, 240);
-            }
-
-            _screen.SendFrame();
 
             Thread.Sleep(500);
         }
