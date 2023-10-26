@@ -35,6 +35,11 @@ namespace Iot.Device.Vcnl4040.Internal
         public byte VersionCode { get; private set; }
 
         /// <summary>
+        /// Gets the complete device Id.
+        /// </summary>
+        public int Id { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="IdRegister"/> class.
         /// </summary>
         public IdRegister(I2cInterface bus)
@@ -52,6 +57,7 @@ namespace Iot.Device.Vcnl4040.Internal
             IdLsb = dataLow;
             SlaveAddress = (byte)(dataHigh & 0b0011_0000 >> 4);
             VersionCode = (byte)(dataHigh & 0b0000_1111);
+            Id = dataHigh << 8 | dataLow;
         }
 
         /// <summary>

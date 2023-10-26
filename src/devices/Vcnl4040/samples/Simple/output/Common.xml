@@ -1,0 +1,2110 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Common</name>
+    </assembly>
+    <members>
+        <member name="T:Interop">
+            <summary>
+            Interop methods for Windows and Unix (P/Invoke call declarations)
+            This class is internal by default, but gets promoted to public within the device binding projects
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Common.NumberHelper">
+            <summary>
+            Helpers for number.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.NumberHelper.Bcd2Dec(System.Byte)">
+            <summary>
+            BCD To decimal
+            </summary>
+            <param name="bcd">BCD Code</param>
+            <returns>decimal</returns>
+        </member>
+        <member name="M:Iot.Device.Common.NumberHelper.Bcd2Dec(System.Byte[])">
+            <summary>
+            BCD To decimal
+            </summary>
+            <param name="bcds">BCD Code</param>
+            <returns>decimal</returns>
+        </member>
+        <member name="M:Iot.Device.Common.NumberHelper.Dec2Bcd(System.Int32)">
+            <summary>
+            Decimal To BCD
+            </summary>
+            <param name="dec">decimal</param>
+            <returns>BCD Code</returns>
+        </member>
+        <member name="T:Iot.Device.Common.AngleExtensions">
+            <summary>
+            Provides extension methods for <see cref="T:UnitsNet.Angle"/>
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.AngleExtensions.Normalize(UnitsNet.Angle,System.Boolean)">
+            <summary>
+            Normalizes the angle so it is between 0° and 360° or between -180° and +180° respectively.
+            </summary>
+            <param name="self">Instance to normalize</param>
+            <param name="toFullCircle">Set to true to normalize to 0-360°, otherwise normalizes to +/-180°</param>
+        </member>
+        <member name="M:Iot.Device.Common.AngleExtensions.Difference(UnitsNet.Angle,UnitsNet.Angle)">
+            <summary>
+            Calculate the difference between two angles. Useful to compute the angle error between a desired and an actual track.
+            </summary>
+            <param name="currentTrack">First angle, actual direction</param>
+            <param name="destinationTrack">Second angle, desired direction</param>
+            <returns>The normalized result of <paramref name="currentTrack"/>-<paramref name="destinationTrack"/>. The value is negative if
+            the current track is to port (left) of the the desired track and positive otherwise</returns>
+        </member>
+        <member name="M:Iot.Device.Common.AngleExtensions.TrueToMagnetic(UnitsNet.Angle,UnitsNet.Angle)">
+            <summary>
+            Helper method to convert a true angle to a magnetic one, given the variation.
+            </summary>
+            <param name="angleTrue">Course relative to true north</param>
+            <param name="variation">Variation. Positive for east</param>
+            <returns>The magnetic course</returns>
+            <remarks>Remember: From true to false with the wrong sign</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.AngleExtensions.MagneticToTrue(UnitsNet.Angle,UnitsNet.Angle)">
+            <summary>
+            Convert magnetic angle to true angle, given the variation
+            </summary>
+            <param name="angleMagnetic">Magnetic north angle</param>
+            <param name="variation">Variation (positive east)</param>
+            <returns>True north angle</returns>
+        </member>
+        <member name="M:Iot.Device.Common.AngleExtensions.TryAverageAngle(System.Collections.Generic.IEnumerable{UnitsNet.Angle},UnitsNet.Angle@)">
+            <summary>
+            Calculates the average (medium) of a set of points.
+            See https://en.wikipedia.org/wiki/Mean_of_circular_quantities
+            This method fails if an empty input set is provided or the inputs are evenly distributed over the circle.
+            </summary>
+            <param name="inputAngles">A set of angles</param>
+            <param name="result">The angle that is the mean of the given angles.</param>
+            <returns>True on success, false otherwise.</returns>
+        </member>
+        <member name="T:Iot.Device.Common.DebuggerOutputLogger">
+            <summary>
+            A logger that prints to the debug console
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.DebuggerOutputLogger.#ctor">
+            <summary>
+            Creates a new instance of the <see cref="T:Iot.Device.Common.DebuggerOutputLogger"/>
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.DebuggerOutputLogger.MinLogLevel">
+            <summary>
+            Sets the minimum log level
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.DebuggerOutputLogger.BeginScope``1(``0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Iot.Device.Common.DebuggerOutputLogger.IsEnabled(Microsoft.Extensions.Logging.LogLevel)">
+            <inheritdoc />
+        </member>
+        <member name="M:Iot.Device.Common.DebuggerOutputLogger.Log``1(Microsoft.Extensions.Logging.LogLevel,Microsoft.Extensions.Logging.EventId,``0,System.Exception,System.Func{``0,System.Exception,System.String})">
+            <inheritdoc />
+        </member>
+        <member name="T:Iot.Device.Common.DebuggerOutputLoggerProvider">
+            <summary>
+            Creates a debugger logger
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.DebuggerOutputLoggerProvider.CreateLogger(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Iot.Device.Common.DebuggerOutputLoggerProvider.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Iot.Device.Common.FileSetStream">
+            <summary>
+            A stream that combines a set of files. Can be used to read from a consecutive
+            list of files, e.g. log files that are split by size or date.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.#ctor(System.Collections.Generic.IEnumerable{System.String})">
+            <summary>
+            Create a new instance using a set of files.
+            </summary>
+            <param name="fileNames">A list of file names</param>
+            <exception cref="T:System.IO.FileNotFoundException">One of the files doesn't exist</exception>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.#ctor(System.Collections.Generic.IEnumerable{System.ValueTuple{System.String,System.IO.Stream}})">
+            <summary>
+            Create a new instance using a set of files.
+            </summary>
+            <param name="files">A list of file names or streams. If the stream of a pair is non-null, it is used instead of the name</param>
+            <exception cref="T:System.IO.FileNotFoundException">One of the files doesn't exist</exception>
+            <exception cref="T:System.InvalidOperationException">A stream was provided that is not readable</exception>
+        </member>
+        <member name="P:Iot.Device.Common.FileSetStream.Loop">
+            <summary>
+            True to indicate that reading should restart at the beginning when the list ends.
+            </summary>
+            <remarks>
+            If this is true, the stream has no end, and reading will always succeed (unless
+            the file list is empty)
+            </remarks>
+        </member>
+        <member name="P:Iot.Device.Common.FileSetStream.CanRead">
+            <summary>
+            This returns true.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.FileSetStream.CanSeek">
+            <summary>
+            This returns false.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.FileSetStream.CanWrite">
+            <summary>
+            This returns false.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.FileSetStream.Length">
+            <summary>
+            This is not supported
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.FileSetStream.Position">
+            <summary>
+            This is not supported
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.Flush">
+            <summary>
+            This does nothing
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.Read(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            Reads data from the stream.
+            </summary>
+            <param name="buffer">Buffer to fill</param>
+            <param name="offset">Offset to start filling the buffer</param>
+            <param name="count">Maximum number of bytes to read.</param>
+            <returns>The number of bytes actually read</returns>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.Seek(System.Int64,System.IO.SeekOrigin)">
+            <summary>
+            This operation is unsupported.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.SetLength(System.Int64)">
+            <summary>
+            This operation is unsupported.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.Write(System.Byte[],System.Int32,System.Int32)">
+            <summary>
+            This operation is unsupported.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.FileSetStream.Dispose(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="T:Iot.Device.Common.GeographicPosition">
+            <summary>
+            Represents a position in WGS84 coordinates. This is the standard coordinate format for most GNSS receivers currently available.
+            An instance with Latitude = Longitude = Height = 0 is considered invalid. A real GNSS receiver will never output this exact value
+            and that position is far out in the ocean.
+            </summary>
+            <remarks>
+            This object stores ellipsoidal height, depending on the GNSS receiver and the application, this needs to be transformed to geoidal height.
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.#ctor">
+            <summary>
+            Initializes an empty geographic position
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.#ctor(Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Copy constructor
+            </summary>
+            <param name="pos">Input position</param>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.#ctor(System.Double,System.Double,System.Double)">
+            <summary>
+            Creates a <see cref="T:Iot.Device.Common.GeographicPosition"/> instance from latitude, longitude and ellipsoidal height.
+            </summary>
+            <param name="latitude">Latitude of position, in degrees. Valid values are -90 - +90</param>
+            <param name="longitude">Longitude of position, in degrees. Valid values are -180 to +180 or 0 to 360, depending on application</param>
+            <param name="ellipsoidalHeight">Height over the WGS84 ellipsoid.</param>
+            <remarks>No exception is thrown on denormalized or out-of-range positions.</remarks>
+        </member>
+        <member name="P:Iot.Device.Common.GeographicPosition.EllipsoidalHeight">
+            <summary>
+            Height over the WGS84 ellipsoid
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.GeographicPosition.Latitude">
+            <summary>
+            Latitude. Positive for north of equator, negative for south.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.GeographicPosition.Longitude">
+            <summary>
+            Longitude. Positive for east of Greenwich, negative for west.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Int32@,System.Int32@,System.Double@)">
+            <summary>
+            Returns the given angle as degrees, minutes and seconds
+            </summary>
+            <param name="angle">Input angle, in degrees</param>
+            <param name="secDigits">Number of digits for the second</param>
+            <param name="normalizedVal">Normalized angle value (to -180 to 180)</param>
+            <param name="degrees">Full degrees</param>
+            <param name="minutes">Full minutes</param>
+            <param name="seconds">Seconds including requested number of digits</param>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.GetDegreesMinutes(System.Double,System.Int32,System.Double@,System.Int32@,System.Double@)">
+            <summary>
+            Returns the given angle as degree and minutes
+            </summary>
+            <param name="angle">Input angle, in degrees</param>
+            <param name="minDigits">Number of digits for the minutes</param>
+            <param name="normalizedVal">Normalized angle value (to -180 to 180)</param>
+            <param name="degrees">Full degrees</param>
+            <param name="minutes">Minutes including requested number of digits</param>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.op_Equality(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Equality operator. See <see cref="M:Iot.Device.Common.GeographicPosition.Equals(Iot.Device.Common.GeographicPosition)"/>
+            </summary>
+            <param name="a">First instance to compare</param>
+            <param name="b">Second instance to compare</param>
+            <returns>True on equality, false otherwise</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.op_Inequality(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Inequality operator. See <see cref="M:Iot.Device.Common.GeographicPosition.Equals(Iot.Device.Common.GeographicPosition)"/>
+            </summary>
+            <param name="a">First instance to compare</param>
+            <param name="b">Second instance to compare</param>
+            <returns>True on inequality, false otherwise</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.Clone">
+            <summary>
+            Creates a copy of this instance
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.ContainsValidPosition">
+            <summary>
+            Returns true if this instance contains a valid position.
+            An invalid position is either when <see cref="P:Iot.Device.Common.GeographicPosition.Latitude"/> and <see cref="P:Iot.Device.Common.GeographicPosition.Longitude"/> and <see cref="P:Iot.Device.Common.GeographicPosition.EllipsoidalHeight"/> are exactly zero,
+            when either value is NaN or when the position is out of range.
+            </summary>
+            <returns>See above</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.EqualPosition(Iot.Device.Common.GeographicPosition,System.Double)">
+            <summary>
+            Returns true if the two positions are (almost) equal. This ignores the altitude.
+            </summary>
+            <param name="position">Position to compare with</param>
+            <param name="delta">Allowed delta, in degrees</param>
+            <returns>True if the two positions are closer than the delta. The default value is around 1cm</returns>
+            <remarks>This does a simple comparison based on the floating point values, it should not be used with large deltas.
+            To get the distance between two positions, use <see cref="M:Iot.Device.Common.GeographicPositionExtensions.DistanceTo(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition)"/> instead.</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.Equals(System.Object)">
+            <summary>
+            Equality comparer. Compares the two positions for equality within about 1cm.
+            </summary>
+            <param name="obj">The other position</param>
+            <returns>True if the two positions are almost identical</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.Equals(Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Equality comparer. Compares the two positions for equality within about 1cm.
+            </summary>
+            <param name="position">The other position</param>
+            <returns>True if the two positions are almost identical</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.ToString">
+            <summary>
+            Returns a string representation of this position.
+            </summary>
+            <returns>A string representation in degrees, minutes and seconds for both latitude and longitude</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.ToString(System.String,System.IFormatProvider)">
+            <summary>
+            Formats this <see cref="T:Iot.Device.Common.GeographicPosition"/> instance to a string.
+            The format string can contain up to three groups of format identifiers of the form "Xn", where X is one of
+            * D: Decimal display: The value is printed in decimal notation
+            * U: Decimal, unsigned: The value is printed in decimal notation, omitting the sign. When using N or E (see below), the sign is typically omitted.
+            * M: Minutes: The value is displayed as degrees minutes
+            * S: Seconds: The value is displayed as degrees minutes seconds
+            A single digit after the letter indicates the number of digits for the last group (e.g. M2 uses two digits for the minutes)
+            The first of the above letters prints the latitude, the second the longitude and the third the altitude.
+            Additionally, the following special letters can be anywhere in the format string:
+            * N: North/South: Prints "N" when the latitude is greater or equal to 0, "S" otherwise
+            * E: East/West Prints "E" when the longitude is greater or equal to 0, "W" otherwise
+            Any other letters (including spaces) are printed as-is.
+            <example>
+            "Format specifier" - "Output"
+            "D3 D3" - "10.000° 23.500°"
+            "U3N D3E" - "10.000°N 23.500°E"
+            "U3N D3E" - "10.500°N 23.512°E"
+            "M2N M2E" - "10° 30.00'N 23° 30.74'E"
+            "S1N S2N D0m" - "10° 30' 00.0\"N 023° 30' 44.42\"E -100m"
+            </example>
+            </summary>
+            <param name="format">The format string. Possible options see above</param>
+            <param name="formatProvider">The format provider</param>
+            <returns>A string representation of this position</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.GetNumDigits(System.String,System.Int32)">
+            <summary>
+            Gets a number after the given index from the format string. Only one digit supported.
+            </summary>
+            <param name="format">The format string</param>
+            <param name="index">The index of the identifier (the last letter)</param>
+            <returns>An interger or null, if none was found at the given position</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPosition.GetHashCode">
+            <inheritdoc/>
+        </member>
+        <member name="T:Iot.Device.Common.GeographicPositionExtensions">
+            <summary>
+            Extensions for positions
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPositionExtensions.NormalizeLongitudeTo180Degrees(Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Normalizes the longitude to +/- 180°
+            This is the common form for displaying longitudes. <see cref="M:Iot.Device.Common.GeographicPositionExtensions.NormalizeLongitudeTo360Degrees(Iot.Device.Common.GeographicPosition)"/> is used when the area of interest
+            is close to the date border (in the pacific ocean)
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPositionExtensions.NormalizeAngleTo180Degrees(System.Double)">
+            <summary>
+            Normalizes the angle to +/- 180°
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPositionExtensions.DistanceTo(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Calculate the distance to another position
+            </summary>
+            <param name="position1">The first position. This argument can be implicitly given</param>
+            <param name="position2">The position to go to</param>
+            <returns>The distance between the two points</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPositionExtensions.DirectionTo(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Calculates the initial angle to travel to get to another position.
+            Calculates on the great circle, therefore the direction to the target is not constant along the path
+            </summary>
+            <param name="position1">The initial position. This argument can be implicitly given</param>
+            <param name="position2">The destination position</param>
+            <returns>The angle to travel</returns>
+            <remarks>If both distance and direction are required, prefer to use <see cref="M:Iot.Device.Common.GreatCircle.DistAndDir(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,UnitsNet.Length@,UnitsNet.Angle@)"/></remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPositionExtensions.MoveBy(Iot.Device.Common.GeographicPosition,UnitsNet.Angle,UnitsNet.Length)">
+            <summary>
+            Move a certain distance into a direction. Where do I end?
+            </summary>
+            <param name="position">Start position.</param>
+            <param name="direction">Direction to travel</param>
+            <param name="distance">Distance to travel</param>
+            <returns>The destination position</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPositionExtensions.NormalizeLongitudeTo360Degrees(Iot.Device.Common.GeographicPosition)">
+            <summary>
+            Normalizes the longitude to [0..360°)
+            This coordinate form is advised if working in an area near the date border in the pacific ocean.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GeographicPositionExtensions.NormalizeAngleTo360Degrees(System.Double)">
+            <summary>
+            Normalizes an angle to [0..360°)
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.GEOD_LATITUDE">
+            <summary>
+            Calculate latitude
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.GEOD_LONGITUDE">
+            <summary>
+            Calculate longitude
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.GEOD_AZIMUTH">
+            <summary>
+            Calculate azimuth
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.GEOD_DISTANCE">
+            <summary>
+             Calculate distance
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.GEOD_DISTANCE_IN">
+            <summary>
+            Allow distance as input
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.GEOD_REDUCEDLENGTH">
+            <summary>
+            Calculate reduced length
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Common.GeoidCalculations.geod_geodesic">
+            <summary>
+            Geodesic helper struct (pre-computed ellipsoid parameters)
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.geod_geodesic.a">
+            <summary>
+            Equatorial radius
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.geod_geodesic.f">
+            Flattening
+        </member>
+        <member name="T:Iot.Device.Common.GeoidCalculations.geod_geodesicline">
+             The struct containing information about a single geodesic.  This must be
+             initialized by geod_lineinit(), geod_directline(), geod_gendirectline(),
+             or geod_inverseline() before use.
+            ********************************************************************
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.geod_geodesicline.lat1">
+            <summary>
+            the starting latitude
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.geod_geodesicline.lon1">
+            <summary>
+            the starting longitude
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GeoidCalculations.geod_geodesicline.azi1">
+            <summary>
+            The starting azimuth
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Common.GreatCircle">
+            <summary>
+            This class provides some basic geodetic calculations on the WGS84 ellipsoid.
+            This returns exact distances between two points, considering the non-spherical shape of the earth.
+            The results are accurate for distances greater than about 1cm.
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GreatCircle.Wgs84A">
+            <summary>
+            Semi-Mayor Axis of the WGS ellipsoid
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GreatCircle.Wgs84F">
+            <summary>
+            Flattening "f" of the WGS84 ellipsoid (1.0 / 298.25722357)
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GreatCircle.MetersPerDegreeeLatitude">
+            <summary>
+            m per degree latitude
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.GreatCircle.MetersPerDegreeLongitude">
+            <summary>
+            m per degree longitude on the equator
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.DistAndDir(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,UnitsNet.Length@,UnitsNet.Angle@)">
+            <summary>
+            Returns the distance and direction between two points on the globe
+            </summary>
+            <param name="position1">Input position 1</param>
+            <param name="position2">Input position 2</param>
+            <param name="distance">Great circle distance between the positions</param>
+            <param name="direction">Initial direction to travel, in degrees true</param>
+            <exception cref="T:System.ArgumentNullException">Either <paramref name="position1"/> or <paramref name="position2"/> are null.</exception>
+            <remarks>The distance and direction are calculated for the great circle. That is the shortest distance between two points on the globe.
+            This path does not follow a constant direction (for large distances)</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.DistAndDir(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,UnitsNet.Length@,UnitsNet.Angle@,UnitsNet.Angle@)">
+            <summary>
+            Returns the distance and direction between two points on the globe
+            </summary>
+            <param name="position1">Input position 1</param>
+            <param name="position2">Input position 2</param>
+            <param name="distance">Great circle distance between the positions</param>
+            <param name="directionAtStart">Initial direction to travel, in degrees true</param>
+            <param name="directionAtEnd">Angle in which the voyage should start. True angle in which the direction lies when standing at the start position.</param>
+            <exception cref="T:System.ArgumentNullException">Either <paramref name="position1"/> or <paramref name="position2"/> are null.</exception>
+            <remarks>This path does not follow a constant direction (for large distances)</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.DistAndDir(System.Double,System.Double,System.Double,System.Double,System.Double@,System.Double@)">
+            <summary>
+            Returns the distance and direction between two points on the globe
+            </summary>
+            <param name="latitude1">Input latitude 1, in degrees</param>
+            <param name="longitude1">Input longitude 1, in degrees</param>
+            <param name="latitude2">Input latitude 2, in degrees</param>
+            <param name="longitude2">Input longitude 2, in degrees</param>
+            <param name="distance">Distance between points, on the great circle, in meters.</param>
+            <param name="direction">Angle in which the voyage should start. True angle in which the direction lies when standing at the start position.</param>
+            <remarks>This path does not follow a constant direction (for large distances).
+            Prefer using the method <see cref="M:Iot.Device.Common.GreatCircle.DistAndDir(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,UnitsNet.Length@,UnitsNet.Angle@)"/> instead,
+            to avoid errors from exchanged parameters or wrong units</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.CrossTrackError(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,UnitsNet.Length@,UnitsNet.Length@)">
+            <summary>
+            Computes cross-track error, that is the distance the current position is away from the route from origin to destination
+            </summary>
+            <param name="origin">Start of current leg</param>
+            <param name="destination">End of current leg</param>
+            <param name="currentPosition">Current position</param>
+            <param name="crossTrackError">The distance perpendicular to the leg. Positive if the current position is to the right of the leg.</param>
+            <param name="distanceTogoAlongRoute">Distance to go on track (with current position projected back to the leg)</param>
+            <remarks>Accuracy may be limited for distances &gt; 100km</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.CalculateVelocityTowardsTarget(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,UnitsNet.Speed,UnitsNet.Angle)">
+            <summary>
+            Calculate the velocity towards (or away from) the target. This is often also called VMG (=Velocity made good)
+            </summary>
+            <param name="destination">Target waypoint</param>
+            <param name="currentPosition">Current position</param>
+            <param name="currentSpeed">Current speed over ground</param>
+            <param name="currentTrack">Current track (course over ground)</param>
+            <returns>Speed towards target. Negative if moving away from target</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.CalcCoords(Iot.Device.Common.GeographicPosition,UnitsNet.Angle,UnitsNet.Length)">
+            <summary>
+            Calculate the coordinate one will be when traveling for the given distance in the given direction
+            </summary>
+            <param name="start">Starting point</param>
+            <param name="direction">Initial direction</param>
+            <param name="distance">Distance to travel</param>
+            <returns>The new position</returns>
+            <exception cref="T:System.ArgumentNullException">The start position is null</exception>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.CalcCoords(System.Double,System.Double,System.Double,System.Double,System.Double@,System.Double@)">
+            <summary>
+            Calculate the coordinate one will be when traveling for the given distance in the given direction
+            </summary>
+            <param name="startLatitude">Starting point latitude</param>
+            <param name="startLongitude">Starting point longitude</param>
+            <param name="direction">Initial direction</param>
+            <param name="distance">Distance to travel</param>
+            <param name="resultLatitude">End point latitude</param>
+            <param name="resultLongitude">End point longitude</param>
+            <remarks>Prefer using <see cref="M:Iot.Device.Common.GreatCircle.CalcCoords(Iot.Device.Common.GeographicPosition,UnitsNet.Angle,UnitsNet.Length)"/> to avoid errors from exchanged parameters or wrong units</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,UnitsNet.Length)">
+            <summary>
+            Calculate a list of waypoints along the route from start to end.
+            </summary>
+            <param name="start">Starting position</param>
+            <param name="end">End position</param>
+            <param name="distanceStep">Distance between waypoints</param>
+            <returns>A list of waypoints</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,UnitsNet.Angle,UnitsNet.Length,UnitsNet.Length)">
+            <summary>
+            Calculate waypoints along a route
+            </summary>
+            <param name="start">Starting position</param>
+            <param name="direction">Starting direction</param>
+            <param name="totalDistance">Distance to travel</param>
+            <param name="distanceStep">Waypoint step distance</param>
+            <returns>A list of waypoints</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.DegreesToRadians(System.Double)">
+            <summary>
+            Convert a value to radians.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.AviaticToRadians(System.Double)">
+            <summary>
+            Converts an angle in aviatic definition to mathematic definition.
+            Aviatic angles are in degrees, where 0 degrees is north, counting clockwise, mathematic angles
+            are in radians, starting east and going counterclockwise.
+            </summary>
+            <param name="val">Aviatic angle, degrees</param>
+            <returns>Mathematic angle, radians, fast-normalized to 0..2Pi</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.AngleDifferenceSignedDegrees(System.Double,System.Double)">
+            <summary>
+            Calculate the difference between two angles, return degrees.
+            </summary>
+            <param name="a">First angle, in degrees</param>
+            <param name="b">Second angle, in degrees</param>
+            <returns>Difference, ranging -180 to +180, in degrees.</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.RadiansToDegrees(System.Double)">
+            <summary>
+            Converts an angle in radians to angle in decimal degrees
+            </summary>
+            <param name="radians">Angle in radians (0-2*Pi)</param>
+            <returns>Angle in decimal degrees (0-360)</returns>
+        </member>
+        <member name="M:Iot.Device.Common.GreatCircle.RadiansToAviatic(System.Double)">
+            <summary>
+            Convert angle from mathematic to aviatic.
+            See also AviaticToRadians()
+            </summary>
+            <param name="val">Mathematic value in radians</param>
+            <returns>Aviatic value in degrees</returns>
+        </member>
+        <member name="T:Iot.Device.Common.LogDispatcher">
+            <summary>
+            This class contains static members that provide log support.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.LogDispatcher.LoggerFactory">
+            <summary>
+            The default logger factory for the whole assembly.
+            If this is null (the default), logging is disabled
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.LogDispatcher.GetLogger(System.String)">
+            <summary>
+            Gets a logger with the given name
+            </summary>
+            <param name="loggerName">Name of the logger</param>
+            <returns>A reference to a <see cref="T:Microsoft.Extensions.Logging.ILogger"/>.</returns>
+        </member>
+        <member name="M:Iot.Device.Common.LogDispatcher.GetCurrentClassLogger(System.Object)">
+            <summary>
+            Gets a logger with the name of the current class
+            </summary>
+            <param name="currentClass">The class whose logger shall be retrieved</param>
+            <returns>A <see cref="T:Microsoft.Extensions.Logging.ILogger"/> instance</returns>
+        </member>
+        <member name="T:Iot.Device.Common.LogDispatcher.ScopeDisposable">
+            <summary>
+            This doesn't really do anything
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Common.SimpleConsoleLogger">
+            <summary>
+            A simple console logger - logs all incoming log messages to the console
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLogger.#ctor(System.String)">
+            <summary>
+            Creates console output with color support
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLogger.#ctor(System.String,Microsoft.Extensions.Logging.LogLevel)">
+            <summary>
+            Creates console output with color support
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.SimpleConsoleLogger.MinLogLevel">
+            <summary>
+            Specifies the minimum log level that is printed. Default is Information
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Common.SimpleConsoleLogger.LoggerName">
+            <summary>
+            Name of the logger
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLogger.Log``1(Microsoft.Extensions.Logging.LogLevel,Microsoft.Extensions.Logging.EventId,``0,System.Exception,System.Func{``0,System.Exception,System.String})">
+            <inheritdoc />
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLogger.IsEnabled(Microsoft.Extensions.Logging.LogLevel)">
+            <inheritdoc />
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLogger.BeginScope``1(``0)">
+            <inheritdoc />
+        </member>
+        <member name="T:Iot.Device.Common.SimpleConsoleLoggerFactory">
+            <summary>
+            Provides a very simple console logger that does not require a reference to Microsoft.Extensions.Logging.dll
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLoggerFactory.#ctor">
+            <summary>
+            Constructs a console logger with the default log level.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLoggerFactory.#ctor(Microsoft.Extensions.Logging.LogLevel)">
+            <summary>
+            Constructs a logger factory that creates loggers with the given log level
+            </summary>
+            <param name="minLogLevel">Minimum log level to use</param>
+        </member>
+        <member name="P:Iot.Device.Common.SimpleConsoleLoggerFactory.MinLogLevel">
+            <summary>
+            Sets the log level for new loggers.
+            Note that changing this value will only affect new loggers
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLoggerFactory.AddProvider(Microsoft.Extensions.Logging.ILoggerProvider)">
+            <summary>
+            The console logger is built-in here
+            </summary>
+            <param name="provider">Argument is ignored</param>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLoggerFactory.CreateLogger(System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Iot.Device.Common.SimpleConsoleLoggerFactory.Dispose">
+            <inheritdoc />
+        </member>
+        <member name="T:Iot.Device.Common.WeatherHelper">
+            <summary>
+            This class contains methods to calculate meteorological values from different
+            sensor measurements. Multiple sensor inputs are used to generate additional information.
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.WeatherHelper.SpecificGasConstantOfAir">
+            <summary>
+            Gas constant of dry Air, J / (kg * K)
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.WeatherHelper.SpecificGasConstantOfVapor">
+            <summary>
+            Gas constant of vapor, J / (kg * K)
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.WeatherHelper.DefaultTemperatureGradient">
+            <summary>
+            Default atmospheric temperature gradient = 0.0065K/m (or 0.65K per 100m)
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Common.WeatherHelper.MeanSeaLevel">
+            <summary>
+            The mean sea-level pressure (MSLP) is the average atmospheric pressure at mean sea level
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateHeatIndex(UnitsNet.Temperature,UnitsNet.RelativeHumidity)">
+            <summary>
+            The heat index (or apparent temperature) is used to measure the amount of discomfort
+            during the summer months when heat and humidity often combine to make it feel hotter
+            than it actually is. The heat index is usually used for afternoon high temperatures.
+            </summary>
+            <param name="airTemperature">The dry air temperature</param>
+            <param name="relativeHumidity">The relative humidity (RH)</param>
+            <returns>The heat index, also known as the apparent temperature</returns>
+            <remarks>
+            Formula from https://www.wpc.ncep.noaa.gov/html/heatindex_equation.shtml
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateSaturatedVaporPressureOverWater(UnitsNet.Temperature)">
+            <summary>
+            Calculates the saturated vapor pressure for a given air temperature over water.
+            The formula used is valid for temperatures between -100°C and +100°C.
+            </summary>
+            <param name="airTemperature">The dry air temperature</param>
+            <returns>The saturated vapor pressure</returns>
+            <remarks>
+            From https://de.wikibooks.org/wiki/Tabellensammlung_Chemie/_Stoffdaten_Wasser, after D. Sonntag (1982)
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateSaturatedVaporPressureOverIce(UnitsNet.Temperature)">
+            <summary>
+            Calculates the saturated vapor pressure for a given air temperature over ice.
+            The formula used is valid for temperatures between -100°C and +0°C.
+            </summary>
+            <param name="airTemperature">The dry air temperature</param>
+            <returns>The saturated vapor pressure</returns>
+            <remarks>
+            From https://de.wikibooks.org/wiki/Tabellensammlung_Chemie/_Stoffdaten_Wasser, after D. Sonntag (1982)
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateActualVaporPressure(UnitsNet.Temperature,UnitsNet.RelativeHumidity)">
+            <summary>
+            Calculates the actual vapor pressure.
+            </summary>
+            <param name="airTemperature">The dry air temperature</param>
+            <param name="relativeHumidity">The relative humidity (RH)</param>
+            <returns>The actual vapor pressure</returns>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateDewPoint(UnitsNet.Temperature,UnitsNet.RelativeHumidity)">
+            <summary>
+            Calculates the dew point. The dew point is the temperature at which, given the other values remain constant - dew or fog would start
+            building up.
+            </summary>
+            <param name="airTemperature">The dry air temperature</param>
+            <param name="relativeHumidity">The relative humidity (RH)</param>
+            <returns>The dew point</returns>
+            <remarks>
+            Source https://en.wikipedia.org/wiki/Dew_point
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateAbsoluteHumidity(UnitsNet.Temperature,UnitsNet.RelativeHumidity)">
+            <summary>
+            Calculates the absolute humidity in g/m³.
+            </summary>
+            <param name="airTemperature">The dry air temperature</param>
+            <param name="relativeHumidity">The relative humidity (RH)</param>
+            <returns>The absolute humidity in g/m³</returns>
+            <remarks>
+            Source https://de.wikipedia.org/wiki/Luftfeuchtigkeit#Absolute_Luftfeuchtigkeit
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.GetRelativeHumidityFromActualAirTemperature(UnitsNet.Temperature,UnitsNet.RelativeHumidity,UnitsNet.Temperature)">
+            <summary>
+            Calculates a corrected relative humidity. This is useful if you have a temperature/humidity sensor that is
+            placed in a location where the temperature is different from the real ambient temperature (like it sits inside a hot case)
+            and another temperature-only sensor that gives more reasonable ambient temperature readings.
+            Do note that the relative humidity is dependent on the temperature, because it depends on how much water a volume of air
+            can contain, which increases with temperature.
+            </summary>
+            <param name="airTemperatureFromHumiditySensor">Temperature measured by the humidity sensor</param>
+            <param name="relativeHumidityMeasured">Humidity measured</param>
+            <param name="airTemperatureFromBetterPlacedSensor">Temperature measured by better placed sensor</param>
+            <returns>A corrected humidity. The value will be lower than the input value if the better placed sensor is cooler than
+            the "bad" sensor.</returns>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateAltitude(UnitsNet.Pressure,UnitsNet.Pressure,UnitsNet.Temperature)">
+            <summary>
+            Calculates the altitude in meters from the given pressure, sea-level pressure and air temperature.
+            </summary>
+            <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+            <param name="seaLevelPressure">The sea-level pressure</param>
+            <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
+            <returns>The altitude</returns>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateAltitude(UnitsNet.Pressure,UnitsNet.Temperature)">
+            <summary>
+            Calculates the altitude in meters from the given pressure and air temperature. Assumes mean sea-level pressure.
+            </summary>
+            <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+            <param name="airTemperature">The dry air temperature at the point for which altitude is being calculated</param>
+            <returns>The altitude</returns>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateAltitude(UnitsNet.Pressure,UnitsNet.Pressure)">
+            <summary>
+            Calculates the altitude in meters from the given pressure and sea-level pressure. Assumes temperature of 15C.
+            </summary>
+            <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+            <param name="seaLevelPressure">The sea-level pressure</param>
+            <returns>The altitude</returns>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateAltitude(UnitsNet.Pressure)">
+            <summary>
+            Calculates the altitude in meters from the given pressure. Assumes mean sea-level pressure and temperature of 15C.
+            </summary>
+            <param name="pressure">The pressure at the point for which altitude is being calculated</param>
+            <returns>The altitude</returns>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateSeaLevelPressure(UnitsNet.Pressure,UnitsNet.Length,UnitsNet.Temperature)">
+            <summary>
+            Calculates the approximate sea-level pressure from given absolute pressure, altitude and air temperature.
+            </summary>
+            <param name="pressure">The air pressure at the point of measurement</param>
+            <param name="altitude">The altitude at the point of the measurement</param>
+            <param name="airTemperature">The air temperature</param>
+            <returns>The estimated absolute sea-level pressure</returns>
+            <remarks><see cref="M:Iot.Device.Common.WeatherHelper.CalculatePressure(UnitsNet.Pressure,UnitsNet.Length,UnitsNet.Temperature)"/> solved for sea level pressure</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculatePressure(UnitsNet.Pressure,UnitsNet.Length,UnitsNet.Temperature)">
+            <summary>
+            Calculates the approximate absolute pressure from given sea-level pressure, altitude and air temperature.
+            </summary>
+            <param name="seaLevelPressure">The sea-level pressure</param>
+            <param name="altitude">The altitude in meters at the point for which pressure is being calculated</param>
+            <param name="airTemperature">The air temperature at the point for which pressure is being calculated</param>
+            <returns>The estimated absolute pressure at the given altitude</returns>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateTemperature(UnitsNet.Pressure,UnitsNet.Pressure,UnitsNet.Length)">
+            <summary>
+            Calculates the temperature gradient for the given pressure difference
+            </summary>
+            <param name="pressure">The air pressure at the point for which temperature is being calculated</param>
+            <param name="seaLevelPressure">The sea-level pressure</param>
+            <param name="altitude">The altitude in meters at the point for which temperature is being calculated</param>
+            <returns>The standard temperature at the given altitude, when the given pressure difference is known</returns>
+            <remarks><see cref="M:Iot.Device.Common.WeatherHelper.CalculatePressure(UnitsNet.Pressure,UnitsNet.Length,UnitsNet.Temperature)"/> solved for temperature</remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateBarometricPressure(UnitsNet.Pressure,UnitsNet.Temperature,UnitsNet.Length)">
+            <summary>
+            Calculates the barometric pressure from a raw reading, using the reduction formula from the german met service.
+            This is a more complex variant of <see cref="M:Iot.Device.Common.WeatherHelper.CalculateSeaLevelPressure(UnitsNet.Pressure,UnitsNet.Length,UnitsNet.Temperature)"/>. It gives the value that a weather station gives
+            for a particular area and is also used in meteorological charts.
+            <example>
+            You are at 650m over sea and measure a pressure of 948.7 hPa and a temperature of 24.0°C. The met service will show that
+            you are within a high-pressure area of around 1020 hPa.
+            </example>
+            </summary>
+            <param name="measuredPressure">Measured pressure at the observation point</param>
+            <param name="measuredTemperature">Measured temperature at the observation point</param>
+            <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
+            to be used above ~750m). Do not use the height obtained by calling <see cref="M:Iot.Device.Common.WeatherHelper.CalculateAltitude(UnitsNet.Pressure)"/>
+            or any of its overloads, since that would use redundant data.</param>
+            <returns>The barometric pressure at the point of observation</returns>
+            <remarks>
+            From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateBarometricPressure(UnitsNet.Pressure,UnitsNet.Temperature,UnitsNet.Pressure,UnitsNet.Length)">
+            <summary>
+            Calculates the barometric pressure from a raw reading, using the reduction formula from the german met service.
+            This is a more complex variant of <see cref="M:Iot.Device.Common.WeatherHelper.CalculateSeaLevelPressure(UnitsNet.Pressure,UnitsNet.Length,UnitsNet.Temperature)"/>. It gives the value that a weather station gives
+            for a particular area and is also used in meteorological charts.
+            <example>
+            You are at 650m over sea and measure a pressure of 948.7 hPa and a temperature of 24.0°C. The met service will show that
+            you are within a high-pressure area of around 1020 hPa.
+            </example>
+            </summary>
+            <param name="measuredPressure">Measured pressure at the observation point</param>
+            <param name="measuredTemperature">Measured temperature at the observation point</param>
+            <param name="vaporPressure">Vapor pressure, meteorologic definition</param>
+            <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
+            to be used above ~750m)</param>
+            <returns>The barometric pressure at the point of observation</returns>
+            <remarks>
+            From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateBarometricPressure(UnitsNet.Pressure,UnitsNet.Temperature,UnitsNet.Length,UnitsNet.RelativeHumidity)">
+            <summary>
+            Calculates the barometric pressure from a raw reading, using the reduction formula from the german met service.
+            This is a more complex variant of <see cref="M:Iot.Device.Common.WeatherHelper.CalculateSeaLevelPressure(UnitsNet.Pressure,UnitsNet.Length,UnitsNet.Temperature)"/>. It gives the value that a weather station gives
+            for a particular area and is also used in meteorological charts.
+            Use this method if you also have the relative humidity.
+            </summary>
+            <param name="measuredPressure">Measured pressure at the observation point</param>
+            <param name="measuredTemperature">Measured temperature at the observation point</param>
+            <param name="measurementAltitude">Height over sea level of the observation point (to be really precise, geopotential heights have
+            to be used above ~750m)</param>
+            <param name="relativeHumidity">Relative humidity at point of measurement</param>
+            <returns>The barometric pressure at the point of observation</returns>
+            <remarks>
+            From https://de.wikipedia.org/wiki/Barometrische_Höhenformel#Anwendungen
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateAirDensity(UnitsNet.Pressure,UnitsNet.Temperature)">
+            <summary>
+            Simplified air density (not taking humidity into account)
+            </summary>
+            <param name="airPressure">Measured air pressure</param>
+            <param name="temperature">Measured temperature</param>
+            <returns>Approximate standard air density</returns>
+            <remarks>From https://de.wikipedia.org/wiki/Luftdichte </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateAirDensity(UnitsNet.Pressure,UnitsNet.Temperature,UnitsNet.RelativeHumidity)">
+            <summary>
+            Calculates the air density
+            </summary>
+            <param name="airPressure">Measured air pressure</param>
+            <param name="temperature">Measured temperature</param>
+            <param name="humidity">Measured relative humidity</param>
+            <returns>Approximate standard air density at sea level</returns>
+            <remarks>From https://de.wikipedia.org/wiki/Luftdichte </remarks>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateWindchill(UnitsNet.Temperature,UnitsNet.Speed)">
+            <summary>
+            Calculates the wind chill temperature - this is the perceived temperature in (heavy) winds at cold temperatures.
+            This is only useful at temperatures below about 20°C, above use <see cref="M:Iot.Device.Common.WeatherHelper.CalculateHeatIndex(UnitsNet.Temperature,UnitsNet.RelativeHumidity)"/> instead.
+            Not suitable for wind speeds &lt; 5 km/h.
+            </summary>
+            <param name="temperature">The measured air temperature</param>
+            <param name="windSpeed">The wind speed (measured at 10m above ground)</param>
+            <returns>The perceived temperature. Note that this is not a real temperature, and the skin will never really reach
+            this temperature. This is more an indication on how fast the skin will reach the air temperature. If the skin
+            reaches a temperature of about -5°C, frostbite might occur.</returns>
+            <remarks>From https://de.wikipedia.org/wiki/Windchill </remarks>
+            <exception cref="T:System.ArgumentOutOfRangeException">The wind speed is less than zero</exception>
+        </member>
+        <member name="M:Iot.Device.Common.WeatherHelper.CalculateWindForce(UnitsNet.Density,UnitsNet.Speed,System.Double)">
+            <summary>
+            Calculates the wind force on an object.
+            </summary>
+            <param name="densityOfAir">The denisty of the air, calculated using one of the overloads of <see cref="M:Iot.Device.Common.WeatherHelper.CalculateAirDensity(UnitsNet.Pressure,UnitsNet.Temperature)"/></param>
+            <param name="windSpeed">The speed of the wind</param>
+            <param name="pressureCoefficient">Pressure coefficient for the shape of the object. Use 1 for a rectangular object directly facing the wind</param>
+            <returns>The Pressure the wind applies on the object</returns>
+            <remarks>From https://de.wikipedia.org/wiki/Winddruck </remarks>
+        </member>
+        <member name="T:Iot.Device.MathExtensions">
+            <summary>
+            Implementations of some functions missing in older .NET versions
+            </summary>
+        </member>
+        <member name="M:Iot.Device.MathExtensions.Clamp(System.Double,System.Double,System.Double)">
+            <summary>
+            Returns val, limited to the range min-max (inclusive)
+            </summary>
+        </member>
+        <member name="M:Iot.Device.MathExtensions.Clamp(System.Single,System.Single,System.Single)">
+            <summary>
+            Returns val, limited to the range min-max (inclusive)
+            </summary>
+        </member>
+        <member name="M:Iot.Device.MathExtensions.Clamp(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Returns val, limited to the range min-max (inclusive)
+            </summary>
+        </member>
+        <member name="M:Iot.Device.MathExtensions.Clamp(System.Byte,System.Byte,System.Byte)">
+            <summary>
+            Returns val, limited to the range min-max (inclusive)
+            </summary>
+        </member>
+        <member name="M:Iot.Device.MathExtensions.Clamp(System.Int64,System.Int64,System.Int64)">
+            <summary>
+            Returns val, limited to the range min-max (inclusive)
+            </summary>
+        </member>
+        <member name="M:Iot.Device.MathExtensions.Clamp(System.UInt32,System.UInt32,System.UInt32)">
+            <summary>
+            Returns val, limited to the range min-max (inclusive)
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Graphics.BdfFont">
+            <summary>
+            Represents Bitmap Distribution Format (BDF) font, partial implementation of specifications.
+            Specifications can be found here: https://www.adobe.com/content/dam/acom/en/devnet/font/pdfs/5005.BDF_Spec.pdf
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.Width">
+            <summary>
+            Character width
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.Height">
+            <summary>
+            Character height
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.XDisplacement">
+            <summary>
+            X displacement of the character
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.YDisplacement">
+            <summary>
+            Y Displacement of the character
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.DefaultChar">
+            <summary>
+            Default character
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.CharsCount">
+            <summary>
+            Number of characters
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.GlyphMapper">
+            <summary>
+            GlyphMapper is mapping from the character number to the index of the character bitmap data in the buffer GlyphUshortData.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.GlyphUshortData">
+            <summary>
+            The buffer containing all the data
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.BdfFont.Load(System.String)">
+            <summary>
+            Loads BdfFont from a specified path
+            </summary>
+            <param name="fontFilePath">Path of the file representing the font</param>
+            <returns>BdfFont instance</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.BdfFont.GetCharData(System.Char,System.ReadOnlySpan{System.UInt16}@)">
+            <summary>
+            Get character data or data for default character
+            </summary>
+            <param name="character">Character whose data needs to be retrieved</param>
+            <param name="charData">Character data</param>
+        </member>
+        <member name="P:Iot.Device.Graphics.BdfFont.SupportedChars">
+            <summary>
+            Characters supported by this font
+            </summary>
+            <value>Array of supported characters</value>
+        </member>
+        <member name="M:Iot.Device.Graphics.BdfFont.GetCharData(System.Int32,System.Span{System.Int32}@,System.Boolean)">
+            <summary>
+            Get character data
+            </summary>
+            <param name="charOrdinal">Character ordinal</param>
+            <param name="data">Buffer to be sliced and filled with character data</param>
+            <param name="useDefaultChar">Use default character if not found</param>
+            <returns>True if data could be retrieved</returns>
+        </member>
+        <member name="T:Iot.Device.Graphics.BitmapImage">
+            <summary>
+            An abstract class for a bitmap image, to be implemented by an image provider.
+            This class is also the factory to create new bitmaps with the current image factory.
+            The image factory must implement <see cref="T:Iot.Device.Graphics.IImageFactory"/> and must be registered using a call to
+            <see cref="M:Iot.Device.Graphics.BitmapImage.RegisterImageFactory(Iot.Device.Graphics.IImageFactory)"/>.
+            </summary>
+            <remarks>
+            This class does not have an implementation within Iot.Device.Bindings.dll. You can use the Iot.Device.Bindings.SkiaSharpAdapter.dll
+            as a supported operating-system independent implementation of this class or write your own implementation.
+            </remarks>
+        </member>
+        <member name="F:Iot.Device.Graphics.BitmapImage.s_currentFactory">
+            <summary>
+            The currently registered image factory
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.#ctor(System.Int32,System.Int32,System.Int32,Iot.Device.Graphics.PixelFormat)">
+            <summary>
+            Initializes a <see cref="T:Iot.Device.Graphics.BitmapImage" /> instance with the specified data, width, height and stride.
+            </summary>
+            <param name="width">Width of the image</param>
+            <param name="height">Height of the image</param>
+            <param name="stride">Number of bytes per row</param>
+            <param name="pixelFormat">The pixel format of the data</param>
+        </member>
+        <member name="P:Iot.Device.Graphics.BitmapImage.Width">
+            <summary>
+            Width of the image
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BitmapImage.Height">
+            <summary>
+            Height of the image
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BitmapImage.Stride">
+            <summary>
+            Number of bytes per row
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BitmapImage.PixelFormat">
+            <summary>
+            The format of the image
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.BitmapImage.Item(System.Int32,System.Int32)">
+            <summary>
+            Accesses the pixel at the given position
+            </summary>
+            <param name="x">Pixel X position</param>
+            <param name="y">Pixel Y position</param>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.RegisterImageFactory(Iot.Device.Graphics.IImageFactory)">
+            <summary>
+            Register an image factory.
+            </summary>
+            <param name="factory">The image factory to register</param>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.CreateBitmap(System.Int32,System.Int32,Iot.Device.Graphics.PixelFormat)">
+            <summary>
+            Creates a bitmap using the active factory. This requires an implementation to be registered.
+            See <see cref="T:Iot.Device.Graphics.BitmapImage"/> for details.
+            </summary>
+            <param name="width">Width of the image, in pixels</param>
+            <param name="height">Height of the image, in pixels</param>
+            <param name="pixelFormat">Desired pixel format</param>
+            <returns>A new bitmap with the provided size</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.CreateFromFile(System.String)">
+            <summary>
+            Create a bitmap from a file. This requires an implementation to be registered.
+            See <see cref="T:Iot.Device.Graphics.BitmapImage"/> for details.
+            </summary>
+            <param name="filename">The file to load</param>
+            <returns>A bitmap</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.CreateFromStream(System.IO.Stream)">
+            <summary>
+            Create a bitmap from an open stream. This requires an implementation to be registered.
+            See <see cref="T:Iot.Device.Graphics.BitmapImage"/> for details.
+            </summary>
+            <param name="data">The data stream</param>
+            <returns>A bitmap</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.Clear(System.Drawing.Color)">
+            <summary>
+            Clears the image to specific color
+            </summary>
+            <param name="color">Color to clear the image. Defaults to black.</param>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.SetPixel(System.Int32,System.Int32,System.Drawing.Color)">
+            <summary>
+            Sets pixel at specific position
+            </summary>
+            <param name="x">X coordinate of the pixel</param>
+            <param name="y">Y coordinate of the pixel</param>
+            <param name="color">Color to set the pixel to</param>
+            <remarks>The use of <see cref="M:Iot.Device.Graphics.BitmapImage.SetPixel(System.Int32,System.Int32,System.Drawing.Color)"/> and <see cref="M:Iot.Device.Graphics.BitmapImage.GetPixel(System.Int32,System.Int32)"/> is usually slow. For fast image updates, grab the underlying
+            raw buffer by calling <see cref="M:Iot.Device.Graphics.BitmapImage.AsByteSpan"/> or use the <see cref="M:Iot.Device.Graphics.BitmapImage.GetDrawingApi"/> method and use high-level drawing functions.</remarks>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.GetPixel(System.Int32,System.Int32)">
+            <summary>
+            Gets the color of the pixel at the given position
+            </summary>
+            <param name="x">X coordinate of the pixel</param>
+            <param name="y">Y coordinate of the pixel</param>
+            <returns>The color of the pixel</returns>
+            <remarks>The use of <see cref="M:Iot.Device.Graphics.BitmapImage.SetPixel(System.Int32,System.Int32,System.Drawing.Color)"/> and <see cref="M:Iot.Device.Graphics.BitmapImage.GetPixel(System.Int32,System.Int32)"/> is usually slow. For fast image updates, grab the underlying
+            raw buffer by calling <see cref="M:Iot.Device.Graphics.BitmapImage.AsByteSpan"/> or use the <see cref="M:Iot.Device.Graphics.BitmapImage.GetDrawingApi"/> method and use high-level drawing functions.</remarks>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.AsByteSpan">
+            <summary>
+            Return the data pointer as a raw span of bytes
+            </summary>
+            <returns>A span of bytes</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.SaveToFile(System.String,Iot.Device.Graphics.ImageFileType)">
+            <summary>
+            Saves this bitmap to a file
+            </summary>
+            <param name="filename">The filename to save it to</param>
+            <param name="fileType">The filetype to use.</param>
+            <remarks>
+            Generally, the method is not checking that the filename extension matches the file type provided.
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.SaveToStream(System.IO.Stream,Iot.Device.Graphics.ImageFileType)">
+            <summary>
+            Save the image to a stream
+            </summary>
+            <param name="stream">The stream to save the data to</param>
+            <param name="format">The image format</param>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance
+            </summary>
+            <param name="disposing">True if disposing, false if called from finalizer</param>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.Dispose">
+            <summary>
+            Disposes this instance. Correctly disposing instance of this class is important to prevent memory leaks or overload of the garbage collector.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.BitmapImage.GetDrawingApi">
+            <summary>
+            Returns an abstraction interface for drawing to this bitmap.
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Graphics.Converters">
+            <summary>
+            Contains a set of converters from <see cref="T:System.Drawing.Bitmap"/> to <see cref="T:Iot.Device.Graphics.BitmapImage"/>, for
+            easy conversion of legacy code that still uses the obsolete System.Drawing library
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.Converters.ToBitmapImage(System.Drawing.Bitmap)">
+            <summary>
+            Convert a <see cref="T:System.Drawing.Bitmap"/> to a <see cref="T:Iot.Device.Graphics.BitmapImage"/>
+            </summary>
+            <param name="bmp">Input bitmap</param>
+            <returns>An image</returns>
+            <exception cref="T:System.ArgumentNullException"><paramref name="bmp"/> is null</exception>
+            <exception cref="T:System.NotSupportedException">The input format is not supported</exception>
+        </member>
+        <member name="M:Iot.Device.Graphics.Converters.AdjustImageDestination(Iot.Device.Graphics.BitmapImage,System.Drawing.Point@,System.Drawing.Rectangle@)">
+            <summary>
+            Adjusts the target position and size so that a given image can be copied to a target image without scaling and without further cropping.
+            This ensures the destination rectangle, starting at the given point lies within the image.
+            </summary>
+            <param name="image">The input image size</param>
+            <param name="leftTop">[in, out] The top left corner of the input image to show. If at the bottom or right edge of the destination, this will be
+            reset so that the right edge of the input image is at the right edge of the destination</param>
+            <param name="destination">The destination rectangle. If this is larger than the input image, the size will be cropped</param>
+        </member>
+        <member name="T:Iot.Device.Graphics.Font5x8">
+            <summary>
+            The specific PCD8544 font for Nokia 5110
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.Font5x8.Ascii">
+            <summary>
+            ASCII Font specific to the PCD8544 Nokia 5110 screen but can be used as a generic 5x8 font.
+            Font characters are column bit mask.
+            Font size is 5 pixels width and 8 pixels height. Each byte represent a vertical column for the character.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.Font5x8.#ctor">
+            <summary>
+            Constructor for Font 5x8
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Graphics.IGraphics">
+            <summary>
+            This declarative interface provides the basis for drawing functions using image specific APIs.
+            This interface is empty. The implementation is provided via extension methods.
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Graphics.IImageFactory">
+            <summary>
+            Factory interface for creating bitmaps.
+            An instance of this interface shall be provided by library-specific adapter classes.
+            The class <see cref="T:Iot.Device.Graphics.BitmapImage"/> requires an instance of this interface to work properly.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.IImageFactory.CreateBitmap(System.Int32,System.Int32,Iot.Device.Graphics.PixelFormat)">
+            <summary>
+            Creates a bitmap with the given size and format
+            </summary>
+            <param name="width">Width of the bitmap, in pixels</param>
+            <param name="height">Height of the bitmap in pixels</param>
+            <param name="pixelFormat">The desired pixel format</param>
+            <returns>An empty bitmap of the given size</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.IImageFactory.CreateFromStream(System.IO.Stream)">
+            <summary>
+            Creates a bitmap from a stream (e.g. an image file)
+            </summary>
+            <param name="file">The stream to open</param>
+            <returns>A bitmap from the given stream</returns>
+        </member>
+        <member name="T:Iot.Device.Graphics.ImageFileType">
+            <summary>
+            Image file type list
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.ImageFileType.Undefined">
+            <summary>
+            Undefined
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.ImageFileType.Png">
+            <summary>
+            Png file
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.ImageFileType.Bmp">
+            <summary>
+            Windows Bitmap
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.ImageFileType.Jpg">
+            <summary>
+            Jpeg file
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Graphics.LcdCharacterEncoding">
+            <summary>
+            Provides the character encoding for an LCD display.
+            Instances of this class are generated by <see cref="T:Iot.Device.Graphics.LcdCharacterEncodingFactory"/>.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.#ctor(System.String,System.String,System.Collections.Generic.Dictionary{System.Char,System.Byte},System.Char)">
+            <summary>
+            Creates an instance of <see cref="T:Iot.Device.Graphics.LcdCharacterEncoding"/>.
+            </summary>
+            <param name="cultureName">Culture name for this encoding (informational only)</param>
+            <param name="readOnlyMemoryName">Name of the ROM (hard coded read-only character memory) on the display</param>
+            <param name="characterMap">The character map to use</param>
+            <param name="unknownLetter">The character to print when a letter not in the map is found. This letter must be part of the map</param>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.#ctor(System.String,System.String,System.Collections.Generic.Dictionary{System.Char,System.Byte},System.Char,System.Collections.Generic.List{System.Byte[]})">
+            <summary>
+            Creates an instance of <see cref="T:Iot.Device.Graphics.LcdCharacterEncoding"/>.
+            </summary>
+            <param name="cultureName">Culture name for this encoding (informational only)</param>
+            <param name="readOnlyMemoryName">Name of the ROM (hard coded read-only character memory) on the display</param>
+            <param name="characterMap">The character map to use</param>
+            <param name="unknownLetter">The character to print when a letter not in the map is found</param>
+            <param name="extraCharacters">The pixel map of characters required for this culture but not found in the character ROM</param>
+        </member>
+        <member name="P:Iot.Device.Graphics.LcdCharacterEncoding.IsSingleByte">
+            <summary>
+            Always returns true for this class.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.LcdCharacterEncoding.EncodingName">
+            <inheritDoc/>
+        </member>
+        <member name="P:Iot.Device.Graphics.LcdCharacterEncoding.ExtraCharacters">
+            <summary>
+            The list of pixel maps for extra characters that are required for this culture.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.LcdCharacterEncoding.AllCharactersSupported">
+            <summary>
+            This is internally set to false if we already know that we won't be able to display all required characters
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Graphics.LcdCharacterEncoding.ReadOnlyMemoryName">
+            <summary>
+            Specified Name of the hardcoded character memory set for which this Encoding is intended. An encoding shall only be loaded to
+            a matching display.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.GetByteCount(System.Char[],System.Int32,System.Int32)">
+            <inheritDoc/>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.GetBytes(System.Char[],System.Int32,System.Int32,System.Byte[],System.Int32)">
+            <inheritDoc/>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.GetCharCount(System.Byte[],System.Int32,System.Int32)">
+            <inheritDoc/>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.GetChars(System.Byte[],System.Int32,System.Int32,System.Char[],System.Int32)">
+            <summary>
+            Reverse mapping is not supported for this encoding.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.GetMaxByteCount(System.Int32)">
+            <inheritDoc/>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncoding.GetMaxCharCount(System.Int32)">
+            <inheritDoc/>
+        </member>
+        <member name="T:Iot.Device.Graphics.LcdCharacterEncodingFactory">
+            <summary>
+            Factory for creating Encodings that support different cultures on different LCD Displays.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.Create(System.Globalization.CultureInfo,System.String,System.Char,System.Int32)">
+            <summary>
+            Creates the character mapping optimized for the given culture.
+            Checks whether the characters required for a given culture are available in the installed character map and tries
+            to add them as user-defined characters, if possible.
+            </summary>
+            <param name="culture">Culture for which support is required</param>
+            <param name="romName">ROM type of attached chip. Supported values: "A00", "A02", "SplC780"</param>
+            <param name="unknownLetter">Letter that is printed when an unknown character is encountered. This letter must be part of the
+            default rom set</param>
+            <param name="maxNumberOfCustomCharacters">Maximum number of custom characters supported on the hardware. Should be 8 for Hd44780-controlled displays.</param>
+            <returns>The newly created encoding. Whether the encoding can be loaded to a certain display will be decided later.</returns>
+            <exception cref="T:System.ArgumentException">The character specified as unknownLetter must be part of the mapping.</exception>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.AssignLettersForCurrentCulture(System.Collections.Generic.Dictionary{System.Char,System.Byte},System.Globalization.CultureInfo,System.String,System.Collections.Generic.List{System.Byte[]},System.Int32)">
+            <summary>
+            Tries to generate letters important in that culture but missing from the current rom set
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.SpecialLettersForCulture(System.Globalization.CultureInfo,System.Collections.Generic.Dictionary{System.Char,System.Byte})">
+            <summary>
+            Returns the set of special characters required for a given culture/language.
+            This may include diacritics (ä, ö, ø), currency signs (€) or similar chars.
+            If any of the returned characters are not found in the ROM map, <see cref="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.CreateLetter(System.Char,System.String)"/> is called to obtain the pixel representation of the given character.
+            A maximum of 8 extra characters can be added to the ones in the ROM.
+            </summary>
+            <param name="culture">Culture to support</param>
+            <param name="characterMapping">The character map, pre-loaded with the characters from the character ROM. This may be extended by explicitly adding direct mappings
+            where an alternative is allowed (i.e. mapping capital diacritics to normal capital letters É -> E, when there's not enough room to put É into character RAM.</param>
+            <returns>A string with the set of special characters for a language, i.e. "äöüß€ÄÖÜ" for German</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.CreateLetter(System.Char,System.String)">
+            <summary>
+            Creates the given letter for the given ROM type.
+            Overwrite this only if an alternate ROM is used.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.CreateLetterA00(System.Char)">
+            <summary>
+            Creates the given letter from a pixel map for Rom Type A00 (7-pixel high letters, bottom row empty)
+            </summary>
+            <param name="character">Character to create</param>
+            <returns>An 8-Byte array of the pixel map for the created letter.</returns>
+            <remarks>
+            Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.CreateLetterA02(System.Char)">
+            <summary>
+            Creates the given letter from a pixel map for Rom Type A02 (7 or 8 Pixel high letters, bottom row filled)
+            </summary>
+            <param name="character">Character to create</param>
+            <returns>An 8-Byte array of the pixel map for the created letter.</returns>
+            <remarks>
+            Currently requires the characters to be hardcoded here. Would be nice if we could generate the pixel maps from an existing font, such as Consolas
+            </remarks>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.CreateCustomCharacter(System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte,System.Byte)">
+            <summary>
+            Combines a set of bytes into a pixel map
+            </summary>
+            <example>
+            Use as follows to create letter 'ü':
+            <code>
+            CreateCustomCharacter(
+                       0b_01010,
+                       0b_00000,
+                       0b_10001,
+                       0b_10001,
+                       0b_10001,
+                       0b_10011,
+                       0b_01101,
+                       0b_00000)
+            </code>
+            </example>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.ConvertFont8to5bytes(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Convert a 8 bytes array with 5 lower bit character representation into a
+            5 bytes array with all bit character representation vertically ordered.
+            </summary>
+            <param name="font8">A span of bytes, must be 8 bytes length</param>
+            <returns>A 5 bytes array containing the character</returns>
+        </member>
+        <member name="M:Iot.Device.Graphics.LcdCharacterEncodingFactory.ConvertFont5to8bytes(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Convert a 5 bytes array with 8 bits vertically encoded character representation into a
+            8 bytes array with the lower 5 bits.
+            </summary>
+            <param name="font5">A span of bytes, must be 5 bytes length</param>
+            <returns>A 8 bytes array containing the character</returns>
+        </member>
+        <member name="T:Iot.Device.Graphics.PixelFormat">
+            <summary>
+            Specifies the pixel format of an image.
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.PixelFormat.Unspecified">
+            <summary>
+            The format is unspecified.
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.PixelFormat.Format32bppArgb">
+            <summary>
+            The standard 32 bit image format
+            </summary>
+        </member>
+        <member name="F:Iot.Device.Graphics.PixelFormat.Format32bppXrgb">
+            <summary>
+            32 bit image format with ignored alpha
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Multiplexing.GpioOutputSegment">
+            <summary>
+            IOutputSegment implementation that uses GpioController.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.#ctor(System.Int32[],System.Device.Gpio.GpioController,System.Boolean)">
+            <summary>
+            IOutputSegment implementation that uses GpioController.
+            </summary>
+            <param name="pins">The GPIO pins that should be used and are connected.</param>
+            <param name="gpioController">The GpioController to use. If one isn't provided, one will be created.</param>
+            <param name="shouldDispose">The policy to use (true, by default) for disposing the GPIO controller when disposing this instance.</param>
+        </member>
+        <member name="P:Iot.Device.Multiplexing.GpioOutputSegment.Length">
+            <summary>
+            The length of the segment; the number of GPIO pins it exposes.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Multiplexing.GpioOutputSegment.Item(System.Int32)">
+            <summary>
+            Segment values.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Writes a PinValue to a virtual segment.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.Write(System.Byte)">
+            <summary>
+            Writes discrete underlying bits to a virtual segment.
+            Writes each bit, left to right. Least significant bit will written to index 0.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes discrete underlying bits to a virtual segment.
+            Writes each byte, left to right. Least significant bit will written to index 0.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.TurnOffAll">
+            <summary>
+            Writes a byte to the underlying GpioController.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.Display(System.Threading.CancellationToken)">
+            <summary>
+            Displays current state of segment.
+            Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.DisplayAsync(System.Threading.CancellationToken)">
+            <summary>
+            Displays current state of segment.
+            Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.GpioOutputSegment.Dispose">
+            <summary>
+            Disposes the underlying GpioController.
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Multiplexing.IOutputSegment">
+            <summary>
+            Abstracts a segment of outputs from multiplexing sources (like a shift register).
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Multiplexing.IOutputSegment.Length">
+            <summary>
+            Length of segment (number of outputs)
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Multiplexing.IOutputSegment.Item(System.Int32)">
+            <summary>
+            Segment values.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.IOutputSegment.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Writes a PinValue to a virtual segment.
+            Does not display output until calling Display() or Display(CancellationToken ct) methods.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.IOutputSegment.Write(System.Byte)">
+            <summary>
+            Writes discrete underlying bits to a virtual segment.
+            Writes each bit, left to right. Least significant bit will written to index 0.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.IOutputSegment.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes discrete underlying bits to a virtual output.
+            Writes each byte, left to right. Least significant bit will written to index 0.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.IOutputSegment.TurnOffAll">
+            <summary>
+            Turns off all outputs.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.IOutputSegment.Display(System.Threading.CancellationToken)">
+            <summary>
+            Displays current state of segment.
+            Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.IOutputSegment.DisplayAsync(System.Threading.CancellationToken)">
+            <summary>
+            Displays current state of segment.
+            Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+            </summary>
+        </member>
+        <member name="T:Iot.Device.Multiplexing.Utility.VirtualOutputSegment">
+            <summary>
+            Interface that abstracts multiplexing over a segment of outputs.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.#ctor(System.Int32)">
+            <summary>
+            A virtual implementation of IOutputSegment that manages the values of a set of virtual outputs.
+            This type is intended as a helper to be used in IOutputSegment implementations.
+            </summary>
+            <param name="length">The number of outputs in the segment.</param>
+        </member>
+        <member name="P:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.Length">
+            <summary>
+            Length of segment (number of outputs).
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.Item(System.Int32)">
+            <summary>
+            Segment values.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Writes a PinValue to a virtual segment.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.Write(System.Byte)">
+            <summary>
+            Writes discrete underlying bits to a virtual segment.
+            Writes each bit, left to right. Least significant bit will written to index 0.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes discrete underlying bits to a virtual output.
+            Writes each byte, left to right. Least significant bit will written to index 0.
+            Does not display output.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.TurnOffAll">
+            <summary>
+            Writes a Low PinValue to all outputs.
+            Performs a latch.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.Display(System.Threading.CancellationToken)">
+            <summary>
+            Displays current state of segment.
+            Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.DisplayAsync(System.Threading.CancellationToken)">
+            <summary>
+            Displays current state of segment.
+            Segment is displayed at least until token receives a cancellation signal, possibly due to a specified duration expiring.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Multiplexing.Utility.VirtualOutputSegment.Dispose">
+            <summary>
+            Disposes any native resources.
+            </summary>
+        </member>
+        <member name="T:System.Device.DelayHelper">
+            <summary>
+            Helpers for short waits.
+            </summary>
+        </member>
+        <member name="F:System.Device.DelayHelper.s_tickFrequency">
+            <summary>A scale that normalizes the hardware ticks to <see cref="T:System.TimeSpan" /> ticks which are 100ns in length.</summary>
+        </member>
+        <member name="M:System.Device.DelayHelper.Delay(System.TimeSpan,System.Boolean)">
+            <summary>
+            Delay for at least the specified <paramref name="time" />.
+            </summary>
+            <param name="time">The amount of time to delay.</param>
+            <param name="allowThreadYield">
+            True to allow yielding the thread. If this is set to false, on single-proc systems
+            this will prevent all other code from running.
+            </param>
+        </member>
+        <member name="M:System.Device.DelayHelper.DelayMicroseconds(System.Int32,System.Boolean)">
+            <summary>
+            Delay for at least the specified <paramref name="microseconds"/>.
+            </summary>
+            <param name="microseconds">The number of microseconds to delay.</param>
+            <param name="allowThreadYield">
+            True to allow yielding the thread. If this is set to false, on single-proc systems
+            this will prevent all other code from running.
+            </param>
+        </member>
+        <member name="M:System.Device.DelayHelper.DelayMilliseconds(System.Int32,System.Boolean)">
+            <summary>
+            Delay for at least the specified <paramref name="milliseconds"/>
+            </summary>
+            <param name="milliseconds">The number of milliseconds to delay.</param>
+            <param name="allowThreadYield">
+            True to allow yielding the thread. If this is set to false, on single-proc systems
+            this will prevent all other code from running.
+            </param>
+        </member>
+        <member name="T:System.Device.Gpio.PinVector32">
+            <summary>
+            32-bit vector of pins and values.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinVector32.Pins">
+            <summary>
+            Bit vector of pin numbers from 0 (bit 0) to 31 (bit 31).
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinVector32.Values">
+            <summary>
+            Bit vector of values for each pin number from 0 (bit 0) to 31 (bit 31).
+            1 is high, 0 is low.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinVector32.#ctor(System.UInt32,System.UInt32)">
+            <summary>
+            Construct from a vector of pins and values.
+            </summary>
+            <param name="pins">Bit vector of pin numbers from 0 (bit 0) to 31 (bit 31).</param>
+            <param name="values">Bit vector of values for each pin number from 0 (bit 0) to 31 (bit 31).</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinVector32.#ctor(System.ReadOnlySpan{System.Device.Gpio.PinValuePair})">
+            <summary>
+            Construct from a span of <see cref="T:System.Device.Gpio.PinValuePair"/>s.
+            </summary>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            Thrown if <paramref name="pinValues"/> contains negative pin numbers or pin numbers higher than 31.
+            </exception>
+        </member>
+        <member name="M:System.Device.Gpio.PinVector32.Deconstruct(System.UInt32@,System.UInt32@)">
+            <summary>
+            Convenience deconstructor. Allows using as a "return tuple".
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.PinVector64">
+            <summary>
+            64-bit vector of pins and values.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinVector64.Pins">
+            <summary>
+            Bit vector of pin numbers from 0 (bit 0) to 63 (bit 63).
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinVector64.Values">
+            <summary>
+            Bit vector of values for each pin number from 0 (bit 0) to 63 (bit 63).
+            1 is high, 0 is low.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinVector64.#ctor(System.UInt64,System.UInt64)">
+            <summary>
+            Construct from a vector of pins and values.
+            </summary>
+            <param name="pins">Bit vector of pin numbers from 0 (bit 0) to 63 (bit 63).</param>
+            <param name="values">Bit vector of values for each pin number from 0 (bit 0) to 63 (bit 63).</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinVector64.#ctor(System.ReadOnlySpan{System.Device.Gpio.PinValuePair})">
+            <summary>
+            Construct from a span of <see cref="T:System.Device.Gpio.PinValuePair"/>s.
+            </summary>
+            <exception cref="T:System.ArgumentOutOfRangeException">
+            Thrown if <paramref name="pinValues"/> contains negative pin numbers or pin numbers higher than 63.
+            </exception>
+        </member>
+        <member name="M:System.Device.Gpio.PinVector64.Deconstruct(System.UInt64@,System.UInt64@)">
+            <summary>
+            Convenience deconstructor. Allows using as a "return tuple".
+            </summary>
+        </member>
+        <member name="T:System.Device.Analog.AnalogController">
+            <summary>
+            Base class for Analog Controllers.
+            These control analog input pins.
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.#ctor(System.Device.Gpio.PinNumberingScheme)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.GpioController"/> class that will use the specified numbering scheme and driver.
+            </summary>
+            <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
+        </member>
+        <member name="P:System.Device.Analog.AnalogController.NumberingScheme">
+            <summary>
+            The numbering scheme used to represent pins provided by the controller.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogController.PinCount">
+            <summary>
+            The number of pins provided by the controller.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogController.VoltageReference">
+            <summary>
+            Reference voltage (the maximum voltage measurable).
+            For some hardware, it might be necessary to manually set this value for the <see cref="M:System.Device.Analog.AnalogInputPin.ReadVoltage"/> method to return correct values.
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.SupportsAnalogInput(System.Int32)">
+            <summary>
+            Returns true if the given pin supports analog input
+            </summary>
+            <param name="pin">Number of the pin</param>
+            <returns>True if the pin supports analog input</returns>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.ConvertPinNumberToAnalogChannelNumber(System.Int32)">
+            <summary>
+            Convert the input pin number to an analog channel number.
+            The analog channel number is typically named A0 - Axx on Arduino boards. E.g. on Uno and Nano boards, A0
+            equals digital pin 14.
+            </summary>
+            <param name="pinNumber">Pin number</param>
+            <returns>Analog channel number. Returns -1 if the given pin does not support analog input</returns>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.ConvertAnalogChannelNumberToPinNumber(System.Int32)">
+            <summary>
+            Convert logical pin to caller's pin numbering scheme.
+            </summary>
+            <param name="analogChannelNumber">Logical pin numbering of the board</param>
+            <returns>Pin number of the given analog channel, or -1 if the input channel is not valid.</returns>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.OpenPin(System.Int32)">
+            <summary>
+            Opens a pin in order for it to be ready to use.
+            </summary>
+            <param name="pinNumber">The pin number to open (not the analog channel!).</param>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.OpenPinCore(System.Int32)">
+            <summary>
+            Overriden by derived classes: Returns an instance of the <see cref="T:System.Device.Analog.AnalogInputPin"/> for the specified pin.
+            </summary>
+            <param name="pinNumber">The pin number to open (not the analog channel)</param>
+            <returns>An instance of an analog pin</returns>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.IsPinOpen(System.Int32)">
+            <summary>
+            Checks if a specific analog channel is open.
+            </summary>
+            <param name="pinNumber">The analog channel number.</param>
+            <returns>The status if the channel is open or closed.</returns>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.ClosePin(System.Device.Analog.AnalogInputPin)">
+            <summary>
+            Closes the given pin
+            </summary>
+            <param name="pin">The pin to close</param>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogController.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="T:System.Device.Analog.AnalogInputPin">
+            <summary>
+            Driver for analog input pins
+            </summary>
+        </member>
+        <member name="E:System.Device.Analog.AnalogInputPin.ValueChanged">
+            <summary>
+            Fires when a value is changed for which a trigger is registered
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.#ctor(System.Device.Analog.AnalogController,System.Int32,UnitsNet.ElectricPotential)">
+            <summary>
+            Construct an instance of an analog pin.
+            This is not usually called directly. Use <see cref="M:System.Device.Analog.AnalogController.OpenPin(System.Int32)"/> instead.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogInputPin.Controller">
+            <summary>
+            Reference to the controller for this pin
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogInputPin.VoltageReference">
+            <summary>
+            The reference voltage level to convert raw values into voltages.
+            Some boards (i.e. the ADS111x series) always return an absolute voltage. Then this value is meaningless.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogInputPin.PinNumber">
+            <summary>
+            The logical pin number of this instance.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogInputPin.MinVoltage">
+            <summary>
+            The minimum measurable voltage. May be negative.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogInputPin.MaxVoltage">
+            <summary>
+            The largest measurable voltage.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.AnalogInputPin.AdcResolutionBits">
+            <summary>
+            Resolution of the Analog-to-Digital converter in bits. If the ADC supports negative values, the sign bit is also counted.
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.ReadRaw">
+            <summary>
+            Read a raw value from the pin
+            </summary>
+            <returns>Raw value of the analog input. Scale depends on hardware.</returns>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.ReadVoltage">
+            <summary>
+            Read a raw value and convert it to a voltage
+            </summary>
+            <returns>Reads a new value from the input and converts it to a voltage. For many boards, the <see cref="P:System.Device.Analog.AnalogInputPin.VoltageReference"/> needs to be correctly set for this to work.</returns>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.ConvertToVoltage(System.UInt32)">
+            <summary>
+            Converts an input raw value to a voltage
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.EnableAnalogValueChangedEvent(System.Device.Gpio.GpioController,System.Int32)">
+            <summary>
+            Enable event callback when the value of this pin changes.
+            </summary>
+            <param name="masterController">If an external interrupt handler is required, it can be provided here. Can be null if another interrupt feature is available</param>
+            <param name="masterPin">Input pin on the master controller.</param>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.DisableAnalogValueChangedEvent">
+            <summary>
+            Disables the event callback
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.FireValueChanged(System.Device.Analog.ValueChangedEventArgs)">
+            <summary>
+            Fires a value changed event.
+            </summary>
+            <param name="eventArgs">New value</param>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.Dispose(System.Boolean)">
+            <summary>
+            Dispose this instance
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.AnalogInputPin.Dispose">
+            <summary>
+            Dispose this instance
+            </summary>
+        </member>
+        <member name="T:System.Device.Analog.TriggerReason">
+            <summary>
+            Gives the reason why a new value was provided
+            </summary>
+        </member>
+        <member name="F:System.Device.Analog.TriggerReason.Unknown">
+            <summary>
+            The reason for the new message is unknown
+            </summary>
+        </member>
+        <member name="F:System.Device.Analog.TriggerReason.NewMeasurement">
+            <summary>
+            A new value is available
+            </summary>
+        </member>
+        <member name="F:System.Device.Analog.TriggerReason.Timed">
+            <summary>
+            A new value is read with a specific frequency
+            </summary>
+        </member>
+        <member name="F:System.Device.Analog.TriggerReason.LimitExceeded">
+            <summary>
+            A value is provided when certain thresholds are exceeded
+            </summary>
+        </member>
+        <member name="T:System.Device.Analog.ValueChangedEventArgs">
+            <summary>
+            Arguments passed in when an event is triggered by the GPIO.
+            </summary>
+        </member>
+        <member name="M:System.Device.Analog.ValueChangedEventArgs.#ctor(System.UInt32,UnitsNet.ElectricPotential,System.Int32,System.Device.Analog.TriggerReason)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Analog.ValueChangedEventArgs"/> class.
+            </summary>
+            <param name="rawValue">The raw analog sensor reading</param>
+            <param name="value">The analog sensor reading, converted to voltage.</param>
+            <param name="pinNumber">The pin number that triggered the event.</param>
+            <param name="triggerReason">The reason for the event</param>
+        </member>
+        <member name="P:System.Device.Analog.ValueChangedEventArgs.RawValue">
+            <summary>
+            Raw value, unscaled.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.ValueChangedEventArgs.Value">
+            <summary>
+            The absolute voltage of the new value.
+            For this to be valid, the voltage reference of the <see cref="T:System.Device.Analog.AnalogController"/> must be set correctly.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.ValueChangedEventArgs.PinNumber">
+            <summary>
+            The physical pin number that triggered the event.
+            </summary>
+        </member>
+        <member name="P:System.Device.Analog.ValueChangedEventArgs.TriggerReason">
+            <summary>
+            The reason that triggered this message.
+            </summary>
+        </member>
+        <member name="T:System.Device.Analog.ValueChangedEventHandler">
+            <summary>
+            Delegate that defines the structure for callbacks when the value of a measurement (i.e. analog input) changes.
+            </summary>
+            <param name="sender">The sender of the event.</param>
+            <param name="pinValueChangedEventArgs">The pin value changed arguments from the event.</param>
+        </member>
+        <member name="T:System.Device.Spi.SpiBusInfo">
+            <summary>
+            Base class for SPI bus information.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.SpiBusInfo.BufferSize">
+            <summary>
+            Buffer size assigned to the SPI bus or -1 if the buffer size is not available.
+            </summary>
+        </member>
+    </members>
+</doc>

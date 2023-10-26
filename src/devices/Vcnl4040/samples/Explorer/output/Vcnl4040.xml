@@ -58,6 +58,11 @@
             Gets the device version code.
             </summary>
         </member>
+        <member name="M:Iot.Device.Vcnl4040.Vcnl4040Device.GetDeviceId">
+            <summary>
+            Gets the device version code.
+            </summary>
+        </member>
         <member name="T:Iot.Device.Vcnl4040.Definitions.PowerState">
             <summary>
             Defines the set of ALS power states.
@@ -167,7 +172,7 @@
             Reads bytes from the device register
             </summary>
             <param name="commandCode">Register access command code</param>
-            <param name="buffer">Bytes to be read from the register</param>
+            <param name="readBuffer">Bytes to be read from the register</param>
         </member>
         <member name="M:Iot.Device.Vcnl4040.Infrastructure.I2cInterface.Write(Iot.Device.Vcnl4040.Definitions.CommandCode,System.Span{System.Byte})">
             <summary>
@@ -278,6 +283,11 @@
             <summary>
             Version code of the device. This is usually 0b0001.
             There is no further description in the datasheet.
+            </summary>
+        </member>
+        <member name="P:Iot.Device.Vcnl4040.Internal.IdRegister.Id">
+            <summary>
+            Gets the complete device Id.
             </summary>
         </member>
         <member name="M:Iot.Device.Vcnl4040.Internal.IdRegister.#ctor(Iot.Device.Vcnl4040.Infrastructure.I2cInterface)">

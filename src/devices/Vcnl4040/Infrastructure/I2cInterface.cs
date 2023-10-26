@@ -38,12 +38,14 @@ namespace Iot.Device.Vcnl4040.Infrastructure
         /// Reads bytes from the device register
         /// </summary>
         /// <param name="commandCode">Register access command code</param>
-        /// <param name="buffer">Bytes to be read from the register</param>
-        public void Read(CommandCode commandCode, Span<byte> buffer)
+        /// <param name="readBuffer">Bytes to be read from the register</param>
+        public void Read(CommandCode commandCode, Span<byte> readBuffer)
         {
-            Write(commandCode, Span<byte>.Empty);
-            _i2cDevice.Read(buffer);
-            Console.WriteLine($"I2cInterface.Read: {buffer[0]} {buffer[1]}");
+            // _i2cDevice.WriteByte((byte)commandCode);
+            // _i2cDevice.Read(buffer);
+            Span<byte> writeBuffer = stackalloc byte[1];
+            writeBuffer[0] = (byte)commandCode;
+            _i2cDevice.WriteRead(writeBuffer, readBuffer);
         }
 
         /// <summary>
@@ -57,14 +59,6 @@ namespace Iot.Device.Vcnl4040.Infrastructure
             output[0] = (byte)commandCode;
             data.CopyTo(output.Slice(1));
             _i2cDevice.Write(output);
-
-            Console.Write("Writing:");
-            foreach (byte b in output)
-            {
-                Console.Write($" {b:X}");
-            }
-
-            Console.WriteLine();
         }
     }
 }

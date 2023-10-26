@@ -108,5 +108,14 @@ namespace Iot.Device.Vcnl4040
             Console.WriteLine(_idRegister.IdLsb);
             return _idRegister.VersionCode;
         }
+
+        /// <summary>
+        /// Gets the device version code.
+        /// </summary>
+        public int GetDeviceId()
+        {
+            _idRegister.Read();
+            return _idRegister.Id;
+        }
     }
 }

@@ -1,0 +1,2291 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>System.Device.Gpio</name>
+    </assembly>
+    <members>
+        <member name="M:Interop.libbcmhost.bcm_host_get_peripheral_address">
+            <summary>
+            Get the peripheral base address of a RaspberryPi.
+            </summary>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_chip_iter_free(System.IntPtr)">
+            <summary>
+            Release all resources allocated for the gpiochip iterator and close the most recently opened gpiochip(if any).
+            </summary>
+            <param name="iter">The gpiochip iterator object</param>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_chip_close(System.IntPtr)">
+            <summary>
+            Close a GPIO chip handle and release all allocated resources.
+            </summary>
+            <param name="chip">The GPIO chip pointer</param>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_chip_num_lines(System.Device.Gpio.SafeChipHandle)">
+            <summary>
+            Get the number of GPIO lines exposed by this chip.
+            </summary>
+            <param name="chip">The GPIO chip handle.</param>
+            <returns>Number of GPIO lines.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_chip_get_line(System.Device.Gpio.SafeChipHandle,System.Int32)">
+            <summary>
+            Get the handle to the GPIO line at given offset.
+            </summary>
+            <param name="chip">The GPIO chip handle</param>
+            <param name="offset">The offset of the GPIO line</param>
+            <returns>Handle to the GPIO line or <see langword="null" /> if an error occurred.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_request_input(System.Device.Gpio.SafeLineHandle,System.String)">
+            <summary>
+            Reserve a single line, set the direction to input.
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <param name="consumer">Name of the consumer.</param>
+            <returns>0 if the line was properly reserved, -1 on failure.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_request_input_flags(System.Device.Gpio.SafeLineHandle,System.String,System.Int32)">
+            <summary>
+            Reserve a single line, set the direction to input with flags
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <param name="consumer">Name of the consumer.</param>
+            <param name="flags">Additional request flags.</param>
+            <returns>0 if the line was properly reserved, -1 on failure.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_request_output(System.Device.Gpio.SafeLineHandle,System.String,System.Int32)">
+            <summary>
+            Reserve a single line, set the direction to output.
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <param name="consumer">Name of the consumer.</param>
+            <param name="default_val">Initial value of the line</param>
+            <returns>0 if the line was properly reserved, -1 on failure.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_set_value(System.Device.Gpio.SafeLineHandle,System.Int32)">
+            <summary>
+            Set the value of a single GPIO line.
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <param name="value">New value.</param>
+            <returns>0 if the operation succeeds. In case of an error this routine returns -1 and sets the last error number.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_get_value(System.Device.Gpio.SafeLineHandle)">
+            <summary>
+            Read current value of a single GPIO line.
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <returns>0 or 1 if the operation succeeds. On error this routine returns -1 and sets the last error number.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_is_free(System.Device.Gpio.SafeLineHandle)">
+            <summary>
+            Check if line is no used (not set as Input or Output, not listening events).
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <returns>false if pin is used as Input/Output or Listening an event, true if it is free</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_release(System.IntPtr)">
+            <summary>
+            Release a previously reserved line.
+            </summary>
+            <param name="lineHandle">GPIO line handle</param>
+            <remarks>
+            This does NOT invalidate the line handle. This only releases the lock, so that a gpiod_line_request_input/gpiod_line_request_output can be called again.
+            </remarks>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_direction(System.Device.Gpio.SafeLineHandle)">
+            <summary>
+            Get the direction of the pin (input or output)
+            </summary>
+            <param name="lineHandle">GPIO line handle</param>
+            <returns>1 for input, 2 for output</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_bias(System.Device.Gpio.SafeLineHandle)">
+            <summary>
+            Read the GPIO line bias setting.
+            </summary>
+            <param name="lineHandle">GPIO line handle</param>
+            <returns>GPIOD_LINE_BIAS_PULL_UP (3), GPIOD_LINE_BIAS_PULL_DOWN (4), GPIOD_LINE_BIAS_DISABLE (2) or GPIOD_LINE_BIAS_UNKNOWN (1). </returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_request_both_edges_events(System.Device.Gpio.SafeLineHandle,System.String)">
+            <summary>
+            Request all event type notifications on a single line.
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <param name="consumer">Name of the consumer.</param>
+            <returns>0 the operation succeeds, -1 on failure.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_event_wait(System.Device.Gpio.SafeLineHandle,TimeSpec@)">
+            <summary>
+            Wait for an event on a single line.
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <param name="timeout">The TimeSpec to wait for before timing out</param>
+            <returns>0 if wait timed out, -1 if an error occurred, 1 if an event occurred.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_line_event_read(System.Device.Gpio.SafeLineHandle,GpioLineEvent@)">
+            <summary>
+            Read the last event from the GPIO line.
+            </summary>
+            <param name="line">GPIO line handle</param>
+            <param name="gpioEvent">Reference to the gpio event that was detected</param>
+            <returns>1 if rising edge event occurred, 2 on falling edge, -1 on error.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_chip_open_by_number(System.Int32)">
+            <summary>
+            Open a gpiochip by number.
+            </summary>
+            <returns>GPIO chip pointer handle or NULL if an error occurred.</returns>
+        </member>
+        <member name="M:Interop.Libgpiod.gpiod_version_string">
+            <summary>
+            Get the API version of the library as a human-readable string.
+            </summary>
+            <returns>Human-readable string containing the library version.</returns>
+        </member>
+        <member name="F:I2cSettings.I2C_FUNCS">
+            <summary>Get the adapter functionality mask.</summary>
+        </member>
+        <member name="F:I2cSettings.I2C_SLAVE_FORCE">
+            <summary>Use this replica address, even if it is already in use by a driver.</summary>
+        </member>
+        <member name="F:I2cSettings.I2C_RDWR">
+            <summary>Combined R/W transfer (one STOP only).</summary>
+        </member>
+        <member name="F:I2cSettings.I2C_SMBUS">
+            <summary>Smbus transfer.</summary>
+        </member>
+        <member name="F:I2cMessageFlags.I2C_M_WR">
+            <summary>Write data to replica.</summary>
+        </member>
+        <member name="F:I2cMessageFlags.I2C_M_RD">
+            <summary>Read data from replica.</summary>
+        </member>
+        <member name="F:SpiSettings.SPI_IOC_WR_MODE">
+            <summary>Set SPI mode.</summary>
+        </member>
+        <member name="F:SpiSettings.SPI_IOC_RD_MODE">
+            <summary>Get SPI mode.</summary>
+        </member>
+        <member name="F:SpiSettings.SPI_IOC_WR_BITS_PER_WORD">
+            <summary>Set bits per word.</summary>
+        </member>
+        <member name="F:SpiSettings.SPI_IOC_RD_BITS_PER_WORD">
+            <summary>Get bits per word.</summary>
+        </member>
+        <member name="F:SpiSettings.SPI_IOC_WR_MAX_SPEED_HZ">
+            <summary>Set max speed (Hz).</summary>
+        </member>
+        <member name="F:SpiSettings.SPI_IOC_RD_MAX_SPEED_HZ">
+            <summary>Get max speed (Hz).</summary>
+        </member>
+        <member name="T:RegisterView">
+             <summary>
+             The BCM GPIO registers expose the data/direction/interrupt/etc functionality of pins.
+             Each register is 64 bits, where each bit represents a logical register number.
+            
+             For example, writing HIGH to register 20 would translate to (registerViewPointer).GPSET[0] | (1U &lt;&lt; 20).
+             </summary>
+        </member>
+        <member name="F:RegisterView.GPFSEL">
+            <summary>GPIO Function Select, 6x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPSET">
+            <summary>GPIO Pin Output Set, 2x32 bits, W.</summary>
+        </member>
+        <member name="F:RegisterView.GPCLR">
+            <summary>GPIO Pin Output Clear, 2x32 bits, W.</summary>
+        </member>
+        <member name="F:RegisterView.GPLEV">
+            <summary>GPIO Pin Level, 2x32 bits, R.</summary>
+        </member>
+        <member name="F:RegisterView.GPEDS">
+            <summary>GPIO Pin Event Detect Status, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPREN">
+            <summary>GPIO Pin Rising Edge Detect Enable, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPFEN">
+            <summary>GPIO Pin Falling Edge Detect Enable, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPHEN">
+            <summary>GPIO Pin High Detect Enable, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPLEN">
+            <summary>GPIO Pin Low Detect Enable, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPAREN">
+            <summary>GPIO Pin Async. Rising Edge Detect, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPAFEN">
+            <summary>GPIO Pin Async. Falling Edge Detect, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPPUD">
+            <summary>GPIO Pin Pull-up/down Enable, 32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPPUDCLK">
+            <summary>GPIO Pin Pull-up/down Enable Clock, 2x32 bits, R/W.</summary>
+        </member>
+        <member name="F:RegisterView.GPPUPPDN">
+            <summary>Pull-up/down Enable on the BCM2711, 4x32 bits, R/W (2 bits per Pin)</summary>
+        </member>
+        <member name="T:System.Device.Gpio.SafeChipHandle">
+            <summary>
+            Pointer to a general-purpose I/O (GPIO) chip.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.SafeChipIteratorHandle">
+            <summary>
+            Pointer to an iterator of all GPIO chips available on the device.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.SafeLineHandle">
+            <summary>
+            Pointer to a pin.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.SafeLineHandle.ReleaseLock">
+            <summary>
+            Release the lock on the line handle. <see cref="M:Interop.Libgpiod.gpiod_line_release(System.IntPtr)"/>
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.HummingBoardDriver">
+            <summary>
+            A GPIO driver for the HummingBoard.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.HummingBoardDriver._internalDriver">
+            <summary>
+            We can't have HummingBoardDriver inherit from Windows10Driver since that would cause issues
+            when we decide to implement the driver on Linux. Having an internal driver instead that we
+            will forward the calls for now.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.#ctor">
+            <summary>
+            Constructs a new instance of a <see cref="T:System.Device.Gpio.Drivers.HummingBoardDriver"/>.
+            This is currently only supported on Windows.
+            </summary>
+            <exception cref="T:System.PlatformNotSupportedException">The current operating system is not Windows</exception>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.HummingBoardDriver.PinCount">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.AddCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.ClosePin(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <summary>
+            Converts a board pin number to the driver's logical numbering scheme.
+            </summary>
+            <param name="pinNumber">The board pin number to convert.</param>
+            <returns>The pin number in the driver's logical numbering scheme.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.GetPinMode(System.Int32)">
+            <summary>
+            Gets the mode of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <returns>The mode of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.OpenPin(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.Read(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.RemoveCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode,System.Device.Gpio.PinValue)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.WaitForEventAsync(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.HummingBoardDriver.Dispose(System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.InterruptSysFsDriver">
+            <summary>
+            This overrides the SysFsDriver, when only the interrupt callback methods are required.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.LibGpiodDriver">
+            <summary>
+            This driver uses the Libgpiod library to get user-level access to the gpio ports.
+            It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
+            "sudo apt install -y libgpiod-dev".
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.LibGpiodDriver.PinCount">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.#ctor(System.Int32)">
+            <summary>
+            Construct an instance
+            </summary>
+            <param name="gpioChip">Number of the gpio Chip. Default 0</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.AddCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.ClosePin(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.GetPinMode(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.OpenPin(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.Read(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.Toggle(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.RemoveCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode,System.Device.Gpio.PinValue)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.QueryComponentInformation">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.LibGpiodDriver.Dispose(System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.RaspberryPi3Driver">
+            <summary>
+            A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode">
+            <summary>
+            Used to set the Alternate Pin Mode on Raspberry Pi 3/4.
+            The actual pin function for anything other than Input or Output is dependent
+            on the pin and can be looked up in the Raspi manual.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Unknown">
+            <summary>
+            The mode is unknown
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Input">
+            <summary>
+            Gpio mode input
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Output">
+            <summary>
+            Gpio mode output
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Alt0">
+            <summary>
+            Mode ALT0
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Alt1">
+            <summary>
+            Mode ALT1
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Alt2">
+            <summary>
+            Mode ALT2
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Alt3">
+            <summary>
+            Mode ALT3
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Alt4">
+            <summary>
+            Mode ALT4
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode.Alt5">
+            <summary>
+            Mode ALT5
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.#ctor">
+            <summary>
+            Creates an instance of the RaspberryPi3Driver.
+            This driver works on Raspberry 3 or 4, both on Linux and on Windows
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.RaspberryPi3Driver.AlternatePinModeSettingSupported">
+            <summary>
+            True if the driver supports <see cref="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.SetAlternatePinMode(System.Int32,System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode)"/> and <see cref="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.GetAlternatePinMode(System.Int32)"/>.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.RaspberryPi3Driver.PinCount">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.AddCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.ClosePin(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.GetPinMode(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.OpenPin(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.Read(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.Toggle(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.RemoveCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.SetPinMode(System.Int32,System.Device.Gpio.PinMode,System.Device.Gpio.PinValue)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.WaitForEventAsync(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.GetAlternatePinMode(System.Int32)">
+            <summary>
+            Retrieve the current alternate pin mode for a given logical pin.
+            This works also with closed pins.
+            </summary>
+            <param name="pinNumber">Pin number in the logical scheme of the driver</param>
+            <returns>Current pin mode</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.SetAlternatePinMode(System.Int32,System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode)">
+            <summary>
+            Set the specified alternate mode for the given pin.
+            Check the manual to know what each pin can do.
+            </summary>
+            <param name="pinNumber">Pin number in the logcal scheme of the driver</param>
+            <param name="altPinMode">Alternate mode to set</param>
+            <exception cref="T:System.NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
+            <remarks>The method is intended for usage by higher-level abstraction interfaces. User code should be very careful when using this method.</remarks>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.RaspberryPi3Driver.SetRegister">
+            <summary>
+            Allows directly setting the "Set pin high" register. Used for special applications only
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.RaspberryPi3Driver.ClearRegister">
+            <summary>
+            Allows directly setting the "Set pin low" register. Used for special applications only
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.Dispose(System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3Driver.QueryComponentInformation">
+            <inheritdoc />
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver">
+            <summary>
+            A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.PinCount">
+            <summary>
+            Raspberry Pi 3 has 28 GPIO pins.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.IsPi4">
+            <summary>
+            Returns true if this is a Raspberry Pi4
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <summary>
+            Converts a board pin number to the driver's logical numbering scheme.
+            </summary>
+            <param name="pinNumber">The board pin number to convert.</param>
+            <returns>The pin number in the driver's logical numbering scheme.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.AddCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Adds a handler for a pin value changed event.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.ClosePin(System.Int32)">
+            <summary>
+            Closes an open pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Checks if a pin supports a specific mode.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode to check.</param>
+            <returns>The status if the pin supports the mode.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.OpenPin(System.Int32)">
+            <summary>
+            Opens a pin in order for it to be ready to use.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.Read(System.Int32)">
+            <summary>
+            Reads the current value of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <returns>The value of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.Toggle(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.RemoveCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Removes a handler for a pin value changed event.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Sets the mode to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode to be set.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.GetPinModeFromHardware(System.Int32)">
+            <summary>
+            Gets the pin mode directly from the hardware. Assumes that its in a valid GPIO mode
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.SetInputPullMode(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Sets the resistor pull up/down mode for an input pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.SetInputPullModePi4(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Sets the resistor pull up/down mode for an input pin on the Raspberry Pi4.
+            The above, complex method doesn't do anything on a Pi4 (it doesn't cause any harm, though)
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode of a pin to set the resistor pull up/down mode.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.SetAlternatePinMode(System.Int32,System.Device.Gpio.Drivers.RaspberryPi3Driver.AltMode)">
+            <summary>
+            Set the specified alternate mode for the given pin.
+            Check the manual to know what each pin can do.
+            </summary>
+            <param name="pinNumber">Pin number in the logcal scheme of the driver</param>
+            <param name="altPinMode">Alternate mode to set</param>
+            <exception cref="T:System.NotSupportedException">This mode is not supported by this driver (or by the given pin)</exception>
+            <remarks>The method is intended for usage by higher-level abstraction interfaces. User code should be very careful when using this method.</remarks>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.GetAlternatePinMode(System.Int32)">
+            <summary>
+            Retrieve the current alternate pin mode for a given logical pin.
+            This works also with closed pins.
+            </summary>
+            <param name="pinNumber">Pin number in the logical scheme of the driver</param>
+            <returns>Current pin mode</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <summary>
+            Blocks execution until an event of type eventType is received or a cancellation is requested.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+            <returns>A structure that contains the result of the waiting operation.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.WaitForEventAsync(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <summary>
+            Async call until an event of type eventType is received or a cancellation is requested.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+            <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Writes a value to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="value">The value to be written to the pin.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.GetPeripheralBaseAddress">
+            <summary>
+            Returns the peripheral base address on the CPU bus of the raspberry pi based on the ranges set within the device tree.
+            </summary>
+            <remarks>
+            The range examined in this method is essentially a mapping between where the peripheral base address on the videocore bus and its
+            address on the cpu bus. The return value is 32bit (is in the first 4GB) even on 64 bit operating systems (debian / ubuntu tested) but may change in the future
+            This method is based on bcm_host_get_peripheral_address() in libbcm_host which may not exist in all linux distributions.
+            </remarks>
+            <returns>This returns the peripheral base address as a 32 bit address or 0xFFFFFFFF when in error.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.GetPinMode(System.Int32)">
+            <summary>
+            Gets the mode of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <returns>The mode of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPi3LinuxDriver.QueryComponentInformation">
+            <inheritdoc />
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.RaspberryPiCm3Driver">
+            <summary>
+            A GPIO driver for the Raspberry Pi Compute Module 3
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.RaspberryPiCm3Driver.PinCount">
+            <summary>
+            Raspberry CM3 has 48 GPIO pins.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.RaspberryPiCm3Driver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <summary>
+            Converts a board pin number to the driver's logical numbering scheme.
+            </summary>
+            <param name="pinNumber">The board pin number to convert.</param>
+            <returns>The pin number in the driver's logical numbering scheme.</returns>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.SysFsDriver">
+            <summary>
+            A GPIO driver for Unix.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.Drivers.SysFsDriver"/> class.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.SysFsDriver.StatusUpdateSleepTime">
+            <summary>
+            The sleep time after an event occured and before the new value is read.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.SysFsDriver.PinCount">
+            <summary>
+            The number of pins provided by the driver.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <summary>
+            Converts a board pin number to the driver's logical numbering scheme.
+            </summary>
+            <param name="pinNumber">The board pin number to convert.</param>
+            <returns>The pin number in the driver's logical numbering scheme.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.OpenPin(System.Int32)">
+            <summary>
+            Opens a pin in order for it to be ready to use.
+            This retains the pin direction, but if it is output, the value will always be low after open.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.ClosePin(System.Int32)">
+            <summary>
+            Closes an open pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Sets the mode to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode to be set.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.Read(System.Int32)">
+            <summary>
+            Reads the current value of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <returns>The value of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.Toggle(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Writes a value to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="value">The value to be written to the pin.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Checks if a pin supports a specific mode.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode to check.</param>
+            <returns>The status if the pin supports the mode.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <summary>
+            Blocks execution until an event of type eventType is received or a cancellation is requested.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for. Can be <see cref="F:System.Device.Gpio.PinEventTypes.Rising"/>, <see cref="F:System.Device.Gpio.PinEventTypes.Falling"/> or both.</param>
+            <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+            <returns>A structure that contains the result of the waiting operation.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.Dispose(System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.AddCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Adds a handler for a pin value changed event.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.RemoveCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Removes a handler for a pin value changed event.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.SysFsDriver.GetPinMode(System.Int32)">
+            <summary>
+            Gets the mode of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <returns>The mode of the pin.</returns>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.UnixDriver">
+            <summary>
+            The base class for the standard unix drivers
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.UnixDriver.#ctor">
+            <summary>
+            Construct an instance of an unix driver.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.UnixDriver.Create">
+            <summary>
+            Static factory method
+            </summary>
+            <returns>An instance of GpioDriver, depending on which one fits</returns>
+        </member>
+        <member name="T:System.Device.Gpio.Drivers.Windows10Driver">
+            <summary>
+            A GPIO driver for Windows 10 IoT.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.Drivers.Windows10Driver"/> class.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.Drivers.Windows10Driver.PinCount">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.AddCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.ClosePin(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.GetPinMode(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.OpenPin(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.Read(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.Toggle(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.RemoveCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.Drivers.Windows10Driver.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <inheritdoc />
+        </member>
+        <member name="T:System.Device.Gpio.GpioController">
+            <summary>
+            Represents a general-purpose I/O (GPIO) controller.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.GpioController._openPins">
+            <summary>
+            If a pin element exists, that pin is open. Uses current controller's numbering scheme
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.#ctor">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.GpioController"/> class that will use the logical pin numbering scheme as default.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.#ctor(System.Device.Gpio.PinNumberingScheme,System.Device.Gpio.GpioDriver)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.GpioController"/> class that will use the specified numbering scheme and driver.
+            </summary>
+            <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
+            <param name="driver">The driver that manages all of the pin operations for the controller.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.#ctor(System.Device.Gpio.PinNumberingScheme)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.GpioController"/> class that will use the specified numbering scheme.
+            The controller will default to use the driver that best applies given the platform the program is executing on.
+            </summary>
+            <param name="numberingScheme">The numbering scheme used to represent pins provided by the controller.</param>
+        </member>
+        <member name="P:System.Device.Gpio.GpioController.NumberingScheme">
+            <summary>
+            The numbering scheme used to represent pins provided by the controller.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.GpioController.PinCount">
+            <summary>
+            The number of pins provided by the controller.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.GpioController.OpenPins">
+            <summary>
+            Returns the collection of open pins
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.GetLogicalPinNumber(System.Int32)">
+            <summary>
+            Gets the logical pin number in the controller's numbering scheme.
+            </summary>
+            <param name="pinNumber">The pin number</param>
+            <returns>The logical pin number in the controller's numbering scheme.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.OpenPin(System.Int32)">
+            <summary>
+            Opens a pin in order for it to be ready to use.
+            The driver attempts to open the pin without changing its mode or value.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.OpenPinCore(System.Int32)">
+            <summary>
+            Opens a pin in order for it to be ready to use.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.OpenPin(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Opens a pin and sets it to a specific mode.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="mode">The mode to be set.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.OpenPin(System.Int32,System.Device.Gpio.PinMode,System.Device.Gpio.PinValue)">
+            <summary>
+            Opens a pin and sets it to a specific mode and value.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="mode">The mode to be set.</param>
+            <param name="initialValue">The initial value to be set if the mode is output. The driver will attempt to set the mode without causing glitches to the other value.
+            (if <paramref name="initialValue"/> is <see cref="P:System.Device.Gpio.PinValue.High"/>, the pin should not glitch to low during open)</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.ClosePin(System.Int32)">
+            <summary>
+            Closes an open pin.
+            If allowed by the driver, the state of the pin is not changed.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.ClosePinCore(System.Int32)">
+            <summary>
+            Closes an open pin.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Sets the mode to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="mode">The mode to be set.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.GetPinMode(System.Int32)">
+            <summary>
+            Gets the mode of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <returns>The mode of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.IsPinOpen(System.Int32)">
+            <summary>
+            Checks if a specific pin is open.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <returns>The status if the pin is open or closed.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Checks if a pin supports a specific mode.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="mode">The mode to check.</param>
+            <returns>The status if the pin supports the mode.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.Read(System.Int32)">
+            <summary>
+            Reads the current value of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <returns>The value of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.Toggle(System.Int32)">
+            <summary>
+            Toggle the current value of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Writes a value to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="value">The value to be written to the pin.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.TimeSpan)">
+            <summary>
+            Blocks execution until an event of type eventType is received or a period of time has expired.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="timeout">The time to wait for the event.</param>
+            <returns>A structure that contains the result of the waiting operation.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <summary>
+            Blocks execution until an event of type eventType is received or a cancellation is requested.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+            <returns>A structure that contains the result of the waiting operation.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.WaitForEventAsync(System.Int32,System.Device.Gpio.PinEventTypes,System.TimeSpan)">
+            <summary>
+            Async call to wait until an event of type eventType is received or a period of time has expired.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="timeout">The time to wait for the event.</param>
+            <returns>A task representing the operation of getting the structure that contains the result of the waiting operation.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.WaitForEventAsync(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <summary>
+            Async call until an event of type eventType is received or a cancellation is requested.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="token">The cancellation token of when the operation should stop waiting for an event.</param>
+            <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.RegisterCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Adds a callback that will be invoked when pinNumber has an event of type eventType.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="callback">The callback method that will be invoked.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.UnregisterCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Removes a callback that was being invoked for pin at pinNumber.
+            </summary>
+            <param name="pinNumber">The pin number in the controller's numbering scheme.</param>
+            <param name="callback">The callback method that will be invoked.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance and closes all open pins associated with this controller.
+            </summary>
+            <param name="disposing">True to dispose all instances, false to dispose only unmanaged resources</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.Dispose">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.Write(System.ReadOnlySpan{System.Device.Gpio.PinValuePair})">
+            <summary>
+            Write the given pins with the given values.
+            </summary>
+            <param name="pinValuePairs">The pin/value pairs to write.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.Read(System.Span{System.Device.Gpio.PinValuePair})">
+            <summary>
+            Read the given pins with the given pin numbers.
+            </summary>
+            <param name="pinValuePairs">The pin/value pairs to read.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.GetBestDriverForBoard">
+            <summary>
+            Tries to create the GPIO driver that best matches the current hardware
+            </summary>
+            <returns>An instance of a GpioDriver that best matches the current hardware</returns>
+            <exception cref="T:System.PlatformNotSupportedException">No matching driver could be found</exception>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.GetBestDriverForBoardOnLinux">
+            <summary>
+            Attempt to get the best applicable driver for the board the program is executing on.
+            </summary>
+            <returns>A driver that works with the board the program is executing on.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.GetBestDriverForBoardOnWindows">
+            <summary>
+            Attempt to get the best applicable driver for the board the program is executing on.
+            </summary>
+            <returns>A driver that works with the board the program is executing on.</returns>
+            <remarks>
+                This really feels like it needs a driver-based pattern, where each driver exposes a static method:
+                public static bool IsSpecificToCurrentEnvironment { get; }
+                The GpioController could use reflection to find all GpioDriver-derived classes and call this
+                static method to determine if the driver considers itself to be the best match for the environment.
+            </remarks>
+        </member>
+        <member name="M:System.Device.Gpio.GpioController.QueryComponentInformation">
+            <summary>
+            Query information about a component and its children.
+            </summary>
+            <returns>A tree of <see cref="T:System.Device.ComponentInformation"/> instances.</returns>
+            <remarks>
+            The returned data structure (or rather, its string representation) can be used to diagnose problems with incorrect driver types or
+            other system configuration problems.
+            This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+            </remarks>
+        </member>
+        <member name="T:System.Device.Gpio.GpioDriver">
+            <summary>
+            Base class for Gpio Drivers.
+            A Gpio driver provides methods to read from and write to digital I/O pins.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.GpioDriver.PinCount">
+            <summary>
+            The number of pins provided by the driver.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.ConvertPinNumberToLogicalNumberingScheme(System.Int32)">
+            <summary>
+            Converts a board pin number to the driver's logical numbering scheme.
+            </summary>
+            <param name="pinNumber">The board pin number to convert.</param>
+            <returns>The pin number in the driver's logical numbering scheme.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.OpenPin(System.Int32)">
+            <summary>
+            Opens a pin in order for it to be ready to use.
+            The driver attempts to open the pin without changing its mode or value.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.ClosePin(System.Int32)">
+            <summary>
+            Closes an open pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Sets the mode to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode to be set.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.SetPinMode(System.Int32,System.Device.Gpio.PinMode,System.Device.Gpio.PinValue)">
+            <summary>
+            Sets the mode to a pin and sets an initial value for an output pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode to be set.</param>
+            <param name="initialValue">The initial value if the <paramref name="mode"/> is output. The driver will do it's best to prevent glitches to the other value when
+            changing from input to output.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.GetPinMode(System.Int32)">
+            <summary>
+            Gets the mode of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <returns>The mode of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.IsPinModeSupported(System.Int32,System.Device.Gpio.PinMode)">
+            <summary>
+            Checks if a pin supports a specific mode.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="mode">The mode to check.</param>
+            <returns>The status if the pin supports the mode.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.Read(System.Int32)">
+            <summary>
+            Reads the current value of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <returns>The value of the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.Toggle(System.Int32)">
+            <summary>
+            Toggle the current value of a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.Write(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Writes a value to a pin.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="value">The value to be written to the pin.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.WaitForEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <summary>
+            Blocks execution until an event of type eventType is received or a cancellation is requested.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+            <returns>A structure that contains the result of the waiting operation.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.WaitForEventAsync(System.Int32,System.Device.Gpio.PinEventTypes,System.Threading.CancellationToken)">
+            <summary>
+            Async call until an event of type eventType is received or a cancellation is requested.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="cancellationToken">The cancellation token of when the operation should stop waiting for an event.</param>
+            <returns>A task representing the operation of getting the structure that contains the result of the waiting operation</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.AddCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinEventTypes,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Adds a handler for a pin value changed event.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="eventTypes">The event types to wait for.</param>
+            <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.RemoveCallbackForPinValueChangedEvent(System.Int32,System.Device.Gpio.PinChangeEventHandler)">
+            <summary>
+            Removes a handler for a pin value changed event.
+            </summary>
+            <param name="pinNumber">The pin number in the driver's logical numbering scheme.</param>
+            <param name="callback">Delegate that defines the structure for callbacks when a pin value changed event occurs.</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.Dispose">
+            <summary>
+            Disposes this instance, closing all open pins
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance
+            </summary>
+            <param name="disposing">True if explicitly disposing, false if in finalizer</param>
+        </member>
+        <member name="M:System.Device.Gpio.GpioDriver.QueryComponentInformation">
+            <summary>
+            Query information about a component and its children.
+            </summary>
+            <returns>A tree of <see cref="T:System.Device.ComponentInformation"/> instances.</returns>
+            <remarks>
+            The returned data structure (or rather, its string representation) can be used to diagnose problems with incorrect driver types or
+            other system configuration problems.
+            This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+            </remarks>
+        </member>
+        <member name="T:System.Device.Gpio.GpioPin">
+            <summary>
+            Represents a general-purpose I/O (GPIO) pin.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.GpioPin.PinNumber">
+            <summary>
+            Gets the pin number of the general-purpose I/O (GPIO) pin.
+            </summary>
+            <value>
+            The pin number of the GPIO pin.
+            </value>
+        </member>
+        <member name="M:System.Device.Gpio.GpioPin.GetPinMode">
+            <summary>
+            Gets the current pin mode for the general-purpose I/O (GPIO) pin. The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.
+            </summary>
+            <returns>An enumeration value that indicates the current pin mode for the GPIO pin.
+            The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioPin.IsPinModeSupported(System.Device.Gpio.PinMode)">
+            <summary>
+            Gets whether the general-purpose I/O (GPIO) pin supports the specified pin mode.
+            </summary>
+            <param name="pinMode">The pin mode that you want to check for support.</param>
+            <returns>
+            <see langword="true"/> if the GPIO pin supports the pin mode that pinMode specifies; otherwise false.
+            If you specify a pin mode for which this method returns <see langword="false"/> when you call <see cref="M:System.Device.Gpio.GpioPin.SetPinMode(System.Device.Gpio.PinMode)"/>, <see cref="M:System.Device.Gpio.GpioPin.SetPinMode(System.Device.Gpio.PinMode)"/> generates an exception.
+            </returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioPin.SetPinMode(System.Device.Gpio.PinMode)">
+            <summary>
+            Sets the pin mode of the general-purpose I/O (GPIO) pin.
+            The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.
+            </summary>
+            <param name="value">An enumeration value that specifies pin mode to use for the GPIO pin.
+            The pin mode specifies whether the pin is configured as an input or an output, and determines how values are driven onto the pin.</param>
+            <exception cref="T:System.ArgumentException">The GPIO pin does not support the specified pin mode.</exception>
+        </member>
+        <member name="M:System.Device.Gpio.GpioPin.Read">
+            <summary>
+            Reads the current value of the general-purpose I/O (GPIO) pin.
+            </summary>
+            <returns>The current value of the GPIO pin. If the pin is configured as an output, this value is the last value written to the pin.</returns>
+        </member>
+        <member name="M:System.Device.Gpio.GpioPin.Write(System.Device.Gpio.PinValue)">
+            <summary>
+            Drives the specified value onto the general purpose I/O (GPIO) pin according to the current pin mode for the pin
+            if the pin is configured as an output, or updates the latched output value for the pin if the pin is configured as an input.
+            </summary>
+            <param name="value">The enumeration value to write to the GPIO pin.
+            <para>If the GPIO pin is configured as an output, the method drives the specified value onto the pin according to the current pin mode for the pin.</para>
+            <para>If the GPIO pin is configured as an input, the method updates the latched output value for the pin. The latched output value is driven onto the pin when the configuration for the pin changes to output.</para>
+            </param>
+            <exception cref="T:System.InvalidOperationException">This exception will be thrown on an attempt to write to a pin that hasn't been opened or is not configured as output.</exception>
+        </member>
+        <member name="E:System.Device.Gpio.GpioPin.ValueChanged">
+            <summary>
+            Occurs when the value of the general-purpose I/O (GPIO) pin changes, either because of an external stimulus when the pin is configured as an input, or when a value is written to the pin when the pin in configured as an output.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.GpioPin.Toggle">
+            <summary>
+            Toggles the output of the general purpose I/O (GPIO) pin if the pin is configured as an output.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.PinChangeEventHandler">
+            <summary>
+            Delegate that defines the structure for callbacks when a pin value changed event occurs.
+            </summary>
+            <param name="sender">The sender of the event.</param>
+            <param name="pinValueChangedEventArgs">The pin value changed arguments from the event.</param>
+        </member>
+        <member name="T:System.Device.Gpio.PinEventTypes">
+            <summary>
+            Event types that can be triggered by the GPIO.
+            Also used to report the received event types back.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinEventTypes.None">
+            <summary>
+            None.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinEventTypes.Rising">
+            <summary>
+            Triggered when pin value goes from low to high.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinEventTypes.Falling">
+            <summary>
+            Triggered when a pin value goes from high to low.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.PinMode">
+            <summary>
+            Pin modes supported by the GPIO controllers and drivers.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinMode.Input">
+            <summary>
+            Input used for reading values from a pin.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinMode.Output">
+            <summary>
+            Output used for writing values to a pin.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinMode.InputPullDown">
+            <summary>
+            Input using a pull-down resistor.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinMode.InputPullUp">
+            <summary>
+            Input using a pull-up resistor.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.PinNumberingScheme">
+            <summary>
+            Different numbering schemes supported by GPIO controllers and drivers.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinNumberingScheme.Logical">
+            <summary>
+            The logical representation of the GPIOs. Refer to the microcontroller's datasheet to find this information.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.PinNumberingScheme.Board">
+            <summary>
+            The physical pin numbering that is usually accessible by the board headers.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.PinValue">
+            <summary>
+            Represents a value for a pin.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinValue.High">
+            <summary>
+            The value of the pin is high.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinValue.Low">
+            <summary>
+            The value of the pin is low.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_Implicit(System.Int32)~System.Device.Gpio.PinValue">
+            <summary>
+            Implicit conversion from int. 0 means <see cref="P:System.Device.Gpio.PinValue.Low"/>, everything else means <see cref="P:System.Device.Gpio.PinValue.High"/>.
+            </summary>
+            <param name="value">Value to set</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_Implicit(System.Boolean)~System.Device.Gpio.PinValue">
+            <summary>
+            Implicit conversion from bool. <see langword="false"/> means <see cref="P:System.Device.Gpio.PinValue.Low"/>, <see langword="true"/> means <see cref="P:System.Device.Gpio.PinValue.High"/>
+            </summary>
+            <param name="value">Value to set</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_Explicit(System.Device.Gpio.PinValue)~System.Byte">
+            <summary>
+            Conversion to byte. Returns 1 on <see cref="P:System.Device.Gpio.PinValue.High"/>, 0 on <see cref="P:System.Device.Gpio.PinValue.Low"/>
+            </summary>
+            <param name="value">PinValue to convert</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_Explicit(System.Device.Gpio.PinValue)~System.Int32">
+            <summary>
+            Conversion to int. Returns 1 on <see cref="P:System.Device.Gpio.PinValue.High"/>, 0 on <see cref="P:System.Device.Gpio.PinValue.Low"/>
+            </summary>
+            <param name="value">PinValue to convert</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_Explicit(System.Device.Gpio.PinValue)~System.Boolean">
+            <summary>
+            Conversion to byte. Returns <see langword="true"/> on <see cref="P:System.Device.Gpio.PinValue.High"/>, <see langword="false"/> on <see cref="P:System.Device.Gpio.PinValue.Low"/>
+            </summary>
+            <param name="value">PinValue to convert</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.Equals(System.Device.Gpio.PinValue)">
+            <summary>
+            Returns true if the other instance represents the same <see cref="T:System.Device.Gpio.PinValue"/> than this.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.Equals(System.Object)">
+            <inheritdoc cref="M:System.ValueType.Equals(System.Object)"/>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_Equality(System.Device.Gpio.PinValue,System.Device.Gpio.PinValue)">
+            <summary>
+            Equality operator
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_Inequality(System.Device.Gpio.PinValue,System.Device.Gpio.PinValue)">
+            <summary>
+            Inequality operator
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.op_LogicalNot(System.Device.Gpio.PinValue)">
+            <summary>
+            Returns the inverse of the value
+            </summary>
+            <param name="v">Input value</param>
+            <returns>High, when the input is low, low when the input is high</returns>
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:System.Device.Gpio.PinValue.ToString">
+            <summary>
+            Returns "Low" for Low and "High" for High
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.PinValueChangedEventArgs">
+            <summary>
+            Arguments passed in when an event is triggered by the GPIO.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinValueChangedEventArgs.#ctor(System.Device.Gpio.PinEventTypes,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.PinValueChangedEventArgs"/> class.
+            </summary>
+            <param name="changeType">The change type that triggered the event.</param>
+            <param name="pinNumber">The pin number that triggered the event.</param>
+        </member>
+        <member name="P:System.Device.Gpio.PinValueChangedEventArgs.ChangeType">
+            <summary>
+            The change type that triggered the event.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinValueChangedEventArgs.PinNumber">
+            <summary>
+            The pin number that triggered the event.
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.PinValuePair">
+            <summary>
+            Simple wrapper for a pin/value pair.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinValuePair.PinNumber">
+            <summary>
+            The pin number.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.PinValuePair.PinValue">
+            <summary>
+            The pin value.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.PinValuePair.#ctor(System.Int32,System.Device.Gpio.PinValue)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Gpio.PinValuePair"/> struct.
+            </summary>
+            <param name="pinNumber">The pin number.</param>
+            <param name="pinValue">The pin value.</param>
+        </member>
+        <member name="M:System.Device.Gpio.PinValuePair.Deconstruct(System.Int32@,System.Device.Gpio.PinValue@)">
+            <summary>
+            Deconstructor for convenience. Allows using as a "return Tuple".
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.RaspberryBoardInfo">
+            <summary>
+            Identification of Raspberry Pi board models
+            </summary>
+        </member>
+        <member name="T:System.Device.Gpio.RaspberryBoardInfo.Model">
+            <summary>
+            The Raspberry Pi model.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.Unknown">
+            <summary>
+            Unknown model.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiA">
+            <summary>
+            Raspberry Model A.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiAPlus">
+            <summary>
+            Model A+.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiBRev1">
+            <summary>
+            Model B rev1.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiBRev2">
+            <summary>
+            Model B rev2.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiBPlus">
+            <summary>
+            Model B+.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiComputeModule">
+            <summary>
+            Compute module.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPi2B">
+            <summary>
+            Pi 2 Model B.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiZero">
+            <summary>
+            Pi Zero.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiZeroW">
+            <summary>
+            Pi Zero W.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiZero2W">
+            <summary>
+            Pi Zero 2 W.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPi3B">
+            <summary>
+            Pi 3 Model B.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPi3APlus">
+            <summary>
+            Pi 3 Model A+.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPi3BPlus">
+            <summary>
+            Pi 3 Model B+.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiComputeModule3">
+            <summary>
+            Compute module 3.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPi4">
+            <summary>
+            Pi 4 all versions.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPi400">
+            <summary>
+            Pi 400
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.RaspberryBoardInfo.Model.RaspberryPiComputeModule4">
+            <summary>
+            Compute module 4.
+            </summary>
+        </member>
+        <member name="M:System.Device.Gpio.RaspberryBoardInfo.GetBoardModel">
+            <summary>
+            Get board model from firmware revision
+            See http://www.raspberrypi-spy.co.uk/2012/09/checking-your-raspberry-pi-board-version/ for information.
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="P:System.Device.Gpio.RaspberryBoardInfo.ProcessorName">
+            <summary>
+            Gets the processor name.
+            </summary>
+            <value>
+            The name of the processor.
+            </value>
+        </member>
+        <member name="P:System.Device.Gpio.RaspberryBoardInfo.Firmware">
+            <summary>
+            Gets the board firmware version.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.RaspberryBoardInfo.SerialNumber">
+            <summary>
+            Gets the serial number.
+            </summary>
+        </member>
+        <member name="P:System.Device.Gpio.RaspberryBoardInfo.IsOverclocked">
+            <summary>
+            Gets a value indicating whether board is overclocked.
+            </summary>
+            <value>
+              <c>true</c> if board is overclocked; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="M:System.Device.Gpio.RaspberryBoardInfo.LoadBoardInfo">
+            <summary>
+            Detect the board CPU information from /proc/cpuinfo
+            </summary>
+            <returns>
+            The <see cref="T:System.Device.Gpio.RaspberryBoardInfo"/>.
+            </returns>
+        </member>
+        <member name="T:System.Device.Gpio.WaitForEventResult">
+            <summary>
+            Resulting object after waiting for an event to occur.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.WaitForEventResult.EventTypes">
+            <summary>
+            The event types that was detected.
+            This is especially useful when listing to both rising and falling edges, where it will indicate which kind of edge was seen.
+            </summary>
+        </member>
+        <member name="F:System.Device.Gpio.WaitForEventResult.TimedOut">
+            <summary>
+            True if waiting for the event timed out. False if an event was triggered before the timeout expired.
+            </summary>
+        </member>
+        <member name="T:System.Device.ComponentInformation">
+            <summary>
+            A class to provide informational data about system components and active drivers and bindings.
+            An instance of this class is typically obtained by calling QueryComponentInformation on any supported object.
+            The structure represents a tree of connected devices, e.g. a controller and its associated drivers.
+            </summary>
+            <remarks>
+            This class is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+            </remarks>
+        </member>
+        <member name="M:System.Device.ComponentInformation.#ctor(System.Object,System.String)">
+            <summary>
+            Create a new instance of <see cref="T:System.Device.ComponentInformation"/>
+            </summary>
+            <param name="instance">The instance this information belongs to</param>
+            <param name="description">An user-readable name for the object</param>
+        </member>
+        <member name="P:System.Device.ComponentInformation.Name">
+            <summary>
+            The name of the type this instance represents.
+            </summary>
+        </member>
+        <member name="P:System.Device.ComponentInformation.Instance">
+            <summary>
+            The actual instance represented.
+            This should only be used for querying information, not for operations on the object.
+            </summary>
+        </member>
+        <member name="P:System.Device.ComponentInformation.Description">
+            <summary>
+            The user-friendly name of the object
+            </summary>
+        </member>
+        <member name="P:System.Device.ComponentInformation.Properties">
+            <summary>
+            A list of additional properties that belong to this object.
+            </summary>
+        </member>
+        <member name="P:System.Device.ComponentInformation.SubComponents">
+            <summary>
+            The list of subcomponents.
+            </summary>
+            <remarks>
+            Note to implementors: Be careful not to generate cycles in the tree!
+            </remarks>
+        </member>
+        <member name="M:System.Device.ComponentInformation.AddSubComponent(System.Device.ComponentInformation)">
+            <summary>
+            Adds another component as subcomponent of this one
+            </summary>
+            <param name="subComponent">Component to add</param>
+            <exception cref="T:System.ArgumentNullException">The component to add is null.</exception>
+        </member>
+        <member name="M:System.Device.ComponentInformation.SubComponentsToString(System.Text.StringBuilder,System.Int32)">
+            <summary>
+            Provides the string representation of all sub-components
+            </summary>
+            <param name="output">The stringbuilder to extend</param>
+            <param name="ident">The level of current ident</param>
+        </member>
+        <member name="M:System.Device.ComponentInformation.ToString">
+            <summary>
+            Creates a string representation of this object.
+            </summary>
+            <returns>A multi-line string in form of a tree.</returns>
+        </member>
+        <member name="T:System.Device.I2c.I2cBus">
+            <summary>
+            I2C bus communication channel.
+            </summary>
+            <summary>
+            The communications channel to a device on an I2C bus.
+            </summary>
+        </member>
+        <member name="M:System.Device.I2c.I2cBus.Create(System.Int32)">
+            <summary>
+            Creates default I2cBus
+            </summary>
+            <param name="busId">The bus ID.</param>
+            <returns>I2cBus instance.</returns>
+        </member>
+        <member name="M:System.Device.I2c.I2cBus.CreateDevice(System.Int32)">
+            <summary>
+            Creates I2C device.
+            </summary>
+            <param name="deviceAddress">Device address related with the device to create.</param>
+            <returns>I2cDevice instance.</returns>
+        </member>
+        <member name="M:System.Device.I2c.I2cBus.RemoveDevice(System.Int32)">
+            <summary>
+            Removes I2C device.
+            </summary>
+            <param name="deviceAddress">Device address to remove.</param>
+        </member>
+        <member name="M:System.Device.I2c.I2cBus.Dispose">
+            <inheritdoc cref="M:System.IDisposable.Dispose"/>
+        </member>
+        <member name="M:System.Device.I2c.I2cBus.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance
+            </summary>
+            <param name="disposing"><see langword="true"/> if explicitly disposing, <see langword="false"/> if in finalizer</param>
+        </member>
+        <member name="M:System.Device.I2c.I2cBus.QueryComponentInformation">
+            <summary>
+            Query information about a component and it's children.
+            </summary>
+            <returns>A tree of <see cref="T:System.Device.ComponentInformation"/> instances.</returns>
+            <remarks>
+            This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+            </remarks>
+        </member>
+        <member name="T:System.Device.I2c.I2cConnectionSettings">
+            <summary>
+            The connection settings of a device on an I2C bus.
+            </summary>
+        </member>
+        <member name="M:System.Device.I2c.I2cConnectionSettings.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.I2c.I2cConnectionSettings"/> class.
+            </summary>
+            <param name="busId">The bus ID the I2C device is connected to.</param>
+            <param name="deviceAddress">The bus address of the I2C device.</param>
+        </member>
+        <member name="P:System.Device.I2c.I2cConnectionSettings.BusId">
+            <summary>
+            The bus ID the I2C device is connected to.
+            </summary>
+        </member>
+        <member name="P:System.Device.I2c.I2cConnectionSettings.DeviceAddress">
+            <summary>
+            The bus address of the I2C device.
+            </summary>
+        </member>
+        <member name="T:System.Device.I2c.I2cDevice">
+            <summary>
+            The communications channel to a device on an I2C bus.
+            </summary>
+            <summary>
+            The communications channel to a device on an I2C bus.
+            </summary>
+        </member>
+        <member name="P:System.Device.I2c.I2cDevice.ConnectionSettings">
+            <summary>
+            The connection settings of a device on an I2C bus. The connection settings are immutable after the device is created
+            so the object returned will be a clone of the settings object.
+            </summary>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.Create(System.Device.I2c.I2cConnectionSettings)">
+            <summary>
+            Creates a communications channel to a device on an I2C bus running on the current platform
+            </summary>
+            <param name="settings">The connection settings of a device on an I2C bus.</param>
+            <returns>A communications channel to a device on an I2C bus running on Windows 10 IoT.</returns>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.ReadByte">
+            <summary>
+            Reads a byte from the I2C device.
+            </summary>
+            <returns>A byte read from the I2C device.</returns>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.Read(System.Span{System.Byte})">
+            <summary>
+            Reads data from the I2C device.
+            </summary>
+            <param name="buffer">
+            The buffer to read the data from the I2C device.
+            The length of the buffer determines how much data to read from the I2C device.
+            </param>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.WriteByte(System.Byte)">
+            <summary>
+            Writes a byte to the I2C device.
+            </summary>
+            <param name="value">The byte to be written to the I2C device.</param>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes data to the I2C device.
+            </summary>
+            <param name="buffer">
+            The buffer that contains the data to be written to the I2C device.
+            The data should not include the I2C device address.
+            </param>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.WriteRead(System.ReadOnlySpan{System.Byte},System.Span{System.Byte})">
+            <summary>
+            Performs an atomic operation to write data to and then read data from the I2C bus on which the device is connected,
+            and sends a restart condition between the write and read operations.
+            </summary>
+            <param name="writeBuffer">
+            The buffer that contains the data to be written to the I2C device.
+            The data should not include the I2C device address.</param>
+            <param name="readBuffer">
+            The buffer to read the data from the I2C device.
+            The length of the buffer determines how much data to read from the I2C device.
+            </param>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.QueryComponentInformation">
+            <summary>
+            Query information about a component and it's children.
+            </summary>
+            <returns>A tree of <see cref="T:System.Device.ComponentInformation"/> instances.</returns>
+            <remarks>
+            This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+            </remarks>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.Dispose">
+            <inheritdoc cref="M:System.IDisposable.Dispose"/>
+        </member>
+        <member name="M:System.Device.I2c.I2cDevice.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance
+            </summary>
+            <param name="disposing"><see langword="true"/> if explicitly disposing, <see langword="false"/> if in finalizer</param>
+        </member>
+        <member name="T:System.Device.Pwm.Channels.BeagleBonePwmChannel">
+            <summary>
+            Represents a PWM channel running on a BeagleBone device.
+            </summary>
+            <remarks>
+            The BeagleBone devices use a custom fork of the Linux kernel.
+            This class allows us to access the PWM on devices running this version of the kernel.
+            </remarks>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.BeagleBonePwmChannel.#ctor(System.Int32,System.Int32,System.Int32,System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Pwm.Channels.BeagleBonePwmChannel"/> class.
+            </summary>
+            <param name="chip">The PWM chip number.</param>
+            <param name="channel">The PWM channel number.</param>
+            <param name="frequency">The frequency in hertz.</param>
+            <param name="dutyCycle">The duty cycle represented as a value between 0.0 and 1.0.</param>
+        </member>
+        <member name="P:System.Device.Pwm.Channels.BeagleBonePwmChannel.ChannelName">
+            <summary>The sysfs name of the PWM channel</summary>
+            <returns>
+            A string like "pwm-X:Y" where X is the Chip number and Y is the Channel number.
+            </returns>
+            <remarks>
+            The BeagleBone kernel uses a non-standard naming convention for PWM Channels.
+            https://github.com/beagleboard/linux/commit/0e09cd3599153a865e87e212ffed6d485488dd4f
+            </remarks>
+        </member>
+        <member name="T:System.Device.Pwm.Channels.UnixPwmChannel">
+            <summary>
+            Represents a PWM channel running on Unix.
+            </summary>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.#ctor(System.Int32,System.Int32,System.Int32,System.Double)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Pwm.Channels.UnixPwmChannel"/> class.
+            </summary>
+            <param name="chip">The PWM chip number.</param>
+            <param name="channel">The PWM channel number.</param>
+            <param name="frequency">The frequency in hertz.</param>
+            <param name="dutyCycle">The duty cycle represented as a value between 0.0 and 1.0.</param>
+        </member>
+        <member name="P:System.Device.Pwm.Channels.UnixPwmChannel.ChannelName">
+            <summary>The sysfs name of the PWM channel</summary>
+            <remarks>May be overriden to allow for non-standard sysfs naming.</remarks>
+        </member>
+        <member name="P:System.Device.Pwm.Channels.UnixPwmChannel.Frequency">
+            <inheritdoc/>
+        </member>
+        <member name="P:System.Device.Pwm.Channels.UnixPwmChannel.DutyCycle">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.GetPeriodInNanoseconds(System.Int32)">
+            <summary>
+            Gets the frequency period in nanoseconds.
+            </summary>
+            <param name="frequency">The frequency in hertz.</param>
+            <returns>The frequency period in nanoseconds.</returns>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.SetDutyCycle(System.Double)">
+            <summary>
+            Sets the duty cycle for the channel.
+            </summary>
+            <param name="dutyCycle">The duty cycle to set represented as a value between 0.0 and 1.0.</param>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.Validate">
+            <summary>
+            Verifies the specified chip and channel are available.
+            </summary>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.Close">
+            <summary>
+            Stops and closes the channel.
+            </summary>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.Open">
+            <summary>
+            Opens the channel.
+            </summary>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.Start">
+            <inheritdoc/>
+        </member>
+        <member name="M:System.Device.Pwm.Channels.UnixPwmChannel.Stop">
+            <inheritdoc/>
+        </member>
+        <member name="T:System.Device.Pwm.PwmChannel">
+            <summary>
+            Represents a single PWM channel.
+            </summary>
+            <summary>
+            Represents a single PWM channel.
+            </summary>
+        </member>
+        <member name="P:System.Device.Pwm.PwmChannel.Frequency">
+            <summary>
+            The frequency in hertz.
+            </summary>
+        </member>
+        <member name="P:System.Device.Pwm.PwmChannel.DutyCycle">
+            <summary>
+            The duty cycle represented as a value between 0.0 and 1.0.
+            </summary>
+        </member>
+        <member name="M:System.Device.Pwm.PwmChannel.Start">
+            <summary>
+            Starts the PWM channel.
+            </summary>
+        </member>
+        <member name="M:System.Device.Pwm.PwmChannel.Stop">
+            <summary>
+            Stops the PWM channel.
+            </summary>
+        </member>
+        <member name="M:System.Device.Pwm.PwmChannel.Dispose">
+            <inheritdoc cref="M:System.IDisposable.Dispose"/>
+        </member>
+        <member name="M:System.Device.Pwm.PwmChannel.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance
+            </summary>
+            <param name="disposing"><see langword="true"/> if explicitly disposing, <see langword="false"/> if in finalizer</param>
+        </member>
+        <member name="M:System.Device.Pwm.PwmChannel.Create(System.Int32,System.Int32,System.Int32,System.Double)">
+            <summary>
+            Creates a new instance of the <see cref="T:System.Device.Pwm.PwmChannel"/> running on the current platform. (Windows 10 IoT or Unix/Raspbian)
+            </summary>
+            <param name="chip">The PWM chip number.</param>
+            <param name="channel">The PWM channel number.</param>
+            <param name="frequency">The frequency in hertz.</param>
+            <param name="dutyCyclePercentage">The duty cycle percentage represented as a value between 0.0 and 1.0.</param>
+            <returns>A PWM channel running on Windows 10 IoT.</returns>
+        </member>
+        <member name="M:System.Device.Pwm.PwmChannel.QueryComponentInformation">
+            <summary>
+            Query information about a component and it's children.
+            </summary>
+            <returns>A tree of <see cref="T:System.Device.ComponentInformation"/> instances.</returns>
+            <remarks>
+            This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+            </remarks>
+        </member>
+        <member name="T:System.Device.Spi.DataFlow">
+            <summary>
+            Specifies order in which bits are transferred first on the SPI bus.
+            </summary>
+        </member>
+        <member name="F:System.Device.Spi.DataFlow.MsbFirst">
+            <summary>
+            Most significant bit will be sent first (most of the devices use this value).
+            </summary>
+        </member>
+        <member name="F:System.Device.Spi.DataFlow.LsbFirst">
+            <summary>
+            Least significant bit will be sent first.
+            </summary>
+        </member>
+        <member name="T:System.Device.Spi.UnixSpiDevice">
+            <summary>
+            Represents a SPI communication channel running on Unix.
+            </summary>
+        </member>
+        <member name="M:System.Device.Spi.UnixSpiDevice.#ctor(System.Device.Spi.SpiConnectionSettings)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Spi.UnixSpiDevice"/> class that will use the specified settings to communicate with the SPI device.
+            </summary>
+            <param name="settings">
+            The connection settings of a device on a SPI bus.
+            </param>
+        </member>
+        <member name="P:System.Device.Spi.UnixSpiDevice.DevicePath">
+            <summary>
+            Path to SPI resources located on the platform.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.UnixSpiDevice.ConnectionSettings">
+            <summary>
+            The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
+            so the object returned will be a clone of the settings object.
+            </summary>
+        </member>
+        <member name="M:System.Device.Spi.UnixSpiDevice.ReadByte">
+            <summary>
+            Reads a byte from the SPI device.
+            </summary>
+            <returns>A byte read from the SPI device.</returns>
+        </member>
+        <member name="M:System.Device.Spi.UnixSpiDevice.Read(System.Span{System.Byte})">
+            <summary>
+            Reads data from the SPI device.
+            </summary>
+            <param name="buffer">
+            The buffer to read the data from the SPI device.
+            The length of the buffer determines how much data to read from the SPI device.
+            </param>
+        </member>
+        <member name="M:System.Device.Spi.UnixSpiDevice.WriteByte(System.Byte)">
+            <summary>
+            Writes a byte to the SPI device.
+            </summary>
+            <param name="value">The byte to be written to the SPI device.</param>
+        </member>
+        <member name="M:System.Device.Spi.UnixSpiDevice.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes data to the SPI device.
+            </summary>
+            <param name="buffer">
+            The buffer that contains the data to be written to the SPI device.
+            </param>
+        </member>
+        <member name="M:System.Device.Spi.UnixSpiDevice.TransferFullDuplex(System.ReadOnlySpan{System.Byte},System.Span{System.Byte})">
+            <summary>
+            Writes and reads data from the SPI device.
+            </summary>
+            <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
+            <param name="readBuffer">The buffer to read the data from the SPI device.</param>
+        </member>
+        <member name="T:System.Device.Spi.SpiConnectionSettings">
+            <summary>
+            The connection settings of a device on a SPI bus.
+            </summary>
+        </member>
+        <member name="M:System.Device.Spi.SpiConnectionSettings.#ctor(System.Int32,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:System.Device.Spi.SpiConnectionSettings"/> class.
+            </summary>
+            <param name="busId">The bus ID the device is connected to.</param>
+            <param name="chipSelectLine">The chip select line used on the bus. Optional, -1 if not used</param>
+        </member>
+        <member name="P:System.Device.Spi.SpiConnectionSettings.BusId">
+            <summary>
+            The bus ID the device is connected to.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.SpiConnectionSettings.ChipSelectLine">
+            <summary>
+            The chip select line used on the bus.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.SpiConnectionSettings.Mode">
+            <summary>
+            The SPI mode being used.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.SpiConnectionSettings.DataBitLength">
+            <summary>
+            The length of the data to be transfered.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.SpiConnectionSettings.ClockFrequency">
+            <summary>
+            The frequency in which the data will be transferred.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.SpiConnectionSettings.DataFlow">
+            <summary>
+            Specifies order in which bits are transferred first on the SPI bus.
+            </summary>
+        </member>
+        <member name="P:System.Device.Spi.SpiConnectionSettings.ChipSelectLineActiveState">
+            <summary>
+            Specifies which value on chip select pin means "active".
+            </summary>
+        </member>
+        <member name="T:System.Device.Spi.SpiDevice">
+            <summary>
+            The communications channel to a device on a SPI bus.
+            </summary>
+            <summary>
+            The communications channel to a device on a SPI bus.
+            </summary>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.Create(System.Device.Spi.SpiConnectionSettings)">
+            <summary>
+            Creates a communications channel to a device on a SPI bus running on the current hardware
+            </summary>
+            <param name="settings">The connection settings of a device on a SPI bus.</param>
+            <returns>A communications channel to a device on a SPI bus.</returns>
+        </member>
+        <member name="P:System.Device.Spi.SpiDevice.ConnectionSettings">
+            <summary>
+            The connection settings of a device on a SPI bus. The connection settings are immutable after the device is created
+            so the object returned will be a clone of the settings object.
+            </summary>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.ReadByte">
+            <summary>
+            Reads a byte from the SPI device.
+            </summary>
+            <returns>A byte read from the SPI device.</returns>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.Read(System.Span{System.Byte})">
+            <summary>
+            Reads data from the SPI device.
+            </summary>
+            <param name="buffer">
+            The buffer to read the data from the SPI device.
+            The length of the buffer determines how much data to read from the SPI device.
+            </param>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.WriteByte(System.Byte)">
+            <summary>
+            Writes a byte to the SPI device.
+            </summary>
+            <param name="value">The byte to be written to the SPI device.</param>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.Write(System.ReadOnlySpan{System.Byte})">
+            <summary>
+            Writes data to the SPI device.
+            </summary>
+            <param name="buffer">
+            The buffer that contains the data to be written to the SPI device.
+            </param>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.TransferFullDuplex(System.ReadOnlySpan{System.Byte},System.Span{System.Byte})">
+            <summary>
+            Writes and reads data from the SPI device.
+            </summary>
+            <param name="writeBuffer">The buffer that contains the data to be written to the SPI device.</param>
+            <param name="readBuffer">The buffer to read the data from the SPI device.</param>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.Dispose">
+            <inheritdoc cref="M:System.IDisposable.Dispose"/>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.Dispose(System.Boolean)">
+            <summary>
+            Disposes this instance
+            </summary>
+            <param name="disposing"><see langword="true"/> if explicitly disposing, <see langword="false"/> if in finalizer</param>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.ReverseByte(System.Byte)">
+            <summary>
+            Reverse the byte
+            </summary>
+            <param name="toReverse">The byte to reverse</param>
+            <returns></returns>
+        </member>
+        <member name="M:System.Device.Spi.SpiDevice.ReverseByte(System.Span{System.Byte})">
+            <summary>
+            Reverse the bytes
+            </summary>
+            <param name="span">The Span of byte to reverse</param>
+        </member>
+        <member name="T:System.Device.Spi.SpiMode">
+            <summary>
+            Defines how data is synchronized between devices on a SPI bus.
+            Clock Polarity (CPOL) determines if clock signal is low or high when in idle state.
+            Clock Phase (CPHA) determines when data is sampled relative to the clock signal.
+            </summary>
+        </member>
+        <member name="F:System.Device.Spi.SpiMode.Mode0">
+            <summary>
+            CPOL 0, CPHA 0. Polarity is idled low and data is sampled on rising edge of the clock signal.
+            </summary>
+        </member>
+        <member name="F:System.Device.Spi.SpiMode.Mode1">
+            <summary>
+            CPOL 0, CPHA 1. Polarity is idled low and data is sampled on falling edge of the clock signal.
+            </summary>
+        </member>
+        <member name="F:System.Device.Spi.SpiMode.Mode2">
+            <summary>
+            CPOL 1, CPHA 0. Polarity is idled high and data is sampled on falling edge of the clock signal.
+            </summary>
+        </member>
+        <member name="F:System.Device.Spi.SpiMode.Mode3">
+            <summary>
+            CPOL 1, CPHA 1. Polarity is idled high and data is sampled on rising edge of the clock signal.
+            </summary>
+        </member>
+        <member name="M:System.Device.SysFsHelpers.EnsureReadWriteAccessToPath(System.String)">
+            <summary>
+            Ensures path can be read-write accessed or throws UnauthorizedAccessException.
+            This method is meant to be used with sysfs drivers and access is checked for maximum period of 1 second.
+            Waiting period is used to give time for udev to update permissions.
+            </summary>
+            <param name="path">Path to be checked for access</param>
+        </member>
+        <member name="M:System.Device.SysFsHelpers.EnsureDirectoryExistsAndHasReadWriteAccess(System.String)">
+            <summary>
+            Ensures directory exists and can be read-write accessed or throws UnauthorizedAccessException.
+            This method is meant to be used with sysfs drivers and exception is thrown if progress is not made for one second.
+            Waiting period is used to give time for udev to create directory or update permissions.
+            </summary>
+            <param name="directory">Directory to be checked for access</param>
+        </member>
+    </members>
+</doc>

@@ -12,8 +12,7 @@ internal class Program
 
     private static void Main()
     {
-        I2cConnectionSettings i2cSettings = new(busId: 1, Vcnl4040Device.DefaultI2cAddress);
-        I2cDevice i2cDevice = I2cDevice.Create(i2cSettings);
+        I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Vcnl4040Device.DefaultI2cAddress));
         s_device = new Vcnl4040Device(i2cDevice);
 
         s_device = new(i2cDevice);
@@ -87,7 +86,7 @@ internal class Program
     private static void PrintMenu()
     {
         Console.WriteLine("======== VNCL4040 Explorer ========\n");
-        Console.WriteLine($"Device version: {s_device!.GetDeviceVersion()}\n");
+        Console.WriteLine($"Device ID: {s_device!.GetDeviceId():x}h\n");
         Console.WriteLine("--- Ambient Light Sensor  (ALS) ---");
         Console.WriteLine("(alssc) Show ALS Configuration");
         Console.WriteLine("(alson) Switch ALS on");
