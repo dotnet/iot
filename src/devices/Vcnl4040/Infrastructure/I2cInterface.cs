@@ -3,9 +3,9 @@
 
 using System;
 using System.Device.I2c;
-using Iot.Device.Vncl4040.Definitions;
+using Iot.Device.Vcnl4040.Definitions;
 
-namespace Iot.Device.Vncl4040.Infrastructure
+namespace Iot.Device.Vcnl4040.Infrastructure
 {
     /// <summary>
     /// Represents an convinient interface to the I2C bus in the context of this binding.
@@ -37,25 +37,34 @@ namespace Iot.Device.Vncl4040.Infrastructure
         /// <summary>
         /// Reads bytes from the device register
         /// </summary>
-        /// <param name="address">Register address</param>
+        /// <param name="commandCode">Register access command code</param>
         /// <param name="buffer">Bytes to be read from the register</param>
-        public void Read(Address address, Span<byte> buffer)
+        public void Read(CommandCode commandCode, Span<byte> buffer)
         {
-            Write(address, Span<byte>.Empty);
+            Write(commandCode, Span<byte>.Empty);
             _i2cDevice.Read(buffer);
+            Console.WriteLine($"I2cInterface.Read: {buffer[0]} {buffer[1]}");
         }
 
         /// <summary>
         /// Writes bytes to the device register
         /// </summary>
-        /// <param name="address">Register address</param>
+        /// <param name="commandCode">Register access command code</param>
         /// <param name="data">Bytes to be written to the register</param>
-        public void Write(Address address, Span<byte> data)
+        public void Write(CommandCode commandCode, Span<byte> data)
         {
             Span<byte> output = stackalloc byte[data.Length + 1];
-            output[0] = (byte)address;
+            output[0] = (byte)commandCode;
             data.CopyTo(output.Slice(1));
             _i2cDevice.Write(output);
+
+            Console.Write("Writing:");
+            foreach (byte b in output)
+            {
+                Console.Write($" {b:X}");
+            }
+
+            Console.WriteLine();
         }
     }
 }

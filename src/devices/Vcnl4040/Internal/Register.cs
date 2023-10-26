@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using Iot.Device.Vncl4040.Definitions;
+using Iot.Device.Vcnl4040.Definitions;
 
-namespace Iot.Device.Vncl4040.Infrastructure
+namespace Iot.Device.Vcnl4040.Infrastructure
 {
     /// <summary>
     /// Device register interface for registers with a width of 1 or 2 bytes.
@@ -15,16 +15,16 @@ namespace Iot.Device.Vncl4040.Infrastructure
         /// </summary>
         private readonly I2cInterface _bus;
 
-        private readonly Address _address;
+        private readonly CommandCode _commandCode;
 
         /// <summary>
-        /// Initializes the base class for any derived register with up to 3 addresses.
+        /// Initializes a new instance of Register.
         /// </summary>
-        /// <param name="address">First register address</param>
+        /// <param name="commandCode">Register address / command code</param>
         /// <param name="bus">I2C bus interface</param>
-        protected Register(Address address, I2cInterface bus)
+        protected Register(CommandCode commandCode, I2cInterface bus)
         {
-            _address = address;
+            _commandCode = commandCode;
             _bus = bus;
         }
 
@@ -43,8 +43,9 @@ namespace Iot.Device.Vncl4040.Infrastructure
         /// </summary>
         protected (byte DataLow, byte DataHigh) ReadData()
         {
-            throw new NotImplementedException();
-            // return (_bus.Read(_address), _bus.Read(_address));
+            byte[] data = new byte[2];
+            _bus.Read(_commandCode, data);
+            return (data[0], data[1]);
         }
 
         /// <summary>
@@ -56,7 +57,7 @@ namespace Iot.Device.Vncl4040.Infrastructure
         }
 
         /// <summary>
-        /// Writes 16-bit data (split into low byte and high byte) to the register targeted by specified address.
+        /// Writes 16-bit data (split into low byte and high byte) to the register targeted by specified command code.
         /// It preserves existing register content as selected by the masks.
         /// Only mask bits set to '1' are modified. All other bits are preserved.
         /// </summary>
@@ -94,7 +95,7 @@ namespace Iot.Device.Vncl4040.Infrastructure
             byte[] data = new byte[2];
             data[0] = regData.DataLow;
             data[1] = regData.DataHigh;
-            _bus.Write(_address, data);
+            _bus.Write(_commandCode, data);
         }
     }
 }

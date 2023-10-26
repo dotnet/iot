@@ -1,14 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Iot.Device.Vncl4040.Definitions;
-using Iot.Device.Vncl4040.Infrastructure;
+using Iot.Device.Vcnl4040.Definitions;
+using Iot.Device.Vcnl4040.Infrastructure;
 
-namespace Iot.Device.Vncl4040.Internal
+namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
     /// ALS configuration register
-    /// Address / command: 0x00
+    /// Command code / address: 0x00
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
     internal class AlsConfRegister : Register
@@ -16,7 +16,7 @@ namespace Iot.Device.Vncl4040.Internal
         /// <summary>
         /// ALS integration time setting
         /// </summary>
-        public AlsIntegrationTime ALS_IT { get; set; } = AlsIntegrationTime.IntegrationTime80ms;
+        public AlsIntegrationTime AlsIt { get; set; } = AlsIntegrationTime.IntegrationTime80ms;
 
         /// <summary>
         /// ALS interrupt persistence setting
@@ -29,12 +29,12 @@ namespace Iot.Device.Vncl4040.Internal
         public AlsInterruptState ALS_INT_EN { get; set; } = AlsInterruptState.Disabled;
 
         /// <summary>
-        /// ALS power state
+        /// ALS power state (ALS_SD of ALS_CONF register)
         /// </summary>
-        public AlsPowerState ALS_SD { get; set; } = AlsPowerState.Shutdown;
+        public PowerState AlsSd { get; set; } = PowerState.Shutdown;
 
         public AlsConfRegister(I2cInterface bus)
-            : base(Address.ALS_CONF, bus)
+            : base(CommandCode.ALS_CONF, bus)
         {
         }
 
@@ -43,20 +43,20 @@ namespace Iot.Device.Vncl4040.Internal
         {
             (byte dataLow, byte _) = ReadData();
 
-            ALS_IT = (AlsIntegrationTime)(byte)((dataLow & 0b1100_0000) >> 6);
+            AlsIt = (AlsIntegrationTime)(byte)((dataLow & 0b1100_0000) >> 6);
             ALS_PERS = (AlsInterruptPersistence)(byte)((dataLow & 0b0000_1100) >> 2);
             ALS_INT_EN = (AlsInterruptState)(byte)((dataLow & 0b0000_0010) >> 1);
-            ALS_SD = (AlsPowerState)(byte)(dataLow & 0b0000_0001);
+            AlsSd = (PowerState)(byte)(dataLow & 0b0000_0001);
         }
 
         /// <inheritdoc/>>
         public override void Write()
         {
             byte dataLow = 0;
-            dataLow |= (byte)((byte)(ALS_IT) << 6);
+            dataLow |= (byte)((byte)(AlsIt) << 6);
             dataLow |= (byte)((byte)(ALS_PERS) << 2);
             dataLow |= (byte)((byte)(ALS_INT_EN) << 1);
-            dataLow |= (byte)ALS_SD;
+            dataLow |= (byte)AlsSd;
 
             WriteData(dataLow, 0);
         }

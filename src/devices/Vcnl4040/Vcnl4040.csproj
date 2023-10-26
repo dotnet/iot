@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <!--Disabling default items so samples source won't get build by the main library-->
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <RootNamespace>Iot.Device.Vcnl4040</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="*.cs" />
+    <AdditionalFiles Remove="C:\Users\marcu\Source\Repos\iot\eng\\stylecop.json" />
+  </ItemGroup>
+  <!-- Make the internal classes visible to the unit test assembly -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>$(AssemblyName).Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Definitions\PowerState.cs" />
+    <Compile Include="Definitions\AlsInterruptState.cs" />
+    <Compile Include="Definitions\AlsInterruptPersistence.cs" />
+    <Compile Include="Definitions\AlsIntegrationTime.cs" />
+    <Compile Include="Infrastructure\I2cInterface.cs" />
+    <Compile Include="Internal\AlsConfRegister.cs" />
+    <Compile Include="Internal\IdRegister.cs" />
+    <Compile Include="Internal\Register.cs" />
+    <Compile Include="Definitions\CommandCode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
+</Project>
