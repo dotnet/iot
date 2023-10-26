@@ -64,7 +64,7 @@ internal class Program
                 break;
 
             case "psda":
-                ShowPsData();
+                // ShowPsData();
                 break;
 
             case "quit":
