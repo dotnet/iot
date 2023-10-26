@@ -21,6 +21,8 @@ namespace Iot.Device.Vcnl4040
         private I2cInterface _i2cBus;
 
         private AlsConfRegister _alsConfRegister;
+        private AlsDataRegister _alsDataRegister;
+        private PsDataRegister _psDataRegister;
         private IdRegister _idRegister;
 
         /// <summary>
@@ -32,6 +34,8 @@ namespace Iot.Device.Vcnl4040
             _i2cBus = new I2cInterface(dev);
 
             _alsConfRegister = new AlsConfRegister(_i2cBus);
+            _alsDataRegister = new AlsDataRegister(_i2cBus);
+            _psDataRegister = new PsDataRegister(_i2cBus);
             _idRegister = new IdRegister(_i2cBus);
         }
 
@@ -102,20 +106,30 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets the device version code.
         /// </summary>
-        public byte GetDeviceVersion()
-        {
-            _idRegister.Read();
-            Console.WriteLine(_idRegister.IdLsb);
-            return _idRegister.VersionCode;
-        }
-
-        /// <summary>
-        /// Gets the device version code.
-        /// </summary>
         public int GetDeviceId()
         {
             _idRegister.Read();
             return _idRegister.Id;
+        }
+
+        /// <summary>
+        /// BLA BLA
+        /// </summary>
+        /// <returns></returns>
+        public int GetAlsReading()
+        {
+            _alsDataRegister.Read();
+            return _alsDataRegister.Data;
+        }
+
+        /// <summary>
+        /// BLA BLA
+        /// </summary>
+        /// <returns></returns>
+        public int GetPsReading()
+        {
+            _psDataRegister.Read();
+            return _psDataRegister.Data;
         }
     }
 }

@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.ComponentModel;
 using System.Device.I2c;
+using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Definitions;
 
@@ -57,6 +59,14 @@ internal class Program
                 ShowAlsConfiguration();
                 break;
 
+            case "alsda":
+                ShowAlsData();
+                break;
+
+            case "psda":
+                ShowPsData();
+                break;
+
             case "quit":
                 return false;
         }
@@ -83,6 +93,17 @@ internal class Program
         s_device!.SetIntegrationTime(integrationTime);
     }
 
+    private static void ShowAlsData()
+    {
+        Console.WriteLine("Ambient light:");
+        while (!Console.KeyAvailable)
+        {
+            int data = s_device!.GetAlsReading();
+            PrintBarGraph(data, 65535, 100);
+            Task.Delay(100).Wait();
+        }
+    }
+
     private static void PrintMenu()
     {
         Console.WriteLine("======== VNCL4040 Explorer ========\n");
@@ -91,6 +112,7 @@ internal class Program
         Console.WriteLine("(alssc) Show ALS Configuration");
         Console.WriteLine("(alson) Switch ALS on");
         Console.WriteLine("(alsof) Switch ALS off");
+        Console.WriteLine("(alsda) Show ALS data");
         Console.WriteLine("(alsit) Set ALS integration time");
         Console.WriteLine("-----------------------------------");
         Console.WriteLine("(quit)   Quit");
@@ -120,5 +142,29 @@ internal class Program
             value = default(T);
             return false;
         }
+    }
+
+    public static void PrintBarGraph(int value, int maxValue, int width)
+    {
+        Console.CursorLeft = 0;
+        Console.Write("[");
+
+        int progressBarWidth = (int)((double)value / maxValue * width);
+        int spaces = width - progressBarWidth;
+
+        for (int i = 0; i < progressBarWidth; i++)
+        {
+            Console.Write("#");
+        }
+
+        for (int i = 0; i < spaces; i++)
+        {
+            Console.Write(" ");
+        }
+
+        Console.Write("]");
+
+        // Move the cursor to the beginning of the line to overwrite the bar on the next update
+        Console.CursorLeft = 0;
     }
 }

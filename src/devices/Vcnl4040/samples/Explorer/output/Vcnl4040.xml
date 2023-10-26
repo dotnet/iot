@@ -53,15 +53,16 @@
             ADD MORE DETAILS
             </summary>
         </member>
-        <member name="M:Iot.Device.Vcnl4040.Vcnl4040Device.GetDeviceVersion">
-            <summary>
-            Gets the device version code.
-            </summary>
-        </member>
         <member name="M:Iot.Device.Vcnl4040.Vcnl4040Device.GetDeviceId">
             <summary>
             Gets the device version code.
             </summary>
+        </member>
+        <member name="M:Iot.Device.Vcnl4040.Vcnl4040Device.GetAlsReading">
+            <summary>
+            BLA BLA
+            </summary>
+            <returns></returns>
         </member>
         <member name="T:Iot.Device.Vcnl4040.Definitions.PowerState">
             <summary>
@@ -257,6 +258,28 @@
         </member>
         <member name="M:Iot.Device.Vcnl4040.Internal.AlsConfRegister.Write">
             <inheritdoc/>>
+        </member>
+        <member name="T:Iot.Device.Vcnl4040.Internal.AlsDataRegister">
+            <summary>
+            ALS data output register
+            Note: this is a read-only register.
+            Command code / address: 0x09
+            Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Vcnl4040.Internal.AlsDataRegister.#ctor(Iot.Device.Vcnl4040.Infrastructure.I2cInterface)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Iot.Device.Vcnl4040.Internal.AlsDataRegister"/> class.
+            </summary>
+        </member>
+        <member name="M:Iot.Device.Vcnl4040.Internal.AlsDataRegister.Read">
+            <inheritdoc/>>
+        </member>
+        <member name="M:Iot.Device.Vcnl4040.Internal.AlsDataRegister.Write">
+            <summary>
+            This register is read-only. The Write-operation is not implemented.
+            </summary>
+            <exception cref="T:System.NotImplementedException">This register is read-only. The Write-operation is not implemented.</exception>
         </member>
         <member name="T:Iot.Device.Vcnl4040.Internal.IdRegister">
             <summary>

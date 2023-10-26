@@ -22,7 +22,9 @@
     <Compile Include="Definitions\AlsIntegrationTime.cs" />
     <Compile Include="Infrastructure\I2cInterface.cs" />
     <Compile Include="Internal\AlsConfRegister.cs" />
+    <Compile Include="Internal\AlsDataRegister.cs" />
     <Compile Include="Internal\IdRegister.cs" />
+    <Compile Include="Internal\PsDataRegister.cs" />
     <Compile Include="Internal\Register.cs" />
     <Compile Include="Definitions\CommandCode.cs" />
   </ItemGroup>
