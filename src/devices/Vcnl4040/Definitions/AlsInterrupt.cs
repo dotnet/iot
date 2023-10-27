@@ -4,19 +4,19 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS and SD power states.
+    /// Defines the set of ALS enable states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PowerState : byte
+    public enum AlsInterrupt : byte
     {
         /// <summary>
-        /// ALS/SD power on
+        /// ALS interrupt disabled
         /// </summary>
-        PowerOn = 0b0000_0000,
+        Disabled = 0b0000_0000,
 
         /// <summary>
-        /// ALS/SD shutdown / power off
+        /// ALS interrupt enabled
         /// </summary>
-        Shutdown = 0b0000_0001
+        Enabled = 0b0000_0010
     }
 }

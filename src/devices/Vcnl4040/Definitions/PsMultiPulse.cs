@@ -4,19 +4,29 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS enable states.
+    /// Defines the set of proximity multi pulse numbers
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum AlsInterruptState : byte
+    public enum PsMultiPulse : byte
     {
         /// <summary>
-        /// ALS interrupt disabled
+        /// 1 multi pulse
         /// </summary>
-        Disabled = 0b0,
+        Pulse1 = 0b0000_0000,
 
         /// <summary>
-        /// ALS interrupt enabled
+        /// 2 multi pulse
         /// </summary>
-        Enabled = 0b01,
+        Pulse2 = 0b0010_0000,
+
+        /// <summary>
+        /// 4 multi pulses
+        /// </summary>
+        Pulse4 = 0b0100_0000,
+
+        /// <summary>
+        /// 8 multi pulses
+        /// </summary>
+        Pulse8 = 0b0110_0000
     }
 }

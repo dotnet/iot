@@ -4,29 +4,29 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS interrupt persistence settings.
+    /// Defines the set of PS interrupt persistence settings.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum AlsInterruptPersistence : byte
+    public enum PsInterruptPersistence : byte
     {
         /// <summary>
-        /// Interrupt persistence setting 0
+        /// Persistence setting 1
         /// </summary>
         Persistence1 = 0b0000_0000,
 
         /// <summary>
-        /// Interrupt persistence setting 2
+        /// Persistence setting 2
         /// </summary>
-        Persistence2 = 0b0000_0100,
+        Persistence2 = 0b0001_0000,
 
         /// <summary>
-        /// Interrupt persistence setting 4
+        /// Persistence setting 3
         /// </summary>
-        Persistence4 = 0b0000_1000,
+        Persistence3 = 0b0010_0000,
 
         /// <summary>
-        /// Interrupt persistence setting 8
+        /// Persistence setting 4
         /// </summary>
-        Persistence8 = 0b0000_1100
+        Persistence4 = 0b0011_0000
     }
 }

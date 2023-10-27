@@ -4,29 +4,29 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS interrupt persistence settings.
+    /// Defines the set of PS interrupt settings.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum AlsInterruptPersistence : byte
+    public enum PsInterrupt : byte
     {
         /// <summary>
-        /// Interrupt persistence setting 0
+        /// Interrupt disable
         /// </summary>
-        Persistence1 = 0b0000_0000,
+        Disable = 0b0000_0000,
 
         /// <summary>
-        /// Interrupt persistence setting 2
+        /// Trigger when close
         /// </summary>
-        Persistence2 = 0b0000_0100,
+        Close = 0b0000_0001,
 
         /// <summary>
-        /// Interrupt persistence setting 4
+        /// Trigger when away
         /// </summary>
-        Persistence4 = 0b0000_1000,
+        Away = 0b0000_0010,
 
         /// <summary>
-        /// Interrupt persistence setting 8
+        /// Trigger when close or away
         /// </summary>
-        Persistence8 = 0b0000_1100
+        CloseOrAway = 0b0000_0011
     }
 }

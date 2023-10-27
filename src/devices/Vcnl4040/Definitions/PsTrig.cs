@@ -4,19 +4,19 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS and SD power states.
+    /// Defines the set of PS output trigger mode
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PowerState : byte
+    public enum PsTrig : byte
     {
         /// <summary>
-        /// ALS/SD power on
+        /// No PS active force mode
         /// </summary>
-        PowerOn = 0b0000_0000,
+        Normale = 0b0000_0000,
 
         /// <summary>
-        /// ALS/SD shutdown / power off
+        /// Force one time cycle
         /// </summary>
-        Shutdown = 0b0000_0001
+        Force = 0b0000_0100
     }
 }

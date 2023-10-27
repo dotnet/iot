@@ -13,10 +13,15 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class AlsConfRegister : Register
     {
+        private static readonly byte AlsItMask = 0b1100_0000;
+        private static readonly byte AlsPersMask = 0b0000_1100;
+        private static readonly byte AlsIntEnMask = 0b0000_0010;
+        private static readonly byte AlsSdMask = 0b0000_0001;
+
         /// <summary>
         /// ALS integration time setting
         /// </summary>
-        public AlsIntegrationTime AlsIt { get; set; } = AlsIntegrationTime.IntegrationTime80ms;
+        public AlsIntegrationTime AlsIt { get; set; } = AlsIntegrationTime.Time80ms;
 
         /// <summary>
         /// ALS interrupt persistence setting
@@ -26,7 +31,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// ALS interrupt enable state
         /// </summary>
-        public AlsInterruptState ALS_INT_EN { get; set; } = AlsInterruptState.Disabled;
+        public AlsInterrupt ALS_INT_EN { get; set; } = AlsInterrupt.Disabled;
 
         /// <summary>
         /// ALS power state (ALS_SD of ALS_CONF register)
@@ -43,10 +48,10 @@ namespace Iot.Device.Vcnl4040.Internal
         {
             (byte dataLow, byte _) = ReadData();
 
-            AlsIt = (AlsIntegrationTime)(byte)((dataLow & 0b1100_0000) >> 6);
-            ALS_PERS = (AlsInterruptPersistence)(byte)((dataLow & 0b0000_1100) >> 2);
-            ALS_INT_EN = (AlsInterruptState)(byte)((dataLow & 0b0000_0010) >> 1);
-            AlsSd = (PowerState)(byte)(dataLow & 0b0000_0001);
+            AlsIt = (AlsIntegrationTime)(byte)(dataLow & AlsItMask);
+            ALS_PERS = (AlsInterruptPersistence)(byte)(dataLow & AlsPersMask);
+            ALS_INT_EN = (AlsInterrupt)(byte)(dataLow & AlsIntEnMask);
+            AlsSd = (PowerState)(byte)(dataLow & AlsSdMask);
         }
 
         /// <inheritdoc/>>

@@ -4,19 +4,19 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS and SD power states.
+    /// Defines the set of PS output settings.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PowerState : byte
+    public enum PsOutput : byte
     {
         /// <summary>
-        /// ALS/SD power on
+        /// PS output is 12 bits
         /// </summary>
-        PowerOn = 0b0000_0000,
+        Bits12 = 0b0000_0000,
 
         /// <summary>
-        /// ALS/SD shutdown / power off
+        /// PS output is 16 bits
         /// </summary>
-        Shutdown = 0b0000_0001
+        Bits16 = 0b0000_1000
     }
 }

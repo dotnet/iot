@@ -4,19 +4,19 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS and SD power states.
+    /// Defines the PS sunlight cancellation state
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PowerState : byte
+    public enum PsSunlight : byte
     {
         /// <summary>
-        /// ALS/SD power on
+        /// Sunlight cancellation disabled
         /// </summary>
-        PowerOn = 0b0000_0000,
+        Disabled = 0b0000_0000,
 
         /// <summary>
-        /// ALS/SD shutdown / power off
+        /// Sunlight cancellation enabled
         /// </summary>
-        Shutdown = 0b0000_0001
+        Enabled = 0b0000_0001
     }
 }

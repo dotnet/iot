@@ -12,21 +12,21 @@ namespace Iot.Device.Vcnl4040.Definitions
         /// <summary>
         /// Integration time is 80 ms.
         /// </summary>
-        IntegrationTime80ms = 0b00,
+        Time80ms = 0b0000_0000,
 
         /// <summary>
         /// Integration time is 160 ms.
         /// </summary>
-        IntegrationTime160ms = 0b01,
+        Time160ms = 0b0100_0000,
 
         /// <summary>
         /// Integration time is 320 ms.
         /// </summary>
-        IntegrationTime320ms = 0b10,
+        Time320ms = 0b1000_0000,
 
         /// <summary>
         /// Integration time is 640 ms.
         /// </summary>
-        IntegrationTime640ms = 0b11
+        Time640ms = 0b1100_0000
     }
 }
