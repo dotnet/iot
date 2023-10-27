@@ -8,54 +8,56 @@ using Iot.Device.Vcnl4040.Infrastructure;
 namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
-    /// ID register
+    /// Interrupt flag register
     /// Note: this is a read-only register.
-    /// Command code / address: 0x0c
+    /// Command code / address: 0x0b
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    internal class IdRegister : Register
+    internal class IntFlagRegister : Register
     {
         /// <summary>
-        /// LSB byte of device Id.
-        /// There is no further description in the datasheet.
+        /// PS entering protection mode event
         /// </summary>
-        public byte IdLsb { get; private set; }
+        public bool PsSpFlag { get; private set; }
 
         /// <summary>
-        /// Slave address of the device.
-        /// This is 0 for the default address 60h.
-        /// There is no further description in the datasheet.
+        /// ALS crossing low threshold event
         /// </summary>
-        public byte SlaveAddress { get; private set; }
+        public bool AlsIfL { get; private set; }
 
         /// <summary>
-        /// Version code of the device. This is usually 0b0001.
-        /// There is no further description in the datasheet.
+        /// ALS crossing high threshold event
         /// </summary>
-        public byte VersionCode { get; private set; }
+        public bool AlsIfH { get; private set; }
 
         /// <summary>
-        /// Gets the complete device Id.
+        /// PS rises above threshold event
         /// </summary>
-        public int Id { get; private set; }
+        public bool PsIfClose { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IdRegister"/> class.
+        /// PS drops below threshold event
         /// </summary>
-        public IdRegister(I2cInterface bus)
-            : base(CommandCode.ID, bus)
+        public bool PsIfAway { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="IntFlagRegister"/> class.
+        /// </summary>
+        public IntFlagRegister(I2cInterface bus)
+            : base(CommandCode.INT_Flag, bus)
         {
         }
 
         /// <inheritdoc/>>
         public override void Read()
         {
-            (byte dataLow, byte dataHigh) = ReadData();
+            (_, byte dataHigh) = ReadData();
 
-            IdLsb = dataLow;
-            SlaveAddress = (byte)(dataHigh & 0b0011_0000 >> 4);
-            VersionCode = (byte)(dataHigh & 0b0000_1111);
-            Id = dataHigh << 8 | dataLow;
+            PsSpFlag = (dataHigh & 0b0100_0000) > 0;
+            AlsIfL = (dataHigh & 0b0010_0000) > 0;
+            AlsIfH = (dataHigh & 0b0001_0000) > 0;
+            PsIfClose = (dataHigh & 0b0000_0010) > 0;
+            PsIfAway = (dataHigh & 0b0000_0001) > 0;
         }
 
         /// <summary>

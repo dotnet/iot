@@ -7,79 +7,75 @@ using Iot.Device.Vcnl4040.Infrastructure;
 namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
-    /// PS configuration register 3 & MS
-    /// Command code / address: 0x04 (LSB)
+    /// PS MS register
+    /// Command code / address: 0x04 (MSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
     internal class PsConf3Register : Register
     {
-        private static readonly byte PsMpsMask = 0b1100_0000;
-        private static readonly byte PsPersMask = 0b0011_0000;
-        private static readonly byte PsItMask = 0b0000_1110;
-        private static readonly byte PsSdMask = 0b0000_0001;
-        private static readonly byte PsHdMask = 0b0001_0000;
-        private static readonly byte PsIntMask = 0b0000_0011;
+        private static readonly byte PsMpsMask = 0b0110_0000;
+        private static readonly byte PsSmartPersMask = 0b0001_0000;
+        private static readonly byte PsAfMask = 0b0000_1000;
+        private static readonly byte PsTrigMask = 0b0000_0100;
+        private static readonly byte PsScEnMask = 0b0000_0001;
 
         /// <summary>
-        /// PS IRED on/off duty ratio
+        /// PS multi pulse setting
         /// </summary>
-        public PsDuty PsDuty { get; set; } = PsDuty.Duty80;
+        public PsMultiPulse PsMps { get; set; } = PsMultiPulse.Pulse1;
 
         /// <summary>
-        /// PS interrupt persistence
+        /// PS smart persistence state
         /// </summary>
-        public PsInterruptPersistence PsPers { get; set; } = PsInterruptPersistence.Persistence1;
+        public PsSmartPersistenceState PsSmartPers { get; set; } = PsSmartPersistenceState.Disabled;
 
         /// <summary>
-        /// PS integration time
+        /// PS active force mode
         /// </summary>
-        public PsIntegrationTime PsIt { get; set; } = PsIntegrationTime.Time1_0;
+        public PsActiveForceMode PsAf { get; set; } = PsActiveForceMode.Disabled;
 
         /// <summary>
-        /// PS power state
+        /// PS active force mode trigger
         /// </summary>
-        public PowerState PsSd { get; set; } = PowerState.Shutdown;
+        public PsActiveForceModeTrigger PsTrig { get; set; } = PsActiveForceModeTrigger.NoTrigger;
 
         /// <summary>
-        /// PS output size
+        /// PS sunlight cancellation state
         /// </summary>
-        public PsOutput PsHd { get; set; } = PsOutput.Bits12;
+        public PsSunlightCancellationState PsScEn { get; set; } = PsSunlightCancellationState.Disabled;
 
         /// <summary>
-        /// PS interrupt source
+        /// Initializes a new instance of the <see cref="PsConf3Register"/> class.
         /// </summary>
-        public PsInterrupt PsInt { get; set; } = PsInterrupt.Disable;
-
-        public PsConf12Register(I2cInterface bus)
-            : base(CommandCode.PS_CONF_1_2, bus)
+        public PsConf3Register(I2cInterface bus)
+            : base(CommandCode.PS_CONF_3_MS, bus)
         {
         }
 
         /// <inheritdoc/>>
         public override void Read()
         {
-            (byte dataLow, byte dataHigh) = ReadData();
+            (byte dataLow, _) = ReadData();
 
-            PsDuty = (PsDuty)(byte)(dataLow & PsDutyMask);
-            PsPers = (PsInterruptPersistence)(byte)(dataLow & PsPersMask);
-            PsIt = (PsIntegrationTime)(byte)(dataLow & PsItMask);
-            PsSd = (PowerState)(byte)(dataLow & PsSdMask);
-            PsHd = (PsOutput)(byte)(dataHigh & PsHdMask);
-            PsInt = (PsInterrupt)(byte)(dataHigh & PsIntMask);
+            PsMps = (PsMultiPulse)(dataLow & PsMpsMask);
+            PsSmartPers = (PsSmartPersistenceState)(dataLow & PsSmartPersMask);
+            PsAf = (PsActiveForceMode)(dataLow & PsAfMask);
+            PsTrig = (PsActiveForceModeTrigger)(dataLow & PsTrigMask);
+            PsScEn = (PsSunlightCancellationState)(dataLow & PsScEnMask);
         }
 
         /// <inheritdoc/>>
         public override void Write()
         {
-            byte dataLow = 0;
-            dataLow |= (byte)PsDuty;
-            dataLow |= (byte)PsPers;
-            dataLow |= (byte)PsIt;
-            dataLow |= (byte)PsSd;
+            // read current register content to preserve high byte
+            (_, byte dataHigh) = ReadData();
 
-            byte dataHigh = 0;
-            dataHigh |= (byte)PsHd;
-            dataHigh |= (byte)PsInt;
+            byte dataLow = 0;
+            dataLow |= (byte)PsMps;
+            dataLow |= (byte)PsSmartPers;
+            dataLow |= (byte)PsAf;
+            dataLow |= (byte)PsTrig;
+            dataLow |= (byte)PsScEn;
 
             WriteData(dataLow, dataHigh);
         }

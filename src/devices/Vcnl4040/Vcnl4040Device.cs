@@ -21,8 +21,19 @@ namespace Iot.Device.Vcnl4040
         private I2cInterface _i2cBus;
 
         private AlsConfRegister _alsConfRegister;
-        private AlsDataRegister _alsDataRegister;
+        private AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
+        private AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
+        private PsConf1Register _psConf1Register;
+        private PsConf2Register _psConf2Register;
+        private PsConf3Register _psConf3Register;
+        private PsMsRegister _psMsRegister;
+        private PsCancellationLevelRegister _psCancellationLevelRegister;
+        private PsLowInterruptThresholdRegister _psLowInterruptThresholdRegister;
+        private PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
         private PsDataRegister _psDataRegister;
+        private AlsDataRegister _alsDataRegister;
+        private WhiteDataRegister _whiteDataRegister;
+        private IntFlagRegister _intFlagRegister;
         private IdRegister _idRegister;
 
         /// <summary>
@@ -34,8 +45,19 @@ namespace Iot.Device.Vcnl4040
             _i2cBus = new I2cInterface(dev);
 
             _alsConfRegister = new AlsConfRegister(_i2cBus);
-            _alsDataRegister = new AlsDataRegister(_i2cBus);
+            _alsHighInterruptThresholdRegister = new AlsHighInterruptThresholdRegister(_i2cBus);
+            _alsLowInterruptThresholdRegister = new AlsLowInterruptThresholdRegister(_i2cBus);
+            _psConf1Register = new PsConf1Register(_i2cBus);
+            _psConf2Register = new PsConf2Register(_i2cBus);
+            _psConf3Register = new PsConf3Register(_i2cBus);
+            _psMsRegister = new PsMsRegister(_i2cBus);
+            _psCancellationLevelRegister = new PsCancellationLevelRegister(_i2cBus);
+            _psLowInterruptThresholdRegister = new PsLowInterruptThresholdRegister(_i2cBus);
+            _psHighInterruptThresholdRegister = new PsHighInterruptThresholdRegister(_i2cBus);
             _psDataRegister = new PsDataRegister(_i2cBus);
+            _alsDataRegister = new AlsDataRegister(_i2cBus);
+            _whiteDataRegister = new WhiteDataRegister(_i2cBus);
+            _intFlagRegister = new IntFlagRegister(_i2cBus);
             _idRegister = new IdRegister(_i2cBus);
         }
 

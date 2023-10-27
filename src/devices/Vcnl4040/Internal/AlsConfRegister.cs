@@ -48,10 +48,10 @@ namespace Iot.Device.Vcnl4040.Internal
         {
             (byte dataLow, byte _) = ReadData();
 
-            AlsIt = (AlsIntegrationTime)(byte)(dataLow & AlsItMask);
-            ALS_PERS = (AlsInterruptPersistence)(byte)(dataLow & AlsPersMask);
-            ALS_INT_EN = (AlsInterrupt)(byte)(dataLow & AlsIntEnMask);
-            AlsSd = (PowerState)(byte)(dataLow & AlsSdMask);
+            AlsIt = (AlsIntegrationTime)(dataLow & AlsItMask);
+            ALS_PERS = (AlsInterruptPersistence)(dataLow & AlsPersMask);
+            ALS_INT_EN = (AlsInterrupt)(dataLow & AlsIntEnMask);
+            AlsSd = (PowerState)(dataLow & AlsSdMask);
         }
 
         /// <inheritdoc/>>

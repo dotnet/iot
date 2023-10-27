@@ -4,19 +4,19 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the PS sunlight cancellation state
+    /// Defines the set of PS white channel states
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsSunlight : byte
+    public enum PsWhiteChannelState : byte
     {
         /// <summary>
-        /// Sunlight cancellation disabled
+        /// White channel enabled
         /// </summary>
-        Disabled = 0b0000_0000,
+        Enabled = 0b0000_0000,
 
         /// <summary>
-        /// Sunlight cancellation enabled
+        /// White channel disabled
         /// </summary>
-        Enabled = 0b0000_0001
+        Disabled = 0b1000_0000
     }
 }

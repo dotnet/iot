@@ -4,19 +4,19 @@
 namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of PS active force mode trigger
+    /// Defines the PS sunlight cancellation state
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsActiveForceModeTrigger : byte
+    public enum PsSunlightCancellationState : byte
     {
         /// <summary>
-        /// No PS active force mode
+        /// Sunlight cancellation disabled
         /// </summary>
-        NoTrigger = 0b0000_0000,
+        Disabled = 0b0000_0000,
 
         /// <summary>
-        /// Force one time cycle
+        /// Sunlight cancellation enabled
         /// </summary>
-        OneTimeCycle = 0b0000_0100
+        Enabled = 0b0000_0001
     }
 }

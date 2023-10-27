@@ -7,7 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
-    <AdditionalFiles Remove="C:\Users\marcu\Source\Repos\iot\eng\\stylecop.json" />
   </ItemGroup>
   <!-- Make the internal classes visible to the unit test assembly -->
   <ItemGroup>
@@ -16,9 +15,13 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Definitions\PsSunlight.cs" />
+    <Compile Include="Definitions\PsActiveForceMode.cs" />
+    <Compile Include="Definitions\PsDetectionLogicOutputMode.cs" />
+    <Compile Include="Definitions\PsLedCurrent.cs" />
+    <Compile Include="Definitions\PsSunlightCancellationState.cs" />
+    <Compile Include="Definitions\PsWhiteChannelState.cs" />
     <Compile Include="Definitions\PsTrig.cs" />
-    <Compile Include="Definitions\PsSmartPers.cs" />
+    <Compile Include="Definitions\PsSmartPersistenceState.cs" />
     <Compile Include="Definitions\PsMultiPulse.cs" />
     <Compile Include="Definitions\PsInterrupt.cs" />
     <Compile Include="Definitions\PsOutput.cs" />
@@ -30,8 +33,12 @@
     <Compile Include="Definitions\AlsInterruptPersistence.cs" />
     <Compile Include="Definitions\AlsIntegrationTime.cs" />
     <Compile Include="Infrastructure\I2cInterface.cs" />
+    <Compile Include="Internal\WhiteDataRegister.cs" />
+    <Compile Include="Internal\PsCancellationLevelRegister.cs" />
+    <Compile Include="Internal\PsMsRegister.cs" />
     <Compile Include="Internal\PsConf3Register.cs" />
-    <Compile Include="Internal\PsConf12Register.cs" />
+    <Compile Include="Internal\PsConf2Register.cs" />
+    <Compile Include="Internal\PsConf1Register.cs" />
     <Compile Include="Internal\PsHighInterruptThresholdRegister.cs" />
     <Compile Include="Internal\PsLowInterruptThresholdRegister.cs" />
     <Compile Include="Internal\AlsLowInterruptThresholdRegister.cs" />

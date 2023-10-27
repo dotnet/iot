@@ -7,18 +7,16 @@ using Iot.Device.Vcnl4040.Infrastructure;
 namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
-    /// PS configuration register 1 & 2
-    /// Command code / address: 0x03 (LSB and MSB)
+    /// PS configuration register 1
+    /// Command code / address: 0x03 (LSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    internal class PsConf12Register : Register
+    internal class PsConf1Register : Register
     {
         private static readonly byte PsDutyMask = 0b1100_0000;
         private static readonly byte PsPersMask = 0b0011_0000;
         private static readonly byte PsItMask = 0b0000_1110;
         private static readonly byte PsSdMask = 0b0000_0001;
-        private static readonly byte PsHdMask = 0b0001_0000;
-        private static readonly byte PsIntMask = 0b0000_0011;
 
         /// <summary>
         /// PS IRED on/off duty ratio
@@ -41,16 +39,9 @@ namespace Iot.Device.Vcnl4040.Internal
         public PowerState PsSd { get; set; } = PowerState.Shutdown;
 
         /// <summary>
-        /// PS output size
+        /// Initializes a new instance of the <see cref="PsConf1Register"/> class.
         /// </summary>
-        public PsOutput PsHd { get; set; } = PsOutput.Bits12;
-
-        /// <summary>
-        /// PS interrupt source
-        /// </summary>
-        public PsInterrupt PsInt { get; set; } = PsInterrupt.Disable;
-
-        public PsConf12Register(I2cInterface bus)
+        public PsConf1Register(I2cInterface bus)
             : base(CommandCode.PS_CONF_1_2, bus)
         {
         }
@@ -60,26 +51,23 @@ namespace Iot.Device.Vcnl4040.Internal
         {
             (byte dataLow, byte dataHigh) = ReadData();
 
-            PsDuty = (PsDuty)(byte)(dataLow & PsDutyMask);
-            PsPers = (PsInterruptPersistence)(byte)(dataLow & PsPersMask);
-            PsIt = (PsIntegrationTime)(byte)(dataLow & PsItMask);
-            PsSd = (PowerState)(byte)(dataLow & PsSdMask);
-            PsHd = (PsOutput)(byte)(dataHigh & PsHdMask);
-            PsInt = (PsInterrupt)(byte)(dataHigh & PsIntMask);
+            PsDuty = (PsDuty)(dataLow & PsDutyMask);
+            PsPers = (PsInterruptPersistence)(dataLow & PsPersMask);
+            PsIt = (PsIntegrationTime)(dataLow & PsItMask);
+            PsSd = (PowerState)(dataLow & PsSdMask);
         }
 
         /// <inheritdoc/>>
         public override void Write()
         {
+            // read current register content, to preserve the high byte
+            (_, byte dataHigh) = ReadData();
+
             byte dataLow = 0;
             dataLow |= (byte)PsDuty;
             dataLow |= (byte)PsPers;
             dataLow |= (byte)PsIt;
             dataLow |= (byte)PsSd;
-
-            byte dataHigh = 0;
-            dataHigh |= (byte)PsHd;
-            dataHigh |= (byte)PsInt;
 
             WriteData(dataLow, dataHigh);
         }
