@@ -153,62 +153,6 @@ public class Program
         device.ClearDisplay();
     }
 
-    private void SendMessageSsd1306(Ssd1306 device, string message)
-    {
-        device.SendCommand(new Ssd1306Cmnds.SetColumnAddress());
-        device.SendCommand(new Ssd1306Cmnds.SetPageAddress(Ssd1306Cmnds.PageAddress.Page0,
-            Ssd1306Cmnds.PageAddress.Page3));
-
-        foreach (char character in message)
-        {
-            device.SendData(BasicFont.GetCharacterBytes(character));
-        }
-    }
-
-    private void SendMessageSsd1327(Ssd1327 device, string message)
-    {
-        device.SetRowAddress(0x00, 0x07);
-
-        foreach (char character in message)
-        {
-            byte[] charBitMap = BasicFont.GetCharacterBytes(character);
-            List<byte> data = new List<byte>();
-            for (var i = 0; i < charBitMap.Length; i = i + 2)
-            {
-                for (var j = 0; j < 8; j++)
-                {
-                    byte cdata = 0x00;
-                    int bit1 = (byte)((charBitMap[i] >> j) & 0x01);
-                    cdata |= (bit1 == 1) ? (byte)0xF0 : (byte)0x00;
-                    var secondBitIndex = i + 1;
-                    if (secondBitIndex < charBitMap.Length)
-                    {
-                        int bit2 = (byte)((charBitMap[i + 1] >> j) & 0x01);
-                        cdata |= (bit2 == 1) ? (byte)0x0F : (byte)0x00;
-                    }
-
-                    data.Add(cdata);
-                }
-            }
-
-            device.SendData(data.ToArray());
-        }
-    }
-
-    private string DisplayIpAddress()
-    {
-        string? ipAddress = GetIpAddress();
-
-        if (ipAddress is null)
-        {
-            return $"IP:{ipAddress}";
-        }
-        else
-        {
-            return $"Error: IP Address Not Found";
-        }
-    }
-
     private void DisplayImages(Ssd1306 ssd1306)
     {
         Console.WriteLine("Display Images");
@@ -247,44 +191,5 @@ public class Program
         }
 
         Console.ReadKey(true);
-    }
-
-    // Referencing https://stackoverflow.com/questions/6803073/get-local-ip-address
-    private string? GetIpAddress()
-    {
-        // Get a list of all network interfaces (usually one per network card, dialup, and VPN connection).
-        NetworkInterface[] networkInterfaces = NetworkInterface.GetAllNetworkInterfaces();
-
-        foreach (NetworkInterface network in networkInterfaces)
-        {
-            // Read the IP configuration for each network
-            IPInterfaceProperties properties = network.GetIPProperties();
-
-            if (network.NetworkInterfaceType == NetworkInterfaceType.Ethernet &&
-                network.OperationalStatus == OperationalStatus.Up &&
-                !network.Description.ToLower().Contains("virtual") &&
-                !network.Description.ToLower().Contains("pseudo"))
-            {
-                // Each network interface may have multiple IP addresses.
-                foreach (IPAddressInformation address in properties.UnicastAddresses)
-                {
-                    // We're only interested in IPv4 addresses for now.
-                    if (address.Address.AddressFamily != AddressFamily.InterNetwork)
-                    {
-                        continue;
-                    }
-
-                    // Ignore loopback addresses (e.g., 127.0.0.1).
-                    if (IPAddress.IsLoopback(address.Address))
-                    {
-                        continue;
-                    }
-
-                    return address.Address.ToString();
-                }
-            }
-        }
-
-        return null;
     }
 }
