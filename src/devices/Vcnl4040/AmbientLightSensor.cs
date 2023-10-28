@@ -19,6 +19,9 @@ namespace Iot.Device.Vcnl4040
         private AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
         private AlsDataRegister _alsDataRegister;
 
+        private bool _interruptIsConfigured = false;
+        private bool _interruptEnabled;
+
         internal AmbientLightSensor(I2cInterface i2cBus)
         {
             _alsConfRegister = new AlsConfRegister(i2cBus);
@@ -49,7 +52,11 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Gets and sets the ALS integration time.
-        /// ADD MORE DETAILS
+        /// Important: the integration time setting influences the interrupt
+        ///            threshold detection range. Therefore changing the
+        ///            integration time will disable the ALS interrupt and
+        ///            require to re-configure and re-enable the interrupt.
+        ///            This is only valid if the ALS interrupt is used.
         /// </summary>
         public AlsIntegrationTime IntegrationTime
         {
@@ -61,6 +68,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
+                InterruptEnabled = false;
+                _interruptIsConfigured = false;
                 _alsConfRegister.Read();
                 _alsConfRegister.AlsIt = value;
                 _alsConfRegister.Write();
@@ -68,42 +77,71 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
+        /// Enables or disables the interrupt of the ambient light sensor
+        /// </summary>
+        public bool InterruptEnabled
+        {
+            get => _interruptEnabled;
+            set
+            {
+                if (value && !_interruptIsConfigured)
+                {
+                    throw new InvalidOperationException("The interrupt must be configured before enabling it.");
+                }
+
+                _alsConfRegister.AlsIntEn = value ? AlsInterrupt.Enabled : AlsInterrupt.Disabled;
+                _interruptEnabled = value;
+            }
+        }
+
+        /// <summary>
         /// Configures the interrupt behaviour for the ambient light sensor.
         /// MEHR ERKLÄRUNG!!!
         /// Ist Persistence eine Art von Tiefpass? Wie oft wird die Messung dann ausgeführt?
+        /// Bevor any setting is altered the interrupt will be implicitly disabled.
+        /// It must be (re-)enabled after configuring.
         /// </summary>
         /// <param name="lowerThreshold">Lower threshold for triggering the interrupt</param>
-        /// <param name="uppderTreshold">Upper threshold for triggering the interrupt</param>
+        /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
         /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
         public void ConfigureInterrupt(Illuminance lowerThreshold,
                                        Illuminance upperThreshold,
                                        AlsInterruptPersistence persistence)
         {
+            _interruptIsConfigured = false;
+
             // the maximum detection range and resolution depends on the integration time setting
             _alsConfRegister.Read();
-            Illuminance max = _alsConfRegister.AlsIt switch
+            (Illuminance maxDetectionRange, double resolution) = _alsConfRegister.AlsIt switch
             {
-                AlsIntegrationTime.Time80ms => Illuminance.FromLux(6553.5),
-                AlsIntegrationTime.Time160ms => Illuminance.FromLux(3276.8),
-                AlsIntegrationTime.Time320ms => Illuminance.FromLux(1638.4),
-                AlsIntegrationTime.Time640ms => Illuminance.FromLux(819.2),
+                AlsIntegrationTime.Time80ms => (Illuminance.FromLux(6553.5), 0.1),
+                AlsIntegrationTime.Time160ms => (Illuminance.FromLux(3276.8), 0.05),
+                AlsIntegrationTime.Time320ms => (Illuminance.FromLux(1638.4), 0.025),
+                AlsIntegrationTime.Time640ms => (Illuminance.FromLux(819.2), 0.0125),
                 _ => throw new NotImplementedException(),
             };
 
-            if (lowerThreshold > max)
+            if (lowerThreshold > maxDetectionRange)
             {
-                throw new ArgumentException($"Lower threshold exceed maximum detection range ({max})");
+                throw new ArgumentException($"Lower threshold exceed maximum detection range ({maxDetectionRange})");
             }
 
-            if (upperThreshold > max)
+            if (upperThreshold > maxDetectionRange)
             {
-                throw new ArgumentException($"Upper threshold exceed maximum detection range ({max})");
+                throw new ArgumentException($"Upper threshold exceed maximum detection range ({maxDetectionRange})");
             }
 
             if (lowerThreshold > upperThreshold)
             {
                 throw new ArgumentException("Lower threshold is higher than upper threshold");
             }
+
+            _alsLowInterruptThresholdRegister.Threshold = (int)(lowerThreshold.Lux * resolution);
+            _alsHighInterruptThresholdRegister.Threshold = (int)(upperThreshold.Lux * resolution);
+            _alsLowInterruptThresholdRegister.Write();
+            _alsHighInterruptThresholdRegister.Write();
+
+            _interruptIsConfigured = true;
         }
 
         /// <summary>
