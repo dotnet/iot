@@ -17,6 +17,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Arduino", "..\Arduino\Ardui
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpAdapter", "..\SkiaSharpAdapter\SkiaSharpAdapter.csproj", "{76D9C818-0A02-4DC1-A480-5C8552AC1B65}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\Common.csproj", "{F067B019-474D-442E-B7A8-A87F59B46F41}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|x64.Build.0 = Release|Any CPU
 		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|x86.ActiveCfg = Release|Any CPU
 		{76D9C818-0A02-4DC1-A480-5C8552AC1B65}.Release|x86.Build.0 = Release|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Debug|x64.Build.0 = Debug|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Debug|x86.Build.0 = Debug|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Release|x64.ActiveCfg = Release|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Release|x64.Build.0 = Release|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Release|x86.ActiveCfg = Release|Any CPU
+		{F067B019-474D-442E-B7A8-A87F59B46F41}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

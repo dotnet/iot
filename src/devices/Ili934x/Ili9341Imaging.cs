@@ -19,7 +19,7 @@ namespace Iot.Device.Ili934x
         /// <param name="sourcePoint">A coordinate point in the source bitmap where copying starts from.</param>
         /// <param name="destinationRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
         /// <param name="update">True to immediately send the new backbuffer to the screen</param>
-        public override void DrawBitmap(BitmapImage bm, Point sourcePoint, Rectangle destinationRect, bool update)
+        public void DrawBitmap(BitmapImage bm, Point sourcePoint, Rectangle destinationRect, bool update)
         {
             if (bm is null)
             {
@@ -34,11 +34,34 @@ namespace Iot.Device.Ili934x
             }
         }
 
+        /// <inheritdoc />
+        public override void DrawBitmap(BitmapImage bm)
+        {
+            int width = (int)ScreenWidth;
+            if (width > bm.Width)
+            {
+                width = bm.Width;
+            }
+
+            int height = (int)ScreenHeight;
+            if (height > bm.Height)
+            {
+                height = bm.Height;
+            }
+
+            DrawBitmap(bm, new Point(0, 0), new Rectangle(0, 0, width, height), true);
+        }
+
         private void FillBackBufferFromImage(BitmapImage image, Point sourcePoint, Rectangle destinationRect)
         {
             if (image is null)
             {
                 throw new ArgumentNullException(nameof(image));
+            }
+
+            if (!CanConvertFromPixelFormat(image.PixelFormat))
+            {
+                throw new InvalidOperationException($"{image.PixelFormat} is not a supported pixel format");
             }
 
             Converters.AdjustImageDestination(image, ref sourcePoint, ref destinationRect);
@@ -59,7 +82,7 @@ namespace Iot.Device.Ili934x
         /// Updates the display with the current screen buffer.
         /// <param name="forceFull">Forces a full update, otherwise only changed screen contents are updated</param>
         /// </summary>
-        public override void SendFrame(bool forceFull)
+        public void SendFrame(bool forceFull)
         {
             if (forceFull)
             {

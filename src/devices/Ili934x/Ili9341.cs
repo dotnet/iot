@@ -192,7 +192,7 @@ namespace Iot.Device.Ili934x
 
             if (doRefresh)
             {
-                SendFrame();
+                SendFrame(false);
             }
         }
 

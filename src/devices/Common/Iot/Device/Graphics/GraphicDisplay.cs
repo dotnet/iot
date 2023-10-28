@@ -56,58 +56,10 @@ namespace Iot.Device.Graphics
         }
 
         /// <summary>
-        /// Send a bitmap to the Ili9341 display.
+        /// Send a bitmap to the display buffer.
         /// </summary>
         /// <param name="bm">The bitmap to be sent to the display controller.</param>
-        public void DrawBitmap(BitmapImage bm)
-        {
-            int width = (int)ScreenWidth;
-            if (width > bm.Width)
-            {
-                width = bm.Width;
-            }
-
-            int height = (int)ScreenHeight;
-            if (height > bm.Height)
-            {
-                height = bm.Height;
-            }
-
-            DrawBitmap(bm, new Point(0, 0), new Rectangle(0, 0, width, height), true);
-        }
-
-        /// <summary>
-        /// Send a bitmap to the Ili9341 display specifying the starting position and destination clipping rectangle.
-        /// </summary>
-        /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
-        /// <param name="updateRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
-        public void DrawBitmap(BitmapImage bm, Rectangle updateRect)
-        {
-            DrawBitmap(bm, new Point(updateRect.X, updateRect.Y), updateRect, true);
-        }
-
-        /// <summary>
-        /// Copies the given bitmap to the back buffer and optionally updates the screen directly
-        /// </summary>
-        /// <param name="bm">The bitmap to draw</param>
-        /// <param name="sourcePoint">A coordinate point in the source bitmap where copying starts from.</param>
-        /// <param name="destinationRect">A rectangle that defines where in the display the bitmap is written. No scaling is done.</param>
-        /// <param name="update">True to immediately send the updated backbuffer to the screen</param>
-        public abstract void DrawBitmap(BitmapImage bm, Point sourcePoint, Rectangle destinationRect, bool update);
-
-        /// <summary>
-        /// Updates the display with the current screen buffer.
-        /// <param name="forceFull">Forces a full update, otherwise only changed screen contents are updated (if that feature is supported)</param>
-        /// </summary>
-        public abstract void SendFrame(bool forceFull);
-
-        /// <summary>
-        /// Updates the display with the current screen buffer.
-        /// </summary>
-        public void SendFrame()
-        {
-            SendFrame(false);
-        }
+        public abstract void DrawBitmap(BitmapImage bm);
 
         /// <summary>
         /// Standard dispose pattern
