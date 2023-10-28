@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Iot.Device.Vcnl4040.Definitions;
+using Iot.Device.Vcnl4040.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 
 namespace Iot.Device.Vcnl4040.Internal
@@ -13,10 +13,10 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class AlsConfRegister : Register
     {
-        private static readonly byte AlsItMask = 0b1100_0000;
-        private static readonly byte AlsPersMask = 0b0000_1100;
-        private static readonly byte AlsIntEnMask = 0b0000_0010;
-        private static readonly byte AlsSdMask = 0b0000_0001;
+        private const byte AlsItMask = 0b1100_0000;
+        private const byte AlsPersMask = 0b0000_1100;
+        private const byte AlsIntEnMask = 0b0000_0010;
+        private const byte AlsSdMask = 0b0000_0001;
 
         /// <summary>
         /// ALS integration time setting
@@ -26,12 +26,12 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// ALS interrupt persistence setting
         /// </summary>
-        public AlsInterruptPersistence ALS_PERS { get; set; } = AlsInterruptPersistence.Persistence1;
+        public AlsInterruptPersistence AlsPers { get; set; } = AlsInterruptPersistence.Persistence1;
 
         /// <summary>
         /// ALS interrupt enable state
         /// </summary>
-        public AlsInterrupt ALS_INT_EN { get; set; } = AlsInterrupt.Disabled;
+        public AlsInterrupt AlsIntEn { get; set; } = AlsInterrupt.Disabled;
 
         /// <summary>
         /// ALS power state (ALS_SD of ALS_CONF register)
@@ -49,8 +49,8 @@ namespace Iot.Device.Vcnl4040.Internal
             (byte dataLow, byte _) = ReadData();
 
             AlsIt = (AlsIntegrationTime)(dataLow & AlsItMask);
-            ALS_PERS = (AlsInterruptPersistence)(dataLow & AlsPersMask);
-            ALS_INT_EN = (AlsInterrupt)(dataLow & AlsIntEnMask);
+            AlsPers = (AlsInterruptPersistence)(dataLow & AlsPersMask);
+            AlsIntEn = (AlsInterrupt)(dataLow & AlsIntEnMask);
             AlsSd = (PowerState)(dataLow & AlsSdMask);
         }
 
@@ -58,9 +58,9 @@ namespace Iot.Device.Vcnl4040.Internal
         public override void Write()
         {
             byte dataLow = 0;
-            dataLow |= (byte)((byte)(AlsIt) << 6);
-            dataLow |= (byte)((byte)(ALS_PERS) << 2);
-            dataLow |= (byte)((byte)(ALS_INT_EN) << 1);
+            dataLow |= (byte)AlsIt;
+            dataLow |= (byte)AlsPers;
+            dataLow |= (byte)AlsIntEn;
             dataLow |= (byte)AlsSd;
 
             WriteData(dataLow, 0);

@@ -1,7 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Definitions
+using System;
+
+namespace Iot.Device.Vcnl4040.Defnitions
 {
     /// <summary>
     /// Defines the set of ALS integration times.

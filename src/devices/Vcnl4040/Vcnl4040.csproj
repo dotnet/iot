@@ -15,24 +15,25 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Definitions\PsActiveForceMode.cs" />
-    <Compile Include="Definitions\PsDetectionLogicOutputMode.cs" />
-    <Compile Include="Definitions\PsLedCurrent.cs" />
-    <Compile Include="Definitions\PsSunlightCancellationState.cs" />
-    <Compile Include="Definitions\PsWhiteChannelState.cs" />
-    <Compile Include="Definitions\PsTrig.cs" />
-    <Compile Include="Definitions\PsSmartPersistenceState.cs" />
-    <Compile Include="Definitions\PsMultiPulse.cs" />
-    <Compile Include="Definitions\PsInterrupt.cs" />
-    <Compile Include="Definitions\PsOutput.cs" />
-    <Compile Include="Definitions\PsIntegrationTime.cs" />
-    <Compile Include="Definitions\PsInterruptPersistence.cs" />
-    <Compile Include="Definitions\PsDuty.cs" />
-    <Compile Include="Definitions\PowerState.cs" />
-    <Compile Include="Definitions\AlsInterrupt.cs" />
-    <Compile Include="Definitions\AlsInterruptPersistence.cs" />
-    <Compile Include="Definitions\AlsIntegrationTime.cs" />
+    <Compile Include="Defnitions\AlsIntegrationTime.cs" />
+    <Compile Include="Defnitions\PsActiveForceMode.cs" />
+    <Compile Include="Defnitions\PsDetectionLogicOutputMode.cs" />
+    <Compile Include="Defnitions\PsLedCurrent.cs" />
+    <Compile Include="Defnitions\PsSunlightCancellationState.cs" />
+    <Compile Include="Defnitions\PsWhiteChannelState.cs" />
+    <Compile Include="Defnitions\PsTrig.cs" />
+    <Compile Include="Defnitions\PsSmartPersistenceState.cs" />
+    <Compile Include="Defnitions\PsMultiPulse.cs" />
+    <Compile Include="Defnitions\PsInterrupt.cs" />
+    <Compile Include="Defnitions\PsOutput.cs" />
+    <Compile Include="Defnitions\PsIntegrationTime.cs" />
+    <Compile Include="Defnitions\PsInterruptPersistence.cs" />
+    <Compile Include="Defnitions\PsDuty.cs" />
+    <Compile Include="Defnitions\PowerState.cs" />
+    <Compile Include="Defnitions\AlsInterrupt.cs" />
+    <Compile Include="Defnitions\AlsInterruptPersistence.cs" />
     <Compile Include="Infrastructure\I2cInterface.cs" />
+    <Compile Include="Internal\IntFlagRegister.cs" />
     <Compile Include="Internal\WhiteDataRegister.cs" />
     <Compile Include="Internal\PsCancellationLevelRegister.cs" />
     <Compile Include="Internal\PsMsRegister.cs" />
@@ -49,7 +50,7 @@
     <Compile Include="Internal\IdRegister.cs" />
     <Compile Include="Internal\PsDataRegister.cs" />
     <Compile Include="Internal\Register.cs" />
-    <Compile Include="Definitions\CommandCode.cs" />
+    <Compile Include="Defnitions\CommandCode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

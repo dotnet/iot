@@ -1,32 +1,32 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Definitions
+namespace Iot.Device.Vcnl4040.Defnitions
 {
     /// <summary>
-    /// Defines the set of PS interrupt persistence settings.
+    /// Defines the set of PS duty on/off ratio settings.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsInterruptPersistence : byte
+    public enum PsDuty : byte
     {
         /// <summary>
-        /// Persistence setting 1
+        /// Duty is 1/40
         /// </summary>
-        Persistence1 = 0b0000_0000,
+        Duty40 = 0b0000_0000,
 
         /// <summary>
-        /// Persistence setting 2
+        /// Duty is 1/80
         /// </summary>
-        Persistence2 = 0b0001_0000,
+        Duty80 = 0b0100_0000,
 
         /// <summary>
-        /// Persistence setting 3
+        /// Duty is 1/160
         /// </summary>
-        Persistence3 = 0b0010_0000,
+        Duty160 = 0b1000_0000,
 
         /// <summary>
-        /// Persistence setting 4
+        /// Duty is 1/320
         /// </summary>
-        Persistence4 = 0b0011_0000
+        Duty320 = 0b1100_0000
     }
 }

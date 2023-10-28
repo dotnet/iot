@@ -1,32 +1,32 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Definitions
+namespace Iot.Device.Vcnl4040.Defnitions
 {
     /// <summary>
-    /// Defines the set of PS interrupt settings.
+    /// Defines the set of proximity multi pulse numbers
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsInterrupt : byte
+    public enum PsMultiPulse : byte
     {
         /// <summary>
-        /// Interrupt disable
+        /// 1 multi pulse
         /// </summary>
-        Disable = 0b0000_0000,
+        Pulse1 = 0b0000_0000,
 
         /// <summary>
-        /// Trigger when close
+        /// 2 multi pulse
         /// </summary>
-        Close = 0b0000_0001,
+        Pulse2 = 0b0010_0000,
 
         /// <summary>
-        /// Trigger when away
+        /// 4 multi pulses
         /// </summary>
-        Away = 0b0000_0010,
+        Pulse4 = 0b0100_0000,
 
         /// <summary>
-        /// Trigger when close or away
+        /// 8 multi pulses
         /// </summary>
-        CloseOrAway = 0b0000_0011
+        Pulse8 = 0b0110_0000
     }
 }

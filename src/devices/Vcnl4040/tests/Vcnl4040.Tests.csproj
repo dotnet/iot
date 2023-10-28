@@ -5,9 +5,6 @@
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <AdditionalFiles Remove="C:\Users\marcu\Source\Repos\iot\eng\\stylecop.json" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Vcnl4040.csproj" />
   </ItemGroup>
 

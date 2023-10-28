@@ -6,7 +6,7 @@ using System.ComponentModel;
 using System.Device.I2c;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
-using Iot.Device.Vcnl4040.Definitions;
+using Iot.Device.Vcnl4040.Internal;
 
 internal class Program
 {
@@ -45,12 +45,12 @@ internal class Program
                 break;
 
             case "alson":
-                s_device!.SetPowerOn();
+                s_device!.AmbientLightSensor.SetPowerState(Iot.Device.Vcnl4040.PowerState.PowerOn);
                 ShowAlsConfiguration();
                 break;
 
             case "alsof":
-                s_device!.SetPowerOff();
+                s_device!.AmbientLightSensor.SetPowerState(Iot.Device.Vcnl4040.PowerState.PowerOff);
                 ShowAlsConfiguration();
                 break;
 
@@ -77,8 +77,8 @@ internal class Program
     private static void ShowAlsConfiguration()
     {
         Console.WriteLine("ALS configuration:");
-        Console.WriteLine($"  Integration time: {s_device!.GetIntegrationTime()}");
-        Console.WriteLine($"  Power state: {s_device!.GetPowerState()}");
+        Console.WriteLine($"  Integration time: {s_device!.AmbientLightSensor.GetIntegrationTime()}");
+        Console.WriteLine($"  Power state: {s_device!.AmbientLightSensor.GetPowerState()}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
@@ -90,7 +90,7 @@ internal class Program
             return;
         }
 
-        s_device!.SetIntegrationTime(integrationTime);
+        s_device!.AmbientLightSensor.SetIntegrationTime(integrationTime);
     }
 
     private static void ShowAlsData()
@@ -98,7 +98,7 @@ internal class Program
         Console.WriteLine("Ambient light:");
         while (!Console.KeyAvailable)
         {
-            int data = s_device!.GetAlsReading();
+            int data = s_device!.AmbientLightSensor.GetAlsReading();
             PrintBarGraph(data, 65535, 100);
             Task.Delay(100).Wait();
         }
