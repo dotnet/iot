@@ -13,7 +13,7 @@ namespace Iot.Device.Vcnl4040.Internal
     /// Command code / address: 0x0b
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    internal class IntFlagRegister : Register
+    internal class InterruptFlagRegister : Register
     {
         /// <summary>
         /// PS entering protection mode event
@@ -41,9 +41,9 @@ namespace Iot.Device.Vcnl4040.Internal
         public bool PsIfAway { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IntFlagRegister"/> class.
+        /// Initializes a new instance of the <see cref="InterruptFlagRegister"/> class.
         /// </summary>
-        public IntFlagRegister(I2cInterface bus)
+        public InterruptFlagRegister(I2cInterface bus)
             : base(CommandCode.INT_Flag, bus)
         {
         }

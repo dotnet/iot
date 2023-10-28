@@ -33,7 +33,7 @@
     <Compile Include="Defnitions\AlsInterrupt.cs" />
     <Compile Include="Defnitions\AlsInterruptPersistence.cs" />
     <Compile Include="Infrastructure\I2cInterface.cs" />
-    <Compile Include="Internal\IntFlagRegister.cs" />
+    <Compile Include="Internal\InterruptFlagRegister.cs" />
     <Compile Include="Internal\WhiteDataRegister.cs" />
     <Compile Include="Internal\PsCancellationLevelRegister.cs" />
     <Compile Include="Internal\PsMsRegister.cs" />

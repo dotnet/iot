@@ -36,7 +36,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// ALS power state (ALS_SD of ALS_CONF register)
         /// </summary>
-        public PowerState AlsSd { get; set; } = PowerState.Shutdown;
+        public PowerState AlsSd { get; set; } = PowerState.PowerOff;
 
         public AlsConfRegister(I2cInterface bus)
             : base(CommandCode.ALS_CONF, bus)

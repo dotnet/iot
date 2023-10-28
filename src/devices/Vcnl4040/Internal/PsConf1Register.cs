@@ -36,7 +36,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// PS power state
         /// </summary>
-        public PowerState PsSd { get; set; } = PowerState.Shutdown;
+        public PowerState PsSd { get; set; } = PowerState.PowerOff;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PsConf1Register"/> class.
