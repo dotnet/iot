@@ -13,7 +13,7 @@ namespace Iot.Device.Si5351.Internal.Register.Tests
     {
         [Theory]
         [InlineData(0b0000_0000, PowerState.PowerOn)]
-        [InlineData(0b0000_0001, PowerState.Shutdown)]
+        [InlineData(0b0000_0001, PowerState.PowerOff)]
         public void Read(byte data, PowerState powerState)
         {
             var testDevice = new I2cTestDevice();
@@ -30,9 +30,9 @@ namespace Iot.Device.Si5351.Internal.Register.Tests
 
         [Theory]
         [InlineData(0b0000_0000, PowerState.PowerOn, 0b0000_0000)]
-        [InlineData(0b0000_0000, PowerState.Shutdown, 0b0000_0001)]
+        [InlineData(0b0000_0000, PowerState.PowerOff, 0b0000_0001)]
         [InlineData(0b0000_0001, PowerState.PowerOn, 0b0000_0000)]
-        [InlineData(0b0000_0001, PowerState.Shutdown, 0b0000_0001)]
+        [InlineData(0b0000_0001, PowerState.PowerOff, 0b0000_0001)]
         public void Write(byte initialData, PowerState powerState, byte modifiedData)
         {
             var testDevice = new I2cTestDevice();

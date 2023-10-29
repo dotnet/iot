@@ -28,7 +28,7 @@ namespace Iot.Device.Vcnl4040
         private PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
         private PsDataRegister _psDataRegister;
         private WhiteDataRegister _whiteDataRegister;
-        private IntFlagRegister _intFlagRegister;
+        private InterruptFlagRegister _interruptFlagRegister;
         private IdRegister _idRegister;
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Iot.Device.Vcnl4040
             _psHighInterruptThresholdRegister = new PsHighInterruptThresholdRegister(_i2cBus);
             _psDataRegister = new PsDataRegister(_i2cBus);
             _whiteDataRegister = new WhiteDataRegister(_i2cBus);
-            _intFlagRegister = new IntFlagRegister(_i2cBus);
+            _interruptFlagRegister = new InterruptFlagRegister(_i2cBus);
             _idRegister = new IdRegister(_i2cBus);
         }
 
@@ -76,6 +76,20 @@ namespace Iot.Device.Vcnl4040
         {
             _idRegister.Read();
             return _idRegister.Id;
+        }
+
+        /// <summary>
+        /// Gets and clears (by reading) the interrupt flags.
+        /// </summary>
+        public InterruptFlags GetAndClearInterruptFlags()
+        {
+            _interruptFlagRegister.Read();
+            InterruptFlags flags = new InterruptFlags(_interruptFlagRegister.PsSpFlag,
+                                                      _interruptFlagRegister.AlsIfL,
+                                                      _interruptFlagRegister.AlsIfH,
+                                                      _interruptFlagRegister.PsIfClose,
+                                                      _interruptFlagRegister.PsIfAway);
+            return flags;
         }
 
         /// <summary>

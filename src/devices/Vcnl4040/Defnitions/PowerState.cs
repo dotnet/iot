@@ -17,6 +17,6 @@ namespace Iot.Device.Vcnl4040.Defnitions
         /// <summary>
         /// ALS/SD shutdown / power off
         /// </summary>
-        Shutdown = 0b0000_0001
+        PowerOff = 0b0000_0001
     }
 }
