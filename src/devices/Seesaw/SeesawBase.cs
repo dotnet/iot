@@ -13,7 +13,8 @@ namespace Iot.Device.Seesaw
     /// </summary>
     public partial class Seesaw : IDisposable
     {
-        private const byte SessawHardwareId = 0x55;
+        private const byte SeesawHardwareId = 0x55;
+        private const byte NeoDriverHardwareId = 0x87;
 
         /// <summary>
         /// I2C device used for communication
@@ -67,13 +68,19 @@ namespace Iot.Device.Seesaw
             SoftwareReset();
             DelayHelper.DelayMilliseconds(10, true);
 
-            if (ReadByte(SeesawModule.Status, SeesawFunction.StatusHwId) != SessawHardwareId)
+            switch (ReadByte(SeesawModule.Status, SeesawFunction.StatusHwId))
             {
-                throw new NotSupportedException($"The hardware on I2C Bus {I2cDevice.ConnectionSettings.BusId}, Address 0x{I2cDevice.ConnectionSettings.DeviceAddress:X2} does not appear to be an Adafruit SeeSaw module");
+                case SeesawHardwareId:
+                    _options = GetOptions();
+                    Version = GetVersion();
+                    break;
+                case NeoDriverHardwareId:
+                    _options = 1 << (byte)SeesawModule.Neopixel;
+                    Version = GetVersion();
+                    break;
+                default:
+                    throw new NotSupportedException($"The hardware on I2C Bus {I2cDevice.ConnectionSettings.BusId}, Address 0x{I2cDevice.ConnectionSettings.DeviceAddress:X2} does not appear to be an Adafruit SeeSaw module");
             }
-
-            _options = GetOptions();
-            Version = GetVersion();
         }
 
         /// <summary>
