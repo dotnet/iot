@@ -80,16 +80,27 @@ namespace Iot.Device.Nmea0183.Ais
         /// <returns>A string</returns>
         public override string ToString()
         {
-            string s = Name ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(s))
-            {
-                s = FormatMmsi();
-            }
+            string s = NameOrMssi();
 
             // Note that the special target types (AtoN, SAR, BaseStation) do not use the notification of transceiver types.
             if (Position.ContainsValidPosition())
             {
                 s += $" {Position}";
+            }
+
+            return s;
+        }
+
+        /// <summary>
+        /// Returns the name of the ship if available, the MMSI or some other identification otherwise
+        /// </summary>
+        /// <returns>A string</returns>
+        public string NameOrMssi()
+        {
+            string s = Name ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                s = FormatMmsi();
             }
 
             return s;
