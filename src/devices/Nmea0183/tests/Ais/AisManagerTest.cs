@@ -179,7 +179,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
                     if ((msgCount++ % 60) == 0)
                     {
                         // Call directly, so our test is deterministic
-                        _manager.AisAlarmThread(msg.DateTime);
+                        _manager.AisAlarmThreadOperation(msg.DateTime);
                     }
                 }
             };
@@ -298,6 +298,59 @@ namespace Iot.Device.Nmea0183.Tests.Ais
         }
 
         [Fact]
+        public void CheckDistances()
+        {
+            const string logToParse = "Nmea-2023-07-29-07-03.txt";
+            using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream(logToParse));
+            _manager.TrackEstimationParameters.AisSafetyCheckInterval = TimeSpan.Zero;
+            _manager.TrackEstimationParameters.MaximumPositionAge = TimeSpan.FromDays(1); // Let's always do this
+            bool wasValid = false;
+            bool wasValid2 = false;
+            NmeaSentence? lastSentence = null;
+
+            void RunCheck(DateTimeOffset currentTime)
+            {
+                var listOfShips = _manager.GetTargets();
+                foreach (var t in listOfShips)
+                {
+                    if (t.RelativePosition != null)
+                    {
+                        Assert.False(t.RelativePosition.Distance > Length.FromNauticalMiles(10), $"Distance to {t.NameOrMssi()} was {t.RelativePosition.Distance}");
+                        wasValid2 = true;
+                        Assert.True(_manager.GetOwnShipData(out var own, currentTime));
+                        var staticDist = own.DistanceTo(t);
+                        Assert.True((staticDist - t.RelativePosition.Distance).Abs() < Length.FromNauticalMiles(1));
+                    }
+
+                    if (t.Name == "WILD CHINOOK")
+                    {
+                        wasValid = true;
+                    }
+                }
+            }
+
+            reader.OnNewSequence += (source, msg) =>
+            {
+                _manager.SendSentence(source, msg);
+                lastSentence = msg;
+            };
+
+            reader.StartDecode();
+            reader.StopDecode();
+            Assert.NotNull(lastSentence);
+            DateTimeOffset currentTime = lastSentence!.DateTime;
+            _manager.AisAlarmThreadOperation(currentTime);
+            RunCheck(currentTime);
+
+            Assert.True(wasValid);
+            Assert.True(wasValid2);
+            currentTime = currentTime + TimeSpan.FromMinutes(3);
+            _manager.AisAlarmThreadOperation(currentTime); // Almost lost the vessels
+            RunCheck(currentTime);
+
+        }
+
+        [Fact]
         public void ShouldEncodeShipCorrectly2()
         {
             // Note that this tests internal conversion functionality of the manager. The public api is tested below.
@@ -410,6 +463,32 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             _manager.OnMessage -= MessageReceived;
             Assert.Equal(2, seenMessages);
             Assert.True(warningReceived);
+        }
+
+        [Fact]
+        public void DistanceIsReasonable()
+        {
+            var otherShip = new Ship(296123456);
+            otherShip.Position = new GeographicPosition(47.58, 9.50, 440);
+            otherShip.CourseOverGround = Angle.FromDegrees(270);
+            otherShip.SpeedOverGround = Speed.FromKnots(0.0001);
+
+            var myShip = new Ship(269110660);
+            myShip.Position = new GeographicPosition(47.60, 9.48, 440);
+            myShip.CourseOverGround = Angle.FromDegrees(355);
+            myShip.SpeedOverGround = Speed.FromKnots(0);
+
+            var delta = myShip.RelativePositionTo(otherShip, DateTimeOffset.UtcNow, new TrackEstimationParameters());
+            Assert.NotNull(delta);
+            Assert.Equal(1.45, delta!.Distance.NauticalMiles, 3);
+            Assert.False(delta.ClosestPointOfApproach.HasValue);
+
+            // The value of "distance" should not change, regardless of our own speed
+            myShip.SpeedOverGround = Speed.FromKnots(5);
+            var delta2 = myShip.RelativePositionTo(otherShip, DateTimeOffset.UtcNow, new TrackEstimationParameters());
+            Assert.NotNull(delta);
+            Assert.Equal(1.45, delta!.Distance.NauticalMiles, 3);
+
         }
     }
 }

@@ -16,6 +16,7 @@
     <None Remove="Nmea-2020-07-23-12-02.txt" />
     <None Remove="Nmea-2021-08-25-16-25.txt" />
     <None Remove="Nmea-2021-08-25-16-49.txt" />
+    <None Remove="Nmea-2023-07-29-07-03.txt" />
     <None Remove="Nmea-AisSpecialTargets.txt" />
   </ItemGroup>
 
@@ -26,6 +27,7 @@
     <EmbeddedResource Include="Nmea-2020-07-23-12-02.txt" />
     <EmbeddedResource Include="Nmea-2021-08-25-16-25.txt" />
     <EmbeddedResource Include="Nmea-2021-08-25-16-49.txt" />
+    <EmbeddedResource Include="Nmea-2023-07-29-07-03.txt" />
     <EmbeddedResource Include="Nmea-AisSpecialTargets.txt" />
   </ItemGroup>
 
