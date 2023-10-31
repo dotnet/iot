@@ -19,22 +19,18 @@ namespace Iot.Device.Vcnl4040
         public static int DefaultI2cAddress = 0x60;
         private I2cInterface _i2cBus;
 
-        private PsConf1Register _psConf1Register;
-        private PsConf2Register _psConf2Register;
-        private PsConf3Register _psConf3Register;
-        private PsMsRegister _psMsRegister;
-        private PsCancellationLevelRegister _psCancellationLevelRegister;
-        private PsLowInterruptThresholdRegister _psLowInterruptThresholdRegister;
-        private PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
-        private PsDataRegister _psDataRegister;
-        private WhiteDataRegister _whiteDataRegister;
         private InterruptFlagRegister _interruptFlagRegister;
         private IdRegister _idRegister;
 
         /// <summary>
-        /// Ambient Light Sensor of the VCNL4040 device
+        /// Ambient light sensor of the VCNL4040 device
         /// </summary>
-        public AmbientLightSensor AmbientLightSensor { get; init; }
+        public AmbientLightSensor AmbientLightSensor { get; private init; }
+
+        /// <summary>
+        /// Proximity sensor of the VCNL4040 device
+        /// </summary>
+        public ProximitySensor ProximitySensor { get; private init; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vcnl4040"/> binding.
@@ -45,16 +41,8 @@ namespace Iot.Device.Vcnl4040
             _i2cBus = new I2cInterface(dev);
 
             AmbientLightSensor = new AmbientLightSensor(_i2cBus);
+            ProximitySensor = new ProximitySensor(_i2cBus);
 
-            _psConf1Register = new PsConf1Register(_i2cBus);
-            _psConf2Register = new PsConf2Register(_i2cBus);
-            _psConf3Register = new PsConf3Register(_i2cBus);
-            _psMsRegister = new PsMsRegister(_i2cBus);
-            _psCancellationLevelRegister = new PsCancellationLevelRegister(_i2cBus);
-            _psLowInterruptThresholdRegister = new PsLowInterruptThresholdRegister(_i2cBus);
-            _psHighInterruptThresholdRegister = new PsHighInterruptThresholdRegister(_i2cBus);
-            _psDataRegister = new PsDataRegister(_i2cBus);
-            _whiteDataRegister = new WhiteDataRegister(_i2cBus);
             _interruptFlagRegister = new InterruptFlagRegister(_i2cBus);
             _idRegister = new IdRegister(_i2cBus);
         }

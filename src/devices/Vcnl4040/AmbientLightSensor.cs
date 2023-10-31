@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System;
 using Iot.Device.Vcnl4040.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
@@ -20,7 +19,6 @@ namespace Iot.Device.Vcnl4040
         private AlsDataRegister _alsDataRegister;
 
         private bool _interruptIsConfigured = false;
-        private bool _interruptEnabled;
 
         internal AmbientLightSensor(I2cInterface i2cBus)
         {
@@ -30,32 +28,64 @@ namespace Iot.Device.Vcnl4040
             _alsDataRegister = new AlsDataRegister(i2cBus);
         }
 
+        #region General
+
         /// <summary>
-        /// Gets and sets the ALS power state.
-        /// ADD MORE DETAILS
+        /// Get or sets the power state (power on, shutdown) of the ambient light sensor.
         /// </summary>
-        public PowerState PowerState
+        public bool PowerOn
         {
             get
             {
                 _alsConfRegister.Read();
-                return _alsConfRegister.AlsSd;
+                return _alsConfRegister.AlsSd == PowerState.PowerOn;
             }
 
             set
             {
                 _alsConfRegister.Read();
-                _alsConfRegister.AlsSd = value;
+                if ((value && _alsConfRegister.AlsSd == PowerState.PowerOn)
+                || (!value && _alsConfRegister.AlsSd == PowerState.PowerOff))
+                {
+                    return;
+                }
+
+                _alsConfRegister.AlsSd = value ? PowerState.PowerOn : PowerState.PowerOff;
                 _alsConfRegister.Write();
             }
         }
+        #endregion
+
+        #region Measurement
+
+        /// <summary>
+        /// Gets the current ambient light sensor reading.
+        /// Note: the update interval depends on the integration time and persistence setting.
+        ///       Interval = integration time * persistence, e.g. 320 ms * 4 = 1280 ms.
+        /// </summary>
+        public Illuminance Reading
+        {
+            get
+            {
+                _alsDataRegister.Read();
+                return Illuminance.FromLux(_alsDataRegister.Data / 10);
+            }
+        }
+
+        #endregion
+
+        #region Configuration
 
         /// <summary>
         /// Gets and sets the ALS integration time.
-        /// Important: the integration time setting influences the interrupt
-        ///            threshold detection range. Therefore changing the
-        ///            integration time will disable the ALS interrupt and
-        ///            require to re-configure and re-enable the interrupt.
+        /// Note: changing the integration time will implicitly change the
+        ///       depending detection range and resolution, hence the
+        ///       corresponding properties.
+        /// Important: the integration time setting influences detection range,
+        ///            hence may lead to an invalid interrupt threshold setting.
+        ///            Therefore changing the integration time will disable the
+        ///            ALS interrupt and require to re-configure and re-enable
+        ///            the interrupt.
         ///            This is only valid if the ALS interrupt is used.
         /// </summary>
         public AlsIntegrationTime IntegrationTime
@@ -68,20 +98,110 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
+                _alsConfRegister.Read();
+                if (_alsConfRegister.AlsIt == value)
+                {
+                    return;
+                }
+
                 InterruptEnabled = false;
                 _interruptIsConfigured = false;
-                _alsConfRegister.Read();
                 _alsConfRegister.AlsIt = value;
                 _alsConfRegister.Write();
             }
         }
 
         /// <summary>
+        /// Gets or sets the detection range.
+        /// Note: changing the detection range will implicitly change the
+        ///       depending integration time and resolution, hence the
+        ///       corresponding properties.
+        /// Important: changing the detection range may lead to an invalid
+        ///            interrupt threshold setting.
+        ///            Therefore changing the detection range will disable the
+        ///            ALS interrupt and require to re-configure and re-enable
+        ///            the interrupt.
+        ///            This is only valid if the ALS interrupt is used.
+        /// </summary>
+        public AlsRange Range
+        {
+            get
+            {
+                return IntegrationTime switch
+                {
+                    AlsIntegrationTime.Time80ms => AlsRange.Range_6553,
+                    AlsIntegrationTime.Time160ms => AlsRange.Range_3276,
+                    AlsIntegrationTime.Time320ms => AlsRange.Range_1638,
+                    AlsIntegrationTime.Time640ms => AlsRange.Range_819,
+                    _ => throw new NotImplementedException(),
+                };
+            }
+
+            set
+            {
+                IntegrationTime = value switch
+                {
+                    AlsRange.Range_819 => AlsIntegrationTime.Time640ms,
+                    AlsRange.Range_1638 => AlsIntegrationTime.Time320ms,
+                    AlsRange.Range_3276 => AlsIntegrationTime.Time160ms,
+                    AlsRange.Range_6553 => AlsIntegrationTime.Time80ms,
+                    _ => throw new NotImplementedException(),
+                };
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the resolution.
+        /// Note: changing the resolution will implicitly change the
+        ///       depending integration time and detection range, hence the
+        ///       corresponding properties.
+        /// Important: changing the resolution may lead to an invalid
+        ///            interrupt threshold setting.
+        ///            Therefore changing the resolution will disable the
+        ///            ALS interrupt and require to re-configure and re-enable
+        ///            the interrupt.
+        ///            This is only valid if the ALS interrupt is used.
+        /// </summary>
+        public AlsResolution Resolution
+        {
+            get
+            {
+                return IntegrationTime switch
+                {
+                    AlsIntegrationTime.Time80ms => AlsResolution.Resolution_0_1,
+                    AlsIntegrationTime.Time160ms => AlsResolution.Resolution_0_05,
+                    AlsIntegrationTime.Time320ms => AlsResolution.Resolution_0_025,
+                    AlsIntegrationTime.Time640ms => AlsResolution.Resolution_0_0125,
+                    _ => throw new NotImplementedException(),
+                };
+            }
+
+            set
+            {
+                IntegrationTime = value switch
+                {
+                    AlsResolution.Resolution_0_1 => AlsIntegrationTime.Time80ms,
+                    AlsResolution.Resolution_0_05 => AlsIntegrationTime.Time160ms,
+                    AlsResolution.Resolution_0_025 => AlsIntegrationTime.Time320ms,
+                    AlsResolution.Resolution_0_0125 => AlsIntegrationTime.Time640ms,
+                    _ => throw new NotImplementedException(),
+                };
+            }
+        }
+        #endregion
+
+        #region Interrupt
+
+        /// <summary>
         /// Enables or disables the interrupt of the ambient light sensor
         /// </summary>
         public bool InterruptEnabled
         {
-            get => _interruptEnabled;
+            get
+            {
+                _alsConfRegister.Read();
+                return _alsConfRegister.AlsIntEn == AlsInterrupt.Enabled;
+            }
             set
             {
                 if (value && !_interruptIsConfigured)
@@ -90,7 +210,6 @@ namespace Iot.Device.Vcnl4040
                 }
 
                 _alsConfRegister.AlsIntEn = value ? AlsInterrupt.Enabled : AlsInterrupt.Disabled;
-                _interruptEnabled = value;
             }
         }
 
@@ -105,8 +224,8 @@ namespace Iot.Device.Vcnl4040
         /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
         /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
         public void ConfigureInterrupt(Illuminance lowerThreshold,
-                                           Illuminance upperThreshold,
-                                           AlsInterruptPersistence persistence)
+                                       Illuminance upperThreshold,
+                                       AlsInterruptPersistence persistence)
         {
             _interruptIsConfigured = false;
 
@@ -134,6 +253,9 @@ namespace Iot.Device.Vcnl4040
             _alsLowInterruptThresholdRegister.Write();
             _alsHighInterruptThresholdRegister.Write();
 
+            _alsConfRegister.AlsPers = persistence;
+            _alsConfRegister.Write();
+
             _interruptIsConfigured = true;
         }
 
@@ -156,15 +278,9 @@ namespace Iot.Device.Vcnl4040
                     _alsConfRegister.AlsPers);
         }
 
-        /// <summary>
-        /// BLA BLA
-        /// </summary>
-        /// <returns></returns>
-        public Illuminance GetAlsReading()
-        {
-            _alsDataRegister.Read();
-            return Illuminance.FromLux(_alsDataRegister.Data / 10);
-        }
+        #endregion
+
+        #region Helper
 
         /// <summary>
         /// Helper method to get max detection range and resolution for the currently set integration time.
@@ -181,5 +297,7 @@ namespace Iot.Device.Vcnl4040
                 _ => throw new NotImplementedException(),
             };
         }
+
+        #endregion
     }
 }
