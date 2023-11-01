@@ -309,7 +309,6 @@ void DisplayingBitmap()
         Thread.Sleep(1000);
         // Shows the first bitmap
         lcd.DrawBitmap(bitmapMe);
-        lcd.Draw();
         Thread.Sleep(1500);
 
         lcd.SetCursorPosition(0, 0);
@@ -321,7 +320,6 @@ void DisplayingBitmap()
         Thread.Sleep(1000);
         // Shows the second bitmap
         lcd.DrawBitmap(bitmapNokia);
-        lcd.Draw();
         Thread.Sleep(1500);
         lcd.SetCursorPosition(0, 0);
         lcd.WriteLine("Large picture");
@@ -331,7 +329,6 @@ void DisplayingBitmap()
         Thread.Sleep(1000);
         // Shows the second bitmap
         lcd.DrawBitmap(bitmapLarge);
-        lcd.Draw();
         Thread.Sleep(1500);
     }
 
