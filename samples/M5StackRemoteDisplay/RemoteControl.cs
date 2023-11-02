@@ -179,7 +179,7 @@ namespace Iot.Device.Ili934x.Samples
 
         private void OnTouched(object o, Point point)
         {
-            Console.WriteLine($"Touched screen at {point}");
+            Debug.WriteLine($"Touched screen at {point}");
             _powerControl?.Beep(TimeSpan.FromMilliseconds(20));
             // For the coordinates here, see the MenuBar.png file
             if (_menuMode && point.Y < 100)
@@ -188,19 +188,19 @@ namespace Iot.Device.Ili934x.Samples
                 {
                     _menuMode = false;
                     _screenMode = ScreenMode.Mirror;
-                    Console.WriteLine("Changed to mirror mode");
+                    Debug.WriteLine("Changed to mirror mode");
                 }
                 else if (point.Y < 50 && point.X > 100 && point.X < 160)
                 {
                     _screenMode = ScreenMode.Battery;
-                    Console.WriteLine("Changed to battery status mode");
+                    Debug.WriteLine("Changed to battery status mode");
                     _mouseButtonsToPress = MouseButton.None;
                     _menuMode = false;
                 }
                 else if (point.Y < 50 && point.X >= 160 && point.X < 220)
                 {
                     _screenMode = ScreenMode.NmeaValue;
-                    Console.WriteLine("Changed to NMEA display mode");
+                    Debug.WriteLine("Changed to NMEA display mode");
                     _mouseButtonsToPress = MouseButton.None;
                     _forceUpdate = true;
                     _menuMode = false;
@@ -208,12 +208,12 @@ namespace Iot.Device.Ili934x.Samples
                 else if (point.Y > 50 && point.X > 100 && point.X < 160)
                 {
                     _scale /= 1.1f;
-                    Console.WriteLine($"Changed scale to {_scale}");
+                    Debug.WriteLine($"Changed scale to {_scale}");
                 }
                 else if (point.Y > 50 && point.X > 160 && point.X < 220)
                 {
                     _scale *= 1.1f;
-                    Console.WriteLine($"Changed scale to {_scale}");
+                    Debug.WriteLine($"Changed scale to {_scale}");
                 }
                 else if (point.X < 100)
                 {
@@ -230,7 +230,7 @@ namespace Iot.Device.Ili934x.Samples
                         _mouseButtonsToPress = MouseButton.Left;
                     }
 
-                    Console.WriteLine($"Mouse mode: {_mouseButtonsToPress}");
+                    Debug.WriteLine($"Mouse mode: {_mouseButtonsToPress}");
                 }
             }
             else
@@ -292,7 +292,7 @@ namespace Iot.Device.Ili934x.Samples
             var (xdiff, ydiff) = (e.LastPoint.X - e.CurrentPoint.X, e.LastPoint.Y - e.CurrentPoint.Y);
             _left += xdiff * _scale;
             _top += ydiff * _scale;
-            Console.WriteLine($"Dragging at {e.CurrentPoint.X}/{e.CurrentPoint.Y} by {xdiff}/{ydiff}.");
+            Debug.WriteLine($"Dragging at {e.CurrentPoint.X}/{e.CurrentPoint.Y} by {xdiff}/{ydiff}.");
             if (e.IsDragBegin)
             {
                 _lastDragBegin = e.LastPoint;
