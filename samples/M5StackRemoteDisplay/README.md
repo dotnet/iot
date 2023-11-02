@@ -9,3 +9,7 @@ Ft4222 Connect to the screen using an FT4222 instead of an Arduino/ESP32.
 INET   Connect using a network connection instead of serial (recommended, as it is faster). Provide the IP address as additional argument
 --nmeaserver If an NMEA server is also available, the display can show some information from an NMEA stream (e.g. speed)
 ```
+
+And this then looks as follows:
+
+![M5Though Mirror Display](M5Example.png)
