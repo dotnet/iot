@@ -95,3 +95,10 @@ public void ConfigureInterrupt(Illuminance lowerThreshold, Illuminace upperThres
 #### Interrupt state
 
 ## Proximity Sensor Interface
+
+# Samples
+## Simple
+The "Simple" sample application demonstrates the fundamental usage of the binding. Initially, it configures both the ambient light sensor and the proximity sensor. Subsequently, it retrieves the current sensor readings at a 200 ms interval and displays them in the console. In the same loop, it clears all interrupts, causing any LED connected to the INT-pin of the VCNL4040 device to briefly blink if the configured interrupt conditions are met. The application can be terminated by pressing a key.
+
+## Explorer
+The **Explorer** sample application allows the user to experiment with all the features of the Binding API. Sensor configurations can be modified at any time. Additionally, the status of the interrupt can be manually read and reset, and individual sensors can be turned on and off. The application includes a simple menu for accessing API functions, and straightforward prompts allow parameter input at runtime.

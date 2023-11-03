@@ -1,0 +1,160 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Iot.Device.Vcnl4040;
+using Iot.Device.Vcnl4040.Defnitions;
+using UnitsNet;
+
+internal partial class ExplorerApp
+{
+    private AmbientLightSensor _als;
+
+    private void PrintAlsMenu()
+    {
+        Console.WriteLine("--- Ambient Light Sensor (ALS) ---------------");
+        Console.WriteLine("(als-shw-cnf) Show configuration");
+        Console.WriteLine("(als-shw-val) Show illuminance value");
+        Console.WriteLine("(als-set-pwr) Set power on/off");
+        Console.WriteLine("(als-cnf-rng) Configure range");
+        Console.WriteLine("(als-cnf-res) Configure resolution");
+        Console.WriteLine("(als-cnf-itg) Configure integration time");
+        Console.WriteLine("(als-cnf-int) Configure interrupt");
+        Console.WriteLine("(als-end-int) Enable/disable interrupt");
+        Console.WriteLine("----------------------------------------------\n");
+    }
+
+    private bool HandleAlsCommand(string command)
+    {
+        switch (command)
+        {
+            case "als-shw-cnf":
+                ShowAlsConfiguration();
+                break;
+
+            case "als-shw-val":
+                ShowAlsReading();
+                break;
+
+            case "als-set-pwr":
+                SetAlsPowerState();
+                ShowAlsConfiguration();
+                break;
+
+            case "als-cnf-rng":
+            case "als-cnf-res":
+            case "als-cnf-itg":
+                ConfigureAlsIntegrationTime();
+                ShowAlsConfiguration();
+                break;
+
+            case "als-cnf-int":
+                ConfigureAlsInterrupt();
+                ShowAlsConfiguration();
+                break;
+
+            case "als-end-int":
+                EnableDisableInterrupt();
+                ShowAlsConfiguration();
+                break;
+        }
+
+        return true;
+    }
+
+    private void ShowAlsConfiguration()
+    {
+        (bool isConfigured,
+         Illuminance lowerThreshold,
+         Illuminance upperThreshold,
+         AlsInterruptPersistence persistence) = _als.GetInterruptConfiguration();
+
+        Console.WriteLine("ALS configuration:");
+        Console.WriteLine($"  Integration time: {_als.IntegrationTime}");
+        Console.WriteLine($"  Power state: {_als.PowerOn}");
+        Console.WriteLine($"  Interrupt low level: {(isConfigured ? lowerThreshold : "-")}");
+        Console.WriteLine($"  Interrupt high level: {(isConfigured ? upperThreshold : "-")}");
+        Console.WriteLine($"  Interrupt persistence: {(isConfigured ? persistence : "-")}");
+        Console.WriteLine($"  Interrupt enabled: {(_als.InterruptEnabled ? "yes" : "no")}");
+        Console.WriteLine("\nPress any key to continue");
+        Console.ReadKey();
+    }
+
+    private void SetAlsPowerState()
+    {
+        bool result = PromptMultipleChoice("Power", new List<string>() { "on", "off" }, out int choice);
+        if (!result)
+        {
+            return;
+        }
+
+        _als.PowerOn = choice == 0;
+    }
+
+    private void ConfigureAlsIntegrationTime()
+    {
+        if (!PromptEnum("Integration time", out AlsIntegrationTime integrationTime))
+        {
+            return;
+        }
+
+        _als.IntegrationTime = integrationTime;
+    }
+
+    private void ConfigureAlsInterrupt()
+    {
+        int maxDetectionRange = _als.IntegrationTime switch
+        {
+            AlsIntegrationTime.Time80ms => 6553,
+            AlsIntegrationTime.Time160ms => 3276,
+            AlsIntegrationTime.Time320ms => 1638,
+            AlsIntegrationTime.Time640ms => 819,
+            _ => 0
+        };
+
+        int lowerThreshold;
+        int upperThreshold = 0;
+        AlsInterruptPersistence persistence = AlsInterruptPersistence.Persistence1;
+        bool result = PromptIntegerValue($"Lower threshold (0 - {maxDetectionRange}) [lx]", out lowerThreshold, false, 0, maxDetectionRange);
+        if (result)
+        {
+            result &= PromptIntegerValue($"Upper threshold ({lowerThreshold} - {maxDetectionRange}) [lx]", out upperThreshold, false, lowerThreshold, maxDetectionRange);
+        }
+
+        if (result)
+        {
+            result &= PromptEnum("Persistence", out persistence);
+        }
+
+        if (!result)
+        {
+            return;
+        }
+
+        _device.AmbientLightSensor.ConfigureInterrupt(Illuminance.FromLux(lowerThreshold), Illuminance.FromLux(upperThreshold), persistence);
+    }
+
+    private void EnableDisableInterrupt()
+    {
+        bool result = PromptMultipleChoice("Interrupt enabled", new List<string>() { "yes", "no" }, out int choice);
+        if (!result)
+        {
+            return;
+        }
+
+        _als.InterruptEnabled = choice == 0;
+    }
+
+    private void ShowAlsReading()
+    {
+        Console.WriteLine("Illuminance:");
+        (Illuminance maxDetectionRange, _) = _als.GetMaxDetectionRangeAndResolution();
+        while (!Console.KeyAvailable)
+        {
+            Illuminance reading = _als.Reading;
+            PrintBarGraph((int)reading.Lux, (int)maxDetectionRange.Lux, 100);
+            Task.Delay(100).Wait();
+        }
+    }
+}

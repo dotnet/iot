@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
-using System.Drawing.Text;
 using System.Globalization;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
@@ -13,40 +12,10 @@ using UnitsNet;
 
 internal class Program
 {
-    private static Vcnl4040Device? s_device;
+
     private static void Main()
     {
-        I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Vcnl4040Device.DefaultI2cAddress));
-        s_device = new Vcnl4040Device(i2cDevice);
-
-        s_device = new(i2cDevice);
-        while (true)
-        {
-            Console.Clear();
-            PrintMenu();
-            Console.Write("==> ");
-            if (!CommandHandling())
-            {
-                return;
-            }
-        }
-    }
-
-    private static void PrintMenu()
-    {
-        Console.WriteLine("======== VNCL4040 Explorer ========\n");
-        Console.WriteLine($"Device ID: {s_device!.GetDeviceId():x}h\n");
-        Console.WriteLine("--- General Device ---------------------------");
-        Console.WriteLine("(int-shw-clr) Show and clear interrupt flags\n");
-        Console.WriteLine("--- Ambient Light Sensor (ALS) ---------------");
-        Console.WriteLine("(als-shw)     Show configuration");
-        Console.WriteLine("(als-pwr)     Switch on/off");
-        Console.WriteLine("(als-igr-cnf) Configure integration time");
-        Console.WriteLine("(als-int-cnf) Configure interrupt");
-        Console.WriteLine("(als-int-end) Enable/disable interrupt");
-        Console.WriteLine("(alsda) Show reading");
-        Console.WriteLine("----------------------------------------------");
-        Console.WriteLine("(quit)   Quit");
+        ExplorerApp app = new ExplorerApp();
     }
 
     private static bool CommandHandling()
