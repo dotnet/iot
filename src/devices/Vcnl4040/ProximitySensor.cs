@@ -38,5 +38,28 @@ namespace Iot.Device.Vcnl4040
             _psDataRegister = new PsDataRegister(i2cBus);
             _whiteDataRegister = new WhiteDataRegister(i2cBus);
         }
+
+        /// <summary>
+        /// Gets or sets the IR LED duty.
+        /// </summary>
+        public PsDuty Duty {
+            get
+            {
+                _psConf1Register.Read();
+                return _psConf1Register.PsDuty;
+            }
+
+            set
+            {
+                _psConf1Register.Read();
+                if (_psConf1Register.PsDuty != value)
+                {
+                    _psConf1Register.PsDuty = value;
+                    _psConf1Register.Write();
+                }
+            }
+        }
+
+        public PsDetectionLogicOutputMode
     }
 }

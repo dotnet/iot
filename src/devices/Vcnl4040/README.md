@@ -88,9 +88,6 @@ When setting the thresholds, the binding checks the validity of the values with 
 public void ConfigureInterrupt(Illuminance lowerThreshold, Illuminace upperThreshold, alalalalal persistence)
 ```
 
-### Helper
-
-
 ### Sensor controlling
 #### Interrupt state
 

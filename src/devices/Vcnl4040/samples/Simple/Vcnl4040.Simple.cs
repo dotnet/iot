@@ -40,6 +40,7 @@ als.InterruptEnabled = true;
     - get current readings
     - get and clear interrupt flags
     - display
+    - wait ~200 ms
 */
 while (!Console.KeyAvailable)
 {
