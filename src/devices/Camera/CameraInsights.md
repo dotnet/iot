@@ -16,23 +16,23 @@ Since the transition to `libcamera`, the APIs are now very different. While in t
 
 This problem is not something limited to the `.NET` world, but any language. For example [this Rust library](https://github.com/lit-robotics/libcamera-rs) have the same issues and created a `C API` wrapper for their own use. C++ is a great language choice, but unfortunately it makes the interoperability with other languages extremely difficult.
 
-#### LibCamera Compatibility Layer
+### LibCamera Compatibility Layer
 
 The `libcamera` API provides a sort of compatibility layer which aimed to expose an API compatible with the legacy API. But [the tests I did](https://github.com/dotnet/iot/issues/1875#issuecomment-1156406558) proved that this is not a viable solution. The compatibility layer did not reach a maturity level sufficient to provide a stable and working solution.
 
-#### Writing a C Wrapper
+### Writing a C Wrapper
 
 Since `libcamera` does not provide a `C language` wrapper around the `C++ library`, this can be written separately from anyone. While this is a possible solution, there is still the problem to maintain aligned the `C wrapper` with the `C++ compilation` which ends up in the same nightmare of interfacing directly C# with the C++ [mangled names](https://en.wikipedia.org/wiki/Name_mangling).
 
 Also, since `libcamera` has not reached yet a stable release, the API shape could still change at any moment in time making this task more difficult.
 
-#### Why is the Python wrapper successful
+### Why is the Python wrapper successful
 
 The Raspberry Foundation successfully provides a Python library. This may raise the question why we could not do the same. They could do it more easily because they ship together the Raspbian Operating System, the `libcamera` library and the wrapper, making the version alignment straightforward.
 
 On our side, we have no visibility over the upcoming API/ABI changes and we would need to maintain several versions to support current and past versions of the library shipped by the OS or available as an upgrade (using `apt-get`). This makes the task harder for both the maintainers (`dotnet/iot`) and the users which should download the matching binary version every time.
 
-#### H.264 hardware encoder
+### H.264 hardware encoder
 
 From our investigation, the H.264 hardware encoder available on the Raspberry PI is **not** supported by `libcamera`. This means that, even using `libcamera`,  after acquiring the video stream, it is still necessary to do additional steps to interop with the `HW` integrated circuit to encode the video and finally rebuild the video stream.
 

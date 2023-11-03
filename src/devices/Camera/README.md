@@ -197,4 +197,3 @@ The document [CameraInsights](CameraInsights.md) provides detailed information o
 - The two different camera stacks in the Raspbian Operating System
 - Why I decided to rely upon the native `libcamera-apps` instead of the `libcamera library` APIs
 - How to switch from/to the two camera stacks
-
