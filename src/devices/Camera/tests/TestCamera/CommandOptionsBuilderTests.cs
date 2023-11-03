@@ -24,6 +24,11 @@ public class CommandOptionsBuilderTests
     public Task TestCommandLineArguments1()
     {
         // repeating the options will NOT repeat the arguments
+        // "baseline" is the profile name as for H.264 specifications
+        // "4" is the minimum level of the protocol as for the H.264 specifications
+        // 15 tells the app to encode the H.264 stream with one "I" frame every 15 frames
+        // The "I" frames can be decoded without looking at previous or following frames
+        // Other type of frames are computed on the base of an "I" frame.
         var builder = new CommandOptionsBuilder()
             .WithContinuousStreaming()
             .WithContinuousStreaming()

@@ -13,6 +13,10 @@ namespace Iot.Device.Camera;
 /// <summary>
 /// Information on the camera listed by the tools
 /// </summary>
+/// <param name="Index">The progressive number assigned to the device from Libcamera</param>
+/// <param name="Name">The name of the device</param>
+/// <param name="MaxResolution">The maximum resolution supported from the device</param>
+/// <param name="DevicePath">The native path assigned from the operating system to the device</param>
 public record class CameraInfo(
     int Index,
     string Name,
@@ -26,6 +30,9 @@ public record class CameraInfo(
     /// Parse the string obtained from the --list-cameras command line and
     /// extracts the main characteristics
     /// </summary>
+    /// <param name="listOutputString">The string output returned from the execution with --list-cameras command line</param>
+    /// <returns></returns>
+    /// <exception cref="Exception">The input string has an unexpected strucutre and cannot be parsed</exception>
     public static async Task<IEnumerable<CameraInfo>> From(string listOutputString)
     {
         if (listOutputString == null || listOutputString.Length < Line1.Length + Line2.Length)

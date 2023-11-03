@@ -38,6 +38,7 @@ public class ProcessRunnerTests
 
     /// <summary>
     /// This is used to create the test.bin file
+    /// which is currently embedded in the test project
     /// </summary>
     private void CreateTestFile(string filename)
     {
@@ -57,6 +58,10 @@ public class ProcessRunnerTests
     [Fact]
     public async Task TestBinary1()
     {
+        // The following method was used to create the "test.bin" file
+        // that is embedded in the test project
+        // Should be needed to create a slightly different binary file
+        // the following code can be used to do that
         /* CreateTestFile(Video1); */
 
         ProcessSettings settings = new()
@@ -88,6 +93,10 @@ public class ProcessRunnerTests
     [Fact]
     public async Task TestBinary2()
     {
+        // The following method was used to create the "test.bin" file
+        // that is embedded in the test project
+        // Should be needed to create a slightly different binary file
+        // the following code can be used to do that
         /* CreateTestFile(Video1); */
 
         ProcessSettings settings = new()
@@ -127,6 +136,10 @@ public class ProcessRunnerTests
     [Fact]
     public async Task TestText1()
     {
+        // The following method was used to create the "test.bin" file
+        // that is embedded in the test project
+        // Should be needed to create a slightly different binary file
+        // the following code can be used to do that
         /* CreateTestFile(Video1); */
 
         ProcessSettings settings = new()
@@ -149,6 +162,10 @@ public class ProcessRunnerTests
     [Fact]
     public async Task TestText2()
     {
+        // The following method was used to create the "test.bin" file
+        // that is embedded in the test project
+        // Should be needed to create a slightly different binary file
+        // the following code can be used to do that
         /* CreateTestFile(Video1); */
 
         ProcessSettings settings = new()

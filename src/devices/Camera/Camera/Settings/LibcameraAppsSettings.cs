@@ -16,7 +16,7 @@ namespace Iot.Device.Camera.Settings;
 public class LibcameraAppsSettings
 {
     /// <summary>
-    /// The default options for the Libcamera-apps
+    /// Gets the default options for the Libcamera-apps
     /// </summary>
     public static IReadOnlyCollection<CommandOption> DefaultOptions { get; } =
         new List<CommandOption>()
