@@ -14,7 +14,7 @@ most recent devices support configuring higher baud rates. Since RS-232 only sup
 required to combine multiple data sources. Chart plotters for NMEA 0183 have several inputs for different sensors.
 
 NMEA 0183 has been superseeded by NMEA 2000, which uses a CAN-Bus protocol and hardware layer and can therefore run a large number of sensors on a single cable.
-Since NMEA 0183 is much simpler to parse and does not require specific electronic components, it is still in wide use. Bi-directional convertes
+Since NMEA 0183 is much simpler to parse and does not require specific electronic components, it is still in wide use. Bi-directional converters
 from NMEA 0183 to NMEA 2000 are available from different vendors.
 
 In NMEA 0183 a device is either a talker or a listener. There are multiple types of sentences (or messages) which can be sent or received.
@@ -35,7 +35,7 @@ The following sentence ids are currently supported:
 - MDA: Meterological information
 - MWD: Wind direction absolute
 - MWV: Wind Speed and angle (both true and apparent)
-- PCDIN: (partial) Used to wrap NMEA2000 engine parameter sets
+- PCDIN: (partial) Used to wrap NMEA2000 engine parameter sets. Message types 0x01F200, 0x01F201, 0x01F211
 - RMB: Recommended navigation to destination (for autopilot)
 - RMC: Recommended minimum navigation sentence
 - RPM: Engine revolutions

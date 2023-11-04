@@ -69,6 +69,16 @@ namespace Iot.Device.Nmea0183.Ais
         }
 
         /// <summary>
+        /// Warnings regarding this target are suppressed until this time elapses.
+        /// Helpful if a specific target is close but well observed and warnings about this target are annoying and disturb from other possible dangers.
+        /// </summary>
+        public DateTimeOffset? SuppressionTime
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// The relative position and collision information with respect to our ship (e.g. distance, CPA, TCPA)
         /// Only valid if calculated by enabling <see cref="AisManager.EnableAisAlarms"/>.
         /// </summary>

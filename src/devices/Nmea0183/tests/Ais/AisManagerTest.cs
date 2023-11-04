@@ -162,11 +162,17 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             // This does a safety check all the time. Very expensive...
             using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
             List<string> messages = new List<string>();
+            List<AisMessageId> warnings = new List<AisMessageId>();
             _manager.TrackEstimationParameters.AisSafetyCheckInterval = TimeSpan.Zero;
             _manager.OnMessage += (received, sourceMmsi, destinationMmsi, text) =>
             {
                 messages.Add(text);
                 Assert.True(sourceMmsi != _manager.OwnMmsi);
+            };
+
+            _manager.OnAisWarning += (id, mmsi, now, message, source) =>
+            {
+                warnings.Add(id);
             };
 
             int msgCount = 0;
@@ -188,6 +194,9 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             reader.StopDecode();
 
             Assert.Equal(20, messages.Count(x => x.Contains("TCPA")));
+            Assert.Equal(20, warnings.Count);
+
+            Assert.Contains(warnings, x => x.Type == AisWarningType.DangerousVessel);
 
             var ship = _manager.GetTarget(305966000);
             Assert.NotNull(ship);
