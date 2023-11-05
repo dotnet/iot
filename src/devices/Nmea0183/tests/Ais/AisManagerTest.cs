@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -156,14 +157,19 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             Assert.Equal(1790, relativePos1.TimeToClosestPointOfApproach(latestPacketDate)!.Value.TotalSeconds, 0);
         }
 
-        [Fact]
-        public void CheckSafetyPermanently()
+        [Theory]
+        [InlineData(600, 1852, 20)] // Default settings
+        [InlineData(600, 0, 0)] // Warning distance zero -> No warnings
+        [InlineData(10, 1852, 39)] // Very short warning timeout -> Many warnings
+        public void CheckSafetyPermanently(int warningRepeatSeconds, int warningDistance, int expectedWarningCount)
         {
             // This does a safety check all the time. Very expensive...
             using NmeaLogDataReader reader = new NmeaLogDataReader("Reader", TestDataHelper.GetResourceStream("Nmea-2021-08-25-16-25.txt"));
             List<string> messages = new List<string>();
             List<AisMessageId> warnings = new List<AisMessageId>();
             _manager.TrackEstimationParameters.AisSafetyCheckInterval = TimeSpan.Zero;
+            _manager.TrackEstimationParameters.WarningDistance = Length.FromMeters(warningDistance);
+            _manager.TrackEstimationParameters.WarningRepeatTimeout = TimeSpan.FromSeconds(warningRepeatSeconds);
             _manager.OnMessage += (received, sourceMmsi, destinationMmsi, text) =>
             {
                 messages.Add(text);
@@ -193,10 +199,13 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             reader.StartDecode();
             reader.StopDecode();
 
-            Assert.Equal(20, messages.Count(x => x.Contains("TCPA")));
-            Assert.Equal(20, warnings.Count);
+            Assert.Equal(expectedWarningCount, messages.Count(x => x.Contains("TCPA")));
+            Assert.Equal(expectedWarningCount, warnings.Count);
 
-            Assert.Contains(warnings, x => x.Type == AisWarningType.DangerousVessel);
+            if (expectedWarningCount > 0)
+            {
+                Assert.Contains(warnings, x => x.Type == AisWarningType.DangerousVessel);
+            }
 
             var ship = _manager.GetTarget(305966000);
             Assert.NotNull(ship);
@@ -495,9 +504,46 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             // The value of "distance" should not change, regardless of our own speed
             myShip.SpeedOverGround = Speed.FromKnots(5);
             var delta2 = myShip.RelativePositionTo(otherShip, DateTimeOffset.UtcNow, new TrackEstimationParameters());
-            Assert.NotNull(delta);
-            Assert.Equal(1.45, delta!.Distance.NauticalMiles, 3);
+            Assert.NotNull(delta2);
+            Assert.Equal(1.45, delta2!.Distance.NauticalMiles, 3);
 
+        }
+
+        [Fact]
+        public void TcpaHasCorrectSign()
+        {
+            DateTimeOffset timeNow = new DateTimeOffset(2023, 11, 1, 10, 10, 0, 0, TimeSpan.Zero);
+            var otherShip = new Ship(296123456);
+            otherShip.Position = new GeographicPosition(47.1, 9.1, 440);
+            otherShip.CourseOverGround = Angle.FromDegrees(270);
+            otherShip.SpeedOverGround = Speed.FromKnots(10);
+            otherShip.LastSeen = timeNow;
+
+            var myShip = new Ship(269110660);
+            myShip.Position = new GeographicPosition(47.05, 9.05, 440);
+            myShip.CourseOverGround = Angle.FromDegrees(0);
+            myShip.SpeedOverGround = Speed.FromKnots(5);
+            myShip.LastSeen = timeNow;
+            myShip.TrueHeading = Angle.Zero;
+
+            var delta = myShip.RelativePositionTo(otherShip, timeNow, new TrackEstimationParameters());
+            Assert.NotNull(delta);
+            Assert.Equal(3.63495682, delta!.Distance.NauticalMiles, 3);
+            Assert.Equal(AisSafetyState.Safe, delta.SafetyState);
+            Assert.True(delta.ClosestPointOfApproach.HasValue);
+            Assert.Equal(1.7664989688744988, delta.ClosestPointOfApproach!.Value.NauticalMiles);
+            Assert.Equal(TimeSpan.FromMinutes(17), delta.TimeToClosestPointOfApproach(timeNow));
+
+            // Now the other way
+            otherShip.CourseOverGround = Angle.FromDegrees(90);
+            delta = myShip.RelativePositionTo(otherShip, timeNow, new TrackEstimationParameters());
+            Assert.NotNull(delta);
+            Assert.Equal(3.63495682, delta!.Distance.NauticalMiles, 3);
+            Assert.Equal(AisSafetyState.Safe, delta.SafetyState);
+            Assert.True(delta.ClosestPointOfApproach.HasValue);
+            Assert.Equal(3.5999173364672554, delta.ClosestPointOfApproach!.Value.NauticalMiles);
+            var ts = new TimeSpan(0, 0, 2, 40);
+            Assert.Equal(-ts, delta.TimeToClosestPointOfApproach(timeNow));
         }
     }
 }

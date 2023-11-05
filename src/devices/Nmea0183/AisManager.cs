@@ -32,18 +32,6 @@ namespace Iot.Device.Nmea0183
     public class AisManager : NmeaSinkAndSource
     {
         /// <summary>
-        /// Time between repeats of the same warning. If this is set to a short value, the same proximity warning will be shown very often,
-        /// which is typically annoying.
-        /// </summary>
-        public static readonly TimeSpan WarningRepeatTimeout = TimeSpan.FromMinutes(10);
-
-        /// <summary>
-        /// Controls how often lost targets are removed completely from the target list. The timespan after which a target is considered lost
-        /// is controlled via <see cref="Iot.Device.Nmea0183.Ais.TrackEstimationParameters.TargetLostTimeout"/>
-        /// </summary>
-        public static readonly TimeSpan CleanupLatency = TimeSpan.FromSeconds(30);
-
-        /// <summary>
         /// Delegate for AIS messages
         /// </summary>
         /// <param name="received">True if the message was received from another ship, false if the message is generated internally (e.g. a proximity warning)</param>
@@ -94,7 +82,7 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// This event is fired when an AIS warning occurs. Requires <see cref="EnableAisAlarms"/> to be set.
         /// Arguments are: MMSI of other vessel, current time, textual warning message and the reference to the other target (which includes further details)
-        /// Messages are suppressed for the smaller of <see cref="WarningRepeatTimeout"/> or the specific vessel <see cref="AisTarget.RelativePosition"/>
+        /// Messages are suppressed for the longer of <see cref="TrackEstimationParameters.WarningRepeatTimeout"/> or the specific vessels <see cref="AisTarget.SuppressionTime"/>
         /// </summary>
         public event AisWarning? OnAisWarning;
 
@@ -724,7 +712,7 @@ namespace Iot.Device.Nmea0183
         {
             if (_activeWarnings.TryGetValue(messageId, out var msg))
             {
-                if (msg.TimeStamp + WarningRepeatTimeout > now)
+                if (msg.TimeStamp + TrackEstimationParameters.WarningRepeatTimeout > now)
                 {
                     return false;
                 }
@@ -853,7 +841,7 @@ namespace Iot.Device.Nmea0183
             }
 
             // Do if the cleanuplatency has elapsed
-            if (_lastCleanupCheck == null || _lastCleanupCheck.Value + CleanupLatency < currentTime)
+            if (_lastCleanupCheck == null || _lastCleanupCheck.Value + TrackEstimationParameters.CleanupLatency < currentTime)
             {
                 lock (_lock)
                 {
