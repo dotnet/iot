@@ -1,6 +1,17 @@
 ﻿# NMEA 0183 Protocol
 
-## Summary
+**Safety Note**
+
+Never rely on electronic aids and their warnings alone for safe navigation. The International Regulations for Preventing Collisions at Sea (COLREG)
+states in Rule 5: „Every vessel shall **at all times** maintain a proper look-out by **sight and hearing** as well as by all available means appropriate 
+in the prevailing circumstances and conditions so as to make a full appraisal of the situation and of the risk of collision.“ It is therefore the
+skippers responsibility to maintain proper watchkeeping with all means available.
+
+AIS is a great aid in avoiding collisions and foreseeing dangerous close encounters with other vessels, but it can never act as sole source
+of information. There's no guarantee for it's seamless operation and there are still a large number of smaller ships that are not equipped with AIS
+transponders.
+
+## Summary for NMEA support
 
 NMEA stands for `National Marine Electronics Associations`.
 
