@@ -1,9 +1,9 @@
 ﻿# NMEA 0183 Protocol
 
-**Safety Note**
+## Safety Note
 
 Never rely on electronic aids and their warnings alone for safe navigation. The International Regulations for Preventing Collisions at Sea (COLREG)
-states in Rule 5: „Every vessel shall **at all times** maintain a proper look-out by **sight and hearing** as well as by all available means appropriate 
+states in Rule 5: „Every vessel shall **at all times** maintain a proper look-out by **sight and hearing** as well as by all available means appropriate
 in the prevailing circumstances and conditions so as to make a full appraisal of the situation and of the risk of collision.“ It is therefore the
 skippers responsibility to maintain proper watchkeeping with all means available.
 
