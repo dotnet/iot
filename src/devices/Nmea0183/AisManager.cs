@@ -689,6 +689,18 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// Sends a message with the given <paramref name="messageText"/> as an AIS broadcast message
         /// </summary>
+        /// <param name="messageId">Obsolete message identifier - ignored</param>
+        /// <param name="sourceMmsi">Source MMSI, can be 0 if irrelevant/unknown</param>
+        /// <param name="messageText">The text of the message. Supports only the AIS 6-bit character set.</param>
+        /// <returns>True if the message was sent, false otherwise</returns>
+        public bool SendWarningMessage(string messageId, uint sourceMmsi, string messageText)
+        {
+            return SendWarningMessage(new AisMessageId(AisWarningType.UserMessage, sourceMmsi), sourceMmsi, messageText, DateTimeOffset.UtcNow, null);
+        }
+
+        /// <summary>
+        /// Sends a message with the given <paramref name="messageText"/> as an AIS broadcast message
+        /// </summary>
         /// <param name="messageId">Identifies the message. Messages with the same ID are only sent once, until the timeout elapses</param>
         /// <param name="sourceMmsi">Source MMSI, can be 0 if irrelevant/unknown</param>
         /// <param name="messageText">The text of the message. Supports only the AIS 6-bit character set.</param>

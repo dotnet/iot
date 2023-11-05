@@ -31,6 +31,11 @@ namespace Iot.Device.Nmea0183
         /// <summary>
         /// A vessel that is close was lost
         /// </summary>
-        VesselLost
+        VesselLost,
+
+        /// <summary>
+        /// A message from the application layer
+        /// </summary>
+        UserMessage
     }
 }

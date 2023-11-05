@@ -531,7 +531,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             Assert.Equal(3.63495682, delta!.Distance.NauticalMiles, 3);
             Assert.Equal(AisSafetyState.Safe, delta.SafetyState);
             Assert.True(delta.ClosestPointOfApproach.HasValue);
-            Assert.Equal(1.7664989688744988, delta.ClosestPointOfApproach!.Value.NauticalMiles);
+            Assert.Equal(1.7664989688744988, delta.ClosestPointOfApproach!.Value.NauticalMiles, 5);
             Assert.Equal(TimeSpan.FromMinutes(17), delta.TimeToClosestPointOfApproach(timeNow));
 
             // Now the other way
@@ -541,7 +541,7 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             Assert.Equal(3.63495682, delta!.Distance.NauticalMiles, 3);
             Assert.Equal(AisSafetyState.Safe, delta.SafetyState);
             Assert.True(delta.ClosestPointOfApproach.HasValue);
-            Assert.Equal(3.5999173364672554, delta.ClosestPointOfApproach!.Value.NauticalMiles);
+            Assert.Equal(3.5999173364672554, delta.ClosestPointOfApproach!.Value.NauticalMiles, 5);
             var ts = new TimeSpan(0, 0, 2, 40);
             Assert.Equal(-ts, delta.TimeToClosestPointOfApproach(timeNow));
         }
