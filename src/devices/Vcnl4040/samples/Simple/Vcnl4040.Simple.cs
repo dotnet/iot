@@ -4,6 +4,7 @@ using System;
 using System.Device.I2c;
 using System.Threading;
 using Iot.Device.Vcnl4040;
+using Iot.Device.Vcnl4040.Common.Defnitions;
 using UnitsNet;
 
 PeriodicTimer loopTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(200));
@@ -25,7 +26,7 @@ AmbientLightSensor als = vcnl4040.AmbientLightSensor;
 als.Range = AlsRange.Range_3276;
 als.ConfigureInterrupt(Illuminance.FromLux(3000),
                        Illuminance.FromLux(5000),
-                       Iot.Device.Vcnl4040.Defnitions.AlsInterruptPersistence.Persistence4);
+                       AlsInterruptPersistence.Persistence4);
 
 /*
   Enable Ambient Light Sensor operation

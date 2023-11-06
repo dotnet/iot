@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.I2c;
+using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 
@@ -78,16 +79,6 @@ namespace Iot.Device.Vcnl4040
                                                       _interruptFlagRegister.PsIfClose,
                                                       _interruptFlagRegister.PsIfAway);
             return flags;
-        }
-
-        /// <summary>
-        /// BLA BLA
-        /// </summary>
-        /// <returns></returns>
-        public int GetPsReading()
-        {
-            _psDataRegister.Read();
-            return _psDataRegister.Data;
         }
     }
 }

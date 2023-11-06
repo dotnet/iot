@@ -1,22 +1,22 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Defnitions
+namespace Iot.Device.Vcnl4040.Common.Defnitions
 {
     /// <summary>
-    /// Defines the set of PS active force mode settings.
+    /// Defines the set of ALS enable states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsActiveForceMode : byte
+    public enum AlsInterrupt : byte
     {
         /// <summary>
-        /// PS active force mode disable
+        /// ALS interrupt disabled
         /// </summary>
         Disabled = 0b0000_0000,
 
         /// <summary>
-        /// PS active force mode enable
+        /// ALS interrupt enabled
         /// </summary>
-        Enabled = 0b0000_1000
+        Enabled = 0b0000_0010
     }
 }

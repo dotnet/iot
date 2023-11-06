@@ -1,22 +1,22 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Defnitions
+namespace Iot.Device.Vcnl4040.Common.Defnitions
 {
     /// <summary>
-    /// Defines the set of ALS and SD power states.
+    /// Defines the set of PS detection logic output modes.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PowerState : byte
+    public enum PsDetectionLogicOutputMode : byte
     {
         /// <summary>
-        /// ALS/SD power on
+        /// Proximity normal operation with interrupt function
         /// </summary>
-        PowerOn = 0b0000_0000,
+        Interrupt = 0b0000_0000,
 
         /// <summary>
-        /// ALS/SD shutdown / power off
+        /// Proximity detection logic output mode enable
         /// </summary>
-        PowerOff = 0b0000_0001
+        LogicOutput = 0b0100_1000
     }
 }

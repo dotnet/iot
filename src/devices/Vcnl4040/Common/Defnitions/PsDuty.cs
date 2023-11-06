@@ -1,32 +1,32 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Defnitions
+namespace Iot.Device.Vcnl4040.Common.Defnitions
 {
     /// <summary>
-    /// Defines the set of proximity multi pulse numbers
+    /// Defines the set of PS duty on/off ratio settings.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsMultiPulse : byte
+    public enum PsDuty : byte
     {
         /// <summary>
-        /// 1 multi pulse
+        /// Duty is 1/40
         /// </summary>
-        Pulse1 = 0b0000_0000,
+        Duty40 = 0b0000_0000,
 
         /// <summary>
-        /// 2 multi pulse
+        /// Duty is 1/80
         /// </summary>
-        Pulse2 = 0b0010_0000,
+        Duty80 = 0b0100_0000,
 
         /// <summary>
-        /// 4 multi pulses
+        /// Duty is 1/160
         /// </summary>
-        Pulse4 = 0b0100_0000,
+        Duty160 = 0b1000_0000,
 
         /// <summary>
-        /// 8 multi pulses
+        /// Duty is 1/320
         /// </summary>
-        Pulse8 = 0b0110_0000
+        Duty320 = 0b1100_0000
     }
 }

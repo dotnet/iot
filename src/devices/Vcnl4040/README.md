@@ -11,13 +11,12 @@ The VCNL4040 is a proximity and ambient light sensor module designed for various
 
 Official manufacturer documentation: [Datasheet](https://www.vishay.com/docs/84274/vcnl4040.pdf)
 
-## Ambient light sensor configuration
-### Measuring
-To provide flexibility in tailoring your measurements to specific conditions, the VCNL4040 allows you to fine-tune the integration time, which dictates how long light is sampled and influences measurement sensitivity in varying lighting environments. When using a shorter integration time like 80ms, the sensor collects data for a brief period, resulting in each recorded unit of light representing a more significant light intensity. Consequently, the maximum measurable lux for an 80ms integration time reaches 6553.5 lux.
+## Ambient light sensor
+The VCNL4040 allows you to configure the integration time, which dictates how long light is sampled and influences measurement sensitivity in varying lighting environments. When using a shorter integration time like 80 ms, the sensor collects data for a brief period, resulting in each recorded unit of light representing a more significant light intensity. Consequently, the maximum measurable lux for an 80ms integration time reaches 6553.5 lux.
 
 Conversely, with an extended integration time, you wait longer for the same number of light measurements, implying a relatively lower rate of light events and indicating reduced ambient light. Therefore, at the maximum integration time of 640ms, the VCNL4040 can measure up to 819.2 lux.
 
-It's important to note that increasing the integration time not only impacts sensitivity but also enhances measurement resolution within the specified range.
+**Important**: increasing the integration time not only impacts sensitivity but also enhances measurement resolution within the specified range.
 
 The parameter dependency is:
 |Integration time [ms]|Resolution [lux]|Detection range [lux]|
@@ -27,10 +26,15 @@ The parameter dependency is:
 |320|0.025|1638.3|
 |640|0.0125|819.1|
 
+The ambient light sensor can be turned off to reduce power consumption of the chip.
+
 For details refer to the official datasheet.
 
-## Proximity sensor configuration
-Furthermore, aside from adjusting light sensitivity, you can modify the current and duty cycle of the IR LED responsible for proximity detection, allowing you to fine-tune the sensitivity of proximity measurements to better suit your requirements.
+## Proximity sensor
+Current and duty ratio of the IR LED responsible for proximity detection can be configured, allowing you to adjust the sensitivity of proximity measurements. The higher the duty
+ratio, the faster the response time achieved with higher power consumption.
+
+The proximity sensor can be turned off to reduce power consumption of the chip.
 
 ## Interrupt configuration
 An interrrupt event can be triggered when the detected illuminance goes above or below a configured threshold.
@@ -48,18 +52,23 @@ The driver also implements rules regarding functional dependencies and condition
 
 ## General Interface
 
+IS CONNECTED mit VERSION check
+
 ## Ambient Light Sensor Interface
 
 ### General
 #### Power state
+The ambient light sensor can be turned off to reduce power consumption of the chip.
+```
+public bool PowerOn {get; set;}
+```
 
 ### Measurement
 The current illuminance reading can be get at anytime.
 It is updated in the interval of the integration time.
 
-Property:
 ```
-public Illuminance Reading
+public Illuminance Reading {get;}
 ```
 
 ### Configuration
@@ -92,6 +101,22 @@ public void ConfigureInterrupt(Illuminance lowerThreshold, Illuminace upperThres
 #### Interrupt state
 
 ## Proximity Sensor Interface
+
+### General
+#### Power state
+The proximity sensor can be turned off to reduce power consumption of the chip.
+```
+public bool PowerOn {get; set;}
+```
+
+### Configuration
+#### IR LED current and duty ratio
+
+**Important:** make sure that your power source is able to support higher LED currents before configuring! The host system (e.g. RPi) may otherwise become unstable or crash.
+```
+public PsDuty DutyRatio
+public PsLedCurrent LedCurrent
+```
 
 # Samples
 ## Simple

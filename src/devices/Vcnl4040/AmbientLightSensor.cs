@@ -1,7 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using Iot.Device.Vcnl4040.Defnitions;
+using System.ComponentModel.Design;
+using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 using UnitsNet;
@@ -17,8 +18,6 @@ namespace Iot.Device.Vcnl4040
         private AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
         private AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
         private AlsDataRegister _alsDataRegister;
-
-        private bool _interruptIsConfigured = false;
 
         internal AmbientLightSensor(I2cInterface i2cBus)
         {
@@ -54,6 +53,7 @@ namespace Iot.Device.Vcnl4040
                 _alsConfRegister.Write();
             }
         }
+
         #endregion
 
         #region Measurement
@@ -105,7 +105,6 @@ namespace Iot.Device.Vcnl4040
                 }
 
                 InterruptEnabled = false;
-                _interruptIsConfigured = false;
                 _alsConfRegister.AlsIt = value;
                 _alsConfRegister.Write();
             }
@@ -204,12 +203,14 @@ namespace Iot.Device.Vcnl4040
             }
             set
             {
-                if (value && !_interruptIsConfigured)
+                if (value)
                 {
-                    throw new InvalidOperationException("The interrupt must be configured before enabling it.");
+                    (Illuminance lowerThreshold, Illuminance upperThreshold, _) = GetInterruptConfiguration();
+                    VerifyInterruptConfiguration(lowerThreshold, upperThreshold);
                 }
 
                 _alsConfRegister.AlsIntEn = value ? AlsInterrupt.Enabled : AlsInterrupt.Disabled;
+                _alsConfRegister.Write();
             }
         }
 
@@ -227,11 +228,9 @@ namespace Iot.Device.Vcnl4040
                                        Illuminance upperThreshold,
                                        AlsInterruptPersistence persistence)
         {
-            _interruptIsConfigured = false;
-
             // the maximum detection range and resolution depends on the integration time setting
             _alsConfRegister.Read();
-            (Illuminance maxDetectionRange, Illuminance resolution) = GetMaxDetectionRangeAndResolution();
+            (Illuminance maxDetectionRange, Illuminance resolution) = GetMaxDetectionRangeAndResolution(_alsConfRegister.AlsIt);
 
             if (lowerThreshold > maxDetectionRange)
             {
@@ -248,33 +247,26 @@ namespace Iot.Device.Vcnl4040
                 throw new ArgumentException("Lower threshold is higher than upper threshold");
             }
 
-            _alsLowInterruptThresholdRegister.Threshold = (int)(lowerThreshold.Lux * resolution.Lux);
-            _alsHighInterruptThresholdRegister.Threshold = (int)(upperThreshold.Lux * resolution.Lux);
+            _alsLowInterruptThresholdRegister.Threshold = (int)(lowerThreshold.Lux / resolution.Lux);
+            _alsHighInterruptThresholdRegister.Threshold = (int)(upperThreshold.Lux / resolution.Lux);
             _alsLowInterruptThresholdRegister.Write();
             _alsHighInterruptThresholdRegister.Write();
 
             _alsConfRegister.AlsPers = persistence;
             _alsConfRegister.Write();
-
-            _interruptIsConfigured = true;
         }
 
         /// <summary>
         /// Gets the interrupt configuration from the device
         /// </summary>
-        public (bool IsConfigured, Illuminance LowerThreshold, Illuminance UpperThreshold, AlsInterruptPersistence Persistence) GetInterruptConfiguration()
+        public (Illuminance LowerThreshold, Illuminance UpperThreshold, AlsInterruptPersistence Persistence) GetInterruptConfiguration()
         {
-            if (!_interruptIsConfigured)
-            {
-                return (false, Illuminance.Zero, Illuminance.Zero, AlsInterruptPersistence.Persistence1);
-            }
-
             _alsLowInterruptThresholdRegister.Read();
             _alsHighInterruptThresholdRegister.Read();
             _alsConfRegister.Read();
-            return (true,
-                    Illuminance.FromLux(_alsLowInterruptThresholdRegister.Threshold / 10),
-                    Illuminance.FromLux(_alsHighInterruptThresholdRegister.Threshold / 10),
+            (Illuminance maxDetectionRange, Illuminance resolution) = GetMaxDetectionRangeAndResolution(_alsConfRegister.AlsIt);
+            return (Illuminance.FromLux(_alsLowInterruptThresholdRegister.Threshold * resolution.Lux),
+                    Illuminance.FromLux(_alsHighInterruptThresholdRegister.Threshold * resolution.Lux),
                     _alsConfRegister.AlsPers);
         }
 
@@ -285,10 +277,9 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Helper method to get max detection range and resolution for the currently set integration time.
         /// </summary>
-        public (Illuminance MaxDetectionRange, Illuminance Resolution) GetMaxDetectionRangeAndResolution()
+        public (Illuminance MaxDetectionRange, Illuminance Resolution) GetMaxDetectionRangeAndResolution(AlsIntegrationTime integrationTime)
         {
-            _alsConfRegister.Read();
-            return _alsConfRegister.AlsIt switch
+            return integrationTime switch
             {
                 AlsIntegrationTime.Time80ms => (Illuminance.FromLux(6553.5), Illuminance.FromLux(0.1)),
                 AlsIntegrationTime.Time160ms => (Illuminance.FromLux(3276.8), Illuminance.FromLux(0.05)),
@@ -296,6 +287,27 @@ namespace Iot.Device.Vcnl4040
                 AlsIntegrationTime.Time640ms => (Illuminance.FromLux(819.2), Illuminance.FromLux(0.0125)),
                 _ => throw new NotImplementedException(),
             };
+        }
+
+        private void VerifyInterruptConfiguration(Illuminance lowerThreshold, Illuminance upperThreshold)
+        {
+            _alsConfRegister.Read();
+            (Illuminance maxDetectionRange, Illuminance resolution) = GetMaxDetectionRangeAndResolution(_alsConfRegister.AlsIt);
+
+            if (lowerThreshold > maxDetectionRange)
+            {
+                throw new ArgumentException($"Lower threshold exceed maximum detection range ({maxDetectionRange})");
+            }
+
+            if (upperThreshold > maxDetectionRange)
+            {
+                throw new ArgumentException($"Upper threshold exceed maximum detection range ({maxDetectionRange})");
+            }
+
+            if (lowerThreshold > upperThreshold)
+            {
+                throw new ArgumentException("Lower threshold is higher than upper threshold");
+            }
         }
 
         #endregion

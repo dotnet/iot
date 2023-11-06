@@ -1,19 +1,21 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Device.I2c;
 using Iot.Device.Vcnl4040;
+using Iot.Device.Vcnl4040.Common.Defnitions;
 
 internal partial class ExplorerApp
 {
     private Vcnl4040Device _device;
+    private I2cDevice _i2cDevice;
 
     public ExplorerApp()
     {
-        I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1,
+        _i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1,
                                                                          Vcnl4040Device.DefaultI2cAddress));
-        _device = new Vcnl4040Device(i2cDevice);
+        _device = new Vcnl4040Device(_i2cDevice);
         _als = _device.AmbientLightSensor;
         _ps = _device.ProximitySensor;
     }
@@ -37,7 +39,7 @@ internal partial class ExplorerApp
                 continue;
             }
 
-            _ = HandleDeviceCommand(command) || HandleAlsCommand(command);
+            _ = HandleDeviceCommand(command) || HandleAlsCommand(command) || HandlePsCommand(command);
         }
     }
 
@@ -46,7 +48,9 @@ internal partial class ExplorerApp
         Console.WriteLine($"Device ID: {_device!.GetDeviceId():x}h\n");
 
         Console.WriteLine("--- General Device ---------------------------");
-        Console.WriteLine("(shw-clr-int) Show and clear interrupt flags\n");
+        Console.WriteLine("(shw-clr-int) Show and clear interrupt flags");
+        Console.WriteLine("(shw-reg-dmp) Show register dump");
+        Console.WriteLine();
     }
 
     private bool HandleDeviceCommand(string command)
@@ -55,13 +59,19 @@ internal partial class ExplorerApp
         {
             case "shw-clr-int":
                 ShowAndClearInterruptFlags();
-                break;
+                return true;
+
+            case "shw-reg-dmp":
+                ShowregisterDump();
+                return true;
 
             case "quit":
+                Environment.Exit(0);
+                return true;
+
+            default:
                 return false;
         }
-
-        return true;
     }
 
     private void ShowAndClearInterruptFlags()
@@ -73,6 +83,24 @@ internal partial class ExplorerApp
         Console.WriteLine($"  {flags.PsClose}");
         Console.WriteLine($"  {flags.PsAway}");
         Console.WriteLine($"  {flags.PsProtectionMode}");
+        Console.WriteLine("\nPress any key to continue");
+        Console.ReadKey();
+    }
+
+    private void ShowregisterDump()
+    {
+        byte[] addr = new byte[1];
+        byte[] data = new byte[2];
+
+        Console.WriteLine("Register dump:");
+        Console.WriteLine($"REG : LSB                MSB");
+        for (byte reg = 0; reg <= 0x0c; reg++)
+        {
+            addr[0] = reg;
+            _i2cDevice.WriteRead(addr, data);
+            Console.WriteLine($"{reg:X2}h : {data[0]:X2}h / {Convert.ToString(data[0], 2).PadLeft(8, '0')}b    {data[1]:X2}h / {Convert.ToString(data[1], 2).PadLeft(8, '0')}b");
+        }
+
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }

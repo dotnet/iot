@@ -1,10 +1,10 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
-using Iot.Device.Vcnl4040.Defnitions;
+using Iot.Device.Vcnl4040.Common.Defnitions;
 using UnitsNet;
 
 internal partial class ExplorerApp
@@ -31,65 +31,68 @@ internal partial class ExplorerApp
         {
             case "als-shw-cnf":
                 ShowAlsConfiguration();
-                break;
+                return true;
 
             case "als-shw-val":
                 ShowAlsReading();
-                break;
+                return true;
 
             case "als-set-pwr":
                 SetAlsPowerState();
                 ShowAlsConfiguration();
-                break;
+                return true;
 
             case "als-cnf-rng":
             case "als-cnf-res":
             case "als-cnf-itg":
                 ConfigureAlsIntegrationTime();
                 ShowAlsConfiguration();
-                break;
+                return true;
 
             case "als-cnf-int":
                 ConfigureAlsInterrupt();
                 ShowAlsConfiguration();
-                break;
+                return true;
 
             case "als-end-int":
                 EnableDisableInterrupt();
                 ShowAlsConfiguration();
-                break;
-        }
+                return true;
 
-        return true;
+            default:
+                return false;
+
+        }
     }
 
     private void ShowAlsConfiguration()
     {
-        (bool isConfigured,
-         Illuminance lowerThreshold,
+        (Illuminance lowerThreshold,
          Illuminance upperThreshold,
          AlsInterruptPersistence persistence) = _als.GetInterruptConfiguration();
 
         Console.WriteLine("ALS configuration:");
-        Console.WriteLine($"  Integration time: {_als.IntegrationTime}");
-        Console.WriteLine($"  Power state: {_als.PowerOn}");
-        Console.WriteLine($"  Interrupt low level: {(isConfigured ? lowerThreshold : "-")}");
-        Console.WriteLine($"  Interrupt high level: {(isConfigured ? upperThreshold : "-")}");
-        Console.WriteLine($"  Interrupt persistence: {(isConfigured ? persistence : "-")}");
-        Console.WriteLine($"  Interrupt enabled: {(_als.InterruptEnabled ? "yes" : "no")}");
+        Console.WriteLine($"  Power state:           {_als.PowerOn}");
+        Console.WriteLine($"  Integration time:      {_als.IntegrationTime}");
+        Console.WriteLine($"    Range:                 {_als.Range}");
+        Console.WriteLine($"    Resolution:            {_als.Resolution}");
+        Console.WriteLine($"  Interrupt low level:   {lowerThreshold}");
+        Console.WriteLine($"  Interrupt high level : {upperThreshold}");
+        Console.WriteLine($"  Interrupt persistence: {persistence}");
+        Console.WriteLine($"  Interrupt enabled:     {(_als.InterruptEnabled ? "yes" : "no")}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
 
     private void SetAlsPowerState()
     {
-        bool result = PromptMultipleChoice("Power", new List<string>() { "on", "off" }, out int choice);
+        bool result = PromptMultipleChoice("Power", new List<string>() { "off", "on" }, out int choice);
         if (!result)
         {
             return;
         }
 
-        _als.PowerOn = choice == 0;
+        _als.PowerOn = choice == 1;
     }
 
     private void ConfigureAlsIntegrationTime()
@@ -132,28 +135,51 @@ internal partial class ExplorerApp
             return;
         }
 
-        _device.AmbientLightSensor.ConfigureInterrupt(Illuminance.FromLux(lowerThreshold), Illuminance.FromLux(upperThreshold), persistence);
+        _als.ConfigureInterrupt(Illuminance.FromLux(lowerThreshold), Illuminance.FromLux(upperThreshold), persistence);
     }
 
     private void EnableDisableInterrupt()
     {
-        bool result = PromptMultipleChoice("Interrupt enabled", new List<string>() { "yes", "no" }, out int choice);
+        bool result = PromptMultipleChoice("Interrupt enabled", new List<string>() { "no", "yes" }, out int choice);
         if (!result)
         {
             return;
         }
 
-        _als.InterruptEnabled = choice == 0;
+        try
+        {
+            _als.InterruptEnabled = choice == 1;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine();
+            Console.WriteLine(ex.Message);
+            Console.WriteLine();
+        }
     }
 
     private void ShowAlsReading()
     {
+        bool result = PromptMultipleChoice("Display interrupt flag (will clear flag continously)", new List<string>() { "no", "yes" }, out int choice);
+        if (!result)
+        {
+            choice = 0;
+        }
+
         Console.WriteLine("Illuminance:");
         (Illuminance maxDetectionRange, _) = _als.GetMaxDetectionRangeAndResolution();
         while (!Console.KeyAvailable)
         {
             Illuminance reading = _als.Reading;
-            PrintBarGraph((int)reading.Lux, (int)maxDetectionRange.Lux, 100);
+
+            string intFlagsInfo = string.Empty;
+            if (choice == 1)
+            {
+                InterruptFlags flags = _device.GetAndClearInterruptFlags();
+                intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
+            }
+
+            PrintBarGraph((int)reading.Lux, (int)maxDetectionRange.Lux, 100, intFlagsInfo);
             Task.Delay(100).Wait();
         }
     }

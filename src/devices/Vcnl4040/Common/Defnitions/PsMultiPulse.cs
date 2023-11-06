@@ -1,34 +1,32 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-
-namespace Iot.Device.Vcnl4040.Defnitions
+namespace Iot.Device.Vcnl4040.Common.Defnitions
 {
     /// <summary>
-    /// Defines the set of ALS integration times.
+    /// Defines the set of proximity multi pulse numbers
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum AlsIntegrationTime : byte
+    public enum PsMultiPulse : byte
     {
         /// <summary>
-        /// Integration time is 80 ms.
+        /// 1 multi pulse
         /// </summary>
-        Time80ms = 0b0000_0000,
+        Pulse1 = 0b0000_0000,
 
         /// <summary>
-        /// Integration time is 160 ms.
+        /// 2 multi pulse
         /// </summary>
-        Time160ms = 0b0100_0000,
+        Pulse2 = 0b0010_0000,
 
         /// <summary>
-        /// Integration time is 320 ms.
+        /// 4 multi pulses
         /// </summary>
-        Time320ms = 0b1000_0000,
+        Pulse4 = 0b0100_0000,
 
         /// <summary>
-        /// Integration time is 640 ms.
+        /// 8 multi pulses
         /// </summary>
-        Time640ms = 0b1100_0000
+        Pulse8 = 0b0110_0000
     }
 }

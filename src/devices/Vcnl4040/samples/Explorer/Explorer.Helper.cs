@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -24,7 +24,7 @@ internal partial class ExplorerApp
 
         if (!result || choice < 0 || choice >= choiceCount)
         {
-            Console.WriteLine("Invalid input or choice");
+            Console.WriteLine("\nINVALID INPUT OR CHOICE\n");
             return false;
         }
 
@@ -50,7 +50,7 @@ internal partial class ExplorerApp
         }
         else
         {
-            Console.WriteLine($"Invalid input ({input})");
+            Console.WriteLine($"\nINVALID INPUT ({input})\n");
             value = default(T);
             return false;
         }
@@ -72,20 +72,20 @@ internal partial class ExplorerApp
 
         if (!result)
         {
-            Console.WriteLine("Invalid input");
+            Console.WriteLine("\nINVALID INPUT\n");
             return false;
         }
 
         if (value < min || value > max)
         {
-            Console.WriteLine($"Input out of range ({min}-{max})");
+            Console.WriteLine($"\nINPUT OUT OF RANGE ({min}-{max})\n");
             return false;
         }
 
         return true;
     }
 
-    private static void PrintBarGraph(int value, int maxValue, int width)
+    private static void PrintBarGraph(int value, int maxValue, int width, string addInfo = "")
     {
         if (value > maxValue)
         {
@@ -108,7 +108,7 @@ internal partial class ExplorerApp
             Console.Write(" ");
         }
 
-        Console.Write($"] ({value})");
+        Console.Write($"] ({value}){(!string.IsNullOrEmpty(addInfo) ? " [" + addInfo + "]" : string.Empty)}".PadLeft(width, ' '));
         Console.CursorLeft = 0;
     }
 }
