@@ -7,18 +7,20 @@ using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using UnitsNet;
 
-internal partial class ExplorerApp
+internal partial class Explorer
 {
     private ProximitySensor _ps;
 
     private void PrintPsMenu()
     {
         Console.WriteLine("--- Proximity Sensor (PS) --------------------");
+        Console.WriteLine("(ps-shw-rdg) Show proximity reading");
         Console.WriteLine("(ps-shw-cnf) Show configuration");
         Console.WriteLine("(ps-set-pwr) Set power on/off");
-        Console.WriteLine("(ps-cnf-dty) Set IR LED duty ratio");
-        Console.WriteLine("(ps-cnf-cur) Set IR LED current");
-        Console.WriteLine("(ps-cnf-igr) Set integration time");
+        Console.WriteLine("(ps-cnf-dty) Configure IR LED duty ratio");
+        Console.WriteLine("(ps-cnf-cur) Configure IR LED current");
+        Console.WriteLine("(ps-cnf-igr) Configure integration time");
+        Console.WriteLine("(ps-cnf-out) Configure output size");
         Console.WriteLine("----------------------------------------------\n");
     }
 
@@ -26,6 +28,10 @@ internal partial class ExplorerApp
     {
         switch (command)
         {
+            case "ps-shw-rdg":
+                ShowPsReading();
+                return true;
+
             case "ps-shw-cnf":
                 ShowPsConfiguration();
                 return true;
@@ -50,8 +56,39 @@ internal partial class ExplorerApp
                 ShowPsConfiguration();
                 return true;
 
+            case "ps-cnf-out":
+                ConfigureOutputSize();
+                ShowPsConfiguration();
+                return true;
+
             default:
                 return false;
+        }
+    }
+
+    private void ShowPsReading()
+    {
+        bool result = PromptEnum("Display interrupt flag (will clear flag continously)", out YesNoChoice choice);
+        if (!result)
+        {
+            choice = YesNoChoice.No;
+        }
+
+        Console.WriteLine("Proximity:");
+
+        while (!Console.KeyAvailable)
+        {
+            int reading = _ps.Reading;
+
+            string intFlagsInfo = string.Empty;
+            if (choice == YesNoChoice.Yes)
+            {
+                InterruptFlags flags = _device.GetAndClearInterruptFlags();
+                intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
+            }
+
+            PrintBarGraph(reading, 65535, Console.WindowWidth - 20, intFlagsInfo);
+            Task.Delay(100).Wait();
         }
     }
 
@@ -62,6 +99,7 @@ internal partial class ExplorerApp
         Console.WriteLine($"  IR LED duty ratio: {_ps.DutyRatio}");
         Console.WriteLine($"  IR LED current:    {_ps.LedCurrent}");
         Console.WriteLine($"  Integration time:  {_ps.IntegrationTime}");
+        Console.WriteLine($"  Output size:       {_ps.OutputSize}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
@@ -105,6 +143,16 @@ internal partial class ExplorerApp
         }
 
         _ps.IntegrationTime = integrationTime;
+    }
+
+    private void ConfigureOutputSize()
+    {
+        if (!PromptEnum("Output size", out PsOutput size))
+        {
+            return;
+        }
+
+        _ps.OutputSize = size;
     }
 
     // private void EnableDisableInterrupt()

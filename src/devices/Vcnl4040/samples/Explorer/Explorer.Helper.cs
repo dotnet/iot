@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 
-internal partial class ExplorerApp
+internal partial class Explorer
 {
     private static bool PromptMultipleChoice(string prompt, List<string> choices, out int choice)
     {
@@ -34,26 +34,44 @@ internal partial class ExplorerApp
     private static bool PromptEnum<T>(string prompt, out T value)
         where T : struct
     {
+        Array enumValues = Enum.GetValues(typeof(T));
+
         Console.WriteLine(prompt);
-        foreach (var x in Enum.GetValues(typeof(T)))
+        int n = 0;
+        foreach (var x in enumValues)
         {
-            Console.WriteLine("  " + x.ToString());
+            Console.WriteLine($"  ({n}) {x}");
+            n++;
         }
 
+        Console.WriteLine("  (x) : cancel");
         Console.Write("=> ");
 
         string? input = Console.ReadLine();
-        if (Enum.TryParse<T>(input, true, out T parsedValue) && Enum.IsDefined(typeof(T), parsedValue))
+        if (input == "x")
         {
-            value = parsedValue;
-            return true;
-        }
-        else
-        {
-            Console.WriteLine($"\nINVALID INPUT ({input})\n");
-            value = default(T);
+            value = default;
             return false;
         }
+
+        bool result = int.TryParse(input, out int choice);
+        if (choice < 0 || choice >= n)
+        {
+            Console.WriteLine($"\nINVALID CHOICE ({choice})\n");
+            value = default;
+            return false;
+        }
+
+        object? choosenEnumValue = enumValues.GetValue(choice);
+        if (choosenEnumValue != null)
+        {
+            value = (T)choosenEnumValue!;
+            return true;
+        }
+
+        Console.WriteLine($"\nINVALID CHOICE ({choice})\n");
+        value = default;
+        return false;
     }
 
     private static bool PromptIntegerValue(string prompt, out int value, bool fromHex = false, int min = int.MinValue, int max = int.MaxValue)
@@ -87,15 +105,10 @@ internal partial class ExplorerApp
 
     private static void PrintBarGraph(int value, int maxValue, int width, string addInfo = "")
     {
-        if (value > maxValue)
-        {
-            value = maxValue;
-        }
-
         Console.CursorLeft = 0;
         Console.Write("[");
 
-        int progressBarWidth = (int)((double)value / maxValue * width);
+        int progressBarWidth = (int)((double)Math.Min(value, maxValue) / maxValue * width);
         int spaces = width - progressBarWidth;
 
         for (int i = 0; i < progressBarWidth; i++)
@@ -108,7 +121,13 @@ internal partial class ExplorerApp
             Console.Write(" ");
         }
 
-        Console.Write($"] ({value}){(!string.IsNullOrEmpty(addInfo) ? " [" + addInfo + "]" : string.Empty)}".PadLeft(width, ' '));
+        Console.Write($"] ({value}){(!string.IsNullOrEmpty(addInfo) ? " [" + addInfo + "]" : string.Empty)}".PadLeft(8, ' '));
         Console.CursorLeft = 0;
+    }
+
+    private enum YesNoChoice
+    {
+        No,
+        Yes
     }
 }

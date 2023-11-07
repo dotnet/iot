@@ -13,7 +13,7 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class PsConf2Register : Register
     {
-        private static readonly byte PsHdMask = 0b0001_0000;
+        private static readonly byte PsHdMask = 0b0000_1000;
         private static readonly byte PsIntMask = 0b0000_0011;
 
         /// <summary>

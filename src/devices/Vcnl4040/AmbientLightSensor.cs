@@ -19,6 +19,8 @@ namespace Iot.Device.Vcnl4040
         private AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
         private AlsDataRegister _alsDataRegister;
 
+        private Illuminance _cachedResolution = Illuminance.Zero;
+
         internal AmbientLightSensor(I2cInterface i2cBus)
         {
             _alsConfRegister = new AlsConfRegister(i2cBus);
@@ -68,7 +70,7 @@ namespace Iot.Device.Vcnl4040
             get
             {
                 _alsDataRegister.Read();
-                return Illuminance.FromLux(_alsDataRegister.Data / 10);
+                return Illuminance.FromLux(Illuminance.FromLux(_alsDataRegister.Data) / _cachedResolution);
             }
         }
 
@@ -107,6 +109,8 @@ namespace Iot.Device.Vcnl4040
                 InterruptEnabled = false;
                 _alsConfRegister.AlsIt = value;
                 _alsConfRegister.Write();
+
+                _cachedResolution = GetDetectionRangeAndResolution(value).Resolution;
             }
         }
 
@@ -126,6 +130,7 @@ namespace Iot.Device.Vcnl4040
         {
             get
             {
+                // get range derived from corresponding integration time
                 return IntegrationTime switch
                 {
                     AlsIntegrationTime.Time80ms => AlsRange.Range_6553,
@@ -138,7 +143,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                IntegrationTime = value switch
+                // set range by setting the corresponding integration time
+                AlsIntegrationTime integrationTime = value switch
                 {
                     AlsRange.Range_819 => AlsIntegrationTime.Time640ms,
                     AlsRange.Range_1638 => AlsIntegrationTime.Time320ms,
@@ -146,6 +152,9 @@ namespace Iot.Device.Vcnl4040
                     AlsRange.Range_6553 => AlsIntegrationTime.Time80ms,
                     _ => throw new NotImplementedException(),
                 };
+
+                IntegrationTime = integrationTime;
+                _cachedResolution = GetDetectionRangeAndResolution(integrationTime).Resolution;
             }
         }
 
@@ -165,6 +174,7 @@ namespace Iot.Device.Vcnl4040
         {
             get
             {
+                // get resolution derived from corresponding integration time
                 return IntegrationTime switch
                 {
                     AlsIntegrationTime.Time80ms => AlsResolution.Resolution_0_1,
@@ -177,7 +187,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                IntegrationTime = value switch
+                // set resolution by setting the corresponding integration time
+                AlsIntegrationTime integrationTime = value switch
                 {
                     AlsResolution.Resolution_0_1 => AlsIntegrationTime.Time80ms,
                     AlsResolution.Resolution_0_05 => AlsIntegrationTime.Time160ms,
@@ -185,6 +196,9 @@ namespace Iot.Device.Vcnl4040
                     AlsResolution.Resolution_0_0125 => AlsIntegrationTime.Time640ms,
                     _ => throw new NotImplementedException(),
                 };
+
+                IntegrationTime = integrationTime;
+                _cachedResolution = GetDetectionRangeAndResolution(integrationTime).Resolution;
             }
         }
         #endregion
@@ -230,7 +244,7 @@ namespace Iot.Device.Vcnl4040
         {
             // the maximum detection range and resolution depends on the integration time setting
             _alsConfRegister.Read();
-            (Illuminance maxDetectionRange, Illuminance resolution) = GetMaxDetectionRangeAndResolution(_alsConfRegister.AlsIt);
+            (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
 
             if (lowerThreshold > maxDetectionRange)
             {
@@ -264,7 +278,7 @@ namespace Iot.Device.Vcnl4040
             _alsLowInterruptThresholdRegister.Read();
             _alsHighInterruptThresholdRegister.Read();
             _alsConfRegister.Read();
-            (Illuminance maxDetectionRange, Illuminance resolution) = GetMaxDetectionRangeAndResolution(_alsConfRegister.AlsIt);
+            (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
             return (Illuminance.FromLux(_alsLowInterruptThresholdRegister.Threshold * resolution.Lux),
                     Illuminance.FromLux(_alsHighInterruptThresholdRegister.Threshold * resolution.Lux),
                     _alsConfRegister.AlsPers);
@@ -277,7 +291,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Helper method to get max detection range and resolution for the currently set integration time.
         /// </summary>
-        public (Illuminance MaxDetectionRange, Illuminance Resolution) GetMaxDetectionRangeAndResolution(AlsIntegrationTime integrationTime)
+        public (Illuminance MaxDetectionRange, Illuminance Resolution) GetDetectionRangeAndResolution(AlsIntegrationTime integrationTime)
         {
             return integrationTime switch
             {
@@ -292,7 +306,7 @@ namespace Iot.Device.Vcnl4040
         private void VerifyInterruptConfiguration(Illuminance lowerThreshold, Illuminance upperThreshold)
         {
             _alsConfRegister.Read();
-            (Illuminance maxDetectionRange, Illuminance resolution) = GetMaxDetectionRangeAndResolution(_alsConfRegister.AlsIt);
+            (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
 
             if (lowerThreshold > maxDetectionRange)
             {

@@ -6,12 +6,12 @@ using System.Device.I2c;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 
-internal partial class ExplorerApp
+internal partial class Explorer
 {
     private Vcnl4040Device _device;
     private I2cDevice _i2cDevice;
 
-    public ExplorerApp()
+    public Explorer()
     {
         _i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1,
                                                                          Vcnl4040Device.DefaultI2cAddress));
@@ -38,6 +38,8 @@ internal partial class ExplorerApp
             {
                 continue;
             }
+
+            Console.WriteLine();
 
             _ = HandleDeviceCommand(command) || HandleAlsCommand(command) || HandlePsCommand(command);
         }

@@ -4,7 +4,7 @@ internal class Program
 {
     private static void Main()
     {
-        ExplorerApp app = new ExplorerApp();
+        Explorer app = new Explorer();
         app.Loop();
     }
 }

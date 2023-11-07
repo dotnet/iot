@@ -22,7 +22,6 @@ namespace Iot.Device.Vcnl4040
         private PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
         private PsDataRegister _psDataRegister;
         private WhiteDataRegister _whiteDataRegister;
-        // private bool _interruptIsConfigured = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProximitySensor"/> API class.
@@ -67,6 +66,33 @@ namespace Iot.Device.Vcnl4040
             }
         }
         #endregion
+
+        #region Measurement
+
+        /// <summary>
+        /// Gets the current proximity sensor reading.
+        /// Important: if the sensor is in force mode it is required triggering a
+        ///            proximity measurement first using the Trigger method.
+        /// </summary>
+        public int Reading
+        {
+            get
+            {
+                _psDataRegister.Read();
+                return _psDataRegister.Data;
+            }
+        }
+
+        /// <summary>
+        /// Triggers a single proximity measurement if the sensor is in force mode.
+        /// </summary>
+        public void Trigger()
+        {
+        }
+
+        #endregion
+
+        #region Configuration
 
         /// <summary>
         /// Gets or sets the IR LED duty ratio.
@@ -135,5 +161,31 @@ namespace Iot.Device.Vcnl4040
                 _psConf1Register.Write();
             }
         }
+
+        /// <summary>
+        /// Gets or sets the sensor output size (12 or 16 bits).
+        /// </summary>
+        public PsOutput OutputSize
+        {
+            get
+            {
+                _psConf2Register.Read();
+                return _psConf2Register.PsHd;
+            }
+
+            set
+            {
+                _psConf2Register.Read();
+                if (value == _psConf2Register.PsHd)
+                {
+                    return;
+                }
+
+                _psConf2Register.PsHd = value;
+                _psConf2Register.Write();
+            }
+        }
+
+        #endregion
     }
 }

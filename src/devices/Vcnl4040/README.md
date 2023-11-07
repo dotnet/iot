@@ -118,6 +118,18 @@ public PsDuty DutyRatio
 public PsLedCurrent LedCurrent
 ```
 
+#### Output length
+
+```
+public PsOutput OutputSize
+```
+
+#### Integration time
+
+```
+public PsIntegrationTime IntegrationTime
+```
+
 # Samples
 ## Simple
 The "Simple" sample application demonstrates the fundamental usage of the binding. Initially, it configures both the ambient light sensor and the proximity sensor. Subsequently, it retrieves the current sensor readings at a 200 ms interval and displays them in the console. In the same loop, it clears all interrupts, causing any LED connected to the INT-pin of the VCNL4040 device to briefly blink if the configured interrupt conditions are met. The application can be terminated by pressing a key.

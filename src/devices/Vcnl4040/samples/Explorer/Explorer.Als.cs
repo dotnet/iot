@@ -7,15 +7,15 @@ using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using UnitsNet;
 
-internal partial class ExplorerApp
+internal partial class Explorer
 {
     private AmbientLightSensor _als;
 
     private void PrintAlsMenu()
     {
         Console.WriteLine("--- Ambient Light Sensor (ALS) ---------------");
+        Console.WriteLine("(als-shw-rdg) Show illuminance reading");
         Console.WriteLine("(als-shw-cnf) Show configuration");
-        Console.WriteLine("(als-shw-val) Show illuminance value");
         Console.WriteLine("(als-set-pwr) Set power on/off");
         Console.WriteLine("(als-cnf-rng) Configure range");
         Console.WriteLine("(als-cnf-res) Configure resolution");
@@ -29,12 +29,12 @@ internal partial class ExplorerApp
     {
         switch (command)
         {
-            case "als-shw-cnf":
-                ShowAlsConfiguration();
+            case "als-shw-rdg":
+                ShowAlsReading();
                 return true;
 
-            case "als-shw-val":
-                ShowAlsReading();
+            case "als-shw-cnf":
+                ShowAlsConfiguration();
                 return true;
 
             case "als-set-pwr":
@@ -43,7 +43,15 @@ internal partial class ExplorerApp
                 return true;
 
             case "als-cnf-rng":
+                ConfigureAlsRange();
+                ShowAlsConfiguration();
+                return true;
+
             case "als-cnf-res":
+                ConfigureAlsResolution();
+                ShowAlsConfiguration();
+                return true;
+
             case "als-cnf-itg":
                 ConfigureAlsIntegrationTime();
                 ShowAlsConfiguration();
@@ -62,6 +70,33 @@ internal partial class ExplorerApp
             default:
                 return false;
 
+        }
+    }
+
+    private void ShowAlsReading()
+    {
+        bool result = PromptMultipleChoice("Display interrupt flag (will clear flag continously)", new List<string>() { "no", "yes" }, out int choice);
+        if (!result)
+        {
+            choice = 0;
+        }
+
+        Console.WriteLine("Illuminance:");
+
+        (Illuminance maxDetectionRange, _) = _als.GetDetectionRangeAndResolution(_als.IntegrationTime);
+        while (!Console.KeyAvailable)
+        {
+            Illuminance reading = _als.Reading;
+
+            string intFlagsInfo = string.Empty;
+            if (choice == 1)
+            {
+                InterruptFlags flags = _device.GetAndClearInterruptFlags();
+                intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
+            }
+
+            PrintBarGraph((int)reading.Lux, (int)maxDetectionRange.Lux, Console.WindowWidth - 20, intFlagsInfo);
+            Task.Delay(100).Wait();
         }
     }
 
@@ -103,6 +138,26 @@ internal partial class ExplorerApp
         }
 
         _als.IntegrationTime = integrationTime;
+    }
+
+    private void ConfigureAlsRange()
+    {
+        if (!PromptEnum("Range", out AlsRange range))
+        {
+            return;
+        }
+
+        _als.Range = range;
+    }
+
+    private void ConfigureAlsResolution()
+    {
+        if (!PromptEnum("Resolution", out AlsResolution resolution))
+        {
+            return;
+        }
+
+        _als.Resolution = resolution;
     }
 
     private void ConfigureAlsInterrupt()
@@ -155,32 +210,6 @@ internal partial class ExplorerApp
             Console.WriteLine();
             Console.WriteLine(ex.Message);
             Console.WriteLine();
-        }
-    }
-
-    private void ShowAlsReading()
-    {
-        bool result = PromptMultipleChoice("Display interrupt flag (will clear flag continously)", new List<string>() { "no", "yes" }, out int choice);
-        if (!result)
-        {
-            choice = 0;
-        }
-
-        Console.WriteLine("Illuminance:");
-        (Illuminance maxDetectionRange, _) = _als.GetMaxDetectionRangeAndResolution();
-        while (!Console.KeyAvailable)
-        {
-            Illuminance reading = _als.Reading;
-
-            string intFlagsInfo = string.Empty;
-            if (choice == 1)
-            {
-                InterruptFlags flags = _device.GetAndClearInterruptFlags();
-                intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
-            }
-
-            PrintBarGraph((int)reading.Lux, (int)maxDetectionRange.Lux, 100, intFlagsInfo);
-            Task.Delay(100).Wait();
         }
     }
 }
