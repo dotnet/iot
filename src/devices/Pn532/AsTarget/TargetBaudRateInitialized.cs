@@ -7,7 +7,7 @@ namespace Iot.Device.Pn532.AsTarget
     /// When PN532 is acting as a target, the baud rate
     /// it is engaged to
     /// </summary>
-    public enum TargetBaudRateInialized
+    public enum TargetBaudRateInitialized
     {
         /// <summary>
         /// 106k bps
