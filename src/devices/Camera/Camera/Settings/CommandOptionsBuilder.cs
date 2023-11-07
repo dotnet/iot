@@ -246,7 +246,7 @@ public class CommandOptionsBuilder
     /// <summary>
     /// Adds the option to capture a video stream in MJPEG format.
     /// </summary>
-    /// <param name="quality">The quality of each MJPEG picture.</param>
+    /// <param name="quality">The quality of each MJPEG picture: 100 is maximum quality and 50 is the default.</param>
     /// <returns>A reference to this instance.</returns>
     public CommandOptionsBuilder WithMJPEGVideoOptions(int quality)
     {
