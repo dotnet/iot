@@ -3,6 +3,7 @@
 
 using System;
 using System.Device.I2c;
+using System.IO;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 
@@ -22,6 +23,22 @@ internal partial class Explorer
 
     public void Loop()
     {
+        try
+        {
+            _device.VerifyDevice();
+        }
+        catch (IOException ioex)
+        {
+            Console.WriteLine("Communication with device using I2C bus is not working");
+            Console.WriteLine(ioex.Message);
+            return;
+        }
+        catch (IncompatibleDeviceException idex)
+        {
+            Console.WriteLine(idex.Message);
+            return;
+        }
+
         while (true)
         {
             Console.Clear();
@@ -47,7 +64,7 @@ internal partial class Explorer
 
     private void PrintDeviceMenu()
     {
-        Console.WriteLine($"Device ID: {_device!.GetDeviceId():x}h\n");
+        Console.WriteLine($"Device ID: {_device!.DeviceId:x}h\n");
 
         Console.WriteLine("--- General Device ---------------------------");
         Console.WriteLine("(shw-clr-int) Show and clear interrupt flags");

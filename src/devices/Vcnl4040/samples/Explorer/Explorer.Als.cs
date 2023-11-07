@@ -75,6 +75,14 @@ internal partial class Explorer
 
     private void ShowAlsReading()
     {
+        if (!_als.PowerOn)
+        {
+            Console.WriteLine("Ambient light sensor is not powered on");
+            Console.WriteLine("\nPress any key to continue");
+            Console.ReadKey();
+            return;
+        }
+
         bool result = PromptMultipleChoice("Display interrupt flag (will clear flag continously)", new List<string>() { "no", "yes" }, out int choice);
         if (!result)
         {
@@ -108,6 +116,7 @@ internal partial class Explorer
 
         Console.WriteLine("ALS configuration:");
         Console.WriteLine($"  Power state:           {_als.PowerOn}");
+        Console.WriteLine($"  Load reduction mode:   {(_als.LoadReductionModeEnabled ? "enabled" : "disabled")}");
         Console.WriteLine($"  Integration time:      {_als.IntegrationTime}");
         Console.WriteLine($"    Range:                 {_als.Range}");
         Console.WriteLine($"    Resolution:            {_als.Resolution}");

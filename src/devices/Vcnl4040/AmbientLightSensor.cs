@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using System.ComponentModel.Design;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
@@ -14,13 +13,16 @@ namespace Iot.Device.Vcnl4040
     /// </summary>
     public class AmbientLightSensor
     {
-        private AlsConfRegister _alsConfRegister;
-        private AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
-        private AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
-        private AlsDataRegister _alsDataRegister;
+        private readonly AlsConfRegister _alsConfRegister;
+        private readonly AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
+        private readonly AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
+        private readonly AlsDataRegister _alsDataRegister;
+        private AlsIntegrationTime _lastKnownIntegrationTime = AlsIntegrationTime.Time80ms;
+        private bool _loadReductionModeEnabled = false;
 
-        private Illuminance _cachedResolution = Illuminance.Zero;
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AmbientLightSensor"/> class.
+        /// </summary>
         internal AmbientLightSensor(I2cInterface i2cBus)
         {
             _alsConfRegister = new AlsConfRegister(i2cBus);
@@ -30,6 +32,26 @@ namespace Iot.Device.Vcnl4040
         }
 
         #region General
+
+        /// <summary>
+        /// Enables or disables the load reduction mode for the ambient light sensor.
+        /// </summary>
+        public bool LoadReductionModeEnabled
+        {
+            get => _loadReductionModeEnabled;
+
+            set
+            {
+                // retrieve current integration time from the device for a last time
+                if (value)
+                {
+                    _alsConfRegister.Read();
+                    _lastKnownIntegrationTime = _alsConfRegister.AlsIt;
+                }
+
+                _loadReductionModeEnabled = value;
+            }
+        }
 
         /// <summary>
         /// Get or sets the power state (power on, shutdown) of the ambient light sensor.
@@ -62,15 +84,21 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Gets the current ambient light sensor reading.
-        /// Note: the update interval depends on the integration time and persistence setting.
-        ///       Interval = integration time * persistence, e.g. 320 ms * 4 = 1280 ms.
         /// </summary>
         public Illuminance Reading
         {
             get
             {
                 _alsDataRegister.Read();
-                return Illuminance.FromLux(Illuminance.FromLux(_alsDataRegister.Data) / _cachedResolution);
+                if (_loadReductionModeEnabled)
+                {
+                    return Illuminance.FromLux(Illuminance.FromLux(_alsDataRegister.Data) / GetDetectionRangeAndResolution(_lastKnownIntegrationTime).Resolution);
+                }
+                else
+                {
+                    return Illuminance.FromLux(Illuminance.FromLux(_alsDataRegister.Data) / GetDetectionRangeAndResolution(IntegrationTime).Resolution);
+                }
+
             }
         }
 
@@ -79,52 +107,33 @@ namespace Iot.Device.Vcnl4040
         #region Configuration
 
         /// <summary>
-        /// Gets and sets the ALS integration time.
-        /// Note: changing the integration time will implicitly change the
-        ///       depending detection range and resolution, hence the
-        ///       corresponding properties.
-        /// Important: the integration time setting influences detection range,
-        ///            hence may lead to an invalid interrupt threshold setting.
-        ///            Therefore changing the integration time will disable the
-        ///            ALS interrupt and require to re-configure and re-enable
-        ///            the interrupt.
-        ///            This is only valid if the ALS interrupt is used.
+        /// Gets or sets the ambient light sensor integration time.
         /// </summary>
         public AlsIntegrationTime IntegrationTime
         {
             get
             {
                 _alsConfRegister.Read();
+
+                // Since we are already reading the current integration time from the chip,
+                // we can also update the internally stored value. While not strictly necessary,
+                // this could potentially resolve any existing inconsistency, ideally.
+                _lastKnownIntegrationTime = _alsConfRegister.AlsIt;
+
                 return _alsConfRegister.AlsIt;
             }
 
             set
             {
                 _alsConfRegister.Read();
-                if (_alsConfRegister.AlsIt == value)
-                {
-                    return;
-                }
-
-                InterruptEnabled = false;
                 _alsConfRegister.AlsIt = value;
                 _alsConfRegister.Write();
-
-                _cachedResolution = GetDetectionRangeAndResolution(value).Resolution;
+                _lastKnownIntegrationTime = value;
             }
         }
 
         /// <summary>
         /// Gets or sets the detection range.
-        /// Note: changing the detection range will implicitly change the
-        ///       depending integration time and resolution, hence the
-        ///       corresponding properties.
-        /// Important: changing the detection range may lead to an invalid
-        ///            interrupt threshold setting.
-        ///            Therefore changing the detection range will disable the
-        ///            ALS interrupt and require to re-configure and re-enable
-        ///            the interrupt.
-        ///            This is only valid if the ALS interrupt is used.
         /// </summary>
         public AlsRange Range
         {
@@ -143,32 +152,23 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                // set range by setting the corresponding integration time
-                AlsIntegrationTime integrationTime = value switch
+                // set the range by setting the corresponding integration time
+                IntegrationTime = value switch
                 {
-                    AlsRange.Range_819 => AlsIntegrationTime.Time640ms,
-                    AlsRange.Range_1638 => AlsIntegrationTime.Time320ms,
-                    AlsRange.Range_3276 => AlsIntegrationTime.Time160ms,
                     AlsRange.Range_6553 => AlsIntegrationTime.Time80ms,
+                    AlsRange.Range_3276 => AlsIntegrationTime.Time160ms,
+                    AlsRange.Range_1638 => AlsIntegrationTime.Time320ms,
+                    AlsRange.Range_819 => AlsIntegrationTime.Time640ms,
                     _ => throw new NotImplementedException(),
                 };
-
-                IntegrationTime = integrationTime;
-                _cachedResolution = GetDetectionRangeAndResolution(integrationTime).Resolution;
             }
         }
 
         /// <summary>
-        /// Gets or sets the resolution.
-        /// Note: changing the resolution will implicitly change the
-        ///       depending integration time and detection range, hence the
-        ///       corresponding properties.
-        /// Important: changing the resolution may lead to an invalid
-        ///            interrupt threshold setting.
-        ///            Therefore changing the resolution will disable the
-        ///            ALS interrupt and require to re-configure and re-enable
-        ///            the interrupt.
-        ///            This is only valid if the ALS interrupt is used.
+        /// Gets or initializes the detection resolution.
+        /// Important note: the resolution can only be initialized if the dependent parameters, integration time,
+        /// and range have not been initialized beforehand.
+        /// The initialization of these three parameters is mutually exclusive for each one of them.
         /// </summary>
         public AlsResolution Resolution
         {
@@ -187,8 +187,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                // set resolution by setting the corresponding integration time
-                AlsIntegrationTime integrationTime = value switch
+                // set the range by setting the corresponding integration time
+                IntegrationTime = value switch
                 {
                     AlsResolution.Resolution_0_1 => AlsIntegrationTime.Time80ms,
                     AlsResolution.Resolution_0_05 => AlsIntegrationTime.Time160ms,
@@ -196,9 +196,6 @@ namespace Iot.Device.Vcnl4040
                     AlsResolution.Resolution_0_0125 => AlsIntegrationTime.Time640ms,
                     _ => throw new NotImplementedException(),
                 };
-
-                IntegrationTime = integrationTime;
-                _cachedResolution = GetDetectionRangeAndResolution(integrationTime).Resolution;
             }
         }
         #endregion
@@ -217,10 +214,19 @@ namespace Iot.Device.Vcnl4040
             }
             set
             {
+                _alsConfRegister.Read();
+
+                // any change?
+                if (_alsConfRegister.AlsIntEn == AlsInterrupt.Enabled ? value == true : value == false)
+                {
+                    return;
+                }
+
+                // if enabling interrupts perform some consistency checks
                 if (value)
                 {
                     (Illuminance lowerThreshold, Illuminance upperThreshold, _) = GetInterruptConfiguration();
-                    VerifyInterruptConfiguration(lowerThreshold, upperThreshold);
+                    VerifyInterruptConfiguration(lowerThreshold, upperThreshold, _alsConfRegister.AlsIt);
                 }
 
                 _alsConfRegister.AlsIntEn = value ? AlsInterrupt.Enabled : AlsInterrupt.Disabled;
@@ -278,7 +284,7 @@ namespace Iot.Device.Vcnl4040
             _alsLowInterruptThresholdRegister.Read();
             _alsHighInterruptThresholdRegister.Read();
             _alsConfRegister.Read();
-            (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
+            (_, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
             return (Illuminance.FromLux(_alsLowInterruptThresholdRegister.Threshold * resolution.Lux),
                     Illuminance.FromLux(_alsHighInterruptThresholdRegister.Threshold * resolution.Lux),
                     _alsConfRegister.AlsPers);
@@ -303,10 +309,9 @@ namespace Iot.Device.Vcnl4040
             };
         }
 
-        private void VerifyInterruptConfiguration(Illuminance lowerThreshold, Illuminance upperThreshold)
+        private void VerifyInterruptConfiguration(Illuminance lowerThreshold, Illuminance upperThreshold, AlsIntegrationTime integrationTime)
         {
-            _alsConfRegister.Read();
-            (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
+            (Illuminance maxDetectionRange, _) = GetDetectionRangeAndResolution(integrationTime);
 
             if (lowerThreshold > maxDetectionRange)
             {

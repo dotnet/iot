@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Device.I2c;
+using System.IO;
 using System.Threading;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
@@ -14,6 +15,22 @@ PeriodicTimer loopTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(200));
  */
 I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Vcnl4040Device.DefaultI2cAddress));
 Vcnl4040Device vcnl4040 = new Vcnl4040Device(i2cDevice);
+
+try
+{
+    vcnl4040.VerifyDevice();
+}
+catch (IOException ioex)
+{
+    Console.WriteLine("Communication with device using I2C bus is not working");
+    Console.WriteLine(ioex.Message);
+    return;
+}
+catch (IncompatibleDeviceException idex)
+{
+    Console.WriteLine(idex.Message);
+    return;
+}
 
 /*
  Configuration of the Ambient Light Sensor

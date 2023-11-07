@@ -46,46 +46,48 @@ If the event occurs a flag in the interrupt flag register is set to indicate the
 Note: for the ALS it may take some time before the interrupt event occurs, depending on the integration time and the persistence setting. If the integration time is 640 ms and the persistence setting is 8, it takes 8 * 640 ms = 5120 ms for the interrupt to occur.
 
 # Binding Documentation
-The device binding provides an API to the VCNL4040 device and its functions.
+
+## Basic principles
+The binding provides an API to the VCNL4040 device and its functions.
 The API hides the details of the device and provides methods for most (if not all) use cases.
-The driver also implements rules regarding functional dependencies and conditions specified in the data sheet, where applicable. This assists the user of the API, eliminating the need for an extensive study of the data sheet. Subsequent documentation will describe these corresponding functions.
+The driver also implements rules regarding functional dependencies and conditions specified in the data sheet, where applicable. This assists the user of the API, eliminating the need for an extensive study of the data sheet.
+
+Even though most use cases should require a one-time configuration only it can be configured at any time. Most parameters can be changed independently. Only the configuration of the integration time (and, in the case of the ambient light sensor, the dependent parameters of Range and Resolution) also affects other functions. The binding handles the dependencies and checks consistency.
+
+## Bus load reduction
+It is necessary for the binding to be aware of the currently configured integration time. This is required to convert measurement values according to the resolution and perform consistency checks when configuring interrupts.
+
+The binding can either fetch the integration time when needed from the device or use an internally stored value. Retrieving it from the device increases I2C bus load, particularly with frequent measurements.
+To reduce bus load, the binding has a *load reduction mode* where it stores the last configured value for integration time, whether it's set directly or indirectly via range or resolution. However, this may cause inconsistencies if the device is externally configured or after a power cycle, impacting measurement accuracy and other functions.
 
 ## General Interface
 
-IS CONNECTED mit VERSION check
+|Area|Function|API|Comments|
+|-|-|-|-|
+|Common|Check basic functionality|```public void VerifyDevice();```|Verifies whether a functional I2C connection to the device exists and checks the identification for device recognition. Should be used before any other function of the binding is used.
+|Common|Reduce bus load|```public bool LoadReductionModeEnabled {get; set;}```|Before enabling load reduction mode, the current configuration is retrieved from the device.|
+
 
 ## Ambient Light Sensor Interface
 
-### General
-#### Power state
-The ambient light sensor can be turned off to reduce power consumption of the chip.
-```
-public bool PowerOn {get; set;}
-```
+In general, the integration time, resolution or range is configured once, before configuring the interrupt settings, enabling the interrupt, and finally powering the sensor. From that point forward, current values are read or interrupt(s) are triggered. The interrupt configuration, as well as the power state and interrupt enable / disable state can be changed at any time afterwards.
 
-### Measurement
-The current illuminance reading can be get at anytime.
-It is updated in the interval of the integration time.
+As described in section [Ambient light sensor configuration](Ambient-light-sensor-configuration) the parameters integration time, range and resolution depend on each other. The API provides three properties to set these parameters and adjusting the depending parameters at the same time.
 
-```
-public Illuminance Reading {get;}
-```
+|Area|Function|API|Comments|
+|-|-|-|-|
+|General|Control power state|```public bool PowerOn {get; set;}```|The ambient light sensor can be turned off to reduce power consumption of the chip.|
+|Measurement|Get latest reading|```public Illuminance Reading {get;}```|The current illuminance reading can be get at anytime. The update interval of the reading depends on the integration time and persistence setting.*Interval = integration time * persistence*, e.g. 320 ms * 4 = 1280 ms. The maximum value and resolution depends on the configured integration time, range or resolution.|
+|Configuration|Configure integration time|```public AlsIntegrationTime IntegrationTime {get; init;}```|**Note:** the property will always get the current value from the device.<br>Configuring the integration changes the dependent parameters, range and resolution, too. The initialization of these three parameters is mutually exclusive for each one of them. The changed integration time, and the resulting changes of range and resolution, have to be considered when configuring interrupts. Changing the integration time will adjust the interrupt configuration  |
+|Configuration|Configure range|```public AlsRange Range {get; init;}```|bla bla|
+|Configuration|Configure resolution|```public AlsResolution Resolution {get; init;}```|bla bla|
 
 ### Configuration
-In general, the resolution or range is configured once, before configuring the interrupt settings, enabling the interrupt, and finally activating the sensor. From that point forward, current values are read or interrupt(s) are triggered.
 
 #### Integration time / detection range / resolution
-As described in section [Ambient light sensor configuration](Ambient-light-sensor-configuration) these parameters depend on each other. The API provides three properties to set these parameters and adjusting the depending parameters at the same time.
 
 **Important**: changing one of these parameters may cause an invalid interrut thresholds configuration. If the new range or resolution results in a detection range below the configured threshold, the interrupt is deactivated and must be reconfigured before reactivation.
 
-Properties:
-
-```
-public AlsIntegrationTime IntegrationTime
-public AlsRange Range
-public AlsResolution Resolution
-```
 
 ### Interrupt configuration
 The interrupt of the ALS is configured by setting the lower and upper thresholds and the hit persistence.

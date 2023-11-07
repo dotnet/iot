@@ -3,7 +3,7 @@
 
 using System;
 using System.Device.I2c;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using System.IO;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 
@@ -18,10 +18,16 @@ namespace Iot.Device.Vcnl4040
         /// Default I2C bus address
         /// </summary>
         public static int DefaultI2cAddress = 0x60;
-        private I2cInterface _i2cBus;
 
-        private InterruptFlagRegister _interruptFlagRegister;
-        private IdRegister _idRegister;
+        /// <summary>
+        /// This is the version code this binding implementation is compatible with.
+        /// Is
+        /// </summary>
+        private const int CompatibleDeviceId = 0x0186;
+
+        private readonly InterruptFlagRegister _interruptFlagRegister;
+        private readonly IdRegister _idRegister;
+        private I2cInterface _i2cBus;
 
         /// <summary>
         /// Ambient light sensor of the VCNL4040 device
@@ -48,6 +54,21 @@ namespace Iot.Device.Vcnl4040
             _idRegister = new IdRegister(_i2cBus);
         }
 
+        /// <summary>
+        /// Verifies whether a functional I2C connection to the device exists and checks the identification for
+        /// device recognition. If the communication doesn't work or the identification is incorrect, an exception is raised.
+        /// </summary>
+        /// <exception cref="IOException">Non-functional I2C communication</exception>
+        /// <exception cref="IncompatibleDeviceException">Incompatible device detected</exception>
+        public void VerifyDevice()
+        {
+            _idRegister.Read();
+            if (_idRegister.Id != CompatibleDeviceId)
+            {
+                throw new IncompatibleDeviceException(CompatibleDeviceId, _idRegister.Id);
+            }
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -61,10 +82,13 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets the device version code.
         /// </summary>
-        public int GetDeviceId()
+        public int DeviceId
         {
-            _idRegister.Read();
-            return _idRegister.Id;
+            get
+            {
+                _idRegister.Read();
+                return _idRegister.Id;
+            }
         }
 
         /// <summary>

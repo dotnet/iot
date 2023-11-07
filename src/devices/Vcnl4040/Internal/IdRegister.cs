@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 
@@ -55,7 +54,7 @@ namespace Iot.Device.Vcnl4040.Internal
             IdLsb = dataLow;
             SlaveAddress = (byte)(dataHigh & 0b0011_0000 >> 4);
             VersionCode = (byte)(dataHigh & 0b0000_1111);
-            Id = dataHigh << 8 | dataLow;
+            Id = (dataHigh << 8 | dataLow) & 0b0000_1111_1111_1111;
         }
 
         /// <summary>
