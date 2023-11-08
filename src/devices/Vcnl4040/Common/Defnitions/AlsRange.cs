@@ -12,21 +12,21 @@ namespace Iot.Device.Vcnl4040.Common.Defnitions
         /// <summary>
         /// Range is 0 to 819.2 lux
         /// </summary>
-        Range_819,
+        Range819,
 
         /// <summary>
         /// Range is 0 to 1638.4 lux
         /// </summary>
-        Range_1638,
+        Range1638,
 
         /// <summary>
         /// Range is 0 to 3276.7 lux
         /// </summary>
-        Range_3276,
+        Range3276,
 
         /// <summary>
         /// Range is 0 to 6553.5 lux
         /// </summary>
-        Range_6553,
+        Range6553,
     }
 }

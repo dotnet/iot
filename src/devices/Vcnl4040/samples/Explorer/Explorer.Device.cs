@@ -67,8 +67,8 @@ internal partial class Explorer
         Console.WriteLine($"Device ID: {_device!.DeviceId:x}h\n");
 
         Console.WriteLine("--- General Device ---------------------------");
-        Console.WriteLine("(shw-clr-int) Show and clear interrupt flags");
-        Console.WriteLine("(shw-reg-dmp) Show register dump");
+        Console.WriteLine("(00) Show and clear interrupt flags");
+        Console.WriteLine("(01) Show register dump");
         Console.WriteLine();
     }
 
@@ -76,11 +76,11 @@ internal partial class Explorer
     {
         switch (command)
         {
-            case "shw-clr-int":
+            case "00":
                 ShowAndClearInterruptFlags();
                 return true;
 
-            case "shw-reg-dmp":
+            case "01":
                 ShowregisterDump();
                 return true;
 

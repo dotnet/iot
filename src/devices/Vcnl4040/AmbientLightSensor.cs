@@ -90,15 +90,17 @@ namespace Iot.Device.Vcnl4040
             get
             {
                 _alsDataRegister.Read();
+                Illuminance resolution;
                 if (_loadReductionModeEnabled)
                 {
-                    return Illuminance.FromLux(Illuminance.FromLux(_alsDataRegister.Data) / GetDetectionRangeAndResolution(_lastKnownIntegrationTime).Resolution);
+                    resolution = GetDetectionRangeAndResolution(_lastKnownIntegrationTime).Resolution;
                 }
                 else
                 {
-                    return Illuminance.FromLux(Illuminance.FromLux(_alsDataRegister.Data) / GetDetectionRangeAndResolution(IntegrationTime).Resolution);
+                    resolution = GetDetectionRangeAndResolution(IntegrationTime).Resolution;
                 }
 
+                return Illuminance.FromLux(_alsDataRegister.Data * resolution.Lux);
             }
         }
 
@@ -125,6 +127,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
+                DisableInterrupts();
+
                 _alsConfRegister.Read();
                 _alsConfRegister.AlsIt = value;
                 _alsConfRegister.Write();
@@ -142,10 +146,10 @@ namespace Iot.Device.Vcnl4040
                 // get range derived from corresponding integration time
                 return IntegrationTime switch
                 {
-                    AlsIntegrationTime.Time80ms => AlsRange.Range_6553,
-                    AlsIntegrationTime.Time160ms => AlsRange.Range_3276,
-                    AlsIntegrationTime.Time320ms => AlsRange.Range_1638,
-                    AlsIntegrationTime.Time640ms => AlsRange.Range_819,
+                    AlsIntegrationTime.Time80ms => AlsRange.Range6553,
+                    AlsIntegrationTime.Time160ms => AlsRange.Range3276,
+                    AlsIntegrationTime.Time320ms => AlsRange.Range1638,
+                    AlsIntegrationTime.Time640ms => AlsRange.Range819,
                     _ => throw new NotImplementedException(),
                 };
             }
@@ -155,10 +159,46 @@ namespace Iot.Device.Vcnl4040
                 // set the range by setting the corresponding integration time
                 IntegrationTime = value switch
                 {
-                    AlsRange.Range_6553 => AlsIntegrationTime.Time80ms,
-                    AlsRange.Range_3276 => AlsIntegrationTime.Time160ms,
-                    AlsRange.Range_1638 => AlsIntegrationTime.Time320ms,
-                    AlsRange.Range_819 => AlsIntegrationTime.Time640ms,
+                    AlsRange.Range6553 => AlsIntegrationTime.Time80ms,
+                    AlsRange.Range3276 => AlsIntegrationTime.Time160ms,
+                    AlsRange.Range1638 => AlsIntegrationTime.Time320ms,
+                    AlsRange.Range819 => AlsIntegrationTime.Time640ms,
+                    _ => throw new NotImplementedException(),
+                };
+            }
+        }
+
+        /// <summary>
+        /// Gets the range as illuminance value
+        /// </summary>
+        public Illuminance RangeAsIlluminance
+        {
+            get
+            {
+                return Range switch
+                {
+                    AlsRange.Range819 => Illuminance.FromLux(819),
+                    AlsRange.Range1638 => Illuminance.FromLux(1638),
+                    AlsRange.Range3276 => Illuminance.FromLux(3276),
+                    AlsRange.Range6553 => Illuminance.FromLux(6553),
+                    _ => throw new NotImplementedException(),
+                };
+            }
+        }
+
+        /// <summary>
+        /// Gets the resolution as illuminance value
+        /// </summary>
+        public Illuminance ResolutionAsIlluminance
+        {
+            get
+            {
+                return Resolution switch
+                {
+                    AlsResolution.Resolution_0_1 => Illuminance.FromLux(0.1),
+                    AlsResolution.Resolution_0_05 => Illuminance.FromLux(0.05),
+                    AlsResolution.Resolution_0_025 => Illuminance.FromLux(0.025),
+                    AlsResolution.Resolution_0_0125 => Illuminance.FromLux(0.0125),
                     _ => throw new NotImplementedException(),
                 };
             }
@@ -203,7 +243,7 @@ namespace Iot.Device.Vcnl4040
         #region Interrupt
 
         /// <summary>
-        /// Enables or disables the interrupt of the ambient light sensor
+        /// Disables the interrupt of the ambient light sensor
         /// </summary>
         public bool InterruptEnabled
         {
@@ -212,26 +252,16 @@ namespace Iot.Device.Vcnl4040
                 _alsConfRegister.Read();
                 return _alsConfRegister.AlsIntEn == AlsInterrupt.Enabled;
             }
-            set
-            {
-                _alsConfRegister.Read();
+        }
 
-                // any change?
-                if (_alsConfRegister.AlsIntEn == AlsInterrupt.Enabled ? value == true : value == false)
-                {
-                    return;
-                }
-
-                // if enabling interrupts perform some consistency checks
-                if (value)
-                {
-                    (Illuminance lowerThreshold, Illuminance upperThreshold, _) = GetInterruptConfiguration();
-                    VerifyInterruptConfiguration(lowerThreshold, upperThreshold, _alsConfRegister.AlsIt);
-                }
-
-                _alsConfRegister.AlsIntEn = value ? AlsInterrupt.Enabled : AlsInterrupt.Disabled;
-                _alsConfRegister.Write();
-            }
+        /// <summary>
+        /// Disables the interrupt
+        /// </summary>
+        public void DisableInterrupts()
+        {
+            _alsConfRegister.Read();
+            _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
+            _alsConfRegister.Write();
         }
 
         /// <summary>
@@ -244,9 +274,9 @@ namespace Iot.Device.Vcnl4040
         /// <param name="lowerThreshold">Lower threshold for triggering the interrupt</param>
         /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
         /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
-        public void ConfigureInterrupt(Illuminance lowerThreshold,
-                                       Illuminance upperThreshold,
-                                       AlsInterruptPersistence persistence)
+        public void EnableInterrupts(Illuminance lowerThreshold,
+                                     Illuminance upperThreshold,
+                                     AlsInterruptPersistence persistence)
         {
             // the maximum detection range and resolution depends on the integration time setting
             _alsConfRegister.Read();
@@ -267,12 +297,16 @@ namespace Iot.Device.Vcnl4040
                 throw new ArgumentException("Lower threshold is higher than upper threshold");
             }
 
+            _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
+            _alsConfRegister.Write();
+
             _alsLowInterruptThresholdRegister.Threshold = (int)(lowerThreshold.Lux / resolution.Lux);
             _alsHighInterruptThresholdRegister.Threshold = (int)(upperThreshold.Lux / resolution.Lux);
             _alsLowInterruptThresholdRegister.Write();
             _alsHighInterruptThresholdRegister.Write();
 
             _alsConfRegister.AlsPers = persistence;
+            _alsConfRegister.AlsIntEn = AlsInterrupt.Enabled;
             _alsConfRegister.Write();
         }
 
@@ -297,7 +331,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Helper method to get max detection range and resolution for the currently set integration time.
         /// </summary>
-        public (Illuminance MaxDetectionRange, Illuminance Resolution) GetDetectionRangeAndResolution(AlsIntegrationTime integrationTime)
+        private (Illuminance MaxDetectionRange, Illuminance Resolution) GetDetectionRangeAndResolution(AlsIntegrationTime integrationTime)
         {
             return integrationTime switch
             {
@@ -308,27 +342,6 @@ namespace Iot.Device.Vcnl4040
                 _ => throw new NotImplementedException(),
             };
         }
-
-        private void VerifyInterruptConfiguration(Illuminance lowerThreshold, Illuminance upperThreshold, AlsIntegrationTime integrationTime)
-        {
-            (Illuminance maxDetectionRange, _) = GetDetectionRangeAndResolution(integrationTime);
-
-            if (lowerThreshold > maxDetectionRange)
-            {
-                throw new ArgumentException($"Lower threshold exceed maximum detection range ({maxDetectionRange})");
-            }
-
-            if (upperThreshold > maxDetectionRange)
-            {
-                throw new ArgumentException($"Upper threshold exceed maximum detection range ({maxDetectionRange})");
-            }
-
-            if (lowerThreshold > upperThreshold)
-            {
-                throw new ArgumentException("Lower threshold is higher than upper threshold");
-            }
-        }
-
         #endregion
     }
 }

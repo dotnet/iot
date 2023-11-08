@@ -14,14 +14,15 @@ internal partial class Explorer
     private void PrintAlsMenu()
     {
         Console.WriteLine("--- Ambient Light Sensor (ALS) ---------------");
-        Console.WriteLine("(als-shw-rdg) Show illuminance reading");
-        Console.WriteLine("(als-shw-cnf) Show configuration");
-        Console.WriteLine("(als-set-pwr) Set power on/off");
-        Console.WriteLine("(als-cnf-rng) Configure range");
-        Console.WriteLine("(als-cnf-res) Configure resolution");
-        Console.WriteLine("(als-cnf-itg) Configure integration time");
-        Console.WriteLine("(als-cnf-int) Configure interrupt");
-        Console.WriteLine("(als-end-int) Enable/disable interrupt");
+        Console.WriteLine("(10) Show illuminance reading");
+        Console.WriteLine("(11) Show configuration");
+        Console.WriteLine("(12) Set power on/off");
+        Console.WriteLine("(13) Set load reduction mode on/off");
+        Console.WriteLine("(14) Configure range");
+        Console.WriteLine("(15) Configure resolution");
+        Console.WriteLine("(16) Configure integration time");
+        Console.WriteLine("(17) Enable interrupts");
+        Console.WriteLine("(18) Disable interrupts");
         Console.WriteLine("----------------------------------------------\n");
     }
 
@@ -29,41 +30,46 @@ internal partial class Explorer
     {
         switch (command)
         {
-            case "als-shw-rdg":
+            case "10":
                 ShowAlsReading();
                 return true;
 
-            case "als-shw-cnf":
+            case "11":
                 ShowAlsConfiguration();
                 return true;
 
-            case "als-set-pwr":
+            case "12":
                 SetAlsPowerState();
                 ShowAlsConfiguration();
                 return true;
 
-            case "als-cnf-rng":
+            case "13":
+                SetLoadReductionMode();
+                ShowAlsConfiguration();
+                return true;
+
+            case "14":
                 ConfigureAlsRange();
                 ShowAlsConfiguration();
                 return true;
 
-            case "als-cnf-res":
+            case "15":
                 ConfigureAlsResolution();
                 ShowAlsConfiguration();
                 return true;
 
-            case "als-cnf-itg":
+            case "16":
                 ConfigureAlsIntegrationTime();
                 ShowAlsConfiguration();
                 return true;
 
-            case "als-cnf-int":
-                ConfigureAlsInterrupt();
+            case "17":
+                EnableAlsInterrupts();
                 ShowAlsConfiguration();
                 return true;
 
-            case "als-end-int":
-                EnableDisableInterrupt();
+            case "18":
+                _als.DisableInterrupts();
                 ShowAlsConfiguration();
                 return true;
 
@@ -83,27 +89,26 @@ internal partial class Explorer
             return;
         }
 
-        bool result = PromptMultipleChoice("Display interrupt flag (will clear flag continously)", new List<string>() { "no", "yes" }, out int choice);
+        bool result = PromptEnum("Display interrupt flags (will clear flags continously)", out YesNoChoice choice);
         if (!result)
         {
-            choice = 0;
+            choice = YesNoChoice.No;
         }
 
         Console.WriteLine("Illuminance:");
 
-        (Illuminance maxDetectionRange, _) = _als.GetDetectionRangeAndResolution(_als.IntegrationTime);
         while (!Console.KeyAvailable)
         {
             Illuminance reading = _als.Reading;
 
             string intFlagsInfo = string.Empty;
-            if (choice == 1)
+            if (choice == YesNoChoice.Yes)
             {
                 InterruptFlags flags = _device.GetAndClearInterruptFlags();
                 intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
             }
 
-            PrintBarGraph((int)reading.Lux, (int)maxDetectionRange.Lux, Console.WindowWidth - 20, intFlagsInfo);
+            PrintBarGraph((int)reading.Lux, (int)_als.RangeAsIlluminance.Lux, Console.WindowWidth - 20, intFlagsInfo);
             Task.Delay(100).Wait();
         }
     }
@@ -130,13 +135,24 @@ internal partial class Explorer
 
     private void SetAlsPowerState()
     {
-        bool result = PromptMultipleChoice("Power", new List<string>() { "off", "on" }, out int choice);
-        if (!result)
+        bool result = PromptEnum("Power", out YesNoCancelChoice choice);
+        if (!result || choice == YesNoCancelChoice.Cancel)
         {
             return;
         }
 
-        _als.PowerOn = choice == 1;
+        _als.PowerOn = choice == YesNoCancelChoice.Yes;
+    }
+
+    private void SetLoadReductionMode()
+    {
+        bool result = PromptEnum("Load reduction mode", out YesNoCancelChoice choice);
+        if (!result || choice == YesNoCancelChoice.Cancel)
+        {
+            return;
+        }
+
+        _als.LoadReductionModeEnabled = choice == YesNoCancelChoice.Yes;
     }
 
     private void ConfigureAlsIntegrationTime()
@@ -169,7 +185,7 @@ internal partial class Explorer
         _als.Resolution = resolution;
     }
 
-    private void ConfigureAlsInterrupt()
+    private void EnableAlsInterrupts()
     {
         int maxDetectionRange = _als.IntegrationTime switch
         {
@@ -199,26 +215,6 @@ internal partial class Explorer
             return;
         }
 
-        _als.ConfigureInterrupt(Illuminance.FromLux(lowerThreshold), Illuminance.FromLux(upperThreshold), persistence);
-    }
-
-    private void EnableDisableInterrupt()
-    {
-        bool result = PromptMultipleChoice("Interrupt enabled", new List<string>() { "no", "yes" }, out int choice);
-        if (!result)
-        {
-            return;
-        }
-
-        try
-        {
-            _als.InterruptEnabled = choice == 1;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine();
-            Console.WriteLine(ex.Message);
-            Console.WriteLine();
-        }
+        _als.EnableInterrupts(Illuminance.FromLux(lowerThreshold), Illuminance.FromLux(upperThreshold), persistence);
     }
 }

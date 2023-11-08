@@ -7,30 +7,6 @@ using System.Globalization;
 
 internal partial class Explorer
 {
-    private static bool PromptMultipleChoice(string prompt, List<string> choices, out int choice)
-    {
-        Console.WriteLine(prompt);
-        int choiceCount = 0;
-        foreach (string choiceStr in choices)
-        {
-            Console.WriteLine($"({choiceCount}) {choiceStr}");
-            choiceCount++;
-        }
-
-        Console.Write("=> ");
-
-        string? input = Console.ReadLine();
-        bool result = int.TryParse(input, out choice);
-
-        if (!result || choice < 0 || choice >= choiceCount)
-        {
-            Console.WriteLine("\nINVALID INPUT OR CHOICE\n");
-            return false;
-        }
-
-        return true;
-    }
-
     private static bool PromptEnum<T>(string prompt, out T value)
         where T : struct
     {
@@ -44,17 +20,16 @@ internal partial class Explorer
             n++;
         }
 
-        Console.WriteLine("  (x) : cancel");
         Console.Write("=> ");
 
         string? input = Console.ReadLine();
-        if (input == "x")
+        bool result = int.TryParse(input, out int choice);
+        if (!result)
         {
             value = default;
             return false;
         }
 
-        bool result = int.TryParse(input, out int choice);
         if (choice < 0 || choice >= n)
         {
             Console.WriteLine($"\nINVALID CHOICE ({choice})\n");
@@ -121,7 +96,7 @@ internal partial class Explorer
             Console.Write(" ");
         }
 
-        Console.Write($"] ({value}){(!string.IsNullOrEmpty(addInfo) ? " [" + addInfo + "]" : string.Empty)}".PadLeft(8, ' '));
+        Console.Write($"] ({value:D5}){(!string.IsNullOrEmpty(addInfo) ? " [" + addInfo + "]" : string.Empty)}".PadLeft(8, ' '));
         Console.CursorLeft = 0;
     }
 
@@ -129,5 +104,19 @@ internal partial class Explorer
     {
         No,
         Yes
+    }
+
+    private enum YesNoCancelChoice
+    {
+        No,
+        Yes,
+        Cancel
+    }
+
+    private enum OnOffCancelChoice
+    {
+        Off,
+        On,
+        Cancel
     }
 }

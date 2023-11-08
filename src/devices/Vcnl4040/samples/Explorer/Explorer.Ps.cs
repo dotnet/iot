@@ -14,13 +14,13 @@ internal partial class Explorer
     private void PrintPsMenu()
     {
         Console.WriteLine("--- Proximity Sensor (PS) --------------------");
-        Console.WriteLine("(ps-shw-rdg) Show proximity reading");
-        Console.WriteLine("(ps-shw-cnf) Show configuration");
-        Console.WriteLine("(ps-set-pwr) Set power on/off");
-        Console.WriteLine("(ps-cnf-dty) Configure IR LED duty ratio");
-        Console.WriteLine("(ps-cnf-cur) Configure IR LED current");
-        Console.WriteLine("(ps-cnf-igr) Configure integration time");
-        Console.WriteLine("(ps-cnf-out) Configure output size");
+        Console.WriteLine("(20) Show proximity reading");
+        Console.WriteLine("(21) Show configuration");
+        Console.WriteLine("(22) Set power on/off");
+        Console.WriteLine("(23) Configure IR LED duty ratio");
+        Console.WriteLine("(24) Configure IR LED current");
+        Console.WriteLine("(25) Configure integration time");
+        Console.WriteLine("(26) Configure output size");
         Console.WriteLine("----------------------------------------------\n");
     }
 
@@ -28,35 +28,35 @@ internal partial class Explorer
     {
         switch (command)
         {
-            case "ps-shw-rdg":
+            case "20":
                 ShowPsReading();
                 return true;
 
-            case "ps-shw-cnf":
+            case "21":
                 ShowPsConfiguration();
                 return true;
 
-            case "ps-set-pwr":
+            case "22":
                 SetPsPowerState();
                 ShowPsConfiguration();
                 return true;
 
-            case "ps-cnf-dty":
+            case "23":
                 ConfigureLedDutyRatio();
                 ShowPsConfiguration();
                 return true;
 
-            case "ps-cnf-cur":
+            case "24":
                 ConfigureLedCurrent();
                 ShowPsConfiguration();
                 return true;
 
-            case "ps-cnf-igr":
+            case "25":
                 ConfigurePsIntegrationTime();
                 ShowPsConfiguration();
                 return true;
 
-            case "ps-cnf-out":
+            case "26":
                 ConfigureOutputSize();
                 ShowPsConfiguration();
                 return true;
@@ -68,10 +68,10 @@ internal partial class Explorer
 
     private void ShowPsReading()
     {
-        bool result = PromptEnum("Display interrupt flag (will clear flag continously)", out YesNoChoice choice);
+        bool result = PromptEnum("Display interrupt flags (will clear flags continously)", out YesNoCancelChoice choice);
         if (!result)
         {
-            choice = YesNoChoice.No;
+            choice = YesNoCancelChoice.No;
         }
 
         Console.WriteLine("Proximity:");
@@ -81,7 +81,7 @@ internal partial class Explorer
             int reading = _ps.Reading;
 
             string intFlagsInfo = string.Empty;
-            if (choice == YesNoChoice.Yes)
+            if (choice == YesNoCancelChoice.Yes)
             {
                 InterruptFlags flags = _device.GetAndClearInterruptFlags();
                 intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
@@ -106,13 +106,13 @@ internal partial class Explorer
 
     private void SetPsPowerState()
     {
-        bool result = PromptMultipleChoice("Power", new List<string>() { "off", "on" }, out int choice);
-        if (!result)
+        bool result = PromptEnum("Power", out YesNoCancelChoice choice);
+        if (!result || choice == YesNoCancelChoice.Cancel)
         {
             return;
         }
 
-        _ps.PowerOn = choice == 1;
+        _ps.PowerOn = choice == YesNoCancelChoice.Yes;
     }
 
     private void ConfigureLedDutyRatio()

@@ -40,8 +40,8 @@ catch (IncompatibleDeviceException idex)
    - interrupt hit persistence is 4
  */
 AmbientLightSensor als = vcnl4040.AmbientLightSensor;
-als.Range = AlsRange.Range_3276;
-als.ConfigureInterrupt(Illuminance.FromLux(3000),
+als.Range = AlsRange.Range3276;
+als.EnableInterrupts(Illuminance.FromLux(3000),
                        Illuminance.FromLux(5000),
                        AlsInterruptPersistence.Persistence4);
 
