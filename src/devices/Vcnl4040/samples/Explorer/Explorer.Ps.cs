@@ -87,7 +87,7 @@ internal partial class Explorer
                 intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
             }
 
-            PrintBarGraph(reading, 65535, Console.WindowWidth - 20, intFlagsInfo);
+            PrintBarGraph(reading, 65535, intFlagsInfo);
             Task.Delay(100).Wait();
         }
     }

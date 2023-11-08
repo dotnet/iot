@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 
 internal partial class Explorer
 {
@@ -78,25 +79,34 @@ internal partial class Explorer
         return true;
     }
 
-    private static void PrintBarGraph(int value, int maxValue, int width, string addInfo = "")
+    private static void PrintBarGraph(double value, double maxValue, string addInfo = "")
     {
         Console.CursorLeft = 0;
-        Console.Write("[");
 
-        int progressBarWidth = (int)((double)Math.Min(value, maxValue) / maxValue * width);
-        int spaces = width - progressBarWidth;
+        string addInfoPart = $" ({value,8:0.000}){(!string.IsNullOrEmpty(addInfo) ? " [" + addInfo + "]" : string.Empty)}";
+
+        StringBuilder line = new();
+        int barWidth = Console.WindowWidth - addInfoPart.Length - 2;
+        int progressBarWidth = (int)((double)Math.Min(value, maxValue) / maxValue * barWidth);
+        int spaces = barWidth - progressBarWidth;
+
+        line.Append('[');
 
         for (int i = 0; i < progressBarWidth; i++)
         {
-            Console.Write("#");
+            line.Append('#');
         }
 
         for (int i = 0; i < spaces; i++)
         {
-            Console.Write(" ");
+            line.Append(' ');
         }
 
-        Console.Write($"] ({value:D5}){(!string.IsNullOrEmpty(addInfo) ? " [" + addInfo + "]" : string.Empty)}".PadLeft(8, ' '));
+        line.Append(']');
+        line.Append(addInfoPart);
+
+        Console.Write(line.ToString());
+        Console.Write(new string(' ', Console.WindowWidth - line.Length));
         Console.CursorLeft = 0;
     }
 

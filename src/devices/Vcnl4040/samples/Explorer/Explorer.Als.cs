@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
@@ -108,7 +107,7 @@ internal partial class Explorer
                 intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
             }
 
-            PrintBarGraph((int)reading.Lux, (int)_als.RangeAsIlluminance.Lux, Console.WindowWidth - 20, intFlagsInfo);
+            PrintBarGraph(reading.Lux, _als.RangeAsIlluminance.Lux, intFlagsInfo);
             Task.Delay(100).Wait();
         }
     }

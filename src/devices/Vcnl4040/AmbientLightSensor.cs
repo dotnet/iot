@@ -177,10 +177,10 @@ namespace Iot.Device.Vcnl4040
             {
                 return Range switch
                 {
-                    AlsRange.Range819 => Illuminance.FromLux(819),
-                    AlsRange.Range1638 => Illuminance.FromLux(1638),
-                    AlsRange.Range3276 => Illuminance.FromLux(3276),
-                    AlsRange.Range6553 => Illuminance.FromLux(6553),
+                    AlsRange.Range819 => Illuminance.FromLux(819.2),
+                    AlsRange.Range1638 => Illuminance.FromLux(1638.4),
+                    AlsRange.Range3276 => Illuminance.FromLux(3276.8),
+                    AlsRange.Range6553 => Illuminance.FromLux(6553.5),
                     _ => throw new NotImplementedException(),
                 };
             }
