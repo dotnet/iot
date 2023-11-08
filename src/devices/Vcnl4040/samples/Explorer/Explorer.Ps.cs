@@ -17,10 +17,11 @@ internal partial class Explorer
         Console.WriteLine("(20) Show proximity reading");
         Console.WriteLine("(21) Show configuration");
         Console.WriteLine("(22) Set power on/off");
-        Console.WriteLine("(23) Configure IR LED duty ratio");
-        Console.WriteLine("(24) Configure IR LED current");
+        Console.WriteLine("(23) Set load reduction mode on/off");
+        Console.WriteLine("(24) Configure IR LED");
         Console.WriteLine("(25) Configure integration time");
-        Console.WriteLine("(26) Configure output size");
+        Console.WriteLine("(26) Configure extended output range");
+        Console.WriteLine("(27) Configure active force mode");
         Console.WriteLine("----------------------------------------------\n");
     }
 
@@ -42,12 +43,12 @@ internal partial class Explorer
                 return true;
 
             case "23":
-                ConfigureLedDutyRatio();
+                SetPsLoadReductionMode();
                 ShowPsConfiguration();
                 return true;
 
             case "24":
-                ConfigureLedCurrent();
+                ConfigureLed();
                 ShowPsConfiguration();
                 return true;
 
@@ -57,7 +58,12 @@ internal partial class Explorer
                 return true;
 
             case "26":
-                ConfigureOutputSize();
+                ConfigureExtendedRange();
+                ShowPsConfiguration();
+                return true;
+
+            case "27":
+                ConfigureActiveForceMode();
                 ShowPsConfiguration();
                 return true;
 
@@ -68,10 +74,18 @@ internal partial class Explorer
 
     private void ShowPsReading()
     {
-        bool result = PromptEnum("Display interrupt flags (will clear flags continously)", out YesNoCancelChoice choice);
+        if (!_ps.PowerOn)
+        {
+            Console.WriteLine("Proximity sensor is not powered on");
+            Console.WriteLine("\nPress any key to continue");
+            Console.ReadKey();
+            return;
+        }
+
+        bool result = PromptEnum("Display interrupt flags (will clear flags continously)", out YesNoChoice choice);
         if (!result)
         {
-            choice = YesNoCancelChoice.No;
+            choice = YesNoChoice.No;
         }
 
         Console.WriteLine("Proximity:");
@@ -81,13 +95,13 @@ internal partial class Explorer
             int reading = _ps.Reading;
 
             string intFlagsInfo = string.Empty;
-            if (choice == YesNoCancelChoice.Yes)
+            if (choice == YesNoChoice.Yes)
             {
                 InterruptFlags flags = _device.GetAndClearInterruptFlags();
                 intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
             }
 
-            PrintBarGraph(reading, 65535, intFlagsInfo);
+            PrintBarGraph(reading, _ps.ExtendedOutputRange ? 65535 : 4095, intFlagsInfo);
             Task.Delay(100).Wait();
         }
     }
@@ -95,18 +109,19 @@ internal partial class Explorer
     private void ShowPsConfiguration()
     {
         Console.WriteLine("PS configuration:");
-        Console.WriteLine($"  Power state:       {_ps.PowerOn}");
-        Console.WriteLine($"  IR LED duty ratio: {_ps.DutyRatio}");
-        Console.WriteLine($"  IR LED current:    {_ps.LedCurrent}");
-        Console.WriteLine($"  Integration time:  {_ps.IntegrationTime}");
-        Console.WriteLine($"  Output size:       {_ps.OutputSize}");
+        Console.WriteLine($"  Power state:           {_ps.PowerOn}");
+        Console.WriteLine($"  IR LED duty ratio:     {_ps.DutyRatio}");
+        Console.WriteLine($"  IR LED current:        {_ps.LedCurrent}");
+        Console.WriteLine($"  Integration time:      {_ps.IntegrationTime}");
+        Console.WriteLine($"  Extended output range: {(_ps.ExtendedOutputRange ? "yes" : "no")}");
+        Console.WriteLine($"  Active force mode:     {(_ps.ActiveForceMode ? "yes" : "no")}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
 
     private void SetPsPowerState()
     {
-        bool result = PromptEnum("Power", out YesNoCancelChoice choice);
+        bool result = PromptEnum("Power on", out YesNoCancelChoice choice);
         if (!result || choice == YesNoCancelChoice.Cancel)
         {
             return;
@@ -115,7 +130,18 @@ internal partial class Explorer
         _ps.PowerOn = choice == YesNoCancelChoice.Yes;
     }
 
-    private void ConfigureLedDutyRatio()
+    private void SetPsLoadReductionMode()
+    {
+        bool result = PromptEnum("Load reduction mode on", out YesNoCancelChoice choice);
+        if (!result || choice == YesNoCancelChoice.Cancel)
+        {
+            return;
+        }
+
+        _als.LoadReductionModeEnabled = choice == YesNoCancelChoice.Yes;
+    }
+
+    private void ConfigureLed()
     {
         if (!PromptEnum("IR LED duty ratio", out PsDuty duty))
         {
@@ -123,10 +149,7 @@ internal partial class Explorer
         }
 
         _ps.DutyRatio = duty;
-    }
 
-    private void ConfigureLedCurrent()
-    {
         if (!PromptEnum("IR LED current", out PsLedCurrent current))
         {
             return;
@@ -145,23 +168,23 @@ internal partial class Explorer
         _ps.IntegrationTime = integrationTime;
     }
 
-    private void ConfigureOutputSize()
+    private void ConfigureExtendedRange()
     {
-        if (!PromptEnum("Output size", out PsOutput size))
+        if (!PromptEnum("Extended output range", out YesNoChoice choice))
         {
             return;
         }
 
-        _ps.OutputSize = size;
+        _ps.ExtendedOutputRange = choice == YesNoChoice.Yes;
     }
 
-    // private void EnableDisableInterrupt()
-    // {
-    //     bool result = PromptMultipleChoice("Interrupt enabled", new List<string>() { "no", "yes" }, out int choice);
-    //     if (!result)
-    //     {
-    //         return;
-    //     }
-    //     _ps.InterruptEnabled = choice == 1;
-    // }
+    private void ConfigureActiveForceMode()
+    {
+        if (!PromptEnum("Active force mode", out YesNoChoice choice))
+        {
+            return;
+        }
+
+        _ps.ActiveForceMode = choice == YesNoChoice.Yes;
+    }
 }

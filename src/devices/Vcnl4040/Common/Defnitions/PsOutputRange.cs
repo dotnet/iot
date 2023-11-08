@@ -7,7 +7,7 @@ namespace Iot.Device.Vcnl4040.Common.Defnitions
     /// Defines the set of PS output settings.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsOutput : byte
+    public enum PsOutputRange : byte
     {
         /// <summary>
         /// PS output is 12 bits

@@ -69,6 +69,18 @@ namespace Iot.Device.Vcnl4040
             }
         }
 
+        /// <summary>
+        /// Attaches the binding instance to an already operating device.
+        /// This synchronizes the binding with the following parameters configured in the device:
+        ///     - Ambient light sensor: integration time for load reduction mode
+        ///     - Proximity sensor: state of active force mode
+        /// </summary>
+        public void Attach()
+        {
+            AmbientLightSensor.Attach();
+            ProximitySensor.Attach();
+        }
+
         /// <inheritdoc />
         public void Dispose()
         {

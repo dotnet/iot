@@ -13,15 +13,16 @@ namespace Iot.Device.Vcnl4040
     /// </summary>
     public class ProximitySensor
     {
-        private PsConf1Register _psConf1Register;
-        private PsConf2Register _psConf2Register;
-        private PsConf3Register _psConf3Register;
-        private PsMsRegister _psMsRegister;
-        private PsCancellationLevelRegister _psCancellationLevelRegister;
-        private PsLowInterruptThresholdRegister _psLowInterruptThresholdRegister;
-        private PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
-        private PsDataRegister _psDataRegister;
-        private WhiteDataRegister _whiteDataRegister;
+        private readonly PsConf1Register _psConf1Register;
+        private readonly PsConf2Register _psConf2Register;
+        private readonly PsConf3Register _psConf3Register;
+        private readonly PsMsRegister _psMsRegister;
+        private readonly PsCancellationLevelRegister _psCancellationLevelRegister;
+        private readonly PsLowInterruptThresholdRegister _psLowInterruptThresholdRegister;
+        private readonly PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
+        private readonly PsDataRegister _psDataRegister;
+        private readonly WhiteDataRegister _whiteDataRegister;
+        private bool _activeForceModeEnabled = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProximitySensor"/> API class.
@@ -40,6 +41,14 @@ namespace Iot.Device.Vcnl4040
         }
 
         #region General
+
+        /// <summary>
+        /// Attaches the binding instance to an already operating device.
+        /// </summary>
+        public void Attach()
+        {
+            _activeForceModeEnabled = ActiveForceMode;
+        }
 
         /// <summary>
         /// Get or sets the power state (power on, shutdown) of the proximity sensor.
@@ -71,23 +80,23 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Gets the current proximity sensor reading.
-        /// Important: if the sensor is in force mode it is required triggering a
-        ///            proximity measurement first using the Trigger method.
+        /// Important: if the sensor is in force mode a proximity measurement is triggered first.
+        ///            Depending on the integration time this takes a while.
         /// </summary>
         public int Reading
         {
             get
             {
+                if (_activeForceModeEnabled)
+                {
+                    _psConf3Register.Read();
+                    _psConf3Register.PsTrig = PsActiveForceModeTrigger.OneTimeCycle;
+                    _psConf3Register.Write();
+                }
+
                 _psDataRegister.Read();
                 return _psDataRegister.Data;
             }
-        }
-
-        /// <summary>
-        /// Triggers a single proximity measurement if the sensor is in force mode.
-        /// </summary>
-        public void Trigger()
-        {
         }
 
         #endregion
@@ -163,26 +172,58 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Gets or sets the sensor output size (12 or 16 bits).
+        /// Gets or sets the extended sensor output range state.
+        /// If set to false, the range is at the 12-bit default.
+        /// If set to true, the range is extended to 16-bit.
         /// </summary>
-        public PsOutput OutputSize
+        public bool ExtendedOutputRange
         {
             get
             {
                 _psConf2Register.Read();
-                return _psConf2Register.PsHd;
+                return _psConf2Register.PsHd == PsOutputRange.Bits16;
             }
 
             set
             {
                 _psConf2Register.Read();
-                if (value == _psConf2Register.PsHd)
+                PsOutputRange newRange = value ? PsOutputRange.Bits16 : PsOutputRange.Bits12;
+                if (_psConf2Register.PsHd == newRange)
                 {
                     return;
                 }
 
-                _psConf2Register.PsHd = value;
+                _psConf2Register.PsHd = newRange;
                 _psConf2Register.Write();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the state of the active force mode.
+        /// If set to true, the active force mode is activated; otherwise it is deactivated.
+        /// </summary>
+        public bool ActiveForceMode
+        {
+            get
+            {
+                _psConf3Register.Read();
+                _activeForceModeEnabled = _psConf3Register.PsAf == PsActiveForceMode.Enabled;
+                return _activeForceModeEnabled;
+            }
+
+            set
+            {
+                _psConf3Register.Read();
+                PsActiveForceMode newMode = value ? PsActiveForceMode.Enabled : PsActiveForceMode.Disabled;
+                if (_psConf3Register.PsAf == newMode)
+                {
+                    return;
+                }
+
+                _psConf3Register.PsAf = newMode;
+                _psConf3Register.Write();
+
+                _activeForceModeEnabled = value;
             }
         }
 

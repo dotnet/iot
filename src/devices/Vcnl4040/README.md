@@ -78,7 +78,7 @@ If bus load is not an issue **do not** enable load reduction mode.
 |-|-|-|-|
 |General|Control power state|```bool PowerOn {get; set;}```|The ambient light sensor can be turned off to reduce power consumption of the chip.|
 |General|Control load reduction mode|```bool LoadReductionModeEnabled {get; set;}```|If enabled a local copy of the integration time is used for calculations. Before enabling load reduction mode, the current configuration is retrieved from the device.|
-|Measurement|Get latest reading|```Illuminance Reading {get;}```|The current value can be get at anytime. The update interval depends on the configured integration time. The integration time determines the period during which the sensor collects light before an updated value is available.<br>The maximum value and resolution depends on the configured integration time, range or resolution.|
+|Measurement|Get latest reading|```Illuminance Reading {get;}```|The current value can be get at anytime. The device internal update interval depends on the configured integration time. The integration time determines the period during which the sensor collects light before an updated value is available.<br>The maximum value and resolution depends on the configured integration time, range or resolution.|
 |Configuration|Configure integration time|```AlsIntegrationTime IntegrationTime {get; set;}```|**Important**: configuring the integration time, and the depedent range, would affect any configured interrupt thresholds. Therefore interrupts are implicitly disabled and required to be configured and enabled again.<br>**Note:** the property will always get the current value from the device, even when in load reduction mode.<br>**Note:**: changing the property will implicitly adjust the dependent properties Range and Resolution as well. For details refer to section [Ambient light sensor configuration](Ambient-light-sensor-configuration).<br>|
 |Configuration|Configure range|```AlsRange Range {get; set;}```|This property depends on the IntegrationTime property. All comments apply accordingly.|
 |Configuration|Configure resolution|```AlsResolution Resolution {get; set;}```|This property depends on the IntegrationTime property. All comments apply accordingly.|
@@ -89,34 +89,13 @@ If bus load is not an issue **do not** enable load reduction mode.
 |Convenience|Get resolution in physical unit|```ResolutionAsIlluminance {get;} ```||
 
 ## Proximity Sensor Interface
-
-### General
-#### Power state
-The proximity sensor can be turned off to reduce power consumption of the chip.
-```
-public bool PowerOn {get; set;}
-```
-
-### Configuration
-#### IR LED current and duty ratio
-
-**Important:** make sure that your power source is able to support higher LED currents before configuring! The host system (e.g. RPi) may otherwise become unstable or crash.
-```
-public PsDuty DutyRatio
-public PsLedCurrent LedCurrent
-```
-
-#### Output length
-
-```
-public PsOutput OutputSize
-```
-
-#### Integration time
-
-```
-public PsIntegrationTime IntegrationTime
-```
+|Area|Function|API|Comments|
+|-|-|-|-|
+|General|Control power state|```bool PowerOn {get; set;}```|The ambient light sensor can be turned off to reduce power consumption of the chip.|
+|General|Control load reduction mode|```bool LoadReductionModeEnabled {get; set;}```|If enabled a local copy of the integration time is used for calculations. Before enabling load reduction mode, the current configuration is retrieved from the device.|
+|Measurement|Get latest reading|```int Reading {get;}```|The current proximity value (counts) can be get at anytime. The device internal update interval depends on the configured integration time.|
+|Configuration|Enable extended 16-bit output range|```bool ExtendedOutputRange {get;}```|Controls the extended output range, which changes the measurement value size from 12-bit (0..4095 counts) to 16-bit (0..65535 counts). This may be necessary depending on the surface that reflects the light for the measurement.|
+|Configuration|Enable active force mode|```bool ActiveForceMode {get;}```|Controls the active force mode. If in active force mode the sensor measures the distance only on demand. The binding will request a measurement when getting a reading using the ```Reading```-property.|
 
 # Samples
 ## Simple

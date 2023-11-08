@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
 
@@ -13,7 +11,7 @@ internal partial class Explorer
     {
         Array enumValues = Enum.GetValues(typeof(T));
 
-        Console.WriteLine(prompt);
+        Console.WriteLine(prompt + ": ");
         int n = 0;
         foreach (var x in enumValues)
         {

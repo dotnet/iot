@@ -43,7 +43,7 @@ internal partial class Explorer
                 return true;
 
             case "13":
-                SetLoadReductionMode();
+                SetAlsLoadReductionMode();
                 ShowAlsConfiguration();
                 return true;
 
@@ -134,7 +134,7 @@ internal partial class Explorer
 
     private void SetAlsPowerState()
     {
-        bool result = PromptEnum("Power", out YesNoCancelChoice choice);
+        bool result = PromptEnum("Power on", out YesNoCancelChoice choice);
         if (!result || choice == YesNoCancelChoice.Cancel)
         {
             return;
@@ -143,9 +143,9 @@ internal partial class Explorer
         _als.PowerOn = choice == YesNoCancelChoice.Yes;
     }
 
-    private void SetLoadReductionMode()
+    private void SetAlsLoadReductionMode()
     {
-        bool result = PromptEnum("Load reduction mode", out YesNoCancelChoice choice);
+        bool result = PromptEnum("Load reduction mode on", out YesNoCancelChoice choice);
         if (!result || choice == YesNoCancelChoice.Cancel)
         {
             return;

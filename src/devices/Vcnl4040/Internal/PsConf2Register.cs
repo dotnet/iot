@@ -19,7 +19,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// PS output size
         /// </summary>
-        public PsOutput PsHd { get; set; } = PsOutput.Bits12;
+        public PsOutputRange PsHd { get; set; } = PsOutputRange.Bits12;
 
         /// <summary>
         /// PS interrupt source
@@ -39,7 +39,7 @@ namespace Iot.Device.Vcnl4040.Internal
         {
             (_, byte dataHigh) = ReadData();
 
-            PsHd = (PsOutput)(dataHigh & PsHdMask);
+            PsHd = (PsOutputRange)(dataHigh & PsHdMask);
             PsInt = (PsInterrupt)(dataHigh & PsIntMask);
         }
 

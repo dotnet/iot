@@ -34,6 +34,14 @@ namespace Iot.Device.Vcnl4040
         #region General
 
         /// <summary>
+        /// Attaches the binding instance to an already operating device.
+        /// </summary>
+        public void Attach()
+        {
+            _lastKnownIntegrationTime = _alsConfRegister.AlsIt;
+        }
+
+        /// <summary>
         /// Enables or disables the load reduction mode for the ambient light sensor.
         /// </summary>
         public bool LoadReductionModeEnabled
