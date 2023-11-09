@@ -267,6 +267,29 @@ namespace Iot.Device.Vcnl4040
                 _psMsRegister.Write();
             }
         }
+
+        /// <summary>
+        /// Gets or sets the number of multi pulses.
+        /// </summary>
+        public PsMultiPulse MultiPulses
+        {
+            get
+            {
+                _psConf3Register.Read();
+                return _psConf3Register.PsMps;
+            }
+
+            set
+            {
+                _psConf3Register.Read();
+                if (value != _psConf3Register.PsMps)
+                {
+                    _psConf3Register.PsMps = value;
+                    _psConf3Register.Write();
+                }
+            }
+        }
+
         #endregion
 
         #region Interrupt
@@ -317,10 +340,12 @@ namespace Iot.Device.Vcnl4040
         /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
         /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
         /// <param name="mode">Interrupt mode</param>
+        /// <param name="enableSmartPersistence">Enable smart persistence</param>
         public void EnableInterrupts(int lowerThreshold,
                                      int upperThreshold,
                                      PsInterruptPersistence persistence,
-                                     PsInterruptMode mode)
+                                     PsInterruptMode mode,
+                                     bool enableSmartPersistence)
         {
             // disable interrupts before altering configuration to avoid transient side effects
             _psConf2Register.Read();
@@ -337,6 +362,11 @@ namespace Iot.Device.Vcnl4040
             _psConf1Register.Read();
             _psConf1Register.PsPers = persistence;
             _psConf1Register.Write();
+
+            // set smart persistence
+            _psConf3Register.Read();
+            _psConf3Register.PsSmartPers = enableSmartPersistence ? PsSmartPersistenceState.Enabled : PsSmartPersistenceState.Disabled;
+            _psConf3Register.Write();
 
             // enable interrupts
             _psConf2Register.PsInt = mode;
@@ -374,6 +404,25 @@ namespace Iot.Device.Vcnl4040
             _psMsRegister.Write();
         }
 
+        /// <summary>
+        /// Gets or sets the cancellation level for the interrupt thresholds
+        /// </summary>
+        public int CancellationLevel
+        {
+            get
+            {
+                _psCancellationLevelRegister.Read();
+                return _psCancellationLevelRegister.Level;
+            }
+
+            set
+            {
+                _psCancellationLevelRegister.Level = value;
+                _psCancellationLevelRegister.Write();
+            }
+
+        }
+
         private void ConfigureThresholds(int lowerThreshold, int upperThreshold)
         {
             // Design consideration: The configured output range (12-bit or 16-bit) is not verified at this point.
@@ -399,13 +448,25 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets the interrupt configuration of the proximity sensor
         /// </summary>
-        public (int LowerThreshold, int UpperThreshold, PsInterruptPersistence Persistence, PsInterruptMode Mode) GetInterruptConfiguration()
+        public (int LowerThreshold,
+                int UpperThreshold,
+                PsInterruptPersistence Persistence,
+                PsInterruptMode Mode,
+                bool SmartPersistenceEnabled,
+                int CancellationLevel) GetInterruptConfiguration()
         {
             _psLowInterruptThresholdRegister.Read();
             _psHighInterruptThresholdRegister.Read();
             _psConf1Register.Read();
             _psConf2Register.Read();
-            return (_psLowInterruptThresholdRegister.Threshold, _psHighInterruptThresholdRegister.Threshold, _psConf1Register.PsPers, _psConf2Register.PsInt);
+            _psConf3Register.Read();
+            _psCancellationLevelRegister.Read();
+            return (_psLowInterruptThresholdRegister.Threshold,
+                    _psHighInterruptThresholdRegister.Threshold,
+                    _psConf1Register.PsPers,
+                    _psConf2Register.PsInt,
+                    _psConf3Register.PsSmartPers == PsSmartPersistenceState.Enabled,
+                    _psCancellationLevelRegister.Level);
         }
         #endregion
     }

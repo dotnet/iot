@@ -91,6 +91,11 @@ internal partial class Explorer
                 ShowPsConfiguration();
                 return true;
 
+            case "32":
+                ConfigureMultiPulses();
+                ShowPsConfiguration();
+                return true;
+
             case "40":
                 DisplayPsReading();
                 return true;
@@ -205,7 +210,12 @@ internal partial class Explorer
 
     private void ShowPsConfiguration()
     {
-        (int lowerThreshold, int upperThreshold, PsInterruptPersistence persistence, PsInterruptMode mode) = _ps.GetInterruptConfiguration();
+        (int lowerThreshold,
+         int upperThreshold,
+         PsInterruptPersistence persistence,
+         PsInterruptMode mode,
+         bool smartPersistenceEnabled,
+         int cancellationLevel) = _ps.GetInterruptConfiguration();
 
         Console.WriteLine("PS configuration:");
         Console.WriteLine($"  Power state:              {_ps.PowerOn}");
@@ -216,12 +226,15 @@ internal partial class Explorer
         Console.WriteLine($"  Active force mode:        {(_ps.ActiveForceMode ? "on" : "off")}");
         Console.WriteLine($"  Proximity detection mode: {(_ps.ProximityDetecionModeEnabled ? "on" : "off")}");
         Console.WriteLine($"  White channel:            {(_ps.WhiteChannelEnabled ? "on" : "off")}");
+        Console.WriteLine($"  Multi pulses:             {_ps.MultiPulses}");
         Console.WriteLine("  Interrupts");
         Console.WriteLine($"    Enabled:                {(_ps.InterruptEnabled ? "yes" : "no")}");
         Console.WriteLine($"    Lower threshold:        {lowerThreshold}");
         Console.WriteLine($"    Upper threshold :       {upperThreshold}");
         Console.WriteLine($"    Persistence:            {persistence}");
         Console.WriteLine($"    Mode:                   {mode}");
+        Console.WriteLine($"    Smart persistence:      {(smartPersistenceEnabled ? "yes" : "no")}");
+        Console.WriteLine($"    Cancellation level:     {cancellationLevel}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
@@ -305,13 +318,28 @@ internal partial class Explorer
         _ps.WhiteChannelEnabled = choice == YesNoChoice.Yes;
     }
 
+    private void ConfigureMultiPulses()
+    {
+        if (!PromptEnum("Multi pulses", out PsMultiPulse choice))
+        {
+            return;
+        }
+
+        _ps.MultiPulses = choice;
+    }
+
     private void EnablePsInterruptsOrProximityDetectionMode()
     {
         int lowerThreshold;
         int upperThreshold = 0;
         PsInterruptPersistence persistence = PsInterruptPersistence.Persistence1;
         PsInterruptMode mode = PsInterruptMode.CloseOrAway;
-        (int currentLowerThreshold, int currentUpperThreshold, PsInterruptPersistence currentPersistence, PsInterruptMode currentMode) = _ps.GetInterruptConfiguration();
+        (int currentLowerThreshold,
+         int currentUpperThreshold,
+         PsInterruptPersistence currentPersistence,
+         PsInterruptMode currentMode,
+         bool currentSmartPersistenceEnabled,
+         int currentCancellationLevel) = _ps.GetInterruptConfiguration();
 
         bool result = PromptIntegerValue($"Lower threshold [0 - 65535]", out lowerThreshold, currentLowerThreshold, 0, 65535);
         if (result)
@@ -322,6 +350,12 @@ internal partial class Explorer
         if (result)
         {
             result &= PromptEnum($"Persistence ({currentPersistence})", out persistence);
+        }
+
+        YesNoChoice enableSmartPersistence = YesNoChoice.No;
+        if (result)
+        {
+            result &= PromptEnum($"Enable smart persistence", out enableSmartPersistence);
         }
 
         YesNoChoice proximityDectectionModeChoice = YesNoChoice.No;
@@ -335,6 +369,23 @@ internal partial class Explorer
             result &= PromptEnum($"Interrupt mode ({currentMode})", out mode);
         }
 
+        YesNoChoice setCancellationLevel = YesNoChoice.No;
+        if (result)
+        {
+            result &= PromptEnum($"Set cancellation level", out setCancellationLevel);
+        }
+
+        int cancellationLevel = 0;
+        if (result && setCancellationLevel == YesNoChoice.Yes)
+        {
+            result &= PromptIntegerValue($"Cancellation level [0 - 65535]", out cancellationLevel, currentCancellationLevel, 0, 65535);
+        }
+
+        if (result)
+        {
+            _ps.CancellationLevel = cancellationLevel;
+        }
+
         if (!result)
         {
             return;
@@ -342,7 +393,7 @@ internal partial class Explorer
 
         if (proximityDectectionModeChoice == YesNoChoice.No)
         {
-            _ps.EnableInterrupts(lowerThreshold, upperThreshold, persistence, mode);
+            _ps.EnableInterrupts(lowerThreshold, upperThreshold, persistence, mode, enableSmartPersistence == YesNoChoice.Yes);
         }
         else
         {

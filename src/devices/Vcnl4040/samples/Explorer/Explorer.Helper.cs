@@ -67,7 +67,7 @@ internal partial class Explorer
         }
         else
         {
-            bool result = int.TryParse(input, NumberStyles.HexNumber, null, out value);
+            bool result = int.TryParse(input, out value);
             if (!result)
             {
                 Console.WriteLine("\nINVALID INPUT\n");
