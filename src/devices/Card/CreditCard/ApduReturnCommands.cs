@@ -20,6 +20,12 @@ namespace Iot.Device.Card
         /// <summary>Memory Failure.</summary>
         public static byte[] MemoryFailure = { 0x65, 0x81 };
 
+        /// <summary>Security status not satisfied.</summary>
+        public static byte[] SecurityNotSatisfied = { 0x69, 0x82 };
+
+        /// <summary>Wrong legnth.</summary>
+        public static byte[] WrongLength = { 0x6C, 0x00 };
+
         /// <summary>End of file before being able to send all.</summary>
         public static byte[] EndOfFileBefore = { 0x62, 0x82 };
     }

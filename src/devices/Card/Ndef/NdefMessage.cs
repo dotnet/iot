@@ -12,6 +12,8 @@ namespace Iot.Device.Ndef
     /// </summary>
     public class NdefMessage
     {
+        private static readonly byte[] _emptyMessage = new byte[] { 0x00, 0x03, 0xD0, 0x00, 0x00 };
+
         /// <summary>
         /// Associated with the GeneralPurposeByteConsitions, it tells if a sector is read/write and a valid
         /// NDEF sector
@@ -112,7 +114,18 @@ namespace Iot.Device.Ndef
         /// <summary>
         /// Get the length of the message
         /// </summary>
-        public int Length => Records.Select(m => m.Length).Sum();
+        public int Length
+        {
+            get
+            {
+                if (Records.Count == 0)
+                {
+                    return _emptyMessage.Length;
+                }
+
+                return Records.Select(m => m.Length).Sum();
+            }
+        }
 
         /// <summary>
         /// Serialize the message in a span of bytes
@@ -127,6 +140,8 @@ namespace Iot.Device.Ndef
 
             if (Records.Count == 0)
             {
+                // Empty record is 00 03 D0 00 00
+                _emptyMessage.CopyTo(messageSerialized);
                 return;
             }
 

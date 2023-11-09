@@ -3,16 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
+using EmulatedTag;
 using Iot.Device.Common;
 using Iot.Device.Ndef;
 using Iot.Device.Pn532;
 using Iot.Device.Pn532.AsTarget;
 using Microsoft.Extensions.Logging;
-using Microsoft.VisualBasic;
 
 namespace Iot.Device.Card
 {
@@ -35,14 +32,15 @@ namespace Iot.Device.Card
         private const byte CapacityContainerId = 0x03;
         private static readonly byte[] NdefTagApplicationNameV2 = new byte[] { 0xD2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x01 };
         private static readonly byte[] NdefTagApplicationNameV1 = new byte[] { 0xD2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x00 };
-        private Pn532.Pn532 _pn532;
+        private readonly List<byte> _receviedBytes = new List<byte>();
+        private readonly Pn532.Pn532 _pn532;
+        private readonly ILogger _logger;
+
         private byte[] _ndefId = new byte[3];
         private ushort _maximumNdefLength = AbsoluteNdefMaxLength;
         private bool _readOnly = false;
         private TagType _tagType = TagType.NoTagSelected;
-        // TODO: implement chunk writing
-        ////private List<byte> _receviedBytes = new List<byte>();
-        ////private bool _isTransferComplete = false;
+        private CardStatus _cardStatus = CardStatus.Released;
 
         // Capability container, page 18
         private byte[] _capabilityContainer = new byte[]
@@ -69,6 +67,16 @@ namespace Iot.Device.Card
             //// NDEF file write access for all by default
             0x00
         };
+
+        /// <summary>
+        /// Event sent when a new NDEF message is received.
+        /// </summary>
+        public event EventHandler<NdefMessage>? NdefReceived;
+
+        /// <summary>
+        /// Event sent when the satus of the card has changed.
+        /// </summary>
+        public event EventHandler<CardStatus>? CardStatusChanged;
 
         /// <summary>
         /// Gets or sets the read only flag. Default is false.
@@ -137,6 +145,8 @@ namespace Iot.Device.Card
             {
                 NdefId = nfId;
             }
+
+            _logger = _pn532.GetCurrentClassLogger();
         }
 
         /// <summary>
@@ -211,32 +221,31 @@ namespace Iot.Device.Card
             byte[] data;
             int ret = -1;
             DateTimeOffset dt = DateTimeOffset.UtcNow;
-            ErrorCode err;
+            ErrorCode err = ErrorCode.None;
             TargetStatus targetStatus;
+            CardStatus newStatus = _cardStatus;
+            _receviedBytes.Clear();
             while ((ret < 0 || !token.IsCancellationRequested))
             {
-                targetStatus = _pn532.GetStatusAsTarget();
-                if (targetStatus is null)
-                {
-                    return ErrorCode.Unknown;
-                }
+                CheckCardStatus();
 
-                if (targetStatus.IsReleased)
+                if (_cardStatus == CardStatus.Released)
                 {
                     return ErrorCode.None;
                 }
 
-                if (targetStatus.IsActivated)
+                if (_cardStatus == CardStatus.Activated)
                 {
                     // This must be a close loop using all the CPU not to miss the message
                     ret = _pn532.ReadDataAsTarget(read);
                     if (ret >= 0)
                     {
                         // For example: 00-00-A4-04-00-0E-32-50-41-59-2E-53-59-53-2E-44-44-46-30-31-00
-                        Console.WriteLine($"Status: {(ErrorCode)read[0]}, Data: {BitConverter.ToString(read.Slice(1, ret - 1).ToArray())}");
+                        _logger.LogDebug($"EMUL RCV- Status: {(ErrorCode)read[0]}, Data: {BitConverter.ToString(read.Slice(1, ret - 1).ToArray())}");
 
                         if ((ErrorCode)read[0] != ErrorCode.None)
                         {
+                            CheckCardStatus();
                             return (ErrorCode)read[0];
                         }
 
@@ -255,26 +264,21 @@ namespace Iot.Device.Card
                             // 00 A4 04 00 07 D2760000850101 00
                             // 00 A4 00 0C 02 E103
                             err = ProcessSelect(data);
-                            if (err != ErrorCode.None)
-                            {
-                                return err;
-                            }
+
                         }
                         else if (data[Cla] == ApduCommands.ReadBinary[Cla] && (data[Ins] == ApduCommands.ReadBinary[Ins]))
                         {
                             err = ProcessBinary(data);
-                            if (err != ErrorCode.None)
-                            {
-                                return err;
-                            }
                         }
                         else if (data[Cla] == ApduCommands.UpdateBinary[Cla] && (data[Ins] == ApduCommands.UpdateBinary[Ins]))
                         {
                             err = ProcessWriting(data);
-                            if (err != ErrorCode.None)
-                            {
-                                return err;
-                            }
+                        }
+
+                        if (err != ErrorCode.None)
+                        {
+                            CheckCardStatus();
+                            return err;
                         }
 
                         dt = DateTimeOffset.UtcNow;
@@ -284,18 +288,38 @@ namespace Iot.Device.Card
                         // It can take up to 1.078 second to get the data
                         if (dt.AddMilliseconds(1100) < DateTimeOffset.UtcNow)
                         {
+                            if (err != ErrorCode.None)
+                            {
+                                CheckCardStatus();
+                                return err;
+                            }
+
                             SendResponse(ApduReturnCommands.FunctionNotSupported);
                             return ErrorCode.Unknown;
                         }
                     }
                 }
-                else
-                {
-                    Console.WriteLine("Deselected");
-                }
             }
 
             return ErrorCode.None;
+
+            void CheckCardStatus()
+            {
+                targetStatus = _pn532.GetStatusAsTarget();
+                if (targetStatus is null)
+                {
+                    return;
+                }
+                else
+                {
+                    newStatus = targetStatus.IsReleased ? CardStatus.Released : (targetStatus.IsActivated ? CardStatus.Activated : CardStatus.Deselected);
+                    if (newStatus != _cardStatus)
+                    {
+                        _cardStatus = newStatus;
+                        CardStatusChanged?.Invoke(this, _cardStatus);
+                    }
+                }
+            }
         }
 
         private ErrorCode ProcessSelect(ReadOnlySpan<byte> data)
@@ -400,7 +424,7 @@ namespace Iot.Device.Card
                 {
                     // 67h 00h Wrong length; no further indication.
                     // 6Ch XXh Wrong Le field; SW2 encodes the exact number of available data bytes.
-                    SendResponse(new byte[] { 0x6C, 0x00 });
+                    SendResponse(ApduReturnCommands.WrongLength);
                     return ErrorCode.None;
                 }
 
@@ -419,36 +443,74 @@ namespace Iot.Device.Card
 
         private ErrorCode ProcessWriting(ReadOnlySpan<byte> data)
         {
-            // 00-D6-00-00-17-00-00-D1-01-11-54-02-65-6E-C3-87-61-20-6D-61-72-63-68-65-20-74-6F-70
-            // 00-D6-00-00-31-00-00-D1-01-2B-54-02-65-6E-2E-4E-45-54-20-49-6F-54-20-61-6E-64-2E-4E-45-54-20-6E-61-6E-6F-46-72-61-6D-65-77-6F-72-6B-20-61-72-65-20-67-72-65-61-74
-            // So far this implementation do not support offset. We will assume all the elements can be written in one write
-            // We do support also only v2.0 and not the v3.0
-            int len = data[Lc];
-            if (len <= 2)
+            if (ReadOnly)
             {
-                // This is the case of a confirmation and greedy collection
-                SendResponse(ApduReturnCommands.CommandComplete);
+                SendResponse(ApduReturnCommands.SecurityNotSatisfied);
                 return ErrorCode.None;
             }
 
-            if (data[Lc + 1] == 0x54)
+            // So far this implementation do not support offset. We will assume all the elements can be written in one write
+            // We do support also only v2.0 and not the v3.0
+            // ---
+            // Case of single writes:
+            // 00-D6-00-00-17-00-00-D1-01-11-54-02-65-6E-C3-87-61-20-6D-61-72-63-68-65-20-74-6F-70
+            // 00-D6-00-00-02-00-15
+            // Another example:
+            // 00-D6-00-00-31-00-00-D1-01-2B-54-02-65-6E-2E-4E-45-54-20-49-6F-54-20-61-6E-64-2E-4E-45-54-20-6E-61-6E-6F-46-72-61-6D-65-77-6F-72-6B-20-61-72-65-20-67-72-65-61-74
+            // 00-D6-00-00-02-00-2F
+            // ---
+            // Case of multiple writes:
+            // 00-D6-00-00-38-00-00-91-01-3A-54-02-65-6E-57-6A-73-68-68-73-68-73-68-73-73-62-73-62-73-68-73-68-20-73-6A-73-6A-73-75-73-20-73-75-73-75-77-69-69-61-F0-9F-8D-B0-F0-9F-98-82-F0-9F-8D-B7
+            // 00-D6-00-38-38-F0-9F-98-9B-F0-9F-A7-80-11-01-7C-55-00-73-6D-73-3A-33-33-36-36-34-34-30-34-36-37-34-26-62-6F-64-79-3D-53-62-73-68-73-75-73-25-32-30-73-6E-73-6E-73-6A-6A-73-25-46-30-25
+            // 00-D6-00-70-38-39-46-25-39-38-25-41-44-25-46-30-25-39-46-25-38-44-25-42-39-25-46-30-25-39-46-25-39-38-25-38-39-25-46-30-25-39-46-25-38-44-25-42-39-25-46-30-25-39-46-25-39-38-25-38-32
+            // 00-D6-00-A8-35-25-46-30-25-39-46-25-39-39-25-38-46-25-46-30-25-39-46-25-39-39-25-38-46-51-01-19-55-02-6C-69-6E-6B-65-64-69-6E-2E-63-6F-6D-2F-69-6E-2F-6C-61-75-72-65-6C-6C-65
+            // Final write gives the full size of the NDEF
+            // 00-D6-00-00-02-00-DB
+            int len = data[Lc];
+            if (len == 2)
             {
+                ErrorCode err = ErrorCode.None;
+                // This is the case of a confirmation and greedy collection
+                var size = (data[Lc + 1] << 8) + data[Lc + 2];
+                _receviedBytes.RemoveRange(0, _receviedBytes.Count - size);
+                var msg = new NdefMessage(_receviedBytes.ToArray());
+                try
+                {
+                    foreach (NdefRecord record in msg.Records)
+                    {
+                        if (record.Payload is null)
+                        {
+                            continue;
+                        }
+
+                        NdefMessage.Records.Add(record);
+                    }
+
+                    NdefReceived?.Invoke(this, msg);
+                }
+                catch (Exception ex)
+                {
+                    // If we are getting 3.0 messages, we will be in this situation
+                    _pn532.GetCurrentClassLogger().LogError($"Exception processing NDEF: {ex}");
+                    err = ErrorCode.Unknown;
+                }
+                finally
+                {
+                    _receviedBytes.Clear();
+                    SendResponse(ApduReturnCommands.CommandComplete);
+                }
+
+                return err;
+            }
+            else if (len < 2)
+            {
+                _receviedBytes.Clear();
                 SendResponse(ApduReturnCommands.FunctionNotSupported);
                 return ErrorCode.None;
             }
 
-            Span<byte> ndef = stackalloc byte[len + 1];
-            data.Slice(Lc, len + 1).CopyTo(ndef);
-            var msg = new NdefMessage(ndef);
-            foreach (NdefRecord record in msg.Records)
-            {
-                if (record.Payload is null)
-                {
-                    continue;
-                }
-
-                NdefMessage.Records.Add(record);
-            }
+            // Add all what is revceived we ignore the offsets as they are always sent in order
+            _receviedBytes.AddRange(data.Slice(Lc + 1, len).ToArray());
 
             SendResponse(ApduReturnCommands.CommandComplete);
             return ErrorCode.None;
@@ -461,7 +523,7 @@ namespace Iot.Device.Card
                 return false;
             }
 
-            _pn532.GetCurrentClassLogger().LogInformation($"RESPONSE: {BitConverter.ToString(response.ToArray())}");
+            _pn532.GetCurrentClassLogger().LogDebug($"RESPONSE: {BitConverter.ToString(response.ToArray())}");
             return _pn532.WriteDataAsTarget(response);
         }
     }

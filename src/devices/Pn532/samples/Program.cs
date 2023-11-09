@@ -797,5 +797,31 @@ void EmulateNdefTag(Pn532 pn532)
     };
 
     EmulatedNdefTag ndef = new(pn532, new byte[] { 0x12, 0x34, 0x45 });
+    ndef.CardStatusChanged += NdefCardStatusChanged;
+    ndef.NdefReceived += NdefNdefReceived;
     ndef.InitializeAndListen(cts.Token);
+}
+
+void NdefNdefReceived(object? sender, NdefMessage e)
+{
+    Console.WriteLine("New NDEF received!");
+    foreach (var record in e.Records)
+    {
+        Console.WriteLine($"Record length: {record.Length}");
+        if (TextRecord.IsTextRecord(record))
+        {
+            var text = new TextRecord(record);
+            Console.WriteLine($"  Text: {text.Text}");
+        }
+        else if (UriRecord.IsUriRecord(record))
+        {
+            var uri = new UriRecord(record);
+            Console.WriteLine($"  Uri: {uri.Uri}");
+        }
+    }
+}
+
+void NdefCardStatusChanged(object? sender, EmulatedTag.CardStatus e)
+{
+    Console.WriteLine($"Status of the emulated card changed to {e}");
 }
