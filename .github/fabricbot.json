@@ -41,17 +41,6 @@
               "operator": "not",
               "operands": [
                 {
-                  "name": "noActivitySince",
-                  "parameters": {
-                    "days": 7
-                  }
-                }
-              ]
-            },
-            {
-              "operator": "not",
-              "operands": [
-                {
                   "name": "isCloseAndComment",
                   "parameters": {}
                 }
@@ -93,68 +82,6 @@
             "name": "removeLabel",
             "parameters": {
               "label": "Needs: Author Feedback"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "taskType": "trigger",
-      "capabilityId": "IssueResponder",
-      "subCapability": "IssueCommentResponder",
-      "version": "1.0",
-      "config": {
-        "conditions": {
-          "operator": "and",
-          "operands": [
-            {
-              "name": "isAction",
-              "parameters": {
-                "action": "created"
-              }
-            },
-            {
-              "operator": "not",
-              "operands": [
-                {
-                  "name": "isOpen",
-                  "parameters": {}
-                }
-              ]
-            },
-            {
-              "name": "activitySenderHasPermissions",
-              "parameters": {
-                "permissions": "none"
-              }
-            },
-            {
-              "name": "noActivitySince",
-              "parameters": {
-                "days": 7
-              }
-            },
-            {
-              "operator": "not",
-              "operands": [
-                {
-                  "name": "isCloseAndComment",
-                  "parameters": {}
-                }
-              ]
-            }
-          ]
-        },
-        "eventType": "issue",
-        "eventNames": [
-          "issue_comment"
-        ],
-        "taskName": "For issues closed with no activity over 7 days, ask non-contributor to consider opening a new issue instead.",
-        "actions": [
-          {
-            "name": "addReply",
-            "parameters": {
-              "comment": "Hello lovely human, thank you for your comment on this issue. Because this issue has been closed for a period of time, please strongly consider opening a new issue linking to this issue instead to ensure better visibility of your comment. Thank you!"
             }
           }
         ]
