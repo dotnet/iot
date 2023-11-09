@@ -77,3 +77,7 @@ Status of the emulated card changed to Released
 And reading back what's on the emulated card with the phone application:
 
 ![display the 3 ndef messages](tag_read.png)
+
+## Future improvements
+
+So far, only PN532 can be setup as a card. Once more readers in this repository will have this ability, an interface will have to be put in place so more readers can be used for this purpose.
