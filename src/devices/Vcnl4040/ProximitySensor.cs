@@ -22,7 +22,7 @@ namespace Iot.Device.Vcnl4040
         private readonly PsLowInterruptThresholdRegister _psLowInterruptThresholdRegister;
         private readonly PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
         private readonly PsDataRegister _psDataRegister;
-        private readonly WhiteDataRegister _whiteDataRegister;
+        private readonly WhiteDataRegister _psWhiteDataRegister;
         private readonly AlsConfRegister _alsConfRegister;
         private bool _activeForceModeEnabled = false;
 
@@ -39,7 +39,7 @@ namespace Iot.Device.Vcnl4040
             _psLowInterruptThresholdRegister = new PsLowInterruptThresholdRegister(i2cBus);
             _psHighInterruptThresholdRegister = new PsHighInterruptThresholdRegister(i2cBus);
             _psDataRegister = new PsDataRegister(i2cBus);
-            _whiteDataRegister = new WhiteDataRegister(i2cBus);
+            _psWhiteDataRegister = new WhiteDataRegister(i2cBus);
             _alsConfRegister = new AlsConfRegister(i2cBus);
         }
 
@@ -105,6 +105,17 @@ namespace Iot.Device.Vcnl4040
             }
         }
 
+        /// <summary>
+        /// Gets the current reading of the proximity sensor's white channel.
+        /// </summary>
+        public int WhiteChannelReading
+        {
+            get
+            {
+                _psWhiteDataRegister.Read();
+                return _psWhiteDataRegister.Data;
+            }
+        }
         #endregion
 
         #region Configuration
@@ -230,6 +241,30 @@ namespace Iot.Device.Vcnl4040
                 _psConf3Register.Write();
 
                 _activeForceModeEnabled = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the white channel enabled state
+        /// </summary>
+        public bool WhiteChannelEnabled
+        {
+            get
+            {
+                _psMsRegister.Read();
+                return _psMsRegister.WhiteEn == PsWhiteChannelState.Enabled;
+            }
+            set
+            {
+                _psMsRegister.Read();
+                PsWhiteChannelState newState = value ? PsWhiteChannelState.Enabled : PsWhiteChannelState.Disabled;
+                if (_psMsRegister.WhiteEn == newState)
+                {
+                    return;
+                }
+
+                _psMsRegister.WhiteEn = newState;
+                _psMsRegister.Write();
             }
         }
         #endregion

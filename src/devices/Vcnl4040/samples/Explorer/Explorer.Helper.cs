@@ -120,11 +120,4 @@ internal partial class Explorer
         No,
         Yes
     }
-
-    private enum YesNoCancelChoice
-    {
-        No,
-        Yes,
-        Cancel
-    }
 }

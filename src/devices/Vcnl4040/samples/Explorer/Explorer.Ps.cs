@@ -1,14 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using System.Collections.Generic;
 using System.Device.Spi;
 using System.Drawing;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Ws28xx;
-using UnitsNet;
 
 internal partial class Explorer
 {
@@ -25,6 +23,8 @@ internal partial class Explorer
         Console.WriteLine("(25) Configure integration time");
         Console.WriteLine("(26) Configure extended output range");
         Console.WriteLine("(27) Configure active force mode");
+        Console.WriteLine("(28) Enable/disable white channel");
+        Console.WriteLine("(29) Show white channel reading");
         Console.WriteLine("(30) Enable interrupts / proximity detection");
         Console.WriteLine("(31) Disable interrupts / proximity detection");
         Console.WriteLine("----------------------------------------------\n");
@@ -70,6 +70,15 @@ internal partial class Explorer
             case "27":
                 ConfigureActiveForceMode();
                 ShowPsConfiguration();
+                return true;
+
+            case "28":
+                EnableDisableWhiteChannel();
+                ShowPsConfiguration();
+                return true;
+
+            case "29":
+                ShowWhiteChannelReading();
                 return true;
 
             case "30":
@@ -125,6 +134,24 @@ internal partial class Explorer
             }
 
             PrintBarGraph(reading, _ps.ExtendedOutputRange ? 65535 : 4095, intFlagsInfo);
+            Task.Delay(100).Wait();
+        }
+    }
+
+    private void ShowWhiteChannelReading()
+    {
+        if (!_ps.PowerOn)
+        {
+            Console.WriteLine("Proximity sensor is not powered on");
+            Console.WriteLine("\nPress any key to continue");
+            Console.ReadKey();
+            return;
+        }
+
+        Console.WriteLine("White channel:");
+        while (!Console.KeyAvailable)
+        {
+            PrintBarGraph(_ps.WhiteChannelReading, 65535, string.Empty);
             Task.Delay(100).Wait();
         }
     }
@@ -188,6 +215,7 @@ internal partial class Explorer
         Console.WriteLine($"  Extended output range:    {(_ps.ExtendedOutputRange ? "on" : "off")}");
         Console.WriteLine($"  Active force mode:        {(_ps.ActiveForceMode ? "on" : "off")}");
         Console.WriteLine($"  Proximity detection mode: {(_ps.ProximityDetecionModeEnabled ? "on" : "off")}");
+        Console.WriteLine($"  White channel:            {(_ps.WhiteChannelEnabled ? "on" : "off")}");
         Console.WriteLine("  Interrupts");
         Console.WriteLine($"    Enabled:                {(_ps.InterruptEnabled ? "yes" : "no")}");
         Console.WriteLine($"    Lower threshold:        {lowerThreshold}");
@@ -200,24 +228,24 @@ internal partial class Explorer
 
     private void SetPsPowerState()
     {
-        bool result = PromptEnum("Power on", out YesNoCancelChoice choice);
-        if (!result || choice == YesNoCancelChoice.Cancel)
+        bool result = PromptEnum("Power on", out YesNoChoice choice);
+        if (!result)
         {
             return;
         }
 
-        _ps.PowerOn = choice == YesNoCancelChoice.Yes;
+        _ps.PowerOn = choice == YesNoChoice.Yes;
     }
 
     private void SetPsLoadReductionMode()
     {
-        bool result = PromptEnum("Load reduction mode on", out YesNoCancelChoice choice);
-        if (!result || choice == YesNoCancelChoice.Cancel)
+        bool result = PromptEnum("Load reduction mode on", out YesNoChoice choice);
+        if (!result)
         {
             return;
         }
 
-        _als.LoadReductionModeEnabled = choice == YesNoCancelChoice.Yes;
+        _als.LoadReductionModeEnabled = choice == YesNoChoice.Yes;
     }
 
     private void ConfigureLed()
@@ -265,6 +293,16 @@ internal partial class Explorer
         }
 
         _ps.ActiveForceMode = choice == YesNoChoice.Yes;
+    }
+
+    private void EnableDisableWhiteChannel()
+    {
+        if (!PromptEnum("Enable white channel", out YesNoChoice choice))
+        {
+            return;
+        }
+
+        _ps.WhiteChannelEnabled = choice == YesNoChoice.Yes;
     }
 
     private void EnablePsInterruptsOrProximityDetectionMode()
