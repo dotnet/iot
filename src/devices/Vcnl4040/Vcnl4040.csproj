@@ -26,7 +26,7 @@
     <Compile Include="Common\Defnitions\PsTrig.cs" />
     <Compile Include="Common\Defnitions\PsSmartPersistenceState.cs" />
     <Compile Include="Common\Defnitions\PsMultiPulse.cs" />
-    <Compile Include="Common\Defnitions\PsInterrupt.cs" />
+    <Compile Include="Common\Defnitions\PsInterruptMode.cs" />
     <Compile Include="Common\Defnitions\PsOutputRange.cs" />
     <Compile Include="Common\Defnitions\PsIntegrationTime.cs" />
     <Compile Include="Common\Defnitions\PsInterruptPersistence.cs" />

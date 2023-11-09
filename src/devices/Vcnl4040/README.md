@@ -30,6 +30,11 @@ The ambient light sensor can be turned off to reduce power consumption of the ch
 
 For details refer to the official datasheet.
 
+BEOBACHTUNG: ZU SCHNELLE / PLÖTZLICHE ÄNDERUNGEN DER HELLIGKEIT IN HOHEM UMFANG FÜHRT ZUR NICHT ERZEUGUNG DES INTERRUPTS, TOO HIGH
+
+PS: ES WIRD IMMER NUR DAS INTERRUPT FLAG STEHEN GELASSEN DES ZULETZT EINGETRETENEN EVENTS!
+ALS: beide Flags können gleichzeitig gesetzt sein.
+
 ## Proximity sensor
 Current and duty ratio of the IR LED responsible for proximity detection can be configured, allowing you to adjust the sensitivity of proximity measurements. The higher the duty
 ratio, the faster the response time achieved with higher power consumption.
@@ -44,6 +49,9 @@ parameter, sets the amount of consecutive hits needed, in order for an interrupt
 If the event occurs a flag in the interrupt flag register is set to indicate the source and the INT-pin of the device is pulled low.
 
 Note: for the ALS it may take some time before the interrupt event occurs, depending on the integration time and the persistence setting. If the integration time is 640 ms and the persistence setting is 8, it takes 8 * 640 ms = 5120 ms for the interrupt to occur.
+
+
+PS: IMPORTANT TO UNDERSTAND- HIGHER VALUE = CLOSER => UPPER THRESHOLD = NEAR DISTANCE
 
 # Binding Documentation
 ## Basic principles
@@ -84,7 +92,8 @@ If bus load is not an issue **do not** enable load reduction mode.
 |Configuration|Configure resolution|```AlsResolution Resolution {get; set;}```|This property depends on the IntegrationTime property. All comments apply accordingly.|
 |Interrupt|Configure and enable interrupts|```void EnableInterrupt(Illuminance lowerThreshold, Illuminance upperThreshold, AlsInterruptPersistence persistence)```|Thresholds are checked for validity with respect to the configured integration time and its resulting resolution and range. Setting a threshold outside the valid measurement range results in an exception, as does using negative values.|
 |Interrupt|Disable interrupts|```void DisableInterrupts```||
-|Interrupt|InterruptsEnabled|bool InterruptEnabled {get;}|Gets the current interrupt enabled state from the device|
+|Interrupt|Get whether interrupts are enabled|bool InterruptEnabled {get;}|Gets the current interrupt enabled state from the device|
+|Interrupt|Get interrupt configuration|```(Illuminance LowerThreshold, Illuminance UpperThreshold, AlsInterruptPersistence Persistence) GetInterruptConfiguration()```|Reads the configuration from the device and converts the tresholds according to **current** integration time configuration.|
 |Convenience|Get range in physical unit|```RangeAsIlluminance {get;} ```||
 |Convenience|Get resolution in physical unit|```ResolutionAsIlluminance {get;} ```||
 
@@ -96,6 +105,11 @@ If bus load is not an issue **do not** enable load reduction mode.
 |Measurement|Get latest reading|```int Reading {get;}```|The current proximity value (counts) can be get at anytime. The device internal update interval depends on the configured integration time.|
 |Configuration|Enable extended 16-bit output range|```bool ExtendedOutputRange {get;}```|Controls the extended output range, which changes the measurement value size from 12-bit (0..4095 counts) to 16-bit (0..65535 counts). This may be necessary depending on the surface that reflects the light for the measurement.|
 |Configuration|Enable active force mode|```bool ActiveForceMode {get;}```|Controls the active force mode. If in active force mode the sensor measures the distance only on demand. The binding will request a measurement when getting a reading using the ```Reading```-property.|
+|Interrupt|Disable interrupts|```void DisableInterrupts()```||
+|Interrupt|Get whether interrupts are enabled|```bool InterruptEnabled {get;}```||
+|Interrupt|Get interrupt configuration|```(int LowerThreshold, int UpperThreshold, PsInterruptPersistence Persistence, PsInterruptMode Mode) GetInterruptConfiguration()```|Reads the configuration from the device.|
+
+
 
 # Samples
 ## Simple

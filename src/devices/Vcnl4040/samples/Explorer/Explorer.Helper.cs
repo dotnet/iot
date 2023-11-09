@@ -48,24 +48,31 @@ internal partial class Explorer
         return false;
     }
 
-    private static bool PromptIntegerValue(string prompt, out int value, bool fromHex = false, int min = int.MinValue, int max = int.MaxValue)
+    private static bool PromptIntegerValue(string prompt, out int value, int? givenValue = null, int min = int.MinValue, int max = int.MaxValue)
     {
-        Console.Write(prompt + ": ");
-        string? input = Console.ReadLine();
-        bool result = false;
-        if (!fromHex)
+        if (givenValue != null)
         {
-            result = int.TryParse(input, out value);
+            Console.Write($"{prompt} ({givenValue}): ");
         }
         else
         {
-            result = int.TryParse(input, NumberStyles.HexNumber, null, out value);
+            Console.Write($"{prompt}: ");
         }
 
-        if (!result)
+        string? input = Console.ReadLine();
+        if (input == string.Empty && givenValue != null)
         {
-            Console.WriteLine("\nINVALID INPUT\n");
-            return false;
+            value = givenValue.Value;
+            Console.WriteLine($"  => {givenValue}");
+        }
+        else
+        {
+            bool result = int.TryParse(input, NumberStyles.HexNumber, null, out value);
+            if (!result)
+            {
+                Console.WriteLine("\nINVALID INPUT\n");
+                return false;
+            }
         }
 
         if (value < min || value > max)
@@ -118,13 +125,6 @@ internal partial class Explorer
     {
         No,
         Yes,
-        Cancel
-    }
-
-    private enum OnOffCancelChoice
-    {
-        Off,
-        On,
         Cancel
     }
 }

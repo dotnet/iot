@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Collections.Generic;
+using System.Device.Spi;
+using System.Drawing;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Ws28xx;
 using UnitsNet;
 
 internal partial class Explorer
@@ -22,6 +25,8 @@ internal partial class Explorer
         Console.WriteLine("(25) Configure integration time");
         Console.WriteLine("(26) Configure extended output range");
         Console.WriteLine("(27) Configure active force mode");
+        Console.WriteLine("(30) Enable interrupts / proximity detection");
+        Console.WriteLine("(31) Disable interrupts / proximity detection");
         Console.WriteLine("----------------------------------------------\n");
     }
 
@@ -67,6 +72,20 @@ internal partial class Explorer
                 ShowPsConfiguration();
                 return true;
 
+            case "30":
+                EnablePsInterruptsOrProximityDetectionMode();
+                ShowPsConfiguration();
+                return true;
+
+            case "31":
+                _ps.DisableInterruptsAndProximityDetection();
+                ShowPsConfiguration();
+                return true;
+
+            case "40":
+                DisplayPsReading();
+                return true;
+
             default:
                 return false;
         }
@@ -88,8 +107,10 @@ internal partial class Explorer
             choice = YesNoChoice.No;
         }
 
-        Console.WriteLine("Proximity:");
+        int psAwayIntDisplayCount = 0;
+        int psCloseIntDisplayCount = 0;
 
+        Console.WriteLine("Proximity:");
         while (!Console.KeyAvailable)
         {
             int reading = _ps.Reading;
@@ -98,7 +119,9 @@ internal partial class Explorer
             if (choice == YesNoChoice.Yes)
             {
                 InterruptFlags flags = _device.GetAndClearInterruptFlags();
-                intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
+                psAwayIntDisplayCount = flags.PsAway ? 10 : psAwayIntDisplayCount > 0 ? psAwayIntDisplayCount - 1 : 0;
+                psCloseIntDisplayCount = flags.PsClose ? 10 : psCloseIntDisplayCount > 0 ? psCloseIntDisplayCount - 1 : 0;
+                intFlagsInfo = $"{(psCloseIntDisplayCount > 0 ? "*" : "-")} / {(psAwayIntDisplayCount > 0 ? "*" : "-")}";
             }
 
             PrintBarGraph(reading, _ps.ExtendedOutputRange ? 65535 : 4095, intFlagsInfo);
@@ -106,15 +129,71 @@ internal partial class Explorer
         }
     }
 
+    private void DisplayPsReading()
+    {
+        const int LedCount = 24;
+
+        if (!_ps.PowerOn)
+        {
+            Console.WriteLine("Proximity sensor is not powered on");
+            Console.WriteLine("\nPress any key to continue");
+            Console.ReadKey();
+            return;
+        }
+
+        SpiConnectionSettings settings = new(0, 0)
+        {
+            ClockFrequency = 2_400_000,
+            Mode = SpiMode.Mode0,
+            DataBitLength = 8
+        };
+
+        using SpiDevice spi = SpiDevice.Create(settings);
+        var ledStrip = new Ws2812b(spi, LedCount);
+        RawPixelContainer img = ledStrip.Image;
+        img.Clear();
+        ledStrip.Update();
+
+        int psAwayIntDisplayCount = 0;
+        int psCloseIntDisplayCount = 0;
+        while (!Console.KeyAvailable)
+        {
+            int reading = _ps.Reading;
+
+            InterruptFlags flags = _device.GetAndClearInterruptFlags();
+            psAwayIntDisplayCount = flags.PsAway ? 10 : psAwayIntDisplayCount > 0 ? psAwayIntDisplayCount - 1 : 0;
+            psCloseIntDisplayCount = flags.PsClose ? 10 : psCloseIntDisplayCount > 0 ? psCloseIntDisplayCount - 1 : 0;
+            int countsPerLed = _ps.ExtendedOutputRange ? 65535 : 4095 / LedCount;
+            img.Clear();
+            for (int i = 0; i < reading / countsPerLed; i++)
+            {
+                img.SetPixel(i, 0, Color.FromArgb(0, psAwayIntDisplayCount > 0 ? 255 : 0, psCloseIntDisplayCount > 0 ? 255 : 0, 255));
+            }
+
+            ledStrip.Update();
+
+            Task.Delay(100).Wait();
+        }
+    }
+
     private void ShowPsConfiguration()
     {
+        (int lowerThreshold, int upperThreshold, PsInterruptPersistence persistence, PsInterruptMode mode) = _ps.GetInterruptConfiguration();
+
         Console.WriteLine("PS configuration:");
-        Console.WriteLine($"  Power state:           {_ps.PowerOn}");
-        Console.WriteLine($"  IR LED duty ratio:     {_ps.DutyRatio}");
-        Console.WriteLine($"  IR LED current:        {_ps.LedCurrent}");
-        Console.WriteLine($"  Integration time:      {_ps.IntegrationTime}");
-        Console.WriteLine($"  Extended output range: {(_ps.ExtendedOutputRange ? "yes" : "no")}");
-        Console.WriteLine($"  Active force mode:     {(_ps.ActiveForceMode ? "yes" : "no")}");
+        Console.WriteLine($"  Power state:              {_ps.PowerOn}");
+        Console.WriteLine($"  IR LED duty ratio:        {_ps.DutyRatio}");
+        Console.WriteLine($"  IR LED current:           {_ps.LedCurrent}");
+        Console.WriteLine($"  Integration time:         {_ps.IntegrationTime}");
+        Console.WriteLine($"  Extended output range:    {(_ps.ExtendedOutputRange ? "on" : "off")}");
+        Console.WriteLine($"  Active force mode:        {(_ps.ActiveForceMode ? "on" : "off")}");
+        Console.WriteLine($"  Proximity detection mode: {(_ps.ProximityDetecionModeEnabled ? "on" : "off")}");
+        Console.WriteLine("  Interrupts");
+        Console.WriteLine($"    Enabled:                {(_ps.InterruptEnabled ? "yes" : "no")}");
+        Console.WriteLine($"    Lower threshold:        {lowerThreshold}");
+        Console.WriteLine($"    Upper threshold :       {upperThreshold}");
+        Console.WriteLine($"    Persistence:            {persistence}");
+        Console.WriteLine($"    Mode:                   {mode}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
@@ -186,5 +265,50 @@ internal partial class Explorer
         }
 
         _ps.ActiveForceMode = choice == YesNoChoice.Yes;
+    }
+
+    private void EnablePsInterruptsOrProximityDetectionMode()
+    {
+        int lowerThreshold;
+        int upperThreshold = 0;
+        PsInterruptPersistence persistence = PsInterruptPersistence.Persistence1;
+        PsInterruptMode mode = PsInterruptMode.CloseOrAway;
+        (int currentLowerThreshold, int currentUpperThreshold, PsInterruptPersistence currentPersistence, PsInterruptMode currentMode) = _ps.GetInterruptConfiguration();
+
+        bool result = PromptIntegerValue($"Lower threshold [0 - 65535]", out lowerThreshold, currentLowerThreshold, 0, 65535);
+        if (result)
+        {
+            result &= PromptIntegerValue($"Upper threshold [{lowerThreshold} - 65535]", out upperThreshold, currentUpperThreshold, lowerThreshold, 65535);
+        }
+
+        if (result)
+        {
+            result &= PromptEnum($"Persistence ({currentPersistence})", out persistence);
+        }
+
+        YesNoChoice proximityDectectionModeChoice = YesNoChoice.No;
+        if (result)
+        {
+            result &= PromptEnum("Enable proximity detection mode", out proximityDectectionModeChoice);
+        }
+
+        if (result && proximityDectectionModeChoice == YesNoChoice.No)
+        {
+            result &= PromptEnum($"Interrupt mode ({currentMode})", out mode);
+        }
+
+        if (!result)
+        {
+            return;
+        }
+
+        if (proximityDectectionModeChoice == YesNoChoice.No)
+        {
+            _ps.EnableInterrupts(lowerThreshold, upperThreshold, persistence, mode);
+        }
+        else
+        {
+            _ps.EnableProximityDetectionMode(lowerThreshold, upperThreshold, persistence);
+        }
     }
 }

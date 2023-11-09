@@ -5,7 +5,6 @@ using System;
 using System.Device.I2c;
 using System.IO;
 using Iot.Device.Vcnl4040;
-using Iot.Device.Vcnl4040.Common.Defnitions;
 
 internal partial class Explorer
 {
@@ -98,11 +97,11 @@ internal partial class Explorer
     {
         InterruptFlags flags = _device!.GetAndClearInterruptFlags();
         Console.WriteLine("Interrupt flags:");
-        Console.WriteLine($"  {flags.AlsLow}");
-        Console.WriteLine($"  {flags.AlsHigh}");
-        Console.WriteLine($"  {flags.PsClose}");
-        Console.WriteLine($"  {flags.PsAway}");
-        Console.WriteLine($"  {flags.PsProtectionMode}");
+        Console.WriteLine($"  ALS lower threshold:        {flags.AlsLow}");
+        Console.WriteLine($"  ALS upper threshold:        {flags.AlsHigh}");
+        Console.WriteLine($"  PS close (upper threshold): {flags.PsClose}");
+        Console.WriteLine($"  PS away (lower threshold):  {flags.PsAway}");
+        Console.WriteLine($"  PS protection mode:         {flags.PsProtectionMode}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }

@@ -4,7 +4,6 @@ using System;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
-using UnitsNet;
 
 namespace Iot.Device.Vcnl4040
 {
@@ -13,6 +12,8 @@ namespace Iot.Device.Vcnl4040
     /// </summary>
     public class ProximitySensor
     {
+        private const int MaximumSensorCounts16Bit = 65535;
+
         private readonly PsConf1Register _psConf1Register;
         private readonly PsConf2Register _psConf2Register;
         private readonly PsConf3Register _psConf3Register;
@@ -22,6 +23,7 @@ namespace Iot.Device.Vcnl4040
         private readonly PsHighInterruptThresholdRegister _psHighInterruptThresholdRegister;
         private readonly PsDataRegister _psDataRegister;
         private readonly WhiteDataRegister _whiteDataRegister;
+        private readonly AlsConfRegister _alsConfRegister;
         private bool _activeForceModeEnabled = false;
 
         /// <summary>
@@ -38,6 +40,7 @@ namespace Iot.Device.Vcnl4040
             _psHighInterruptThresholdRegister = new PsHighInterruptThresholdRegister(i2cBus);
             _psDataRegister = new PsDataRegister(i2cBus);
             _whiteDataRegister = new WhiteDataRegister(i2cBus);
+            _alsConfRegister = new AlsConfRegister(i2cBus);
         }
 
         #region General
@@ -80,8 +83,6 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Gets the current proximity sensor reading.
-        /// Important: if the sensor is in force mode a proximity measurement is triggered first.
-        ///            Depending on the integration time this takes a while.
         /// </summary>
         public int Reading
         {
@@ -89,6 +90,11 @@ namespace Iot.Device.Vcnl4040
             {
                 if (_activeForceModeEnabled)
                 {
+                    // design consideration: When the active force mode is in use, it can be assumed
+                    // that the measurement is retrieved rather infrequently.
+                    // Therefore, it is legitimate to read the current register content instead of
+                    // working with a local copy. This only minimally increases the bus load and
+                    // avoids potential inconsistencies.
                     _psConf3Register.Read();
                     _psConf3Register.PsTrig = PsActiveForceModeTrigger.OneTimeCycle;
                     _psConf3Register.Write();
@@ -226,7 +232,146 @@ namespace Iot.Device.Vcnl4040
                 _activeForceModeEnabled = value;
             }
         }
+        #endregion
 
+        #region Interrupt
+
+        /// <summary>
+        /// Gets whether proximity sensor interrupts are enabled.
+        /// Important: will also return TRUE if in proximity detection mode
+        /// </summary>
+        public bool InterruptEnabled
+        {
+            get
+            {
+                _psConf2Register.Read();
+                return _psConf2Register.PsInt != PsInterruptMode.Disabled;
+            }
+        }
+
+        /// <summary>
+        /// Gets whether the proximity detection logic output mode is enabled.
+        /// </summary>
+        public bool ProximityDetecionModeEnabled
+        {
+            get
+            {
+                _psMsRegister.Read();
+                return _psMsRegister.PsMs == PsDetectionLogicOutputMode.LogicOutput;
+            }
+        }
+
+        /// <summary>
+        /// Disables the interrupts and proximity detection mode.
+        /// </summary>
+        public void DisableInterruptsAndProximityDetection()
+        {
+            _psConf2Register.Read();
+            _psConf2Register.PsInt = PsInterruptMode.Disabled;
+            _psConf2Register.Write();
+
+            _psMsRegister.Read();
+            _psMsRegister.PsMs = PsDetectionLogicOutputMode.Interrupt;
+            _psMsRegister.Write();
+        }
+
+        /// <summary>
+        /// ...disables proximity detection mode...
+        /// </summary>
+        /// <param name="lowerThreshold">Lower threshold for triggering the interrupt</param>
+        /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
+        /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
+        /// <param name="mode">Interrupt mode</param>
+        public void EnableInterrupts(int lowerThreshold,
+                                     int upperThreshold,
+                                     PsInterruptPersistence persistence,
+                                     PsInterruptMode mode)
+        {
+            // disable interrupts before altering configuration to avoid transient side effects
+            _psConf2Register.Read();
+            _psConf2Register.PsInt = PsInterruptMode.Disabled;
+            _psConf2Register.Write();
+
+            ConfigureThresholds(lowerThreshold, upperThreshold);
+
+            _psMsRegister.Read();
+            _psMsRegister.PsMs = PsDetectionLogicOutputMode.Interrupt;
+            _psMsRegister.Write();
+
+            // set persistence
+            _psConf1Register.Read();
+            _psConf1Register.PsPers = persistence;
+            _psConf1Register.Write();
+
+            // enable interrupts
+            _psConf2Register.PsInt = mode;
+            _psConf2Register.Write();
+        }
+
+        /// <summary>
+        /// ....interrupts are not available in this mode (incl. ALS interrupts)
+        /// </summary>
+        /// <param name="lowerThreshold">Lower threshold for triggering the interrupt</param>
+        /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
+        /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
+        public void EnableProximityDetectionMode(int lowerThreshold,
+                                                 int upperThreshold,
+                                                 PsInterruptPersistence persistence)
+        {
+            // disable interrupts before altering configuration to avoid transient side effects
+            _psConf2Register.Read();
+            _psConf2Register.PsInt = PsInterruptMode.Disabled;
+            _psConf2Register.Write();
+
+            ConfigureThresholds(lowerThreshold, upperThreshold);
+
+            // set persistence
+            _psConf1Register.Read();
+            _psConf1Register.PsPers = persistence;
+            _psConf1Register.Write();
+
+            // enable interrupts
+            _psConf2Register.PsInt = PsInterruptMode.CloseOrAway;
+            _psConf2Register.Write();
+
+            _psMsRegister.Read();
+            _psMsRegister.PsMs = PsDetectionLogicOutputMode.LogicOutput;
+            _psMsRegister.Write();
+        }
+
+        private void ConfigureThresholds(int lowerThreshold, int upperThreshold)
+        {
+            // Design consideration: The configured output range (12-bit or 16-bit) is not verified at this point.
+            // Even if the range is set to the default of 12-bit, threshold values above it work reliably.
+            // Therefore, the configuration of the output range and the interrupts are considered independently.
+            if (lowerThreshold < 0 || lowerThreshold > MaximumSensorCounts16Bit)
+            {
+                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) must be positive and must not exceed the maximum range of {MaximumSensorCounts16Bit} counts");
+            }
+
+            if (lowerThreshold > upperThreshold || upperThreshold > MaximumSensorCounts16Bit)
+            {
+                throw new ArgumentException($"Upper threshold (is: {upperThreshold}) must be higher than the lower threshold (is: {lowerThreshold}) and must not exceed the maximum range of ({MaximumSensorCounts16Bit}) counts");
+            }
+
+            // set new thresholds
+            _psLowInterruptThresholdRegister.Threshold = lowerThreshold;
+            _psHighInterruptThresholdRegister.Threshold = upperThreshold;
+            _psLowInterruptThresholdRegister.Write();
+            _psHighInterruptThresholdRegister.Write();
+        }
+
+        /// <summary>
+        /// Gets the interrupt configuration of the proximity sensor
+        /// </summary>
+        public (int LowerThreshold, int UpperThreshold, PsInterruptPersistence Persistence, PsInterruptMode Mode) GetInterruptConfiguration()
+        {
+            _psLowInterruptThresholdRegister.Read();
+            _psHighInterruptThresholdRegister.Read();
+            _psConf1Register.Read();
+            _psConf2Register.Read();
+            return (_psLowInterruptThresholdRegister.Threshold, _psHighInterruptThresholdRegister.Threshold, _psConf1Register.PsPers, _psConf2Register.PsInt);
+        }
         #endregion
     }
 }

@@ -251,7 +251,7 @@ namespace Iot.Device.Vcnl4040
         #region Interrupt
 
         /// <summary>
-        /// Disables the interrupt of the ambient light sensor
+        /// Gets whether ambient light sensor interrupts are enabled.
         /// </summary>
         public bool InterruptEnabled
         {
@@ -263,7 +263,7 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Disables the interrupt
+        /// Disables the interrupts.
         /// </summary>
         public void DisableInterrupts()
         {
@@ -290,21 +290,17 @@ namespace Iot.Device.Vcnl4040
             _alsConfRegister.Read();
             (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
 
-            if (lowerThreshold > maxDetectionRange)
+            if (lowerThreshold > maxDetectionRange || upperThreshold > maxDetectionRange)
             {
-                throw new ArgumentException($"Lower threshold exceed maximum detection range ({maxDetectionRange})");
-            }
-
-            if (upperThreshold > maxDetectionRange)
-            {
-                throw new ArgumentException($"Upper threshold exceed maximum detection range ({maxDetectionRange})");
+                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) or upper threshold (is: {upperThreshold}) must not exceed maximum range of {maxDetectionRange} lux");
             }
 
             if (lowerThreshold > upperThreshold)
             {
-                throw new ArgumentException("Lower threshold is higher than upper threshold");
+                throw new ArgumentException("Lower threshold (is: {lowerThreshold}) must not be higher than upper threshold  (is: {upperThreshold})");
             }
 
+            // disable interrupts before altering configuration to avoid transient side effects
             _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
             _alsConfRegister.Write();
 
@@ -319,7 +315,7 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Gets the interrupt configuration from the device
+        /// Gets the interrupt configuration of the ambient light sensor
         /// </summary>
         public (Illuminance LowerThreshold, Illuminance UpperThreshold, AlsInterruptPersistence Persistence) GetInterruptConfiguration()
         {

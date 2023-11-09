@@ -17,6 +17,6 @@ namespace Iot.Device.Vcnl4040.Common.Defnitions
         /// <summary>
         /// Proximity detection logic output mode enable
         /// </summary>
-        LogicOutput = 0b0100_1000
+        LogicOutput = 0b0100_0000
     }
 }

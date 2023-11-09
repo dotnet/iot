@@ -13,18 +13,18 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class PsConf2Register : Register
     {
-        private static readonly byte PsHdMask = 0b0000_1000;
-        private static readonly byte PsIntMask = 0b0000_0011;
+        private const byte PsHdMask = 0b0000_1000;
+        private const byte PsIntMask = 0b0000_0011;
 
         /// <summary>
-        /// PS output size
+        /// PS output range size
         /// </summary>
         public PsOutputRange PsHd { get; set; } = PsOutputRange.Bits12;
 
         /// <summary>
         /// PS interrupt source
         /// </summary>
-        public PsInterrupt PsInt { get; set; } = PsInterrupt.Disable;
+        public PsInterruptMode PsInt { get; set; } = PsInterruptMode.Disabled;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PsConf2Register"/> class.
@@ -40,7 +40,7 @@ namespace Iot.Device.Vcnl4040.Internal
             (_, byte dataHigh) = ReadData();
 
             PsHd = (PsOutputRange)(dataHigh & PsHdMask);
-            PsInt = (PsInterrupt)(dataHigh & PsIntMask);
+            PsInt = (PsInterruptMode)(dataHigh & PsIntMask);
         }
 
         /// <inheritdoc/>>

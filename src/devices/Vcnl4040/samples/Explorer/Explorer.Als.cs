@@ -94,8 +94,10 @@ internal partial class Explorer
             choice = YesNoChoice.No;
         }
 
-        Console.WriteLine("Illuminance:");
+        int lowIntDisplayCount = 0;
+        int highIntDisplayCount = 0;
 
+        Console.WriteLine("Illuminance:");
         while (!Console.KeyAvailable)
         {
             Illuminance reading = _als.Reading;
@@ -104,7 +106,9 @@ internal partial class Explorer
             if (choice == YesNoChoice.Yes)
             {
                 InterruptFlags flags = _device.GetAndClearInterruptFlags();
-                intFlagsInfo = $"{(flags.AlsLow ? "*" : "-")} / {(flags.AlsHigh ? "*" : "-")}";
+                lowIntDisplayCount = flags.AlsLow ? 10 : lowIntDisplayCount > 0 ? lowIntDisplayCount - 1 : 0;
+                highIntDisplayCount = flags.AlsHigh ? 10 : highIntDisplayCount > 0 ? highIntDisplayCount - 1 : 0;
+                intFlagsInfo = $"{(lowIntDisplayCount > 0 ? "*" : "-")} / {(highIntDisplayCount > 0 ? "*" : "-")}";
             }
 
             PrintBarGraph(reading.Lux, _als.RangeAsIlluminance.Lux, intFlagsInfo);
@@ -119,39 +123,40 @@ internal partial class Explorer
          AlsInterruptPersistence persistence) = _als.GetInterruptConfiguration();
 
         Console.WriteLine("ALS configuration:");
-        Console.WriteLine($"  Power state:           {_als.PowerOn}");
-        Console.WriteLine($"  Load reduction mode:   {(_als.LoadReductionModeEnabled ? "enabled" : "disabled")}");
-        Console.WriteLine($"  Integration time:      {_als.IntegrationTime}");
-        Console.WriteLine($"    Range:                 {_als.Range}");
-        Console.WriteLine($"    Resolution:            {_als.Resolution}");
-        Console.WriteLine($"  Interrupt low level:   {lowerThreshold}");
-        Console.WriteLine($"  Interrupt high level : {upperThreshold}");
-        Console.WriteLine($"  Interrupt persistence: {persistence}");
-        Console.WriteLine($"  Interrupt enabled:     {(_als.InterruptEnabled ? "yes" : "no")}");
+        Console.WriteLine($"  Power state:         {_als.PowerOn}");
+        Console.WriteLine($"  Load reduction mode: {(_als.LoadReductionModeEnabled ? "on" : "off")}");
+        Console.WriteLine($"  Integration time:    {_als.IntegrationTime}");
+        Console.WriteLine($"    Range:               {_als.Range}");
+        Console.WriteLine($"    Resolution:          {_als.Resolution}");
+        Console.WriteLine("  Interrupts");
+        Console.WriteLine($"    Enabled:           {(_als.InterruptEnabled ? "yes" : "no")}");
+        Console.WriteLine($"    Lower threshold:   {lowerThreshold}");
+        Console.WriteLine($"    Upper threshold :  {upperThreshold}");
+        Console.WriteLine($"    Persistence:       {persistence}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
 
     private void SetAlsPowerState()
     {
-        bool result = PromptEnum("Power on", out YesNoCancelChoice choice);
-        if (!result || choice == YesNoCancelChoice.Cancel)
+        bool result = PromptEnum("Power on", out YesNoChoice choice);
+        if (!result)
         {
             return;
         }
 
-        _als.PowerOn = choice == YesNoCancelChoice.Yes;
+        _als.PowerOn = choice == YesNoChoice.Yes;
     }
 
     private void SetAlsLoadReductionMode()
     {
-        bool result = PromptEnum("Load reduction mode on", out YesNoCancelChoice choice);
-        if (!result || choice == YesNoCancelChoice.Cancel)
+        bool result = PromptEnum("Load reduction mode on", out YesNoChoice choice);
+        if (!result)
         {
             return;
         }
 
-        _als.LoadReductionModeEnabled = choice == YesNoCancelChoice.Yes;
+        _als.LoadReductionModeEnabled = choice == YesNoChoice.Yes;
     }
 
     private void ConfigureAlsIntegrationTime()
@@ -195,18 +200,20 @@ internal partial class Explorer
             _ => 0
         };
 
+        (Illuminance currentLowerThreshold, Illuminance currentUpperThreshold, AlsInterruptPersistence currentPersistence) = _als.GetInterruptConfiguration();
+
         int lowerThreshold;
         int upperThreshold = 0;
         AlsInterruptPersistence persistence = AlsInterruptPersistence.Persistence1;
-        bool result = PromptIntegerValue($"Lower threshold (0 - {maxDetectionRange}) [lx]", out lowerThreshold, false, 0, maxDetectionRange);
+        bool result = PromptIntegerValue($"Lower threshold [0 - {maxDetectionRange} lux]", out lowerThreshold, (int)currentLowerThreshold.Lux, 0, maxDetectionRange);
         if (result)
         {
-            result &= PromptIntegerValue($"Upper threshold ({lowerThreshold} - {maxDetectionRange}) [lx]", out upperThreshold, false, lowerThreshold, maxDetectionRange);
+            result &= PromptIntegerValue($"Upper threshold [{lowerThreshold} - {maxDetectionRange} lux])", out upperThreshold, (int)currentUpperThreshold.Lux, lowerThreshold, maxDetectionRange);
         }
 
         if (result)
         {
-            result &= PromptEnum("Persistence", out persistence);
+            result &= PromptEnum($"Persistence ({currentPersistence})", out persistence);
         }
 
         if (!result)

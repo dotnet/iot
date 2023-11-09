@@ -1,0 +1,80 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LEDStripSample</name>
+    </assembly>
+    <members>
+        <member name="T:LEDStripSample.Animations">
+            <summary>
+            This type defines several animation examples.
+            </summary>
+        </member>
+        <member name="M:LEDStripSample.Animations.#ctor(Iot.Device.Ws28xx.Ws28xx,System.Int32)">
+            <summary>
+            Initializes a new instance of the <see cref="T:LEDStripSample.Animations"/> class.
+            </summary>
+            <param name="ledStrip">The led strip.</param>
+            <param name="ledCount">The led count.</param>
+        </member>
+        <member name="P:LEDStripSample.Animations.SupportsSeparateWhite">
+            <summary>
+            Gets or sets a value indicating whether the attached strips supports a separate white LED (warmwhite/coldwhite).
+            </summary>
+            <value>
+              <c>true</c> if [supports separate white]; otherwise, <c>false</c>.
+            </value>
+        </member>
+        <member name="M:LEDStripSample.Animations.ColorWipe(System.Drawing.Color)">
+            <summary>
+            Wipes the selected color.
+            </summary>
+            <param name="color">The color.</param>
+        </member>
+        <member name="M:LEDStripSample.Animations.FilterColor(System.Drawing.Color)">
+            <summary>
+            Filters the color in regards of the .
+            </summary>
+            <param name="source">The source.</param>
+            <returns></returns>
+        </member>
+        <member name="M:LEDStripSample.Animations.KnightRider(System.Threading.CancellationToken)">
+            <summary>
+            Animation similar to "Knight Rider".
+            </summary>
+            <param name="token">The token.</param>
+        </member>
+        <member name="M:LEDStripSample.Animations.Rainbow(System.Threading.CancellationToken)">
+            <summary>
+            Rainbows the specified count.
+            </summary>
+            <param name="token">The token.</param>
+        </member>
+        <member name="M:LEDStripSample.Animations.SetColor(System.Drawing.Color,System.Int32)">
+            <summary>
+            Sets the color of the entire strip.
+            </summary>
+            <param name="color">The color.</param>
+            <param name="count">The count.</param>
+        </member>
+        <member name="M:LEDStripSample.Animations.SetWhiteValue(System.Single,System.Boolean)">
+            <summary>
+            Sets the white value using a percentag.
+            </summary>
+            <param name="colorPercentage">The color percentage.</param>
+            <param name="separateWhite">if set to <c>true</c> [separate white].</param>
+        </member>
+        <member name="M:LEDStripSample.Animations.SwitchOffLeds">
+            <summary>
+            Switches the LEDs off.
+            </summary>
+        </member>
+        <member name="M:LEDStripSample.Animations.TheatreChase(System.Drawing.Color,System.Drawing.Color,System.Threading.CancellationToken)">
+            <summary>
+            Theatre Chase animation.
+            </summary>
+            <param name="color">The color.</param>
+            <param name="blankColor">Color of the blank.</param>
+            <param name="token">The token.</param>
+        </member>
+    </members>
+</doc>

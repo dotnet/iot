@@ -13,9 +13,9 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class PsMsRegister : Register
     {
-        private static readonly byte WhiteEnMask = 0b1000_0000;
-        private static readonly byte PsMsMask = 0b0100_0000;
-        private static readonly byte LedIMask = 0b0000_0111;
+        private const byte WhiteEnMask = 0b1000_0000;
+        private const byte PsMsMask = 0b0100_0000;
+        private const byte LedIMask = 0b0000_0111;
 
         /// <summary>
         /// PS white channel state
@@ -58,7 +58,7 @@ namespace Iot.Device.Vcnl4040.Internal
 
             byte dataHigh = 0;
             dataHigh |= (byte)WhiteEn;
-            dataHigh |= (byte)PsMsMask;
+            dataHigh |= (byte)PsMs;
             dataHigh |= (byte)LedI;
 
             WriteData(dataLow, dataHigh);
