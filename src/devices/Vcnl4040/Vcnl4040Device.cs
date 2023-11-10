@@ -55,6 +55,23 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
+        /// Resets the device to defaults
+        /// </summary>
+        public void Reset()
+        {
+            new AlsConfRegister(_i2cBus).Write();
+            new AlsHighInterruptThresholdRegister(_i2cBus).Write();
+            new AlsLowInterruptThresholdRegister(_i2cBus).Write();
+            new PsConf1Register(_i2cBus).Write();
+            new PsConf2Register(_i2cBus).Write();
+            new PsConf3Register(_i2cBus).Write();
+            new PsMsRegister(_i2cBus).Write();
+            new PsCancellationLevelRegister(_i2cBus).Write();
+            new PsLowInterruptThresholdRegister(_i2cBus).Write();
+            new PsHighInterruptThresholdRegister(_i2cBus).Write();
+        }
+
+        /// <summary>
         /// Verifies whether a functional I2C connection to the device exists and checks the identification for
         /// device recognition. If the communication doesn't work or the identification is incorrect, an exception is raised.
         /// </summary>

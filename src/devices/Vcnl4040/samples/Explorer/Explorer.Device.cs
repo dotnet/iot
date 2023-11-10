@@ -4,93 +4,19 @@
 using System;
 using System.Device.I2c;
 using System.IO;
+using System.Linq;
 using Iot.Device.Vcnl4040;
 
 internal partial class Explorer
 {
-    private Vcnl4040Device _device;
-    private I2cDevice _i2cDevice;
-
-    public Explorer()
+    private void InitDeviceExplorer()
     {
-        _i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1,
-                                                                Vcnl4040Device.DefaultI2cAddress));
-        _device = new Vcnl4040Device(_i2cDevice);
-        _device.Attach();
-        _als = _device.AmbientLightSensor;
-        _ps = _device.ProximitySensor;
-    }
-
-    public void Loop()
-    {
-        try
+        _commands.AddRange(new[]
         {
-            _device.VerifyDevice();
-        }
-        catch (IOException ioex)
-        {
-            Console.WriteLine("Communication with device using I2C bus is not working");
-            Console.WriteLine(ioex.Message);
-            return;
-        }
-        catch (IncompatibleDeviceException idex)
-        {
-            Console.WriteLine(idex.Message);
-            return;
-        }
-
-        while (true)
-        {
-            Console.Clear();
-            Console.WriteLine("======== VNCL4040 Explorer ========\n");
-            PrintDeviceMenu();
-            PrintAlsMenu();
-            PrintPsMenu();
-            Console.WriteLine("(99) Quit application");
-
-            Console.Write("==> ");
-
-            string? command = Console.ReadLine()?.ToLower();
-            if (command == null)
-            {
-                continue;
-            }
-
-            Console.WriteLine();
-
-            _ = HandleDeviceCommand(command) || HandleAlsCommand(command) || HandlePsCommand(command);
-        }
-    }
-
-    private void PrintDeviceMenu()
-    {
-        Console.WriteLine($"Device ID: {_device!.DeviceId:x}h\n");
-
-        Console.WriteLine("--- General Device ---------------------------");
-        Console.WriteLine("(00) Show and clear interrupt flags");
-        Console.WriteLine("(01) Show register dump");
-        Console.WriteLine();
-    }
-
-    private bool HandleDeviceCommand(string command)
-    {
-        switch (command)
-        {
-            case "00":
-                ShowAndClearInterruptFlags();
-                return true;
-
-            case "01":
-                ShowregisterDump();
-                return true;
-
-            case "99":
-                Environment.Exit(0);
-                return true;
-
-            default:
-                return false;
-        }
+            new Command() { Section = MenuDevice, Category = MenuGeneral, Name = "Show and clear interrupt flags", Action = ShowAndClearInterruptFlags, ShowConfiguration = false },
+            new Command() { Section = MenuDevice, Category = MenuGeneral, Name = "Show register dump", Action = ShowRegisterDump, ShowConfiguration = false },
+            new Command() { Section = MenuDevice, Category = MenuGeneral, Name = "Reset to defaults", Action = _device.Reset },
+        });
     }
 
     private void ShowAndClearInterruptFlags()
@@ -106,7 +32,7 @@ internal partial class Explorer
         Console.ReadKey();
     }
 
-    private void ShowregisterDump()
+    private void ShowRegisterDump()
     {
         byte[] addr = new byte[1];
         byte[] data = new byte[2];

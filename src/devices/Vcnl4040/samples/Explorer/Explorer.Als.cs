@@ -10,72 +10,22 @@ internal partial class Explorer
 {
     private AmbientLightSensor _als;
 
-    private void PrintAlsMenu()
+    private void InitAlsExplorer()
     {
-        Console.WriteLine("--- Ambient Light Sensor (ALS) ---------------");
-        Console.WriteLine("(10) Show illuminance reading");
-        Console.WriteLine("(11) Show configuration");
-        Console.WriteLine("(12) Set power on/off");
-        Console.WriteLine("(13) Set load reduction mode on/off");
-        Console.WriteLine("(14) Configure range");
-        Console.WriteLine("(15) Configure resolution");
-        Console.WriteLine("(16) Configure integration time");
-        Console.WriteLine("(17) Enable interrupts");
-        Console.WriteLine("(18) Disable interrupts");
-        Console.WriteLine("----------------------------------------------\n");
-    }
-
-    private bool HandleAlsCommand(string command)
-    {
-        switch (command)
+        _commands.AddRange(new[]
         {
-            case "10":
-                ShowAlsReading();
-                return true;
+            new Command() { Section = MenuAls, Category = MenuGeneral, Name = "Show illuminance reading", Action = ShowAlsReading, ShowConfiguration = false },
+            new Command() { Section = MenuAls, Category = MenuGeneral, Name = "Set power state", Action = SetAlsPowerState },
+            new Command() { Section = MenuAls, Category = MenuGeneral, Name = "Enable/disable load reduction mode", Action = EnableDisableAlsLoadReductionMode },
 
-            case "11":
-                ShowAlsConfiguration();
-                return true;
+            new Command() { Section = MenuAls, Category = MenuConfiguration, Name = "Show configuration", Action = ShowAlsConfiguration, ShowConfiguration = false },
+            new Command() { Section = MenuAls, Category = MenuConfiguration, Name = "Set integration time", Action = SetAlsIntegrationTime },
+            new Command() { Section = MenuAls, Category = MenuConfiguration, Name = "Set range", Action = SetAlsRange },
+            new Command() { Section = MenuAls, Category = MenuConfiguration, Name = "Set resolution", Action = SetAlsResolution },
 
-            case "12":
-                SetAlsPowerState();
-                ShowAlsConfiguration();
-                return true;
-
-            case "13":
-                SetAlsLoadReductionMode();
-                ShowAlsConfiguration();
-                return true;
-
-            case "14":
-                ConfigureAlsRange();
-                ShowAlsConfiguration();
-                return true;
-
-            case "15":
-                ConfigureAlsResolution();
-                ShowAlsConfiguration();
-                return true;
-
-            case "16":
-                ConfigureAlsIntegrationTime();
-                ShowAlsConfiguration();
-                return true;
-
-            case "17":
-                EnableAlsInterrupts();
-                ShowAlsConfiguration();
-                return true;
-
-            case "18":
-                _als.DisableInterrupts();
-                ShowAlsConfiguration();
-                return true;
-
-            default:
-                return false;
-
-        }
+            new Command() { Section = MenuAls, Category = MenuInterrupts, Name = "Enable interrupts", Action = EnableAlsInterrupts },
+            new Command() { Section = MenuAls, Category = MenuInterrupts, Name = "Disable interrupts", Action = _als.DisableInterrupts }
+        });
     }
 
     private void ShowAlsReading()
@@ -148,7 +98,7 @@ internal partial class Explorer
         _als.PowerOn = choice == YesNoChoice.Yes;
     }
 
-    private void SetAlsLoadReductionMode()
+    private void EnableDisableAlsLoadReductionMode()
     {
         bool result = PromptEnum("Load reduction mode on", out YesNoChoice choice);
         if (!result)
@@ -159,7 +109,7 @@ internal partial class Explorer
         _als.LoadReductionModeEnabled = choice == YesNoChoice.Yes;
     }
 
-    private void ConfigureAlsIntegrationTime()
+    private void SetAlsIntegrationTime()
     {
         if (!PromptEnum("Integration time", out AlsIntegrationTime integrationTime))
         {
@@ -169,7 +119,7 @@ internal partial class Explorer
         _als.IntegrationTime = integrationTime;
     }
 
-    private void ConfigureAlsRange()
+    private void SetAlsRange()
     {
         if (!PromptEnum("Range", out AlsRange range))
         {
@@ -179,7 +129,7 @@ internal partial class Explorer
         _als.Range = range;
     }
 
-    private void ConfigureAlsResolution()
+    private void SetAlsResolution()
     {
         if (!PromptEnum("Resolution", out AlsResolution resolution))
         {

@@ -12,97 +12,28 @@ internal partial class Explorer
 {
     private ProximitySensor _ps;
 
-    private void PrintPsMenu()
+    private void InitPsExplorer()
     {
-        Console.WriteLine("--- Proximity Sensor (PS) --------------------");
-        Console.WriteLine("(20) Show proximity reading");
-        Console.WriteLine("(21) Show configuration");
-        Console.WriteLine("(22) Set power on/off");
-        Console.WriteLine("(23) Set load reduction mode on/off");
-        Console.WriteLine("(24) Configure IR LED");
-        Console.WriteLine("(25) Configure integration time");
-        Console.WriteLine("(26) Configure extended output range");
-        Console.WriteLine("(27) Configure active force mode");
-        Console.WriteLine("(28) Enable/disable white channel");
-        Console.WriteLine("(29) Show white channel reading");
-        Console.WriteLine("(30) Enable interrupts / proximity detection");
-        Console.WriteLine("(31) Disable interrupts / proximity detection");
-        Console.WriteLine("----------------------------------------------\n");
-    }
-
-    private bool HandlePsCommand(string command)
-    {
-        switch (command)
+        _commands.AddRange(new[]
         {
-            case "20":
-                ShowPsReading();
-                return true;
+            new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Show proximity reading", Action = ShowPsReading, ShowConfiguration = false },
+            new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Show white channgel reading", Action = ShowWhiteChannelReading, ShowConfiguration = false },
+            new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Set power state", Action = SetPsPowerState, ShowConfiguration = true },
 
-            case "21":
-                ShowPsConfiguration();
-                return true;
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Show configuration", Action = ShowPsConfiguration, ShowConfiguration = false },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure IR LED", Action = ConfigureIrLed },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set integration time", Action = SetPsIntegrationTime },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set multi pulses", Action = SetMultiPulses },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set cancellation level", Action = SetCancellationLevel },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disbale active force mode", Action = EnableDisableActiveForceMode },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable white channel", Action = EnableDisableWhiteChannel },
 
-            case "22":
-                SetPsPowerState();
-                ShowPsConfiguration();
-                return true;
+            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts / proximity detection", Action = EnablePsInterruptsOrProximityDetectionMode },
+            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts / proximity detection", Action = _ps.DisableInterruptsAndProximityDetection },
 
-            case "23":
-                SetPsLoadReductionMode();
-                ShowPsConfiguration();
-                return true;
+            new Command() { Section = MenuPs, Category = MenuOthers, Name = "Proximity LED Display", Action = ProximityLedDisplay, ShowConfiguration = false },
 
-            case "24":
-                ConfigureLed();
-                ShowPsConfiguration();
-                return true;
-
-            case "25":
-                ConfigurePsIntegrationTime();
-                ShowPsConfiguration();
-                return true;
-
-            case "26":
-                ConfigureExtendedRange();
-                ShowPsConfiguration();
-                return true;
-
-            case "27":
-                ConfigureActiveForceMode();
-                ShowPsConfiguration();
-                return true;
-
-            case "28":
-                EnableDisableWhiteChannel();
-                ShowPsConfiguration();
-                return true;
-
-            case "29":
-                ShowWhiteChannelReading();
-                return true;
-
-            case "30":
-                EnablePsInterruptsOrProximityDetectionMode();
-                ShowPsConfiguration();
-                return true;
-
-            case "31":
-                _ps.DisableInterruptsAndProximityDetection();
-                ShowPsConfiguration();
-                return true;
-
-            case "32":
-                ConfigureMultiPulses();
-                ShowPsConfiguration();
-                return true;
-
-            case "40":
-                DisplayPsReading();
-                return true;
-
-            default:
-                return false;
-        }
+        });
     }
 
     private void ShowPsReading()
@@ -161,7 +92,7 @@ internal partial class Explorer
         }
     }
 
-    private void DisplayPsReading()
+    private void ProximityLedDisplay()
     {
         const int LedCount = 24;
 
@@ -250,18 +181,7 @@ internal partial class Explorer
         _ps.PowerOn = choice == YesNoChoice.Yes;
     }
 
-    private void SetPsLoadReductionMode()
-    {
-        bool result = PromptEnum("Load reduction mode on", out YesNoChoice choice);
-        if (!result)
-        {
-            return;
-        }
-
-        _als.LoadReductionModeEnabled = choice == YesNoChoice.Yes;
-    }
-
-    private void ConfigureLed()
+    private void ConfigureIrLed()
     {
         if (!PromptEnum("IR LED duty ratio", out PsDuty duty))
         {
@@ -278,7 +198,7 @@ internal partial class Explorer
         _ps.LedCurrent = current;
     }
 
-    private void ConfigurePsIntegrationTime()
+    private void SetPsIntegrationTime()
     {
         if (!PromptEnum("Integration time", out PsIntegrationTime integrationTime))
         {
@@ -298,7 +218,7 @@ internal partial class Explorer
         _ps.ExtendedOutputRange = choice == YesNoChoice.Yes;
     }
 
-    private void ConfigureActiveForceMode()
+    private void EnableDisableActiveForceMode()
     {
         if (!PromptEnum("Active force mode", out YesNoChoice choice))
         {
@@ -318,7 +238,7 @@ internal partial class Explorer
         _ps.WhiteChannelEnabled = choice == YesNoChoice.Yes;
     }
 
-    private void ConfigureMultiPulses()
+    private void SetMultiPulses()
     {
         if (!PromptEnum("Multi pulses", out PsMultiPulse choice))
         {
@@ -326,6 +246,16 @@ internal partial class Explorer
         }
 
         _ps.MultiPulses = choice;
+    }
+
+    private void SetCancellationLevel()
+    {
+        if (!PromptIntegerValue($"Cancellation level [0 - 65535]", out int cancellationLevel, _ps.CancellationLevel, 0, 65535))
+        {
+            return;
+        }
+
+        _ps.CancellationLevel = cancellationLevel;
     }
 
     private void EnablePsInterruptsOrProximityDetectionMode()
@@ -369,23 +299,6 @@ internal partial class Explorer
             result &= PromptEnum($"Interrupt mode ({currentMode})", out mode);
         }
 
-        YesNoChoice setCancellationLevel = YesNoChoice.No;
-        if (result)
-        {
-            result &= PromptEnum($"Set cancellation level", out setCancellationLevel);
-        }
-
-        int cancellationLevel = 0;
-        if (result && setCancellationLevel == YesNoChoice.Yes)
-        {
-            result &= PromptIntegerValue($"Cancellation level [0 - 65535]", out cancellationLevel, currentCancellationLevel, 0, 65535);
-        }
-
-        if (result)
-        {
-            _ps.CancellationLevel = cancellationLevel;
-        }
-
         if (!result)
         {
             return;
@@ -399,5 +312,15 @@ internal partial class Explorer
         {
             _ps.EnableProximityDetectionMode(lowerThreshold, upperThreshold, persistence);
         }
+    }
+
+    private class Command
+    {
+        public string Section { get; init; } = string.Empty;
+        public string Category { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+        public Action Action { get; init; } = () => { };
+        public bool ShowConfiguration { get; init; } = true;
+        public string Id { get; set; } = string.Empty;
     }
 }
