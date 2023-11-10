@@ -94,12 +94,35 @@ mcp23S17.Enable();
 mcp23S17.Disable();
 ```
 
-**TODO**: Interrupt pins can only be read for now.  Events are coming in a future PR.
+### Interrupt support
+
+The `Mcp23xxx` has one (8-bit variants) or two (16-bit variants) interrupt pins. These allow external
+signalisation on interrupt change. The corresponding pins need to be connected to a master GPIO controller
+for this feature to work. You can use a GPIO controller around the MCP device to handle everything
+for you:
 
 ```csharp
-var mcp23S17 = new Mcp23S17(spiDevice, 0x20, 10, 25, 17);
-PinValue interruptA = mcp23S17.ReadInterruptA();
-PinValue interruptB = mcp23S17.ReadInterruptB();
+// Gpio controller from parent device (eg. Raspberry Pi)
+_gpioController = new GpioController(PinNumberingScheme.Logical);
+_i2c = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
+// The "InterruptA" line of the Mcp23017 is connected to GPIO input 11 of the Raspi
+_device = new Mcp23017(_i2c, -1, 11, -1, _gpioController, false);
+GpioController theDeviceController = new GpioController(PinNumberingScheme.Logical, _device);
+theDeviceController.OpenPin(1, PinMode.Input);
+theDeviceController.RegisterCallbackForPinValueChangedEvent(1, PinEventTypes.Rising, Callback);
+```
+
+Alternatively, you can also manually control the event handling:
+
+```csharp
+_gpioController = new GpioController();
+_device = I2cDevice.Create(new I2cConnectionSettings(1, 0x21));
+// Interrupt pin B is connected to GPIO pin 22
+_mcp23017 = new Mcp23017(_device, -1, -1, 22, gpioController, false);
+_mcp23017.EnableInterruptOnChange(8, PinEventTypes.Rising | PinEventTypes.Falling); // Enable interrupt for pin 8
+_gpioController.RegisterCallbackForPinValueChangedEvent(22, PinEventTypes.Falling, Interrupt);
+// Read the interrupt register, to make sure we get any further interrupts
+_mcp23017.ReadByte(Register.GPIO, Port.PortB);
 ```
 
 ## Binding Notes

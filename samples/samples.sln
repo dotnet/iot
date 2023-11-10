@@ -1,17 +1,19 @@
-﻿﻿
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26124.0
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.33808.371
 MinimumVisualStudioVersion = 15.0.26124.0
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "force-sensitive-resistor", "force-sensitive-resistor\force-sensitive-resistor.csproj", "{CC818841-2E48-4506-89C7-5E1FC8515411}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "force-sensitive-resistor", "force-sensitive-resistor\force-sensitive-resistor.csproj", "{CC818841-2E48-4506-89C7-5E1FC8515411}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "led-blink", "led-blink\led-blink.csproj", "{209ED2E1-34A0-4470-900D-FB472E533457}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "led-blink", "led-blink\led-blink.csproj", "{209ED2E1-34A0-4470-900D-FB472E533457}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "led-matrix-weather", "led-matrix-weather\led-matrix-weather.csproj", "{3DA8B28B-8BDD-4570-99A7-4EAE3781740B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "led-matrix-weather", "led-matrix-weather\led-matrix-weather.csproj", "{3DA8B28B-8BDD-4570-99A7-4EAE3781740B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "led-more-blinking-lights", "led-more-blinking-lights\led-more-blinking-lights.csproj", "{CF15F904-02EA-44E1-8BDB-71945D716A90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "led-more-blinking-lights", "led-more-blinking-lights\led-more-blinking-lights.csproj", "{CF15F904-02EA-44E1-8BDB-71945D716A90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "serialport-arduino", "serialport-arduino\serialport-arduino.csproj", "{D0E85F49-B2FE-43A7-AB13-DAD8D92F85B3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "serialport-arduino", "serialport-arduino\serialport-arduino.csproj", "{D0E85F49-B2FE-43A7-AB13-DAD8D92F85B3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "M5StackRemoteDisplay", "M5StackRemoteDisplay\M5StackRemoteDisplay.csproj", "{26CA32C7-F546-48F2-8041-299C86EA22F9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,9 +23,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 		Release|x64 = Release|x64
 		Release|x86 = Release|x86
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{CC818841-2E48-4506-89C7-5E1FC8515411}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -86,5 +85,20 @@ Global
 		{D0E85F49-B2FE-43A7-AB13-DAD8D92F85B3}.Release|x64.Build.0 = Release|Any CPU
 		{D0E85F49-B2FE-43A7-AB13-DAD8D92F85B3}.Release|x86.ActiveCfg = Release|Any CPU
 		{D0E85F49-B2FE-43A7-AB13-DAD8D92F85B3}.Release|x86.Build.0 = Release|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Debug|x64.Build.0 = Debug|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Debug|x86.Build.0 = Debug|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Release|x64.ActiveCfg = Release|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Release|x64.Build.0 = Release|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Release|x86.ActiveCfg = Release|Any CPU
+		{26CA32C7-F546-48F2-8041-299C86EA22F9}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

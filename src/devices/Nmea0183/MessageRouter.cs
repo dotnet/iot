@@ -24,6 +24,11 @@ namespace Iot.Device.Nmea0183
         /// The name of the default logger. This field is constant.
         /// </summary>
         public const string LoggingSinkName = "LOGGER";
+
+        /// <summary>
+        /// The AIS manager as NMEA target
+        /// </summary>
+        public const string AisManager = "AIS";
         private readonly Dictionary<string, NmeaSinkAndSource> _sourcesAndSinks;
         private List<FilterRule> _filterRules;
         private bool _localInterfaceActive;
