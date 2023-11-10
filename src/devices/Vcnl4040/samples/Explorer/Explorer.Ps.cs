@@ -18,13 +18,14 @@ internal partial class Explorer
         {
             new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Show proximity reading", Action = ShowPsReading, ShowConfiguration = false },
             new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Show white channgel reading", Action = ShowWhiteChannelReading, ShowConfiguration = false },
-            new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Set power state", Action = SetPsPowerState, ShowConfiguration = true },
+            new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Set power state", Action = SetPsPowerState },
 
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Show configuration", Action = ShowPsConfiguration, ShowConfiguration = false },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure IR LED", Action = ConfigureIrLed },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set integration time", Action = SetPsIntegrationTime },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set multi pulses", Action = SetMultiPulses },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set cancellation level", Action = SetCancellationLevel },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set extended range mode", Action = SetExtendedRange },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disbale active force mode", Action = EnableDisableActiveForceMode },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable white channel", Action = EnableDisableWhiteChannel },
 
@@ -104,6 +105,12 @@ internal partial class Explorer
             return;
         }
 
+        int max = 12000;
+        if (!PromptIntegerValue($"Max", out max, max, 0, 65535))
+        {
+            return;
+        }
+
         SpiConnectionSettings settings = new(0, 0)
         {
             ClockFrequency = 2_400_000,
@@ -126,9 +133,9 @@ internal partial class Explorer
             InterruptFlags flags = _device.GetAndClearInterruptFlags();
             psAwayIntDisplayCount = flags.PsAway ? 10 : psAwayIntDisplayCount > 0 ? psAwayIntDisplayCount - 1 : 0;
             psCloseIntDisplayCount = flags.PsClose ? 10 : psCloseIntDisplayCount > 0 ? psCloseIntDisplayCount - 1 : 0;
-            int countsPerLed = _ps.ExtendedOutputRange ? 65535 : 4095 / LedCount;
+            int countsPerLed = max / LedCount;
             img.Clear();
-            for (int i = 0; i < reading / countsPerLed; i++)
+            for (int i = 0; i < Math.Min(reading / countsPerLed, LedCount); i++)
             {
                 img.SetPixel(i, 0, Color.FromArgb(0, psAwayIntDisplayCount > 0 ? 255 : 0, psCloseIntDisplayCount > 0 ? 255 : 0, 255));
             }
@@ -208,7 +215,7 @@ internal partial class Explorer
         _ps.IntegrationTime = integrationTime;
     }
 
-    private void ConfigureExtendedRange()
+    private void SetExtendedRange()
     {
         if (!PromptEnum("Extended output range", out YesNoChoice choice))
         {
