@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.ComponentModel;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 
@@ -17,6 +18,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private const byte AlsPersMask = 0b0000_1100;
         private const byte AlsIntEnMask = 0b0000_0010;
         private const byte AlsSdMask = 0b0000_0001;
+        private const byte ReservedBitsMask = 0b0011_0000;
 
         /// <summary>
         /// ALS integration time setting
@@ -57,13 +59,15 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <inheritdoc/>>
         public override void Write()
         {
-            byte dataLow = 0;
+            (byte dataLow, byte dataHigh) = ReadData();
+
+            dataLow &= ReservedBitsMask;
             dataLow |= (byte)AlsIt;
             dataLow |= (byte)AlsPers;
             dataLow |= (byte)AlsIntEn;
             dataLow |= (byte)AlsSd;
 
-            WriteData(dataLow, 0);
+            WriteData(dataLow, dataHigh);
         }
     }
 }

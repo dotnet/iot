@@ -26,6 +26,11 @@ namespace Iot.Device.Vcnl4040.Tests
 
         public override void Read(Span<byte> buffer)
         {
+            if (buffer.Length > DataToRead.Count)
+            {
+                throw new InvalidOperationException("Not enough data to read available");
+            }
+
             for (int i = 0; i < buffer.Length && DataToRead.Count > 0; i++)
             {
                 buffer[i] = DataToRead.Dequeue();
