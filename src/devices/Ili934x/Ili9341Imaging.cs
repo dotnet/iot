@@ -13,10 +13,29 @@ namespace Iot.Device.Ili934x
     public partial class Ili9341
     {
         /// <summary>
-        /// Send a bitmap to the Ili9341 display.
+        /// Send a bitmap to the Ili9341 display specifying the starting position and destination clipping rectangle.
         /// </summary>
-        /// <param name="bm">The bitmap to be sent to the display controller.</param>
-        public void DrawBitmap(BitmapImage bm)
+        /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
+        /// <param name="sourcePoint">A coordinate point in the source bitmap where copying starts from.</param>
+        /// <param name="destinationRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
+        /// <param name="update">True to immediately send the new backbuffer to the screen</param>
+        public void DrawBitmap(BitmapImage bm, Point sourcePoint, Rectangle destinationRect, bool update)
+        {
+            if (bm is null)
+            {
+                throw new ArgumentNullException(nameof(bm));
+            }
+
+            FillBackBufferFromImage(bm, sourcePoint, destinationRect);
+
+            if (update)
+            {
+                SendFrame(false);
+            }
+        }
+
+        /// <inheritdoc />
+        public override void DrawBitmap(BitmapImage bm)
         {
             int width = (int)ScreenWidth;
             if (width > bm.Width)
@@ -30,33 +49,7 @@ namespace Iot.Device.Ili934x
                 height = bm.Height;
             }
 
-            DrawBitmap(bm, new Point(0, 0), new Rectangle(0, 0, width, height));
-        }
-
-        /// <summary>
-        /// Send a bitmap to the Ili9341 display specifying the starting position and destination clipping rectangle.
-        /// </summary>
-        /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
-        /// <param name="updateRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
-        public void DrawBitmap(BitmapImage bm, Rectangle updateRect)
-        {
-            DrawBitmap(bm, new Point(updateRect.X, updateRect.Y), updateRect);
-        }
-
-        /// <summary>
-        /// Send a bitmap to the Ili9341 display specifying the starting position and destination clipping rectangle.
-        /// </summary>
-        /// <param name="bm">The bitmap to be sent to the display controller note that only Pixel Format Format32bppArgb is supported.</param>
-        /// <param name="sourcePoint">A coordinate point in the source bitmap where copying starts from.</param>
-        /// <param name="destinationRect">A rectangle that defines where in the display the bitmap is written. Note that no scaling is done.</param>
-        public void DrawBitmap(BitmapImage bm, Point sourcePoint, Rectangle destinationRect)
-        {
-            if (bm is null)
-            {
-                throw new ArgumentNullException(nameof(bm));
-            }
-
-            FillBackBufferFromImage(bm, sourcePoint, destinationRect);
+            DrawBitmap(bm, new Point(0, 0), new Rectangle(0, 0, width, height), true);
         }
 
         private void FillBackBufferFromImage(BitmapImage image, Point sourcePoint, Rectangle destinationRect)
@@ -64,6 +57,11 @@ namespace Iot.Device.Ili934x
             if (image is null)
             {
                 throw new ArgumentNullException(nameof(image));
+            }
+
+            if (!CanConvertFromPixelFormat(image.PixelFormat))
+            {
+                throw new InvalidOperationException($"{image.PixelFormat} is not a supported pixel format");
             }
 
             Converters.AdjustImageDestination(image, ref sourcePoint, ref destinationRect);
@@ -84,7 +82,7 @@ namespace Iot.Device.Ili934x
         /// Updates the display with the current screen buffer.
         /// <param name="forceFull">Forces a full update, otherwise only changed screen contents are updated</param>
         /// </summary>
-        public void SendFrame(bool forceFull = false)
+        public void SendFrame(bool forceFull)
         {
             if (forceFull)
             {

@@ -17,7 +17,7 @@ namespace Iot.Device.Display
     /// <summary>
     /// PCD8544 - 48 × 84 pixels matrix LCD, famous Nokia 5110 screen
     /// </summary>
-    public class Pcd8544 : ICharacterLcd, IDisposable
+    public class Pcd8544 : GraphicDisplay, ICharacterLcd, IDisposable
     {
         private const int CharacterWidth = 6;
 
@@ -35,6 +35,15 @@ namespace Iot.Device.Display
         /// The size of the screen in terms of characters
         /// </summary>
         public Size Size => new Size(14, 6);
+
+        /// <inheritdoc />
+        public override int ScreenWidth => PixelScreenSize.Width;
+
+        /// <inheritdoc />
+        public override int ScreenHeight => PixelScreenSize.Height;
+
+        /// <inheritdoc />
+        public override PixelFormat NativePixelFormat => PixelFormat.Format1bppBw;
 
         /// <summary>
         /// Number of bit per pixel for the color
@@ -707,6 +716,54 @@ namespace Iot.Device.Display
         /// <param name="isFilled">If it's filled or not.</param>
         public void DrawRectangle(Rectangle rectangle, bool isOn, bool isFilled) => DrawRectangle(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height, isOn, isFilled);
 
+        /// <inheritdoc />
+        public override void DrawBitmap(BitmapImage bitmap)
+        {
+            var data = BitmapToByteArray(bitmap);
+            SetByteMap(data);
+            Draw();
+        }
+
+        private byte[] BitmapToByteArray(BitmapImage bitmap)
+        {
+            if (bitmap is not object)
+            {
+                throw new ArgumentNullException(nameof(bitmap));
+            }
+
+            if ((bitmap.Width != Pcd8544.PixelScreenSize.Width) || (bitmap.Height != Pcd8544.PixelScreenSize.Height))
+            {
+                throw new ArgumentException($"{nameof(bitmap)} should be same size as the screen {Pcd8544.PixelScreenSize.Width}x{Pcd8544.PixelScreenSize.Height}");
+            }
+
+            byte[] toReturn = new byte[Pcd8544.ScreenBufferByteSize];
+            int width = Pcd8544.PixelScreenSize.Width;
+            for (int position = 0; position < Pcd8544.ScreenBufferByteSize; position++)
+            {
+                byte toStore = 0;
+                for (int bit = 0; bit < 8; bit++)
+                {
+                    toStore = (byte)(toStore | (((bitmap[position % width, position / width * 8 + bit].ToArgb() & 0xFFFFFF) == 0xFFFFFF ? 0 : 1) << bit));
+                }
+
+                toReturn[position] = toStore;
+            }
+
+            return toReturn;
+        }
+
+        /// <inheritdoc />
+        public override bool CanConvertFromPixelFormat(PixelFormat format)
+        {
+            return format == PixelFormat.Format32bppArgb || format == PixelFormat.Format32bppXrgb;
+        }
+
+        /// <inheritdoc />
+        public override BitmapImage GetBackBufferCompatibleImage()
+        {
+            return BitmapImage.CreateBitmap(ScreenWidth, ScreenHeight, PixelFormat.Format32bppArgb);
+        }
+
         #endregion
 
         private void SpiWrite(bool isData, ReadOnlySpan<byte> toSend)
@@ -716,7 +773,7 @@ namespace Iot.Device.Display
         }
 
         /// <inheritdoc/>
-        public void Dispose()
+        protected override void Dispose(bool disposing)
         {
             if (_shouldDispose)
             {
@@ -748,6 +805,8 @@ namespace Iot.Device.Display
             _spiDevice = null!;
             _pwmBacklight?.Dispose();
             _pwmBacklight = null!;
+
+            base.Dispose(disposing);
         }
     }
 }

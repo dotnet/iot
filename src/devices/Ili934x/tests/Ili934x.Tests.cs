@@ -70,7 +70,7 @@ namespace Iot.Device.Ili934x.Tests
                     m.CallBase = true;
                     return m.Object;
                 }));
-            using var bmp = _testee!.CreateBackBuffer();
+            using var bmp = _testee!.GetBackBufferCompatibleImage();
 
             Assert.Equal(320, bmp.Width);
             Assert.Equal(240, bmp.Height);
