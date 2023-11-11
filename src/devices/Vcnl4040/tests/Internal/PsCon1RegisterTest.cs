@@ -10,7 +10,7 @@ namespace Iot.Device.Vcnl4040.Tests
     /// <summary>
     /// This is a test against the register specification in the datasheet.
     /// </summary>
-    public class PsCon1RegisterTest : RegisterTest
+    public class PsConf1RegisterTest : RegisterTest
     {
         [Theory]
         // PS_SD
@@ -91,11 +91,11 @@ namespace Iot.Device.Vcnl4040.Tests
         {
             const byte mask = 0b0000_1110;
 
-            PropertyWriteTest<PsConf1Register, PsIntegrationTime>(initialRegisterLowByte: InitialLowByteInv,
-                                                                  initialRegisterHighByte: UnmodifiedHighByteInv,
+            PropertyWriteTest<PsConf1Register, PsIntegrationTime>(initialRegisterLowByte: InitialLowByte,
+                                                                  initialRegisterHighByte: UnmodifiedHighByte,
                                                                   testValue: integrationTime,
-                                                                  expectedLowByte: (byte)(expectedLowByte | ~mask),
-                                                                  expectedHighByte: UnmodifiedHighByteInv,
+                                                                  expectedLowByte: expectedLowByte,
+                                                                  expectedHighByte: UnmodifiedHighByte,
                                                                   commandCode: (byte)CommandCode.PS_CONF_1_2,
                                                                   registerPropertyName: nameof(PsConf1Register.PsIt),
                                                                   registerReadsBeforeWriting: true);
@@ -120,11 +120,11 @@ namespace Iot.Device.Vcnl4040.Tests
         {
             const byte mask = 0b0011_0000;
 
-            PropertyWriteTest<PsConf1Register, PsInterruptPersistence>(initialRegisterLowByte: InitialLowByteInv,
-                                                                       initialRegisterHighByte: UnmodifiedHighByteInv,
+            PropertyWriteTest<PsConf1Register, PsInterruptPersistence>(initialRegisterLowByte: InitialLowByte,
+                                                                       initialRegisterHighByte: UnmodifiedHighByte,
                                                                        testValue: persistence,
-                                                                       expectedLowByte: (byte)(expectedLowByte | ~mask),
-                                                                       expectedHighByte: UnmodifiedHighByteInv,
+                                                                       expectedLowByte: expectedLowByte,
+                                                                       expectedHighByte: UnmodifiedHighByte,
                                                                        commandCode: (byte)CommandCode.PS_CONF_1_2,
                                                                        registerPropertyName: nameof(PsConf1Register.PsPers),
                                                                        registerReadsBeforeWriting: true);
@@ -147,12 +147,12 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(PsDuty.Duty320, 0b1100_0000)]
         public void Write_PsDuty(PsDuty duty, byte expectedLowByte)
         {
-            const byte mask = 0b0011_0000;
-            PropertyWriteTest<PsConf1Register, PsDuty>(initialRegisterLowByte: InitialLowByteInv,
-                                                       initialRegisterHighByte: UnmodifiedHighByteInv,
+            const byte mask = 0b1100_0000;
+            PropertyWriteTest<PsConf1Register, PsDuty>(initialRegisterLowByte: InitialLowByte,
+                                                       initialRegisterHighByte: UnmodifiedHighByte,
                                                        testValue: duty,
-                                                       expectedLowByte: (byte)(expectedLowByte | ~mask),
-                                                       expectedHighByte: UnmodifiedHighByteInv,
+                                                       expectedLowByte: expectedLowByte,
+                                                       expectedHighByte: UnmodifiedHighByte,
                                                        commandCode: (byte)CommandCode.PS_CONF_1_2,
                                                        registerPropertyName: nameof(PsConf1Register.PsDuty),
                                                        registerReadsBeforeWriting: true);
