@@ -58,107 +58,114 @@ namespace Iot.Device.Vcnl4040.Tests
         public void Write_PsSd(PowerState powerState, byte expectedLowByte)
         {
             const byte mask = 0b0000_0001;
-            byte initialLowByte = 0x00;
-            byte unmodifiedHighByte = 0x55;
 
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PowerState>(initialLowByte,
-                                                           unmodifiedHighByte,
-                                                           powerState,
-                                                           expectedLowByte,
-                                                           unmodifiedHighByte,
-                                                           (byte)CommandCode.PS_CONF_1_2,
-                                                           nameof(PsConf1Register.PsSd),
-                                                           5,
-                                                           true);
+            PropertyWriteTest<PsConf1Register, PowerState>(initialRegisterLowByte: InitialLowByte,
+                                                           initialRegisterHighByte: UnmodifiedHighByte,
+                                                           testValue: powerState,
+                                                           expectedLowByte: expectedLowByte,
+                                                           expectedHighByte: UnmodifiedHighByte,
+                                                           commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                           registerPropertyName: nameof(PsConf1Register.PsSd),
+                                                           registerReadsBeforeWriting: true);
 
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PowerState>((byte)~initialLowByte,
-                                                           (byte)~unmodifiedHighByte,
-                                                           powerState,
-                                                           (byte)(expectedLowByte | ~mask),
-                                                           (byte)~unmodifiedHighByte,
-                                                           (byte)CommandCode.PS_CONF_1_2,
-                                                           nameof(PsConf1Register.PsSd),
-                                                           5,
-                                                           true);
+            PropertyWriteTest<PsConf1Register, PowerState>(initialRegisterLowByte: InitialLowByteInv,
+                                                           initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                           testValue: powerState,
+                                                           expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                           expectedHighByte: UnmodifiedHighByteInv,
+                                                           commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                           registerPropertyName: nameof(PsConf1Register.PsSd),
+                                                           registerReadsBeforeWriting: true);
         }
 
         [Theory]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time1_0, 0b0000_0000, 0x55)]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time1_5, 0b0000_0010, 0xaa)]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time2_0, 0b0000_0100, 0x55)]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time2_5, 0b0000_0110, 0xaa)]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time3_0, 0b0000_1000, 0x55)]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time3_5, 0b0000_1010, 0xaa)]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time4_0, 0b0000_1100, 0x55)]
-        [InlineData(0b0000_0000, PsIntegrationTime.Time8_0, 0b0000_1110, 0xaa)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time1_0, 0b1111_0001, 0x55)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time1_5, 0b1111_0011, 0xaa)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time2_0, 0b1111_0101, 0x55)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time2_5, 0b1111_0111, 0xaa)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time3_0, 0b1111_1001, 0x55)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time3_5, 0b1111_1011, 0xaa)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time4_0, 0b1111_1101, 0x55)]
-        [InlineData(0b1111_1111, PsIntegrationTime.Time8_0, 0b1111_1111, 0xaa)]
-        public void Write_PsIt(byte initialLowByte, PsIntegrationTime integrationTime, byte expectedLowByte, byte unmodifiedHighByte)
+        [InlineData(PsIntegrationTime.Time1_0, 0b0000_0000)]
+        [InlineData(PsIntegrationTime.Time1_5, 0b0000_0010)]
+        [InlineData(PsIntegrationTime.Time2_0, 0b0000_0100)]
+        [InlineData(PsIntegrationTime.Time2_5, 0b0000_0110)]
+        [InlineData(PsIntegrationTime.Time3_0, 0b0000_1000)]
+        [InlineData(PsIntegrationTime.Time3_5, 0b0000_1010)]
+        [InlineData(PsIntegrationTime.Time4_0, 0b0000_1100)]
+        [InlineData(PsIntegrationTime.Time8_0, 0b0000_1110)]
+        public void Write_PsIt(PsIntegrationTime integrationTime, byte expectedLowByte)
         {
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PsIntegrationTime>(initialLowByte,
-                                                                  unmodifiedHighByte,
-                                                                  integrationTime,
-                                                                  expectedLowByte,
-                                                                  unmodifiedHighByte,
-                                                                  (byte)CommandCode.PS_CONF_1_2,
-                                                                  nameof(PsConf1Register.PsIt),
-                                                                  5,
-                                                                  true);
+            const byte mask = 0b0000_1110;
+
+            PropertyWriteTest<PsConf1Register, PsIntegrationTime>(initialRegisterLowByte: InitialLowByteInv,
+                                                                  initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                                  testValue: integrationTime,
+                                                                  expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                                  expectedHighByte: UnmodifiedHighByteInv,
+                                                                  commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                                  registerPropertyName: nameof(PsConf1Register.PsIt),
+                                                                  registerReadsBeforeWriting: true);
+
+            PropertyWriteTest<PsConf1Register, PsIntegrationTime>(initialRegisterLowByte: InitialLowByteInv,
+                                                                  initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                                  testValue: integrationTime,
+                                                                  expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                                  expectedHighByte: UnmodifiedHighByteInv,
+                                                                  commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                                  registerPropertyName: nameof(PsConf1Register.PsIt),
+                                                                  registerReadsBeforeWriting: true);
+
         }
 
         [Theory]
-        [InlineData(0b0000_0000, PsInterruptPersistence.Persistence1, 0b0000_0000, 0x55)]
-        [InlineData(0b0000_0000, PsInterruptPersistence.Persistence2, 0b0001_0000, 0xaa)]
-        [InlineData(0b0000_0000, PsInterruptPersistence.Persistence3, 0b0010_0000, 0x55)]
-        [InlineData(0b0000_0000, PsInterruptPersistence.Persistence4, 0b0011_0000, 0xaa)]
-        [InlineData(0b1111_1111, PsInterruptPersistence.Persistence1, 0b1100_1111, 0x55)]
-        [InlineData(0b1111_1111, PsInterruptPersistence.Persistence2, 0b1101_1111, 0xaa)]
-        [InlineData(0b1111_1111, PsInterruptPersistence.Persistence3, 0b1110_1111, 0x55)]
-        [InlineData(0b1111_1111, PsInterruptPersistence.Persistence4, 0b1111_1111, 0xaa)]
-        public void Write_PsPers(byte initialLowByte, PsInterruptPersistence persistence, byte expectedLowByte, byte unmodifiedHighByte)
+        [InlineData(PsInterruptPersistence.Persistence1, 0b0000_0000)]
+        [InlineData(PsInterruptPersistence.Persistence2, 0b0001_0000)]
+        [InlineData(PsInterruptPersistence.Persistence3, 0b0010_0000)]
+        [InlineData(PsInterruptPersistence.Persistence4, 0b0011_0000)]
+        public void Write_PsPers(PsInterruptPersistence persistence, byte expectedLowByte)
         {
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PsInterruptPersistence>(initialLowByte,
-                                                                       unmodifiedHighByte,
-                                                                       persistence,
-                                                                       expectedLowByte,
-                                                                       unmodifiedHighByte,
-                                                                       (byte)CommandCode.PS_CONF_1_2,
-                                                                       nameof(PsConf1Register.PsPers),
-                                                                       5,
-                                                                       true);
+            const byte mask = 0b0011_0000;
+
+            PropertyWriteTest<PsConf1Register, PsInterruptPersistence>(initialRegisterLowByte: InitialLowByteInv,
+                                                                       initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                                       testValue: persistence,
+                                                                       expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                                       expectedHighByte: UnmodifiedHighByteInv,
+                                                                       commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                                       registerPropertyName: nameof(PsConf1Register.PsPers),
+                                                                       registerReadsBeforeWriting: true);
+
+            PropertyWriteTest<PsConf1Register, PsInterruptPersistence>(initialRegisterLowByte: InitialLowByteInv,
+                                                                       initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                                       testValue: persistence,
+                                                                       expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                                       expectedHighByte: UnmodifiedHighByteInv,
+                                                                       commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                                       registerPropertyName: nameof(PsConf1Register.PsPers),
+                                                                       registerReadsBeforeWriting: true);
+
         }
 
         [Theory]
-        [InlineData(0b0000_0000, PsDuty.Duty40, 0b0000_0000, 0x55)]
-        [InlineData(0b0000_0000, PsDuty.Duty80, 0b0100_0000, 0xaa)]
-        [InlineData(0b0000_0000, PsDuty.Duty160, 0b1000_0000, 0x55)]
-        [InlineData(0b0000_0000, PsDuty.Duty320, 0b1100_0000, 0xaa)]
-        [InlineData(0b1111_1111, PsDuty.Duty40, 0b0011_1111, 0x55)]
-        [InlineData(0b1111_1111, PsDuty.Duty80, 0b0111_1111, 0xaa)]
-        [InlineData(0b1111_1111, PsDuty.Duty160, 0b1011_1111, 0x55)]
-        [InlineData(0b1111_1111, PsDuty.Duty320, 0b1111_1111, 0xaa)]
-        public void Write_PsDuty(byte initialLowByte, PsDuty duty, byte expectedLowByte, byte unmodifiedHighByte)
+        [InlineData(PsDuty.Duty40, 0b0000_0000)]
+        [InlineData(PsDuty.Duty80, 0b0100_0000)]
+        [InlineData(PsDuty.Duty160, 0b1000_0000)]
+        [InlineData(PsDuty.Duty320, 0b1100_0000)]
+        public void Write_PsDuty(PsDuty duty, byte expectedLowByte)
         {
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PsDuty>(initialLowByte,
-                                                       unmodifiedHighByte,
-                                                       duty,
-                                                       expectedLowByte,
-                                                       unmodifiedHighByte,
-                                                       (byte)CommandCode.PS_CONF_1_2,
-                                                       nameof(PsConf1Register.PsDuty),
-                                                       5,
-                                                       true);
+            const byte mask = 0b0011_0000;
+            PropertyWriteTest<PsConf1Register, PsDuty>(initialRegisterLowByte: InitialLowByteInv,
+                                                       initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                       testValue: duty,
+                                                       expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                       expectedHighByte: UnmodifiedHighByteInv,
+                                                       commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                       registerPropertyName: nameof(PsConf1Register.PsDuty),
+                                                       registerReadsBeforeWriting: true);
+
+            PropertyWriteTest<PsConf1Register, PsDuty>(initialRegisterLowByte: InitialLowByteInv,
+                                                       initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                       testValue: duty,
+                                                       expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                       expectedHighByte: UnmodifiedHighByteInv,
+                                                       commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                       registerPropertyName: nameof(PsConf1Register.PsDuty),
+                                                       registerReadsBeforeWriting: true);
+
         }
 
         [Fact]

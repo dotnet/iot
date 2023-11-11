@@ -47,26 +47,23 @@ namespace Iot.Device.Vcnl4040.Tests
         {
             const byte mask = 0b0000_0011;
 
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf2Register, PsInterruptMode>(0x55,
-                                                                0b0000_0000,
-                                                                interruptMode,
-                                                                0x55,
-                                                                expectedHighByte,
-                                                                (byte)CommandCode.PS_CONF_1_2,
-                                                                nameof(PsConf2Register.PsInt),
-                                                                5,
-                                                                true);
+            PropertyWriteTest<PsConf1Register, PsInterruptMode>(initialRegisterLowByte: UnmodifiedLowByte,
+                                                                initialRegisterHighByte: InitialHighByte,
+                                                                testValue: interruptMode,
+                                                                expectedLowByte: expectedHighByte,
+                                                                expectedHighByte: UnmodifiedHighByte,
+                                                                commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                                registerPropertyName: nameof(PsConf2Register.PsInt),
+                                                                registerReadsBeforeWriting: true);
 
-            PropertyWriteTest<PsConf2Register, PsInterruptMode>(0xaa,
-                                                                0b1111_1111,
-                                                                interruptMode,
-                                                                0xaa,
-                                                                (byte)(expectedHighByte | ~mask),
-                                                                (byte)CommandCode.PS_CONF_1_2,
-                                                                nameof(PsConf2Register.PsInt),
-                                                                5,
-                                                                true);
+            PropertyWriteTest<PsConf1Register, PsInterruptMode>(initialRegisterLowByte: UnmodifiedLowByteInv,
+                                                                initialRegisterHighByte: InitialHighByteInv,
+                                                                testValue: interruptMode,
+                                                                expectedLowByte: (byte)(expectedHighByte | ~mask),
+                                                                expectedHighByte: UnmodifiedHighByteInv,
+                                                                commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                                registerPropertyName: nameof(PsConf2Register.PsInt),
+                                                                registerReadsBeforeWriting: true);
         }
 
         [Theory]
@@ -76,26 +73,23 @@ namespace Iot.Device.Vcnl4040.Tests
         {
             const byte mask = 0b0000_1000;
 
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf2Register, PsOutputRange>(0x55,
-                                                              0b0000_0000,
-                                                              range,
-                                                              0x55,
-                                                              expectedHighByte,
-                                                              (byte)CommandCode.PS_CONF_1_2,
-                                                              nameof(PsConf2Register.PsHd),
-                                                              5,
-                                                              true);
+            PropertyWriteTest<PsConf1Register, PsOutputRange>(initialRegisterLowByte: UnmodifiedLowByte,
+                                                              initialRegisterHighByte: InitialHighByte,
+                                                              testValue: range,
+                                                              expectedLowByte: expectedHighByte,
+                                                              expectedHighByte: UnmodifiedHighByte,
+                                                              commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                              registerPropertyName: nameof(PsConf2Register.PsHd),
+                                                              registerReadsBeforeWriting: true);
 
-            PropertyWriteTest<PsConf2Register, PsOutputRange>(0xaa,
-                                                              0b1111_1111,
-                                                              range,
-                                                              0xaa,
-                                                              (byte)(expectedHighByte | ~mask),
-                                                              (byte)CommandCode.PS_CONF_1_2,
-                                                              nameof(PsConf2Register.PsHd),
-                                                              5,
-                                                              true);
+            PropertyWriteTest<PsConf1Register, PsOutputRange>(initialRegisterLowByte: UnmodifiedLowByteInv,
+                                                              initialRegisterHighByte: InitialHighByteInv,
+                                                              testValue: range,
+                                                              expectedLowByte: (byte)(expectedHighByte | ~mask),
+                                                              expectedHighByte: UnmodifiedHighByteInv,
+                                                              commandCode: (byte)CommandCode.PS_CONF_1_2,
+                                                              registerPropertyName: nameof(PsConf2Register.PsHd),
+                                                              registerReadsBeforeWriting: true);
         }
 
         [Fact]

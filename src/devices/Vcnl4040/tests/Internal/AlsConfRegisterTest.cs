@@ -47,87 +47,111 @@ namespace Iot.Device.Vcnl4040.Tests
         }
 
         [Theory]
-        [InlineData(0b0000_0000, PowerState.PowerOff, 0b0000_0001, 0x55)]
-        [InlineData(0b0000_0001, PowerState.PowerOn, 0b0000_0000, 0x55)]
-        [InlineData(0b1111_1110, PowerState.PowerOff, 0b1111_1111, 0xaa)]
-        [InlineData(0b1111_1111, PowerState.PowerOn, 0b1111_1110, 0xaa)]
-        public void Write_AlsSd(byte initialLowByte, PowerState powerState, byte expectedLowByte, byte unmodifiedHighByte)
+        [InlineData(PowerState.PowerOff, 0b0000_0001)]
+        [InlineData(PowerState.PowerOn, 0b0000_0000)]
+        public void Write_AlsSd(PowerState powerState, byte expectedLowByte)
         {
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, PowerState>(initialLowByte,
-                                                           unmodifiedHighByte,
-                                                           powerState,
-                                                           expectedLowByte,
-                                                           unmodifiedHighByte,
-                                                           (byte)CommandCode.ALS_CONF,
-                                                           nameof(AlsConfRegister.AlsSd),
-                                                           5,
-                                                           true);
+            const byte mask = 0b0000_0001;
+
+            PropertyWriteTest<AlsConfRegister, PowerState>(initialRegisterLowByte: InitialLowByte,
+                                                           initialRegisterHighByte: UnmodifiedHighByte,
+                                                           testValue: powerState,
+                                                           expectedLowByte: expectedLowByte,
+                                                           expectedHighByte: UnmodifiedHighByte,
+                                                           commandCode: (byte)CommandCode.ALS_CONF,
+                                                           registerPropertyName: nameof(AlsConfRegister.AlsSd),
+                                                           registerReadsBeforeWriting: true);
+
+            PropertyWriteTest<AlsConfRegister, PowerState>(initialRegisterLowByte: InitialLowByteInv,
+                                                           initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                           testValue: powerState,
+                                                           expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                           expectedHighByte: UnmodifiedHighByteInv,
+                                                           commandCode: (byte)CommandCode.ALS_CONF,
+                                                           registerPropertyName: nameof(AlsConfRegister.AlsSd),
+                                                           registerReadsBeforeWriting: true);
         }
 
         [Theory]
-        [InlineData(0b0000_0000, AlsInterrupt.Enabled, 0b0000_0010, 0x55)]
-        [InlineData(0b0000_0010, AlsInterrupt.Disabled, 0b0000_0000, 0x55)]
-        [InlineData(0b1111_1101, AlsInterrupt.Enabled, 0b1111_1111, 0xaa)]
-        [InlineData(0b1111_1111, AlsInterrupt.Disabled, 0b1111_1101, 0xaa)]
-        public void Write_AlsIntEn(byte initialLowByte, AlsInterrupt interruptEnabled, byte expectedLowByte, byte unmodifiedHighByte)
+        [InlineData(AlsInterrupt.Enabled, 0b0000_0010)]
+        [InlineData(AlsInterrupt.Disabled, 0b0000_0000)]
+        public void Write_AlsIntEn(AlsInterrupt interruptEnabled, byte expectedLowByte)
         {
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, AlsInterrupt>(initialLowByte,
-                                                             unmodifiedHighByte,
-                                                             interruptEnabled,
-                                                             expectedLowByte,
-                                                             unmodifiedHighByte,
-                                                             (byte)CommandCode.ALS_CONF,
-                                                             nameof(AlsConfRegister.AlsIntEn),
-                                                             5,
-                                                             true);
+            const byte mask = 0b0000_0010;
+
+            PropertyWriteTest<AlsConfRegister, AlsInterrupt>(initialRegisterLowByte: InitialLowByte,
+                                                             initialRegisterHighByte: UnmodifiedHighByte,
+                                                             testValue: interruptEnabled,
+                                                             expectedLowByte: expectedLowByte,
+                                                             expectedHighByte: UnmodifiedHighByte,
+                                                             commandCode: (byte)CommandCode.ALS_CONF,
+                                                             registerPropertyName: nameof(AlsConfRegister.AlsIntEn),
+                                                             registerReadsBeforeWriting: true);
+
+            PropertyWriteTest<AlsConfRegister, AlsInterrupt>(initialRegisterLowByte: InitialLowByteInv,
+                                                             initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                             testValue: interruptEnabled,
+                                                             expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                             expectedHighByte: UnmodifiedHighByteInv,
+                                                             commandCode: (byte)CommandCode.ALS_CONF,
+                                                             registerPropertyName: nameof(AlsConfRegister.AlsIntEn),
+                                                             registerReadsBeforeWriting: true);
         }
 
         [Theory]
-        [InlineData(0b0000_0000, AlsInterruptPersistence.Persistence1, 0b0000_0000, 0x55)]
-        [InlineData(0b0000_0000, AlsInterruptPersistence.Persistence2, 0b0000_0100, 0x55)]
-        [InlineData(0b0000_0000, AlsInterruptPersistence.Persistence4, 0b0000_1000, 0x55)]
-        [InlineData(0b0000_0000, AlsInterruptPersistence.Persistence8, 0b0000_1100, 0x55)]
-        [InlineData(0b1111_1111, AlsInterruptPersistence.Persistence1, 0b1111_0011, 0xaa)]
-        [InlineData(0b1111_1111, AlsInterruptPersistence.Persistence2, 0b1111_0111, 0xaa)]
-        [InlineData(0b1111_1111, AlsInterruptPersistence.Persistence4, 0b1111_1011, 0xaa)]
-        [InlineData(0b1111_1111, AlsInterruptPersistence.Persistence8, 0b1111_1111, 0xaa)]
-        public void Write_AlsPers(byte initialLowByte, AlsInterruptPersistence persistence, byte expectedLowByte, byte unmodifiedHighByte)
+        [InlineData(AlsInterruptPersistence.Persistence1, 0b0000_0000)]
+        [InlineData(AlsInterruptPersistence.Persistence2, 0b0000_0100)]
+        [InlineData(AlsInterruptPersistence.Persistence4, 0b0000_1000)]
+        [InlineData(AlsInterruptPersistence.Persistence8, 0b0000_1100)]
+        public void Write_AlsPers(AlsInterruptPersistence persistence, byte expectedLowByte)
         {
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, AlsInterruptPersistence>(initialLowByte,
-                                                                        unmodifiedHighByte,
-                                                                        persistence,
-                                                                        expectedLowByte,
-                                                                        unmodifiedHighByte,
-                                                                        (byte)CommandCode.ALS_CONF,
-                                                                        nameof(AlsConfRegister.AlsPers),
-                                                                        5,
-                                                                        true);
+            const byte mask = 0b0000_1100;
+
+            PropertyWriteTest<AlsConfRegister, AlsInterruptPersistence>(initialRegisterLowByte: InitialLowByte,
+                                                                        initialRegisterHighByte: UnmodifiedHighByte,
+                                                                        testValue: persistence,
+                                                                        expectedLowByte: expectedLowByte,
+                                                                        expectedHighByte: UnmodifiedHighByte,
+                                                                        commandCode: (byte)CommandCode.ALS_CONF,
+                                                                        registerPropertyName: nameof(AlsConfRegister.AlsPers),
+                                                                        registerReadsBeforeWriting: true);
+
+            PropertyWriteTest<AlsConfRegister, AlsInterruptPersistence>(initialRegisterLowByte: InitialLowByteInv,
+                                                                        initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                                        testValue: persistence,
+                                                                        expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                                        expectedHighByte: UnmodifiedHighByteInv,
+                                                                        commandCode: (byte)CommandCode.ALS_CONF,
+                                                                        registerPropertyName: nameof(AlsConfRegister.AlsPers),
+                                                                        registerReadsBeforeWriting: true);
         }
 
         [Theory]
-        [InlineData(0b0000_0000, AlsIntegrationTime.Time80ms, 0b0000_0000, 0x55)]
-        [InlineData(0b0000_0000, AlsIntegrationTime.Time160ms, 0b0100_0000, 0x55)]
-        [InlineData(0b0000_0000, AlsIntegrationTime.Time320ms, 0b1000_0000, 0x55)]
-        [InlineData(0b0000_0000, AlsIntegrationTime.Time640ms, 0b1100_0000, 0x55)]
-        [InlineData(0b1100_1111, AlsIntegrationTime.Time80ms, 0b0000_1111, 0xaa)]
-        [InlineData(0b1100_1111, AlsIntegrationTime.Time160ms, 0b0100_1111, 0xaa)]
-        [InlineData(0b1100_1111, AlsIntegrationTime.Time320ms, 0b1000_1111, 0xaa)]
-        [InlineData(0b1100_1111, AlsIntegrationTime.Time640ms, 0b1100_1111, 0xaa)]
-        public void Write_AlsIt(byte initialLowByte, AlsIntegrationTime integrationTime, byte expectedLowByte, byte unmodifiedHighByte)
+        [InlineData(AlsIntegrationTime.Time80ms, 0b0000_0000)]
+        [InlineData(AlsIntegrationTime.Time160ms, 0b0100_0000)]
+        [InlineData(AlsIntegrationTime.Time320ms, 0b1000_0000)]
+        [InlineData(AlsIntegrationTime.Time640ms, 0b1100_0000)]
+        public void Write_AlsIt(AlsIntegrationTime integrationTime, byte expectedLowByte)
         {
-            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, AlsIntegrationTime>(initialLowByte,
-                                                                   unmodifiedHighByte,
-                                                                   integrationTime,
-                                                                   expectedLowByte,
-                                                                   unmodifiedHighByte,
-                                                                   (byte)CommandCode.ALS_CONF,
-                                                                   nameof(AlsConfRegister.AlsIt),
-                                                                   5,
-                                                                   true);
+            const byte mask = 0b1100_0000;
+
+            PropertyWriteTest<AlsConfRegister, AlsIntegrationTime>(initialRegisterLowByte: InitialLowByte,
+                                                                   initialRegisterHighByte: UnmodifiedHighByte,
+                                                                   testValue: integrationTime,
+                                                                   expectedLowByte: expectedLowByte,
+                                                                   expectedHighByte: UnmodifiedHighByte,
+                                                                   commandCode: (byte)CommandCode.ALS_CONF,
+                                                                   registerPropertyName: nameof(AlsConfRegister.AlsIt),
+                                                                   registerReadsBeforeWriting: true);
+
+            PropertyWriteTest<AlsConfRegister, AlsIntegrationTime>(initialRegisterLowByte: InitialLowByteInv,
+                                                                   initialRegisterHighByte: UnmodifiedHighByteInv,
+                                                                   testValue: integrationTime,
+                                                                   expectedLowByte: (byte)(expectedLowByte | ~mask),
+                                                                   expectedHighByte: UnmodifiedHighByteInv,
+                                                                   commandCode: (byte)CommandCode.ALS_CONF,
+                                                                   registerPropertyName: nameof(AlsConfRegister.AlsIt),
+                                                                   registerReadsBeforeWriting: true);
         }
 
         [Fact]

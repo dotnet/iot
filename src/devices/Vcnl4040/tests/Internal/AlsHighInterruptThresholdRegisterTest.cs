@@ -43,8 +43,7 @@ namespace Iot.Device.Vcnl4040.Tests
                                                                      expectedThresholdHighByte,
                                                                      (byte)CommandCode.ALS_THDH,
                                                                      nameof(AlsHighInterruptThresholdRegister.Threshold),
-                                                                     5,
-                                                                     true);
+                                                                     false);
         }
     }
 }
