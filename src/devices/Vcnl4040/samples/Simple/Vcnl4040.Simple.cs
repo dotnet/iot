@@ -51,7 +51,10 @@ als.EnableInterrupts(Illuminance.FromLux(3000),
     - turn interrupts on
  */
 als.PowerOn = true;
-als.InterruptEnabled = true;
+
+/*
+    als.InterruptEnabled = true;
+*/
 
 /*
   Sensor loop

@@ -16,6 +16,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private const byte WhiteEnMask = 0b1000_0000;
         private const byte PsMsMask = 0b0100_0000;
         private const byte LedIMask = 0b0000_0111;
+        private const byte ReservedBitsMask = 0b0011_1000;
 
         /// <summary>
         /// PS white channel state
@@ -54,9 +55,9 @@ namespace Iot.Device.Vcnl4040.Internal
         public override void Write()
         {
             // read current register content to preserve low byte
-            (byte dataLow, _) = ReadData();
+            (byte dataLow, byte dataHigh) = ReadData();
 
-            byte dataHigh = 0;
+            dataHigh &= ReservedBitsMask;
             dataHigh |= (byte)WhiteEn;
             dataHigh |= (byte)PsMs;
             dataHigh |= (byte)LedI;

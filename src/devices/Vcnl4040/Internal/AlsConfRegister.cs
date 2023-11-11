@@ -1,7 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-
-using System.ComponentModel;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 
@@ -20,25 +18,66 @@ namespace Iot.Device.Vcnl4040.Internal
         private const byte AlsSdMask = 0b0000_0001;
         private const byte ReservedBitsMask = 0b0011_0000;
 
+        private bool _alsItChanged = false;
+        private bool _alsPersChanged = false;
+        private bool _alsIntEnChanged = false;
+        private bool _alsSdChanged = false;
+        private PowerState _alsSd = PowerState.PowerOff;
+        private AlsInterrupt _alsIntEn = AlsInterrupt.Disabled;
+        private AlsInterruptPersistence _alsPers = AlsInterruptPersistence.Persistence1;
+        private AlsIntegrationTime _alsIt = AlsIntegrationTime.Time80ms;
+
         /// <summary>
         /// ALS integration time setting
         /// </summary>
-        public AlsIntegrationTime AlsIt { get; set; } = AlsIntegrationTime.Time80ms;
+        public AlsIntegrationTime AlsIt
+        {
+            get => _alsIt;
+            set
+            {
+                _alsIt = value;
+                _alsItChanged = true;
+            }
+        }
 
         /// <summary>
         /// ALS interrupt persistence setting
         /// </summary>
-        public AlsInterruptPersistence AlsPers { get; set; } = AlsInterruptPersistence.Persistence1;
+        public AlsInterruptPersistence AlsPers
+        {
+            get => _alsPers;
+            set
+            {
+                _alsPers = value;
+                _alsPersChanged = true;
+            }
+        }
 
         /// <summary>
         /// ALS interrupt enable state
         /// </summary>
-        public AlsInterrupt AlsIntEn { get; set; } = AlsInterrupt.Disabled;
+        public AlsInterrupt AlsIntEn
+        {
+            get => _alsIntEn;
+            set
+            {
+                _alsIntEn = value;
+                _alsIntEnChanged = true;
+            }
+        }
 
         /// <summary>
         /// ALS power state (ALS_SD of ALS_CONF register)
         /// </summary>
-        public PowerState AlsSd { get; set; } = PowerState.PowerOff;
+        public PowerState AlsSd
+        {
+            get => _alsSd;
+            set
+            {
+                _alsSd = value;
+                _alsSdChanged = true;
+            }
+        }
 
         public AlsConfRegister(I2cInterface bus)
             : base(CommandCode.ALS_CONF, bus)
@@ -59,13 +98,34 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <inheritdoc/>>
         public override void Write()
         {
+            // Read current LSB and MSB, to preserve MSB and reserved bits from LSB.
             (byte dataLow, byte dataHigh) = ReadData();
 
             dataLow &= ReservedBitsMask;
-            dataLow |= (byte)AlsIt;
-            dataLow |= (byte)AlsPers;
-            dataLow |= (byte)AlsIntEn;
-            dataLow |= (byte)AlsSd;
+
+            if (_alsItChanged)
+            {
+                dataLow = (byte)(dataLow & ~AlsItMask | (byte)AlsIt);
+                _alsItChanged = false;
+            }
+
+            if (_alsPersChanged)
+            {
+                dataLow = (byte)(dataLow & ~AlsPersMask | (byte)AlsPers);
+                _alsPersChanged = false;
+            }
+
+            if (_alsIntEnChanged)
+            {
+                dataLow = (byte)(dataLow & ~AlsIntEnMask | (byte)AlsIntEn);
+                _alsIntEnChanged = false;
+            }
+
+            if (_alsSdChanged)
+            {
+                dataLow = (byte)(dataLow & ~AlsSdMask | (byte)AlsSd);
+                _alsSdChanged = false;
+            }
 
             WriteData(dataLow, dataHigh);
         }

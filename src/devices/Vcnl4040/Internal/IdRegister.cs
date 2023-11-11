@@ -15,26 +15,7 @@ namespace Iot.Device.Vcnl4040.Internal
     internal class IdRegister : Register
     {
         /// <summary>
-        /// LSB byte of device Id.
-        /// There is no further description in the datasheet.
-        /// </summary>
-        public byte IdLsb { get; private set; }
-
-        /// <summary>
-        /// Slave address of the device.
-        /// This is 0 for the default address 60h.
-        /// There is no further description in the datasheet.
-        /// </summary>
-        public byte SlaveAddress { get; private set; }
-
-        /// <summary>
-        /// Version code of the device. This is usually 0b0001.
-        /// There is no further description in the datasheet.
-        /// </summary>
-        public byte VersionCode { get; private set; }
-
-        /// <summary>
-        /// Gets the complete device Id.
+        /// Gets the device Id.
         /// </summary>
         public int Id { get; private set; }
 
@@ -50,10 +31,6 @@ namespace Iot.Device.Vcnl4040.Internal
         public override void Read()
         {
             (byte dataLow, byte dataHigh) = ReadData();
-
-            IdLsb = dataLow;
-            SlaveAddress = (byte)(dataHigh & 0b0011_0000 >> 4);
-            VersionCode = (byte)(dataHigh & 0b0000_1111);
             Id = (dataHigh << 8 | dataLow) & 0b0000_1111_1111_1111;
         }
 

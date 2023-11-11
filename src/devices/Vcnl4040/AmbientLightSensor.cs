@@ -74,13 +74,6 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                _alsConfRegister.Read();
-                if ((value && _alsConfRegister.AlsSd == PowerState.PowerOn)
-                || (!value && _alsConfRegister.AlsSd == PowerState.PowerOff))
-                {
-                    return;
-                }
-
                 _alsConfRegister.AlsSd = value ? PowerState.PowerOn : PowerState.PowerOff;
                 _alsConfRegister.Write();
             }
