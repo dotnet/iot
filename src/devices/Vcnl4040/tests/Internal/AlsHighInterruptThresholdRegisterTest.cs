@@ -3,7 +3,6 @@
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
-using Iot.Device.Vcnl4040.Tests;
 using Xunit;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -44,8 +43,8 @@ namespace Iot.Device.Vcnl4040.Tests
                                                                      expectedThresholdHighByte,
                                                                      (byte)CommandCode.ALS_THDH,
                                                                      nameof(AlsHighInterruptThresholdRegister.Threshold),
-                                                                     3,
-                                                                     false);
+                                                                     5,
+                                                                     true);
         }
     }
 }

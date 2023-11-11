@@ -53,18 +53,31 @@ namespace Iot.Device.Vcnl4040.Tests
         }
 
         [Theory]
-        [InlineData(0b0000_0000, PowerState.PowerOff, 0b0000_0001, 0x55)]
-        [InlineData(0b0000_0001, PowerState.PowerOn, 0b0000_0000, 0x55)]
-        [InlineData(0b1111_1110, PowerState.PowerOff, 0b1111_1111, 0xaa)]
-        [InlineData(0b1111_1111, PowerState.PowerOn, 0b1111_1110, 0xaa)]
-        public void Write_PsSd(byte registerLowByte, PowerState powerState, byte expectedData, byte unmodifiedHighByte)
+        [InlineData(PowerState.PowerOff, 0b0000_0001)]
+        [InlineData(PowerState.PowerOn, 0b0000_0000)]
+        public void Write_PsSd(PowerState powerState, byte expectedLowByte)
         {
+            const byte mask = 0b0000_0001;
+            byte initialLowByte = 0x00;
+            byte unmodifiedHighByte = 0x55;
+
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PowerState>(registerLowByte,
+            PropertyWriteTest<PsConf1Register, PowerState>(initialLowByte,
                                                            unmodifiedHighByte,
                                                            powerState,
-                                                           expectedData,
+                                                           expectedLowByte,
                                                            unmodifiedHighByte,
+                                                           (byte)CommandCode.PS_CONF_1_2,
+                                                           nameof(PsConf1Register.PsSd),
+                                                           5,
+                                                           true);
+
+            // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
+            PropertyWriteTest<PsConf1Register, PowerState>((byte)~initialLowByte,
+                                                           (byte)~unmodifiedHighByte,
+                                                           powerState,
+                                                           (byte)(expectedLowByte | ~mask),
+                                                           (byte)~unmodifiedHighByte,
                                                            (byte)CommandCode.PS_CONF_1_2,
                                                            nameof(PsConf1Register.PsSd),
                                                            5,
@@ -88,13 +101,13 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b1111_1111, PsIntegrationTime.Time3_5, 0b1111_1011, 0xaa)]
         [InlineData(0b1111_1111, PsIntegrationTime.Time4_0, 0b1111_1101, 0x55)]
         [InlineData(0b1111_1111, PsIntegrationTime.Time8_0, 0b1111_1111, 0xaa)]
-        public void Write_PsIt(byte registerLowByte, PsIntegrationTime integrationTime, byte expectedData, byte unmodifiedHighByte)
+        public void Write_PsIt(byte initialLowByte, PsIntegrationTime integrationTime, byte expectedLowByte, byte unmodifiedHighByte)
         {
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PsIntegrationTime>(registerLowByte,
+            PropertyWriteTest<PsConf1Register, PsIntegrationTime>(initialLowByte,
                                                                   unmodifiedHighByte,
                                                                   integrationTime,
-                                                                  expectedData,
+                                                                  expectedLowByte,
                                                                   unmodifiedHighByte,
                                                                   (byte)CommandCode.PS_CONF_1_2,
                                                                   nameof(PsConf1Register.PsIt),
@@ -111,13 +124,13 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b1111_1111, PsInterruptPersistence.Persistence2, 0b1101_1111, 0xaa)]
         [InlineData(0b1111_1111, PsInterruptPersistence.Persistence3, 0b1110_1111, 0x55)]
         [InlineData(0b1111_1111, PsInterruptPersistence.Persistence4, 0b1111_1111, 0xaa)]
-        public void Write_PsPers(byte registerLowByte, PsInterruptPersistence persistence, byte expectedData, byte unmodifiedHighByte)
+        public void Write_PsPers(byte initialLowByte, PsInterruptPersistence persistence, byte expectedLowByte, byte unmodifiedHighByte)
         {
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PsInterruptPersistence>(registerLowByte,
+            PropertyWriteTest<PsConf1Register, PsInterruptPersistence>(initialLowByte,
                                                                        unmodifiedHighByte,
                                                                        persistence,
-                                                                       expectedData,
+                                                                       expectedLowByte,
                                                                        unmodifiedHighByte,
                                                                        (byte)CommandCode.PS_CONF_1_2,
                                                                        nameof(PsConf1Register.PsPers),
@@ -134,13 +147,13 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b1111_1111, PsDuty.Duty80, 0b0111_1111, 0xaa)]
         [InlineData(0b1111_1111, PsDuty.Duty160, 0b1011_1111, 0x55)]
         [InlineData(0b1111_1111, PsDuty.Duty320, 0b1111_1111, 0xaa)]
-        public void Write_PsDuty(byte registerLowByte, PsDuty duty, byte expectedData, byte unmodifiedHighByte)
+        public void Write_PsDuty(byte initialLowByte, PsDuty duty, byte expectedLowByte, byte unmodifiedHighByte)
         {
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<PsConf1Register, PsDuty>(registerLowByte,
+            PropertyWriteTest<PsConf1Register, PsDuty>(initialLowByte,
                                                        unmodifiedHighByte,
                                                        duty,
-                                                       expectedData,
+                                                       expectedLowByte,
                                                        unmodifiedHighByte,
                                                        (byte)CommandCode.PS_CONF_1_2,
                                                        nameof(PsConf1Register.PsDuty),

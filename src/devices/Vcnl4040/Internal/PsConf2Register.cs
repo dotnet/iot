@@ -15,6 +15,7 @@ namespace Iot.Device.Vcnl4040.Internal
     {
         private const byte PsHdMask = 0b0000_1000;
         private const byte PsIntMask = 0b0000_0011;
+        private const byte ReservedBitsMask = 0b1111_0100;
 
         /// <summary>
         /// PS output range size
@@ -47,9 +48,9 @@ namespace Iot.Device.Vcnl4040.Internal
         public override void Write()
         {
             // read current register content to preserve low byte
-            (byte dataLow, _) = ReadData();
+            (byte dataLow, byte dataHigh) = ReadData();
 
-            byte dataHigh = 0;
+            dataHigh &= ReservedBitsMask;
             dataHigh |= (byte)PsHd;
             dataHigh |= (byte)PsInt;
 

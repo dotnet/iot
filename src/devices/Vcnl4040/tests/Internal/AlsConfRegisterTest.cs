@@ -51,10 +51,10 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b0000_0001, PowerState.PowerOn, 0b0000_0000, 0x55)]
         [InlineData(0b1111_1110, PowerState.PowerOff, 0b1111_1111, 0xaa)]
         [InlineData(0b1111_1111, PowerState.PowerOn, 0b1111_1110, 0xaa)]
-        public void Write_AlsSd(byte registerLowByte, PowerState powerState, byte expectedLowByte, byte unmodifiedHighByte)
+        public void Write_AlsSd(byte initialLowByte, PowerState powerState, byte expectedLowByte, byte unmodifiedHighByte)
         {
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, PowerState>(registerLowByte,
+            PropertyWriteTest<AlsConfRegister, PowerState>(initialLowByte,
                                                            unmodifiedHighByte,
                                                            powerState,
                                                            expectedLowByte,
@@ -70,10 +70,10 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b0000_0010, AlsInterrupt.Disabled, 0b0000_0000, 0x55)]
         [InlineData(0b1111_1101, AlsInterrupt.Enabled, 0b1111_1111, 0xaa)]
         [InlineData(0b1111_1111, AlsInterrupt.Disabled, 0b1111_1101, 0xaa)]
-        public void Write_AlsIntEn(byte registerLowByte, AlsInterrupt interruptEnabled, byte expectedLowByte, byte unmodifiedHighByte)
+        public void Write_AlsIntEn(byte initialLowByte, AlsInterrupt interruptEnabled, byte expectedLowByte, byte unmodifiedHighByte)
         {
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, AlsInterrupt>(registerLowByte,
+            PropertyWriteTest<AlsConfRegister, AlsInterrupt>(initialLowByte,
                                                              unmodifiedHighByte,
                                                              interruptEnabled,
                                                              expectedLowByte,
@@ -93,10 +93,10 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b1111_1111, AlsInterruptPersistence.Persistence2, 0b1111_0111, 0xaa)]
         [InlineData(0b1111_1111, AlsInterruptPersistence.Persistence4, 0b1111_1011, 0xaa)]
         [InlineData(0b1111_1111, AlsInterruptPersistence.Persistence8, 0b1111_1111, 0xaa)]
-        public void Write_AlsPers(byte registerLowByte, AlsInterruptPersistence persistence, byte expectedLowByte, byte unmodifiedHighByte)
+        public void Write_AlsPers(byte initialLowByte, AlsInterruptPersistence persistence, byte expectedLowByte, byte unmodifiedHighByte)
         {
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, AlsInterruptPersistence>(registerLowByte,
+            PropertyWriteTest<AlsConfRegister, AlsInterruptPersistence>(initialLowByte,
                                                                         unmodifiedHighByte,
                                                                         persistence,
                                                                         expectedLowByte,
@@ -116,10 +116,10 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b1100_1111, AlsIntegrationTime.Time160ms, 0b0100_1111, 0xaa)]
         [InlineData(0b1100_1111, AlsIntegrationTime.Time320ms, 0b1000_1111, 0xaa)]
         [InlineData(0b1100_1111, AlsIntegrationTime.Time640ms, 0b1100_1111, 0xaa)]
-        public void Write_AlsIt(byte registerLowByte, AlsIntegrationTime integrationTime, byte expectedLowByte, byte unmodifiedHighByte)
+        public void Write_AlsIt(byte initialLowByte, AlsIntegrationTime integrationTime, byte expectedLowByte, byte unmodifiedHighByte)
         {
             // expect 5 bytes to be written: 1x command code for read, 1x command code for read in write, 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsConfRegister, AlsIntegrationTime>(registerLowByte,
+            PropertyWriteTest<AlsConfRegister, AlsIntegrationTime>(initialLowByte,
                                                                    unmodifiedHighByte,
                                                                    integrationTime,
                                                                    expectedLowByte,
