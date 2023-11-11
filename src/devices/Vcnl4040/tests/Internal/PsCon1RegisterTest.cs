@@ -32,12 +32,12 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b0100_0000, PowerState.PowerOn, PsIntegrationTime.Time1_0, PsInterruptPersistence.Persistence1, PsDuty.Duty80)]
         [InlineData(0b1000_0000, PowerState.PowerOn, PsIntegrationTime.Time1_0, PsInterruptPersistence.Persistence1, PsDuty.Duty160)]
         [InlineData(0b1100_0000, PowerState.PowerOn, PsIntegrationTime.Time1_0, PsInterruptPersistence.Persistence1, PsDuty.Duty320)]
-        public void Read(byte data, PowerState powerState, PsIntegrationTime integrationTime, PsInterruptPersistence persistence, PsDuty duty)
+        public void Read(byte regsiterData, PowerState powerState, PsIntegrationTime integrationTime, PsInterruptPersistence persistence, PsDuty duty)
         {
             var testDevice = new I2cTestDevice();
             I2cInterface testBus = new(testDevice);
             // low byte
-            testDevice.DataToRead.Enqueue(data);
+            testDevice.DataToRead.Enqueue(regsiterData);
             // high byte (not relevant)
             testDevice.DataToRead.Enqueue(0x00);
 

@@ -13,11 +13,12 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class PsConf3Register : Register
     {
-        private static readonly byte PsMpsMask = 0b0110_0000;
-        private static readonly byte PsSmartPersMask = 0b0001_0000;
-        private static readonly byte PsAfMask = 0b0000_1000;
-        private static readonly byte PsTrigMask = 0b0000_0100;
-        private static readonly byte PsScEnMask = 0b0000_0001;
+        private const byte PsMpsMask = 0b0110_0000;
+        private const byte PsSmartPersMask = 0b0001_0000;
+        private const byte PsAfMask = 0b0000_1000;
+        private const byte PsTrigMask = 0b0000_0100;
+        private const byte PsScEnMask = 0b0000_0001;
+        private const byte ReservedBitsMask = 0b1000_0010;
 
         /// <summary>
         /// PS multi pulse setting
@@ -67,10 +68,9 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <inheritdoc/>>
         public override void Write()
         {
-            // read current register content to preserve high byte
-            (_, byte dataHigh) = ReadData();
+            (byte dataLow, byte dataHigh) = ReadData();
 
-            byte dataLow = 0;
+            dataLow &= ReservedBitsMask;
             dataLow |= (byte)PsMps;
             dataLow |= (byte)PsSmartPers;
             dataLow |= (byte)PsAf;
