@@ -10,7 +10,7 @@ namespace Iot.Device.Vcnl4040.Tests
     /// <summary>
     /// This is a test against the register specification in the datasheet.
     /// </summary>
-    public class AlsHighInterruptThresholdRegisterTest : RegisterTest
+    public class PsLowInterruptThresholdRegisterTest : RegisterTest
     {
         [Theory]
         [InlineData(0b0101_0101, 0b1010_1010)]
@@ -22,11 +22,11 @@ namespace Iot.Device.Vcnl4040.Tests
             testDevice.DataToRead.Enqueue(thresholdLowByte);
             testDevice.DataToRead.Enqueue(thresholdHighByte);
 
-            var reg = new AlsHighInterruptThresholdRegister(testBus);
+            var reg = new PsLowInterruptThresholdRegister(testBus);
             reg.Read();
 
             Assert.Single(testDevice.DataWritten);
-            Assert.Equal((byte)CommandCode.ALS_THDH, testDevice.DataWritten.Dequeue());
+            Assert.Equal((byte)CommandCode.PS_THDL, testDevice.DataWritten.Dequeue());
             Assert.Equal(thresholdHighByte << 8 | thresholdLowByte, reg.Threshold);
         }
 
@@ -35,14 +35,14 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(0b1010_1010_0000_0101, 0b1010_1010, 0b0000_0101)]
         public void Write(int threshold, byte expectedThresholdHighByte, byte expectedThresholdLowByte)
         {
-            PropertyWriteTest<AlsHighInterruptThresholdRegister, int>(0x00,
-                                                                     0x00,
-                                                                     threshold,
-                                                                     expectedThresholdLowByte,
-                                                                     expectedThresholdHighByte,
-                                                                     (byte)CommandCode.ALS_THDH,
-                                                                     nameof(AlsHighInterruptThresholdRegister.Threshold),
-                                                                     false);
+            PropertyWriteTest<PsLowInterruptThresholdRegister, int>(initialRegisterLowByte: 0x00,
+                                                                    initialRegisterHighByte: 0x00,
+                                                                    testValue: threshold,
+                                                                    expectedLowByte: expectedThresholdLowByte,
+                                                                    expectedHighByte: expectedThresholdHighByte,
+                                                                    commandCode: (byte)CommandCode.PS_THDL,
+                                                                    registerPropertyName: nameof(PsLowInterruptThresholdRegister.Threshold),
+                                                                    registerReadsBeforeWriting: false);
         }
     }
 }

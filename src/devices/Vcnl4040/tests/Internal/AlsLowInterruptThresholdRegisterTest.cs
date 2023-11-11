@@ -3,7 +3,6 @@
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
-using Iot.Device.Vcnl4040.Tests;
 using Xunit;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -34,17 +33,16 @@ namespace Iot.Device.Vcnl4040.Tests
         [Theory]
         [InlineData(0b0101_0101_1010_1010, 0b0101_0101, 0b1010_1010)]
         [InlineData(0b1010_1010_0000_0101, 0b1010_1010, 0b0000_0101)]
-        public void Write_AlsSd(int threshold, byte expectedThresholdHighByte, byte expectedThresholdLowByte)
+        public void Write(int threshold, byte expectedThresholdHighByte, byte expectedThresholdLowByte)
         {
-            // expect 3 bytes to be written: 1x command code for actual write, 2x data for write
-            PropertyWriteTest<AlsLowInterruptThresholdRegister, int>(0x00,
-                                                                     0x00,
-                                                                     threshold,
-                                                                     expectedThresholdLowByte,
-                                                                     expectedThresholdHighByte,
-                                                                     (byte)CommandCode.ALS_THDL,
-                                                                     nameof(AlsLowInterruptThresholdRegister.Threshold),
-                                                                     false);
+            PropertyWriteTest<AlsLowInterruptThresholdRegister, int>(initialRegisterLowByte: 0x00,
+                                                                     initialRegisterHighByte: 0x00,
+                                                                     testValue: threshold,
+                                                                     expectedLowByte: expectedThresholdLowByte,
+                                                                     expectedHighByte: expectedThresholdHighByte,
+                                                                     commandCode: (byte)CommandCode.ALS_THDL,
+                                                                     registerPropertyName: nameof(AlsLowInterruptThresholdRegister.Threshold),
+                                                                     registerReadsBeforeWriting: false);
         }
     }
 }
