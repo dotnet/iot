@@ -5,7 +5,7 @@ using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 using Xunit;
 
-namespace Iot.Device.Vcnl4040.Tests
+namespace Iot.Device.Vcnl4040.Tests.Internal
 {
     /// <summary>
     /// This is a test against the register specification in the datasheet.
