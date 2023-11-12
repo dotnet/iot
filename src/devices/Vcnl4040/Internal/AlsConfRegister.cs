@@ -16,8 +16,6 @@ namespace Iot.Device.Vcnl4040.Internal
         private const byte AlsPersMask = 0b0000_1100;
         private const byte AlsIntEnMask = 0b0000_0010;
         private const byte AlsSdMask = 0b0000_0001;
-        private const byte ReservedBitsMask = 0b0011_0000;
-
         private bool _alsItChanged = false;
         private bool _alsPersChanged = false;
         private bool _alsIntEnChanged = false;
@@ -93,6 +91,7 @@ namespace Iot.Device.Vcnl4040.Internal
             AlsPers = (AlsInterruptPersistence)(dataLow & AlsPersMask);
             AlsIntEn = (AlsInterrupt)(dataLow & AlsIntEnMask);
             AlsSd = (PowerState)(dataLow & AlsSdMask);
+            ResetChangeFlags();
         }
 
         /// <inheritdoc/>>
@@ -100,34 +99,21 @@ namespace Iot.Device.Vcnl4040.Internal
         {
             // Read current LSB and MSB, to preserve MSB and reserved bits from LSB.
             (byte dataLow, byte dataHigh) = ReadData();
-
-            dataLow &= ReservedBitsMask;
-
-            if (_alsItChanged)
-            {
-                dataLow = (byte)(dataLow & ~AlsItMask | (byte)AlsIt);
-                _alsItChanged = false;
-            }
-
-            if (_alsPersChanged)
-            {
-                dataLow = (byte)(dataLow & ~AlsPersMask | (byte)AlsPers);
-                _alsPersChanged = false;
-            }
-
-            if (_alsIntEnChanged)
-            {
-                dataLow = (byte)(dataLow & ~AlsIntEnMask | (byte)AlsIntEn);
-                _alsIntEnChanged = false;
-            }
-
-            if (_alsSdChanged)
-            {
-                dataLow = (byte)(dataLow & ~AlsSdMask | (byte)AlsSd);
-                _alsSdChanged = false;
-            }
+            dataLow = AlterIfChanged(_alsItChanged, dataLow, (byte)AlsIt, AlsItMask);
+            dataLow = AlterIfChanged(_alsPersChanged, dataLow, (byte)AlsPers, AlsPersMask);
+            dataLow = AlterIfChanged(_alsIntEnChanged, dataLow, (byte)AlsIntEn, AlsIntEnMask);
+            dataLow = AlterIfChanged(_alsSdChanged, dataLow, (byte)AlsSd, AlsSdMask);
 
             WriteData(dataLow, dataHigh);
+            ResetChangeFlags();
+        }
+
+        private void ResetChangeFlags()
+        {
+            _alsItChanged = false;
+            _alsPersChanged = false;
+            _alsIntEnChanged = false;
+            _alsSdChanged = false;
         }
     }
 }

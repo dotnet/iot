@@ -18,32 +18,82 @@ namespace Iot.Device.Vcnl4040.Internal
         private const byte PsAfMask = 0b0000_1000;
         private const byte PsTrigMask = 0b0000_0100;
         private const byte PsScEnMask = 0b0000_0001;
-        private const byte ReservedBitsMask = 0b1000_0010;
+
+        private bool _psMpsChanged = false;
+        private bool _psSmartPersChanged = false;
+        private bool _psAfChanged = false;
+        private bool _psTrigChanged = false;
+        private bool _psScEnChanged = false;
+        private PsMultiPulse _psMps = PsMultiPulse.Pulse1;
+        private PsSmartPersistenceState _psSmartPers = PsSmartPersistenceState.Disabled;
+        private PsActiveForceMode _psAf = PsActiveForceMode.Disabled;
+        private PsActiveForceModeTrigger _psTrig = PsActiveForceModeTrigger.NoTrigger;
+        private PsSunlightCancellationState _psScEn = PsSunlightCancellationState.Disabled;
 
         /// <summary>
         /// PS multi pulse setting
         /// </summary>
-        public PsMultiPulse PsMps { get; set; } = PsMultiPulse.Pulse1;
+        public PsMultiPulse PsMps
+        {
+            get => _psMps;
+            set
+            {
+                _psMps = value;
+                _psMpsChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS smart persistence state
         /// </summary>
-        public PsSmartPersistenceState PsSmartPers { get; set; } = PsSmartPersistenceState.Disabled;
+        public PsSmartPersistenceState PsSmartPers
+        {
+            get => _psSmartPers;
+            set
+            {
+                _psSmartPers = value;
+                _psSmartPersChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS active force mode
         /// </summary>
-        public PsActiveForceMode PsAf { get; set; } = PsActiveForceMode.Disabled;
+        public PsActiveForceMode PsAf
+        {
+            get => _psAf;
+            set
+            {
+                _psAf = value;
+                _psAfChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS active force mode trigger
         /// </summary>
-        public PsActiveForceModeTrigger PsTrig { get; set; } = PsActiveForceModeTrigger.NoTrigger;
+        public PsActiveForceModeTrigger PsTrig
+        {
+            get => _psTrig;
+            set
+            {
+                _psTrig = value;
+                _psTrigChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS sunlight cancellation state
         /// </summary>
-        public PsSunlightCancellationState PsScEn { get; set; } = PsSunlightCancellationState.Disabled;
+        public PsSunlightCancellationState PsScEn
+        {
+            get => _psScEn;
+            set
+            {
+                _psScEn = value;
+                _psScEnChanged = true;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PsConf3Register"/> class.
@@ -63,6 +113,7 @@ namespace Iot.Device.Vcnl4040.Internal
             PsAf = (PsActiveForceMode)(dataLow & PsAfMask);
             PsTrig = (PsActiveForceModeTrigger)(dataLow & PsTrigMask);
             PsScEn = (PsSunlightCancellationState)(dataLow & PsScEnMask);
+            ResetChangeFlags();
         }
 
         /// <inheritdoc/>>
@@ -70,14 +121,23 @@ namespace Iot.Device.Vcnl4040.Internal
         {
             (byte dataLow, byte dataHigh) = ReadData();
 
-            dataLow &= ReservedBitsMask;
-            dataLow |= (byte)PsMps;
-            dataLow |= (byte)PsSmartPers;
-            dataLow |= (byte)PsAf;
-            dataLow |= (byte)PsTrig;
-            dataLow |= (byte)PsScEn;
+            dataLow = AlterIfChanged(_psMpsChanged, dataLow, (byte)PsMps, PsMpsMask);
+            dataLow = AlterIfChanged(_psSmartPersChanged, dataLow, (byte)PsSmartPers, PsSmartPersMask);
+            dataLow = AlterIfChanged(_psAfChanged, dataLow, (byte)PsAf, PsAfMask);
+            dataLow = AlterIfChanged(_psTrigChanged, dataLow, (byte)PsTrig, PsTrigMask);
+            dataLow = AlterIfChanged(_psScEnChanged, dataLow, (byte)PsScEn, PsScEnMask);
 
             WriteData(dataLow, dataHigh);
+            ResetChangeFlags();
+        }
+
+        private void ResetChangeFlags()
+        {
+            _psMpsChanged = false;
+            _psSmartPersChanged = false;
+            _psAfChanged = false;
+            _psTrigChanged = false;
+            _psScEnChanged = false;
         }
     }
 }

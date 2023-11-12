@@ -97,5 +97,15 @@ namespace Iot.Device.Vcnl4040.Infrastructure
             data[1] = regData.DataHigh;
             _bus.Write(_commandCode, data);
         }
+
+        protected static byte AlterIfChanged(bool changedFlag, byte dataByte, byte property, byte mask)
+        {
+            if (changedFlag)
+            {
+                dataByte = (byte)(dataByte & ~mask | property);
+            }
+
+            return dataByte;
+        }
     }
 }

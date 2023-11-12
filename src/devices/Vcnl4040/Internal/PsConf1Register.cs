@@ -19,25 +19,66 @@ namespace Iot.Device.Vcnl4040.Internal
         private static readonly byte PsItMask = 0b0000_1110;
         private static readonly byte PsSdMask = 0b0000_0001;
 
+        private bool _pPsDutyChanged = false;
+        private bool _psPersChanged = false;
+        private bool _psItChanged = false;
+        private bool _psSdChanged = false;
+        private PsDuty _psDuty = PsDuty.Duty40;
+        private PsInterruptPersistence _psPers = PsInterruptPersistence.Persistence1;
+        private PsIntegrationTime _psIt = PsIntegrationTime.Time1_0;
+        private PowerState _psSd = PowerState.PowerOff;
+
         /// <summary>
         /// PS IRED on/off duty ratio
         /// </summary>
-        public PsDuty PsDuty { get; set; } = PsDuty.Duty40;
+        public PsDuty PsDuty
+        {
+            get => _psDuty;
+            set
+            {
+                _psDuty = value;
+                _pPsDutyChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS interrupt persistence
         /// </summary>
-        public PsInterruptPersistence PsPers { get; set; } = PsInterruptPersistence.Persistence1;
+        public PsInterruptPersistence PsPers
+        {
+            get => _psPers;
+            set
+            {
+                _psPers = value;
+                _psPersChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS integration time
         /// </summary>
-        public PsIntegrationTime PsIt { get; set; } = PsIntegrationTime.Time1_0;
+        public PsIntegrationTime PsIt
+        {
+            get => _psIt;
+            set
+            {
+                _psIt = value;
+                _psItChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS power state
         /// </summary>
-        public PowerState PsSd { get; set; } = PowerState.PowerOff;
+        public PowerState PsSd
+        {
+            get => _psSd;
+            set
+            {
+                _psSd = value;
+                _psSdChanged = true;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PsConf1Register"/> class.
@@ -50,26 +91,37 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <inheritdoc/>>
         public override void Read()
         {
-            (byte dataLow, byte dataHigh) = ReadData();
+            (byte dataLow, _) = ReadData();
 
             PsDuty = (PsDuty)(dataLow & PsDutyMask);
             PsPers = (PsInterruptPersistence)(dataLow & PsPersMask);
             PsIt = (PsIntegrationTime)(dataLow & PsItMask);
             PsSd = (PowerState)(dataLow & PsSdMask);
+
+            ResetChangeFlags();
         }
 
         /// <inheritdoc/>>
         public override void Write()
         {
             // read current register content, to preserve the high byte
-            (_, byte dataHigh) = ReadData();
+            (byte dataLow, byte dataHigh) = ReadData();
 
-            byte dataLow = 0;
-            dataLow |= (byte)PsDuty;
-            dataLow |= (byte)PsPers;
-            dataLow |= (byte)PsIt;
-            dataLow |= (byte)PsSd;
+            dataLow = AlterIfChanged(_pPsDutyChanged, dataLow, (byte)PsDuty, PsDutyMask);
+            dataLow = AlterIfChanged(_psPersChanged, dataLow, (byte)PsPers, PsPersMask);
+            dataLow = AlterIfChanged(_psItChanged, dataLow, (byte)PsIt, PsItMask);
+            dataLow = AlterIfChanged(_psSdChanged, dataLow, (byte)PsSd, PsSdMask);
+
             WriteData(dataLow, dataHigh);
+            ResetChangeFlags();
+        }
+
+        private void ResetChangeFlags()
+        {
+            _pPsDutyChanged = false;
+            _psPersChanged = false;
+            _psItChanged = false;
+            _psSdChanged = false;
         }
     }
 }

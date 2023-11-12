@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Reflection;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 
@@ -16,22 +17,51 @@ namespace Iot.Device.Vcnl4040.Internal
         private const byte WhiteEnMask = 0b1000_0000;
         private const byte PsMsMask = 0b0100_0000;
         private const byte LedIMask = 0b0000_0111;
-        private const byte ReservedBitsMask = 0b0011_1000;
+        private bool _whiteEnChanged = false;
+        private bool _psMsChanged = false;
+        private bool _ledIChanged = false;
+        private PsLedCurrent _ledI = PsLedCurrent.I50mA;
+        private PsDetectionLogicOutputMode _psMs = PsDetectionLogicOutputMode.Interrupt;
+        private PsWhiteChannelState _whiteEn = PsWhiteChannelState.Enabled;
 
         /// <summary>
         /// PS white channel state
         /// </summary>
-        public PsWhiteChannelState WhiteEn { get; set; } = PsWhiteChannelState.Enabled;
+        public PsWhiteChannelState WhiteEn
+        {
+            get => _whiteEn;
+            set
+            {
+                _whiteEn = value;
+                _whiteEnChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS detection logic output mode
         /// </summary>
-        public PsDetectionLogicOutputMode PsMs { get; set; } = PsDetectionLogicOutputMode.Interrupt;
+        public PsDetectionLogicOutputMode PsMs
+        {
+            get => _psMs;
+            set
+            {
+                _psMs = value;
+                _psMsChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS LED current
         /// </summary>
-        public PsLedCurrent LedI { get; set; } = PsLedCurrent.I50mA;
+        public PsLedCurrent LedI
+        {
+            get => _ledI;
+            set
+            {
+                _ledI = value;
+                _ledIChanged = true;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PsMsRegister"/> class.
@@ -57,12 +87,20 @@ namespace Iot.Device.Vcnl4040.Internal
             // read current register content to preserve low byte
             (byte dataLow, byte dataHigh) = ReadData();
 
-            dataHigh &= ReservedBitsMask;
-            dataHigh |= (byte)WhiteEn;
-            dataHigh |= (byte)PsMs;
-            dataHigh |= (byte)LedI;
+            dataHigh = AlterIfChanged(_whiteEnChanged, dataHigh, (byte)WhiteEn, WhiteEnMask);
+            dataHigh = AlterIfChanged(_psMsChanged, dataHigh, (byte)PsMs, PsMsMask);
+            dataHigh = AlterIfChanged(_ledIChanged, dataHigh, (byte)LedI, LedIMask);
 
             WriteData(dataLow, dataHigh);
+            ResetChangeFlags();
         }
+
+        private void ResetChangeFlags()
+        {
+            _whiteEnChanged = false;
+            _psMsChanged = false;
+            _ledIChanged = false;
+        }
+
     }
 }

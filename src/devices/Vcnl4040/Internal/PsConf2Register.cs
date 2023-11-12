@@ -15,17 +15,36 @@ namespace Iot.Device.Vcnl4040.Internal
     {
         private const byte PsHdMask = 0b0000_1000;
         private const byte PsIntMask = 0b0000_0011;
-        private const byte ReservedBitsMask = 0b1111_0100;
+        private bool _psHdChanged = false;
+        private bool _psIntChanged = false;
+        private PsOutputRange _psHd = PsOutputRange.Bits12;
+        private PsInterruptMode _psInt = PsInterruptMode.Disabled;
 
         /// <summary>
         /// PS output range size
         /// </summary>
-        public PsOutputRange PsHd { get; set; } = PsOutputRange.Bits12;
+        public PsOutputRange PsHd
+        {
+            get => _psHd;
+            set
+            {
+                _psHd = value;
+                _psHdChanged = true;
+            }
+        }
 
         /// <summary>
         /// PS interrupt source
         /// </summary>
-        public PsInterruptMode PsInt { get; set; } = PsInterruptMode.Disabled;
+        public PsInterruptMode PsInt
+        {
+            get => _psInt;
+            set
+            {
+                _psInt = value;
+                _psIntChanged = true;
+            }
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PsConf2Register"/> class.
@@ -42,6 +61,7 @@ namespace Iot.Device.Vcnl4040.Internal
 
             PsHd = (PsOutputRange)(dataHigh & PsHdMask);
             PsInt = (PsInterruptMode)(dataHigh & PsIntMask);
+            ResetChangeFlags();
         }
 
         /// <inheritdoc/>>
@@ -49,12 +69,16 @@ namespace Iot.Device.Vcnl4040.Internal
         {
             // read current register content to preserve low byte
             (byte dataLow, byte dataHigh) = ReadData();
-
-            dataHigh &= ReservedBitsMask;
-            dataHigh |= (byte)PsHd;
-            dataHigh |= (byte)PsInt;
-
+            dataHigh = AlterIfChanged(_psHdChanged, dataHigh, (byte)PsHd, PsHdMask);
+            dataHigh = AlterIfChanged(_psIntChanged, dataHigh, (byte)PsInt, PsIntMask);
             WriteData(dataLow, dataHigh);
+            ResetChangeFlags();
+        }
+
+        private void ResetChangeFlags()
+        {
+            _psHdChanged = false;
+            _psIntChanged = false;
         }
     }
 }

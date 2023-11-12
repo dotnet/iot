@@ -290,6 +290,24 @@ namespace Iot.Device.Vcnl4040
             }
         }
 
+        /// <summary>
+        /// Enables/disables the sunligh cancellation
+        /// </summary>
+        public bool SunlightCancellationEnabled
+        {
+            get
+            {
+                _psConf3Register.Read();
+                return _psConf3Register.PsScEn == PsSunlightCancellationState.Enabled;
+            }
+
+            set
+            {
+                _psConf3Register.PsScEn = value ? PsSunlightCancellationState.Enabled : PsSunlightCancellationState.Disabled;
+                _psConf3Register.Write();
+            }
+        }
+
         #endregion
 
         #region Interrupt

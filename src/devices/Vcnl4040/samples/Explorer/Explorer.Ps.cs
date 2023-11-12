@@ -28,6 +28,7 @@ internal partial class Explorer
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set extended range mode", Action = SetExtendedRange },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disbale active force mode", Action = EnableDisableActiveForceMode },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable white channel", Action = EnableDisableWhiteChannel },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable sunlight cancellation", Action = () => SetProperyEnum<YesNoChoice>("Enable sunlight cancellation", choice => _ps.SunlightCancellationEnabled = choice == YesNoChoice.Yes) },
 
             new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts / proximity detection", Action = EnablePsInterruptsOrProximityDetectionMode },
             new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts / proximity detection", Action = _ps.DisableInterruptsAndProximityDetection },
@@ -172,7 +173,8 @@ internal partial class Explorer
         Console.WriteLine($"    Persistence:            {persistence}");
         Console.WriteLine($"    Mode:                   {mode}");
         Console.WriteLine($"    Smart persistence:      {(smartPersistenceEnabled ? "yes" : "no")}");
-        Console.WriteLine($"    Cancellation level:     {cancellationLevel}");
+        Console.WriteLine($" Cancellation level:        {cancellationLevel}");
+        Console.WriteLine($" Sunlight cancellation:     {(_ps.SunlightCancellationEnabled ? "on" : "off")}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
@@ -263,6 +265,17 @@ internal partial class Explorer
         }
 
         _ps.CancellationLevel = cancellationLevel;
+    }
+
+    private void SetProperyEnum<T>(string prompt, Action<T> setter)
+        where T : struct, Enum
+    {
+        if (!PromptEnum(prompt, out T choice))
+        {
+            return;
+        }
+
+        setter(choice);
     }
 
     private void EnablePsInterruptsOrProximityDetectionMode()

@@ -35,15 +35,16 @@ catch (IncompatibleDeviceException idex)
 /*
  Configuration of the Ambient Light Sensor
    - max. Range is 3276.7 lux => resulting integration time is 160 ms
-   - lower interrupt threshold is 3000 lux
-   - upper interrupt threshold is 5000 lux
+   - lower interrupt threshold is 1000 lux
+   - upper interrupt threshold is 3000 lux
    - interrupt hit persistence is 4
+   - interrupts are enabled
  */
 AmbientLightSensor als = vcnl4040.AmbientLightSensor;
 als.Range = AlsRange.Range3276;
-als.EnableInterrupts(Illuminance.FromLux(3000),
-                       Illuminance.FromLux(5000),
-                       AlsInterruptPersistence.Persistence4);
+als.EnableInterrupts(Illuminance.FromLux(1000),
+                     Illuminance.FromLux(3000),
+                     AlsInterruptPersistence.Persistence4);
 
 /*
   Enable Ambient Light Sensor operation
@@ -51,10 +52,6 @@ als.EnableInterrupts(Illuminance.FromLux(3000),
     - turn interrupts on
  */
 als.PowerOn = true;
-
-/*
-    als.InterruptEnabled = true;
-*/
 
 /*
   Sensor loop

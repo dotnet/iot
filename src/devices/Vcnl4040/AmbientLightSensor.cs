@@ -17,7 +17,7 @@ namespace Iot.Device.Vcnl4040
         private readonly AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
         private readonly AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
         private readonly AlsDataRegister _alsDataRegister;
-        private AlsIntegrationTime _lastKnownIntegrationTime = AlsIntegrationTime.Time80ms;
+        private AlsIntegrationTime _localIntegrationTime = AlsIntegrationTime.Time80ms;
         private bool _loadReductionModeEnabled = false;
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace Iot.Device.Vcnl4040
         /// </summary>
         public void Attach()
         {
-            _lastKnownIntegrationTime = _alsConfRegister.AlsIt;
+            _localIntegrationTime = _alsConfRegister.AlsIt;
         }
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Iot.Device.Vcnl4040
                 if (value)
                 {
                     _alsConfRegister.Read();
-                    _lastKnownIntegrationTime = _alsConfRegister.AlsIt;
+                    _localIntegrationTime = _alsConfRegister.AlsIt;
                 }
 
                 _loadReductionModeEnabled = value;
@@ -62,7 +62,8 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Get or sets the power state (power on, shutdown) of the ambient light sensor.
+        /// Get or sets the power state of the ambient light sensor.
+        /// <value><c>true</c> powered up;<c>false</c> shutdown</value>
         /// </summary>
         public bool PowerOn
         {
@@ -94,7 +95,7 @@ namespace Iot.Device.Vcnl4040
                 Illuminance resolution;
                 if (_loadReductionModeEnabled)
                 {
-                    resolution = GetDetectionRangeAndResolution(_lastKnownIntegrationTime).Resolution;
+                    resolution = GetDetectionRangeAndResolution(_localIntegrationTime).Resolution;
                 }
                 else
                 {
@@ -111,6 +112,11 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Gets or sets the ambient light sensor integration time.
+        /// Important: when setting the integration time, possibly configured
+        ///            interrupts are implicitly deactivated.
+        ///            This is done to prevent accidentally using changed threshold
+        ///            values (based on the integration time).
+        ///            The user must explicitly reconfigure and activate the interrupts.
         /// </summary>
         public AlsIntegrationTime IntegrationTime
         {
@@ -121,7 +127,7 @@ namespace Iot.Device.Vcnl4040
                 // Since we are already reading the current integration time from the chip,
                 // we can also update the internally stored value. While not strictly necessary,
                 // this could potentially resolve any existing inconsistency, ideally.
-                _lastKnownIntegrationTime = _alsConfRegister.AlsIt;
+                _localIntegrationTime = _alsConfRegister.AlsIt;
 
                 return _alsConfRegister.AlsIt;
             }
@@ -130,10 +136,9 @@ namespace Iot.Device.Vcnl4040
             {
                 DisableInterrupts();
 
-                _alsConfRegister.Read();
                 _alsConfRegister.AlsIt = value;
                 _alsConfRegister.Write();
-                _lastKnownIntegrationTime = value;
+                _localIntegrationTime = value;
             }
         }
 
@@ -283,6 +288,11 @@ namespace Iot.Device.Vcnl4040
             _alsConfRegister.Read();
             (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
 
+            if (lowerThreshold.Lux < 0 || upperThreshold.Lux < 0)
+            {
+                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) and upper threshold (is: {upperThreshold}) must be positive");
+            }
+
             if (lowerThreshold > maxDetectionRange || upperThreshold > maxDetectionRange)
             {
                 throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) or upper threshold (is: {upperThreshold}) must not exceed maximum range of {maxDetectionRange} lux");
@@ -290,7 +300,7 @@ namespace Iot.Device.Vcnl4040
 
             if (lowerThreshold > upperThreshold)
             {
-                throw new ArgumentException("Lower threshold (is: {lowerThreshold}) must not be higher than upper threshold  (is: {upperThreshold})");
+                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) must not be higher than upper threshold  (is: {upperThreshold})");
             }
 
             // disable interrupts before altering configuration to avoid transient side effects
