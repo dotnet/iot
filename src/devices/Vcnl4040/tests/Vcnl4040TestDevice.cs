@@ -9,22 +9,25 @@ namespace Iot.Device.Vcnl4040.Tests
 {
     internal class Vcnl4040TestDevice : I2cDevice
     {
+        private const int Msb = 1;
+        private const int Lsb = 0;
+
         public byte[,] Data { get; set; } = new byte[0x0c, 0x02];
 
         public override I2cConnectionSettings ConnectionSettings => throw new NotImplementedException();
 
         public int GetData(CommandCode addr)
         {
-            return Data[(byte)addr, 0] | Data[(byte)addr, 1] << 8;
+            return Data[(byte)addr, Lsb] | Data[(byte)addr, Msb] << 8;
         }
 
-        public byte GetLsb(CommandCode addr) => Data[(byte)addr, 0];
-        public byte GetMsb(CommandCode addr) => Data[(byte)addr, 1];
+        public byte GetLsb(CommandCode addr) => Data[(byte)addr, Lsb];
+        public byte GetMsb(CommandCode addr) => Data[(byte)addr, Msb];
 
         public void SetData(CommandCode addr, byte lsb, byte msb)
         {
-            Data[(byte)addr, 0] = lsb;
-            Data[(byte)addr, 1] = msb;
+            Data[(byte)addr, Lsb] = lsb;
+            Data[(byte)addr, Msb] = msb;
         }
 
         public void SetData(CommandCode addr, int data)
@@ -33,9 +36,9 @@ namespace Iot.Device.Vcnl4040.Tests
             SetMsb(addr, (byte)(data >> 8));
         }
 
-        public void SetLsb(CommandCode addr, byte lsb) => Data[(byte)addr, 0] = lsb;
+        public void SetLsb(CommandCode addr, byte lsb) => Data[(byte)addr, Lsb] = lsb;
 
-        public void SetMsb(CommandCode addr, byte msb) => Data[(byte)addr, 1] = msb;
+        public void SetMsb(CommandCode addr, byte msb) => Data[(byte)addr, Msb] = msb;
 
         public override void Read(Span<byte> buffer)
         {
@@ -50,8 +53,8 @@ namespace Iot.Device.Vcnl4040.Tests
             }
 
             int addr = buffer[0];
-            Data[addr, 0] = buffer[1];
-            Data[addr, 1] = buffer[2];
+            Data[addr, Lsb] = buffer[1];
+            Data[addr, Msb] = buffer[2];
         }
 
         public override void WriteRead(ReadOnlySpan<byte> writeBuffer, Span<byte> readBuffer)
@@ -67,8 +70,8 @@ namespace Iot.Device.Vcnl4040.Tests
             }
 
             int addr = writeBuffer[0];
-            readBuffer[0] = Data[addr, 0];
-            readBuffer[1] = Data[addr, 1];
+            readBuffer[0] = Data[addr, Lsb];
+            readBuffer[1] = Data[addr, Msb];
         }
     }
 }

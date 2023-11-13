@@ -53,6 +53,7 @@
     <Compile Include="Internal\PsDataRegister.cs" />
     <Compile Include="Internal\Register.cs" />
     <Compile Include="Common\Defnitions\CommandCode.cs" />
+    <Compile Include="Common\Defnitions\BitMasks.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -36,5 +36,17 @@ namespace Iot.Device.Vcnl4040.Tests
             Assert.Equal(refReading, vcnl4040.ProximitySensor.Reading);
             Assert.Equal((byte)PsActiveForceModeTrigger.OneTimeCycle, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
         }
+
+        [Fact]
+        public void WhiteChannel_Get()
+        {
+            int refReading = 5678;
+
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.ProximitySensor);
+            _testDevice.SetData(CommandCode.White_Data, refReading);
+
+            Assert.Equal(refReading, vcnl4040.ProximitySensor.WhiteChannelReading);
+        }
     }
 }

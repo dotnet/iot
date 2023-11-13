@@ -6,6 +6,7 @@ using System.Device.I2c;
 using System.IO;
 using System.Linq;
 using Iot.Device.Vcnl4040;
+using Iot.Device.Vcnl4040.Common.Defnitions;
 
 internal partial class Explorer
 {

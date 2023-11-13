@@ -95,7 +95,6 @@ namespace Iot.Device.Vcnl4040
                     // Therefore, it is legitimate to read the current register content instead of
                     // working with a local copy. This only minimally increases the bus load and
                     // avoids potential inconsistencies.
-                    _psConf3Register.Read();
                     _psConf3Register.PsTrig = PsActiveForceModeTrigger.OneTimeCycle;
                     _psConf3Register.Write();
                 }
@@ -133,12 +132,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                _psConf1Register.Read();
-                if (_psConf1Register.PsDuty != value)
-                {
-                    _psConf1Register.PsDuty = value;
-                    _psConf1Register.Write();
-                }
+                _psConf1Register.PsDuty = value;
+                _psConf1Register.Write();
             }
         }
 
@@ -155,12 +150,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                _psMsRegister.Read();
-                if (_psMsRegister.LedI != value)
-                {
-                    _psMsRegister.LedI = value;
-                    _psMsRegister.Write();
-                }
+                _psMsRegister.LedI = value;
+                _psMsRegister.Write();
             }
         }
 
@@ -177,12 +168,6 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                _psConf1Register.Read();
-                if (_psConf1Register.PsIt == value)
-                {
-                    return;
-                }
-
                 _psConf1Register.PsIt = value;
                 _psConf1Register.Write();
             }
@@ -203,14 +188,7 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                _psConf2Register.Read();
-                PsOutputRange newRange = value ? PsOutputRange.Bits16 : PsOutputRange.Bits12;
-                if (_psConf2Register.PsHd == newRange)
-                {
-                    return;
-                }
-
-                _psConf2Register.PsHd = newRange;
+                _psConf2Register.PsHd = value ? PsOutputRange.Bits16 : PsOutputRange.Bits12;
                 _psConf2Register.Write();
             }
         }
@@ -230,16 +208,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                _psConf3Register.Read();
-                PsActiveForceMode newMode = value ? PsActiveForceMode.Enabled : PsActiveForceMode.Disabled;
-                if (_psConf3Register.PsAf == newMode)
-                {
-                    return;
-                }
-
-                _psConf3Register.PsAf = newMode;
+                _psConf3Register.PsAf = value ? PsActiveForceMode.Enabled : PsActiveForceMode.Disabled;
                 _psConf3Register.Write();
-
                 _activeForceModeEnabled = value;
             }
         }
@@ -256,14 +226,7 @@ namespace Iot.Device.Vcnl4040
             }
             set
             {
-                _psMsRegister.Read();
-                PsWhiteChannelState newState = value ? PsWhiteChannelState.Enabled : PsWhiteChannelState.Disabled;
-                if (_psMsRegister.WhiteEn == newState)
-                {
-                    return;
-                }
-
-                _psMsRegister.WhiteEn = newState;
+                _psMsRegister.WhiteEn = value ? PsWhiteChannelState.Enabled : PsWhiteChannelState.Disabled;
                 _psMsRegister.Write();
             }
         }
@@ -281,12 +244,8 @@ namespace Iot.Device.Vcnl4040
 
             set
             {
-                _psConf3Register.Read();
-                if (value != _psConf3Register.PsMps)
-                {
-                    _psConf3Register.PsMps = value;
-                    _psConf3Register.Write();
-                }
+                _psConf3Register.PsMps = value;
+                _psConf3Register.Write();
             }
         }
 
@@ -306,6 +265,46 @@ namespace Iot.Device.Vcnl4040
                 _psConf3Register.PsScEn = value ? PsSunlightCancellationState.Enabled : PsSunlightCancellationState.Disabled;
                 _psConf3Register.Write();
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the cancellation level for the interrupt thresholds
+        /// </summary>
+        public int CancellationLevel
+        {
+            get
+            {
+                _psCancellationLevelRegister.Read();
+                return _psCancellationLevelRegister.Level;
+            }
+
+            set
+            {
+                _psCancellationLevelRegister.Level = value;
+                _psCancellationLevelRegister.Write();
+            }
+        }
+
+        /// <summary>
+        /// Configures the IR led emitter
+        /// </summary>
+        /// <param name="current">...</param>
+        /// <param name="dutyRation">...</param>
+        /// <param name="multiPulses">...</param>
+        public void ConfigureEmitter(PsLedCurrent current, PsDuty dutyRation, PsMultiPulse multiPulses)
+        {
+        }
+
+        /// <summary>
+        /// Configures the IR receiver.
+        /// </summary>
+        /// <param name="integrationTime">...</param>
+        /// <param name="extendedOutputRange">...</param>
+        /// <param name="cancellationLevel">...</param>
+        /// <param name="whiteChannelEnabled">...</param>
+        /// <param name="sunlightCancellationEnabled">...</param>
+        public void ConfigureReceiver(PsIntegrationTime integrationTime, bool extendedOutputRange, int cancellationLevel, bool whiteChannelEnabled, bool sunlightCancellationEnabled)
+        {
         }
 
         #endregion
@@ -420,25 +419,6 @@ namespace Iot.Device.Vcnl4040
             _psMsRegister.Read();
             _psMsRegister.PsMs = PsDetectionLogicOutputMode.LogicOutput;
             _psMsRegister.Write();
-        }
-
-        /// <summary>
-        /// Gets or sets the cancellation level for the interrupt thresholds
-        /// </summary>
-        public int CancellationLevel
-        {
-            get
-            {
-                _psCancellationLevelRegister.Read();
-                return _psCancellationLevelRegister.Level;
-            }
-
-            set
-            {
-                _psCancellationLevelRegister.Level = value;
-                _psCancellationLevelRegister.Write();
-            }
-
         }
 
         private void ConfigureThresholds(int lowerThreshold, int upperThreshold)
