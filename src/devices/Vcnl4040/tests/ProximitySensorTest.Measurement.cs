@@ -1,0 +1,40 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+using Iot.Device.Vcnl4040.Common.Defnitions;
+using Xunit;
+
+namespace Iot.Device.Vcnl4040.Tests
+{
+    public partial class ProximitySensorTest
+    {
+        [Fact]
+        public void Reading_Get_ActiveForceModeDisabled()
+        {
+            int refReading = 1234;
+
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.ProximitySensor);
+            _testDevice.SetData(CommandCode.PS_Data, refReading);
+
+            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+            Assert.Equal(refReading, vcnl4040.ProximitySensor.Reading);
+            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+        }
+
+        [Fact]
+        public void Reading_Get_ActiveForceModeEnabled()
+        {
+            int refReading = 1234;
+
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.ProximitySensor);
+            _testDevice.SetData(CommandCode.PS_Data, refReading);
+
+            vcnl4040.ProximitySensor.ActiveForceMode = true;
+
+            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+            Assert.Equal(refReading, vcnl4040.ProximitySensor.Reading);
+            Assert.Equal((byte)PsActiveForceModeTrigger.OneTimeCycle, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+        }
+    }
+}

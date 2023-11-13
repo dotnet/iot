@@ -9,12 +9,12 @@ namespace Iot.Device.Vcnl4040.Tests
 {
     public partial class AmbientLightSensorTest
     {
-        private AlsConfRegister _alsConfRegister;
-        private AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
-        private AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
-        private AlsDataRegister _alsDataRegister;
-        private Vcnl4040TestDevice _testDevice = new();
-        private I2cInterface _testBus;
+        private readonly AlsConfRegister _alsConfRegister;
+        private readonly AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
+        private readonly AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
+        private readonly AlsDataRegister _alsDataRegister;
+        private readonly Vcnl4040TestDevice _testDevice = new();
+        private readonly I2cInterface _testBus;
 
         private static FieldInfo GetFieldInfoOrThrow(object instance, string fieldName) =>
             instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)
