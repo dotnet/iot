@@ -799,6 +799,8 @@ void EmulateNdefTag(Pn532 pn532)
     EmulatedNdefTag ndef = new(pn532, new byte[] { 0x12, 0x34, 0x45 });
     ndef.CardStatusChanged += NdefCardStatusChanged;
     ndef.NdefReceived += NdefNdefReceived;
+    ndef.NdefMessage.Records.Add(new TextRecord("I love NET IoT and .NET nanoFramework!", "en-us", Encoding.UTF8));
+    ndef.NdefMessage.Records.Add(new UriRecord(UriType.Https, "github.com/dotnet/iot"));
     ndef.InitializeAndListen(cts.Token);
 }
 
