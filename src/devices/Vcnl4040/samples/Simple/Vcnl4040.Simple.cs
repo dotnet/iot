@@ -8,13 +8,15 @@ using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using UnitsNet;
 
-PeriodicTimer loopTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(200));
+PeriodicTimer loopTimer = new(TimeSpan.FromMilliseconds(1000));
 
 /*
- Prepare of the binding for use.
+ Prepare the binding for use.
  */
 I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Vcnl4040Device.DefaultI2cAddress));
-Vcnl4040Device vcnl4040 = new Vcnl4040Device(i2cDevice);
+Vcnl4040Device vcnl4040 = new(i2cDevice);
+AmbientLightSensor als = vcnl4040.AmbientLightSensor;
+ProximitySensor ps = vcnl4040.ProximitySensor;
 
 try
 {
@@ -22,52 +24,88 @@ try
 }
 catch (IOException ioex)
 {
-    Console.WriteLine("Communication with device using I2C bus is not working");
+    Console.WriteLine("Communication with device using I2C bus is not available");
     Console.WriteLine(ioex.Message);
     return;
 }
-catch (IncompatibleDeviceException idex)
+catch (IncompatibleDeviceException ex)
 {
-    Console.WriteLine(idex.Message);
+    Console.WriteLine(ex.Message);
     return;
 }
 
 /*
  Configuration of the Ambient Light Sensor
-   - max. Range is 3276.7 lux => resulting integration time is 160 ms
-   - lower interrupt threshold is 1000 lux
-   - upper interrupt threshold is 3000 lux
-   - interrupt hit persistence is 4
-   - interrupts are enabled
+   - max. range is 3276.7 lux => resulting integration time is 160 ms
+   - Interrupts (INT-pin function)
+     - lower threshold is 1000 lux => low interrupt event
+     - upper threshold is 3000 lux => high interrupt event
+     - interrupt hit persistence is 4 (minor false trigger suppresion, limit impact on reaction time)
  */
-AmbientLightSensor als = vcnl4040.AmbientLightSensor;
 als.Range = AlsRange.Range3276;
-als.EnableInterrupts(Illuminance.FromLux(1000),
-                     Illuminance.FromLux(3000),
-                     AlsInterruptPersistence.Persistence4);
+AmbientLightInterruptConfiguration alsInterruptConfiguration = new(LowerThreshold: Illuminance.FromLux(1000),
+                                                                   UpperThreshold: Illuminance.FromLux(3000),
+                                                                   Persistence: AlsInterruptPersistence.Persistence4);
+als.EnableInterrupts(alsInterruptConfiguration);
 
 /*
   Enable Ambient Light Sensor operation
-    - turn sensor on
-    - turn interrupts on
  */
 als.PowerOn = true;
 
 /*
-  Sensor loop
-    - get current readings
+ Configuration of the Proximity Sensor
+   - Emitter, configured for max. power = distance
+     - max. IR LED current of 200 mA
+     - duty ratio is 1/40
+     - multi pulses is 1 (off)
+   - Receiver, configured for max. sensitivity
+     - integration time is 8T
+     - normal output range (12-bit)
+     - cancellation level is 0
+     - white channel is enabled
+     - sunlight cancellation is disabled
+   - Interrupts (INT-pin function)
+     - lower threshold is 2000 counts => away interrupt event
+     - upper threshold is 4000 counts => close interrupt event
+     - trigger both, away and close event
+     - interrupt hit persistence is 1 (no trigger suppresion, no impact on reaction time)
+     - Note: logic output is NOT demonstrated here, as this would exclude ALS interrupts
+ */
+EmitterConfiguration emitterConfiguration = new(Current: PsLedCurrent.I200mA,
+                                                DutyRatio: PsDuty.Duty40,
+                                                MultiPulses: PsMultiPulse.Pulse1);
+
+ReceiverConfiguration receiverConfiguration = new(PsIntegrationTime.Time8_0, false, 0, true, false);
+
+ProximityInterruptConfiguration proximityInterruptConfiguration = new(2000,
+                                                                      UpperThreshold: 4000,
+                                                                      Persistence: PsInterruptPersistence.Persistence1,
+                                                                      SmartPersistenceEnabled: false,
+                                                                      Mode: ProximityInterruptMode.CloseOrAwayInterrupt);
+
+ps.ConfigureEmitter(emitterConfiguration);
+ps.ConfigureReceiver(receiverConfiguration);
+ps.EnableInterrupt(proximityInterruptConfiguration);
+ps.PowerOn = true;
+
+/*
+  Sensor loop (~1000 ms cycle time)
+    - get current readings from ALS and PS
     - get and clear interrupt flags
-    - display
-    - wait ~200 ms
+    - display readings and flags
 */
 while (!Console.KeyAvailable)
 {
     Illuminance alsReading = als.Reading;
+    int psReading = ps.Reading;
     InterruptFlags interrupts = vcnl4040.GetAndClearInterruptFlags();
 
     Console.WriteLine($"Illuminance: {alsReading}");
-    Console.WriteLine(interrupts);
-    Console.WriteLine("-----------------------------------------");
+    Console.WriteLine($"Proximty:    {psReading}");
+    string intFlagsStr = interrupts.ToString();
+    Console.WriteLine(intFlagsStr);
+    Console.WriteLine(new string('-', intFlagsStr.Length));
 
     await loopTimer.WaitForNextTickAsync();
 }

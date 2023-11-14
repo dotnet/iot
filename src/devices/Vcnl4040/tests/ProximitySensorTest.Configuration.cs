@@ -8,85 +8,129 @@ namespace Iot.Device.Vcnl4040.Tests
     public partial class ProximitySensorTest
     {
         [Fact]
-        public void DutyRatio_Get()
+        public void GetEmitterConfiguration()
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
-            _testDevice.SetLsb(CommandCode.PS_CONF_1_2, (byte)PsDuty.Duty320);
-            Assert.Equal(PsDuty.Duty320, vcnl4040.ProximitySensor.DutyRatio);
+
+            EmitterConfiguration referenceConfiguration = new(PsLedCurrent.I180mA, PsDuty.Duty320, PsMultiPulse.Pulse4);
+
+            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, (byte)referenceConfiguration.Current);
+            _testDevice.SetLsb(CommandCode.PS_CONF_1_2, (byte)referenceConfiguration.DutyRatio);
+            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)referenceConfiguration.MultiPulses);
+
+            EmitterConfiguration configuration = vcnl4040.ProximitySensor.GetEmitterConfiguration();
+            Assert.Equal(referenceConfiguration.Current, configuration.Current);
+            Assert.Equal(referenceConfiguration.DutyRatio, configuration.DutyRatio);
+            Assert.Equal(referenceConfiguration.MultiPulses, configuration.MultiPulses);
+
+            referenceConfiguration = new(PsLedCurrent.I120mA, PsDuty.Duty160, PsMultiPulse.Pulse2);
+
+            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, (byte)referenceConfiguration.Current);
+            _testDevice.SetLsb(CommandCode.PS_CONF_1_2, (byte)referenceConfiguration.DutyRatio);
+            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)referenceConfiguration.MultiPulses);
+
+            EmitterConfiguration updatedConfiguration = vcnl4040.ProximitySensor.GetEmitterConfiguration();
+            Assert.Equal(referenceConfiguration.Current, updatedConfiguration.Current);
+            Assert.Equal(referenceConfiguration.DutyRatio, updatedConfiguration.DutyRatio);
+            Assert.Equal(referenceConfiguration.MultiPulses, updatedConfiguration.MultiPulses);
         }
 
         [Fact]
-        public void DutyRatio_Set()
+        public void ConfigureEmitter()
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
-            vcnl4040.ProximitySensor.DutyRatio = PsDuty.Duty160;
-            Assert.Equal((byte)PsDuty.Duty160, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsDuty);
-            vcnl4040.ProximitySensor.DutyRatio = PsDuty.Duty320;
-            Assert.Equal((byte)PsDuty.Duty320, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsDuty);
+
+            EmitterConfiguration initialConfiguration = new(Current: PsLedCurrent.I180mA,
+                                                            DutyRatio: PsDuty.Duty160,
+                                                            MultiPulses: PsMultiPulse.Pulse4);
+            vcnl4040.ProximitySensor.ConfigureEmitter(initialConfiguration);
+
+            Assert.Equal((byte)initialConfiguration.Current, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsLedI);
+            Assert.Equal((byte)initialConfiguration.DutyRatio, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsDuty);
+            Assert.Equal((byte)initialConfiguration.MultiPulses, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsMps);
+
+            EmitterConfiguration reconfiguration = new(Current: PsLedCurrent.I160mA,
+                                                       DutyRatio: PsDuty.Duty320,
+                                                       MultiPulses: PsMultiPulse.Pulse2);
+            vcnl4040.ProximitySensor.ConfigureEmitter(reconfiguration);
+
+            Assert.Equal((byte)reconfiguration.Current, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsLedI);
+            Assert.Equal((byte)reconfiguration.DutyRatio, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsDuty);
+            Assert.Equal((byte)reconfiguration.MultiPulses, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsMps);
         }
 
         [Fact]
-        public void LedCurrent_Get()
+        public void GetReceiverConfiguration()
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
-            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, (byte)PsLedCurrent.I180mA);
-            Assert.Equal(PsLedCurrent.I180mA, vcnl4040.ProximitySensor.LedCurrent);
-        }
 
-        [Fact]
-        public void LedCurrent_Set()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            vcnl4040.ProximitySensor.LedCurrent = PsLedCurrent.I180mA;
-            Assert.Equal((byte)PsLedCurrent.I180mA, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsLedI);
-            vcnl4040.ProximitySensor.LedCurrent = PsLedCurrent.I160mA;
-            Assert.Equal((byte)PsLedCurrent.I160mA, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsLedI);
-        }
-
-        [Fact]
-        public void IntegrationTime_Get()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
             _testDevice.SetLsb(CommandCode.PS_CONF_1_2, (byte)PsIntegrationTime.Time3_0);
-            Assert.Equal(PsIntegrationTime.Time3_0, vcnl4040.ProximitySensor.IntegrationTime);
-        }
-
-        [Fact]
-        public void IntegrationTime_Set()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            vcnl4040.ProximitySensor.IntegrationTime = PsIntegrationTime.Time2_0;
-            Assert.Equal((byte)PsIntegrationTime.Time2_0, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsIt);
-            vcnl4040.ProximitySensor.IntegrationTime = PsIntegrationTime.Time2_5;
-            Assert.Equal((byte)PsIntegrationTime.Time2_5, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsIt);
-        }
-
-        [Fact]
-        public void ExtendedOutputRange_Get()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            Assert.False(vcnl4040.ProximitySensor.ExtendedOutputRange);
             _testDevice.SetMsb(CommandCode.PS_CONF_1_2, (byte)BitMasks.PsHd);
-            Assert.True(vcnl4040.ProximitySensor.ExtendedOutputRange);
+            _testDevice.SetData(CommandCode.PS_CANC, 12345);
+            // while channel disabled (bit = 1)
+            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, (byte)BitMasks.WhiteEn);
+            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)PsSunlightCancellationState.Enabled);
+
+            ReceiverConfiguration configuration = vcnl4040.ProximitySensor.GetReceiverConfiguration();
+            Assert.Equal(PsIntegrationTime.Time3_0, configuration.IntegrationTime);
+            Assert.True(configuration.ExtendedOutputRange);
+            Assert.Equal(12345, configuration.CancellationLevel);
+            Assert.False(configuration.WhiteChannelEnabled);
+            Assert.True(configuration.SunlightCancellationEnabled);
+
+            // Output range is 12-bit (default, 0)
+            _testDevice.SetMsb(CommandCode.PS_CONF_1_2, 0);
+            _testDevice.SetLsb(CommandCode.PS_CONF_1_2, (byte)PsIntegrationTime.Time2_0);
+            _testDevice.SetData(CommandCode.PS_CANC, 54321);
+            // white channel enabled (bit = 0)
+            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, 0);
+            // sunlight cancellation disabled
+            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, 0);
+
+            ReceiverConfiguration updatedConfiguration = vcnl4040.ProximitySensor.GetReceiverConfiguration();
+            Assert.Equal(PsIntegrationTime.Time2_0, updatedConfiguration.IntegrationTime);
+            Assert.False(updatedConfiguration.ExtendedOutputRange);
+            Assert.Equal(54321, updatedConfiguration.CancellationLevel);
+            Assert.True(updatedConfiguration.WhiteChannelEnabled);
+            Assert.False(updatedConfiguration.SunlightCancellationEnabled);
         }
 
         [Fact]
-        public void ExtendedOutputRange_Set()
+        public void ConfigureReceiver()
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
-            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsHd);
-            vcnl4040.ProximitySensor.ExtendedOutputRange = true;
+
+            ReceiverConfiguration initialConfiguration = new(IntegrationTime: PsIntegrationTime.Time2_0,
+                                                             ExtendedOutputRange: true,
+                                                             CancellationLevel: 12345,
+                                                             WhiteChannelEnabled: true,
+                                                             SunlightCancellationEnabled: false);
+
+            vcnl4040.ProximitySensor.ConfigureReceiver(initialConfiguration);
+
+            Assert.Equal((byte)PsIntegrationTime.Time2_0, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsIt);
             Assert.Equal((byte)BitMasks.PsHd, _testDevice.GetMsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsHd);
-            vcnl4040.ProximitySensor.ExtendedOutputRange = false;
+            Assert.Equal(12345, _testDevice.GetData(CommandCode.PS_CANC));
+            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.WhiteEn);
+            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsScEn);
+
+            ReceiverConfiguration reConfiguration = new(IntegrationTime: PsIntegrationTime.Time2_5,
+                                                        ExtendedOutputRange: false,
+                                                        CancellationLevel: 54321,
+                                                        WhiteChannelEnabled: false,
+                                                        SunlightCancellationEnabled: true);
+
+            vcnl4040.ProximitySensor.ConfigureReceiver(reConfiguration);
+
+            Assert.Equal((byte)PsIntegrationTime.Time2_5, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsIt);
             Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsHd);
+            Assert.Equal(54321, _testDevice.GetData(CommandCode.PS_CANC));
+            Assert.Equal((byte)BitMasks.WhiteEn, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.WhiteEn);
+            Assert.Equal((byte)BitMasks.PsScEn, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsScEn);
         }
 
         [Fact]
@@ -110,89 +154,6 @@ namespace Iot.Device.Vcnl4040.Tests
             Assert.Equal((byte)BitMasks.PsAf, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsAf);
             vcnl4040.ProximitySensor.ActiveForceMode = false;
             Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsAf);
-        }
-
-        [Fact]
-        public void WhiteChannelEnabled_Get()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            // note: 0 = enabled, 1 = disabled
-            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, (byte)BitMasks.WhiteEn);
-            Assert.False(vcnl4040.ProximitySensor.WhiteChannelEnabled);
-            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, 0);
-            Assert.True(vcnl4040.ProximitySensor.WhiteChannelEnabled);
-        }
-
-        [Fact]
-        public void WhiteChannelEnabled_Set()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.WhiteEn);
-            vcnl4040.ProximitySensor.WhiteChannelEnabled = false;
-            Assert.Equal((byte)BitMasks.WhiteEn, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.WhiteEn);
-            vcnl4040.ProximitySensor.WhiteChannelEnabled = true;
-            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.WhiteEn);
-        }
-
-        [Fact]
-        public void MultiPulses_Get()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)PsMultiPulse.Pulse4);
-            Assert.Equal(PsMultiPulse.Pulse4, vcnl4040.ProximitySensor.MultiPulses);
-        }
-
-        [Fact]
-        public void MultiPulses_Set()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            Assert.Equal((byte)PsMultiPulse.Pulse1, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsMps);
-            vcnl4040.ProximitySensor.MultiPulses = PsMultiPulse.Pulse2;
-            Assert.Equal((byte)PsMultiPulse.Pulse2, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsMps);
-        }
-
-        [Fact]
-        public void SunlightCancellationEnabled_Get()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)PsSunlightCancellationState.Disabled);
-            Assert.False(vcnl4040.ProximitySensor.SunlightCancellationEnabled);
-            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)PsSunlightCancellationState.Enabled);
-            Assert.True(vcnl4040.ProximitySensor.SunlightCancellationEnabled);
-        }
-
-        [Fact]
-        public void SunlightCancellationEnabled_Set()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            vcnl4040.ProximitySensor.SunlightCancellationEnabled = false;
-            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsScEn);
-            vcnl4040.ProximitySensor.SunlightCancellationEnabled = true;
-            Assert.Equal((byte)BitMasks.PsScEn, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsScEn);
-        }
-
-        [Fact]
-        public void Cancellation_Get()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            _testDevice.SetData(CommandCode.PS_CANC, 12345);
-            Assert.Equal(12345, vcnl4040.ProximitySensor.CancellationLevel);
-        }
-
-        [Fact]
-        public void Cancellation_Set()
-        {
-            Vcnl4040Device vcnl4040 = new(_testDevice);
-            InjectTestRegister(vcnl4040.ProximitySensor);
-            vcnl4040.ProximitySensor.CancellationLevel = 13579;
-            Assert.Equal(13579, _testDevice.GetData(CommandCode.PS_CANC));
         }
     }
 }

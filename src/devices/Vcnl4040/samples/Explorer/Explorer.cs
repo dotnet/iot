@@ -27,7 +27,6 @@ internal partial class Explorer
         _i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1,
                                                                 Vcnl4040Device.DefaultI2cAddress));
         _device = new Vcnl4040Device(_i2cDevice);
-        _device.Attach();
         _als = _device.AmbientLightSensor;
         _ps = _device.ProximitySensor;
 

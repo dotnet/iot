@@ -12,7 +12,7 @@ namespace Iot.Device.Vcnl4040.Tests
         private const int Msb = 1;
         private const int Lsb = 0;
 
-        public byte[,] Data { get; set; } = new byte[0x0c, 0x02];
+        public byte[,] Data { get; set; } = new byte[0x0d, 0x02];
 
         public override I2cConnectionSettings ConnectionSettings => throw new NotImplementedException();
 

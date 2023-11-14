@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
+using System.Device.I2c;
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 using UnitsNet;
 
@@ -23,23 +23,15 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Initializes a new instance of the <see cref="AmbientLightSensor"/> class.
         /// </summary>
-        internal AmbientLightSensor(I2cInterface i2cBus)
+        internal AmbientLightSensor(I2cDevice device)
         {
-            _alsConfRegister = new AlsConfRegister(i2cBus);
-            _alsHighInterruptThresholdRegister = new AlsHighInterruptThresholdRegister(i2cBus);
-            _alsLowInterruptThresholdRegister = new AlsLowInterruptThresholdRegister(i2cBus);
-            _alsDataRegister = new AlsDataRegister(i2cBus);
+            _alsConfRegister = new AlsConfRegister(device);
+            _alsHighInterruptThresholdRegister = new AlsHighInterruptThresholdRegister(device);
+            _alsLowInterruptThresholdRegister = new AlsLowInterruptThresholdRegister(device);
+            _alsDataRegister = new AlsDataRegister(device);
         }
 
         #region General
-
-        /// <summary>
-        /// Attaches the binding instance to an already operating device.
-        /// </summary>
-        public void Attach()
-        {
-            _localIntegrationTime = _alsConfRegister.AlsIt;
-        }
 
         /// <summary>
         /// Enables or disables the load reduction mode for the ambient light sensor.
@@ -277,42 +269,37 @@ namespace Iot.Device.Vcnl4040
         /// Bevor any setting is altered the interrupt will be implicitly disabled.
         /// It must be (re-)enabled after configuring.
         /// </summary>
-        /// <param name="lowerThreshold">Lower threshold for triggering the interrupt</param>
-        /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
-        /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
-        public void EnableInterrupts(Illuminance lowerThreshold,
-                                     Illuminance upperThreshold,
-                                     AlsInterruptPersistence persistence)
+        public void EnableInterrupts(AmbientLightInterruptConfiguration configuration)
         {
             // the maximum detection range and resolution depends on the integration time setting
             _alsConfRegister.Read();
             (Illuminance maxDetectionRange, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
 
-            if (lowerThreshold.Lux < 0 || upperThreshold.Lux < 0)
+            if (configuration.LowerThreshold.Lux < 0 || configuration.UpperThreshold.Lux < 0)
             {
-                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) and upper threshold (is: {upperThreshold}) must be positive");
+                throw new ArgumentException($"Lower threshold (is: {configuration.LowerThreshold}) and upper threshold (is: {configuration.UpperThreshold}) must be positive");
             }
 
-            if (lowerThreshold > maxDetectionRange || upperThreshold > maxDetectionRange)
+            if (configuration.LowerThreshold > maxDetectionRange || configuration.UpperThreshold > maxDetectionRange)
             {
-                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) or upper threshold (is: {upperThreshold}) must not exceed maximum range of {maxDetectionRange} lux");
+                throw new ArgumentException($"Lower threshold (is: {configuration.LowerThreshold}) or upper threshold (is: {configuration.UpperThreshold}) must not exceed maximum range of {maxDetectionRange} lux");
             }
 
-            if (lowerThreshold > upperThreshold)
+            if (configuration.LowerThreshold > configuration.UpperThreshold)
             {
-                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) must not be higher than upper threshold  (is: {upperThreshold})");
+                throw new ArgumentException($"Lower threshold (is: {configuration.LowerThreshold}) must not be higher than upper threshold  (is: {configuration.UpperThreshold})");
             }
 
             // disable interrupts before altering configuration to avoid transient side effects
             _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
             _alsConfRegister.Write();
 
-            _alsLowInterruptThresholdRegister.Threshold = (int)(lowerThreshold.Lux / resolution.Lux);
-            _alsHighInterruptThresholdRegister.Threshold = (int)(upperThreshold.Lux / resolution.Lux);
+            _alsLowInterruptThresholdRegister.Threshold = (int)(configuration.LowerThreshold.Lux / resolution.Lux);
+            _alsHighInterruptThresholdRegister.Threshold = (int)(configuration.UpperThreshold.Lux / resolution.Lux);
             _alsLowInterruptThresholdRegister.Write();
             _alsHighInterruptThresholdRegister.Write();
 
-            _alsConfRegister.AlsPers = persistence;
+            _alsConfRegister.AlsPers = configuration.Persistence;
             _alsConfRegister.AlsIntEn = AlsInterrupt.Enabled;
             _alsConfRegister.Write();
         }
@@ -320,15 +307,15 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets the interrupt configuration of the ambient light sensor
         /// </summary>
-        public (Illuminance LowerThreshold, Illuminance UpperThreshold, AlsInterruptPersistence Persistence) GetInterruptConfiguration()
+        public AmbientLightInterruptConfiguration GetInterruptConfiguration()
         {
             _alsLowInterruptThresholdRegister.Read();
             _alsHighInterruptThresholdRegister.Read();
             _alsConfRegister.Read();
             (_, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
-            return (Illuminance.FromLux(_alsLowInterruptThresholdRegister.Threshold * resolution.Lux),
-                    Illuminance.FromLux(_alsHighInterruptThresholdRegister.Threshold * resolution.Lux),
-                    _alsConfRegister.AlsPers);
+            return new(Illuminance.FromLux(_alsLowInterruptThresholdRegister.Threshold * resolution.Lux),
+                       Illuminance.FromLux(_alsHighInterruptThresholdRegister.Threshold * resolution.Lux),
+                       _alsConfRegister.AlsPers);
         }
 
         #endregion

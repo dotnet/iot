@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 using Xunit;
 
@@ -18,11 +17,10 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         public void Read(byte thresholdHighByte, byte thresholdLowByte)
         {
             var testDevice = new I2cTestDevice();
-            I2cInterface testBus = new(testDevice);
             testDevice.DataToRead.Enqueue(thresholdLowByte);
             testDevice.DataToRead.Enqueue(thresholdHighByte);
 
-            var reg = new AlsHighInterruptThresholdRegister(testBus);
+            var reg = new AlsHighInterruptThresholdRegister(testDevice);
             reg.Read();
 
             Assert.Single(testDevice.DataWritten);

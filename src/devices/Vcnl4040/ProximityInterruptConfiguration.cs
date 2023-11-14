@@ -6,9 +6,9 @@ using Iot.Device.Vcnl4040.Common.Defnitions;
 /// <summary>
 /// ...
 /// </summary>
-public record ProximityDetectionConfiguration(
+public record ProximityInterruptConfiguration(
     int LowerThreshold,
     int UpperThreshold,
     PsInterruptPersistence Persistence,
     bool SmartPersistenceEnabled,
-    ProximityDetectionMode Mode);
+    ProximityInterruptMode Mode);

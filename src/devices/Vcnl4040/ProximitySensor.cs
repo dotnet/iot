@@ -1,10 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using System.Diagnostics;
-using System.Reflection;
+using System.Device.I2c;
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 
 namespace Iot.Device.Vcnl4040
@@ -31,18 +29,18 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Initializes a new instance of the <see cref="ProximitySensor"/> API class.
         /// </summary>
-        internal ProximitySensor(I2cInterface i2cBus)
+        internal ProximitySensor(I2cDevice device)
         {
-            _psConf1Register = new PsConf1Register(i2cBus);
-            _psConf2Register = new PsConf2Register(i2cBus);
-            _psConf3Register = new PsConf3Register(i2cBus);
-            _psMsRegister = new PsMsRegister(i2cBus);
-            _psCancellationLevelRegister = new PsCancellationLevelRegister(i2cBus);
-            _psLowInterruptThresholdRegister = new PsLowInterruptThresholdRegister(i2cBus);
-            _psHighInterruptThresholdRegister = new PsHighInterruptThresholdRegister(i2cBus);
-            _psDataRegister = new PsDataRegister(i2cBus);
-            _psWhiteDataRegister = new WhiteDataRegister(i2cBus);
-            _alsConfRegister = new AlsConfRegister(i2cBus);
+            _psConf1Register = new PsConf1Register(device);
+            _psConf2Register = new PsConf2Register(device);
+            _psConf3Register = new PsConf3Register(device);
+            _psMsRegister = new PsMsRegister(device);
+            _psCancellationLevelRegister = new PsCancellationLevelRegister(device);
+            _psLowInterruptThresholdRegister = new PsLowInterruptThresholdRegister(device);
+            _psHighInterruptThresholdRegister = new PsHighInterruptThresholdRegister(device);
+            _psDataRegister = new PsDataRegister(device);
+            _psWhiteDataRegister = new WhiteDataRegister(device);
+            _alsConfRegister = new AlsConfRegister(device);
         }
 
         #region General
@@ -174,10 +172,11 @@ namespace Iot.Device.Vcnl4040
             _psMsRegister.WhiteEn = configuration.WhiteChannelEnabled ? PsWhiteChannelState.Enabled : PsWhiteChannelState.Disabled;
             _psCancellationLevelRegister.Level = configuration.CancellationLevel;
             _psConf3Register.PsScEn = configuration.SunlightCancellationEnabled ? PsSunlightCancellationState.Enabled : PsSunlightCancellationState.Disabled;
-            _psCancellationLevelRegister.Write();
+            _psConf1Register.Write();
+            _psConf2Register.Write();
             _psConf3Register.Write();
             _psMsRegister.Write();
-            _psConf2Register.Write();
+            _psCancellationLevelRegister.Write();
         }
 
         /// <summary>
@@ -186,16 +185,16 @@ namespace Iot.Device.Vcnl4040
         public ReceiverConfiguration GetReceiverConfiguration()
         {
             _psCancellationLevelRegister.Read();
-            _psConf3Register.Read();
             _psMsRegister.Read();
+            _psConf1Register.Read();
             _psConf2Register.Read();
+            _psConf3Register.Read();
 
-            return new ReceiverConfiguration(
-            _psConf1Register.PsIt,
-            _psConf2Register.PsHd == PsOutputRange.Bits16,
-            _psCancellationLevelRegister.Level,
-            _psMsRegister.WhiteEn == PsWhiteChannelState.Enabled,
-            _psConf3Register.PsScEn == PsSunlightCancellationState.Enabled);
+            return new ReceiverConfiguration(_psConf1Register.PsIt,
+                                             _psConf2Register.PsHd == PsOutputRange.Bits16,
+                                             _psCancellationLevelRegister.Level,
+                                             _psMsRegister.WhiteEn == PsWhiteChannelState.Enabled,
+                                             _psConf3Register.PsScEn == PsSunlightCancellationState.Enabled);
         }
 
         #endregion
@@ -230,7 +229,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Disables the interrupts and proximity detection mode.
         /// </summary>
-        public void DisableInterruptsAndProximityDetection()
+        public void DisableInterrupt()
         {
             _psConf2Register.Read();
             _psConf2Register.PsInt = PsInterruptMode.Disabled;
@@ -244,14 +243,31 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// ...disables proximity detection mode...
         /// </summary>
-        public void EnableProximityDetection(ProximityDetectionConfiguration configuration)
+        public void EnableInterrupt(ProximityInterruptConfiguration configuration)
         {
             // disable interrupts before altering configuration to avoid transient side effects
             _psConf2Register.Read();
             _psConf2Register.PsInt = PsInterruptMode.Disabled;
             _psConf2Register.Write();
 
-            ConfigureThresholds(configuration.LowerThreshold, configuration.UpperThreshold);
+            // Design consideration: The configured output range (12-bit or 16-bit) is not verified at this point.
+            // Even if the range is set to the default of 12-bit, threshold values above it work reliably.
+            // Therefore, the configuration of the output range and the interrupts are considered independently.
+            if (configuration.LowerThreshold < 0 || configuration.LowerThreshold > MaximumSensorCounts16Bit)
+            {
+                throw new ArgumentException($"Lower threshold (is: {configuration.LowerThreshold}) must be positive and must not exceed the maximum range of {MaximumSensorCounts16Bit} counts");
+            }
+
+            if (configuration.LowerThreshold > configuration.UpperThreshold || configuration.UpperThreshold > MaximumSensorCounts16Bit)
+            {
+                throw new ArgumentException($"Upper threshold (is: {configuration.UpperThreshold}) must be higher than the lower threshold (is: {configuration.LowerThreshold}) and must not exceed the maximum range of ({MaximumSensorCounts16Bit}) counts");
+            }
+
+            // set new thresholds
+            _psLowInterruptThresholdRegister.Threshold = configuration.LowerThreshold;
+            _psHighInterruptThresholdRegister.Threshold = configuration.UpperThreshold;
+            _psLowInterruptThresholdRegister.Write();
+            _psHighInterruptThresholdRegister.Write();
 
             // set persistence
             _psConf1Register.Read();
@@ -265,7 +281,7 @@ namespace Iot.Device.Vcnl4040
 
             // enable interrupts / proximity dectection logic output
             _psMsRegister.Read();
-            if (configuration.Mode == ProximityDetectionMode.LogicOutput)
+            if (configuration.Mode == ProximityInterruptMode.LogicOutput)
             {
                 // disable ALS interrupts
                 // (required according to datasheet, but it may work even if still enabled)
@@ -282,10 +298,10 @@ namespace Iot.Device.Vcnl4040
             // enable interrupts
             _psConf2Register.PsInt = configuration.Mode switch
             {
-                ProximityDetectionMode.CloseInterrupt => PsInterruptMode.Close,
-                ProximityDetectionMode.AwayInterrupt => PsInterruptMode.Away,
-                ProximityDetectionMode.CloseOrAwayInterrupt => PsInterruptMode.CloseOrAway,
-                ProximityDetectionMode.LogicOutput => PsInterruptMode.CloseOrAway,
+                ProximityInterruptMode.CloseInterrupt => PsInterruptMode.Close,
+                ProximityInterruptMode.AwayInterrupt => PsInterruptMode.Away,
+                ProximityInterruptMode.CloseOrAwayInterrupt => PsInterruptMode.CloseOrAway,
+                ProximityInterruptMode.LogicOutput => PsInterruptMode.CloseOrAway,
                 _ => throw new ArgumentException("Invalid mode", nameof(configuration))
             };
 
@@ -296,7 +312,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets the interrupt configuration of the proximity sensor
         /// </summary>
-        public ProximityDetectionConfiguration GetProximityDetectionConfiguration()
+        public ProximityInterruptConfiguration GetInterruptConfiguration()
         {
             _psLowInterruptThresholdRegister.Read();
             _psHighInterruptThresholdRegister.Read();
@@ -306,50 +322,28 @@ namespace Iot.Device.Vcnl4040
             _psMsRegister.Read();
             _psCancellationLevelRegister.Read();
 
-            ProximityDetectionMode mode;
+            ProximityInterruptMode mode;
             if (_psMsRegister.PsMs == PsDetectionLogicOutputMode.LogicOutput)
             {
-                mode = ProximityDetectionMode.LogicOutput;
+                mode = ProximityInterruptMode.LogicOutput;
             }
             else
             {
                 mode = _psConf2Register.PsInt switch
                 {
-                    PsInterruptMode.Disabled => ProximityDetectionMode.Nothing,
-                    PsInterruptMode.Close => ProximityDetectionMode.CloseInterrupt,
-                    PsInterruptMode.Away => ProximityDetectionMode.AwayInterrupt,
-                    PsInterruptMode.CloseOrAway => ProximityDetectionMode.CloseOrAwayInterrupt,
+                    PsInterruptMode.Disabled => ProximityInterruptMode.Nothing,
+                    PsInterruptMode.Close => ProximityInterruptMode.CloseInterrupt,
+                    PsInterruptMode.Away => ProximityInterruptMode.AwayInterrupt,
+                    PsInterruptMode.CloseOrAway => ProximityInterruptMode.CloseOrAwayInterrupt,
                     _ => throw new ArgumentException("Invalid interrupt")
                 };
             }
 
-            return new ProximityDetectionConfiguration(_psLowInterruptThresholdRegister.Threshold,
+            return new ProximityInterruptConfiguration(_psLowInterruptThresholdRegister.Threshold,
                                                        _psHighInterruptThresholdRegister.Threshold,
                                                        _psConf1Register.PsPers,
                                                        _psConf3Register.PsSmartPers == PsSmartPersistenceState.Enabled,
                                                        mode);
-        }
-
-        private void ConfigureThresholds(int lowerThreshold, int upperThreshold)
-        {
-            // Design consideration: The configured output range (12-bit or 16-bit) is not verified at this point.
-            // Even if the range is set to the default of 12-bit, threshold values above it work reliably.
-            // Therefore, the configuration of the output range and the interrupts are considered independently.
-            if (lowerThreshold < 0 || lowerThreshold > MaximumSensorCounts16Bit)
-            {
-                throw new ArgumentException($"Lower threshold (is: {lowerThreshold}) must be positive and must not exceed the maximum range of {MaximumSensorCounts16Bit} counts");
-            }
-
-            if (lowerThreshold > upperThreshold || upperThreshold > MaximumSensorCounts16Bit)
-            {
-                throw new ArgumentException($"Upper threshold (is: {upperThreshold}) must be higher than the lower threshold (is: {lowerThreshold}) and must not exceed the maximum range of ({MaximumSensorCounts16Bit}) counts");
-            }
-
-            // set new thresholds
-            _psLowInterruptThresholdRegister.Threshold = lowerThreshold;
-            _psHighInterruptThresholdRegister.Threshold = upperThreshold;
-            _psLowInterruptThresholdRegister.Write();
-            _psHighInterruptThresholdRegister.Write();
         }
         #endregion
     }

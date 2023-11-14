@@ -25,10 +25,10 @@ internal partial class Explorer
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Show configuration", Action = ShowPsConfiguration, ShowConfiguration = false },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure emitter", Action = ConfigureEmitter },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure receiver", Action = ConfigureReceiver },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disbale active force mode", Action = EnableDisableActiveForceMode },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable active force mode", Action = EnableDisableActiveForceMode },
 
-            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts / proximity detection", Action = EnablePsInterruptsOrProximityDetectionMode },
-            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts / proximity detection", Action = _ps.DisableInterruptsAndProximityDetection },
+            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts", Action = EnableProximitInterrupts },
+            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts", Action = _ps.DisableInterrupt },
 
             new Command() { Section = MenuPs, Category = MenuOthers, Name = "Proximity LED Display", Action = ProximityLedDisplay, ShowConfiguration = false },
         });
@@ -149,7 +149,7 @@ internal partial class Explorer
     {
         EmitterConfiguration emitterConfiguration = _ps.GetEmitterConfiguration();
         ReceiverConfiguration receiverConfiguration = _ps.GetReceiverConfiguration();
-        ProximityDetectionConfiguration proximityDetectionConfiguration = _ps.GetProximityDetectionConfiguration();
+        ProximityInterruptConfiguration proximityDetectionConfiguration = _ps.GetInterruptConfiguration();
 
         Console.WriteLine("PS configuration:");
         Console.WriteLine($"  Power state:              {_ps.PowerOn}");
@@ -163,7 +163,7 @@ internal partial class Explorer
         Console.WriteLine($"  Cancellation level:       {receiverConfiguration.CancellationLevel}");
         Console.WriteLine($"  White channel:            {receiverConfiguration.WhiteChannelEnabled}");
         Console.WriteLine($"  Sunlight cancellation:    {receiverConfiguration.SunlightCancellationEnabled}");
-        Console.WriteLine("  Proximity detection (interrupts/logic output)");
+        Console.WriteLine("  Interrupts");
         Console.WriteLine($"    Enabled:                {_ps.InterruptEnabled}");
         Console.WriteLine($"    Lower threshold:        {proximityDetectionConfiguration.LowerThreshold}");
         Console.WriteLine($"    Upper threshold:        {proximityDetectionConfiguration.UpperThreshold}");
@@ -258,9 +258,9 @@ internal partial class Explorer
         _ps.ActiveForceMode = choice == YesNoChoice.Yes;
     }
 
-    private void EnablePsInterruptsOrProximityDetectionMode()
+    private void EnableProximitInterrupts()
     {
-        ProximityDetectionConfiguration currentConfiguration = _ps.GetProximityDetectionConfiguration();
+        ProximityInterruptConfiguration currentConfiguration = _ps.GetInterruptConfiguration();
 
         int lowerThreshold;
         int upperThreshold = 0;
@@ -271,34 +271,34 @@ internal partial class Explorer
             && PromptIntegerValue("Upper threshold [0 - 65535]", out upperThreshold, currentConfiguration.UpperThreshold, lowerThreshold, 65535)
             && PromptEnum("Persistence", out persistence, currentConfiguration.Persistence)
             && PromptYesNoChoice("Enable smart persistence", out smartPersistenceEnabled, currentConfiguration.SmartPersistenceEnabled)
-            && PromptYesNoChoice("Enable logic output mode", out logicOutputModeEnabled, currentConfiguration.Mode == ProximityDetectionMode.LogicOutput);
+            && PromptYesNoChoice("Enable logic output mode", out logicOutputModeEnabled, currentConfiguration.Mode == ProximityInterruptMode.LogicOutput);
 
         if (!result)
         {
             return;
         }
 
-        ProximityDetectionMode mode = ProximityDetectionMode.Nothing;
+        ProximityInterruptMode mode = ProximityInterruptMode.Nothing;
         if (logicOutputModeEnabled)
         {
-            mode = ProximityDetectionMode.LogicOutput;
+            mode = ProximityInterruptMode.LogicOutput;
         }
         else
         {
             bool awayEventEnabled = false;
-            result = PromptYesNoChoice("Enable close proximity event", out bool closeEventEnabled, currentConfiguration.Mode == ProximityDetectionMode.CloseInterrupt || currentConfiguration.Mode == ProximityDetectionMode.CloseOrAwayInterrupt)
-                 && PromptYesNoChoice("Enable away proximity event", out awayEventEnabled, currentConfiguration.Mode == ProximityDetectionMode.AwayInterrupt || currentConfiguration.Mode == ProximityDetectionMode.CloseOrAwayInterrupt);
+            result = PromptYesNoChoice("Enable close proximity event", out bool closeEventEnabled, currentConfiguration.Mode == ProximityInterruptMode.CloseInterrupt || currentConfiguration.Mode == ProximityInterruptMode.CloseOrAwayInterrupt)
+                 && PromptYesNoChoice("Enable away proximity event", out awayEventEnabled, currentConfiguration.Mode == ProximityInterruptMode.AwayInterrupt || currentConfiguration.Mode == ProximityInterruptMode.CloseOrAwayInterrupt);
 
             if (!result)
             {
                 return;
             }
 
-            mode = awayEventEnabled && closeEventEnabled ? ProximityDetectionMode.CloseOrAwayInterrupt :
-            awayEventEnabled ? ProximityDetectionMode.AwayInterrupt : closeEventEnabled ? ProximityDetectionMode.CloseInterrupt : ProximityDetectionMode.Nothing;
+            mode = awayEventEnabled && closeEventEnabled ? ProximityInterruptMode.CloseOrAwayInterrupt :
+            awayEventEnabled ? ProximityInterruptMode.AwayInterrupt : closeEventEnabled ? ProximityInterruptMode.CloseInterrupt : ProximityInterruptMode.Nothing;
         }
 
-        if (mode == ProximityDetectionMode.Nothing)
+        if (mode == ProximityInterruptMode.Nothing)
         {
             Console.WriteLine("No interrupt event or proximity detection have been enabled");
             return;
@@ -307,13 +307,13 @@ internal partial class Explorer
         Console.WriteLine($"{logicOutputModeEnabled}");
         Console.WriteLine($"{mode}");
 
-        ProximityDetectionConfiguration configuration = new(
+        ProximityInterruptConfiguration configuration = new(
             lowerThreshold,
             upperThreshold,
             persistence,
             smartPersistenceEnabled,
             mode);
-        _ps.EnableProximityDetection(configuration);
+        _ps.EnableInterrupt(configuration);
     }
 
     private class Command

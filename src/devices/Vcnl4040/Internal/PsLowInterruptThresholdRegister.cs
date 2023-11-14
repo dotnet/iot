@@ -1,8 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Device.I2c;
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 
 namespace Iot.Device.Vcnl4040.Internal
 {
@@ -13,8 +13,8 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class PsLowInterruptThresholdRegister : InterruptThresholdRegister
     {
-        public PsLowInterruptThresholdRegister(I2cInterface bus)
-            : base(CommandCode.PS_THDL, bus)
+        public PsLowInterruptThresholdRegister(I2cDevice device)
+            : base(CommandCode.PS_THDL, device)
         {
         }
     }

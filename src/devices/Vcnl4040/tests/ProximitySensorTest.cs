@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Reflection;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -20,7 +19,6 @@ namespace Iot.Device.Vcnl4040.Tests
         private readonly WhiteDataRegister _psWhiteDataRegister;
         private readonly AlsConfRegister _alsConfRegister;
         private readonly Vcnl4040TestDevice _testDevice = new();
-        private readonly I2cInterface _testBus;
 
         private static FieldInfo GetFieldInfoOrThrow(object instance, string fieldName) =>
             instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)
@@ -28,17 +26,16 @@ namespace Iot.Device.Vcnl4040.Tests
 
         public ProximitySensorTest()
         {
-            _testBus = new(_testDevice);
-            _psConf1Register = new(_testBus);
-            _psConf2Register = new(_testBus);
-            _psConf3Register = new(_testBus);
-            _psMsRegister = new(_testBus);
-            _psCancellationLevelRegister = new(_testBus);
-            _psLowInterruptThresholdRegister = new(_testBus);
-            _psHighInterruptThresholdRegister = new(_testBus);
-            _psDataRegister = new(_testBus);
-            _psWhiteDataRegister = new(_testBus);
-            _alsConfRegister = new(_testBus);
+            _psConf1Register = new(_testDevice);
+            _psConf2Register = new(_testDevice);
+            _psConf3Register = new(_testDevice);
+            _psMsRegister = new(_testDevice);
+            _psCancellationLevelRegister = new(_testDevice);
+            _psLowInterruptThresholdRegister = new(_testDevice);
+            _psHighInterruptThresholdRegister = new(_testDevice);
+            _psDataRegister = new(_testDevice);
+            _psWhiteDataRegister = new(_testDevice);
+            _alsConfRegister = new(_testDevice);
         }
 
         private void InjectTestRegister(ProximitySensor ps)

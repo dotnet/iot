@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Reflection;
-using Iot.Device.Vcnl4040.Infrastructure;
+using Iot.Device.Vcnl4040.Internal;
 using Xunit;
 
 namespace Iot.Device.Vcnl4040.Tests.Internal
@@ -29,7 +29,6 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
             where TReg : Register
         {
             var testDevice = new I2cTestDevice();
-            I2cInterface testBus = new(testDevice);
             // enqueue data for initial read operation to load register with device data
             testDevice.DataToRead.Enqueue(initialRegisterLowByte);
             testDevice.DataToRead.Enqueue(initialRegisterHighByte);
@@ -42,7 +41,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
             }
 
             // Instantiate the class, reead register from device, set the property and write back to device
-            TReg reg = (TReg)Activator.CreateInstance(typeof(TReg), testBus)!;
+            TReg reg = (TReg)Activator.CreateInstance(typeof(TReg), testDevice)!;
             reg.Read();
 
             PropertyInfo property = typeof(TReg).GetProperty(registerPropertyName)!;

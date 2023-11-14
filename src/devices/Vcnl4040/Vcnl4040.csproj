@@ -34,7 +34,6 @@
     <Compile Include="Common\Defnitions\PowerState.cs" />
     <Compile Include="Common\Defnitions\AlsInterrupt.cs" />
     <Compile Include="Common\Defnitions\AlsInterruptPersistence.cs" />
-    <Compile Include="Infrastructure\I2cInterface.cs" />
     <Compile Include="Internal\InterruptFlagRegister.cs" />
     <Compile Include="Internal\WhiteDataRegister.cs" />
     <Compile Include="Internal\PsCancellationLevelRegister.cs" />
@@ -54,7 +53,7 @@
     <Compile Include="Internal\Register.cs" />
     <Compile Include="Common\Defnitions\CommandCode.cs" />
     <Compile Include="Common\Defnitions\BitMasks.cs" />
-    <Compile Include="Common\Defnitions\ProximityDetectionMode.cs" />
+    <Compile Include="Common\Defnitions\ProximityInterruptMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 using Xunit;
 
@@ -35,13 +34,12 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         public void Read(byte regsiterData, PowerState powerState, PsIntegrationTime integrationTime, PsInterruptPersistence persistence, PsDuty duty)
         {
             var testDevice = new I2cTestDevice();
-            I2cInterface testBus = new(testDevice);
             // low byte
             testDevice.DataToRead.Enqueue(regsiterData);
             // high byte (not relevant)
             testDevice.DataToRead.Enqueue(0x00);
 
-            var reg = new PsConf1Register(testBus);
+            var reg = new PsConf1Register(testDevice);
             reg.Read();
 
             Assert.Single(testDevice.DataWritten);
@@ -171,7 +169,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         [Fact]
         public void CheckRegisterDefaults()
         {
-            var reg = new PsConf1Register(new I2cInterface(new I2cTestDevice()));
+            var reg = new PsConf1Register(new I2cTestDevice());
             Assert.Equal(PowerState.PowerOff, reg.PsSd);
             Assert.Equal(PsIntegrationTime.Time1_0, reg.PsIt);
             Assert.Equal(PsInterruptPersistence.Persistence1, reg.PsPers);

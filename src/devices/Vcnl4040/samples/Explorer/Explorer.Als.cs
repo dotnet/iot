@@ -68,9 +68,7 @@ internal partial class Explorer
 
     private void ShowAlsConfiguration()
     {
-        (Illuminance lowerThreshold,
-         Illuminance upperThreshold,
-         AlsInterruptPersistence persistence) = _als.GetInterruptConfiguration();
+        AmbientLightInterruptConfiguration configuration = _als.GetInterruptConfiguration();
 
         Console.WriteLine("ALS configuration:");
         Console.WriteLine($"  Power state:         {_als.PowerOn}");
@@ -80,9 +78,9 @@ internal partial class Explorer
         Console.WriteLine($"    Resolution:          {_als.Resolution}");
         Console.WriteLine("  Interrupts");
         Console.WriteLine($"    Enabled:           {(_als.InterruptEnabled ? "yes" : "no")}");
-        Console.WriteLine($"    Lower threshold:   {lowerThreshold}");
-        Console.WriteLine($"    Upper threshold :  {upperThreshold}");
-        Console.WriteLine($"    Persistence:       {persistence}");
+        Console.WriteLine($"    Lower threshold:   {configuration.LowerThreshold}");
+        Console.WriteLine($"    Upper threshold :  {configuration.UpperThreshold}");
+        Console.WriteLine($"    Persistence:       {configuration.Persistence}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
     }
@@ -171,6 +169,6 @@ internal partial class Explorer
             return;
         }
 
-        _als.EnableInterrupts(Illuminance.FromLux(lowerThreshold), Illuminance.FromLux(upperThreshold), persistence);
+        _als.EnableInterrupts(new AmbientLightInterruptConfiguration(Illuminance.FromLux(lowerThreshold), Illuminance.FromLux(upperThreshold), persistence));
     }
 }

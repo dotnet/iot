@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 using Xunit;
 
@@ -29,13 +28,12 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         public void Read(byte registerData, PsLedCurrent current, PsDetectionLogicOutputMode outputMode, PsWhiteChannelState whiteChannel)
         {
             var testDevice = new I2cTestDevice();
-            I2cInterface testBus = new(testDevice);
             // low byte (not relevant)
             testDevice.DataToRead.Enqueue(0x00);
             // high byte
             testDevice.DataToRead.Enqueue(registerData);
 
-            var reg = new PsMsRegister(testBus);
+            var reg = new PsMsRegister(testDevice);
             reg.Read();
 
             Assert.Single(testDevice.DataWritten);
@@ -132,7 +130,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         [Fact]
         public void CheckRegisterDefaults()
         {
-            var reg = new PsMsRegister(new I2cInterface(new I2cTestDevice()));
+            var reg = new PsMsRegister(new I2cTestDevice());
             Assert.Equal(PsLedCurrent.I50mA, reg.LedI);
             Assert.Equal(PsDetectionLogicOutputMode.Interrupt, reg.PsMs);
             Assert.Equal(PsWhiteChannelState.Enabled, reg.WhiteEn);

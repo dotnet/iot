@@ -2,8 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device.I2c;
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 
 namespace Iot.Device.Vcnl4040.Internal
 {
@@ -20,8 +20,8 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// Initializes a new instance of the <see cref="WhiteDataRegister"/> class.
         /// </summary>
-        public WhiteDataRegister(I2cInterface bus)
-            : base(CommandCode.White_Data, bus)
+        public WhiteDataRegister(I2cDevice device)
+            : base(CommandCode.White_Data, device)
         {
         }
 

@@ -6,7 +6,7 @@ namespace Iot.Device.Vcnl4040.Common.Defnitions
     /// <summary>
     /// ...
     /// </summary>
-    public enum ProximityDetectionMode
+    public enum ProximityInterruptMode
     {
         /// <summary>
         ///

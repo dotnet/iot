@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using Iot.Device.Vcnl4040.Common.Defnitions;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 using Xunit;
 
@@ -23,13 +22,12 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         public void Read(byte registerData, PsInterruptMode interruptMode, PsOutputRange range)
         {
             var testDevice = new I2cTestDevice();
-            I2cInterface testBus = new(testDevice);
             // low byte (not relevant)
             testDevice.DataToRead.Enqueue(0x00);
             // high byte
             testDevice.DataToRead.Enqueue(registerData);
 
-            var reg = new PsConf2Register(testBus);
+            var reg = new PsConf2Register(testDevice);
             reg.Read();
 
             Assert.Single(testDevice.DataWritten);
@@ -95,7 +93,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         [Fact]
         public void CheckRegisterDefaults()
         {
-            var reg = new PsConf2Register(new I2cInterface(new I2cTestDevice()));
+            var reg = new PsConf2Register(new I2cTestDevice());
             Assert.Equal(PsInterruptMode.Disabled, reg.PsInt);
             Assert.Equal(PsOutputRange.Bits12, reg.PsHd);
         }

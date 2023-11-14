@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Reflection;
-using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -14,7 +13,6 @@ namespace Iot.Device.Vcnl4040.Tests
         private readonly AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
         private readonly AlsDataRegister _alsDataRegister;
         private readonly Vcnl4040TestDevice _testDevice = new();
-        private readonly I2cInterface _testBus;
 
         private static FieldInfo GetFieldInfoOrThrow(object instance, string fieldName) =>
             instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)
@@ -22,11 +20,10 @@ namespace Iot.Device.Vcnl4040.Tests
 
         public AmbientLightSensorTest()
         {
-            _testBus = new(_testDevice);
-            _alsConfRegister = new(_testBus);
-            _alsHighInterruptThresholdRegister = new(_testBus);
-            _alsLowInterruptThresholdRegister = new(_testBus);
-            _alsDataRegister = new(_testBus);
+            _alsConfRegister = new(_testDevice);
+            _alsHighInterruptThresholdRegister = new(_testDevice);
+            _alsLowInterruptThresholdRegister = new(_testDevice);
+            _alsDataRegister = new(_testDevice);
         }
 
         private void InjectTestRegister(AmbientLightSensor als)
