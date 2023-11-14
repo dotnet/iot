@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
+using System.Diagnostics;
+using System.Reflection;
 using Iot.Device.Vcnl4040.Common.Defnitions;
 using Iot.Device.Vcnl4040.Infrastructure;
 using Iot.Device.Vcnl4040.Internal;
@@ -46,14 +48,6 @@ namespace Iot.Device.Vcnl4040
         #region General
 
         /// <summary>
-        /// Attaches the binding instance to an already operating device.
-        /// </summary>
-        public void Attach()
-        {
-            _activeForceModeEnabled = ActiveForceMode;
-        }
-
-        /// <summary>
         /// Get or sets the power state (power on, shutdown) of the proximity sensor.
         /// </summary>
         public bool PowerOn
@@ -75,6 +69,28 @@ namespace Iot.Device.Vcnl4040
 
                 _psConf1Register.PsSd = value ? PowerState.PowerOn : PowerState.PowerOff;
                 _psConf1Register.Write();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the state of the active force mode.
+        /// If set to true, the active force mode is activated; otherwise it is deactivated.
+        /// IN POWER SAVE UMBENENNEN?
+        /// </summary>
+        public bool ActiveForceMode
+        {
+            get
+            {
+                _psConf3Register.Read();
+                _activeForceModeEnabled = _psConf3Register.PsAf == PsActiveForceMode.Enabled;
+                return _activeForceModeEnabled;
+            }
+
+            set
+            {
+                _psConf3Register.PsAf = value ? PsActiveForceMode.Enabled : PsActiveForceMode.Disabled;
+                _psConf3Register.Write();
+                _activeForceModeEnabled = value;
             }
         }
         #endregion
@@ -120,191 +136,66 @@ namespace Iot.Device.Vcnl4040
         #region Configuration
 
         /// <summary>
-        /// Gets or sets the IR LED duty ratio.
+        /// Configures the IR led emitter.
         /// </summary>
-        public PsDuty DutyRatio
+        public void ConfigureEmitter(EmitterConfiguration configuration)
         {
-            get
-            {
-                _psConf1Register.Read();
-                return _psConf1Register.PsDuty;
-            }
+            _psMsRegister.LedI = configuration.Current;
+            _psConf1Register.PsDuty = configuration.DutyRatio;
+            _psConf3Register.PsMps = configuration.MultiPulses;
 
-            set
-            {
-                _psConf1Register.PsDuty = value;
-                _psConf1Register.Write();
-            }
+            _psConf1Register.Write();
+            _psConf3Register.Write();
+            _psMsRegister.Write();
         }
 
         /// <summary>
-        /// Gets or sets the IR LED current.
+        /// Gets the current emitter configuration from the device.
         /// </summary>
-        public PsLedCurrent LedCurrent
+        public EmitterConfiguration GetEmitterConfiguration()
         {
-            get
-            {
-                _psMsRegister.Read();
-                return _psMsRegister.LedI;
-            }
+            _psConf1Register.Read();
+            _psConf3Register.Read();
+            _psMsRegister.Read();
 
-            set
-            {
-                _psMsRegister.LedI = value;
-                _psMsRegister.Write();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the integration time.
-        /// </summary>
-        public PsIntegrationTime IntegrationTime
-        {
-            get
-            {
-                _psConf1Register.Read();
-                return _psConf1Register.PsIt;
-            }
-
-            set
-            {
-                _psConf1Register.PsIt = value;
-                _psConf1Register.Write();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the extended sensor output range state.
-        /// If set to false, the range is at the 12-bit default.
-        /// If set to true, the range is extended to 16-bit.
-        /// </summary>
-        public bool ExtendedOutputRange
-        {
-            get
-            {
-                _psConf2Register.Read();
-                return _psConf2Register.PsHd == PsOutputRange.Bits16;
-            }
-
-            set
-            {
-                _psConf2Register.PsHd = value ? PsOutputRange.Bits16 : PsOutputRange.Bits12;
-                _psConf2Register.Write();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the state of the active force mode.
-        /// If set to true, the active force mode is activated; otherwise it is deactivated.
-        /// </summary>
-        public bool ActiveForceMode
-        {
-            get
-            {
-                _psConf3Register.Read();
-                _activeForceModeEnabled = _psConf3Register.PsAf == PsActiveForceMode.Enabled;
-                return _activeForceModeEnabled;
-            }
-
-            set
-            {
-                _psConf3Register.PsAf = value ? PsActiveForceMode.Enabled : PsActiveForceMode.Disabled;
-                _psConf3Register.Write();
-                _activeForceModeEnabled = value;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the white channel enabled state
-        /// </summary>
-        public bool WhiteChannelEnabled
-        {
-            get
-            {
-                _psMsRegister.Read();
-                return _psMsRegister.WhiteEn == PsWhiteChannelState.Enabled;
-            }
-            set
-            {
-                _psMsRegister.WhiteEn = value ? PsWhiteChannelState.Enabled : PsWhiteChannelState.Disabled;
-                _psMsRegister.Write();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the number of multi pulses.
-        /// </summary>
-        public PsMultiPulse MultiPulses
-        {
-            get
-            {
-                _psConf3Register.Read();
-                return _psConf3Register.PsMps;
-            }
-
-            set
-            {
-                _psConf3Register.PsMps = value;
-                _psConf3Register.Write();
-            }
-        }
-
-        /// <summary>
-        /// Enables/disables the sunligh cancellation
-        /// </summary>
-        public bool SunlightCancellationEnabled
-        {
-            get
-            {
-                _psConf3Register.Read();
-                return _psConf3Register.PsScEn == PsSunlightCancellationState.Enabled;
-            }
-
-            set
-            {
-                _psConf3Register.PsScEn = value ? PsSunlightCancellationState.Enabled : PsSunlightCancellationState.Disabled;
-                _psConf3Register.Write();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the cancellation level for the interrupt thresholds
-        /// </summary>
-        public int CancellationLevel
-        {
-            get
-            {
-                _psCancellationLevelRegister.Read();
-                return _psCancellationLevelRegister.Level;
-            }
-
-            set
-            {
-                _psCancellationLevelRegister.Level = value;
-                _psCancellationLevelRegister.Write();
-            }
-        }
-
-        /// <summary>
-        /// Configures the IR led emitter
-        /// </summary>
-        /// <param name="current">...</param>
-        /// <param name="dutyRation">...</param>
-        /// <param name="multiPulses">...</param>
-        public void ConfigureEmitter(PsLedCurrent current, PsDuty dutyRation, PsMultiPulse multiPulses)
-        {
+            return new EmitterConfiguration(
+                _psMsRegister.LedI,
+                _psConf1Register.PsDuty,
+                _psConf3Register.PsMps);
         }
 
         /// <summary>
         /// Configures the IR receiver.
         /// </summary>
-        /// <param name="integrationTime">...</param>
-        /// <param name="extendedOutputRange">...</param>
-        /// <param name="cancellationLevel">...</param>
-        /// <param name="whiteChannelEnabled">...</param>
-        /// <param name="sunlightCancellationEnabled">...</param>
-        public void ConfigureReceiver(PsIntegrationTime integrationTime, bool extendedOutputRange, int cancellationLevel, bool whiteChannelEnabled, bool sunlightCancellationEnabled)
+        public void ConfigureReceiver(ReceiverConfiguration configuration)
         {
+            _psConf1Register.PsIt = configuration.IntegrationTime;
+            _psConf2Register.PsHd = configuration.ExtendedOutputRange ? PsOutputRange.Bits16 : PsOutputRange.Bits12;
+            _psMsRegister.WhiteEn = configuration.WhiteChannelEnabled ? PsWhiteChannelState.Enabled : PsWhiteChannelState.Disabled;
+            _psCancellationLevelRegister.Level = configuration.CancellationLevel;
+            _psConf3Register.PsScEn = configuration.SunlightCancellationEnabled ? PsSunlightCancellationState.Enabled : PsSunlightCancellationState.Disabled;
+            _psCancellationLevelRegister.Write();
+            _psConf3Register.Write();
+            _psMsRegister.Write();
+            _psConf2Register.Write();
+        }
+
+        /// <summary>
+        /// Gets the current receiver configuration from the device.
+        /// </summary>
+        public ReceiverConfiguration GetReceiverConfiguration()
+        {
+            _psCancellationLevelRegister.Read();
+            _psConf3Register.Read();
+            _psMsRegister.Read();
+            _psConf2Register.Read();
+
+            return new ReceiverConfiguration(
+            _psConf1Register.PsIt,
+            _psConf2Register.PsHd == PsOutputRange.Bits16,
+            _psCancellationLevelRegister.Level,
+            _psMsRegister.WhiteEn == PsWhiteChannelState.Enabled,
+            _psConf3Register.PsScEn == PsSunlightCancellationState.Enabled);
         }
 
         #endregion
@@ -327,7 +218,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets whether the proximity detection logic output mode is enabled.
         /// </summary>
-        public bool ProximityDetecionModeEnabled
+        public bool LogicOutputModeEnabled
         {
             get
             {
@@ -353,72 +244,90 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// ...disables proximity detection mode...
         /// </summary>
-        /// <param name="lowerThreshold">Lower threshold for triggering the interrupt</param>
-        /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
-        /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
-        /// <param name="mode">Interrupt mode</param>
-        /// <param name="enableSmartPersistence">Enable smart persistence</param>
-        public void EnableInterrupts(int lowerThreshold,
-                                     int upperThreshold,
-                                     PsInterruptPersistence persistence,
-                                     PsInterruptMode mode,
-                                     bool enableSmartPersistence)
+        public void EnableProximityDetection(ProximityDetectionConfiguration configuration)
         {
             // disable interrupts before altering configuration to avoid transient side effects
             _psConf2Register.Read();
             _psConf2Register.PsInt = PsInterruptMode.Disabled;
             _psConf2Register.Write();
 
-            ConfigureThresholds(lowerThreshold, upperThreshold);
-
-            _psMsRegister.Read();
-            _psMsRegister.PsMs = PsDetectionLogicOutputMode.Interrupt;
-            _psMsRegister.Write();
+            ConfigureThresholds(configuration.LowerThreshold, configuration.UpperThreshold);
 
             // set persistence
             _psConf1Register.Read();
-            _psConf1Register.PsPers = persistence;
+            _psConf1Register.PsPers = configuration.Persistence;
             _psConf1Register.Write();
 
             // set smart persistence
             _psConf3Register.Read();
-            _psConf3Register.PsSmartPers = enableSmartPersistence ? PsSmartPersistenceState.Enabled : PsSmartPersistenceState.Disabled;
+            _psConf3Register.PsSmartPers = configuration.SmartPersistenceEnabled ? PsSmartPersistenceState.Enabled : PsSmartPersistenceState.Disabled;
             _psConf3Register.Write();
 
+            // enable interrupts / proximity dectection logic output
+            _psMsRegister.Read();
+            if (configuration.Mode == ProximityDetectionMode.LogicOutput)
+            {
+                // disable ALS interrupts
+                // (required according to datasheet, but it may work even if still enabled)
+                _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
+                _alsConfRegister.Write();
+
+                _psMsRegister.PsMs = PsDetectionLogicOutputMode.LogicOutput;
+            }
+            else
+            {
+                _psMsRegister.PsMs = PsDetectionLogicOutputMode.Interrupt;
+            }
+
             // enable interrupts
-            _psConf2Register.PsInt = mode;
+            _psConf2Register.PsInt = configuration.Mode switch
+            {
+                ProximityDetectionMode.CloseInterrupt => PsInterruptMode.Close,
+                ProximityDetectionMode.AwayInterrupt => PsInterruptMode.Away,
+                ProximityDetectionMode.CloseOrAwayInterrupt => PsInterruptMode.CloseOrAway,
+                ProximityDetectionMode.LogicOutput => PsInterruptMode.CloseOrAway,
+                _ => throw new ArgumentException("Invalid mode", nameof(configuration))
+            };
+
+            _psMsRegister.Write();
             _psConf2Register.Write();
         }
 
         /// <summary>
-        /// ....interrupts are not available in this mode (incl. ALS interrupts)
+        /// Gets the interrupt configuration of the proximity sensor
         /// </summary>
-        /// <param name="lowerThreshold">Lower threshold for triggering the interrupt</param>
-        /// <param name="upperThreshold">Upper threshold for triggering the interrupt</param>
-        /// <param name="persistence">Amount of consecutive hits needed for triggering the interrupt</param>
-        public void EnableProximityDetectionMode(int lowerThreshold,
-                                                 int upperThreshold,
-                                                 PsInterruptPersistence persistence)
+        public ProximityDetectionConfiguration GetProximityDetectionConfiguration()
         {
-            // disable interrupts before altering configuration to avoid transient side effects
-            _psConf2Register.Read();
-            _psConf2Register.PsInt = PsInterruptMode.Disabled;
-            _psConf2Register.Write();
-
-            ConfigureThresholds(lowerThreshold, upperThreshold);
-
-            // set persistence
+            _psLowInterruptThresholdRegister.Read();
+            _psHighInterruptThresholdRegister.Read();
             _psConf1Register.Read();
-            _psConf1Register.PsPers = persistence;
-            _psConf1Register.Write();
-
-            // enable interrupts
-            _psConf2Register.PsInt = PsInterruptMode.CloseOrAway;
-            _psConf2Register.Write();
-
+            _psConf2Register.Read();
+            _psConf3Register.Read();
             _psMsRegister.Read();
-            _psMsRegister.PsMs = PsDetectionLogicOutputMode.LogicOutput;
-            _psMsRegister.Write();
+            _psCancellationLevelRegister.Read();
+
+            ProximityDetectionMode mode;
+            if (_psMsRegister.PsMs == PsDetectionLogicOutputMode.LogicOutput)
+            {
+                mode = ProximityDetectionMode.LogicOutput;
+            }
+            else
+            {
+                mode = _psConf2Register.PsInt switch
+                {
+                    PsInterruptMode.Disabled => ProximityDetectionMode.Nothing,
+                    PsInterruptMode.Close => ProximityDetectionMode.CloseInterrupt,
+                    PsInterruptMode.Away => ProximityDetectionMode.AwayInterrupt,
+                    PsInterruptMode.CloseOrAway => ProximityDetectionMode.CloseOrAwayInterrupt,
+                    _ => throw new ArgumentException("Invalid interrupt")
+                };
+            }
+
+            return new ProximityDetectionConfiguration(_psLowInterruptThresholdRegister.Threshold,
+                                                       _psHighInterruptThresholdRegister.Threshold,
+                                                       _psConf1Register.PsPers,
+                                                       _psConf3Register.PsSmartPers == PsSmartPersistenceState.Enabled,
+                                                       mode);
         }
 
         private void ConfigureThresholds(int lowerThreshold, int upperThreshold)
@@ -441,30 +350,6 @@ namespace Iot.Device.Vcnl4040
             _psHighInterruptThresholdRegister.Threshold = upperThreshold;
             _psLowInterruptThresholdRegister.Write();
             _psHighInterruptThresholdRegister.Write();
-        }
-
-        /// <summary>
-        /// Gets the interrupt configuration of the proximity sensor
-        /// </summary>
-        public (int LowerThreshold,
-                int UpperThreshold,
-                PsInterruptPersistence Persistence,
-                PsInterruptMode Mode,
-                bool SmartPersistenceEnabled,
-                int CancellationLevel) GetInterruptConfiguration()
-        {
-            _psLowInterruptThresholdRegister.Read();
-            _psHighInterruptThresholdRegister.Read();
-            _psConf1Register.Read();
-            _psConf2Register.Read();
-            _psConf3Register.Read();
-            _psCancellationLevelRegister.Read();
-            return (_psLowInterruptThresholdRegister.Threshold,
-                    _psHighInterruptThresholdRegister.Threshold,
-                    _psConf1Register.PsPers,
-                    _psConf2Register.PsInt,
-                    _psConf3Register.PsSmartPers == PsSmartPersistenceState.Enabled,
-                    _psCancellationLevelRegister.Level);
         }
         #endregion
     }

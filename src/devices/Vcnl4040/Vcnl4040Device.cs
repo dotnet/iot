@@ -95,7 +95,6 @@ namespace Iot.Device.Vcnl4040
         public void Attach()
         {
             AmbientLightSensor.Attach();
-            ProximitySensor.Attach();
         }
 
         /// <inheritdoc />

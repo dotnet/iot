@@ -3,6 +3,8 @@
 using System;
 using System.Device.Spi;
 using System.Drawing;
+using System.Reflection;
+using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Common.Defnitions;
@@ -21,20 +23,14 @@ internal partial class Explorer
             new Command() { Section = MenuPs, Category = MenuGeneral, Name = "Set power state", Action = SetPsPowerState },
 
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Show configuration", Action = ShowPsConfiguration, ShowConfiguration = false },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure IR LED", Action = ConfigureIrLed },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set integration time", Action = SetPsIntegrationTime },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set multi pulses", Action = SetMultiPulses },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set cancellation level", Action = SetCancellationLevel },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Set extended range mode", Action = SetExtendedRange },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure emitter", Action = ConfigureEmitter },
+            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure receiver", Action = ConfigureReceiver },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disbale active force mode", Action = EnableDisableActiveForceMode },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable white channel", Action = EnableDisableWhiteChannel },
-            new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable sunlight cancellation", Action = () => SetProperyEnum<YesNoChoice>("Enable sunlight cancellation", choice => _ps.SunlightCancellationEnabled = choice == YesNoChoice.Yes) },
 
             new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts / proximity detection", Action = EnablePsInterruptsOrProximityDetectionMode },
             new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts / proximity detection", Action = _ps.DisableInterruptsAndProximityDetection },
 
             new Command() { Section = MenuPs, Category = MenuOthers, Name = "Proximity LED Display", Action = ProximityLedDisplay, ShowConfiguration = false },
-
         });
     }
 
@@ -57,6 +53,8 @@ internal partial class Explorer
         int psAwayIntDisplayCount = 0;
         int psCloseIntDisplayCount = 0;
 
+        ReceiverConfiguration receiverConfiguration = _ps.GetReceiverConfiguration();
+
         Console.WriteLine("Proximity:");
         while (!Console.KeyAvailable)
         {
@@ -71,7 +69,7 @@ internal partial class Explorer
                 intFlagsInfo = $"{(psCloseIntDisplayCount > 0 ? "*" : "-")} / {(psAwayIntDisplayCount > 0 ? "*" : "-")}";
             }
 
-            PrintBarGraph(reading, _ps.ExtendedOutputRange ? 65535 : 4095, intFlagsInfo);
+            PrintBarGraph(reading, receiverConfiguration.ExtendedOutputRange ? 65535 : 4095, intFlagsInfo);
             Task.Delay(100).Wait();
         }
     }
@@ -149,34 +147,33 @@ internal partial class Explorer
 
     private void ShowPsConfiguration()
     {
-        (int lowerThreshold,
-         int upperThreshold,
-         PsInterruptPersistence persistence,
-         PsInterruptMode mode,
-         bool smartPersistenceEnabled,
-         int cancellationLevel) = _ps.GetInterruptConfiguration();
+        EmitterConfiguration emitterConfiguration = _ps.GetEmitterConfiguration();
+        ReceiverConfiguration receiverConfiguration = _ps.GetReceiverConfiguration();
+        ProximityDetectionConfiguration proximityDetectionConfiguration = _ps.GetProximityDetectionConfiguration();
 
         Console.WriteLine("PS configuration:");
         Console.WriteLine($"  Power state:              {_ps.PowerOn}");
-        Console.WriteLine($"  IR LED duty ratio:        {_ps.DutyRatio}");
-        Console.WriteLine($"  IR LED current:           {_ps.LedCurrent}");
-        Console.WriteLine($"  Integration time:         {_ps.IntegrationTime}");
-        Console.WriteLine($"  Extended output range:    {(_ps.ExtendedOutputRange ? "on" : "off")}");
-        Console.WriteLine($"  Active force mode:        {(_ps.ActiveForceMode ? "on" : "off")}");
-        Console.WriteLine($"  Proximity detection mode: {(_ps.ProximityDetecionModeEnabled ? "on" : "off")}");
-        Console.WriteLine($"  White channel:            {(_ps.WhiteChannelEnabled ? "on" : "off")}");
-        Console.WriteLine($"  Multi pulses:             {_ps.MultiPulses}");
-        Console.WriteLine("  Interrupts");
-        Console.WriteLine($"    Enabled:                {(_ps.InterruptEnabled ? "yes" : "no")}");
-        Console.WriteLine($"    Lower threshold:        {lowerThreshold}");
-        Console.WriteLine($"    Upper threshold :       {upperThreshold}");
-        Console.WriteLine($"    Persistence:            {persistence}");
-        Console.WriteLine($"    Mode:                   {mode}");
-        Console.WriteLine($"    Smart persistence:      {(smartPersistenceEnabled ? "yes" : "no")}");
-        Console.WriteLine($" Cancellation level:        {cancellationLevel}");
-        Console.WriteLine($" Sunlight cancellation:     {(_ps.SunlightCancellationEnabled ? "on" : "off")}");
+        Console.WriteLine($"  IR LED duty ratio:        {emitterConfiguration.DutyRatio}");
+        Console.WriteLine($"  IR LED current:           {emitterConfiguration.Current}");
+        Console.WriteLine($"  Multi pulses:             {emitterConfiguration.MultiPulses}");
+        Console.WriteLine($"  Integration time:         {receiverConfiguration.IntegrationTime}");
+        Console.WriteLine($"  Extended output range:    {receiverConfiguration.ExtendedOutputRange}");
+        Console.WriteLine($"  Active force mode:        {_ps.ActiveForceMode}");
+        Console.WriteLine($"  Proximity detection mode: {_ps.LogicOutputModeEnabled}");
+        Console.WriteLine($"  Cancellation level:       {receiverConfiguration.CancellationLevel}");
+        Console.WriteLine($"  White channel:            {receiverConfiguration.WhiteChannelEnabled}");
+        Console.WriteLine($"  Sunlight cancellation:    {receiverConfiguration.SunlightCancellationEnabled}");
+        Console.WriteLine("  Proximity detection (interrupts/logic output)");
+        Console.WriteLine($"    Enabled:                {_ps.InterruptEnabled}");
+        Console.WriteLine($"    Lower threshold:        {proximityDetectionConfiguration.LowerThreshold}");
+        Console.WriteLine($"    Upper threshold:        {proximityDetectionConfiguration.UpperThreshold}");
+        Console.WriteLine($"    Mode:                   {proximityDetectionConfiguration.Mode}");
+        Console.WriteLine($"    Persistence:            {proximityDetectionConfiguration.Persistence}");
+        Console.WriteLine($"    Smart persistence:      {proximityDetectionConfiguration.SmartPersistenceEnabled}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
+
+        // this configuration results in a peak current and an average current
     }
 
     private void SetPsPowerState()
@@ -190,41 +187,65 @@ internal partial class Explorer
         _ps.PowerOn = choice == YesNoChoice.Yes;
     }
 
-    private void ConfigureIrLed()
+    private void ConfigureEmitter()
     {
-        if (!PromptEnum("IR LED duty ratio", out PsDuty duty))
+        EmitterConfiguration currentConfiguration = _ps.GetEmitterConfiguration();
+
+        if (!PromptEnum("IR LED current", out PsLedCurrent current, currentConfiguration.Current))
         {
             return;
         }
 
-        _ps.DutyRatio = duty;
-
-        if (!PromptEnum("IR LED current", out PsLedCurrent current))
+        if (!PromptEnum("IR LED duty ratio", out PsDuty duty, currentConfiguration.DutyRatio))
         {
             return;
         }
 
-        _ps.LedCurrent = current;
+        if (!PromptEnum("Multi pulses", out PsMultiPulse multiPulse, currentConfiguration.MultiPulses))
+        {
+            return;
+        }
+
+        EmitterConfiguration configuration = new(current, duty, multiPulse);
+        _ps.ConfigureEmitter(configuration);
     }
 
-    private void SetPsIntegrationTime()
+    private void ConfigureReceiver()
     {
-        if (!PromptEnum("Integration time", out PsIntegrationTime integrationTime))
+        ReceiverConfiguration currentConfiguration = _ps.GetReceiverConfiguration();
+
+        if (!PromptEnum("Integration time", out PsIntegrationTime integrationTime, currentConfiguration.IntegrationTime))
         {
             return;
         }
 
-        _ps.IntegrationTime = integrationTime;
-    }
-
-    private void SetExtendedRange()
-    {
-        if (!PromptEnum("Extended output range", out YesNoChoice choice))
+        if (!PromptYesNoChoice("Extended output range", out bool extendedOutputRange, currentConfiguration.ExtendedOutputRange))
         {
             return;
         }
 
-        _ps.ExtendedOutputRange = choice == YesNoChoice.Yes;
+        if (!PromptYesNoChoice("Enable white channel", out bool whiteChannelEnabled, currentConfiguration.WhiteChannelEnabled))
+        {
+            return;
+        }
+
+        if (!PromptIntegerValue($"Ambient light cancellation level [0 - 65535]", out int cancellationLevel, currentConfiguration.CancellationLevel, 0, 65535))
+        {
+            return;
+        }
+
+        if (!PromptYesNoChoice($"Sunlight cancellation", out bool sunlightCancellationEnabled, currentConfiguration.SunlightCancellationEnabled))
+        {
+            return;
+        }
+
+        ReceiverConfiguration configuration = new(
+            integrationTime,
+            extendedOutputRange,
+            cancellationLevel,
+            whiteChannelEnabled,
+            sunlightCancellationEnabled);
+        _ps.ConfigureReceiver(configuration);
     }
 
     private void EnableDisableActiveForceMode()
@@ -237,101 +258,62 @@ internal partial class Explorer
         _ps.ActiveForceMode = choice == YesNoChoice.Yes;
     }
 
-    private void EnableDisableWhiteChannel()
-    {
-        if (!PromptEnum("Enable white channel", out YesNoChoice choice))
-        {
-            return;
-        }
-
-        _ps.WhiteChannelEnabled = choice == YesNoChoice.Yes;
-    }
-
-    private void SetMultiPulses()
-    {
-        if (!PromptEnum("Multi pulses", out PsMultiPulse choice))
-        {
-            return;
-        }
-
-        _ps.MultiPulses = choice;
-    }
-
-    private void SetCancellationLevel()
-    {
-        if (!PromptIntegerValue($"Cancellation level [0 - 65535]", out int cancellationLevel, _ps.CancellationLevel, 0, 65535))
-        {
-            return;
-        }
-
-        _ps.CancellationLevel = cancellationLevel;
-    }
-
-    private void SetProperyEnum<T>(string prompt, Action<T> setter)
-        where T : struct, Enum
-    {
-        if (!PromptEnum(prompt, out T choice))
-        {
-            return;
-        }
-
-        setter(choice);
-    }
-
     private void EnablePsInterruptsOrProximityDetectionMode()
     {
+        ProximityDetectionConfiguration currentConfiguration = _ps.GetProximityDetectionConfiguration();
+
         int lowerThreshold;
         int upperThreshold = 0;
         PsInterruptPersistence persistence = PsInterruptPersistence.Persistence1;
-        PsInterruptMode mode = PsInterruptMode.CloseOrAway;
-        (int currentLowerThreshold,
-         int currentUpperThreshold,
-         PsInterruptPersistence currentPersistence,
-         PsInterruptMode currentMode,
-         bool currentSmartPersistenceEnabled,
-         int currentCancellationLevel) = _ps.GetInterruptConfiguration();
-
-        bool result = PromptIntegerValue($"Lower threshold [0 - 65535]", out lowerThreshold, currentLowerThreshold, 0, 65535);
-        if (result)
-        {
-            result &= PromptIntegerValue($"Upper threshold [{lowerThreshold} - 65535]", out upperThreshold, currentUpperThreshold, lowerThreshold, 65535);
-        }
-
-        if (result)
-        {
-            result &= PromptEnum($"Persistence ({currentPersistence})", out persistence);
-        }
-
-        YesNoChoice enableSmartPersistence = YesNoChoice.No;
-        if (result)
-        {
-            result &= PromptEnum($"Enable smart persistence", out enableSmartPersistence);
-        }
-
-        YesNoChoice proximityDectectionModeChoice = YesNoChoice.No;
-        if (result)
-        {
-            result &= PromptEnum("Enable proximity detection mode", out proximityDectectionModeChoice);
-        }
-
-        if (result && proximityDectectionModeChoice == YesNoChoice.No)
-        {
-            result &= PromptEnum($"Interrupt mode ({currentMode})", out mode);
-        }
+        bool smartPersistenceEnabled = false;
+        bool logicOutputModeEnabled = false;
+        bool result = PromptIntegerValue("Lower threshold [0 - 65535]", out lowerThreshold, currentConfiguration.LowerThreshold, 0, 65535)
+            && PromptIntegerValue("Upper threshold [0 - 65535]", out upperThreshold, currentConfiguration.UpperThreshold, lowerThreshold, 65535)
+            && PromptEnum("Persistence", out persistence, currentConfiguration.Persistence)
+            && PromptYesNoChoice("Enable smart persistence", out smartPersistenceEnabled, currentConfiguration.SmartPersistenceEnabled)
+            && PromptYesNoChoice("Enable logic output mode", out logicOutputModeEnabled, currentConfiguration.Mode == ProximityDetectionMode.LogicOutput);
 
         if (!result)
         {
             return;
         }
 
-        if (proximityDectectionModeChoice == YesNoChoice.No)
+        ProximityDetectionMode mode = ProximityDetectionMode.Nothing;
+        if (logicOutputModeEnabled)
         {
-            _ps.EnableInterrupts(lowerThreshold, upperThreshold, persistence, mode, enableSmartPersistence == YesNoChoice.Yes);
+            mode = ProximityDetectionMode.LogicOutput;
         }
         else
         {
-            _ps.EnableProximityDetectionMode(lowerThreshold, upperThreshold, persistence);
+            bool awayEventEnabled = false;
+            result = PromptYesNoChoice("Enable close proximity event", out bool closeEventEnabled, currentConfiguration.Mode == ProximityDetectionMode.CloseInterrupt || currentConfiguration.Mode == ProximityDetectionMode.CloseOrAwayInterrupt)
+                 && PromptYesNoChoice("Enable away proximity event", out awayEventEnabled, currentConfiguration.Mode == ProximityDetectionMode.AwayInterrupt || currentConfiguration.Mode == ProximityDetectionMode.CloseOrAwayInterrupt);
+
+            if (!result)
+            {
+                return;
+            }
+
+            mode = awayEventEnabled && closeEventEnabled ? ProximityDetectionMode.CloseOrAwayInterrupt :
+            awayEventEnabled ? ProximityDetectionMode.AwayInterrupt : closeEventEnabled ? ProximityDetectionMode.CloseInterrupt : ProximityDetectionMode.Nothing;
         }
+
+        if (mode == ProximityDetectionMode.Nothing)
+        {
+            Console.WriteLine("No interrupt event or proximity detection have been enabled");
+            return;
+        }
+
+        Console.WriteLine($"{logicOutputModeEnabled}");
+        Console.WriteLine($"{mode}");
+
+        ProximityDetectionConfiguration configuration = new(
+            lowerThreshold,
+            upperThreshold,
+            persistence,
+            smartPersistenceEnabled,
+            mode);
+        _ps.EnableProximityDetection(configuration);
     }
 
     private class Command

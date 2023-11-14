@@ -1,11 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
+using System.Globalization;
 using System.Text;
 
 internal partial class Explorer
 {
-    private static bool PromptEnum<T>(string prompt, out T value)
+    private static bool PromptEnum<T>(string prompt, out T selectedValue, T currentValue = default)
         where T : struct
     {
         Array enumValues = Enum.GetValues(typeof(T));
@@ -18,40 +19,49 @@ internal partial class Explorer
             n++;
         }
 
-        Console.Write("=> ");
+        Console.Write($"({currentValue}) => ");
 
         string? input = Console.ReadLine();
+        if (string.IsNullOrEmpty(input))
+        {
+            selectedValue = currentValue;
+            Console.WriteLine($"  => {currentValue}\n");
+            return true;
+        }
+
         bool result = int.TryParse(input, out int choice);
         if (!result)
         {
-            value = default;
+            selectedValue = default;
+            Console.WriteLine();
             return false;
         }
 
         if (choice < 0 || choice >= n)
         {
             Console.WriteLine($"\nINVALID CHOICE ({choice})\n");
-            value = default;
+            selectedValue = default;
             return false;
         }
 
         object? choosenEnumValue = enumValues.GetValue(choice);
         if (choosenEnumValue != null)
         {
-            value = (T)choosenEnumValue!;
+            selectedValue = (T)choosenEnumValue!;
+            Console.WriteLine();
             return true;
         }
 
         Console.WriteLine($"\nINVALID CHOICE ({choice})\n");
-        value = default;
+        selectedValue = default;
         return false;
     }
 
-    private static bool PromptIntegerValue(string prompt, out int value, int? givenValue = null, int min = int.MinValue, int max = int.MaxValue)
+    private static bool PromptIntegerValue(string prompt, out int enteredValue, int? currentValue = null, int min = int.MinValue, int max = int.MaxValue)
     {
-        if (givenValue != null)
+        if (currentValue != null)
         {
-            Console.Write($"{prompt} ({givenValue}): ");
+            Console.Write($"{prompt} ({currentValue}): ");
         }
         else
         {
@@ -59,14 +69,14 @@ internal partial class Explorer
         }
 
         string? input = Console.ReadLine();
-        if (input == string.Empty && givenValue != null)
+        if (input == string.Empty && currentValue != null)
         {
-            value = givenValue.Value;
-            Console.WriteLine($"  => {givenValue}");
+            enteredValue = currentValue.Value;
+            Console.WriteLine($"  => {currentValue}");
         }
         else
         {
-            bool result = int.TryParse(input, out value);
+            bool result = int.TryParse(input, out enteredValue);
             if (!result)
             {
                 Console.WriteLine("\nINVALID INPUT\n");
@@ -74,12 +84,26 @@ internal partial class Explorer
             }
         }
 
-        if (value < min || value > max)
+        if (enteredValue < min || enteredValue > max)
         {
             Console.WriteLine($"\nINPUT OUT OF RANGE ({min}-{max})\n");
             return false;
         }
 
+        Console.WriteLine();
+        return true;
+    }
+
+    private static bool PromptYesNoChoice(string prompt, out bool value, bool current)
+    {
+        bool result = PromptEnum(prompt, out YesNoChoice choice, current ? YesNoChoice.Yes : YesNoChoice.No);
+        if (!result)
+        {
+            value = false;
+            return false;
+        }
+
+        value = choice == YesNoChoice.Yes;
         return true;
     }
 
