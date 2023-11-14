@@ -1,7 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Device.I2c;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 
 namespace Iot.Device.Vcnl4040.Internal
 {
@@ -28,7 +29,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// ALS integration time setting
         /// </summary>
-        public AlsIntegrationTime AlsIt
+        internal AlsIntegrationTime AlsIt
         {
             get => _alsIt;
             set
@@ -41,7 +42,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// ALS interrupt persistence setting
         /// </summary>
-        public AlsInterruptPersistence AlsPers
+        internal AlsInterruptPersistence AlsPers
         {
             get => _alsPers;
             set
@@ -54,7 +55,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// ALS interrupt enable state
         /// </summary>
-        public AlsInterrupt AlsIntEn
+        internal AlsInterrupt AlsIntEn
         {
             get => _alsIntEn;
             set

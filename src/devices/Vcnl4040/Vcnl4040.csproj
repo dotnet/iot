@@ -15,25 +15,25 @@
     </AssemblyAttribute>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\Defnitions\AlsIntegrationTime.cs" />
-    <Compile Include="Common\Defnitions\AlsRange.cs" />
-    <Compile Include="Common\Defnitions\AlsResolution.cs" />
-    <Compile Include="Common\Defnitions\PsActiveForceMode.cs" />
-    <Compile Include="Common\Defnitions\PsDetectionLogicOutputMode.cs" />
-    <Compile Include="Common\Defnitions\PsLedCurrent.cs" />
-    <Compile Include="Common\Defnitions\PsSunlightCancellationState.cs" />
-    <Compile Include="Common\Defnitions\PsWhiteChannelState.cs" />
-    <Compile Include="Common\Defnitions\PsTrig.cs" />
-    <Compile Include="Common\Defnitions\PsSmartPersistenceState.cs" />
-    <Compile Include="Common\Defnitions\PsMultiPulse.cs" />
-    <Compile Include="Common\Defnitions\PsInterruptMode.cs" />
-    <Compile Include="Common\Defnitions\PsOutputRange.cs" />
-    <Compile Include="Common\Defnitions\PsIntegrationTime.cs" />
-    <Compile Include="Common\Defnitions\PsInterruptPersistence.cs" />
-    <Compile Include="Common\Defnitions\PsDuty.cs" />
-    <Compile Include="Common\Defnitions\PowerState.cs" />
-    <Compile Include="Common\Defnitions\AlsInterrupt.cs" />
-    <Compile Include="Common\Defnitions\AlsInterruptPersistence.cs" />
+    <Compile Include="Common\Definitions\AlsIntegrationTime.cs" />
+    <Compile Include="Common\Definitions\AlsRange.cs" />
+    <Compile Include="Common\Definitions\AlsResolution.cs" />
+    <Compile Include="Common\Definitions\PsActiveForceMode.cs" />
+    <Compile Include="Common\Definitions\PsProximityDetectionOutputMode.cs" />
+    <Compile Include="Common\Definitions\PsLedCurrent.cs" />
+    <Compile Include="Common\Definitions\PsSunlightCancellationState.cs" />
+    <Compile Include="Common\Definitions\PsWhiteChannelState.cs" />
+    <Compile Include="Common\Definitions\PsTrig.cs" />
+    <Compile Include="Common\Definitions\PsSmartPersistenceState.cs" />
+    <Compile Include="Common\Definitions\PsMultiPulse.cs" />
+    <Compile Include="Common\Definitions\PsInterruptMode.cs" />
+    <Compile Include="Common\Definitions\PsOutputRange.cs" />
+    <Compile Include="Common\Definitions\PsIntegrationTime.cs" />
+    <Compile Include="Common\Definitions\PsInterruptPersistence.cs" />
+    <Compile Include="Common\Definitions\PsDuty.cs" />
+    <Compile Include="Common\Definitions\PowerState.cs" />
+    <Compile Include="Common\Definitions\AlsInterrupt.cs" />
+    <Compile Include="Common\Definitions\AlsInterruptPersistence.cs" />
     <Compile Include="Internal\InterruptFlagRegister.cs" />
     <Compile Include="Internal\WhiteDataRegister.cs" />
     <Compile Include="Internal\PsCancellationLevelRegister.cs" />
@@ -51,9 +51,9 @@
     <Compile Include="Internal\IdRegister.cs" />
     <Compile Include="Internal\PsDataRegister.cs" />
     <Compile Include="Internal\Register.cs" />
-    <Compile Include="Common\Defnitions\CommandCode.cs" />
-    <Compile Include="Common\Defnitions\BitMasks.cs" />
-    <Compile Include="Common\Defnitions\ProximityInterruptMode.cs" />
+    <Compile Include="Common\Definitions\CommandCode.cs" />
+    <Compile Include="Common\Definitions\BitMasks.cs" />
+    <Compile Include="Common\Definitions\ProximityInterruptMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

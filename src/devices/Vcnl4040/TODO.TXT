@@ -1,1 +1,2 @@
-- Simple Smaple: Scenario Driven Design
+- PS Interrupt Konfiguration von oberen und unteren Schwellwert auf Nah- und Ferndistanz ändern.
+- PS Integration Time gehört zum Emitter und nicht zum Receiver

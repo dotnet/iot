@@ -3,7 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 using UnitsNet;
 
 internal partial class Explorer

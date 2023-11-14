@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 using Iot.Device.Ws28xx;
 
 internal partial class Explorer

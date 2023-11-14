@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Device.I2c;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 
 namespace Iot.Device.Vcnl4040.Internal
 {

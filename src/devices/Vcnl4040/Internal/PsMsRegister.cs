@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.I2c;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 
 namespace Iot.Device.Vcnl4040.Internal
 {
@@ -20,7 +20,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private bool _psMsChanged = false;
         private bool _ledIChanged = false;
         private PsLedCurrent _ledI = PsLedCurrent.I50mA;
-        private PsDetectionLogicOutputMode _psMs = PsDetectionLogicOutputMode.Interrupt;
+        private PsProximityDetectionOutputMode _psMs = PsProximityDetectionOutputMode.Interrupt;
         private PsWhiteChannelState _whiteEn = PsWhiteChannelState.Enabled;
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// PS detection logic output mode
         /// </summary>
-        public PsDetectionLogicOutputMode PsMs
+        public PsProximityDetectionOutputMode PsMs
         {
             get => _psMs;
             set
@@ -76,7 +76,7 @@ namespace Iot.Device.Vcnl4040.Internal
             (_, byte dataHigh) = ReadData();
 
             WhiteEn = (PsWhiteChannelState)(dataHigh & WhiteEnMask);
-            PsMs = (PsDetectionLogicOutputMode)(dataHigh & PsMsMask);
+            PsMs = (PsProximityDetectionOutputMode)(dataHigh & PsMsMask);
             LedI = (PsLedCurrent)(dataHigh & LedIMask);
         }
 

@@ -3,7 +3,7 @@
 
 using System;
 using System.Device.I2c;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 
 namespace Iot.Device.Vcnl4040.Internal
 {

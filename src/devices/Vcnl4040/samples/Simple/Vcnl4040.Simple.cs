@@ -5,7 +5,7 @@ using System.Device.I2c;
 using System.IO;
 using System.Threading;
 using Iot.Device.Vcnl4040;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 using UnitsNet;
 
 PeriodicTimer loopTimer = new(TimeSpan.FromMilliseconds(1000));

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Device.I2c;
-using Iot.Device.Vcnl4040.Common.Defnitions;
+using Iot.Device.Vcnl4040.Common.Definitions;
 using Iot.Device.Vcnl4040.Internal;
 
 namespace Iot.Device.Vcnl4040
@@ -222,7 +222,7 @@ namespace Iot.Device.Vcnl4040
             get
             {
                 _psMsRegister.Read();
-                return _psMsRegister.PsMs == PsDetectionLogicOutputMode.LogicOutput;
+                return _psMsRegister.PsMs == PsProximityDetectionOutputMode.LogicOutput;
             }
         }
 
@@ -236,7 +236,7 @@ namespace Iot.Device.Vcnl4040
             _psConf2Register.Write();
 
             _psMsRegister.Read();
-            _psMsRegister.PsMs = PsDetectionLogicOutputMode.Interrupt;
+            _psMsRegister.PsMs = PsProximityDetectionOutputMode.Interrupt;
             _psMsRegister.Write();
         }
 
@@ -288,11 +288,11 @@ namespace Iot.Device.Vcnl4040
                 _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
                 _alsConfRegister.Write();
 
-                _psMsRegister.PsMs = PsDetectionLogicOutputMode.LogicOutput;
+                _psMsRegister.PsMs = PsProximityDetectionOutputMode.LogicOutput;
             }
             else
             {
-                _psMsRegister.PsMs = PsDetectionLogicOutputMode.Interrupt;
+                _psMsRegister.PsMs = PsProximityDetectionOutputMode.Interrupt;
             }
 
             // enable interrupts
@@ -323,7 +323,7 @@ namespace Iot.Device.Vcnl4040
             _psCancellationLevelRegister.Read();
 
             ProximityInterruptMode mode;
-            if (_psMsRegister.PsMs == PsDetectionLogicOutputMode.LogicOutput)
+            if (_psMsRegister.PsMs == PsProximityDetectionOutputMode.LogicOutput)
             {
                 mode = ProximityInterruptMode.LogicOutput;
             }

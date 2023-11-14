@@ -1,22 +1,22 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Common.Defnitions
+namespace Iot.Device.Vcnl4040.Common.Definitions
 {
     /// <summary>
-    /// Defines the set of PS active force mode trigger
+    /// Defines the set of PS smart persistence states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsActiveForceModeTrigger : byte
+    public enum PsSmartPersistenceState : byte
     {
         /// <summary>
-        /// No PS active force mode
+        /// Smart persistence disabled
         /// </summary>
-        NoTrigger = 0b0000_0000,
+        Disabled = 0b0000_0000,
 
         /// <summary>
-        /// Force one time cycle
+        /// Smart persistence enabled
         /// </summary>
-        OneTimeCycle = 0b0000_0100
+        Enabled = 0b0001_0000
     }
 }
