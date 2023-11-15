@@ -12,7 +12,7 @@ internal partial class Explorer
         {
             new Command() { Section = MenuDevice, Category = MenuGeneral, Name = "Show and clear interrupt flags", Action = ShowAndClearInterruptFlags, ShowConfiguration = false },
             new Command() { Section = MenuDevice, Category = MenuGeneral, Name = "Show register dump", Action = ShowRegisterDump, ShowConfiguration = false },
-            new Command() { Section = MenuDevice, Category = MenuGeneral, Name = "Reset to defaults", Action = _device.Reset },
+            new Command() { Section = MenuDevice, Category = MenuGeneral, Name = "Reset to defaults", Action = DeviceReset },
         });
     }
 
@@ -45,5 +45,12 @@ internal partial class Explorer
 
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
+    }
+
+    private void DeviceReset()
+    {
+        _device.Reset();
+        ShowAlsConfiguration();
+        ShowPsConfiguration();
     }
 }

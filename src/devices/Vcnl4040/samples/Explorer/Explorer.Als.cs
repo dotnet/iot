@@ -3,7 +3,7 @@
 using System;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
-using Iot.Device.Vcnl4040.Common.Definitions;
+using Iot.Device.Vcnl4040.Definitions;
 using UnitsNet;
 
 internal partial class Explorer
@@ -77,7 +77,7 @@ internal partial class Explorer
         Console.WriteLine($"    Range:               {_als.Range}");
         Console.WriteLine($"    Resolution:          {_als.Resolution}");
         Console.WriteLine("  Interrupts");
-        Console.WriteLine($"    Enabled:           {(_als.InterruptEnabled ? "yes" : "no")}");
+        Console.WriteLine($"    Enabled:           {(_als.InterruptsEnabled ? "yes" : "no")}");
         Console.WriteLine($"    Lower threshold:   {configuration.LowerThreshold}");
         Console.WriteLine($"    Upper threshold :  {configuration.UpperThreshold}");
         Console.WriteLine($"    Persistence:       {configuration.Persistence}");

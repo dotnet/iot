@@ -1,31 +1,31 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Common.Definitions
+namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of ALS ranges.
+    /// Defines the set of ALS resolutions.
     /// </summary>
-    public enum AlsRange
+    public enum AlsResolution
     {
         /// <summary>
-        /// Range is 0 to 819.2 lux
+        /// Resolution is 0.1 lux
         /// </summary>
-        Range819,
+        Resolution_0_1,
 
         /// <summary>
-        /// Range is 0 to 1638.4 lux
+        /// Resolution is 0.05 lux
         /// </summary>
-        Range1638,
+        Resolution_0_05,
 
         /// <summary>
-        /// Range is 0 to 3276.7 lux
+        /// Resolution is 0.025 lux
         /// </summary>
-        Range3276,
+        Resolution_0_025,
 
         /// <summary>
-        /// Range is 0 to 6553.5 lux
+        /// Resolution is 0.0125 lux
         /// </summary>
-        Range6553
+        Resolution_0_0125
     }
 }

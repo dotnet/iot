@@ -60,7 +60,6 @@ internal partial class Explorer
                     commandNumber++;
                 }
 
-                // Console.WriteLine();
                 categoryNumber++;
             }
 
@@ -93,7 +92,7 @@ internal partial class Explorer
         {
             Console.Clear();
 
-            string heading = " VNCL4040 Explorer ";
+            string heading = " VCNL4040 Explorer ";
             heading = heading.PadLeft(MenuWidth - (MenuWidth - heading.Length) / 2, '=').PadRight(MenuWidth, '=');
             Console.WriteLine(heading);
             Console.WriteLine(new string('=', MenuWidth));

@@ -1,5 +1,3 @@
 - PS Interrupt Konfiguration von oberen und unteren Schwellwert auf Nah- und Ferndistanz ändern.
 - PS Integration Time gehört zum Emitter und nicht zum Receiver
-- Nach Typos VNCL suchen
-- Den Enum BitsMasks noch einmal überdenken => unabhängigkeit von unit tests als zusätzliche Sicherheit
-- Überprüfen, warum Klasswen explizit im Projectfile aufgelistet werden.
+- Category.txt ausfüllen

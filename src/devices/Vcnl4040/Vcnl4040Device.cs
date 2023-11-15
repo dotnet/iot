@@ -4,13 +4,13 @@
 using System;
 using System.Device.I2c;
 using System.IO;
-using Iot.Device.Vcnl4040.Common.Definitions;
+using Iot.Device.Vcnl4040.Definitions;
 using Iot.Device.Vcnl4040.Internal;
 
 namespace Iot.Device.Vcnl4040
 {
     /// <summary>
-    /// Represents a VNCL4040 device
+    /// Represents a VCNL4040 device
     /// </summary>
     public class Vcnl4040Device : IDisposable
     {

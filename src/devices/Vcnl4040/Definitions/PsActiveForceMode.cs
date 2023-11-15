@@ -1,22 +1,22 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Common.Definitions
+namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of PS output range settings.
+    /// Defines the set of PS active force mode states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsOutputRange : byte
+    public enum PsActiveForceMode : byte
     {
         /// <summary>
-        /// PS output range is 12 bits long
+        /// PS active force mode disabled
         /// </summary>
-        Bits12 = 0b0000_0000,
+        Disabled = 0b0000_0000,
 
         /// <summary>
-        /// PS output range is 16 bits long
+        /// PS active force mode enabled
         /// </summary>
-        Bits16 = 0b0000_1000
+        Enabled = 0b0000_1000
     }
 }

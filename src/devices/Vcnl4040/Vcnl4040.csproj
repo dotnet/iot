@@ -7,54 +7,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="Internal\*.cs" />
+    <Compile Include="Definitions\*.cs" />
   </ItemGroup>
   <!-- Make the internal classes visible to the unit test assembly -->
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
     </AssemblyAttribute>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Common\Definitions\AlsIntegrationTime.cs" />
-    <Compile Include="Common\Definitions\AlsRange.cs" />
-    <Compile Include="Common\Definitions\AlsResolution.cs" />
-    <Compile Include="Common\Definitions\PsActiveForceMode.cs" />
-    <Compile Include="Common\Definitions\PsProximityDetectionOutputMode.cs" />
-    <Compile Include="Common\Definitions\PsLedCurrent.cs" />
-    <Compile Include="Common\Definitions\PsSunlightCancellationState.cs" />
-    <Compile Include="Common\Definitions\PsWhiteChannelState.cs" />
-    <Compile Include="Common\Definitions\PsTrig.cs" />
-    <Compile Include="Common\Definitions\PsSmartPersistenceState.cs" />
-    <Compile Include="Common\Definitions\PsMultiPulse.cs" />
-    <Compile Include="Common\Definitions\PsInterruptMode.cs" />
-    <Compile Include="Common\Definitions\PsOutputRange.cs" />
-    <Compile Include="Common\Definitions\PsIntegrationTime.cs" />
-    <Compile Include="Common\Definitions\PsInterruptPersistence.cs" />
-    <Compile Include="Common\Definitions\PsDuty.cs" />
-    <Compile Include="Common\Definitions\PowerState.cs" />
-    <Compile Include="Common\Definitions\AlsInterrupt.cs" />
-    <Compile Include="Common\Definitions\AlsInterruptPersistence.cs" />
-    <Compile Include="Internal\InterruptFlagRegister.cs" />
-    <Compile Include="Internal\WhiteDataRegister.cs" />
-    <Compile Include="Internal\PsCancellationLevelRegister.cs" />
-    <Compile Include="Internal\PsMsRegister.cs" />
-    <Compile Include="Internal\PsConf3Register.cs" />
-    <Compile Include="Internal\PsConf2Register.cs" />
-    <Compile Include="Internal\PsConf1Register.cs" />
-    <Compile Include="Internal\PsHighInterruptThresholdRegister.cs" />
-    <Compile Include="Internal\PsLowInterruptThresholdRegister.cs" />
-    <Compile Include="Internal\AlsLowInterruptThresholdRegister.cs" />
-    <Compile Include="Internal\LevelRegister.cs" />
-    <Compile Include="Internal\AlsHighInterruptThresholdRegister.cs" />
-    <Compile Include="Internal\AlsConfRegister.cs" />
-    <Compile Include="Internal\AlsDataRegister.cs" />
-    <Compile Include="Internal\IdRegister.cs" />
-    <Compile Include="Internal\PsDataRegister.cs" />
-    <Compile Include="Internal\Register.cs" />
-    <Compile Include="Internal\DataRegister.cs" />
-    <Compile Include="Common\Definitions\CommandCode.cs" />
-    <Compile Include="Common\Definitions\BitMasks.cs" />
-    <Compile Include="Common\Definitions\ProximityInterruptMode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="README.md" />

@@ -67,7 +67,7 @@ In most cases the use of binding and device follows this sequence:
 * Configure and enable interrupts (*optionally*)
 * Retrieve sensor readings
 
-## Bus load reduction
+## I2C bus load reduction
 It is necessary for the binding to be aware of the currently configured integration time. This is required to convert measurement values according to the resolution and perform consistency checks when configuring interrupts.
 
 The binding can either fetch the integration time when needed from the device or use an internally stored value. Retrieving it from the device increases I2C bus load, particularly with frequent measurements.
@@ -82,7 +82,7 @@ If bus load is not an issue **do not** enable load reduction mode.
 |Common|Check basic functionality|```void VerifyDevice();```|Verifies whether a functional I2C connection to the device exists and checks the identification for device recognition. Should be used before any other function of the binding is used.
 
 ## Ambient Light Sensor Interface
-|Area|Function|API|Comments|
+|Area|Function|API|Additional Information|
 |-|-|-|-|
 |General|Control power state|```bool PowerOn {get; set;}```|The ambient light sensor can be turned off to reduce power consumption of the chip.|
 |General|Control load reduction mode|```bool LoadReductionModeEnabled {get; set;}```|If enabled a local copy of the integration time is used for calculations. Before enabling load reduction mode, the current configuration is retrieved from the device.|

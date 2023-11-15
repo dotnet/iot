@@ -1,22 +1,22 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace Iot.Device.Vcnl4040.Common.Definitions
+namespace Iot.Device.Vcnl4040.Definitions
 {
     /// <summary>
-    /// Defines the set of PS smart persistence states.
+    /// Defines the set of ALS and SD power states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsSmartPersistenceState : byte
+    public enum PowerState : byte
     {
         /// <summary>
-        /// Smart persistence disabled
+        /// ALS/SD power on
         /// </summary>
-        Disabled = 0b0000_0000,
+        PowerOn = 0b0000_0000,
 
         /// <summary>
-        /// Smart persistence enabled
+        /// ALS/SD shutdown / power off
         /// </summary>
-        Enabled = 0b0001_0000
+        PowerOff = 0b0000_0001
     }
 }

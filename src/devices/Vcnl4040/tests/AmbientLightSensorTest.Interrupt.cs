@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
-using Iot.Device.Vcnl4040.Common.Definitions;
+using Iot.Device.Vcnl4040.Definitions;
 using UnitsNet;
 using Xunit;
 
@@ -18,7 +18,7 @@ namespace Iot.Device.Vcnl4040.Tests
             InjectTestRegister(vcnl4040.AmbientLightSensor);
             _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)state);
 
-            Assert.Equal(state == AlsInterrupt.Enabled, vcnl4040.AmbientLightSensor.InterruptEnabled);
+            Assert.Equal(state == AlsInterrupt.Enabled, vcnl4040.AmbientLightSensor.InterruptsEnabled);
         }
 
         [Fact]
@@ -28,12 +28,12 @@ namespace Iot.Device.Vcnl4040.Tests
             InjectTestRegister(vcnl4040.AmbientLightSensor);
             _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)AlsInterrupt.Enabled);
 
-            Assert.True(vcnl4040.AmbientLightSensor.InterruptEnabled);
+            Assert.True(vcnl4040.AmbientLightSensor.InterruptsEnabled);
 
             vcnl4040.AmbientLightSensor.DisableInterrupts();
 
             Assert.Equal((byte)AlsInterrupt.Disabled, _testDevice.GetLsb(CommandCode.ALS_CONF));
-            Assert.False(vcnl4040.AmbientLightSensor.InterruptEnabled);
+            Assert.False(vcnl4040.AmbientLightSensor.InterruptsEnabled);
         }
 
         [Fact]

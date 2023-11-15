@@ -1,6 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-using Iot.Device.Vcnl4040.Common.Definitions;
+using Iot.Device.Vcnl4040.Definitions;
 using Xunit;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -47,18 +47,18 @@ namespace Iot.Device.Vcnl4040.Tests
                                                             MultiPulses: PsMultiPulse.Pulse4);
             vcnl4040.ProximitySensor.ConfigureEmitter(initialConfiguration);
 
-            Assert.Equal((byte)initialConfiguration.Current, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsLedI);
-            Assert.Equal((byte)initialConfiguration.DutyRatio, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsDuty);
-            Assert.Equal((byte)initialConfiguration.MultiPulses, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsMps);
+            Assert.Equal((byte)initialConfiguration.Current, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & 0b0000_0111);
+            Assert.Equal((byte)initialConfiguration.DutyRatio, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & 0b1100_0000);
+            Assert.Equal((byte)initialConfiguration.MultiPulses, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & 0b0110_0000);
 
             EmitterConfiguration reconfiguration = new(Current: PsLedCurrent.I160mA,
                                                        DutyRatio: PsDuty.Duty320,
                                                        MultiPulses: PsMultiPulse.Pulse2);
             vcnl4040.ProximitySensor.ConfigureEmitter(reconfiguration);
 
-            Assert.Equal((byte)reconfiguration.Current, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsLedI);
-            Assert.Equal((byte)reconfiguration.DutyRatio, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsDuty);
-            Assert.Equal((byte)reconfiguration.MultiPulses, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsMps);
+            Assert.Equal((byte)reconfiguration.Current, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & 0b0000_0111);
+            Assert.Equal((byte)reconfiguration.DutyRatio, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & 0b1100_0000);
+            Assert.Equal((byte)reconfiguration.MultiPulses, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & 0b0110_0000);
         }
 
         [Fact]
@@ -68,10 +68,10 @@ namespace Iot.Device.Vcnl4040.Tests
             InjectTestRegister(vcnl4040.ProximitySensor);
 
             _testDevice.SetLsb(CommandCode.PS_CONF_1_2, (byte)PsIntegrationTime.Time3_0);
-            _testDevice.SetMsb(CommandCode.PS_CONF_1_2, (byte)BitMasks.PsHd);
+            _testDevice.SetMsb(CommandCode.PS_CONF_1_2, 0b0000_1000);
             _testDevice.SetData(CommandCode.PS_CANC, 12345);
             // while channel disabled (bit = 1)
-            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, (byte)BitMasks.WhiteEn);
+            _testDevice.SetMsb(CommandCode.PS_CONF_3_MS, 0b1000_0000);
             _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)PsSunlightCancellationState.Enabled);
 
             ReceiverConfiguration configuration = vcnl4040.ProximitySensor.GetReceiverConfiguration();
@@ -112,11 +112,11 @@ namespace Iot.Device.Vcnl4040.Tests
 
             vcnl4040.ProximitySensor.ConfigureReceiver(initialConfiguration);
 
-            Assert.Equal((byte)PsIntegrationTime.Time2_0, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsIt);
-            Assert.Equal((byte)BitMasks.PsHd, _testDevice.GetMsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsHd);
+            Assert.Equal((byte)PsIntegrationTime.Time2_0, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & 0b0000_1110);
+            Assert.Equal(0b0000_1000, _testDevice.GetMsb(CommandCode.PS_CONF_1_2) & 0b0000_1000);
             Assert.Equal(12345, _testDevice.GetData(CommandCode.PS_CANC));
-            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.WhiteEn);
-            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsScEn);
+            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & 0b1000_0000);
+            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & 0b0000_0001);
 
             ReceiverConfiguration reConfiguration = new(IntegrationTime: PsIntegrationTime.Time2_5,
                                                         ExtendedOutputRange: false,
@@ -126,11 +126,11 @@ namespace Iot.Device.Vcnl4040.Tests
 
             vcnl4040.ProximitySensor.ConfigureReceiver(reConfiguration);
 
-            Assert.Equal((byte)PsIntegrationTime.Time2_5, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsIt);
-            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_1_2) & (byte)BitMasks.PsHd);
+            Assert.Equal((byte)PsIntegrationTime.Time2_5, _testDevice.GetLsb(CommandCode.PS_CONF_1_2) & 0b0000_1110);
+            Assert.Equal(0, _testDevice.GetMsb(CommandCode.PS_CONF_1_2) & 0b0000_1000);
             Assert.Equal(54321, _testDevice.GetData(CommandCode.PS_CANC));
-            Assert.Equal((byte)BitMasks.WhiteEn, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.WhiteEn);
-            Assert.Equal((byte)BitMasks.PsScEn, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsScEn);
+            Assert.Equal(0b1000_0000, _testDevice.GetMsb(CommandCode.PS_CONF_3_MS) & 0b1000_0000);
+            Assert.Equal(0b0000_0001, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & 0b0000_0001);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace Iot.Device.Vcnl4040.Tests
             InjectTestRegister(vcnl4040.ProximitySensor);
             _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, 0);
             Assert.False(vcnl4040.ProximitySensor.ActiveForceMode);
-            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, (byte)BitMasks.PsAf);
+            _testDevice.SetLsb(CommandCode.PS_CONF_3_MS, 0b0000_1000);
             Assert.True(vcnl4040.ProximitySensor.ActiveForceMode);
         }
 
@@ -149,11 +149,11 @@ namespace Iot.Device.Vcnl4040.Tests
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
-            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsAf);
+            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & 0b0000_1000);
             vcnl4040.ProximitySensor.ActiveForceMode = true;
-            Assert.Equal((byte)BitMasks.PsAf, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsAf);
+            Assert.Equal(0b0000_1000, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & 0b0000_1000);
             vcnl4040.ProximitySensor.ActiveForceMode = false;
-            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)BitMasks.PsAf);
+            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & 0b0000_1000);
         }
     }
 }
