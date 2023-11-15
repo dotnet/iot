@@ -8,11 +8,14 @@ namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
     /// ALS high interrupt threshold register
-    /// Command code / address: 0x01
+    /// Command code / address: 0x01 (LSB, MSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    internal class AlsHighInterruptThresholdRegister : InterruptThresholdRegister
+    internal class AlsHighInterruptThresholdRegister : LevelRegister
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AlsHighInterruptThresholdRegister"/> class.
+        /// </summary>
         public AlsHighInterruptThresholdRegister(I2cDevice device)
             : base(CommandCode.ALS_THDH, device)
         {

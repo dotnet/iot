@@ -7,7 +7,7 @@ using Iot.Device.Vcnl4040.Common.Definitions;
 namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
-    /// PS configuration register 3
+    /// PS MS configuration register
     /// Command code / address: 0x04 (MSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
@@ -24,7 +24,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private PsWhiteChannelState _whiteEn = PsWhiteChannelState.Enabled;
 
         /// <summary>
-        /// PS white channel state
+        /// Gets or sets the white channel state (White_EN).
         /// </summary>
         public PsWhiteChannelState WhiteEn
         {
@@ -37,7 +37,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS detection logic output mode
+        /// Gets or set the detection logic output mode state (PS_MS).
         /// </summary>
         public PsProximityDetectionOutputMode PsMs
         {
@@ -50,7 +50,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS LED current
+        /// Gets or sets the LED current (LED_I).
         /// </summary>
         public PsLedCurrent LedI
         {
@@ -100,6 +100,5 @@ namespace Iot.Device.Vcnl4040.Internal
             _psMsChanged = false;
             _ledIChanged = false;
         }
-
     }
 }

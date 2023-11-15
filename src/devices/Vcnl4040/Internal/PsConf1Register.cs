@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Device.I2c;
 using Iot.Device.Vcnl4040.Common.Definitions;
 
@@ -18,7 +17,6 @@ namespace Iot.Device.Vcnl4040.Internal
         private static readonly byte PsPersMask = 0b0011_0000;
         private static readonly byte PsItMask = 0b0000_1110;
         private static readonly byte PsSdMask = 0b0000_0001;
-
         private bool _pPsDutyChanged = false;
         private bool _psPersChanged = false;
         private bool _psItChanged = false;
@@ -29,7 +27,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private PowerState _psSd = PowerState.PowerOff;
 
         /// <summary>
-        /// PS IRED on/off duty ratio
+        /// Gets or sets the duty ratio (PS_Duty).
         /// </summary>
         public PsDuty PsDuty
         {
@@ -42,7 +40,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS interrupt persistence
+        /// Gets or sets the interrupt persistence (PS_PERS).
         /// </summary>
         public PsInterruptPersistence PsPers
         {
@@ -55,7 +53,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS integration time
+        /// Gets or sets the integration time (PS_IT).
         /// </summary>
         public PsIntegrationTime PsIt
         {
@@ -68,7 +66,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS power state
+        /// Gets or sets the power state (PS_SD).
         /// </summary>
         public PowerState PsSd
         {

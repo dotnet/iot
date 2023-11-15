@@ -21,7 +21,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private PsInterruptMode _psInt = PsInterruptMode.Disabled;
 
         /// <summary>
-        /// PS output range size
+        /// Gets or sets the output range (PS_HD).
         /// </summary>
         public PsOutputRange PsHd
         {
@@ -34,7 +34,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS interrupt source
+        /// Gets or sets the interrupt event source (PS_INT).
         /// </summary>
         public PsInterruptMode PsInt
         {
@@ -61,16 +61,18 @@ namespace Iot.Device.Vcnl4040.Internal
 
             PsHd = (PsOutputRange)(dataHigh & PsHdMask);
             PsInt = (PsInterruptMode)(dataHigh & PsIntMask);
+
             ResetChangeFlags();
         }
 
         /// <inheritdoc/>>
         public override void Write()
         {
-            // read current register content to preserve low byte
             (byte dataLow, byte dataHigh) = ReadData();
+
             dataHigh = AlterIfChanged(_psHdChanged, dataHigh, (byte)PsHd, PsHdMask);
             dataHigh = AlterIfChanged(_psIntChanged, dataHigh, (byte)PsInt, PsIntMask);
+
             WriteData(dataLow, dataHigh);
             ResetChangeFlags();
         }

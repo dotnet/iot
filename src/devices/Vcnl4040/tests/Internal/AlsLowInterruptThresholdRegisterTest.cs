@@ -25,7 +25,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             Assert.Single(testDevice.DataWritten);
             Assert.Equal((byte)CommandCode.ALS_THDL, testDevice.DataWritten.Dequeue());
-            Assert.Equal(thresholdHighByte << 8 | thresholdLowByte, reg.Threshold);
+            Assert.Equal(thresholdHighByte << 8 | thresholdLowByte, reg.Level);
         }
 
         [Theory]
@@ -39,7 +39,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
                                                                      expectedLowByte: expectedThresholdLowByte,
                                                                      expectedHighByte: expectedThresholdHighByte,
                                                                      commandCode: (byte)CommandCode.ALS_THDL,
-                                                                     registerPropertyName: nameof(AlsLowInterruptThresholdRegister.Threshold),
+                                                                     registerPropertyName: nameof(AlsLowInterruptThresholdRegister.Level),
                                                                      registerReadsBeforeWriting: false);
         }
     }

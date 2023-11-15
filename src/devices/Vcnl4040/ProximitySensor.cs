@@ -264,8 +264,8 @@ namespace Iot.Device.Vcnl4040
             }
 
             // set new thresholds
-            _psLowInterruptThresholdRegister.Threshold = configuration.LowerThreshold;
-            _psHighInterruptThresholdRegister.Threshold = configuration.UpperThreshold;
+            _psLowInterruptThresholdRegister.Level = configuration.LowerThreshold;
+            _psHighInterruptThresholdRegister.Level = configuration.UpperThreshold;
             _psLowInterruptThresholdRegister.Write();
             _psHighInterruptThresholdRegister.Write();
 
@@ -339,8 +339,8 @@ namespace Iot.Device.Vcnl4040
                 };
             }
 
-            return new ProximityInterruptConfiguration(_psLowInterruptThresholdRegister.Threshold,
-                                                       _psHighInterruptThresholdRegister.Threshold,
+            return new ProximityInterruptConfiguration(_psLowInterruptThresholdRegister.Level,
+                                                       _psHighInterruptThresholdRegister.Level,
                                                        _psConf1Register.PsPers,
                                                        _psConf3Register.PsSmartPers == PsSmartPersistenceState.Enabled,
                                                        mode);

@@ -294,8 +294,8 @@ namespace Iot.Device.Vcnl4040
             _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
             _alsConfRegister.Write();
 
-            _alsLowInterruptThresholdRegister.Threshold = (int)(configuration.LowerThreshold.Lux / resolution.Lux);
-            _alsHighInterruptThresholdRegister.Threshold = (int)(configuration.UpperThreshold.Lux / resolution.Lux);
+            _alsLowInterruptThresholdRegister.Level = (int)(configuration.LowerThreshold.Lux / resolution.Lux);
+            _alsHighInterruptThresholdRegister.Level = (int)(configuration.UpperThreshold.Lux / resolution.Lux);
             _alsLowInterruptThresholdRegister.Write();
             _alsHighInterruptThresholdRegister.Write();
 
@@ -313,8 +313,8 @@ namespace Iot.Device.Vcnl4040
             _alsHighInterruptThresholdRegister.Read();
             _alsConfRegister.Read();
             (_, Illuminance resolution) = GetDetectionRangeAndResolution(_alsConfRegister.AlsIt);
-            return new(Illuminance.FromLux(_alsLowInterruptThresholdRegister.Threshold * resolution.Lux),
-                       Illuminance.FromLux(_alsHighInterruptThresholdRegister.Threshold * resolution.Lux),
+            return new(Illuminance.FromLux(_alsLowInterruptThresholdRegister.Level * resolution.Lux),
+                       Illuminance.FromLux(_alsHighInterruptThresholdRegister.Level * resolution.Lux),
                        _alsConfRegister.AlsPers);
         }
 

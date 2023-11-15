@@ -44,13 +44,14 @@
     <Compile Include="Internal\PsHighInterruptThresholdRegister.cs" />
     <Compile Include="Internal\PsLowInterruptThresholdRegister.cs" />
     <Compile Include="Internal\AlsLowInterruptThresholdRegister.cs" />
-    <Compile Include="Internal\InterruptThresholdRegister.cs" />
+    <Compile Include="Internal\LevelRegister.cs" />
     <Compile Include="Internal\AlsHighInterruptThresholdRegister.cs" />
     <Compile Include="Internal\AlsConfRegister.cs" />
     <Compile Include="Internal\AlsDataRegister.cs" />
     <Compile Include="Internal\IdRegister.cs" />
     <Compile Include="Internal\PsDataRegister.cs" />
     <Compile Include="Internal\Register.cs" />
+    <Compile Include="Internal\DataRegister.cs" />
     <Compile Include="Common\Definitions\CommandCode.cs" />
     <Compile Include="Common\Definitions\BitMasks.cs" />
     <Compile Include="Common\Definitions\ProximityInterruptMode.cs" />

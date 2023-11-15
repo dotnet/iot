@@ -7,17 +7,20 @@ using Iot.Device.Vcnl4040.Common.Definitions;
 namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
-    /// Base class for various interrupt threshold registers
+    /// Base class for 16-bit level registers of ALS and PS.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    internal abstract class InterruptThresholdRegister : Register
+    internal abstract class LevelRegister : Register
     {
         /// <summary>
-        /// Interrupt threshold setting.
+        /// Gets or sets the level (threshold).
         /// </summary>
-        public int Threshold { get; set; } = 0;
+        public int Level { get; set; } = 0;
 
-        public InterruptThresholdRegister(CommandCode commandCode, I2cDevice device)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="LevelRegister"/> class.
+        /// </summary>
+        public LevelRegister(CommandCode commandCode, I2cDevice device)
             : base(commandCode, device)
         {
         }
@@ -26,13 +29,13 @@ namespace Iot.Device.Vcnl4040.Internal
         public override void Read()
         {
             (byte dataLow, byte dataHigh) = ReadData();
-            Threshold = dataHigh << 8 | dataLow;
+            Level = dataHigh << 8 | dataLow;
         }
 
         /// <inheritdoc/>>
         public override void Write()
         {
-            WriteData((byte)(Threshold & 0xff), (byte)((Threshold >> 8) & 0xff));
+            WriteData((byte)Level, (byte)(Level >> 8));
         }
     }
 }

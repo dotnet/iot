@@ -7,23 +7,17 @@ using Iot.Device.Vcnl4040.Common.Definitions;
 namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
-    /// ID register
-    /// Note: this is a read-only register.
-    /// Command code / address: 0x0c (LSB, MSB)
-    /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
+    /// Base class for read-only 12/16-bit data registers of ALS and PS.
     /// </summary>
-    internal class IdRegister : Register
+    internal class DataRegister : Register
     {
-        /// <summary>
-        /// Gets the device identifier.
-        /// </summary>
-        public int Id { get; private set; }
+        public int Data { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="IdRegister"/> class.
+        /// Initializes a new instance of the <see cref="DataRegister"/> class.
         /// </summary>
-        public IdRegister(I2cDevice device)
-            : base(CommandCode.ID, device)
+        public DataRegister(CommandCode commandCode, I2cDevice device)
+            : base(commandCode, device)
         {
         }
 
@@ -31,7 +25,7 @@ namespace Iot.Device.Vcnl4040.Internal
         public override void Read()
         {
             (byte dataLow, byte dataHigh) = ReadData();
-            Id = (dataHigh << 8 | dataLow) & 0b0000_1111_1111_1111;
+            Data = dataHigh << 8 | dataLow;
         }
 
         /// <summary>

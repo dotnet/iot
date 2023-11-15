@@ -91,7 +91,7 @@ ps.PowerOn = true;
 
 /*
   Sensor loop (~1000 ms cycle time)
-    - get current readings from ALS and PS
+    - get current readings from ALS, PS and white channel
     - get and clear interrupt flags
     - display readings and flags
 */
@@ -99,10 +99,12 @@ while (!Console.KeyAvailable)
 {
     Illuminance alsReading = als.Reading;
     int psReading = ps.Reading;
+    int psWhiteChannel = ps.WhiteChannelReading;
     InterruptFlags interrupts = vcnl4040.GetAndClearInterruptFlags();
 
-    Console.WriteLine($"Illuminance: {alsReading}");
-    Console.WriteLine($"Proximty:    {psReading}");
+    Console.WriteLine($"Illuminance:   {alsReading}");
+    Console.WriteLine($"Proximty:      {psReading}");
+    Console.WriteLine($"White channel: {psWhiteChannel}");
     string intFlagsStr = interrupts.ToString();
     Console.WriteLine(intFlagsStr);
     Console.WriteLine(new string('-', intFlagsStr.Length));

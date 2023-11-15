@@ -8,11 +8,14 @@ namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
     /// ALS low interrupt threshold register
-    /// Command code / address: 0x02
+    /// Command code / address: 0x02 (LSB, MSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    internal class AlsLowInterruptThresholdRegister : InterruptThresholdRegister
+    internal class AlsLowInterruptThresholdRegister : LevelRegister
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AlsLowInterruptThresholdRegister"/> class.
+        /// </summary>
         public AlsLowInterruptThresholdRegister(I2cDevice device)
             : base(CommandCode.ALS_THDL, device)
         {

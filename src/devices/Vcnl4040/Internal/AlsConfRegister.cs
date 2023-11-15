@@ -8,7 +8,7 @@ namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
     /// ALS configuration register
-    /// Command code / address: 0x00
+    /// Command code / address: 0x00 (LSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
     internal class AlsConfRegister : Register
@@ -27,9 +27,9 @@ namespace Iot.Device.Vcnl4040.Internal
         private AlsIntegrationTime _alsIt = AlsIntegrationTime.Time80ms;
 
         /// <summary>
-        /// ALS integration time setting
+        /// Gets or sets the ALS integration time setting (ALS_IT).
         /// </summary>
-        internal AlsIntegrationTime AlsIt
+        public AlsIntegrationTime AlsIt
         {
             get => _alsIt;
             set
@@ -40,9 +40,9 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// ALS interrupt persistence setting
+        /// Gets or sets th ALS interrupt persistence setting (ALS_PERS).
         /// </summary>
-        internal AlsInterruptPersistence AlsPers
+        public AlsInterruptPersistence AlsPers
         {
             get => _alsPers;
             set
@@ -53,9 +53,9 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// ALS interrupt enable state
+        /// Gets or sets the ALS interrupt enable state (ALS_INT_EN).
         /// </summary>
-        internal AlsInterrupt AlsIntEn
+        public AlsInterrupt AlsIntEn
         {
             get => _alsIntEn;
             set
@@ -66,7 +66,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// ALS power state (ALS_SD of ALS_CONF register)
+        /// Gets or sets the ALS power state (ALS_SD).
         /// </summary>
         public PowerState AlsSd
         {
@@ -78,6 +78,9 @@ namespace Iot.Device.Vcnl4040.Internal
             }
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AlsConfRegister"/> class.
+        /// </summary>
         public AlsConfRegister(I2cDevice device)
             : base(CommandCode.ALS_CONF, device)
         {
@@ -92,14 +95,15 @@ namespace Iot.Device.Vcnl4040.Internal
             AlsPers = (AlsInterruptPersistence)(dataLow & AlsPersMask);
             AlsIntEn = (AlsInterrupt)(dataLow & AlsIntEnMask);
             AlsSd = (PowerState)(dataLow & AlsSdMask);
+
             ResetChangeFlags();
         }
 
         /// <inheritdoc/>>
         public override void Write()
         {
-            // Read current LSB and MSB, to preserve MSB and reserved bits from LSB.
             (byte dataLow, byte dataHigh) = ReadData();
+
             dataLow = AlterIfChanged(_alsItChanged, dataLow, (byte)AlsIt, AlsItMask);
             dataLow = AlterIfChanged(_alsPersChanged, dataLow, (byte)AlsPers, AlsPersMask);
             dataLow = AlterIfChanged(_alsIntEnChanged, dataLow, (byte)AlsIntEn, AlsIntEnMask);

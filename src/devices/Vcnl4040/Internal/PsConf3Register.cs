@@ -8,7 +8,7 @@ namespace Iot.Device.Vcnl4040.Internal
 {
     /// <summary>
     /// PS MS register
-    /// Command code / address: 0x04 (MSB)
+    /// Command code / address: 0x04 (LSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
     internal class PsConf3Register : Register
@@ -18,7 +18,6 @@ namespace Iot.Device.Vcnl4040.Internal
         private const byte PsAfMask = 0b0000_1000;
         private const byte PsTrigMask = 0b0000_0100;
         private const byte PsScEnMask = 0b0000_0001;
-
         private bool _psMpsChanged = false;
         private bool _psSmartPersChanged = false;
         private bool _psAfChanged = false;
@@ -31,7 +30,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private PsSunlightCancellationState _psScEn = PsSunlightCancellationState.Disabled;
 
         /// <summary>
-        /// PS multi pulse setting
+        /// Gets or sets the multi pulse setting (PS_MPS).
         /// </summary>
         public PsMultiPulse PsMps
         {
@@ -44,7 +43,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS smart persistence state
+        /// Gets or sets the smart persistence state (PS_SMART_PERS).
         /// </summary>
         public PsSmartPersistenceState PsSmartPers
         {
@@ -57,7 +56,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS active force mode
+        /// Gets or sets the active force mode state (PS_AF).
         /// </summary>
         public PsActiveForceMode PsAf
         {
@@ -70,7 +69,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS active force mode trigger
+        /// Gets or sets the active force mode trigger (PS_TRIG).
         /// </summary>
         public PsActiveForceModeTrigger PsTrig
         {
@@ -83,7 +82,7 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// PS sunlight cancellation state
+        /// Gets or sets the sunlight cancellation state (PS_SC_EN).
         /// </summary>
         public PsSunlightCancellationState PsScEn
         {
@@ -113,6 +112,7 @@ namespace Iot.Device.Vcnl4040.Internal
             PsAf = (PsActiveForceMode)(dataLow & PsAfMask);
             PsTrig = (PsActiveForceModeTrigger)(dataLow & PsTrigMask);
             PsScEn = (PsSunlightCancellationState)(dataLow & PsScEnMask);
+
             ResetChangeFlags();
         }
 

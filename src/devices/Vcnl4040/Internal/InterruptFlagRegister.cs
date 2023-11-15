@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Device.I2c;
 using Iot.Device.Vcnl4040.Common.Definitions;
 
@@ -10,38 +9,39 @@ namespace Iot.Device.Vcnl4040.Internal
     /// <summary>
     /// Interrupt flag register
     /// Note: this is a read-only register.
-    /// Command code / address: 0x0b
+    /// Command code / address: 0x0b (MSB)
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
     internal class InterruptFlagRegister : Register
     {
         /// <summary>
-        /// PS entering protection mode event
+        /// Gets the PS entering protection mode interrupt event has been triggered.
         /// </summary>
         public bool PsSpFlag { get; private set; }
 
         /// <summary>
-        /// ALS crossing low threshold event
+        /// Gets whether the ALS crossing low threshold interrupt event has been triggered.
         /// </summary>
         public bool AlsIfL { get; private set; }
 
         /// <summary>
-        /// ALS crossing high threshold event
+        /// Gets whether the ALS crossing high threshold interrupt event has been triggered.
         /// </summary>
         public bool AlsIfH { get; private set; }
 
         /// <summary>
-        /// PS rises above threshold event
+        /// Gets whether the PS rises above threshold interrupt event has been triggered.
         /// </summary>
         public bool PsIfClose { get; private set; }
 
         /// <summary>
-        /// PS drops below threshold event
+        /// Gets whether the PS drops below threshold interrupt event has been triggered.
         /// </summary>
         public bool PsIfAway { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="InterruptFlagRegister"/> class.
+        /// Note: reading the registers resets the set flags.
         /// </summary>
         public InterruptFlagRegister(I2cDevice device)
             : base(CommandCode.INT_Flag, device)
@@ -61,12 +61,11 @@ namespace Iot.Device.Vcnl4040.Internal
         }
 
         /// <summary>
-        /// This register is read-only. The Write-operation is not implemented.
+        /// This register is read-only. The write-operation is not implemented.
         /// </summary>
-        /// <exception cref="System.NotImplementedException">This register is read-only. The Write-operation is not implemented.</exception>
+        /// <exception cref="System.NotImplementedException">This register is read-only. The write-operation is not implemented.</exception>
         public override void Write()
         {
-            // Note: this is a read-only register
             throw new System.NotImplementedException();
         }
     }
