@@ -58,9 +58,9 @@ als.PowerOn = true;
    - Emitter, configured for max. power = distance
      - max. IR LED current of 200 mA
      - duty ratio is 1/40
-     - multi pulses is 1 (off)
-   - Receiver, configured for max. sensitivity
      - integration time is 8T
+     - multi pulses is 2 (two pulses per measurement cycle)
+   - Receiver, configured for max. sensitivity
      - normal output range (12-bit)
      - cancellation level is 0
      - white channel is enabled
@@ -69,16 +69,20 @@ als.PowerOn = true;
      - lower threshold is 2000 counts => away interrupt event
      - upper threshold is 4000 counts => close interrupt event
      - trigger both, away and close event
-     - interrupt hit persistence is 1 (no trigger suppresion, no impact on reaction time)
+     - interrupt hit persistence is 1 (no trigger suppression, no impact on reaction time)
      - Note: logic output is NOT demonstrated here, as this would exclude ALS interrupts
  */
 EmitterConfiguration emitterConfiguration = new(Current: PsLedCurrent.I200mA,
                                                 DutyRatio: PsDuty.Duty40,
-                                                MultiPulses: PsMultiPulse.Pulse1);
+                                                IntegrationTime: PsIntegrationTime.Time8_0,
+                                                MultiPulses: PsMultiPulse.Pulse2);
 
-ReceiverConfiguration receiverConfiguration = new(PsIntegrationTime.Time8_0, false, 0, true, false);
+ReceiverConfiguration receiverConfiguration = new(ExtendedOutputRange: false,
+                                                  CancellationLevel: 0,
+                                                  WhiteChannelEnabled: true,
+                                                  SunlightCancellationEnabled: false);
 
-ProximityInterruptConfiguration proximityInterruptConfiguration = new(2000,
+ProximityInterruptConfiguration proximityInterruptConfiguration = new(LowerThreshold: 2000,
                                                                       UpperThreshold: 4000,
                                                                       Persistence: PsInterruptPersistence.Persistence1,
                                                                       SmartPersistenceEnabled: false,
@@ -103,7 +107,7 @@ while (!Console.KeyAvailable)
     InterruptFlags interrupts = vcnl4040.GetAndClearInterruptFlags();
 
     Console.WriteLine($"Illuminance:   {alsReading}");
-    Console.WriteLine($"Proximty:      {psReading}");
+    Console.WriteLine($"Proximity:     {psReading}");
     Console.WriteLine($"White channel: {psWhiteChannel}");
     string intFlagsStr = interrupts.ToString();
     Console.WriteLine(intFlagsStr);

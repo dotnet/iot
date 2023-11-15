@@ -152,24 +152,26 @@ internal partial class Explorer
         ProximityInterruptConfiguration proximityDetectionConfiguration = _ps.GetInterruptConfiguration();
 
         Console.WriteLine("PS configuration:");
-        Console.WriteLine($"  Power state:              {_ps.PowerOn}");
-        Console.WriteLine($"  IR LED duty ratio:        {emitterConfiguration.DutyRatio}");
-        Console.WriteLine($"  IR LED current:           {emitterConfiguration.Current}");
-        Console.WriteLine($"  Multi pulses:             {emitterConfiguration.MultiPulses}");
-        Console.WriteLine($"  Integration time:         {receiverConfiguration.IntegrationTime}");
-        Console.WriteLine($"  Extended output range:    {receiverConfiguration.ExtendedOutputRange}");
-        Console.WriteLine($"  Active force mode:        {_ps.ActiveForceMode}");
-        Console.WriteLine($"  Proximity detection mode: {_ps.LogicOutputModeEnabled}");
-        Console.WriteLine($"  Cancellation level:       {receiverConfiguration.CancellationLevel}");
-        Console.WriteLine($"  White channel:            {receiverConfiguration.WhiteChannelEnabled}");
-        Console.WriteLine($"  Sunlight cancellation:    {receiverConfiguration.SunlightCancellationEnabled}");
+        Console.WriteLine($"  Power state:                {_ps.PowerOn}");
+        Console.WriteLine("  Emitter:");
+        Console.WriteLine($"    IR LED current:           {emitterConfiguration.Current}");
+        Console.WriteLine($"    IR LED duty ratio:        {emitterConfiguration.DutyRatio}");
+        Console.WriteLine($"    Integration time:         {emitterConfiguration.IntegrationTime}");
+        Console.WriteLine($"    Multi pulses:             {emitterConfiguration.MultiPulses}");
+        Console.WriteLine("  Receiver:");
+        Console.WriteLine($"    Extended output range:    {receiverConfiguration.ExtendedOutputRange}");
+        Console.WriteLine($"    Active force mode:        {_ps.ActiveForceMode}");
+        Console.WriteLine($"    Proximity detection mode: {_ps.LogicOutputModeEnabled}");
+        Console.WriteLine($"    Cancellation level:       {receiverConfiguration.CancellationLevel}");
+        Console.WriteLine($"    White channel:            {receiverConfiguration.WhiteChannelEnabled}");
+        Console.WriteLine($"    Sunlight cancellation:    {receiverConfiguration.SunlightCancellationEnabled}");
         Console.WriteLine("  Interrupts");
-        Console.WriteLine($"    Enabled:                {_ps.InterruptEnabled}");
-        Console.WriteLine($"    Lower threshold:        {proximityDetectionConfiguration.LowerThreshold}");
-        Console.WriteLine($"    Upper threshold:        {proximityDetectionConfiguration.UpperThreshold}");
-        Console.WriteLine($"    Mode:                   {proximityDetectionConfiguration.Mode}");
-        Console.WriteLine($"    Persistence:            {proximityDetectionConfiguration.Persistence}");
-        Console.WriteLine($"    Smart persistence:      {proximityDetectionConfiguration.SmartPersistenceEnabled}");
+        Console.WriteLine($"    Enabled:                  {_ps.InterruptEnabled}");
+        Console.WriteLine($"    Lower threshold:          {proximityDetectionConfiguration.LowerThreshold}");
+        Console.WriteLine($"    Upper threshold:          {proximityDetectionConfiguration.UpperThreshold}");
+        Console.WriteLine($"    Mode:                     {proximityDetectionConfiguration.Mode}");
+        Console.WriteLine($"    Persistence:              {proximityDetectionConfiguration.Persistence}");
+        Console.WriteLine($"    Smart persistence:        {proximityDetectionConfiguration.SmartPersistenceEnabled}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
 
@@ -201,23 +203,23 @@ internal partial class Explorer
             return;
         }
 
+        if (!PromptEnum("Integration time", out PsIntegrationTime integrationTime, currentConfiguration.IntegrationTime))
+        {
+            return;
+        }
+
         if (!PromptEnum("Multi pulses", out PsMultiPulse multiPulse, currentConfiguration.MultiPulses))
         {
             return;
         }
 
-        EmitterConfiguration configuration = new(current, duty, multiPulse);
+        EmitterConfiguration configuration = new(current, duty, integrationTime, multiPulse);
         _ps.ConfigureEmitter(configuration);
     }
 
     private void ConfigureReceiver()
     {
         ReceiverConfiguration currentConfiguration = _ps.GetReceiverConfiguration();
-
-        if (!PromptEnum("Integration time", out PsIntegrationTime integrationTime, currentConfiguration.IntegrationTime))
-        {
-            return;
-        }
 
         if (!PromptYesNoChoice("Extended output range", out bool extendedOutputRange, currentConfiguration.ExtendedOutputRange))
         {
@@ -240,7 +242,6 @@ internal partial class Explorer
         }
 
         ReceiverConfiguration configuration = new(
-            integrationTime,
             extendedOutputRange,
             cancellationLevel,
             whiteChannelEnabled,

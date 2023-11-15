@@ -117,3 +117,23 @@ The "Simple" sample application demonstrates the fundamental usage of the bindin
 
 ## Explorer
 The **Explorer** sample application allows the user to experiment with all the features of the Binding API. Sensor configurations can be modified at any time. Additionally, the status of the interrupt can be manually read and reset, and individual sensors can be turned on and off. The application includes a simple menu for accessing API functions, and straightforward prompts allow parameter input at runtime.
+
+
+
+    /// The measurement repetition time is defined by duty ratio and integration time.
+    /// According to application note: if integration time is 1 and duty is 1/40 the repetition time is 4,85ms.
+    /// (Note: test with oscilloscope and actual device showed 5.75 ms).
+    /// An integration time of 2, 4, or 8 is a scale factor for the repetition time.
+    /// tRep = 4.85 ms * Duty/40 * integration time factor.
+    /// Example: duty = 1/160 and integration time is 4T.
+    /// tRep = 4.85 ms * 160/40 * 4 = 77.6 ms.
+    /// The pulse length for the IR LED is defined by the integration time.
+    /// If the integration time is set to 1T, the pulse length is 125 us.
+    /// An integration time of 8T will result in 8 * 1T = 1000 us.
+    /// (Note: test with oscilloscope and actual device showed 150 us)
+    /// The maximum interval between two measurements is: tRepMax = 320/40 * 8 * 4.85ms = 310 ms.
+    /// (Note: test with oscilloscope and actual device showed 360 ms)
+    /// The average current results from the peak current and duty ratio.
+    /// Iavg = Ipeak * duty, e.g. Iavg = 100 mA * 1/40 = 2.5mA.
+    /// The duty ratio has no influence on the detection range.
+    /// Multi-pulse: 8 haben keinen Effekt, 2 oder 4 Pulse direkt hinter einander, Gesamtintervall bleibt unverändert

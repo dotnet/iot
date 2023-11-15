@@ -140,6 +140,7 @@ namespace Iot.Device.Vcnl4040
         {
             _psMsRegister.LedI = configuration.Current;
             _psConf1Register.PsDuty = configuration.DutyRatio;
+            _psConf1Register.PsIt = configuration.IntegrationTime;
             _psConf3Register.PsMps = configuration.MultiPulses;
 
             _psConf1Register.Write();
@@ -156,10 +157,10 @@ namespace Iot.Device.Vcnl4040
             _psConf3Register.Read();
             _psMsRegister.Read();
 
-            return new EmitterConfiguration(
-                _psMsRegister.LedI,
-                _psConf1Register.PsDuty,
-                _psConf3Register.PsMps);
+            return new EmitterConfiguration(Current: _psMsRegister.LedI,
+                                            DutyRatio: _psConf1Register.PsDuty,
+                                            IntegrationTime: _psConf1Register.PsIt,
+                                            MultiPulses: _psConf3Register.PsMps);
         }
 
         /// <summary>
@@ -167,12 +168,10 @@ namespace Iot.Device.Vcnl4040
         /// </summary>
         public void ConfigureReceiver(ReceiverConfiguration configuration)
         {
-            _psConf1Register.PsIt = configuration.IntegrationTime;
             _psConf2Register.PsHd = configuration.ExtendedOutputRange ? PsOutputRange.Bits16 : PsOutputRange.Bits12;
             _psMsRegister.WhiteEn = configuration.WhiteChannelEnabled ? PsWhiteChannelState.Enabled : PsWhiteChannelState.Disabled;
             _psCancellationLevelRegister.Level = configuration.CancellationLevel;
             _psConf3Register.PsScEn = configuration.SunlightCancellationEnabled ? PsSunlightCancellationState.Enabled : PsSunlightCancellationState.Disabled;
-            _psConf1Register.Write();
             _psConf2Register.Write();
             _psConf3Register.Write();
             _psMsRegister.Write();
@@ -190,11 +189,10 @@ namespace Iot.Device.Vcnl4040
             _psConf2Register.Read();
             _psConf3Register.Read();
 
-            return new ReceiverConfiguration(_psConf1Register.PsIt,
-                                             _psConf2Register.PsHd == PsOutputRange.Bits16,
-                                             _psCancellationLevelRegister.Level,
-                                             _psMsRegister.WhiteEn == PsWhiteChannelState.Enabled,
-                                             _psConf3Register.PsScEn == PsSunlightCancellationState.Enabled);
+            return new ReceiverConfiguration(ExtendedOutputRange: _psConf2Register.PsHd == PsOutputRange.Bits16,
+                                             CancellationLevel: _psCancellationLevelRegister.Level,
+                                             WhiteChannelEnabled: _psMsRegister.WhiteEn == PsWhiteChannelState.Enabled,
+                                             SunlightCancellationEnabled: _psConf3Register.PsScEn == PsSunlightCancellationState.Enabled);
         }
 
         #endregion
