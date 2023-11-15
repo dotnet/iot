@@ -26,7 +26,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Constructs a new sentence
         /// </summary>
-        public SeaSmartEngineDetail(bool status, TimeSpan operatingTime, Temperature temperature, int engineNumber)
+        public SeaSmartEngineDetail(EngineStatus status, TimeSpan operatingTime, Temperature temperature, int engineNumber)
             : base()
         {
             Status = status;
@@ -42,7 +42,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// </summary>
         public SeaSmartEngineDetail(EngineData data)
         {
-            Status = !data.Revolutions.Equals(RotationalSpeed.Zero, RotationalSpeed.Zero);
+            Status = data.Status;
             OperatingTime = data.OperatingTime;
             Temperature = data.EngineTemperature;
             EngineNumber = data.EngineNo;
@@ -111,9 +111,9 @@ namespace Iot.Device.Nmea0183.Sentences
                 OperatingTime = TimeSpan.FromSeconds(operatingTime);
             }
 
-            if (ReadFromHexString(data, 40, 4, true, out int status))
+            if (ReadFromHexString(data, 40, 4, false, out int status))
             {
-                Status = status == 0;
+                Status = (EngineStatus)status;
             }
 
             Valid = true;
@@ -136,7 +136,7 @@ namespace Iot.Device.Nmea0183.Sentences
         /// <summary>
         /// Engine status: True for running, false for not running/error.
         /// </summary>
-        public bool Status
+        public EngineStatus Status
         {
             get;
             private set;
@@ -204,7 +204,7 @@ namespace Iot.Device.Nmea0183.Sentences
                                        operatingTimeString.Substring(2, 2) + operatingTimeString.Substring(0, 2);
 
                 // Status = 0 is ok, anything else seems to indicate a fault
-                int status = Status ? 0 : 1;
+                uint status = (uint)Status;
                 string statusString = status.ToString("X4", CultureInfo.InvariantCulture);
                 int engineTempKelvin;
                 if (Temperature.HasValue)
@@ -231,7 +231,7 @@ namespace Iot.Device.Nmea0183.Sentences
         {
             if (Valid)
             {
-                return $"Engine {EngineNumber} Status: {(Status ? "Running" : "Off")} Temperature {Temperature.GetValueOrDefault(UnitsNet.Temperature.Zero).DegreesCelsius} °C";
+                return $"Engine {EngineNumber} Status: {Status} Temperature {Temperature.GetValueOrDefault(UnitsNet.Temperature.Zero).DegreesCelsius} °C";
             }
 
             return "No valid data (or engine off)";
