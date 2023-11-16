@@ -24,7 +24,7 @@
    </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="3.10.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.5.0" />
     <ProjectReference Include="..\..\src\devices\Arduino\Arduino.csproj" />
     <ProjectReference Include="..\..\src\System.Device.Gpio\System.Device.Gpio.csproj" />
   </ItemGroup>
