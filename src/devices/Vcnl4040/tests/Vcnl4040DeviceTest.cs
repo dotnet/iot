@@ -22,7 +22,7 @@ namespace Iot.Device.Vcnl4040.Tests
 
             vcnl4040.Reset();
 
-            // check whether all registers relevant for device configuraion have been reset to their defaults
+            // check whether all registers relevant for device configuration have been reset to their defaults
             Assert.Equal(0x0001, _testDevice.GetData(CommandCode.ALS_CONF));
             Assert.Equal(0x0000, _testDevice.GetData(CommandCode.ALS_THDL));
             Assert.Equal(0x0000, _testDevice.GetData(CommandCode.ALS_THDH));

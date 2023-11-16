@@ -1,5 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Device.I2c;
 using System.IO;
@@ -22,10 +23,10 @@ try
 {
     vcnl4040.VerifyDevice();
 }
-catch (IOException ioex)
+catch (IOException ex)
 {
     Console.WriteLine("Communication with device using I2C bus is not available");
-    Console.WriteLine(ioex.Message);
+    Console.WriteLine(ex.Message);
     return;
 }
 catch (IncompatibleDeviceException ex)
@@ -40,7 +41,7 @@ catch (IncompatibleDeviceException ex)
    - Interrupts (INT-pin function)
      - lower threshold is 1000 lux => low interrupt event
      - upper threshold is 3000 lux => high interrupt event
-     - interrupt hit persistence is 4 (minor false trigger suppresion, limit impact on reaction time)
+     - interrupt hit persistence is 4 (minor false trigger suppression, limit impact on reaction time)
  */
 als.Range = AlsRange.Range3276;
 AmbientLightInterruptConfiguration alsInterruptConfiguration = new(LowerThreshold: Illuminance.FromLux(1000),
@@ -90,7 +91,11 @@ ProximityInterruptConfiguration proximityInterruptConfiguration = new(LowerThres
 
 ps.ConfigureEmitter(emitterConfiguration);
 ps.ConfigureReceiver(receiverConfiguration);
-ps.EnableInterrupt(proximityInterruptConfiguration);
+ps.EnableInterrupts(proximityInterruptConfiguration);
+
+/*
+  Enable Proximity Sensor operation
+ */
 ps.PowerOn = true;
 
 /*

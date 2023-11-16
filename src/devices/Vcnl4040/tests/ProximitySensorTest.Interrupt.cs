@@ -14,7 +14,7 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(2000, 3000, PsInterruptPersistence.Persistence2, true, ProximityInterruptMode.CloseInterrupt)]
         [InlineData(3000, 4000, PsInterruptPersistence.Persistence3, false, ProximityInterruptMode.CloseOrAwayInterrupt)]
         [InlineData(4000, 5000, PsInterruptPersistence.Persistence4, true, ProximityInterruptMode.LogicOutput)]
-        public void EnableInterrupt(int lowerThreshold, int upperThreshold, PsInterruptPersistence persistence, bool smartPersistenceEnabled, ProximityInterruptMode mode)
+        public void EnableInterrupt(ushort lowerThreshold, ushort upperThreshold, PsInterruptPersistence persistence, bool smartPersistenceEnabled, ProximityInterruptMode mode)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
@@ -26,14 +26,14 @@ namespace Iot.Device.Vcnl4040.Tests
                                                                 Mode: mode);
 
             // apply configuration and enable
-            vcnl4040.ProximitySensor.EnableInterrupt(configuration);
+            vcnl4040.ProximitySensor.EnableInterrupts(configuration);
 
             ReadBackRegisters();
             Assert.Equal(lowerThreshold, _psLowInterruptThresholdRegister.Level);
             Assert.Equal(upperThreshold, _psHighInterruptThresholdRegister.Level);
             Assert.Equal(persistence, _psConf1Register.PsPers);
             Assert.Equal(smartPersistenceEnabled ? PsSmartPersistenceState.Enabled : PsSmartPersistenceState.Disabled, _psConf3Register.PsSmartPers);
-            Assert.Equal(mode == ProximityInterruptMode.LogicOutput ? PsProximityDetectionOutputMode.LogicOutput : PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
+            Assert.Equal(mode == ProximityInterruptMode.LogicOutput ? PsProximityDetectionOutput.LogicOutput : PsProximityDetectionOutput.Interrupt, _psMsRegister.PsMs);
             Assert.Equal(mode switch
             {
                 ProximityInterruptMode.Nothing => PsInterruptMode.Disabled,
@@ -49,9 +49,7 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(1000, 2000, false)]
         [InlineData(1000, 1000, false)]
         [InlineData(2000, 1999, true)]
-        [InlineData(-001, 1000, true)]
-        [InlineData(1000, -001, true)]
-        public void EnableInterrupt_ThresholdChecks(int lowerThreshold, int upperThreshold, bool exceptionExpected)
+        public void EnableInterrupt_ThresholdCheck_Exception(ushort lowerThreshold, ushort upperThreshold, bool exceptionExpected)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
@@ -65,7 +63,7 @@ namespace Iot.Device.Vcnl4040.Tests
             // apply configuration and enable
             if (exceptionExpected)
             {
-                Assert.Throws<ArgumentException>(() => vcnl4040.ProximitySensor.EnableInterrupt(configuration));
+                Assert.Throws<ArgumentException>(() => vcnl4040.ProximitySensor.EnableInterrupts(configuration));
             }
             else
             {
@@ -74,7 +72,7 @@ namespace Iot.Device.Vcnl4040.Tests
         }
 
         [Fact]
-        public void EnableInterrupt_AlsInterruptInterference()
+        public void EnableInterrupt_AlsInterruptInterference_Exception()
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
@@ -89,7 +87,7 @@ namespace Iot.Device.Vcnl4040.Tests
             _alsConfRegister.AlsIntEn = AlsInterrupt.Enabled;
             WriteRegisters();
 
-            Assert.Throws<ArgumentException>(() => vcnl4040.ProximitySensor.EnableInterrupt(configuration));
+            Assert.Throws<InvalidOperationException>(() => vcnl4040.ProximitySensor.EnableInterrupts(configuration));
         }
 
         [Fact]
@@ -106,15 +104,15 @@ namespace Iot.Device.Vcnl4040.Tests
 
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.Disabled, _psConf2Register.PsInt);
-            Assert.Equal(PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
+            Assert.Equal(PsProximityDetectionOutput.Interrupt, _psMsRegister.PsMs);
             Assert.False(vcnl4040.ProximitySensor.InterruptEnabled);
             Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
 
-            vcnl4040.ProximitySensor.EnableInterrupt(configuration);
+            vcnl4040.ProximitySensor.EnableInterrupts(configuration);
 
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.Away, _psConf2Register.PsInt);
-            Assert.Equal(PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
+            Assert.Equal(PsProximityDetectionOutput.Interrupt, _psMsRegister.PsMs);
             Assert.True(vcnl4040.ProximitySensor.InterruptEnabled);
             Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
         }
@@ -133,15 +131,15 @@ namespace Iot.Device.Vcnl4040.Tests
 
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.Disabled, _psConf2Register.PsInt);
-            Assert.Equal(PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
+            Assert.Equal(PsProximityDetectionOutput.Interrupt, _psMsRegister.PsMs);
             Assert.False(vcnl4040.ProximitySensor.InterruptEnabled);
             Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
 
-            vcnl4040.ProximitySensor.EnableInterrupt(configuration);
+            vcnl4040.ProximitySensor.EnableInterrupts(configuration);
 
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.CloseOrAway, _psConf2Register.PsInt);
-            Assert.Equal(PsProximityDetectionOutputMode.LogicOutput, _psMsRegister.PsMs);
+            Assert.Equal(PsProximityDetectionOutput.LogicOutput, _psMsRegister.PsMs);
             Assert.True(vcnl4040.ProximitySensor.InterruptEnabled);
             Assert.True(vcnl4040.ProximitySensor.LogicOutputEnabled);
         }
@@ -151,7 +149,7 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(2000, 3000, PsInterruptPersistence.Persistence2, true, ProximityInterruptMode.CloseInterrupt)]
         [InlineData(3000, 4000, PsInterruptPersistence.Persistence3, false, ProximityInterruptMode.CloseOrAwayInterrupt)]
         [InlineData(4000, 5000, PsInterruptPersistence.Persistence4, true, ProximityInterruptMode.LogicOutput)]
-        public void GetInterruptConfiguration(int lowerThreshold, int upperThreshold, PsInterruptPersistence persistence, bool smartPersistenceEnabled, ProximityInterruptMode mode)
+        public void GetInterruptConfiguration(ushort lowerThreshold, ushort upperThreshold, PsInterruptPersistence persistence, bool smartPersistenceEnabled, ProximityInterruptMode mode)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
@@ -163,7 +161,7 @@ namespace Iot.Device.Vcnl4040.Tests
                                                                 Mode: mode);
 
             // apply configuration and enable
-            vcnl4040.ProximitySensor.EnableInterrupt(referenceConfiguration);
+            vcnl4040.ProximitySensor.EnableInterrupts(referenceConfiguration);
 
             ProximityInterruptConfiguration retrievedConfiguration = vcnl4040.ProximitySensor.GetInterruptConfiguration();
             Assert.Equal(referenceConfiguration.LowerThreshold, retrievedConfiguration.LowerThreshold);

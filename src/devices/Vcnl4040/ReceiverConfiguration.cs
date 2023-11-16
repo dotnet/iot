@@ -15,7 +15,7 @@ namespace Iot.Device.Vcnl4040
     /// <param name="SunlightCancellationEnabled">Enables the sunlight cancellation feature.</param>
     public record ReceiverConfiguration(
         bool ExtendedOutputRange,
-        int CancellationLevel,
+        ushort CancellationLevel,
         bool WhiteChannelEnabled,
         bool SunlightCancellationEnabled);
 }

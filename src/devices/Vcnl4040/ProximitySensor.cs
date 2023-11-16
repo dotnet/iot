@@ -1,5 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Device.I2c;
 using Iot.Device.Vcnl4040.Definitions;
@@ -12,8 +13,6 @@ namespace Iot.Device.Vcnl4040
     /// </summary>
     public class ProximitySensor
     {
-        private const int MaximumSensorCounts16Bit = 65535;
-
         private readonly PsConf1Register _psConf1Register;
         private readonly PsConf2Register _psConf2Register;
         private readonly PsConf3Register _psConf3Register;
@@ -27,7 +26,7 @@ namespace Iot.Device.Vcnl4040
         private bool _activeForceModeEnabled = false;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProximitySensor"/> API class.
+        /// Initializes a new instance of the <see cref="ProximitySensor"/> class.
         /// </summary>
         internal ProximitySensor(I2cDevice device)
         {
@@ -71,9 +70,14 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Gets or sets the state of the active force mode.
-        /// If set to true, the active force mode is activated; otherwise it is deactivated.
-        /// IN POWER SAVE UMBENENNEN?
+        /// Gets or sets the state of the active force mode for proximity measurement.
+        /// When the sensor is operated in Active Force Mode, an explicit request for a measurement
+        /// is required before a current measurement value can be read.
+        /// This is in contrast to normal operation, where measurements are continuous.
+        /// This significantly reduces power consumption, as the IR LED is only activated for each
+        /// individual measurement.
+        /// Important: In Active Force Mode, the interrupt function is not available,
+        /// as no measurement is performed, and therefore, threshold checks are not possible.
         /// </summary>
         public bool ActiveForceMode
         {
@@ -97,6 +101,8 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Gets the current proximity sensor reading.
+        /// Note: if active force mode is enabled reading this property implicitly triggers
+        /// the measurement for once cylce.
         /// </summary>
         public int Reading
         {
@@ -104,11 +110,6 @@ namespace Iot.Device.Vcnl4040
             {
                 if (_activeForceModeEnabled)
                 {
-                    // design consideration: When the active force mode is in use, it can be assumed
-                    // that the measurement is retrieved rather infrequently.
-                    // Therefore, it is legitimate to read the current register content instead of
-                    // working with a local copy. This only minimally increases the bus load and
-                    // avoids potential inconsistencies.
                     _psConf3Register.PsTrig = PsActiveForceModeTrigger.OneTimeCycle;
                     _psConf3Register.Write();
                 }
@@ -119,7 +120,7 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Gets the current reading of the proximity sensor's white channel.
+        /// Gets the current measurement value from the white channel of the proximity sensor.
         /// </summary>
         public int WhiteChannelReading
         {
@@ -134,7 +135,8 @@ namespace Iot.Device.Vcnl4040
         #region Configuration
 
         /// <summary>
-        /// Configures the IR led emitter.
+        /// Configures the IR LED emitter.
+        /// Refer to <see cref="EmitterConfiguration"/> for more information on the parameters.
         /// </summary>
         public void ConfigureEmitter(EmitterConfiguration configuration)
         {
@@ -165,6 +167,7 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Configures the IR receiver.
+        /// Refer to <see cref="ReceiverConfiguration"/> for more information on the parameters.
         /// </summary>
         public void ConfigureReceiver(ReceiverConfiguration configuration)
         {
@@ -200,8 +203,9 @@ namespace Iot.Device.Vcnl4040
         #region Interrupt
 
         /// <summary>
-        /// Gets whether proximity sensor interrupts are enabled.
-        /// Important: will also return TRUE if in proximity detection mode
+        /// Gets whether the proximity sensor interrupts are enabled.
+        /// Important: will also return TRUE if in proximity detection mode,
+        /// as this is a specific interrupt function.
         /// </summary>
         public bool InterruptEnabled
         {
@@ -213,53 +217,66 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Gets whether the proximity detection logic output mode is enabled.
+        /// Gets whether the proximity detection logic output is enabled.
         /// </summary>
         public bool LogicOutputEnabled
         {
             get
             {
                 _psMsRegister.Read();
-                return _psMsRegister.PsMs == PsProximityDetectionOutputMode.LogicOutput;
+                return _psMsRegister.PsMs == PsProximityDetectionOutput.LogicOutput;
             }
         }
 
         /// <summary>
-        /// Disables the interrupts and proximity detection mode.
+        /// Disables the interrupts or logic output.
         /// </summary>
-        public void DisableInterrupt()
+        public void DisableInterrupts()
         {
             _psConf2Register.Read();
             _psConf2Register.PsInt = PsInterruptMode.Disabled;
             _psConf2Register.Write();
 
             _psMsRegister.Read();
-            _psMsRegister.PsMs = PsProximityDetectionOutputMode.Interrupt;
+            _psMsRegister.PsMs = PsProximityDetectionOutput.Interrupt;
             _psMsRegister.Write();
         }
 
         /// <summary>
-        /// ...disables proximity detection mode...
+        /// Configures the interrupt parameters and enables the interrupt (INT-pin function).
+        /// Refer to <see cref="ProximityInterruptConfiguration"/> for more information on the parameters.
         /// </summary>
-        public void EnableInterrupt(ProximityInterruptConfiguration configuration)
+        /// <exception cref="ArgumentException">Thrown if upper threshold is less than lower threshold.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if Interrupt function of the ambient light sensor is enabled.
+        /// Refer to <see cref="ProximityInterruptConfiguration"/> for more information.</exception>
+        public void EnableInterrupts(ProximityInterruptConfiguration configuration)
         {
-            // disable interrupts before altering configuration to avoid transient side effects
-            _psConf2Register.Read();
-            _psConf2Register.PsInt = PsInterruptMode.Disabled;
-            _psConf2Register.Write();
-
             // Design consideration: The configured output range (12-bit or 16-bit) is not verified at this point.
             // Even if the range is set to the default of 12-bit, threshold values above it work reliably.
             // Therefore, the configuration of the output range and the interrupts are considered independently.
-            if (configuration.LowerThreshold < 0 || configuration.LowerThreshold > MaximumSensorCounts16Bit)
+            if (configuration.LowerThreshold > configuration.UpperThreshold)
             {
-                throw new ArgumentException($"Lower threshold (is: {configuration.LowerThreshold}) must be positive and must not exceed the maximum range of {MaximumSensorCounts16Bit} counts");
+                throw new ArgumentException($"Upper threshold (is: {configuration.UpperThreshold}) must be higher than the lower threshold (is: {configuration.LowerThreshold}).");
             }
 
-            if (configuration.LowerThreshold > configuration.UpperThreshold || configuration.UpperThreshold > MaximumSensorCounts16Bit)
+            // enable interrupts / proximity detection logic output
+            if (configuration.Mode == ProximityInterruptMode.LogicOutput)
             {
-                throw new ArgumentException($"Upper threshold (is: {configuration.UpperThreshold}) must be higher than the lower threshold (is: {configuration.LowerThreshold}) and must not exceed the maximum range of ({MaximumSensorCounts16Bit}) counts");
+                if (_alsConfRegister.AlsIntEn == AlsInterrupt.Enabled)
+                {
+                    throw new InvalidOperationException("Logic output mode interferes with ALS interrupt function. ALS interrupts must be disabled.");
+                }
+
+                _psMsRegister.PsMs = PsProximityDetectionOutput.LogicOutput;
             }
+            else
+            {
+                _psMsRegister.PsMs = PsProximityDetectionOutput.Interrupt;
+            }
+
+            // disable interrupts before altering configuration to avoid transient side effects
+            _psConf2Register.PsInt = PsInterruptMode.Disabled;
+            _psConf2Register.Write();
 
             // set new thresholds
             _psLowInterruptThresholdRegister.Level = configuration.LowerThreshold;
@@ -268,30 +285,12 @@ namespace Iot.Device.Vcnl4040
             _psHighInterruptThresholdRegister.Write();
 
             // set persistence
-            _psConf1Register.Read();
             _psConf1Register.PsPers = configuration.Persistence;
             _psConf1Register.Write();
 
             // set smart persistence
-            _psConf3Register.Read();
             _psConf3Register.PsSmartPers = configuration.SmartPersistenceEnabled ? PsSmartPersistenceState.Enabled : PsSmartPersistenceState.Disabled;
             _psConf3Register.Write();
-
-            // enable interrupts / proximity detection logic output
-            _psMsRegister.Read();
-            if (configuration.Mode == ProximityInterruptMode.LogicOutput)
-            {
-                if (_alsConfRegister.AlsIntEn == AlsInterrupt.Enabled)
-                {
-                    throw new ArgumentException("Logic output mode interferes with ALS interrupt function. ALS interrupts must be disabled.");
-                }
-
-                _psMsRegister.PsMs = PsProximityDetectionOutputMode.LogicOutput;
-            }
-            else
-            {
-                _psMsRegister.PsMs = PsProximityDetectionOutputMode.Interrupt;
-            }
 
             // enable interrupts
             _psConf2Register.PsInt = configuration.Mode switch
@@ -308,7 +307,7 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Gets the interrupt configuration of the proximity sensor
+        /// Gets the interrupt configuration from the device.
         /// </summary>
         public ProximityInterruptConfiguration GetInterruptConfiguration()
         {
@@ -318,10 +317,9 @@ namespace Iot.Device.Vcnl4040
             _psConf2Register.Read();
             _psConf3Register.Read();
             _psMsRegister.Read();
-            _psCancellationLevelRegister.Read();
 
             ProximityInterruptMode mode;
-            if (_psMsRegister.PsMs == PsProximityDetectionOutputMode.LogicOutput)
+            if (_psMsRegister.PsMs == PsProximityDetectionOutput.LogicOutput)
             {
                 mode = ProximityInterruptMode.LogicOutput;
             }

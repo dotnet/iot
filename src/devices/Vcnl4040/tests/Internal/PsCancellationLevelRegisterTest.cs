@@ -31,16 +31,16 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         [Theory]
         [InlineData(0b0101_0101_1010_1010, 0b0101_0101, 0b1010_1010)]
         [InlineData(0b1010_1010_0000_0101, 0b1010_1010, 0b0000_0101)]
-        public void Write(int level, byte expectedHighByte, byte expectedLowByte)
+        public void Write(ushort level, byte expectedHighByte, byte expectedLowByte)
         {
-            PropertyWriteTest<PsCancellationLevelRegister, int>(0x00,
-                                                                0x00,
-                                                                level,
-                                                                expectedLowByte,
-                                                                expectedHighByte,
-                                                                (byte)CommandCode.PS_CANC,
-                                                                nameof(PsCancellationLevelRegister.Level),
-                                                                false);
+            PropertyWriteTest<PsCancellationLevelRegister, ushort>(initialRegisterLowByte: 0x00,
+                                                                   initialRegisterHighByte: 0x00,
+                                                                   testValue: level,
+                                                                   expectedLowByte: expectedLowByte,
+                                                                   expectedHighByte: expectedHighByte,
+                                                                   commandCode: (byte)CommandCode.PS_CANC,
+                                                                   registerPropertyName: nameof(PsCancellationLevelRegister.Level),
+                                                                   registerReadsBeforeWriting: false);
         }
     }
 }

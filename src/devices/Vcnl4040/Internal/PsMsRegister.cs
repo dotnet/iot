@@ -20,7 +20,7 @@ namespace Iot.Device.Vcnl4040.Internal
         private bool _psMsChanged = false;
         private bool _ledIChanged = false;
         private PsLedCurrent _ledI = PsLedCurrent.I50mA;
-        private PsProximityDetectionOutputMode _psMs = PsProximityDetectionOutputMode.Interrupt;
+        private PsProximityDetectionOutput _psMs = PsProximityDetectionOutput.Interrupt;
         private PsWhiteChannelState _whiteEn = PsWhiteChannelState.Enabled;
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// Gets or set the detection logic output mode state (PS_MS).
         /// </summary>
-        public PsProximityDetectionOutputMode PsMs
+        public PsProximityDetectionOutput PsMs
         {
             get => _psMs;
             set
@@ -76,7 +76,7 @@ namespace Iot.Device.Vcnl4040.Internal
             (_, byte dataHigh) = ReadData();
 
             WhiteEn = (PsWhiteChannelState)(dataHigh & WhiteEnMask);
-            PsMs = (PsProximityDetectionOutputMode)(dataHigh & PsMsMask);
+            PsMs = (PsProximityDetectionOutput)(dataHigh & PsMsMask);
             LedI = (PsLedCurrent)(dataHigh & LedIMask);
         }
 

@@ -1,3 +1,0 @@
-- Category.txt ausfüllen
-- beim Aktivieren vom ALS Interrupt überprüfen, ob der PS nicht im Logic Output Mode ist => Exception
-- Bei den High Level Tests auf die Register zugreifen und nicht auf den Speicher

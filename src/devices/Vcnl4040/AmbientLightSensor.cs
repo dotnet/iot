@@ -18,6 +18,7 @@ namespace Iot.Device.Vcnl4040
         private readonly AlsHighInterruptThresholdRegister _alsHighInterruptThresholdRegister;
         private readonly AlsLowInterruptThresholdRegister _alsLowInterruptThresholdRegister;
         private readonly AlsDataRegister _alsDataRegister;
+        private readonly PsMsRegister _psMsRegister;
         private AlsIntegrationTime _localIntegrationTime = AlsIntegrationTime.Time80ms;
         private bool _loadReductionModeEnabled = false;
 
@@ -30,6 +31,7 @@ namespace Iot.Device.Vcnl4040
             _alsHighInterruptThresholdRegister = new AlsHighInterruptThresholdRegister(device);
             _alsLowInterruptThresholdRegister = new AlsLowInterruptThresholdRegister(device);
             _alsDataRegister = new AlsDataRegister(device);
+            _psMsRegister = new PsMsRegister(device);
         }
 
         #region General
@@ -265,15 +267,14 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Configures the interrupt parameters and enables the interrupt (INT-pin function).
         /// Refer to <see cref="AmbientLightInterruptConfiguration"/> for more information on the parameters.
-        /// It checks the validity of the provided threshold levels.
-        /// If a threshold exceeds the limit set by the current detection range or integration time,
-        /// or if the lower threshold is higher than the upper one, or if a threshold is negative,
-        /// an exception is triggered.
         /// Note: even in Load Reduction Mode the actual integration time setting from the device is
         ///       used. This would implicitly update the local copy if an inconsistency should prevail.
         ///       Refer to <see cref="LoadReductionModeEnabled"/> for further information.
         /// </summary>
-        /// <exception cref="ArgumentException">Invalid threshold configuration</exception>
+        /// <exception cref="ArgumentException">Thrown if any threshold exceeds the limit defined by the range (integration time),
+        /// or lower threshold is higher than the upper one, or a threshold is negative.</exception>
+        /// <exception cref="InvalidOperationException">Thrown if the proximity logic output of the proximity sensor is enabled.
+        /// Refer to <see cref="ProximityInterruptConfiguration"/> for more information.</exception>
         public void EnableInterrupts(AmbientLightInterruptConfiguration configuration)
         {
             // the maximum detection range and resolution depends on the integration time setting
@@ -295,13 +296,19 @@ namespace Iot.Device.Vcnl4040
                 throw new ArgumentException($"Lower threshold (is: {configuration.LowerThreshold}) must not be higher than upper threshold  (is: {configuration.UpperThreshold}).");
             }
 
+            _psMsRegister.Read();
+            if (_psMsRegister.PsMs == PsProximityDetectionOutput.LogicOutput)
+            {
+                throw new InvalidOperationException("Logic output mode interferes with ALS interrupt function. Logic output must be disabled.");
+            }
+
             // disable interrupts before altering configuration to avoid transient side effects
             _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
             _alsConfRegister.Write();
 
             // set threshold levels by calculating the register value in counts based on the current resolution.
-            _alsLowInterruptThresholdRegister.Level = (int)(configuration.LowerThreshold.Lux / resolution.Lux);
-            _alsHighInterruptThresholdRegister.Level = (int)(configuration.UpperThreshold.Lux / resolution.Lux);
+            _alsLowInterruptThresholdRegister.Level = (ushort)(configuration.LowerThreshold.Lux / resolution.Lux);
+            _alsHighInterruptThresholdRegister.Level = (ushort)(configuration.UpperThreshold.Lux / resolution.Lux);
             _alsLowInterruptThresholdRegister.Write();
             _alsHighInterruptThresholdRegister.Write();
             // set persistence and enable interrupts

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using Iot.Device.Vcnl4040.Definitions;
+using Iot.Device.Vcnl4040.Internal;
 using UnitsNet;
 using Xunit;
 
@@ -90,7 +91,7 @@ namespace Iot.Device.Vcnl4040.Tests
         [InlineData(-1, 1, true)]
         // Upper is negative
         [InlineData(0, -1, true)]
-        public void EnableInterrupts_ThresholdChecks(int lowerThreshold, int upperThreshold, bool throws)
+        public void EnableInterrupts_ThresholdChecks_Exception(int lowerThreshold, int upperThreshold, bool throws)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
@@ -102,7 +103,7 @@ namespace Iot.Device.Vcnl4040.Tests
                                                                    Persistence: AlsInterruptPersistence.Persistence2);
             if (throws)
             {
-                Assert.ThrowsAny<Exception>(() => vcnl4040.AmbientLightSensor.EnableInterrupts(configuration));
+                Assert.ThrowsAny<ArgumentException>(() => vcnl4040.AmbientLightSensor.EnableInterrupts(configuration));
             }
             else
             {
@@ -110,6 +111,23 @@ namespace Iot.Device.Vcnl4040.Tests
                 ReadBackRegisters();
                 Assert.Equal(AlsInterrupt.Enabled, _alsConfRegister.AlsIntEn);
             }
+        }
+
+        [Fact]
+        public void EnableInterrupts_PsLogicOutputInterference_Exception()
+        {
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.AmbientLightSensor);
+
+            AmbientLightInterruptConfiguration configuration = new(LowerThreshold: Illuminance.FromLux(0),
+                                                                   UpperThreshold: Illuminance.FromLux(0),
+                                                                   Persistence: AlsInterruptPersistence.Persistence1);
+
+            PsMsRegister psMsRegister = new(_testDevice);
+            psMsRegister.PsMs = PsProximityDetectionOutput.LogicOutput;
+            psMsRegister.Write();
+
+            Assert.ThrowsAny<InvalidOperationException>(() => vcnl4040.AmbientLightSensor.EnableInterrupts(configuration));
         }
 
         [Theory]

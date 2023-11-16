@@ -32,8 +32,8 @@ using Iot.Device.Vcnl4040.Definitions;
 /// In this mode, the interrupt flags are NOT set. Detection in the host software is not possible.
 /// </param>
 public record ProximityInterruptConfiguration(
-    int LowerThreshold,
-    int UpperThreshold,
+    ushort LowerThreshold,
+    ushort UpperThreshold,
     PsInterruptPersistence Persistence,
     bool SmartPersistenceEnabled,
     ProximityInterruptMode Mode);

@@ -9,6 +9,7 @@ using Iot.Device.Vcnl4040;
 
 internal partial class Explorer
 {
+    private const string Heading = " VCNL4040 Explorer ";
     private const int MenuWidth = 60;
     private const string MenuDevice = "Device";
     private const string MenuAls = "Ambient Light Sensor";
@@ -42,12 +43,12 @@ internal partial class Explorer
         int categoryNumber = 0;
         int commandNumber = 0;
 
-        foreach (var secGroup in _commands.GroupBy(c => c.Section))
+        foreach (IGrouping<string, Command> secGroup in _commands.GroupBy(c => c.Section))
         {
             string sectionHeader = $"=== {secGroup.Key} ".PadRight(MenuWidth, '=');
             Console.WriteLine(sectionHeader);
 
-            foreach (var catGroup in secGroup.GroupBy(c => c.Category))
+            foreach (IGrouping<string, Command> catGroup in secGroup.GroupBy(c => c.Category))
             {
                 Console.WriteLine($"--- {catGroup.Key} ---");
 
@@ -76,29 +77,25 @@ internal partial class Explorer
         {
             _device.VerifyDevice();
         }
-        catch (IOException ioex)
+        catch (IOException ex)
         {
             Console.WriteLine("Communication with device using I2C bus is not working");
-            Console.WriteLine(ioex.Message);
+            Console.WriteLine(ex.Message);
             return;
         }
-        catch (IncompatibleDeviceException idex)
+        catch (IncompatibleDeviceException ex)
         {
-            Console.WriteLine(idex.Message);
+            Console.WriteLine(ex.Message);
             return;
         }
 
         while (true)
         {
             Console.Clear();
-
-            string heading = " VCNL4040 Explorer ";
-            heading = heading.PadLeft(MenuWidth - (MenuWidth - heading.Length) / 2, '=').PadRight(MenuWidth, '=');
+            string heading = Heading.PadLeft(MenuWidth - (MenuWidth - Heading.Length) / 2, '=').PadRight(MenuWidth, '=');
             Console.WriteLine(heading);
             Console.WriteLine(new string('=', MenuWidth));
-
             PrintMenu();
-
             Console.Write("==> ");
 
             string? command = Console.ReadLine()?.ToLower();

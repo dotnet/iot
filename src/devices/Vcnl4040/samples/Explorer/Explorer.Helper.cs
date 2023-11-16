@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
-using System.Globalization;
 using System.Text;
 
 internal partial class Explorer
@@ -44,10 +44,10 @@ internal partial class Explorer
             return false;
         }
 
-        object? choosenEnumValue = enumValues.GetValue(choice);
-        if (choosenEnumValue != null)
+        object? chosenEnumValue = enumValues.GetValue(choice);
+        if (chosenEnumValue != null)
         {
-            selectedValue = (T)choosenEnumValue!;
+            selectedValue = (T)chosenEnumValue!;
             Console.WriteLine();
             return true;
         }
@@ -57,7 +57,7 @@ internal partial class Explorer
         return false;
     }
 
-    private static bool PromptIntegerValue(string prompt, out int enteredValue, int? currentValue = null, int min = int.MinValue, int max = int.MaxValue)
+    private static bool PromptValue(string prompt, out ushort enteredValue, ushort? currentValue = null, ushort min = ushort.MinValue, ushort max = ushort.MaxValue)
     {
         if (currentValue != null)
         {
@@ -76,7 +76,7 @@ internal partial class Explorer
         }
         else
         {
-            bool result = int.TryParse(input, out enteredValue);
+            bool result = ushort.TryParse(input, out enteredValue);
             if (!result)
             {
                 Console.WriteLine("\nINVALID INPUT\n");
@@ -142,5 +142,15 @@ internal partial class Explorer
     {
         No,
         Yes
+    }
+
+    private class Command
+    {
+        public string Section { get; init; } = string.Empty;
+        public string Category { get; init; } = string.Empty;
+        public string Name { get; init; } = string.Empty;
+        public Action Action { get; init; } = () => { };
+        public bool ShowConfiguration { get; init; } = true;
+        public string Id { get; set; } = string.Empty;
     }
 }

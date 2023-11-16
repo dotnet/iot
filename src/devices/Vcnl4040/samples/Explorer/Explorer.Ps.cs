@@ -1,10 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Device.Spi;
 using System.Drawing;
-using System.Reflection;
-using System.Reflection.Metadata;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Definitions;
@@ -27,8 +26,8 @@ internal partial class Explorer
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Configure receiver", Action = ConfigureReceiver },
             new Command() { Section = MenuPs, Category = MenuConfiguration, Name = "Enable/disable active force mode", Action = EnableDisableActiveForceMode },
 
-            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts", Action = EnableProximitInterrupts },
-            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts", Action = _ps.DisableInterrupt },
+            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts", Action = EnableProximityInterrupts },
+            new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts", Action = _ps.DisableInterrupts },
 
             new Command() { Section = MenuPs, Category = MenuOthers, Name = "Proximity LED Display", Action = ProximityLedDisplay, ShowConfiguration = false },
         });
@@ -44,7 +43,7 @@ internal partial class Explorer
             return;
         }
 
-        bool result = PromptEnum("Display interrupt flags (will clear flags continously)", out YesNoChoice choice);
+        bool result = PromptEnum("Display interrupt flags (will clear flags continuously)", out YesNoChoice choice);
         if (!result)
         {
             choice = YesNoChoice.No;
@@ -104,8 +103,8 @@ internal partial class Explorer
             return;
         }
 
-        int max = 12000;
-        if (!PromptIntegerValue($"Max", out max, max, 0, 65535))
+        ushort max = 12000;
+        if (!PromptValue($"Max", out max, max, 0, 65535))
         {
             return;
         }
@@ -154,7 +153,7 @@ internal partial class Explorer
         Console.WriteLine("PS configuration:");
         Console.WriteLine($"  Power state:                {_ps.PowerOn}");
         Console.WriteLine("  Emitter:");
-        Console.WriteLine($"    IR LED current:           {emitterConfiguration.Current}");
+        Console.WriteLine($"    IR LED current (peak):    {emitterConfiguration.Current}");
         Console.WriteLine($"    IR LED duty ratio:        {emitterConfiguration.DutyRatio}");
         Console.WriteLine($"    Integration time:         {emitterConfiguration.IntegrationTime}");
         Console.WriteLine($"    Multi pulses:             {emitterConfiguration.MultiPulses}");
@@ -174,8 +173,6 @@ internal partial class Explorer
         Console.WriteLine($"    Smart persistence:        {proximityDetectionConfiguration.SmartPersistenceEnabled}");
         Console.WriteLine("\nPress any key to continue");
         Console.ReadKey();
-
-        // this configuration results in a peak current and an average current
     }
 
     private void SetPsPowerState()
@@ -213,7 +210,10 @@ internal partial class Explorer
             return;
         }
 
-        EmitterConfiguration configuration = new(current, duty, integrationTime, multiPulse);
+        EmitterConfiguration configuration = new(Current: current,
+                                                 DutyRatio: duty,
+                                                 IntegrationTime: integrationTime,
+                                                 MultiPulses: multiPulse);
         _ps.ConfigureEmitter(configuration);
     }
 
@@ -231,7 +231,7 @@ internal partial class Explorer
             return;
         }
 
-        if (!PromptIntegerValue($"Ambient light cancellation level [0 - 65535]", out int cancellationLevel, currentConfiguration.CancellationLevel, 0, 65535))
+        if (!PromptValue($"Ambient light cancellation level [0 - 65535]", out ushort cancellationLevel, currentConfiguration.CancellationLevel, 0, 65535))
         {
             return;
         }
@@ -241,11 +241,10 @@ internal partial class Explorer
             return;
         }
 
-        ReceiverConfiguration configuration = new(
-            extendedOutputRange,
-            cancellationLevel,
-            whiteChannelEnabled,
-            sunlightCancellationEnabled);
+        ReceiverConfiguration configuration = new(ExtendedOutputRange: extendedOutputRange,
+                                                  CancellationLevel: cancellationLevel,
+                                                  WhiteChannelEnabled: whiteChannelEnabled,
+                                                  SunlightCancellationEnabled: sunlightCancellationEnabled);
         _ps.ConfigureReceiver(configuration);
     }
 
@@ -259,17 +258,17 @@ internal partial class Explorer
         _ps.ActiveForceMode = choice == YesNoChoice.Yes;
     }
 
-    private void EnableProximitInterrupts()
+    private void EnableProximityInterrupts()
     {
         ProximityInterruptConfiguration currentConfiguration = _ps.GetInterruptConfiguration();
 
-        int lowerThreshold;
-        int upperThreshold = 0;
+        ushort lowerThreshold;
+        ushort upperThreshold = 0;
         PsInterruptPersistence persistence = PsInterruptPersistence.Persistence1;
         bool smartPersistenceEnabled = false;
         bool logicOutputModeEnabled = false;
-        bool result = PromptIntegerValue("Lower threshold [0 - 65535]", out lowerThreshold, currentConfiguration.LowerThreshold, 0, 65535)
-            && PromptIntegerValue("Upper threshold [0 - 65535]", out upperThreshold, currentConfiguration.UpperThreshold, lowerThreshold, 65535)
+        bool result = PromptValue("Lower threshold [0 - 65535]", out lowerThreshold, currentConfiguration.LowerThreshold, 0, 65535)
+            && PromptValue("Upper threshold [0 - 65535]", out upperThreshold, currentConfiguration.UpperThreshold, lowerThreshold, 65535)
             && PromptEnum("Persistence", out persistence, currentConfiguration.Persistence)
             && PromptYesNoChoice("Enable smart persistence", out smartPersistenceEnabled, currentConfiguration.SmartPersistenceEnabled)
             && PromptYesNoChoice("Enable logic output mode", out logicOutputModeEnabled, currentConfiguration.Mode == ProximityInterruptMode.LogicOutput);
@@ -305,30 +304,23 @@ internal partial class Explorer
             return;
         }
 
-        ProximityInterruptConfiguration configuration = new(
-            lowerThreshold,
-            upperThreshold,
-            persistence,
-            smartPersistenceEnabled,
-            mode);
+        ProximityInterruptConfiguration configuration = new(LowerThreshold: lowerThreshold,
+                                                            UpperThreshold: upperThreshold,
+                                                            Persistence: persistence,
+                                                            SmartPersistenceEnabled: smartPersistenceEnabled,
+                                                            Mode: mode);
 
         try
         {
-            _ps.EnableInterrupt(configuration);
+            _ps.EnableInterrupts(configuration);
         }
-        catch(Exception ex)
+        catch (ArgumentException ex)
         {
-            Console.WriteLine($"Invalid interrupt configuration:\n{ex.Message}\n");
+            Console.WriteLine($"{ex.Message}\n");
         }
-    }
-
-    private class Command
-    {
-        public string Section { get; init; } = string.Empty;
-        public string Category { get; init; } = string.Empty;
-        public string Name { get; init; } = string.Empty;
-        public Action Action { get; init; } = () => { };
-        public bool ShowConfiguration { get; init; } = true;
-        public string Id { get; set; } = string.Empty;
+        catch (InvalidOperationException ex)
+        {
+            Console.WriteLine($"{ex.Message}\n");
+        }
     }
 }

@@ -38,7 +38,7 @@ internal partial class Explorer
             return;
         }
 
-        bool result = PromptEnum("Display interrupt flags (will clear flags continously)", out YesNoChoice choice);
+        bool result = PromptEnum("Display interrupt flags (will clear flags continuously)", out YesNoChoice choice);
         if (!result)
         {
             choice = YesNoChoice.No;
@@ -139,7 +139,7 @@ internal partial class Explorer
 
     private void EnableAlsInterrupts()
     {
-        int maxDetectionRange = _als.IntegrationTime switch
+        ushort maxDetectionRange = _als.IntegrationTime switch
         {
             AlsIntegrationTime.Time80ms => 6553,
             AlsIntegrationTime.Time160ms => 3276,
@@ -150,13 +150,13 @@ internal partial class Explorer
 
         (Illuminance currentLowerThreshold, Illuminance currentUpperThreshold, AlsInterruptPersistence currentPersistence) = _als.GetInterruptConfiguration();
 
-        int lowerThreshold;
-        int upperThreshold = 0;
+        ushort lowerThreshold;
+        ushort upperThreshold = 0;
         AlsInterruptPersistence persistence = AlsInterruptPersistence.Persistence1;
-        bool result = PromptIntegerValue($"Lower threshold [0 - {maxDetectionRange} lux]", out lowerThreshold, (int)currentLowerThreshold.Lux, 0, maxDetectionRange);
+        bool result = PromptValue($"Lower threshold [0 - {maxDetectionRange} lux]", out lowerThreshold, (ushort)currentLowerThreshold.Lux, 0, maxDetectionRange);
         if (result)
         {
-            result &= PromptIntegerValue($"Upper threshold [{lowerThreshold} - {maxDetectionRange} lux])", out upperThreshold, (int)currentUpperThreshold.Lux, lowerThreshold, maxDetectionRange);
+            result &= PromptValue($"Upper threshold [{lowerThreshold} - {maxDetectionRange} lux])", out upperThreshold, (ushort)currentUpperThreshold.Lux, lowerThreshold, maxDetectionRange);
         }
 
         if (result)

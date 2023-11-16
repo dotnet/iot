@@ -15,7 +15,7 @@ namespace Iot.Device.Vcnl4040.Internal
         /// <summary>
         /// Gets or sets the level (threshold).
         /// </summary>
-        public int Level { get; set; } = 0;
+        public ushort Level { get; set; } = 0;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LevelRegister"/> class.
@@ -29,7 +29,7 @@ namespace Iot.Device.Vcnl4040.Internal
         public override void Read()
         {
             (byte dataLow, byte dataHigh) = ReadData();
-            Level = dataHigh << 8 | dataLow;
+            Level = (ushort)(dataHigh << 8 | dataLow);
         }
 
         /// <inheritdoc/>>

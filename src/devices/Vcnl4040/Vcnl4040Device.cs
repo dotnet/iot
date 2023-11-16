@@ -15,36 +15,31 @@ namespace Iot.Device.Vcnl4040
     public class Vcnl4040Device : IDisposable
     {
         /// <summary>
-        /// Default I2C bus address
+        /// I2C bus address
         /// </summary>
         public static int DefaultI2cAddress = 0x60;
 
-        /// <summary>
-        /// This is the version code this binding implementation is compatible with.
-        /// Is
-        /// </summary>
         private const int CompatibleDeviceId = 0x0186;
-
         private readonly InterruptFlagRegister _interruptFlagRegister;
         private readonly IdRegister _idRegister;
         private I2cDevice _i2cDevice;
 
         /// <summary>
-        /// Ambient light sensor of the VCNL4040 device
+        /// Gets the ambient light sensor of the VCNL4040 device.
         /// </summary>
         public AmbientLightSensor AmbientLightSensor { get; private init; }
 
         /// <summary>
-        /// Proximity sensor of the VCNL4040 device
+        /// Get the proximity sensor of the VCNL4040 device.
         /// </summary>
         public ProximitySensor ProximitySensor { get; private init; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Vcnl4040"/> binding.
+        /// Initializes a new instance of the <see cref="Vcnl4040Device"/> binding.
         /// </summary>
         public Vcnl4040Device(I2cDevice i2cDevice)
         {
-            _i2cDevice = i2cDevice ?? throw new ArgumentNullException(nameof(i2cDevice));
+            _i2cDevice = i2cDevice;
 
             AmbientLightSensor = new AmbientLightSensor(_i2cDevice);
             ProximitySensor = new ProximitySensor(_i2cDevice);
@@ -54,7 +49,7 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Resets the device to defaults
+        /// Resets the device to defaults.
         /// </summary>
         public void Reset()
         {
@@ -88,10 +83,10 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Verifies whether a functional I2C connection to the device exists and checks the identification for
-        /// device recognition. If the communication doesn't work or the identification is incorrect, an exception is raised.
+        /// device recognition. An exception is raised, if the communication doesn't work or the identification is incorrect.
         /// </summary>
-        /// <exception cref="IOException">Non-functional I2C communication</exception>
-        /// <exception cref="IncompatibleDeviceException">Incompatible device detected</exception>
+        /// <exception cref="IOException">Non-functional I2C communication.</exception>
+        /// <exception cref="IncompatibleDeviceException">Incompatible device detected.</exception>
         public void VerifyDevice()
         {
             _idRegister.Read();
@@ -112,7 +107,7 @@ namespace Iot.Device.Vcnl4040
         }
 
         /// <summary>
-        /// Gets the device version code.
+        /// Gets the device identifier.
         /// </summary>
         public int DeviceId
         {
