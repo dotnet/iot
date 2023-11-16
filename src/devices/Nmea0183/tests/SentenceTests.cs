@@ -285,7 +285,7 @@ namespace Iot.Device.Nmea0183.Tests
             CrossTrackError xte = (CrossTrackError)decoded!.TryGetTypedValue(ref _lastPacketTime)!;
 
             Assert.True(xte.Valid);
-            Assert.True(xte.Distance.Equals(Length.Zero, 0, ComparisonType.Absolute));
+            Assert.True(xte.Distance.Equals(Length.Zero, Length.Zero));
         }
 
         [Fact]
