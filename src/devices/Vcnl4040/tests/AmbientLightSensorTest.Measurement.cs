@@ -19,8 +19,11 @@ namespace Iot.Device.Vcnl4040.Tests
 
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
+
+            // set data directly as the register is readonly
             _testDevice.SetData(CommandCode.ALS_Data, registerValue);
-            _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)integrationTime);
+            _alsConfRegister.AlsIt = integrationTime;
+            WriteRegisters();
 
             Assert.Equal(refReading, vcnl4040.AmbientLightSensor.Reading);
         }
@@ -35,7 +38,7 @@ namespace Iot.Device.Vcnl4040.Tests
              Approach:
                1)  Switch load reduction mode on
                2)  Set data register to 10000
-               3)  set integeration time using the property to 320 ms
+               3)  set integration time using the property to 320 ms
                4)  change the integration time in the register to 160 ms
                    This WILL NOT update the local integration time in the binding,
                    hance the reading will still base on the local integration time.

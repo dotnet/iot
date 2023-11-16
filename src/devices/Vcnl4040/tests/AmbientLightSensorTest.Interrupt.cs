@@ -16,7 +16,9 @@ namespace Iot.Device.Vcnl4040.Tests
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
-            _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)state);
+
+            _alsConfRegister.AlsIntEn = state;
+            WriteRegisters();
 
             Assert.Equal(state == AlsInterrupt.Enabled, vcnl4040.AmbientLightSensor.InterruptsEnabled);
         }
@@ -26,14 +28,17 @@ namespace Iot.Device.Vcnl4040.Tests
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
-            _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)AlsInterrupt.Enabled);
+
+            _alsConfRegister.AlsIntEn = AlsInterrupt.Enabled;
+            WriteRegisters();
 
             Assert.True(vcnl4040.AmbientLightSensor.InterruptsEnabled);
 
             vcnl4040.AmbientLightSensor.DisableInterrupts();
 
-            Assert.Equal((byte)AlsInterrupt.Disabled, _testDevice.GetLsb(CommandCode.ALS_CONF));
             Assert.False(vcnl4040.AmbientLightSensor.InterruptsEnabled);
+            ReadBackRegisters();
+            Assert.Equal(AlsInterrupt.Disabled, _alsConfRegister.AlsIntEn);
         }
 
         [Fact]
@@ -65,10 +70,11 @@ namespace Iot.Device.Vcnl4040.Tests
 
             int lowerThresholdCounts = (int)(lowerThresholdLux * (1 / vcnl4040.AmbientLightSensor.ResolutionAsIlluminance.Lux));
             int upperThresholdCounts = (int)(upperThresholdLux * (1 / vcnl4040.AmbientLightSensor.ResolutionAsIlluminance.Lux));
-            Assert.Equal(lowerThresholdCounts, _testDevice.GetData(CommandCode.ALS_THDL));
-            Assert.Equal(upperThresholdCounts, _testDevice.GetData(CommandCode.ALS_THDH));
-            // Persistence: bits 3:2
-            Assert.Equal((byte)persistence, _testDevice.GetLsb(CommandCode.ALS_CONF) & 0b00001100);
+
+            ReadBackRegisters();
+            Assert.Equal(lowerThresholdCounts, _alsLowInterruptThresholdRegister.Level);
+            Assert.Equal(upperThresholdCounts, _alsHighInterruptThresholdRegister.Level);
+            Assert.Equal(persistence, _alsConfRegister.AlsPers);
         }
 
         [Theory]
@@ -101,32 +107,30 @@ namespace Iot.Device.Vcnl4040.Tests
             else
             {
                 vcnl4040.AmbientLightSensor.EnableInterrupts(configuration);
+                ReadBackRegisters();
                 Assert.Equal(AlsInterrupt.Enabled, _alsConfRegister.AlsIntEn);
             }
         }
 
-        [Fact]
-        public void GetInterruptConfiguration()
+        [Theory]
+        [InlineData(1000, 2000, AlsInterruptPersistence.Persistence1)]
+        [InlineData(2000, 3000, AlsInterruptPersistence.Persistence2)]
+        public void GetInterruptConfiguration(int lowerThreshold, int upperThreshold, AlsInterruptPersistence persistence)
         {
-            AlsIntegrationTime integrationTime = AlsIntegrationTime.Time80ms;
-
-            int lowerThresholdLux = 1000;
-            int upperThresholdLux = 2000;
-            AlsInterruptPersistence persistence = AlsInterruptPersistence.Persistence1;
-
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
 
-            int lowerThresholdCounts = (int)(lowerThresholdLux * (1 / vcnl4040.AmbientLightSensor.ResolutionAsIlluminance.Lux));
-            int upperThresholdCounts = (int)(upperThresholdLux * (1 / vcnl4040.AmbientLightSensor.ResolutionAsIlluminance.Lux));
-            _testDevice.SetData(CommandCode.ALS_THDL, lowerThresholdCounts);
-            _testDevice.SetData(CommandCode.ALS_THDH, upperThresholdCounts);
-            _testDevice.SetData(CommandCode.ALS_CONF, (byte)integrationTime | (byte)persistence);
+            AmbientLightInterruptConfiguration referenceConfiguration = new(LowerThreshold: Illuminance.FromLux(lowerThreshold),
+                                                                            UpperThreshold: Illuminance.FromLux(upperThreshold),
+                                                                            Persistence: persistence);
 
-            AmbientLightInterruptConfiguration configuration = vcnl4040.AmbientLightSensor.GetInterruptConfiguration();
-            Assert.Equal(lowerThresholdLux, configuration.LowerThreshold.Lux);
-            Assert.Equal(upperThresholdLux, configuration.UpperThreshold.Lux);
-            Assert.Equal(persistence, configuration.Persistence);
+            vcnl4040.AmbientLightSensor.EnableInterrupts(referenceConfiguration);
+
+            AmbientLightInterruptConfiguration retrievedConfiguration = vcnl4040.AmbientLightSensor.GetInterruptConfiguration();
+
+            Assert.Equal(referenceConfiguration.LowerThreshold, retrievedConfiguration.LowerThreshold);
+            Assert.Equal(referenceConfiguration.UpperThreshold, retrievedConfiguration.UpperThreshold);
+            Assert.Equal(referenceConfiguration.Persistence, retrievedConfiguration.Persistence);
         }
     }
 }

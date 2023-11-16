@@ -137,3 +137,13 @@ The **Explorer** sample application allows the user to experiment with all the f
     /// Iavg = Ipeak * duty, e.g. Iavg = 100 mA * 1/40 = 2.5mA.
     /// The duty ratio has no influence on the detection range.
     /// Multi-pulse: 8 haben keinen Effekt, 2 oder 4 Pulse direkt hinter einander, Gesamtintervall bleibt unverändert
+
+
+This duty cycle also determines how fast the application
+reacts when an object appears in, or is removed from, the
+proximity zone.
+
+Reaction time is also determined by the number of counts
+that must be exceeded before an interrupt is set. This is
+possible to define with proximity persist: PS_PERS.
+Possible values are from 1 to 4.

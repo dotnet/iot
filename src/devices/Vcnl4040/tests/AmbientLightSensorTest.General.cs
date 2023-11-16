@@ -13,10 +13,12 @@ namespace Iot.Device.Vcnl4040.Tests
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
 
-            _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)PowerState.PowerOff);
+            _alsConfRegister.AlsSd = PowerState.PowerOff;
+            WriteRegisters();
             Assert.False(vcnl4040.AmbientLightSensor.PowerOn);
 
-            _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)PowerState.PowerOn);
+            _alsConfRegister.AlsSd = PowerState.PowerOn;
+            WriteRegisters();
             Assert.True(vcnl4040.AmbientLightSensor.PowerOn);
         }
 
@@ -30,9 +32,11 @@ namespace Iot.Device.Vcnl4040.Tests
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
 
-            _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)initialState);
+            _alsConfRegister.AlsSd = initialState;
+            WriteRegisters();
             vcnl4040.AmbientLightSensor.PowerOn = newState == PowerState.PowerOn;
-            Assert.Equal((byte)newState, _testDevice.GetLsb(CommandCode.ALS_CONF));
+            ReadBackRegisters();
+            Assert.Equal(newState, _alsConfRegister.AlsSd);
         }
     }
 }

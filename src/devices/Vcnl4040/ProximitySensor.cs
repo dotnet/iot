@@ -8,7 +8,7 @@ using Iot.Device.Vcnl4040.Internal;
 namespace Iot.Device.Vcnl4040
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="ProximitySensor"/> API class.
+    /// Initializes a new instance of the <see cref="ProximitySensor"/> class.
     /// </summary>
     public class ProximitySensor
     {
@@ -215,7 +215,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets whether the proximity detection logic output mode is enabled.
         /// </summary>
-        public bool LogicOutputModeEnabled
+        public bool LogicOutputEnabled
         {
             get
             {
@@ -277,14 +277,14 @@ namespace Iot.Device.Vcnl4040
             _psConf3Register.PsSmartPers = configuration.SmartPersistenceEnabled ? PsSmartPersistenceState.Enabled : PsSmartPersistenceState.Disabled;
             _psConf3Register.Write();
 
-            // enable interrupts / proximity dectection logic output
+            // enable interrupts / proximity detection logic output
             _psMsRegister.Read();
             if (configuration.Mode == ProximityInterruptMode.LogicOutput)
             {
-                // disable ALS interrupts
-                // (required according to datasheet, but it may work even if still enabled)
-                _alsConfRegister.AlsIntEn = AlsInterrupt.Disabled;
-                _alsConfRegister.Write();
+                if (_alsConfRegister.AlsIntEn == AlsInterrupt.Enabled)
+                {
+                    throw new ArgumentException("Logic output mode interferes with ALS interrupt function. ALS interrupts must be disabled.");
+                }
 
                 _psMsRegister.PsMs = PsProximityDetectionOutputMode.LogicOutput;
             }

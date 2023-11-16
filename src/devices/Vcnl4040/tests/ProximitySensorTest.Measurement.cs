@@ -14,11 +14,16 @@ namespace Iot.Device.Vcnl4040.Tests
 
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
+
             _testDevice.SetData(CommandCode.PS_Data, refReading);
 
-            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+            ReadBackRegisters();
+            Assert.Equal(PsActiveForceModeTrigger.NoTrigger, _psConf3Register.PsTrig);
+
             Assert.Equal(refReading, vcnl4040.ProximitySensor.Reading);
-            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+
+            ReadBackRegisters();
+            Assert.Equal(PsActiveForceModeTrigger.NoTrigger, _psConf3Register.PsTrig);
         }
 
         [Fact]
@@ -28,13 +33,18 @@ namespace Iot.Device.Vcnl4040.Tests
 
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
+
             _testDevice.SetData(CommandCode.PS_Data, refReading);
 
             vcnl4040.ProximitySensor.ActiveForceMode = true;
 
-            Assert.Equal(0, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+            ReadBackRegisters();
+            Assert.Equal(PsActiveForceModeTrigger.NoTrigger, _psConf3Register.PsTrig);
+
             Assert.Equal(refReading, vcnl4040.ProximitySensor.Reading);
-            Assert.Equal((byte)PsActiveForceModeTrigger.OneTimeCycle, _testDevice.GetLsb(CommandCode.PS_CONF_3_MS) & (byte)PsActiveForceModeTrigger.OneTimeCycle);
+
+            ReadBackRegisters();
+            Assert.Equal(PsActiveForceModeTrigger.OneTimeCycle, _psConf3Register.PsTrig);
         }
 
         [Fact]

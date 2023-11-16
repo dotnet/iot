@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Reflection;
+using Iot.Device.Vcnl4040.Definitions;
 using Iot.Device.Vcnl4040.Internal;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -16,7 +17,7 @@ namespace Iot.Device.Vcnl4040.Tests
 
         private static FieldInfo GetFieldInfoOrThrow(object instance, string fieldName) =>
             instance.GetType().GetField(fieldName, BindingFlags.NonPublic | BindingFlags.Instance)
-                               ?? throw new Exception($"Coulnd't get field named '{fieldName}' for type '{instance.GetType().Name}'");
+                               ?? throw new Exception($"Couldn't get field named '{fieldName}' for type '{instance.GetType().Name}'");
 
         public AmbientLightSensorTest()
         {
@@ -32,6 +33,21 @@ namespace Iot.Device.Vcnl4040.Tests
             GetFieldInfoOrThrow(als, "_alsHighInterruptThresholdRegister").SetValue(als, _alsHighInterruptThresholdRegister);
             GetFieldInfoOrThrow(als, "_alsLowInterruptThresholdRegister").SetValue(als, _alsLowInterruptThresholdRegister);
             GetFieldInfoOrThrow(als, "_alsDataRegister").SetValue(als, _alsDataRegister);
+        }
+
+        private void ReadBackRegisters()
+        {
+            _alsConfRegister.Read();
+            _alsHighInterruptThresholdRegister.Read();
+            _alsLowInterruptThresholdRegister.Read();
+            _alsDataRegister.Read();
+        }
+
+        private void WriteRegisters()
+        {
+            _alsConfRegister.Write();
+            _alsHighInterruptThresholdRegister.Write();
+            _alsLowInterruptThresholdRegister.Write();
         }
     }
 }

@@ -1,7 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-/*
-using Iot.Device.Vcnl4040.Common.Defnitions;
+
+using System;
+using Iot.Device.Vcnl4040.Definitions;
 using Xunit;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -9,34 +10,167 @@ namespace Iot.Device.Vcnl4040.Tests
     public partial class ProximitySensorTest
     {
         [Theory]
-        [InlineData(PsInterruptMode.Close)]
-        [InlineData(PsInterruptMode.Away)]
-        [InlineData(PsInterruptMode.CloseOrAway)]
-        public void InterruptEnabled_Get(PsInterruptMode mode)
+        [InlineData(1000, 2000, PsInterruptPersistence.Persistence1, false, ProximityInterruptMode.AwayInterrupt)]
+        [InlineData(2000, 3000, PsInterruptPersistence.Persistence2, true, ProximityInterruptMode.CloseInterrupt)]
+        [InlineData(3000, 4000, PsInterruptPersistence.Persistence3, false, ProximityInterruptMode.CloseOrAwayInterrupt)]
+        [InlineData(4000, 5000, PsInterruptPersistence.Persistence4, true, ProximityInterruptMode.LogicOutput)]
+        public void EnableInterrupt(int lowerThreshold, int upperThreshold, PsInterruptPersistence persistence, bool smartPersistenceEnabled, ProximityInterruptMode mode)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
 
-            _testDevice.SetMsb(CommandCode.PS_CONF_1_2, (byte)PsInterruptMode.Disabled);
-            Assert.False(vcnl4040.ProximitySensor.InterruptEnabled);
-            _testDevice.SetMsb(CommandCode.PS_CONF_1_2, (byte)mode);
-            Assert.True(vcnl4040.ProximitySensor.InterruptEnabled);
+            ProximityInterruptConfiguration configuration = new(LowerThreshold: lowerThreshold,
+                                                                UpperThreshold: upperThreshold,
+                                                                Persistence: persistence,
+                                                                SmartPersistenceEnabled: smartPersistenceEnabled,
+                                                                Mode: mode);
+
+            // apply configuration and enable
+            vcnl4040.ProximitySensor.EnableInterrupt(configuration);
+
+            ReadBackRegisters();
+            Assert.Equal(lowerThreshold, _psLowInterruptThresholdRegister.Level);
+            Assert.Equal(upperThreshold, _psHighInterruptThresholdRegister.Level);
+            Assert.Equal(persistence, _psConf1Register.PsPers);
+            Assert.Equal(smartPersistenceEnabled ? PsSmartPersistenceState.Enabled : PsSmartPersistenceState.Disabled, _psConf3Register.PsSmartPers);
+            Assert.Equal(mode == ProximityInterruptMode.LogicOutput ? PsProximityDetectionOutputMode.LogicOutput : PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
+            Assert.Equal(mode switch
+            {
+                ProximityInterruptMode.Nothing => PsInterruptMode.Disabled,
+                ProximityInterruptMode.CloseInterrupt => PsInterruptMode.Close,
+                ProximityInterruptMode.AwayInterrupt => PsInterruptMode.Away,
+                ProximityInterruptMode.CloseOrAwayInterrupt => PsInterruptMode.CloseOrAway,
+                ProximityInterruptMode.LogicOutput => PsInterruptMode.CloseOrAway,
+                _ => throw new NotImplementedException(),
+            }, _psConf2Register.PsInt);
         }
 
         [Theory]
-        [InlineData(PsInterruptMode.Close)]
-        [InlineData(PsInterruptMode.Away)]
-        [InlineData(PsInterruptMode.CloseOrAway)]
-        public void InterruptEnabled_Get(PsInterruptMode mode)
+        [InlineData(1000, 2000, false)]
+        [InlineData(1000, 1000, false)]
+        [InlineData(2000, 1999, true)]
+        [InlineData(-001, 1000, true)]
+        [InlineData(1000, -001, true)]
+        public void EnableInterrupt_ThresholdChecks(int lowerThreshold, int upperThreshold, bool exceptionExpected)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
 
-            _testDevice.SetMsb(CommandCode.PS_CONF_1_2, (byte)PsInterruptMode.Disabled);
+            ProximityInterruptConfiguration configuration = new(LowerThreshold: lowerThreshold,
+                                                                UpperThreshold: upperThreshold,
+                                                                Persistence: PsInterruptPersistence.Persistence1,
+                                                                SmartPersistenceEnabled: false,
+                                                                Mode: ProximityInterruptMode.CloseInterrupt);
+
+            // apply configuration and enable
+            if (exceptionExpected)
+            {
+                Assert.Throws<ArgumentException>(() => vcnl4040.ProximitySensor.EnableInterrupt(configuration));
+            }
+            else
+            {
+                Assert.True(true);
+            }
+        }
+
+        [Fact]
+        public void EnableInterrupt_AlsInterruptInterference()
+        {
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.ProximitySensor);
+
+            ProximityInterruptConfiguration configuration = new(LowerThreshold: 1000,
+                                                                UpperThreshold: 2000,
+                                                                Persistence: PsInterruptPersistence.Persistence1,
+                                                                SmartPersistenceEnabled: false,
+                                                                Mode: ProximityInterruptMode.LogicOutput);
+
+            // fake that ALS interrupt is enabled
+            _alsConfRegister.AlsIntEn = AlsInterrupt.Enabled;
+            WriteRegisters();
+
+            Assert.Throws<ArgumentException>(() => vcnl4040.ProximitySensor.EnableInterrupt(configuration));
+        }
+
+        [Fact]
+        public void InterruptEnabled()
+        {
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.ProximitySensor);
+
+            ProximityInterruptConfiguration configuration = new(LowerThreshold: 1000,
+                                                                UpperThreshold: 2000,
+                                                                Persistence: PsInterruptPersistence.Persistence1,
+                                                                SmartPersistenceEnabled: false,
+                                                                Mode: ProximityInterruptMode.AwayInterrupt);
+
+            ReadBackRegisters();
+            Assert.Equal(PsInterruptMode.Disabled, _psConf2Register.PsInt);
+            Assert.Equal(PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
             Assert.False(vcnl4040.ProximitySensor.InterruptEnabled);
-            _testDevice.SetMsb(CommandCode.PS_CONF_1_2, (byte)mode);
+            Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
+
+            vcnl4040.ProximitySensor.EnableInterrupt(configuration);
+
+            ReadBackRegisters();
+            Assert.Equal(PsInterruptMode.Away, _psConf2Register.PsInt);
+            Assert.Equal(PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
             Assert.True(vcnl4040.ProximitySensor.InterruptEnabled);
+            Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
+        }
+
+        [Fact]
+        public void LogicOutputEnabled()
+        {
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.ProximitySensor);
+
+            ProximityInterruptConfiguration configuration = new(LowerThreshold: 1000,
+                                                                UpperThreshold: 2000,
+                                                                Persistence: PsInterruptPersistence.Persistence1,
+                                                                SmartPersistenceEnabled: false,
+                                                                Mode: ProximityInterruptMode.LogicOutput);
+
+            ReadBackRegisters();
+            Assert.Equal(PsInterruptMode.Disabled, _psConf2Register.PsInt);
+            Assert.Equal(PsProximityDetectionOutputMode.Interrupt, _psMsRegister.PsMs);
+            Assert.False(vcnl4040.ProximitySensor.InterruptEnabled);
+            Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
+
+            vcnl4040.ProximitySensor.EnableInterrupt(configuration);
+
+            ReadBackRegisters();
+            Assert.Equal(PsInterruptMode.CloseOrAway, _psConf2Register.PsInt);
+            Assert.Equal(PsProximityDetectionOutputMode.LogicOutput, _psMsRegister.PsMs);
+            Assert.True(vcnl4040.ProximitySensor.InterruptEnabled);
+            Assert.True(vcnl4040.ProximitySensor.LogicOutputEnabled);
+        }
+
+        [Theory]
+        [InlineData(1000, 2000, PsInterruptPersistence.Persistence1, false, ProximityInterruptMode.AwayInterrupt)]
+        [InlineData(2000, 3000, PsInterruptPersistence.Persistence2, true, ProximityInterruptMode.CloseInterrupt)]
+        [InlineData(3000, 4000, PsInterruptPersistence.Persistence3, false, ProximityInterruptMode.CloseOrAwayInterrupt)]
+        [InlineData(4000, 5000, PsInterruptPersistence.Persistence4, true, ProximityInterruptMode.LogicOutput)]
+        public void GetInterruptConfiguration(int lowerThreshold, int upperThreshold, PsInterruptPersistence persistence, bool smartPersistenceEnabled, ProximityInterruptMode mode)
+        {
+            Vcnl4040Device vcnl4040 = new(_testDevice);
+            InjectTestRegister(vcnl4040.ProximitySensor);
+
+            ProximityInterruptConfiguration referenceConfiguration = new(LowerThreshold: lowerThreshold,
+                                                                UpperThreshold: upperThreshold,
+                                                                Persistence: persistence,
+                                                                SmartPersistenceEnabled: smartPersistenceEnabled,
+                                                                Mode: mode);
+
+            // apply configuration and enable
+            vcnl4040.ProximitySensor.EnableInterrupt(referenceConfiguration);
+
+            ProximityInterruptConfiguration retrievedConfiguration = vcnl4040.ProximitySensor.GetInterruptConfiguration();
+            Assert.Equal(referenceConfiguration.LowerThreshold, retrievedConfiguration.LowerThreshold);
+            Assert.Equal(referenceConfiguration.UpperThreshold, retrievedConfiguration.UpperThreshold);
+            Assert.Equal(referenceConfiguration.Persistence, retrievedConfiguration.Persistence);
+            Assert.Equal(referenceConfiguration.SmartPersistenceEnabled, retrievedConfiguration.SmartPersistenceEnabled);
+            Assert.Equal(referenceConfiguration.Mode, retrievedConfiguration.Mode);
         }
     }
 }
-*/

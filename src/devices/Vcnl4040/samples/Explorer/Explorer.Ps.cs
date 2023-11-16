@@ -161,7 +161,7 @@ internal partial class Explorer
         Console.WriteLine("  Receiver:");
         Console.WriteLine($"    Extended output range:    {receiverConfiguration.ExtendedOutputRange}");
         Console.WriteLine($"    Active force mode:        {_ps.ActiveForceMode}");
-        Console.WriteLine($"    Proximity detection mode: {_ps.LogicOutputModeEnabled}");
+        Console.WriteLine($"    Proximity detection mode: {_ps.LogicOutputEnabled}");
         Console.WriteLine($"    Cancellation level:       {receiverConfiguration.CancellationLevel}");
         Console.WriteLine($"    White channel:            {receiverConfiguration.WhiteChannelEnabled}");
         Console.WriteLine($"    Sunlight cancellation:    {receiverConfiguration.SunlightCancellationEnabled}");
@@ -301,12 +301,9 @@ internal partial class Explorer
 
         if (mode == ProximityInterruptMode.Nothing)
         {
-            Console.WriteLine("No interrupt event or proximity detection have been enabled");
+            Console.WriteLine("Neither interrupt events nor logic output mode have been enabled");
             return;
         }
-
-        Console.WriteLine($"{logicOutputModeEnabled}");
-        Console.WriteLine($"{mode}");
 
         ProximityInterruptConfiguration configuration = new(
             lowerThreshold,
@@ -314,7 +311,15 @@ internal partial class Explorer
             persistence,
             smartPersistenceEnabled,
             mode);
-        _ps.EnableInterrupt(configuration);
+
+        try
+        {
+            _ps.EnableInterrupt(configuration);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Invalid interrupt configuration:\n{ex.Message}\n");
+        }
     }
 
     private class Command

@@ -51,5 +51,31 @@ namespace Iot.Device.Vcnl4040.Tests
             GetFieldInfoOrThrow(ps, "_psDataRegister").SetValue(ps, _psDataRegister);
             GetFieldInfoOrThrow(ps, "_psWhiteDataRegister").SetValue(ps, _psWhiteDataRegister);
         }
+
+        private void ReadBackRegisters()
+        {
+            _psConf1Register.Read();
+            _psConf2Register.Read();
+            _psConf3Register.Read();
+            _psMsRegister.Read();
+            _psCancellationLevelRegister.Read();
+            _psLowInterruptThresholdRegister.Read();
+            _psHighInterruptThresholdRegister.Read();
+            _psDataRegister.Read();
+            _psWhiteDataRegister.Read();
+            _alsConfRegister.Read();
+        }
+
+        private void WriteRegisters()
+        {
+            _psConf1Register.Write();
+            _psConf2Register.Write();
+            _psConf3Register.Write();
+            _psMsRegister.Write();
+            _psCancellationLevelRegister.Write();
+            _psLowInterruptThresholdRegister.Write();
+            _psHighInterruptThresholdRegister.Write();
+            _alsConfRegister.Write();
+        }
     }
 }
