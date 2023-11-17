@@ -28,7 +28,7 @@ using Ili9341 ili9341 = new(displaySPI, pinDC, pinReset, backlightPin: pinLed, g
 
 while (true)
 {
-    using var backBuffer = ili9341.CreateBackBuffer();
+    using var backBuffer = ili9341.GetBackBufferCompatibleImage();
     foreach (string filepath in Directory.GetFiles(@"images", "*.png").OrderBy(f => f))
     {
         Console.WriteLine($"Drawing {filepath}");
@@ -52,7 +52,6 @@ while (true)
 
     Console.WriteLine("ClearScreen()");
     ili9341.ClearScreen();
-    ili9341.SendFrame(true);
     Task.Delay(1000).Wait();
 
     Console.WriteLine("FillRect(Color.Green, 0, 0, 120, 160)");
