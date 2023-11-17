@@ -102,7 +102,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets the current proximity sensor reading.
         /// Note: if active force mode is enabled reading this property implicitly triggers
-        /// the measurement for once cylce.
+        /// the measurement for once cycle.
         /// </summary>
         public int Reading
         {
@@ -207,7 +207,7 @@ namespace Iot.Device.Vcnl4040
         /// Important: will also return TRUE if in proximity detection mode,
         /// as this is a specific interrupt function.
         /// </summary>
-        public bool InterruptEnabled
+        public bool IsInterruptEnabled
         {
             get
             {
@@ -219,7 +219,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets whether the proximity detection logic output is enabled.
         /// </summary>
-        public bool LogicOutputEnabled
+        public bool IsLogicOutputEnabled
         {
             get
             {

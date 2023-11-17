@@ -105,16 +105,16 @@ namespace Iot.Device.Vcnl4040.Tests
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.Disabled, _psConf2Register.PsInt);
             Assert.Equal(PsProximityDetectionOutput.Interrupt, _psMsRegister.PsMs);
-            Assert.False(vcnl4040.ProximitySensor.InterruptEnabled);
-            Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
+            Assert.False(vcnl4040.ProximitySensor.IsInterruptEnabled);
+            Assert.False(vcnl4040.ProximitySensor.IsLogicOutputEnabled);
 
             vcnl4040.ProximitySensor.EnableInterrupts(configuration);
 
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.Away, _psConf2Register.PsInt);
             Assert.Equal(PsProximityDetectionOutput.Interrupt, _psMsRegister.PsMs);
-            Assert.True(vcnl4040.ProximitySensor.InterruptEnabled);
-            Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
+            Assert.True(vcnl4040.ProximitySensor.IsInterruptEnabled);
+            Assert.False(vcnl4040.ProximitySensor.IsLogicOutputEnabled);
         }
 
         [Fact]
@@ -132,16 +132,16 @@ namespace Iot.Device.Vcnl4040.Tests
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.Disabled, _psConf2Register.PsInt);
             Assert.Equal(PsProximityDetectionOutput.Interrupt, _psMsRegister.PsMs);
-            Assert.False(vcnl4040.ProximitySensor.InterruptEnabled);
-            Assert.False(vcnl4040.ProximitySensor.LogicOutputEnabled);
+            Assert.False(vcnl4040.ProximitySensor.IsInterruptEnabled);
+            Assert.False(vcnl4040.ProximitySensor.IsLogicOutputEnabled);
 
             vcnl4040.ProximitySensor.EnableInterrupts(configuration);
 
             ReadBackRegisters();
             Assert.Equal(PsInterruptMode.CloseOrAway, _psConf2Register.PsInt);
             Assert.Equal(PsProximityDetectionOutput.LogicOutput, _psMsRegister.PsMs);
-            Assert.True(vcnl4040.ProximitySensor.InterruptEnabled);
-            Assert.True(vcnl4040.ProximitySensor.LogicOutputEnabled);
+            Assert.True(vcnl4040.ProximitySensor.IsInterruptEnabled);
+            Assert.True(vcnl4040.ProximitySensor.IsLogicOutputEnabled);
         }
 
         [Theory]

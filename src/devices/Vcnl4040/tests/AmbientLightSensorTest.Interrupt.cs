@@ -21,7 +21,7 @@ namespace Iot.Device.Vcnl4040.Tests
             _alsConfRegister.AlsIntEn = state;
             WriteRegisters();
 
-            Assert.Equal(state == AlsInterrupt.Enabled, vcnl4040.AmbientLightSensor.InterruptsEnabled);
+            Assert.Equal(state == AlsInterrupt.Enabled, vcnl4040.AmbientLightSensor.IsInterruptEnabled);
         }
 
         [Fact]
@@ -33,11 +33,11 @@ namespace Iot.Device.Vcnl4040.Tests
             _alsConfRegister.AlsIntEn = AlsInterrupt.Enabled;
             WriteRegisters();
 
-            Assert.True(vcnl4040.AmbientLightSensor.InterruptsEnabled);
+            Assert.True(vcnl4040.AmbientLightSensor.IsInterruptEnabled);
 
             vcnl4040.AmbientLightSensor.DisableInterrupts();
 
-            Assert.False(vcnl4040.AmbientLightSensor.InterruptsEnabled);
+            Assert.False(vcnl4040.AmbientLightSensor.IsInterruptEnabled);
             ReadBackRegisters();
             Assert.Equal(AlsInterrupt.Disabled, _alsConfRegister.AlsIntEn);
         }

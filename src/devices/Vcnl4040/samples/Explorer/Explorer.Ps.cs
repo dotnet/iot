@@ -104,12 +104,12 @@ internal partial class Explorer
         Console.WriteLine("  Receiver:");
         Console.WriteLine($"    Extended output range:    {receiverConfiguration.ExtendedOutputRange}");
         Console.WriteLine($"    Active force mode:        {_ps.ActiveForceMode}");
-        Console.WriteLine($"    Proximity detection mode: {_ps.LogicOutputEnabled}");
+        Console.WriteLine($"    Proximity detection mode: {_ps.IsLogicOutputEnabled}");
         Console.WriteLine($"    Cancellation level:       {receiverConfiguration.CancellationLevel}");
         Console.WriteLine($"    White channel:            {receiverConfiguration.WhiteChannelEnabled}");
         Console.WriteLine($"    Sunlight cancellation:    {receiverConfiguration.SunlightCancellationEnabled}");
         Console.WriteLine("  Interrupts");
-        Console.WriteLine($"    Enabled:                  {_ps.InterruptEnabled}");
+        Console.WriteLine($"    Enabled:                  {_ps.IsInterruptEnabled}");
         Console.WriteLine($"    Lower threshold:          {proximityDetectionConfiguration.LowerThreshold}");
         Console.WriteLine($"    Upper threshold:          {proximityDetectionConfiguration.UpperThreshold}");
         Console.WriteLine($"    Mode:                     {proximityDetectionConfiguration.Mode}");

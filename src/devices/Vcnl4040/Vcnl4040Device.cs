@@ -17,7 +17,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// I2C bus address
         /// </summary>
-        public static int DefaultI2cAddress = 0x60;
+        public const int DefaultI2cAddress = 0x60;
 
         private const int CompatibleDeviceId = 0x0186;
         private readonly InterruptFlagRegister _interruptFlagRegister;

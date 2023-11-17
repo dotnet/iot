@@ -244,9 +244,9 @@ namespace Iot.Device.Vcnl4040
         #region Interrupt
 
         /// <summary>
-        /// Gets whether interrupts (INT-pin function) are enabled.
+        /// Gets whether interrupt function (INT-pin function) is enabled.
         /// </summary>
-        public bool InterruptsEnabled
+        public bool IsInterruptEnabled
         {
             get
             {

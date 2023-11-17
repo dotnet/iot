@@ -77,7 +77,7 @@ internal partial class Explorer
         Console.WriteLine($"    Range:               {_als.Range}");
         Console.WriteLine($"    Resolution:          {_als.Resolution}");
         Console.WriteLine("  Interrupts");
-        Console.WriteLine($"    Enabled:           {(_als.InterruptsEnabled ? "yes" : "no")}");
+        Console.WriteLine($"    Enabled:           {(_als.IsInterruptEnabled ? "yes" : "no")}");
         Console.WriteLine($"    Lower threshold:   {configuration.LowerThreshold}");
         Console.WriteLine($"    Upper threshold :  {configuration.UpperThreshold}");
         Console.WriteLine($"    Persistence:       {configuration.Persistence}");
