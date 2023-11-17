@@ -21,7 +21,6 @@ Consider also the documentation of the API classes for further information.
 * Information on the configuration of the ambient light sensor can also be found in the documentation of the ```AmbientLightSensor``` and ```AmbientLightInterruptConfiguration``` classes.
 * Information on the configuration of the proximity sensor can also be found in the documentation of the ```ProximitySensor```, ```EmitterConfiguration```, ```ReceiverConfiguration``` and ```ProximityInterruptConfiguration``` classes.
 
-
 ### Ambient light sensor
 #### Interdepence of parameters / settings:
 * **Integration Time, Resolution, and Range:**
