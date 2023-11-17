@@ -34,7 +34,7 @@ Consider also the documentation of the API classes for further information.
 The illuminance measurement is configured by selecting an appropriate integration time. A shorter integration time increases the measurement range but reduces resolution. Moreover, the integration time determines the minimum cycle time for consecutive measurements. The table below illustrates the relationship between integration time, resolution, and measurement range.
 
 |Integration time [ms]|Resolution [lux]|Detection range [lux]|
-|-|-|-|
+|---|---|---|
 |80|0.1|6335.5|
 |160|0.05|3276.7|
 |320|0.025|1638.3|
