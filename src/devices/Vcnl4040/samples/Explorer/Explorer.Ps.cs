@@ -7,7 +7,6 @@ using System.Drawing;
 using System.Threading.Tasks;
 using Iot.Device.Vcnl4040;
 using Iot.Device.Vcnl4040.Definitions;
-using Iot.Device.Ws28xx;
 
 internal partial class Explorer
 {
@@ -28,8 +27,6 @@ internal partial class Explorer
 
             new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Enable interrupts", Action = EnableProximityInterrupts },
             new Command() { Section = MenuPs, Category = MenuInterrupts, Name = "Disable interrupts", Action = _ps.DisableInterrupts },
-
-            new Command() { Section = MenuPs, Category = MenuOthers, Name = "Proximity LED Display", Action = ProximityLedDisplay, ShowConfiguration = false },
         });
     }
 
@@ -87,59 +84,6 @@ internal partial class Explorer
         while (!Console.KeyAvailable)
         {
             PrintBarGraph(_ps.WhiteChannelReading, 65535, string.Empty);
-            Task.Delay(100).Wait();
-        }
-    }
-
-    private void ProximityLedDisplay()
-    {
-        const int LedCount = 24;
-
-        if (!_ps.PowerOn)
-        {
-            Console.WriteLine("Proximity sensor is not powered on");
-            Console.WriteLine("\nPress any key to continue");
-            Console.ReadKey();
-            return;
-        }
-
-        ushort max = 12000;
-        if (!PromptValue($"Max", out max, max, 0, 65535))
-        {
-            return;
-        }
-
-        SpiConnectionSettings settings = new(0, 0)
-        {
-            ClockFrequency = 2_400_000,
-            Mode = SpiMode.Mode0,
-            DataBitLength = 8
-        };
-
-        using SpiDevice spi = SpiDevice.Create(settings);
-        var ledStrip = new Ws2812b(spi, LedCount);
-        RawPixelContainer img = ledStrip.Image;
-        img.Clear();
-        ledStrip.Update();
-
-        int psAwayIntDisplayCount = 0;
-        int psCloseIntDisplayCount = 0;
-        while (!Console.KeyAvailable)
-        {
-            int reading = _ps.Reading;
-
-            InterruptFlags flags = _device.GetAndClearInterruptFlags();
-            psAwayIntDisplayCount = flags.PsAway ? 10 : psAwayIntDisplayCount > 0 ? psAwayIntDisplayCount - 1 : 0;
-            psCloseIntDisplayCount = flags.PsClose ? 10 : psCloseIntDisplayCount > 0 ? psCloseIntDisplayCount - 1 : 0;
-            int countsPerLed = max / LedCount;
-            img.Clear();
-            for (int i = 0; i < Math.Min(reading / countsPerLed, LedCount); i++)
-            {
-                img.SetPixel(i, 0, Color.FromArgb(0, psAwayIntDisplayCount > 0 ? 255 : 0, psCloseIntDisplayCount > 0 ? 255 : 0, 255));
-            }
-
-            ledStrip.Update();
-
             Task.Delay(100).Wait();
         }
     }

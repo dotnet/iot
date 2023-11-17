@@ -7,14 +7,14 @@ using Iot.Device.Vcnl4040.Definitions;
 /// Represents the set of parameters defining the interrupt configuration for the proximity sensor.
 /// </summary>
 /// <param name="LowerThreshold">Value for the lower proximity threshold.
-/// The lower and upper threshold together define the proximity zone.
+/// The lower and upper threshold together define the proximity zone (hysteresis).
 /// The lower threshold defines the boundary of the furthest distance.
-/// An interrupt is triggered when a detected object, coming from within the zone (higher value),
+/// An interrupt is triggered when a detected object, coming from above the zone (higher value),
 /// passes this boundary (decreasing value), i.e., the object is moving away.</param>
 /// <param name="UpperThreshold">Value for the upper proximity threshold.
-/// The lower and upper thresholds together define the proximity zone.
+/// The lower and upper thresholds together define the proximity zone (hysteresis).
 /// The upper threshold defines the boundary of the closest distance.
-/// An interrupt is triggered when a detected object, coming from within the zone (lower value),
+/// An interrupt is triggered when a detected object, coming from below the zone (lower value),
 /// passes this boundary (increasing value), i.e., the object is approaching.</param>
 /// <param name="Persistence">Interrupt persistence setting.</param>
 /// It defines the number of consecutive measurements with a value above or below the respective

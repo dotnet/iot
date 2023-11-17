@@ -5,6 +5,5 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Vcnl4040.csproj" />
-    <ProjectReference Include="..\..\..\Ws28xx\Ws28xx.csproj" />
   </ItemGroup>
 </Project>
