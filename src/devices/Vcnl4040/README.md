@@ -107,5 +107,6 @@ dotnet publish --output ./output --self-contained --runtime linux-arm --framewor
 ```
 
 Notes:
+
 * The framework version may change in future. Check with your actual environment.
 * Copy from publish folder ```./output``` to target folder on your RPi using ```rsync``` or ```scp```.
