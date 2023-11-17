@@ -1,4 +1,5 @@
-# VCNL4040
+# VCNL4040 - Proximity and Ambient Light Sensor
+
 The VCNL4040 is a proximity and ambient light sensor device designed for various applications that require accurate measurement of proximity and light levels.
 
 ## Key features of the sensor
