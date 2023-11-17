@@ -1,6 +1,17 @@
 ﻿# NMEA 0183 Protocol
 
-## Summary
+## Safety Note
+
+Never rely on electronic aids and their warnings alone for safe navigation. The International Regulations for Preventing Collisions at Sea (COLREG)
+states in Rule 5: „Every vessel shall **at all times** maintain a proper look-out by **sight and hearing** as well as by all available means appropriate
+in the prevailing circumstances and conditions so as to make a full appraisal of the situation and of the risk of collision.“ It is therefore the
+skippers responsibility to maintain proper watchkeeping with all means available.
+
+AIS is a great aid in avoiding collisions and foreseeing dangerous close encounters with other vessels, but it can never act as sole source
+of information. There's no guarantee for it's seamless operation and there are still a large number of smaller ships that are not equipped with AIS
+transponders.
+
+## Summary for NMEA support
 
 NMEA stands for `National Marine Electronics Associations`.
 
@@ -14,7 +25,7 @@ most recent devices support configuring higher baud rates. Since RS-232 only sup
 required to combine multiple data sources. Chart plotters for NMEA 0183 have several inputs for different sensors.
 
 NMEA 0183 has been superseeded by NMEA 2000, which uses a CAN-Bus protocol and hardware layer and can therefore run a large number of sensors on a single cable.
-Since NMEA 0183 is much simpler to parse and does not require specific electronic components, it is still in wide use. Bi-directional convertes
+Since NMEA 0183 is much simpler to parse and does not require specific electronic components, it is still in wide use. Bi-directional converters
 from NMEA 0183 to NMEA 2000 are available from different vendors.
 
 In NMEA 0183 a device is either a talker or a listener. There are multiple types of sentences (or messages) which can be sent or received.
@@ -35,7 +46,7 @@ The following sentence ids are currently supported:
 - MDA: Meterological information
 - MWD: Wind direction absolute
 - MWV: Wind Speed and angle (both true and apparent)
-- PCDIN: (partial) Used to wrap NMEA2000 engine parameter sets
+- PCDIN: (partial) Used to wrap NMEA2000 engine parameter sets. Message types 0x01F200, 0x01F201, 0x01F211
 - RMB: Recommended navigation to destination (for autopilot)
 - RMC: Recommended minimum navigation sentence
 - RPM: Engine revolutions

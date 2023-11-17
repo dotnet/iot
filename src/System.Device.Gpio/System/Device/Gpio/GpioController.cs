@@ -25,6 +25,7 @@ public class GpioController : IDisposable
     private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
     private const string RaspberryPi2Product = "Raspberry Pi 2";
     private const string RaspberryPi3Product = "Raspberry Pi 3";
+    private const string RaspberryPi5Product = "Raspberry Pi 5";
 
     private const string HummingBoardProduct = "HummingBoard-Edge";
     private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
@@ -469,14 +470,40 @@ public class GpioController : IDisposable
     /// <returns>A driver that works with the board the program is executing on.</returns>
     private static GpioDriver GetBestDriverForBoardOnLinux()
     {
-        RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
+        var boardInfo = RaspberryBoardInfo.LoadBoardInfo();
 
-        if (internalDriver is object)
+        switch (boardInfo.BoardModel)
         {
-            return new RaspberryPi3Driver(internalDriver);
-        }
+            case RaspberryBoardInfo.Model.RaspberryPi3B:
+            case RaspberryBoardInfo.Model.RaspberryPi3APlus:
+            case RaspberryBoardInfo.Model.RaspberryPi3BPlus:
+            case RaspberryBoardInfo.Model.RaspberryPiZeroW:
+            case RaspberryBoardInfo.Model.RaspberryPiZero2W:
+            case RaspberryBoardInfo.Model.RaspberryPi4:
+            case RaspberryBoardInfo.Model.RaspberryPi400:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule4:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
 
-        return UnixDriver.Create();
+                RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
+
+                if (internalDriver is object)
+                {
+                    return new RaspberryPi3Driver(internalDriver);
+                }
+
+                return UnixDriver.Create();
+
+            case RaspberryBoardInfo.Model.RaspberryPi5:
+
+                // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
+                // We need to create a new driver for the Raspberry Pi 5,
+                // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
+                return new LibGpiodDriver(4);
+
+            default:
+
+                return UnixDriver.Create();
+        }
     }
 
     /// <summary>

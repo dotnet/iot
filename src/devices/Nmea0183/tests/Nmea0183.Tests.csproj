@@ -13,9 +13,12 @@
     <None Remove="Calibration_Cirrus.xml" />
     <None Remove="Calibration_Cirrus_v1.xml" />
     <None Remove="Calibration_Cirrus_v3.xml" />
+    <None Remove="Calibration_Cirrus_v5.xml" />
     <None Remove="Nmea-2020-07-23-12-02.txt" />
     <None Remove="Nmea-2021-08-25-16-25.txt" />
     <None Remove="Nmea-2021-08-25-16-49.txt" />
+    <None Remove="Nmea-2023-07-29-07-03.txt" />
+    <None Remove="Nmea-2023-10-22-13-39.txt" />
     <None Remove="Nmea-AisSpecialTargets.txt" />
   </ItemGroup>
 
@@ -23,17 +26,17 @@
     <EmbeddedResource Include="Calibration_Cirrus.xml" />
     <EmbeddedResource Include="Calibration_Cirrus_v1.xml" />
     <EmbeddedResource Include="Calibration_Cirrus_v3.xml" />
+    <EmbeddedResource Include="Calibration_Cirrus_v5.xml" />
     <EmbeddedResource Include="Nmea-2020-07-23-12-02.txt" />
     <EmbeddedResource Include="Nmea-2021-08-25-16-25.txt" />
     <EmbeddedResource Include="Nmea-2021-08-25-16-49.txt" />
+    <EmbeddedResource Include="Nmea-2023-07-29-07-03.txt" />
+    <EmbeddedResource Include="Nmea-2023-10-22-13-39.txt" />
     <EmbeddedResource Include="Nmea-AisSpecialTargets.txt" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Nmea0183.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Shouldly" Version="4.0.3" />
   </ItemGroup>
 
 </Project>

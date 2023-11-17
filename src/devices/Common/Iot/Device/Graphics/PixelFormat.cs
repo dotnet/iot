@@ -28,5 +28,15 @@ namespace Iot.Device.Graphics
         /// 32 bit image format with ignored alpha
         /// </summary>
         Format32bppXrgb,
+
+        /// <summary>
+        /// 16 bit RGB image format (5 bits for red, 6 bits for green and 5 bits for blue)
+        /// </summary>
+        Format16bppRgb565,
+
+        /// <summary>
+        /// 1 bit black and white image
+        /// </summary>
+        Format1bppBw,
     }
 }
