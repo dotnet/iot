@@ -11,7 +11,7 @@ You can find useful documentation on:
 
 ## Usage
 
-When you have created a PN52, you can use directly 
+When you have created a PN52, you can use directly:
 
 ```csharp
 EmulatedNdefTag ndef = new(pn532, new byte[] { 0x12, 0x34, 0x45 });
