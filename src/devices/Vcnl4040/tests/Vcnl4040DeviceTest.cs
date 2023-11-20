@@ -1,5 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+using System;
 using Iot.Device.Vcnl4040.Definitions;
 using Xunit;
 
@@ -8,6 +9,11 @@ namespace Iot.Device.Vcnl4040.Tests
     public class Vcnl4040DeviceTest
     {
         private readonly Vcnl4040TestDevice _testDevice = new();
+
+        public Vcnl4040DeviceTest()
+        {
+            _testDevice.SetData(CommandCode.ID, 0x0186);
+        }
 
         [Fact]
         public void Reset()
@@ -44,7 +50,7 @@ namespace Iot.Device.Vcnl4040.Tests
 
             // set some incompatible Id
             _testDevice.SetLsb(CommandCode.ID, 0x33);
-            Assert.Throws<IncompatibleDeviceException>(() => vcnl4040.VerifyDevice());
+            Assert.Throws<NotSupportedException>(() => vcnl4040.VerifyDevice());
         }
 
         [Fact]

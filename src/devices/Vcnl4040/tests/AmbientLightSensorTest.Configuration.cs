@@ -150,7 +150,7 @@ namespace Iot.Device.Vcnl4040.Tests
             vcnl4040.AmbientLightSensor.Resolution = resolution;
 
             ReadBackRegisters();
-            Assert.Equal((byte)integrationTime, _testDevice.GetLsb(CommandCode.ALS_CONF));
+            Assert.Equal(integrationTime, _alsConfRegister.AlsIt);
         }
     }
 }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 using System;
 using System.Reflection;
+using Iot.Device.Vcnl4040.Definitions;
 using Iot.Device.Vcnl4040.Internal;
 
 namespace Iot.Device.Vcnl4040.Tests
@@ -36,6 +37,8 @@ namespace Iot.Device.Vcnl4040.Tests
             _psDataRegister = new(_testDevice);
             _psWhiteDataRegister = new(_testDevice);
             _alsConfRegister = new(_testDevice);
+
+            _testDevice.SetData(CommandCode.ID, 0x0186);
         }
 
         private void InjectTestRegister(ProximitySensor ps)

@@ -7,7 +7,7 @@ namespace Iot.Device.Vcnl4040.Definitions
     /// Defines the set of ALS and SD power states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    internal enum PowerState : byte
+    public enum PowerState : byte
     {
         /// <summary>
         /// ALS/SD power on

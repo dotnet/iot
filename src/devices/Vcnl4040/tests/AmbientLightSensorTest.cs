@@ -25,6 +25,8 @@ namespace Iot.Device.Vcnl4040.Tests
             _alsHighInterruptThresholdRegister = new(_testDevice);
             _alsLowInterruptThresholdRegister = new(_testDevice);
             _alsDataRegister = new(_testDevice);
+
+            _testDevice.SetData(CommandCode.ID, 0x0186);
         }
 
         private void InjectTestRegister(AmbientLightSensor als)
