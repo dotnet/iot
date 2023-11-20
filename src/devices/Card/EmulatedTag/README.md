@@ -28,7 +28,7 @@ This implies in this mode that once the card is deselected and read already, pla
 
 So you can use the `CardStatusChanged` event to adjust the needed behavior. Both `Initialize` and `Listen` functions can be used in a more granular way.
 
-Here is an example of writing 3 tags on the emulated tag from a phone application:
+Here is an example of writing 3 tags on the emulated tag from a [phone application](https://apps.apple.com/app/nfc-tools/id1252962749):
 
 ![write the 3 ndef messages](tag_write.png)
 
