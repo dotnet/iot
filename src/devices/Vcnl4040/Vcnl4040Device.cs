@@ -27,7 +27,7 @@ namespace Iot.Device.Vcnl4040
         /// <summary>
         /// Gets the ambient light sensor of the VCNL4040 device.
         /// </summary>
-        public AmbientLightSensor AmbientLightSensor { get; private init; }
+        public AmbientLightSensor AmbientLightSensor { get; }
 
         /// <summary>
         /// Get the proximity sensor of the VCNL4040 device.
@@ -36,6 +36,8 @@ namespace Iot.Device.Vcnl4040
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Vcnl4040Device"/> binding.
+        /// It checks communication and compatibility basing on the device identifier.
+        /// After that it resets the device by setting all registers to the default values.
         /// </summary>
         public Vcnl4040Device(I2cDevice i2cDevice)
         {
@@ -46,6 +48,9 @@ namespace Iot.Device.Vcnl4040
 
             _interruptFlagRegister = new InterruptFlagRegister(_i2cDevice);
             _idRegister = new IdRegister(_i2cDevice);
+
+            VerifyDevice();
+            Reset();
         }
 
         /// <summary>
@@ -86,13 +91,13 @@ namespace Iot.Device.Vcnl4040
         /// device recognition. An exception is raised, if the communication doesn't work or the identification is incorrect.
         /// </summary>
         /// <exception cref="IOException">Non-functional I2C communication.</exception>
-        /// <exception cref="IncompatibleDeviceException">Incompatible device detected.</exception>
+        /// <exception cref="NotSupportedException">Incompatible device detected.</exception>
         public void VerifyDevice()
         {
             _idRegister.Read();
             if (_idRegister.Id != CompatibleDeviceId)
             {
-                throw new IncompatibleDeviceException(CompatibleDeviceId, _idRegister.Id);
+                throw new NotSupportedException(($"Incompatible device found (expected ID: {CompatibleDeviceId}, actual ID: {_idRegister.Id})"));
             }
         }
 

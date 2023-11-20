@@ -83,7 +83,7 @@ internal partial class Explorer
             Console.WriteLine(ex.Message);
             return;
         }
-        catch (IncompatibleDeviceException ex)
+        catch (NotSupportedException ex)
         {
             Console.WriteLine(ex.Message);
             return;

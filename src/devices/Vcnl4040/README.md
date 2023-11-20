@@ -103,15 +103,15 @@
     further configuration, like setting up a cancellation level for the proximity sensor.
 
     ### Implementation
-    The preparation of the binding for use is straightforward. During instantiation, an initialized I2CDevice is passed. To ensure the correct functioning of the device, it should be verified.
+    The preparation of the binding for use is straightforward. The binding is initialized with the given I2CDevice. During initialization it checks the correct functioning of the device and the compatibility basing on the device identifier. It also resets the device registers to default values.
 
     ```
     I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Vcnl4040Device.DefaultI2cAddress));
-    Vcnl4040Device vcnl4040 = new(i2cDevice);
+    Vcnl4040Device vcnl4040;
 
     try
     {
-        vcnl4040.VerifyDevice();
+        vcnl4040 = new(i2cDevice);
     }
     catch (IOException ex)
     {
@@ -119,7 +119,7 @@
         Console.WriteLine(ex.Message);
         return;
     }
-    catch (IncompatibleDeviceException ex)
+    catch (NotSupportedException ex)
     {
         Console.WriteLine(ex.Message);
         return;
@@ -183,7 +183,7 @@
     while (true)
     {
         // check whether night has come
-        if (vcnl4040.AmbientLightSensor.Reading < Illuminance.FromLux(100))
+        if (vcnl4040.AmbientLightSensor.Illuminance < Illuminance.FromLux(100))
         {
             // check whether an approach has been detected (read and reset flags)
             InterruptFlags interrupts = vcnl4040.GetAndClearInterruptFlags();
@@ -209,7 +209,7 @@
     * RPi
     * Transistor BC547 (or any other general purpose NPN type [may require adapted resistor value])
     * LED (e.g. 3mm, red)
-    * Resistors: 10k, 47R
+    * Resistors: 10k, 100R
     * Capacitor (*optionally*): 1000µF, 16V or higher
     * Board, wires
 

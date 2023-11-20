@@ -20,7 +20,7 @@ namespace Iot.Device.Vcnl4040.Tests
             ReadBackRegisters();
             Assert.Equal(PsActiveForceModeTrigger.NoTrigger, _psConf3Register.PsTrig);
 
-            Assert.Equal(refReading, vcnl4040.ProximitySensor.Reading);
+            Assert.Equal(refReading, vcnl4040.ProximitySensor.Distance);
 
             ReadBackRegisters();
             Assert.Equal(PsActiveForceModeTrigger.NoTrigger, _psConf3Register.PsTrig);
@@ -41,7 +41,7 @@ namespace Iot.Device.Vcnl4040.Tests
             ReadBackRegisters();
             Assert.Equal(PsActiveForceModeTrigger.NoTrigger, _psConf3Register.PsTrig);
 
-            Assert.Equal(refReading, vcnl4040.ProximitySensor.Reading);
+            Assert.Equal(refReading, vcnl4040.ProximitySensor.Distance);
 
             ReadBackRegisters();
             Assert.Equal(PsActiveForceModeTrigger.OneTimeCycle, _psConf3Register.PsTrig);

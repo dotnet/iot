@@ -102,7 +102,7 @@ namespace Iot.Device.Vcnl4040
         /// Note: the resolution is an indirect parameter derived from the integration time, as described in the datasheet.
         /// Note: the documentation for the Load Reduction Mode should be considered.
         /// </summary>
-        public Illuminance Reading
+        public Illuminance Illuminance
         {
             get
             {

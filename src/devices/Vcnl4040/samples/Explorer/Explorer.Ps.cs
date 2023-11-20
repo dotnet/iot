@@ -54,7 +54,7 @@ internal partial class Explorer
         Console.WriteLine("Proximity:");
         while (!Console.KeyAvailable)
         {
-            int reading = _ps.Reading;
+            int reading = _ps.Distance;
 
             string intFlagsInfo = string.Empty;
             if (choice == YesNoChoice.Yes)

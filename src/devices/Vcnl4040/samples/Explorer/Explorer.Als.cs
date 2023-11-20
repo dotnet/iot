@@ -50,7 +50,7 @@ internal partial class Explorer
         Console.WriteLine("Illuminance:");
         while (!Console.KeyAvailable)
         {
-            Illuminance reading = _als.Reading;
+            Illuminance reading = _als.Illuminance;
 
             string intFlagsInfo = string.Empty;
             if (choice == YesNoChoice.Yes)

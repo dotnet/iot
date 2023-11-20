@@ -15,13 +15,11 @@ PeriodicTimer loopTimer = new(TimeSpan.FromMilliseconds(1000));
  Prepare the binding for use.
  */
 I2cDevice i2cDevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, Vcnl4040Device.DefaultI2cAddress));
-Vcnl4040Device vcnl4040 = new(i2cDevice);
-AmbientLightSensor als = vcnl4040.AmbientLightSensor;
-ProximitySensor ps = vcnl4040.ProximitySensor;
+Vcnl4040Device vcnl4040;
 
 try
 {
-    vcnl4040.VerifyDevice();
+    vcnl4040 = new(i2cDevice);
 }
 catch (IOException ex)
 {
@@ -29,11 +27,14 @@ catch (IOException ex)
     Console.WriteLine(ex.Message);
     return;
 }
-catch (IncompatibleDeviceException ex)
+catch (NotSupportedException ex)
 {
     Console.WriteLine(ex.Message);
     return;
 }
+
+AmbientLightSensor als = vcnl4040.AmbientLightSensor;
+ProximitySensor ps = vcnl4040.ProximitySensor;
 
 /*
  Configuration of the Ambient Light Sensor
@@ -106,8 +107,8 @@ ps.PowerOn = true;
 */
 while (!Console.KeyAvailable)
 {
-    Illuminance alsReading = als.Reading;
-    int psReading = ps.Reading;
+    Illuminance alsReading = als.Illuminance;
+    int psReading = ps.Distance;
     int psWhiteChannel = ps.WhiteChannelReading;
     InterruptFlags interrupts = vcnl4040.GetAndClearInterruptFlags();
 

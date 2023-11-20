@@ -104,7 +104,7 @@ namespace Iot.Device.Vcnl4040
         /// Note: if active force mode is enabled reading this property implicitly triggers
         /// the measurement for once cycle.
         /// </summary>
-        public int Reading
+        public int Distance
         {
             get
             {

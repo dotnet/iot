@@ -25,7 +25,7 @@ namespace Iot.Device.Vcnl4040.Tests
             _alsConfRegister.AlsIt = integrationTime;
             WriteRegisters();
 
-            Assert.Equal(refReading, vcnl4040.AmbientLightSensor.Reading);
+            Assert.Equal(refReading, vcnl4040.AmbientLightSensor.Illuminance);
         }
 
         [Fact]
@@ -62,17 +62,17 @@ namespace Iot.Device.Vcnl4040.Tests
             // 4
             _testDevice.SetLsb(CommandCode.ALS_CONF, (byte)AlsIntegrationTime.Time160ms);
             // 5
-            Assert.Equal(250, vcnl4040.AmbientLightSensor.Reading.Lux);
+            Assert.Equal(250, vcnl4040.AmbientLightSensor.Illuminance.Lux);
             // 6
             vcnl4040.AmbientLightSensor.IntegrationTime = AlsIntegrationTime.Time80ms;
             // 7
-            Assert.Equal(1000, vcnl4040.AmbientLightSensor.Reading.Lux);
+            Assert.Equal(1000, vcnl4040.AmbientLightSensor.Illuminance.Lux);
             // 8
             vcnl4040.AmbientLightSensor.LoadReductionModeEnabled = false;
             // 9
             _testDevice.SetData(CommandCode.ALS_CONF, (byte)AlsIntegrationTime.Time640ms);
             // 10
-            Assert.Equal(125, vcnl4040.AmbientLightSensor.Reading.Lux);
+            Assert.Equal(125, vcnl4040.AmbientLightSensor.Illuminance.Lux);
         }
     }
 }
