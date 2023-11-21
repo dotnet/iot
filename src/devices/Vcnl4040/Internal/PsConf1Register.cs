@@ -13,10 +13,10 @@ namespace Iot.Device.Vcnl4040.Internal
     /// </summary>
     internal class PsConf1Register : Register
     {
-        private static readonly byte PsDutyMask = 0b1100_0000;
-        private static readonly byte PsPersMask = 0b0011_0000;
-        private static readonly byte PsItMask = 0b0000_1110;
-        private static readonly byte PsSdMask = 0b0000_0001;
+        private const byte PsDutyMask = 0b1100_0000;
+        private const byte PsPersMask = 0b0011_0000;
+        private const byte PsItMask = 0b0000_1110;
+        private const byte PsSdMask = 0b0000_0001;
         private bool _pPsDutyChanged = false;
         private bool _psPersChanged = false;
         private bool _psItChanged = false;
