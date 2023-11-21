@@ -32,6 +32,19 @@ namespace ArduinoCsCompiler.Runtime
             internal const uint LOCALE_RETURN_NUMBER = 0x20000000;
             internal const uint LOCALE_NOUSEROVERRIDE = 0x80000000;
 
+            [ArduinoImplementation(CompareByParameterNames = true)]
+            public static unsafe bool GetThreadIOPendingFlag(System.IntPtr hThread, out bool lpIOIsPending)
+            {
+                lpIOIsPending = false;
+                return true;
+            }
+
+            [ArduinoImplementation("Interop_Kernel32GetCurrentThreadNative")]
+            public static int GetCurrentThread()
+            {
+                return 1;
+            }
+
             public static unsafe uint GetFullPathNameW(ref Char lpFileName, UInt32 nBufferLength, ref Char lpBuffer, IntPtr lpFilePart)
             {
                 throw new NotImplementedException();
