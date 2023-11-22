@@ -7,7 +7,7 @@ namespace Iot.Device.Vcnl4040.Definitions
     /// Defines the PS active force mode trigger flag.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsActiveForceModeTrigger : byte
+    internal enum PsActiveForceModeTrigger : byte
     {
         /// <summary>
         /// No trigger (idle-state of the auto-reset event)

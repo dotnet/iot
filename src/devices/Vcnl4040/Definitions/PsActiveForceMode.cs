@@ -7,7 +7,7 @@ namespace Iot.Device.Vcnl4040.Definitions
     /// Defines the set of PS active force mode states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsActiveForceMode : byte
+    internal enum PsActiveForceMode : byte
     {
         /// <summary>
         /// PS active force mode disabled

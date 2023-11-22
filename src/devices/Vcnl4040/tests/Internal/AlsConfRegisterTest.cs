@@ -13,19 +13,19 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
     {
         [Theory]
         // ALS_SD
-        [InlineData(0b0000_0000, PowerState.PowerOn, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time80ms)]
-        [InlineData(0b0000_0001, PowerState.PowerOff, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time80ms)]
+        [InlineData(0b0000_0000, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time80ms)]
+        [InlineData(0b0000_0001, (byte)PowerState.PowerOff, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time80ms)]
         // ALS_INT_EN
-        [InlineData(0b0000_0010, PowerState.PowerOn, AlsInterrupt.Enabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time80ms)]
+        [InlineData(0b0000_0010, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Enabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time80ms)]
         // ALS_PERS
-        [InlineData(0b0000_0100, PowerState.PowerOn, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence2, AlsIntegrationTime.Time80ms)]
-        [InlineData(0b0000_1000, PowerState.PowerOn, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence4, AlsIntegrationTime.Time80ms)]
-        [InlineData(0b0000_1100, PowerState.PowerOn, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence8, AlsIntegrationTime.Time80ms)]
+        [InlineData(0b0000_0100, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence2, AlsIntegrationTime.Time80ms)]
+        [InlineData(0b0000_1000, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence4, AlsIntegrationTime.Time80ms)]
+        [InlineData(0b0000_1100, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence8, AlsIntegrationTime.Time80ms)]
         // ALS_IT
-        [InlineData(0b0100_0000, PowerState.PowerOn, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time160ms)]
-        [InlineData(0b1000_0000, PowerState.PowerOn, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time320ms)]
-        [InlineData(0b1100_0000, PowerState.PowerOn, AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time640ms)]
-        public void Read(byte data, PowerState powerState, AlsInterrupt interruptEnabled, AlsInterruptPersistence persistence, AlsIntegrationTime integrationTime)
+        [InlineData(0b0100_0000, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time160ms)]
+        [InlineData(0b1000_0000, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time320ms)]
+        [InlineData(0b1100_0000, (byte)PowerState.PowerOn, (byte)AlsInterrupt.Disabled, AlsInterruptPersistence.Persistence1, AlsIntegrationTime.Time640ms)]
+        public void Read(byte data, byte powerState, byte interruptEnabled, AlsInterruptPersistence persistence, AlsIntegrationTime integrationTime)
         {
             var testDevice = new I2cTestDevice();
             // low byte
@@ -38,22 +38,22 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             Assert.Single(testDevice.DataWritten);
             Assert.Equal((byte)CommandCode.ALS_CONF, testDevice.DataWritten.Dequeue());
-            Assert.Equal(powerState, reg.AlsSd);
-            Assert.Equal(interruptEnabled, reg.AlsIntEn);
+            Assert.Equal((PowerState)powerState, reg.AlsSd);
+            Assert.Equal((AlsInterrupt)interruptEnabled, reg.AlsIntEn);
             Assert.Equal(persistence, reg.AlsPers);
             Assert.Equal(integrationTime, reg.AlsIt);
         }
 
         [Theory]
-        [InlineData(PowerState.PowerOff, 0b0000_0001)]
-        [InlineData(PowerState.PowerOn, 0b0000_0000)]
-        public void Write_AlsSd(PowerState powerState, byte expectedLowByte)
+        [InlineData((byte)PowerState.PowerOff, 0b0000_0001)]
+        [InlineData((byte)PowerState.PowerOn, 0b0000_0000)]
+        public void Write_AlsSd(byte powerState, byte expectedLowByte)
         {
             const byte mask = 0b0000_0001;
 
             PropertyWriteTest<AlsConfRegister, PowerState>(initialRegisterLowByte: InitialLowByte,
                                                            initialRegisterHighByte: UnmodifiedHighByte,
-                                                           testValue: powerState,
+                                                           testValue: (PowerState)powerState,
                                                            expectedLowByte: expectedLowByte,
                                                            expectedHighByte: UnmodifiedHighByte,
                                                            commandCode: (byte)CommandCode.ALS_CONF,
@@ -62,7 +62,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<AlsConfRegister, PowerState>(initialRegisterLowByte: InitialLowByteInv,
                                                            initialRegisterHighByte: UnmodifiedHighByteInv,
-                                                           testValue: powerState,
+                                                           testValue: (PowerState)powerState,
                                                            expectedLowByte: (byte)(expectedLowByte | ~mask),
                                                            expectedHighByte: UnmodifiedHighByteInv,
                                                            commandCode: (byte)CommandCode.ALS_CONF,
@@ -71,15 +71,15 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         }
 
         [Theory]
-        [InlineData(AlsInterrupt.Enabled, 0b0000_0010)]
-        [InlineData(AlsInterrupt.Disabled, 0b0000_0000)]
-        public void Write_AlsIntEn(AlsInterrupt interruptEnabled, byte expectedLowByte)
+        [InlineData((byte)AlsInterrupt.Enabled, 0b0000_0010)]
+        [InlineData((byte)AlsInterrupt.Disabled, 0b0000_0000)]
+        public void Write_AlsIntEn(byte interruptEnabled, byte expectedLowByte)
         {
             const byte mask = 0b0000_0010;
 
             PropertyWriteTest<AlsConfRegister, AlsInterrupt>(initialRegisterLowByte: InitialLowByte,
                                                              initialRegisterHighByte: UnmodifiedHighByte,
-                                                             testValue: interruptEnabled,
+                                                             testValue: (AlsInterrupt)interruptEnabled,
                                                              expectedLowByte: expectedLowByte,
                                                              expectedHighByte: UnmodifiedHighByte,
                                                              commandCode: (byte)CommandCode.ALS_CONF,
@@ -88,7 +88,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<AlsConfRegister, AlsInterrupt>(initialRegisterLowByte: InitialLowByteInv,
                                                              initialRegisterHighByte: UnmodifiedHighByteInv,
-                                                             testValue: interruptEnabled,
+                                                             testValue: (AlsInterrupt)interruptEnabled,
                                                              expectedLowByte: (byte)(expectedLowByte | ~mask),
                                                              expectedHighByte: UnmodifiedHighByteInv,
                                                              commandCode: (byte)CommandCode.ALS_CONF,

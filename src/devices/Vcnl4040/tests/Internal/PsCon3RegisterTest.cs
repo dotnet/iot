@@ -13,19 +13,19 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
     {
         [Theory]
         // PS_SC_EN
-        [InlineData(0b0000_0000, PsSunlightCancellationState.Disabled, PsActiveForceModeTrigger.NoTrigger, PsActiveForceMode.Disabled, PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
-        [InlineData(0b0000_0001, PsSunlightCancellationState.Enabled, PsActiveForceModeTrigger.NoTrigger, PsActiveForceMode.Disabled, PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
+        [InlineData(0b0000_0000, (byte)PsSunlightCancellationState.Disabled, (byte)PsActiveForceModeTrigger.NoTrigger, (byte)PsActiveForceMode.Disabled, (byte)PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
+        [InlineData(0b0000_0001, (byte)PsSunlightCancellationState.Enabled, (byte)PsActiveForceModeTrigger.NoTrigger, (byte)PsActiveForceMode.Disabled, (byte)PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
         // PS_TRIG
-        [InlineData(0b0000_0100, PsSunlightCancellationState.Disabled, PsActiveForceModeTrigger.OneTimeCycle, PsActiveForceMode.Disabled, PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
+        [InlineData(0b0000_0100, (byte)PsSunlightCancellationState.Disabled, (byte)PsActiveForceModeTrigger.OneTimeCycle, (byte)PsActiveForceMode.Disabled, (byte)PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
         // PS_AF
-        [InlineData(0b0000_1000, PsSunlightCancellationState.Disabled, PsActiveForceModeTrigger.NoTrigger, PsActiveForceMode.Enabled, PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
+        [InlineData(0b0000_1000, (byte)PsSunlightCancellationState.Disabled, (byte)PsActiveForceModeTrigger.NoTrigger, (byte)PsActiveForceMode.Enabled, (byte)PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse1)]
         // PS_SMART_PERS
-        [InlineData(0b0001_0000, PsSunlightCancellationState.Disabled, PsActiveForceModeTrigger.NoTrigger, PsActiveForceMode.Disabled, PsSmartPersistenceState.Enabled, PsMultiPulse.Pulse1)]
+        [InlineData(0b0001_0000, (byte)PsSunlightCancellationState.Disabled, (byte)PsActiveForceModeTrigger.NoTrigger, (byte)PsActiveForceMode.Disabled, (byte)PsSmartPersistenceState.Enabled, PsMultiPulse.Pulse1)]
         // PS_SMART_MPS
-        [InlineData(0b0010_0000, PsSunlightCancellationState.Disabled, PsActiveForceModeTrigger.NoTrigger, PsActiveForceMode.Disabled, PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse2)]
-        [InlineData(0b0100_0000, PsSunlightCancellationState.Disabled, PsActiveForceModeTrigger.NoTrigger, PsActiveForceMode.Disabled, PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse4)]
-        [InlineData(0b0110_0000, PsSunlightCancellationState.Disabled, PsActiveForceModeTrigger.NoTrigger, PsActiveForceMode.Disabled, PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse8)]
-        public void Read(byte registerData, PsSunlightCancellationState sunlightCancellationState, PsActiveForceModeTrigger trigger, PsActiveForceMode forceMode, PsSmartPersistenceState smartPersistenceState, PsMultiPulse multiPulse)
+        [InlineData(0b0010_0000, (byte)PsSunlightCancellationState.Disabled, (byte)PsActiveForceModeTrigger.NoTrigger, (byte)PsActiveForceMode.Disabled, (byte)PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse2)]
+        [InlineData(0b0100_0000, (byte)PsSunlightCancellationState.Disabled, (byte)PsActiveForceModeTrigger.NoTrigger, (byte)PsActiveForceMode.Disabled, (byte)PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse4)]
+        [InlineData(0b0110_0000, (byte)PsSunlightCancellationState.Disabled, (byte)PsActiveForceModeTrigger.NoTrigger, (byte)PsActiveForceMode.Disabled, (byte)PsSmartPersistenceState.Disabled, PsMultiPulse.Pulse8)]
+        public void Read(byte registerData, byte sunlightCancellationState, byte trigger, byte forceMode, byte smartPersistenceState, PsMultiPulse multiPulse)
         {
             var testDevice = new I2cTestDevice();
             // low byte
@@ -38,23 +38,23 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             Assert.Single(testDevice.DataWritten);
             Assert.Equal((byte)CommandCode.PS_CONF_3_MS, testDevice.DataWritten.Dequeue());
-            Assert.Equal(sunlightCancellationState, reg.PsScEn);
-            Assert.Equal(trigger, reg.PsTrig);
-            Assert.Equal(forceMode, reg.PsAf);
-            Assert.Equal(smartPersistenceState, reg.PsSmartPers);
+            Assert.Equal((PsSunlightCancellationState)sunlightCancellationState, reg.PsScEn);
+            Assert.Equal((PsActiveForceModeTrigger)trigger, reg.PsTrig);
+            Assert.Equal((PsActiveForceMode)forceMode, reg.PsAf);
+            Assert.Equal((PsSmartPersistenceState)smartPersistenceState, reg.PsSmartPers);
             Assert.Equal(multiPulse, reg.PsMps);
         }
 
         [Theory]
-        [InlineData(PsSunlightCancellationState.Disabled, 0b0000_0000)]
-        [InlineData(PsSunlightCancellationState.Enabled, 0b0000_0001)]
-        public void Write_PsScEn(PsSunlightCancellationState sunlightCancellationState, byte expectedLowByte)
+        [InlineData((byte)PsSunlightCancellationState.Disabled, 0b0000_0000)]
+        [InlineData((byte)PsSunlightCancellationState.Enabled, 0b0000_0001)]
+        public void Write_PsScEn(byte sunlightCancellationState, byte expectedLowByte)
         {
             const byte mask = 0b0000_0001;
 
             PropertyWriteTest<PsConf3Register, PsSunlightCancellationState>(initialRegisterLowByte: InitialLowByte,
                                                                             initialRegisterHighByte: UnmodifiedHighByte,
-                                                                            testValue: sunlightCancellationState,
+                                                                            testValue: (PsSunlightCancellationState)sunlightCancellationState,
                                                                             expectedLowByte: expectedLowByte,
                                                                             expectedHighByte: UnmodifiedHighByte,
                                                                             commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -63,7 +63,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsConf3Register, PsSunlightCancellationState>(initialRegisterLowByte: InitialLowByteInv,
                                                                             initialRegisterHighByte: UnmodifiedHighByteInv,
-                                                                            testValue: sunlightCancellationState,
+                                                                            testValue: (PsSunlightCancellationState)sunlightCancellationState,
                                                                             expectedLowByte: (byte)(expectedLowByte | ~mask),
                                                                             expectedHighByte: UnmodifiedHighByteInv,
                                                                             commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -72,15 +72,15 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         }
 
         [Theory]
-        [InlineData(PsActiveForceModeTrigger.NoTrigger, 0b0000_0000)]
-        [InlineData(PsActiveForceModeTrigger.OneTimeCycle, 0b0000_0100)]
-        public void Write_PsTrig(PsActiveForceModeTrigger trigger, byte expectedLowByte)
+        [InlineData((byte)PsActiveForceModeTrigger.NoTrigger, 0b0000_0000)]
+        [InlineData((byte)PsActiveForceModeTrigger.OneTimeCycle, 0b0000_0100)]
+        public void Write_PsTrig(byte trigger, byte expectedLowByte)
         {
             const byte mask = 0b0000_0100;
 
             PropertyWriteTest<PsConf3Register, PsActiveForceModeTrigger>(initialRegisterLowByte: InitialLowByte,
                                                                          initialRegisterHighByte: UnmodifiedHighByte,
-                                                                         testValue: trigger,
+                                                                         testValue: (PsActiveForceModeTrigger)trigger,
                                                                          expectedLowByte: expectedLowByte,
                                                                          expectedHighByte: UnmodifiedHighByte,
                                                                          commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -89,7 +89,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsConf3Register, PsActiveForceModeTrigger>(initialRegisterLowByte: InitialLowByteInv,
                                                                          initialRegisterHighByte: UnmodifiedHighByteInv,
-                                                                         testValue: trigger,
+                                                                         testValue: (PsActiveForceModeTrigger)trigger,
                                                                          expectedLowByte: (byte)(expectedLowByte | ~mask),
                                                                          expectedHighByte: UnmodifiedHighByteInv,
                                                                          commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -98,15 +98,15 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         }
 
         [Theory]
-        [InlineData(PsActiveForceMode.Disabled, 0b0000_0000)]
-        [InlineData(PsActiveForceMode.Enabled, 0b0000_1000)]
-        public void Write_PsAf(PsActiveForceMode activeForceMode, byte expectedLowByte)
+        [InlineData((byte)PsActiveForceMode.Disabled, 0b0000_0000)]
+        [InlineData((byte)PsActiveForceMode.Enabled, 0b0000_1000)]
+        public void Write_PsAf(byte activeForceMode, byte expectedLowByte)
         {
             const byte mask = 0b0000_1000;
 
             PropertyWriteTest<PsConf3Register, PsActiveForceMode>(initialRegisterLowByte: InitialLowByte,
                                                                        initialRegisterHighByte: UnmodifiedHighByte,
-                                                                       testValue: activeForceMode,
+                                                                       testValue: (PsActiveForceMode)activeForceMode,
                                                                        expectedLowByte: expectedLowByte,
                                                                        expectedHighByte: UnmodifiedHighByte,
                                                                        commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -115,7 +115,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsConf3Register, PsActiveForceMode>(initialRegisterLowByte: InitialLowByteInv,
                                                                        initialRegisterHighByte: UnmodifiedHighByteInv,
-                                                                       testValue: activeForceMode,
+                                                                       testValue: (PsActiveForceMode)activeForceMode,
                                                                        expectedLowByte: (byte)(expectedLowByte | ~mask),
                                                                        expectedHighByte: UnmodifiedHighByteInv,
                                                                        commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -124,14 +124,14 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         }
 
         [Theory]
-        [InlineData(PsSmartPersistenceState.Disabled, 0b0000_0000)]
-        [InlineData(PsSmartPersistenceState.Enabled, 0b0001_0000)]
-        public void Write_PsSmartPers(PsSmartPersistenceState smartPersistenceState, byte expectedLowByte)
+        [InlineData((byte)PsSmartPersistenceState.Disabled, 0b0000_0000)]
+        [InlineData((byte)PsSmartPersistenceState.Enabled, 0b0001_0000)]
+        public void Write_PsSmartPers(byte smartPersistenceState, byte expectedLowByte)
         {
             const byte mask = 0b0001_0000;
             PropertyWriteTest<PsConf3Register, PsSmartPersistenceState>(initialRegisterLowByte: InitialLowByte,
                                                        initialRegisterHighByte: UnmodifiedHighByte,
-                                                       testValue: smartPersistenceState,
+                                                       testValue: (PsSmartPersistenceState)smartPersistenceState,
                                                        expectedLowByte: expectedLowByte,
                                                        expectedHighByte: UnmodifiedHighByte,
                                                        commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -140,7 +140,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsConf3Register, PsSmartPersistenceState>(initialRegisterLowByte: InitialLowByteInv,
                                                        initialRegisterHighByte: UnmodifiedHighByteInv,
-                                                       testValue: smartPersistenceState,
+                                                       testValue: (PsSmartPersistenceState)smartPersistenceState,
                                                        expectedLowByte: (byte)(expectedLowByte | ~mask),
                                                        expectedHighByte: UnmodifiedHighByteInv,
                                                        commandCode: (byte)CommandCode.PS_CONF_3_MS,

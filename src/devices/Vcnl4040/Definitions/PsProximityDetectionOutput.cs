@@ -7,7 +7,7 @@ namespace Iot.Device.Vcnl4040.Definitions
     /// Defines the set of PS proximity detection output modes.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum PsProximityDetectionOutput : byte
+    internal enum PsProximityDetectionOutput : byte
     {
         /// <summary>
         /// Proximity detection normal operation with interrupt function

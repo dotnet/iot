@@ -13,19 +13,19 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
     {
         [Theory]
         // LED_I
-        [InlineData(0b0000_0000, PsLedCurrent.I50mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
-        [InlineData(0b0000_0001, PsLedCurrent.I75mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
-        [InlineData(0b0000_0010, PsLedCurrent.I100mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
-        [InlineData(0b0000_0011, PsLedCurrent.I120mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
-        [InlineData(0b0000_0100, PsLedCurrent.I140mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
-        [InlineData(0b0000_0101, PsLedCurrent.I160mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
-        [InlineData(0b0000_0110, PsLedCurrent.I180mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
-        [InlineData(0b0000_0111, PsLedCurrent.I200mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0000, PsLedCurrent.I50mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0001, PsLedCurrent.I75mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0010, PsLedCurrent.I100mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0011, PsLedCurrent.I120mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0100, PsLedCurrent.I140mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0101, PsLedCurrent.I160mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0110, PsLedCurrent.I180mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
+        [InlineData(0b0000_0111, PsLedCurrent.I200mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Enabled)]
         // PS_MS
-        [InlineData(0b0100_0000, PsLedCurrent.I50mA, PsProximityDetectionOutput.LogicOutput, PsWhiteChannelState.Enabled)]
+        [InlineData(0b0100_0000, PsLedCurrent.I50mA, (byte)PsProximityDetectionOutput.LogicOutput, (byte)PsWhiteChannelState.Enabled)]
         // White_EN
-        [InlineData(0b1000_0000, PsLedCurrent.I50mA, PsProximityDetectionOutput.Interrupt, PsWhiteChannelState.Disabled)]
-        public void Read(byte registerData, PsLedCurrent current, PsProximityDetectionOutput outputMode, PsWhiteChannelState whiteChannel)
+        [InlineData(0b1000_0000, PsLedCurrent.I50mA, (byte)PsProximityDetectionOutput.Interrupt, (byte)PsWhiteChannelState.Disabled)]
+        public void Read(byte registerData, PsLedCurrent current, byte outputMode, byte whiteChannel)
         {
             var testDevice = new I2cTestDevice();
             // low byte (not relevant)
@@ -39,8 +39,8 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
             Assert.Single(testDevice.DataWritten);
             Assert.Equal((byte)CommandCode.PS_CONF_3_MS, testDevice.DataWritten.Dequeue());
             Assert.Equal(current, reg.LedI);
-            Assert.Equal(outputMode, reg.PsMs);
-            Assert.Equal(whiteChannel, reg.WhiteEn);
+            Assert.Equal((PsProximityDetectionOutput)outputMode, reg.PsMs);
+            Assert.Equal((PsWhiteChannelState)whiteChannel, reg.WhiteEn);
         }
 
         [Theory]
@@ -76,15 +76,15 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         }
 
         [Theory]
-        [InlineData(PsProximityDetectionOutput.Interrupt, 0b0000_0000)]
-        [InlineData(PsProximityDetectionOutput.LogicOutput, 0b0100_0000)]
-        public void Write_PsMs(PsProximityDetectionOutput mode, byte expectedHighByte)
+        [InlineData((byte)PsProximityDetectionOutput.Interrupt, 0b0000_0000)]
+        [InlineData((byte)PsProximityDetectionOutput.LogicOutput, 0b0100_0000)]
+        public void Write_PsMs(byte mode, byte expectedHighByte)
         {
             const byte mask = 0b0100_0000;
 
             PropertyWriteTest<PsMsRegister, PsProximityDetectionOutput>(initialRegisterLowByte: UnmodifiedLowByte,
                                                                             initialRegisterHighByte: InitialHighByte,
-                                                                            testValue: mode,
+                                                                            testValue: (PsProximityDetectionOutput)mode,
                                                                             expectedLowByte: UnmodifiedLowByte,
                                                                             expectedHighByte: expectedHighByte,
                                                                             commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -93,7 +93,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsMsRegister, PsProximityDetectionOutput>(initialRegisterLowByte: UnmodifiedLowByteInv,
                                                                             initialRegisterHighByte: InitialHighByteInv,
-                                                                            testValue: mode,
+                                                                            testValue: (PsProximityDetectionOutput)mode,
                                                                             expectedLowByte: UnmodifiedLowByteInv,
                                                                             expectedHighByte: (byte)(expectedHighByte | ~mask),
                                                                             commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -102,15 +102,15 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         }
 
         [Theory]
-        [InlineData(PsWhiteChannelState.Disabled, 0b1000_0000)]
-        [InlineData(PsWhiteChannelState.Enabled, 0b0000_0000)]
-        public void Write_WhiteEn(PsWhiteChannelState state, byte expectedHighByte)
+        [InlineData((byte)PsWhiteChannelState.Disabled, 0b1000_0000)]
+        [InlineData((byte)PsWhiteChannelState.Enabled, 0b0000_0000)]
+        public void Write_WhiteEn(byte state, byte expectedHighByte)
         {
             const byte mask = 0b1000_0000;
 
             PropertyWriteTest<PsMsRegister, PsWhiteChannelState>(initialRegisterLowByte: UnmodifiedLowByte,
                                                                  initialRegisterHighByte: InitialHighByte,
-                                                                 testValue: state,
+                                                                 testValue: (PsWhiteChannelState)state,
                                                                  expectedLowByte: UnmodifiedLowByte,
                                                                  expectedHighByte: expectedHighByte,
                                                                  commandCode: (byte)CommandCode.PS_CONF_3_MS,
@@ -119,7 +119,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsMsRegister, PsWhiteChannelState>(initialRegisterLowByte: UnmodifiedLowByteInv,
                                                                  initialRegisterHighByte: InitialHighByteInv,
-                                                                 testValue: state,
+                                                                 testValue: (PsWhiteChannelState)state,
                                                                  expectedLowByte: UnmodifiedLowByteInv,
                                                                  expectedHighByte: (byte)(expectedHighByte | ~mask),
                                                                  commandCode: (byte)CommandCode.PS_CONF_3_MS,

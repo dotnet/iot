@@ -7,7 +7,7 @@ namespace Iot.Device.Vcnl4040.Definitions
     /// Defines the set of ALS interrupt enable states.
     /// Documentation: datasheet (Rev. 1.7, 04-Nov-2020 9 Document Number: 84274).
     /// </summary>
-    public enum AlsInterrupt : byte
+    internal enum AlsInterrupt : byte
     {
         /// <summary>
         /// ALS interrupt disabled

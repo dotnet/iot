@@ -11,17 +11,17 @@ namespace Iot.Device.Vcnl4040.Tests
     public partial class AmbientLightSensorTest
     {
         [Theory]
-        [InlineData(AlsInterrupt.Disabled)]
-        [InlineData(AlsInterrupt.Enabled)]
-        public void InterruptEnabled_Get(AlsInterrupt state)
+        [InlineData((byte)AlsInterrupt.Disabled)]
+        [InlineData((byte)AlsInterrupt.Enabled)]
+        public void InterruptEnabled_Get(byte state)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
 
-            _alsConfRegister.AlsIntEn = state;
+            _alsConfRegister.AlsIntEn = (AlsInterrupt)state;
             WriteRegisters();
 
-            Assert.Equal(state == AlsInterrupt.Enabled, vcnl4040.AmbientLightSensor.IsInterruptEnabled);
+            Assert.Equal((AlsInterrupt)state == AlsInterrupt.Enabled, vcnl4040.AmbientLightSensor.IsInterruptEnabled);
         }
 
         [Fact]

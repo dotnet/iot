@@ -21,18 +21,19 @@ namespace Iot.Device.Vcnl4040.Tests
         }
 
         [Theory]
-        [InlineData(PowerState.PowerOff, PowerState.PowerOff)]
-        [InlineData(PowerState.PowerOff, PowerState.PowerOn)]
-        [InlineData(PowerState.PowerOn, PowerState.PowerOff)]
-        [InlineData(PowerState.PowerOn, PowerState.PowerOn)]
-        public void PowerOn_Set(PowerState initialState, PowerState newState)
+        [InlineData((byte)PowerState.PowerOff, (byte)PowerState.PowerOff)]
+        [InlineData((byte)PowerState.PowerOff, (byte)PowerState.PowerOn)]
+        [InlineData((byte)PowerState.PowerOn, (byte)PowerState.PowerOff)]
+        [InlineData((byte)PowerState.PowerOn, (byte)PowerState.PowerOn)]
+        public void PowerOn_Set(byte initialState, byte newState)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.ProximitySensor);
 
             _testDevice.SetLsb(CommandCode.PS_CONF_1_2, (byte)initialState);
-            vcnl4040.ProximitySensor.PowerOn = newState == PowerState.PowerOn;
-            Assert.Equal((byte)newState, _testDevice.GetLsb(CommandCode.PS_CONF_1_2));
+            vcnl4040.ProximitySensor.PowerOn = (PowerState)newState == PowerState.PowerOn;
+            ReadBackRegisters();
+            Assert.Equal((PowerState)newState, _psConf1Register.PsSd);
         }
     }
 }

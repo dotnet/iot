@@ -23,20 +23,20 @@ namespace Iot.Device.Vcnl4040.Tests
         }
 
         [Theory]
-        [InlineData(PowerState.PowerOff, PowerState.PowerOff)]
-        [InlineData(PowerState.PowerOff, PowerState.PowerOn)]
-        [InlineData(PowerState.PowerOn, PowerState.PowerOff)]
-        [InlineData(PowerState.PowerOn, PowerState.PowerOn)]
-        public void PowerOn_Set(PowerState initialState, PowerState newState)
+        [InlineData((byte)PowerState.PowerOff, (byte)PowerState.PowerOff)]
+        [InlineData((byte)PowerState.PowerOff, (byte)PowerState.PowerOn)]
+        [InlineData((byte)PowerState.PowerOn, (byte)PowerState.PowerOff)]
+        [InlineData((byte)PowerState.PowerOn, (byte)PowerState.PowerOn)]
+        public void PowerOn_Set(byte initialState, byte newState)
         {
             Vcnl4040Device vcnl4040 = new(_testDevice);
             InjectTestRegister(vcnl4040.AmbientLightSensor);
 
-            _alsConfRegister.AlsSd = initialState;
+            _alsConfRegister.AlsSd = (PowerState)initialState;
             WriteRegisters();
-            vcnl4040.AmbientLightSensor.PowerOn = newState == PowerState.PowerOn;
+            vcnl4040.AmbientLightSensor.PowerOn = (PowerState)newState == PowerState.PowerOn;
             ReadBackRegisters();
-            Assert.Equal(newState, _alsConfRegister.AlsSd);
+            Assert.Equal((PowerState)newState, _alsConfRegister.AlsSd);
         }
     }
 }

@@ -13,13 +13,13 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
     {
         [Theory]
         // PS_INT
-        [InlineData(0b0000_0000, PsInterruptMode.Disabled, PsOutputRange.Bits12)]
-        [InlineData(0b0000_0001, PsInterruptMode.Close, PsOutputRange.Bits12)]
-        [InlineData(0b0000_0010, PsInterruptMode.Away, PsOutputRange.Bits12)]
-        [InlineData(0b0000_0011, PsInterruptMode.CloseOrAway, PsOutputRange.Bits12)]
+        [InlineData(0b0000_0000, (byte)PsInterruptMode.Disabled, (byte)PsOutputRange.Bits12)]
+        [InlineData(0b0000_0001, (byte)PsInterruptMode.Close, (byte)PsOutputRange.Bits12)]
+        [InlineData(0b0000_0010, (byte)PsInterruptMode.Away, (byte)PsOutputRange.Bits12)]
+        [InlineData(0b0000_0011, (byte)PsInterruptMode.CloseOrAway, (byte)PsOutputRange.Bits12)]
         // PS_HD
-        [InlineData(0b0000_1000, PsInterruptMode.Disabled, PsOutputRange.Bits16)]
-        public void Read(byte registerData, PsInterruptMode interruptMode, PsOutputRange range)
+        [InlineData(0b0000_1000, (byte)PsInterruptMode.Disabled, (byte)PsOutputRange.Bits16)]
+        public void Read(byte registerData, byte interruptMode, byte range)
         {
             var testDevice = new I2cTestDevice();
             // low byte (not relevant)
@@ -32,22 +32,22 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             Assert.Single(testDevice.DataWritten);
             Assert.Equal((byte)CommandCode.PS_CONF_1_2, testDevice.DataWritten.Dequeue());
-            Assert.Equal(interruptMode, reg.PsInt);
-            Assert.Equal(range, reg.PsHd);
+            Assert.Equal((PsInterruptMode)interruptMode, reg.PsInt);
+            Assert.Equal((PsOutputRange)range, reg.PsHd);
         }
 
         [Theory]
-        [InlineData(PsInterruptMode.Disabled, 0b0000_0000)]
-        [InlineData(PsInterruptMode.Close, 0b0000_0001)]
-        [InlineData(PsInterruptMode.Away, 0b0000_0010)]
-        [InlineData(PsInterruptMode.CloseOrAway, 0b0000_0011)]
-        public void Write_PsInt(PsInterruptMode interruptMode, byte expectedHighByte)
+        [InlineData((byte)PsInterruptMode.Disabled, 0b0000_0000)]
+        [InlineData((byte)PsInterruptMode.Close, 0b0000_0001)]
+        [InlineData((byte)PsInterruptMode.Away, 0b0000_0010)]
+        [InlineData((byte)PsInterruptMode.CloseOrAway, 0b0000_0011)]
+        public void Write_PsInt(byte interruptMode, byte expectedHighByte)
         {
             const byte mask = 0b0000_0011;
 
             PropertyWriteTest<PsConf2Register, PsInterruptMode>(initialRegisterLowByte: UnmodifiedLowByte,
                                                                 initialRegisterHighByte: InitialHighByte,
-                                                                testValue: interruptMode,
+                                                                testValue: (PsInterruptMode)interruptMode,
                                                                 expectedLowByte: UnmodifiedLowByte,
                                                                 expectedHighByte: expectedHighByte,
                                                                 commandCode: (byte)CommandCode.PS_CONF_1_2,
@@ -56,7 +56,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsConf2Register, PsInterruptMode>(initialRegisterLowByte: UnmodifiedLowByteInv,
                                                                 initialRegisterHighByte: InitialHighByteInv,
-                                                                testValue: interruptMode,
+                                                                testValue: (PsInterruptMode)interruptMode,
                                                                 expectedLowByte: UnmodifiedLowByteInv,
                                                                 expectedHighByte: (byte)(expectedHighByte | ~mask),
                                                                 commandCode: (byte)CommandCode.PS_CONF_1_2,
@@ -65,15 +65,15 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
         }
 
         [Theory]
-        [InlineData(PsOutputRange.Bits12, 0b0000_0000)]
-        [InlineData(PsOutputRange.Bits16, 0b0000_1000)]
-        public void Write_PsIt(PsOutputRange range, byte expectedHighByte)
+        [InlineData((byte)PsOutputRange.Bits12, 0b0000_0000)]
+        [InlineData((byte)PsOutputRange.Bits16, 0b0000_1000)]
+        public void Write_PsIt(byte range, byte expectedHighByte)
         {
             const byte mask = 0b0000_1000;
 
             PropertyWriteTest<PsConf2Register, PsOutputRange>(initialRegisterLowByte: UnmodifiedLowByte,
                                                               initialRegisterHighByte: InitialHighByte,
-                                                              testValue: range,
+                                                              testValue: (PsOutputRange)range,
                                                               expectedLowByte: UnmodifiedLowByte,
                                                               expectedHighByte: expectedHighByte,
                                                               commandCode: (byte)CommandCode.PS_CONF_1_2,
@@ -82,7 +82,7 @@ namespace Iot.Device.Vcnl4040.Tests.Internal
 
             PropertyWriteTest<PsConf2Register, PsOutputRange>(initialRegisterLowByte: UnmodifiedLowByteInv,
                                                               initialRegisterHighByte: InitialHighByteInv,
-                                                              testValue: range,
+                                                              testValue: (PsOutputRange)range,
                                                               expectedLowByte: UnmodifiedLowByteInv,
                                                               expectedHighByte: (byte)(expectedHighByte | ~mask),
                                                               commandCode: (byte)CommandCode.PS_CONF_1_2,
