@@ -19,6 +19,9 @@ namespace Iot.Device.Gpio
     {
         private readonly ConcurrentDictionary<int, GpioPin> _pins = new ConcurrentDictionary<int, GpioPin>();
         private readonly ConcurrentDictionary<int, VirtualGpioPin> _openPins = new ConcurrentDictionary<int, VirtualGpioPin>();
+        private readonly ConcurrentDictionary<int, PinEvent> _callbackEvents = new ConcurrentDictionary<int, PinEvent>();
+
+        private record PinEvent(PinEventTypes PinEventTypes, PinChangeEventHandler? Callbacks);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="VirtualGpioController"/> class.
@@ -257,13 +260,47 @@ namespace Iot.Device.Gpio
         /// <inheritdoc/>
         public override void RegisterCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
         {
-            // Todo
+            if (_callbackEvents.Count == 0)
+            {
+                _pins[pinNumber].ValueChanged += PinValueChanged;
+            }
+
+            _callbackEvents.TryAdd(pinNumber, new PinEvent(eventTypes, callback));
+        }
+
+        private void PinValueChanged(object sender, PinValueChangedEventArgs pinValueChangedEventArgs)
+        {
+            // Get GpioPin associated with the real life pin
+            // Note that if we have multiple pins with the same pin number, we will only take the first one in the list
+            var pins = _pins.Where(m => m.Value.PinNumber == pinValueChangedEventArgs.PinNumber);
+            foreach (var pin in pins)
+            {
+                if (_callbackEvents.ContainsKey(pin.Key))
+                {
+                    var pinEvent = _callbackEvents[pin.Key];
+                    if (pinEvent == null)
+                    {
+                        return;
+                    }
+
+                    if (pinEvent.PinEventTypes == pinValueChangedEventArgs.ChangeType)
+                    {
+                        pinEvent.Callbacks?.Invoke(this, new PinValueChangedEventArgs(pinValueChangedEventArgs.ChangeType, pin.Key));
+                    }
+
+                    break;
+                }
+            }
         }
 
         /// <inheritdoc/>
         public override void UnregisterCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
         {
-            // Todo
+            _callbackEvents.TryRemove(pinNumber, out _);
+            if (_callbackEvents.Count == 0)
+            {
+                _pins[pinNumber].ValueChanged -= PinValueChanged;
+            }
         }
 
         /// <inheritdoc/>
