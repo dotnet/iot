@@ -182,7 +182,16 @@ namespace ArduinoCsCompiler
                     {
                         _compiler.ExecuteStaticCtors(set);
                         var remoteMain = set.MainEntryPoint;
-                        remoteMain.InvokeAsync();
+                        if (set.MainEntryPointMethod != null && set.MainEntryPointMethod.GetParameters().Length > 0)
+                        {
+                            // If we're calling a real "main" method, we have to provide an empty string array as argument.
+                            remoteMain.InvokeAsync(new object[] { Array.Empty<string>() });
+                        }
+                        else
+                        {
+                            remoteMain.InvokeAsync();
+                        }
+
                         Logger.LogInformation("Program upload successful. Main method invoked. The program is now running.");
                         return;
                     }
