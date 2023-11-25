@@ -18,6 +18,14 @@ namespace System.Device.Gpio
         }
 
         /// <summary>
+        /// Only for compatibility reason and heritage. Do not use in normal usage.
+        /// </summary>
+        protected GpioPin()
+        {
+            _driver = null!;
+        }
+
+        /// <summary>
         /// Gets the pin number of the general-purpose I/O (GPIO) pin.
         /// </summary>
         /// <value>
