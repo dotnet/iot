@@ -5,22 +5,24 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
+using System.Device.Gpio.Drivers;
+using System.Device.Gpio.Interop.Unix.libgpiod.V1;
 using System.Diagnostics;
-using System.Net.NetworkInformation;
+using LibgpiodV1 = Interop.LibgpiodV1;
 
-namespace System.Device.Gpio.Drivers;
+namespace System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
 
 /// <summary>
-/// This driver uses the Libgpiod library to get user-level access to the gpio ports.
+/// This driver uses libgpiod v0/1 to get user-level access to the gpio ports.
 /// It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
 /// "sudo apt install -y libgpiod-dev".
 /// </summary>
-public class LibGpiodDriver : UnixDriver
+public class LibGpiodV1Driver : UnixDriver
 {
     private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
     private readonly object _pinNumberLock;
     private readonly ConcurrentDictionary<int, SafeLineHandle> _pinNumberToSafeLineHandle;
-    private readonly ConcurrentDictionary<int, LibGpiodDriverEventHandler> _pinNumberToEventHandler;
+    private readonly ConcurrentDictionary<int, LibGpiodV1DriverEventHandler> _pinNumberToEventHandler;
     private readonly int _pinCount;
     private readonly ConcurrentDictionary<int, PinValue> _pinValue;
     private SafeChipHandle _chip;
@@ -31,7 +33,7 @@ public class LibGpiodDriver : UnixDriver
     // for use the bias flags we need libgpiod version 1.5 or later
     private static bool IsLibgpiodVersion1_5orHigher()
     {
-        IntPtr libgpiodVersionPtr = Interop.Libgpiod.gpiod_version_string();
+        IntPtr libgpiodVersionPtr = LibgpiodV1.gpiod_version_string();
         string? libgpiodVersionMatch = Marshal.PtrToStringAnsi(libgpiodVersionPtr);
 
         if (libgpiodVersionMatch is object)
@@ -59,7 +61,7 @@ public class LibGpiodDriver : UnixDriver
     /// Construct an instance
     /// </summary>
     /// <param name="gpioChip">Number of the gpio Chip. Default 0</param>
-    public LibGpiodDriver(int gpioChip = 0)
+    public LibGpiodV1Driver(int gpioChip = 0)
     {
         if (Environment.OSVersion.Platform != PlatformID.Unix)
         {
@@ -69,14 +71,14 @@ public class LibGpiodDriver : UnixDriver
         try
         {
             _pinNumberLock = new object();
-            _chip = Interop.Libgpiod.gpiod_chip_open_by_number(gpioChip);
+            _chip = LibgpiodV1.gpiod_chip_open_by_number(gpioChip);
             if (_chip == null)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.NoChipFound, Marshal.GetLastWin32Error());
             }
 
-            _pinCount = Interop.Libgpiod.gpiod_chip_num_lines(_chip);
-            _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodDriverEventHandler>();
+            _pinCount = LibgpiodV1.gpiod_chip_num_lines(_chip);
+            _pinNumberToEventHandler = new ConcurrentDictionary<int, LibGpiodV1DriverEventHandler>();
             _pinNumberToSafeLineHandle = new ConcurrentDictionary<int, SafeLineHandle>();
             _pinValue = new ConcurrentDictionary<int, PinValue>();
         }
@@ -91,7 +93,7 @@ public class LibGpiodDriver : UnixDriver
     {
         if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
         {
-            LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+            LibGpiodV1DriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
             if ((eventTypes & PinEventTypes.Rising) != 0)
             {
@@ -109,20 +111,20 @@ public class LibGpiodDriver : UnixDriver
         }
     }
 
-    private LibGpiodDriverEventHandler PopulateEventHandler(int pinNumber)
+    private LibGpiodV1DriverEventHandler PopulateEventHandler(int pinNumber)
     {
         lock (_pinNumberLock)
         {
             _pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle);
 
-            if (pinHandle is null || (pinHandle is object && !Interop.Libgpiod.gpiod_line_is_free(pinHandle)))
+            if (pinHandle is null || (pinHandle is object && !LibgpiodV1.gpiod_line_is_free(pinHandle)))
             {
                 pinHandle?.Dispose();
-                pinHandle = Interop.Libgpiod.gpiod_chip_get_line(_chip, pinNumber);
+                pinHandle = LibgpiodV1.gpiod_chip_get_line(_chip, pinNumber);
                 _pinNumberToSafeLineHandle[pinNumber] = pinHandle;
             }
 
-            return new LibGpiodDriverEventHandler(pinNumber, pinHandle!);
+            return new LibGpiodV1DriverEventHandler(pinNumber, pinHandle!);
         }
     }
 
@@ -184,13 +186,13 @@ public class LibGpiodDriver : UnixDriver
                 return;
             }
 
-            SafeLineHandle pinHandle = Interop.Libgpiod.gpiod_chip_get_line(_chip, pinNumber);
+            SafeLineHandle pinHandle = LibgpiodV1.gpiod_chip_get_line(_chip, pinNumber);
             if (pinHandle == null)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.OpenPinError, Marshal.GetLastWin32Error());
             }
 
-            int mode = Interop.Libgpiod.gpiod_line_direction(pinHandle);
+            int mode = LibgpiodV1.gpiod_line_direction(pinHandle);
             if (mode == 1)
             {
                 pinHandle.PinMode = PinMode.Input;
@@ -202,7 +204,7 @@ public class LibGpiodDriver : UnixDriver
 
             if (s_isLibgpiodVersion1_5orHigher && pinHandle.PinMode == PinMode.Input)
             {
-                int bias = Interop.Libgpiod.gpiod_line_bias(pinHandle);
+                int bias = LibgpiodV1.gpiod_line_bias(pinHandle);
                 if (bias == (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN)
                 {
                     pinHandle.PinMode = PinMode.InputPullDown;
@@ -226,7 +228,7 @@ public class LibGpiodDriver : UnixDriver
     {
         if (_pinNumberToSafeLineHandle.TryGetValue(pinNumber, out SafeLineHandle? pinHandle))
         {
-            int result = Interop.Libgpiod.gpiod_line_get_value(pinHandle);
+            int result = LibgpiodV1.gpiod_line_get_value(pinHandle);
             if (result == -1)
             {
                 throw ExceptionHelper.GetIOException(ExceptionResource.ReadPinError, Marshal.GetLastWin32Error(), pinNumber);
@@ -245,7 +247,7 @@ public class LibGpiodDriver : UnixDriver
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
     {
-        if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodDriverEventHandler? eventHandler))
+        if (_pinNumberToEventHandler.TryGetValue(pinNumber, out LibGpiodV1DriverEventHandler? eventHandler))
         {
             eventHandler.ValueFalling -= callback;
             eventHandler.ValueRising -= callback;
@@ -271,12 +273,12 @@ public class LibGpiodDriver : UnixDriver
             pinHandle.ReleaseLock();
             int requestResult = mode switch
             {
-                PinMode.Input => Interop.Libgpiod.gpiod_line_request_input(pinHandle, s_consumerName),
-                PinMode.InputPullDown => Interop.Libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                PinMode.Input => LibgpiodV1.gpiod_line_request_input(pinHandle, s_consumerName),
+                PinMode.InputPullDown => LibgpiodV1.gpiod_line_request_input_flags(pinHandle, s_consumerName,
                         (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN),
-                PinMode.InputPullUp => Interop.Libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                PinMode.InputPullUp => LibgpiodV1.gpiod_line_request_input_flags(pinHandle, s_consumerName,
                         (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP),
-                PinMode.Output => Interop.Libgpiod.gpiod_line_request_output(pinHandle, s_consumerName, 0),
+                PinMode.Output => LibgpiodV1.gpiod_line_request_output(pinHandle, s_consumerName, 0),
                 _ => -1,
             };
 
@@ -303,12 +305,12 @@ public class LibGpiodDriver : UnixDriver
             pinHandle.ReleaseLock();
             int requestResult = mode switch
             {
-                PinMode.Input => Interop.Libgpiod.gpiod_line_request_input(pinHandle, s_consumerName),
-                PinMode.InputPullDown => Interop.Libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                PinMode.Input => LibgpiodV1.gpiod_line_request_input(pinHandle, s_consumerName),
+                PinMode.InputPullDown => LibgpiodV1.gpiod_line_request_input_flags(pinHandle, s_consumerName,
                     (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_DOWN),
-                PinMode.InputPullUp => Interop.Libgpiod.gpiod_line_request_input_flags(pinHandle, s_consumerName,
+                PinMode.InputPullUp => LibgpiodV1.gpiod_line_request_input_flags(pinHandle, s_consumerName,
                     (int)RequestFlag.GPIOD_LINE_REQUEST_FLAG_BIAS_PULL_UP),
-                PinMode.Output => Interop.Libgpiod.gpiod_line_request_output(pinHandle, s_consumerName, initialValue == PinValue.High ? 1 : 0),
+                PinMode.Output => LibgpiodV1.gpiod_line_request_output(pinHandle, s_consumerName, initialValue == PinValue.High ? 1 : 0),
                 _ => -1,
             };
 
@@ -331,7 +333,7 @@ public class LibGpiodDriver : UnixDriver
     {
         if ((eventTypes & PinEventTypes.Rising) != 0 || (eventTypes & PinEventTypes.Falling) != 0)
         {
-            LibGpiodDriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
+            LibGpiodV1DriverEventHandler eventHandler = _pinNumberToEventHandler.GetOrAdd(pinNumber, PopulateEventHandler);
 
             if ((eventTypes & PinEventTypes.Rising) != 0)
             {
@@ -383,7 +385,7 @@ public class LibGpiodDriver : UnixDriver
                 pin: pinNumber);
         }
 
-        Interop.Libgpiod.gpiod_line_set_value(pinHandle, (value == PinValue.High) ? 1 : 0);
+        LibgpiodV1.gpiod_line_set_value(pinHandle, (value == PinValue.High) ? 1 : 0);
         _pinValue[pinNumber] = value;
     }
 
@@ -391,7 +393,7 @@ public class LibGpiodDriver : UnixDriver
     public override ComponentInformation QueryComponentInformation()
     {
         var self = new ComponentInformation(this, "LibGpiodDriver");
-        IntPtr libgpiodVersionPtr = Interop.Libgpiod.gpiod_version_string();
+        IntPtr libgpiodVersionPtr = LibgpiodV1.gpiod_version_string();
         string libgpiodVersion = Marshal.PtrToStringAnsi(libgpiodVersionPtr) ?? string.Empty;
         self.Properties["LibGpiodVersion"] = libgpiodVersion;
         return self;
@@ -402,9 +404,9 @@ public class LibGpiodDriver : UnixDriver
     {
         if (_pinNumberToEventHandler != null)
         {
-            foreach (KeyValuePair<int, LibGpiodDriverEventHandler> kv in _pinNumberToEventHandler)
+            foreach (KeyValuePair<int, LibGpiodV1DriverEventHandler> kv in _pinNumberToEventHandler)
             {
-                LibGpiodDriverEventHandler eventHandler = kv.Value;
+                LibGpiodV1DriverEventHandler eventHandler = kv.Value;
                 eventHandler.Dispose();
             }
 

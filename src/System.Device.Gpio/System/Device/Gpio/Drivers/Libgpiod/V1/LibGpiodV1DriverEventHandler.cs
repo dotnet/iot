@@ -1,14 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Device.Gpio.Interop.Unix.libgpiod.V1;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using LibgpiodV1 = Interop.LibgpiodV1;
 
-namespace System.Device.Gpio.Drivers;
-
-internal sealed class LibGpiodDriverEventHandler : IDisposable
+namespace System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
+internal sealed class LibGpiodV1DriverEventHandler : IDisposable
 {
     private const int ERROR_CODE_EINTR = 4; // Interrupted system call
 
@@ -22,7 +23,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
     private readonly Task _task;
     private bool _disposing;
 
-    public LibGpiodDriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle)
+    public LibGpiodV1DriverEventHandler(int pinNumber, SafeLineHandle safeLineHandle)
     {
         _pinNumber = pinNumber;
         _cancellationTokenSource = new CancellationTokenSource();
@@ -34,7 +35,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
 
     private void SubscribeForEvent(SafeLineHandle pinHandle)
     {
-        int eventSuccess = Interop.Libgpiod.gpiod_line_request_both_edges_events(pinHandle, s_consumerName);
+        int eventSuccess = LibgpiodV1.gpiod_line_request_both_edges_events(pinHandle, s_consumerName);
 
         if (eventSuccess < 0)
         {
@@ -55,7 +56,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                     TvNsec = new IntPtr(50_000_000)
                 };
 
-                WaitEventResult waitResult = Interop.Libgpiod.gpiod_line_event_wait(pinHandle, ref timeout);
+                WaitEventResult waitResult = LibgpiodV1.gpiod_line_event_wait(pinHandle, ref timeout);
                 if (waitResult == WaitEventResult.Error)
                 {
                     var errorCode = Marshal.GetLastWin32Error();
@@ -71,7 +72,7 @@ internal sealed class LibGpiodDriverEventHandler : IDisposable
                 if (waitResult == WaitEventResult.EventOccured)
                 {
                     GpioLineEvent eventResult = new GpioLineEvent();
-                    int checkForEvent = Interop.Libgpiod.gpiod_line_event_read(pinHandle, ref eventResult);
+                    int checkForEvent = LibgpiodV1.gpiod_line_event_read(pinHandle, ref eventResult);
                     if (checkForEvent == -1)
                     {
                         throw ExceptionHelper.GetIOException(ExceptionResource.EventReadError, Marshal.GetLastWin32Error());

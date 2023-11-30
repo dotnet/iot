@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
+
 namespace System.Device.Gpio.Drivers;
 
 /// <summary>
@@ -34,7 +36,7 @@ public abstract class UnixDriver : GpioDriver
         UnixDriver? driver = null;
         try
         {
-            driver = new LibGpiodDriver();
+            driver = new LibGpiodV1Driver();
         }
         catch (PlatformNotSupportedException)
         {
