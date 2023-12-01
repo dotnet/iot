@@ -5,9 +5,9 @@
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
 using System.Runtime.InteropServices;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
 
 internal class ChipSafeHandle : SafeHandle
 {
@@ -18,7 +18,7 @@ internal class ChipSafeHandle : SafeHandle
 
     protected override bool ReleaseHandle()
     {
-        Libgpiodv2.gpiod_chip_close(handle);
+        LibgpiodV2.gpiod_chip_close(handle);
         return true;
     }
 

@@ -4,13 +4,13 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.ValueTypes;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
 using System.Runtime.InteropServices;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// Line info object contains an immutable snapshot of a line's status.
@@ -41,7 +41,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineInfo Copy()
     {
-        var handle = TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_copy(_handle));
+        var handle = TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_copy(_handle));
 
         if (handle.IsInvalid)
         {
@@ -58,7 +58,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public Offset GetOffset()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_get_offset(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_get_offset(_handle));
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ internal class LineInfo : LibGpiodProxyBase
     {
         return TryCallGpiodLocked(() =>
         {
-            IntPtr namePtr = Libgpiodv2.gpiod_line_info_get_name(_handle);
+            IntPtr namePtr = LibgpiodV2.gpiod_line_info_get_name(_handle);
 
             if (namePtr == IntPtr.Zero)
             {
@@ -88,7 +88,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public bool GetIsUsed()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_is_used(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_is_used(_handle));
     }
 
     /// <summary>
@@ -101,7 +101,7 @@ internal class LineInfo : LibGpiodProxyBase
     {
         return TryCallGpiodLocked(() =>
         {
-            IntPtr namePtr = Libgpiodv2.gpiod_line_info_get_consumer(_handle);
+            IntPtr namePtr = LibgpiodV2.gpiod_line_info_get_consumer(_handle);
 
             if (namePtr == IntPtr.Zero)
             {
@@ -119,7 +119,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineDirection GetDirection()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_get_direction(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_get_direction(_handle));
     }
 
     /// <summary>
@@ -129,7 +129,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineEdge GetEdgeDetection()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_get_edge_detection(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_get_edge_detection(_handle));
     }
 
     /// <summary>
@@ -139,7 +139,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineBias GetBias()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_get_bias(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_get_bias(_handle));
     }
 
     /// <summary>
@@ -149,7 +149,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineDrive GetDrive()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_get_drive(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_get_drive(_handle));
     }
 
     /// <summary>
@@ -159,7 +159,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public bool GetIsActiveLow()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_is_active_low(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_is_active_low(_handle));
     }
 
     /// <summary>
@@ -169,7 +169,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public bool GetIsDebounced()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_is_debounced(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_is_debounced(_handle));
     }
 
     /// <summary>
@@ -181,7 +181,7 @@ internal class LineInfo : LibGpiodProxyBase
     {
         return TryCallGpiodLocked(() =>
         {
-            ulong debouncePeriodMicroseconds = Libgpiodv2.gpiod_line_info_get_debounce_period_us(_handle);
+            ulong debouncePeriodMicroseconds = LibgpiodV2.gpiod_line_info_get_debounce_period_us(_handle);
             return TimeSpan.FromMilliseconds(debouncePeriodMicroseconds / 1000f);
         });
     }
@@ -193,7 +193,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineClock GetEventClock()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_info_get_event_clock(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_info_get_event_clock(_handle));
     }
 
     /// <summary>

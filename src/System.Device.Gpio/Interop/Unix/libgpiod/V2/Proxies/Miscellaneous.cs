@@ -5,9 +5,9 @@
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
 using System.Runtime.InteropServices;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// Contains functions that are not part of any specific concept.
@@ -22,7 +22,7 @@ internal class Miscellaneous : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public bool IsGpioChipDevice(string path)
     {
-        return TryCallGpiod(() => Libgpiodv2.gpiod_is_gpiochip_device(Marshal.StringToHGlobalAuto(path)));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_is_gpiochip_device(Marshal.StringToHGlobalAuto(path)));
     }
 
     /// <summary>
@@ -33,6 +33,6 @@ internal class Miscellaneous : LibGpiodProxyBase
     public string GetApiVersion()
     {
         return TryCallGpiod(() =>
-            Marshal.PtrToStringAuto(Libgpiodv2.gpiod_api_version()) ?? throw new GpiodException($"Could not get API version: {LastErr.GetMsg()}"));
+            Marshal.PtrToStringAuto(LibgpiodV2.gpiod_api_version()) ?? throw new GpiodException($"Could not get API version: {LastErr.GetMsg()}"));
     }
 }

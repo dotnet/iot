@@ -4,12 +4,12 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.ValueTypes;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// An edge event object contains information about a single line edge event. It contains the event type, timestamp and the offset of the line on
@@ -41,7 +41,7 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public EdgeEvent Copy()
     {
-        var handle = TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_copy(_handle));
+        var handle = TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_copy(_handle));
 
         if (handle.IsInvalid)
         {
@@ -58,7 +58,7 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodEdgeEventType GetEventType()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_get_event_type(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_get_event_type(_handle));
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public ulong GetTimestampNs()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_get_timestamp_ns(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_get_timestamp_ns(_handle));
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public Offset GetLineOffset()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_get_line_offset(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_get_line_offset(_handle));
     }
 
     /// <summary>
@@ -88,7 +88,7 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public SequenceNumber GetGlobalSequenceNumber()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_get_global_seqno(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_get_global_seqno(_handle));
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public SequenceNumber GetLineSequenceNumber()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_get_line_seqno(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_get_line_seqno(_handle));
     }
 
     /// <summary>

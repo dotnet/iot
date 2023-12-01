@@ -4,11 +4,11 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
 using System.Runtime.InteropServices;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// Request config objects are used to pass a set of options to the kernel at the time of the line request.
@@ -26,7 +26,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public RequestConfig()
     {
-        Handle = TryCallGpiod(Libgpiodv2.gpiod_request_config_new);
+        Handle = TryCallGpiod(LibgpiodV2.gpiod_request_config_new);
 
         if (Handle.IsInvalid)
         {
@@ -41,7 +41,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void SetConsumer(string consumer)
     {
-        TryCallGpiodLocked(() => Libgpiodv2.gpiod_request_config_set_consumer(Handle, Marshal.StringToHGlobalAuto(consumer)));
+        TryCallGpiodLocked(() => LibgpiodV2.gpiod_request_config_set_consumer(Handle, Marshal.StringToHGlobalAuto(consumer)));
     }
 
     /// <summary>
@@ -53,7 +53,7 @@ internal class RequestConfig : LibGpiodProxyBase
     {
         return TryCallGpiodLocked(() =>
         {
-            IntPtr consumerPtr = Libgpiodv2.gpiod_request_config_get_consumer(Handle);
+            IntPtr consumerPtr = LibgpiodV2.gpiod_request_config_get_consumer(Handle);
             return Marshal.PtrToStringAuto(consumerPtr) ?? string.Empty;
         });
     }
@@ -73,7 +73,7 @@ internal class RequestConfig : LibGpiodProxyBase
                 throw new ArgumentOutOfRangeException(nameof(eventBufferSize), "Event buffer size must be 0 or greater");
             }
 
-            Libgpiodv2.gpiod_request_config_set_event_buffer_size(Handle, eventBufferSize);
+            LibgpiodV2.gpiod_request_config_set_event_buffer_size(Handle, eventBufferSize);
         });
     }
 
@@ -84,7 +84,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetEventBufferSize()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_request_config_get_event_buffer_size(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_request_config_get_event_buffer_size(Handle));
     }
 
     /// <summary>

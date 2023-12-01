@@ -5,12 +5,12 @@
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
 using System.Collections.Generic;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.ValueTypes;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
 using System.Runtime.InteropServices;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// A GPIO chip object is associated with an open file descriptor to the GPIO character device. It exposes basic information about the chip and
@@ -29,7 +29,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
     public Chip(string devicePath)
     {
-        _handle = TryCallGpiod(() => Libgpiodv2.gpiod_chip_open(Marshal.StringToHGlobalAuto(devicePath)));
+        _handle = TryCallGpiod(() => LibgpiodV2.gpiod_chip_open(Marshal.StringToHGlobalAuto(devicePath)));
 
         if (_handle.IsInvalid)
         {
@@ -55,7 +55,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string GetPath()
     {
-        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(Libgpiodv2.gpiod_chip_get_path(_handle)) ??
+        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_get_path(_handle)) ??
             throw new GpiodException($"Could not get chip path: {LastErr.GetMsg()}"));
     }
 
@@ -68,7 +68,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            var chipInfoHandle = Libgpiodv2.gpiod_chip_get_info(_handle);
+            var chipInfoHandle = LibgpiodV2.gpiod_chip_get_info(_handle);
 
             if (chipInfoHandle.IsInvalid)
             {
@@ -88,7 +88,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            var lineInfoHandle = Libgpiodv2.gpiod_chip_get_line_info(_handle, offset);
+            var lineInfoHandle = LibgpiodV2.gpiod_chip_get_line_info(_handle, offset);
 
             if (lineInfoHandle.IsInvalid)
             {
@@ -108,7 +108,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            var lineInfoHandle = Libgpiodv2.gpiod_chip_watch_line_info(_handle, offset);
+            var lineInfoHandle = LibgpiodV2.gpiod_chip_watch_line_info(_handle, offset);
 
             if (lineInfoHandle.IsInvalid)
             {
@@ -128,7 +128,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_chip_unwatch_line_info(_handle, offset);
+            int result = LibgpiodV2.gpiod_chip_unwatch_line_info(_handle, offset);
             if (result < 0)
             {
                 throw new GpiodException($"Could not unwatch line info '{offset}': {LastErr.GetMsg()}");
@@ -143,7 +143,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetFileDescriptor()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_chip_get_fd(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_chip_get_fd(_handle));
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_chip_wait_info_event(_handle, timeoutNs);
+            int result = LibgpiodV2.gpiod_chip_wait_info_event(_handle, timeoutNs);
             if (result < 0)
             {
                 throw new GpiodException($"Could not wait for line info event: {LastErr.GetMsg()}");
@@ -175,7 +175,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            var lineInfoEventHandle = Libgpiodv2.gpiod_chip_read_info_event(_handle);
+            var lineInfoEventHandle = LibgpiodV2.gpiod_chip_read_info_event(_handle);
 
             if (lineInfoEventHandle.IsInvalid)
             {
@@ -195,7 +195,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_chip_get_line_offset_from_name(_handle, name);
+            int result = LibgpiodV2.gpiod_chip_get_line_offset_from_name(_handle, name);
             if (result < 0)
             {
                 throw new GpiodException($"Could not get line offset from name '{name}': {LastErr.GetMsg()}");
@@ -214,7 +214,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            var lineRequestHandle = Libgpiodv2.gpiod_chip_request_lines(_handle, requestConfig.Handle, lineConfig.Handle);
+            var lineRequestHandle = LibgpiodV2.gpiod_chip_request_lines(_handle, requestConfig.Handle, lineConfig.Handle);
 
             if (lineRequestHandle.IsInvalid)
             {

@@ -4,11 +4,11 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// Callers are notified about changes in a line's status due to GPIO uAPI calls.
@@ -40,7 +40,7 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineInfoEventType GetEventType()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_info_event_get_event_type(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_info_event_get_event_type(_handle));
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public ulong GetTimestampNs()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_info_event_get_timestamp_ns(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_info_event_get_timestamp_ns(_handle));
     }
 
     /// <summary>
@@ -62,11 +62,11 @@ internal class LineInfoEvent : LibGpiodProxyBase
     {
         return TryCallGpiodLocked(() =>
         {
-            LineInfoSafeHandleNotFreeable lineInfoHandle = Libgpiodv2.gpiod_info_event_get_line_info(_handle);
+            LineInfoSafeHandleNotFreeable lineInfoHandle = LibgpiodV2.gpiod_info_event_get_line_info(_handle);
             // Since the line-info object is tied to the event, different threads may not operate on the event and line-info at the same time.
             // The line-info can be copied using gpiod_line_info_copy in order to create a standalone object - which then may safely be used from a
             // different thread concurrently. See documentation 2.1
-            LineInfoSafeHandle lineInfoCopyHandle = Libgpiodv2.gpiod_line_info_copy(lineInfoHandle);
+            LineInfoSafeHandle lineInfoCopyHandle = LibgpiodV2.gpiod_line_info_copy(lineInfoHandle);
             return new LineInfo(lineInfoCopyHandle);
         });
     }

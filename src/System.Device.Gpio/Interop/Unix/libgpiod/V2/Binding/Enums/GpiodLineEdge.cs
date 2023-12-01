@@ -4,15 +4,13 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
 
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__defs.html"/>
 internal enum GpiodLineEdge
 {
-#pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
     None = 1,
     Rising,
     Falling,
     Both
-#pragma warning restore CS1591 // Missing XML comment for publicly visible type or member
 }

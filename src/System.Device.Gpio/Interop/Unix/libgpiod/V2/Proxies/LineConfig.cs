@@ -5,13 +5,13 @@
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
 using System.Collections.Generic;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.ValueTypes;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
 using System.Linq;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// The line-config object contains the configuration for lines that can be used in two cases:
@@ -36,7 +36,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineConfig()
     {
-        Handle = TryCallGpiod(Libgpiodv2.gpiod_line_config_new);
+        Handle = TryCallGpiod(LibgpiodV2.gpiod_line_config_new);
 
         if (Handle.IsInvalid)
         {
@@ -51,7 +51,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void Reset()
     {
-        TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_config_reset(Handle));
+        TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_config_reset(Handle));
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void AddLineSettings(Offset[] offsets, LineSettings lineSettings)
     {
-        TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_config_add_line_settings(Handle, offsets.Convert(), offsets.Length, lineSettings.Handle));
+        TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_config_add_line_settings(Handle, offsets.Convert(), offsets.Length, lineSettings.Handle));
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineSettings GetLineSettings(Offset offset)
     {
-        return TryCallGpiodLocked(() => new LineSettings(Libgpiodv2.gpiod_line_config_get_line_settings(Handle, offset)));
+        return TryCallGpiodLocked(() => new LineSettings(LibgpiodV2.gpiod_line_config_get_line_settings(Handle, offset)));
     }
 
     /// <summary>
@@ -94,7 +94,7 @@ internal class LineConfig : LibGpiodProxyBase
         TryCallGpiodLocked(() =>
         {
             var valArr = values.ToArray();
-            int result = Libgpiodv2.gpiod_line_config_set_output_values(Handle, valArr, valArr.Length);
+            int result = LibgpiodV2.gpiod_line_config_set_output_values(Handle, valArr, valArr.Length);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set output values: {LastErr.GetMsg()}");
@@ -109,7 +109,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumConfiguredOffsets()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_config_get_num_configured_offsets(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_config_get_num_configured_offsets(Handle));
     }
 
     /// <summary>
@@ -123,7 +123,7 @@ internal class LineConfig : LibGpiodProxyBase
         {
             int numConfiguredOffsets = GetNumConfiguredOffsets();
             uint[] configuredOffsets = new uint[numConfiguredOffsets];
-            int nStored = Libgpiodv2.gpiod_line_config_get_configured_offsets(Handle, configuredOffsets, configuredOffsets.Length);
+            int nStored = LibgpiodV2.gpiod_line_config_get_configured_offsets(Handle, configuredOffsets, configuredOffsets.Length);
             Array.Resize(ref configuredOffsets, nStored);
             return configuredOffsets.Convert();
         });

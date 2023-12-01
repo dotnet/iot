@@ -6,7 +6,7 @@
 
 using System.Runtime.InteropServices;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2;
 
 internal static class LastErr
 {

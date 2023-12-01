@@ -5,9 +5,9 @@
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
 using System.Runtime.InteropServices;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
 
 internal class LineInfoEventSafeHandle : SafeHandle
 {
@@ -18,7 +18,7 @@ internal class LineInfoEventSafeHandle : SafeHandle
 
     protected override bool ReleaseHandle()
     {
-        Libgpiodv2.gpiod_info_event_free(handle);
+        LibgpiodV2.gpiod_info_event_free(handle);
         return true;
     }
 

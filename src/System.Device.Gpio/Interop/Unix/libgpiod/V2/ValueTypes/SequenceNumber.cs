@@ -4,7 +4,7 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.ValueTypes;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
 
 /// <summary>
 /// Value type for GPIO edge event sequence number

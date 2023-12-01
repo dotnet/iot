@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.ValueTypes;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;

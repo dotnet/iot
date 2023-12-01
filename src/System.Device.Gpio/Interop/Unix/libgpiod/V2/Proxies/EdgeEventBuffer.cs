@@ -4,10 +4,10 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// An edge event object contains information about a single line edge event. It contains the event type, timestamp and the offset of the line on
@@ -27,7 +27,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public EdgeEventBuffer(int capacity = 10)
     {
-        Handle = TryCallGpiod(() => Libgpiodv2.gpiod_edge_event_buffer_new(capacity));
+        Handle = TryCallGpiod(() => LibgpiodV2.gpiod_edge_event_buffer_new(capacity));
 
         if (Handle.IsInvalid)
         {
@@ -42,7 +42,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetCapacity()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_buffer_get_capacity(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_buffer_get_capacity(Handle));
     }
 
     /// <summary>
@@ -54,11 +54,11 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     {
         return TryCallGpiodLocked(() =>
         {
-            EdgeEventNotFreeable edgeEventHandle = Libgpiodv2.gpiod_edge_event_buffer_get_event(Handle, index);
+            EdgeEventNotFreeable edgeEventHandle = LibgpiodV2.gpiod_edge_event_buffer_get_event(Handle, index);
             // Since events are tied to the buffer instance, different threads may not operate on the buffer and any associated events at the same
             // time. Events can be copied using ::gpiod_edge_event_copy in order to create a standalone objects - which each may safely be used from
             // a different thread concurrently.
-            EdgeEventSafeHandle edgeEventCopyHandle = Libgpiodv2.gpiod_edge_event_copy(edgeEventHandle);
+            EdgeEventSafeHandle edgeEventCopyHandle = LibgpiodV2.gpiod_edge_event_copy(edgeEventHandle);
             return new EdgeEvent(edgeEventCopyHandle);
         });
     }
@@ -70,7 +70,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumEvents()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_edge_event_buffer_get_num_events(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_buffer_get_num_events(Handle));
     }
 
     /// <summary>

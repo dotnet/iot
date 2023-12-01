@@ -4,11 +4,11 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// Callers are notified about changes in a line's status due to GPIO uAPI calls.
@@ -27,7 +27,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineSettings()
     {
-        Handle = TryCallGpiod(Libgpiodv2.gpiod_line_settings_new);
+        Handle = TryCallGpiod(LibgpiodV2.gpiod_line_settings_new);
 
         if (Handle.IsInvalid)
         {
@@ -55,7 +55,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineSettings Copy()
     {
-        var handle = TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_copy(Handle));
+        var handle = TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_copy(Handle));
 
         if (handle.IsInvalid)
         {
@@ -72,7 +72,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void Reset()
     {
-        TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_reset(Handle));
+        TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_reset(Handle));
     }
 
     /// <summary>
@@ -84,7 +84,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_direction(Handle, lineDirection);
+            int result = LibgpiodV2.gpiod_line_settings_set_direction(Handle, lineDirection);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line direction: {LastErr.GetMsg()}");
@@ -99,7 +99,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineDirection GetDirection()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_get_direction(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_direction(Handle));
     }
 
     /// <summary>
@@ -111,7 +111,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_edge_detection(Handle, edge);
+            int result = LibgpiodV2.gpiod_line_settings_set_edge_detection(Handle, edge);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line edge detection: {LastErr.GetMsg()}");
@@ -126,7 +126,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineEdge GetEdgeDetection()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_get_edge_detection(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_edge_detection(Handle));
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_bias(Handle, bias);
+            int result = LibgpiodV2.gpiod_line_settings_set_bias(Handle, bias);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line bias: {LastErr.GetMsg()}");
@@ -153,7 +153,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineBias GetBias()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_get_bias(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_bias(Handle));
     }
 
     /// <summary>
@@ -165,7 +165,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_drive(Handle, drive);
+            int result = LibgpiodV2.gpiod_line_settings_set_drive(Handle, drive);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line drive: {LastErr.GetMsg()}");
@@ -180,7 +180,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineDrive GetDrive()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_get_drive(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_drive(Handle));
     }
 
     /// <summary>
@@ -192,7 +192,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_active_low(Handle, isActiveLow);
+            int result = LibgpiodV2.gpiod_line_settings_set_active_low(Handle, isActiveLow);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line active low: {LastErr.GetMsg()}");
@@ -207,7 +207,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public bool GetActiveLow()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_get_active_low(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_active_low(Handle));
     }
 
     /// <summary>
@@ -219,7 +219,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_debounce_period_us(Handle, (ulong)(debouncePeriod.TotalMilliseconds * 1000));
+            int result = LibgpiodV2.gpiod_line_settings_set_debounce_period_us(Handle, (ulong)(debouncePeriod.TotalMilliseconds * 1000));
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line debounce period: {LastErr.GetMsg()}");
@@ -236,7 +236,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         return TryCallGpiodLocked(() =>
         {
-            ulong debouncePeriodUs = Libgpiodv2.gpiod_line_settings_get_debounce_period_us(Handle);
+            ulong debouncePeriodUs = LibgpiodV2.gpiod_line_settings_get_debounce_period_us(Handle);
             return TimeSpan.FromMilliseconds(debouncePeriodUs / 1000f);
         });
     }
@@ -250,7 +250,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_event_clock(Handle, eventClock);
+            int result = LibgpiodV2.gpiod_line_settings_set_event_clock(Handle, eventClock);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line event clock: {LastErr.GetMsg()}");
@@ -265,7 +265,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineClock GetEventClock()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_get_event_clock(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_event_clock(Handle));
     }
 
     /// <summary>
@@ -277,7 +277,7 @@ internal class LineSettings : LibGpiodProxyBase
     {
         TryCallGpiodLocked(() =>
         {
-            int result = Libgpiodv2.gpiod_line_settings_set_output_value(Handle, lineValue);
+            int result = LibgpiodV2.gpiod_line_settings_set_output_value(Handle, lineValue);
             if (result < 0)
             {
                 throw new GpiodException($"Could not set line output value: {LastErr.GetMsg()}");
@@ -292,7 +292,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineValue GetOutputValue()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_line_settings_get_output_value(Handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_output_value(Handle));
     }
 
     /// <summary>

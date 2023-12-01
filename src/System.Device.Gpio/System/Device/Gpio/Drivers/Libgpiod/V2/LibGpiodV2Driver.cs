@@ -3,10 +3,10 @@
 
 using System.Collections.Generic;
 using System.Device.Gpio.Drivers;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.ValueTypes;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
@@ -14,7 +14,7 @@ using System.Threading;
 namespace System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V2;
 
 /// <summary>
-/// Driver that uses libgpiod v2 for GPIO control.
+/// Driver that uses libgpiod V2 for GPIO control.
 /// </summary>
 public sealed class LibGpiodV2Driver : UnixDriver
 {

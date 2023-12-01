@@ -6,14 +6,14 @@
 #pragma warning disable SA1307 // Accessible fields should begin with upper-case letter
 
 using System;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
 using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
     /// <summary>
-    /// Binding for libgpiod v2 /// href="https://libgpiod.readthedocs.io/en/latest/modules.html"/>
+    /// Binding for libgpiod V2 /// href="https://libgpiod.readthedocs.io/en/latest/modules.html"/>
     /// </summary>
     internal static class LibgpiodV2
     {

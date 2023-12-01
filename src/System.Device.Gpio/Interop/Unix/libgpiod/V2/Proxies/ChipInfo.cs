@@ -4,11 +4,11 @@
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
 
-using System.Device.Gpio.Interop.Unix.libgpiod.v2.Binding.Handles;
+using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
 using System.Runtime.InteropServices;
-using Libgpiodv2 = Interop.LibgpiodV2;
+using LibgpiodV2 = Interop.LibgpiodV2;
 
-namespace System.Device.Gpio.Interop.Unix.libgpiod.v2.Proxies;
+namespace System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
 
 /// <summary>
 /// The chip info contains all the publicly available information about a chip.
@@ -38,7 +38,7 @@ internal class ChipInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string GetName()
     {
-        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(Libgpiodv2.gpiod_chip_info_get_name(_handle)) ??
+        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_info_get_name(_handle)) ??
             throw new GpiodException($"Could not get name from chip info: {LastErr.GetMsg()}"));
     }
 
@@ -49,7 +49,7 @@ internal class ChipInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string GetLabel()
     {
-        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(Libgpiodv2.gpiod_chip_info_get_label(_handle)) ??
+        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_info_get_label(_handle)) ??
             throw new GpiodException($"Could not get label from chip info: {LastErr.GetMsg()}"));
     }
 
@@ -60,7 +60,7 @@ internal class ChipInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumLines()
     {
-        return TryCallGpiodLocked(() => Libgpiodv2.gpiod_chip_info_get_num_lines(_handle));
+        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_chip_info_get_num_lines(_handle));
     }
 
     /// <summary>
