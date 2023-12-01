@@ -6,9 +6,7 @@ As of now (12/2023) only a few distros ship version 2 with their package manager
 
 ## Install libgpiod v2.x
 
-The installation should be the same on all Pi's, other other boards.
-
-Head to [releases](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/refs/) and copy the download URL of a libgpiod version.
+The installation should be the same on all Pi's, or other boards.
 
 1. Install build dependencies
 
@@ -17,9 +15,7 @@ Head to [releases](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/ref
    
    ``````
 
-   
-
-2. Download the tarball and unpack it
+2. Download the tarball and unpack it: Go to [releases](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/refs/) and copy the download URL of a libgpiod version
 
    ``````shell
    wget https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.1.tar.gz
