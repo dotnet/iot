@@ -496,7 +496,7 @@ public abstract class GpioControllerTestBase
     }
 
     [Fact]
-    public void WaitForEventBothEdgesTest()
+    public async Task WaitForEventBothEdgesTest()
     {
         using (GpioController controller = new GpioController(GetTestNumberingScheme(), GetTestDriver()))
         {
@@ -529,7 +529,7 @@ public abstract class GpioControllerTestBase
             result = controller.WaitForEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, tokenSource.Token);
             Assert.False(result.TimedOut);
             Assert.Equal(PinEventTypes.Rising, result.EventTypes);
-            Assert.True(task.Wait(TimeSpan.FromSeconds(30))); // Should end long before that
+            await task.WaitAsync(TimeSpan.FromSeconds(30)); // Should end long before that
             tokenSource.Dispose();
         }
     }

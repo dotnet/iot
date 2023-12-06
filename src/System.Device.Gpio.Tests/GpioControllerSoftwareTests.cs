@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Threading;
+using System.Threading.Tasks;
 using Moq;
 using Xunit;
 
@@ -235,7 +236,7 @@ public class GpioControllerSoftwareTests : IDisposable
     }
 
     [Fact]
-    public void WaitForEventAsyncFail()
+    public async Task WaitForEventAsyncFail()
     {
         var ctrl = new GpioController(PinNumberingScheme.Logical, _mockedGpioDriver.Object);
         _mockedGpioDriver.Setup(x => x.OpenPinEx(1));
@@ -249,11 +250,11 @@ public class GpioControllerSoftwareTests : IDisposable
         ctrl.OpenPin(1, PinMode.Input);
 
         var task = ctrl.WaitForEventAsync(1, PinEventTypes.Falling | PinEventTypes.Rising, TimeSpan.FromSeconds(0.01)).AsTask();
-        task.Wait(CancellationToken.None);
+        var result = await task.WaitAsync(CancellationToken.None);
         Assert.True(task.IsCompleted);
         Assert.Null(task.Exception);
-        Assert.True(task.Result.TimedOut);
-        Assert.Equal(PinEventTypes.None, task.Result.EventTypes);
+        Assert.True(result.TimedOut);
+        Assert.Equal(PinEventTypes.None, result.EventTypes);
     }
 
     [Fact]
