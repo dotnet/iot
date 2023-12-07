@@ -2,48 +2,48 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
-using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V2;
+using System.Device.Gpio.Drivers.Libgpiod.V1;
+using System.Device.Gpio.Drivers.Libgpiod.V2;
 using System.IO;
 using System.Linq;
 
-namespace System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod;
+namespace System.Device.Gpio.Drivers;
 
 internal static class LibGpiodDriverFactory
 {
     private const int _defaultDriverVersion = 1;
 
     private const string _librarySearchPattern = "libgpiod.so*";
-    private const string _v0 = "libgpiod.so.0";
-    private const string _v1_0 = "libgpiod.so.1";
-    private const string _v1_1 = "libgpiod.so.2";
-    private const string _v2 = "libgpiod.so.3";
+    private const string _libgpiod_0 = "libgpiod.so.0";
+    private const string _libgpiod_1_0 = "libgpiod.so.1";
+    private const string _libgpiod_1_1 = "libgpiod.so.2";
+    private const string _libgpiod_2 = "libgpiod.so.3";
 
     private static readonly string[] _librarySearchPaths = { "/lib", "/usr/lib", "/usr/local/lib" };
 
-    private static readonly object _lockObject = new();
-    private static int? _driverVersionToLoad;
+    private static int _driverVersionToLoad;
 
-    /// <summary>
-    /// Tries with best effort to find installed libgpiod libraries and loads the latest version.
-    /// <see href="https://learn.microsoft.com/en-us/dotnet/standard/native-interop/native-library-loading#custom-import-resolver"/>
-    /// </summary>
-    /// <remarks> On NET Core 3.1 or NET5+ SetDllImportResolver would be a better solution</remarks>
-    public static GpioDriver Create(int chipNumber)
+    static LibGpiodDriverFactory()
     {
-        lock (_lockObject)
+        try
         {
-            if (_driverVersionToLoad.HasValue)
-            {
-                return InstantiateDriver(_driverVersionToLoad.Value, chipNumber);
-            }
-
             _driverVersionToLoad = GetDriverVersionToLoad();
-            return InstantiateDriver(_driverVersionToLoad.Value, chipNumber);
+        }
+        catch (Exception)
+        {
+            _driverVersionToLoad = 1;
         }
     }
 
-    private static GpioDriver InstantiateDriver(int driverVersionToLoad, int chipNumber)
+    /// <summary>
+    /// Tries with best effort to find installed libgpiod libraries and loads the latest version.
+    /// </summary>
+    public static UnixDriver Create(int chipNumber)
+    {
+        return InstantiateDriver(_driverVersionToLoad, chipNumber);
+    }
+
+    private static UnixDriver InstantiateDriver(int driverVersionToLoad, int chipNumber)
     {
         return driverVersionToLoad switch
         {
@@ -72,22 +72,22 @@ internal static class LibGpiodDriverFactory
             return _defaultDriverVersion;
         }
 
-        if (foundLibraryFiles.Any(x => x.Contains(_v2)))
+        if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_2)))
         {
             return 2;
         }
 
-        if (foundLibraryFiles.Any(x => x.Contains(_v1_1)))
+        if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_1_1)))
         {
             return 1;
         }
 
-        if (foundLibraryFiles.Any(x => x.Contains(_v1_0)))
+        if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_1_0)))
         {
             return 1;
         }
 
-        if (foundLibraryFiles.Any(x => x.Contains(_v0)))
+        if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_0)))
         {
             return 1;
         }

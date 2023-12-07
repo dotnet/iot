@@ -3,11 +3,9 @@
 
 // Disable these StyleCop rules for this file, as we are using native names here.
 #pragma warning disable SA1300 // Element should begin with upper-case letter
-#pragma warning disable SA1307 // Accessible fields should begin with upper-case letter
 
 using System;
-using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Handles;
+using System.Device.Gpio.Libgpiod.V2;
 using System.Runtime.InteropServices;
 
 internal partial class Interop

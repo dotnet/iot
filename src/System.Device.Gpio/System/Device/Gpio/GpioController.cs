@@ -3,10 +3,7 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Device.Gpio.Drivers;
-using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod;
-using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -500,7 +497,7 @@ public class GpioController : IDisposable
                 // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
                 // We need to create a new driver for the Raspberry Pi 5,
                 // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
-                return LibGpiodDriverFactory.Create(4);
+                return new LibGpiodDriver(4);
 
             default:
 

@@ -1,14 +1,15 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Device.Gpio.Interop.Unix.libgpiod.V1;
+using System.Device.Gpio.Libgpiod.V1;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using LibgpiodV1 = Interop.LibgpiodV1;
 
-namespace System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
+namespace System.Device.Gpio.Drivers.Libgpiod.V1;
+
 internal sealed class LibGpiodV1DriverEventHandler : IDisposable
 {
     private const int ERROR_CODE_EINTR = 4; // Interrupted system call

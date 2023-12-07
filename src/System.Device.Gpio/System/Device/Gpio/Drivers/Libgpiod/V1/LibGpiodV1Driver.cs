@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Runtime.InteropServices;
 using System.Collections.Concurrent;
-using System.Device.Gpio.Drivers;
-using System.Device.Gpio.Interop.Unix.libgpiod.V1;
+using System.Device.Gpio.Libgpiod.V1;
 using System.Diagnostics;
 using LibgpiodV1 = Interop.LibgpiodV1;
 
-namespace System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
+namespace System.Device.Gpio.Drivers.Libgpiod.V1;
 
 /// <summary>
 /// This driver uses libgpiod v0/1 to get user-level access to the gpio ports.

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Buffers.Binary;
-using System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V1;
+using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -655,7 +655,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             }
 
             // try and open /dev/gpiomem
-            fileDescriptor = global::Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
+            fileDescriptor = Interop.open(GpioMemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
             if (fileDescriptor == -1)
             {
                 win32Error = Marshal.GetLastWin32Error();
@@ -669,7 +669,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 }
 
                 // if /dev/gpiomem doesn't seem to be available then let's try /dev/mem
-                fileDescriptor = global::Interop.open(MemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
+                fileDescriptor = Interop.open(MemoryFilePath, FileOpenFlags.O_RDWR | FileOpenFlags.O_SYNC);
                 if (fileDescriptor == -1)
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
@@ -682,7 +682,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                     {
                         // get the periphal base address from the libbcm_host library which is the reccomended way
                         // according to the RasperryPi website
-                        gpioRegisterOffset = global::Interop.libbcmhost.bcm_host_get_peripheral_address();
+                        gpioRegisterOffset = Interop.libbcmhost.bcm_host_get_peripheral_address();
 
                         // if we get zero back then we use our own internal method. This can happen
                         // on a Pi4 if the userland libraries haven't been updated and was fixed in Jul/Aug 2019.
@@ -707,13 +707,13 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
                 }
             }
 
-            IntPtr mapPointer = global::Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
+            IntPtr mapPointer = Interop.mmap(IntPtr.Zero, Environment.SystemPageSize, (MemoryMappedProtections.PROT_READ | MemoryMappedProtections.PROT_WRITE), MemoryMappedFlags.MAP_SHARED, fileDescriptor, (int)gpioRegisterOffset);
             if (mapPointer.ToInt64() == -1)
             {
                 throw new IOException($"Error {Marshal.GetLastWin32Error()} initializing the Gpio driver.");
             }
 
-            global::Interop.close(fileDescriptor);
+            Interop.close(fileDescriptor);
             _registerViewPointer = (RegisterView*)mapPointer;
 
             // Detect whether we're running on a Raspberry Pi 4
@@ -722,7 +722,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
             {
                 if (File.Exists(ModelFilePath))
                 {
-                    string model = File.ReadAllText(ModelFilePath, Text.Encoding.ASCII);
+                    string model = File.ReadAllText(ModelFilePath, Encoding.ASCII);
                     if (model.Contains("Raspberry Pi 4") || model.Contains("Raspberry Pi Compute Module 4"))
                     {
                         IsPi4 = true;
@@ -765,7 +765,7 @@ internal unsafe class RaspberryPi3LinuxDriver : GpioDriver
     {
         if (_registerViewPointer != null)
         {
-            global::Interop.munmap((IntPtr)_registerViewPointer, 0);
+            Interop.munmap((IntPtr)_registerViewPointer, 0);
             _registerViewPointer = null;
         }
 

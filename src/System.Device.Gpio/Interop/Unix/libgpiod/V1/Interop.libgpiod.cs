@@ -7,7 +7,7 @@
 
 using System;
 using System.Device.Gpio;
-using System.Device.Gpio.Interop.Unix.libgpiod.V1;
+using System.Device.Gpio.Libgpiod.V1;
 using System.Runtime.InteropServices;
 #if NET6_0_OR_GREATER
 using System.Runtime.Loader;

@@ -419,7 +419,7 @@ public class SysFsDriver : UnixDriver
     {
         if (pollFileDescriptor == -1)
         {
-            pollFileDescriptor = global::Interop.epoll_create(1);
+            pollFileDescriptor = Interop.epoll_create(1);
             if (pollFileDescriptor < 0)
             {
                 throw new IOException("Error while trying to initialize pin interrupts (epoll_create failed).");
@@ -431,7 +431,7 @@ public class SysFsDriver : UnixDriver
         if (valueFileDescriptor == -1)
         {
             string valuePath = Path.Combine(GpioBasePath, $"gpio{pinNumber + s_pinOffset}", "value");
-            valueFileDescriptor = global::Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
+            valueFileDescriptor = Interop.open(valuePath, FileOpenFlags.O_RDONLY | FileOpenFlags.O_NONBLOCK);
             if (valueFileDescriptor < 0)
             {
                 throw new IOException($"Error while trying to open pin value file {valuePath}.");
@@ -449,14 +449,14 @@ public class SysFsDriver : UnixDriver
             }
         };
 
-        int result = global::Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, valueFileDescriptor, ref epollEvent);
+        int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, valueFileDescriptor, ref epollEvent);
         if (result == -1)
         {
             throw new IOException("Error while trying to initialize pin interrupts (epoll_ctl failed).");
         }
 
         // Ignore first time because it will always return the current state.
-        while (global::Interop.epoll_wait(pollFileDescriptor, out _, 1, 0) == -1)
+        while (Interop.epoll_wait(pollFileDescriptor, out _, 1, 0) == -1)
         {
             var errorCode = Marshal.GetLastWin32Error();
             if (errorCode != ERROR_CODE_EINTR)
@@ -476,7 +476,7 @@ public class SysFsDriver : UnixDriver
         while (!cancellationToken.IsCancellationRequested)
         {
             // Wait until something happens
-            int waitResult = global::Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, PollingTimeout);
+            int waitResult = Interop.epoll_wait(pollFileDescriptor, out epoll_event events, 1, PollingTimeout);
             if (waitResult == -1)
             {
                 var errorCode = Marshal.GetLastWin32Error();
@@ -506,7 +506,7 @@ public class SysFsDriver : UnixDriver
             events = PollEvents.EPOLLIN | PollEvents.EPOLLET | PollEvents.EPOLLPRI
         };
 
-        int result = global::Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, valueFileDescriptor, ref epollEvent);
+        int result = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_DEL, valueFileDescriptor, ref epollEvent);
         if (result == -1)
         {
             throw new IOException("Error while trying to delete pin interrupts.");
@@ -514,7 +514,7 @@ public class SysFsDriver : UnixDriver
 
         if (closePinValueFileDescriptor)
         {
-            global::Interop.close(valueFileDescriptor);
+            Interop.close(valueFileDescriptor);
             valueFileDescriptor = -1;
         }
 
@@ -540,7 +540,7 @@ public class SysFsDriver : UnixDriver
                 }
             }
 
-            global::Interop.close(pollFileDescriptor);
+            Interop.close(pollFileDescriptor);
             pollFileDescriptor = -1;
         }
     }
@@ -579,7 +579,7 @@ public class SysFsDriver : UnixDriver
         _pinValues.Clear();
         if (_pollFileDescriptor != -1)
         {
-            global::Interop.close(_pollFileDescriptor);
+            Interop.close(_pollFileDescriptor);
             _pollFileDescriptor = -1;
         }
 

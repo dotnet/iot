@@ -2,16 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Device.Gpio.Drivers;
-using System.Device.Gpio.Interop.Unix.libgpiod.V2;
-using System.Device.Gpio.Interop.Unix.libgpiod.V2.Binding.Enums;
-using System.Device.Gpio.Interop.Unix.libgpiod.V2.Proxies;
-using System.Device.Gpio.Interop.Unix.libgpiod.V2.ValueTypes;
+using System.Device.Gpio.Libgpiod.V2;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-namespace System.Device.Gpio.System.Device.Gpio.Drivers.Libgpiod.V2;
+namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 
 /// <summary>
 /// Driver that uses libgpiod V2 for GPIO control.
@@ -33,7 +29,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
     /// <param name="waitForEventsTimeout">
     /// The time for the event handling thread to timeout and try again reading events.
     /// When the driver gets disposed it waits for the event handling thread to complete, so increasing the timeout will delay disposing.
-    /// Setting the timout to a very low value means more frequent check iterations, which can negatively impact performance. Defaults to 1 second.
+    /// Setting the timeout to a very low value means more frequent check iterations, which can negatively impact performance. Defaults to 1 second.
     /// </param>
     public LibGpiodV2Driver(int chipNumber = 0, TimeSpan? waitForEventsTimeout = null)
     {

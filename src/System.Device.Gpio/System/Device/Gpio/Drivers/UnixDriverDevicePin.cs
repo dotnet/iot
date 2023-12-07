@@ -51,7 +51,7 @@ internal sealed class UnixDriverDevicePin : IDisposable
     {
         if (FileDescriptor != -1)
         {
-            global::Interop.close(FileDescriptor);
+            Interop.close(FileDescriptor);
             FileDescriptor = -1;
         }
 
