@@ -18,7 +18,7 @@
     <Compile Include="*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.8.0" />
+    <PackageReference Include="CommandLineParser" Version="2.9.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\src\devices\Arduino\Arduino.csproj" />
