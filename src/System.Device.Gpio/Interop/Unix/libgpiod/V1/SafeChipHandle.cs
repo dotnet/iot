@@ -22,5 +22,5 @@ internal class SafeChipHandle : SafeHandle
         return true;
     }
 
-    public override bool IsInvalid => handle == IntPtr.Zero || handle == global::Interop.LibgpiodV1.InvalidHandleValue;
+    public override bool IsInvalid => handle == IntPtr.Zero || handle == LibgpiodV1.InvalidHandleValue;
 }
