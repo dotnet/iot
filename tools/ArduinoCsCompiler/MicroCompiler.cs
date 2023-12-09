@@ -3008,13 +3008,13 @@ namespace ArduinoCsCompiler
 
         public void KillTask(EquatableMethod? methodInfo)
         {
-            if (_activeExecutionSet == null)
-            {
-                throw new InvalidOperationException("No execution set loaded");
-            }
-
             if (methodInfo != null)
             {
+                if (_activeExecutionSet == null)
+                {
+                    throw new InvalidOperationException("No execution set loaded");
+                }
+
                 var decl = _activeExecutionSet.GetMethod(methodInfo);
 
                 _commandHandler.SendKillTask(decl.Token);
