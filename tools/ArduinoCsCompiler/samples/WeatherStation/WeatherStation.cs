@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Device.Gpio;
 using System.Device.I2c;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Ports;
@@ -163,6 +164,9 @@ namespace WeatherStation
         {
             Length stationAltitude = Length.FromMeters(StationAltitude);
             int currentPage = _page;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            WriteLogEntry(DateTime.Now);
             while (!Console.KeyAvailable)
             {
                 try
@@ -177,6 +181,13 @@ namespace WeatherStation
                     }
 
                     var time = DateTime.Now;
+                    if (sw.Elapsed > TimeSpan.FromMinutes(5))
+                    {
+                        sw.Restart();
+                        WriteLogEntry(time);
+                    }
+
+                    Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds.ToString());
                     // left align the date in the top left corner, right align the time in the top right corner
                     string dateString = time.ToShortDateString();
                     string timeString = time.ToLongTimeString();
@@ -230,6 +241,36 @@ namespace WeatherStation
                 gpioController.Write(RedLed, PinValue.High);
                 Thread.Sleep(100);
                 gpioController.Write(RedLed, PinValue.Low);
+            }
+        }
+
+        private void WriteLogEntry(DateTime time)
+        {
+            string logTime = time.ToString("s", CultureInfo.InvariantCulture) + "; ";
+            Length stationAltitude = Length.FromMeters(StationAltitude);
+            _bme680!.SetPowerMode(Bme680PowerMode.Forced);
+            if (_bme680.TryReadTemperature(out Temperature temp) && _bme680.TryReadPressure(out Pressure pressure) && _bme680.TryReadHumidity(out RelativeHumidity humidity))
+            {
+                Pressure correctedPressure = WeatherHelper.CalculateBarometricPressure(pressure, temp, stationAltitude);
+                Temperature dewPoint = WeatherHelper.CalculateDewPoint(temp, humidity);
+                string temperature = temp.DegreesCelsius.ToString("F2") + "; " + correctedPressure.Hectopascals.ToString("F1") + "; ";
+                string humidityLine = humidity.Percent.ToString("F1") + "; ";
+                string dewPointLine = dewPoint.DegreesCelsius.ToString("F1");
+
+                using FileStream fileStream = new FileStream("DataLogger.txt", FileMode.Append, FileAccess.Write);
+                TextWriter tw = new StreamWriter(fileStream);
+                if (fileStream.Position == 0)
+                {
+                    // The file is new, write the header.
+                    tw.WriteLine("Date/Time; Temperature (C); Pressure (hPA); Humidity (%); Dew Point (C)");
+                }
+
+                tw.Write(logTime);
+                tw.Write(temperature);
+                tw.Write(humidityLine);
+                tw.WriteLine(dewPointLine);
+                tw.Flush();
+                fileStream.Dispose();
             }
         }
     }

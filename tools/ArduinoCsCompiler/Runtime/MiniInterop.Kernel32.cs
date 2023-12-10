@@ -9,6 +9,7 @@ using System.Threading;
 using Iot.Device.Arduino;
 using Microsoft.Win32.SafeHandles;
 
+#pragma warning disable CA1416 // Function is only available on Windows (Oh, well, what a coincidence that we're mimicking the windows kernel here...)
 namespace ArduinoCsCompiler.Runtime
 {
     internal partial class MiniInterop
@@ -332,8 +333,14 @@ namespace ArduinoCsCompiler.Runtime
                 return 1;
             }
 
-            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2", 0x210)]
+            [ArduinoImplementation]
             internal static unsafe Int32 WriteFile(System.Runtime.InteropServices.SafeHandle handle, Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, NativeOverlapped* lpOverlapped)
+            {
+                return WriteFile(handle.DangerousGetHandle(), bytes, numBytesToWrite, ref numBytesWritten, lpOverlapped->OffsetLow);
+            }
+
+            [ArduinoImplementation("Interop_Kernel32WriteFileOverlapped2", 0x210)]
+            internal static unsafe Int32 WriteFile(IntPtr handle, Byte* bytes, System.Int32 numBytesToWrite, ref System.Int32 numBytesWritten, Int32 offset)
             {
                 return 0;
             }
@@ -454,8 +461,14 @@ namespace ArduinoCsCompiler.Runtime
                 return false;
             }
 
-            [ArduinoImplementation("Interop_Kernel32GetFileInformationByHandleEx", 0x20E)]
+            [ArduinoImplementation]
             internal static unsafe Boolean GetFileInformationByHandleEx(Microsoft.Win32.SafeHandles.SafeFileHandle hFile, System.Int32 FileInformationClass, void* lpFileInformation, System.UInt32 dwBufferSize)
+            {
+                return GetFileInformationByHandleExInternal(hFile.DangerousGetHandle(), FileInformationClass, lpFileInformation, dwBufferSize);
+            }
+
+            [ArduinoImplementation("Interop_Kernel32GetFileInformationByHandleEx", 0x20E)]
+            public static unsafe Boolean GetFileInformationByHandleExInternal(IntPtr hFile, System.Int32 FileInformationClass, void* lpFileInformation, System.UInt32 dwBufferSize)
             {
                 return false;
             }

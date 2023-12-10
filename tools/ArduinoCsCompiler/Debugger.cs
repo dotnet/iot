@@ -132,7 +132,7 @@ Use -1 to allow breaking on all threads.")
         {
             if (args.Length <= 1)
             {
-                PrintHelp(new string[] { "bp" });
+                PrintHelp("bp");
                 return;
             }
 
@@ -376,6 +376,7 @@ Use -1 to allow breaking on all threads.")
         {
             PrintHelp(new string[]
             {
+                "help",
                 cmd
             });
         }
