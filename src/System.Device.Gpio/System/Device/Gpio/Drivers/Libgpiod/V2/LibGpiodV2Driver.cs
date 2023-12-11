@@ -26,16 +26,11 @@ public sealed class LibGpiodV2Driver : UnixDriver
     /// Creates a driver instance for the specified GPIO chip.
     /// </summary>
     /// <param name="chipNumber">Number of the GPIO chip to drive</param>
-    /// <param name="waitForEventsTimeout">
-    /// The time for the event handling thread to timeout and try again reading events.
-    /// When the driver gets disposed it waits for the event handling thread to complete, so increasing the timeout will delay disposing.
-    /// Setting the timeout to a very low value means more frequent check iterations, which can negatively impact performance. Defaults to 1 second.
-    /// </param>
-    public LibGpiodV2Driver(int chipNumber = 0, TimeSpan? waitForEventsTimeout = null)
+    /// <param name="eventObserverFactory">Factory method to create the event observer (use for tests).</param>
+    public LibGpiodV2Driver(int chipNumber = 0, Func<LibGpiodV2EventObserver>? eventObserverFactory = null)
     {
         _chip = new Chip(chipNumber);
-        waitForEventsTimeout ??= TimeSpan.FromSeconds(1);
-        _eventObserver = new LibGpiodV2EventObserver(waitForEventsTimeout.Value);
+        _eventObserver = eventObserverFactory != null ? eventObserverFactory.Invoke() : new LibGpiodV2EventObserver();
     }
 
     /// <inheritdoc/>
@@ -461,6 +456,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
                 foreach (var request in _requestedLineByLineOffset.Select(x => x.Value.LineRequest).Distinct())
                 {
+                    request.StopWaitingOnEdgeEvents();
                     request.Dispose();
                 }
 

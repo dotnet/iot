@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using LibgpiodV2 = Interop.LibgpiodV2;
 
 namespace System.Device.Gpio.Libgpiod.V2;
@@ -17,6 +18,9 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal class LineRequest : LibGpiodProxyBase, IDisposable
 {
     private readonly LineRequestSafeHandle _handle;
+
+    private readonly object _signalPipeWriteSideLock = new();
+    private int? _signalPipeWriteSide;
 
     /// <summary>
     /// Constructor for a line-request-proxy object that points to an existing gpiod line-request object using a safe handle.
@@ -43,6 +47,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public int GetNumRequestedLines()
     {
+        StopWaitingOnEdgeEvents();
         return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_request_get_num_requested_lines(_handle));
     }
 
@@ -53,6 +58,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public IEnumerable<Offset> GetRequestedOffsets()
     {
+        StopWaitingOnEdgeEvents();
         return TryCallGpiodLocked(() =>
         {
             int numRequestedLines = GetNumRequestedLines();
@@ -70,6 +76,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineValue GetValue(Offset offset)
     {
+        StopWaitingOnEdgeEvents();
         return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_request_get_value(_handle, offset));
     }
 
@@ -80,6 +87,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public IEnumerable<GpiodLineValue> GetValuesSubset(IEnumerable<Offset> offsets)
     {
+        StopWaitingOnEdgeEvents();
         return TryCallGpiodLocked(() =>
         {
             uint[] offsetsArr = offsets.ToArray().Convert();
@@ -101,6 +109,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public IEnumerable<GpiodLineValue> GetValues()
     {
+        StopWaitingOnEdgeEvents();
         return TryCallGpiodLocked(() =>
         {
             int numRequestedLines = GetNumRequestedLines();
@@ -122,6 +131,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void SetValue(Offset offset, GpiodLineValue value)
     {
+        StopWaitingOnEdgeEvents();
         TryCallGpiodLocked(() =>
         {
             int result = LibgpiodV2.gpiod_line_request_set_value(_handle, offset, value);
@@ -139,6 +149,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void SetValuesSubset(IEnumerable<(Offset _offset, GpiodLineValue _value)> valueByOffset)
     {
+        StopWaitingOnEdgeEvents();
         TryCallGpiodLocked(() =>
         {
             var tupleArr = valueByOffset.ToArray();
@@ -160,6 +171,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="ArgumentOutOfRangeException">Count of values does not match number of currently requested lines</exception>
     public void SetValues(IEnumerable<GpiodLineValue> values)
     {
+        StopWaitingOnEdgeEvents();
         TryCallGpiodLocked(() =>
         {
             int numRequestedLines = GetNumRequestedLines();
@@ -185,6 +197,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void ReconfigureLines(LineConfig lineConfig)
     {
+        StopWaitingOnEdgeEvents();
         TryCallGpiodLocked(() =>
         {
             int result = LibgpiodV2.gpiod_line_request_reconfigure_lines(_handle, lineConfig.Handle);
@@ -229,6 +242,147 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
 
             return result;
         });
+    }
+
+    /// <summary>
+    /// A more respectful version of <see cref="WaitEdgeEvents"/> that returns as soon as another thread signals it to i.e. this method
+    /// does not stubbornly wait for the timeout or an event to appear, blocking any other call in between.
+    /// </summary>
+    /// <remarks>
+    /// Uses epoll to wait for either edge events of the requests file descriptor or signals coming from <see cref="StopWaitingOnEdgeEvents"/>.
+    /// For example when this method is waiting on edge events, and someone calls GetValue, a signal will be written to the signal file descriptor
+    /// which triggers epoll to return, which allows releasing the lock to let GetValue through.
+    /// </remarks>
+    /// <returns>0 if wait timed out, 2 if wait got interrupted, 1 if an event is pending.</returns>
+    public int WaitEdgeEventsRespectfully(TimeSpan? timeout = null)
+    {
+        timeout ??= TimeSpan.FromMilliseconds(100);
+
+        return TryCallGpiodLocked(() =>
+        {
+            int requestFileDescriptor = GetFileDescriptor();
+            int pollFileDescriptor = Interop.epoll_create(1);
+            if (pollFileDescriptor < 0)
+            {
+                throw new GpiodException($"Error while waiting for edge events, epoll_create: {LastErr.GetMsg()}");
+            }
+
+            var requestEvent = new epoll_event
+            {
+                events = PollEvents.EPOLLIN | PollEvents.EPOLLPRI, data = new epoll_data { fd = requestFileDescriptor }
+            };
+
+            int ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, requestFileDescriptor, ref requestEvent);
+            if (ret < 0)
+            {
+                throw new GpiodException($"Error while waiting for edge events, epoll_ctl: {LastErr.GetMsg()}");
+            }
+
+            int[] signalPipe = new int[2];
+            ret = Interop.pipe(signalPipe);
+            if (ret < 0)
+            {
+                throw new GpiodException($"Error while waiting for edge events, pipe: {LastErr.GetMsg()}");
+            }
+
+            int signalPipeReadSide = signalPipe[0];
+
+            lock (_signalPipeWriteSideLock)
+            {
+                _signalPipeWriteSide = signalPipe[1];
+            }
+
+            try
+            {
+                var signalEvent = new epoll_event { events = PollEvents.EPOLLIN | PollEvents.EPOLLERR, data = new epoll_data { fd = signalPipeReadSide } };
+
+                ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, signalPipeReadSide, ref signalEvent);
+                if (ret < 0)
+                {
+                    throw new GpiodException($"Error while waiting for edge events, epoll_ctl: {LastErr.GetMsg()}");
+                }
+
+                using var eventBuffer = new UnmanagedArray<epoll_event>(2);
+                ret = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 2, (int)timeout.Value.TotalMilliseconds);
+                if (ret < 0)
+                {
+                    throw new GpiodException($"Error while waiting for edge events, epoll_wait: {LastErr.GetMsg()}");
+                }
+
+                bool isTimeout = ret == 0;
+
+                if (isTimeout)
+                {
+                    return 0;
+                }
+
+                var events = eventBuffer.ReadToManagedArray();
+                for (int i = 0; i < events.Length; ++i)
+                {
+                    if (events[i].data.fd == signalPipeReadSide)
+                    {
+                        return 2;
+                    }
+
+                    if (events[i].data.fd == requestFileDescriptor)
+                    {
+                        return 1;
+                    }
+                }
+            }
+            finally
+            {
+                lock (_signalPipeWriteSideLock)
+                {
+                    Interop.close(signalPipeReadSide);
+                    if (_signalPipeWriteSide != null)
+                    {
+                        Interop.close(_signalPipeWriteSide.Value);
+                        _signalPipeWriteSide = null;
+                    }
+                }
+            }
+
+            return 0;
+        });
+    }
+
+    /// <summary>
+    /// Stops <see cref="WaitEdgeEventsRespectfully"/> waiting for events, to let other operations call libgpiod.
+    /// </summary>
+    public void StopWaitingOnEdgeEvents()
+    {
+        lock (_signalPipeWriteSideLock)
+        {
+            if (_signalPipeWriteSide == null)
+            {
+                return;
+            }
+
+            // the byte value is irrelevant, it is only used as a signal
+            IntPtr signal = Marshal.AllocHGlobal(1);
+
+            try
+            {
+                int ret = Interop.write(_signalPipeWriteSide.Value, signal, 1);
+                if (ret < 0)
+                {
+                    throw new GpiodException($"Error signaling to stop waiting for edge events: write: {LastErr.GetMsg()}");
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(signal);
+                lock (_signalPipeWriteSideLock)
+                {
+                    if (_signalPipeWriteSide != null)
+                    {
+                        Interop.close(_signalPipeWriteSide.Value);
+                        _signalPipeWriteSide = null;
+                    }
+                }
+            }
+        }
     }
 
     /// <summary>

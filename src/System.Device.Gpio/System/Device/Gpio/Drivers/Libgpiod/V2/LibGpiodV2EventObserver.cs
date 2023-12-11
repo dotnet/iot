@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 
 namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 
-internal sealed class LibGpiodV2EventObserver : IDisposable
+/// <summary>
+/// Class that observes libgpiod line requests for events.
+/// </summary>
+public sealed class LibGpiodV2EventObserver : IDisposable
 {
-    private readonly TimeSpan _waitForEventsTimeout;
     private readonly Dictionary<EventSubscription, List<PinChangeEventHandler>> _handlersBySubscription = new();
 
     private readonly List<Task> _requestObserverTasks = new();
@@ -19,10 +21,10 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
     private bool _shouldExit;
 
-    public LibGpiodV2EventObserver(TimeSpan waitForEventsTimeout)
-    {
-        _waitForEventsTimeout = waitForEventsTimeout;
-    }
+    /// <summary>
+    /// Timeout for waiting on edge events.
+    /// </summary>
+    public TimeSpan WaitEdgeEventsTimeout { get; set; } = TimeSpan.FromMilliseconds(100);
 
     /// <summary>
     /// Registers an event subscription and returns a handle that can be waited on for the event.
@@ -31,7 +33,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     /// <param name="request">The line request to observe</param>
     /// <param name="eventSubscription">The subscription for events</param>
     /// <returns>A handle to wait on</returns>
-    public EventWaitHandle ObserveSingleEvent(LineRequest request, EventSubscription eventSubscription)
+    internal EventWaitHandle ObserveSingleEvent(LineRequest request, EventSubscription eventSubscription)
     {
         lock (_handlersBySubscription)
         {
@@ -55,7 +57,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     /// <param name="request">The line request to observe</param>
     /// <param name="eventSubscription">The subscription for events</param>
     /// <param name="callback">Method to call when event arrives</param>
-    public void Observe(LineRequest request, EventSubscription eventSubscription, PinChangeEventHandler callback)
+    internal void Observe(LineRequest request, EventSubscription eventSubscription, PinChangeEventHandler callback)
     {
         lock (_handlersBySubscription)
         {
@@ -90,7 +92,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     /// <summary>
     /// Removes a callback of an event subscription. If no callbacks are present anymore, the event subscription also gets removed.
     /// </summary>
-    public void RemoveCallback(Offset offset, PinChangeEventHandler callback)
+    internal void RemoveCallback(Offset offset, PinChangeEventHandler callback)
     {
         lock (_handlersBySubscription)
         {
@@ -116,7 +118,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     /// <summary>
     /// Removes all event subscriptions of all specified offsets
     /// </summary>
-    public void RemoveSubscriptions(IEnumerable<Offset> offsets)
+    internal void RemoveSubscriptions(IEnumerable<Offset> offsets)
     {
         foreach (var offset in offsets)
         {
@@ -127,7 +129,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     /// <summary>
     /// Removes all event subscriptions of the specified offset
     /// </summary>
-    public void RemoveSubscriptions(Offset offset)
+    internal void RemoveSubscriptions(Offset offset)
     {
         lock (_handlersBySubscription)
         {
@@ -146,7 +148,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     /// There is also the case where the pin mode is changed to output, which requires edge detection to be reset. When switching back to input,
     /// any present event subscriptions should be re-considered.
     /// </summary>
-    public void EnrichLineConfigWithPresentEventSubscriptions(LineConfig lineConfig)
+    internal void EnrichLineConfigWithPresentEventSubscriptions(LineConfig lineConfig)
     {
         lock (_handlersBySubscription)
         {
@@ -197,12 +199,39 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
             EdgeEventBuffer edgeEventBuffer = new();
 
+            // Note: libgpiod does not guarantee thread safety on its objects.
+            // To address this, all calls to a libgpiod object are made mutually exclusive using a lock.
+            // When waiting for edge events, the lock is acquired, and any other call must wait for the wait to timeout, which is undesirable.
+            // One simple solution is to set the timeout to a low value, but this may negatively impact performance, due to more iterations.
+            // A more refined approach is to "fast poll" only when other operations (e.g. GetValue) on the request object are made.
+            // After a period of inactivity on the request, it gracefully transitions back to normal polling.
+            // This approach ensures quick response to events and accelerates the processing of other calls.
+            var fastPollTimeout = TimeSpan.FromMilliseconds(1);
+            var normalPollTimeout = WaitEdgeEventsTimeout;
+            var currentWaitTimeout = normalPollTimeout;
+            var timeToSwitchBackToNormalPollTimeout = TimeSpan.FromMilliseconds(1000);
+            DateTime? lastInterruptionTime = null;
+
             while (request.IsAlive && !_shouldExit)
             {
-                int waitResult = request.WaitEdgeEvents(_waitForEventsTimeout);
+                if (lastInterruptionTime != null && DateTime.Now - lastInterruptionTime >= timeToSwitchBackToNormalPollTimeout)
+                {
+                    currentWaitTimeout = normalPollTimeout;
+                    lastInterruptionTime = null;
+                }
+
+                int waitResult = request.WaitEdgeEventsRespectfully(currentWaitTimeout);
                 bool isGpiodTimeout = waitResult == 0;
                 if (isGpiodTimeout)
                 {
+                    continue;
+                }
+
+                bool isInterrupted = waitResult == 2;
+                if (isInterrupted)
+                {
+                    currentWaitTimeout = fastPollTimeout;
+                    lastInterruptionTime = DateTime.Now;
                     continue;
                 }
 
@@ -257,19 +286,21 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
     #region Dispose
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _shouldExit = true;
+
         // wait for all observer tasks to complete
-        // as long as they are not complete, they might still wait on request.WaitEdgeEvents(), and until that returns the request is still open
+        // as long as they are not complete, they might still wait on edge events, and until that returns the request is still open,
         // which means the lines are still reserved
-        // this should only return all requests have been released
+        // this should only return after all requests have been released
         Task.WhenAll(_requestObserverTasks).Wait();
     }
 
     #endregion
 
-    public sealed class EventWaitHandle
+    internal sealed class EventWaitHandle
     {
         private readonly ManualResetEventSlim _resultSet = new();
         private WaitForEventResult _result;
@@ -295,7 +326,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
         }
     }
 
-    public sealed record EventSubscription(Offset Offset, GpiodLineEdge Edge)
+    internal sealed record EventSubscription(Offset Offset, GpiodLineEdge Edge)
     {
         public bool IsFor(Offset offset, GpiodEdgeEventType edgeEventType)
         {
