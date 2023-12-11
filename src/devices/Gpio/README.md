@@ -7,7 +7,7 @@ This project contains some **full function(PULL-UP, PULL-DOWN)** generic GPIO dr
 * For Allwinner SoCs: [SunxiDriver](Drivers/Sunxi/README.md)
 * For Rockchip SoCs: [RockchipDriver](Drivers/Rockchip/README.md)
 
-## Usage of vivirtual GpioController and virtual GpioPin
+## Usage of virtual GpioController and virtual GpioPin
 
 When you have multiple GpioControllers and want to use them together in a specific binding, the `VirtualGpioController` allows to create a GpioController from GpioPin already open from different controllers. USage is straight forward and classes fully compatible with a normal `GpioController`.
 

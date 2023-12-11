@@ -19,7 +19,7 @@
     </PackageReference>
     <Content Include="$(RepoRoot)README-nuget.md" Pack="true" Visible="false" PackagePath="\README.md" />
   </ItemGroup>
-
+  
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Win32.Registry" Version="$(MicrosoftWin32RegistryPackageVersion)" /> <!-- This is Windows specific -->
     <PackageReference Include="System.Memory" Version="$(SystemMemoryPackageVersion)" />
