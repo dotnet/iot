@@ -9,6 +9,7 @@ using System.Collections.Concurrent;
 using System.Device.Gpio;
 using System;
 using System.Device;
+using System.Reflection;
 
 namespace Iot.Device.Gpio
 {
@@ -18,7 +19,7 @@ namespace Iot.Device.Gpio
     public class VirtualGpioController : GpioController
     {
         private readonly ConcurrentDictionary<int, GpioPin> _pins = new ConcurrentDictionary<int, GpioPin>();
-        private readonly ConcurrentDictionary<int, VirtualGpioPin> _openPins = new ConcurrentDictionary<int, VirtualGpioPin>();
+        private readonly ConcurrentDictionary<int, GpioPin> _openPins = new ConcurrentDictionary<int, GpioPin>();
         private readonly ConcurrentDictionary<int, PinEvent> _callbackEvents = new ConcurrentDictionary<int, PinEvent>();
 
         private record PinEvent(PinEventTypes PinEventTypes, PinChangeEventHandler? Callbacks);
@@ -189,7 +190,15 @@ namespace Iot.Device.Gpio
                 return _openPins[pinNumber];
             }
 
-            _openPins.TryAdd(pinNumber, new VirtualGpioPin(_pins[pinNumber], pinNumber));
+            // We're going to call the internal constructor taking a GpioPin
+            var ctor = typeof(GpioPin).GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic).
+                FirstOrDefault(c => c.GetParameters().Where(m => m.ParameterType == typeof(GpioPin)).Any());
+            if (ctor == null)
+            {
+                throw new ArgumentException("Invalid version of System.Device.Gpio");
+            }
+
+            _openPins.TryAdd(pinNumber, (GpioPin)ctor.Invoke(new object[2] { _pins[pinNumber], pinNumber }));
             return _openPins[pinNumber];
         }
 
