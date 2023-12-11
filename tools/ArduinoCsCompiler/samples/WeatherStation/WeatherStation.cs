@@ -143,7 +143,7 @@ namespace WeatherStation
             console.LoadEncoding(encoding);
             console.LineFeedMode = LineWrapMode.Truncate;
             console.ReplaceLine(0, "Startup!");
-            console.ReplaceLine(1, "Initializing BME680...");
+            // console.ReplaceLine(1, "Initializing BME680...");
             InitBme();
             _button = new GpioButton(Button, false, true, gpioController, false, TimeSpan.FromMilliseconds(50));
             _button.Press += (sender, e) =>
@@ -187,7 +187,7 @@ namespace WeatherStation
                         WriteLogEntry(time);
                     }
 
-                    Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds.ToString());
+                    // Console.WriteLine("Elapsed: " + sw.ElapsedMilliseconds.ToString());
                     // left align the date in the top left corner, right align the time in the top right corner
                     string dateString = time.ToShortDateString();
                     string timeString = time.ToLongTimeString();
