@@ -16,7 +16,7 @@ namespace System.Device.Gpio.Drivers.Libgpiod.V1;
 /// It superseeds the SysFsDriver, but requires that libgpiod is installed. To do so, run
 /// "sudo apt install -y libgpiod-dev".
 /// </summary>
-public class LibGpiodV1Driver : UnixDriver
+internal class LibGpiodV1Driver : UnixDriver
 {
     private static string s_consumerName = Process.GetCurrentProcess().ProcessName;
     private readonly object _pinNumberLock;

@@ -18,29 +18,10 @@ internal class LineSettings : LibGpiodProxyBase
     /// <summary>
     /// Constructor for a line-settings-proxy object. This call will create a new gpiod line-settings object.
     /// </summary>
-    /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__settings.html#gab02d1cceffbb24dc95edc851e8519f0b"/>
-    /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public LineSettings()
-    {
-        Handle = TryCallGpiod(LibgpiodV2.gpiod_line_settings_new);
-
-        if (Handle.IsInvalid)
-        {
-            throw new GpiodException($"Could not create new line settings: {LastErr.GetMsg()}");
-        }
-    }
-
-    /// <summary>
-    /// Constructor for a line-settings-proxy object that points to an existing gpiod line-settings object using a safe handle.
-    /// </summary>
-    /// <exception cref="GpiodException"><paramref name="handle"/> is invalid</exception>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
+    /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__settings.html"/>
     public LineSettings(LineSettingsSafeHandle handle)
     {
-        if (handle.IsInvalid)
-        {
-            throw new GpiodException($"Could not create new line settings");
-        }
-
         Handle = handle;
     }
 

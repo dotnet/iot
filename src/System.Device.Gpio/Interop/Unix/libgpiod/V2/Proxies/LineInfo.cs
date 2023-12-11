@@ -19,13 +19,10 @@ internal class LineInfo : LibGpiodProxyBase
     /// <summary>
     /// Constructor for a line-info-proxy object that points to an existing gpiod line-info object using a safe handle.
     /// </summary>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
+    /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__info.html"/>
     public LineInfo(LineInfoSafeHandle handle)
     {
-        if (handle.IsInvalid)
-        {
-            throw new ArgumentOutOfRangeException(nameof(handle), "Invalid handle");
-        }
-
         _handle = handle;
     }
 

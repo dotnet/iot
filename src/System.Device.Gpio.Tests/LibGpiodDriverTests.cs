@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Device.Gpio.Drivers;
 using System.Device.Gpio.Drivers.Libgpiod.V1;
 using System.Threading;
 using Xunit;
@@ -18,7 +19,7 @@ public class LibGpiodDriverTests : GpioControllerTestBase
     {
     }
 
-    protected override GpioDriver GetTestDriver() => new LibGpiodV1Driver();
+    protected override GpioDriver GetTestDriver() => LibGpiodDriverFactory.CreateV1Driver();
 
     protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 

@@ -19,16 +19,11 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     /// <summary>
     /// Constructor for a edge-event-buffer-proxy object. This call will create a new gpiod edge-event-buffer object.
     /// </summary>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html#ga4249b081f27908f7b8365dd897673e21"/>
-    /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public EdgeEventBuffer(int capacity = 10)
+    public EdgeEventBuffer(EdgeEventBufferSafeHandle handle)
     {
-        Handle = TryCallGpiod(() => LibgpiodV2.gpiod_edge_event_buffer_new(capacity));
-
-        if (Handle.IsInvalid)
-        {
-            throw new GpiodException($"Could not create new edge event buffer: {LastErr.GetMsg()}");
-        }
+        Handle = handle;
     }
 
     /// <summary>

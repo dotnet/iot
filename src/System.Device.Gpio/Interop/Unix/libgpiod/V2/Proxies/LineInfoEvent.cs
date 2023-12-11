@@ -18,13 +18,10 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <summary>
     /// Constructor for a line-info-event-proxy object that points to an existing gpiod line-info-event object using a safe handle.
     /// </summary>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
+    /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__watch.html"/>
     public LineInfoEvent(LineInfoEventSafeHandle handle)
     {
-        if (handle.IsInvalid)
-        {
-            throw new ArgumentOutOfRangeException(nameof(handle), "Invalid handle");
-        }
-
         _handle = handle;
     }
 

@@ -26,16 +26,11 @@ internal class LineConfig : LibGpiodProxyBase
     /// <summary>
     /// Constructor for a line-config-proxy object. This call will create a new gpiod line-config object.
     /// </summary>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__config.html#ga17ebc375388c6588fc96cf0f069d58b3"/>
-    /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public LineConfig()
+    public LineConfig(LineConfigSafeHandle handle)
     {
-        Handle = TryCallGpiod(LibgpiodV2.gpiod_line_config_new);
-
-        if (Handle.IsInvalid)
-        {
-            throw new GpiodException($"Could not create new line config: {LastErr.GetMsg()}");
-        }
+        Handle = handle;
     }
 
     /// <summary>

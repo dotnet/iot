@@ -18,16 +18,11 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <summary>
     /// Constructor for a request-config-proxy object. This call will create a new gpiod request-config object.
     /// </summary>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__request__config.html#gaca72f4c114efce4aa3909a3f71fb6c8e"/>
-    /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public RequestConfig()
+    public RequestConfig(RequestConfigSafeHandle handle)
     {
-        Handle = TryCallGpiod(LibgpiodV2.gpiod_request_config_new);
-
-        if (Handle.IsInvalid)
-        {
-            throw new GpiodException($"Could not create new request config: {LastErr.GetMsg()}");
-        }
+        Handle = handle;
     }
 
     /// <summary>

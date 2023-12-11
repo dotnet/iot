@@ -12,7 +12,7 @@ namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 /// <summary>
 /// Driver that uses libgpiod V2 for GPIO control.
 /// </summary>
-public sealed class LibGpiodV2Driver : UnixDriver
+internal sealed class LibGpiodV2Driver : UnixDriver
 {
     private static readonly string ConsumerId = $"C#-{nameof(LibGpiodV2Driver)}-{Process.GetCurrentProcess().Id}";
 
@@ -25,12 +25,12 @@ public sealed class LibGpiodV2Driver : UnixDriver
     /// <summary>
     /// Creates a driver instance for the specified GPIO chip.
     /// </summary>
-    /// <param name="chipNumber">Number of the GPIO chip to drive</param>
-    /// <param name="eventObserverFactory">Factory method to create the event observer (use for tests).</param>
-    public LibGpiodV2Driver(int chipNumber = 0, Func<LibGpiodV2EventObserver>? eventObserverFactory = null)
+    /// <param name="chip">Chip proxy object to drive.</param>
+    /// <param name="waitEdgeEventsTimeout">Timeout to wait for edge events. Primarily used for testing.</param>
+    public LibGpiodV2Driver(Chip chip, TimeSpan? waitEdgeEventsTimeout = null)
     {
-        _chip = new Chip(chipNumber);
-        _eventObserver = eventObserverFactory != null ? eventObserverFactory.Invoke() : new LibGpiodV2EventObserver();
+        _chip = chip;
+        _eventObserver = new LibGpiodV2EventObserver { WaitEdgeEventsTimeout = waitEdgeEventsTimeout ?? TimeSpan.FromMilliseconds(100) };
     }
 
     /// <inheritdoc/>
@@ -58,7 +58,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
     protected internal override void OpenPin(int lineOffset)
     {
         Offset offset = lineOffset;
-        CreateLineRequestForSingleOffset(offset, () => new LineSettings());
+        CreateLineRequestForSingleOffset(offset, LibGpiodProxyFactory.CreateLineSettings);
     }
 
     /// <inheritdoc/>
@@ -121,7 +121,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
             CreateLineRequestForSingleOffset(offset, () =>
             {
-                var newLineSettings = new LineSettings();
+                var newLineSettings = LibGpiodProxyFactory.CreateLineSettings();
                 ChangeExistingLineSettings(newLineSettings);
                 return newLineSettings;
             });
@@ -192,7 +192,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
             LineRequest request = CreateLineRequestForSingleOffset(offset, () =>
             {
-                var newLineSettings = new LineSettings();
+                var newLineSettings = LibGpiodProxyFactory.CreateLineSettings();
                 newLineSettings.SetDirection(GpiodLineDirection.Input);
                 return newLineSettings;
             });
@@ -235,7 +235,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
 
             CreateLineRequestForSingleOffset(offset, () =>
             {
-                var newLineSettings = new LineSettings();
+                var newLineSettings = LibGpiodProxyFactory.CreateLineSettings();
                 newLineSettings.SetDirection(GpiodLineDirection.Output);
                 newLineSettings.SetOutputValue(Translator.Translate(value));
                 return newLineSettings;
@@ -274,7 +274,7 @@ public sealed class LibGpiodV2Driver : UnixDriver
             {
                 lineRequest = CreateLineRequestForSingleOffset(offset, () =>
                 {
-                    var newLineSettings = new LineSettings();
+                    var newLineSettings = LibGpiodProxyFactory.CreateLineSettings();
                     adjustLineSettings.Invoke(newLineSettings);
                     return newLineSettings;
                 });
@@ -358,10 +358,10 @@ public sealed class LibGpiodV2Driver : UnixDriver
     {
         lock (_lockObject)
         {
-            RequestConfig requestConfig = new();
+            RequestConfig requestConfig = LibGpiodProxyFactory.CreateRequestConfig();
             requestConfig.SetConsumer(ConsumerId);
             var lineSettings = lineSettingsFactory.Invoke();
-            LineConfig lineConfig = new();
+            LineConfig lineConfig = LibGpiodProxyFactory.CreateLineConfig();
             lineConfig.AddLineSettings(offset, lineSettings);
             _eventObserver.EnrichLineConfigWithPresentEventSubscriptions(lineConfig);
 

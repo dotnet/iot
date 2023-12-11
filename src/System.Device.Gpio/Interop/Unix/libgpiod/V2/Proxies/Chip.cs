@@ -19,28 +19,11 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <summary>
     /// Constructor for a chip-proxy object. This call will try to open the chip.
     /// </summary>
-    /// <param name="devicePath">File system path to the chip device, e.g. '/dev/gpiochip4'</param>
-    /// <exception cref="GpiodException">The chip does not exist or an unexpected error happened while opening chip</exception>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
-    public Chip(string devicePath)
+    public Chip(ChipSafeHandle handle)
     {
-        _handle = TryCallGpiod(() => LibgpiodV2.gpiod_chip_open(Marshal.StringToHGlobalAuto(devicePath)));
-
-        if (_handle.IsInvalid)
-        {
-            throw new GpiodException($"Could not open gpio chip at path '{devicePath}': {LastErr.GetMsg()}");
-        }
-    }
-
-    /// <summary>
-    /// Constructor for a chip-proxy-object. This call will try to open the chip.
-    /// </summary>
-    /// <param name="chipNumber">Number that will be translated to a device path for example 4 -> '/dev/gpiochip4'</param>
-    /// <exception cref="GpiodException">The chip does not exist or an unexpected error happened while opening chip</exception>
-    /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
-    public Chip(int chipNumber)
-        : this($"/dev/gpiochip{chipNumber}")
-    {
+        _handle = handle;
     }
 
     /// <summary>

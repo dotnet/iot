@@ -17,7 +17,7 @@ internal class Miscellaneous : LibGpiodProxyBase
     /// </summary>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__misc.html#gace4957f84bc1a308e581cbc5ec71e96d"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public bool IsGpioChipDevice(string path)
+    public static bool IsGpioChipDevice(string path)
     {
         return TryCallGpiod(() => LibgpiodV2.gpiod_is_gpiochip_device(Marshal.StringToHGlobalAuto(path)));
     }
@@ -27,7 +27,7 @@ internal class Miscellaneous : LibGpiodProxyBase
     /// </summary>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__misc.html#gac7919e728ad7c9ba534ec543a8dbcac2"/>
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
-    public string GetApiVersion()
+    public static string GetApiVersion()
     {
         return TryCallGpiod(() =>
             Marshal.PtrToStringAuto(LibgpiodV2.gpiod_api_version()) ?? throw new GpiodException($"Could not get API version: {LastErr.GetMsg()}"));

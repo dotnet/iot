@@ -12,7 +12,7 @@ namespace System.Device.Gpio.Drivers.Libgpiod.V2;
 /// <summary>
 /// Class that observes libgpiod line requests for events.
 /// </summary>
-public sealed class LibGpiodV2EventObserver : IDisposable
+internal sealed class LibGpiodV2EventObserver : IDisposable
 {
     private readonly Dictionary<EventSubscription, List<PinChangeEventHandler>> _handlersBySubscription = new();
 
@@ -197,7 +197,7 @@ public sealed class LibGpiodV2EventObserver : IDisposable
         {
             requestedOffsets.AddRange(request.GetRequestedOffsets());
 
-            EdgeEventBuffer edgeEventBuffer = new();
+            EdgeEventBuffer edgeEventBuffer = LibGpiodProxyFactory.CreateEdgeEventBuffer();
 
             // Note: libgpiod does not guarantee thread safety on its objects.
             // To address this, all calls to a libgpiod object are made mutually exclusive using a lock.

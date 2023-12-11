@@ -1,7 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Device.Gpio.Drivers.Libgpiod.V2;
+using System.Device.Gpio.Drivers;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Xunit;
@@ -14,12 +14,14 @@ namespace System.Device.Gpio.Tests;
 [Trait("SkipOnTestRun", "Windows_NT")]
 public class LibGpiodV2DriverTests : GpioControllerTestBase
 {
+    private const int ChipNumber = 0;
+
     public LibGpiodV2DriverTests(ITestOutputHelper testOutputHelper)
         : base(testOutputHelper)
     {
     }
 
-    protected override GpioDriver GetTestDriver() => new LibGpiodV2Driver(4);
+    protected override GpioDriver GetTestDriver() => LibGpiodDriverFactory.CreateV2Driver(ChipNumber);
 
     protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 
@@ -27,10 +29,7 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     public async Task WaitEdgeEvents_ShouldNotBlockOtherRequestOperations()
     {
         var largeWaitForEventsTimeout = TimeSpan.FromSeconds(5);
-        var eventObserverFactory = () => new LibGpiodV2EventObserver { WaitEdgeEventsTimeout = largeWaitForEventsTimeout };
-
-        using var gpioController = new GpioController(GetTestNumberingScheme(),
-            new LibGpiodV2Driver(4, eventObserverFactory));
+        using var gpioController = new GpioController(GetTestNumberingScheme(), LibGpiodDriverFactory.CreateV2Driver(ChipNumber, largeWaitForEventsTimeout));
 
         gpioController.OpenPin(InputPin);
 

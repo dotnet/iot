@@ -19,13 +19,10 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <summary>
     /// Constructor for a edge-event-proxy object that points to an existing gpiod edge-event object using a safe handle.
     /// </summary>
+    /// <param name="handle">Safe handle to the libgpiod object.</param>
+    /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html"/>
     public EdgeEvent(EdgeEventSafeHandle handle)
     {
-        if (handle.IsInvalid)
-        {
-            throw new ArgumentOutOfRangeException(nameof(handle), "Invalid handle");
-        }
-
         _handle = handle;
     }
 
