@@ -31,7 +31,7 @@ internal class ChipInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string GetName()
     {
-        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_info_get_name(_handle)) ??
+        return TryCallGpiod(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_info_get_name(_handle)) ??
             throw new GpiodException($"Could not get name from chip info: {LastErr.GetMsg()}"));
     }
 
@@ -42,7 +42,7 @@ internal class ChipInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string GetLabel()
     {
-        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_info_get_label(_handle)) ??
+        return TryCallGpiod(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_info_get_label(_handle)) ??
             throw new GpiodException($"Could not get label from chip info: {LastErr.GetMsg()}"));
     }
 
@@ -53,7 +53,7 @@ internal class ChipInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumLines()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_chip_info_get_num_lines(_handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_chip_info_get_num_lines(_handle));
     }
 
     /// <summary>

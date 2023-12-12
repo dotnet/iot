@@ -11,7 +11,7 @@ namespace System.Device.Gpio.Drivers;
 /// </summary>
 public class LibGpiodDriver : UnixDriver
 {
-    private readonly UnixDriver _versionedLibgpiodDriver;
+    private readonly GpioDriver _versionedLibgpiodDriver;
 
     /// <summary>
     /// Creates an instance of the LigGpiodDriver that matches the installed version of libgpiod.

@@ -33,7 +33,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string GetPath()
     {
-        return TryCallGpiodLocked(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_get_path(_handle)) ??
+        return TryCallGpiod(() => Marshal.PtrToStringAuto(LibgpiodV2.gpiod_chip_get_path(_handle)) ??
             throw new GpiodException($"Could not get chip path: {LastErr.GetMsg()}"));
     }
 
@@ -44,7 +44,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public ChipInfo GetInfo()
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             var chipInfoHandle = LibgpiodV2.gpiod_chip_get_info(_handle);
 
@@ -64,7 +64,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException"><paramref name="offset"/> not known to chip or other error when invoking native function</exception>
     public LineInfo GetLineInfo(Offset offset)
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             var lineInfoHandle = LibgpiodV2.gpiod_chip_get_line_info(_handle, offset);
 
@@ -84,7 +84,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException"><paramref name="offset"/> not known to chip or other error when invoking native function</exception>
     public LineInfo WatchLineInfo(Offset offset)
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             var lineInfoHandle = LibgpiodV2.gpiod_chip_watch_line_info(_handle, offset);
 
@@ -121,7 +121,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetFileDescriptor()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_chip_get_fd(_handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_chip_get_fd(_handle));
     }
 
     /// <summary>
@@ -132,7 +132,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <returns>0 if wait timed out, 1 if an event is pending</returns>
     public int WaitInfoEvent(long timeoutNs)
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             int result = LibgpiodV2.gpiod_chip_wait_info_event(_handle, timeoutNs);
             if (result < 0)
@@ -151,7 +151,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineInfoEvent ReadInfoEvent()
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             var lineInfoEventHandle = LibgpiodV2.gpiod_chip_read_info_event(_handle);
 
@@ -171,7 +171,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Line is not exposed by chip or unexpected error invoking native function</exception>
     public int GetLineOffsetFromName(string name)
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             int result = LibgpiodV2.gpiod_chip_get_line_offset_from_name(_handle, name);
             if (result < 0)

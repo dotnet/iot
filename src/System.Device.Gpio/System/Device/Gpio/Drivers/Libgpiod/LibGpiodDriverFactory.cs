@@ -42,26 +42,26 @@ public static class LibGpiodDriverFactory
     /// <summary>
     /// Tries with best effort to find installed libgpiod libraries and loads the latest version.
     /// </summary>
-    public static UnixDriver Create(int chipNumber)
+    public static GpioDriver Create(int chipNumber)
     {
         return InstantiateDriver(_driverVersionToLoad, chipNumber);
     }
 
     /// <summary>
-    /// Creates and returns an instance of the libgpiodv1 driver.
+    /// Creates and returns an instance of a driver suitable for libgpiodv1.
     /// </summary>
     /// <param name="chipNumber">The number of the GPIO chip to drive.</param>
-    public static UnixDriver CreateV1Driver(int chipNumber = 0)
+    public static GpioDriver CreateV1Driver(int chipNumber = 0)
     {
         return CreateLibgpiodV1DriverInstance(chipNumber);
     }
 
     /// <summary>
-    /// Creates and returns an instance of the libgpiodv1 driver.
+    /// Creates and returns an instance of a driver suitable for libgpiodv2.
     /// </summary>
     /// <param name="chipNumber">The number of the GPIO chip to drive.</param>
     /// <param name="waitEdgeEventsTimeout">Timeout to wait for edge events. Primarily used for testing.</param>
-    public static UnixDriver CreateV2Driver(int chipNumber, TimeSpan? waitEdgeEventsTimeout = null)
+    public static GpioDriver CreateV2Driver(int chipNumber, TimeSpan? waitEdgeEventsTimeout = null)
     {
         return CreateLibgpiodV2DriverInstance(chipNumber, waitEdgeEventsTimeout);
     }
@@ -106,11 +106,6 @@ public static class LibGpiodDriverFactory
             return _defaultDriverVersion;
         }
 
-        if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_2)))
-        {
-            return 2;
-        }
-
         if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_1_1)))
         {
             return 1;
@@ -124,6 +119,11 @@ public static class LibGpiodDriverFactory
         if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_0)))
         {
             return 1;
+        }
+
+        if (foundLibraryFiles.Any(x => x.Contains(_libgpiod_2)))
+        {
+            return 2;
         }
 
         return _defaultDriverVersion;

@@ -31,7 +31,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineSettings Copy()
     {
-        var handle = TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_copy(Handle));
+        var handle = TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_copy(Handle));
 
         if (handle.IsInvalid)
         {
@@ -75,7 +75,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineDirection GetDirection()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_direction(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_get_direction(Handle));
     }
 
     /// <summary>
@@ -102,7 +102,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineEdge GetEdgeDetection()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_edge_detection(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_get_edge_detection(Handle));
     }
 
     /// <summary>
@@ -129,7 +129,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineBias GetBias()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_bias(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_get_bias(Handle));
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineDrive GetDrive()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_drive(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_get_drive(Handle));
     }
 
     /// <summary>
@@ -183,7 +183,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public bool GetActiveLow()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_active_low(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_get_active_low(Handle));
     }
 
     /// <summary>
@@ -210,7 +210,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public TimeSpan GetDebouncePeriod()
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             ulong debouncePeriodUs = LibgpiodV2.gpiod_line_settings_get_debounce_period_us(Handle);
             return TimeSpan.FromMilliseconds(debouncePeriodUs / 1000f);
@@ -241,7 +241,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineClock GetEventClock()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_event_clock(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_get_event_clock(Handle));
     }
 
     /// <summary>
@@ -268,7 +268,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineValue GetOutputValue()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_settings_get_output_value(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_line_settings_get_output_value(Handle));
     }
 
     /// <summary>
@@ -277,8 +277,8 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public Snapshot MakeSnapshot()
     {
-        return TryCallGpiodLocked(() => new Snapshot(GetDirection(), GetEdgeDetection(), GetBias(), GetDrive(), GetActiveLow(), GetDebouncePeriod(),
-            GetEventClock(), GetOutputValue()));
+        return new Snapshot(GetDirection(), GetEdgeDetection(), GetBias(), GetDrive(), GetActiveLow(), GetDebouncePeriod(),
+            GetEventClock(), GetOutputValue());
     }
 
     /// <summary>

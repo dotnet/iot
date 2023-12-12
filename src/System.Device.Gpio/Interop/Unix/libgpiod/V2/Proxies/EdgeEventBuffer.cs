@@ -33,7 +33,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetCapacity()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_buffer_get_capacity(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_edge_event_buffer_get_capacity(Handle));
     }
 
     /// <summary>
@@ -43,7 +43,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public EdgeEvent GetEvent(ulong index)
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             EdgeEventNotFreeable edgeEventHandle = LibgpiodV2.gpiod_edge_event_buffer_get_event(Handle, index);
             // Since events are tied to the buffer instance, different threads may not operate on the buffer and any associated events at the same
@@ -61,7 +61,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumEvents()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_edge_event_buffer_get_num_events(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_edge_event_buffer_get_num_events(Handle));
     }
 
     /// <summary>

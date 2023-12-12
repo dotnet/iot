@@ -16,7 +16,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 {
     private readonly Dictionary<EventSubscription, List<PinChangeEventHandler>> _handlersBySubscription = new();
 
-    private readonly List<Task> _requestObserverTasks = new();
+    private readonly List<Thread> _requestObserverThreads = new();
     private readonly HashSet<LineRequest> _observedRequests = new();
 
     private bool _shouldExit;
@@ -73,7 +73,9 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
             // observe request in only 1 task
             if (_observedRequests.Add(request))
             {
-                _requestObserverTasks.Add(Task.Run(() => HandleEdgeEventsOfRequestInLoop(request)));
+                var thread = new Thread(() => HandleEdgeEventsOfRequestInLoop(request));
+                thread.Start();
+                _requestObserverThreads.Add(thread);
             }
         }
     }
@@ -199,28 +201,9 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
 
             EdgeEventBuffer edgeEventBuffer = LibGpiodProxyFactory.CreateEdgeEventBuffer();
 
-            // Note: libgpiod does not guarantee thread safety on its objects.
-            // To address this, all calls to a libgpiod object are made mutually exclusive using a lock.
-            // When waiting for edge events, the lock is acquired, and any other call must wait for the wait to timeout, which is undesirable.
-            // One simple solution is to set the timeout to a low value, but this may negatively impact performance, due to more iterations.
-            // A more refined approach is to "fast poll" only when other operations (e.g. GetValue) on the request object are made.
-            // After a period of inactivity on the request, it gracefully transitions back to normal polling.
-            // This approach ensures quick response to events and accelerates the processing of other calls.
-            var fastPollTimeout = TimeSpan.FromMilliseconds(1);
-            var normalPollTimeout = WaitEdgeEventsTimeout;
-            var currentWaitTimeout = normalPollTimeout;
-            var timeToSwitchBackToNormalPollTimeout = TimeSpan.FromMilliseconds(1000);
-            DateTime? lastInterruptionTime = null;
-
             while (request.IsAlive && !_shouldExit)
             {
-                if (lastInterruptionTime != null && DateTime.Now - lastInterruptionTime >= timeToSwitchBackToNormalPollTimeout)
-                {
-                    currentWaitTimeout = normalPollTimeout;
-                    lastInterruptionTime = null;
-                }
-
-                int waitResult = request.WaitEdgeEventsRespectfully(currentWaitTimeout);
+                int waitResult = request.WaitEdgeEventsRespectfully(WaitEdgeEventsTimeout);
                 bool isGpiodTimeout = waitResult == 0;
                 if (isGpiodTimeout)
                 {
@@ -230,8 +213,6 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
                 bool isInterrupted = waitResult == 2;
                 if (isInterrupted)
                 {
-                    currentWaitTimeout = fastPollTimeout;
-                    lastInterruptionTime = DateTime.Now;
                     continue;
                 }
 
@@ -295,7 +276,10 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
         // as long as they are not complete, they might still wait on edge events, and until that returns the request is still open,
         // which means the lines are still reserved
         // this should only return after all requests have been released
-        Task.WhenAll(_requestObserverTasks).Wait();
+        foreach (var t in _requestObserverThreads)
+        {
+            t.Join();
+        }
     }
 
     #endregion

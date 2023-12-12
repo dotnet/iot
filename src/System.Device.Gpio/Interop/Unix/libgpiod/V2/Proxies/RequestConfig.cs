@@ -32,7 +32,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void SetConsumer(string consumer)
     {
-        TryCallGpiodLocked(() => LibgpiodV2.gpiod_request_config_set_consumer(Handle, Marshal.StringToHGlobalAuto(consumer)));
+        TryCallGpiod(() => LibgpiodV2.gpiod_request_config_set_consumer(Handle, Marshal.StringToHGlobalAuto(consumer)));
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string GetConsumer()
     {
-        return TryCallGpiodLocked(() =>
+        return TryCallGpiod(() =>
         {
             IntPtr consumerPtr = LibgpiodV2.gpiod_request_config_get_consumer(Handle);
             return Marshal.PtrToStringAuto(consumerPtr) ?? string.Empty;
@@ -75,7 +75,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetEventBufferSize()
     {
-        return TryCallGpiodLocked(() => LibgpiodV2.gpiod_request_config_get_event_buffer_size(Handle));
+        return TryCallGpiod(() => LibgpiodV2.gpiod_request_config_get_event_buffer_size(Handle));
     }
 
     /// <summary>
