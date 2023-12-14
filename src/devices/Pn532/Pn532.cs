@@ -898,13 +898,18 @@ namespace Iot.Device.Pn532
         #region PN532 as Target
 
         /// <summary>
-        /// Set the PN532 as a target, so as a card
+        /// Set the PN532 as a target, so as a card.
         /// </summary>
+        /// <param name="mode">The target mode to select.</param>
+        /// <param name="mifare">The Mifare card definition.</param>
+        /// <param name="feliCa">The Felica card definition.</param>
+        /// <param name="picc">The PICC card definition.</param>
+        /// <returns>A tuple containing the initialization details and the data sent by the initiator.</returns>
         public (TargetModeInitialized? ModeInialized, byte[]? Initiator) InitAsTarget(TargetModeInitialization mode,
             TargetMifareParameters mifare, TargetFeliCaParameters feliCa, TargetPiccParameters picc)
         {
             // First make sure we have the right mode in the parameters for the PICC only case
-            if (mode == TargetModeInitialization.PiccOnly)
+            if (mode.HasFlag(TargetModeInitialization.PiccOnly))
             {
                 _logger.LogDebug($"{nameof(InitAsTarget)} - changing mode for Picc only");
                 ParametersFlags |= ParametersFlags.ISO14443_4_PICC;
@@ -939,7 +944,7 @@ namespace Iot.Device.Pn532
                 modeInitialized.IsDep = (receivedData[0] & 0b0000_0100) == 0b0000_0100;
                 modeInitialized.IsISO14443_4Picc = (receivedData[0] & 0b0000_1000) == 0b0000_1000;
                 modeInitialized.TargetFramingType = (TargetFramingType)(receivedData[0] & 0b0000_0011);
-                modeInitialized.TargetBaudRate = (TargetBaudRateInialized)(receivedData[0] & 0b0111_0000);
+                modeInitialized.TargetBaudRate = (TargetBaudRateInitialized)(receivedData[0] & 0b0111_0000);
                 return (modeInitialized, receivedData.Slice(1, ret - 1).ToArray());
             }
 
@@ -960,10 +965,10 @@ namespace Iot.Device.Pn532
             }
 
             ret = ReadResponse(CommandSet.TgGetData, receivedData);
-            _logger.LogDebug($"{nameof(InitAsTarget)}, success: {ret}");
+            _logger.LogDebug($"{nameof(ReadDataAsTarget)}, success: {ret}");
             if (ret > 0)
             {
-                _logger.LogDebug($"{nameof(WriteDataAsTarget)} - error: {(ErrorCode)receivedData[0]}, received array: {BitConverter.ToString(receivedData.Slice(1, ret - 1).ToArray())}");
+                _logger.LogDebug($"{nameof(ReadDataAsTarget)} - error: {(ErrorCode)receivedData[0]}, received array: {BitConverter.ToString(receivedData.Slice(1, ret - 1).ToArray())}");
             }
 
             return ret;
@@ -984,7 +989,7 @@ namespace Iot.Device.Pn532
 
             Span<byte> receivedData = stackalloc byte[1];
             ret = ReadResponse(CommandSet.TgSetData, receivedData);
-            _logger.LogDebug($"{nameof(InitAsTarget)}, success: {ret}");
+            _logger.LogDebug($"{nameof(WriteDataAsTarget)}, success: {ret}");
             if (ret > 0)
             {
                 _logger.LogDebug($"{nameof(WriteDataAsTarget)} - error: {(ErrorCode)receivedData[0]}");
@@ -992,6 +997,29 @@ namespace Iot.Device.Pn532
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Gets the status of the PN532 when it is a target.
+        /// </summary>
+        /// <returns>A target status object and null in case of problem.</returns>
+        public TargetStatus GetStatusAsTarget()
+        {
+            var ret = WriteCommand(CommandSet.TgGetTargetStatus);
+            if (ret < 0)
+            {
+                return null!;
+            }
+
+            Span<byte> receivedData = stackalloc byte[2];
+            ret = ReadResponse(CommandSet.TgGetTargetStatus, receivedData);
+            _logger.LogDebug($"{nameof(GetStatusAsTarget)}, success: {ret}");
+            if (ret > 0)
+            {
+                return new TargetStatus(receivedData[0], receivedData[1]);
+            }
+
+            return null!;
         }
 
         #endregion

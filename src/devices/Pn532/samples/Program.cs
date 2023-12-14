@@ -17,6 +17,7 @@ using Iot.Device.Card.Ultralight;
 using Iot.Device.Common;
 using Iot.Device.Ndef;
 using Iot.Device.Pn532;
+using Iot.Device.Pn532.AsTarget;
 using Iot.Device.Pn532.ListPassive;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Console;
@@ -94,7 +95,9 @@ if (pn532.FirmwareVersion is FirmwareVersion version)
         (MifareReadNdef, nameof(MifareReadNdef)),
         (MifareWriteNdef, nameof(MifareWriteNdef)),
         (TestGPIO, nameof(TestGPIO)),
-        (ReadCreditCard, nameof(ReadCreditCard))
+        (ReadCreditCard, nameof(ReadCreditCard)),
+        (AsATarget, nameof(AsATarget)),
+        (EmulateNdefTag, nameof(EmulateNdefTag))
     };
 
     while (true)
@@ -729,4 +732,98 @@ void ProcessUltralight(Pn532 pn532)
     {
         Console.WriteLine("Error writing NDEF data on card");
     }
+}
+
+void AsATarget(Pn532 pn532)
+{
+    byte[]? retData = null!;
+    TargetModeInitialized? modeInitialized = null!;
+    while ((!Console.KeyAvailable))
+    {
+        (modeInitialized, retData) = pn532.InitAsTarget(
+            TargetModeInitialization.PiccOnly | TargetModeInitialization.PassiveOnly,
+            new TargetMifareParameters()
+            {
+                NfcId3 = new byte[] { 0x01, 0x02, 0x03 },
+                Atqa = new byte[] { 0x04, 0x00 },
+                Sak = 0x20
+            },
+            new TargetFeliCaParameters()
+            {
+                NfcId2 = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+                Pad = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 },
+                SystemCode = new byte[] { 0x00, 0x00 }
+            },
+            new TargetPiccParameters());
+        if (modeInitialized is object)
+        {
+            break;
+        }
+
+        // Give time to PN532 to process
+        Thread.Sleep(300);
+    }
+
+    if (modeInitialized is null)
+    {
+        return;
+    }
+
+    Console.WriteLine($"PN532 as a target: ISDep: {modeInitialized.IsDep}, IsPicc {modeInitialized.IsISO14443_4Picc}, {modeInitialized.TargetBaudRate}, {modeInitialized.TargetFramingType}");
+    Console.WriteLine($"Initiator: {BitConverter.ToString(retData!)}");
+    // 25-D4-00-E8-11-6A-0A-69-1C-46-5D-2D-7C-00-00-00-32-46-66-6D-01-01-12-02-02-07-FF-03-02-00-13-04-01-64-07-01-03
+    // 11-D4-00-01-FE-A2-A3-A4-A5-A6-A7-00-00-00-00-00-30
+    // E0-80
+    // In the case of E0-80, the reader is seen as a Type 4A Tag and it's part of the activation. See https://www.st.com/resource/en/datasheet/st25ta64k.pdf section 5.9.2
+    // the command is E0 and the param is 80
+    Span<byte> read = stackalloc byte[512];
+    int ret = -1;
+    while (ret < 0)
+    {
+        ret = pn532.ReadDataAsTarget(read);
+    }
+
+    // For example: 00-00-A4-04-00-0E-32-50-41-59-2E-53-59-53-2E-44-44-46-30-31-00
+    Console.WriteLine($"Status: {(ErrorCode)read[0]}, Data: {BitConverter.ToString(read.Slice(1, ret - 1).ToArray())}");
+}
+
+void EmulateNdefTag(Pn532 pn532)
+{
+    CancellationTokenSource cts = new();
+    Console.CancelKeyPress += (s, e) =>
+    {
+        e.Cancel = true;
+        cts.Cancel();
+    };
+
+    EmulatedNdefTag ndef = new(pn532, new byte[] { 0x12, 0x34, 0x45 });
+    ndef.CardStatusChanged += NdefCardStatusChanged;
+    ndef.NdefReceived += NdefNdefReceived;
+    ndef.NdefMessage.Records.Add(new TextRecord("I love NET IoT and .NET nanoFramework!", "en-us", Encoding.UTF8));
+    ndef.NdefMessage.Records.Add(new UriRecord(UriType.Https, "github.com/dotnet/iot"));
+    ndef.InitializeAndListen(cts.Token);
+}
+
+void NdefNdefReceived(object? sender, NdefMessage e)
+{
+    Console.WriteLine("New NDEF received!");
+    foreach (var record in e.Records)
+    {
+        Console.WriteLine($"Record length: {record.Length}");
+        if (TextRecord.IsTextRecord(record))
+        {
+            var text = new TextRecord(record);
+            Console.WriteLine($"  Text: {text.Text}");
+        }
+        else if (UriRecord.IsUriRecord(record))
+        {
+            var uri = new UriRecord(record);
+            Console.WriteLine($"  Uri: {uri.Uri}");
+        }
+    }
+}
+
+void NdefCardStatusChanged(object? sender, EmulatedTag.CardStatus e)
+{
+    Console.WriteLine($"Status of the emulated card changed to {e}");
 }
