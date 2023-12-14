@@ -291,15 +291,11 @@ void DisplayingBitmap()
 {
     Console.WriteLine("Displaying bitmap, text, resizing them");
     using BitmapImage bitmapMe = BitmapImage.CreateFromFile(Path.Combine("me.bmp"));
-    var bitmap1 = BitmapToByteArray(bitmapMe);
     using BitmapImage bitmapNokia = BitmapImage.CreateFromFile(Path.Combine("nokia_bw.bmp"));
-    var bitmap2 = BitmapToByteArray(bitmapNokia);
 
     // Open a non bitmap and resize it
     BitmapImage bitmapLarge = BitmapImage.CreateFromFile(Path.Combine("nonbmp.jpg"));
     bitmapLarge = bitmapLarge.Resize(Pcd8544.PixelScreenSize);
-    bitmapLarge.Clear();
-    var bitmap3 = BitmapToByteArray(bitmapLarge);
 
     for (byte i = 0; i < 2; i++)
     {
@@ -312,8 +308,7 @@ void DisplayingBitmap()
         lcd.Write("This is me");
         Thread.Sleep(1000);
         // Shows the first bitmap
-        lcd.SetByteMap(bitmap1);
-        lcd.Draw();
+        lcd.DrawBitmap(bitmapMe);
         Thread.Sleep(1500);
 
         lcd.SetCursorPosition(0, 0);
@@ -324,8 +319,7 @@ void DisplayingBitmap()
         lcd.WriteLine("on the screen");
         Thread.Sleep(1000);
         // Shows the second bitmap
-        lcd.SetByteMap(bitmap2);
-        lcd.Draw();
+        lcd.DrawBitmap(bitmapNokia);
         Thread.Sleep(1500);
         lcd.SetCursorPosition(0, 0);
         lcd.WriteLine("Large picture");
@@ -334,8 +328,7 @@ void DisplayingBitmap()
         lcd.WriteLine("monochrome");
         Thread.Sleep(1000);
         // Shows the second bitmap
-        lcd.SetByteMap(bitmap3);
-        lcd.Draw();
+        lcd.DrawBitmap(bitmapLarge);
         Thread.Sleep(1500);
     }
 
@@ -465,32 +458,3 @@ Thread.Sleep(2000);
 lcd.Dispose();
 // In case we're using FT4222, gpio needs to be disposed after the screen
 gpio?.Dispose();
-
-byte[] BitmapToByteArray(BitmapImage bitmap)
-{
-    if (bitmap is not object)
-    {
-        throw new ArgumentNullException(nameof(bitmap));
-    }
-
-    if ((bitmap.Width != Pcd8544.PixelScreenSize.Width) || (bitmap.Height != Pcd8544.PixelScreenSize.Height))
-    {
-        throw new ArgumentException($"{nameof(bitmap)} should be same size as the screen {Pcd8544.PixelScreenSize.Width}x{Pcd8544.PixelScreenSize.Height}");
-    }
-
-    byte[] toReturn = new byte[Pcd8544.ScreenBufferByteSize];
-    int width = Pcd8544.PixelScreenSize.Width;
-    Color colWhite = Color.White;
-    for (int position = 0; position < Pcd8544.ScreenBufferByteSize; position++)
-    {
-        byte toStore = 0;
-        for (int bit = 0; bit < 8; bit++)
-        {
-            toStore = (byte)(toStore | ((bitmap[position % width, position / width * 8 + bit] == colWhite ? 0 : 1) << bit));
-        }
-
-        toReturn[position] = toStore;
-    }
-
-    return toReturn;
-}

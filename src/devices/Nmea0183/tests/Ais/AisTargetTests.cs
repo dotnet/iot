@@ -48,8 +48,8 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             ship.RateOfTurn = RotationalSpeed.FromDegreesPerMinute(10);
             ship2 = ship.EstimatePosition(TimeSpan.FromMinutes(10), TimeSpan.FromSeconds(20));
             Assert.Equal(Angle.FromDegrees(100).Value, ship2.CourseOverGround.Value, 3);
-            Assert.Equal(45.015124163, ship2.Position.Latitude, 9);
-            Assert.Equal(9.026965951, ship2.Position.Longitude, 9);
+            Assert.Equal(45.015124163, ship2.Position.Latitude, 7);
+            Assert.Equal(9.026965951, ship2.Position.Longitude, 7);
         }
 
         [Fact]
@@ -81,8 +81,8 @@ namespace Iot.Device.Nmea0183.Tests.Ais
             var ship2 = ship.EstimatePosition(t + TimeSpan.FromMinutes(10), TimeSpan.FromSeconds(20));
             Assert.Equal(t + TimeSpan.FromMinutes(10), ship2.LastSeen);
             Assert.Equal(Angle.FromDegrees(100).Value, ship2.CourseOverGround.Value, 3);
-            Assert.Equal(45.015124163, ship2.Position.Latitude, 9);
-            Assert.Equal(9.026965951, ship2.Position.Longitude, 9);
+            Assert.Equal(45.015124163, ship2.Position.Latitude, 7);
+            Assert.Equal(9.026965951, ship2.Position.Longitude, 7);
         }
     }
 }

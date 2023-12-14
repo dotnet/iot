@@ -33,6 +33,9 @@ const int pinID_DC = 25;
 const int pinID_Reset = 24;
 const int interruptPin = 39;
 
+// This is required to initialize the graphics library
+SkiaSharpAdapter.Register();
+
 Chsc6440 touch = null;
 using SpiDevice displaySPI = SpiDevice.Create(new SpiConnectionSettings(0, 0) { Mode = SpiMode.Mode3, DataBitLength = 8, ClockFrequency = 12_000_000 /* 12MHz */ });
 using Ili9341 ili9341 = new(displaySPI, pinID_DC, pinID_Reset);

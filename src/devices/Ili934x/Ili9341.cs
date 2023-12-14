@@ -14,7 +14,7 @@ namespace Iot.Device.Ili934x
     /// <summary>
     /// The ILI9341 is a QVGA (Quarter VGA) driver integrated circuit that is used to control 240×320 VGA LCD screens.
     /// </summary>
-    public partial class Ili9341 : IDisposable
+    public partial class Ili9341 : GraphicDisplay
     {
         /// <summary>
         /// Default frequency for SPI
@@ -109,13 +109,16 @@ namespace Iot.Device.Ili934x
         /// Width of the screen, in pixels
         /// </summary>
         /// <remarks>This is of type int, because all image sizes use int, even though this can never be negative</remarks>
-        public virtual int ScreenWidth => 240;
+        public override int ScreenWidth => 240;
 
         /// <summary>
         /// Height of the screen, in pixels
         /// </summary>
         /// <remarks>This is of type int, because all image sizes use int, even though this can never be negative</remarks>
-        public virtual int ScreenHeight => 320;
+        public override int ScreenHeight => 320;
+
+        /// <inheritdoc />
+        public override PixelFormat NativePixelFormat => PixelFormat.Format16bppRgb565;
 
         /// <summary>
         /// Returns the last FPS value (frames per second).
@@ -136,6 +139,16 @@ namespace Iot.Device.Ili934x
             SendCommand(Ili9341Command.PageAddressSet, 0x00, 0x00, 0x01, 0x3F); // height of the screen
             SendCommand(Ili9341Command.EntryModeSet, 0x07);
             SendCommand(Ili9341Command.DisplayFunctionControl, 0x0A, 0x82, 0x27, 0x00);
+        }
+
+        /// <summary>
+        /// This device supports standard 32 bit formats as input
+        /// </summary>
+        /// <param name="format">The format to query</param>
+        /// <returns>True if it is supported, false if not</returns>
+        public override bool CanConvertFromPixelFormat(PixelFormat format)
+        {
+            return format == PixelFormat.Format32bppXrgb || format == PixelFormat.Format32bppArgb;
         }
 
         /// <summary>
@@ -179,7 +192,7 @@ namespace Iot.Device.Ili934x
 
             if (doRefresh)
             {
-                SendFrame();
+                SendFrame(false);
             }
         }
 
@@ -188,7 +201,7 @@ namespace Iot.Device.Ili934x
         /// </summary>
         /// <param name="color">The color to clear the screen to</param>
         /// <param name="doRefresh">Immediately force an update of the screen. If false, only the backbuffer is cleared.</param>
-        public void ClearScreen(Color color, bool doRefresh = false)
+        public void ClearScreen(Color color, bool doRefresh)
         {
             FillRect(color, 0, 0, ScreenWidth, ScreenHeight, doRefresh);
         }
@@ -197,9 +210,17 @@ namespace Iot.Device.Ili934x
         /// Clears the screen to black
         /// </summary>
         /// <param name="doRefresh">Immediately force an update of the screen. If false, only the backbuffer is cleared.</param>
-        public void ClearScreen(bool doRefresh = false)
+        public void ClearScreen(bool doRefresh)
         {
             FillRect(Color.FromArgb(0, 0, 0), 0, 0, ScreenWidth, ScreenHeight, doRefresh);
+        }
+
+        /// <summary>
+        /// Immediately clears the screen to black.
+        /// </summary>
+        public override void ClearScreen()
+        {
+            ClearScreen(true);
         }
 
         /// <summary>
@@ -334,17 +355,14 @@ namespace Iot.Device.Ili934x
             while (index < data.Length); // repeat until all data sent.
         }
 
-        /// <summary>
-        /// Creates an image with the correct size and color depth to be sent to the screen
-        /// </summary>
-        /// <returns>An image instance</returns>
-        public virtual BitmapImage CreateBackBuffer()
+        /// <inheritdoc />
+        public override BitmapImage GetBackBufferCompatibleImage()
         {
             return BitmapImage.CreateBitmap(ScreenWidth, ScreenHeight, PixelFormat.Format32bppArgb);
         }
 
-        /// <inheritdoc cref="Dispose()"/>
-        protected virtual void Dispose(bool disposing)
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
@@ -376,13 +394,6 @@ namespace Iot.Device.Ili934x
                 _spiDevice?.Dispose();
                 _spiDevice = null!;
             }
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
         }
     }
 }
