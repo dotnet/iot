@@ -317,7 +317,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.CastClassTest), 0, 0, 1)]
         public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = false, UseFlashForKernel = false });
+            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = false, UseFlashForKernel = false });
         }
 
         [Theory]
@@ -347,7 +347,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = false
             };
 
-            LoadCodeMethod(nameof(TestMethods.EnumsHaveNames), 0, 0, 1, compilerSettings, false);
+            LoadCodeMethod(typeof(TestMethods), nameof(TestMethods.EnumsHaveNames), 0, 0, 1, compilerSettings, false);
         }
 
         [Theory]
@@ -363,7 +363,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = true
             };
 
-            LoadCodeMethod(name, 20.23, 202.1, 20.23, compilerSettings);
+            LoadCodeMethod(typeof(TestMethods), name, 20.23, 202.1, 20.23, compilerSettings);
         }
 
         /// <summary>
@@ -415,7 +415,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = true
             };
 
-            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, compilerSettings);
         }
 
         /// <summary>
@@ -435,7 +435,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = true
             };
 
-            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]
@@ -461,7 +461,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = true
             };
 
-            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]
@@ -477,7 +477,7 @@ namespace Iot.Device.Arduino.Tests
                 UseFlashForProgram = false
             };
 
-            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
+            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]

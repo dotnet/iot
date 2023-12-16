@@ -1167,8 +1167,8 @@ namespace Iot.Device.Arduino
                 if (analogChannel <= 15)
                 {
                     _firmataStream.WriteByte((byte)((int)FirmataCommand.REPORT_ANALOG_PIN + analogChannel));
-                _firmataStream.WriteByte((byte)1);
-            }
+                    _firmataStream.WriteByte((byte)1);
+                }
                 else if (_actualFirmataProtocolVersion >= new Version(2, 7))
                 {
                     // Note: Requires Protocol Version 2.7 or later
@@ -1178,7 +1178,7 @@ namespace Iot.Device.Arduino
                     commandSequence.WriteByte((byte)1);
                     commandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
                     SendCommand(commandSequence);
-        }
+                }
                 else
                 {
                     throw new NotSupportedException($"Using analog channel A{analogChannel} requires firmata protocol version 2.7 or later");
@@ -1199,8 +1199,8 @@ namespace Iot.Device.Arduino
                 if (analogChannel <= 15)
                 {
                     _firmataStream.WriteByte((byte)((int)FirmataCommand.REPORT_ANALOG_PIN + analogChannel));
-                _firmataStream.WriteByte((byte)0);
-            }
+                    _firmataStream.WriteByte((byte)0);
+                }
                 else
                 {
                     FirmataCommandSequence pwmCommandSequence = new();
