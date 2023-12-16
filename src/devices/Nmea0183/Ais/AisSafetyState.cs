@@ -28,5 +28,10 @@ namespace Iot.Device.Nmea0183.Ais
         /// The other target is lost, meaning there was no recent position update from that ship.
         /// </summary>
         Lost,
+
+        /// <summary>
+        /// The other target is so far away or the relative speed is so low, that (T)CPA calculations wouldn't be meaningful.
+        /// </summary>
+        FarAway
     }
 }

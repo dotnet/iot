@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33326.253
+MinimumVisualStudioVersion = 15.0.26124.0
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkiaSharpAdapter", "SkiaSharpAdapter.csproj", "{B82C190A-642B-465B-BD3F-DB56FFF22253}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Debug|x86 = Debug|x86
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Debug|x64.Build.0 = Debug|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Debug|x86.Build.0 = Debug|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Release|x64.ActiveCfg = Release|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Release|x64.Build.0 = Release|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Release|x86.ActiveCfg = Release|Any CPU
+		{B82C190A-642B-465B-BD3F-DB56FFF22253}.Release|x86.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88F2ACC7-6A5A-425A-81EA-7EC63893AB55}
+	EndGlobalSection
+EndGlobal

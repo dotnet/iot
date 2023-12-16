@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Device.Gpio;
 using System.Diagnostics;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.IO.Ports;
@@ -13,13 +14,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
-using BuildHat.Models;
 using Iot.Device.BuildHat.Models;
 using Iot.Device.BuildHat.Motors;
 using Iot.Device.BuildHat.Sensors;
 using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
-using SixLabors.ImageSharp;
 using UnitsNet;
 
 namespace Iot.Device.BuildHat
@@ -1159,10 +1158,12 @@ namespace Iot.Device.BuildHat
                                                 case 5:
                                                     if (_sensorType[port] == SensorType.SpikePrimeColorSensor)
                                                     {
-                                                        color.Color = Color.FromRgba((byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
-                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
-                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024),
-                                                            (byte)(Convert.ToInt32(elements[inc++]) * 255 / 1024));
+                                                        // Verify the colors here (a and b could be exchanged)
+                                                        color.Color = Color.FromArgb((byte)(Convert.ToInt32(elements[inc + 3]) * 255 / 1024),
+                                                            (byte)(Convert.ToInt32(elements[inc + 1]) * 255 / 1024),
+                                                            (byte)(Convert.ToInt32(elements[inc + 2]) * 255 / 1024),
+                                                            (byte)(Convert.ToInt32(elements[inc + 0]) * 255 / 1024));
+                                                        inc += 4;
                                                         color.IsColorDetected = true;
                                                     }
                                                     else
@@ -1186,7 +1187,7 @@ namespace Iot.Device.BuildHat
                                                     // Normal color mode
                                                     if (!isCombi)
                                                     {
-                                                        color.Color = Color.FromRgb((byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
+                                                        color.Color = Color.FromArgb((byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
                                                             (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400),
                                                             (byte)(Convert.ToInt32(elements[inc++]) * 255 / 400));
                                                         color.IsColorDetected = true;

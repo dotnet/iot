@@ -89,7 +89,7 @@ internal partial class InteropVideodev2
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
         public string description;
 
-        public PixelFormat pixelformat;
+        public VideoPixelFormat pixelformat;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
         public uint[] reserved;
@@ -152,7 +152,7 @@ internal partial class InteropVideodev2
         [FieldOffset(4)]
         public uint height;
         [FieldOffset(8)]
-        public PixelFormat pixelformat;
+        public VideoPixelFormat pixelformat;
         [FieldOffset(12)]
         public v4l2_field field;
         [FieldOffset(16)]
@@ -228,7 +228,7 @@ internal partial class InteropVideodev2
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct v4l2_sdr_format
     {
-        public PixelFormat pixelformat;
+        public VideoPixelFormat pixelformat;
         public uint buffersize;
         public fixed byte reserved[24];
     }
@@ -373,7 +373,7 @@ internal partial class InteropVideodev2
         [FieldOffset(0)]
         public uint index;
         [FieldOffset(4)]
-        public PixelFormat pixel_format;
+        public VideoPixelFormat pixel_format;
         [FieldOffset(8)]
         public v4l2_frmsizetypes type;
         [FieldOffset(12)]

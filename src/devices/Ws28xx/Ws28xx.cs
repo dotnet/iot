@@ -20,14 +20,14 @@ namespace Iot.Device.Ws28xx
         /// <summary>
         /// Backing image to be updated on the driver
         /// </summary>
-        public BitmapImage Image { get; }
+        public RawPixelContainer Image { get; }
 
         /// <summary>
         /// Constructs Ws28xx instance
         /// </summary>
         /// <param name="spiDevice">SPI device used for communication with the LED driver.</param>
         /// <param name="image">The bitmap that represents the screen or led strip.</param>
-        public Ws28xx(SpiDevice spiDevice, BitmapImage image)
+        public Ws28xx(SpiDevice spiDevice, RawPixelContainer image)
         {
             _spiDevice = spiDevice ?? throw new ArgumentNullException(nameof(spiDevice));
             Image = image;

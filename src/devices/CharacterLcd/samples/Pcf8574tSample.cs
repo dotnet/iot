@@ -7,8 +7,8 @@ using System.Device.I2c;
 using System.Diagnostics;
 using System.Text;
 using System.Timers;
+using System.Drawing;
 using Iot.Device.Pcx857x;
-using SixLabors.ImageSharp;
 
 namespace Iot.Device.CharacterLcd.Samples
 {
@@ -216,7 +216,7 @@ namespace Iot.Device.CharacterLcd.Samples
             foreach (var color in colors)
             {
                 lcd.Clear();
-                lcd.Write(color.ToHex());
+                lcd.Write(color.ToString());
 
                 lcd.SetBacklightColor(color);
                 System.Threading.Thread.Sleep(1000);

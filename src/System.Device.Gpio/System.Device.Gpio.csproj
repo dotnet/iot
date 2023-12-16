@@ -66,5 +66,9 @@
     <Compile Remove="System\Device\Spi\SpiDevice.Windows.cs" />
 
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <!-- Need this for record support in older runtimes -->
+    <Compile Remove="System\Device\IsExternalInit.cs" />
+  </ItemGroup>
 
 </Project>

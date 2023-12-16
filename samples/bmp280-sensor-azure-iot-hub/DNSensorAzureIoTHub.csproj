@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Iot.Device.Bindings" Version="1.5.0-prerelease.21212.1" />
-    <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.38.0" />
-    <PackageReference Include="System.Device.Gpio" Version="1.5.0-prerelease.21212.1" />
+    <PackageReference Include="Iot.Device.Bindings" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Azure.Devices.Client" Version="1.42.0" />
+    <PackageReference Include="System.Device.Gpio" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>

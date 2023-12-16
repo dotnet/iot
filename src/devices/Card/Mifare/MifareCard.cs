@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Collections.Generic;
 using Iot.Device.Common;
 using Iot.Device.Ndef;
 using Microsoft.Extensions.Logging;
@@ -20,12 +21,8 @@ namespace Iot.Device.Card.Mifare
         private const byte BlocksPerSmallSector = 4;
         private const byte BlocksPerLargeSector = 16;
         private const byte NumberOfSmallSectors = 32;
-        private static readonly byte[] Mifare1KBlock1 = new byte[] { 0x14, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
-        private static readonly byte[] Mifare1KBlock2 = new byte[] { 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
-        private static readonly byte[] Mifare1KBlock4 = new byte[] { 0x03, 0x00, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-        private static readonly byte[] Mifare2KBlock64 = new byte[] { 0xBE, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
-        private static readonly byte[] Mifare2KBlock66 = new byte[] { 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05, 0x00, 0x05 };
-        private static readonly byte[] Mifare4KBlock64 = new byte[] { 0xE8, 0x01, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1, 0x03, 0xE1 };
+        private static readonly MifareApplicationIdentifier NfcNdefId = new(0xE103);
+        private static readonly byte[] EmptyNdefBlock = new byte[] { 0x03, 0x00, 0xFE, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private static readonly byte[] StaticDefaultKeyA = new byte[6] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
         private static readonly byte[] StaticDefaultKeyB = new byte[6] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
         private static readonly byte[] StaticDefaultFirstBlockNdefKeyA = new byte[6] { 0xA0, 0xA1, 0xA2, 0xA3, 0xA4, 0xA5 };
@@ -100,6 +97,15 @@ namespace Iot.Device.Card.Mifare
         public byte[] Data { get; set; } = new byte[0];
 
         /// <summary>
+        /// Reselect the card after a card command fails
+        /// After an error, the card will not respond to any further commands
+        /// until it is reselected. If this property is false, the caller
+        /// is responsible for calling ReselectCard when RunMifareCardCommand
+        /// returns an error (-1).
+        /// </summary>
+        public bool ReselectAfterError { get; set; } = false;
+
+        /// <summary>
         /// Determine the block group corresponding to a block number
         /// </summary>
         /// <param name="blockNumber">block number</param>
@@ -158,6 +164,11 @@ namespace Iot.Device.Card.Mifare
             if ((ret > 0) && (Command == MifareCardCommand.Read16Bytes))
             {
                 Data = dataOut;
+            }
+
+            if (ret < 0 && ReselectAfterError)
+            {
+                ReselectCard();
             }
 
             return ret;
@@ -810,14 +821,26 @@ namespace Iot.Device.Card.Mifare
         }
 
         /// <summary>
-        /// Format the Card to NDEF
+        /// Format the entire card to NDEF
         /// </summary>
         /// <param name="keyB">The key B to be used for formatting, if empty, will use the default key B</param>
         /// <returns>True if success</returns>
-        /// <remarks>All sectors are configured as NFC Forum sectors</remarks>
-        public bool FormatNdef(ReadOnlySpan<byte> keyB = default)
+        /// <exception cref="ArgumentException">The card size is unknown or the specified KeyB is invalid</exception>
+        public bool FormatNdef(ReadOnlySpan<byte> keyB = default) => FormatNdef(0, keyB);
+
+        /// <summary>
+        /// Format a portion of the card to NDEF
+        /// </summary>
+        /// <param name="numberOfSectors">The number of sectors for NDEF, if zero, use the entire card</param>
+        /// <param name="keyB">The key B to be used for formatting, if empty, will use the default key B</param>
+        /// <returns>True if success</returns>
+        /// <exception cref="ArgumentException">The card size is unknown or the specified KeyB is invalid</exception>
+        /// <remarks>The requested number of sectors are configured as NFC Forum sectors. To reserve some
+        /// space on the card for other purposes, specify a nonzero value for <paramref name="numberOfSectors" />
+        /// and then allocate additional applications using <see cref="MifareDirectory"/> </remarks>
+        public bool FormatNdef(uint numberOfSectors, ReadOnlySpan<byte> keyB = default)
         {
-            if (Capacity is not MifareCardCapacity.Mifare1K or MifareCardCapacity.Mifare2K or MifareCardCapacity.Mifare4K)
+            if (Capacity is not (MifareCardCapacity.Mifare1K or MifareCardCapacity.Mifare2K or MifareCardCapacity.Mifare4K))
             {
                 throw new ArgumentException($"Only Mifare card classic are supported with capacity of 1K, 2K and 4K");
             }
@@ -830,68 +853,18 @@ namespace Iot.Device.Card.Mifare
                 throw new ArgumentException($"{nameof(keyB)} can only be empty or 6 bytes length");
             }
 
-            // First write the Mifare Application Directory for the format
-            // All block data coming from https://www.nxp.com/docs/en/application-note/AN10787.pdf
-            byte[] madSectorTrailer = new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x78, 0x77, 0x88, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
-            DefaultFirstBlockNdefKeyA.CopyTo(madSectorTrailer);
-            madSectorTrailer[9] = Capacity == MifareCardCapacity.Mifare1K ? (byte)0xC1 : (byte)0xC2;
-            keyFormat.CopyTo(madSectorTrailer, 10);
-            var authOk = AuthenticateBlockKeyB(keyFormat, 1);
-            Data = Mifare1KBlock1;
-            authOk &= WriteDataBlock(1);
-            authOk &= AuthenticateBlockKeyB(keyFormat, 2);
-            Data = Mifare1KBlock2;
-            authOk &= WriteDataBlock(2);
-            authOk &= AuthenticateBlockKeyB(keyFormat, 3);
-            Data = madSectorTrailer;
-            authOk &= WriteDataBlock(3);
+            // Create and write the Mifare Application Directory
+            MifareDirectory directory = MifareDirectory.CreateEmpty(this);
+            MifareDirectoryEntry? ndefEntry = directory.Allocate(NfcNdefId, numberOfSectors);
+            var formatOk = (ndefEntry != null) && directory.StoreToCard(keyFormat);
 
-            if (Capacity == MifareCardCapacity.Mifare2K)
-            {
-                byte block = 16 * 4;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = Mifare2KBlock64;
-                authOk &= WriteDataBlock(block);
-                block++;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = Mifare1KBlock2; // 65 is same as 2
-                authOk &= WriteDataBlock(block);
-                block++;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = Mifare2KBlock66;
-                authOk &= WriteDataBlock(block);
-                block++;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = madSectorTrailer;
-                authOk &= WriteDataBlock(block);
-            }
-            else if (Capacity == MifareCardCapacity.Mifare4K)
-            {
-                byte block = 16 * 4;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = Mifare4KBlock64;
-                authOk &= WriteDataBlock(block);
-                block++;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = Mifare1KBlock2; // 65 is same as 2
-                authOk &= WriteDataBlock(block);
-                block++;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = Mifare1KBlock2; // 66 is same as 2
-                authOk &= WriteDataBlock(block);
-                block++;
-                authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                Data = madSectorTrailer;
-                authOk &= WriteDataBlock(block);
-            }
+            // Write the empty NDEF TLV in the first NFC sector
+            byte ndefBlockNumber = ndefEntry?.GetAllDataBlocks().FirstOrDefault() ?? 0;
+            formatOk &= (ndefBlockNumber != 0) && AuthenticateBlockKeyB(keyFormat, ndefBlockNumber);
+            Data = EmptyNdefBlock;
+            formatOk &= WriteDataBlock(ndefBlockNumber);
 
-            // write the empty NDEF TLV in the first NFC sector
-            authOk &= AuthenticateBlockKeyB(keyFormat, 4);
-            Data = Mifare1KBlock4;
-            authOk &= WriteDataBlock(4);
-
-            // GBP should be 0xC1 for the MAD sectors and 0x40 for the others for a full read/write access
-            // We wrote the MAD sector trailers above, so we write the NFC sector trailers here
+            // We wrote the MAD sector trailers already, so we write the NFC sector trailers here
             Data = new byte[] { 0, 0, 0, 0, 0, 0, 0x7F, 0x07, 0x88, 0x40, 0, 0, 0, 0, 0, 0 };
             DefaultBlocksNdefKeyA.CopyTo(Data);
             keyFormat.CopyTo(Data, 10);
@@ -900,20 +873,25 @@ namespace Iot.Device.Card.Mifare
                 if (sector != 16)
                 {
                     byte block = SectorToBlockNumber(sector, 3);
-                    authOk &= AuthenticateBlockKeyB(keyFormat, block);
-                    authOk &= WriteDataBlock(block);
+                    formatOk &= AuthenticateBlockKeyB(keyFormat, block);
+                    formatOk &= WriteDataBlock(block);
                 }
             }
 
-            return authOk;
+            return formatOk;
         }
 
         /// <summary>
         /// Write an NDEF Message
         /// </summary>
         /// <param name="message">The NDEF Message to write</param>
-        /// <param name="writeKeyA">True to write with Key A</param>
+        /// <param name="writeKeyA">True to write with Key A, false to write with Key B</param>
         /// <returns>True if success</returns>
+        /// <exception cref="ArgumentException">If using KeyB, it must be 6 bytes long</exception>
+        /// <exception cref="InvalidOperationException">The card is not formatted for NDEF</exception>
+        /// <exception cref="ArgumentOutOfRangeException">The message to be written is larger than the available space on the card</exception>
+        /// <remarks>The Mifare application directory indicates range of sectors for NDEF. Normally,
+        /// these begin at sector 1. The message must fit within the allocated space on the card.</remarks>
         public bool WriteNdefMessage(NdefMessage message, bool writeKeyA = true)
         {
             if ((KeyB is not object or { Length: not 6 }) && (!writeKeyA))
@@ -939,194 +917,64 @@ namespace Iot.Device.Card.Mifare
 
             serializedMessage[serializedMessage.Length - 1] = 0xFE;
 
+            // Get NDEF application entry from Mifare application directory
+            MifareDirectory? directory = MifareDirectory.LoadFromCard(this);
+            MifareDirectoryEntry ndefEntry =
+                directory?.TryGetApplication(NfcNdefId) ?? throw new InvalidOperationException("card is not formatted for NDEF");
+
             // Number of blocks to write
-            int nbBlocks = serializedMessage.Length / 16 + (serializedMessage.Length % 16 > 0 ? 1 : 0);
-            switch (Capacity)
+            int nbBlocks = (serializedMessage.Length + BytesPerBlock - 1) / BytesPerBlock;
+            if (nbBlocks > ndefEntry.NumberOfBlocks)
             {
-                default:
-                case MifareCardCapacity.Unknown:
-                case MifareCardCapacity.Mifare300:
-                    throw new ArgumentException($"Mifare card unknown and 300 are not supported for writing");
-                case MifareCardCapacity.Mifare2K:
-                    // Total blocks where we can write = 30 * 3 = 90
-                    if (nbBlocks > 90)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(message), $"NNDEF message too large, maximum {90 * 16} bytes, current size is {nbBlocks * 16}");
-                    }
-
-                    break;
-                case MifareCardCapacity.Mifare4K:
-                    // Total blocks where we can write = 30 * 3 + 8 * 15 = 210
-                    if (nbBlocks > 210)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(message), $"NNDEF message too large, maximum {210 * 16} bytes, current size is {nbBlocks * 16}");
-                    }
-
-                    break;
-                case MifareCardCapacity.Mifare1K:
-                    // Total blocks where we can write = 15 * 3 = 45
-                    if (nbBlocks > 45)
-                    {
-                        throw new ArgumentOutOfRangeException(nameof(message), $"NNDEF message too large, maximum {45 * 16} bytes, current size is {nbBlocks * 16}");
-                    }
-
-                    break;
+                uint maximumNumberOfBytes = ndefEntry.NumberOfBlocks * BytesPerBlock;
+                throw new ArgumentOutOfRangeException(nameof(message), $"NDEF message too large, maximum {maximumNumberOfBytes} bytes, current size is {serializedMessage.Length} bytes");
             }
 
-            int inc = 4;
-            bool ret;
-            for (int block = 0; block < nbBlocks; block++)
+            bool Authenticate(byte block) => writeKeyA ? AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, block) : AuthenticateBlockKeyB(KeyB!, block);
+            Data = new byte[BytesPerBlock];
+            bool ret = true;
+            IEnumerator<byte> sectorBlocks = ndefEntry.GetAllDataBlocks().GetEnumerator();
+            for (int byteOffset = 0; byteOffset < serializedMessage.Length; byteOffset += BytesPerBlock)
             {
-                if (IsSectorBlock((byte)(block + inc)))
+                if (!sectorBlocks.MoveNext())
                 {
-                    inc++;
+                    // this "can't happen" because we checked the size above
+                    ret = false;
+                    break;
                 }
 
-                // Skip as well sector 16 for 2K and 4K cards
-                if (block == 16 * 4)
-                {
-                    inc += 4;
-                }
-
-                // Safe cast, max is 255 in all cases
-                if (!writeKeyA)
-                {
-                    ret = AuthenticateBlockKeyB(KeyB!, (byte)(block + inc));
-                }
-                else
-                {
-                    ret = AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, (byte)(block + inc));
-                }
-
-                if (!ret)
-                {
-                    return false;
-                }
-
-                if (block * 16 + 16 <= serializedMessage.Length)
-                {
-                    Data = serializedMessage.Slice(block * 16, 16).ToArray();
-                }
-                else
-                {
-                    Data = new byte[16];
-                    serializedMessage.Slice(block * 16).CopyTo(Data);
-                }
-
-                if (!WriteDataBlock((byte)(block + inc)))
-                {
-                    return false;
-                }
+                // copy the next block, filling with zeros at the end of the last block
+                int dataLen = Math.Min(BytesPerBlock, serializedMessage.Length - byteOffset);
+                serializedMessage.Slice(byteOffset, dataLen).CopyTo(Data);
+                Array.Clear(Data, dataLen, BytesPerBlock - dataLen);
+                ret &= Authenticate(sectorBlocks.Current) && WriteDataBlock(sectorBlocks.Current);
             }
 
-            return true;
+            return ret;
         }
 
         /// <summary>
-        /// Check if the card formated to NDEF
+        /// Check if the card is formatted to NDEF
         /// </summary>
         /// <returns>True if NDEF formatted</returns>
-        /// <remarks>It will only check the first 2 block of the first sector and that the GPB is set properly</remarks>
-        /// TODO: support formatted cards where some sectors are used for other purposes
+        /// <remarks>This checks for a Mifare application directory in sector 0 and
+        /// (for 2K and 4K cards) sector 16, that there is an NDEF application, that
+        /// the sector trailer is readable in all sectors in that application, and
+        /// that the GPB byte is set correctly in the trailers.</remarks>
         public bool IsFormattedNdef()
         {
-            int nbBlocks = GetNumberBlocks();
-
-            if (KeyA is not object or { Length: not 6 })
+            MifareDirectory? directory = MifareDirectory.LoadFromCard(this);
+            MifareDirectoryEntry? ndefEntry = directory?.TryGetApplication(NfcNdefId);
+            bool ret = (ndefEntry != null);
+            foreach (byte sector in ndefEntry?.GetAllSectors() ?? Enumerable.Empty<byte>())
             {
-                throw new ArgumentException($"{nameof(KeyA)} can only be empty or 6 bytes length");
+                byte sectorBlock = SectorToBlockNumber(sector, 3);
+                ret &= AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, sectorBlock);
+                ret &= ReadDataBlock(sectorBlock);
+                ret &= (Data[9] == 0x40);
             }
 
-            if (Data is not object or { Length: not 6 })
-            {
-                Data = new byte[6];
-            }
-
-            // First write the data for the format
-            // All block data coming from https://www.nxp.com/docs/en/application-note/AN10787.pdf
-            var authOk = AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, 1);
-            authOk &= ReadDataBlock(1);
-            authOk &= Data.SequenceEqual(Mifare1KBlock1);
-            authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, 2);
-            authOk &= ReadDataBlock(2);
-            authOk &= Data.SequenceEqual(Mifare1KBlock2);
-
-            if (Capacity == MifareCardCapacity.Mifare2K)
-            {
-                byte block = 16 * 4;
-                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
-                authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(Mifare2KBlock64);
-                block++;
-                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
-                authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(Mifare1KBlock2); // 65 is same as 2
-                block++;
-                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
-                authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(Mifare2KBlock66);
-            }
-            else if (Capacity == MifareCardCapacity.Mifare4K)
-            {
-                byte block = 16 * 4;
-                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
-                authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(Mifare4KBlock64);
-                block++;
-                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
-                authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(Mifare1KBlock2); // 65 is same as 2
-                block++;
-                authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, block);
-                authOk &= ReadDataBlock(block);
-                authOk &= Data.SequenceEqual(Mifare1KBlock2); // 66 is same as 2
-            }
-
-            // GBP should be 0xC1 for the MAD sectors and 0x40 for the others for a full read/write access
-            for (int block = 0; block < nbBlocks; block++)
-            {
-                // Safe cast, max is 255
-                if (IsSectorBlock((byte)block))
-                {
-                    if ((block == 3) || (block == 67))
-                    {
-                        authOk &= AuthenticateBlockKeyA(StaticDefaultFirstBlockNdefKeyA, (byte)block);
-                    }
-                    else
-                    {
-                        authOk &= AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, (byte)block);
-                    }
-
-                    if (authOk)
-                    {
-                        authOk &= ReadDataBlock((byte)block);
-                        if (authOk)
-                        {
-                            byte gpb = 0x40;
-                            // Change only the GPB byte
-                            if ((block == 3) || (block == 67))
-                            {
-                                switch (Capacity)
-                                {
-                                    case MifareCardCapacity.Mifare4K:
-                                    case MifareCardCapacity.Mifare2K:
-                                        gpb = 0xC2;
-                                        break;
-                                    case MifareCardCapacity.Unknown:
-                                    case MifareCardCapacity.Mifare300:
-                                    case MifareCardCapacity.Mifare1K:
-                                        gpb = 0xC1;
-                                        break;
-                                }
-                            }
-
-                            authOk &= Data[9] == gpb;
-                        }
-                    }
-                }
-            }
-
-            return authOk;
+            return ret;
         }
 
         /// <summary>
@@ -1162,99 +1010,61 @@ namespace Iot.Device.Card.Mifare
         /// </summary>
         /// <param name="message">The NDEF message</param>
         /// <returns>True if success</returns>
+        /// <remarks>The Mifare application directory indicates the range of sectors used for NDEF. Normally
+        /// these begin at sector 1.</remarks>
         public bool TryReadNdefMessage(out NdefMessage message)
         {
-            const int BlockSize = 16;
             message = new NdefMessage();
 
-            int cardSize;
-            switch (Capacity)
+            // Get the NDEF application from the directory
+            MifareDirectory? directory = MifareDirectory.LoadFromCard(this);
+            MifareDirectoryEntry? ndefEntry = directory?.TryGetApplication(NfcNdefId);
+            if (ndefEntry == null)
             {
-                case MifareCardCapacity.Mifare1K:
-                    // 15 sectors, 3 blocks, 16 bytes
-                    cardSize = 720;
-                    break;
-                case MifareCardCapacity.Mifare2K:
-                    // 30 sectors, 3 blocks, 16 bytes
-                    cardSize = 1440;
-                    break;
-                case MifareCardCapacity.Mifare4K:
-                    // 62 sectors, 3 blocks, 16 bytes
-                    cardSize = 2976;
-                    break;
-                /* We don't support those
-                case MifareCardCapacity.Mifare300:
-                case MifareCardCapacity.Unknown */
-                default:
-                    throw new NotSupportedException();
+                return false;
             }
 
-            if (KeyB is not object or { Length: not 6 })
-            {
-                KeyB = StaticDefaultKeyB;
-            }
-
-            // Read block 4 and check for the data, it should be present in this one
-            var authOk = AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, 4);
-            authOk &= ReadDataBlock(4);
-
+            // Read the first NDEF data block
+            IEnumerator<byte> dataBlocks = ndefEntry.GetAllDataBlocks().GetEnumerator();
+            dataBlocks.MoveNext();
+            var authOk = AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, dataBlocks.Current);
+            authOk &= ReadDataBlock(dataBlocks.Current);
             if (!authOk)
             {
                 return false;
             }
 
             var (start, size) = NdefMessage.GetStartSizeNdef(Data.AsSpan());
-
             if ((start < 0) || (size < 0))
             {
                 return false;
             }
 
-            // calculate the size to read
-            int blocksToRead = (size + start) / BlockSize + ((size + start) % BlockSize != 0 ? 1 : 0);
-
-            // We would have to read more available data than the capacity
-            if (cardSize < blocksToRead * BlockSize)
+            // calculate the number of blocks to read, which must fit within the application
+            int blocksToRead = (size + start + BytesPerBlock - 1) / BytesPerBlock;
+            if (ndefEntry.NumberOfBlocks < blocksToRead)
             {
                 return false;
             }
 
-            Span<byte> card = new byte[blocksToRead * BlockSize];
+            Span<byte> card = new byte[blocksToRead * BytesPerBlock];
             Data.CopyTo(card);
 
-            byte idxCard = 1;
-            int block = 5;
-            while (idxCard < blocksToRead)
+            for (int byteIndex = BytesPerBlock; byteIndex < size + start; byteIndex += BytesPerBlock)
             {
-                // Skip sector blocks, safe cast, max is 255
-                if (IsSectorBlock((byte)block))
+                if (!dataBlocks.MoveNext())
                 {
-                    block++;
-                    continue;
+                    // this "can't happen" because we checked the size above
+                    return false;
                 }
 
-                // Skip as well sector 16 for 2K and 4K cards
-                if ((block == 16 * 4) || (block == 16 * 4 + 1) || (block == 16 * 4 + 2) || (block == 16 * 4 + 3))
-                {
-                    block++;
-                    continue;
-                }
-
-                authOk = AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, (byte)block);
-                if (!authOk)
+                if (!AuthenticateBlockKeyA(StaticDefaultBlocksNdefKeyA, dataBlocks.Current) ||
+                    !ReadDataBlock(dataBlocks.Current))
                 {
                     return false;
                 }
 
-                authOk = ReadDataBlock((byte)block);
-                if (!authOk)
-                {
-                    return false;
-                }
-
-                Data.CopyTo(card.Slice(idxCard * BlockSize));
-                idxCard++;
-                block++;
+                Data.CopyTo(card.Slice(byteIndex));
             }
 
             var ndef = NdefMessage.ExtractMessage(card);

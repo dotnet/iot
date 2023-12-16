@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>$(DefaultBindingTfms)</TargetFrameworks>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Pn532\Pn532.csproj" />
+    <ProjectReference Include="..\CreditCard\CreditCardProcessing.csproj" />
+    <ProjectReference Include="..\Ndef\Ndef.csproj" />
+  </ItemGroup>
+
+</Project>

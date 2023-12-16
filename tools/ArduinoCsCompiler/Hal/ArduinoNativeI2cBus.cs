@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,6 +41,14 @@ namespace ArduinoCsCompiler
         public override void RemoveDevice(int deviceAddress)
         {
             _usedAddresses.Remove(deviceAddress);
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "Arduino Native I2C Bus Driver");
+            self.Properties["BusNo"] = _busId.ToString(CultureInfo.CurrentCulture);
+
+            return self;
         }
     }
 }

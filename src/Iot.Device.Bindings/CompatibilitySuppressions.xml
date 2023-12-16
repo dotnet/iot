@@ -3,665 +3,420 @@
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Common.ValueArray`1</Target>
+    <Target>T:Iot.Device.Pn532.AsTarget.TargetBaudRateInialized</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Display.BarColor</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Ft232H.Ft232HI2c</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Pn532.ErrorCode</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Channel</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Gain</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.IntegrationTime</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.InterruptControl</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.InterruptPersistence</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.PackageType</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Tsl256x</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Common.ValueArray`1</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Display.BarColor</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Pn532.ErrorCode</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Channel</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Gain</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.IntegrationTime</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.InterruptControl</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.InterruptPersistence</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.PackageType</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Tsl256x</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Display.BarColor</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Ft232H.Ft232HI2c</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Common.ValueArray`1</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Display.BarColor</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:Iot.Device.Ft232H.Ft232HI2c</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Pn532.ErrorCode</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Channel</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Gain</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.IntegrationTime</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.InterruptControl</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.InterruptPersistence</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.PackageType</Target>
-    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0001</DiagnosticId>
-    <Target>T:IoT.Device.Tsl256x.Tsl256x</Target>
+    <Target>T:Iot.Device.Pn532.AsTarget.TargetBaudRateInialized</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
+    <Target>F:Iot.Device.Axp192.BatteryStatus.Overwinered</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Iot.Device.Imu.Mpu6500.SecondI2cAddress</Target>
+    <Target>F:Iot.Device.Axp192.Gpio0Behavior.MnosLeakOpenOutput</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Target>F:Iot.Device.Axp192.PowerStatus.VbuxExists</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Target>F:Iot.Device.Nmea0183.AisManager.CleanupLatency</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.Transceive(System.Byte,System.ReadOnlySpan{System.Byte},System.Span{System.Byte})</Target>
+    <Target>F:Iot.Device.Nmea0183.AisManager.WarningRepeatTimeout</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
+    <Target>M:Iot.Device.Axp192.Axp192.SetGPIO0(Iot.Device.Axp192.Gpio0Behavior,System.Byte)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO2Output(System.Byte)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO3Output(System.Byte)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Target>M:Iot.Device.Ili934x.Ili9341.CreateBackBuffer</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Mfrc522.MfRc522.IsCardPresent(System.Byte[])</Target>
+    <Target>M:Iot.Device.Ili934x.Ili9341.DrawBitmap(Iot.Device.Graphics.BitmapImage,System.Drawing.Point,System.Drawing.Rectangle)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.GetSatellitesInView(System.Int32@)</Target>
+    <Target>M:Iot.Device.Ili934x.Ili9341.DrawBitmap(Iot.Device.Graphics.BitmapImage,System.Drawing.Rectangle)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentPosition(Iot.Device.Common.GeographicPosition@,System.Boolean,UnitsNet.Angle@,UnitsNet.Speed@,System.Nullable{UnitsNet.Angle}@)</Target>
+    <Target>M:Iot.Device.Nmea0183.AisManager.get_DeleteTargetAfterTimeout</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentPosition(Iot.Device.Common.GeographicPosition@,UnitsNet.Angle@,UnitsNet.Speed@,System.Nullable{UnitsNet.Angle}@)</Target>
+    <Target>M:Iot.Device.Nmea0183.AisManager.SendWarningMessage(System.String,System.UInt32,System.String,System.DateTimeOffset)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentRoute(System.Collections.Generic.List{Iot.Device.Nmea0183.RoutePoint}@)</Target>
+    <Target>M:Iot.Device.Nmea0183.AisManager.set_DeleteTargetAfterTimeout(System.TimeSpan)</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
+    <Target>M:Iot.Device.Nmea0183.Sentences.EngineData.#ctor(System.Int32,System.Int32,UnitsNet.RotationalSpeed,UnitsNet.Ratio,System.TimeSpan,System.Nullable{UnitsNet.Temperature})</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <Target>M:Iot.Device.Nmea0183.Sentences.SeaSmartEngineDetail.#ctor(System.Boolean,System.TimeSpan,UnitsNet.Temperature,System.Int32)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Iot.Device.Imu.Mpu6500.SecondI2cAddress</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <Target>M:Iot.Device.Ssd13xx.Ssd1306.#ctor(System.Device.I2c.I2cDevice)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Right>
+    <Target>M:Iot.Device.Ssd13xx.Ssd1327.#ctor(System.Device.I2c.I2cDevice)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <Target>M:Iot.Device.Ssd13xx.Ssd1327.ClearDisplay</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <Target>M:Iot.Device.Ssd13xx.Ssd13xx.#ctor(System.Device.I2c.I2cDevice,System.Int32)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.Transceive(System.Byte,System.ReadOnlySpan{System.Byte},System.Span{System.Byte})</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Mfrc522.MfRc522.IsCardPresent(System.Byte[])</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.GetSatellitesInView(System.Int32@)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentPosition(Iot.Device.Common.GeographicPosition@,System.Boolean,UnitsNet.Angle@,UnitsNet.Speed@,System.Nullable{UnitsNet.Angle}@)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentPosition(Iot.Device.Common.GeographicPosition@,UnitsNet.Angle@,UnitsNet.Speed@,System.Nullable{UnitsNet.Angle}@)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentRoute(System.Collections.Generic.List{Iot.Device.Nmea0183.RoutePoint}@)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Iot.Device.Imu.Mpu6500.DefaultI2cAddress</Target>
+    <Target>F:Iot.Device.Axp192.BatteryStatus.Overwinered</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>F:Iot.Device.Imu.Mpu6500.SecondI2cAddress</Target>
+    <Target>F:Iot.Device.Axp192.Gpio0Behavior.MnosLeakOpenOutput</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Target>F:Iot.Device.Axp192.PowerStatus.VbuxExists</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Button.GpioButton.#ctor(System.Int32,System.TimeSpan,System.TimeSpan,System.Device.Gpio.GpioController,System.Boolean,System.Device.Gpio.PinMode,System.TimeSpan)</Target>
+    <Target>F:Iot.Device.Nmea0183.AisManager.CleanupLatency</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.Transceive(System.Byte,System.ReadOnlySpan{System.Byte},System.Span{System.Byte})</Target>
+    <Target>F:Iot.Device.Nmea0183.AisManager.WarningRepeatTimeout</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GeographicPosition.GetDegreesMinutesSeconds(System.Double,System.Int32,System.Double@,System.Double@,System.Double@,System.Double@)</Target>
+    <Target>M:Iot.Device.Axp192.Axp192.SetGPIO0(Iot.Device.Axp192.Gpio0Behavior,System.Byte)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,Iot.Device.Common.GeographicPosition,System.Double)</Target>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO2Output(System.Byte)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Common.GreatCircle.CalculateRoute(Iot.Device.Common.GeographicPosition,System.Double,System.Double,System.Double)</Target>
+    <Target>M:Iot.Device.Axp192.Axp192.SetLDO3Output(System.Byte)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Display.BiColorBarGraph.Fill(Iot.Device.Display.BarColor)</Target>
+    <Target>M:Iot.Device.Ili934x.Ili9341.CreateBackBuffer</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Mfrc522.MfRc522.IsCardPresent(System.Byte[])</Target>
+    <Target>M:Iot.Device.Ili934x.Ili9341.DrawBitmap(Iot.Device.Graphics.BitmapImage,System.Drawing.Point,System.Drawing.Rectangle)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.GetSatellitesInView(System.Int32@)</Target>
+    <Target>M:Iot.Device.Ili934x.Ili9341.DrawBitmap(Iot.Device.Graphics.BitmapImage,System.Drawing.Rectangle)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentPosition(Iot.Device.Common.GeographicPosition@,System.Boolean,UnitsNet.Angle@,UnitsNet.Speed@,System.Nullable{UnitsNet.Angle}@)</Target>
+    <Target>M:Iot.Device.Nmea0183.AisManager.get_DeleteTargetAfterTimeout</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentPosition(Iot.Device.Common.GeographicPosition@,UnitsNet.Angle@,UnitsNet.Speed@,System.Nullable{UnitsNet.Angle}@)</Target>
+    <Target>M:Iot.Device.Nmea0183.AisManager.SendWarningMessage(System.String,System.UInt32,System.String,System.DateTimeOffset)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.SentenceCache.TryGetCurrentRoute(System.Collections.Generic.List{Iot.Device.Nmea0183.RoutePoint}@)</Target>
+    <Target>M:Iot.Device.Nmea0183.AisManager.set_DeleteTargetAfterTimeout(System.TimeSpan)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0002</DiagnosticId>
-    <Target>M:Iot.Device.Nmea0183.Sentences.DepthBelowSurface.get_Left</Target>
+    <Target>M:Iot.Device.Nmea0183.Sentences.EngineData.#ctor(System.Int32,System.Int32,UnitsNet.RotationalSpeed,UnitsNet.Ratio,System.TimeSpan,System.Nullable{UnitsNet.Temperature})</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Nmea0183.Sentences.SeaSmartEngineDetail.#ctor(System.Boolean,System.TimeSpan,UnitsNet.Temperature,System.Int32)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Ssd13xx.Ssd1306.#ctor(System.Device.I2c.I2cDevice)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Ssd13xx.Ssd1327.#ctor(System.Device.I2c.I2cDevice)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Ssd13xx.Ssd1327.ClearDisplay</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Iot.Device.Ssd13xx.Ssd13xx.#ctor(System.Device.I2c.I2cDevice,System.Int32)</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.get_MaximumReadSize</Target>
+    <Target>M:Iot.Device.Ssd13xx.Ssd13xx.SetStartAddress</Target>
     <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
     <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.get_MaximumWriteSize</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.Transceive(System.Byte,System.ReadOnlySpan{System.Byte},System.Span{System.Byte},Iot.Device.Card.NfcProtocol)</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>P:Iot.Device.Card.CardTransceiver.MaximumReadSize</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>P:Iot.Device.Card.CardTransceiver.MaximumWriteSize</Target>
-    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
-    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.get_MaximumReadSize</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.get_MaximumWriteSize</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.Transceive(System.Byte,System.ReadOnlySpan{System.Byte},System.Span{System.Byte},Iot.Device.Card.NfcProtocol)</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>P:Iot.Device.Card.CardTransceiver.MaximumReadSize</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>P:Iot.Device.Card.CardTransceiver.MaximumWriteSize</Target>
-    <Left>lib/netcoreapp3.1/Iot.Device.Bindings.dll</Left>
-    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
-    <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.get_MaximumReadSize</Target>
+    <Target>M:Iot.Device.Ssd13xx.Ssd13xx.SetStartAddress</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.get_MaximumWriteSize</Target>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Display.Pcd8544</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Ili934x.Ili9341</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Ssd13xx.Ssd13xx</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Display.Pcd8544</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>M:Iot.Device.Card.CardTransceiver.Transceive(System.Byte,System.ReadOnlySpan{System.Byte},System.Span{System.Byte},Iot.Device.Card.NfcProtocol)</Target>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Ili934x.Ili9341</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>P:Iot.Device.Card.CardTransceiver.MaximumReadSize</Target>
+    <DiagnosticId>CP0007</DiagnosticId>
+    <Target>T:Iot.Device.Ssd13xx.Ssd13xx</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
-    <DiagnosticId>CP0005</DiagnosticId>
-    <Target>P:Iot.Device.Card.CardTransceiver.MaximumWriteSize</Target>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>M:Iot.Device.Ili934x.Ili9341.Dispose(System.Boolean)</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>M:Iot.Device.Ili934x.Ili9341.get_ScreenHeight</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>M:Iot.Device.Ili934x.Ili9341.get_ScreenWidth</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>P:Iot.Device.Ili934x.Ili9341.ScreenHeight</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>P:Iot.Device.Ili934x.Ili9341.ScreenWidth</Target>
+    <Left>lib/net6.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/net6.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>M:Iot.Device.Ili934x.Ili9341.Dispose(System.Boolean)</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>M:Iot.Device.Ili934x.Ili9341.get_ScreenHeight</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>M:Iot.Device.Ili934x.Ili9341.get_ScreenWidth</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>P:Iot.Device.Ili934x.Ili9341.ScreenHeight</Target>
+    <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
+    <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0012</DiagnosticId>
+    <Target>P:Iot.Device.Ili934x.Ili9341.ScreenWidth</Target>
     <Left>lib/netstandard2.0/Iot.Device.Bindings.dll</Left>
     <Right>lib/netstandard2.0/Iot.Device.Bindings.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>

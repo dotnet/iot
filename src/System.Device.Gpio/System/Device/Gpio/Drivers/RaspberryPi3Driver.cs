@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace System.Device.Gpio.Drivers;
 
 /// <summary>
-/// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian (or, with some limitations, ubuntu)
+/// A GPIO driver for the Raspberry Pi 3 or 4, running Raspbian or Raspberry Pi OS (or, with some limitations, ubuntu)
 /// </summary>
 public class RaspberryPi3Driver : GpioDriver
 {
@@ -89,7 +89,7 @@ public class RaspberryPi3Driver : GpioDriver
 
             if (_linuxDriver == null)
             {
-                throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: " + boardInfo.BoardModel);
+                throw new PlatformNotSupportedException($"Not a supported Raspberry Pi type: {boardInfo.BoardModel} (0x{((int)boardInfo.BoardModel):X4})");
             }
 
             _setSetRegister = (value) => _linuxDriver.SetRegister = value;
@@ -281,5 +281,13 @@ public class RaspberryPi3Driver : GpioDriver
         _internalDriver?.Dispose();
         _internalDriver = null!;
         base.Dispose(disposing);
+    }
+
+    /// <inheritdoc />
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var ret = new ComponentInformation(this, "Generic Raspberry Pi Wrapper driver");
+        ret.AddSubComponent(_internalDriver.QueryComponentInformation());
+        return ret;
     }
 }

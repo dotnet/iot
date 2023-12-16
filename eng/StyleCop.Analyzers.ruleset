@@ -136,7 +136,7 @@
     <Rule Id="SA1515" Action="None" /> <!-- Single-line comment should be preceded by blank line -->
     <Rule Id="SA1516" Action="None" /> <!-- Elements should be separated by blank line -->
     <Rule Id="SA1517" Action="Error" />
-    <Rule Id="SA1518" Action="Error" />
+    <Rule Id="SA1518" Action="None" /> <!-- Files must end with exactly one newline -->
     <Rule Id="SA1519" Action="Error" />
     <Rule Id="SA1520" Action="Error" />
     <Rule Id="SA1600" Action="None" />  <!-- Elements should be documented -->

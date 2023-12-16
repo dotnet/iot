@@ -128,7 +128,7 @@ namespace Iot.Device.FtCommon
         /// <summary>
         /// Gets the number of pins for this specific FT device.
         /// </summary>
-        public int PinCount => Type == FtDeviceType.Ft4232H ? PinNumberFT2x : PinNumberFT4x;
+        public int PinCount => Type == FtDeviceType.Ft4232H ? PinNumberFT4x : PinNumberFT2x;
 
         /// <summary>
         /// Gets or sets the I2C Bus frequency. Default value is 400 KHz.

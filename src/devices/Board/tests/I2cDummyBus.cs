@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Device;
 using System.Device.I2c;
+using System.Globalization;
 using System.Text;
 using Board.Tests;
 
@@ -25,6 +27,13 @@ namespace Iot.Device.Board.Tests
 
         public override void RemoveDevice(int deviceAddress)
         {
+        }
+
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var self = new ComponentInformation(this, "Dummy I2C Bus");
+            self.Properties["BusNo"] = _busNumber.ToString(CultureInfo.InvariantCulture);
+            return self;
         }
     }
 }

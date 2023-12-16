@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace System.Device.I2c;
 
@@ -57,5 +58,17 @@ internal class Windows10I2cBus : I2cBus
         }
 
         base.Dispose(disposing);
+    }
+
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var self = new ComponentInformation(this, "Windows IoT Core I2C bus");
+        self.Properties["BusNo"] = BusId.ToString(CultureInfo.InvariantCulture);
+        foreach (var device in _devices)
+        {
+            self.AddSubComponent(device.Value.QueryComponentInformation());
+        }
+
+        return self;
     }
 }

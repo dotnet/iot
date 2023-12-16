@@ -10,7 +10,7 @@ namespace Iot.Device.Ws28xx
     /// Special 24bit GRB format for Neo pixel LEDs where each bit is converted to 3 bits.
     /// A one is converted to 110, a zero is converted to 100.
     /// </summary>
-    internal class BitmapImageNeo3 : BitmapImage
+    internal class BitmapImageNeo3 : RawPixelContainer
     {
         // The Neo Pixels require a 50us delay (all zeros) after. Since Spi freq is not exactly
         // as requested 100us is used here with good practical results. 100us @ 2.4Mbps and 8bit
@@ -19,6 +19,24 @@ namespace Iot.Device.Ws28xx
 
         protected const int BytesPerComponent = 3;
         protected const int BytesPerPixel = BytesPerComponent * 3;
+
+        protected static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
+
+        static BitmapImageNeo3()
+        {
+            for (int i = 0; i < 256; i++)
+            {
+                int data = 0;
+                for (int j = 7; j >= 0; j--)
+                {
+                    data = (data << 3) | 0b100 | ((i >> j) << 1) & 2;
+                }
+
+                _lookup[i * BytesPerComponent + 0] = unchecked((byte)(data >> 16));
+                _lookup[i * BytesPerComponent + 1] = unchecked((byte)(data >> 8));
+                _lookup[i * BytesPerComponent + 2] = unchecked((byte)(data >> 0));
+            }
+        }
 
         public BitmapImageNeo3(int width, int height)
             : base(new byte[width * height * BytesPerPixel + ResetDelayInBytes], width, height, width * BytesPerPixel)
@@ -37,24 +55,6 @@ namespace Iot.Device.Ws28xx
             Data[offset++] = _lookup[c.B * BytesPerComponent + 0];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 1];
             Data[offset++] = _lookup[c.B * BytesPerComponent + 2];
-        }
-
-        protected static readonly byte[] _lookup = new byte[256 * BytesPerComponent];
-
-        static BitmapImageNeo3()
-        {
-            for (int i = 0; i < 256; i++)
-            {
-                int data = 0;
-                for (int j = 7; j >= 0; j--)
-                {
-                    data = (data << 3) | 0b100 | ((i >> j) << 1) & 2;
-                }
-
-                _lookup[i * BytesPerComponent + 0] = unchecked((byte)(data >> 16));
-                _lookup[i * BytesPerComponent + 1] = unchecked((byte)(data >> 8));
-                _lookup[i * BytesPerComponent + 2] = unchecked((byte)(data >> 0));
-            }
         }
     }
 }

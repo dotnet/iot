@@ -100,6 +100,28 @@ namespace Iot.Device.Display
         }
 
         /// <summary>
+        /// Set value for all LEDs.
+        /// </summary>
+        public void WriteAllPixels(int[,] brightness)
+        {
+            Span<byte> data = stackalloc byte[_pwmRegisterLength];
+
+            int maxX = brightness.GetLength(0);
+            int maxY = brightness.GetLength(1);
+
+            for (int x = 0; x < maxX; x++)
+            {
+                for (int y = 0; y < maxY; y++)
+                {
+                    int address = GetLedAddress(x, y);
+                    data[address] = (byte)brightness[x, y];
+                }
+            }
+
+            WriteLedPwm(data);
+        }
+
+        /// <summary>
         /// Fill all LEDs.
         /// </summary>
         public void Fill(byte brightness = 128, byte page = 0)
@@ -209,6 +231,12 @@ namespace Iot.Device.Display
         {
             int address = FrameRegister.Pwm + GetLedAddress(x, y);
             Write(0, (byte)address, (byte)brightness);
+        }
+
+        private void WriteLedPwm(ReadOnlySpan<byte> value)
+        {
+            int address = FrameRegister.Pwm + GetLedAddress(0, 0);
+            Write(0, (byte)address, value);
         }
 
         private void WriteLed(int x, int y, bool enable)

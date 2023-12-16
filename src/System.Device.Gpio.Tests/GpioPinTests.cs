@@ -37,7 +37,7 @@ namespace System.Device.Gpio.Tests
             // Act
             GpioPin pin = ctrl.OpenPin(PinNumber, PinMode.Input);
             // Assert
-            Assert.Equal(pin.PinNumber, PinNumber);
+            Assert.Equal(PinNumber, pin.PinNumber);
             Assert.Equal(PinMode.Input, pin.GetPinMode());
         }
 

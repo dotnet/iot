@@ -2,7 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Device.Gpio.Drivers;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32;
@@ -22,6 +25,7 @@ public class GpioController : IDisposable
     private const string BaseBoardProductRegistryValue = @"SYSTEM\HardwareConfig\Current\BaseBoardProduct";
     private const string RaspberryPi2Product = "Raspberry Pi 2";
     private const string RaspberryPi3Product = "Raspberry Pi 3";
+    private const string RaspberryPi5Product = "Raspberry Pi 5";
 
     private const string HummingBoardProduct = "HummingBoard-Edge";
     private const string HummingBoardHardware = @"Freescale i.MX6 Quad/DualLite (Device Tree)";
@@ -73,6 +77,17 @@ public class GpioController : IDisposable
     /// The number of pins provided by the controller.
     /// </summary>
     public virtual int PinCount => _driver.PinCount;
+
+    /// <summary>
+    /// Returns the collection of open pins
+    /// </summary>
+    private IEnumerable<GpioPin> OpenPins
+    {
+        get
+        {
+            return _gpioPins.Values;
+        }
+    }
 
     /// <summary>
     /// Gets the logical pin number in the controller's numbering scheme.
@@ -455,14 +470,40 @@ public class GpioController : IDisposable
     /// <returns>A driver that works with the board the program is executing on.</returns>
     private static GpioDriver GetBestDriverForBoardOnLinux()
     {
-        RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
+        var boardInfo = RaspberryBoardInfo.LoadBoardInfo();
 
-        if (internalDriver is object)
+        switch (boardInfo.BoardModel)
         {
-            return new RaspberryPi3Driver(internalDriver);
-        }
+            case RaspberryBoardInfo.Model.RaspberryPi3B:
+            case RaspberryBoardInfo.Model.RaspberryPi3APlus:
+            case RaspberryBoardInfo.Model.RaspberryPi3BPlus:
+            case RaspberryBoardInfo.Model.RaspberryPiZeroW:
+            case RaspberryBoardInfo.Model.RaspberryPiZero2W:
+            case RaspberryBoardInfo.Model.RaspberryPi4:
+            case RaspberryBoardInfo.Model.RaspberryPi400:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule4:
+            case RaspberryBoardInfo.Model.RaspberryPiComputeModule3:
 
-        return UnixDriver.Create();
+                RaspberryPi3LinuxDriver? internalDriver = RaspberryPi3Driver.CreateInternalRaspberryPi3LinuxDriver(out _);
+
+                if (internalDriver is object)
+                {
+                    return new RaspberryPi3Driver(internalDriver);
+                }
+
+                return UnixDriver.Create();
+
+            case RaspberryBoardInfo.Model.RaspberryPi5:
+
+                // For now, for Raspberry Pi 5, we'll use the LibGpiodDriver.
+                // We need to create a new driver for the Raspberry Pi 5,
+                // because the Raspberry Pi 5 uses an entirely different GPIO controller (RP1)
+                return new LibGpiodDriver(4);
+
+            default:
+
+                return UnixDriver.Create();
+        }
     }
 
     /// <summary>
@@ -499,5 +540,30 @@ public class GpioController : IDisposable
 
         // Default for Windows IoT Core on a non-specific device
         return new Windows10Driver();
+    }
+
+    /// <summary>
+    /// Query information about a component and its children.
+    /// </summary>
+    /// <returns>A tree of <see cref="ComponentInformation"/> instances.</returns>
+    /// <remarks>
+    /// The returned data structure (or rather, its string representation) can be used to diagnose problems with incorrect driver types or
+    /// other system configuration problems.
+    /// This method is currently reserved for debugging purposes. Its behavior its and signature are subject to change.
+    /// </remarks>
+    public virtual ComponentInformation QueryComponentInformation()
+    {
+        ComponentInformation self = new ComponentInformation(this, "Generic GPIO Controller");
+
+        if (_driver != null)
+        {
+            ComponentInformation driverInfo = _driver.QueryComponentInformation();
+            self.AddSubComponent(driverInfo);
+        }
+
+        // PinCount is not added on purpose, because the property throws NotSupportedException on some hardware
+        self.Properties["OpenPins"] = string.Join(", ", _openPins.Select(x => x.Key));
+
+        return self;
     }
 }

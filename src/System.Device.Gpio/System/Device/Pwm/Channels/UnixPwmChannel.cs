@@ -230,6 +230,14 @@ internal class UnixPwmChannel : PwmChannel
         File.WriteAllText(enablePath, "0");
     }
 
+    public override ComponentInformation QueryComponentInformation()
+    {
+        var ret = new ComponentInformation(this, "Unix standard PWM Channel");
+        ret.Properties["ChannelPath"] = _channelPath;
+        ret.Properties["ChannelName"] = ChannelName;
+        return ret;
+    }
+
     protected override void Dispose(bool disposing)
     {
         _dutyCycleWriter?.Dispose();

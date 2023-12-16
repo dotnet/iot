@@ -2,10 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Device;
 using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Pwm;
 using System.Device.Spi;
+using System.Globalization;
+using System.Security.Cryptography;
 using Iot.Device.Board;
 
 namespace Iot.Device.FtCommon
@@ -114,5 +117,16 @@ namespace Iot.Device.FtCommon
         /// You can create multiple SPI devices, the first one will be the one used for the clock frequency.
         /// They all have to have different Chip Select. You can use any of the 3 to 15 pin for this function.</remarks>
         protected override SpiDevice CreateSimpleSpiDevice(SpiConnectionSettings settings, int[] pins) => throw new NotSupportedException("No SPI bus present on this device");
+
+        /// <inheritdoc />
+        public override ComponentInformation QueryComponentInformation()
+        {
+            var ret = base.QueryComponentInformation();
+            ret.Properties["Description"] = Description;
+            ret.Properties["SerialNumber"] = SerialNumber;
+            ret.Properties["VendorId"] = Id.ToString(CultureInfo.InvariantCulture);
+            ret.Properties["LocId"] = LocId.ToString(CultureInfo.InvariantCulture);
+            return ret;
+        }
     }
 }

@@ -317,7 +317,7 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.CastClassTest), 0, 0, 1)]
         public void CastTest(string methodName, Int32 argument1, Int32 argument2, Int32 expected)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = true, UseFlashForKernel = true });
+            LoadCodeMethod(methodName, argument1, argument2, expected, new CompilerSettings() { CreateKernelForFlashing = false, UseFlashForKernel = false });
         }
 
         [Theory]
@@ -339,7 +339,15 @@ namespace Iot.Device.Arduino.Tests
         [Fact]
         public void EnumsHaveNames()
         {
-            LoadCodeMethod(typeof(TestMethods), nameof(TestMethods.EnumsHaveNames), 0, 0, 1, CompilerSettings, false);
+            var compilerSettings = new CompilerSettings()
+            {
+                AutoRestartProgram = false,
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = false
+            };
+
+            LoadCodeMethod(nameof(TestMethods.EnumsHaveNames), 0, 0, 1, compilerSettings, false);
         }
 
         [Theory]
@@ -347,7 +355,15 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.DoubleToString2))]
         public void DoubleToStringTest(string name)
         {
-            LoadCodeMethod(typeof(TestMethods), name, 20.23, 202.1, 20.23, CompilerSettings);
+            var compilerSettings = new CompilerSettings()
+            {
+                AutoRestartProgram = false,
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = true
+            };
+
+            LoadCodeMethod(name, 20.23, 202.1, 20.23, compilerSettings);
         }
 
         /// <summary>
@@ -391,7 +407,15 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.IterateOverArray3), 1)]
         public void IteratorProblems(string methodName, int arg1)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
+            var compilerSettings = new CompilerSettings()
+            {
+                AutoRestartProgram = false,
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = true
+            };
+
+            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
         }
 
         /// <summary>
@@ -403,7 +427,15 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.UnsafeSizeOf), 1)]
         public void CanMergeSimilarGenericMethods(string methodName, int arg1)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
+            var compilerSettings = new CompilerSettings()
+            {
+                AutoRestartProgram = false,
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = true
+            };
+
+            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]
@@ -421,7 +453,15 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.FinallyInDifferentBlock), 0)]
         public void ExceptionHandling(string methodName, int arg1)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
+            var compilerSettings = new CompilerSettings()
+            {
+                AutoRestartProgram = false,
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = true
+            };
+
+            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]
@@ -429,7 +469,15 @@ namespace Iot.Device.Arduino.Tests
         [InlineData(nameof(TestMethods.TryCatchIndexOutOfRangeException), 10)]
         public void ExceptionHandlingForBuiltinErrors(string methodName, int arg1)
         {
-            LoadCodeMethod(typeof(TestMethods), methodName, arg1, 0, 1, CompilerSettings);
+            var compilerSettings = new CompilerSettings()
+            {
+                AutoRestartProgram = false,
+                CreateKernelForFlashing = false,
+                LaunchProgramFromFlash = false,
+                UseFlashForProgram = false
+            };
+
+            LoadCodeMethod(methodName, arg1, 0, 1, compilerSettings);
         }
 
         [Theory]

@@ -4,6 +4,7 @@
     <TargetFramework>$(DefaultSampleTfms)</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\SkiaSharpAdapter\SkiaSharpAdapter.csproj" />
     <ProjectReference Include="..\Pcd8544.csproj" />
     <ProjectReference Include="..\..\Ft4222\Ft4222.csproj" />
     <ProjectReference Include="..\..\SoftPwm\SoftwarePwm.csproj" />

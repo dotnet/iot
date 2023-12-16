@@ -22,6 +22,7 @@ namespace Iot.Device.Arduino.Tests
             : base(fixture)
         {
             Compiler.ClearAllData(true, false);
+            CompilerSettings.CreateKernelForFlashing = false;
         }
 
         [Fact]

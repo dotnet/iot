@@ -4,10 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Device.I2c;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using Iot.Device.Display;
-using SixLabors.ImageSharp;
 
 // Port of https://github.com/adafruit/Adafruit_CircuitPython_IS31FL3731/blob/main/examples/is31fl3731_rgbmatrix5x5_rainbow.py
 using I2cDevice i2cdevice = I2cDevice.Create(new I2cConnectionSettings(busId: 1, BreakoutRgb5x5.DefaultI2cAddress));
@@ -80,7 +80,7 @@ void TestPixels(byte r, byte g, byte b)
         foreach (int x in Enumerable.Range(0, 5))
         {
             matrix.Fill(0);  // Clear display
-            Color color = Color.FromRgb(r, g, b);
+            Color color = Color.FromArgb(r, g, b);
             matrix.WritePixelRgb(x, y, color);
             Thread.Sleep(50);
         }
@@ -89,7 +89,7 @@ void TestPixels(byte r, byte g, byte b)
 
 void TestRows(byte r, byte g, byte b)
 {
-    Color color = Color.FromRgb(r, g, b);
+    Color color = Color.FromArgb(r, g, b);
     // Draw full rows from top to bottom
     foreach (int y in Enumerable.Range(0, 5))
     {
@@ -105,7 +105,7 @@ void TestRows(byte r, byte g, byte b)
 
 void TestColumns(byte r, byte g, byte b)
 {
-    Color color = Color.FromRgb(r, g, b);
+    Color color = Color.FromArgb(r, g, b);
     // Draw full columns from left to right
     foreach (int x in Enumerable.Range(0, 5))
     {
@@ -135,7 +135,7 @@ void TestRainbowSweep()
                 pixel_hue = pixel_hue - Math.Floor(pixel_hue);
 
                 var (r, g, b) = HsvToRgb(pixel_hue, 1, 1);
-                Color color = Color.FromRgb((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
+                Color color = Color.FromArgb((byte)(r * 255), (byte)(g * 255), (byte)(b * 255));
                 matrix.WritePixelRgb(x, y, color);
             }
 
