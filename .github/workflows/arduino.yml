@@ -23,10 +23,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@master
         
-      - name: Install Arduino CLI
-        uses: arduino/setup-arduino-cli@master
-
       - run: |
-          mkdir -p "$HOME/Arduino/libraries"
-          eng/ArduinoCsCI.cmd
+          eng/ArduinoCsCI.cmd %USERPROFILE% Debug
 

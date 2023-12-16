@@ -176,7 +176,7 @@ Note that the compiler will not output source file information, since it operate
 ACS0001: Internal compiler error 
 : Instead of this error, you'll probably get an exception.
 
-ACS0002: This compiler is currently supported on Windows only. The target CPU may be anything, but the compiler is only tested on Windows. You might experience build or runtime failures otherwise."
+ACS0002: This compiler is currently supported on Windows only. The target CPU may be anything, but the compiler is only tested on Windows. You might experience build or runtime failures otherwise.
 : The Arduino Compiler is currently only supported on windows. The runtime replicates parts of the low-level system calls, and hence depends on the operating system the compiler runs on.
 
 ACS0003: Could not find file {FileName}. (Looking at absolute path {Path})
