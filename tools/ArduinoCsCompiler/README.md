@@ -173,7 +173,7 @@ extern caddr_t _sbrk (int incr) {
 This is an incomplete list of error and warning messages from the Arduino Compiler (ACS).
 Note that the compiler will not output source file information, since it operates directly on the binary file. It only "knows" of methods and classes.
 
-ACS0001: Internal compiler error 
+ACS0001: Internal compiler error
 : Instead of this error, you'll probably get an exception.
 
 ACS0002: This compiler is currently supported on Windows only. The target CPU may be anything, but the compiler is only tested on Windows. You might experience build or runtime failures otherwise.
@@ -190,4 +190,3 @@ ACS0006, Method {methodInfo.MemberInfoSignature()} has [MethodImpl(MethodImplAtt
 
 ACS0007: Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}. Original implementation is in {original.DeclaringType!.AssemblyQualifiedName}
 : This error means that the Arduino Runtime is missing a required replacement method. A replacement method is a low-level call that needs to be provided by the firmware (because the original method doesn't work on the microcontroller)
-
