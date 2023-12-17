@@ -338,7 +338,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <summary>
     /// Stops <see cref="WaitEdgeEventsRespectfully"/> waiting for events.
     /// </summary>
-    public void StopWaitingOnEdgeEvents()
+    private void StopWaitingOnEdgeEvents()
     {
         lock (_signalPipeWriteSideLock)
         {

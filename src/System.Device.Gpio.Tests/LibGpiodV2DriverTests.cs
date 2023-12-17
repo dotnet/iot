@@ -21,7 +21,7 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     {
     }
 
-    protected override GpioDriver GetTestDriver() => LibGpiodDriverFactory.CreateV2Driver(ChipNumber);
+    protected override GpioDriver GetTestDriver() => new LibGpiodDriver(ChipNumber, LibGpiodDriverVersion.V2);
 
     protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 
@@ -29,7 +29,7 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     public async Task WaitEdgeEvents_ShouldNotBlockOtherRequestOperations()
     {
         var largeWaitForEventsTimeout = TimeSpan.FromSeconds(5);
-        using var gpioController = new GpioController(GetTestNumberingScheme(), LibGpiodDriverFactory.CreateV2Driver(ChipNumber, largeWaitForEventsTimeout));
+        using var gpioController = new GpioController(GetTestNumberingScheme(), new LibGpiodDriver(ChipNumber, LibGpiodDriverVersion.V2));
 
         gpioController.OpenPin(InputPin);
 

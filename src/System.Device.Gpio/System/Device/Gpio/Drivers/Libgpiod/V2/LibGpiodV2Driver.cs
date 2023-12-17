@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Device.Gpio.Libgpiod;
 using System.Device.Gpio.Libgpiod.V2;
 using System.Diagnostics;
 using System.Linq;
@@ -456,7 +457,6 @@ internal sealed class LibGpiodV2Driver : UnixDriver
 
                 foreach (var request in _requestedLineByLineOffset.Select(x => x.Value.LineRequest).Distinct())
                 {
-                    request.StopWaitingOnEdgeEvents();
                     request.Dispose();
                 }
 

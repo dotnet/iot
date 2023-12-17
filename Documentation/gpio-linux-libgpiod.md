@@ -26,17 +26,7 @@ for (int i = 0; i < 5; i++)
 }
 ``````
 
-## Install libgpiod
-
-If you want to control GPIOs using libgpiod, the library must be installed.
-
-Many package managers provide a libgpiod package, for example:
-
-``````shell
-apt install libgpiod2
-``````
-
-Currently (12/23) dotnet-iot supports v0, v1 and v2 of libgpiod.
+## libgpiod versions
 
 **Note**: The documented version of libgpiod is not the same as the library so name, see the following table:
 
@@ -48,9 +38,30 @@ Currently (12/23) dotnet-iot supports v0, v1 and v2 of libgpiod.
 | 2.0                | libgpiod.so.3.0.0 | first .so.3.x library                                    |
 | 2.1                | libgpiod.so.3.1.0 | latest .so.3.x library (currently)                       |
 
+## libgpiod version support
+
+Currently (12/23) dotnet-iot supports v0, v1 and v2 of libgpiod.
+
+The following table shows which driver supports which library version
+
+| LibGpiodDriverVersion | Libgpiod version (documented) |
+| --------------------- | ----------------------------- |
+| V1                    | 0.x to 1.x                    |
+| V2                    | 2.x                           |
+
+## Install libgpiod
+
+If you want to control GPIOs using libgpiod, the library must be installed.
+
+Many package managers provide a libgpiod package, for example:
+
+``````shell
+apt install libgpiod2
+``````
+
 ## Install libgpiod manually
 
-The installation should be the same on all Pi's, or other boards.
+The installation should be the same on all Pi's, or boards whose distro uses the APT package manager.
 
 1. Install build dependencies
 
@@ -59,16 +70,14 @@ The installation should be the same on all Pi's, or other boards.
    
    ``````
 
-2. Download the tarball and unpack it: Go to [releases](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/refs/) and copy the download URL of a libgpiod version
+2. Download the tarball and unpack it, see [releases](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/refs/), e.g.
 
    ``````shell
    wget https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.1.tar.gz
    tar -xzf libgpiod-2.1.tar.gz
    ``````
 
-   or any other version
-
-3. Compile libgpiod and install (see [BUILDING](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/))
+3. Compile and install (see [docs](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/))
 
    ``````shell
    cd libgpiod-2.1/

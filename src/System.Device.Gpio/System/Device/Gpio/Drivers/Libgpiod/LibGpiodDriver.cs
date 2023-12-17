@@ -11,108 +11,131 @@ namespace System.Device.Gpio.Drivers;
 /// </summary>
 public class LibGpiodDriver : UnixDriver
 {
-    private readonly GpioDriver _versionedLibgpiodDriver;
+    private readonly GpioDriver _driver;
 
     /// <summary>
-    /// Creates an instance of the LigGpiodDriver that matches the installed version of libgpiod.
+    /// Creates an instance of the LibGpiodDriver.
     /// </summary>
     /// <param name="gpioChip">The number of the GPIO chip to drive.</param>
+    /// <remarks>The driver version is chosen based on the available libgpiod version.</remarks>
     public LibGpiodDriver(int gpioChip = 0)
     {
-        _versionedLibgpiodDriver = LibGpiodDriverFactory.Create(gpioChip);
+        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Create(gpioChip);
+        _driver = versionedLibgpiodDriver.LibGpiogDriver;
+        Version = versionedLibgpiodDriver.DriverVersion;
     }
 
+    /// <summary>
+    /// Creates an instance of the LigGpiodDriver that targets specific version/s of libgpiod.
+    /// <see cref="LibGpiodDriverVersion.V1"/> supports libgpiod.so.1.x to libgpiod.so.2.x
+    /// and <see cref="LibGpiodDriverVersion.V2"/> supports libgpiod.so.3.x
+    /// For more information see documentation.
+    /// </summary>
+    /// <param name="gpioChip">The number of the GPIO chip to drive.</param>
+    /// <param name="driverVersion">Version of the libgpiod driver to create.</param>
+    public LibGpiodDriver(int gpioChip, LibGpiodDriverVersion driverVersion)
+    {
+        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Create(gpioChip, driverVersion);
+        _driver = versionedLibgpiodDriver.LibGpiogDriver;
+        Version = versionedLibgpiodDriver.DriverVersion;
+    }
+
+    /// <summary>
+    /// Version of the libgpiod driver.
+    /// </summary>
+    public LibGpiodDriverVersion Version { get; protected set; }
+
     /// <inheritdoc/>
-    protected internal override int PinCount => _versionedLibgpiodDriver.PinCount;
+    protected internal override int PinCount => _driver.PinCount;
 
     /// <inheritdoc/>
     protected internal override void AddCallbackForPinValueChangedEvent(int pinNumber, PinEventTypes eventTypes, PinChangeEventHandler callback)
     {
-        _versionedLibgpiodDriver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
+        _driver.AddCallbackForPinValueChangedEvent(pinNumber, eventTypes, callback);
     }
 
     /// <inheritdoc/>
     protected internal override void ClosePin(int pinNumber)
     {
-        _versionedLibgpiodDriver.ClosePin(pinNumber);
+        _driver.ClosePin(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override int ConvertPinNumberToLogicalNumberingScheme(int pinNumber)
     {
-        return _versionedLibgpiodDriver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
+        return _driver.ConvertPinNumberToLogicalNumberingScheme(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override PinMode GetPinMode(int pinNumber)
     {
-        return _versionedLibgpiodDriver.GetPinMode(pinNumber);
+        return _driver.GetPinMode(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override bool IsPinModeSupported(int pinNumber, PinMode mode)
     {
-        return _versionedLibgpiodDriver.IsPinModeSupported(pinNumber, mode);
+        return _driver.IsPinModeSupported(pinNumber, mode);
     }
 
     /// <inheritdoc/>
     protected internal override void OpenPin(int pinNumber)
     {
-        _versionedLibgpiodDriver.OpenPin(pinNumber);
+        _driver.OpenPin(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override PinValue Read(int pinNumber)
     {
-        return _versionedLibgpiodDriver.Read(pinNumber);
+        return _driver.Read(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override void Toggle(int pinNumber)
     {
-        _versionedLibgpiodDriver.Toggle(pinNumber);
+        _driver.Toggle(pinNumber);
     }
 
     /// <inheritdoc/>
     protected internal override void RemoveCallbackForPinValueChangedEvent(int pinNumber, PinChangeEventHandler callback)
     {
-        _versionedLibgpiodDriver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
+        _driver.RemoveCallbackForPinValueChangedEvent(pinNumber, callback);
     }
 
     /// <inheritdoc/>
     protected internal override void SetPinMode(int pinNumber, PinMode mode)
     {
-        _versionedLibgpiodDriver.SetPinMode(pinNumber, mode);
+        _driver.SetPinMode(pinNumber, mode);
     }
 
     /// <inheritdoc />
     protected internal override void SetPinMode(int pinNumber, PinMode mode, PinValue initialValue)
     {
-        _versionedLibgpiodDriver.SetPinMode(pinNumber, mode, initialValue);
+        _driver.SetPinMode(pinNumber, mode, initialValue);
     }
 
     /// <inheritdoc/>
     protected internal override WaitForEventResult WaitForEvent(int pinNumber, PinEventTypes eventTypes, CancellationToken cancellationToken)
     {
-        return _versionedLibgpiodDriver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
+        return _driver.WaitForEvent(pinNumber, eventTypes, cancellationToken);
     }
 
     /// <inheritdoc/>
     protected internal override void Write(int pinNumber, PinValue value)
     {
-        _versionedLibgpiodDriver.Write(pinNumber, value);
+        _driver.Write(pinNumber, value);
     }
 
     /// <inheritdoc />
     public override ComponentInformation QueryComponentInformation()
     {
-        return _versionedLibgpiodDriver.QueryComponentInformation();
+        return _driver.QueryComponentInformation();
     }
 
     /// <inheritdoc/>
     protected override void Dispose(bool disposing)
     {
-        _versionedLibgpiodDriver.Dispose();
+        _driver.Dispose();
         base.Dispose(disposing);
     }
 }

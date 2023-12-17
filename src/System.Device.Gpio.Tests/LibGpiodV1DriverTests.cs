@@ -12,14 +12,14 @@ namespace System.Device.Gpio.Tests;
 [Trait("feature", "gpio")]
 [Trait("feature", "gpio-libgpiod")]
 [Trait("SkipOnTestRun", "Windows_NT")]
-public class LibGpiodDriverTests : GpioControllerTestBase
+public class LibGpiodV1DriverTests : GpioControllerTestBase
 {
-    public LibGpiodDriverTests(ITestOutputHelper testOutputHelper)
+    public LibGpiodV1DriverTests(ITestOutputHelper testOutputHelper)
         : base(testOutputHelper)
     {
     }
 
-    protected override GpioDriver GetTestDriver() => LibGpiodDriverFactory.CreateV1Driver();
+    protected override GpioDriver GetTestDriver() => new LibGpiodDriver(0, LibGpiodDriverVersion.V1);
 
     protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
 
