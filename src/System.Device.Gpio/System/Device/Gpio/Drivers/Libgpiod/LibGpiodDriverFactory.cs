@@ -157,5 +157,5 @@ internal static class LibGpiodDriverFactory
         return supportedLibraryVersions;
     }
 
-    public sealed record VersionedLibgpiodDriver(LibGpiodDriverVersion DriverVersion, GpioDriver LibGpiogDriver);
+    public sealed record VersionedLibgpiodDriver(LibGpiodDriverVersion DriverVersion, GpioDriver LibGpiodDriver);
 }

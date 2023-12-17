@@ -21,7 +21,7 @@ public class LibGpiodDriver : UnixDriver
     public LibGpiodDriver(int gpioChip = 0)
     {
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Create(gpioChip);
-        _driver = versionedLibgpiodDriver.LibGpiogDriver;
+        _driver = versionedLibgpiodDriver.LibGpiodDriver;
         Version = versionedLibgpiodDriver.DriverVersion;
     }
 
@@ -36,7 +36,7 @@ public class LibGpiodDriver : UnixDriver
     public LibGpiodDriver(int gpioChip, LibGpiodDriverVersion driverVersion)
     {
         LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Create(gpioChip, driverVersion);
-        _driver = versionedLibgpiodDriver.LibGpiogDriver;
+        _driver = versionedLibgpiodDriver.LibGpiodDriver;
         Version = versionedLibgpiodDriver.DriverVersion;
     }
 
