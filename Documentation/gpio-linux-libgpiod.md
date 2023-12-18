@@ -49,6 +49,24 @@ The following table shows which driver supports which library version
 | V1                    | 0.x to 1.x                    |
 | V2                    | 2.x                           |
 
+## Choose LibGpiodDriver Version
+
+If you want to explicitly select the version of the libgpiod driver, to target a specific library version, there are following options:
+
+1. constructor of LibGpiodDriver:
+
+   ``````c#
+   new LibGpiodDriver(chipNumber, LibGpiodDriverVersion.V1)
+   ``````
+
+2. Environment variable:
+
+   ``````shell
+   export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V1 // or V2...
+   ``````
+
+When not explicitly specified, dotnet iot automatically tries to find a driver compatible to what library version is installed.
+
 ## Install libgpiod
 
 If you want to control GPIOs using libgpiod, the library must be installed.
@@ -67,9 +85,8 @@ The installation should be the same on all Pi's, or boards whose distro uses the
 
    ``````shell
    sudo apt update && sudo apt install -y autogen autoconf autoconf-archive libtool libtool-bin pkg-config build-essential
-   
    ``````
-
+   
 2. Download the tarball and unpack it, see [releases](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/refs/), e.g.
 
    ``````shell
