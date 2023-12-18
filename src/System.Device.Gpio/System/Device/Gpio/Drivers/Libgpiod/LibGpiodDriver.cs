@@ -41,9 +41,15 @@ public class LibGpiodDriver : UnixDriver
     }
 
     /// <summary>
-    /// Version of the libgpiod driver.
+    /// Version of the libgpiod driver
     /// </summary>
     public LibGpiodDriverVersion Version { get; protected set; }
+
+    /// <summary>
+    /// A collection of driver versions that correspond to the installed versions of libgpiod on this system. Each driver is dependent
+    /// on specific libgpiod version/s. If the collection is empty, it indicates that libgpiod might not be installed or could not be detected.
+    /// </summary>
+    public static LibGpiodDriverVersion[] GetAvailableVersions() => LibGpiodDriverFactory.DriverCandidates;
 
     /// <inheritdoc/>
     protected internal override int PinCount => _driver.PinCount;

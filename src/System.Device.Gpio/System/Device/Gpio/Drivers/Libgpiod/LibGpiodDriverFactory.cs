@@ -33,8 +33,6 @@ internal static class LibGpiodDriverFactory
         { LibGpiodDriverVersion.V2, new[] { "libgpiod.so.3" } }
     };
 
-    private static readonly LibGpiodDriverVersion[] _driverCandidates;
-
     private static readonly string? _driverVersionEnvVarValue;
     private static readonly LibGpiodDriverVersion? _driverVersionSetByEnvVar;
 
@@ -45,14 +43,16 @@ internal static class LibGpiodDriverFactory
 
     private static readonly string[] _librarySearchPaths = { "/lib", "/usr/lib", "/usr/local/lib" }; // Based on Linux FHS standard
 
+    public static readonly LibGpiodDriverVersion[] DriverCandidates;
+
     static LibGpiodDriverFactory()
     {
         var installedLibraries = GetInstalledLibraries();
 
-        _driverCandidates = installedLibraries.Where(installedVersion => _libraryToDriverVersionMap.ContainsKey(installedVersion))
+        DriverCandidates = installedLibraries.Where(installedVersion => _libraryToDriverVersionMap.ContainsKey(installedVersion))
                                               .Select(installedVersion => _libraryToDriverVersionMap[installedVersion]).ToArray();
 
-        _automaticallySelectedDriverVersion = _driverCandidates.Any() ? _driverCandidates.Max() : null;
+        _automaticallySelectedDriverVersion = DriverCandidates.Any() ? DriverCandidates.Max() : null;
 
         _driverVersionEnvVarValue = Environment.GetEnvironmentVariable(DriverVersionEnvVar);
 
@@ -111,7 +111,7 @@ internal static class LibGpiodDriverFactory
 
     private static GpioDriver CreateInternal(LibGpiodDriverVersion version, int chipNumber)
     {
-        if (!_driverCandidates.Contains(version))
+        if (!DriverCandidates.Contains(version))
         {
             throw new GpiodException($"No suitable libgpiod library found for {nameof(LibGpiodDriverVersion)}.{version}. " +
                 $"Supported versions: {string.Join(", ", _driverVersionToLibrariesMap[version])}\n" +
