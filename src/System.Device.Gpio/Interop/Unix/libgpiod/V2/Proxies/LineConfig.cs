@@ -40,7 +40,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void Reset()
     {
-        TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_config_reset(Handle));
+        CallLibpiodLocked(() => LibgpiodV2.gpiod_line_config_reset(Handle));
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void AddLineSettings(Offset[] offsets, LineSettings lineSettings)
     {
-        TryCallGpiodLocked(() => LibgpiodV2.gpiod_line_config_add_line_settings(Handle, offsets.Convert(), offsets.Length, lineSettings.Handle));
+        CallLibpiodLocked(() => LibgpiodV2.gpiod_line_config_add_line_settings(Handle, offsets.Convert(), offsets.Length, lineSettings.Handle));
     }
 
     /// <summary>
@@ -70,7 +70,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineSettings GetLineSettings(Offset offset)
     {
-        return TryCallGpiod(() => new LineSettings(LibgpiodV2.gpiod_line_config_get_line_settings(Handle, offset)));
+        return CallLibgpiod(() => new LineSettings(LibgpiodV2.gpiod_line_config_get_line_settings(Handle, offset)));
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public void SetOutputValues(IEnumerable<GpiodLineValue> values)
     {
-        TryCallGpiodLocked(() =>
+        CallLibpiodLocked(() =>
         {
             var valArr = values.ToArray();
             int result = LibgpiodV2.gpiod_line_config_set_output_values(Handle, valArr, valArr.Length);
@@ -98,7 +98,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public int GetNumConfiguredOffsets()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_config_get_num_configured_offsets(Handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_config_get_num_configured_offsets(Handle));
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public IEnumerable<Offset> GetConfiguredOffsets()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             int numConfiguredOffsets = GetNumConfiguredOffsets();
             uint[] configuredOffsets = new uint[numConfiguredOffsets];

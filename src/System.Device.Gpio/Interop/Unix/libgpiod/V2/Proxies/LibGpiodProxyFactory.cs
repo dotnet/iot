@@ -16,7 +16,7 @@ internal static class LibGpiodProxyFactory
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
     public static Chip CreateChip(string devicePath)
     {
-        var handle = LibGpiodProxyBase.TryCallGpiod(() => LibgpiodV2.gpiod_chip_open(Marshal.StringToHGlobalAuto(devicePath)));
+        var handle = LibGpiodProxyBase.CallLibgpiod(() => LibgpiodV2.gpiod_chip_open(Marshal.StringToHGlobalAuto(devicePath)));
 
         if (handle.IsInvalid)
         {
@@ -44,7 +44,7 @@ internal static class LibGpiodProxyFactory
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static EdgeEventBuffer CreateEdgeEventBuffer(int capacity = 10)
     {
-        var handle = LibGpiodProxyBase.TryCallGpiod(() => LibgpiodV2.gpiod_edge_event_buffer_new(capacity));
+        var handle = LibGpiodProxyBase.CallLibgpiod(() => LibgpiodV2.gpiod_edge_event_buffer_new(capacity));
 
         if (handle.IsInvalid)
         {
@@ -61,7 +61,7 @@ internal static class LibGpiodProxyFactory
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static LineConfig CreateLineConfig()
     {
-        var handle = LibGpiodProxyBase.TryCallGpiod(LibgpiodV2.gpiod_line_config_new);
+        var handle = LibGpiodProxyBase.CallLibgpiod(LibgpiodV2.gpiod_line_config_new);
 
         if (handle.IsInvalid)
         {
@@ -78,7 +78,7 @@ internal static class LibGpiodProxyFactory
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static LineSettings CreateLineSettings()
     {
-        var handle = LibGpiodProxyBase.TryCallGpiod(LibgpiodV2.gpiod_line_settings_new);
+        var handle = LibGpiodProxyBase.CallLibgpiod(LibgpiodV2.gpiod_line_settings_new);
 
         if (handle.IsInvalid)
         {
@@ -95,7 +95,7 @@ internal static class LibGpiodProxyFactory
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static RequestConfig CreateRequestConfig()
     {
-        var handle = LibGpiodProxyBase.TryCallGpiod(LibgpiodV2.gpiod_request_config_new);
+        var handle = LibGpiodProxyBase.CallLibgpiod(LibgpiodV2.gpiod_request_config_new);
 
         if (handle.IsInvalid)
         {

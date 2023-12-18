@@ -32,7 +32,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public LineInfo Copy()
     {
-        var handle = TryCallGpiod(() => LibgpiodV2.gpiod_line_info_copy(_handle));
+        var handle = CallLibgpiod(() => LibgpiodV2.gpiod_line_info_copy(_handle));
 
         if (handle.IsInvalid)
         {
@@ -49,7 +49,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public Offset GetOffset()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_get_offset(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_get_offset(_handle));
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string? GetName()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             IntPtr namePtr = LibgpiodV2.gpiod_line_info_get_name(_handle);
 
@@ -79,7 +79,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public bool GetIsUsed()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_is_used(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_is_used(_handle));
     }
 
     /// <summary>
@@ -90,7 +90,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public string? GetConsumer()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             IntPtr namePtr = LibgpiodV2.gpiod_line_info_get_consumer(_handle);
 
@@ -110,7 +110,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineDirection GetDirection()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_get_direction(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_get_direction(_handle));
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineEdge GetEdgeDetection()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_get_edge_detection(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_get_edge_detection(_handle));
     }
 
     /// <summary>
@@ -130,7 +130,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineBias GetBias()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_get_bias(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_get_bias(_handle));
     }
 
     /// <summary>
@@ -140,7 +140,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineDrive GetDrive()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_get_drive(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_get_drive(_handle));
     }
 
     /// <summary>
@@ -150,7 +150,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public bool GetIsActiveLow()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_is_active_low(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_is_active_low(_handle));
     }
 
     /// <summary>
@@ -160,7 +160,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public bool GetIsDebounced()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_is_debounced(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_is_debounced(_handle));
     }
 
     /// <summary>
@@ -170,7 +170,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public TimeSpan GetDebouncePeriod()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             ulong debouncePeriodMicroseconds = LibgpiodV2.gpiod_line_info_get_debounce_period_us(_handle);
             return TimeSpan.FromMilliseconds(debouncePeriodMicroseconds / 1000f);
@@ -184,7 +184,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public GpiodLineClock GetEventClock()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_info_get_event_clock(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_info_get_event_clock(_handle));
     }
 
     /// <summary>

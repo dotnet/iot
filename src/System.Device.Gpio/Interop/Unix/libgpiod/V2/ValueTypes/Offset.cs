@@ -6,7 +6,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// <summary>
 /// Unique identifier of a line.
 /// </summary>
-public readonly record struct Offset
+internal readonly record struct Offset
 {
     private readonly uint _value;
 
@@ -83,7 +83,7 @@ public readonly record struct Offset
 /// <summary>
 /// Extension methods for <see cref="Offset"/>
 /// </summary>
-public static class OffsetExtensions
+internal static class OffsetExtensions
 {
     /// <summary>
     /// Converts Offset[] to uint[]

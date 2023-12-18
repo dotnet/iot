@@ -7,22 +7,22 @@ namespace System.Device.Gpio;
 
 internal sealed class UnmanagedArray<T> : SafeHandle
 {
-    private readonly int _length;
-    private readonly int _size;
+    private readonly int _arrayLength;
+    private readonly int _typeSize;
 
     public static readonly UnmanagedArray<T> Empty = new(0);
 
-    public UnmanagedArray(int length)
+    public UnmanagedArray(int arrayLength)
         : base(IntPtr.Zero, true)
     {
-        if (length < 0)
+        if (arrayLength < 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(length), "Length must be 0 or greater");
+            throw new ArgumentOutOfRangeException(nameof(arrayLength), "Length must be 0 or greater");
         }
 
-        _length = length;
-        _size = Marshal.SizeOf(typeof(T));
-        SetHandle(Marshal.AllocHGlobal(_size * length));
+        _arrayLength = arrayLength;
+        _typeSize = Marshal.SizeOf(typeof(T));
+        SetHandle(Marshal.AllocHGlobal(_typeSize * arrayLength));
     }
 
     protected override bool ReleaseHandle()
@@ -35,12 +35,12 @@ internal sealed class UnmanagedArray<T> : SafeHandle
 
     public T[] ReadToManagedArray()
     {
-        var managedArray = new T[_length];
+        var managedArray = new T[_arrayLength];
         var unmanagedArrayPtrAsLong = Environment.Is64BitOperatingSystem ? handle.ToInt64() : handle.ToInt32();
 
-        for (int i = 0; i < _length; i++)
+        for (int i = 0; i < _arrayLength; i++)
         {
-            IntPtr elementPtr = new(unmanagedArrayPtrAsLong + i * _size);
+            IntPtr elementPtr = new(unmanagedArrayPtrAsLong + i * _typeSize);
             var structure = Marshal.PtrToStructure<T>(elementPtr);
             if (structure == null)
             {

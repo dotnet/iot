@@ -6,7 +6,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// <summary>
 /// Value type for GPIO edge event sequence number
 /// </summary>
-public readonly record struct SequenceNumber
+internal readonly record struct SequenceNumber
 {
     private readonly ulong _value;
 

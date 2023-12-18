@@ -3,17 +3,29 @@
 
 namespace System.Device.Gpio.Libgpiod;
 
-internal class GpiodException : Exception
+/// <summary>
+/// Exception in the context of calling libgpiod
+/// </summary>
+public class GpiodException : Exception
 {
+    /// <summary>
+    /// Exception in the context of calling libgpiod
+    /// </summary>
     public GpiodException()
     {
     }
 
+    /// <summary>
+    /// Exception in the context of calling libgpiod
+    /// </summary>
     public GpiodException(string message)
         : base(message)
     {
     }
 
+    /// <summary>
+    /// Exception in the context of calling libgpiod
+    /// </summary>
     public GpiodException(string message, Exception inner)
         : base(message, inner)
     {

@@ -32,7 +32,7 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineInfoEventType GetEventType()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_info_event_get_event_type(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_info_event_get_event_type(_handle));
     }
 
     /// <summary>
@@ -42,7 +42,7 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public ulong GetTimestampNs()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_info_event_get_timestamp_ns(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_info_event_get_timestamp_ns(_handle));
     }
 
     /// <summary>
@@ -52,7 +52,7 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public LineInfo GetLineInfo()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             LineInfoSafeHandleNotFreeable lineInfoHandle = LibgpiodV2.gpiod_info_event_get_line_info(_handle);
             // Since the line-info object is tied to the event, different threads may not operate on the event and line-info at the same time.

@@ -13,7 +13,7 @@ internal abstract class LibGpiodProxyBase
     /// <summary>
     /// Helper function that wraps any exception (from a native call) in <see cref="GpiodException"/> for easier exception handling on client side.
     /// </summary>
-    public static void TryCallGpiod(Action action)
+    public static void CallLibgpiod(Action action)
     {
         try
         {
@@ -28,7 +28,7 @@ internal abstract class LibGpiodProxyBase
     /// <summary>
     /// Helper function that wraps any exception (from a native call) in <see cref="GpiodException"/> for easier exception handling on client side.
     /// </summary>
-    public static TResult TryCallGpiod<TResult>(Func<TResult> func)
+    public static TResult CallLibgpiod<TResult>(Func<TResult> func)
     {
         try
         {
@@ -44,11 +44,11 @@ internal abstract class LibGpiodProxyBase
     /// Helper function that calls gpiod synchronized using a lock and wraps any exception (from a native call) in <see cref="GpiodException"/>
     /// for easier exception handling on client side.
     /// </summary>
-    public void TryCallGpiodLocked(Action action)
+    public void CallLibpiodLocked(Action action)
     {
         lock (_lock)
         {
-            TryCallGpiod(action);
+            CallLibgpiod(action);
         }
     }
 
@@ -56,11 +56,11 @@ internal abstract class LibGpiodProxyBase
     /// Helper function that calls gpiod synchronized using a lock and wraps any exception (from a native call) in <see cref="GpiodException"/>
     /// for easier exception handling on client side.
     /// </summary>
-    public TResult TryCallGpiodLocked<TResult>(Func<TResult> func)
+    public TResult CallLibpiodLocked<TResult>(Func<TResult> func)
     {
         lock (_lock)
         {
-            return TryCallGpiod(func);
+            return CallLibgpiod(func);
         }
     }
 }

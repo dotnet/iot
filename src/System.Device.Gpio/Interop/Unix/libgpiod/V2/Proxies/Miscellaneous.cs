@@ -19,7 +19,7 @@ internal class Miscellaneous : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static bool IsGpioChipDevice(string path)
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_is_gpiochip_device(Marshal.StringToHGlobalAuto(path)));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_is_gpiochip_device(Marshal.StringToHGlobalAuto(path)));
     }
 
     /// <summary>
@@ -29,7 +29,7 @@ internal class Miscellaneous : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static string GetApiVersion()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
             Marshal.PtrToStringAuto(LibgpiodV2.gpiod_api_version()) ?? throw new GpiodException($"Could not get API version: {LastErr.GetMsg()}"));
     }
 }

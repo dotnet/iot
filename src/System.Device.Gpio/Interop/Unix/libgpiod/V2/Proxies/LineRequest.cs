@@ -44,7 +44,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public int GetNumRequestedLines()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_request_get_num_requested_lines(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_request_get_num_requested_lines(_handle));
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public IEnumerable<Offset> GetRequestedOffsets()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             int numRequestedLines = GetNumRequestedLines();
             uint[] requestedOffsets = new uint[numRequestedLines];
@@ -71,7 +71,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public GpiodLineValue GetValue(Offset offset)
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_request_get_value(_handle, offset));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_request_get_value(_handle, offset));
     }
 
     /// <summary>
@@ -81,7 +81,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public IEnumerable<GpiodLineValue> GetValuesSubset(IEnumerable<Offset> offsets)
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             uint[] offsetsArr = offsets.ToArray().Convert();
             var offsetValues = new GpiodLineValue[offsetsArr.Length];
@@ -102,7 +102,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public IEnumerable<GpiodLineValue> GetValues()
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             int numRequestedLines = GetNumRequestedLines();
             var offsetValues = new GpiodLineValue[numRequestedLines];
@@ -123,7 +123,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void SetValue(Offset offset, GpiodLineValue value)
     {
-        TryCallGpiodLocked(() =>
+        CallLibpiodLocked(() =>
         {
             int result = LibgpiodV2.gpiod_line_request_set_value(_handle, offset, value);
             if (result < 0)
@@ -140,7 +140,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void SetValuesSubset(IEnumerable<(Offset _offset, GpiodLineValue _value)> valueByOffset)
     {
-        TryCallGpiodLocked(() =>
+        CallLibpiodLocked(() =>
         {
             var tupleArr = valueByOffset.ToArray();
             uint[] offsets = tupleArr.Select(x => x._offset).ToArray().Convert();
@@ -161,7 +161,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="ArgumentOutOfRangeException">Count of values does not match number of currently requested lines</exception>
     public void SetValues(IEnumerable<GpiodLineValue> values)
     {
-        TryCallGpiodLocked(() =>
+        CallLibpiodLocked(() =>
         {
             int numRequestedLines = GetNumRequestedLines();
             var valArr = values.ToArray();
@@ -186,7 +186,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void ReconfigureLines(LineConfig lineConfig)
     {
-        TryCallGpiodLocked(() =>
+        CallLibpiodLocked(() =>
         {
             int result = LibgpiodV2.gpiod_line_request_reconfigure_lines(_handle, lineConfig.Handle);
             if (result < 0)
@@ -203,7 +203,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public int GetFileDescriptor()
     {
-        return TryCallGpiod(() => LibgpiodV2.gpiod_line_request_get_fd(_handle));
+        return CallLibgpiod(() => LibgpiodV2.gpiod_line_request_get_fd(_handle));
     }
 
     /// <summary>
@@ -218,7 +218,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public int WaitEdgeEvents(TimeSpan? timeout = null, bool waitIndefinitely = false)
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             timeout ??= TimeSpan.FromSeconds(1);
             long timeoutNs = waitIndefinitely ? -1 : (long)timeout.Value.TotalMilliseconds * 1_000_000;
@@ -238,15 +238,15 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// </summary>
     /// <remarks>
     /// Uses epoll to wait for either edge events of the requests file descriptor or signals coming from <see cref="StopWaitingOnEdgeEvents"/>.
-    /// For example when this method is waiting on edge events, and someone calls GetValue, a signal will be written to the signal file descriptor
-    /// which triggers epoll to return, which allows releasing the lock to let GetValue through.
+    /// For example when this method is waiting on edge events, and someone calls Close, a signal will be written to the signal file descriptor
+    /// which triggers epoll to return, which allows releasing the lock to let the other thread through.
     /// </remarks>
     /// <returns>0 if wait timed out, 2 if wait got interrupted, 1 if an event is pending.</returns>
     public int WaitEdgeEventsRespectfully(TimeSpan? timeout = null)
     {
         timeout ??= TimeSpan.FromMilliseconds(100);
 
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             int requestFileDescriptor = GetFileDescriptor();
             int pollFileDescriptor = Interop.epoll_create(1);
@@ -380,7 +380,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public int ReadEdgeEvents(EdgeEventBuffer edgeEventBuffer)
     {
-        return TryCallGpiod(() =>
+        return CallLibgpiod(() =>
         {
             int nReadEvents = LibgpiodV2.gpiod_line_request_read_edge_events(_handle, edgeEventBuffer.Handle, edgeEventBuffer.GetCapacity());
             if (nReadEvents < 0)
@@ -400,7 +400,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     {
         IsAlive = false;
         StopWaitingOnEdgeEvents();
-        TryCallGpiodLocked(_handle.Dispose);
+        CallLibpiodLocked(_handle.Dispose);
     }
 
     /// <summary>
