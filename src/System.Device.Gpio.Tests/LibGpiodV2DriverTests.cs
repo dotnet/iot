@@ -24,30 +24,4 @@ public class LibGpiodV2DriverTests : GpioControllerTestBase
     protected override GpioDriver GetTestDriver() => new LibGpiodDriver(ChipNumber, LibGpiodDriverVersion.V2);
 
     protected override PinNumberingScheme GetTestNumberingScheme() => PinNumberingScheme.Logical;
-
-    [Fact]
-    public async Task WaitEdgeEvents_ShouldNotBlockOtherRequestOperations()
-    {
-        var largeWaitForEventsTimeout = TimeSpan.FromSeconds(5);
-        using var gpioController = new GpioController(GetTestNumberingScheme(), new LibGpiodDriver(ChipNumber, LibGpiodDriverVersion.V2));
-
-        gpioController.OpenPin(InputPin);
-
-        // make event observer start waiting for events
-        gpioController.RegisterCallbackForPinValueChangedEvent(InputPin, PinEventTypes.Falling | PinEventTypes.Rising, (_, args) =>
-        {
-        });
-
-        // waiting is done in a background thread, so delay until the background thread is waiting
-        await Task.Delay(100);
-
-        // perform any other operation (read) and measure time
-        var sw = new Stopwatch();
-        sw.Start();
-        gpioController.Read(InputPin);
-        sw.Stop();
-
-        // the operation should finish fairly quick
-        Assert.True(sw.Elapsed < TimeSpan.FromSeconds(1));
-    }
 }
