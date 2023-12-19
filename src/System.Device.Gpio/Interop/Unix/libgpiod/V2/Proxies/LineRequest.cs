@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Device.Gpio.Drivers;
 using LibgpiodV2 = Interop.LibgpiodV2;
 
 namespace System.Device.Gpio.Libgpiod.V2;

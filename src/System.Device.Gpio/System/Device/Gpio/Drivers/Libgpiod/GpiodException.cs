@@ -1,12 +1,14 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-namespace System.Device.Gpio.Libgpiod;
+using System.IO;
+
+namespace System.Device.Gpio.Drivers;
 
 /// <summary>
 /// Exception in the context of calling libgpiod
 /// </summary>
-public class GpiodException : Exception
+public class GpiodException : IOException
 {
     /// <summary>
     /// Exception in the context of calling libgpiod
