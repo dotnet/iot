@@ -399,4 +399,9 @@ public enum Command
     /// The command for the --frames option
     /// </summary>
     Frames,
+
+    /// <summary>
+    /// The command for the --framerate option
+    /// </summary>
+    Framerate,
 }
