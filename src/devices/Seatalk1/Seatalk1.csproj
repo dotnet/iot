@@ -6,10 +6,20 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <LangVersion>9</LangVersion>
     <RootNamespace>Iot.Device.Seatalk1</RootNamespace>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <!--todo remove the above-->
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="Messages\CompassHeadingAndRudderPosition.cs" />
+    <Compile Include="Messages\CompassHeadingAutopilotCourse.cs" />
+    <Compile Include="Messages\SeatalkMessage.cs" />
+    <Compile Include="Messages\TurnDirection.cs" />
     <None Include="README.md" />
   </ItemGroup>
 

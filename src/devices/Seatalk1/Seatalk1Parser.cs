@@ -107,6 +107,7 @@ namespace Iot.Device.Seatalk1
                     {
                         byte nextByte = _reader.ReadByte();
                         _buffer.Add(nextByte);
+                        int msgLen = GetLengthOfNextMessage();
                     }
                 }
                 catch (Exception x) when (x is EndOfStreamException || x is IOException)
@@ -115,6 +116,22 @@ namespace Iot.Device.Seatalk1
                     _logger.LogError(x, $"Seatalk Parser error: {x.Message}");
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the length of the message in the input buffer
+        /// </summary>
+        /// <returns>The length of the message (max 18 bytes), 0 if the message in the buffer is probably incomplete and -1 if
+        /// the buffer contains invalid data or has lost sync.</returns>
+        private int GetLengthOfNextMessage()
+        {
+            // The minimum message length is 3 bytes
+            if (_buffer.Count < 3)
+            {
+                return 0;
+            }
+
+
         }
 
         /// <inheritdoc />

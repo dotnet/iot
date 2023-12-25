@@ -6,5 +6,25 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
 using System.Threading;
+using System.IO.Ports;
 
-Console.WriteLine("Hello _DeviceBinding Sample!");
+namespace Seatalk1Sample
+{
+    internal class Program
+    {
+        internal static int Main(string[] args)
+        {
+            Console.WriteLine("Hello Seatalk1 Sample!");
+
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Error: Port not specified");
+                return 1;
+            }
+
+            SerialPort port1 = new SerialPort();
+
+            return 0;
+        }
+    }
+}
