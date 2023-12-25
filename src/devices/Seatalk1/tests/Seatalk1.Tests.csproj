@@ -5,10 +5,11 @@
     <LangVersion>10</LangVersion>
     <IsPackable>false</IsPackable>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <RootNamespace>Iot.Device.Tests.Seatalk1</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../_DeviceBinding.csproj" />
+    <ProjectReference Include="../Seatalk1.csproj" />
   </ItemGroup>
 
 </Project>

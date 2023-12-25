@@ -35,7 +35,7 @@ namespace Iot.Device.Seatalk1.Messages
         /// </summary>
         /// <param name="data">The sliced input data</param>
         /// <returns></returns>
-        public abstract SeatalkMessage CreateNewMessage(ReadOnlySpan<byte> data);
+        public abstract SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data);
 
         // To count the number of bits set in (U >> 4) & 0xc
         protected int BitCount(uint v)
@@ -56,14 +56,14 @@ namespace Iot.Device.Seatalk1.Messages
         /// <param name="data">The sliced data</param>
         /// <exception cref="ArgumentNullException">Data was null</exception>
         /// <exception cref="InvalidOperationException">The data does not match this instance</exception>
-        protected virtual void VerifyPacket(ReadOnlySpan<byte> data)
+        protected virtual void VerifyPacket(IReadOnlyList<byte> data)
         {
             if (data == null)
             {
                 throw new ArgumentNullException(nameof(data));
             }
 
-            if (data.Length != ExpectedLength)
+            if (data.Count != ExpectedLength)
             {
                 throw new InvalidOperationException($"Cannot decode data to {GetType()}- invalid data length.");
             }
@@ -77,6 +77,31 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 throw new InvalidOperationException($"Length nibble for {GetType()} was expected to be {ExpectedLength}, but was {data[1] & 0xF}");
             }
+        }
+
+        public virtual bool MatchesMessageType(IReadOnlyList<byte> data)
+        {
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(data));
+            }
+
+            if (data.Count != ExpectedLength)
+            {
+                return false;
+            }
+
+            if (data[0] != CommandByte)
+            {
+                return false;
+            }
+
+            if ((data[1] & 0xF) != (ExpectedLength - 3))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

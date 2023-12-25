@@ -6,7 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../_DeviceBinding.csproj" />
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
   </ItemGroup>
 

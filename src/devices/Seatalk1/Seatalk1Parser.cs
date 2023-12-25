@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using Iot.Device.Common;
+using Iot.Device.Seatalk1.Messages;
 using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Seatalk1
@@ -30,6 +31,8 @@ namespace Iot.Device.Seatalk1
         private CancellationTokenSource? _cancellationTokenSource;
         private bool _disposed;
 
+        private List<SeatalkMessage> _messageFactories;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Seatalk1Parser"/> class.
         /// </summary>
@@ -47,7 +50,13 @@ namespace Iot.Device.Seatalk1
             }
 
             _reader = new BinaryReader(inputStream, Encoding.UTF8);
+            _messageFactories = new List<SeatalkMessage>()
+            {
+                new CompassHeadingAndRudderPosition(), new CompassHeadingAutopilotCourse(),
+            };
         }
+
+        public event Action<SeatalkMessage>? NewMessageDecoded;
 
         /// <summary>
         /// Starts the thread to decode packets
@@ -107,7 +116,22 @@ namespace Iot.Device.Seatalk1
                     {
                         byte nextByte = _reader.ReadByte();
                         _buffer.Add(nextByte);
-                        int msgLen = GetLengthOfNextMessage();
+                        var msg = GetTypeOfNextMessage(out int messageLength);
+                        if (msg == null)
+                        {
+                            if (messageLength == 0)
+                            {
+                                break;
+                            }
+                            else
+                            {
+                                _logger.LogWarning($"Seatalk parser sync lost. Next message was 0x{_buffer[0]:X2}, now skipping");
+                                _buffer.RemoveAt(0);
+                                continue;
+                            }
+                        }
+
+                        NewMessageDecoded?.Invoke(msg);
                     }
                 }
                 catch (Exception x) when (x is EndOfStreamException || x is IOException)
@@ -115,23 +139,44 @@ namespace Iot.Device.Seatalk1
                     // Ignore
                     _logger.LogError(x, $"Seatalk Parser error: {x.Message}");
                 }
+
+                Thread.Sleep(50);
             }
         }
 
         /// <summary>
         /// Returns the length of the message in the input buffer
         /// </summary>
-        /// <returns>The length of the message (max 18 bytes), 0 if the message in the buffer is probably incomplete and -1 if
-        /// the buffer contains invalid data or has lost sync.</returns>
-        private int GetLengthOfNextMessage()
+        /// <param name="bytesInMessage">The number of bytes in the next message. Returns 0 if not enough data, -1 if sync lost (to many bytes, but no valid sentence)</param>
+        /// <returns>An instance that can be used as factory for the next message or null if nothing can be decoded.</returns>
+        private SeatalkMessage? GetTypeOfNextMessage(out int bytesInMessage)
         {
             // The minimum message length is 3 bytes
             if (_buffer.Count < 3)
             {
-                return 0;
+                bytesInMessage = 0;
+                return null;
             }
 
+            // The maximum length is 0xF + 3 = 18
+            if (_buffer.Count > 18)
+            {
+                bytesInMessage = -1;
+                return null;
+            }
 
+            foreach (var t in _messageFactories)
+            {
+                if (t.MatchesMessageType(_buffer))
+                {
+                    bytesInMessage = t.ExpectedLength;
+                    return t.CreateNewMessage(_buffer);
+                }
+            }
+
+            _logger.LogWarning($"Unable to decode message. Stream is out of sync or unknown message type 0x{_buffer[0]:X2}.");
+            bytesInMessage = -1;
+            return null;
         }
 
         /// <inheritdoc />

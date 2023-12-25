@@ -22,8 +22,14 @@ namespace Seatalk1Sample
                 return 1;
             }
 
-            SerialPort port1 = new SerialPort();
+            SerialPort port1 = new SerialPort(args[0]);
+            port1.BaudRate = 4800;
+            port1.Parity = Parity.Even;
+            port1.StopBits = StopBits.One;
+            port1.DataBits = 8;
+            port1.Open();
 
+            port1.Close();
             return 0;
         }
     }
