@@ -144,7 +144,8 @@ namespace Iot.Device.Seatalk1
                             }
                             else
                             {
-                                _logger.LogWarning($"Seatalk parser sync lost. Next message was 0x{_buffer[0]:X2}, now skipping");
+                                var bytesFound = BitConverter.ToString(_buffer.ToArray());
+                                _logger.LogWarning($"Seatalk parser sync lost. Buffer contents: {bytesFound}, trying to resync");
                                 _buffer.RemoveAt(0);
                                 // We removed the first byte from the sequence, we need to try again before we add the next byte
                                 isInSync = false;
@@ -160,7 +161,7 @@ namespace Iot.Device.Seatalk1
                         }
                     }
                 }
-                catch (Exception x) when (x is EndOfStreamException || x is IOException)
+                catch (Exception x) when (x is EndOfStreamException || x is IOException || x is ObjectDisposedException)
                 {
                     // Ignore
                     _logger.LogError(x, $"Seatalk Parser error: {x.Message}");

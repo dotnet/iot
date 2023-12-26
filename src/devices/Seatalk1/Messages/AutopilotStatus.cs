@@ -20,5 +20,6 @@ namespace Iot.Device.Seatalk1.Messages
         Track,
         Wind,
         Display,
+        Undefined,
     }
 }

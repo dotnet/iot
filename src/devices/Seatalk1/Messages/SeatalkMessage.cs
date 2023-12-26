@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Common;
+using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Seatalk1.Messages
 {
@@ -14,6 +16,11 @@ namespace Iot.Device.Seatalk1.Messages
     /// </summary>
     public abstract record SeatalkMessage
     {
+        protected SeatalkMessage()
+        {
+            Logger = this.GetCurrentClassLogger();
+        }
+
         /// <summary>
         /// The command byte for this message
         /// </summary>
@@ -29,6 +36,8 @@ namespace Iot.Device.Seatalk1.Messages
         {
             get;
         }
+
+        protected ILogger Logger { get; }
 
         /// <summary>
         /// Creates a new message from this template

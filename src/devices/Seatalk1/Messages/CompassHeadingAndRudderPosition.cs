@@ -27,8 +27,6 @@ namespace Iot.Device.Seatalk1.Messages
             init;
         }
 
-        public TurnDirection TurnDirection { get; init; }
-
         /// <summary>
         /// 84  U6  VW  XY 0Z 0M RR SS TT  Compass heading  Autopilot course
         /// </summary>
@@ -49,7 +47,6 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 CompassHeading = headingA,
                 RudderPosition = Angle.FromDegrees(rudder),
-                TurnDirection = (u & 0x80) == 0 ? TurnDirection.Port : TurnDirection.Starboard,
             };
         }
     }

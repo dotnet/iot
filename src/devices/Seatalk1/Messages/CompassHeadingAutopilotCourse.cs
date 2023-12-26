@@ -17,9 +17,15 @@ namespace Iot.Device.Seatalk1.Messages
 
         public Angle CompassHeading { get; init; }
 
-        public TurnDirection TurnDirection { get; init; }
+        public byte AutoPilotType { get; init; }
 
-        public byte AutoPilotType { get; set; }
+        public Angle AutoPilotCourse { get; init; }
+
+        public Angle RudderPosition { get; init; }
+
+        public AutopilotStatus AutopilotStatus { get; init; }
+
+        public AutopilotAlarms Alarms { get; init; }
 
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
@@ -31,11 +37,44 @@ namespace Iot.Device.Seatalk1.Messages
             long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + BitCount(u & 0xC);
             Angle headingA = Angle.FromDegrees(heading);
 
+            long desiredCourse = (vw >> 6) * 90 + data[3] / 2;
+
+            AutopilotStatus status = GetAutopilotStatus(data[4]);
+
+            sbyte rudder = (sbyte)data[6];
+
+            AutopilotAlarms alarms = AutopilotAlarms.None;
+            byte almByte = data[5];
+            if ((almByte & 0x4) == 0x4)
+            {
+                alarms |= AutopilotAlarms.OffCourse;
+            }
+
+            if ((almByte & 0x8) == 0x8)
+            {
+                alarms |= AutopilotAlarms.WindShift;
+            }
+
             return new CompassHeadingAutopilotCourse()
             {
                 CompassHeading = headingA,
-                TurnDirection = (u & 0x80) == 0 ? TurnDirection.Port : TurnDirection.Starboard,
                 AutoPilotType = data[8],
+                AutoPilotCourse = Angle.FromDegrees(desiredCourse),
+                AutopilotStatus = status,
+                RudderPosition = Angle.FromDegrees(rudder),
+                Alarms = alarms,
+            };
+        }
+
+        private AutopilotStatus GetAutopilotStatus(byte z)
+        {
+            return (z & 0xf) switch
+            {
+                0 => AutopilotStatus.Standby,
+                2 => AutopilotStatus.Auto,
+                4 => AutopilotStatus.Wind,
+                8 => AutopilotStatus.Track,
+                _ => AutopilotStatus.Undefined,
             };
         }
     }

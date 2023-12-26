@@ -9,4 +9,8 @@
     <PackageReference Include="System.IO.Ports" Version="$(SystemIOPortsPackageVersion)" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Seatalk1.csproj" />
+  </ItemGroup>
+
 </Project>
