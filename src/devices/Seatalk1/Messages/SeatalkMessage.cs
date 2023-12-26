@@ -51,7 +51,8 @@ namespace Iot.Device.Seatalk1.Messages
         }
 
         /// <summary>
-        /// This checks the precondition for a valid input packet
+        /// This checks the precondition for a valid input packet.
+        /// Normally, derived classes do not need to override this, it's sufficient to override <see cref="MatchesMessageType"/> to add any per-message verifications.
         /// </summary>
         /// <param name="data">The sliced data</param>
         /// <exception cref="ArgumentNullException">Data was null</exception>
@@ -77,8 +78,19 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 throw new InvalidOperationException($"Length nibble for {GetType()} was expected to be {ExpectedLength}, but was {data[1] & 0xF}");
             }
+
+            if (!MatchesMessageType(data))
+            {
+                throw new InvalidOperationException($"A custom package verification failed");
+            }
         }
 
+        /// <summary>
+        /// Checks whether the data could be a packet of the current type. Unlike the above, this does not throw exceptions, but only returns true or false.
+        /// </summary>
+        /// <param name="data">The input sequence</param>
+        /// <returns>True if the input is likely a complete and valid packet of the current type, false otherwise.</returns>
+        /// <exception cref="ArgumentNullException">The input is null</exception>
         public virtual bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             if (data == null)

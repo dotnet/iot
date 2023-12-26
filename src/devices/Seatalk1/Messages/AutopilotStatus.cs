@@ -9,9 +9,16 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Seatalk1.Messages
 {
-    public enum TurnDirection
+    /// <summary>
+    /// The current state of the auto pilot controller
+    /// </summary>
+    public enum AutopilotStatus
     {
-        Port = 0,
-        Starboard = 1,
+        Offline,
+        Standby,
+        Auto,
+        Track,
+        Wind,
+        Display,
     }
 }

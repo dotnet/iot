@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,7 +21,7 @@ namespace Iot.Device.Seatalk1.Messages
 
         public byte AutoPilotType { get; set; }
 
-        public override SeatalkMessage CreateNewMessage(ReadOnlySpan<byte> data)
+        public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             VerifyPacket(data);
 
