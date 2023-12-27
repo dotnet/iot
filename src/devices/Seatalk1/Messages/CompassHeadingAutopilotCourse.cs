@@ -55,7 +55,7 @@ namespace Iot.Device.Seatalk1.Messages
                 alarms |= AutopilotAlarms.WindShift;
             }
 
-            return new CompassHeadingAutopilotCourse()
+            return this with
             {
                 CompassHeading = headingA,
                 AutoPilotType = data[8],

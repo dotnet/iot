@@ -54,11 +54,18 @@ namespace Iot.Device.Seatalk1
             {
                 new CompassHeadingAndRudderPosition(),
                 new CompassHeadingAutopilotCourse(),
+                new CompassHeadingAutopilotCourseAlt(),
                 new Keystroke(),
+                new DeadbandSetting(),
             };
         }
 
         public event Action<SeatalkMessage>? NewMessageDecoded;
+
+        public void RegisterMessageType(SeatalkMessage message)
+        {
+            _messageFactories.Add(message);
+        }
 
         /// <summary>
         /// Starts the thread to decode packets
@@ -177,7 +184,7 @@ namespace Iot.Device.Seatalk1
         /// <param name="buffer">The data to decode</param>
         /// <param name="bytesInMessage">The number of bytes in the next message. Returns 0 if not enough data, -1 if sync lost (to many bytes, but no valid sentence)</param>
         /// <returns>An instance that can be used as factory for the next message or null if nothing can be decoded.</returns>
-        private SeatalkMessage? GetTypeOfNextMessage(IReadOnlyList<byte> buffer, out int bytesInMessage)
+        internal SeatalkMessage? GetTypeOfNextMessage(IReadOnlyList<byte> buffer, out int bytesInMessage)
         {
             // The minimum message length is 3 bytes
             if (buffer.Count < 3)

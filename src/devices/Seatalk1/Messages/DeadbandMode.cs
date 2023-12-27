@@ -1,15 +1,12 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-
 namespace Iot.Device.Seatalk1.Messages
 {
-    [Flags]
-    public enum AutopilotAlarms
+    public enum DeadbandMode
     {
         None = 0,
-        OffCourse = 4,
-        WindShift = 8,
+        Automatic,
+        Minimal,
     }
 }

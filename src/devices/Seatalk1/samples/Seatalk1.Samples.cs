@@ -18,6 +18,7 @@ namespace Seatalk1Sample
     {
         private CompassHeadingAndRudderPosition? _headingAndRudderPosition;
         private CompassHeadingAutopilotCourse? _autopilotCourse;
+        private DeadbandMode _deadbandMode = DeadbandMode.None;
 
         internal static int Main(string[] args)
         {
@@ -72,7 +73,7 @@ namespace Seatalk1Sample
 
             Console.Write("\r");
             Console.Write($"MAG: {_headingAndRudderPosition.CompassHeading} TRK: {_autopilotCourse.AutoPilotCourse} " +
-                          $"STAT: {_autopilotCourse.AutopilotStatus} RUDDER: {_autopilotCourse.RudderPosition} ALRT: {_autopilotCourse.Alarms}   ");
+                          $"STAT: {_autopilotCourse.AutopilotStatus} RUDDER: {_autopilotCourse.RudderPosition} ALRT: {_autopilotCourse.Alarms} DB: {_deadbandMode}  ");
         }
 
         private void ParserOnNewMessageDecoded(SeatalkMessage obj)
@@ -85,6 +86,11 @@ namespace Seatalk1Sample
             else if (obj is CompassHeadingAndRudderPosition rb)
             {
                 _headingAndRudderPosition = rb;
+                WriteCurrentState();
+            }
+            else if (obj is DeadbandSetting dbs)
+            {
+                _deadbandMode = dbs.Mode;
                 WriteCurrentState();
             }
             else if (obj is Keystroke keystroke)
