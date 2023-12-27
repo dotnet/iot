@@ -124,7 +124,7 @@ While contributing, you should read the [coding guidelines section](https://gith
 
 #### GPIO
 
-- [Use libgpiod to control GPIOs on Linux](./gpio-linux-libgpiod.md)
+* [Use libgpiod to control GPIOs on Linux](./gpio-linux-libgpiod.md)
 
 ## Maker Resources
 

@@ -4,7 +4,7 @@
 
 This example targets a RaspberryPi 3/4, see comments for more information:
 
-``````c#
+```c#
 // side note: on the Raspberry Pi the GPIO chip line offsets are the same numbers as the usual BCM GPIO numbering, which is convenient
 const int ledGpio = 15;
 
@@ -24,7 +24,7 @@ for (int i = 0; i < 5; i++)
     controller.Write(ledGpio, PinValue.Low);
     await Task.Delay(1000);
 }
-``````
+```
 
 ## libgpiod versions
 
@@ -55,15 +55,15 @@ If you want to explicitly select the version of the libgpiod driver, to target a
 
 1. constructor of LibGpiodDriver:
 
-``````c#
-new LibGpiodDriver(chipNumber, LibGpiodDriverVersion.V1)
-``````
+   ```c#
+   new LibGpiodDriver(chipNumber, LibGpiodDriverVersion.V1)
+   ```
 
 2. Environment variable:
 
-``````shell
-export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V1 // or V2...
-``````
+   ```shell
+   export DOTNET_IOT_LIBGPIOD_DRIVER_VERSION=V1 // or V2...
+   ```
 
 When not explicitly specified, dotnet iot automatically tries to find a driver compatible to what library version is installed.
 
@@ -73,9 +73,9 @@ If you want to control GPIOs using libgpiod, the library must be installed.
 
 Many package managers provide a libgpiod package, for example:
 
-``````shell
-apt install libgpiod2
-``````
+   ```shell
+   apt install libgpiod2
+   ```
 
 ## Install libgpiod manually
 
@@ -83,26 +83,26 @@ The installation should be the same on all Pi's, or boards whose distro uses the
 
 1. Install build dependencies
 
-``````shell
-sudo apt update && sudo apt install -y autogen autoconf autoconf-archive libtool libtool-bin pkg-config build-essential
-``````
+   ```shell
+   sudo apt update && sudo apt install -y autogen autoconf autoconf-archive libtool libtool-bin pkg-config build-essential
+   ```
 
 2. Download the tarball and unpack it, see [releases](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/refs/), e.g.
 
-``````shell
-wget https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.1.tar.gz
-tar -xzf libgpiod-2.1.tar.gz
-``````
+   ```shell
+   wget https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/snapshot/libgpiod-2.1.tar.gz
+   tar -xzf libgpiod-2.1.tar.gz
+   ```
 
 3. Compile and install (see [docs](https://git.kernel.org/pub/scm/libs/libgpiod/libgpiod.git/about/))
 
-``````shell
-cd libgpiod-2.1/
-./autogen.sh
-make
-sudo make install
-sudo ldconfig
-``````
+   ```shell
+   cd libgpiod-2.1/
+   ./autogen.sh
+   make
+   sudo make install
+   sudo ldconfig
+   ```
 
 This will install the library .so files to `/usr/lib/local`
 
