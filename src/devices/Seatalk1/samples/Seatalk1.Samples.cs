@@ -71,6 +71,27 @@ namespace Seatalk1Sample
 
                         _seatalk.SendDatagram(keyPlus1);
                     }
+                    else if (key.Key == ConsoleKey.C)
+                    {
+                        // For testing only
+                        byte[] keyPlus1 = new byte[]
+                        {
+                            0x86, 0x11, 0x08, 0xf7
+                        };
+
+                        _seatalk.SendDatagram(keyPlus1);
+                    }
+                    else if (key.Key == ConsoleKey.D)
+                    {
+                        // For testing only
+                        byte[] keyPlus1 = new byte[]
+                        {
+                            0x86, 0x11, 0x06, 0xf9
+                            // 0xFF, 0xFF,
+                        };
+
+                        _seatalk.SendDatagram(keyPlus1);
+                    }
                 }
 
                 Thread.Sleep(500);

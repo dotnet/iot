@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.IO.Ports;
 using System.Threading;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
@@ -88,6 +89,50 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.True(cnt > 0); // timeout?
 
             parser.Dispose();
+        }
+
+        [Fact]
+        public void ParityBitCheckForMessageThatWorks()
+        {
+            // This message (-10 key) worked right away
+            byte[] datagram = new byte[]
+            {
+                0x86, 0x11, 0x06, 0xf9
+            };
+
+            var withParity = SeatalkInterface.CalculateParityForEachByte(datagram);
+            Assert.Equal(0x86, withParity[0].B);
+            Assert.Equal(0, withParity[0].Index);
+            // 0x86 is odd (not the value, but it's bitcount), and we want the stopbit to be 1, so the parity should be even
+            Assert.Equal(Parity.Even, withParity[0].P);
+            // 0x11 is even, but we need the stopbit to be 0, so parity still needs to be even
+            Assert.Equal(Parity.Even, withParity[1].P);
+            // 0x06 is even, we need the stopbit to be 0, so parity still needs to be even
+            Assert.Equal(Parity.Even, withParity[2].P);
+            // 0xf9 is even, we need the stopbit to be 0, so parity still needs to be even
+            Assert.Equal(Parity.Even, withParity[3].P);
+        }
+
+        [Fact]
+        public void ParityBitCheckForMessageThatMustWork()
+        {
+            // This message (+10 key) doesn't work yet.
+            byte[] datagram = new byte[]
+            {
+                0x86, 0x11, 0x08, 0xf7
+            };
+
+            var withParity = SeatalkInterface.CalculateParityForEachByte(datagram);
+            Assert.Equal(0x86, withParity[0].B);
+            Assert.Equal(0, withParity[0].Index);
+            // 0x86 is odd (not the value, but it's bitcount), and we want the stopbit to be 1, so the parity should be even
+            Assert.Equal(Parity.Even, withParity[0].P);
+            // 0x11 is even, but we need the stopbit to be 0, so parity still needs to be even
+            Assert.Equal(Parity.Even, withParity[1].P);
+            // 0x08 is odd, we need the stopbit to be 0, so parity needs to be odd
+            Assert.Equal(Parity.Odd, withParity[2].P);
+            // 0xf7 is odd, we need the stopbit to be 0, so parity needs to be odd
+            Assert.Equal(Parity.Odd, withParity[3].P);
         }
 
         private static MemoryStream GetStreamFromInputString(string data)

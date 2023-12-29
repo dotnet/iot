@@ -15,6 +15,7 @@ namespace Iot.Device.Seatalk1
 {
     public class SeatalkInterface : IDisposable
     {
+        private const Parity DefaultParity = Parity.Even;
         private readonly SerialPort _port;
         private readonly Seatalk1Parser _parser;
         private readonly Thread _watchDog;
@@ -43,7 +44,7 @@ namespace Iot.Device.Seatalk1
 
             _port = new SerialPort(uart);
             _port.BaudRate = 4800;
-            _port.Parity = Parity.Even; // Can be anything but none, but "Mark" or "Space" won't have the desired effect on linux, causing garbage to be sent
+            _port.Parity = DefaultParity; // Can be anything but none, but "Mark" or "Space" won't have the desired effect on linux, causing garbage to be sent
             _port.StopBits = StopBits.One;
             _port.DataBits = 8;
             _port.Open();
@@ -61,24 +62,7 @@ namespace Iot.Device.Seatalk1
 
         public Seatalk1Parser Parser => _parser;
 
-        /// <summary>
-        /// Periodic watchdog tasks
-        /// </summary>
-        private void WatchDog()
-        {
-            while (!_cancellation.IsCancellationRequested)
-            {
-                Thread.Sleep(1000);
-                _autopilotController.UpdateStatus();
-            }
-        }
-
-        private void OnNewMessage(SeatalkMessage obj)
-        {
-            MessageReceived?.Invoke(obj);
-        }
-
-        private int BitCount(int b)
+        private static int BitCount(int b)
         {
             int count = 0;
             while (b != 0)
@@ -90,10 +74,10 @@ namespace Iot.Device.Seatalk1
             return count;
         }
 
-        public void SendDatagram(byte[] data)
+        internal static List<(byte B, Parity P, int Index)> CalculateParityForEachByte(byte[] data)
         {
-            // Send byte-by-byte
             bool isCommandByte = true;
+            List<(byte, Parity, int)> ret = new();
             for (int i = 0; i < data.Length; i++)
             {
                 byte b = data[i];
@@ -127,16 +111,48 @@ namespace Iot.Device.Seatalk1
                     }
                 }
 
-                // parityToSend = parityToSend == Parity.Odd ? Parity.Even : Parity.Odd;
-                _port.Parity = parityToSend;
-                _port.Write(data, i, 1);
-                while (_port.BytesToWrite != 0)
-                {
-                    Thread.Yield();
-                }
-
+                ret.Add((data[i], parityToSend, i));
                 isCommandByte = false;
             }
+
+            return ret;
+        }
+
+        /// <summary>
+        /// Periodic watchdog tasks
+        /// </summary>
+        private void WatchDog()
+        {
+            while (!_cancellation.IsCancellationRequested)
+            {
+                Thread.Sleep(1000);
+                _autopilotController.UpdateStatus();
+            }
+        }
+
+        private void OnNewMessage(SeatalkMessage obj)
+        {
+            MessageReceived?.Invoke(obj);
+        }
+
+        public void SendDatagram(byte[] data)
+        {
+            var dataWithParity = CalculateParityForEachByte(data);
+            foreach (var e in dataWithParity)
+            {
+                // parityToSend = parityToSend == Parity.Odd ? Parity.Even : Parity.Odd;
+                if (_port.Parity != e.P)
+                {
+                    _port.BaseStream.Flush();
+                    _port.Parity = e.P;
+                    _port.BaseStream.Flush();
+                }
+
+                _port.Write(data, e.Index, 1);
+            }
+
+            _port.BaseStream.Flush();
+            _port.Parity = DefaultParity;
         }
 
         /// <summary>
