@@ -16,9 +16,7 @@ namespace Seatalk1Sample
 {
     internal class Program
     {
-        private CompassHeadingAndRudderPosition? _headingAndRudderPosition;
-        private CompassHeadingAutopilotCourse? _autopilotCourse;
-        private DeadbandMode _deadbandMode = DeadbandMode.None;
+        private SeatalkInterface? _seatalk;
 
         internal static int Main(string[] args)
         {
@@ -39,61 +37,65 @@ namespace Seatalk1Sample
         {
             LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory(LogLevel.Trace);
 
-            SerialPort port1 = new SerialPort(args[0]);
-            port1.BaudRate = 4800;
-            port1.Parity = Parity.Even;
-            port1.StopBits = StopBits.One;
-            port1.DataBits = 8;
-            port1.Open();
+            _seatalk = new SeatalkInterface(args[0]);
 
-            Seatalk1Parser parser = new Seatalk1Parser(port1.BaseStream);
-            parser.StartDecode();
+            _seatalk.MessageReceived += ParserOnNewMessageDecoded;
 
-            parser.NewMessageDecoded += ParserOnNewMessageDecoded;
-
-            while (!Console.KeyAvailable)
+            while (true)
             {
+                if (Console.KeyAvailable)
+                {
+                    var key = Console.ReadKey(true);
+                    if (key.Key == ConsoleKey.Escape)
+                    {
+                        break;
+                    }
+                    else if (key.Key == ConsoleKey.A)
+                    {
+                        // For testing only
+                        byte[] keyPlus1 = new byte[]
+                        {
+                            0x86, 0x11, 0x07, 0xf8
+                        };
+
+                        _seatalk.SendDatagram(keyPlus1);
+                    }
+                    else if (key.Key == ConsoleKey.B)
+                    {
+                        // For testing only
+                        byte[] keyPlus1 = new byte[]
+                        {
+                            0x86, 0x11, 0x05, 0xfa
+                            // 0xFF, 0xFF,
+                        };
+
+                        _seatalk.SendDatagram(keyPlus1);
+                    }
+                }
+
                 Thread.Sleep(500);
+                WriteCurrentState();
             }
 
-            parser.StopDecode();
-            Console.ReadKey(true);
+            _seatalk.Dispose();
+            _seatalk = null;
 
             Console.WriteLine("Program is terminating");
-            parser.Dispose();
-            port1.Close();
         }
 
         private void WriteCurrentState()
         {
-            if (_headingAndRudderPosition == null || _autopilotCourse == null)
+            var ctrl = _seatalk?.GetAutopilotRemoteController();
+            if (ctrl != null)
             {
-                return;
+                Console.Write("\r");
+                Console.Write(ctrl.ToString());
             }
-
-            Console.Write("\r");
-            Console.Write($"MAG: {_headingAndRudderPosition.CompassHeading} TRK: {_autopilotCourse.AutoPilotCourse} " +
-                          $"STAT: {_autopilotCourse.AutopilotStatus} RUDDER: {_autopilotCourse.RudderPosition} ALRT: {_autopilotCourse.Alarms} DB: {_deadbandMode}  ");
         }
 
         private void ParserOnNewMessageDecoded(SeatalkMessage obj)
         {
-            if (obj is CompassHeadingAutopilotCourse ch)
-            {
-                _autopilotCourse = ch;
-                WriteCurrentState();
-            }
-            else if (obj is CompassHeadingAndRudderPosition rb)
-            {
-                _headingAndRudderPosition = rb;
-                WriteCurrentState();
-            }
-            else if (obj is DeadbandSetting dbs)
-            {
-                _deadbandMode = dbs.Mode;
-                WriteCurrentState();
-            }
-            else if (obj is Keystroke keystroke)
+            if (obj is Keystroke keystroke)
             {
                 Console.WriteLine();
                 Console.WriteLine($"Pressed key(s): {keystroke}");
