@@ -66,6 +66,11 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        public override byte[] CreateDatagram()
+        {
+            throw new NotImplementedException();
+        }
+
         private AutopilotStatus GetAutopilotStatus(byte z)
         {
             return (z & 0xf) switch

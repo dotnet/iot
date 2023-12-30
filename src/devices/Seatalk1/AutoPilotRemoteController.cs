@@ -3,8 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Seatalk1.Messages;
 using UnitsNet;
@@ -19,9 +21,11 @@ namespace Iot.Device.Seatalk1
     /// </remarks>
     public class AutoPilotRemoteController
     {
+        private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(6);
         private readonly SeatalkInterface _parentInterface;
         private readonly object _lock = new object();
         private DateTime _lastUpdateTime = new DateTime(0);
+        private bool _buttonOnApPressed = false;
 
         internal AutoPilotRemoteController(SeatalkInterface parentInterface)
         {
@@ -31,6 +35,7 @@ namespace Iot.Device.Seatalk1
             Status = AutopilotStatus.Offline;
             Alarms = AutopilotAlarms.None;
             DeadbandMode = DeadbandMode.Automatic;
+            DefaultTimeout = TimeSpan.FromSeconds(3);
         }
 
         public Angle? AutopilotHeading { get; private set; }
@@ -46,6 +51,8 @@ namespace Iot.Device.Seatalk1
         public AutopilotAlarms Alarms { get; private set; }
 
         public DeadbandMode DeadbandMode { get; private set; }
+
+        public TimeSpan DefaultTimeout { get; set; }
 
         public event Action<Keystroke>? AutopilotKeysPressed;
 
@@ -98,6 +105,11 @@ namespace Iot.Device.Seatalk1
                 }
                 else if (obj is Keystroke keystroke)
                 {
+                    if (keystroke.Source != 1)
+                    {
+                        _buttonOnApPressed = true;
+                    }
+
                     AutopilotKeysPressed?.Invoke(keystroke);
                 }
 
@@ -106,6 +118,64 @@ namespace Iot.Device.Seatalk1
                     DeadbandMode = DeadbandMode.Automatic; // Resets automatically when going to standby (the message is not sent periodically)
                 }
             }
+        }
+
+        public bool SetStatus(AutopilotStatus status)
+        {
+            return SetStatus(status, DefaultTimeout);
+        }
+
+        /// <summary>
+        /// Attempts to set the Autopilot to the given state.
+        /// </summary>
+        /// <param name="newStatus">The status to set</param>
+        /// <param name="timeout">How long to try. For safety reasons (see remark) the maximum value is limited</param>
+        /// <returns>True on success, false if the change didn't succeed within the timeout.</returns>
+        /// <remarks>
+        /// Don't be tempted to attempt to set the mode to Auto with a large timeout, as this could
+        /// override the user's desire to disable the Autopilot and is therefore VERY DANGEROUS!
+        /// </remarks>
+        public bool SetStatus(AutopilotStatus newStatus, TimeSpan timeout)
+        {
+            if (Status == newStatus)
+            {
+                return true; // nothing to do
+            }
+
+            if (timeout > MaximumTimeout)
+            {
+                throw new ArgumentOutOfRangeException(nameof(timeout), $"The maximum timeout is {MaximumTimeout}, see remarks in documentation");
+            }
+
+            _buttonOnApPressed = false;
+            Stopwatch sw = Stopwatch.StartNew();
+            while (sw.Elapsed < timeout)
+            {
+                // If a button on the AP was pressed, abort immediately, as that one must always have precedence.
+                if (_buttonOnApPressed)
+                {
+                    return false;
+                }
+
+                if (Status == newStatus)
+                {
+                    return true;
+                }
+
+                AutopilotButtons buttonToPress = newStatus switch
+                {
+                    AutopilotStatus.Auto => AutopilotButtons.Auto,
+                    AutopilotStatus.Standby => AutopilotButtons.StandBy,
+                    AutopilotStatus.Track => AutopilotButtons.Track,
+                    AutopilotStatus.Wind => AutopilotButtons.Auto | AutopilotButtons.StandBy,
+                    _ => throw new ArgumentException($"Status {newStatus} is not valid", nameof(newStatus)),
+                };
+
+                _parentInterface.SendMessage(new Keystroke(buttonToPress, 1));
+                Thread.Sleep(137); // Some random number
+            }
+
+            return false;
         }
 
         internal void UpdateStatus()

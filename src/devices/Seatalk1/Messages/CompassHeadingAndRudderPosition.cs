@@ -49,5 +49,10 @@ namespace Iot.Device.Seatalk1.Messages
                 RudderPosition = Angle.FromDegrees(rudder),
             };
         }
+
+        public override byte[] CreateDatagram()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -41,6 +41,8 @@ namespace Seatalk1Sample
 
             _seatalk.MessageReceived += ParserOnNewMessageDecoded;
 
+            var ctrl = _seatalk.GetAutopilotRemoteController();
+
             while (true)
             {
                 if (Console.KeyAvailable)
@@ -50,47 +52,69 @@ namespace Seatalk1Sample
                     {
                         break;
                     }
-                    else if (key.Key == ConsoleKey.A)
-                    {
-                        // For testing only
-                        byte[] keyPlus1 = new byte[]
-                        {
-                            0x86, 0x11, 0x07, 0xf8
-                        };
 
-                        _seatalk.SendDatagram(keyPlus1);
+                    Keystroke ks = new Keystroke();
+                    switch (key.Key)
+                    {
+                        case ConsoleKey.A:
+                            ks = new Keystroke(AutopilotButtons.MinusOne);
+                            break;
+                        case ConsoleKey.D:
+                            ks = new Keystroke(AutopilotButtons.PlusOne);
+                            break;
+                        case ConsoleKey.Q:
+                            ks = new Keystroke(AutopilotButtons.MinusTen);
+                            break;
+                        case ConsoleKey.E:
+                            ks = new Keystroke(AutopilotButtons.PlusTen);
+                            break;
+                        case ConsoleKey.W:
+                        {
+                            if (ctrl.SetStatus(AutopilotStatus.Auto))
+                            {
+                                Console.WriteLine("Autopilot set to AUTO mode");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Setting AUTO mode FAILED!");
+                            }
+
+                            break;
+                        }
+
+                        case ConsoleKey.L:
+                        {
+                            ks = new Keystroke(AutopilotButtons.Disp);
+                            break;
+                        }
+
+                        case ConsoleKey.I:
+                        {
+                            // This is expected to fail if the AP has no wind data
+                            if (ctrl.SetStatus(AutopilotStatus.Wind))
+                            {
+                                Console.WriteLine("Autopilot set to WIND mode");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Setting WIND mode FAILED!");
+                            }
+
+                            break;
+                        }
+
+                        case ConsoleKey.S:
+                            if (ctrl.SetStatus(AutopilotStatus.Standby))
+                            {
+                                Console.WriteLine("Autopilot set to STANDBY mode");
+                            }
+
+                            break;
                     }
-                    else if (key.Key == ConsoleKey.B)
-                    {
-                        // For testing only
-                        byte[] keyPlus1 = new byte[]
-                        {
-                            0x86, 0x11, 0x05, 0xfa
-                            // 0xFF, 0xFF,
-                        };
 
-                        _seatalk.SendDatagram(keyPlus1);
-                    }
-                    else if (key.Key == ConsoleKey.C)
+                    if (ks.ButtonsPressed != AutopilotButtons.None)
                     {
-                        // For testing only
-                        byte[] keyPlus1 = new byte[]
-                        {
-                            0x86, 0x11, 0x08, 0xf7
-                        };
-
-                        _seatalk.SendDatagram(keyPlus1);
-                    }
-                    else if (key.Key == ConsoleKey.D)
-                    {
-                        // For testing only
-                        byte[] keyPlus1 = new byte[]
-                        {
-                            0x86, 0x11, 0x06, 0xf9
-                            // 0xFF, 0xFF,
-                        };
-
-                        _seatalk.SendDatagram(keyPlus1);
+                        _seatalk.SendMessage(ks);
                     }
                 }
 

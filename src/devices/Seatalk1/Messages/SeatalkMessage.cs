@@ -46,6 +46,8 @@ namespace Iot.Device.Seatalk1.Messages
         /// <returns></returns>
         public abstract SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data);
 
+        public abstract byte[] CreateDatagram();
+
         // To count the number of bits set in (U >> 4) & 0xc
         protected int BitCount(uint v)
         {

@@ -35,6 +35,11 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        public override byte[] CreateDatagram()
+        {
+            throw new NotImplementedException();
+        }
+
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[1] == 0x0;

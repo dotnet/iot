@@ -21,6 +21,7 @@ namespace Iot.Device.Seatalk1
         private readonly Thread _watchDog;
         private readonly CancellationTokenSource _cancellation;
         private readonly AutoPilotRemoteController _autopilotController;
+        private readonly object _lock;
 
         public event Action<SeatalkMessage>? MessageReceived;
 
@@ -42,6 +43,7 @@ namespace Iot.Device.Seatalk1
                 throw new ArgumentNullException(nameof(uart));
             }
 
+            _lock = new object();
             _port = new SerialPort(uart);
             _port.BaudRate = 4800;
             _port.Parity = DefaultParity; // Can be anything but none, but "Mark" or "Space" won't have the desired effect on linux, causing garbage to be sent
@@ -74,6 +76,16 @@ namespace Iot.Device.Seatalk1
             return count;
         }
 
+        /// <summary>
+        /// This calculates the correct parity for each byte in the datagram.
+        /// </summary>
+        /// <param name="data">The datagram to send (first byte is the command byte, remainder are the arguments)</param>
+        /// <returns>A list of bytes with parity information</returns>
+        /// <remarks>
+        /// We need to send the first byte (the command byte) with a parity of "mark" (=1), all the remaining bytes with a parity of "space" (=0),
+        /// but since Linux doesn't seem to properly support Mark or Space parity settings (on the raspberry pi, that setting results in no parity bit to be sent)
+        /// we cheat and count what the parity bit should be and use even or odd to achieve the desired result.
+        /// </remarks>
         internal static List<(byte B, Parity P, int Index)> CalculateParityForEachByte(byte[] data)
         {
             bool isCommandByte = true;
@@ -81,9 +93,6 @@ namespace Iot.Device.Seatalk1
             for (int i = 0; i < data.Length; i++)
             {
                 byte b = data[i];
-                // We need to send the first byte (the command byte) with a parity of "mark", all the remaining bytes with a parity of "space",
-                // but since Linux doesn't seem to properly support Mark or Space (on the raspberry pi, that setting results in no parity bit to be sent)
-                // we cheat here and count what the parity bit should be and use even or odd to achieve the desired result.
                 bool isEven = BitCount(b) % 2 == 0;
                 Parity parityToSend;
                 if (isEven)
@@ -135,24 +144,50 @@ namespace Iot.Device.Seatalk1
             MessageReceived?.Invoke(obj);
         }
 
+        /// <summary>
+        /// Synchronously send a datagram. This is a low-level function, prefer <see cref="SendMessage"/> instead.
+        /// </summary>
+        /// <param name="data">The datagram</param>
         public void SendDatagram(byte[] data)
         {
+            // First calculate the required parity setting for each byte.
             var dataWithParity = CalculateParityForEachByte(data);
-            foreach (var e in dataWithParity)
+            // Only one thread at a time, please!
+            lock (_lock)
             {
-                // parityToSend = parityToSend == Parity.Odd ? Parity.Even : Parity.Odd;
-                if (_port.Parity != e.P)
+                foreach (var e in dataWithParity)
                 {
-                    _port.BaseStream.Flush();
-                    _port.Parity = e.P;
-                    _port.BaseStream.Flush();
+                    // The many flushes here appear to be necessary to make sure the parity correctly applies to the next byte we send (and only to the next)
+                    if (_port.Parity != e.P)
+                    {
+                        _port.BaseStream.Flush();
+                        _port.Parity = e.P;
+                        _port.BaseStream.Flush();
+                    }
+
+                    _port.Write(data, e.Index, 1);
                 }
 
-                _port.Write(data, e.Index, 1);
+                _port.BaseStream.Flush();
+                _port.Parity = DefaultParity;
             }
+        }
 
-            _port.BaseStream.Flush();
-            _port.Parity = DefaultParity;
+        /// <summary>
+        /// Synchronously send the given message
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <remarks>Transmission of Seatalk messages can be very slow and include considerable delays. Also, there's no guarantee the
+        /// message is successfully transmitted or received anywhere.</remarks>
+        public void SendMessage(SeatalkMessage message)
+        {
+            byte[] bytes = message.CreateDatagram();
+            SendDatagram(bytes);
+        }
+
+        public Task SendMessageAsync(SeatalkMessage message)
+        {
+            return Task.Factory.StartNew(() => SendMessage(message));
         }
 
         /// <summary>
