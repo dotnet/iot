@@ -192,7 +192,7 @@ internal partial class Interop
         public static extern bool gpiod_line_settings_get_active_low(LineSettingsSafeHandle settings);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
-        public static extern int gpiod_line_settings_set_debounce_period_us(LineSettingsSafeHandle settings, ulong period);
+        public static extern void gpiod_line_settings_set_debounce_period_us(LineSettingsSafeHandle settings, ulong period);
 
         [DllImport(LibgpiodLibrary, SetLastError = true)]
         public static extern ulong gpiod_line_settings_get_debounce_period_us(LineSettingsSafeHandle settings);

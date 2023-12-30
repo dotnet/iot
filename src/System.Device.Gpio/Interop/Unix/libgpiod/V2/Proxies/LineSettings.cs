@@ -195,14 +195,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public void SetDebouncePeriod(TimeSpan debouncePeriod)
     {
-        CallLibpiodLocked(() =>
-        {
-            int result = LibgpiodV2.gpiod_line_settings_set_debounce_period_us(Handle, (ulong)(debouncePeriod.TotalMilliseconds * 1000));
-            if (result < 0)
-            {
-                throw new GpiodException($"Could not set line debounce period: {LastErr.GetMsg()}");
-            }
-        });
+        CallLibpiodLocked(() => LibgpiodV2.gpiod_line_settings_set_debounce_period_us(Handle, (ulong)(debouncePeriod.TotalMilliseconds * 1000)));
     }
 
     /// <summary>
