@@ -142,6 +142,53 @@ namespace Iot.Device.Seatalk1
                 return true; // nothing to do
             }
 
+            AutopilotButtons buttonToPress = newStatus switch
+            {
+                AutopilotStatus.Auto => AutopilotButtons.Auto,
+                AutopilotStatus.Standby => AutopilotButtons.StandBy,
+                AutopilotStatus.Track => AutopilotButtons.Track,
+                AutopilotStatus.Wind => AutopilotButtons.Auto | AutopilotButtons.StandBy,
+                _ => throw new ArgumentException($"Status {newStatus} is not valid", nameof(newStatus)),
+            };
+
+            return SendMessageAndVerifyStatus(new Keystroke(buttonToPress, 1), timeout, () => Status == newStatus);
+        }
+
+        public bool SetDeadbandMode(DeadbandMode mode)
+        {
+            if (Status == AutopilotStatus.Offline || Status == AutopilotStatus.Standby)
+            {
+                // The Deadband mode can only be set in auto mode
+                return false;
+            }
+
+            if (mode != DeadbandMode.Automatic && mode != DeadbandMode.Minimal)
+            {
+                throw new ArgumentException("Invalid Deadband mode", nameof(mode));
+            }
+
+            if (mode == DeadbandMode)
+            {
+                return true;
+            }
+
+            Keystroke ks;
+            // If we are in automatic (default) mode, we need to send 0x0a to enter minimal deadband mode,
+            // but if we already are in minimal deadband mode, we need to send 0x09 to leave.
+            if (DeadbandMode == DeadbandMode.Automatic)
+            {
+                ks = new Keystroke(0x0A);
+            }
+            else
+            {
+                ks = new Keystroke(0x09);
+            }
+
+            return SendMessageAndVerifyStatus(ks, DefaultTimeout, () => DeadbandMode == mode);
+        }
+
+        private bool SendMessageAndVerifyStatus(SeatalkMessage message, TimeSpan timeout, Func<bool> successCondition)
+        {
             if (timeout > MaximumTimeout)
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), $"The maximum timeout is {MaximumTimeout}, see remarks in documentation");
@@ -154,28 +201,19 @@ namespace Iot.Device.Seatalk1
                 // If a button on the AP was pressed, abort immediately, as that one must always have precedence.
                 if (_buttonOnApPressed)
                 {
-                    return false;
+                    return successCondition();
                 }
 
-                if (Status == newStatus)
+                if (successCondition())
                 {
                     return true;
                 }
 
-                AutopilotButtons buttonToPress = newStatus switch
-                {
-                    AutopilotStatus.Auto => AutopilotButtons.Auto,
-                    AutopilotStatus.Standby => AutopilotButtons.StandBy,
-                    AutopilotStatus.Track => AutopilotButtons.Track,
-                    AutopilotStatus.Wind => AutopilotButtons.Auto | AutopilotButtons.StandBy,
-                    _ => throw new ArgumentException($"Status {newStatus} is not valid", nameof(newStatus)),
-                };
-
-                _parentInterface.SendMessage(new Keystroke(buttonToPress, 1));
+                _parentInterface.SendMessage(message);
                 Thread.Sleep(137); // Some random number
             }
 
-            return false;
+            return successCondition();
         }
 
         internal void UpdateStatus()

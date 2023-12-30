@@ -84,9 +84,22 @@ namespace Seatalk1Sample
 
                         case ConsoleKey.L:
                         {
+                            // Doesn't seem to do anything on the ST2000+, even though it is documented that remote-controlling the display backlight should work
                             ks = new Keystroke(AutopilotButtons.Disp);
                             break;
                         }
+
+                        case ConsoleKey.K:
+                            if (ctrl.DeadbandMode == DeadbandMode.Automatic)
+                            {
+                                ctrl.SetDeadbandMode(DeadbandMode.Minimal);
+                            }
+                            else
+                            {
+                                ctrl.SetDeadbandMode(DeadbandMode.Automatic);
+                            }
+
+                            break;
 
                         case ConsoleKey.I:
                         {

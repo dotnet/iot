@@ -37,7 +37,7 @@ namespace Iot.Device.Seatalk1.Messages
 
         public override byte[] CreateDatagram()
         {
-            throw new NotImplementedException();
+            throw new NotSupportedException("Send the respective keycodes instead (0x09 or 0x0a)");
         }
 
         public override bool MatchesMessageType(IReadOnlyList<byte> data)

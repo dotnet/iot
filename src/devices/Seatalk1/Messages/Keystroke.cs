@@ -20,6 +20,7 @@ namespace Iot.Device.Seatalk1.Messages
         {
             s_codeToButtonMap = new Dictionary<int, AutopilotButtons>()
             {
+                { 0x00, AutopilotButtons.None },
                 { 0x01, AutopilotButtons.Auto },
                 { 0x02, AutopilotButtons.StandBy },
                 { 0x03, AutopilotButtons.MinusTen | AutopilotButtons.PlusTen },
@@ -54,14 +55,28 @@ namespace Iot.Device.Seatalk1.Messages
 
         public Keystroke()
         {
-            ButtonsPressed = AutopilotButtons.None;
+            KeyCode = 0;
             Source = 0;
         }
 
         public Keystroke(AutopilotButtons buttonsToPress, int source = 1)
         {
-            ButtonsPressed = buttonsToPress;
             Source = source;
+
+            if (s_buttonToCodeMap.TryGetValue(buttonsToPress, out int code))
+            {
+                KeyCode = code;
+            }
+            else
+            {
+                throw new ArgumentException($"The button combination {buttonsToPress} is not a valid button combination");
+            }
+        }
+
+        public Keystroke(byte keyCode, int source = 1)
+        {
+            Source = source;
+            KeyCode = keyCode;
         }
 
         /// <summary>
@@ -86,6 +101,14 @@ namespace Iot.Device.Seatalk1.Messages
 
         public AutopilotButtons ButtonsPressed
         {
+            get
+            {
+                return GetButtons(KeyCode);
+            }
+        }
+
+        public int KeyCode
+        {
             get;
             init;
         }
@@ -103,29 +126,23 @@ namespace Iot.Device.Seatalk1.Messages
 
             int source = data[1] >> 4;
 
-            AutopilotButtons buttons = GetButtons(data[2]);
+            // Just as a verification step
+            GetButtons(data[2]);
 
             return new Keystroke()
             {
-                ButtonsPressed = buttons, Source = source,
+                Source = source, KeyCode = data[2]
             };
         }
 
         public override byte[] CreateDatagram()
         {
-            byte keyCode = 0;
-            if (s_buttonToCodeMap.TryGetValue(ButtonsPressed, out int code))
+            byte inverseCode = (byte)~KeyCode;
+            int attributeByte = ExpectedLength - 3 | (Source << 4);
+            return new byte[]
             {
-                keyCode = (byte)code;
-                byte inverseCode = (byte)~keyCode;
-                int attributeByte = ExpectedLength - 3 | (Source << 4);
-                return new byte[]
-                {
-                    CommandByte, (byte)attributeByte, keyCode, inverseCode
-                };
-            }
-
-            throw new ArgumentException($"The button combination {ButtonsPressed} is not a valid button combination");
+                CommandByte, (byte)attributeByte, (byte)KeyCode, inverseCode
+            };
         }
 
         private AutopilotButtons GetButtons(int keyCode)
@@ -135,7 +152,7 @@ namespace Iot.Device.Seatalk1.Messages
                 return result;
             }
 
-            Logger.LogWarning($"Unknown keycode {keyCode} in command");
+            Logger.LogWarning($"Unknown keycode 0x{keyCode:X2} in command");
             return AutopilotButtons.None;
         }
 
@@ -155,6 +172,13 @@ namespace Iot.Device.Seatalk1.Messages
             }
 
             return base.MatchesMessageType(data);
+        }
+
+        protected override bool PrintMembers(StringBuilder stringBuilder)
+        {
+            base.PrintMembers(stringBuilder);
+            stringBuilder.Append($", Source = {Source}, KeyCode = 0x{KeyCode:X2}, Buttons = {GetButtons(KeyCode)}");
+            return true;
         }
     }
 }
