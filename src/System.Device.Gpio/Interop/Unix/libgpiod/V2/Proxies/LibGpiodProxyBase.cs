@@ -2,15 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Device.Gpio.Drivers;
+using System.Runtime.InteropServices;
 
 namespace System.Device.Gpio.Libgpiod.V2;
 
-internal abstract class LibGpiodProxyBase
+internal abstract class LibGpiodProxyBase : IDisposable
 {
-    /// <summary>
+    /// <remarks>
     /// Each proxy instance gets its dedicated lock instance.
+    /// </remarks>
+    private readonly object _safeHandleLock = new();
+
+    protected LibGpiodProxyBase(SafeHandle handle)
+    {
+        SafeHandle = handle;
+    }
+
+    /// <summary>
+    /// A safe handle to the libgpiod object
     /// </summary>
-    private readonly object _lock = new();
+    protected SafeHandle SafeHandle { get; }
 
     /// <summary>
     /// Helper function that wraps any exception (from a native call) in <see cref="GpiodException"/> for easier exception handling on client side.
@@ -48,7 +59,7 @@ internal abstract class LibGpiodProxyBase
     /// </summary>
     public void CallLibpiodLocked(Action action)
     {
-        lock (_lock)
+        lock (_safeHandleLock)
         {
             CallLibgpiod(action);
         }
@@ -60,9 +71,38 @@ internal abstract class LibGpiodProxyBase
     /// </summary>
     public TResult CallLibpiodLocked<TResult>(Func<TResult> func)
     {
-        lock (_lock)
+        lock (_safeHandleLock)
         {
             return CallLibgpiod(func);
         }
     }
+
+    #region Dispose
+
+    private bool _isDisposed;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposeManagedResources)
+    {
+        if (_isDisposed)
+        {
+            return;
+        }
+
+        if (disposeManagedResources)
+        {
+            // no managed resources to dispose (yet)
+        }
+
+        CallLibpiodLocked(SafeHandle.Dispose);
+
+        _isDisposed = true;
+    }
+
+    #endregion
 }

@@ -199,7 +199,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
         {
             requestedOffsets.AddRange(request.GetRequestedOffsets());
 
-            EdgeEventBuffer edgeEventBuffer = LibGpiodProxyFactory.CreateEdgeEventBuffer();
+            using EdgeEventBuffer edgeEventBuffer = LibGpiodProxyFactory.CreateEdgeEventBuffer();
 
             while (request.IsAlive && !_shouldExit)
             {
@@ -261,7 +261,7 @@ internal sealed class LibGpiodV2EventObserver : IDisposable
     {
         foreach (PinChangeEventHandler eventHandler in eventHandlers)
         {
-            eventHandler.Invoke(this, new PinValueChangedEventArgs(Translator.Translate(edgeEventType), offset));
+            eventHandler.Invoke(this, new PinValueChangedEventArgs(Translator.Translate(edgeEventType), (int)offset));
         }
     }
 

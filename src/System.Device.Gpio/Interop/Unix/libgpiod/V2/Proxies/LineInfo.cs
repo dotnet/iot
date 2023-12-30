@@ -23,6 +23,7 @@ internal class LineInfo : LibGpiodProxyBase
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__info.html"/>
     public LineInfo(LineInfoSafeHandle handle)
+        : base(handle)
     {
         _handle = handle;
     }

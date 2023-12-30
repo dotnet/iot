@@ -21,6 +21,7 @@ internal class ChipInfo : LibGpiodProxyBase
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chip__info.html"/>
     public ChipInfo(ChipInfoSafeHandle handle)
+        : base(handle)
     {
         _handle = handle;
     }

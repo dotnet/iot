@@ -23,6 +23,7 @@ internal class EdgeEvent : LibGpiodProxyBase
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html"/>
     public EdgeEvent(EdgeEventSafeHandle handle)
+        : base(handle)
     {
         _handle = handle;
     }

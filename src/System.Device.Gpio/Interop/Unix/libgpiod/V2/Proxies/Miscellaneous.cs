@@ -11,7 +11,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// Contains functions that are not part of any specific concept.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__misc.html"/>
-internal class Miscellaneous : LibGpiodProxyBase
+internal class Miscellaneous
 {
     /// <summary>
     /// Check if the file pointed to by path is a GPIO chip character device
@@ -20,7 +20,7 @@ internal class Miscellaneous : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static bool IsGpioChipDevice(string path)
     {
-        return CallLibgpiod(() => LibgpiodV2.gpiod_is_gpiochip_device(Marshal.StringToHGlobalAuto(path)));
+        return LibGpiodProxyBase.CallLibgpiod(() => LibgpiodV2.gpiod_is_gpiochip_device(Marshal.StringToHGlobalAuto(path)));
     }
 
     /// <summary>
@@ -30,7 +30,7 @@ internal class Miscellaneous : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error invoking native function</exception>
     public static string GetApiVersion()
     {
-        return CallLibgpiod(() =>
+        return LibGpiodProxyBase.CallLibgpiod(() =>
             Marshal.PtrToStringAuto(LibgpiodV2.gpiod_api_version()) ?? throw new GpiodException($"Could not get API version: {LastErr.GetMsg()}"));
     }
 }

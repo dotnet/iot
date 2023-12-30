@@ -13,7 +13,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// allows callers to retrieve information about each line, watch lines for state changes and make line requests.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html"/>
-internal class Chip : LibGpiodProxyBase, IDisposable
+internal class Chip : LibGpiodProxyBase
 {
     private readonly ChipSafeHandle _handle;
 
@@ -23,6 +23,7 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__chips.html#ga25097f48949d0ac81e9ab341193da1a4"/>
     public Chip(ChipSafeHandle handle)
+        : base(handle)
     {
         _handle = handle;
     }
@@ -206,28 +207,20 @@ internal class Chip : LibGpiodProxyBase, IDisposable
     }
 
     /// <summary>
-    /// Frees all associated resources of gpiod chip object
-    /// </summary>
-    /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
-    public void Close()
-    {
-        CallLibpiodLocked(_handle.Dispose);
-    }
-
-    /// <summary>
     /// Helper function for capturing information and creating an immutable snapshot instance.
     /// </summary>
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public Snapshot MakeSnapshot()
     {
-        var chipInfo = GetInfo();
+        using var chipInfo = GetInfo();
         var chipInfoSnapshot = chipInfo.MakeSnapshot();
         int numLines = chipInfoSnapshot.NumLines;
         List<LineInfo.Snapshot> lineInfos = new();
         for (uint offset = 0; offset < numLines; offset++)
         {
-            var lineInfo = GetLineInfo(offset).MakeSnapshot();
-            lineInfos.Add(lineInfo);
+            using var lineInfo = GetLineInfo(offset);
+            var lineInfoSnapshot = lineInfo.MakeSnapshot();
+            lineInfos.Add(lineInfoSnapshot);
         }
 
         return new Snapshot(chipInfoSnapshot, GetPath(), GetFileDescriptor(), lineInfos);
@@ -247,26 +240,4 @@ internal class Chip : LibGpiodProxyBase, IDisposable
                 $"{nameof(ChipInfo)}: {ChipInfo}, {nameof(Path)}: {Path}, {nameof(FileDescriptor)}: {FileDescriptor}, {nameof(LineInfos)}: {string.Join("\n", LineInfos)}";
         }
     }
-
-    #region Dispose
-
-    private readonly object _isDisposedLock = new();
-    private bool _isDisposed;
-
-    public void Dispose()
-    {
-        lock (_isDisposedLock)
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            Close();
-
-            _isDisposed = true;
-        }
-    }
-
-    #endregion
 }

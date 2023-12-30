@@ -7,8 +7,8 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal enum GpiodLineBias
 {
     AsIs = 1,
-    Unknown,
-    Disabled,
-    PullUp,
-    PullDown
+    Unknown = 2,
+    Disabled = 3,
+    PullUp = 4,
+    PullDown = 5
 }

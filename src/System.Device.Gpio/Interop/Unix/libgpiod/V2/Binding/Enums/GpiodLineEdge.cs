@@ -7,7 +7,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal enum GpiodLineEdge
 {
     None = 1,
-    Rising,
-    Falling,
-    Both
+    Rising = 2,
+    Falling = 3,
+    Both = 4
 }

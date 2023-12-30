@@ -22,6 +22,7 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__watch.html"/>
     public LineInfoEvent(LineInfoEventSafeHandle handle)
+        : base(handle)
     {
         _handle = handle;
     }
@@ -70,7 +71,8 @@ internal class LineInfoEvent : LibGpiodProxyBase
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public Snapshot MakeSnapshot()
     {
-        return new Snapshot(GetEventType(), GetTimestampNs(), GetLineInfo().MakeSnapshot());
+        using LineInfo lineInfo = GetLineInfo();
+        return new Snapshot(GetEventType(), GetTimestampNs(), lineInfo.MakeSnapshot());
     }
 
     public sealed record Snapshot(GpiodLineInfoEventType Type, ulong TimestampNs, LineInfo.Snapshot LineInfo)

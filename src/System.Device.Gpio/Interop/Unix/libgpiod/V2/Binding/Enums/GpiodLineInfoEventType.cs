@@ -7,6 +7,6 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal enum GpiodLineInfoEventType
 {
     LineRequested = 1,
-    LineReleased,
-    LineConfigChanged
+    LineReleased = 2,
+    LineConfigChanged = 3
 }

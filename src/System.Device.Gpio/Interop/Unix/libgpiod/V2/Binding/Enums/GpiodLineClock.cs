@@ -7,6 +7,6 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal enum GpiodLineClock
 {
     Monotonic = 1,
-    Realtime,
-    Hte
+    Realtime = 2,
+    Hte = 3
 }

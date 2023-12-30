@@ -7,6 +7,6 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal enum GpiodLineDrive
 {
     PushPull = 1,
-    OpenDrain,
-    OpenSource
+    OpenDrain = 2,
+    OpenSource = 3
 }

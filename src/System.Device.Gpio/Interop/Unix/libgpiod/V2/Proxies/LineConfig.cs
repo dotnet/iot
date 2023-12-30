@@ -30,6 +30,7 @@ internal class LineConfig : LibGpiodProxyBase
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__config.html#ga17ebc375388c6588fc96cf0f069d58b3"/>
     public LineConfig(LineConfigSafeHandle handle)
+        : base(handle)
     {
         Handle = handle;
     }

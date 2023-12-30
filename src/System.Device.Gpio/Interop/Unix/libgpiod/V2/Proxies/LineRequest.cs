@@ -16,7 +16,7 @@ namespace System.Device.Gpio.Libgpiod.V2;
 /// This object provides exclusive usage, i.e. reading or setting lines state.
 /// </summary>
 /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__request.html#details"/>
-internal class LineRequest : LibGpiodProxyBase, IDisposable
+internal class LineRequest : LibGpiodProxyBase
 {
     private readonly LineRequestSafeHandle _handle;
 
@@ -29,6 +29,7 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__request.html"/>
     public LineRequest(LineRequestSafeHandle handle)
+        : base(handle)
     {
         _handle = handle;
     }
@@ -394,24 +395,17 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
     }
 
     /// <summary>
-    /// Releases the gpiod request object
-    /// </summary>
-    /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
-    public void Close()
-    {
-        IsAlive = false;
-        StopWaitingOnEdgeEvents();
-        CallLibpiodLocked(_handle.Dispose);
-    }
-
-    /// <summary>
     /// Helper function for capturing information and creating an immutable snapshot instance.
     /// </summary>
     /// <exception cref="GpiodException">Unexpected error when invoking native function</exception>
     public Snapshot MakeSnapshot(Chip chip)
     {
         var requestedOffsets = GetRequestedOffsets();
-        return new Snapshot(GetNumRequestedLines(), requestedOffsets.Select(offset => chip.GetLineInfo(offset).MakeSnapshot()));
+        return new Snapshot(GetNumRequestedLines(), requestedOffsets.Select(offset =>
+        {
+            using LineInfo lineInfo = chip.GetLineInfo(offset);
+            return lineInfo.MakeSnapshot();
+        }));
     }
 
     /// <summary>
@@ -428,25 +422,10 @@ internal class LineRequest : LibGpiodProxyBase, IDisposable
         }
     }
 
-    #region Dispose
-
-    private readonly object _isDisposedLock = new();
-    private bool _isDisposed;
-
-    public void Dispose()
+    protected override void Dispose(bool disposeManagedResources)
     {
-        lock (_isDisposedLock)
-        {
-            if (_isDisposed)
-            {
-                return;
-            }
-
-            Close();
-
-            _isDisposed = true;
-        }
+        IsAlive = false;
+        StopWaitingOnEdgeEvents();
+        base.Dispose(disposeManagedResources);
     }
-
-    #endregion
 }

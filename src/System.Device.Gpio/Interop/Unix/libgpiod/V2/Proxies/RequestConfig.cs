@@ -22,6 +22,7 @@ internal class RequestConfig : LibGpiodProxyBase
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__request__config.html#gaca72f4c114efce4aa3909a3f71fb6c8e"/>
     public RequestConfig(RequestConfigSafeHandle handle)
+        : base(handle)
     {
         Handle = handle;
     }

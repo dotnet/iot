@@ -24,10 +24,10 @@ internal readonly record struct SequenceNumber
     }
 
     /// <summary>
-    /// Implicit cast operator SequenceNumber -> ulong
+    /// Explicit cast operator SequenceNumber -> ulong
     /// </summary>
     /// <param name="s">The sequenceNumber</param>
-    public static implicit operator ulong(SequenceNumber s)
+    public static explicit operator ulong(SequenceNumber s)
     {
         return s._value;
     }

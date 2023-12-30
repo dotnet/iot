@@ -7,6 +7,6 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal enum GpiodLineDirection
 {
     AsIs = 1,
-    Input,
-    Output
+    Input = 2,
+    Output = 3
 }

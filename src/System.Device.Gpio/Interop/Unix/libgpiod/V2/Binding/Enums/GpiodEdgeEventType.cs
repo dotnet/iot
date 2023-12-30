@@ -7,5 +7,5 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal enum GpiodEdgeEventType
 {
     RisingEdge = 1,
-    FallingEdge
+    FallingEdge = 2
 }

@@ -41,7 +41,8 @@ internal sealed class LibGpiodV2Driver : UnixDriver
         {
             lock (_lockObject)
             {
-                return _chip.GetInfo().GetNumLines();
+                using var chipInfo = _chip.GetInfo();
+                return chipInfo.GetNumLines();
             }
         }
     }
@@ -359,7 +360,7 @@ internal sealed class LibGpiodV2Driver : UnixDriver
     {
         lock (_lockObject)
         {
-            RequestConfig requestConfig = LibGpiodProxyFactory.CreateRequestConfig();
+            using RequestConfig requestConfig = LibGpiodProxyFactory.CreateRequestConfig();
             requestConfig.SetConsumer(ConsumerId);
             var lineSettings = lineSettingsFactory.Invoke();
             LineConfig lineConfig = LibGpiodProxyFactory.CreateLineConfig();
@@ -455,9 +456,14 @@ internal sealed class LibGpiodV2Driver : UnixDriver
                     return;
                 }
 
-                foreach (var request in _requestedLineByLineOffset.Select(x => x.Value.LineRequest).Distinct())
+                foreach (var requestedLines in _requestedLineByLineOffset.Select(x => x.Value).Distinct())
                 {
-                    request.Dispose();
+                    requestedLines.LineRequest.Dispose();
+                    requestedLines.LineConfig.Dispose();
+                    foreach (var lineSettings in requestedLines.SettingsByLine.Values)
+                    {
+                        lineSettings.Dispose();
+                    }
                 }
 
                 _requestedLineByLineOffset.Clear();

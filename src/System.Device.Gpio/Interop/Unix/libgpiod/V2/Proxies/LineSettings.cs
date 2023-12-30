@@ -22,6 +22,7 @@ internal class LineSettings : LibGpiodProxyBase
     /// <param name="handle">Safe handle to the libgpiod object.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__line__settings.html"/>
     public LineSettings(LineSettingsSafeHandle handle)
+        : base(handle)
     {
         Handle = handle;
     }

@@ -24,10 +24,10 @@ internal readonly record struct Offset
     }
 
     /// <summary>
-    /// Implicit cast operator Offset -> int
+    /// Explicit cast operator Offset -> int
     /// </summary>
     /// <param name="i">The offset value</param>
-    public static implicit operator int(Offset i)
+    public static explicit operator int(Offset i)
     {
         if (i._value > int.MaxValue)
         {
