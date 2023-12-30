@@ -7,10 +7,12 @@ using System.Device.I2c;
 using System.Device.Spi;
 using System.Threading;
 using System.IO.Ports;
+using System.Threading.Tasks;
 using Iot.Device.Common;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
 using Microsoft.Extensions.Logging;
+using UnitsNet;
 
 namespace Seatalk1Sample
 {
@@ -33,7 +35,7 @@ namespace Seatalk1Sample
             return 0;
         }
 
-        public void Run(string[] args)
+        public async void Run(string[] args)
         {
             LogDispatcher.LoggerFactory = new SimpleConsoleLoggerFactory(LogLevel.Trace);
 
@@ -42,6 +44,8 @@ namespace Seatalk1Sample
             _seatalk.MessageReceived += ParserOnNewMessageDecoded;
 
             var ctrl = _seatalk.GetAutopilotRemoteController();
+
+            WriteCurrentState();
 
             while (true)
             {
@@ -89,6 +93,20 @@ namespace Seatalk1Sample
                             break;
                         }
 
+                        case ConsoleKey.U:
+                        {
+                            await ctrl.TurnByAsync(Angle.FromDegrees(90), TurnDirection.Starboard, CancellationToken.None);
+
+                            break;
+                        }
+
+                        case ConsoleKey.Z:
+                        {
+                            await ctrl.TurnByAsync(Angle.FromDegrees(-90), TurnDirection.Port, CancellationToken.None);
+
+                            break;
+                        }
+
                         case ConsoleKey.K:
                             if (ctrl.DeadbandMode == DeadbandMode.Automatic)
                             {
@@ -131,7 +149,7 @@ namespace Seatalk1Sample
                     }
                 }
 
-                Thread.Sleep(500);
+                await Task.Delay(500);
                 WriteCurrentState();
             }
 

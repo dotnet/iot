@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Common;
 using Iot.Device.Seatalk1.Messages;
 using UnitsNet;
 
@@ -21,6 +22,7 @@ namespace Iot.Device.Seatalk1
     /// </remarks>
     public class AutoPilotRemoteController
     {
+        private const double AngleEpsilon = 1.1; // The protocol can only give angles in whole degrees
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(6);
         private readonly SeatalkInterface _parentInterface;
         private readonly object _lock = new object();
@@ -53,6 +55,8 @@ namespace Iot.Device.Seatalk1
         public DeadbandMode DeadbandMode { get; private set; }
 
         public TimeSpan DefaultTimeout { get; set; }
+
+        public bool IsOperating => Status is AutopilotStatus.Auto or AutopilotStatus.Track or AutopilotStatus.Wind;
 
         public event Action<Keystroke>? AutopilotKeysPressed;
 
@@ -185,6 +189,121 @@ namespace Iot.Device.Seatalk1
             }
 
             return SendMessageAndVerifyStatus(ks, DefaultTimeout, () => DeadbandMode == mode);
+        }
+
+        public bool TurnTo(Angle degrees, TurnDirection? direction)
+        {
+            return TurnTo(degrees, direction, CancellationToken.None);
+        }
+
+        public Task<bool> TurnToAsync(Angle degrees, TurnDirection? direction, CancellationToken token)
+        {
+            return Task.Factory.StartNew(() => TurnTo(degrees, direction, token));
+        }
+
+        public Task<bool> TurnByAsync(Angle degrees, TurnDirection direction, CancellationToken token)
+        {
+            return Task.Factory.StartNew(() => TurnBy(degrees, direction, token));
+        }
+
+        public bool TurnTo(Angle degrees, TurnDirection? direction, CancellationToken token)
+        {
+            degrees = degrees.Normalize(true);
+
+            var currentHeading1 = AutopilotDesiredHeading;
+            if (!IsOperating || !currentHeading1.HasValue)
+            {
+                return false;
+            }
+
+            var currentDesiredHeading = currentHeading1.Value;
+
+            if (!direction.HasValue)
+            {
+                Angle diff = AngleExtensions.Difference(currentDesiredHeading, degrees);
+                if (diff < Angle.Zero)
+                {
+                    direction = TurnDirection.Starboard;
+                }
+                else
+                {
+                    direction = TurnDirection.Port;
+                }
+            }
+
+            while (!AnglesAreClose(currentDesiredHeading, degrees))
+            {
+                // Should also work if diff is small, but we intend to go the other way (make a full 360)
+                Angle diff = AngleExtensions.Difference(currentDesiredHeading, degrees);
+                if (diff.Abs() > Angle.FromDegrees(10))
+                {
+                    SendMessage(new Keystroke(direction == TurnDirection.Starboard ? AutopilotButtons.PlusTen : AutopilotButtons.PlusOne));
+                }
+                else
+                {
+                    SendMessage(new Keystroke(direction == TurnDirection.Starboard ? AutopilotButtons.PlusOne : AutopilotButtons.MinusOne));
+                }
+
+                token.WaitHandle.WaitOne(TimeSpan.FromSeconds(2));
+
+                if (token.IsCancellationRequested || !IsOperating)
+                {
+                    break;
+                }
+
+                currentHeading1 = AutopilotDesiredHeading;
+                if (currentHeading1.HasValue == false)
+                {
+                    break;
+                }
+
+                currentDesiredHeading = currentHeading1.Value;
+            }
+
+            return currentHeading1.HasValue && AnglesAreClose(currentHeading1.Value, degrees);
+        }
+
+        private bool AnglesAreClose(Angle angle1, Angle angle2)
+        {
+            if (angle1.Equals(angle2, Angle.FromDegrees(AngleEpsilon)))
+            {
+                return true;
+            }
+
+            if (angle1 >= Angle.FromDegrees(359) && angle2 <= Angle.FromDegrees(1))
+            {
+                return true;
+            }
+
+            if (angle2 >= Angle.FromDegrees(359) && angle1 <= Angle.FromDegrees(1))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool TurnBy(Angle degrees, TurnDirection direction, CancellationToken token)
+        {
+            if (degrees < Angle.Zero)
+            {
+                throw new ArgumentOutOfRangeException(nameof(degrees), "Turn amount must be positive. User the direction argument instead of a sign");
+            }
+
+            var currentHeading1 = AutopilotDesiredHeading;
+            if (!IsOperating || !currentHeading1.HasValue)
+            {
+                return false;
+            }
+
+            Angle target = direction == TurnDirection.Starboard ? currentHeading1.Value + degrees : currentHeading1.Value - degrees;
+            target = target.Normalize(true);
+            return TurnTo(target, direction, token);
+        }
+
+        private bool SendMessage(SeatalkMessage message)
+        {
+            return _parentInterface.SendMessage(message);
         }
 
         private bool SendMessageAndVerifyStatus(SeatalkMessage message, TimeSpan timeout, Func<bool> successCondition)

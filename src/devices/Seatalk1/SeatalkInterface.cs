@@ -37,13 +37,13 @@ namespace Iot.Device.Seatalk1
         /// set it up in a special way and change the communication parameters during operation.
         /// </remarks>
         public SeatalkInterface(string uart)
+            : this()
         {
             if (uart == null)
             {
                 throw new ArgumentNullException(nameof(uart));
             }
 
-            _lock = new object();
             _port = new SerialPort(uart);
             _port.BaudRate = 4800;
             _port.Parity = DefaultParity; // Can be anything but none, but "Mark" or "Space" won't have the desired effect on linux, causing garbage to be sent
@@ -55,11 +55,20 @@ namespace Iot.Device.Seatalk1
             _parser.NewMessageDecoded += OnNewMessage;
             _parser.StartDecode();
 
-            _autopilotController = new AutoPilotRemoteController(this);
-
-            _cancellation = new CancellationTokenSource();
-            _watchDog = new Thread(WatchDog);
             _watchDog.Start();
+        }
+
+        /// <summary>
+        /// This constructor is for mocking only!
+        /// </summary>
+        protected SeatalkInterface()
+        {
+            _lock = new object();
+            _port = null!;
+            _parser = null!;
+            _autopilotController = new AutoPilotRemoteController(this);
+            _cancellation = new CancellationTokenSource();
+            _watchDog = new Thread(WatchDogStarter);
         }
 
         public Seatalk1Parser Parser => _parser;
@@ -130,16 +139,21 @@ namespace Iot.Device.Seatalk1
         /// <summary>
         /// Periodic watchdog tasks
         /// </summary>
-        private void WatchDog()
+        private void WatchDogStarter()
         {
             while (!_cancellation.IsCancellationRequested)
             {
+                WatchDog();
                 Thread.Sleep(1000);
-                _autopilotController.UpdateStatus();
             }
         }
 
-        private void OnNewMessage(SeatalkMessage obj)
+        protected virtual void WatchDog()
+        {
+            _autopilotController.UpdateStatus();
+        }
+
+        internal void OnNewMessage(SeatalkMessage obj)
         {
             MessageReceived?.Invoke(obj);
         }
@@ -148,7 +162,11 @@ namespace Iot.Device.Seatalk1
         /// Synchronously send a datagram. This is a low-level function, prefer <see cref="SendMessage"/> instead.
         /// </summary>
         /// <param name="data">The datagram</param>
-        public void SendDatagram(byte[] data)
+        /// <returns>
+        /// True on success, false otherwise. May fail e.g. if the bus is busy all the time.
+        /// Todo: This doesn't do any checks for collisions just yet.
+        /// </returns>
+        public virtual bool SendDatagram(byte[] data)
         {
             // First calculate the required parity setting for each byte.
             var dataWithParity = CalculateParityForEachByte(data);
@@ -171,6 +189,8 @@ namespace Iot.Device.Seatalk1
                 _port.BaseStream.Flush();
                 _port.Parity = DefaultParity;
             }
+
+            return true;
         }
 
         /// <summary>
@@ -179,10 +199,10 @@ namespace Iot.Device.Seatalk1
         /// <param name="message">The message to send</param>
         /// <remarks>Transmission of Seatalk messages can be very slow and include considerable delays. Also, there's no guarantee the
         /// message is successfully transmitted or received anywhere.</remarks>
-        public void SendMessage(SeatalkMessage message)
+        public virtual bool SendMessage(SeatalkMessage message)
         {
             byte[] bytes = message.CreateDatagram();
-            SendDatagram(bytes);
+            return SendDatagram(bytes);
         }
 
         public Task SendMessageAsync(SeatalkMessage message)

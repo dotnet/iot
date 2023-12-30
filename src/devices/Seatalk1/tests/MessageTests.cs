@@ -56,5 +56,25 @@ namespace Iot.Device.Tests.Seatalk1
 
             Assert.NotEqual(obj, copy);
         }
+
+        [Fact]
+        public void EqualKeysAreEqual()
+        {
+            Keystroke ks1 = new Keystroke(AutopilotButtons.PlusTen, 1);
+            Keystroke ks2 = new Keystroke(AutopilotButtons.PlusTen, 1);
+            Assert.Equal(ks1, ks2);
+            Assert.True(ks1.Equals(ks2));
+            Assert.Equal(ks1.GetHashCode(), ks2.GetHashCode());
+        }
+
+        [Fact]
+        public void UnEqualKeysAreNotEqual()
+        {
+            Keystroke ks1 = new Keystroke(AutopilotButtons.PlusTen, 1);
+            Keystroke ks2 = new Keystroke(AutopilotButtons.MinusTen, 1);
+            Assert.NotEqual(ks1, ks2);
+            Assert.False(ks1.Equals(ks2));
+            Assert.NotEqual(ks1.GetHashCode(), ks2.GetHashCode());
+        }
     }
 }

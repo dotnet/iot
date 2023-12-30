@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using Iot.Device.Common;
@@ -37,6 +38,7 @@ namespace Iot.Device.Seatalk1.Messages
             get;
         }
 
+        [IgnoreDataMember]
         protected ILogger Logger { get; }
 
         /// <summary>
@@ -94,6 +96,21 @@ namespace Iot.Device.Seatalk1.Messages
             {
                 throw new InvalidOperationException($"A custom package verification failed");
             }
+        }
+
+        public virtual bool Equals(SeatalkMessage? other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return ExpectedLength == other.ExpectedLength && CommandByte == other.CommandByte;
+        }
+
+        public override int GetHashCode()
+        {
+            return CommandByte << 8 | ExpectedLength;
         }
 
         /// <summary>
