@@ -58,9 +58,12 @@ namespace Iot.Device.Seatalk1
                 new Keystroke(),
                 new DeadbandSetting(),
                 new SetLampIntensity(),
-                new AutopilotCalibrationParameterMessage()
+                new AutopilotCalibrationParameterMessage(),
+                new ApparentWindAngle()
             };
         }
+
+        public bool IsBufferEmpty => _buffer.Count == 0;
 
         public event Action<SeatalkMessage>? NewMessageDecoded;
 

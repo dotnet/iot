@@ -47,6 +47,8 @@ namespace Seatalk1Sample
 
             WriteCurrentState();
 
+            Angle windAngle = Angle.Zero;
+
             while (true)
             {
                 if (Console.KeyAvailable)
@@ -83,6 +85,12 @@ namespace Seatalk1Sample
                                 Console.WriteLine("Setting AUTO mode FAILED!");
                             }
 
+                            break;
+                        }
+
+                        case ConsoleKey.X:
+                        {
+                            ctrl.SetStatus(AutopilotStatus.Wind);
                             break;
                         }
 
@@ -155,6 +163,9 @@ namespace Seatalk1Sample
                 }
 
                 await Task.Delay(500);
+                windAngle = windAngle + Angle.FromDegrees(1.5);
+                var windMsg = new ApparentWindAngle(windAngle);
+                _seatalk.SendMessage(windMsg);
                 WriteCurrentState();
             }
 

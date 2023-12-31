@@ -71,9 +71,11 @@ namespace Iot.Device.Seatalk1
         {
             lock (_lock)
             {
-                _lastUpdateTime = DateTime.UtcNow;
                 if (obj is CompassHeadingAutopilotCourse ch)
                 {
+                    // Only update this when we see an autopilot message, otherwise we declare the autopilot as online
+                    // if all we see is the echo of some of the repeating messages we send out.
+                    _lastUpdateTime = DateTime.UtcNow;
                     Status = ch.AutopilotStatus;
                     AutopilotHeading = ch.CompassHeading;
                     AutopilotDesiredHeading = Status != AutopilotStatus.Standby ? ch.AutoPilotCourse : null;
@@ -176,6 +178,16 @@ namespace Iot.Device.Seatalk1
                 AutopilotStatus.Wind => AutopilotButtons.Auto | AutopilotButtons.StandBy,
                 _ => throw new ArgumentException($"Status {newStatus} is not valid", nameof(newStatus)),
             };
+
+            // For setting wind or track modes, we need to first set auto mode.
+            // Setting wind mode without auto works (and is returned as status 0x4), but has no visible effect.
+            if (newStatus == AutopilotStatus.Wind || newStatus == AutopilotStatus.Track)
+            {
+                if (!SendMessageAndVerifyStatus(new Keystroke(AutopilotButtons.Auto, 1), timeout, () => Status is AutopilotStatus.Auto or AutopilotStatus.Wind or AutopilotStatus.Track))
+                {
+                    return false;
+                }
+            }
 
             return SendMessageAndVerifyStatus(new Keystroke(buttonToPress, 1), timeout, () => Status == newStatus);
         }
@@ -383,12 +395,16 @@ namespace Iot.Device.Seatalk1
                 if (_lastUpdateTime + TimeSpan.FromSeconds(5) < DateTime.UtcNow)
                 {
                     // The autopilot hasn't sent anything for 5 seconds. Assume it's offline
+                    if (Status != AutopilotStatus.Offline) // don't repeat message
+                    {
+                        _logger.LogWarning("Autopilot connection timed out. Assuming it's offline");
+                    }
+
                     Status = AutopilotStatus.Offline;
                     DeadbandMode = DeadbandMode.Automatic;
                     RudderAngle = null;
                     AutopilotDesiredHeading = null;
                     AutopilotHeading = null;
-                    _logger.LogWarning("Autopilot connection timed out. Assuming it's offline");
                 }
             }
         }

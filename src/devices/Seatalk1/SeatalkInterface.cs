@@ -170,6 +170,14 @@ namespace Iot.Device.Seatalk1
         {
             // First calculate the required parity setting for each byte.
             var dataWithParity = CalculateParityForEachByte(data);
+
+            // Only start sending if the buffer is empty. This should hopefully avoid to many collisions
+            while (!_parser.IsBufferEmpty)
+            {
+                // Sending a message takes 1 - 2ms, so wait a bit (knowing that this sleep isn't precise)
+                Thread.Sleep(1);
+            }
+
             // Only one thread at a time, please!
             lock (_lock)
             {

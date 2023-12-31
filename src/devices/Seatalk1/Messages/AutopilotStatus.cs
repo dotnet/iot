@@ -19,6 +19,8 @@ namespace Iot.Device.Seatalk1.Messages
         Auto,
         Track,
         Wind,
+        InactiveTrack,
+        InactiveWind,
         Calibration,
         Undefined,
     }

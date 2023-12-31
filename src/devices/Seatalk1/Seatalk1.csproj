@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <Compile Include="*.cs" />
+    <Compile Include="Messages\ApparentWindAngle.cs" />
     <Compile Include="Messages\AutopilotAlarms.cs" />
     <Compile Include="Messages\AutopilotButtons.cs" />
     <Compile Include="Messages\AutopilotCalibrationParameterMessage.cs" />

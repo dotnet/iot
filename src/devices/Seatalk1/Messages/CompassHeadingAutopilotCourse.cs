@@ -85,9 +85,13 @@ namespace Iot.Device.Seatalk1.Messages
                     return AutopilotStatus.Standby;
                 case 2:
                     return AutopilotStatus.Auto;
-                case 4:
+                case 4: // Wind mode may be on its own and together with the auto flag
+                    return AutopilotStatus.InactiveWind;
+                case 6:
                     return AutopilotStatus.Wind;
                 case 8:
+                    return AutopilotStatus.InactiveTrack;
+                case 10:
                     return AutopilotStatus.Track;
                 case 0x10:
                     return AutopilotStatus.Calibration;

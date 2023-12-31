@@ -29,6 +29,7 @@ namespace Iot.Device.Tests.Seatalk1
         [InlineData("9c 01 12 00", typeof(CompassHeadingAndRudderPosition))]
         [InlineData("87 00 01", typeof(DeadbandSetting))]
         [InlineData("86 01 02 fd", typeof(Keystroke))]
+        [InlineData("10 01 00 01", typeof(ApparentWindAngle))]
         public void KnownMessageTypeDecode(string msg, Type expectedType)
         {
             msg = msg.Replace(" ", string.Empty);
@@ -76,6 +77,18 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.NotEqual(ks1, ks2);
             Assert.False(ks1.Equals(ks2));
             Assert.NotEqual(ks1.GetHashCode(), ks2.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData(10.0)]
+        [InlineData(0.0)]
+        [InlineData(-11.0)]
+        public void SignIsMaintainedInWindAngle(double value)
+        {
+            ApparentWindAngle angle = new ApparentWindAngle(Angle.FromDegrees(value));
+            byte[] data = angle.CreateDatagram();
+            var angle2 = angle.CreateNewMessage(data);
+            Assert.Equal(angle, angle2);
         }
     }
 }
