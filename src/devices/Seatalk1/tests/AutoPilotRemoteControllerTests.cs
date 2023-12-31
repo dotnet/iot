@@ -139,5 +139,58 @@ namespace Iot.Device.Tests.Seatalk1
 
             _interface.Verify(x => x.SendMessage(ks));
         }
+
+        [Fact]
+        public void TurnToPortFullSequence()
+        {
+            // Ap is in auto mode
+            var msg = new CompassHeadingAutopilotCourse()
+            {
+                AutopilotStatus = AutopilotStatus.Auto,
+                AutoPilotCourse = Angle.FromDegrees(10),
+                CompassHeading = Angle.FromDegrees(9),
+            };
+
+            _interface.Object.OnNewMessage(msg);
+
+            int indexOfCommand = 0;
+            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            {
+                var ks = (Keystroke)i;
+                if (indexOfCommand == 0)
+                {
+                    Assert.True(ks.ButtonsPressed == AutopilotButtons.MinusTen);
+                    msg = msg with
+                    {
+                        AutoPilotCourse = Angle.Zero
+                    };
+                }
+                else if (indexOfCommand == 1)
+                {
+                    Assert.True(ks.ButtonsPressed == AutopilotButtons.MinusOne);
+                    msg = msg with
+                    {
+                        AutoPilotCourse = Angle.FromDegrees(359)
+                    };
+                }
+                else if (indexOfCommand == 2)
+                {
+                    Assert.True(ks.ButtonsPressed == AutopilotButtons.MinusOne);
+                    msg = msg with
+                    {
+                        AutoPilotCourse = Angle.FromDegrees(358)
+                    };
+                }
+                else
+                {
+                    Assert.Fail("More commands sent than necessary");
+                }
+
+                _interface.Object.OnNewMessage(msg);
+                indexOfCommand++;
+            }).Returns(true);
+
+            Assert.True(_testee.TurnBy(Angle.FromDegrees(12), TurnDirection.Port, _tokenSource.Token));
+        }
     }
 }

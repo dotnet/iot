@@ -237,7 +237,7 @@ namespace Iot.Device.Seatalk1
                 Angle diff = AngleExtensions.Difference(currentDesiredHeading, degrees);
                 if (diff.Abs() > Angle.FromDegrees(10))
                 {
-                    SendMessage(new Keystroke(direction == TurnDirection.Starboard ? AutopilotButtons.PlusTen : AutopilotButtons.PlusOne));
+                    SendMessage(new Keystroke(direction == TurnDirection.Starboard ? AutopilotButtons.PlusTen : AutopilotButtons.MinusTen));
                 }
                 else
                 {
