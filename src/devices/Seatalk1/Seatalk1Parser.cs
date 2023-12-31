@@ -57,6 +57,8 @@ namespace Iot.Device.Seatalk1
                 new CompassHeadingAutopilotCourseAlt(),
                 new Keystroke(),
                 new DeadbandSetting(),
+                new SetLampIntensity(),
+                new AutopilotCalibrationParameterMessage()
             };
         }
 

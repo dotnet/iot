@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
@@ -41,6 +42,11 @@ namespace Iot.Device.Seatalk1.Messages
 
             AutopilotStatus status = GetAutopilotStatus(data[4]);
 
+            if (status == AutopilotStatus.Undefined)
+            {
+                Logger.LogWarning($"Unknown autopilot status byte {data[4]}");
+            }
+
             sbyte rudder = (sbyte)data[6];
 
             AutopilotAlarms alarms = AutopilotAlarms.None;
@@ -73,14 +79,27 @@ namespace Iot.Device.Seatalk1.Messages
 
         private AutopilotStatus GetAutopilotStatus(byte z)
         {
-            return (z & 0xf) switch
+            switch (z)
             {
-                0 => AutopilotStatus.Standby,
-                2 => AutopilotStatus.Auto,
-                4 => AutopilotStatus.Wind,
-                8 => AutopilotStatus.Track,
-                _ => AutopilotStatus.Undefined,
-            };
+                case 0:
+                    return AutopilotStatus.Standby;
+                case 2:
+                    return AutopilotStatus.Auto;
+                case 4:
+                    return AutopilotStatus.Wind;
+                case 8:
+                    return AutopilotStatus.Track;
+                case 0x10:
+                    return AutopilotStatus.Calibration;
+                default:
+                    return AutopilotStatus.Undefined;
+            }
+        }
+
+        public override bool MatchesMessageType(IReadOnlyList<byte> data)
+        {
+            // Add some additional tests to make sure the message is not messed up
+            return base.MatchesMessageType(data) && GetAutopilotStatus(data[4]) != AutopilotStatus.Undefined && (data[5] & 0xF0) == 0 && (data[8] & 0xF0) == 0;
         }
     }
 }

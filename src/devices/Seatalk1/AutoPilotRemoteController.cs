@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Iot.Device.Common;
 using Iot.Device.Seatalk1.Messages;
+using Microsoft.Extensions.Logging;
 using UnitsNet;
 
 namespace Iot.Device.Seatalk1
@@ -20,17 +22,22 @@ namespace Iot.Device.Seatalk1
     /// <remarks>
     /// Type is not disposable, to prevent accidental disposal by clients. They don't get ownership of the instance.
     /// </remarks>
-    public class AutoPilotRemoteController
+    public class AutoPilotRemoteController : MarshalByRefObject
     {
         private const double AngleEpsilon = 1.1; // The protocol can only give angles in whole degrees
         private static readonly TimeSpan MaximumTimeout = TimeSpan.FromSeconds(6);
         private readonly SeatalkInterface _parentInterface;
         private readonly object _lock = new object();
+        private readonly ILogger _logger;
+        private ConcurrentDictionary<AutopilotCalibrationParameter, AutopilotCalibrationParameterMessage> _calibrationParameters;
+
         private DateTime _lastUpdateTime = new DateTime(0);
         private bool _buttonOnApPressed = false;
 
         internal AutoPilotRemoteController(SeatalkInterface parentInterface)
         {
+            _logger = this.GetCurrentClassLogger();
+            _calibrationParameters = new();
             _parentInterface = parentInterface ?? throw new ArgumentNullException(nameof(parentInterface));
             _parentInterface.MessageReceived += AutopilotMessageInterpretation;
             RudderAngleAvailable = false;
@@ -116,6 +123,11 @@ namespace Iot.Device.Seatalk1
 
                     AutopilotKeysPressed?.Invoke(keystroke);
                 }
+                else if (obj is AutopilotCalibrationParameterMessage calibParam)
+                {
+                    _logger.LogInformation($"Received calibration value for {calibParam.Parameter}. Current {calibParam.CurrentSetting} Min {calibParam.MinValue} Max {calibParam.MaxValue}");
+                    _calibrationParameters.AddOrUpdate(calibParam.Parameter, x => calibParam, (a, b) => calibParam);
+                }
 
                 if (Status == AutopilotStatus.Standby || Status == AutopilotStatus.Offline)
                 {
@@ -127,6 +139,16 @@ namespace Iot.Device.Seatalk1
         public bool SetStatus(AutopilotStatus status)
         {
             return SetStatus(status, DefaultTimeout);
+        }
+
+        /// <summary>
+        /// Returns the currently known parameter values.
+        /// Note: The values can currently only be read out by manually entering the calibration mode once.
+        /// </summary>
+        /// <returns>A list of parameter values</returns>
+        public List<AutopilotCalibrationParameterMessage> GetCalibrationParameters()
+        {
+            return _calibrationParameters.Values.ToList();
         }
 
         /// <summary>
@@ -231,6 +253,8 @@ namespace Iot.Device.Seatalk1
                 }
             }
 
+            _logger.LogInformation($"New desired heading: {degrees}");
+
             while (!AnglesAreClose(currentDesiredHeading, degrees))
             {
                 // Should also work if diff is small, but we intend to go the other way (make a full 360)
@@ -246,8 +270,15 @@ namespace Iot.Device.Seatalk1
 
                 token.WaitHandle.WaitOne(TimeSpan.FromSeconds(2));
 
-                if (token.IsCancellationRequested || !IsOperating)
+                if (token.IsCancellationRequested)
                 {
+                    _logger.LogWarning("Turning cancelled because operation was externally aborted");
+                    break;
+                }
+
+                if (!IsOperating)
+                {
+                    _logger.LogWarning($"Turning cancelled because Autopilot is no longer in the correct state. Current State {Status}");
                     break;
                 }
 
@@ -260,10 +291,20 @@ namespace Iot.Device.Seatalk1
                 currentDesiredHeading = currentHeading1.Value;
             }
 
-            return currentHeading1.HasValue && AnglesAreClose(currentHeading1.Value, degrees);
+            bool ret = currentHeading1.HasValue && AnglesAreClose(currentHeading1.Value, degrees);
+            if (ret)
+            {
+                _logger.LogInformation($"Reached new desired course {currentHeading1.GetValueOrDefault()}");
+            }
+            else
+            {
+                _logger.LogWarning($"TurnTo terminated prematurely, desired new heading not reached");
+            }
+
+            return ret;
         }
 
-        private bool AnglesAreClose(Angle angle1, Angle angle2)
+        internal bool AnglesAreClose(Angle angle1, Angle angle2)
         {
             if (angle1.Equals(angle2, Angle.FromDegrees(AngleEpsilon)))
             {
@@ -347,9 +388,63 @@ namespace Iot.Device.Seatalk1
                     RudderAngle = null;
                     AutopilotDesiredHeading = null;
                     AutopilotHeading = null;
+                    _logger.LogWarning("Autopilot connection timed out. Assuming it's offline");
                 }
             }
         }
+
+        /* Unfortunately, the exact sequence to remotely enter calibration mode appears to be different for each type of remote control and autopilot
+            I have not found out how it works for the ST2000+. I also have not found out how to read out parameter values without entering calibration mode
+        public bool ReadCalibrationValues()
+        {
+            if (Status != AutopilotStatus.Standby)
+            {
+                return false;
+            }
+
+            _calibrationParameters.Clear();
+
+            Keystroke ks;
+
+            Thread.Sleep(100);
+            ks = new Keystroke(0x42);
+            SendMessage(ks);
+            Thread.Sleep(200);
+            ks = new Keystroke(0x68);
+            SendMessage(ks);
+            Thread.Sleep(500);
+            ks = new Keystroke(0x84);
+            SendMessage(ks);
+            Thread.Sleep(500);
+
+            ks = new Keystroke(0x04);
+            SendMessage(ks);
+
+            ks = new Keystroke(AutopilotButtons.MinusOne | AutopilotButtons.PlusOne);
+            SendMessage(ks);
+
+            Stopwatch sw = Stopwatch.StartNew();
+            int currentEntries = _calibrationParameters.Count;
+            while (sw.ElapsedMilliseconds < 3500)
+            {
+                ks = new Keystroke(AutopilotButtons.Auto);
+                SendMessage(ks);
+                _parentInterface.SendDatagram(new byte[]
+                {
+                    0x92, 1, 1
+                });
+                Thread.Sleep(1500);
+                if (currentEntries != _calibrationParameters.Count)
+                {
+                    currentEntries = _calibrationParameters.Count;
+                    sw.Restart();
+                }
+            }
+
+            ks = new Keystroke(AutopilotButtons.StandBy);
+            SendMessage(ks);
+            return true;
+        }*/
 
         /// <summary>
         /// Returns a textual representation of the current AP status

@@ -24,6 +24,7 @@ namespace Iot.Device.Tests.Seatalk1
 
         [Theory]
         [InlineData("95 86 26 97 02 00 00 00 08", typeof(CompassHeadingAutopilotCourseAlt))]
+        [InlineData("95 86 0E 00 10 00 00 04 08", typeof(CompassHeadingAutopilotCourseAlt))]
         [InlineData("84 86 26 97 02 00 00 00 08", typeof(CompassHeadingAutopilotCourse))]
         [InlineData("9c 01 12 00", typeof(CompassHeadingAndRudderPosition))]
         [InlineData("87 00 01", typeof(DeadbandSetting))]

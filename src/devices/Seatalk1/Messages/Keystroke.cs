@@ -42,7 +42,12 @@ namespace Iot.Device.Seatalk1.Messages
                 { 0x30, AutopilotButtons.MinusOne | AutopilotButtons.PlusTen },
                 { 0x31, AutopilotButtons.MinusTen | AutopilotButtons.PlusOne },
                 { 0x41, AutopilotButtons.Auto | AutopilotButtons.LongPress },
-                { 0x63, AutopilotButtons.Auto | AutopilotButtons.LongPress | AutopilotButtons.StandBy }
+                { 0x42, AutopilotButtons.StandBy | AutopilotButtons.LongPress },
+                { 0x63, AutopilotButtons.Auto | AutopilotButtons.LongPress | AutopilotButtons.StandBy },
+
+                // This one can mean: Return to previous track, but is also sent when Standby is pressed for more than 5 seconds (entering calibration)
+                // In the later case, it comes after 0x42
+                { 0x68, AutopilotButtons.PlusTen | AutopilotButtons.MinusTen | AutopilotButtons.LongPress },
             };
 
             s_buttonToCodeMap = new Dictionary<AutopilotButtons, int>();

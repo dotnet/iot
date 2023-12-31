@@ -9,17 +9,11 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Seatalk1.Messages
 {
-    /// <summary>
-    /// The current state of the auto pilot controller
-    /// </summary>
-    public enum AutopilotStatus
+    public enum DisplayBacklightLevel
     {
-        Offline,
-        Standby,
-        Auto,
-        Track,
-        Wind,
-        Calibration,
-        Undefined,
+        Off = 0,
+        Level1 = 4,
+        Level2 = 8,
+        Level3 = 0xC,
     }
 }

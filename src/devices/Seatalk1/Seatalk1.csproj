@@ -18,14 +18,18 @@
     <Compile Include="*.cs" />
     <Compile Include="Messages\AutopilotAlarms.cs" />
     <Compile Include="Messages\AutopilotButtons.cs" />
+    <Compile Include="Messages\AutopilotCalibrationParameterMessage.cs" />
+    <Compile Include="Messages\AutopilotCalibrationParameter.cs" />
     <Compile Include="Messages\AutopilotStatus.cs" />
     <Compile Include="Messages\CompassHeadingAndRudderPosition.cs" />
     <Compile Include="Messages\CompassHeadingAutopilotCourse.cs" />
     <Compile Include="Messages\CompassHeadingAutopilotCourseAlt.cs" />
     <Compile Include="Messages\DeadbandMode.cs" />
     <Compile Include="Messages\DeadbandSetting.cs" />
+    <Compile Include="Messages\DisplayBacklightLevel.cs" />
     <Compile Include="Messages\Keystroke.cs" />
     <Compile Include="Messages\SeatalkMessage.cs" />
+    <Compile Include="Messages\SetLampIntensity.cs" />
     <Compile Include="Messages\TurnDirection.cs" />
     <None Include="README.md" />
   </ItemGroup>

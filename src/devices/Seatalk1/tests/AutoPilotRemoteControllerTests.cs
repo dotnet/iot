@@ -39,7 +39,7 @@ namespace Iot.Device.Tests.Seatalk1
         }
 
         [Fact]
-        public void MakeReady()
+        public void SetToStandby()
         {
             var msg = new CompassHeadingAutopilotCourse()
             {
@@ -90,6 +90,15 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.Equal(Angle.FromDegrees(90), _testee.AutopilotHeading);
             Assert.Equal(AutopilotAlarms.None, _testee.Alarms);
             Assert.False(_testee.RudderAngleAvailable);
+        }
+
+        [Fact]
+        public void TurnToHasNoEffectWhenStandby()
+        {
+            SetToStandby();
+            Assert.Equal(AutopilotStatus.Standby, _testee.Status);
+            // Also: Shouldn't block, despite no Cancellation given
+            Assert.False(_testee.TurnTo(Angle.FromDegrees(100), TurnDirection.Starboard));
         }
 
         [Fact]
@@ -191,6 +200,107 @@ namespace Iot.Device.Tests.Seatalk1
             }).Returns(true);
 
             Assert.True(_testee.TurnBy(Angle.FromDegrees(12), TurnDirection.Port, _tokenSource.Token));
+        }
+
+        [Fact]
+        public void TurnTo()
+        {
+            // Ap is in auto mode
+            var msg = new CompassHeadingAutopilotCourse()
+            {
+                AutopilotStatus = AutopilotStatus.Auto,
+                AutoPilotCourse = Angle.FromDegrees(10),
+                CompassHeading = Angle.FromDegrees(9),
+            };
+
+            _interface.Object.OnNewMessage(msg);
+
+            Keystroke ks = new Keystroke(AutopilotButtons.PlusTen, 1); // We expect that it's automatically guessing the "nearer" direction right
+            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            {
+                Assert.Equal(ks, i);
+            }).Returns(true);
+            _tokenSource.Cancel(); // Cancellation is only tested after the first command was sent
+            Assert.False(_testee.TurnTo(Angle.FromDegrees(100), null, _tokenSource.Token));
+
+            _interface.Verify(x => x.SendMessage(ks));
+        }
+
+        [Fact]
+        public void SetAndResetDeadbandMode()
+        {
+            SetToStandby();
+            Assert.Equal(DeadbandMode.Automatic, _testee.DeadbandMode);
+            Assert.False(_testee.SetDeadbandMode(DeadbandMode.Minimal));
+            SetToAuto();
+
+            int num = 0;
+            Keystroke ks = new Keystroke(0x0a); // We expect that it's automatically guessing the "nearer" direction right
+            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            {
+                if (num == 0)
+                {
+                    Assert.Equal(ks, i);
+                    var msg = new DeadbandSetting()
+                    {
+                        Mode = DeadbandMode.Minimal,
+                    };
+
+                    _interface.Object.OnNewMessage(msg);
+                }
+                else
+                {
+                    var ks2 = (Keystroke)i;
+                    Assert.Equal(0x09, ks2.KeyCode);
+                    var msg = new DeadbandSetting()
+                    {
+                        Mode = DeadbandMode.Automatic,
+                    };
+
+                    _interface.Object.OnNewMessage(msg);
+                }
+
+                num++;
+            }).Returns(true);
+
+            Assert.True(_testee.SetDeadbandMode(DeadbandMode.Minimal));
+            Assert.True(_testee.SetDeadbandMode(DeadbandMode.Automatic));
+        }
+
+        [Fact]
+        public void AnglesAreClose()
+        {
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(359), Angle.FromDegrees(0.1)));
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(360), Angle.FromDegrees(359)));
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(0), Angle.FromDegrees(359)));
+            Assert.True(_testee.AnglesAreClose(Angle.FromDegrees(181), Angle.FromDegrees(180)));
+        }
+
+        [Fact]
+        public void ToStringTest()
+        {
+            Assert.NotEmpty(_testee.ToString());
+        }
+
+        [Fact]
+        public void SetToAutoRemotely()
+        {
+            Keystroke ks = new Keystroke(AutopilotButtons.Auto, 1); // We expect that it's automatically guessing the "nearer" direction right
+            _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
+            {
+                Assert.Equal(ks, i);
+                var msg = new CompassHeadingAutopilotCourse()
+                {
+                    AutopilotStatus = AutopilotStatus.Auto,
+                    AutoPilotCourse = Angle.FromDegrees(10),
+                    CompassHeading = Angle.FromDegrees(9),
+                };
+
+                _interface.Object.OnNewMessage(msg);
+
+            }).Returns(true);
+
+            Assert.True(_testee.SetStatus(AutopilotStatus.Auto));
         }
     }
 }

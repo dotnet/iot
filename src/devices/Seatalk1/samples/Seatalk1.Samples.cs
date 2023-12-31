@@ -86,13 +86,6 @@ namespace Seatalk1Sample
                             break;
                         }
 
-                        case ConsoleKey.L:
-                        {
-                            // Doesn't seem to do anything on the ST2000+, even though it is documented that remote-controlling the display backlight should work
-                            ks = new Keystroke(AutopilotButtons.Disp);
-                            break;
-                        }
-
                         case ConsoleKey.U:
                         {
                             await ctrl.TurnByAsync(Angle.FromDegrees(90), TurnDirection.Starboard, CancellationToken.None);
@@ -102,7 +95,7 @@ namespace Seatalk1Sample
 
                         case ConsoleKey.Z:
                         {
-                            await ctrl.TurnByAsync(Angle.FromDegrees(-90), TurnDirection.Port, CancellationToken.None);
+                            await ctrl.TurnByAsync(Angle.FromDegrees(90), TurnDirection.Port, CancellationToken.None);
 
                             break;
                         }
@@ -141,6 +134,18 @@ namespace Seatalk1Sample
                             }
 
                             break;
+                        case ConsoleKey.L:
+                            if (key.Modifiers == ConsoleModifiers.Shift)
+                            {
+                                _seatalk.SetLampIntensity(DisplayBacklightLevel.Off);
+                            }
+                            else
+                            {
+                                _seatalk.SetLampIntensity(DisplayBacklightLevel.Level3);
+                            }
+
+                            break;
+
                     }
 
                     if (ks.ButtonsPressed != AutopilotButtons.None)

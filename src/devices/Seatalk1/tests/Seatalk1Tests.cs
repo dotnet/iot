@@ -116,7 +116,7 @@ namespace Iot.Device.Tests.Seatalk1
         [Fact]
         public void ParityBitCheckForMessageThatMustWork()
         {
-            // This message (+10 key) doesn't work yet.
+            // This message took a bit to get right
             byte[] datagram = new byte[]
             {
                 0x86, 0x11, 0x08, 0xf7
@@ -133,6 +133,25 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.Equal(Parity.Odd, withParity[2].P);
             // 0xf7 is odd, we need the stopbit to be 0, so parity needs to be odd
             Assert.Equal(Parity.Odd, withParity[3].P);
+        }
+
+        [Fact]
+        public void ParityBitCheckForMessageWithOddCommandByte()
+        {
+            byte[] datagram = new byte[]
+            {
+                0x9C, 0x01, 0x03, 0x0f
+            };
+
+            var withParity = SeatalkInterface.CalculateParityForEachByte(datagram);
+            Assert.Equal(0x9c, withParity[0].B);
+            Assert.Equal(0, withParity[0].Index);
+            // 0x9c is even (not the value, but it's bitcount), and we want the stopbit to be 1, so the parity should be odd
+            Assert.Equal(Parity.Odd, withParity[0].P);
+            // 0x01 is odd, we need the stopbit to be 0, so parity needs to be odd
+            Assert.Equal(Parity.Odd, withParity[1].P);
+            // 0x03 is even, we need the stopbit to be 0, so parity needs to be even
+            Assert.Equal(Parity.Even, withParity[2].P);
         }
 
         private static MemoryStream GetStreamFromInputString(string data)

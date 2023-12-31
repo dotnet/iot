@@ -13,7 +13,7 @@ using Iot.Device.Seatalk1.Messages;
 
 namespace Iot.Device.Seatalk1
 {
-    public class SeatalkInterface : IDisposable
+    public class SeatalkInterface : MarshalByRefObject, IDisposable
     {
         private const Parity DefaultParity = Parity.Even;
         private readonly SerialPort _port;
@@ -215,6 +215,17 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         /// <returns>An interface to monitor and control an Autopilot connected via Seatalk1</returns>
         public AutoPilotRemoteController GetAutopilotRemoteController() => _autopilotController;
+
+        /// <summary>
+        /// Configures the display backlight of all devices connected to the bus, as far as this is supported
+        /// (e.g. the ST2000 autopilot only supports on or off)
+        /// </summary>
+        /// <param name="intensity">The new backlight level</param>
+        public void SetLampIntensity(DisplayBacklightLevel intensity)
+        {
+            var msg = new SetLampIntensity(intensity);
+            SendMessage(msg);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
