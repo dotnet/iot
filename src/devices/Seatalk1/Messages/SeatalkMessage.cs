@@ -100,7 +100,7 @@ namespace Iot.Device.Seatalk1.Messages
 
         public virtual bool Equals(SeatalkMessage? other)
         {
-            if (other == null)
+            if (ReferenceEquals(other, null))
             {
                 return false;
             }

@@ -65,6 +65,8 @@ namespace Iot.Device.Seatalk1
 
         public TimeSpan DefaultTimeout { get; set; }
 
+        public TurnDirection TurnDirection { get; private set; }
+
         public bool IsOperating => Status is AutopilotStatus.Auto or AutopilotStatus.Track or AutopilotStatus.Wind;
 
         public bool IsStandby => Status is AutopilotStatus.Standby or AutopilotStatus.InactiveTrack or AutopilotStatus.InactiveWind;
@@ -86,6 +88,7 @@ namespace Iot.Device.Seatalk1
                     AutopilotHeading = ch.CompassHeading;
                     AutopilotDesiredHeading = !IsStandby ? ch.AutoPilotCourse : null;
                     AutopilotType = ch.AutoPilotType;
+                    TurnDirection = ch.TurnDirection;
                     if (!RudderAngleAvailable)
                     {
                         RudderAngleAvailable = !ch.RudderPosition.Equals(Angle.Zero, Angle.FromDegrees(0.5));
@@ -105,6 +108,7 @@ namespace Iot.Device.Seatalk1
                 else if (obj is CompassHeadingAndRudderPosition rb)
                 {
                     AutopilotHeading = rb.CompassHeading;
+                    TurnDirection = rb.TurnDirection;
                     if (!RudderAngleAvailable)
                     {
                         RudderAngleAvailable = !rb.RudderPosition.Equals(Angle.Zero, Angle.FromDegrees(0.5));
@@ -526,7 +530,7 @@ namespace Iot.Device.Seatalk1
             string hdg = AutopilotHeading.HasValue ? AutopilotHeading.Value.ToString() : "N/A";
             string desiredHdg = AutopilotDesiredHeading.HasValue ? AutopilotDesiredHeading.Value.ToString() : "N/A";
             string rudderAngle = RudderAngleAvailable ? RudderAngle.GetValueOrDefault().ToString() : "N/A";
-            string ret = $"MODE: {Status}; HDG: {hdg}; DESHDG: {desiredHdg}; RUD: {rudderAngle}; DB: {DeadbandMode}; ALRT: {Alarms}";
+            string ret = $"MODE:{Status}; HDG:{hdg}; DES:{desiredHdg}; RUD:{rudderAngle}; DB:{DeadbandMode}; ALRT:{Alarms}; TD:{TurnDirection}";
             return ret;
         }
     }

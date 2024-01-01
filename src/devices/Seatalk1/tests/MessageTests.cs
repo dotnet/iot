@@ -134,13 +134,13 @@ namespace Iot.Device.Tests.Seatalk1
             byte[] data = n.CreateDatagram();
             // Cross track error
             Assert.Equal(0x85, data[0]);
-            Assert.Equal(0xb6, data[1]);
-            Assert.Equal(0xef, data[2]);
+            Assert.Equal(0x56, data[1]);
+            Assert.Equal(0x10, data[2]);
 
             // Distance
             Assert.Equal(0x10, data[4] & 0xF0);
             Assert.Equal(0x20, data[5]);
-            Assert.Equal(0x00, data[6] & 0xF0);
+            Assert.Equal(0x40, data[6] & 0xF0);
 
             // Bearing
             Assert.Equal(0x08, data[3]);

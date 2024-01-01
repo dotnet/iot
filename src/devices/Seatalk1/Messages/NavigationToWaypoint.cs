@@ -12,6 +12,18 @@ namespace Iot.Device.Seatalk1.Messages
 {
     public record NavigationToWaypoint : SeatalkMessage
     {
+        public NavigationToWaypoint()
+        {
+        }
+
+        public NavigationToWaypoint(Length? crossTrackError, Angle? bearingToDestination, bool bearingIsTrue, Length? distanceToDestination)
+        {
+            CrossTrackError = crossTrackError;
+            BearingToDestination = bearingToDestination;
+            BearingIsTrue = bearingIsTrue;
+            DistanceToDestination = distanceToDestination;
+        }
+
         public override byte CommandByte => 0x85;
         public override byte ExpectedLength => 0x9;
 
@@ -50,7 +62,7 @@ namespace Iot.Device.Seatalk1.Messages
             byte flags = 0;
             byte[] data = new byte[9];
             data[0] = CommandByte;
-            data[1] = ExpectedLength;
+            data[1] = (byte)(ExpectedLength - 3);
             if (CrossTrackError.HasValue)
             {
                 double nmTimes100 = CrossTrackError.Value.NauticalMiles * 100.0;

@@ -79,6 +79,8 @@ namespace Iot.Device.Seatalk1
 
         public event Action<SeatalkMessage>? NewMessageDecoded;
 
+        internal List<SeatalkMessage> MessageTypes => _messageFactories;
+
         public void RegisterMessageType(SeatalkMessage message)
         {
             if (message.ExpectedLength > 18)

@@ -9,6 +9,16 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Sent by the auto pilot when the automatic deadband mode is changed.
+    /// If set to "Automatic" (the default) the Autopilot tries to compensate for the effect of waves and reduces the
+    /// rudder movement to a minimum. If set to "Minimum", the Autopilot tries to minimize the off-track error, at the
+    /// expense of additional movements and thus higher power consumption. The latter is particularly useful when navigating
+    /// on narrow waterways.
+    /// </summary>
+    /// <remarks>
+    /// To change the setting, send the respective keycodes (0x09 or 0x0a) instead of a message with the desired new value.
+    /// </remarks>
     public record DeadbandSetting : SeatalkMessage
     {
         public override byte CommandByte => 0x87;
@@ -35,9 +45,23 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <summary>
+        /// Creates a Deadband status change message.
+        /// </summary>
+        /// <returns>The datagram</returns>
         public override byte[] CreateDatagram()
         {
-            throw new NotSupportedException("Send the respective keycodes instead (0x09 or 0x0a)");
+            byte mode = Mode switch
+            {
+                DeadbandMode.Automatic => 1,
+                DeadbandMode.Minimal => 2,
+                _ => 0,
+            };
+
+            return new byte[]
+            {
+                CommandByte, (byte)(ExpectedLength - 3), mode
+            };
         }
 
         public override bool MatchesMessageType(IReadOnlyList<byte> data)

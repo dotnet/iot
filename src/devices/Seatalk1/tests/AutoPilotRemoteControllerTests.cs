@@ -285,6 +285,7 @@ namespace Iot.Device.Tests.Seatalk1
         [Fact]
         public void SetToAutoRemotely()
         {
+            SetToStandby();
             Keystroke ks = new Keystroke(AutopilotButtons.Auto, 1); // We expect that it's automatically guessing the "nearer" direction right
             _interface.Setup(x => x.SendMessage(It.IsAny<SeatalkMessage>())).Callback<SeatalkMessage>(i =>
             {
@@ -300,7 +301,8 @@ namespace Iot.Device.Tests.Seatalk1
 
             }).Returns(true);
 
-            Assert.True(_testee.SetStatus(AutopilotStatus.Auto));
+            TurnDirection? ignore = TurnDirection.Starboard;
+            Assert.True(_testee.SetStatus(AutopilotStatus.Auto, ref ignore));
         }
     }
 }

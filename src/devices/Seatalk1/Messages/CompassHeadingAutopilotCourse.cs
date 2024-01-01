@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Iot.Device.Common;
 using Microsoft.Extensions.Logging;
 using UnitsNet;
 
@@ -24,9 +25,11 @@ namespace Iot.Device.Seatalk1.Messages
 
         public Angle RudderPosition { get; init; }
 
-        public AutopilotStatus AutopilotStatus { get; init; }
+        public AutopilotStatus AutopilotStatus { get; init; } = AutopilotStatus.Standby;
 
         public AutopilotAlarms Alarms { get; init; }
+
+        public TurnDirection TurnDirection { get; init; }
 
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
@@ -34,11 +37,12 @@ namespace Iot.Device.Seatalk1.Messages
 
             uint u = ((uint)data[1]) >> 4;
             uint vw = data[2];
-            // TODO: Verify last part. Actually, only one bit is required there, and the uppermost bit is also used for the turning direction, according to the docs
-            long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + BitCount(u & 0xC);
+            long heading = (u & 0x3) * 90 + (vw & 0x3F) * 2 + ((u & 0x4) == 0x4 ? 1 : 0);
             Angle headingA = Angle.FromDegrees(heading);
 
-            long desiredCourse = (vw >> 6) * 90 + data[3] / 2;
+            Messages.TurnDirection td = (u & 0x8) == 0x8 ? TurnDirection.Starboard : TurnDirection.Port;
+
+            double desiredCourse = ((vw >> 6) * 90) + (data[3] / 2.0);
 
             AutopilotStatus status = GetAutopilotStatus(data[4]);
 
@@ -69,12 +73,87 @@ namespace Iot.Device.Seatalk1.Messages
                 AutopilotStatus = status,
                 RudderPosition = Angle.FromDegrees(rudder),
                 Alarms = alarms,
+                TurnDirection = td,
             };
         }
 
         public override byte[] CreateDatagram()
         {
-            throw new NotImplementedException();
+            byte[] data = new byte[ExpectedLength];
+            data[0] = CommandByte;
+            int heading = (int)Math.Round(CompassHeading.Normalize(true).Degrees);
+            int u = 0;
+            if (heading >= 270)
+            {
+                u = 3;
+                heading -= 270;
+            }
+            else if (heading >= 180)
+            {
+                u = 2;
+                heading -= 180;
+            }
+            else if (heading >= 90)
+            {
+                u = 1;
+                heading -= 90;
+            }
+
+            if (TurnDirection == TurnDirection.Starboard)
+            {
+                u |= 0x8;
+            }
+
+            if (heading % 2 == 1)
+            {
+                u |= 0x4;
+            }
+
+            sbyte rudder = Convert.ToSByte(RudderPosition.Degrees);
+
+            data[1] = (byte)(u << 4 | (ExpectedLength - 3));
+            data[2] = (byte)((heading >> 1) & 0x3f);
+
+            byte almByte = 0;
+            if ((Alarms & AutopilotAlarms.OffCourse) == AutopilotAlarms.OffCourse)
+            {
+                almByte |= 4;
+            }
+
+            if ((Alarms & AutopilotAlarms.WindShift) == AutopilotAlarms.WindShift)
+            {
+                almByte |= 8;
+            }
+
+            int vw = 0;
+            double desiredCourse = AutoPilotCourse.Normalize(true).Degrees;
+            if (desiredCourse >= 270)
+            {
+                vw = 0xC0;
+                desiredCourse -= 270;
+            }
+            else if (desiredCourse >= 180)
+            {
+                vw = 0x80;
+                desiredCourse -= 180;
+            }
+            else if (desiredCourse >= 90)
+            {
+                vw = 0x40;
+                desiredCourse -= 90;
+            }
+
+            int xy = (int)Math.Round(desiredCourse * 2);
+
+            data[2] |= (byte)vw;
+            data[3] |= (byte)xy;
+            data[4] = GetAutopilotStatusByte(AutopilotStatus);
+            data[5] = almByte;
+            data[6] = (byte)rudder;
+            data[7] = 0;
+            data[8] = AutoPilotType;
+
+            return data;
         }
 
         private AutopilotStatus GetAutopilotStatus(byte z)
@@ -91,13 +170,28 @@ namespace Iot.Device.Seatalk1.Messages
                     return AutopilotStatus.Wind;
                 case 8:
                     return AutopilotStatus.InactiveTrack;
-                case 10:
+                case 0x0a:
                     return AutopilotStatus.Track;
                 case 0x10:
                     return AutopilotStatus.Calibration;
                 default:
                     return AutopilotStatus.Undefined;
             }
+        }
+
+        private byte GetAutopilotStatusByte(AutopilotStatus status)
+        {
+            return AutopilotStatus switch
+            {
+                AutopilotStatus.Standby => 0,
+                AutopilotStatus.Auto => 2,
+                AutopilotStatus.Track => 10,
+                AutopilotStatus.Wind => 6,
+                AutopilotStatus.Calibration => 16,
+                AutopilotStatus.InactiveTrack => 8,
+                AutopilotStatus.InactiveWind => 4,
+                _ => 0,
+            };
         }
 
         public override bool MatchesMessageType(IReadOnlyList<byte> data)

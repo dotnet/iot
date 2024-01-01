@@ -5,6 +5,7 @@ using System;
 using System.ComponentModel;
 using System.IO;
 using System.IO.Ports;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
@@ -152,6 +153,24 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.Equal(Parity.Odd, withParity[1].P);
             // 0x03 is even, we need the stopbit to be 0, so parity needs to be even
             Assert.Equal(Parity.Even, withParity[2].P);
+        }
+
+        [Fact]
+        public void CanBasicRoundTripMessages()
+        {
+            MemoryStream ms = new MemoryStream();
+
+            Seatalk1Parser parser = new Seatalk1Parser(ms);
+            foreach (var m in parser.MessageTypes)
+            {
+                // we already have an instance of each message type
+                byte[] data = m.CreateDatagram();
+                var decoded = parser.GetTypeOfNextMessage(data, out int bytesOfNewMessage);
+                Assert.NotNull(decoded);
+                Assert.NotEqual(0, bytesOfNewMessage);
+                Assert.Equal(m.GetType(), decoded.GetType());
+                Assert.Equal(m, decoded);
+            }
         }
 
         private static MemoryStream GetStreamFromInputString(string data)

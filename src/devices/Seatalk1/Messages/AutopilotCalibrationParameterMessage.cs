@@ -55,7 +55,14 @@ namespace Iot.Device.Seatalk1.Messages
 
         public override byte[] CreateDatagram()
         {
-            throw new NotImplementedException();
+            byte[] data = new byte[ExpectedLength];
+            data[0] = CommandByte;
+            data[1] = (byte)(ExpectedLength - 3);
+            data[2] = (byte)Parameter;
+            data[3] = (byte)CurrentSetting;
+            data[4] = (byte)MaxValue;
+            data[5] = (byte)MinValue;
+            return data;
         }
     }
 }
