@@ -23,7 +23,6 @@ namespace Iot.Device.Seatalk1.Messages
         PlusTen = 8,
         Auto = 16,
         StandBy = 32,
-        Track = 64,
         Disp = 128,
         LongPress = 256,
     }

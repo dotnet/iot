@@ -7,12 +7,14 @@ using System.Device.Gpio;
 using System.Device.I2c;
 using System.Device.Spi;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
 using Iot.Device.Common;
 using Iot.Device.Seatalk1.Messages;
 using Microsoft.Extensions.Logging;
+using UnitsNet;
 
 namespace Iot.Device.Seatalk1
 {
@@ -59,9 +61,19 @@ namespace Iot.Device.Seatalk1
                 new DeadbandSetting(),
                 new SetLampIntensity(),
                 new AutopilotCalibrationParameterMessage(),
-                new ApparentWindAngle()
+                new ApparentWindAngle(),
+                new NavigationToWaypoint(),
+                new CourseComputerStatus(),
             };
+
+            MaxMessageLength = _messageFactories.Select(x => x.ExpectedLength).Max();
+            if (MaxMessageLength > 18)
+            {
+                throw new InvalidOperationException("At least one message reports an expected length > 18 bytes. This is illegal");
+            }
         }
+
+        public int MaxMessageLength { get; private set; }
 
         public bool IsBufferEmpty => _buffer.Count == 0;
 
@@ -69,7 +81,13 @@ namespace Iot.Device.Seatalk1
 
         public void RegisterMessageType(SeatalkMessage message)
         {
+            if (message.ExpectedLength > 18)
+            {
+                throw new ArgumentException("The maximum length of a message is 18 bytes", nameof(message));
+            }
+
             _messageFactories.Add(message);
+            MaxMessageLength = _messageFactories.Select(x => x.ExpectedLength).Max();
         }
 
         /// <summary>
@@ -198,8 +216,8 @@ namespace Iot.Device.Seatalk1
                 return null;
             }
 
-            // The maximum length is 0xF + 3 = 18
-            if (buffer.Count > 18)
+            // The maximum length is 0xF + 3 = 18 or the maximum message length we know about
+            if (buffer.Count > MaxMessageLength)
             {
                 bytesInMessage = -1;
                 return null;

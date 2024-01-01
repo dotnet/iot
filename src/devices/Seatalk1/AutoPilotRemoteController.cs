@@ -61,9 +61,15 @@ namespace Iot.Device.Seatalk1
 
         public DeadbandMode DeadbandMode { get; private set; }
 
+        public int AutopilotType { get; private set; }
+
         public TimeSpan DefaultTimeout { get; set; }
 
         public bool IsOperating => Status is AutopilotStatus.Auto or AutopilotStatus.Track or AutopilotStatus.Wind;
+
+        public bool IsStandby => Status is AutopilotStatus.Standby or AutopilotStatus.InactiveTrack or AutopilotStatus.InactiveWind;
+
+        public CourseComputerWarnings CourseComputerStatus { get; private set; }
 
         public event Action<Keystroke>? AutopilotKeysPressed;
 
@@ -78,7 +84,8 @@ namespace Iot.Device.Seatalk1
                     _lastUpdateTime = DateTime.UtcNow;
                     Status = ch.AutopilotStatus;
                     AutopilotHeading = ch.CompassHeading;
-                    AutopilotDesiredHeading = Status != AutopilotStatus.Standby ? ch.AutoPilotCourse : null;
+                    AutopilotDesiredHeading = !IsStandby ? ch.AutoPilotCourse : null;
+                    AutopilotType = ch.AutoPilotType;
                     if (!RudderAngleAvailable)
                     {
                         RudderAngleAvailable = !ch.RudderPosition.Equals(Angle.Zero, Angle.FromDegrees(0.5));
@@ -130,17 +137,23 @@ namespace Iot.Device.Seatalk1
                     _logger.LogInformation($"Received calibration value for {calibParam.Parameter}. Current {calibParam.CurrentSetting} Min {calibParam.MinValue} Max {calibParam.MaxValue}");
                     _calibrationParameters.AddOrUpdate(calibParam.Parameter, x => calibParam, (a, b) => calibParam);
                 }
+                else if (obj is CourseComputerStatus status)
+                {
+                    _logger.LogWarning($"Course computer has warnings: {status.Warnings}");
+                    CourseComputerStatus = status.Warnings;
+                }
 
-                if (Status == AutopilotStatus.Standby || Status == AutopilotStatus.Offline)
+                if (IsStandby || Status == AutopilotStatus.Offline)
                 {
                     DeadbandMode = DeadbandMode.Automatic; // Resets automatically when going to standby (the message is not sent periodically)
+                    CourseComputerStatus = CourseComputerWarnings.None;
                 }
             }
         }
 
-        public bool SetStatus(AutopilotStatus status)
+        public bool SetStatus(AutopilotStatus status, ref TurnDirection? directionConfirmation)
         {
-            return SetStatus(status, DefaultTimeout);
+            return SetStatus(status, DefaultTimeout, ref directionConfirmation);
         }
 
         /// <summary>
@@ -158,23 +171,30 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         /// <param name="newStatus">The status to set</param>
         /// <param name="timeout">How long to try. For safety reasons (see remark) the maximum value is limited</param>
-        /// <returns>True on success, false if the change didn't succeed within the timeout.</returns>
+        /// <param name="directionConfirmation">If entering track mode (<paramref name="newStatus"/>==<see cref="AutopilotStatus.Track"/>), confirm a turn
+        /// in the given direction. If left null, will return the required direction for the turn. The method has then to be called again with the parameter set</param>
+        /// <returns>True on success, false if the change didn't succeed within the timeout. Also returns false if a change to track mode wasn't confirmed yet.</returns>
         /// <remarks>
         /// Don't be tempted to attempt to set the mode to Auto with a large timeout, as this could
         /// override the user's desire to disable the Autopilot and is therefore VERY DANGEROUS!
         /// </remarks>
-        public bool SetStatus(AutopilotStatus newStatus, TimeSpan timeout)
+        public bool SetStatus(AutopilotStatus newStatus, TimeSpan timeout, ref TurnDirection? directionConfirmation)
         {
-            if (Status == newStatus)
+            if (Status == newStatus && CourseComputerStatus == 0)
             {
                 return true; // nothing to do
+            }
+
+            if (Status == AutopilotStatus.Offline)
+            {
+                return false;
             }
 
             AutopilotButtons buttonToPress = newStatus switch
             {
                 AutopilotStatus.Auto => AutopilotButtons.Auto,
                 AutopilotStatus.Standby => AutopilotButtons.StandBy,
-                AutopilotStatus.Track => AutopilotButtons.Track,
+                AutopilotStatus.Track => AutopilotButtons.PlusTen | AutopilotButtons.MinusTen,
                 AutopilotStatus.Wind => AutopilotButtons.Auto | AutopilotButtons.StandBy,
                 _ => throw new ArgumentException($"Status {newStatus} is not valid", nameof(newStatus)),
             };
@@ -189,12 +209,46 @@ namespace Iot.Device.Seatalk1
                 }
             }
 
-            return SendMessageAndVerifyStatus(new Keystroke(buttonToPress, 1), timeout, () => Status == newStatus);
+            bool ret = SendMessageAndVerifyStatus(new Keystroke(buttonToPress, 1), timeout, () => (Status == newStatus) || ((newStatus == AutopilotStatus.Standby) && IsStandby));
+
+            if (ret && newStatus == AutopilotStatus.Track)
+            {
+                // Wait until the AP reports a course computer warning - and then just confirm it.
+                Stopwatch sw = Stopwatch.StartNew();
+                // This needs a longer timeout, since it can take several seconds for the confirmation to appear
+                while (sw.Elapsed < TimeSpan.FromSeconds(5))
+                {
+                    if ((CourseComputerStatus & CourseComputerWarnings.DriveFailure) != 0)
+                    {
+                        TurnDirection directionRequired =
+                            (CourseComputerStatus & CourseComputerWarnings.CourseChangeToPort) == CourseComputerWarnings.CourseChangeToPort ? TurnDirection.Port : TurnDirection.Starboard;
+                        if (directionConfirmation == null)
+                        {
+                            directionConfirmation = directionRequired;
+                            return false;
+                        }
+
+                        if (directionRequired == directionConfirmation &&
+                            SendMessageAndVerifyStatus(new Keystroke(0x28, 1), timeout,
+                                () => Status == AutopilotStatus.Track))
+                        {
+                            CourseComputerStatus = 0; // Apparently, the clearance of this warning is not sent
+                            break;
+                        }
+                    }
+
+                    Thread.Sleep(150);
+                }
+
+                ret = Status == AutopilotStatus.Track && CourseComputerStatus == CourseComputerWarnings.None;
+            }
+
+            return ret;
         }
 
         public bool SetDeadbandMode(DeadbandMode mode)
         {
-            if (Status == AutopilotStatus.Offline || Status == AutopilotStatus.Standby)
+            if (Status == AutopilotStatus.Offline || IsStandby)
             {
                 // The Deadband mode can only be set in auto mode
                 return false;
@@ -405,6 +459,7 @@ namespace Iot.Device.Seatalk1
                     RudderAngle = null;
                     AutopilotDesiredHeading = null;
                     AutopilotHeading = null;
+                    CourseComputerStatus = CourseComputerWarnings.None;
                 }
             }
         }

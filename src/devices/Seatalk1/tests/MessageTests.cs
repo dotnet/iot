@@ -30,6 +30,7 @@ namespace Iot.Device.Tests.Seatalk1
         [InlineData("87 00 01", typeof(DeadbandSetting))]
         [InlineData("86 01 02 fd", typeof(Keystroke))]
         [InlineData("10 01 00 01", typeof(ApparentWindAngle))]
+        [InlineData("85 06 00 00 C0 0D 1F 00 E0", typeof(NavigationToWaypoint))]
         public void KnownMessageTypeDecode(string msg, Type expectedType)
         {
             msg = msg.Replace(" ", string.Empty);
@@ -89,6 +90,63 @@ namespace Iot.Device.Tests.Seatalk1
             byte[] data = angle.CreateDatagram();
             var angle2 = angle.CreateNewMessage(data);
             Assert.Equal(angle, angle2);
+        }
+
+        [Fact]
+        public void NavigationToWaypointMessage1()
+        {
+            var n = new NavigationToWaypoint()
+            {
+                BearingToDestination = Angle.FromDegrees(230),
+                CrossTrackError = Length.FromNauticalMiles(2.61),
+                DistanceToDestination = Length.FromNauticalMiles(5.13),
+            };
+
+            byte[] data = n.CreateDatagram();
+            // Cross track error
+            Assert.Equal(0x85, data[0]);
+            Assert.Equal(0x56, data[1]);
+            Assert.Equal(0x10, data[2]);
+
+            // Distance
+            Assert.Equal(0x10, data[4] & 0xF0);
+            Assert.Equal(0x20, data[5]);
+            Assert.Equal(0x10, data[6] & 0xF0);
+
+            // Bearing
+            Assert.Equal(0x42, data[3]);
+            Assert.Equal(0x06, data[4] & 0x0F);
+
+            Assert.Equal(0x0F, data[6] & 0xF); // flags
+        }
+
+        [Fact]
+        public void NavigationToWaypointMessage2()
+        {
+            var n = new NavigationToWaypoint()
+            {
+                BearingToDestination = Angle.FromDegrees(0),
+                BearingIsTrue = true,
+                CrossTrackError = Length.FromNauticalMiles(-2.61),
+                DistanceToDestination = Length.FromNauticalMiles(51.3),
+            };
+
+            byte[] data = n.CreateDatagram();
+            // Cross track error
+            Assert.Equal(0x85, data[0]);
+            Assert.Equal(0xb6, data[1]);
+            Assert.Equal(0xef, data[2]);
+
+            // Distance
+            Assert.Equal(0x10, data[4] & 0xF0);
+            Assert.Equal(0x20, data[5]);
+            Assert.Equal(0x00, data[6] & 0xF0);
+
+            // Bearing
+            Assert.Equal(0x08, data[3]);
+            Assert.Equal(0x00, data[4] & 0x0F);
+
+            Assert.Equal(0x0F, data[6] & 0xF); // flags
         }
     }
 }

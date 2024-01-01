@@ -49,6 +49,8 @@ namespace Seatalk1Sample
 
             Angle windAngle = Angle.Zero;
 
+            TurnDirection? directionConfirmation = null;
+
             while (true)
             {
                 if (Console.KeyAvailable)
@@ -76,7 +78,7 @@ namespace Seatalk1Sample
                             break;
                         case ConsoleKey.W:
                         {
-                            if (ctrl.SetStatus(AutopilotStatus.Auto))
+                            if (ctrl.SetStatus(AutopilotStatus.Auto, ref directionConfirmation))
                             {
                                 Console.WriteLine("Autopilot set to AUTO mode");
                             }
@@ -90,7 +92,16 @@ namespace Seatalk1Sample
 
                         case ConsoleKey.X:
                         {
-                            ctrl.SetStatus(AutopilotStatus.Wind);
+                            // This is expected to fail if the AP has no wind data
+                            if (ctrl.SetStatus(AutopilotStatus.Wind, ref directionConfirmation))
+                            {
+                                Console.WriteLine("Autopilot set to WIND mode");
+                            }
+                            else
+                            {
+                                Console.WriteLine("Setting WIND mode FAILED!");
+                            }
+
                             break;
                         }
 
@@ -120,23 +131,33 @@ namespace Seatalk1Sample
 
                             break;
 
-                        case ConsoleKey.I:
+                        case ConsoleKey.T:
                         {
                             // This is expected to fail if the AP has no wind data
-                            if (ctrl.SetStatus(AutopilotStatus.Wind))
+                            if (ctrl.SetStatus(AutopilotStatus.Track, ref directionConfirmation))
                             {
-                                Console.WriteLine("Autopilot set to WIND mode");
+                                Console.WriteLine("Autopilot set to TRACK mode");
+                                directionConfirmation = null;
                             }
                             else
                             {
-                                Console.WriteLine("Setting WIND mode FAILED!");
+                                Console.WriteLine("Setting TRACK mode incomplete!");
+                                if (directionConfirmation == TurnDirection.Port)
+                                {
+                                    Console.WriteLine("Press T again to confirm a turn to Port");
+                                }
+                                else
+                                {
+                                    Console.WriteLine("Press T again to confirm a turn to Starboard");
+                                }
                             }
 
                             break;
                         }
 
                         case ConsoleKey.S:
-                            if (ctrl.SetStatus(AutopilotStatus.Standby))
+                            directionConfirmation = null;
+                            if (ctrl.SetStatus(AutopilotStatus.Standby, ref directionConfirmation))
                             {
                                 Console.WriteLine("Autopilot set to STANDBY mode");
                             }
@@ -163,9 +184,18 @@ namespace Seatalk1Sample
                 }
 
                 await Task.Delay(500);
+
+                NavigationToWaypoint wp = new NavigationToWaypoint()
+                {
+                    BearingToDestination = Angle.FromDegrees(10),
+                    CrossTrackError = Length.FromNauticalMiles(-0.11),
+                    DistanceToDestination = Length.FromNauticalMiles(51.3),
+                };
+
+                _seatalk.SendMessage(wp);
+
                 windAngle = windAngle + Angle.FromDegrees(1.5);
-                var windMsg = new ApparentWindAngle(windAngle);
-                _seatalk.SendMessage(windMsg);
+                // SendRandomWindAngle(windAngle);
                 WriteCurrentState();
             }
 
@@ -173,6 +203,12 @@ namespace Seatalk1Sample
             _seatalk = null;
 
             Console.WriteLine("Program is terminating");
+        }
+
+        private void SendRandomWindAngle(Angle angle)
+        {
+            var windMsg = new ApparentWindAngle(angle);
+            _seatalk?.SendMessage(windMsg);
         }
 
         private void WriteCurrentState()
