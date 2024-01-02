@@ -5,6 +5,7 @@ SK6812RGBW is a smart LED control circuit and light emitting circuit in one cont
 The data protocol being used is unipolar RZ communication mode. The 32-bit data is transmitted from the controller to DIN of the first element, and if it is accepted it is extracted pixel to pixel. After an internal data latch, the remaining data is passed through the internal amplification circuit and sent out on the DO port to the remaining pixels. The pixel is reset after the end of DIN. Using automatic shaping forwarding technology makes the number of cascaded pixels without signal transmission only limited by signal transmission speed.
 
 The LED has a low driving voltage (which allows for environmental protection and energy saving), high brightness, scattering angle, good consistency, low power, and long life. The control circuit is integrated in the LED above.
+
 ## Documentation
 
 - [Introduce](http://www.normandled.com/Product/view/id/799.html)
