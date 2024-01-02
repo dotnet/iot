@@ -18,7 +18,7 @@ The LED has a low driving voltage (which allows for environmental protection and
 
 There is 8 SPI bits for 2 SK6812RGBW data bits.
 
-The SPI clock frequency must be 3MHz.
+The SPI clock frequency can be 3.2MHz - 4MHz.
 
 ![timing](timing.png)
 
