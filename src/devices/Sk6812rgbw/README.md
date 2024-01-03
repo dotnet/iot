@@ -1,10 +1,10 @@
 ﻿# SK6812RGBW - Intelligent control LED integrated light source
 
-SK6812RGBW is a smart LED control circuit and light emitting circuit in one controlled LED source, which has the shape of a 5050 LED chip. Each lighting element is a pixel, and the intensities of the pixels are contained within the intelligent digital interface input. The output is driven by patented PWM technology, which effectively guarantees high consistency of the color of the pixels. The control circuit consists of a signal shaping amplification circuit, a built-in constant current circuit, and a high precision RC oscillator.
+SK6812RGBW is a 5050-package addressable single-pixel LED. Similar to the WS2812, any number of LEDs can be controlled via a single data line.
 
-The data protocol being used is unipolar RZ communication mode. The 32-bit data is transmitted from the controller to DIN of the first element, and if it is accepted it is extracted pixel to pixel. After an internal data latch, the remaining data is passed through the internal amplification circuit and sent out on the DO port to the remaining pixels. The pixel is reset after the end of DIN. Using automatic shaping forwarding technology makes the number of cascaded pixels without signal transmission only limited by signal transmission speed.
+Unlike WS2812, SK6812RGBW adds a color channel, usually white, and the data length of a single pixel becomes 32 bits.
 
-The LED has a low driving voltage (which allows for environmental protection and energy saving), high brightness, scattering angle, good consistency, low power, and long life. The control circuit is integrated in the LED above.
+This device binding provides required data format to output SK6812RGBW through the MOSI of SPI, and it should be noted that this binding needs to use a specific range of SPI frequencies to output a specific time length of signal. At the same time, the chip selection signal of the SPI will be ignored.
 
 ## Documentation
 
