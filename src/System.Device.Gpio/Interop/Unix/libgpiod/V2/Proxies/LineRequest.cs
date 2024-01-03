@@ -257,80 +257,90 @@ internal class LineRequest : LibGpiodProxyBase
                 throw new GpiodException($"Error while waiting for edge events, epoll_create: {LastErr.GetMsg()}");
             }
 
-            var requestEvent = new epoll_event
-            {
-                events = PollEvents.EPOLLIN | PollEvents.EPOLLPRI, data = new epoll_data { fd = requestFileDescriptor }
-            };
-
-            int ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, requestFileDescriptor, ref requestEvent);
-            if (ret < 0)
-            {
-                throw new GpiodException($"Error while waiting for edge events, epoll_ctl: {LastErr.GetMsg()}");
-            }
-
-            int[] signalPipe = new int[2];
-            ret = Interop.pipe(signalPipe);
-            if (ret < 0)
-            {
-                throw new GpiodException($"Error while waiting for edge events, pipe: {LastErr.GetMsg()}");
-            }
-
-            int signalPipeReadSide = signalPipe[0];
-
-            lock (_signalPipeWriteSideLock)
-            {
-                _signalPipeWriteSide = signalPipe[1];
-            }
-
             try
             {
-                var signalEvent = new epoll_event { events = PollEvents.EPOLLIN | PollEvents.EPOLLERR, data = new epoll_data { fd = signalPipeReadSide } };
+                var requestEvent = new epoll_event
+                {
+                    events = PollEvents.EPOLLIN | PollEvents.EPOLLPRI, data = new epoll_data { fd = requestFileDescriptor }
+                };
 
-                ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, signalPipeReadSide, ref signalEvent);
+                int ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, requestFileDescriptor, ref requestEvent);
                 if (ret < 0)
                 {
                     throw new GpiodException($"Error while waiting for edge events, epoll_ctl: {LastErr.GetMsg()}");
                 }
 
-                using var eventBuffer = new UnmanagedArray<epoll_event>(2);
-                ret = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 2, (int)timeout.Value.TotalMilliseconds);
+                int[] signalPipe = new int[2];
+                ret = Interop.pipe(signalPipe);
                 if (ret < 0)
                 {
-                    throw new GpiodException($"Error while waiting for edge events, epoll_wait: {LastErr.GetMsg()}");
+                    throw new GpiodException($"Error while waiting for edge events, pipe: {LastErr.GetMsg()}");
                 }
 
-                bool isTimeout = ret == 0;
+                int signalPipeReadSide = signalPipe[0];
 
-                if (isTimeout)
+                lock (_signalPipeWriteSideLock)
                 {
-                    return 0;
+                    _signalPipeWriteSide = signalPipe[1];
                 }
 
-                var events = eventBuffer.ReadToManagedArray();
-                for (int i = 0; i < events.Length; ++i)
+                try
                 {
-                    if (events[i].data.fd == signalPipeReadSide)
+                    var signalEvent = new epoll_event
                     {
-                        return 2;
+                        events = PollEvents.EPOLLIN | PollEvents.EPOLLERR, data = new epoll_data { fd = signalPipeReadSide }
+                    };
+
+                    ret = Interop.epoll_ctl(pollFileDescriptor, PollOperations.EPOLL_CTL_ADD, signalPipeReadSide, ref signalEvent);
+                    if (ret < 0)
+                    {
+                        throw new GpiodException($"Error while waiting for edge events, epoll_ctl: {LastErr.GetMsg()}");
                     }
 
-                    if (events[i].data.fd == requestFileDescriptor)
+                    using var eventBuffer = new UnmanagedArray<epoll_event>(2);
+                    ret = Interop.epoll_wait(pollFileDescriptor, eventBuffer, 2, (int)timeout.Value.TotalMilliseconds);
+                    if (ret < 0)
                     {
-                        return 1;
+                        throw new GpiodException($"Error while waiting for edge events, epoll_wait: {LastErr.GetMsg()}");
+                    }
+
+                    bool isTimeout = ret == 0;
+
+                    if (isTimeout)
+                    {
+                        return 0;
+                    }
+
+                    var events = eventBuffer.ReadToManagedArray();
+                    for (int i = 0; i < events.Length; ++i)
+                    {
+                        if (events[i].data.fd == signalPipeReadSide)
+                        {
+                            return 2;
+                        }
+
+                        if (events[i].data.fd == requestFileDescriptor)
+                        {
+                            return 1;
+                        }
+                    }
+                }
+                finally
+                {
+                    lock (_signalPipeWriteSideLock)
+                    {
+                        Interop.close(signalPipeReadSide);
+                        if (_signalPipeWriteSide != null)
+                        {
+                            Interop.close(_signalPipeWriteSide.Value);
+                            _signalPipeWriteSide = null;
+                        }
                     }
                 }
             }
             finally
             {
-                lock (_signalPipeWriteSideLock)
-                {
-                    Interop.close(signalPipeReadSide);
-                    if (_signalPipeWriteSide != null)
-                    {
-                        Interop.close(_signalPipeWriteSide.Value);
-                        _signalPipeWriteSide = null;
-                    }
-                }
+                Interop.close(pollFileDescriptor);
             }
 
             return 0;
@@ -384,7 +394,7 @@ internal class LineRequest : LibGpiodProxyBase
     {
         return CallLibgpiod(() =>
         {
-            int nReadEvents = LibgpiodV2.gpiod_line_request_read_edge_events(_handle, edgeEventBuffer.Handle, edgeEventBuffer.GetCapacity());
+            int nReadEvents = LibgpiodV2.gpiod_line_request_read_edge_events(_handle, edgeEventBuffer.Handle, edgeEventBuffer.Capacity);
             if (nReadEvents < 0)
             {
                 throw new GpiodException($"Could not read edge events: {LastErr.GetMsg()}");

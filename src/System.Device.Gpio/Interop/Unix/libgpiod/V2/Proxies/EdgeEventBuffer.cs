@@ -16,16 +16,19 @@ namespace System.Device.Gpio.Libgpiod.V2;
 internal class EdgeEventBuffer : LibGpiodProxyBase
 {
     internal EdgeEventBufferSafeHandle Handle { get; }
+    public int Capacity { get; }
 
     /// <summary>
     /// Constructor for a edge-event-buffer-proxy object. This call will create a new gpiod edge-event-buffer object.
     /// </summary>
     /// <param name="handle">Safe handle to the libgpiod object.</param>
+    /// <param name="capacity">The capacity of the event buffer.</param>
     /// <seealso href="https://libgpiod.readthedocs.io/en/latest/group__edge__event.html#ga4249b081f27908f7b8365dd897673e21"/>
-    public EdgeEventBuffer(EdgeEventBufferSafeHandle handle)
+    public EdgeEventBuffer(EdgeEventBufferSafeHandle handle, int capacity)
         : base(handle)
     {
         Handle = handle;
+        Capacity = capacity;
     }
 
     /// <summary>
@@ -47,7 +50,7 @@ internal class EdgeEventBuffer : LibGpiodProxyBase
     {
         return CallLibgpiod(() =>
         {
-            EdgeEventNotFreeable edgeEventHandle = LibgpiodV2.gpiod_edge_event_buffer_get_event(Handle, index);
+            using EdgeEventNotFreeable edgeEventHandle = LibgpiodV2.gpiod_edge_event_buffer_get_event(Handle, index);
             // Since events are tied to the buffer instance, different threads may not operate on the buffer and any associated events at the same
             // time. Events can be copied using ::gpiod_edge_event_copy in order to create a standalone objects - which each may safely be used from
             // a different thread concurrently.

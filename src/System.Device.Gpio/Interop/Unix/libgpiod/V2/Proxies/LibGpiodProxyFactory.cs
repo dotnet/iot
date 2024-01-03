@@ -52,7 +52,7 @@ internal static class LibGpiodProxyFactory
             throw new GpiodException($"Could not create new edge event buffer: {LastErr.GetMsg()}");
         }
 
-        return new EdgeEventBuffer(handle);
+        return new EdgeEventBuffer(handle, capacity);
     }
 
     /// <summary>
