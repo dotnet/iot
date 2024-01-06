@@ -47,6 +47,7 @@ namespace Iot.Device.Nmea0183
             knownSentences[SatellitesInView.Id] = (sentence, time) => new SatellitesInView(sentence, time);
             knownSentences[WindDirectionWithRespectToNorth.Id] =
                 (sentence, time) => new WindDirectionWithRespectToNorth(sentence, time);
+            knownSentences[HeadingAndTrackControl.Id] = (sentence, time) => new HeadingAndTrackControl(sentence, time);
             knownSentences[ProprietaryMessage.Id] = (sentence, time) =>
             {
                 var specificMessageId = sentence.Fields.FirstOrDefault();

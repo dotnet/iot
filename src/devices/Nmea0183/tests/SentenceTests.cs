@@ -495,6 +495,18 @@ namespace Iot.Device.Nmea0183.Tests
             }
         }
 
+        [Fact]
+        public void HtdEncode()
+        {
+            var hdt = new HeadingAndTrackControl("M", null, "L", "N", null, null, null, null, null, null, null, true);
+            var msg = hdt.ToNmeaParameterList();
+            Assert.Equal("A,,L,M,N,,,,,,,,T", msg);
+
+            hdt = new HeadingAndTrackControl("H", Angle.FromDegrees(10.21), "L", "N", null, null, Length.FromNauticalMiles(22.29), null, null, null, Angle.FromDegrees(2), false);
+            msg = hdt.ToNmeaParameterList();
+            Assert.Equal("V,10.2,L,H,N,,,22.3,,,,2.0,M", msg);
+        }
+
         [Theory]
         [InlineData("$GPRMC,211730.997,A,3511.28000,S,13823.26000,E,7.000,229.000,190120,,*19")]
         [InlineData("$GPRMC,115613.000,A,4729.49750,N,00930.39830,E,1.600,36.200,240520,1.900,E,D*34")]
@@ -603,6 +615,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M")]
+        [InlineData("$APHTD,V,10.0,L,R,N,12,13,2.0,1.0,15.1,0.5,16.2,T")]
         public void SentenceRoundTripIsUnaffectedByCulture(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here
@@ -639,6 +652,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M")]
+        [InlineData("$APHTD,V,10.0,L,R,N,12,13,2.5,1.0,15.1,0.5,16.2,M")]
         public void TwoWaysOfGettingSentenceAreEqual(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here
