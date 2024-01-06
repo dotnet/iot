@@ -8,6 +8,7 @@ using System.Net;
 using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
+using Iot.Device;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
@@ -23,11 +24,13 @@ namespace Nmea.Simulator
         private SimulatorData _activeData;
         private NmeaTcpServer? _tcpServer;
         private NmeaUdpServer? _udpServer;
+        private Random _random;
 
         public Simulator()
         {
             _activeData = new SimulatorData();
             ReplayFiles = new List<string>();
+            _random = new Random();
         }
 
         private List<string> ReplayFiles
@@ -135,7 +138,7 @@ namespace Nmea.Simulator
                 var data = _activeData;
                 RecommendedMinimumNavigationInformation rmc = new RecommendedMinimumNavigationInformation(DateTimeOffset.UtcNow,
                     NavigationStatus.Valid, data.Position,
-                    data.Speed, data.Course, null);
+                    data.SpeedOverGround, data.Course, null);
                 SendSentence(rmc);
 
                 GlobalPositioningSystemFixData gga = new GlobalPositioningSystemFixData(
@@ -145,6 +148,18 @@ namespace Nmea.Simulator
 
                 TimeDate zda = new TimeDate(DateTimeOffset.UtcNow);
                 SendSentence(zda);
+
+                WindSpeedAndAngle mwv = new WindSpeedAndAngle(data.WindDirectionRelative, data.WindSpeedRelative, true);
+                SendSentence(mwv);
+
+                WaterSpeedAndAngle vhw = new WaterSpeedAndAngle(null, null, data.SpeedTroughWater);
+                SendSentence(vhw);
+
+                RawSentence sentence = new RawSentence(new TalkerId('S', 'T'), new SentenceId("ALK"), new string[]
+                {
+                    "84", "86", "26", "97", "02", "00", "00", "00", "08"
+                }, DateTimeOffset.UtcNow);
+                SendSentence(sentence);
             }
             catch (IOException x)
             {
@@ -171,8 +186,13 @@ namespace Nmea.Simulator
             while (!_terminate)
             {
                 var newData = _activeData.Clone();
-                GeographicPosition newPosition = GreatCircle.CalcCoords(newData.Position, _activeData.Course,
-                    _activeData.Speed * UpdateRate);
+                newData.SpeedOverGround = UnitMath.Clamp(newData.SpeedOverGround + Speed.FromKnots(_random.NextDouble() - 0.5), Speed.Zero, Speed.FromKnots(12));
+                newData.SpeedTroughWater = UnitMath.Clamp(newData.SpeedOverGround + Speed.FromKnots(1.5), Speed.Zero, Speed.FromKnots(10.0));
+                newData.WindSpeedRelative = UnitMath.Clamp(newData.WindSpeedRelative + Speed.FromKnots(_random.NextDouble() - 0.5), Speed.Zero, Speed.FromKnots(65));
+                newData.WindDirectionRelative = newData.WindDirectionRelative + Angle.FromDegrees(_random.NextDouble() * 2.0);
+                newData.WindDirectionRelative = newData.WindDirectionRelative.Normalize(true);
+                GeographicPosition newPosition = GreatCircle.CalcCoords(newData.Position, newData.Course,
+                    newData.SpeedOverGround * UpdateRate);
                 newData.Position = newPosition;
                 _activeData = newData;
 

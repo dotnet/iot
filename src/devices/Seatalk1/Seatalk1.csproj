@@ -21,7 +21,6 @@
     <Compile Include="Messages\AutopilotButtons.cs" />
     <Compile Include="Messages\AutopilotCalibrationParameterMessage.cs" />
     <Compile Include="Messages\AutopilotCalibrationParameter.cs" />
-    <Compile Include="Messages\AutopilotStatus.cs" />
     <Compile Include="Messages\CompassHeadingAndRudderPosition.cs" />
     <Compile Include="Messages\CompassHeadingAutopilotCourse.cs" />
     <Compile Include="Messages\CompassHeadingAutopilotCourseAlt.cs" />
@@ -41,5 +40,8 @@
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
       <_Parameter1>$(AssemblyName).Tests</_Parameter1>
     </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Nmea0183\Nmea0183.csproj" />
   </ItemGroup>
 </Project>

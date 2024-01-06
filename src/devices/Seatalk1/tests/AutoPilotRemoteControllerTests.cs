@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
 using Moq;

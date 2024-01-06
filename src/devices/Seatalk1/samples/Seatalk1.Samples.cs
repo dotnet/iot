@@ -9,6 +9,7 @@ using System.Threading;
 using System.IO.Ports;
 using System.Threading.Tasks;
 using Iot.Device.Common;
+using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1;
 using Iot.Device.Seatalk1.Messages;
 using Microsoft.Extensions.Logging;
