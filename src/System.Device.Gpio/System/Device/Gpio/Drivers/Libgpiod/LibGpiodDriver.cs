@@ -20,7 +20,7 @@ public class LibGpiodDriver : UnixDriver
     /// <remarks>The driver version is chosen based on the available libgpiod version.</remarks>
     public LibGpiodDriver(int gpioChip = 0)
     {
-        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Create(gpioChip);
+        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip);
         _driver = versionedLibgpiodDriver.LibGpiodDriver;
         Version = versionedLibgpiodDriver.DriverVersion;
     }
@@ -35,7 +35,7 @@ public class LibGpiodDriver : UnixDriver
     /// <param name="driverVersion">Version of the libgpiod driver to create.</param>
     public LibGpiodDriver(int gpioChip, LibGpiodDriverVersion driverVersion)
     {
-        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Create(gpioChip, driverVersion);
+        LibGpiodDriverFactory.VersionedLibgpiodDriver versionedLibgpiodDriver = LibGpiodDriverFactory.Instance.Create(gpioChip, driverVersion);
         _driver = versionedLibgpiodDriver.LibGpiodDriver;
         Version = versionedLibgpiodDriver.DriverVersion;
     }
@@ -49,7 +49,7 @@ public class LibGpiodDriver : UnixDriver
     /// A collection of driver versions that correspond to the installed versions of libgpiod on this system. Each driver is dependent
     /// on specific libgpiod version/s. If the collection is empty, it indicates that libgpiod might not be installed or could not be detected.
     /// </summary>
-    public static LibGpiodDriverVersion[] GetAvailableVersions() => LibGpiodDriverFactory.DriverCandidates;
+    public static LibGpiodDriverVersion[] GetAvailableVersions() => LibGpiodDriverFactory.Instance.DriverCandidates;
 
     /// <inheritdoc/>
     protected internal override int PinCount => _driver.PinCount;
