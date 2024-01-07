@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using System.Linq;
@@ -14,6 +15,7 @@ using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
 using Iot.Device.Seatalk1;
 using UnitsNet;
+using CommandLine;
 
 namespace Nmea.Simulator
 {
@@ -40,27 +42,43 @@ namespace Nmea.Simulator
             get;
         }
 
-        public static void Main(string[] args)
+        public static int Main(string[] args)
         {
             Console.WriteLine("Simple GNSS simulator");
             Console.WriteLine("Usage: NmeaSimulator [options]");
 
-            Console.WriteLine("Options are:");
-            Console.WriteLine("--replay files    Plays back the given NMEA log file in real time (only with shifted timestamps). Wildcards supported.");
-            Console.WriteLine();
-            var sim = new Simulator();
-            if (args.Length >= 2 && args[0] == "--replay")
+            var parser = new Parser(x =>
             {
-                var wildCards = args[1];
+                x.AutoHelp = true;
+                x.AutoVersion = true;
+                x.CaseInsensitiveEnumValues = true;
+                x.ParsingCulture = CultureInfo.InvariantCulture;
+                x.CaseSensitive = false;
+                x.HelpWriter = Console.Out;
+            });
+
+            var parsed = parser.ParseArguments<SimulatorArguments>(args);
+            if (parsed.Errors.Any())
+            {
+                Console.WriteLine("Error in command line");
+                return 1;
+            }
+
+            var sim = new Simulator();
+            if (!string.IsNullOrWhiteSpace(parsed.Value.ReplayFiles))
+            {
+                var wildCards = parsed.Value.ReplayFiles;
                 FileInfo fi = new FileInfo(wildCards);
                 string path = fi.DirectoryName ?? string.Empty;
                 sim.ReplayFiles.AddRange(Directory.GetFiles(path, fi.Name));
             }
 
-            sim.StartServer();
+            sim.StartServer(parsed.Value.SeatalkInterface);
+
+            return 0;
         }
 
-        private void StartServer()
+        private void StartServer(string seatalk)
         {
             _tcpServer = null;
             _udpServer = null;
@@ -92,9 +110,14 @@ namespace Nmea.Simulator
 
                 // Also optionally directly connect to the Seatalk1 bus.
                 // For simplicity, this example is not using a MessageRouter.
-                _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", "/dev/ttyAMA2");
-                _seatalkInterface.OnNewSequence += SeatalkNewSequence;
-                _seatalkInterface.StartDecode();
+                if (!string.IsNullOrWhiteSpace(seatalk))
+                {
+                    _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", seatalk);
+                    _seatalkInterface.OnNewSequence += SeatalkNewSequence;
+                    _seatalkInterface.SentencesToTranslate.Add(HeadingAndTrackControlStatus.Id);
+                    _seatalkInterface.SentencesToTranslate.Add(RudderSensorAngle.Id);
+                    _seatalkInterface.StartDecode();
+                }
 
                 Console.WriteLine("Waiting for connections. Press x to quit");
                 while (true)
@@ -190,9 +213,9 @@ namespace Nmea.Simulator
 
         private void SendSentence(NmeaSentence sentence)
         {
+            Console.WriteLine($"Sending {sentence.ToReadableContent()}");
             if (_tcpServer != null)
             {
-                // Console.WriteLine($"Sending {sentence.ToReadableContent()}");
                 _tcpServer.SendSentence(sentence);
             }
 

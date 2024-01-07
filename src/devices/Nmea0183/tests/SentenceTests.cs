@@ -496,7 +496,7 @@ namespace Iot.Device.Nmea0183.Tests
         }
 
         [Fact]
-        public void HtdEncode()
+        public void HtcEncode()
         {
             var hdt = new HeadingAndTrackControl("M", null, "L", "N", null, null, null, null, null, null, null, true);
             var msg = hdt.ToNmeaParameterList();
@@ -599,6 +599,7 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$HCHDG,30.9,,,1.9,E")]
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,*64")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M*58")]
+        [InlineData("$APRSA,12.2,A,,V")]
         public void CanParseAllTheseMessages(string input)
         {
             var inSentence = TalkerSentence.FromSentenceString(input, out var error);
@@ -628,9 +629,10 @@ namespace Iot.Device.Nmea0183.Tests
         [InlineData("$YDVHW,,T,,M,3.1,N,5.7,K,")]
         [InlineData("$YDGSV,5,1,18,19,29,257,45,22,30,102,45,04,76,143,44,06,47,295,42")]
         [InlineData("$YDMWD,336.8,T,333.8,M,21.6,N,11.1,M")]
-        [InlineData("$APHTD,V,10.0,L,R,N,12,13,2.0,1.0,15.1,0.5,16.2,T")]
+        [InlineData("$APHTC,V,10.0,L,R,N,12.3,13.4,2.0,1.0,15.1,0.5,16.2,T")]
+        [InlineData("$APHTD,V,10.0,L,R,N,12.0,13.5,2.0,1.0,15.1,0.5,16.2,T,V,A,V,123.2")]
         [InlineData("$STALK,84,86,26,97,02,00,00,00,08")]
-        [InlineData("$STALK,9c,01,12,00")]
+        [InlineData("$STALK,9C,01,12,00")]
         public void SentenceRoundTripIsUnaffectedByCulture(string input)
         {
             // de-DE has "," as decimal separator. Big trouble if using CurrentCulture for any parsing or formatting here

@@ -12,7 +12,7 @@ using UnitsNet;
 namespace Iot.Device.Nmea0183.Sentences
 {
     /// <summary>
-    /// HDC sequence. This is used to control an attached auto-pilot.
+    /// HTC sequence. This is used to control an attached auto-pilot.
     /// Documentation of this sentence is very poor, and one has to dig deep
     /// to find information about it.
     /// Since the actual encoding might be autopilot-dependent, this message outputs all values in raw format.
@@ -206,7 +206,7 @@ namespace Iot.Device.Nmea0183.Sentences
             b.Append(FromLength(TurnRadius));
             if (RateOfTurn.HasValue)
             {
-                b.Append(RateOfTurn.Value.DeciradiansPerSecond.ToString("F1", CultureInfo.InvariantCulture) + ",");
+                b.Append(RateOfTurn.Value.DegreesPerSecond.ToString("F1", CultureInfo.InvariantCulture) + ",");
             }
             else
             {
@@ -227,7 +227,12 @@ namespace Iot.Device.Nmea0183.Sentences
             return $"Mode: {Status}, CommandedTrack: {CommandedTrack}, TurnMode: {TurnMode}";
         }
 
-        private static Angle? AsAngle(double? value)
+        /// <summary>
+        /// Get a nullable double field as angle
+        /// </summary>
+        /// <param name="value">Input angle</param>
+        /// <returns>An angle or null, if the input is null</returns>
+        protected static Angle? AsAngle(double? value)
         {
             if (value.HasValue)
             {
@@ -237,7 +242,12 @@ namespace Iot.Device.Nmea0183.Sentences
             return null;
         }
 
-        private static string FromAngle(Angle? angle)
+        /// <summary>
+        /// Translate as nullable angle to a value in degrees with one digit
+        /// </summary>
+        /// <param name="angle">Angle to translate</param>
+        /// <returns>The translated angle or just a comma</returns>
+        protected static string FromAngle(Angle? angle)
         {
             if (!angle.HasValue)
             {
