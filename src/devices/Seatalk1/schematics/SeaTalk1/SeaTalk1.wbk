@@ -1,8 +1,11 @@
 version 2
 1
 9
-.tran 100u 15m{return}{return}.kicad adjustpaths{return}.save all{return}.probe alli
-4
+.tran 10u 20m{return}.kicad adjustpaths{return}.save all{return}.probe alli
+5
+2
+I(D1)
+ 
 1
 V(Net-_D1-K_)
  
