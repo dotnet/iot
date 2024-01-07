@@ -34,7 +34,9 @@ namespace Iot.Device.Seatalk1
         /// </summary>
         /// <remarks>
         /// The following sentences are currently supported:
-        /// HTD (only Seatalk->Nmea)
+        /// HTD (Seatalk->Nmea)
+        /// RSA (Seatalk->Nmea)
+        /// MWV (Nmea->Seatalk)
         /// </remarks>
         public List<SentenceId> SentencesToTranslate => _sentencesToTranslate;
 
@@ -43,9 +45,11 @@ namespace Iot.Device.Seatalk1
             var nmeaMsg = new SeatalkNmeaMessage(stalk.CreateDatagram(), DateTimeOffset.UtcNow);
             _logger.LogDebug($"Received Seatalk message: {stalk}");
             DispatchSentenceEvents(nmeaMsg);
+
+            // Translations Seatalk->Nmea
             if (stalk is CompassHeadingAutopilotCourse apStatus)
             {
-                if (SentencesToTranslate.Contains(HeadingAndTrackControlStatus.Id))
+                if (SentencesToTranslate.Contains(HeadingAndTrackControlStatus.Id) || SentencesToTranslate.Contains(SentenceId.Any))
                 {
                     string status = apStatus.AutopilotStatus switch
                     {
@@ -60,7 +64,7 @@ namespace Iot.Device.Seatalk1
                     DispatchSentenceEvents(htd);
                 }
 
-                if (SentencesToTranslate.Contains(RudderSensorAngle.Id))
+                if (SentencesToTranslate.Contains(RudderSensorAngle.Id) || SentencesToTranslate.Contains(SentenceId.Any))
                 {
                     var angle = apStatus.RudderPosition;
                     var rsa = new RudderSensorAngle(angle, null);
@@ -81,7 +85,12 @@ namespace Iot.Device.Seatalk1
 
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
-            if (sentence.Valid && sentence.SentenceId == SeatalkNmeaMessage.Id)
+            if (sentence.Valid == false)
+            {
+                return;
+            }
+
+            if (sentence.SentenceId == SeatalkNmeaMessage.Id)
             {
                 // Since we get all commands we send out back on this interface, we must make sure we're not bouncing those again
                 if (sentence is SeatalkNmeaMessage msg && source != this)
@@ -90,6 +99,34 @@ namespace Iot.Device.Seatalk1
                     _seatalkInterface.SendDatagram(data);
                 }
             }
+
+            if (DoTranslate(sentence, out WindSpeedAndAngle? mwv) && mwv != null)
+            {
+                ApparentWindAngle awa = new ApparentWindAngle()
+                    {
+                        ApparentAngle = mwv.Angle
+                    };
+                _seatalkInterface.SendMessage(awa);
+
+                ApparentWindSpeed aws = new ApparentWindSpeed()
+                {
+                    ApparentSpeed = mwv.Speed,
+                };
+                _seatalkInterface.SendMessage(aws);
+            }
+        }
+
+        private bool DoTranslate<T>(NmeaSentence sentence, out T? convertedSentence)
+            where T : NmeaSentence
+        {
+            if (sentence is T converted && (SentencesToTranslate.Contains(sentence.SentenceId) || SentencesToTranslate.Contains(SentenceId.Any)))
+            {
+                convertedSentence = converted;
+                return true;
+            }
+
+            convertedSentence = default(T);
+            return false;
         }
 
         public override void StopDecode()

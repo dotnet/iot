@@ -62,6 +62,7 @@ namespace Iot.Device.Seatalk1
                 new SetLampIntensity(),
                 new AutopilotCalibrationParameterMessage(),
                 new ApparentWindAngle(),
+                new ApparentWindSpeed(),
                 new NavigationToWaypoint(),
                 new CourseComputerStatus(),
             };

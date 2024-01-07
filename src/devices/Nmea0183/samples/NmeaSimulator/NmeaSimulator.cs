@@ -114,8 +114,7 @@ namespace Nmea.Simulator
                 {
                     _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", seatalk);
                     _seatalkInterface.OnNewSequence += SeatalkNewSequence;
-                    _seatalkInterface.SentencesToTranslate.Add(HeadingAndTrackControlStatus.Id);
-                    _seatalkInterface.SentencesToTranslate.Add(RudderSensorAngle.Id);
+                    _seatalkInterface.SentencesToTranslate.Add(SentenceId.Any);
                     _seatalkInterface.StartDecode();
                 }
 

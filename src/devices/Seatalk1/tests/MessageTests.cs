@@ -31,6 +31,7 @@ namespace Iot.Device.Tests.Seatalk1
         [InlineData("86 01 02 fd", typeof(Keystroke))]
         [InlineData("10 01 00 01", typeof(ApparentWindAngle))]
         [InlineData("85 06 00 00 C0 0D 1F 00 E0", typeof(NavigationToWaypoint))]
+        [InlineData("11 01 00 00", typeof(ApparentWindSpeed))]
         public void KnownMessageTypeDecode(string msg, Type expectedType)
         {
             msg = msg.Replace(" ", string.Empty);
@@ -147,6 +148,21 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.Equal(0x00, data[4] & 0x0F);
 
             Assert.Equal(0x0F, data[6] & 0xF); // flags
+        }
+
+        [Fact]
+        public void WindSpeedMessage()
+        {
+            var windSpeed = new ApparentWindSpeed()
+            {
+                ApparentSpeed = Speed.FromKnots(12.212)
+            };
+
+            byte[] data = windSpeed.CreateDatagram();
+            Assert.Equal(0x11, data[0]);
+            Assert.Equal(0x1, data[1]);
+            Assert.Equal(12, data[2]);
+            Assert.Equal(2, data[3]);
         }
     }
 }

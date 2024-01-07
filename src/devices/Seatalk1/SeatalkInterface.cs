@@ -221,7 +221,7 @@ namespace Iot.Device.Seatalk1
             return SendDatagram(bytes);
         }
 
-        public Task SendMessageAsync(SeatalkMessage message)
+        public Task<bool> SendMessageAsync(SeatalkMessage message)
         {
             return Task.Factory.StartNew(() => SendMessage(message));
         }
