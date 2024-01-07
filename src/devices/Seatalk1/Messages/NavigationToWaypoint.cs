@@ -53,7 +53,56 @@ namespace Iot.Device.Seatalk1.Messages
 
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
-            return new NavigationToWaypoint();
+            byte flags = data[6];
+            int vvv = ((data[1] & 0xF0) >> 4) | (data[2] << 4);
+            Length? crossTrackDistance = Length.FromNauticalMiles(vvv / 100.0);
+            if ((data[6] & 0x40) == 0x40)
+            {
+                crossTrackDistance = -crossTrackDistance;
+            }
+
+            if ((flags & 1) == 0)
+            {
+                crossTrackDistance = null;
+            }
+
+            bool bearingIsTrue = (data[3] & 0x8) == 0x8;
+            int u = data[3] & 0x3;
+
+            int remainder = (data[4] & 0xF) << 4;
+            remainder |= (data[3] & 0xF0) >> 4;
+
+            Angle? bearingToDestination = Angle.FromDegrees((u * 90) + (remainder / 2.0));
+
+            if ((flags & 2) == 0)
+            {
+                bearingToDestination = null;
+            }
+
+            int dist = data[5] << 4;
+            dist |= (data[4] >> 4);
+
+            Length? distance;
+            if ((flags & 4) == 0)
+            {
+                distance = null;
+            }
+            else if ((data[6] & 0x10) == 0x10)
+            {
+                distance = Length.FromNauticalMiles(dist / 100.0);
+            }
+            else
+            {
+                distance = Length.FromNauticalMiles(dist / 10.0);
+            }
+
+            return new NavigationToWaypoint()
+            {
+                BearingIsTrue = bearingIsTrue,
+                BearingToDestination = bearingToDestination,
+                CrossTrackError = crossTrackDistance,
+                DistanceToDestination = distance,
+            };
         }
 
         public override byte[] CreateDatagram()
@@ -145,6 +194,11 @@ namespace Iot.Device.Seatalk1.Messages
             data[8] = (byte)(~data[6]);
 
             return data;
+        }
+
+        public override bool MatchesMessageType(IReadOnlyList<byte> data)
+        {
+            return base.MatchesMessageType(data) && data[6] == (byte)(~data[8]);
         }
     }
 }

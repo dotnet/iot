@@ -119,6 +119,9 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.Equal(0x06, data[4] & 0x0F);
 
             Assert.Equal(0x0F, data[6] & 0xF); // flags
+
+            var reverse = n.CreateNewMessage(data);
+            Assert.Equal(n, reverse);
         }
 
         [Fact]
@@ -148,6 +151,25 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.Equal(0x00, data[4] & 0x0F);
 
             Assert.Equal(0x0F, data[6] & 0xF); // flags
+
+            var reverse = n.CreateNewMessage(data);
+            Assert.Equal(n, reverse);
+        }
+
+        [Fact]
+        public void NavigationToWaypointMessage3()
+        {
+            var n = new NavigationToWaypoint()
+            {
+                BearingToDestination = Angle.FromDegrees(299.5),
+                BearingIsTrue = true,
+                CrossTrackError = Length.FromNauticalMiles(-0.1),
+                DistanceToDestination = Length.FromNauticalMiles(5.3),
+            };
+
+            byte[] data = n.CreateDatagram();
+            var reverse = n.CreateNewMessage(data);
+            Assert.Equal(n, reverse);
         }
 
         [Fact]
@@ -155,7 +177,7 @@ namespace Iot.Device.Tests.Seatalk1
         {
             var windSpeed = new ApparentWindSpeed()
             {
-                ApparentSpeed = Speed.FromKnots(12.212)
+                ApparentSpeed = Speed.FromKnots(12.2)
             };
 
             byte[] data = windSpeed.CreateDatagram();
@@ -163,6 +185,9 @@ namespace Iot.Device.Tests.Seatalk1
             Assert.Equal(0x1, data[1]);
             Assert.Equal(12, data[2]);
             Assert.Equal(2, data[3]);
+
+            var reverse = windSpeed.CreateNewMessage(data);
+            Assert.Equal(windSpeed, reverse);
         }
     }
 }

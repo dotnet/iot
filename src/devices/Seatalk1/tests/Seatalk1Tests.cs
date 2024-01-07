@@ -173,6 +173,33 @@ namespace Iot.Device.Tests.Seatalk1
             }
         }
 
+        [Theory]
+        [InlineData("9c 01 12 00")]
+        [InlineData("84 06 12 00 00 00 00 00 08")]
+        [InlineData("86 01 02 fd")]
+        [InlineData("95 86 26 97 02 00 00 00 08")]
+        [InlineData("87 00 01")]
+        [InlineData("87 00 02")]
+        [InlineData("10 01 00 01")]
+        [InlineData("85 06 00 00 C0 0D 17 00 E8")]
+        [InlineData("11 01 12 04")]
+        public void ParseAndBack(string inputSentence)
+        {
+            var split = inputSentence.Split(new char[] { '\n', '\r', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            // FromHexString expects an uninterrupted sequence of two-char pairs
+            byte[] inputDatagram = Convert.FromHexString(string.Join(string.Empty, split));
+
+            MemoryStream ms = new MemoryStream();
+            Seatalk1Parser parser = new Seatalk1Parser(ms);
+
+            var msg = parser.GetTypeOfNextMessage(inputDatagram, out int bytesInMessage);
+            Assert.NotNull(msg);
+            Assert.NotEqual(0, bytesInMessage);
+
+            byte[] roundTripped = msg.CreateDatagram();
+            Assert.Equal(inputDatagram, roundTripped);
+        }
+
         private static MemoryStream GetStreamFromInputString(string data)
         {
             var split = data.Split(new char[] { '\n', '\r', ' ' }, StringSplitOptions.RemoveEmptyEntries);
