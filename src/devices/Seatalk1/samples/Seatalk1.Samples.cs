@@ -44,6 +44,8 @@ namespace Seatalk1Sample
 
             _seatalk.MessageReceived += ParserOnNewMessageDecoded;
 
+            _seatalk.StartDecode();
+
             var ctrl = _seatalk.GetAutopilotRemoteController();
 
             WriteCurrentState();

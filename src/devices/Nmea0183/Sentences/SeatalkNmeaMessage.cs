@@ -62,6 +62,19 @@ namespace Iot.Device.Nmea0183.Sentences
             }
 
             Datagram = datagram.ToArray();
+            Valid = true;
+        }
+
+        /// <summary>
+        /// Directly create a message from a datagram
+        /// </summary>
+        /// <param name="datagram">Datagram, byte array</param>
+        /// <param name="time">The current time</param>
+        public SeatalkNmeaMessage(byte[] datagram, DateTimeOffset time)
+            : base(TalkerId.Seatalk,  Id, time)
+        {
+            Datagram = datagram;
+            Valid = true;
         }
 
         /// <summary>

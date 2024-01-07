@@ -48,6 +48,7 @@ namespace Iot.Device.Nmea0183
             knownSentences[WindDirectionWithRespectToNorth.Id] =
                 (sentence, time) => new WindDirectionWithRespectToNorth(sentence, time);
             knownSentences[HeadingAndTrackControl.Id] = (sentence, time) => new HeadingAndTrackControl(sentence, time);
+            knownSentences[SeatalkNmeaMessage.Id] = (sentence, time) => new SeatalkNmeaMessage(sentence, time);
             knownSentences[ProprietaryMessage.Id] = (sentence, time) =>
             {
                 var specificMessageId = sentence.Fields.FirstOrDefault();

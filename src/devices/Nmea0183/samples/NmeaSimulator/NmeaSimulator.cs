@@ -12,6 +12,7 @@ using Iot.Device;
 using Iot.Device.Common;
 using Iot.Device.Nmea0183;
 using Iot.Device.Nmea0183.Sentences;
+using Iot.Device.Seatalk1;
 using UnitsNet;
 
 namespace Nmea.Simulator
@@ -24,6 +25,7 @@ namespace Nmea.Simulator
         private SimulatorData _activeData;
         private NmeaTcpServer? _tcpServer;
         private NmeaUdpServer? _udpServer;
+        private SeatalkToNmeaConverter? _seatalkInterface;
         private Random _random;
 
         public Simulator()
@@ -88,6 +90,12 @@ namespace Nmea.Simulator
                 _udpServer.StartDecode();
                 _udpServer.OnNewSequence += OnNewSequenceFromServer;
 
+                // Also optionally directly connect to the Seatalk1 bus.
+                // For simplicity, this example is not using a MessageRouter.
+                _seatalkInterface = new SeatalkToNmeaConverter("Seatalk1", "/dev/ttyAMA2");
+                _seatalkInterface.OnNewSequence += SeatalkNewSequence;
+                _seatalkInterface.StartDecode();
+
                 Console.WriteLine("Waiting for connections. Press x to quit");
                 while (true)
                 {
@@ -109,6 +117,8 @@ namespace Nmea.Simulator
             }
             finally
             {
+                _seatalkInterface?.StopDecode();
+                _seatalkInterface?.Dispose();
                 _tcpServer?.StopDecode();
                 _udpServer?.StopDecode();
                 if (_simulatorThread != null)
@@ -122,12 +132,22 @@ namespace Nmea.Simulator
             }
         }
 
+        private void SeatalkNewSequence(NmeaSinkAndSource source, NmeaSentence sentence)
+        {
+            SendSentence(sentence);
+        }
+
         // We're not really expecting input here.
         private void OnNewSequenceFromServer(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             if (sentence is RawSentence)
             {
                 Console.WriteLine($"Received message: {sentence.ToReadableContent()} from {source.InterfaceName}");
+            }
+
+            if (_seatalkInterface != null)
+            {
+                _seatalkInterface.SendSentence(source, sentence);
             }
         }
 
@@ -155,11 +175,12 @@ namespace Nmea.Simulator
                 WaterSpeedAndAngle vhw = new WaterSpeedAndAngle(null, null, data.SpeedTroughWater);
                 SendSentence(vhw);
 
-                RawSentence sentence = new RawSentence(new TalkerId('S', 'T'), new SentenceId("ALK"), new string[]
-                {
-                    "84", "86", "26", "97", "02", "00", "00", "00", "08"
-                }, DateTimeOffset.UtcNow);
-                SendSentence(sentence);
+                // Test Seatalk message (understood by some OpenCPN plugins)
+                ////RawSentence sentence = new RawSentence(new TalkerId('S', 'T'), new SentenceId("ALK"), new string[]
+                ////{
+                ////    "84", "86", "26", "97", "02", "00", "00", "00", "08"
+                ////}, DateTimeOffset.UtcNow);
+                ////SendSentence(sentence);
             }
             catch (IOException x)
             {
@@ -171,13 +192,18 @@ namespace Nmea.Simulator
         {
             if (_tcpServer != null)
             {
-                Console.WriteLine($"Sending {sentence.ToReadableContent()}");
+                // Console.WriteLine($"Sending {sentence.ToReadableContent()}");
                 _tcpServer.SendSentence(sentence);
             }
 
             if (_udpServer != null)
             {
                 _udpServer.SendSentence(sentence);
+            }
+
+            if (_seatalkInterface != null)
+            {
+                _seatalkInterface.SendSentence(sentence);
             }
         }
 

@@ -22,6 +22,7 @@ namespace Iot.Device.Seatalk1
         private readonly CancellationTokenSource _cancellation;
         private readonly AutoPilotRemoteController _autopilotController;
         private readonly object _lock;
+        private bool _disposed;
 
         public event Action<SeatalkMessage>? MessageReceived;
 
@@ -53,9 +54,6 @@ namespace Iot.Device.Seatalk1
 
             _parser = new Seatalk1Parser(_port.BaseStream);
             _parser.NewMessageDecoded += OnNewMessage;
-            _parser.StartDecode();
-
-            _watchDog.Start();
         }
 
         /// <summary>
@@ -69,9 +67,19 @@ namespace Iot.Device.Seatalk1
             _autopilotController = new AutoPilotRemoteController(this);
             _cancellation = new CancellationTokenSource();
             _watchDog = new Thread(WatchDogStarter);
+            _disposed = false;
         }
 
         public Seatalk1Parser Parser => _parser;
+
+        /// <summary>
+        /// Starts listening on the port
+        /// </summary>
+        public void StartDecode()
+        {
+            _parser.StartDecode();
+            _watchDog.Start();
+        }
 
         private static int BitCount(int b)
         {
@@ -237,6 +245,11 @@ namespace Iot.Device.Seatalk1
 
         protected virtual void Dispose(bool disposing)
         {
+            if (_disposed)
+            {
+                return;
+            }
+
             if (disposing)
             {
                 _cancellation.Cancel();
@@ -246,6 +259,7 @@ namespace Iot.Device.Seatalk1
                 _port.Dispose();
                 _watchDog.Join();
                 _cancellation.Dispose();
+                _disposed = true;
             }
         }
 
