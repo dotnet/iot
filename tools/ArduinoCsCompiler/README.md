@@ -167,3 +167,26 @@ extern caddr_t _sbrk (int incr) {
     return (caddr_t) prev_heap ;
 }
 ```
+
+## Compiler Diagnostics
+
+This is an incomplete list of error and warning messages from the Arduino Compiler (ACS).
+Note that the compiler will not output source file information, since it operates directly on the binary file. It only "knows" of methods and classes.
+
+ACS0001: Internal compiler error
+: Instead of this error, you'll probably get an exception.
+
+ACS0002: This compiler is currently supported on Windows only. The target CPU may be anything, but the compiler is only tested on Windows. You might experience build or runtime failures otherwise.
+: The Arduino Compiler is currently only supported on windows. The runtime replicates parts of the low-level system calls, and hence depends on the operating system the compiler runs on.
+
+ACS0003: Could not find file {FileName}. (Looking at absolute path {Path})
+: The input file could not be found.
+
+ACS0004, {methodInfo.MethodSignature()} has no visible implementation
+: The given low-level method is not implemented in the runtime. If the method is actually used in the program, a run-time error will occur.
+
+ACS0006, Method {methodInfo.MemberInfoSignature()} has [MethodImpl(MethodImplAttributes.Synchronized)] and is static. This is not supported.
+: Don't use `[MethodImpl(MethodImplAttributes.Synchronized)]` on static methods (and generally, by the way).
+
+ACS0007: Should have a replacement for {original.MethodSignature()}, but it is missing. Caller: {callingMethod.MethodSignature()}. Original implementation is in {original.DeclaringType!.AssemblyQualifiedName}
+: This error means that the Arduino Runtime is missing a required replacement method. A replacement method is a low-level call that needs to be provided by the firmware (because the original method doesn't work on the microcontroller)

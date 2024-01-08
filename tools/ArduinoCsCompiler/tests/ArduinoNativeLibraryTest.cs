@@ -19,7 +19,7 @@ namespace Iot.Device.Arduino.Tests
     /// Tests native library functions for the IL Executor
     /// </summary>
     [Collection("SingleClientOnly")]
-    [Trait("feature", "firmata-compiler")]
+    [Trait("feature", "firmata")]
     [Trait("requires", "hardware")]
     public class ArduinoNativeLibraryTest : ArduinoTestBase, IClassFixture<FirmataTestFixture>
     {

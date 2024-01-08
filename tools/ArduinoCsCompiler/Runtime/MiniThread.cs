@@ -10,13 +10,21 @@ namespace ArduinoCsCompiler.Runtime
     [ArduinoReplacement(typeof(System.Threading.Thread), false, IncludingPrivates = true)]
     internal class MiniThread
     {
-#pragma warning disable 414
+#pragma warning disable 414, SA1306
+        private IntPtr _DONT_USE_InternalThread;
+        private int _managedThreadId;
         private ExecutionContext? _executionContext;
-#pragma warning restore 414
+        private SynchronizationContext? _synchronizationContext;
+        private string _name;
+#pragma warning restore 414, SA1306
 
         public MiniThread()
         {
             _executionContext = null;
+            _DONT_USE_InternalThread = IntPtr.Zero;
+            _managedThreadId = 0;
+            _synchronizationContext = null;
+            _name = string.Empty;
         }
 
         /// <summary>
@@ -43,6 +51,7 @@ namespace ArduinoCsCompiler.Runtime
                 while (previous < ticks)
                 {
                     previous = ticks;
+                    Yield();
                     ticks = Environment.TickCount;
                 }
             }
@@ -50,6 +59,7 @@ namespace ArduinoCsCompiler.Runtime
             while (endTicks > ticks)
             {
                 // Busy waiting is ok here - the microcontroller has no sleep state
+                Yield();
                 ticks = Environment.TickCount;
             }
         }
@@ -68,8 +78,32 @@ namespace ArduinoCsCompiler.Runtime
             [ArduinoImplementation]
             get
             {
-                return 1;
+                return _managedThreadId;
             }
+        }
+
+        public bool IsThreadPoolThread
+        {
+            // The backend doesn't do much with this field, but if we implement it here,
+            // we need to add it's backing field to the class, which would require some
+            // special handling
+            [ArduinoImplementation("Thread_get_IsThreadPoolThread")]
+            get;
+
+            [ArduinoImplementation("Thread_set_IsThreadPoolThread")]
+            set;
+        }
+
+        public bool IsBackground
+        {
+            // The backend doesn't do much with this field, but if we implement it here,
+            // we need to add it's backing field to the class, which would require some
+            // special handling
+            [ArduinoImplementation("Thread_get_IsBackground")]
+            get;
+
+            [ArduinoImplementation("Thread_set_IsBackground")]
+            set;
         }
 
         [ArduinoImplementation]
@@ -78,10 +112,9 @@ namespace ArduinoCsCompiler.Runtime
             Sleep((int)delay.TotalMilliseconds);
         }
 
-        [ArduinoImplementation]
+        [ArduinoImplementation("ThreadYield")]
         public static bool Yield()
         {
-            // We are running in a single-thread environment, so this is effectively a no-op
             return false;
         }
 
@@ -103,10 +136,37 @@ namespace ArduinoCsCompiler.Runtime
             return 0;
         }
 
-        [ArduinoImplementation]
+        [ArduinoImplementation("ThreadGetCurrentThreadNative")]
         public static Thread GetCurrentThreadNative()
         {
-            return MiniUnsafe.As<Thread>(new MiniThread());
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// First arg is of type ThreadHandle, but this is a value type over an IntPtr, so their layout is identical
+        /// </summary>
+        [ArduinoImplementation("ThreadStartInternal", CompareByParameterNames = true)]
+        public static unsafe void StartInternal(IntPtr t, int stackSize, int priority, char* pThreadName)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("ThreadInitialize")]
+        public void Initialize()
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation("ThreadJoin")]
+        public bool Join(int millisecondsTimeout)
+        {
+            throw new NotImplementedException();
+        }
+
+        [ArduinoImplementation]
+        public void SetThreadPoolWorkerThreadName()
+        {
+            // Nothing to do, really (we don't keep thread names)
         }
     }
 }

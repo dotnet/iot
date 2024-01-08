@@ -7,7 +7,7 @@ using System.Collections.Generic;
 #pragma warning disable CS1591
 namespace ArduinoCsCompiler
 {
-    public class ClassDeclaration
+    public class ClassDeclaration : IEquatable<ClassDeclaration>
     {
         private readonly List<ClassMember> _members;
         private readonly List<Type> _interfaces;
@@ -68,6 +68,57 @@ namespace ArduinoCsCompiler
                 // Don't run these init functions, to complicated or depend on native functions
                 return TheType.FullName == "System.SR";
             }
+        }
+
+        public bool Equals(ClassDeclaration? other)
+        {
+            if (ReferenceEquals(null, other))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            // Here, Type and MiniType must be distinct.
+            return NewToken == other.NewToken && Name == other.Name;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            if (ReferenceEquals(null, obj))
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != GetType())
+            {
+                return false;
+            }
+
+            return Equals((ClassDeclaration)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return NewToken;
+        }
+
+        public static bool operator ==(ClassDeclaration? left, ClassDeclaration? right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(ClassDeclaration? left, ClassDeclaration? right)
+        {
+            return !Equals(left, right);
         }
 
         public void AddClassMember(ClassMember member)

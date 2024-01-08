@@ -30,7 +30,7 @@ namespace Iot.Device.Arduino
         private const byte FIRMATA_PROTOCOL_MAJOR_VERSION = 2;
         private const byte FIRMATA_PROTOCOL_MINOR_VERSION = 5; // 2.5 works, but 2.6 is recommended
         private const int FIRMATA_INIT_TIMEOUT_SECONDS = 2;
-        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(2000);
+        internal static readonly TimeSpan DefaultReplyTimeout = TimeSpan.FromMilliseconds(3000);
 
         private byte _firmwareVersionMajor;
         private byte _firmwareVersionMinor;
@@ -1209,7 +1209,7 @@ namespace Iot.Device.Arduino
                     pwmCommandSequence.WriteByte((byte)0);
                     pwmCommandSequence.WriteByte((byte)FirmataCommand.END_SYSEX);
                     SendCommand(pwmCommandSequence);
-                }
+        }
             }
         }
 

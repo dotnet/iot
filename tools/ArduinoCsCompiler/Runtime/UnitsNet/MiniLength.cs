@@ -11,7 +11,7 @@ namespace ArduinoCsCompiler.Runtime.UnitsNet
     internal struct MiniLength
     {
         private double _value;
-        private LengthUnit _unit;
+        private LengthUnit? _unit;
 
         private MiniLength(double value, LengthUnit unit)
         {

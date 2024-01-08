@@ -108,6 +108,15 @@ namespace ArduinoCsCompiler
         }
 
         /// <summary>
+        /// Set to true for methods that are only called by the runtime (e.g. thread start callbacks)
+        /// </summary>
+        public bool InternalCall
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// Computes a hash code for a string that stays consistent over different architectures and between program runs.
         /// </summary>
         /// <param name="text">Text to calculate hash code from</param>

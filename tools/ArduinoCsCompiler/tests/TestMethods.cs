@@ -1191,6 +1191,13 @@ namespace Iot.Device.Arduino.Tests
             return 1;
         }
 
+        public static int UseStringlyTypedDictionary(int arg1, int arg2)
+        {
+            var dict = new Dictionary<string, int>();
+            dict.Add("Blah", 1);
+            return dict.Count;
+        }
+
         private class StuffThatNeedsDisposing : IDisposable
         {
             public StuffThatNeedsDisposing(int initialValue)
