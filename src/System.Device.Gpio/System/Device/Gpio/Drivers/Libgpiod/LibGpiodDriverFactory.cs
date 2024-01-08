@@ -73,7 +73,7 @@ internal sealed class LibGpiodDriverFactory
     /// <summary>
     /// Singleton instance.
     /// </summary>
-    public static LibGpiodDriverFactory Instance { get; } = new();
+    public static readonly LibGpiodDriverFactory Instance = new();
 
     /// <summary>
     /// A collection of driver versions that correspond to the installed versions of libgpiod on this system. Each driver is dependent
@@ -111,7 +111,7 @@ internal sealed class LibGpiodDriverFactory
         if (AutomaticallySelectedDriverVersion == null)
         {
             throw new GpiodException($"No supported libgpiod library file found.\n" +
-                $"Supported versions: {string.Join(", ", _libraryToDriverVersionMap.Keys)}\n" +
+                $"Supported library files: {string.Join(", ", _libraryToDriverVersionMap.Keys)}\n" +
                 $"Searched paths: {string.Join(", ", _librarySearchPaths)}");
         }
 
@@ -125,8 +125,10 @@ internal sealed class LibGpiodDriverFactory
     {
         if (!DriverCandidates.Contains(version))
         {
-            throw new GpiodException($"No suitable libgpiod library found for {nameof(LibGpiodDriverVersion)}.{version}. " +
-                $"Supported versions: {string.Join(", ", _driverVersionToLibrariesMap[version])}\n" +
+            string installedLibraryFiles = InstalledLibraries.Any() ? string.Join(", ", InstalledLibraries) : "None";
+            throw new GpiodException($"No suitable libgpiod library file found for {nameof(LibGpiodDriverVersion)}.{version} " +
+                $"which requires one of: {string.Join(", ", _driverVersionToLibrariesMap[version])}\n" +
+                $"Installed library files: {installedLibraryFiles}\n" +
                 $"Searched paths: {string.Join(", ", _librarySearchPaths)}");
         }
 
