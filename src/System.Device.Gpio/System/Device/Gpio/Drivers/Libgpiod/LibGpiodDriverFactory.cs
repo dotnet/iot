@@ -7,7 +7,6 @@ using System.Device.Gpio.Drivers.Libgpiod.V2;
 using System.Device.Gpio.Libgpiod.V2;
 using System.IO;
 using System.Linq;
-using System.Threading;
 
 namespace System.Device.Gpio.Drivers;
 
@@ -35,65 +34,75 @@ internal sealed class LibGpiodDriverFactory
 
     private static readonly string[] _librarySearchPaths = { "/lib", "/usr/lib", "/usr/local/lib" }; // Based on Linux FHS standard
 
+    private static readonly object _initLock = new();
+    private static LibGpiodDriverFactory? _instance;
+
     /// <summary>
     /// The value set by DOTNET_IOT_LIBGPIOD_DRIVER_VERSION. Null when not set.
     /// </summary>
-    private string? DriverVersionEnvVarValue => _driverVersionEnvVarValue.Value;
-    private readonly Lazy<string?> _driverVersionEnvVarValue;
+    private readonly string? _driverVersionEnvVarValue;
 
     /// <summary>
     /// The driver version that was resolved based on the value of DOTNET_IOT_LIBGPIOD_DRIVER_VERSION. Null when env var not set.
     /// </summary>
-    private LibGpiodDriverVersion? DriverVersionSetByEnvVar => _driverVersionSetByEnvVar.Value;
-    private readonly Lazy<LibGpiodDriverVersion?> _driverVersionSetByEnvVar;
+    private readonly LibGpiodDriverVersion? _driverVersionSetByEnvVar;
 
     /// <remarks>
     /// Driver version that is picked by this factory when no version is explicitly specified. Null when libpgiod is not installed.
     /// </remarks>
-    private LibGpiodDriverVersion? AutomaticallySelectedDriverVersion => _automaticallySelectedDriverVersion.Value;
-    private readonly Lazy<LibGpiodDriverVersion?> _automaticallySelectedDriverVersion;
+    private readonly LibGpiodDriverVersion? _automaticallySelectedDriverVersion;
 
-    private readonly Lazy<LibGpiodDriverVersion[]> _driverCandidates;
+    private readonly LibGpiodDriverVersion[] _driverCandidates;
 
     /// <summary>
     /// Collection of installed libgpiod libraries (their file name).
     /// </summary>
-    private IEnumerable<string> InstalledLibraries => _installedLibraries.Value;
-    private readonly Lazy<IEnumerable<string>> _installedLibraries;
+    private readonly IEnumerable<string> _installedLibraries;
 
     private LibGpiodDriverFactory()
     {
-        _installedLibraries = new Lazy<IEnumerable<string>>(GetInstalledLibraries, LazyThreadSafetyMode.PublicationOnly);
-        _driverCandidates = new Lazy<LibGpiodDriverVersion[]>(GetDriverCandidates, LazyThreadSafetyMode.PublicationOnly);
-        _automaticallySelectedDriverVersion = new Lazy<LibGpiodDriverVersion?>(GetAutomaticallySelectedDriverVersion, LazyThreadSafetyMode.PublicationOnly);
-        _driverVersionEnvVarValue = new Lazy<string?>(GetDriverVersionEnvVarValue, LazyThreadSafetyMode.PublicationOnly);
-        _driverVersionSetByEnvVar = new Lazy<LibGpiodDriverVersion?>(GetDriverVersionSetByEnvVar, LazyThreadSafetyMode.PublicationOnly);
+        _installedLibraries = GetInstalledLibraries();
+        _driverCandidates = GetDriverCandidates();
+        _automaticallySelectedDriverVersion = GetAutomaticallySelectedDriverVersion();
+        _driverVersionEnvVarValue = GetDriverVersionEnvVarValue();
+        _driverVersionSetByEnvVar = GetDriverVersionSetByEnvVar();
     }
 
     /// <summary>
     /// Singleton instance.
     /// </summary>
-    public static readonly LibGpiodDriverFactory Instance = new();
+    public static LibGpiodDriverFactory Instance
+    {
+        get
+        {
+            lock (_initLock)
+            {
+                _instance ??= new LibGpiodDriverFactory();
+            }
+
+            return _instance;
+        }
+    }
 
     /// <summary>
     /// A collection of driver versions that correspond to the installed versions of libgpiod on this system. Each driver is dependent
     /// on specific libgpiod version/s. If the collection is empty, it indicates that libgpiod might not be installed or could not be detected.
     /// </summary>
-    public LibGpiodDriverVersion[] DriverCandidates => _driverCandidates.Value;
+    public LibGpiodDriverVersion[] DriverCandidates => _driverCandidates;
 
     public VersionedLibgpiodDriver Create(int chipNumber)
     {
-        if (DriverVersionEnvVarValue != null)
+        if (_driverVersionEnvVarValue != null)
         {
-            if (DriverVersionSetByEnvVar == null)
+            if (_driverVersionSetByEnvVar == null)
             {
                 throw new GpiodException($"Can not create libgpiod driver due to invalid specified value in environment variable" +
-                    $" {DriverVersionEnvVar}: '{DriverVersionEnvVarValue}'" +
+                    $" {DriverVersionEnvVar}: '{_driverVersionEnvVarValue}'" +
                     $". Valid values: {string.Join(", ", _libraryToDriverVersionMap.Values.Distinct())}");
             }
 
-            var version = DriverVersionSetByEnvVar.Value;
-            var driver = CreateInternal(DriverVersionSetByEnvVar.Value, chipNumber);
+            var version = _driverVersionSetByEnvVar.Value;
+            var driver = CreateInternal(_driverVersionSetByEnvVar.Value, chipNumber);
 
             return new VersionedLibgpiodDriver(version, driver);
         }
@@ -108,15 +117,15 @@ internal sealed class LibGpiodDriverFactory
 
     private VersionedLibgpiodDriver CreateAutomaticallyChosenDriver(int chipNumber)
     {
-        if (AutomaticallySelectedDriverVersion == null)
+        if (_automaticallySelectedDriverVersion == null)
         {
             throw new GpiodException($"No supported libgpiod library file found.\n" +
                 $"Supported library files: {string.Join(", ", _libraryToDriverVersionMap.Keys)}\n" +
                 $"Searched paths: {string.Join(", ", _librarySearchPaths)}");
         }
 
-        var version = AutomaticallySelectedDriverVersion.Value;
-        var driver = CreateInternal(AutomaticallySelectedDriverVersion.Value, chipNumber);
+        var version = _automaticallySelectedDriverVersion.Value;
+        var driver = CreateInternal(_automaticallySelectedDriverVersion.Value, chipNumber);
 
         return new VersionedLibgpiodDriver(version, driver);
     }
@@ -125,11 +134,10 @@ internal sealed class LibGpiodDriverFactory
     {
         if (!DriverCandidates.Contains(version))
         {
-            string installedLibraryFiles = InstalledLibraries.Any() ? string.Join(", ", InstalledLibraries) : "None";
+            string installedLibraryFiles = _installedLibraries.Any() ? string.Join(", ", _installedLibraries) : "None";
             throw new GpiodException($"No suitable libgpiod library file found for {nameof(LibGpiodDriverVersion)}.{version} " +
                 $"which requires one of: {string.Join(", ", _driverVersionToLibrariesMap[version])}\n" +
-                $"Installed library files: {installedLibraryFiles}\n" +
-                $"Searched paths: {string.Join(", ", _librarySearchPaths)}");
+                $"Installed library files: {installedLibraryFiles}\n" + $"Searched paths: {string.Join(", ", _librarySearchPaths)}");
         }
 
         return version switch
@@ -173,8 +181,8 @@ internal sealed class LibGpiodDriverFactory
 
     private LibGpiodDriverVersion[] GetDriverCandidates()
     {
-        return InstalledLibraries.Where(installedVersion => _libraryToDriverVersionMap.ContainsKey(installedVersion))
-                                 .Select(installedVersion => _libraryToDriverVersionMap[installedVersion]).ToArray();
+        return _installedLibraries.Where(installedVersion => _libraryToDriverVersionMap.ContainsKey(installedVersion))
+                                  .Select(installedVersion => _libraryToDriverVersionMap[installedVersion]).ToArray();
     }
 
     private LibGpiodDriverVersion? GetAutomaticallySelectedDriverVersion()
@@ -189,14 +197,14 @@ internal sealed class LibGpiodDriverFactory
 
     private LibGpiodDriverVersion? GetDriverVersionSetByEnvVar()
     {
-        if (DriverVersionEnvVarValue != null)
+        if (_driverVersionEnvVarValue != null)
         {
-            if (DriverVersionEnvVarValue == LibGpiodDriverVersion.V1.ToString())
+            if (_driverVersionEnvVarValue == LibGpiodDriverVersion.V1.ToString())
             {
                 return LibGpiodDriverVersion.V1;
             }
 
-            if (DriverVersionEnvVarValue == LibGpiodDriverVersion.V2.ToString())
+            if (_driverVersionEnvVarValue == LibGpiodDriverVersion.V2.ToString())
             {
                 return LibGpiodDriverVersion.V2;
             }
