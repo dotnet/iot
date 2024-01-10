@@ -211,7 +211,7 @@ stages:
       runOnce:
         deploy:
           steps:
-          - task: NuGetAuthenticate@0
+          - task: NuGetAuthenticate@1
             displayName: 'NuGet Authenticate'
 
           - task: NuGetCommand@2
