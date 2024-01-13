@@ -37,6 +37,7 @@ namespace Iot.Device.Seatalk1
         /// HTD (Seatalk->Nmea)
         /// RSA (Seatalk->Nmea)
         /// MWV (Nmea->Seatalk)
+        /// RMB (Nmea->Seatalk)
         /// </remarks>
         public List<SentenceId> SentencesToTranslate => _sentencesToTranslate;
 
@@ -113,6 +114,13 @@ namespace Iot.Device.Seatalk1
                     ApparentSpeed = mwv.Speed,
                 };
                 _seatalkInterface.SendMessage(aws);
+            }
+
+            if (DoTranslate(sentence, out RecommendedMinimumNavToDestination? rmb) && rmb != null)
+            {
+                // RMB should always report true bearing.
+                NavigationToWaypoint nwp = new NavigationToWaypoint(rmb.CrossTrackError, rmb.BearingToWayPoint, true, rmb.DistanceToWayPoint);
+                _seatalkInterface.SendMessage(nwp);
             }
         }
 

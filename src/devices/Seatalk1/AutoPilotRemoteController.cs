@@ -18,7 +18,7 @@ using UnitsNet;
 namespace Iot.Device.Seatalk1
 {
     /// <summary>
-    /// Remote controller for an autopilot connected via Seatalk1
+    /// Remote controller for an autopilot connected via Seatalk1. To get an instance of this class, call <see cref="SeatalkInterface.GetAutopilotRemoteController"/>.
     /// </summary>
     /// <remarks>
     /// Type is not disposable, to prevent accidental disposal by clients. They don't get ownership of the instance.
@@ -35,6 +35,10 @@ namespace Iot.Device.Seatalk1
         private DateTime _lastUpdateTime = new DateTime(0);
         private bool _buttonOnApPressed = false;
 
+        /// <summary>
+        /// Internal constructor, used by the owning instance of <see cref="SeatalkInterface"/>
+        /// </summary>
+        /// <param name="parentInterface">The owner</param>
         internal AutoPilotRemoteController(SeatalkInterface parentInterface)
         {
             _logger = this.GetCurrentClassLogger();
@@ -48,32 +52,79 @@ namespace Iot.Device.Seatalk1
             DefaultTimeout = TimeSpan.FromSeconds(3);
         }
 
+        /// <summary>
+        /// Current value of the heading sensor internal to the autopilot (if present).
+        /// When the autopilot controller has such a sensor, this value is always available, however it is
+        /// useless on tiler pilots such as ST2000 in standby mode, because that one needs to be removed from the tiller for manual steering and thus
+        /// will read random values.
+        /// </summary>
         public Angle? AutopilotHeading { get; private set; }
 
+        /// <summary>
+        /// Desired heading of the autopilot.
+        /// This value is only valid when the autopilot is active (not standby)
+        /// </summary>
         public Angle? AutopilotDesiredHeading { get; private set; }
 
+        /// <summary>
+        /// Current rudder angle. Positive for turning to starboard.
+        /// This value is only available when a rudder position sensor is fitted.
+        /// </summary>
         public Angle? RudderAngle { get; private set; }
 
+        /// <summary>
+        /// True when the rudder angle is valid. This stays false when either no rudder sensor is fitted or the reported values are apparently wrong.
+        /// </summary>
         public bool RudderAngleAvailable { get; private set; }
 
+        /// <summary>
+        /// Current status of the autopilot
+        /// </summary>
         public AutopilotStatus Status { get; private set; }
 
+        /// <summary>
+        /// Active autopilot alarms
+        /// </summary>
         public AutopilotAlarms Alarms { get; private set; }
 
+        /// <summary>
+        /// Current deadband mode. The value is only meaningful in auto mode
+        /// </summary>
         public DeadbandMode DeadbandMode { get; private set; }
 
+        /// <summary>
+        /// Type of autopilot controller. Known values: 05 for 150G type, 08 for most other types
+        /// </summary>
         public int AutopilotType { get; private set; }
 
+        /// <summary>
+        /// Timeout for changing the status
+        /// </summary>
         public TimeSpan DefaultTimeout { get; set; }
 
+        /// <summary>
+        /// Current turning direction of the boat. Depending on the type, this may be derived from heading changes and therefore not really reliable.
+        /// </summary>
         public TurnDirection TurnDirection { get; private set; }
 
+        /// <summary>
+        /// True if the autopilot is active
+        /// </summary>
         public bool IsOperating => Status is AutopilotStatus.Auto or AutopilotStatus.Track or AutopilotStatus.Wind;
 
+        /// <summary>
+        /// True if the autopilot is in Standby
+        /// </summary>
         public bool IsStandby => Status is AutopilotStatus.Standby or AutopilotStatus.InactiveTrack or AutopilotStatus.InactiveWind;
 
+        /// <summary>
+        /// Warning flags from the course computer
+        /// </summary>
         public CourseComputerWarnings CourseComputerStatus { get; private set; }
 
+        /// <summary>
+        /// This event is fired when keys on the controller are pressed.
+        /// </summary>
         public event Action<Keystroke>? AutopilotKeysPressed;
 
         private void AutopilotMessageInterpretation(SeatalkMessage obj)
@@ -156,6 +207,17 @@ namespace Iot.Device.Seatalk1
             }
         }
 
+        /// <summary>
+        /// Change the autopilot status.
+        /// </summary>
+        /// <param name="status">The new desired status</param>
+        /// <param name="directionConfirmation">When changing to track mode, confirm a turn in this direction.</param>
+        /// <returns>True if the desired mode was reached, false if not. Reasons that this could fail are: Operation cancelled by user
+        /// (user pressed standby while remote control was trying to switch to auto); No data available for change to wind or track mode</returns>
+        /// <remarks>
+        /// <paramref name="directionConfirmation"/> should initially be set to null. When requesting a change to track mode, it will return a value
+        /// indicating the required direction change to return to the track. Then call the method again with that value to confirm the change.
+        /// </remarks>
         public bool SetStatus(AutopilotStatus status, ref TurnDirection? directionConfirmation)
         {
             return SetStatus(status, DefaultTimeout, ref directionConfirmation);
@@ -251,6 +313,11 @@ namespace Iot.Device.Seatalk1
             return ret;
         }
 
+        /// <summary>
+        /// Change deadband mode
+        /// </summary>
+        /// <param name="mode">The new mode</param>
+        /// <returns>True if the value was set, false otherwise. This method fails if the autopilot is in standby mode</returns>
         public bool SetDeadbandMode(DeadbandMode mode)
         {
             if (Status == AutopilotStatus.Offline || IsStandby)
@@ -284,21 +351,50 @@ namespace Iot.Device.Seatalk1
             return SendMessageAndVerifyStatus(ks, DefaultTimeout, () => DeadbandMode == mode);
         }
 
+        /// <summary>
+        /// Turns to the desired heading
+        /// </summary>
+        /// <param name="degrees">New desired heading</param>
+        /// <param name="direction">Desired turn direction. Pass null for taking the default (shorter) turn.</param>
+        /// <returns>True on success, false otherwise</returns>
+        /// <remarks>This operation can take a significant time</remarks>
         public bool TurnTo(Angle degrees, TurnDirection? direction)
         {
             return TurnTo(degrees, direction, CancellationToken.None);
         }
 
+        /// <summary>
+        /// Same as <see cref="TurnTo(UnitsNet.Angle,System.Nullable{Iot.Device.Seatalk1.Messages.TurnDirection})"/>, except in async mode
+        /// </summary>
+        /// <param name="degrees">New desired heading</param>
+        /// <param name="direction">Desired turn direction</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>True on success, false otherwise</returns>
         public Task<bool> TurnToAsync(Angle degrees, TurnDirection? direction, CancellationToken token)
         {
             return Task.Factory.StartNew(() => TurnTo(degrees, direction, token));
         }
 
+        /// <summary>
+        /// Turn by a certain value
+        /// </summary>
+        /// <param name="degrees">Degrees to turn, unsigned</param>
+        /// <param name="direction">Direction to turn</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>True on success, false otherwise</returns>
         public Task<bool> TurnByAsync(Angle degrees, TurnDirection direction, CancellationToken token)
         {
             return Task.Factory.StartNew(() => TurnBy(degrees, direction, token));
         }
 
+        /// <summary>
+        /// Turns to the desired heading
+        /// </summary>
+        /// <param name="degrees">New desired heading</param>
+        /// <param name="direction">Desired turn direction. Pass null for taking the default (shorter) turn.</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>True on success, false otherwise</returns>
+        /// <remarks>This operation can take a significant time</remarks>
         public bool TurnTo(Angle degrees, TurnDirection? direction, CancellationToken token)
         {
             degrees = degrees.Normalize(true);
@@ -395,6 +491,13 @@ namespace Iot.Device.Seatalk1
             return false;
         }
 
+        /// <summary>
+        /// Turn by a certain value
+        /// </summary>
+        /// <param name="degrees">Degrees to turn, unsigned</param>
+        /// <param name="direction">Direction to turn</param>
+        /// <param name="token">Cancellation token</param>
+        /// <returns>True on success, false otherwise</returns>
         public bool TurnBy(Angle degrees, TurnDirection direction, CancellationToken token)
         {
             if (degrees < Angle.Zero)

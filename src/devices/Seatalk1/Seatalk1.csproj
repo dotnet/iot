@@ -6,8 +6,6 @@
     <EnableDefaultItems>false</EnableDefaultItems>
     <LangVersion>9</LangVersion>
     <RootNamespace>Iot.Device.Seatalk1</RootNamespace>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <!--todo remove the above-->
   </PropertyGroup>
 
   <ItemGroup>
