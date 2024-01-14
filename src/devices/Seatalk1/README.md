@@ -2,7 +2,7 @@
 
 ## Summary
 
-Seatalk, also called Seatalk1, is a bus protocol used by the marine equipment company Raymarine. It is used as a protocol to connect various devices on a boat, such as depth sounders, anemometers (wind sensors), autopilots and displays. The protocol is the successor of NMEA-0183, providing the main benefit of being able to connect various devices to a single bus, without the need of complex star networks and bridges as it was required for NMEA-0183. 
+Seatalk, also called Seatalk1, is a bus protocol used by the marine equipment company Raymarine. It is used as a protocol to connect various devices on a boat, such as depth sounders, anemometers (wind sensors), autopilots and displays. The protocol is the successor of NMEA-0183, providing the main benefit of being able to connect various devices to a single bus, without the need of complex star networks and bridges as it was required for NMEA-0183.
 
 Data transfer uses a slow transmission rate of 4800 Baud, but this makes the bus quite stable with respect to interference. Collisions do occur, but as most messages are repeated at least every second, lost messages are typically negligible.
 
@@ -56,11 +56,12 @@ private void ParserOnNewMessageDecoded(SeatalkMessage obj)
 ```
 
 ## Physical interface
+
 The physical bus uses a kind of UART protocol, but since it uses a single wire both for sending and receiving, additional electronics are required to connect the bus to an UART (RS-232) interface. Protocol converters are available on the market. The following scheme shows a schematic that allows connecting a Seatalk network to a Raspberry Pi. The seatalk cable is connected to J3. The grey wire from the bus goes to GND, the yellow wire is the data wire and the red wire is +12V. In this schematic, connecting the 12V wire is optional as long as there's at least one other device on the bus that provides the necessary pull-up. The wiring shows a connection to TXD2/RXD2 (ttyAMA2 on linux), as this interface is easier to configure than the default one on GPIO14/15, as long as it's enabled in `boot/config.txt` with `dtoverlay=uart2`.
 
 ![Seatalk-to-TTL-Uart](SeatalkInterface.png)
 
-When connecting to a default RS-232 interface (e.g. using an USB-to-RS-232 converter), the inverting stages Q2 on RXD and Q5 on TXD should be skipped. Powering the entire wiring via 12V should work with some minor adjustments, such as changing R9 to 470Ω to avoid destroying D1. 
+When connecting to a default RS-232 interface (e.g. using an USB-to-RS-232 converter), the inverting stages Q2 on RXD and Q5 on TXD should be skipped. Powering the entire wiring via 12V should work with some minor adjustments, such as changing R9 to 470Ω to avoid destroying D1.
 
 ## References
 
