@@ -10,17 +10,27 @@ using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Course computer status. Various autopilots may use this message for different purposes.
+    /// </summary>
     public record CourseComputerStatus : SeatalkMessage
     {
+        /// <inheritdoc />
         public override byte CommandByte => 0x83;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 0x0a; // this message has 10 bytes, despite only 3 used.
 
+        /// <summary>
+        /// Active warnings
+        /// </summary>
         public CourseComputerWarnings Warnings
         {
             get;
             init;
         }
 
+        /// <inheritdoc />
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             Logger.LogInformation($"Course computer warning msg: {string.Join("-", data.Select(x => x.ToString("X2")))}");
@@ -30,6 +40,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             return new byte[]
@@ -38,6 +49,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[3] == 0;

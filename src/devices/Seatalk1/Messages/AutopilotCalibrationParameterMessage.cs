@@ -9,35 +9,54 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Message generated when autopilot is in calibration mode.
+    /// </summary>
     public record AutopilotCalibrationParameterMessage : SeatalkMessage
     {
+        /// <inheritdoc />
         public override byte CommandByte => 0x88;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 0x06;
 
+        /// <summary>
+        /// The parameter in this message. Defines the meaning of the other fields.
+        /// </summary>
         public AutopilotCalibrationParameter Parameter
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// The value of the parameter
+        /// </summary>
         public int CurrentSetting
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// Minimum allowed value for the setting
+        /// </summary>
         public int MinValue
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// Maximum allowed value for the setting
+        /// </summary>
         public int MaxValue
         {
             get;
             init;
         }
 
+        /// <inheritdoc />
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             int param = data[2];
@@ -53,6 +72,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             byte[] data = new byte[ExpectedLength];

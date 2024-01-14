@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Course computer warnings
+    /// </summary>
     [Flags]
     public enum CourseComputerWarnings
     {

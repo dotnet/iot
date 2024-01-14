@@ -9,9 +9,19 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Turn direction, for Autopilot operation
+    /// </summary>
     public enum TurnDirection
     {
+        /// <summary>
+        /// Turn or turning to port (left)
+        /// </summary>
         Port = 0,
+
+        /// <summary>
+        /// Turn or turning to starboard (right)
+        /// </summary>
         Starboard = 1,
     }
 }

@@ -9,11 +9,29 @@ using System.Threading.Tasks;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Backlight level setting. Some devices may only support on or off.
+    /// </summary>
     public enum DisplayBacklightLevel
     {
+        /// <summary>
+        /// Backlight off
+        /// </summary>
         Off = 0,
+
+        /// <summary>
+        /// Backlight level 1
+        /// </summary>
         Level1 = 4,
+
+        /// <summary>
+        /// Backlight level 2
+        /// </summary>
         Level2 = 8,
+
+        /// <summary>
+        /// Backlight level 3
+        /// </summary>
         Level3 = 0xC,
     }
 }

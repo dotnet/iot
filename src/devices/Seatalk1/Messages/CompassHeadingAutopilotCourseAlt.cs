@@ -15,6 +15,7 @@ namespace Iot.Device.Seatalk1.Messages
     /// </summary>
     public record CompassHeadingAutopilotCourseAlt : CompassHeadingAutopilotCourse
     {
+        /// <inheritdoc />
         public override byte CommandByte => 0x95;
     }
 }

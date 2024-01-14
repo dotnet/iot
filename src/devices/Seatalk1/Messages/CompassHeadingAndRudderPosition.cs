@@ -11,23 +11,38 @@ using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Compass heading and rudder position message from autopilot
+    /// </summary>
     public record CompassHeadingAndRudderPosition : SeatalkMessage
     {
+        /// <inheritdoc />
         public override byte CommandByte => 0x9c;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 4;
 
+        /// <summary>
+        /// Compass heading from the autopilot's internal sensor
+        /// </summary>
         public Angle CompassHeading
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// Rudder position. The autopilot may consistently report 0 here if no such sensor is fitted.
+        /// </summary>
         public Angle RudderPosition
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// Direction the boat is currently turning
+        /// </summary>
         public TurnDirection TurnDirection
         {
             get;
@@ -59,6 +74,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             byte[] data = new byte[4];

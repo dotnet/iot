@@ -11,6 +11,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Keypress messages from/to the autopilot
+    /// </summary>
     public record Keystroke : SeatalkMessage
     {
         private static readonly Dictionary<int, AutopilotButtons> s_codeToButtonMap;
@@ -58,12 +61,22 @@ namespace Iot.Device.Seatalk1.Messages
             }
         }
 
+        /// <summary>
+        /// Empty constructor
+        /// </summary>
         public Keystroke()
         {
             KeyCode = 0;
             Source = 0;
         }
 
+        /// <summary>
+        /// Create a button command
+        /// </summary>
+        /// <param name="buttonsToPress">Button combination to press</param>
+        /// <param name="source">Whether the message is from (0) or to (1) the autopilot</param>
+        /// <remarks>When sending a keystroke command to the AP, make sure the source is 1, otherwise it is filtered by the sender,
+        /// because the source is the only to way to distinguish own messages from remote messages on the bus.</remarks>
         public Keystroke(AutopilotButtons buttonsToPress, int source = 1)
         {
             Source = source;
@@ -78,6 +91,11 @@ namespace Iot.Device.Seatalk1.Messages
             }
         }
 
+        /// <summary>
+        /// Send a keystroke message, directly with the bytecode
+        /// </summary>
+        /// <param name="keyCode">Bytecode of the message</param>
+        /// <param name="source">Source of the command</param>
         public Keystroke(byte keyCode, int source = 1)
         {
             Source = source;
@@ -104,6 +122,10 @@ namespace Iot.Device.Seatalk1.Messages
             init;
         }
 
+        /// <summary>
+        /// The buttons that where pressed. Note that not all keycodes are valid and autopilots/remote controllers translate some keycodes differently. (e.g.
+        /// some remote controllers have a "track" button, while others use a dual-button combination for this)
+        /// </summary>
         public AutopilotButtons ButtonsPressed
         {
             get
@@ -112,6 +134,9 @@ namespace Iot.Device.Seatalk1.Messages
             }
         }
 
+        /// <summary>
+        /// The keycode.
+        /// </summary>
         public int KeyCode
         {
             get;
@@ -140,6 +165,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             byte inverseCode = (byte)~KeyCode;
@@ -161,6 +187,7 @@ namespace Iot.Device.Seatalk1.Messages
             return AutopilotButtons.None;
         }
 
+        /// <inheritdoc />
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             // Byte 4 must be the binary inverse of byte 3
@@ -179,6 +206,7 @@ namespace Iot.Device.Seatalk1.Messages
             return base.MatchesMessageType(data);
         }
 
+        /// <inheritdoc />
         protected override bool PrintMembers(StringBuilder stringBuilder)
         {
             base.PrintMembers(stringBuilder);

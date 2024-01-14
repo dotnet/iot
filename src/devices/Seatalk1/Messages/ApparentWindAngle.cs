@@ -11,25 +11,38 @@ using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Apparent wind angle, as provided by the wind instrument in the masthead of a sailboat.
+    /// </summary>
     public record ApparentWindAngle : SeatalkMessage
     {
         private readonly Angle _apparentAngle;
 
+        /// <summary>
+        /// Create a default instance
+        /// </summary>
         public ApparentWindAngle()
         {
             ApparentAngle = Angle.Zero;
         }
 
+        /// <summary>
+        /// Create a new instance
+        /// </summary>
+        /// <param name="apparentAngle">Apparent wind angle (positive for wind from starboard)</param>
         public ApparentWindAngle(Angle apparentAngle)
         {
             ApparentAngle = apparentAngle;
         }
 
+        /// <inheritdoc />
         public override byte CommandByte => 0x10;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 0x4;
 
         /// <summary>
-        /// Apparent wind angle, relative to bow.
+        /// Apparent wind angle, relative to bow. 0 means wind comes directly from ahead.
         /// Positive for right of bow (wind from starboard)
         /// </summary>
         public Angle ApparentAngle
@@ -45,6 +58,7 @@ namespace Iot.Device.Seatalk1.Messages
             }
         }
 
+        /// <inheritdoc />
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             uint angle10u = Convert.ToUInt32(data[2] << 8 | data[3]);
@@ -61,6 +75,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             short angle10 = (short)Math.Round(ApparentAngle.Degrees * 2);

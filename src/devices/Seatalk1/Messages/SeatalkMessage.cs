@@ -17,6 +17,9 @@ namespace Iot.Device.Seatalk1.Messages
     /// </summary>
     public abstract record SeatalkMessage
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         protected SeatalkMessage()
         {
             Logger = this.GetCurrentClassLogger();
@@ -38,30 +41,29 @@ namespace Iot.Device.Seatalk1.Messages
             get;
         }
 
+        /// <summary>
+        /// Logger instance, to report possible issues
+        /// </summary>
         [IgnoreDataMember]
         protected ILogger Logger { get; }
 
         /// <summary>
-        /// Creates a new message from this template
+        /// Creates a new message from this template.
+        /// This function creates a new instance of the current type with the data fields updated according to the data parameter.
         /// </summary>
         /// <param name="data">The sliced input data</param>
-        /// <returns></returns>
+        /// <returns>A typed <see cref="SeatalkMessage"/> instance</returns>
+        /// <exception cref="InvalidOperationException">The datagram does not match this type</exception>
+        /// <remarks>
+        /// Before calling this method, <see cref="MatchesMessageType"/> should be used to verify the types match without creating an exception.
+        /// </remarks>
         public abstract SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data);
 
+        /// <summary>
+        /// Creates a datagram (byte array) from a message
+        /// </summary>
+        /// <returns>The bytes to send</returns>
         public abstract byte[] CreateDatagram();
-
-        // To count the number of bits set in (U >> 4) & 0xc
-        protected int BitCount(uint v)
-        {
-            return v switch
-            {
-                0 => 0,
-                0xc => 2,
-                0x8 => 1,
-                0x4 => 1,
-                _ => throw new ArgumentOutOfRangeException(nameof(v), "That value was unexpected"),
-            };
-        }
 
         /// <summary>
         /// This checks the precondition for a valid input packet.
@@ -98,8 +100,14 @@ namespace Iot.Device.Seatalk1.Messages
             }
         }
 
+        /// <summary>
+        /// Compares this instance against another one
+        /// </summary>
+        /// <param name="other">Other instance</param>
+        /// <returns>True or false</returns>
         public virtual bool Equals(SeatalkMessage? other)
         {
+            // This method is overriden, because we don't want to compare the logger
             if (ReferenceEquals(other, null))
             {
                 return false;
@@ -108,6 +116,10 @@ namespace Iot.Device.Seatalk1.Messages
             return ExpectedLength == other.ExpectedLength && CommandByte == other.CommandByte;
         }
 
+        /// <summary>
+        /// Standard hash code implementation
+        /// </summary>
+        /// <returns>A hash code</returns>
         public override int GetHashCode()
         {
             return CommandByte << 8 | ExpectedLength;

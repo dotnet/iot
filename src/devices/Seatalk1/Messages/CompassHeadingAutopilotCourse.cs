@@ -13,25 +13,54 @@ using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Compass heading and current autopilot course and parameters. This message contains the same fields as <see cref="CompassHeadingAutopilotCourse"/>,
+    /// plus some more.
+    /// </summary>
     public record CompassHeadingAutopilotCourse : SeatalkMessage
     {
+        /// <inheritdoc />
         public override byte CommandByte => 0x84;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 0x9;
 
+        /// <summary>
+        /// Heading of the internal sensor of the autopilot.
+        /// </summary>
         public Angle CompassHeading { get; init; }
 
+        /// <summary>
+        /// Autopilot type, not really relevant
+        /// </summary>
         public byte AutoPilotType { get; init; }
 
+        /// <summary>
+        /// Autopilot target course. Often not available when not in auto mode
+        /// </summary>
         public Angle AutoPilotCourse { get; init; }
 
+        /// <summary>
+        /// Rudder position. Positive when turning to starboard
+        /// </summary>
         public Angle RudderPosition { get; init; }
 
+        /// <summary>
+        /// Current autopilot status
+        /// </summary>
         public AutopilotStatus AutopilotStatus { get; init; } = AutopilotStatus.Standby;
 
+        /// <summary>
+        /// Active alarms
+        /// </summary>
         public AutopilotAlarms Alarms { get; init; }
 
+        /// <summary>
+        /// Turn direction. Not really reliable when no Rudder sensor is fitted.
+        /// </summary>
         public TurnDirection TurnDirection { get; init; }
 
+        /// <inheritdoc />
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             VerifyPacket(data);
@@ -78,6 +107,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             byte[] data = new byte[ExpectedLength];
@@ -195,6 +225,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             // Add some additional tests to make sure the message is not messed up

@@ -11,21 +11,34 @@ using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// This message provides the apparent wind speed as measured by the wind instrument on the masthead of a sailboat.
+    /// </summary>
     public record ApparentWindSpeed : SeatalkMessage
     {
         private readonly Speed _apparentSpeed;
 
+        /// <summary>
+        /// Create a new instance
+        /// </summary>
         public ApparentWindSpeed()
         {
             ApparentSpeed = Speed.FromKnots(0); // Default unit is knots
         }
 
+        /// <summary>
+        /// Create a new instance
+        /// </summary>
+        /// <param name="apparentSpeed">Apparent wind speed (default unit is knots)</param>
         public ApparentWindSpeed(Speed apparentSpeed)
         {
             ApparentSpeed = apparentSpeed;
         }
 
+        /// <inheritdoc />
         public override byte CommandByte => 0x11;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 0x4;
 
         /// <summary>
@@ -49,6 +62,7 @@ namespace Iot.Device.Seatalk1.Messages
             }
         }
 
+        /// <inheritdoc />
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             Speed spd = Speed.Zero;
@@ -67,6 +81,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             double rounded = Math.Round(ApparentSpeed.Knots, 1);

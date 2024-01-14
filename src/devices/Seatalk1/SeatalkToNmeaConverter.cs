@@ -12,6 +12,13 @@ using UnitsNet;
 
 namespace Iot.Device.Seatalk1
 {
+    /// <summary>
+    /// Seatalk to NMEA-0183 converter.
+    /// This subclasses <see cref="NmeaSinkAndSource"/> and hence can be included in a <see cref="MessageRouter"/>, which will make
+    /// the Seatalk interface look very similar to an NMEA-0183 interface.
+    /// This class embeds the <see cref="SeatalkInterface"/>, so no extra instance is required if this class is used. The class supports translation
+    /// of directly wrapped seatalk messages (that start with $STALK) as well as a set of navigation messages (see <see cref="SentencesToTranslate"/>)
+    /// </summary>
     public class SeatalkToNmeaConverter : NmeaSinkAndSource
     {
         private readonly List<SentenceId> _sentencesToTranslate;
@@ -19,6 +26,11 @@ namespace Iot.Device.Seatalk1
         private bool _isDisposed;
         private ILogger _logger;
 
+        /// <summary>
+        /// Construct an instance of this class.
+        /// </summary>
+        /// <param name="interfaceName">Interface name, for message routing. Can be an arbitrary string.</param>
+        /// <param name="portName">Interface to connect to. e.g. "/dev/ttyAMA2"</param>
         public SeatalkToNmeaConverter(string interfaceName, string portName)
             : base(interfaceName)
         {
@@ -74,6 +86,10 @@ namespace Iot.Device.Seatalk1
             }
         }
 
+        /// <summary>
+        /// Start receiving data
+        /// </summary>
+        /// <exception cref="ObjectDisposedException">The instance has already been disposed</exception>
         public override void StartDecode()
         {
             if (_isDisposed)
@@ -84,6 +100,15 @@ namespace Iot.Device.Seatalk1
             _seatalkInterface.StartDecode();
         }
 
+        /// <summary>
+        /// Send a sentence through the Seatalk port. This ignores unknown or disabled sentences.
+        /// </summary>
+        /// <param name="source">The source</param>
+        /// <param name="sentence">The sentence to send</param>
+        /// <remarks>
+        /// This sends out a message when it is valid and it is a $STALK message and this instance is not the source. Or when the
+        /// message is valid and one of the supported messages to send as specified in <see cref="SentencesToTranslate"/>.
+        /// </remarks>
         public override void SendSentence(NmeaSinkAndSource source, NmeaSentence sentence)
         {
             if (sentence.Valid == false)
@@ -137,6 +162,9 @@ namespace Iot.Device.Seatalk1
             return false;
         }
 
+        /// <summary>
+        /// Terminate the parsing
+        /// </summary>
         public override void StopDecode()
         {
             _seatalkInterface.Dispose();

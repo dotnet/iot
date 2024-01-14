@@ -74,14 +74,31 @@ namespace Iot.Device.Seatalk1
             }
         }
 
-        public int MaxMessageLength { get; private set; }
+        /// <summary>
+        /// The maximum length of all known messages (used to detect when the parser lost sync)
+        /// </summary>
+        private int MaxMessageLength { get; set; }
 
+        /// <summary>
+        /// True if the input buffer is currently empty
+        /// </summary>
         public bool IsBufferEmpty => _buffer.Count == 0;
 
+        /// <summary>
+        /// This event is fired when a new message was decoded
+        /// </summary>
         public event Action<SeatalkMessage>? NewMessageDecoded;
 
+        /// <summary>
+        /// List of known messages
+        /// </summary>
         internal List<SeatalkMessage> MessageTypes => _messageFactories;
 
+        /// <summary>
+        /// Register a new message type
+        /// </summary>
+        /// <param name="message">An instance of the new message type</param>
+        /// <exception cref="ArgumentException">The definition of the message seems incorrect</exception>
         public void RegisterMessageType(SeatalkMessage message)
         {
             if (message.ExpectedLength > 18)

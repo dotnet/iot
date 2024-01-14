@@ -13,6 +13,11 @@ using Iot.Device.Seatalk1.Messages;
 
 namespace Iot.Device.Seatalk1
 {
+    /// <summary>
+    /// Seatalk interface handler.
+    /// This class is the main handler for talking over a seatalk network.
+    /// Only when also working with NMEA-0183, the <see cref="SeatalkToNmeaConverter"/> should be used instead.
+    /// </summary>
     public class SeatalkInterface : MarshalByRefObject, IDisposable
     {
         private const Parity DefaultParity = Parity.Even;
@@ -24,6 +29,9 @@ namespace Iot.Device.Seatalk1
         private readonly object _lock;
         private bool _disposed;
 
+        /// <summary>
+        /// This event is fired with every received message
+        /// </summary>
         public event Action<SeatalkMessage>? MessageReceived;
 
         /// <summary>
@@ -70,6 +78,9 @@ namespace Iot.Device.Seatalk1
             _disposed = false;
         }
 
+        /// <summary>
+        /// Provides access to the internal parser
+        /// </summary>
         public Seatalk1Parser Parser => _parser;
 
         /// <summary>
@@ -156,6 +167,10 @@ namespace Iot.Device.Seatalk1
             }
         }
 
+        /// <summary>
+        /// Watchdog function. Called at regular intervals for some housekeeping. The
+        /// default implementation checks for lost connections with the autopilot.
+        /// </summary>
         protected virtual void WatchDog()
         {
             _autopilotController.UpdateStatus();
@@ -221,6 +236,12 @@ namespace Iot.Device.Seatalk1
             return SendDatagram(bytes);
         }
 
+        /// <summary>
+        /// Synchronously send the given message
+        /// </summary>
+        /// <param name="message">The message to send</param>
+        /// <remarks>Transmission of Seatalk messages can be very slow and include considerable delays. Also, there's no guarantee the
+        /// message is successfully transmitted or received anywhere.</remarks>
         public Task<bool> SendMessageAsync(SeatalkMessage message)
         {
             return Task.Factory.StartNew(() => SendMessage(message));
@@ -243,6 +264,10 @@ namespace Iot.Device.Seatalk1
             SendMessage(msg);
         }
 
+        /// <summary>
+        /// Default dispose method
+        /// </summary>
+        /// <param name="disposing">Always true</param>
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed)
@@ -263,6 +288,7 @@ namespace Iot.Device.Seatalk1
             }
         }
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);

@@ -21,11 +21,18 @@ namespace Iot.Device.Seatalk1.Messages
     /// </remarks>
     public record DeadbandSetting : SeatalkMessage
     {
+        /// <inheritdoc />
         public override byte CommandByte => 0x87;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 0x03;
 
+        /// <summary>
+        /// The new mode
+        /// </summary>
         public DeadbandMode Mode { get; init; }
 
+        /// <inheritdoc />
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             VerifyPacket(data);
@@ -64,6 +71,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[1] == 0x0;

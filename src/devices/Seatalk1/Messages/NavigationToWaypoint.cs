@@ -10,12 +10,25 @@ using UnitsNet;
 
 namespace Iot.Device.Seatalk1.Messages
 {
+    /// <summary>
+    /// Navigation-to-waypoint message from a navigation computer
+    /// </summary>
     public record NavigationToWaypoint : SeatalkMessage
     {
+        /// <summary>
+        /// Default constructor
+        /// </summary>
         public NavigationToWaypoint()
         {
         }
 
+        /// <summary>
+        /// Construct a new instance
+        /// </summary>
+        /// <param name="crossTrackError">Cross track error. Positive if right of desired track</param>
+        /// <param name="bearingToDestination">Bearing to destination</param>
+        /// <param name="bearingIsTrue">The bearing is true, false if it is magnetic</param>
+        /// <param name="distanceToDestination">Distance to destination</param>
         public NavigationToWaypoint(Length? crossTrackError, Angle? bearingToDestination, bool bearingIsTrue, Length? distanceToDestination)
         {
             CrossTrackError = crossTrackError;
@@ -24,33 +37,49 @@ namespace Iot.Device.Seatalk1.Messages
             DistanceToDestination = distanceToDestination;
         }
 
+        /// <inheritdoc />
         public override byte CommandByte => 0x85;
+
+        /// <inheritdoc />
         public override byte ExpectedLength => 0x9;
 
+        /// <summary>
+        /// Cross track error. Positive if right of track
+        /// </summary>
         public Length? CrossTrackError
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// Bearing to destination waypoint.
+        /// </summary>
         public Angle? BearingToDestination
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// The bearing value is true (means: It is relative to true north)
+        /// </summary>
         public bool BearingIsTrue
         {
             get;
             init;
         }
 
+        /// <summary>
+        /// Distance to destination
+        /// </summary>
         public Length? DistanceToDestination
         {
             get;
             init;
         }
 
+        /// <inheritdoc />
         public override SeatalkMessage CreateNewMessage(IReadOnlyList<byte> data)
         {
             byte flags = data[6];
@@ -105,6 +134,7 @@ namespace Iot.Device.Seatalk1.Messages
             };
         }
 
+        /// <inheritdoc />
         public override byte[] CreateDatagram()
         {
             // 85  X6  XX  VU ZW ZZ YF 00 yf
@@ -196,6 +226,7 @@ namespace Iot.Device.Seatalk1.Messages
             return data;
         }
 
+        /// <inheritdoc />
         public override bool MatchesMessageType(IReadOnlyList<byte> data)
         {
             return base.MatchesMessageType(data) && data[6] == (byte)(~data[8]);
