@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 namespace System.Device.Gpio.Tests;
 
 [Trait("feature", "gpio")]
-[Trait("feature", "gpio-libgpiod")]
+[Trait("feature", "gpio-libgpiod2")]
 [Trait("SkipOnTestRun", "Windows_NT")]
 public class LibGpiodV2DriverTests : GpioControllerTestBase
 {
